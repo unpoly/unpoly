@@ -225,11 +225,7 @@ up.feedback = do ->
 
   around = (element, fn) ->
     start(element)
-    fnPromise = fn()
-    # Don't reassign the result of result of always() --
-    # this would hide rejections.
-    u.always(fnPromise, -> stop(element))
-    return fnPromise
+    return fn().finally(-> stop(element))
 
   aroundForOptions = (options, fn) ->
     if feedbackOpt = options.feedback

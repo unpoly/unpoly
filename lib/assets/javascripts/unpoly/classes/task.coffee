@@ -7,7 +7,7 @@ class up.Task extends up.Class
     @spawnTime = new Date()
     @uid = u.uid() # TODO: Remove
 
-  @delegate ['then', 'catch', 'always'], 'deferred'
+  @delegate ['then', 'catch', 'finally'], 'deferred'
 
   abort: (message) ->
     @onAbort?(message)

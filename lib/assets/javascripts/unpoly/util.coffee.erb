@@ -1032,10 +1032,13 @@ up.util = do ->
   @function up.util.microtask
   @param {Function()} task
   @return {Promise}
+    A promise that is resolved with the return value of `task`.
+
+    If `task` throws an error, the promise is rejected with that error.
   @experimental
   ###
   queueMicrotask = (task) ->
-    Promise.resolve().then(task)
+    return Promise.resolve().then(task)
 
   ###**
   Returns the last element of the given array.
@@ -1373,10 +1376,12 @@ up.util = do ->
   ###**
   Sets the given callback as both fulfillment and rejection handler for the given promise.
 
+  [Unlike `promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
+  of the given promise.
+
   @function up.util.always
   @internal
   ###
-  # TODO: Rename to finally
   always = (promise, callback) ->
     promise.then(callback, callback)
 
@@ -1639,12 +1644,9 @@ up.util = do ->
         result[key] = value
     result
 
-  asyncWrap = (fn, before, after) ->
-    before()
-    promise = fn()
-    u.always(promise, after)
-    # Return the original promise returned from `fn()`.
-    return promise
+#  asyncWrap = (fn, before, after) ->
+#    before()
+#    return fn().finally(after)
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseURL: parseURL
@@ -1788,7 +1790,7 @@ up.util = do ->
   getter: defineGetter
   delegate: defineDelegates
   literal: literal
-  asyncWrap: asyncWrap
+#  asyncWrap: asyncWrap
   reverse: reverse
   prefixCamelCase: prefixCamelCase
   unprefixCamelCase: unprefixCamelCase

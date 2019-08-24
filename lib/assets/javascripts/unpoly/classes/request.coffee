@@ -85,6 +85,7 @@ class up.Request extends up.Record
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
       'preflightLayer',
+      'origin',
       'context',
       'solo',
     ]
@@ -112,10 +113,13 @@ class up.Request extends up.Record
     super(options)
     @params = new up.Params(@params) # copies, which we want
 
+    if @origin
+      @preflightLayer ||= up.layer.of(@origin)
+
     # Make sure @context is always an object, even if no preflightLayer is given.
     # Note that @context is a part of our @cacheKey(), since different contexts
     # might yield different server responses.
-    @context ?= @preflightLayer?.context || {}
+    @context ||= @preflightLayer?.context || {}
 
     @uid = u.uid()
 
@@ -123,8 +127,30 @@ class up.Request extends up.Record
     @aborted = false
     @deferred = u.newDeferred()
     @deferred.promise().then(=> console.log("Request %o fulfilled", @uid)).catch(=> console.log("Request %o rejected", @uid))
+    # TODO: Test that compacting happens
 
-  @delegate ['then', 'catch', 'always'], 'deferred'
+    # console.log("Request#always is %o", @always)
+    @finally(@evictExpensiveAttrs)
+
+  @delegate ['then', 'catch', 'finally'], 'deferred'
+
+  evictExpensiveAttrs: =>
+    # Allow up:proxy:loaded events etc. to still access the properties that
+    # we are about to evict.
+
+    u.task =>
+      # While the request is still in flight, we require the target layer
+      # to be able to cancel it when the layers gets closed. We now
+      # evict this property, since response.request.preflightLayer.element will
+      # prevent the layer DOM tree from garbage collection while the response
+      # is cached by up.proxy.
+      @preflightLayer = undefined
+
+      # We want to provide the triggering element as { origin } to the function
+      # providing the CSRF function. We now evict this property, since
+      # response.request.origin will prevent its (now maybe detached) DOM tree
+      # from garbage collection while the response is cached by up.proxy.
+      @origin = undefined
 
   normalize: =>
     @method = u.normalizeMethod(@method)
@@ -179,8 +205,8 @@ class up.Request extends up.Record
     xhrHeaders[up.protocol.config.targetHeader] = @target if @target
     xhrHeaders[up.protocol.config.failTargetHeader] = @failTarget if @failTarget
     xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
-    if csrfToken = @csrfToken()
-      xhrHeaders[up.protocol.config.csrfHeader] = csrfToken
+    if (csrfHeader= @csrfHeader()) && (csrfToken = @csrfToken())
+      xhrHeaders[csrfHeader] = csrfToken
 
     if @context
       xhrHeaders[up.protocol.config.contextHeader] = JSON.stringify(@context)
@@ -244,7 +270,7 @@ class up.Request extends up.Record
 
     e.setAttrs(form, method: formMethod, action: @url)
 
-    if (csrfParam = up.protocol.csrfParam()) && (csrfToken = @csrfToken())
+    if (csrfParam = @csrfParam()) && (csrfToken = @csrfToken())
       addField(name: csrfParam, value: csrfToken)
 
     # @params will be undefined for GET requests, since we have already
@@ -255,10 +281,16 @@ class up.Request extends up.Record
 
     up.browser.submitForm(form)
 
+  csrfHeader: ->
+    up.protocol.csrfHeader(this)
+
+  csrfParam: ->
+    up.protocol.csrfParam(this)
+
   # Returns a csrfToken if this request requires it
   csrfToken: =>
     if !@isSafe() && !@isCrossDomain()
-      up.protocol.csrfToken()
+      up.protocol.csrfToken(this)
 
   isCrossDomain: =>
     u.isCrossDomain(@url)

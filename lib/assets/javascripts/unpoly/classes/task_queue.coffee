@@ -50,14 +50,14 @@ class up.TaskQueue extends up.Class
     console.debug("active task count is now", @currentTasks.length)
 
     task.start()
-    u.always task, => @onTaskDone(task)
+    task.finally => @onTaskDone(task)
 
 #    returnValue = task.start()
 #
 #    console.debug("return value of task %o is %o (isPromise == %o)", task.uid, returnValue, u.isPromise(returnValue))
 #
 #    if u.isPromise(returnValue)
-#      u.always(returnValue, => @onTaskDone(task))
+#      u.finally(returnValue, => @onTaskDone(task))
 #    else
 #      @onTaskDone(task)
 

@@ -49,15 +49,15 @@ class up.MotionController
       # Since we don't want recursive tracking or finishing, we could run
       # the animator() now. However, since the else branch is async, we push
       # the animator into the microtask queue to be async as well.
-      u.microtask(mutedAnimator)
+      return u.microtask(mutedAnimator)
     else
       memory.trackMotion = false
-      @finish(cluster).then =>
+      return @finish(cluster).then =>
         promise = @whileForwardingFinishEvent(cluster, mutedAnimator)
         promise = promise.then => @unmarkCluster(cluster)
         # Attach the modified promise to the cluster's elements
         @markCluster(cluster, promise)
-        promise
+        return promise
 
   ###*
   Finishes all animations in the given elements' ancestors and

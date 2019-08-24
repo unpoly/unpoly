@@ -107,11 +107,11 @@ class up.Change.FromURL extends up.Change
     rejectWithFailedResponse = -> Promise.reject(response)
     if @failedResponseHasContent(response)
       promise = @processResponse(response, @failureOptions)
-      # Although processResponse() we will perform a successful replacement of options.failTarget,
+      # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
-      u.always(promise, rejectWithFailedResponse)
+      return u.always(promise, rejectWithFailedResponse)
     else
-      rejectWithFailedResponse()
+      return rejectWithFailedResponse()
 
   processResponse: (response, options) ->
     @augmentOptionsFromResponse(response, options)

@@ -642,7 +642,7 @@ describe 'up.fragment', ->
                 promise.then (result) => expect(result.state).toEqual('fulfilled')
 
             it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
@@ -671,7 +671,7 @@ describe 'up.fragment', ->
 
 
             it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               $outer = $fixture('.outer').text('old outer text')
               $inner = $outer.affix('.inner').text('old inner text')
@@ -2029,6 +2029,7 @@ describe 'up.fragment', ->
         beforeEach ->
           up.viewport.knife.mock('reveal').and.callFake (element, options) =>
             @revealScrollBehavior = options.behavior ? options.scrollBehavior
+            return Promise.resolve()
 
         it 'animates the revealing when prepending an element', asyncSpec (next) ->
           fixture('.element', text: 'version 1')

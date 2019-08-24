@@ -56,7 +56,7 @@ class up.FieldObserver
       # contained in the `callbackReturnValues` array.
       callbacksDone = Promise.all(callbackReturnValues)
 
-      u.always callbacksDone, =>
+      callbacksDone.finally =>
         @callbackRunning = false
         @requestCallback()
 

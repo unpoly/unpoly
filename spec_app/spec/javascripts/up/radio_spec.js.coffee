@@ -56,7 +56,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        revealStub = up.viewport.knife.mock('reveal')
+        revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
         up.replace('.target', '/path', reveal: true)
 

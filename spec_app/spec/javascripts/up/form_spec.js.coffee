@@ -482,7 +482,7 @@ describe 'up.form', ->
             $form = $fixture('form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
-            revealStub = up.viewport.knife.mock('reveal')
+            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
             up.submit($form)
 
@@ -497,7 +497,7 @@ describe 'up.form', ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
-            revealStub = up.viewport.knife.mock('reveal')
+            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
             up.submit($form)
 
@@ -522,7 +522,7 @@ describe 'up.form', ->
               $target = $fixture('.target')
               $other = $fixture('.other')
 
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               up.submit($form, reveal: '.other')
 
@@ -545,7 +545,7 @@ describe 'up.form', ->
               $target = $fixture('.target')
               $other = $fixture('.other')
 
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               up.submit($form, reveal: '.other')
 
@@ -565,7 +565,7 @@ describe 'up.form', ->
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
               $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
 
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               up.submit($form, reveal: '& .form-child')
 
@@ -591,7 +591,7 @@ describe 'up.form', ->
               $target = $fixture('.target')
               $other = $fixture('.other')
 
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               up.submit($form, reveal: '.other', failReveal: '.error')
 
@@ -612,7 +612,7 @@ describe 'up.form', ->
               $form = $fixture('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')
               $target = $fixture('.target')
 
-              revealStub = up.viewport.knife.mock('reveal')
+              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
 
               up.submit($form, reveal: '& .form-child')
 

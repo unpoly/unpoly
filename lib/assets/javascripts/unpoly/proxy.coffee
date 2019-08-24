@@ -454,13 +454,6 @@ up.proxy = do ->
       up.proxy.alias(request, newRequest)
 
   requestSettled = (request, value) ->
-    # While the request is still in flight, we require the target layer
-    # to be able to cancel it when the layers gets closed. We now
-    # loose this property, since response.request.preflightLayer.element will
-    # prevent the layer DOM tree from garbage collection while the response
-    # is cached by up.proxy.
-    request.preflightLayer = undefined
-
     if value.text
       if value.isSuccess()
         registerAliasForRedirect(value)

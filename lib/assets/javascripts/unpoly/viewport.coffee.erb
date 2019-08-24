@@ -245,9 +245,10 @@ up.viewport = do ->
   @stable
   ###
   reveal = (elementOrSelector, options) ->
+    console.debug("reveal(%o, %o)", elementOrSelector, options)
     element = e.get(elementOrSelector)
     motion = new up.RevealMotion(element, options)
-    scrollingController.startMotion(element, motion, options)
+    return scrollingController.startMotion(element, motion, options)
 
   ###**
   @function up.viewport.scrollAfterInsertFragment
@@ -268,6 +269,7 @@ up.viewport = do ->
     animateOptions = u.pick(options, ['scrollBehavior', 'scrollSpeed'])
 
     if resetScrollOpt
+      console.debug("return resetScroll")
       return resetScroll(around: element)
 
     else if restoreScrollOpt
@@ -275,9 +277,11 @@ up.viewport = do ->
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(restoreScrollOpt, u.isObject)
+      console.debug("return restoreScroll")
       return restoreScroll(around: element, scrollTops: givenTops)
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
+      console.debug("return revealHash")
       return revealHash(hashOpt, animateOptions)
 
     else if revealOpt
@@ -298,12 +302,16 @@ up.viewport = do ->
       # reveals the first validation error message, but the error is shown in an
       # unexpected element.
       if element
-        return reveal(element, animateOptions)
+        console.debug("----------------")
+        console.debug("revealing")
+        value = reveal(element, animateOptions)
+        console.debug("return reveal: %o", value)
+        return value
 
-    else
-      # If we didn't need to scroll above, just return a resolved promise
-      # to fulfill this function's signature.
-      return Promise.resolve()
+    console.debug("return resolved")
+    # If we didn't need to scroll above, just return a resolved promise
+    # to fulfill this function's signature.
+    return Promise.resolve()
 
   ###**
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.

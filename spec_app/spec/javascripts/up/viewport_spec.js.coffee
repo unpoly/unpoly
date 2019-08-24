@@ -392,25 +392,25 @@ describe 'up.viewport', ->
     describe 'up.viewport.revealHash', ->
 
       it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->
-        revealSpy = up.viewport.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
         $match = $fixture('div#hash')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
-        revealSpy = up.viewport.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
         $match = $fixture('a[name="hash"]')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'reveals an element with an [up-id] attribute matching the given #hash', asyncSpec (next) ->
-        revealSpy = up.viewport.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
         $match = $fixture('div[up-id="hash"]')
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
       it 'does nothing and returns a fulfilled promise if no element or anchor matches the given #hash', (done) ->
-        revealSpy = up.viewport.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
         promise = up.viewport.revealHash('#hash')
         expect(revealSpy).not.toHaveBeenCalled()
         promiseState(promise).then (result) ->
@@ -418,7 +418,7 @@ describe 'up.viewport', ->
           done()
 
       it 'does nothing and returns a fulfilled promise if no #hash is given', (done) ->
-        revealSpy = up.viewport.knife.mock('reveal')
+        revealSpy = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
         promise = up.viewport.revealHash('')
         expect(revealSpy).not.toHaveBeenCalled()
         promiseState(promise).then (result) ->

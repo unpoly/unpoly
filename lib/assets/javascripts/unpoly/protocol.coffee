@@ -312,11 +312,14 @@ up.protocol = do ->
     eventHeader: 'X-Up-Event'
     layerEventHeader: 'X-Up-Layer-Event'
 
-  csrfParam = ->
-    u.evalOption(config.csrfParam)
+  csrfHeader = (request) ->
+    u.evalOption(config.csrfHeader, request)
 
-  csrfToken = ->
-    u.evalOption(config.csrfToken)
+  csrfParam = (request) ->
+    u.evalOption(config.csrfParam, request)
+
+  csrfToken = (request) ->
+    u.evalOption(config.csrfToken, request)
 
   reset = ->
     config.reset()
@@ -332,6 +335,7 @@ up.protocol = do ->
   dismissLayerFromXhr: dismissLayerFromXhr
   eventFromXhr: eventFromXhr
   layerEventFromXhr: layerEventFromXhr
-  csrfParam :csrfParam
+  csrfHeader: csrfHeader
+  csrfParam: csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod
