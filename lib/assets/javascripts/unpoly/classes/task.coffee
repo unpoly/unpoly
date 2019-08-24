@@ -16,15 +16,7 @@ class up.Task extends up.Class
 
   start: ->
     innerPromise = @onStart()
-    console.debug("task %o returned innerPromise", @uid, innerPromise.uid)
-
-    promiseState(innerPromise).then (result) =>
-      console.debug("state of innerPromise %o (returned by task %o) is %o", innerPromise.uid, @uid, result.state)
-
-    console.debug("will resolve task %o with innerPromise %o", @uid, innerPromise.uid)
-
     @deferred.resolve(innerPromise)
-    # return @deferred.promise()
 
   matches: (conditions) ->
     conditions == true ||

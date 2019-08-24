@@ -139,7 +139,6 @@ describe 'up.proxy', ->
               done()
 
         it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
-          console.debug("--- request start")
           up.request('/foo')
 
           next =>
@@ -755,7 +754,6 @@ describe 'up.proxy', ->
     describe 'up.ajax', ->
 
       it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
-        console.debug("----------- spec start")
         promise = up.ajax('/url')
 
         u.task =>
@@ -778,7 +776,6 @@ describe 'up.proxy', ->
           @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
 
         it "loads and caches the given link's destination", asyncSpec (next) ->
-          console.debug("---------------------")
           $fixture('.target')
           $link = $fixture('a[href="/path"][up-target=".target"]')
 

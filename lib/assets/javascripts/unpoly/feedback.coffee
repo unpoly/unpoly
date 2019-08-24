@@ -146,7 +146,6 @@ up.feedback = do ->
   @internal
   ###
   start = (element) ->
-    console.debug("Feedback: Start on %o", element)
     findActivatableArea(element).classList.add(CLASS_ACTIVE)
 
   ###**
@@ -220,7 +219,6 @@ up.feedback = do ->
   @internal
   ###
   stop = (element) ->
-    console.debug("Feedback: Stop on %o", element)
     findActivatableArea(element).classList.remove(CLASS_ACTIVE)
 
   around = (element, fn) ->

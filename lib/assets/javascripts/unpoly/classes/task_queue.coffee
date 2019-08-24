@@ -16,8 +16,6 @@ class up.TaskQueue extends up.Class
   asap: (args...) ->
     task = up.Task.fromAsapArgs(args)
 
-    console.debug("asap(%o) with concurerncy %o and active count %o", task.uid, u.evalOption(@concurrency), @currentTasks.length)
-
     if @hasConcurrencyLeft()
       @runTaskNow(task)
     else
@@ -37,18 +35,13 @@ class up.TaskQueue extends up.Class
       @runTaskNow(task)
 
   queueTask: (task) ->
-    console.debug("queueTask(%o)", task.uid)
     @queuedTasks.push(task)
 
   pluckNextTask: ->
     @queuedTasks.shift()
 
   runTaskNow: (task) ->
-    console.debug("runTaskNow(%o)", task.uid)
     @currentTasks.push(task)
-
-    console.debug("active task count is now", @currentTasks.length)
-
     task.start()
     task.finally => @onTaskDone(task)
 
@@ -62,19 +55,6 @@ class up.TaskQueue extends up.Class
 #      @onTaskDone(task)
 
   onTaskDone: (task) ->
-    console.debug("onTaskDone(%o)", task.uid)
-
-    task.then(=> console.log('onTaskDone: task %o fulfilled', task.uid)).catch(=> console.log('onTaskDone: task %o rejected', task.uid))
-
-    promiseState(task).then (result) =>
-      console.debug("onTaskDone: state of task %o is %o", task.uid, result.state)
-
-    promiseState(task.deferred.promise()).then (result) =>
-      console.debug("onTaskDone: deferred state of task %o is %o", task.uid, result.state)
-
-    promiseState(task.deferred.promise()).then (result) =>
-      console.debug("onTaskDone: deferred.promise state of task %o is %o", task.uid, result.state)
-
     u.remove(@currentTasks, task)
     u.microtask(@poke)
 
@@ -95,6 +75,5 @@ class up.TaskQueue extends up.Class
     return
 
   abort: (conditions = true) ->
-    console.debug("abort(%o)", conditions)
     @abortList(@currentTasks, conditions)
     @abortList(@queuedTasks, conditions)

@@ -24,8 +24,6 @@ class up.Change.CloseLayer extends up.Change.Removal
   closedCallbackName: null  # implement in child class
 
   execute: ->
-    console.debug("--- Closing layer %o", @layer)
-
     if @origin && u.isUndefined(value)
       value = e.jsonAttr(@origin, @valueAttr)
 

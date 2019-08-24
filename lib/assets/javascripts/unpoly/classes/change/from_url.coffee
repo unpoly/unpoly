@@ -123,8 +123,6 @@ class up.Change.FromURL extends up.Change
     responseURL = response.url
     locationFromExchange = responseURL
 
-    # console.debug("TODO: Restore old behavior from master that respects response success/failure")
-
     if hash = @request.hash
       options.hash = hash
       locationFromExchange += hash

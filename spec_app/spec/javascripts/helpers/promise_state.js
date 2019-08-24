@@ -40,7 +40,5 @@ function promiseState(promise) {
 
   var race = [promise, Promise.resolve(uniqueValue)]
 
-  console.debug("promiseState: racing %o", race)
-
   return raceThenables(race).then(notifyPendingOrResolved, notifyRejected)
 }

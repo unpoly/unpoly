@@ -231,10 +231,8 @@ class up.Request extends up.Record
     @setAbortedState(message)
 
   setAbortedState: (message = 'Request was aborted') =>
-    console.debug("setAbortedState(%o)", message)
     @aborted = true
     @deferred.reject(up.event.abortError(message))
-    console.debug("Request deferred %o was rejected", @deferred)
 
   responseReceived: =>
     @respondWith(@extractResponseFromXhr())

@@ -11,7 +11,6 @@ up.modal = u.literal
 
   extract: (target, html, options = {}) ->
     up.legacy.deprecated('up.modal.extract(target, html)', 'up.change(target, { document: html, flavor: "modal" })')
-    console.debug("up.change(%o)", u.merge(options, { target, document: html, flavor: 'modal' }))
     up.change(u.merge(options, { target, document: html, flavor: 'modal' }))
 
   close: (options = {}) ->

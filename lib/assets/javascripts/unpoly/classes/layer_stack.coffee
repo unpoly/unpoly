@@ -21,10 +21,7 @@ class up.LayerStack extends up.Class
     @layers.push(layer)
 
   peel: (layer) ->
-    console.debug("=== Peeling %o", layer)
-    console.debug("... descendants of %o are %o", layer, @descendantsOf(layer))
     for descendant in @descendantsOf(layer)
-      console.debug("... during peel we decide to close descendant: %o", descendant)
       descendant.dismiss(preventable: false)
 
   reset: ->

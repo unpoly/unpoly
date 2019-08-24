@@ -238,10 +238,6 @@ up.proxy = do ->
       loadOrQueue(request)
 
     # The request is also a promise for its response.
-    console.debug("makeRequest returns request %o", request.uid)
-
-    request.then(=> console.log("makeRequest: request %o fulfilled", request.uid)).catch(=> console.log("makeRequest: request %o rejected", request.uid))
-
     return request
 
   ###**
@@ -394,9 +390,6 @@ up.proxy = do ->
     # and target. See up.Request#cacheKey().
     set(request, request)
 
-    console.debug("setting cache: %o / %o", request)
-    console.debug("getting cache: %o", request)
-
     # Immediately uncache failed requests.
     # We have no control over the server, and another request with the
     # same properties might succeed.
@@ -425,10 +418,8 @@ up.proxy = do ->
     u.always request, (responseOrError) -> requestSettled(request, responseOrError)
 
     if up.event.nobodyPrevents('up:proxy:load', eventProps)
-      console.debug("request.send()")
       request.send()
     else
-      console.debug("request.abort()")
       request.abort()
 
     return request
