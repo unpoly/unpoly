@@ -620,7 +620,7 @@ describe 'up.proxy', ->
             # The same request with preloading does trigger up:proxy:slow.
             up.request(url: '/foo')
 
-          next =>
+          next.after 10, =>
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:slow'

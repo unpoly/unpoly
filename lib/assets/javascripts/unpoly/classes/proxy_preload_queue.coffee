@@ -9,8 +9,8 @@ class up.ProxyPreloadQueue extends up.TaskQueue
     @size = options.size
 
   hasQueueSpaceLeft: ->
-    size = u.evalOption(@size) ? -1
-    return size == -1 || @size.length < size
+    size = u.evalOption(@size)
+    return size == -1 || @queuedTasks.length < size
 
   queueTask: (task) ->
     # If the queue is already at capacity, we drop the oldest task.

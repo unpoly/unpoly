@@ -100,6 +100,7 @@ up.proxy = do ->
 
   foregroundQueue = new up.ProxyForegroundQueue
     concurrency: -> config.concurrency
+    slowDelay: -> config.slowDelay
 
   preloadQueue = new up.ProxyPreloadQueue
     concurrency: -> config.preloadConcurrency
@@ -230,6 +231,7 @@ up.proxy = do ->
       #   Now we *should* trigger `up:proxy:slow`.
       # - The request (1) finishes. This triggers `up:proxy:recover`.
       unless request.preload
+        console.debug "TODO: cachedRequest needs to move to the foregroundqueue now"
         cachedRequest.preload = false
 
       request = cachedRequest
@@ -398,6 +400,7 @@ up.proxy = do ->
     queue.asap(taskForRequest(request))
 
   queueForRequest = (request) ->
+    console.debug("--- queueForRequest() with request.preload == %o", request.preload)
     if request.preload
       preloadQueue
     else
