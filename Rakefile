@@ -11,7 +11,7 @@ module Unpoly
       unpoly.js
       unpoly.css
       unpoly-bootstrap3.js
-      unpoly-bootstrap3.css
+      unpoly-bootstrap4.js
     )
     SPROCKETS_SOURCES = %w(lib/assets/javascripts lib/assets/stylesheets)
     SPROCKETS_OUTPUT_FOLDER = 'dist'
