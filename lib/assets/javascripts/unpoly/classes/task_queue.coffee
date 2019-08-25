@@ -10,9 +10,6 @@ class up.TaskQueue extends up.Class
     @queuedTasks = []
     @currentTasks = []
 
-  @getter 'allTasks', ->
-    @currentTasks.concat(@queuedTasks)
-
   asap: (args...) ->
     task = up.Task.fromAsapArgs(args)
 

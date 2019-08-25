@@ -230,9 +230,8 @@ up.proxy = do ->
       #   We have a cache hit and receive the earlier request that is still preloading.
       #   Now we *should* trigger `up:proxy:slow`.
       # - The request (1) finishes. This triggers `up:proxy:recover`.
-      unless request.preload
-        console.debug "TODO: cachedRequest needs to move to the foregroundqueue now"
-        cachedRequest.preload = false
+      console.debug "TODO: cachedRequest needs to move to the foregroundqueue now"
+      queue.promoteToForeground(request)
 
       request = cachedRequest
     else
@@ -318,8 +317,11 @@ up.proxy = do ->
   isBusy = ->
     foregroundQueue.isBusy()
 
-  # TODO: Document up.proxy.abort(). Also document whether it is sync or async.
+  # TODO: Test and document up.proxy.abort().
+  # TODO: Test and document up.proxy.abort(request)
+  # TODO: Test and document up.proxy.abort(conditionsObj)
   abortRequests = (conditions = true) ->
+    # Aborting a request will cause its promise to reject, which will also uncache it
     for queue in [foregroundQueue, preloadQueue]
       queue.abort(conditions)
 
