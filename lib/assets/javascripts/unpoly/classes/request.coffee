@@ -110,8 +110,16 @@ class up.Request extends up.Record
     options.url ||= args[0]
 
     up.legacy.fixKey(options, 'data', 'params')
+
     super(options)
+
     @params = new up.Params(@params) # copies, which we want
+    @uid = u.uid() # TODO: Remove me
+    @method = u.normalizeMethod(@method)
+    @headers ||= {}
+    @aborted = false
+    @preload = !!@preload
+    @headers ||= {}
 
     if @origin
       @preflightLayer ||= up.layer.of(@origin)
@@ -121,22 +129,19 @@ class up.Request extends up.Record
     # might yield different server responses.
     @context ||= @preflightLayer?.context || {}
 
-    @uid = u.uid()
+    @extractHashFromURL()
+    unless u.methodAllowsPayload(@method)
+      @transferParamsToURL()
 
-    @normalize()
-    @aborted = false
     @deferred = u.newDeferred()
-    @deferred.promise().then(=> console.log("Request %o fulfilled", @uid)).catch(=> console.log("Request %o rejected", @uid))
-    # TODO: Test that compacting happens
 
-    # console.log("Request#always is %o", @always)
     @finally(@evictExpensiveAttrs)
 
   @delegate ['then', 'catch', 'finally'], 'deferred'
 
   evictExpensiveAttrs: =>
-    # Allow up:proxy:loaded events etc. to still access the properties that
-    # we are about to evict.
+    # We want to allow up:proxy:loaded events etc. to still access the properties that
+    # we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
 
     u.task =>
       # While the request is still in flight, we require the target layer
@@ -151,14 +156,6 @@ class up.Request extends up.Record
       # response.request.origin will prevent its (now maybe detached) DOM tree
       # from garbage collection while the response is cached by up.proxy.
       @origin = undefined
-
-  normalize: =>
-    @method = u.normalizeMethod(@method)
-    @headers ||= {}
-    @extractHashFromURL()
-
-    unless u.methodAllowsPayload(@method)
-      @transferParamsToURL()
 
   extractHashFromURL: =>
     urlParts = u.parseURL(@url)
@@ -184,7 +181,7 @@ class up.Request extends up.Record
     up.proxy.isSafeMethod(@method)
 
   send: =>
-    # If the requesr was aborted before it was sent (e.g. because it was queued)
+    # If the request was aborted before it was sent (e.g. because it was queued)
     # we don't send it.
     return if @aborted
 

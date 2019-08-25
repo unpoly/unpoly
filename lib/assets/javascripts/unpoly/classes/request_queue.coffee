@@ -24,13 +24,13 @@ class up.RequestQueue extends up.Class
       if request.preload
         if @hasPreloadQueueSpaceLeft()
           @queueRequest(request)
-        else if oldestQueuedPreloadRequest = u.detect(@queuedRequests, 'preload')
+        else if oldestQueuedPreloadRequest = u.find(@queuedRequests, 'preload')
           @abort(oldestQueuedPreloadRequest)
           @queueRequest(request)
         else
           @abort(request)
       else
-        if oldestCurrentPreloadRequest = u.detect(@currentRequests, 'preload')
+        if oldestCurrentPreloadRequest = u.find(@currentRequests, 'preload')
           @abort(oldestCurrentPreloadRequest)
           @sendRequestNow()
         else
@@ -77,41 +77,53 @@ class up.RequestQueue extends up.Class
     @queuedRequests.shift()
 
   sendRequestNow: (request) ->
-    @currentRequests.push(request)
-    request.start()
-    request.finally => @onRequestSettled(request)
+    eventProps =
+      request: request
+      log: ['Loading %s %s', request.method, request.url]
 
-#    returnValue = request.start()
-#
-#    console.debug("return value of request %o is %o (isPromise == %o)", request.uid, returnValue, u.isPromise(returnValue))
-#
-#    if u.isPromise(returnValue)
-#      u.finally(returnValue, => @onRequestDone(request))
-#    else
-#      @onRequestDone(request)
+    if up.event.nobodyPrevents('up:proxy:load', eventProps)
+      @currentRequests.push(request)
+      request.send()
+      u.always request, (value) => @onRequestSettled(request, value)
+    else
+      request.abort()
 
-  onRequestSettled: (request) ->
-    u.remove(@currentRequests, request)
-    u.microrequest(@poke)
+  onRequestSettled: (request, value) ->
+    u.remove(@currentRequests, value)
 
-  poke: ->
+    # Check if the settlement value is a up.Response (which has #text) or an error
+    if value.text
+      if value.isSuccess()
+        up.proxy.registerAliasForRedirect(request, value)
+
+      up.emit 'up:proxy:loaded',
+        log: ['Server responded with HTTP %d (%d bytes)', value.status, value.text.length]
+        request: request
+        response: value
+    else
+      up.emit 'up:proxy:fatal',
+        log: 'Fatal error during request'
+        request: request
+        error: value
+
+    u.microtask(@poke)
+
+  poke: =>
     if @hasConcurrencyLeft() && (request = @pluckNextRequest())
       @sendRequestNow(request)
 
-  abortList: (list, conditions) ->
-    matches = u.select list, (request) => @requestMatches(request, conditions)
-    matches.forEach (match) ->
-      match.abort()
-      u.remove(list, match)
-    return
+  # Aborting a request will cause its promise to reject, which will also uncache it
+  abort: (conditions = true) ->
+    for list in [@currentRequests, @queuedRequests]
+      matches = u.filter list, (request) => @requestMatches(request, conditions)
+      matches.forEach (match) ->
+        match.abort()
+        u.remove(list, match)
+      return
 
   requestMatches: (request, conditions) ->
     return conditions == true ||
-      u.objectContains(request, conditions) ||
-
-  abort: (conditions = true) ->
-    @abortList(@currentRequests, conditions)
-    @abortList(@queuedRequests, conditions)
+      u.objectContains(request, conditions)
 
   checkSlow: =>
     currentSlow = @isSlow()

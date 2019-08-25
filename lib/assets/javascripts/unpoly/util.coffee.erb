@@ -822,6 +822,7 @@ up.util = do ->
   @stable
   ###
   findInList = (list, tester) ->
+    tester = iteratee(tester)
     match = undefined
     for element in list
       if tester(element)

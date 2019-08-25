@@ -98,13 +98,7 @@ up.proxy = do ->
     cachable: (request) -> up.Request.wrap(request).isCachable()
     # logPrefix: 'up.proxy'
 
-  foregroundQueue = new up.ProxyForegroundQueue
-    concurrency: -> config.concurrency
-    slowDelay: -> config.slowDelay
-
-  preloadQueue = new up.ProxyPreloadQueue
-    concurrency: -> config.preloadConcurrency
-    size: -> config.preloadQueueSize
+  queue = new up.RequestQueue()
 
   ###**
   Returns a cached response for the given request.
@@ -139,8 +133,7 @@ up.proxy = do ->
 
   reset = ->
     abortRequests()
-    preloadQueue.reset()
-    foregroundQueue.reset()
+    queue.reset()
     config.reset()
     cache.clear()
 
@@ -230,13 +223,23 @@ up.proxy = do ->
       #   We have a cache hit and receive the earlier request that is still preloading.
       #   Now we *should* trigger `up:proxy:slow`.
       # - The request (1) finishes. This triggers `up:proxy:recover`.
-      console.debug "TODO: cachedRequest needs to move to the foregroundqueue now"
-      queue.promoteToForeground(request)
+      unless request.preload
+        queue.promoteToForeground(cachedRequest)
 
       request = cachedRequest
     else
       # If no existing promise is available, we make a network request.
-      loadOrQueue(request)
+
+      # Cache the request for calls for calls with the same URL, method, params
+      # and target. See up.Request#cacheKey().
+      set(request, request)
+
+      # Immediately uncache failed requests.
+      # We have no control over the server, and another request with the
+      # same properties might succeed.
+      request.catch -> remove(request)
+
+      queue.asap(request)
 
     # The request is also a promise for its response.
     return request
@@ -320,10 +323,8 @@ up.proxy = do ->
   # TODO: Test and document up.proxy.abort().
   # TODO: Test and document up.proxy.abort(request)
   # TODO: Test and document up.proxy.abort(conditionsObj)
-  abortRequests = (conditions = true) ->
-    # Aborting a request will cause its promise to reject, which will also uncache it
-    for queue in [foregroundQueue, preloadQueue]
-      queue.abort(conditions)
+  abortRequests = (args...) ->
+    queue.abort(args...)
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
@@ -387,48 +388,6 @@ up.proxy = do ->
   @stable
   ###
 
-  loadOrQueue = (request) ->
-    queue = queueForRequest(request)
-
-    # Cache the request for calls for calls with the same URL, method, params
-    # and target. See up.Request#cacheKey().
-    set(request, request)
-
-    # Immediately uncache failed requests.
-    # We have no control over the server, and another request with the
-    # same properties might succeed.
-    request.catch -> remove(request)
-
-    queue.asap(taskForRequest(request))
-
-  queueForRequest = (request) ->
-    console.debug("--- queueForRequest() with request.preload == %o", request.preload)
-    if request.preload
-      preloadQueue
-    else
-      foregroundQueue
-
-  taskForRequest = (request) ->
-    return new up.Task(
-      data: request
-      onStart: -> load(request)
-      onAbort: -> request.abort()
-    )
-
-  load = (request) ->
-    eventProps =
-      request: request
-      log: ['Loading %s %s', request.method, request.url]
-
-    u.always request, (responseOrError) -> requestSettled(request, responseOrError)
-
-    if up.event.nobodyPrevents('up:proxy:load', eventProps)
-      request.send()
-    else
-      request.abort()
-
-    return request
-
   ###**
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
@@ -440,29 +399,13 @@ up.proxy = do ->
   @experimental
   ###
 
-  registerAliasForRedirect = (response) ->
-    request = response.request
+  registerAliasForRedirect = (request, response) ->
     if response.url && request.url != response.url
       newRequest = request.variant(
         method: response.method
         url: response.url
       )
       up.proxy.alias(request, newRequest)
-
-  requestSettled = (request, value) ->
-    if value.text
-      if value.isSuccess()
-        registerAliasForRedirect(value)
-
-      up.emit 'up:proxy:loaded',
-        log: ['Server responded with HTTP %d (%d bytes)', value.status, value.text.length]
-        request: request
-        response: value
-    else
-      up.emit 'up:proxy:fatal',
-        log: 'Fatal error during request'
-        request: request
-        error: value
 
   ###**
   This event is [emitted](/up.emit) when the response to an
@@ -578,6 +521,7 @@ up.proxy = do ->
   wrapMethod: wrapMethod
   config: config
   abort: abortRequests
+  registerAliasForRedirect: registerAliasForRedirect
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request
