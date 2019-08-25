@@ -48,10 +48,13 @@ class up.Layer extends up.Record
     @stack.current == this
 
   isLeaf: ->
-    @stack.leaf == this
+    @stack.isLeaf(this)
 
   isRoot: ->
-    @stack.root == this
+    @stack.isRoot(this)
+
+  isOverlay: ->
+    @stack.isOverlay(this)
 
   isOpen: ->
     @stack.isOpen(this)

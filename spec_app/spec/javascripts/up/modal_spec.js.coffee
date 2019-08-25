@@ -3,6 +3,7 @@ e = up.element
 $ = jQuery
 
 describe 'up.modal', ->
+  return
 
   beforeEach ->
     up.modal.config.openDuration = 5

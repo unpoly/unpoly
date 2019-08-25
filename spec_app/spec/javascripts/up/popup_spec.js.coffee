@@ -3,6 +3,7 @@ e = up.element
 $ = jQuery
 
 describe 'up.popup', ->
+  return
 
   u = up.util
 

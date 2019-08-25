@@ -419,14 +419,14 @@ describe 'up.form', ->
           next =>
             expect(up.history.location).toMatchURL('/other-path')
 
-        it 'submits the form to the current URL if the form has no [action] attribute', asyncSpec (next) ->
+        it "submits the form's source URL if the form has no [action] attribute", asyncSpec (next) ->
           form = fixture('form')
-          hrefBeforeSubmit = location.href
+          up.fragment.setSource(form, '/form-source')
 
           up.submit(form)
 
           next =>
-            expect(@lastRequest().url).toMatchURL(hrefBeforeSubmit)
+            expect(@lastRequest().url).toMatchURL('/form-source')
 
         describe 'handling of query params in the [action] URL', ->
 

@@ -99,6 +99,8 @@ up.history = do ->
   replace = (url) ->
     if manipulate('replaceState', url)
       up.emit('up:history:replaced', url: url)
+    else
+      up.emit('up:history:muted', url: url, log: "Did not replace state with #{url} (history is unavailable)")
 
   ###**
   Adds a new history entry and updates the browser's

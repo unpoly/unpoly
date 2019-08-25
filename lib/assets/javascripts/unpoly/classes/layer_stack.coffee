@@ -8,8 +8,14 @@ class up.LayerStack extends up.Class
   constructor: ->
     @reset()
 
-  isRoot: (layer = @current()) ->
+  isRoot: (layer = @current) ->
     @layers[0] == layer
+
+  isOverlay: (layer) ->
+    !@isRoot(layer)
+
+  isLeaf: (layer = @current) ->
+    @leaf == layer
 
   at: (i) ->
     @layers[i]

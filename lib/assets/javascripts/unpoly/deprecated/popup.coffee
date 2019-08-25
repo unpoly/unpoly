@@ -29,8 +29,8 @@ up.popup = u.literal
     up.layer.contains(element)
 
   isOpen: ->
-    up.legacy.deprecated('up.popup.isOpen()', 'up.layer.isOpen()')
-    up.layer.isOpen()
+    up.legacy.deprecated('up.popup.isOpen()', 'up.layer.isOverlay()')
+    up.layer.isOverlay()
 
   sync: ->
     up.legacy.deprecated('up.popup.sync()', 'up.layer.sync()')

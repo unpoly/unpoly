@@ -190,7 +190,7 @@ describe 'up.feedback', ->
 
           it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
-            $link = $nav.affix('a[href="/foo"][up-target=".main"]')
+            $link = $nav.affix('a[href="/fork"][up-target=".main"]')
             fixture('.main')
             up.hello($nav)
 
@@ -199,10 +199,11 @@ describe 'up.feedback', ->
 
             next =>
               @respondWith
-                responseHeaders: { 'X-Up-Location': '/foo/' }
+                responseHeaders: { 'X-Up-Location': '/fork/' }
                 responseText: '<div class="main">new-text</div>'
 
             next =>
+              console.debug('link href is %o, current URL is %o', $link.attr('href'), location.href)
               expect($link).toHaveClass('up-current')
 
           it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->

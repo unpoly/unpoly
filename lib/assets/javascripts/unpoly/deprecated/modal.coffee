@@ -34,8 +34,8 @@ up.modal = u.literal
     up.layer.contains(element)
 
   isOpen: ->
-    up.legacy.deprecated('up.modal.isOpen()', 'up.layer.isOpen()')
-    up.layer.isOpen()
+    up.legacy.deprecated('up.modal.isOpen()', 'up.layer.isOverlay()')
+    up.layer.isOverlay()
 
   get_flavors: ->
     throw 'up.modal.flavors has been removed without replacement'

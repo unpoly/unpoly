@@ -319,6 +319,7 @@ up.feedback = do ->
 
   onHistoryChanged = ->
     leafLayer = up.layer.leaf
+
     # We allow Unpoly-unaware code to use the pushState API and change the
     # leaf layer in the process.
     if leafLayer.hasLiveHistory()
