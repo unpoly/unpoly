@@ -45,6 +45,7 @@ up.layer = do ->
       popup:
         position: 'bottom'
         align: 'left'
+        history: false
       drawer:
         position: 'left'
         openAnimation: (layer) ->
@@ -180,8 +181,8 @@ up.layer = do ->
       # If the link is in the root layer, we allow the event to bubble up.
       unless layer.isRoot()
         value = e.jsonAttr(origin, attribute)
-        # u.muteRejection closeFn(layer, { value, origin })
-        closeFn(layer, { value, origin })
+        u.muteRejection closeFn(layer, { value, origin })
+        # closeFn(layer, { value, origin })
         up.event.halt(event)
 
   up.on 'up:framework:boot', ->

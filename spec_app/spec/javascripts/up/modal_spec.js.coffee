@@ -714,8 +714,8 @@ describe 'up.modal', ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
-          $backdrop = $('.up-overlay-backdrop')
-          Trigger.clickSequence($backdrop)
+          backdrop = document.elementFromPoint(5, 5)
+          Trigger.clickSequence(backdrop)
 
         next =>
           expect(up.modal.isOpen()).toBe(false)
@@ -745,12 +745,13 @@ describe 'up.modal', ->
 
       it 'stays open if #preventDefault() is called on up:modal:close event', asyncSpec (next) ->
         up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
-        up.on 'up:modal:close', (e) -> e.preventDefault()
+        up.on 'up:modal:close', (e) ->
+          console.debug("LISTENER FOR up:modal:close CALLED")
+          e.preventDefault()
 
         next =>
-          debugger
-          $backdrop = $('.up-overlay-backdrop')
-          Trigger.clickSequence($backdrop)
+          backdrop = document.elementFromPoint(5, 5)
+          Trigger.clickSequence(backdrop)
 
         next =>
           expect(up.modal.isOpen()).toBe(true)
@@ -771,8 +772,8 @@ describe 'up.modal', ->
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, dismissable: false)
 
           next =>
-            $backdrop = $('.up-overlay-backdrop')
-            Trigger.clickSequence($backdrop)
+            backdrop = document.elementFromPoint(5, 5)
+            Trigger.clickSequence(backdrop)
 
           next =>
             expect(up.modal.isOpen()).toBe(true)
@@ -814,7 +815,7 @@ describe 'up.modal', ->
           @respondWith("<div class='inside'>old inside</div>")
 
         next =>
-          up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.inside'))
+          up.extract('.outside', "<div class='outside'>new outside</div>", layer: 'root', origin: $('.inside'))
 
         next =>
           expect($('.outside')).toHaveText('new outside')
@@ -834,7 +835,7 @@ describe 'up.modal', ->
 
         next =>
           up.extract('.outside', "<div class='outside'>new outside</div>",
-            origin: $('.inside'), history: '/new-location') # Provoke auto-close
+            layer: 'root', origin: $('.inside'), history: '/new-location') # Provoke auto-close
 
         next =>
           expect(location.href).toMatchURL '/new-location'
@@ -861,7 +862,7 @@ describe 'up.modal', ->
           @respondWith("<div class='inside'>old inside</div>")
 
         next =>
-          up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'))
+          up.extract('.outside', "<div class='outside'>new outside</div>", origin: $('.outside'), layer: 'root')
 
         next =>
           expect($('.outside')).toHaveText('new outside')

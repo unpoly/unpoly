@@ -10,7 +10,7 @@ class up.Change.CloseLayer extends up.Change.Removal
     @layer = up.layer.lookup(options)
     @origin = options.origin
     @value = options.value
-    @preventable = options.preventable
+    @preventable = options.preventable ? true
 
   valueAttr: null       # implement in child class
 
@@ -39,9 +39,8 @@ class up.Change.CloseLayer extends up.Change.Removal
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(preflightLayer: this)
 
-    # TODO: Is up.proxy.abort sync or async?
-
     @layer[@closeCallbackName]?(closeEvent)
+    console.debug("@layer.emit(%o)", closeEvent)
     @layer.emit(closeEvent) # will bubble up to document
 
     if !closeEvent.defaultPrevented || !@preventable

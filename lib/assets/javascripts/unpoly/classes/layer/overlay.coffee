@@ -68,7 +68,15 @@ class up.Layer.Overlay extends up.Layer
       'up-position': @position,
       'up-size': @size,
     @element = e.affix(parentElement, '.up-overlay', attrs)
-    @element.classList.add(@class) if @class
+
+    if @class
+      @element.classList.add(@class)
+
+    if @dismissable
+      @element.addEventListener 'click', (event) =>
+        unless e.closest(event.target, '.up-overlay-frame')
+          u.muteRejection @dismiss()
+          up.event.halt(event)
 
   destroyElement: (options) ->
     up.destroy(@element, options)
