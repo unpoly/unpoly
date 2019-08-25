@@ -84,10 +84,18 @@ up.proxy = do ->
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
-    preloadConcurrency: 2
     preloadQueueSize: 5
     preloadEnabled: !up.browser.hasSlowConnection()
     preloadTimeout: 10
+
+  preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
+  Object.defineProperty config, 'preloadDelay',
+    get: ->
+      preloadDelayMoved()
+      return up.link.config.preloadDelay
+    set: (value) ->
+      preloadDelayMoved()
+      up.link.config.preloadDelay = value
 
   up.legacy.renamedProperty(config, 'maxRequests', 'concurrency')
 
@@ -318,7 +326,7 @@ up.proxy = do ->
   @experimental
   ###
   isBusy = ->
-    foregroundQueue.isBusy()
+    queue.isBusy()
 
   # TODO: Test and document up.proxy.abort().
   # TODO: Test and document up.proxy.abort(request)

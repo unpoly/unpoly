@@ -32,7 +32,7 @@ class up.RequestQueue extends up.Class
       else
         if oldestCurrentPreloadRequest = u.find(@currentRequests, 'preload')
           @abort(oldestCurrentPreloadRequest)
-          @sendRequestNow()
+          @sendRequestNow(request)
         else
           @queueRequest(request)
 
@@ -51,13 +51,7 @@ class up.RequestQueue extends up.Class
   setSlowTimer: (request) ->
     unless request.preload || request.aborted
       slowDelay = u.evalOption(@slowDelay)
-      timer = setTimeout(@checkSlow, slowDelay)
-      request.finally =>
-        # If the request settled before the timer, we don't need it anymore.
-        clearTimeout(timer)
-        # In case a slow request eventually settled, we need to checkSlow() again
-        # for a chance to emit up:proxy:recover.
-        @checkSlow()
+      setTimeout(@checkSlow, slowDelay)
 
   hasConcurrencyLeft: ->
     maxConcurrency = u.evalOption(@concurrency)
@@ -68,7 +62,7 @@ class up.RequestQueue extends up.Class
     return maxSize == -1 || u.filter(@queuedRequests, 'preload').length < maxSize
 
   isBusy: ->
-    @currentRequests.length > 0
+    u.reject(@currentRequests, 'preload').length > 0
 
   queueRequest: (request) ->
     @queuedRequests.push(request)
@@ -89,7 +83,7 @@ class up.RequestQueue extends up.Class
       request.abort()
 
   onRequestSettled: (request, value) ->
-    u.remove(@currentRequests, value)
+    u.remove(@currentRequests, request)
 
     # Check if the settlement value is a up.Response (which has #text) or an error
     if value.text
@@ -105,6 +99,8 @@ class up.RequestQueue extends up.Class
         log: 'Fatal error during request'
         request: request
         error: value
+
+    @checkSlow()
 
     u.microtask(@poke)
 
@@ -127,8 +123,6 @@ class up.RequestQueue extends up.Class
 
   checkSlow: =>
     currentSlow = @isSlow()
-
-    console.debug("--- checkSlow(); currentSlow is %o", currentSlow)
 
     if @emittedSlow != currentSlow
       @emittedSlow = currentSlow
