@@ -124,14 +124,14 @@ describe 'up.popup', ->
             expect(events).toEqual ['up:popup:open', 'up:popup:opened', 'up:popup:close', 'up:popup:closed', 'up:popup:open', 'up:popup:opened']
             expect($('.target')).toHaveText('response2')
 
-    describe 'up.popup.coveredURL', ->
+    describe 'up.popup.coveredUrl', ->
 
       describeCapability 'canPushState', ->
 
         it 'returns the URL behind the popup', asyncSpec (next) ->
           up.history.config.enabled = true
           up.history.replace('/foo')
-          expect(up.popup.coveredURL()).toBeMissing()
+          expect(up.popup.coveredUrl()).toBeMissing()
 
           $popupLink = $fixture('a[href="/bar"][up-popup=".container"][up-history="true"]')
           up.hello($popupLink)
@@ -139,12 +139,12 @@ describe 'up.popup', ->
 
           next =>
             @respondWith('<div class="container">text</div>')
-            expect(up.popup.coveredURL()).toMatchURL('/foo')
+            expect(up.popup.coveredUrl()).toMatchURL('/foo')
 
             next.await up.popup.close()
 
           next =>
-            expect(up.popup.coveredURL()).toBeMissing()
+            expect(up.popup.coveredUrl()).toBeMissing()
 
     describe 'up.popup.close', ->
 

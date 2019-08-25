@@ -3,7 +3,6 @@ e = up.element
 $ = jQuery
 
 describe 'up.modal', ->
-  return
 
   beforeEach ->
     up.modal.config.openDuration = 5
@@ -397,7 +396,7 @@ describe 'up.modal', ->
             promise = promiseState(openPromise)
             promise.then (result) => expect(result.state).toEqual('pending')
 
-    describe 'up.modal.coveredURL', ->
+    describe 'up.modal.coveredUrl', ->
 
       describeCapability 'canPushState', ->
 
@@ -405,14 +404,14 @@ describe 'up.modal', ->
           up.history.config.enabled = true
           up.history.replace('/foo')
 
-          expect(up.modal.coveredURL()).toBeMissing()
+          expect(up.modal.coveredUrl()).toBeMissing()
           visitPromise = up.modal.visit('/bar', target: '.container')
           u.task =>
             @respondWith('<div class="container">text</div>')
             visitPromise.then ->
-              expect(up.modal.coveredURL()).toMatchURL('/foo')
+              expect(up.modal.coveredUrl()).toMatchURL('/foo')
               up.modal.close().then ->
-                expect(up.modal.coveredURL()).toBeMissing()
+                expect(up.modal.coveredUrl()).toBeMissing()
                 done()
 
 #    describe 'up.modal.flavors', ->
@@ -481,8 +480,8 @@ describe 'up.modal', ->
         @stubFollow = =>
           @$link = $fixture('a[href="/path"][up-modal=".target"]')
           up.hello(@$link)
-          @followSpy = up.modal.knife.mock('followAsap').and.returnValue(Promise.resolve())
-          @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
+          @followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
+          @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', asyncSpec (next) ->
         @$link = $fixture('a[href="/path"][up-modal=".target"]')
@@ -531,7 +530,7 @@ describe 'up.modal', ->
         it 'opens the modal on mousedown (instead of on click)', asyncSpec (next) ->
           Trigger.mousedown(@$link)
           next =>
-            expect(@followSpy).toHaveBeenCalledWith(@$link[0], {})
+            expect(@followSpy).toHaveBeenCalledWith(@$link[0])
 
         it 'does nothing on mouseup', asyncSpec (next) ->
           Trigger.mouseup(@$link)
@@ -681,7 +680,7 @@ describe 'up.modal', ->
           up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
 
           next =>
-            $link = $('.up-overlay a[up-dismiss]') # link is within the modal
+            $link = $('.up-overlay .up-overlay-dismiss') # link is within the modal
             Trigger.clickSequence($link)
 
           next =>
@@ -749,6 +748,7 @@ describe 'up.modal', ->
         up.on 'up:modal:close', (e) -> e.preventDefault()
 
         next =>
+          debugger
           $backdrop = $('.up-overlay-backdrop')
           Trigger.clickSequence($backdrop)
 

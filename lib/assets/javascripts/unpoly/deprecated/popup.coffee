@@ -9,16 +9,16 @@ up.popup = u.literal
     up.layer.open(u.merge(options, { origin, flavor: 'popup' }))
 
   close: (options = {}) ->
-    up.legacy.deprecated('up.popup.close()', 'up.layer.dismiss() or up.layer.accept()')
+    up.legacy.deprecated('up.popup.close()', 'up.layer.dismiss()')
     up.layer.dismiss(options)
 
   url: ->
     up.legacy.deprecated('up.popup.url()', 'up.layer.location')
     up.layer.location
 
-  coveredURL: ->
-    up.legacy.deprecated('up.popup.coveredURL()', 'up.layer.parent.location')
-    up.layer.parent.location
+  coveredUrl: ->
+    up.legacy.deprecated('up.popup.coveredUrl()', 'up.layer.parent.location')
+    up.layer.parent?.location
 
   get_config: ->
     up.legacy.deprecated('up.popup.config', 'up.layer.config.popup')

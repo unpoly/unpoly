@@ -14,16 +14,16 @@ up.modal = u.literal
     up.change(u.merge(options, { target, document: html, flavor: 'modal' }))
 
   close: (options = {}) ->
-    up.legacy.deprecated('up.modal.close()', 'up.layer.dismiss() or up.layer.accept()')
+    up.legacy.deprecated('up.modal.close()', 'up.layer.dismiss()')
     up.layer.dismiss(options)
 
   url: ->
     up.legacy.deprecated('up.modal.url()', 'up.layer.location')
     up.layer.location
 
-  coveredURL: ->
-    up.legacy.deprecated('up.modal.coveredURL()', 'up.layer.parent.location')
-    up.layer.parent.location
+  coveredUrl: ->
+    up.legacy.deprecated('up.modal.coveredUrl()', 'up.layer.parent.location')
+    up.layer.parent?.location
 
   get_config: ->
     up.legacy.deprecated('up.modal.config', 'up.layer.config.modal')
