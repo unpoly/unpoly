@@ -16,10 +16,6 @@
 - Deprecate shortcuts like [up-modal] for shrink the API surface
   - people can use [up-layer=modal] to open a new modal
   - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
-- Is { peel: true } a good default for up.change()?
-  - E.g. up.destroy() does not peel because it is not a change
-  - Only user interactions ({ navigate: true }? follow? submit? UJS handlers?) should trigger peeling
-- { peel } option for up.destroy
 - Have up.layer.build delegate to up.Layer class
 - Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback, reveal }.
 - Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
@@ -80,6 +76,9 @@
 - Deprecate unpoly-bootstrap3
 - Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
 - Opening a new layer should cancel requests that also open a new layer
+- { peel } option for up.destroy
+
+
 
 - Tests
   - Get tests green again

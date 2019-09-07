@@ -858,6 +858,8 @@ describe 'up.modal', ->
         $fixture('.outside').text('old outside')
         up.modal.visit('/path', target: '.inside')
 
+        # throw "apparently peeling seemed to have more conditions"
+
         next =>
           @respondWith("<div class='inside'>old inside</div>")
 

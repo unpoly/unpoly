@@ -162,7 +162,7 @@ up.link = do ->
     parser.json('query') # TODO                       # preflight
     parser.json('params')                             # preflight
     parser.boolean('cache')                           # preflight (but failed responses will be uncached)
-    parser.boolean('navigate', default: true)         # macro to set multiple options, see up.change()
+    parser.boolean('navigate')                        # macro to set multiple options, see up.change()
     parser.boolean('solo')                            # preflight
     parser.string('confirm')                          # preflight
     parser.boolean('feedback')                        # preflight

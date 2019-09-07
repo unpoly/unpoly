@@ -55,14 +55,19 @@ up.fragment = do ->
       options.confirm = false
       options.feedback = false
 
-    if options.navigate
-      options.solo ?= true
-      options.feedback ?= true
+    navigate = options.navigate ? true
 
-      options.peel ?= true
-      options.reveal ?= true
-      options.failPeel ?= true
-      options.failReveal ?= true
+    options.solo ?= navigate
+    options.feedback ?= navigate
+
+    options.peel ?= navigate
+    options.reveal ?= navigate
+    options.failPeel ?= navigate
+    options.failReveal ?= navigate
+
+    if navigate == false
+      # Only change this for non-default { navigate } option
+      options.history = false
 
     promise = up.browser.whenConfirmed(options)
 
@@ -75,6 +80,11 @@ up.fragment = do ->
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise
+
+#  navigate = (args...) ->
+#    options = parseTargetAndOptions(args)
+#    options.navigate = true
+#    return makeChange(options)
 
   makeChangeNow = (options) ->
     if options.content || options.document
