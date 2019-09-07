@@ -6,27 +6,28 @@ describe 'up.fragment', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.fragment.first', ->
+    describe 'up.fragment.all', ->
 
-      it 'returns the first element with the given selector', ->
+      it 'returns elements matching the given selector', ->
         match = fixture('.match')
+        otherMatch = fixture('.match.other')
         noMatch = fixture('.no-match')
-        result = up.fragment.first('.match')
-        expect(result).toBe(match)
+        results = up.fragment.all('.match')
+        expect(results).toEqual [match, otherMatch]
 
-      it 'returns the first argument if the first argument is already an element', ->
+      it 'returns an array of the first argument if the first argument is already an element', ->
         match = fixture('.match')
-        result = up.fragment.first(match)
-        expect(result).toBe(match)
+        results = up.fragment.all(match)
+        expect(results).toEqual [match]
 
-      it 'returns undefined if there are no matches', ->
-        result = up.fragment.first('.match')
-        expect(result).toBeUndefined()
+      it 'returns an empty array if there are no matches', ->
+        results = up.fragment.all('.match')
+        expect(results).toEqual []
 
       it 'does not return an element that is currently destroying', ->
         match = fixture('.match.up-destroying')
-        result = up.fragment.first('.match')
-        expect(result).toBeUndefined()
+        results = up.fragment.all('.match')
+        expect(results).toEqual []
 
       describe 'when given a root element for the search', ->
 
@@ -37,28 +38,44 @@ describe 'up.fragment', ->
           parent2 = fixture('.parent1')
           parent2Match = e.affix(parent2, '.match')
 
-          expect(up.fragment.first(parent1, '.match')).toBe(parent1Match)
-          expect(up.fragment.first(parent2, '.match')).toBe(parent2Match)
+          expect(up.fragment.all(parent1, '.match')).toEqual [parent1Match]
+          expect(up.fragment.all(parent2, '.match')).toEqual [parent2Match]
 
-        it 'returns the second argument if the second argument is already an element', ->
+        it 'returns an array of the second argument if the second argument is already an element', ->
           root = fixture('.root')
           match = fixture('.match')
-          result = up.fragment.first(root, match)
-          expect(result).toBe(match)
+          result = up.fragment.all(root, match)
+          expect(result).toEqual [match]
 
-      describe 'with { origin } option', ->
+      it 'resolves an & in the selector string with an selector for the { origin }'
 
-        it 'resolves an & in the selector string with an selector for the origin'
+      describe 'layer matching', ->
 
-        it 'prefers to find an element in the same layer as the origin'
+        beforeEach (done) ->
+          @rootElement = fixture('.element.in-root')
+          up.layer.open(target: '.element', document: '<div class="element in-overlay"></div>').then =>
+            @overlayElement = document.querySelector('.up-overlay .element')
+            @overlayElement or throw "Could not find element in overlay"
+            done()
 
-        it "returns the element in the top-most layer if there are no matches in the origin's layer"
+        it 'only matches elements in the current layer', ->
+          results = up.fragment.all('.element')
+          expect(results).toEqual [@overlayElement]
 
-      describe 'with { layer } option', ->
+        it 'returns undefined if the only match is in a non-current layer', ->
+          results = up.fragment.all('.element.in-root')
+          expect(results).toEqual []
 
-        it 'only matches elements in that layer'
+        it "only matches elements in the layer of the given { origin }", ->
+          otherRootElement = fixture('.element.other.in-root')
+          results = up.fragment.all('.element', origin: otherRootElement)
+          expect(results).toEqual [@rootElement, otherRootElement]
 
-        it 'returns the first argument if the first argument is already an element', ->
+        it 'only matches elements in the given { layer }', ->
+          results = up.fragment.all('.element', layer: 'root')
+          expect(results).toEqual [@rootElement]
+
+        it 'returns the first argument if the first argument is already an element, even if { layer } is given', ->
           match = fixture('.match')
           result = up.fragment.first(match, layer: 'root')
           expect(result).toBe(match)
