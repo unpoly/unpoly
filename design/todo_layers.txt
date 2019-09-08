@@ -7,7 +7,6 @@
 - up.history.replace() is kinda dangerous API
   - the current layer still has the previous URL
 - Move up.browser.location to up.history.location
-- Rename Response#url to Response#location
 - Deprecate shortcuts like [up-modal] for shrink the API surface
   - people can use [up-layer=modal] to open a new modal
   - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
