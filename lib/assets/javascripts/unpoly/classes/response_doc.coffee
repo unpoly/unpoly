@@ -38,14 +38,10 @@ class up.ResponseDoc
 
   parseInnerContent: (options) ->
     if content = options.content
-      # Since #first() only seeks in children of @parsedRoot, we need to
-      # wrap the matching element in another parent.
-      root = document.createElement('div')
-
       target = options.target or throw "must pass a { target } when passing { content }"
       if u.contains(target, ',')
         throw 'when passing { content } you must { target } a single element'
-      matchingElement = e.affix(root, target)
+      matchingElement = e.createFromSelector(target)
 
       if u.isString(content)
         content = @wrapHTML(content)
@@ -53,7 +49,7 @@ class up.ResponseDoc
       else
         matchingElement.appendChild(content)
 
-      return root
+      return matchingElement
 
   wrapHTML: (html) ->
     html = @noscriptWrapper.wrap(html)
@@ -63,8 +59,9 @@ class up.ResponseDoc
   title: ->
     @parsedRoot.querySelector("head title")?.textContent
 
-  first: (selector) ->
-    e.first(@parsedRoot, selector)
+  select: (selector) ->
+    e.subtree(@parsedRoot, selector)[0]
+    # e.first(@parsedRoot, selector)
 
   isInlineScript: (element) ->
     element.hasAttribute('src')

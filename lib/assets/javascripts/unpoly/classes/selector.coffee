@@ -8,9 +8,14 @@ class up.Selector
   constructor: (@selector, @filterFn) ->
 
   matches: (element) ->
-    doesMatch = element[MATCH_FN_NAME](@selector)
-    doesMatch &&= @filterFn(element) if @filterFn
-    doesMatch
+    if element[MATCH_FN_NAME]
+      doesMatch = element[MATCH_FN_NAME](@selector)
+      if @filterFn
+        doesMatch &&= @filterFn(element)
+      doesMatch
+    else
+      # When passed a document
+      false
 
   descendants: (root) ->
     matches = root.querySelectorAll(@selector)

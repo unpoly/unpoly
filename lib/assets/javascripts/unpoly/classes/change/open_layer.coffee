@@ -22,7 +22,7 @@ class up.Change.OpenLayer extends up.Change.Addition
   execute: ->
     # Selecting the content needs to happen sync, since our caller
     # might want catch up.Change.NOT_APPLICABLE.
-    @content = @responseDoc.first(@target) or @notApplicable()
+    @content = @responseDoc.select(@target) or @notApplicable()
 
     unless @currentLayer.isOpen()
       @notApplicable('Could not open %o in new layer: Parent layer was closed', @target)

@@ -220,7 +220,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return if @foundNew
     for step in @steps
       # The responseDoc has no layers.
-      step.newElement = @responseDoc.first(step.selector) or @notApplicable()
+      step.newElement = @responseDoc.select(step.selector) or @notApplicable()
     @foundNew = true
 
   addHungrySteps: ->
@@ -230,7 +230,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       transition = up.radio.config.hungryTransition ? @transition
       for hungry in hungries
         selector = e.toSelector(hungry)
-        if newHungry = @responseDoc.first(selector)
+        if newHungry = @responseDoc.select(selector)
           @steps.push
             selector: selector
             oldElement: hungry

@@ -23,3 +23,8 @@ window.$fixture = $appendFixture
 
 # A lot of legacy tests require this jQuery function
 $.fn.affix = (args...) -> $(e.affix(this[0], args...))
+
+window.fixtureInOverlay = (target, args...) ->
+  document = e.createFromSelector(target, args...)
+  up.layer.open({ target, document }).then ->
+    return document

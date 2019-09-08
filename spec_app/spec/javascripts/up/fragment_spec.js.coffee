@@ -53,9 +53,8 @@ describe 'up.fragment', ->
 
         beforeEach (done) ->
           @rootElement = fixture('.element.in-root')
-          up.layer.open(target: '.element', document: '<div class="element in-overlay"></div>').then =>
-            @overlayElement = document.querySelector('.up-overlay .element')
-            @overlayElement or throw "Could not find element in overlay"
+          fixtureInOverlay('.element.in-overlay').then (element) =>
+            @overlayElement = element
             done()
 
         it 'only matches elements in the current layer', ->
