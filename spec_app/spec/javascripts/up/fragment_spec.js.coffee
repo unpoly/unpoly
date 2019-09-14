@@ -6,7 +6,7 @@ describe 'up.fragment', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.fragment.all', ->
+    describe 'up.fragment.all()', ->
 
       it 'returns elements matching the given selector', ->
         match = fixture('.match')
@@ -79,98 +79,135 @@ describe 'up.fragment', ->
           result = up.fragment.first(match, layer: 'root')
           expect(result).toBe(match)
 
-    describe 'up.replace', ->
+    describe 'up.change()', ->
 
-      describeCapability 'canPushState', ->
+      describe 'with { url } option', ->
 
-        beforeEach ->
+        describeCapability 'canPushState', ->
 
-          @$oldBefore = $fixture('.before').text('old-before')
-          @$oldMiddle = $fixture('.middle').text('old-middle')
-          @$oldAfter = $fixture('.after').text('old-after')
+          it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
+            fixture('.before', text: 'old-before')
+            fixture('.middle', text: 'old-middle')
+            fixture('.after', text: 'old-after')
 
-          @responseText =
-            """
-            <div class="before">new-before</div>
-            <div class="middle">new-middle</div>
-            <div class="after">new-after</div>
-            """
+            up.change(target: '.middle', url: '/path')
 
-          @respond = (options = {}) -> @respondWith(@responseText, options)
+            next =>
+              @respondWith """
+                <div class="before">new-before</div>
+                <div class="middle">new-middle</div>
+                <div class="after">new-after</div>
+                """
 
-        it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
-          up.replace('.middle', '/path')
-
-          next =>
-            @respond()
-
-          next.after 10, =>
-            expect($('.before')).toHaveText('old-before')
-            expect($('.middle')).toHaveText('new-middle')
-            expect($('.after')).toHaveText('old-after')
+            next =>
+              expect('.before').toHaveText('old-before')
+              expect('.middle').toHaveText('new-middle')
+              expect('.after').toHaveText('old-after')
 
         it 'returns a promise that will be fulfilled once the server response was received and the fragments were swapped', asyncSpec (next) ->
+          fixture('.target')
+
           resolution = jasmine.createSpy()
-          promise = up.replace('.middle', '/path')
+          promise = up.change(target: '.target', url: '/path')
           promise.then(resolution)
-          expect(resolution).not.toHaveBeenCalled()
-          expect($('.middle')).toHaveText('old-middle')
 
           next =>
-            @respond()
+            expect(resolution).not.toHaveBeenCalled()
+            @respondWith('<div class="target">new-text</div>')
 
           next =>
             expect(resolution).toHaveBeenCalled()
-            expect($('.middle')).toHaveText('new-middle')
+            expect($('.target')).toHaveText('new-text')
 
-        it 'allows to pass an element instead of a selector', asyncSpec (next) ->
-          up.replace(@$oldMiddle, '/path')
-
-          next =>
-            @respond()
-
-          next =>
-            expect($('.before')).toHaveText('old-before')
-            expect($('.middle')).toHaveText('new-middle')
-            expect($('.after')).toHaveText('old-after')
-
-        describe 'with { transition } option', ->
-
-          it 'returns a promise that will be fulfilled once the server response was received and the swap transition has completed', asyncSpec (next) ->
-            resolution = jasmine.createSpy()
-            promise = up.replace('.middle', '/path', transition: 'cross-fade', duration: 200)
-            promise.then(resolution)
-            expect(resolution).not.toHaveBeenCalled()
-            expect($('.middle')).toHaveText('old-middle')
-
-            next =>
-              @respond()
-              expect(resolution).not.toHaveBeenCalled()
-
-            next.after 100, =>
-              expect(resolution).not.toHaveBeenCalled()
-
-            next.after 200, =>
-              expect(resolution).toHaveBeenCalled()
+        it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
+          fixture('.target')
+          up.change(target: '.target', url: '/path', method: 'put')
+          next => expect(@lastRequest()).toHaveRequestMethod('PUT')
 
         describe 'with { params } option', ->
 
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.replace('.middle', '/path', method: 'put', params: givenParams)
+            fixture('.target')
+            up.change(target: '.target', url: '/path', method: 'put', params: givenParams)
 
             next =>
               expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
               expect(@lastRequest().data()['bar-key']).toEqual(['bar-value'])
 
           it "encodes the given params into the URL of a GET request", asyncSpec (next) ->
+            fixture('.target')
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.replace('.middle', '/path', method: 'get', params: givenParams)
+            up.change(target: '.target', url: '/path', method: 'get', params: givenParams)
             next => expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
 
-        it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
-          up.replace('.middle', '/path', method: 'put')
-          next => expect(@lastRequest()).toHaveRequestMethod('PUT')
+        describeFallback 'canPushState', ->
+
+          it 'makes a full page load', asyncSpec (next) ->
+            spyOn(up.browser, 'loadPage')
+            up.change(target: '.selector', url: '/path')
+
+            next =>
+              expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
+
+      describe 'with { content } option', ->
+
+        it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string'
+
+        it 'replaces the given selector with a matching element that has the inner HTML from the given { content } element'
+
+      describe 'with { document } option', ->
+
+        it 'replaces the given selector with a matching element that has the outer HTML from the given { content } string'
+
+        it 'replaces the given selector with a matching element that has the outer HTML from the given { content } element'
+
+      describe 'when no { target } options is given', ->
+
+        it 'uses a default target for the layer that is being updated'
+
+      describe 'with { transition } option', ->
+
+        it 'returns a promise that will be fulfilled once the server response was received and the swap transition has completed', asyncSpec (next) ->
+          fixture('.target', text: 'old-text')
+          resolution = jasmine.createSpy()
+          promise = up.change(target: '.target', url: '/path', transition: 'cross-fade', duration: 200)
+          promise.then(resolution)
+
+          next =>
+            expect(resolution).not.toHaveBeenCalled()
+            expect('.target').toHaveText('old-text')
+            @respondWith '<div class="target">new-text</div>'
+
+          next.after 100, =>
+            target = e.first('.target')
+            opacity = e.styleNumber(target, 'opacity')
+            expect(opacity).toBeAround(0.5, 0.4)
+            expect(resolution).not.toHaveBeenCalled()
+
+          next.after 200, =>
+            expect(resolution).toHaveBeenCalled()
+            expect('.target').toHaveText('new-text')
+
+      it 'allows to pass an element as { target } option', asyncSpec (next) ->
+        target = fixture('.target', text: 'old-text')
+        up.change(target: target, document: '<div class="target">new-text</div>')
+
+        next =>
+          expect('.target').toHaveText('new-text')
+
+
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+    ##############################################################################
+
+    describe 'up.replace', ->
+
+      describeCapability 'canPushState', ->
+
+
 
         describe 'when the server responds with an error', ->
 
@@ -1617,15 +1654,6 @@ describe 'up.fragment', ->
               expect($('.up-insertion')).not.toBeAttached()
 
         it 'uses a { failTransition } option if the request failed'
-
-      describeFallback 'canPushState', ->
-
-        it 'makes a full page load', asyncSpec (next) ->
-          spyOn(up.browser, 'loadPage')
-          up.replace('.selector', '/path')
-
-          next =>
-            expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
 
     describe 'up.extract', ->
 
