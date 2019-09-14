@@ -78,6 +78,14 @@ class up.Layer.Overlay extends up.Layer
           u.muteRejection @dismiss()
           up.event.halt(event)
 
+    @registerCloser(@acceptOn, @accept)
+    @registerCloser(@dismissOn, @dismiss)
+
+  registerCloser: (closer, close) ->
+    if closer
+      [eventName, selector] = closer.match(/^([^ ]+)(?: (.*))?$/)
+      @on(@eventName, selector, close.bind(this))
+
   destroyElement: (options) ->
     up.destroy(@element, options)
 

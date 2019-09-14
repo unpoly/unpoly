@@ -194,6 +194,8 @@ up.link = do ->
     parser.parse(up.layer.closeCallbackAttr, 'onDismiss')     # success only
     parser.parse(up.layer.closeCallbackAttr, 'onDismissing')  # success only
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')   # success only
+    parser.string('acceptOn')
+    parser.string('dismissOn')
     u.assign(options, up.motion.animateOptions(options, link))
     options.guardEvent ?= up.event.build('up:link:follow', log: 'Following link')
 
