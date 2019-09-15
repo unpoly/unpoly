@@ -10,6 +10,7 @@ Unreleased
 ----------
 
 - Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
+- Failed responses now change the URL
 - TODO ...
 
 

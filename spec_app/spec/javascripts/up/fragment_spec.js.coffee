@@ -83,37 +83,35 @@ describe 'up.fragment', ->
 
       describe 'with { url } option', ->
 
-        describeCapability 'canPushState', ->
+        it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
+          fixture('.before', text: 'old-before')
+          fixture('.middle', text: 'old-middle')
+          fixture('.after', text: 'old-after')
 
-          it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
-            fixture('.before', text: 'old-before')
-            fixture('.middle', text: 'old-middle')
-            fixture('.after', text: 'old-after')
+          up.change('.middle', url: '/path')
 
-            up.change(target: '.middle', url: '/path')
+          next =>
+            @respondWith """
+              <div class="before">new-before</div>
+              <div class="middle">new-middle</div>
+              <div class="after">new-after</div>
+              """
 
-            next =>
-              @respondWith """
-                <div class="before">new-before</div>
-                <div class="middle">new-middle</div>
-                <div class="after">new-after</div>
-                """
-
-            next =>
-              expect('.before').toHaveText('old-before')
-              expect('.middle').toHaveText('new-middle')
-              expect('.after').toHaveText('old-after')
+          next =>
+            expect('.before').toHaveText('old-before')
+            expect('.middle').toHaveText('new-middle')
+            expect('.after').toHaveText('old-after')
 
         it 'returns a promise that will be fulfilled once the server response was received and the fragments were swapped', asyncSpec (next) ->
           fixture('.target')
 
           resolution = jasmine.createSpy()
-          promise = up.change(target: '.target', url: '/path')
+          promise = up.change('.target', url: '/path')
           promise.then(resolution)
 
           next =>
             expect(resolution).not.toHaveBeenCalled()
-            @respondWith('<div class="target">new-text</div>')
+            @respondWithSelector('.target', text: 'new-text')
 
           next =>
             expect(resolution).toHaveBeenCalled()
@@ -121,7 +119,7 @@ describe 'up.fragment', ->
 
         it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
           fixture('.target')
-          up.change(target: '.target', url: '/path', method: 'put')
+          up.change('.target', url: '/path', method: 'put')
           next => expect(@lastRequest()).toHaveRequestMethod('PUT')
 
         describe 'with { params } option', ->
@@ -129,7 +127,7 @@ describe 'up.fragment', ->
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             fixture('.target')
-            up.change(target: '.target', url: '/path', method: 'put', params: givenParams)
+            up.change('.target', url: '/path', method: 'put', params: givenParams)
 
             next =>
               expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
@@ -138,17 +136,102 @@ describe 'up.fragment', ->
           it "encodes the given params into the URL of a GET request", asyncSpec (next) ->
             fixture('.target')
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.change(target: '.target', url: '/path', method: 'get', params: givenParams)
+            up.change('.target', url: '/path', method: 'get', params: givenParams)
             next => expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
 
         describeFallback 'canPushState', ->
 
           it 'makes a full page load', asyncSpec (next) ->
             spyOn(up.browser, 'loadPage')
-            up.change(target: '.selector', url: '/path')
+            up.change('.selector', url: '/path')
 
             next =>
               expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
+
+        describe 'when the server responds with an error', ->
+
+          it "replaces the layer's default target instead of the given selector", asyncSpec (next) ->
+            up.layer.config.root.targets = ['.default']
+            fixture('.target', text: 'old target text')
+            fixture('.default', text: 'old fallback text')
+
+            next =>
+              up.change('.target', url: '/path')
+            next =>
+              @respondWithSelector('.default', text: 'new fallback text', status: 500)
+            next =>
+              expect('.target').toHaveText('old target text')
+              expect('.default').toHaveText('new fallback text')
+
+          it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
+            fixture('.success-target', text: 'old success text')
+            fixture('.failure-target', text: 'old failure text')
+
+            up.change('.success-target', url: '/path', failTarget: '.failure-target')
+
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="failure-target">new failure text</div>
+                  <div class="success-target">new success text</div>
+                """
+
+            next =>
+              expect('.success-target').toHaveText('old success text')
+              expect('.failure-target').toHaveText('new failure text')
+
+          it 'rejects the returned promise', (done) ->
+            fixture('.success-target')
+            fixture('.failure-target')
+            promise = up.change('.success-target', url: '/path', failTarget: '.failure-target')
+
+            u.task =>
+              promiseState(promise).then (result) =>
+                expect(result.state).toEqual('pending')
+
+                @respondWithSelector('.failure-target', status: 500)
+
+                u.task =>
+                  promiseState(promise).then (result) =>
+                    expect(result.state).toEqual('rejected')
+                    done()
+
+        describe 'when the request times out', ->
+
+          it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
+            jasmine.clock().install() # required by responseTimeout()
+            fixture('.target')
+            promise = up.change('.target', url: '/path', timeout: 50)
+
+            next =>
+              # See that the correct timeout value has been set on the XHR instance
+              expect(@lastRequest().timeout).toEqual(50)
+
+            next.await =>
+              # See that the promise is still pending before the timeout
+              promiseState(promise).then (result) -> expect(result.state).toEqual('pending')
+
+            next =>
+              @lastRequest().responseTimeout()
+
+            next.await =>
+              promiseState(promise).then (result) -> expect(result.state).toEqual('rejected')
+
+        describe 'when there is a network issue', ->
+
+          it "doesn't crash and rejects the returned promise", (done) ->
+            fixture('.target')
+            promise = up.change('.target', url: '/path')
+
+            u.task =>
+              promiseState(promise).then (result) =>
+                expect(result.state).toEqual('pending')
+                @lastRequest().responseError()
+                u.task =>
+                  promiseState(promise).then (result) =>
+                    expect(result.state).toEqual('rejected')
+                    done()
 
       describe 'with { content } option', ->
 
@@ -162,9 +245,109 @@ describe 'up.fragment', ->
 
         it 'replaces the given selector with a matching element that has the outer HTML from the given { content } element'
 
-      describe 'when no { target } options is given', ->
+      describe 'choice of target', ->
 
-        it 'uses a default target for the layer that is being updated'
+        describe 'when no { target } options is given', ->
+
+          it 'uses a default target for the layer that is being updated'
+
+          it 'allows to pass an element as { target } option', asyncSpec (next) ->
+            target = fixture('.target', text: 'old-text')
+            up.change(target, document: '<div class="target">new-text</div>')
+
+            next =>
+              expect('.target').toHaveText('new-text')
+
+      describe 'browser location URL', ->
+
+        beforeEach ->
+          up.history.config.enabled = true
+
+        it 'sets the browser location to the requested URL', asyncSpec (next) ->
+          fixture('.target')
+          promise = up.change('.target', url: '/path')
+          next =>
+            @respondWithSelector('.target')
+            next.await(promise)
+          next =>
+            expect(location.href).toMatchURL('/path')
+
+        it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path', method: 'post')
+          next => @respondWithSelector('.target')
+          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+
+        it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path')
+          next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
+          next => expect(location.href).toMatchURL('/other-path')
+
+        it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/requested-path', method: 'post')
+          next =>
+            @respondWithSelector('.target', {
+              responseHeaders: {
+                'X-Up-Method': 'GET'
+                'X-Up-Location': '/signaled-path'
+              }})
+          next =>
+            expect(location.href).toMatchURL('/signaled-path')
+
+        it 'does not add a history entry after a failed GET-request', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path', method: 'post', failTarget: '.target')
+          next => @respondWithSelector('.target', status: 500)
+          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+
+        it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path', history: false)
+          next => @respondWithSelector('.target', status: 500)
+          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+
+        it 'does not add a history entry with { location: false } option', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path', location: false)
+          next => @respondWithSelector('.target')
+          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+
+        it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
+          next => @respondWithSelector('.target')
+          next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
+
+        describe 'with { location } option', ->
+
+          it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path', location: '/path2')
+            next => @respondWithSelector('.target')
+            next =>
+              expect(location.href).toMatchURL('/path2')
+
+          it 'adds a history entry after a non-GET request', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path', method: 'post', location: '/path3')
+            next => @respondWithSelector('.target')
+            next => expect(location.href).toMatchURL('/path3')
+
+          it 'does not override the response URL after a failed request', asyncSpec (next) ->
+            fixture('.success-target')
+            fixture('.failure-target')
+            up.change('.success-target', url: '/path', location: '/path4', failTarget: '.failure-target')
+            next => @respondWithSelector('.failure-target', status: 500)
+            next => expect(location.href).toMatchURL('/path')
+
+          it 'overrides the response URL after a failed request when passed as { failLocation }', asyncSpec (next) ->
+            fixture('.success-target')
+            fixture('.failure-target')
+            up.change('.success-target', url: '/path', location: '/path5', failLocation: '/path6', failTarget: '.failure-target')
+            next => @respondWithSelector('.failure-target', status: 500)
+            next => expect(location.href).toMatchURL('/path6')
 
       describe 'with { transition } option', ->
 
@@ -189,12 +372,6 @@ describe 'up.fragment', ->
             expect(resolution).toHaveBeenCalled()
             expect('.target').toHaveText('new-text')
 
-      it 'allows to pass an element as { target } option', asyncSpec (next) ->
-        target = fixture('.target', text: 'old-text')
-        up.change(target: target, document: '<div class="target">new-text</div>')
-
-        next =>
-          expect('.target').toHaveText('new-text')
 
 
     ##############################################################################
@@ -206,157 +383,6 @@ describe 'up.fragment', ->
     describe 'up.replace', ->
 
       describeCapability 'canPushState', ->
-
-
-
-        describe 'when the server responds with an error', ->
-
-          it 'replaces the first default target instead of the given selector', asyncSpec (next) ->
-            up.layer.config.root.targets = ['.fallback']
-            $fixture('.fallback').text('old fallback text')
-
-            @responseText = """
-              <div class='fallback'>
-                new fallback text
-              </div>
-            """
-
-            next => up.replace('.middle', '/path')
-            next => @respond(status: 500)
-            next =>
-              expect($('.middle')).toHaveText('old-middle')
-              expect($('.fallback')).toHaveText('new fallback text')
-
-          it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
-            next =>
-              up.replace('.middle', '/path', failTarget: '.after')
-
-            next =>
-              @respond(status: 500)
-
-            next =>
-              expect($('.middle')).toHaveText('old-middle')
-              expect($('.after')).toHaveText('new-after')
-
-          it 'rejects the returned promise', (done) ->
-            $fixture('.after')
-            promise = up.replace('.middle', '/path', failTarget: '.after')
-
-            u.task =>
-              promiseState(promise).then (result) =>
-                expect(result.state).toEqual('pending')
-
-                @respond(status: 500)
-
-                u.task =>
-                  promiseState(promise).then (result) =>
-                    expect(result.state).toEqual('rejected')
-                    done()
-
-        describe 'when the request times out', ->
-
-          it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
-            jasmine.clock().install() # required by responseTimeout()
-            $fixture('.target')
-            promise = up.replace('.middle', '/path', timeout: 50)
-
-            next =>
-              # See that the correct timeout value has been set on the XHR instance
-              expect(@lastRequest().timeout).toEqual(50)
-
-            next.await =>
-              # See that the promise is still pending before the timeout
-              promiseState(promise).then (result) -> expect(result.state).toEqual('pending')
-
-            next =>
-              @lastRequest().responseTimeout()
-
-            next.await =>
-              promiseState(promise).then (result) -> expect(result.state).toEqual('rejected')
-
-        describe 'when there is a network issue', ->
-
-          it "doesn't crash and rejects the returned promise", (done) ->
-            $fixture('.target')
-            promise = up.replace('.middle', '/path')
-
-            u.task =>
-              promiseState(promise).then (result) =>
-                expect(result.state).toEqual('pending')
-                @lastRequest().responseError()
-                u.task =>
-                  promiseState(promise).then (result) =>
-                    expect(result.state).toEqual('rejected')
-                    done()
-
-        describe 'history', ->
-
-          beforeEach ->
-            up.history.config.enabled = true
-
-          it 'should set the browser location to the given URL', asyncSpec (next) ->
-            promise = up.replace('.middle', '/path')
-            next =>
-              @respond()
-              next.await(promise)
-            next =>
-              expect(location.href).toMatchURL('/path')
-
-          it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
-            up.replace('.middle', '/path', method: 'post')
-            next => @respond()
-            next => expect(location.href).toMatchURL(@hrefBeforeExample)
-
-          it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
-            up.replace('.middle', '/requested-path', method: 'post')
-            next => @respond(responseHeaders:
-              'X-Up-Method': 'GET'
-              'X-Up-Location': '/signaled-path'
-            )
-            next => expect(location.href).toMatchURL('/signaled-path')
-
-          it 'does not add a history entry after a failed GET-request', asyncSpec (next) ->
-            up.replace('.middle', '/path', method: 'post', failTarget: '.middle')
-            next => @respond(status: 500)
-            next => expect(location.href).toMatchURL(@hrefBeforeExample)
-
-          it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
-            up.replace('.middle', '/path', history: false)
-            next => @respond()
-            next => expect(location.href).toMatchURL(@hrefBeforeExample)
-
-          it 'does not add a history entry with { location: false } option', asyncSpec (next) ->
-            up.replace('.middle', '/path', location: false)
-            next => @respond()
-            next => expect(location.href).toMatchURL(@hrefBeforeExample)
-
-          it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
-            up.replace('.middle', '/path')
-            next => @respond(responseHeaders: { 'X-Up-Location': '/other-path' })
-            next => expect(location.href).toMatchURL('/other-path')
-
-          it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
-            up.replace('.middle', '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
-            next => @respond()
-            next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
-
-          describe 'if a URL is given as { location } option', ->
-
-            it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', location: '/given-path')
-              next => @respond(failTarget: '.middle')
-              next =>
-                expect(location.href).toMatchURL('/given-path')
-
-            it 'adds a history entry after a non-GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', method: 'post', location: '/given-path')
-              next => @respond(failTarget: '.middle')
-              next => expect(location.href).toMatchURL('/given-path')
-
-            it 'does not add a history entry after a failed non-GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', method: 'post', location: '/given-path', failTarget: '.middle')
-              next => @respond(failTarget: '.middle', status: 500)
-              next => expect(location.href).toMatchURL(@hrefBeforeExample)
 
         describe 'source', ->
 

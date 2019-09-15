@@ -184,6 +184,8 @@ up.protocol = do ->
   @internal
   ###
   locationFromXhr = (xhr) ->
+    console.debug("locationFromXhr(): xhr.responseURL is %o", xhr.responseURL)
+    console.debug("locationFromXhr(): X-Up-Location header is %o", extractHeader(xhr, config.locationHeader))
     extractHeader(xhr, config.locationHeader) || xhr.responseURL
 
   ###**

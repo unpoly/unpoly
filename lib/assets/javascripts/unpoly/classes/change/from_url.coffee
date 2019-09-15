@@ -139,6 +139,8 @@ class up.Change.FromURL extends up.Change
       # we can only provide history if a location URL is passed as an option.
       options.history = !!options.location
 
+    console.debug("options.location is %o, locationFromExchange is %o", options.location, locationFromExchange)
+
     options.location = @improveHistoryValue(options.location, locationFromExchange)
     options.title = @improveHistoryValue(options.title, response.title)
     options.acceptLayer = response.acceptLayer

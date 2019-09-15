@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 beforeEach ->
@@ -22,4 +23,13 @@ beforeEach ->
       responseHeaders: options.responseHeaders
       responseText: responseText
       responseURL: options.responseURL
+
+  @respondWithSelector = (selector, options = {}) ->
+    respondWithKeys = ['contentType', 'status', 'responseURL', 'responseHeaders']
+    respondWithOptions = u.only(options, respondWithKeys...)
+    affixOptions = u.except(options, respondWithKeys...)
+
+    element = e.createFromSelector(selector, affixOptions)
+    responseText = element.outerHTML
+    @respondWith(responseText, respondWithOptions)
 
