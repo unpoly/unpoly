@@ -51,8 +51,16 @@ up.form = do ->
     config.fields.join(',')
 
   ###**
+  Returns a list of form fields within the given element.
+
+  You can configure what Unpoly considers a form field by adding CSS selectors to the
+  [`up.form.config.fields`](/up.form.config#config.fields) array.
+
+  If the given element is itself a form field, a list of the given element is returned.
+
   @function up.form.fields
-  @internal
+  @return {NodeList<Element>|Array<Element>}
+  @experimental
   ###
   findFields = (root) ->
     e.subtree(root, fieldSelector())

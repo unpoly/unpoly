@@ -6,6 +6,25 @@ describe 'up.form', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.form.fields', ->
+
+      it 'returns a list of form fields within the given element', ->
+        form = fixture('form')
+        textField = e.affix(form, 'input[type=text]')
+        select = e.affix(form, 'select')
+        results = up.form.fields(form)
+        expect(results).toMatchList([textField, select])
+
+      it 'returns an empty list if the given element contains no form fields', ->
+        form = fixture('form')
+        results = up.form.fields(form)
+        expect(results).toMatchList([])
+
+      it 'returns a list of the given element if the element is itself a form field', ->
+        textArea = fixture('textarea')
+        results = up.form.fields(textArea)
+        expect(results).toMatchList([textArea])
+
     describe 'up.observe', ->
 
       beforeEach ->
