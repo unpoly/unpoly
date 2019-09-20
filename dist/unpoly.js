@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.60.3"
+    version: "0.61.0"
   };
 
 }).call(this);
@@ -595,7 +595,7 @@ to not include another library in your asset bundle.
     @stable
      */
     isJQuery = function(object) {
-      return up.browser.canJQuery() && (object instanceof jQuery);
+      return !!(object != null ? object.jquery : void 0);
     };
 
     /***
@@ -1898,8 +1898,10 @@ Internet Explorer 10 or lower
  */
 
 (function() {
+  var slice = [].slice;
+
   up.browser = (function() {
-    var canAnimationFrame, canConsole, canControlScrollRestoration, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canJQuery, canPromise, canPushState, isIE10OrWorse, isIE11, isSupported, navigate, popCookie, submitForm, u, url, whenConfirmed;
+    var callJQuery, canAnimationFrame, canConsole, canControlScrollRestoration, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canPromise, canPushState, isIE10OrWorse, isIE11, isSupported, navigate, popCookie, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /***
@@ -2038,9 +2040,6 @@ Internet Explorer 10 or lower
     canCustomElements = u.memoize(function() {
       return !!window.customElements;
     });
-    canJQuery = u.memoize(function() {
-      return !!window.jQuery;
-    });
     canAnimationFrame = u.memoize(function() {
       return 'requestAnimationFrame' in window;
     });
@@ -2086,6 +2085,12 @@ Internet Explorer 10 or lower
     isSupported = function() {
       return !isIE10OrWorse() && canConsole() && canDOMParser() && canFormData() && canCssTransition() && canInputEvent() && canPromise() && canAnimationFrame();
     };
+    callJQuery = function() {
+      var args, jQuery;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      jQuery = window.jQuery || up.fail("jQuery must be published as window.jQuery");
+      return jQuery.apply(null, args);
+    };
     return {
       url: url,
       navigate: navigate,
@@ -2094,11 +2099,11 @@ Internet Explorer 10 or lower
       canFormData: canFormData,
       canInspectFormData: canInspectFormData,
       canCustomElements: canCustomElements,
-      canJQuery: canJQuery,
       canControlScrollRestoration: canControlScrollRestoration,
       whenConfirmed: whenConfirmed,
       isSupported: isSupported,
       popCookie: popCookie,
+      jQuery: callJQuery,
       isIE11: isIE11
     };
   })();
@@ -3774,7 +3779,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
     CompilePass.prototype.compileOneElement = function(compiler, element) {
       var compileArgs, data, destructorOrDestructors, elementArg, result;
-      elementArg = compiler.jQuery ? jQuery(element) : element;
+      elementArg = compiler.jQuery ? up.browser.jQuery(element) : element;
       compileArgs = [elementArg];
       if (compiler.length !== 1) {
         data = up.syntax.data(element);
@@ -3788,7 +3793,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
     CompilePass.prototype.compileBatch = function(compiler, elements) {
       var compileArgs, dataList, elementsArgs, result;
-      elementsArgs = compiler.jQuery ? jQuery(elements) : elements;
+      elementsArgs = compiler.jQuery ? up.browser.jQuery(elements) : elements;
       compileArgs = [elementsArgs];
       if (compiler.length !== 1) {
         dataList = u.map(elements, up.syntax.data);
@@ -4126,7 +4131,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
         element = e.closest(element, this.selector);
       }
       if (element) {
-        elementArg = this.jQuery ? jQuery(element) : element;
+        elementArg = this.jQuery ? up.browser.jQuery(element) : element;
         args = [event, elementArg];
         expectedArgCount = this.callback.length;
         if (!(expectedArgCount === 1 || expectedArgCount === 2)) {
@@ -7263,14 +7268,15 @@ There are some advantages to using `up.on()`:
     };
 
     /***
-    Stops the given event from propagating and prevents the default action.
+    Prevents the event from bubbling up the DOM.
+    Also prevents other event handlers bound on the same element.
+    Also prevents the event's default action.
     
     @function up.event.halt
-    @internal
+    @experimental
      */
     halt = function(event) {
       event.stopImmediatePropagation();
-      event.stopPropagation();
       return event.preventDefault();
     };
 
@@ -7579,7 +7585,7 @@ an existing cookie should be deleted.
       The parameter name can be configured as a string or as function that returns the parameter name.
       If no name is set, no token will be sent.
     
-      Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
+      Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
     
           <meta name="csrf-param" content="authenticity_token" />
     
@@ -12849,8 +12855,16 @@ open dialogs with sub-forms, etc. all without losing form state.
     };
 
     /***
+    Returns a list of form fields within the given element.
+    
+    You can configure what Unpoly considers a form field by adding CSS selectors to the
+    [`up.form.config.fields`](/up.form.config#config.fields) array.
+    
+    If the given element is itself a form field, a list of the given element is returned.
+    
     @function up.form.fields
-    @internal
+    @return {NodeList<Element>|Array<Element>}
+    @experimental
      */
     findFields = function(root) {
       return e.subtree(root, fieldSelector());
@@ -13614,7 +13628,19 @@ open dialogs with sub-forms, etc. all without losing form state.
       This defaults to a fieldset or form group around the validating field.
     @stable
      */
-    up.on('change', '[up-validate]', function(event, field) {
+
+    /***
+    Performs [server-side validation](/input-up-validate) when any fieldset within this form changes.
+    
+    You can configure what Unpoly considers a fieldset by adding CSS selectors to the
+    [`up.form.config.validateTargets`](/up.form.config#config.validateTargets) array.
+    
+    @selector form[up-validate]
+    @stable
+     */
+    up.on('change', '[up-validate]', function(event) {
+      var field;
+      field = findFields(event.target)[0];
       return u.muteRejection(validate(field));
     });
 
