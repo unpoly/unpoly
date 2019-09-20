@@ -56,13 +56,18 @@ up.form = do ->
   You can configure what Unpoly considers a form field by adding CSS selectors to the
   [`up.form.config.fields`](/up.form.config#config.fields) array.
 
-  If the given element is itself a form field, a list of the given element is returned.
+  If the given element is itself a form field, a list of that given element is returned.
 
   @function up.form.fields
+  @param {Element|jQuery} root
+    The element to scan for contained form fields.
+
+    If the element is itself a form field, a list of that element is returned.
   @return {NodeList<Element>|Array<Element>}
   @experimental
   ###
   findFields = (root) ->
+    root = e.get(root)
     e.subtree(root, fieldSelector())
 
 #  findFields = (rootOrRoots) ->

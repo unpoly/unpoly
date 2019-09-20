@@ -387,7 +387,14 @@ up.event = do ->
   Also prevents other event handlers bound on the same element.
   Also prevents the event's default action.
 
+  \#\#\# Example
+
+      up.on('click', 'link.disabled', function(event) {
+        up.event.halt(event)
+      })
+
   @function up.event.halt
+  @param {Event} event
   @experimental
   ###
   halt = (event) ->
