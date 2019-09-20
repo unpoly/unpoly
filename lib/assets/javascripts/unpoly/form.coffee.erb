@@ -774,7 +774,18 @@ up.form = do ->
     This defaults to a fieldset or form group around the validating field.
   @stable
   ###
-  up.on 'change', '[up-validate]', (event, field) ->
+
+  ###**
+  Performs [server-side validation](/input-up-validate) when any fieldset within this form changes.
+
+  You can configure what Unpoly considers a fieldset by adding CSS selectors to the
+  [`up.form.config.validateTargets`](/up.form.config#config.validateTargets) array.
+
+  @selector form[up-validate]
+  @stable
+  ###
+  up.on 'change', '[up-validate]', (event) ->
+    field = findFields(event.target)[0]
     u.muteRejection validate(field)
 
   ###**

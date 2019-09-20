@@ -1042,6 +1042,7 @@ describe 'up.form', ->
 
             </form>
           """
+          up.hello(container)
 
           Trigger.change $('#registration input[name=password]')
 
@@ -1066,6 +1067,75 @@ describe 'up.form', ->
             $labels = $('#registration [up-fieldset]')
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
+
+    describe 'form[up-validate]', ->
+
+      # it 'prints an error saying that this form is not yet supported', ->
+
+      it 'performs server-side validation for all fieldsets contained within the form', asyncSpec (next) ->
+        container = fixture('.container')
+        container.innerHTML = """
+          <form action="/users" id="registration" up-validate>
+
+            <div up-fieldset>
+              <input type="text" name="email">
+            </div>
+
+            <div up-fieldset>
+              <input type="password" name="password">
+            </div>
+
+          </form>
+        """
+        up.hello(container)
+
+        Trigger.change $('#registration input[name=password]')
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(@lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-fieldset]:has(input[name="password"])')
+
+
+          @respondWith """
+            <form action="/users" id="registration" up-validate>
+
+              <div up-fieldset>
+                Validation message
+                <input type="text" name="email">
+              </div>
+
+              <div up-fieldset>
+                Validation message
+                <input type="password" name="password">
+              </div>
+
+            </form>
+          """
+
+        next =>
+          $labels = $('#registration [up-fieldset]')
+          expect($labels[0]).not.toHaveText('Validation message')
+          expect($labels[1]).toHaveText('Validation message')
+
+      it 'only sends a single request when a radio button group changes', asyncSpec (next) ->
+        container = fixture('.container')
+        container.innerHTML = """
+          <form action="/users" id="registration" up-validate>
+
+            <div up-fieldset>
+              <input type="radio" name="foo" value="1" checked>
+              <input type="radio" name="foo" value="2">
+            </div>
+
+          </form>
+        """
+        up.hello(container)
+
+        Trigger.change $('#registration input[value="2"]')
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
     describe '[up-switch]', ->
 
