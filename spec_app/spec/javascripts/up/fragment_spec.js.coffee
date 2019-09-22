@@ -287,7 +287,695 @@ describe 'up.fragment', ->
 
         it 'derives a selector from an element given as first argument'
 
-        it 'uses a default target for the layer that is being updated if nothing else is specified'
+        it 'uses a default target for the layer that is being updated if no other option suggests a target'
+
+        it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
+          html = '<div class="foo-bar">text</div>'
+          $fixture('.foo-bar.up-destroying')
+          promise = up.change('.foo-bar', document: html)
+
+          u.task ->
+            promiseState(promise).then (result) =>
+              expect(result.state).toEqual('rejected')
+              expect(result.value).toMatch(/Could not match target/i)
+              done()
+
+        it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
+          html = '<div class="foo-bar">text</div>'
+          $parent = $fixture('.up-destroying')
+          $child = $fixture('.foo-bar').appendTo($parent)
+          promise = up.change('.foo-bar', document: html)
+
+          u.task ->
+            promiseState(promise).then (result) =>
+              expect(result.state).toEqual('rejected')
+              expect(result.value).toMatch(/Could not match target/i)
+              done()
+
+        it 'only replaces the first element matching the selector', asyncSpec (next) ->
+          html = '<div class="foo-bar">text</div>'
+          $fixture('.foo-bar')
+          $fixture('.foo-bar')
+          up.change('.foo-bar', document: html)
+
+          next =>
+            $elements = $('.foo-bar')
+            expect($($elements.get(0)).text()).toEqual('text')
+            expect($($elements.get(1)).text()).toEqual('')
+
+        it 'replaces the body if asked to replace the "html" selector'
+
+        it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
+          target = fixture('.target')
+          e.affix(target, '.child', text: 'old')
+          up.change('.target:before', document: """
+            <div class='target'>
+              <div class='child'>new</div>
+            </div>"
+            """
+          )
+
+          next =>
+            children = target.querySelectorAll('.child')
+            expect(children.length).toBe(2)
+            expect(children[0]).toHaveText('new')
+            expect(children[1]).toHaveText('old')
+
+        it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
+          target = fixture('.target')
+          e.affix(target, '.child', text: 'old')
+          up.change('.target:after', document: """
+            <div class='target'>
+              <div class='child'>new</div>
+            </div>
+            """
+          )
+
+          next =>
+            children = target.querySelectorAll('.child')
+            expect(children.length).toBe(2)
+            expect(children[0]).toHaveText('old')
+            expect(children[1]).toHaveText('new')
+
+        it "lets the developer choose between replacing/prepending/appending for each selector", asyncSpec (next) ->
+          fixture('.before', text: 'old-before')
+          fixture('.middle', text: 'old-middle')
+          fixture('.after', text: 'old-after')
+          up.change '.before:before, .middle, .after:after', document: """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """
+          next =>
+            expect($('.before')).toHaveText('new-beforeold-before')
+            expect($('.middle')).toHaveText('new-middle')
+            expect($('.after')).toHaveText('old-afternew-after')
+
+        it 'understands non-standard CSS selector extensions such as :has(...)', asyncSpec (next) ->
+          $first = $fixture('.boxx#first')
+          $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
+          $second = $fixture('.boxx#second')
+          $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
+
+          promise = up.replace('.boxx:has(.first-child)', '/path')
+
+          next =>
+            @respondWith """
+              <div class="boxx" id="first">
+                <span class="first-child">new first</span>
+              </div>
+              """
+            next.await(promise)
+
+          next =>
+            expect($('#first span')).toHaveText('new first')
+            expect($('#second span')).toHaveText('old second')
+
+        it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
+          fixture('.before', text: 'old-before')
+          fixture('.middle', text: 'old-middle')
+          fixture('.after', text: 'old-after')
+
+          up.change '.middle, .after', document: """
+            <div class="before">new-before</div>
+            <div class="middle">new-middle</div>
+            <div class="after">new-after</div>
+            """
+
+          next =>
+            expect($('.before')).toHaveText('old-before')
+            expect($('.middle')).toHaveText('new-middle')
+            expect($('.after')).toHaveText('new-after')
+
+        describe 'merging of nested selectors', ->
+
+          it 'replaces a single fragment if a selector contains a subsequent selector in the current page', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.change('.outer, .inner', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.change('.outer:before, .inner', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:before, .inner')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.outer').text()).toContain('old outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'does not merge selectors if a selector contains a subsequent selector, but appends instead of replacing', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.change('.outer:after, .inner', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('old outer text')
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.change('.outer:after, .inner', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
+
+          it 'replaces a single fragment if a selector contains a previous selector in the current page', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.change('.outer, .inner', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
+            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            up.change('.inner, .outer', url: '/path', reveal: true)
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+              expect(revealStub).toHaveBeenCalled()
+
+          it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
+            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            up.change('.inner, .outer', url: '/path', reveal: '.revealee')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                    <div class="revealee">
+                      revealee text
+                    </div>
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+              expect(revealStub).toHaveBeenCalled()
+              revealArg = revealStub.calls.mostRecent().args[0]
+              expect(revealArg).toMatchSelector('.revealee')
+
+          it 'replaces a single fragment if the nesting differs in current page and response', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.change('.outer, .inner', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="inner">
+                  new inner text
+                  <div class="outer">
+                    new outer text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).not.toBeAttached()
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'does not crash if two selectors that are siblings in the current page are nested in the response', asyncSpec (next) ->
+            $outer = $fixture('.one').text('old one text')
+            $inner = $fixture('.two').text('old two text')
+
+            replacePromise = up.change('.one, .two', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="one">
+                  new one text
+                  <div class="two">
+                    new two text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.one')).toBeAttached()
+              expect($('.one').text()).toContain('new one text')
+              expect($('.two')).toBeAttached()
+              expect($('.two').text()).toContain('new two text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'does not crash if selectors that siblings in the current page are inversely nested in the response', asyncSpec (next) ->
+            $outer = $fixture('.one').text('old one text')
+            $inner = $fixture('.two').text('old two text')
+
+            replacePromise = up.change('.one, .two', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="two">
+                  new two text
+                  <div class="one">
+                    new one text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.one')).toBeAttached()
+              expect($('.one').text()).toContain('new one text')
+              expect($('.two')).toBeAttached()
+              expect($('.two').text()).toContain('new two text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'updates the first selector if the same element is targeted twice in a single replacement', asyncSpec (next) ->
+            $one = $fixture('.one.alias').text('old one text')
+
+            replacePromise = up.change('.one, .alias', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
+
+              @respondWith """
+                <div class="one">
+                  new one text
+                </div>
+                """
+
+            next =>
+              expect($('.one')).toBeAttached()
+              expect($('.one').text()).toContain('new one text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it 'updates the first selector if the same element is prepended or appended twice in a single replacement', asyncSpec (next) ->
+            $one = $fixture('.one').text('old one text')
+
+            replacePromise = up.change('.one:before, .one:after', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one:before')
+
+              @respondWith """
+                <div class="one">
+                  new one text
+                </div>
+                """
+
+            next =>
+              expect($('.one')).toBeAttached()
+              expect($('.one').text()).toMatchText('new one text old one text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+          it "updates the first selector if the same element is prepended, replaced and appended in a single replacement", asyncSpec (next) ->
+            $elem = $fixture('.elem.alias1.alias2').text("old text")
+
+            replacePromise = up.change('.elem:before, .alias1, .alias2:after', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem:before')
+
+              @respondWith """
+                <div class="elem alias1 alias2">
+                  new text
+                </div>
+                """
+
+            next =>
+              expect('.elem').toBeAttached()
+              expect($('.elem').text()).toMatchText('new text old text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
+        describe 'when selectors are missing on the page before the request was made', ->
+
+          beforeEach ->
+            # In helpers/protect_jasmine_runner wie have configured .default-fallback
+            # as a default target for all layers.
+            up.layer.config.all.targets = []
+
+          it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
+            $fixture('.box').text('old box')
+            up.change('.unknown', url: '/path', fallback: '.box')
+
+            next => @respondWith '<div class="box">new box</div>'
+            next => expect('.box').toHaveText('new box')
+
+          it 'rejects the promise if all alternatives are exhausted', (done) ->
+            promise = up.change('.unknown', url: '/path', fallback: '.more-unknown')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('rejected')
+                expect(result.value).toBeError(/Could not find target in current page/i)
+                done()
+
+          it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
+            $fixture('.target').text('old target')
+            $fixture('.fallback').text('old fallback')
+            up.change('.target, .unknown', url: '/path', fallback: '.fallback')
+
+            next =>
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+            next =>
+              expect('.target').toHaveText('old target')
+              expect('.fallback').toHaveText('new fallback')
+
+          it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
+            up.layer.config.all.targets = ['.existing']
+            $fixture('.existing').text('old existing')
+            up.change('.unknown', url: '/path')
+            next => @respondWith '<div class="existing">new existing</div>'
+            next => expect('.existing').toHaveText('new existing')
+
+          it "does not try the layer's default targets and rejects the promise wieht { fallback: false }", (done) ->
+            up.layer.config.all.targets = ['.existing']
+            $fixture('.existing').text('old existing')
+            up.change('.unknown', url: '/path', fallback: false).catch (e) ->
+              expect(e).toBeError(/Could not find target in current page/i)
+              done()
+
+        describe 'when selectors are missing on the page after the request was made', ->
+
+          beforeEach ->
+            up.layer.config.all.targets = []
+
+          it 'tries the selector in options.fallback before swapping elements', asyncSpec (next) ->
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            up.change('.target', url: '/path', fallback: '.fallback')
+            $target.remove()
+
+            next =>
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+            next =>
+              expect('.fallback').toHaveText('new fallback')
+
+          it 'rejects the promise if all alternatives are exhausted', (done) ->
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            promise = up.change('.target', url: '/path', fallback: '.fallback')
+
+            u.task =>
+              $target.remove()
+              $fallback.remove()
+
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+              u.task =>
+                promiseState(promise).then (result) ->
+                  expect(result.state).toEqual('rejected')
+                  expect(result.value).toBeError(/Could not match target in current page and response/i)
+                  done()
+
+          it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
+            $target = $fixture('.target').text('old target')
+            $target2 = $fixture('.target2').text('old target2')
+            $fallback = $fixture('.fallback').text('old fallback')
+            up.change('.target, .target2', url: '/path', fallback: '.fallback')
+            $target2.remove()
+
+            next =>
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="target2">new target2</div>
+                <div class="fallback">new fallback</div>
+              """
+            next =>
+              expect('.target').toHaveText('old target')
+              expect('.fallback').toHaveText('new fallback')
+
+          it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
+            up.layer.config.all.targets = ['.fallback']
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            up.change('.target', url: '/path')
+            $target.remove()
+
+            next =>
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+            next =>
+              expect('.fallback').toHaveText('new fallback')
+
+          it "does not try the layer's default targets and rejects the promise if options.fallback is false", (done) ->
+            up.layer.config.all.fallbacks = ['.fallback']
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            promise = up.change('.target', url: '/path', fallback: false)
+
+            u.task =>
+              $target.remove()
+
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+              promise.catch (e) ->
+                expect(e).toBeError(/Could not match target/i)
+                done()
+
+        describe 'when selectors are missing in the response', ->
+
+          beforeEach ->
+            up.layer.config.all.targets = []
+
+          it "tries the selector in options.fallback before swapping elements", asyncSpec (next) ->
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            up.change('.target', url: '/path', fallback: '.fallback')
+
+            next =>
+              @respondWith """
+                <div class="fallback">new fallback</div>
+              """
+
+            next =>
+              expect('.target').toHaveText('old target')
+              expect('.fallback').toHaveText('new fallback')
+
+          describe 'if all alternatives are exhausted', ->
+
+            it 'rejects the promise', (done) ->
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
+              promise = up.change('.target', url: '/path', fallback: '.fallback')
+
+              u.task =>
+                @respondWith '<div class="unexpected">new unexpected</div>'
+
+              promise.catch (e) ->
+                expect(e).toBeError(/Could not match target/i)
+                done()
+
+            it 'shows a link to open the unexpected response', (done) ->
+              $target = $fixture('.target').text('old target')
+              $fallback = $fixture('.fallback').text('old fallback')
+              promise = up.change('.target', url: '/path', fallback: '.fallback')
+              loadPage = spyOn(up.browser, 'loadPage')
+
+              u.task =>
+                @respondWith '<div class="unexpected">new unexpected</div>'
+
+              promise.catch (e) ->
+                $toast = $('.up-toast')
+                expect($toast).toBeAttached()
+                $inspectLink = $toast.find(".up-toast-action:contains('Open response')")
+                expect($inspectLink).toBeAttached()
+                expect(loadPage).not.toHaveBeenCalled()
+
+                Trigger.clickSequence($inspectLink)
+
+                u.task =>
+                  expect(loadPage).toHaveBeenCalledWith('/path', {})
+                  done()
+
+          it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
+            $target = $fixture('.target').text('old target')
+            $target2 = $fixture('.target2').text('old target2')
+            $fallback = $fixture('.fallback').text('old fallback')
+            up.change('.target, .target2', url: '/path', fallback: '.fallback')
+
+            next =>
+              @respondWith """
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              """
+
+            next =>
+              expect('.target').toHaveText('old target')
+              expect('.target2').toHaveText('old target2')
+              expect('.fallback').toHaveText('new fallback')
+
+          it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
+            up.layer.config.all.targets = ['.fallback']
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith '<div class="fallback">new fallback</div>'
+
+            next =>
+              expect('.target').toHaveText('old target')
+              expect('.fallback').toHaveText('new fallback')
+
+          it "does not try the layer's default targets and rejects the promise with { fallback: false }", (done) ->
+            up.layer.config.all.targets = ['.fallback']
+            $target = $fixture('.target').text('old target')
+            $fallback = $fixture('.fallback').text('old fallback')
+            promise = up.change('.target', url: '/path', fallback: false)
+
+            u.task =>
+              @respondWith '<div class="fallback">new fallback</div>'
+
+            promise.catch (e) ->
+              expect(e).toBeError(/Could not match target/i)
+              done()
 
       describe 'choice of layer', ->
 
@@ -1277,7 +1965,6 @@ describe 'up.fragment', ->
 
       describe 'destruction of old element', ->
 
-        # up.extract
         it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element.v1').text('v1')
@@ -1882,709 +2569,21 @@ describe 'up.fragment', ->
             next =>
               expect(constructorSpy.calls.count()).toBe(1)
 
-
-
-    ##############################################################################
-    ##############################################################################
-    ##############################################################################
-    ##############################################################################
-    ##############################################################################
-
     describe 'up.replace()', ->
 
-      describeCapability 'canPushState', ->
-
-        describe 'selector processing', ->
-
-          it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
-            promise = up.replace('.middle, .after', '/path')
-            next =>
-              @respond()
-              next.await(promise)
-            next =>
-              expect($('.before')).toHaveText('old-before')
-              expect($('.middle')).toHaveText('new-middle')
-              expect($('.after')).toHaveText('new-after')
-
-          describe 'nested selector merging', ->
-
-            it 'replaces a single fragment if a selector contains a subsequent selector in the current page', asyncSpec (next) ->
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              replacePromise = up.replace('.outer, .inner', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-
-                @respondWith """
-                  <div class="outer">
-                    new outer text
-                    <div class="inner">
-                      new inner text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toBeAttached()
-                expect($('.inner').text()).toContain('new inner text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', asyncSpec (next) ->
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              replacePromise = up.replace('.outer:before, .inner', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:before, .inner')
-
-                @respondWith """
-                  <div class="outer">
-                    new outer text
-                    <div class="inner">
-                      new inner text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.outer').text()).toContain('old outer text')
-                expect($('.inner')).toBeAttached()
-                expect($('.inner').text()).toContain('new inner text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'does not merge selectors if a selector contains a subsequent selector, but appends instead of replacing', asyncSpec (next) ->
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              replacePromise = up.replace('.outer:after, .inner', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
-
-                @respondWith """
-                  <div class="outer">
-                    new outer text
-                    <div class="inner">
-                      new inner text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('old outer text')
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toBeAttached()
-                expect($('.inner').text()).toContain('new inner text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              replacePromise = up.replace('.outer:after, .inner', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
-
-            it 'replaces a single fragment if a selector contains a previous selector in the current page', asyncSpec (next) ->
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              replacePromise = up.replace('.outer, .inner', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-
-                @respondWith """
-                  <div class="outer">
-                    new outer text
-                    <div class="inner">
-                      new inner text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toBeAttached()
-                expect($('.inner').text()).toContain('new inner text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
-
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              up.replace('.inner, .outer', '/path', reveal: true)
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-
-                @respondWith """
-                  <div class="outer">
-                    new outer text
-                    <div class="inner">
-                      new inner text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toBeAttached()
-                expect($('.inner').text()).toContain('new inner text')
-
-                expect(revealStub).toHaveBeenCalled()
-
-
-            it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
-
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              up.replace('.inner, .outer', '/path', reveal: '.revealee')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-
-                @respondWith """
-                  <div class="outer">
-                    new outer text
-                    <div class="inner">
-                      new inner text
-                      <div class="revealee">
-                        revealee text
-                      </div>
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).toBeAttached()
-                expect($('.inner').text()).toContain('new inner text')
-
-                expect(revealStub).toHaveBeenCalled()
-                revealArg = revealStub.calls.mostRecent().args[0]
-                expect(revealArg).toMatchSelector('.revealee')
-
-
-            it 'replaces a single fragment if the nesting differs in current page and response', asyncSpec (next) ->
-              $outer = $fixture('.outer').text('old outer text')
-              $inner = $outer.affix('.inner').text('old inner text')
-
-              replacePromise = up.replace('.outer, .inner', '/path')
-
-              next =>
-                @respondWith """
-                  <div class="inner">
-                    new inner text
-                    <div class="outer">
-                      new outer text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.outer')).toBeAttached()
-                expect($('.outer').text()).toContain('new outer text')
-                expect($('.inner')).not.toBeAttached()
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'does not crash if two selectors that are siblings in the current page are nested in the response', asyncSpec (next) ->
-              $outer = $fixture('.one').text('old one text')
-              $inner = $fixture('.two').text('old two text')
-
-              replacePromise = up.replace('.one, .two', '/path')
-
-              next =>
-                @respondWith """
-                  <div class="one">
-                    new one text
-                    <div class="two">
-                      new two text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.one')).toBeAttached()
-                expect($('.one').text()).toContain('new one text')
-                expect($('.two')).toBeAttached()
-                expect($('.two').text()).toContain('new two text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'does not crash if selectors that siblings in the current page are inversely nested in the response', asyncSpec (next) ->
-              $outer = $fixture('.one').text('old one text')
-              $inner = $fixture('.two').text('old two text')
-
-              replacePromise = up.replace('.one, .two', '/path')
-
-              next =>
-                @respondWith """
-                  <div class="two">
-                    new two text
-                    <div class="one">
-                      new one text
-                    </div>
-                  </div>
-                  """
-
-              next =>
-                expect($('.one')).toBeAttached()
-                expect($('.one').text()).toContain('new one text')
-                expect($('.two')).toBeAttached()
-                expect($('.two').text()).toContain('new two text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'updates the first selector if the same element is targeted twice in a single replacement', asyncSpec (next) ->
-              $one = $fixture('.one.alias').text('old one text')
-
-              replacePromise = up.replace('.one, .alias', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
-
-                @respondWith """
-                  <div class="one">
-                    new one text
-                  </div>
-                  """
-
-              next =>
-                expect($('.one')).toBeAttached()
-                expect($('.one').text()).toContain('new one text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it 'updates the first selector if the same element is prepended or appended twice in a single replacement', asyncSpec (next) ->
-              $one = $fixture('.one').text('old one text')
-
-              replacePromise = up.replace('.one:before, .one:after', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one:before')
-
-                @respondWith """
-                  <div class="one">
-                    new one text
-                  </div>
-                  """
-
-              next =>
-                expect($('.one')).toBeAttached()
-                expect($('.one').text()).toMatchText('new one text old one text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-            it "updates the first selector if the same element is prepended, replaced and appended in a single replacement", asyncSpec (next) ->
-              $elem = $fixture('.elem.alias1.alias2').text("old text")
-
-              replacePromise = up.replace('.elem:before, .alias1, .alias2:after', '/path')
-
-              next =>
-                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem:before')
-
-                @respondWith """
-                  <div class="elem alias1 alias2">
-                    new text
-                  </div>
-                  """
-
-              next =>
-                expect('.elem').toBeAttached()
-                expect($('.elem').text()).toMatchText('new text old text')
-
-              next.await =>
-                promise = promiseState(replacePromise)
-                promise.then (result) => expect(result.state).toEqual('fulfilled')
-
-          it 'replaces the body if asked to replace the "html" selector'
-
-          it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
-            promise = up.replace('.middle:before', '/path')
-            next =>
-              @respond()
-              next.await(promise)
-            next =>
-              expect($('.before')).toHaveText('old-before')
-              expect($('.middle')).toHaveText('new-middleold-middle')
-              expect($('.after')).toHaveText('old-after')
-
-          it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
-            promise = up.replace('.middle:after', '/path')
-            next =>
-              @respond()
-              next.await(promise)
-            next =>
-              expect($('.before')).toHaveText('old-before')
-              expect($('.middle')).toHaveText('old-middlenew-middle')
-              expect($('.after')).toHaveText('old-after')
-
-          it "lets the developer choose between replacing/prepending/appending for each selector", asyncSpec (next) ->
-            promise = up.replace('.before:before, .middle, .after:after', '/path')
-            next =>
-              @respond()
-              next.await(promise)
-            next =>
-              expect($('.before')).toHaveText('new-beforeold-before')
-              expect($('.middle')).toHaveText('new-middle')
-              expect($('.after')).toHaveText('old-afternew-after')
-
-          it 'understands non-standard CSS selector extensions such as :has(...)', asyncSpec (next) ->
-            $first = $fixture('.boxx#first')
-            $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
-            $second = $fixture('.boxx#second')
-            $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
-
-            promise = up.replace('.boxx:has(.first-child)', '/path')
-
-            next =>
-              @respondWith """
-                <div class="boxx" id="first">
-                  <span class="first-child">new first</span>
-                </div>
-                """
-              next.await(promise)
-
-            next =>
-              expect($('#first span')).toHaveText('new first')
-              expect($('#second span')).toHaveText('old second')
-
-          describe 'when selectors are missing on the page before the request was made', ->
-
-            beforeEach ->
-              up.layer.config.all.targets = []
-
-            it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
-              $fixture('.box').text('old box')
-              up.replace('.unknown', '/path', fallback: '.box')
-
-              next => @respondWith '<div class="box">new box</div>'
-              next => expect('.box').toHaveText('new box')
-
-            it 'rejects the promise if all alternatives are exhausted', (done) ->
-              promise = up.replace('.unknown', '/path', fallback: '.more-unknown')
-
-              u.task ->
-                promiseState(promise).then (result) ->
-                  expect(result.state).toEqual('rejected')
-                  expect(result.value).toBeError(/Could not find target in current page/i)
-                  done()
-
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              $fixture('.target').text('old target')
-              $fixture('.fallback').text('old fallback')
-              up.replace('.target, .unknown', '/path', fallback: '.fallback')
-
-              next =>
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
-
-              next =>
-                expect('.target').toHaveText('old target')
-                expect('.fallback').toHaveText('new fallback')
-
-            it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
-              up.layer.config.all.targets = ['.existing']
-              $fixture('.existing').text('old existing')
-              up.replace('.unknown', '/path')
-              next => @respondWith '<div class="existing">new existing</div>'
-              next => expect('.existing').toHaveText('new existing')
-
-            it "does not try the layer's default targets and rejects the promise if options.fallback is false", (done) ->
-              up.layer.config.all.targets = ['.existing']
-              $fixture('.existing').text('old existing')
-              up.replace('.unknown', '/path', fallback: false).catch (e) ->
-                expect(e).toBeError(/Could not find target in current page/i)
-                done()
-
-          describe 'when selectors are missing on the page after the request was made', ->
-
-            beforeEach ->
-              up.layer.config.all.targets = []
-
-            it 'tries the selector in options.fallback before swapping elements', asyncSpec (next) ->
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              up.replace('.target', '/path', fallback: '.fallback')
-              $target.remove()
-
-              next =>
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
-
-              next =>
-                expect('.fallback').toHaveText('new fallback')
-
-            it 'rejects the promise if all alternatives are exhausted', (done) ->
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              promise = up.replace('.target', '/path', fallback: '.fallback')
-
-              u.task =>
-                $target.remove()
-                $fallback.remove()
-
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
-
-                u.task =>
-                  promiseState(promise).then (result) ->
-                    expect(result.state).toEqual('rejected')
-                    expect(result.value).toBeError(/Could not match target in current page and response/i)
-                    done()
-
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              $target = $fixture('.target').text('old target')
-              $target2 = $fixture('.target2').text('old target2')
-              $fallback = $fixture('.fallback').text('old fallback')
-              up.replace('.target, .target2', '/path', fallback: '.fallback')
-              $target2.remove()
-
-              next =>
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="target2">new target2</div>
-                  <div class="fallback">new fallback</div>
-                """
-              next =>
-                expect('.target').toHaveText('old target')
-                expect('.fallback').toHaveText('new fallback')
-
-            it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
-              up.layer.config.all.targets = ['.fallback']
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              up.replace('.target', '/path')
-              $target.remove()
-
-              next =>
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
-
-              next =>
-                expect('.fallback').toHaveText('new fallback')
-
-            it "tries the layer's default targets  and rejects the promise if options.fallback is false", (done) ->
-              up.layer.config.all.fallbacks = ['.fallback']
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              promise = up.replace('.target', '/path', fallback: false)
-
-              u.task =>
-                $target.remove()
-
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
-
-                promise.catch (e) ->
-                  expect(e).toBeError(/Could not match target/i)
-                  done()
-
-          describe 'when selectors are missing in the response', ->
-
-            beforeEach ->
-              up.layer.config.all.targets = []
-
-            it "tries the selector in options.fallback before swapping elements", asyncSpec (next) ->
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              up.replace('.target', '/path', fallback: '.fallback')
-
-              next =>
-                @respondWith """
-                  <div class="fallback">new fallback</div>
-                """
-
-              next =>
-                expect('.target').toHaveText('old target')
-                expect('.fallback').toHaveText('new fallback')
-
-            describe 'if all alternatives are exhausted', ->
-
-              it 'rejects the promise', (done) ->
-                $target = $fixture('.target').text('old target')
-                $fallback = $fixture('.fallback').text('old fallback')
-                promise = up.replace('.target', '/path', fallback: '.fallback')
-
-                u.task =>
-                  @respondWith '<div class="unexpected">new unexpected</div>'
-
-                promise.catch (e) ->
-                  expect(e).toBeError(/Could not match target/i)
-                  done()
-
-              it 'shows a link to open the unexpected response', (done) ->
-                $target = $fixture('.target').text('old target')
-                $fallback = $fixture('.fallback').text('old fallback')
-                promise = up.replace('.target', '/path', fallback: '.fallback')
-                loadPage = spyOn(up.browser, 'loadPage')
-
-                u.task =>
-                  @respondWith '<div class="unexpected">new unexpected</div>'
-
-                promise.catch (e) ->
-                  $toast = $('.up-toast')
-                  expect($toast).toBeAttached()
-                  $inspectLink = $toast.find(".up-toast-action:contains('Open response')")
-                  expect($inspectLink).toBeAttached()
-                  expect(loadPage).not.toHaveBeenCalled()
-
-                  Trigger.clickSequence($inspectLink)
-
-                  u.task =>
-                    expect(loadPage).toHaveBeenCalledWith('/path', {})
-                    done()
-
-            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-              $target = $fixture('.target').text('old target')
-              $target2 = $fixture('.target2').text('old target2')
-              $fallback = $fixture('.fallback').text('old fallback')
-              up.replace('.target, .target2', '/path', fallback: '.fallback')
-
-              next =>
-                @respondWith """
-                  <div class="target">new target</div>
-                  <div class="fallback">new fallback</div>
-                """
-
-              next =>
-                expect('.target').toHaveText('old target')
-                expect('.target2').toHaveText('old target2')
-                expect('.fallback').toHaveText('new fallback')
-
-            it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
-              up.layer.config.all.targets = ['.fallback']
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              up.replace('.target', '/path')
-
-              next =>
-                @respondWith '<div class="fallback">new fallback</div>'
-
-              next =>
-                expect('.target').toHaveText('old target')
-                expect('.fallback').toHaveText('new fallback')
-
-            it "does not try the layer's default targets and rejects the promise if options.fallback is false", (done) ->
-              up.layer.config.all.targets = ['.fallback']
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              promise = up.replace('.target', '/path', fallback: false)
-
-              u.task =>
-                @respondWith '<div class="fallback">new fallback</div>'
-
-              promise.catch (e) ->
-                expect(e).toBeError(/Could not match target/i)
-                done()
-
-
-
-
-
-
-
+      it 'delegates to up.change(target, { url })', ->
+        changeSpy = up.fragment.knife.mock('makeChange')
+        up.replace('target', 'url')
+        expect(changeSpy).toHaveBeenCalledWith('target', { url: 'url' })
 
     describe 'up.extract()', ->
 
-      it "rejects if the selector can't be found on the current page", (done) ->
-        html = '<div class="foo-bar">text</div>'
-        promise = up.extract('.foo-bar', html)
+      it 'delegates to up.change(target, { document })', ->
+        changeSpy = up.fragment.knife.mock('makeChange')
+        up.extract('target', 'document')
+        expect(changeSpy).toHaveBeenCalledWith('target', { document: 'document' })
 
-        u.task ->
-          promiseState(promise).then (result) =>
-            expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not match target in current page/i)
-            done()
-
-      it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
-        html = '<div class="foo-bar">text</div>'
-        $fixture('.foo-bar.up-destroying')
-        promise = up.extract('.foo-bar', html)
-
-        u.task ->
-          promiseState(promise).then (result) =>
-            expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not match target/i)
-            done()
-
-      it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
-        html = '<div class="foo-bar">text</div>'
-        $parent = $fixture('.up-destroying')
-        $child = $fixture('.foo-bar').appendTo($parent)
-        promise = up.extract('.foo-bar', html)
-
-        u.task ->
-          promiseState(promise).then (result) =>
-            expect(result.state).toEqual('rejected')
-            expect(result.value).toMatch(/Could not match target/i)
-            done()
-
-      it 'only replaces the first element matching the selector', asyncSpec (next) ->
-        html = '<div class="foo-bar">text</div>'
-        $fixture('.foo-bar')
-        $fixture('.foo-bar')
-        up.extract('.foo-bar', html)
-
-        next =>
-          $elements = $('.foo-bar')
-          expect($($elements.get(0)).text()).toEqual('text')
-          expect($($elements.get(1)).text()).toEqual('')
-
-
-
-
-    describe 'up.destroy', ->
+    describe 'up.destroy()', ->
 
       it 'removes the element with the given selector', (done) ->
         $fixture('.element')
@@ -2725,7 +2724,6 @@ describe 'up.fragment', ->
 
         next =>
           expect($('.element')).toHaveText('new text')
-
 
       describeFallback 'canPushState', ->
 
