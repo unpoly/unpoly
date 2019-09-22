@@ -858,12 +858,9 @@ describe 'up.fragment', ->
             next =>
               expect(swapDirectlySpy).toHaveBeenCalled()
 
-
-      describe 'with { reveal } option', ->
+      describe 'revealing', ->
 
         beforeEach ->
-          up.history.config.enabled = true
-
           @revealedHTML = []
           @revealedText = []
           @revealOptions = {}
@@ -874,7 +871,7 @@ describe 'up.fragment', ->
             @revealOptions = options
             Promise.resolve()
 
-        it 'reveals a new element before it is being replaced', asyncSpec (next) ->
+        it 'scrolls to the new element that is inserted into the DOM', asyncSpec (next) ->
           fixture('.target')
           up.change('.target', url: '/path', reveal: true)
 
@@ -973,6 +970,36 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['new one text']
 
+        it 'reveals a new element that is being appended', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target:after', url: '/path', reveal: true)
+
+          next =>
+            @respondWithSelector('.target', text: 'new target text')
+
+          next =>
+            # Text nodes are wrapped in a .up-insertion container so we can
+            # animate them and measure their position/size for scrolling.
+            # This is not possible for container-less text nodes.
+            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
+            # Show that the wrapper is done after the insertion.
+            expect($('.up-insertion')).not.toBeAttached()
+
+        it 'reveals a new element that is being prepended', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target:before', url: '/path', reveal: true)
+
+          next =>
+            @respondWithSelector('.target', text: 'new target text')
+
+          next =>
+            # Text nodes are wrapped in a .up-insertion container so we can
+            # animate them and measure their position/size for scrolling.
+            # This is not possible for container-less text nodes.
+            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
+            # Show that the wrapper is done after the insertion.
+            expect($('.up-insertion')).not.toBeAttached()
+
         describe 'when there is an anchor #hash in the URL', ->
 
           it 'scrolls to the top of an element with the ID of that #hash', asyncSpec (next) ->
@@ -1066,35 +1093,37 @@ describe 'up.fragment', ->
             next =>
               expect(@revealMock).not.toHaveBeenCalled()
 
-        it 'reveals a new element that is being appended', asyncSpec (next) ->
-          fixture('.target')
-          up.change('.target:after', url: '/path', reveal: true)
+        describe 'with { scrollBehavior } option', ->
 
-          next =>
-            @respondWithSelector('.target', text: 'new target text')
+          it 'animates the revealing when prepending an element', asyncSpec (next) ->
+            fixture('.element', text: 'version 1')
+            up.change('.element:before',
+              document: '<div class="element">version 2</div>',
+              reveal: true,
+              scrollBehavior: 'smooth'
+            )
+            next =>
+              expect(@revealOptions.scrollBehavior).toEqual('smooth')
 
-          next =>
-            # Text nodes are wrapped in a .up-insertion container so we can
-            # animate them and measure their position/size for scrolling.
-            # This is not possible for container-less text nodes.
-            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
-            # Show that the wrapper is done after the insertion.
-            expect($('.up-insertion')).not.toBeAttached()
+          it 'animates the revealing when appending an element', asyncSpec (next) ->
+            fixture('.element', text: 'version 1')
+            up.change('.element:after',
+              document: '<div class="element">version 2</div>',
+              reveal: true,
+              scrollBehavior: 'smooth'
+            )
+            next =>
+              expect(@revealOptions.scrollBehavior).toEqual('smooth')
 
-        it 'reveals a new element that is being prepended', asyncSpec (next) ->
-          fixture('.target')
-          up.change('.target:before', url: '/path', reveal: true)
-
-          next =>
-            @respondWithSelector('.target', text: 'new target text')
-
-          next =>
-            # Text nodes are wrapped in a .up-insertion container so we can
-            # animate them and measure their position/size for scrolling.
-            # This is not possible for container-less text nodes.
-            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
-            # Show that the wrapper is done after the insertion.
-            expect($('.up-insertion')).not.toBeAttached()
+          it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
+            fixture('.element', text: 'version 1')
+            up.change('.element',
+              document: '<div class="element">version 2</div>',
+              reveal: true,
+              scrollBehavior: 'smooth'
+            )
+            next =>
+              expect(@revealOptions.scrollBehavior).toEqual('auto')
 
 
       describe 'execution of scripts', ->
@@ -2130,30 +2159,6 @@ describe 'up.fragment', ->
           expect($($elements.get(0)).text()).toEqual('text')
           expect($($elements.get(1)).text()).toEqual('')
 
-      describe 'with { scrollBehavior } option', ->
-
-        beforeEach ->
-          up.viewport.knife.mock('reveal').and.callFake (element, options) =>
-            @revealScrollBehavior = options.behavior ? options.scrollBehavior
-            return Promise.resolve()
-
-        it 'animates the revealing when prepending an element', asyncSpec (next) ->
-          fixture('.element', text: 'version 1')
-          up.extract('.element:before', '<div class="element">version 2</div>', reveal: true, scrollBehavior: 'smooth')
-          next =>
-            expect(@revealScrollBehavior).toEqual('smooth')
-
-        it 'animates the revealing when appending an element', asyncSpec (next) ->
-          fixture('.element', text: 'version 1')
-          up.extract('.element:after', '<div class="element">version 2</div>', reveal: true, scrollBehavior: 'smooth')
-          next =>
-            expect(@revealScrollBehavior).toEqual('smooth')
-
-        it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
-          fixture('.element', text: 'version 1')
-          up.extract('.element', '<div class="element">version 2</div>', reveal: true, scrollBehavior: 'smooth')
-          next =>
-            expect(@revealScrollBehavior).toEqual('auto')
 
       describe 'handling of [up-keep] elements', ->
 
