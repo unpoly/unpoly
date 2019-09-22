@@ -349,6 +349,51 @@ describe 'up.fragment', ->
             next => @respondWithSelector('.failure-target', status: 500)
             next => expect(location.href).toMatchURL('/path6')
 
+      describe 'source', ->
+
+        it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path')
+          next =>
+            @respondWithSelector('.target')
+          next =>
+            expect(up.fragment.source('.target')).toMatchURL('/path')
+
+        it 'keeps the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
+          fixture('.target', 'up-source': '/previous-source')
+          up.change('.target', url: '/path', method: 'post')
+          next =>
+            @respondWithSelector('.target')
+          next =>
+            expect(up.fragment.source('.target')).toMatchURL('/previous-source')
+
+        describe 'with { source } option', ->
+
+          it 'uses that URL as the source for a GET request', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path', source: '/given-path')
+            next =>
+              @respondWithSelector('.target')
+            next =>
+              expect(up.fragment.source('.target')).toMatchURL('/given-path')
+
+          it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path', method: 'post', source: '/given-path')
+            next =>
+              @respondWithSelector('.target')
+            next =>
+              expect(up.fragment.source('.target')).toMatchURL('/given-path')
+
+          it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
+            fixture('.target', 'up-source': '/previous-source')
+            up.replace('.target', '/path', method: 'post', source: '/given-path', failTarget: '.target')
+            next =>
+              @respondWithSelector('target', status: 500)
+            next =>
+              expect(up.fragment.source('.target')).toMatchURL('/previous-source')
+
+
       describe 'with { transition } option', ->
 
         it 'returns a promise that will be fulfilled once the server response was received and the swap transition has completed', asyncSpec (next) ->
@@ -384,42 +429,6 @@ describe 'up.fragment', ->
 
       describeCapability 'canPushState', ->
 
-        describe 'source', ->
-
-          it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
-            promise = up.replace('.middle', '/path')
-            next =>
-              @respond()
-              next.await(promise)
-            next =>
-              expect($('.middle').attr('up-source')).toMatch(/\/path$/)
-
-          it 'reuses the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
-            @$oldMiddle.attr('up-source', '/previous-source')
-            up.replace('.middle', '/path', method: 'post')
-            next =>
-              @respond()
-            next =>
-              expect($('.middle')).toHaveText('new-middle')
-              expect(up.fragment.source('.middle')).toMatchURL('/previous-source')
-
-          describe 'if a URL is given as { source } option', ->
-
-            it 'uses that URL as the source for a GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', source: '/given-path')
-              next => @respond()
-              next => expect(up.fragment.source('.middle')).toMatchURL('/given-path')
-
-            it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
-              up.replace('.middle', '/path', method: 'post', source: '/given-path')
-              next => @respond()
-              next => expect(up.fragment.source('.middle')).toMatchURL('/given-path')
-
-            it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
-              @$oldMiddle.attr('up-source', '/previous-source')
-              up.replace('.middle', '/path', method: 'post', source: '/given-path', failTarget: '.middle')
-              next => @respond(status: 500)
-              next => expect(up.fragment.source('.middle')).toMatchURL('/previous-source')
 
         describe 'document title', ->
 
