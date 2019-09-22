@@ -247,16 +247,32 @@ describe 'up.fragment', ->
 
       describe 'choice of target', ->
 
-        describe 'when no { target } options is given', ->
+        it 'uses a selector given as { target } option'
 
-          it 'uses a default target for the layer that is being updated'
+        it 'uses a selector given as first argument'
 
-          it 'allows to pass an element as { target } option', asyncSpec (next) ->
-            target = fixture('.target', text: 'old-text')
-            up.change(target, document: '<div class="target">new-text</div>')
+        it 'derives a selector from an element given as { target } option', asyncSpec (next) ->
+          target = fixture('.target', text: 'old-text')
+          up.change(target, document: '<div class="target">new-text</div>')
 
-            next =>
-              expect('.target').toHaveText('new-text')
+          next =>
+            expect('.target').toHaveText('new-text')
+
+        it 'derives a selector from an element given as first argument'
+
+        it 'uses a default target for the layer that is being updated if nothing else is specified'
+
+      describe 'choice of layer', ->
+
+        it 'updates the layer given as { layer } option'
+
+        it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
+
+        it 'updates the layer of the given { origin }'
+
+        it 'opens a new layer when given { layer: "new" }'
+
+        it 'updates the current layer if nothing else is specified'
 
       describe 'browser location URL', ->
 
@@ -349,6 +365,169 @@ describe 'up.fragment', ->
             next => @respondWithSelector('.failure-target', status: 500)
             next => expect(location.href).toMatchURL('/path6')
 
+      describe 'document title', ->
+
+        beforeEach ->
+          up.history.config.enabled = true
+
+        it "sets the document title to the response <title> xxx", asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          up.change('.container', url: '/path')
+
+          next =>
+            @respondWith """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          next =>
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from HTML')
+
+        it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          up.change('.container', url: '/path')
+
+          next =>
+            @respondWith
+              responseHeaders:
+                'X-Up-Title': 'Title from header'
+              responseText: """
+                <div class='container'>
+                  new container text
+                </div>
+                """
+
+          next =>
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from header')
+
+        it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          up.change('.container', url: '/path')
+
+          next =>
+            @respondWith
+              responseHeaders:
+                'X-Up-Title': 'Title from header'
+              responseText: """
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+
+          next =>
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from header')
+
+        it "sets the document title to the response <title> with { location: false, title: true } options (bugfix) xxx", asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          up.change('.container', url: '/path', location: false, title: true)
+
+          next =>
+            @respondWith """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          next =>
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from HTML')
+
+        it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          oldTitle = document.title
+          up.change('.container', url: '/path', history: false, title: true)
+
+          next =>
+            @respondWith """
+              <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+                <g>
+                  <title>SVG Title Demo example</title>
+                  <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
+                </g>
+              </svg>
+
+              <div class='container'>
+                new container text
+              </div>
+            """
+
+          next =>
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe(oldTitle)
+
+        it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          oldTitle = document.title
+          up.change('.container', url: '/path', history: false)
+
+          next =>
+            @respondWith
+              responseHeaders:
+                'X-Up-Title': 'Title from header'
+              responseText: """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          next =>
+            expect(document.title).toEqual(oldTitle)
+
+        it 'allows to pass an explicit title as { title } option', asyncSpec (next) ->
+          $fixture('.container').text('old container text')
+          up.change('.container', url: '/path', title: 'Title from options')
+
+          next =>
+            @respondWith """
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new container text
+                  </div>
+                </body>
+              </html>
+            """
+
+          next =>
+            expect($('.container')).toHaveText('new container text')
+            expect(document.title).toBe('Title from options')
+
+
       describe 'source', ->
 
         it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
@@ -432,165 +611,6 @@ describe 'up.fragment', ->
 
         describe 'document title', ->
 
-          beforeEach ->
-            up.history.config.enabled = true
-
-          it "sets the document title to the response <title> xxx", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            up.replace('.container', '/path')
-
-            next =>
-              @respondWith """
-                <html>
-                  <head>
-                    <title>Title from HTML</title>
-                  </head>
-                  <body>
-                    <div class='container'>
-                      new container text
-                    </div>
-                  </body>
-                </html>
-              """
-
-            next =>
-              expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe('Title from HTML')
-
-          it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            up.replace('.container', '/path')
-
-            next =>
-              @respondWith
-                responseHeaders:
-                  'X-Up-Title': 'Title from header'
-                responseText: """
-                  <div class='container'>
-                    new container text
-                  </div>
-                  """
-
-            next =>
-              expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe('Title from header')
-
-          it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            up.replace('.container', '/path')
-
-            next =>
-              @respondWith
-                responseHeaders:
-                  'X-Up-Title': 'Title from header'
-                responseText: """
-                  <html>
-                    <head>
-                      <title>Title from HTML</title>
-                    </head>
-                    <body>
-                      <div class='container'>
-                        new container text
-                      </div>
-                    </body>
-                  </html>
-                """
-
-            next =>
-              expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe('Title from header')
-
-          it "sets the document title to the response <title> with { location: false, title: true } options (bugfix) xxx", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            up.replace('.container', '/path', location: false, title: true)
-
-            next =>
-              @respondWith """
-                <html>
-                  <head>
-                    <title>Title from HTML</title>
-                  </head>
-                  <body>
-                    <div class='container'>
-                      new container text
-                    </div>
-                  </body>
-                </html>
-              """
-
-            next =>
-              expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe('Title from HTML')
-
-          it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            oldTitle = document.title
-            up.replace('.container', '/path', history: false, title: true)
-
-            next =>
-              @respondWith """
-                <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
-                  <g>
-                    <title>SVG Title Demo example</title>
-                    <rect x="10" y="10" width="200" height="50" style="fill:none; stroke:blue; stroke-width:1px"/>
-                  </g>
-                </svg>
-
-                <div class='container'>
-                  new container text
-                </div>
-              """
-
-            next =>
-              expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe(oldTitle)
-
-          it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            oldTitle = document.title
-            up.replace('.container', '/path', history: false)
-
-            next =>
-              @respondWith
-                responseHeaders:
-                  'X-Up-Title': 'Title from header'
-                responseText: """
-                <html>
-                  <head>
-                    <title>Title from HTML</title>
-                  </head>
-                  <body>
-                    <div class='container'>
-                      new container text
-                    </div>
-                  </body>
-                </html>
-              """
-
-            next =>
-              expect(document.title).toEqual(oldTitle)
-
-          it 'allows to pass an explicit title as { title } option', asyncSpec (next) ->
-            $fixture('.container').text('old container text')
-            up.replace('.container', '/path', title: 'Title from options')
-
-            next =>
-              @respondWith """
-                <html>
-                  <head>
-                    <title>Title from HTML</title>
-                  </head>
-                  <body>
-                    <div class='container'>
-                      new container text
-                    </div>
-                  </body>
-                </html>
-              """
-
-            next =>
-              expect($('.container')).toHaveText('new container text')
-              expect(document.title).toBe('Title from options')
 
         describe 'selector processing', ->
 
