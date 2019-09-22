@@ -272,7 +272,6 @@ describe 'up.fragment', ->
               expect(result.value).toMatch(/Could not match target in current page and response/i)
               done()
 
-
       describe 'choice of target', ->
 
         it 'uses a selector given as { target } option'
@@ -1123,6 +1122,34 @@ describe 'up.fragment', ->
             next =>
               expect(@revealOptions.scrollBehavior).toEqual('auto')
 
+      describe 'with { restoreScroll: true } option', ->
+
+        beforeEach ->
+          up.history.config.enabled = true
+
+        it 'restores the scroll positions of all viewports around the target', asyncSpec (next) ->
+
+          $viewport = $fixture('div[up-viewport] .element').css
+            'height': '100px'
+            'width': '100px'
+            'overflow-y': 'scroll'
+
+          respond = =>
+            @lastRequest().respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: '<div class="element" style="height: 300px"></div>'
+
+          up.change('.element', url: '/foo')
+
+          next => respond()
+          next => $viewport.scrollTop(65)
+          next => up.replace('.element', '/bar')
+          next => respond()
+          next => $viewport.scrollTop(0)
+          next.await => up.replace('.element', '/foo', restoreScroll: true)
+          # No need to respond because /foo has been cached before
+          next => expect($viewport.scrollTop()).toEqual(65)
 
       describe 'execution of scripts', ->
 
@@ -1863,7 +1890,7 @@ describe 'up.fragment', ->
     ##############################################################################
     ##############################################################################
 
-    describe 'up.replace', ->
+    describe 'up.replace()', ->
 
       describeCapability 'canPushState', ->
 
@@ -2504,39 +2531,11 @@ describe 'up.fragment', ->
 
 
 
-        describe 'with { restoreScroll: true } option', ->
-
-          beforeEach ->
-            up.history.config.enabled = true
-
-          it 'restores the scroll positions of all viewports around the target', asyncSpec (next) ->
-
-            $viewport = $fixture('div[up-viewport] .element').css
-              'height': '100px'
-              'width': '100px'
-              'overflow-y': 'scroll'
-
-            respond = =>
-              @lastRequest().respondWith
-                status: 200
-                contentType: 'text/html'
-                responseText: '<div class="element" style="height: 300px"></div>'
-
-            up.replace('.element', '/foo')
-
-            next => respond()
-            next => $viewport.scrollTop(65)
-            next => up.replace('.element', '/bar')
-            next => respond()
-            next => $viewport.scrollTop(0)
-            next.await => up.replace('.element', '/foo', restoreScroll: true)
-            # No need to respond because /foo has been cached before
-            next => expect($viewport.scrollTop()).toEqual(65)
 
 
-        it 'uses a { failTransition } option if the request failed'
 
-    describe 'up.extract', ->
+
+    describe 'up.extract()', ->
 
       it "rejects if the selector can't be found on the current page", (done) ->
         html = '<div class="foo-bar">text</div>'
