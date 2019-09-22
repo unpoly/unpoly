@@ -184,7 +184,7 @@ up.browser = do ->
   @internal
   ###
   whenConfirmed = (options) ->
-    if options.preload || !options.confirm || window.confirm(options.confirm)
+    if !options.confirm || window.confirm(options.confirm)
       Promise.resolve()
     else
       up.event.abortRejection('User canceled action')

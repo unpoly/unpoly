@@ -203,7 +203,6 @@ describe 'up.feedback', ->
                 responseText: '<div class="main">new-text</div>'
 
             next =>
-              console.debug('link href is %o, current URL is %o', $link.attr('href'), location.href)
               expect($link).toHaveClass('up-current')
 
           it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->

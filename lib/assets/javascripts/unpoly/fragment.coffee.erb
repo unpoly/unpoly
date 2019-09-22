@@ -55,9 +55,9 @@ up.fragment = do ->
 
     # When preloading, disable all preflight side effects.
     if options.preload
-      options.solo = false
-      options.confirm = false
-      options.feedback = false
+      options.solo = false # preflight option has no failVariant
+      options.confirm = false # preflight option has no failVariant
+      options.feedback = false # preflight option has no failVariant
 
     # By default we consider every change to be a user-initiated navigation
     # that involves changing scroll positions, browser location, etc.
@@ -65,17 +65,19 @@ up.fragment = do ->
     # any other effects.
     navigate = options.navigate ? true
 
-    options.solo ?= navigate
-    options.feedback ?= navigate
+    options.solo ?= navigate # preflight option has no failVariant
+    options.feedback ?= navigate # preflight option has no failVariant
     options.peel ?= navigate
-    options.reveal ?= navigate
     options.failPeel ?= navigate
+    options.reveal ?= navigate
     options.failReveal ?= navigate
     options.saveScroll ?= navigate
+    options.failSaveScroll ?= navigate
 
     if navigate == false
       # Only change this for non-default { navigate } option
       options.history = false
+      options.failHistory = false
 
     promise = up.browser.whenConfirmed(options)
 

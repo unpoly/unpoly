@@ -40,7 +40,6 @@ class up.Change.CloseLayer extends up.Change.Removal
     up.proxy.abort(preflightLayer: this)
 
     @layer[@closeCallbackName]?(closeEvent)
-    console.debug("@layer.emit(%o)", closeEvent)
     @layer.emit(closeEvent) # will bubble up to document
 
     if !closeEvent.defaultPrevented || !@preventable

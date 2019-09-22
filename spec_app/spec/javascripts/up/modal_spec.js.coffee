@@ -746,7 +746,6 @@ describe 'up.modal', ->
       it 'stays open if #preventDefault() is called on up:modal:close event', asyncSpec (next) ->
         up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
         up.on 'up:modal:close', (e) ->
-          console.debug("LISTENER FOR up:modal:close CALLED")
           e.preventDefault()
 
         next =>

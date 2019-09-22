@@ -596,6 +596,244 @@ describe 'up.fragment', ->
             expect(resolution).toHaveBeenCalled()
             expect('.target').toHaveText('new-text')
 
+      describe 'with { reveal } option', ->
+
+        beforeEach ->
+          up.history.config.enabled = true
+
+          @revealedHTML = []
+          @revealedText = []
+          @revealOptions = {}
+
+          @revealMock = up.viewport.knife.mock('reveal').and.callFake (element, options) =>
+            @revealedHTML.push element.outerHTML
+            @revealedText.push element.textContent.trim()
+            @revealOptions = options
+            Promise.resolve()
+
+        it 'reveals a new element before it is being replaced', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target', url: '/path', reveal: true)
+
+          next =>
+            @respondWithSelector('.target', text: 'new text')
+
+          next =>
+            expect(@revealedText).toEqual ['new text']
+
+        it 'allows to pass another selector to reveal', asyncSpec (next)->
+          fixture('.target', text: 'target text')
+          fixture('.other', text: 'other text')
+
+          up.change('.target', url: '/path', reveal: '.other')
+
+          next =>
+            @respondWithSelector('.target')
+
+          next =>
+            expect(@revealedText).toEqual ['other text']
+
+        it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
+          fixture('.target', text: 'target text')
+          fixture('.origin', text: 'origin text')
+
+          up.change('.target', url: '/path', reveal: '&', origin: '.origin')
+
+          next =>
+            @respondWithSelector('.target')
+
+          next =>
+            expect(@revealedText).toEqual ['origin text']
+
+        describe 'when the server responds with an error code', ->
+
+          it 'ignores the { reveal } option', asyncSpec (next) ->
+            fixture('.target', text: 'target text')
+            fixture('.other', text: 'other text')
+            fixture('.fail-target', text: 'fail-target text')
+            up.change('.target', url: '/path', failTarget: '.fail-target', reveal: '.other')
+
+            next =>
+              @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
+
+            next =>
+              expect(@revealedText).toEqual ['new fail-target text']
+
+          it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
+            fixture('.target', text: 'old target text')
+            fixture('.other', text: 'other text')
+            fixture('.fail-target', text: 'old fail-target text')
+            up.change('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '.other')
+
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="fail-target">
+                    new fail-target text
+                  </div>
+                  """
+
+            next =>
+              expect(@revealedText).toEqual ['other text']
+
+          it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
+            $origin = $fixture('.origin').text('origin text')
+            $failTarget = $fixture('.fail-target').text('old fail-target text')
+            up.change('.middle', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
+
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="fail-target">
+                    new fail-target text
+                  </div>
+                  """
+
+            next =>
+              expect(@revealedText).toEqual ['origin text']
+
+        describe 'when more than one fragment is replaced', ->
+
+          it 'only reveals the first fragment', asyncSpec (next) ->
+            fixture('.one', text: 'old one text')
+            fixture('.two', text: 'old two text')
+            up.change('.one, .two', url: '/path', reveal: true)
+
+            next =>
+              @respondWith """
+                <div class="one">new one text</div>
+                <div class="two">new two text</div>
+                """
+
+            next =>
+              expect(@revealedText).toEqual ['new one text']
+
+        describe 'when there is an anchor #hash in the URL', ->
+
+          it 'scrolls to the top of an element with the ID of that #hash', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path#hash', reveal: true)
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div id="hash"></div>
+                </div>
+                """
+
+            next =>
+              expect(@revealedHTML).toEqual ['<div id="hash"></div>']
+              expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
+
+          it "scrolls to the top of an <a> element with the name of that hash", asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path#three', reveal: true)
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <a name="three"></a>
+                </div>
+                """
+
+            next =>
+              expect(@revealedHTML).toEqual ['<a name="three"></a>']
+              expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
+
+          it "scrolls to a hash that includes a dot character ('.') (bugfix)", asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path#foo.bar', reveal: true)
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <a name="foo.bar"></a>
+                </div>
+                """
+
+            next =>
+              expect(@revealedHTML).toEqual ['<a name="foo.bar"></a>']
+              expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
+
+          it 'does not scroll if { reveal: false } is also set', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path#hash', reveal: false)
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div id="hash"></div>
+                </div>
+                """
+
+            next =>
+              expect(@revealMock).not.toHaveBeenCalled()
+
+          it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path#two', reveal: true)
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div id="one">one</div>
+                  <div id="two">two</div>
+                  <div id="three">three</div>
+                </div>
+                """
+
+            next =>
+              expect(@revealedText).toEqual ['two']
+
+              up.change('.target', url: '/path#three', reveal: true)
+              # response is already cached
+
+            next =>
+              expect(@revealedText).toEqual ['two', 'three']
+
+          it "does not scroll if there is no element with the ID of that #hash", asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path#hash', reveal: true)
+
+            next =>
+              @respondWithSelector('.target')
+
+            next =>
+              expect(@revealMock).not.toHaveBeenCalled()
+
+        it 'reveals a new element that is being appended', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target:after', url: '/path', reveal: true)
+
+          next =>
+            @respondWithSelector('.target', text: 'new target text')
+
+          next =>
+            # Text nodes are wrapped in a .up-insertion container so we can
+            # animate them and measure their position/size for scrolling.
+            # This is not possible for container-less text nodes.
+            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
+            # Show that the wrapper is done after the insertion.
+            expect($('.up-insertion')).not.toBeAttached()
+
+        it 'reveals a new element that is being prepended', asyncSpec (next) ->
+          fixture('.target')
+          up.change('.target:before', url: '/path', reveal: true)
+
+          next =>
+            @respondWithSelector('.target', text: 'new target text')
+
+          next =>
+            # Text nodes are wrapped in a .up-insertion container so we can
+            # animate them and measure their position/size for scrolling.
+            # This is not possible for container-less text nodes.
+            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
+            # Show that the wrapper is done after the insertion.
+            expect($('.up-insertion')).not.toBeAttached()
+
+
       describe 'execution of scripts', ->
 
         beforeEach ->
@@ -1452,244 +1690,6 @@ describe 'up.fragment', ->
             # No need to respond because /foo has been cached before
             next => expect($viewport.scrollTop()).toEqual(65)
 
-        describe 'with { reveal } option', ->
-
-          beforeEach ->
-            up.history.config.enabled = true
-
-            @revealedHTML = []
-            @revealedText = []
-            @revealOptions = {}
-
-            @revealMock = up.viewport.knife.mock('reveal').and.callFake (element, options) =>
-              @revealedHTML.push element.outerHTML
-              @revealedText.push element.textContent.trim()
-              @revealOptions = options
-              Promise.resolve()
-
-          it 'reveals a new element before it is being replaced', asyncSpec (next) ->
-            up.replace('.middle', '/path', reveal: true)
-
-            next =>
-              @respond()
-
-            next =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
-              expect(@revealedText).toEqual ['new-middle']
-
-          it 'allows to pass another selector to reveal', asyncSpec (next)->
-            $other = $fixture('.other').text('other text')
-
-            up.replace('.middle', '/path', reveal: '.other')
-
-            next =>
-              @respond()
-
-            next =>
-              expect(@revealedText).toEqual ['other text']
-
-          it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
-            $origin = $fixture('.origin').text('origin text')
-
-            up.replace('.middle', '/path', reveal: '&', origin: '.origin')
-
-            next =>
-              @respond()
-
-            next =>
-              expect(@revealedText).toEqual ['origin text']
-
-          describe 'when the server responds with an error code', ->
-
-            it 'ignores the { reveal } option', asyncSpec (next) ->
-              $failTarget = $fixture('.fail-target')
-              up.replace('.middle', '/path', failTarget: '.fail-target', reveal: true)
-
-              next =>
-                @respond(status: 500)
-
-              next =>
-                expect(@revealMock).not.toHaveBeenCalled()
-
-            it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
-              $failTarget = $fixture('.fail-target').text('old fail target text')
-              up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: true)
-
-              next =>
-                @respondWith
-                  status: 500
-                  responseText: """
-                    <div class="fail-target">
-                      new fail target text
-                    </div>
-                    """
-
-              next =>
-                expect(@revealedText).toEqual ['new fail target text']
-
-            it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
-              $origin = $fixture('.origin').text('origin text')
-              $failTarget = $fixture('.fail-target').text('old fail target text')
-              up.replace('.middle', '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
-
-              next =>
-                @respondWith
-                  status: 500
-                  responseText: """
-                    <div class="fail-target">
-                      new fail target text
-                    </div>
-                    """
-
-              next =>
-                expect(@revealedText).toEqual ['origin text']
-
-          describe 'when more than one fragment is replaced', ->
-
-            it 'only reveals the first fragment', asyncSpec (next) ->
-              up.replace('.middle, .after', '/path', reveal: true)
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
-                expect(@revealedText).toEqual ['new-middle']
-
-          describe 'when there is an anchor #hash in the URL', ->
-
-            it 'scrolls to the top of an element with the ID of that #hash', asyncSpec (next) ->
-              up.replace('.middle', '/path#hash', reveal: true)
-              @responseText =
-                """
-                <div class="middle">
-                  <div id="hash"></div>
-                </div>
-                """
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealedHTML).toEqual ['<div id="hash"></div>']
-                expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
-
-            it "scrolls to the top of an <a> element with the name of that hash", asyncSpec (next) ->
-              up.replace('.middle', '/path#three', reveal: true)
-              @responseText =
-                """
-                <div class="middle">
-                  <a name="three"></a>
-                </div>
-                """
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealedHTML).toEqual ['<a name="three"></a>']
-                expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
-
-            it "scrolls to a hash that includes a dot character ('.') (bugfix)", asyncSpec (next) ->
-              up.replace('.middle', '/path#foo.bar', reveal: true)
-              @responseText =
-                """
-                <div class="middle">
-                  <a name="foo.bar"></a>
-                </div>
-                """
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealedHTML).toEqual ['<a name="foo.bar"></a>']
-                expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
-
-            it 'does not scroll if { reveal: false } is also set', asyncSpec (next) ->
-              up.replace('.middle', '/path#hash', reveal: false)
-              @responseText =
-                """
-                <div class="middle">
-                  <div id="hash"></div>
-                </div>
-                """
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealMock).not.toHaveBeenCalled()
-
-            it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
-              up.replace('.middle', '/path#two', reveal: true)
-              @responseText =
-                """
-                <div class="middle">
-                  <div id="one">one</div>
-                  <div id="two">two</div>
-                  <div id="three">three</div>
-                </div>
-                """
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealedText).toEqual ['two']
-
-                up.replace('.middle', '/path#three', reveal: true)
-                # response is already cached
-
-              next =>
-                expect(@revealedText).toEqual ['two', 'three']
-
-            it "does not scroll if there is no element with the ID of that #hash", asyncSpec (next) ->
-              up.replace('.middle', '/path#hash', reveal: true)
-              @responseText =
-                """
-                <div class="middle">
-                </div>
-                """
-
-              next =>
-                @respond()
-
-              next =>
-                expect(@revealMock).not.toHaveBeenCalled()
-
-
-          it 'reveals a new element that is being appended', asyncSpec (next) ->
-            promise = up.replace('.middle:after', '/path', reveal: true)
-
-            next =>
-              @respond()
-              next.await(promise)
-
-            next =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
-              # Text nodes are wrapped in a .up-insertion container so we can
-              # animate them and measure their position/size for scrolling.
-              # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
-              # Show that the wrapper is done after the insertion.
-              expect($('.up-insertion')).not.toBeAttached()
-
-          it 'reveals a new element that is being prepended', asyncSpec (next) ->
-            promise = up.replace('.middle:before', '/path', reveal: true)
-
-            next =>
-              @respond()
-              next.await(promise)
-
-            next =>
-              expect(@revealMock).not.toHaveBeenCalledWith(@$oldMiddle[0])
-              # Text nodes are wrapped in a .up-insertion container so we can
-              # animate them and measure their position/size for scrolling.
-              # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<div class="up-insertion">new-middle</div>']
-              # Show that the wrapper is done after the insertion.
-              expect($('.up-insertion')).not.toBeAttached()
 
         it 'uses a { failTransition } option if the request failed'
 

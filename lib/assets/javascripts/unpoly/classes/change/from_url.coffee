@@ -64,13 +64,13 @@ class up.Change.FromURL extends up.Change
   explicitFailureOptions: ->
     opts = {}
     for key, value of @successOptions
-      # Keep key/value unless there is a defined failOverride
+      # Drop key/value pair unless there is a defined failOverride
       if unprefixedKey = u.unprefixCamelCase(key, 'fail')
         failValue = @successOptions[key]
         # up.OptionParser sets keys to undefined, even if neither options nor element
         # produces that option. Hence we ignore undefined values. To override it with
         # an empty value, the developer needs to pass null instead.
-        unless u.isUndefined(failValue)
+        if u.isDefined(failValue)
           opts[unprefixedKey] = failValue
     return opts
 
@@ -138,8 +138,6 @@ class up.Change.FromURL extends up.Change
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
       options.history = !!options.location
-
-    console.debug("options.location is %o, locationFromExchange is %o", options.location, locationFromExchange)
 
     options.location = @improveHistoryValue(options.location, locationFromExchange)
     options.title = @improveHistoryValue(options.title, response.title)
