@@ -43,7 +43,7 @@ class up.EventListener extends up.Record
       return
 
     if element
-      elementArg = if @jQuery then jQuery(element) else element
+      elementArg = if @jQuery then up.browser.jQuery(element) else element
       args = [event, elementArg]
 
       # Do not retrieve and parse [up-data] unless the listener function

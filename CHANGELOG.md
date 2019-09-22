@@ -14,6 +14,32 @@ Unreleased
 - TODO ...
 
 
+0.61.0
+------
+
+This release makes it easier to migrate to a recent version of Unpoly when your app still depends on jQuery.
+Unpoly dropped its jQuery dependency with version 0.60.0, but retains optional jQuery support through functions like
+[`up.$compiler()`](/up.$compiler) and [`up.$on()`](/up.$on). All Unpoly functions that take a native element as an
+argument may also be called with a jQuery collection as an argument.
+
+The following changes to the optional jQuery support were implemented:
+
+- In an ES6 build pipeline, Unpoly's jQuery support no longer requires `window.jQuery` to be defined before
+  Unpoly is imported into the build. You still need to define `window.jQuery`, but you may do so at any time in your
+  scripts, regardless of load order.
+- jQuery support functions like [`up.$compiler()`](/up.$compiler) now fail with a helpful message if the developer
+  forgets to define `window.jQuery`.
+
+This release also exposes some convenience functions and selectors:
+
+- New experimental function [`up.event.halt()`](/up.event.halt). It prevents the event from bubbling up the DOM.
+  It also prevents other event handlers bound on the same element. It also prevents the event's default action.
+- New experimental function [`up.form.fields()`](/up.form.fields).  It returns a list of form fields within the given element.
+- The selector [`form[up-validate]`](/form-up-validate) is now supported. It performs
+  [server-side validation](/input-up-validate) when any fieldset within this form changes. Previously only the variant
+  [`input[up-validate]`](/input-up-validate) was supported.
+
+
 0.60.3
 ------
 

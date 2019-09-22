@@ -51,10 +51,23 @@ up.form = do ->
     config.fields.join(',')
 
   ###**
+  Returns a list of form fields within the given element.
+
+  You can configure what Unpoly considers a form field by adding CSS selectors to the
+  [`up.form.config.fields`](/up.form.config#config.fields) array.
+
+  If the given element is itself a form field, a list of that given element is returned.
+
   @function up.form.fields
-  @internal
+  @param {Element|jQuery} root
+    The element to scan for contained form fields.
+
+    If the element is itself a form field, a list of that element is returned.
+  @return {NodeList<Element>|Array<Element>}
+  @experimental
   ###
   findFields = (root) ->
+    root = e.get(root)
     e.subtree(root, fieldSelector())
 
 #  findFields = (rootOrRoots) ->
@@ -748,7 +761,18 @@ up.form = do ->
     This defaults to a fieldset or form group around the validating field.
   @stable
   ###
-  up.on 'change', '[up-validate]', (event, field) ->
+
+  ###**
+  Performs [server-side validation](/input-up-validate) when any fieldset within this form changes.
+
+  You can configure what Unpoly considers a fieldset by adding CSS selectors to the
+  [`up.form.config.validateTargets`](/up.form.config#config.validateTargets) array.
+
+  @selector form[up-validate]
+  @stable
+  ###
+  up.on 'change', '[up-validate]', (event) ->
+    field = findFields(event.target)[0]
     u.muteRejection validate(field)
 
   ###**

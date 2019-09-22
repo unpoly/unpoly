@@ -502,3 +502,37 @@ describe 'up.event', ->
         it 'allows the function to return a promise that will delay the promise returned by whenEmitted'
 
         it 'does not call the function if the event was prevented'
+
+    describe 'up.event.halt', ->
+
+      it 'stops propagation of the given event to other event listeners on the same element', ->
+        otherListenerBefore = jasmine.createSpy()
+        otherListenerAfter = jasmine.createSpy()
+        element = fixture('div')
+
+        element.addEventListener('foo', otherListenerBefore)
+        element.addEventListener('foo', up.event.halt)
+        element.addEventListener('foo', otherListenerAfter)
+
+        up.emit(element, 'foo')
+
+        expect(otherListenerBefore).toHaveBeenCalled()
+        expect(otherListenerAfter).not.toHaveBeenCalled()
+
+      it 'stops the event from bubbling up the document tree', ->
+        parent = fixture('div')
+        element = e.affix(parent, 'div')
+        parentListener = jasmine.createSpy()
+        parent.addEventListener('foo', parentListener)
+        element.addEventListener('foo', up.event.halt)
+
+        up.emit(element, 'foo')
+
+        expect(parentListener).not.toHaveBeenCalled()
+
+      it 'prevents default on the event', ->
+        element = fixture('div')
+        element.addEventListener('foo', up.event.halt)
+        event = up.emit(element, 'foo')
+        expect(event.defaultPrevented).toBe(true)
+

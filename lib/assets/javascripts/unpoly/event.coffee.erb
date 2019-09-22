@@ -356,14 +356,22 @@ up.event = do ->
     )
 
   ###**
-  Stops the given event from propagating and prevents the default action.
+  Prevents the event from bubbling up the DOM.
+  Also prevents other event handlers bound on the same element.
+  Also prevents the event's default action.
+
+  \#\#\# Example
+
+      up.on('click', 'link.disabled', function(event) {
+        up.event.halt(event)
+      })
 
   @function up.event.halt
-  @internal
+  @param {Event} event
+  @experimental
   ###
   halt = (event) ->
     event.stopImmediatePropagation()
-    event.stopPropagation()
     event.preventDefault()
 
   ###**

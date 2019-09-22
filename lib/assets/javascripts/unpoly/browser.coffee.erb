@@ -165,9 +165,6 @@ up.browser = do ->
   canCustomElements = u.memoize ->
     !!window.customElements
 
-  canJQuery = u.memoize ->
-    !!window.jQuery
-
   canAnimationFrame = u.memoize ->
     'requestAnimationFrame' of window
 
@@ -216,6 +213,10 @@ up.browser = do ->
       canPromise() &&
       canAnimationFrame()
 
+  callJQuery = (args...) ->
+    jQuery = window.jQuery or up.fail("jQuery must be published as window.jQuery")
+    return jQuery(args...)
+
   hasSlowConnection = ->
     # https://wicg.github.io/netinfo/
     netInfo = navigator.connection
@@ -230,10 +231,10 @@ up.browser = do ->
     canFormData: canFormData
     canInspectFormData: canInspectFormData
     canCustomElements: canCustomElements
-    canJQuery: canJQuery
     canControlScrollRestoration: canControlScrollRestoration
     whenConfirmed: whenConfirmed
     isSupported: isSupported
     popCookie: popCookie
     hasSlowConnection: hasSlowConnection
+    jQuery: callJQuery
     isIE11: isIE11
