@@ -11,7 +11,6 @@
   - people can use [up-layer=modal] to open a new modal
   - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
 - Have up.layer.build delegate to up.Layer class
-- Rename { navigate } to { solo }. Then MAYBE use { navigate } to mass-set { peel, solo, feedback, reveal }.
 - Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
   - [X] close-Event sollte { origin } haben
   - [X] close-Event sollte { layer } haben
@@ -71,8 +70,7 @@
 - Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
 - Opening a new layer should cancel requests that also open a new layer
 - { peel } option for up.destroy
-- Remove up.element.createFromHtml to createFromHTML
-
+- Should up:layer:open and up:layer:closed be emitted on parent layer to enable story pattern?
 
 
 - Tests

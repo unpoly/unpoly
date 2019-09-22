@@ -140,11 +140,3 @@ describe 'up.browser', ->
           expect(window.confirm).not.toHaveBeenCalled()
           expect(result.state).toEqual('fulfilled')
           done()
-
-      it "does now show a conformation dialog and fulfills if a { confirm } option is given but we're also preloading", (done) ->
-        spyOn(window, 'confirm')
-        promise = up.browser.whenConfirmed(confirm: 'Do action?', preload: true)
-        promiseState(promise).then (result) ->
-          expect(window.confirm).not.toHaveBeenCalled()
-          expect(result.state).toEqual('fulfilled')
-          done()
