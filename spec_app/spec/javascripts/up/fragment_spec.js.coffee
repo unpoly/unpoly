@@ -958,6 +958,49 @@ describe 'up.fragment', ->
               expect(text0).toEqual('<img src="foo.png">')
               expect(text1).toEqual('<img src="bar.png">')
 
+      describeCapability 'canCustomElements', ->
+
+        describe 'custom elements', ->
+
+          beforeAll ->
+            TestComponent = ->
+              instance = Reflect.construct(HTMLElement, [], TestComponent)
+              instance.innerHTML = 'component activated'
+              up.emit('test-component:new')
+              instance
+            Object.setPrototypeOf(TestComponent.prototype, HTMLElement.prototype)
+            Object.setPrototypeOf(TestComponent, HTMLElement)
+
+            window.customElements.define('test-component-activation', TestComponent)
+
+          it 'activates custom elements in inserted fragments', asyncSpec (next) ->
+            fixture('.target')
+
+            up.change '.target', content: """
+              <test-component-activation></test-component-activation>
+              """
+
+            next =>
+              expect('.target test-component-activation').toHaveText('component activated')
+
+          it 'does not activate custom elements outside of inserted fragments (for performance reasons)', asyncSpec (next) ->
+            fixture('.target')
+            constructorSpy = jasmine.createSpy('constructor called')
+            up.on('test-component:new', constructorSpy)
+
+            up.change '.target', document: """
+              <div class="target">
+                <test-component-activation></test-component-activation>
+              </div>
+              <div class="other">
+                <test-component-activation></test-component-activation>
+              </div>
+              """
+
+            next =>
+              expect(constructorSpy.calls.count()).toBe(1)
+
+
 
     ##############################################################################
     ##############################################################################
@@ -1604,61 +1647,6 @@ describe 'up.fragment', ->
                 done()
 
 
-          if up.browser.canCustomElements()
-
-            describe 'custom elements', ->
-
-              beforeAll ->
-                TestComponent = ->
-                  instance = Reflect.construct(HTMLElement, [], TestComponent)
-                  instance.innerHTML = 'text from component'
-                  up.emit('test-component:new')
-                  instance
-                Object.setPrototypeOf(TestComponent.prototype, HTMLElement.prototype)
-                Object.setPrototypeOf(TestComponent, HTMLElement)
-
-                window.customElements.define('test-component-activation', TestComponent)
-
-              it 'activates custom elements in inserted fragments', asyncSpec (next) ->
-                @responseText = """
-                  <div class="middle">
-                    <test-component-activation></test-component-activation>
-                  </div>
-                  """
-
-                promise = up.replace('.middle', '/path')
-
-                next =>
-                  @respond()
-                  next.await(promise)
-
-                next =>
-                  expect('.middle test-component-activation').toHaveText('text from component')
-
-              it 'does not activate custom elements outside of inserted fragments', asyncSpec (next) ->
-                constructorSpy = jasmine.createSpy('constructor called')
-                up.on('test-component:new', constructorSpy)
-
-                @responseText = """
-                  <div class="before">
-                    <test-component-activation></test-component-activation>
-                  </div>
-                  <div class="middle">
-                    <test-component-activation></test-component-activation>
-                  </div>
-                  <div class="after">
-                    <test-component-activation></test-component-activation>
-                  </div>
-                  """
-
-                promise = up.replace('.middle', '/path')
-
-                next =>
-                  @respond()
-                  next.await(promise)
-
-                next =>
-                  expect(constructorSpy.calls.count()).toBe(1)
 
 
         describe 'with { restoreScroll: true } option', ->
