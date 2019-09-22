@@ -71,6 +71,7 @@
 - Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
 - Opening a new layer should cancel requests that also open a new layer
 - { peel } option for up.destroy
+- Remove up.element.createFromHtml to createFromHTML
 
 
 

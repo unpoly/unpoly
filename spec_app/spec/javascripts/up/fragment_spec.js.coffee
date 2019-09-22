@@ -235,9 +235,20 @@ describe 'up.fragment', ->
 
       describe 'with { content } option', ->
 
-        it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string'
+        it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->
+          fixture('.target', text: 'old text')
+          up.change('.target', content: 'new text')
 
-        it 'replaces the given selector with a matching element that has the inner HTML from the given { content } element'
+          next =>
+            expect('.target').toHaveText('new text')
+
+        it 'replaces the given selector with a matching element that has the inner HTML from the given { content } element', asyncSpec (next) ->
+          fixture('.target', text: 'old text')
+          content = e.createFromSelector('div', text: 'new text')
+          up.change('.target', { content })
+
+          next =>
+            expect('.target').toHaveText('new text')
 
       describe 'with { document } option', ->
 
@@ -260,7 +271,13 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-after')
 
-        it 'replaces the given selector with a matching element that has the outer HTML from the given { document } element'
+        it 'replaces the given selector with a matching element that has the outer HTML from the given { document } element', asyncSpec (next) ->
+          fixture('.target', text: 'old text')
+          document = e.createFromHtml('<div class="target">new text</div>')
+          up.change('.target', { document })
+
+          next =>
+            expect('.target').toHaveText('new text')
 
         it "rejects if the selector can't be found in the given HTML string", (done) ->
           $fixture('.foo-bar')
