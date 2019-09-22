@@ -14,10 +14,6 @@ class up.Change.FromContent extends up.Change
     # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
     # since the current layer might change before the response is received.
     @options.currentLayer ?= up.layer.current
-    @options.hungry ?= true
-    @options.keep ?= true
-    @options.saveScroll ?= true
-    @options.peel ?= true
     @extractFlavorFromLayerOption()
     @setDefaultLayer()
 

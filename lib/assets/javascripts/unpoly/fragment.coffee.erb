@@ -50,20 +50,28 @@ up.fragment = do ->
   makeChange = (args...) ->
     options = parseTargetAndOptions(args)
 
+    options.hungry ?= true
+    options.keep ?= true
+
+    # When preloading, disable all preflight side effects.
     if options.preload
       options.solo = false
       options.confirm = false
       options.feedback = false
 
+    # By default we consider every change to be a user-initiated navigation
+    # that involves changing scroll positions, browser location, etc.
+    # Developers can pass { navigate: true } to only update a fragment without
+    # any other effects.
     navigate = options.navigate ? true
 
     options.solo ?= navigate
     options.feedback ?= navigate
-
     options.peel ?= navigate
     options.reveal ?= navigate
     options.failPeel ?= navigate
     options.failReveal ?= navigate
+    options.saveScroll ?= navigate
 
     if navigate == false
       # Only change this for non-default { navigate } option
