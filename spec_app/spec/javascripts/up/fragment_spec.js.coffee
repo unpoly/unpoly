@@ -958,6 +958,134 @@ describe 'up.fragment', ->
               expect(text0).toEqual('<img src="foo.png">')
               expect(text1).toEqual('<img src="bar.png">')
 
+      describe 'destruction of old element', ->
+
+        # up.extract
+        it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
+          $parent = $fixture('.parent')
+          $element = $parent.affix('.element.v1').text('v1')
+          expect($element).toBeAttached()
+
+          spy = jasmine.createSpy('event listener')
+          $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
+            spy(event.target, event.fragment, up.specUtil.isDetached($element))
+
+          extractDone = up.change('.element', document: '<div class="element v2">v2</div>')
+
+          extractDone.then ->
+            expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
+            done()
+
+        it 'calls destructors on the old element', asyncSpec (next) ->
+          destructor = jasmine.createSpy('destructor')
+          up.$compiler '.container', ($element) ->
+            -> destructor($element.text())
+          $container = $fixture('.container').text('old text')
+          up.hello($container)
+          up.change('.container', document: '<div class="container">new text</div>')
+
+          next =>
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalledWith('old text')
+
+        it 'calls destructors on the old element after a { transition }', (done) ->
+          destructor = jasmine.createSpy('destructor')
+          up.$compiler '.container', ($element) ->
+            -> destructor($element.text())
+          $container = $fixture('.container').text('old text')
+          up.hello($container)
+
+          up.change('.container', document: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
+
+          u.timer 50, =>
+            expect(destructor).not.toHaveBeenCalled()
+
+          u.timer 220, =>
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalledWith('old text')
+            done()
+
+        it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
+          # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
+          up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
+          destructor = jasmine.createSpy('destructor')
+          up.$compiler '.container', -> destructor
+          $container = $fixture('.container')
+          up.hello($container)
+          up.change('.container', document: '<div class="container">new text</div>')
+
+          next =>
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalled()
+
+        it 'marks the old element as .up-destroying before destructors', (done) ->
+          destructor = jasmine.createSpy('destructor')
+          up.$compiler '.container', ($element) ->
+            -> destructor($element.text(), $element.is('.up-destroying'))
+          $container = $fixture('.container').text('old text')
+          up.hello($container)
+
+          extractDone = up.change('.container', document: '<div class="container">new text</div>')
+
+          extractDone.then ->
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalledWith('old text', true)
+            done()
+
+        it 'marks the old element as .up-destroying before destructors after a { transition }', (done) ->
+          destructor = jasmine.createSpy('destructor')
+          up.$compiler '.container', ($element) ->
+            -> destructor($element.text(), $element.is('.up-destroying'))
+          $container = $fixture('.container').text('old text')
+          up.hello($container)
+
+          extractDone = up.change('.container',
+            document: '<div class="container">new text</div>',
+            transition: 'cross-fade',
+            duration: 100
+          )
+
+          extractDone.then ->
+            expect('.container').toHaveText('new text')
+            expect(destructor).toHaveBeenCalledWith('old text', true)
+            done()
+
+        it 'calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', asyncSpec (next) ->
+          spy = jasmine.createSpy('parent spy')
+          up.$compiler '.element', ($element) ->
+            return -> spy($element.text(), $element.parent())
+
+          $parent = $fixture('.parent')
+          $element = $parent.affix('.element').text('old text')
+          up.hello($element)
+
+          up.change('.element', document: '<div class="element">new text</div>')
+
+          next =>
+            expect(spy).toHaveBeenCalledWith('old text', $parent)
+
+        it 'calls destructors while the element is still attached to the DOM when also using a { transition }', (done) ->
+          spy = jasmine.createSpy('parent spy')
+          up.$compiler '.element', ($element) ->
+            return ->
+              # We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
+              spy($element.text(), $element.closest('.parent'))
+
+          $parent = $fixture('.parent')
+          $element = $parent.affix('.element').text('old text')
+          up.hello($element)
+
+          extractDone = up.change('.element',
+            document: '<div class="element">new text</div>',
+            transition: 'cross-fade',
+            duration: 30
+          )
+
+          extractDone.then ->
+            expect(spy).toHaveBeenCalledWith('old text', $parent)
+            done()
+
+
       describeCapability 'canCustomElements', ->
 
         describe 'custom elements', ->
@@ -1683,7 +1811,7 @@ describe 'up.fragment', ->
 
     describe 'up.extract', ->
 
-      it 'Updates a selector on the current page with the same selector from the given HTML string', asyncSpec (next) ->
+      it 'updates a selector on the current page with the same selector from the given HTML string', asyncSpec (next) ->
 
         $fixture('.before').text('old-before')
         $fixture('.middle').text('old-middle')
@@ -1771,124 +1899,6 @@ describe 'up.fragment', ->
           expect(document.activeElement).toBe(input)
 
 
-      # up.extract
-      it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
-        $parent = $fixture('.parent')
-        $element = $parent.affix('.element.v1').text('v1')
-        expect($element).toBeAttached()
-
-        spy = jasmine.createSpy('event listener')
-        $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
-          spy(event.target, event.fragment, up.specUtil.isDetached($element))
-
-        extractDone = up.extract('.element', '<div class="element v2">v2</div>')
-
-        extractDone.then ->
-          expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
-          done()
-
-      describe 'cleaning up', ->
-
-        it 'calls destructors on the old element', asyncSpec (next) ->
-          destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text())
-          $container = $fixture('.container').text('old text')
-          up.hello($container)
-          up.extract('.container', '<div class="container">new text</div>')
-
-          next =>
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalledWith('old text')
-
-        it 'calls destructors on the old element after a { transition }', (done) ->
-          destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text())
-          $container = $fixture('.container').text('old text')
-          up.hello($container)
-
-          up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
-
-          u.timer 50, =>
-            expect(destructor).not.toHaveBeenCalled()
-
-          u.timer 220, =>
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalledWith('old text')
-            done()
-
-        it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
-          # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
-          destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', -> destructor
-          $container = $fixture('.container')
-          up.hello($container)
-          up.extract('.container', '<div class="container">new text</div>')
-
-          next =>
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalled()
-
-        it 'marks the old element as .up-destroying before destructors', (done) ->
-          destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text(), $element.is('.up-destroying'))
-          $container = $fixture('.container').text('old text')
-          up.hello($container)
-
-          extractDone = up.extract('.container', '<div class="container">new text</div>')
-
-          extractDone.then ->
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalledWith('old text', true)
-            done()
-
-        it 'marks the old element as .up-destroying before destructors after a { transition }', (done) ->
-          destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text(), $element.is('.up-destroying'))
-          $container = $fixture('.container').text('old text')
-          up.hello($container)
-
-          extractDone = up.extract('.container', '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
-
-          extractDone.then ->
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalledWith('old text', true)
-            done()
-
-        it 'calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', asyncSpec (next) ->
-          spy = jasmine.createSpy('parent spy')
-          up.$compiler '.element', ($element) ->
-            return -> spy($element.text(), $element.parent())
-
-          $parent = $fixture('.parent')
-          $element = $parent.affix('.element').text('old text')
-          up.hello($element)
-
-          up.extract '.element', '<div class="element">new text</div>'
-
-          next =>
-            expect(spy).toHaveBeenCalledWith('old text', $parent)
-
-        it 'calls destructors while the element is still attached to the DOM when also using a { transition }', (done) ->
-          spy = jasmine.createSpy('parent spy')
-          up.$compiler '.element', ($element) ->
-            return ->
-              # We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
-              spy($element.text(), $element.closest('.parent'))
-
-          $parent = $fixture('.parent')
-          $element = $parent.affix('.element').text('old text')
-          up.hello($element)
-
-          extractDone = up.extract('.element', '<div class="element">new text</div>', transition: 'cross-fade', duration: 30)
-
-          extractDone.then ->
-            expect(spy).toHaveBeenCalledWith('old text', $parent)
-            done()
 
 
       describe 'with { transition } option', ->
