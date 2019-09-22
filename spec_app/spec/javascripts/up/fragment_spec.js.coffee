@@ -596,6 +596,129 @@ describe 'up.fragment', ->
             expect(resolution).toHaveBeenCalled()
             expect('.target').toHaveText('new-text')
 
+      describe 'execution of scripts', ->
+
+        beforeEach ->
+          window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+
+        describe 'inline scripts', ->
+
+          it 'does not execute inline script tags', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                </div>
+              """
+
+            next =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+
+          it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div>before</div>
+                  <script type="text/javascript">
+                    window.scriptTagExecuted()
+                  </script>
+                  <div>after</div>
+                </div>
+                """
+
+            next =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+
+        describe 'linked scripts', ->
+
+          beforeEach ->
+            # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
+            @linkedScriptPath = "/assets/fixtures/linked_script.js?cache-buster=#{Math.random().toString()}"
+
+          it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <script type="text/javascript" src="#{@linkedScriptPath}"></script>
+                </div>
+                """
+
+            next =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+
+        describe '<noscript> tags', ->
+
+          it 'parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <noscript>
+                    <img src="foo.png">
+                  </noscript>
+                </div>
+                """
+
+            next =>
+              $noscript = $('.target noscript')
+              text = $noscript.text().trim()
+              expect(text).toEqual('<img src="foo.png">')
+
+          it 'parses <noscript> contents with multiple lines as text, not DOM nodes', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <noscript>
+                    <img src="foo.png">
+                    <img src="bar.png">
+                  </noscript>
+                </div>
+                """
+
+            next =>
+              $noscript = $('.target noscript')
+              text = $noscript.text().trim()
+              expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
+
+          it 'parses multiple <noscript> tags in the same fragment as text, not DOM nodes', asyncSpec (next) ->
+            fixture('.target')
+            up.change('.target', url: '/path')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <noscript>
+                    <img src="foo.png">
+                  </noscript>
+                  <noscript>
+                    <img src="bar.png">
+                  </noscript>
+                </div>
+                """
+
+            next =>
+              $noscripts = $('.target noscript')
+              expect($noscripts.length).toBe(2)
+              text0 = $noscripts[0].textContent.trim()
+              text1 = $noscripts[1].textContent.trim()
+              expect(text0).toEqual('<img src="foo.png">')
+              expect(text1).toEqual('<img src="bar.png">')
 
 
     ##############################################################################
@@ -607,10 +730,6 @@ describe 'up.fragment', ->
     describe 'up.replace', ->
 
       describeCapability 'canPushState', ->
-
-
-        describe 'document title', ->
-
 
         describe 'selector processing', ->
 
@@ -1246,142 +1365,6 @@ describe 'up.fragment', ->
                 expect(e).toBeError(/Could not match target/i)
                 done()
 
-        describe 'execution of scripts', ->
-
-          beforeEach ->
-            window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
-
-          describe 'inline scripts', ->
-
-            it 'does not execute inline script tags', asyncSpec (next) ->
-              @responseText = """
-                <div class="middle">
-                  new-middle
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
-                </div>
-                """
-
-              promise = up.replace('.middle', '/path')
-
-              next =>
-                @respond()
-                next.await(promise)
-
-              next =>
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-
-            it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
-              @responseText = """
-                <div class="middle">
-                  <div>new-middle-before</div>
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
-                  <div>new-middle-after</div>
-                </div>
-                """
-
-              promise = up.replace('.middle', '/path')
-
-              next =>
-                @respond()
-                next.await(promise)
-
-              next =>
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-
-          describe 'linked scripts', ->
-
-            beforeEach ->
-              # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
-              @linkedScriptPath = "/assets/fixtures/linked_script.js?cache-buster=#{Math.random().toString()}"
-
-            it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
-              @responseText = """
-                <div class="middle">
-                  new-middle
-                  <script type="text/javascript" src="#{@linkedScriptPath}"></script>
-                </div>
-                """
-
-              promise = up.replace('.middle', '/path')
-
-              next =>
-                @respond()
-                next.await(promise)
-
-              next =>
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-
-          describe '<noscript> tags', ->
-
-            it 'parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', asyncSpec (next) ->
-              @responseText = """
-                <div class="middle">
-                  <noscript>
-                    <img src="foo.png">
-                  </noscript>
-                </div>
-                """
-
-              promise = up.replace('.middle', '/path')
-
-              next =>
-                @respond()
-
-              next =>
-                $noscript = $('.middle noscript')
-                text = $noscript.text().trim()
-                expect(text).toEqual('<img src="foo.png">')
-
-            it 'parses <noscript> contents with multiple lines as text, not DOM nodes', asyncSpec (next) ->
-              @responseText = """
-                <div class="middle">
-                  <noscript>
-                    <img src="foo.png">
-                    <img src="bar.png">
-                  </noscript>
-                </div>
-                """
-
-              promise = up.replace('.middle', '/path')
-
-              next =>
-                @respond()
-                next.await(promise)
-
-              next =>
-                $noscript = $('.middle noscript')
-                text = $noscript.text().trim()
-                expect(text).toMatch(/<img src="foo\.png">\s+<img src="bar\.png">/)
-
-            it 'parses multiple <noscript> tags in the same fragment as text, not DOM nodes', asyncSpec (next) ->
-              @responseText = """
-                <div class="middle">
-                  <noscript>
-                    <img src="foo.png">
-                  </noscript>
-                  <noscript>
-                    <img src="bar.png">
-                  </noscript>
-                </div>
-                """
-
-              promise = up.replace('.middle', '/path')
-
-              next =>
-                @respond()
-                next.await(promise)
-
-              next =>
-                $noscripts = $('.middle noscript')
-                expect($noscripts.length).toBe(2)
-                text0 = $noscripts[0].textContent.trim()
-                text1 = $noscripts[1].textContent.trim()
-                expect(text0).toEqual('<img src="foo.png">')
-                expect(text1).toEqual('<img src="bar.png">')
 
           if up.browser.canCustomElements()
 
