@@ -2710,24 +2710,22 @@ describe 'up.fragment', ->
 
     describe 'up.reload', ->
 
-      describeCapability 'canPushState', ->
+      it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
+        $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
 
-        it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
-          $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
+        next =>
+          up.reload('.element')
 
-          next =>
-            up.reload('.element')
+        next =>
+          expect(@lastRequest().url).toMatch(/\/source$/)
+          @respondWith """
+            <div class="container">
+              <div class="element">new text</div>
+            </div>
+            """
 
-          next =>
-            expect(@lastRequest().url).toMatch(/\/source$/)
-            @respondWith """
-              <div class="container">
-                <div class="element">new text</div>
-              </div>
-              """
-
-          next =>
-            expect($('.element')).toHaveText('new text')
+        next =>
+          expect($('.element')).toHaveText('new text')
 
 
       describeFallback 'canPushState', ->
