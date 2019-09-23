@@ -1,5 +1,7 @@
 - Check new layer styles visually
   - Nested layers should have more padding
+  - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
+
 - Should we keep up.history.popTargets?
   - Should this always reset the world?
   - up.config.root.targets might not be appropriate
@@ -14,14 +16,10 @@
 - Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
   - [X] close-Event sollte { origin } haben
   - [X] close-Event sollte { layer } haben
-  - Wir sollten das ganze Layer compilen, nicht nur den content => Schwierig
   - Ist { dismissable: true } genug zur Config?
     - { buttonDismissable: true }
     - { escapeDismissable: true }
     - { backdropDismissable: true }
-- Check if all events are emitted on a close element
-  - so they can be observed with up.on(element)
-  - e.g. up:layer:open is being emitted on document, but it should be emitted on the parent layer element
 - Allow to emit an event with a response
   - X-Up-Event: app:message:new  # globaler Event auf document
   - X-Up-Layer-Event: flight:picked { flight_id: 5 }  # event auf layer element
@@ -54,12 +52,12 @@
 - up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
 - Rename some config options
   - up.link.config.selectors => up.link.config.followSelectors
-  - introduce up.link.config.instantSelectors
   - up.radio.config.hungry => up.radio.config.hungrySelectors
 - up:fragment:inserted should receive the entire document from which the fragment was extracted
 - Rename { document } to { page }?
 - Publish up.Request#loadPage()
 - Rename up.element.*fromHtml to ...fromHTML
+- Reanem up.util.escapeHtml to up.util.escapeHTML
 - I see no up:layer:opened events in the console?
 - Check that up.layer forwards getters for all layer properties to stack.current
 - Easy way to check that an error is an AbortError
@@ -71,6 +69,8 @@
 - Opening a new layer should cancel requests that also open a new layer
 - { peel } option for up.destroy
 - Should up:layer:open and up:layer:closed be emitted on parent layer to enable story pattern?
+  - Check if all other events are emitted on a close element
+- Reconsider if it should be .up-overlay (more precise) or .up-layer (shorter and expected)
 
 
 - Tests
@@ -129,6 +129,7 @@ Finishing up
 - Grep for TODO
 - Test in all browsers
 - Migrate cards
+- Migrate a Webpacker app
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
     - This should just be layer-link
@@ -154,6 +155,7 @@ Bootstrap integration
 Later?
 ------
 
+- Introduce up.link.config.instantSelectors
 - Instead of a single event listener slot per layer, allow layer.addEventListener('closing')?
   - How is this different from up.layer.on('up:layer:closing') ?
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
