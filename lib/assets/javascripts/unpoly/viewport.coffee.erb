@@ -506,13 +506,37 @@ up.viewport = do ->
 
   The scroll positions will be associated with the current URL.
   They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
-  at the same URL.
+  at the same URL, or by following a link with an [`[up-restore-scroll]`](/a-up-follow#up-restore-scroll)
+  attribute.
 
-  Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
+  Unpoly automatically saves scroll positions before a [fragment update](/up.replace)
+  you will rarely need to call this function yourself.
+
+  \#\#\# Examples
+
+  Should you need to save the current scroll positions outside of a [fragment update](/up.replace),
+  you may call:
+
+      up.viewport.saveScroll()
+
+  Instead of saving the current scroll positions for the current URL, you may also pass another
+  url or vertical scroll positionsfor each viewport:
+
+      up.viewport.saveScroll({
+        url: '/inbox',
+        tops: {
+          'body': 0,
+          '.sidebar', 100,
+          '.main', 320
+        }
+      })
 
   @function up.viewport.saveScroll
   @param {string} [options.url]
+    The URL for which to save scroll positions.
+    If omitted, the current browser location is used.
   @param {Object<string, number>} [options.tops]
+    An object mapping viewport selectors to vertical scroll positions in pixels.
   @experimental
   ###
   saveScroll = (options = {}) ->
