@@ -877,6 +877,23 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
+      it 'submits the form when a change is observed on a container for a radio button group', asyncSpec (next) ->
+        form = fixture('form')
+        group = e.affix(form, '.group[up-autosubmit][up-delay=0]')
+        radio1 = e.affix(group, 'input[type=radio][name=foo][value=1]')
+        radio2 = e.affix(group, 'input[type=radio][name=foo][value=2]')
+        up.hello(form)
+        submitSpy = up.form.knife.mock('submit').and.returnValue(Promise.reject())
+        Trigger.clickSequence(radio1)
+        next =>
+          expect(submitSpy.calls.count()).toBe(1)
+          Trigger.clickSequence(radio2)
+        next =>
+          expect(submitSpy.calls.count()).toBe(2)
+          Trigger.clickSequence(radio1)
+        next =>
+          expect(submitSpy.calls.count()).toBe(3)
+
     describe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->

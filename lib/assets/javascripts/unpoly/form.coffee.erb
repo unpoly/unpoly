@@ -906,24 +906,36 @@ up.form = do ->
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
-  \#\#\# Examples
+  \#\#\# Example
 
   The following would run a global `showSuggestions(value)` function
   whenever the `<input>` changes:
 
-      <form>
-        <input name="query" up-observe="showSuggestions(value)">
-      </form>
+      <input name="query" up-observe="showSuggestions(value)">
 
   \#\#\# Callback context
 
-  The script given to `up-observe` runs with the following context:
+  The script given to `[up-observe]` runs with the following context:
 
   | Name     | Type      | Description                           |
   | -------- | --------- | ------------------------------------- |
   | `value`  | `string`  | The current value of the field        |
   | `this`   | `Element` | The form field                        |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
+
+  \#\#\# Observing radio buttons
+
+  Multiple radio buttons with the same `[name]` (a radio button group)
+  produce a single value for the form.
+
+  To observe radio buttons group, use the `[up-observe]` attribute on an
+  element that contains all radio button elements with a given name:
+
+      <div up-observe="formatSelected(value)">
+        <input type="radio" name="format" value="html"> HTML format
+        <input type="radio" name="format" value="pdf"> PDF format
+        <input type="radio" name="format" value="txt"> Text format
+      </div>
 
   @selector input[up-observe]
   @param {string} up-observe
@@ -971,7 +983,7 @@ up.form = do ->
   up.compiler '[up-observe]', (formOrField) -> observe(formOrField)
 
   ###**
-  [Observes](/up.observe) this form field and submits the form when its value changes.
+  Submits this field's form when this field changes its values.
 
   Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
   while the autosubmitted form is loading.
@@ -987,6 +999,20 @@ up.form = do ->
         <input type="checkbox" name="archive"> Include archive
       </form>
 
+  \#\#\# Auto-submitting radio buttons
+
+  Multiple radio buttons with the same `[name]` (a radio button group)
+  produce a single value for the form.
+
+  To auto-submit radio buttons group, use the `[up-submit]` attribute on an
+  element that contains all radio button elements with a given name:
+
+      <div up-autosubmit>
+        <input type="radio" name="format" value="html"> HTML format
+        <input type="radio" name="format" value="pdf"> PDF format
+        <input type="radio" name="format" value="txt"> Text format
+      </div>
+
   @selector input[up-autosubmit]
   @param {string} up-delay
     The number of miliseconds to wait after a change before the form is submitted.
@@ -994,7 +1020,7 @@ up.form = do ->
   ###
 
   ###**
-  [Observes](/up.observe) this form and submits the form when *any* field changes.
+  Submits the form when *any* field changes.
 
   Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
   while the autosubmitted form is loading.
