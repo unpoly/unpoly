@@ -1,0 +1,3 @@
+- Module build
+- Also compile stylesheets
+- Remove redundant sprockets requires (we now import it all in unpoly.js)
