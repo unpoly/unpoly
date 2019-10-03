@@ -2,23 +2,9 @@
   "name": "unpoly",
   "version": "0.61.0",
   "description": "Unobtrusive JavaScript framework",
-  "main": "dist/unpoly.js",
-  "files": [
-    "dist/unpoly.js",
-    "dist/unpoly.min.js",
-    "dist/unpoly.css",
-    "dist/unpoly.min.css",
-    "dist/unpoly-bootstrap3.js",
-    "dist/unpoly-bootstrap3.min.js",
-    "dist/unpoly-bootstrap3.css",
-    "dist/unpoly-bootstrap3.min.css"
-  ],
-  "scripts": {
-    "test": "echo \"See https://github.com/unpoly/unpoly for test instructions\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unpoly/unpoly.git"
+    "url": "https://github.com/unpoly/unpoly.git"
   },
   "keywords": [
     "progressive enhancement",
@@ -33,6 +19,30 @@
     "url": "https://github.com/unpoly/unpoly/issues"
   },
   "homepage": "https://unpoly.com",
-  "dependencies": {
+  "main": "dist/unpoly.js",
+  "files": [
+    "dist/unpoly.js",
+    "dist/unpoly.min.js",
+    "dist/unpoly.css",
+    "dist/unpoly.min.css"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --config ./webpack.config.js --mode development",
+    "build": "webpack --config ./webpack.config.js --mode production",
+    "dev-server": "webpack-dev-server --config ./webpack.config.js --mode development",
+    "build-dev": "webpack --config ./webpack.config.js --mode development"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "coffee-loader": "^0.9.0",
+    "coffeescript": "^2.3.2",
+    "rails-erb-loader": "^5.5.0",
+    "ts-loader": "^5.3.2",
+    "typescript": "^3.2.2",
+    "webpack": "^4.28.2",
+    "webpack-bundle-analyzer": "^3.0.3",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.14"
   }
 }

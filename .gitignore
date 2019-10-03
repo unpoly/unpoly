@@ -8,3 +8,4 @@ tmp
 /dist/manifest.json
 /doc
 npm-debug.log
+node_modules
