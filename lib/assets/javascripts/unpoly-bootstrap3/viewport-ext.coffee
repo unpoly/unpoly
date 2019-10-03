@@ -1,5 +1,0 @@
-up.viewport.config.fixedTop.push('.navbar-fixed-top')
-up.viewport.config.fixedBottom.push('.navbar-fixed-bottom')
-up.viewport.config.anchoredRight.push('.navbar-fixed-top')
-up.viewport.config.anchoredRight.push('.navbar-fixed-bottom')
-up.viewport.config.anchoredRight.push('.footer')
