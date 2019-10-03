@@ -1,3 +1,29 @@
 - Module build
-- Also compile stylesheets
+- Also compile and minify CSS
 - Remove redundant sprockets requires (we now import it all in unpoly.js)
+
+
+
+spec/index.html -- lädt den runner
+
+
+development:
+  dist/tests.js
+    Jasmine
+    JS spec helpers
+
+  dist/unpoly.development.es5.js
+    transpilet
+    nicht minimized
+    mit Knifes
+
+  dist/unpoly.development.esnext.js
+    ES6
+    nicht minified
+    mit Knifes
+
+production:
+  dist/unpoly.es5.js
+  dist/unpoly.es5.min.js
+  dist/unpoly.esnext.js
+  dist/unpoly.esnext.min.js
