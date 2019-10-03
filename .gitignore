@@ -9,3 +9,4 @@ tmp
 /doc
 npm-debug.log
 node_modules
+/dist/*.development.*

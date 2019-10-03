@@ -27,11 +27,10 @@
     "dist/unpoly.min.css"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "build": "webpack --config ./webpack.config.js --mode production",
-    "dev-server": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "build-dev": "webpack --config ./webpack.config.js --mode development"
+    "test": "echo \"Open specs/index.html in a browser to run tests\" && exit 1",
+    "build": "webpack --config ./webpack/production.js",
+    "dev-server": "webpack-dev-server --config ./development.js",
+    "build-dev": "webpack --config ./webpack/development.js"
   },
   "dependencies": {},
   "devDependencies": {
