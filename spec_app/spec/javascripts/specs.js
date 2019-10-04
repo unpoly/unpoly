@@ -1,5 +1,5 @@
-var context = require.context('./helpers', true, /(\.js|\.coffee)$/);
-context.keys().forEach(context)
+var context1 = require.context('./helpers', true, /(\.js|\.coffee)$/);
+context1.keys().forEach(context1)
 
-var context = require.context('./up', true, /(\.js|\.coffee)$/);
-context.keys().forEach(context)
+var context2 = require.context('./up', true, /(\.js|\.coffee)$/);
+context2.keys().forEach(context2)

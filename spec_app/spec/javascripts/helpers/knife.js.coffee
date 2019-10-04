@@ -28,7 +28,7 @@
 #     klass.publicMethod() # => 'mocked!'
 #     expect(spy).toHaveBeenCalled()
 #
-@Knife = (->
+window.Knife = (->
 
   contextBleeder = ->
 

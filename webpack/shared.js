@@ -1,10 +1,17 @@
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
 function minify(doMinify) {
   return { mode: doMinify ? 'production' : 'none' }
 }
 
 function file(srcPath, outputFilename) {
+  let entryName = path.parse(outputFilename).name
+
   return {
-    entry: srcPath,
+    entry: {
+      [entryName]: srcPath
+    },
     output: {
       path: __dirname + '/../dist',
       // publicPath: '/',
@@ -16,12 +23,12 @@ function file(srcPath, outputFilename) {
   }
 }
 
-function scriptPipeline(target) {
+function scriptPipeline(target, options = {}) {
   let erbLoader = {
     loader: 'rails-erb-loader',
     options: {
       runner: 'ruby',
-      engine: 'erb'
+      engine: 'erb',
     }
   }
 
@@ -110,4 +117,35 @@ function merge(...configs) {
   return merged
 }
 
-module.exports = { merge, file, scriptPipeline, minify }
+stylePipeline = function() {
+  return {
+    plugins: [
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // all options are optional
+        filename: '[name].css',
+        chunkFilename: '[id].css',
+        ignoreOrder: false, // Enable to remove warnings about conflicting order
+      })
+    ],
+    module: {
+      rules: [
+        {
+          test: /\.(css|sass|scss)$/,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                hmr: false
+              },
+            },
+            'css-loader',
+            'sass-loader',
+          ],
+        },
+      ],
+    },
+  }
+}
+
+module.exports = { merge, file, scriptPipeline, stylePipeline, minify }

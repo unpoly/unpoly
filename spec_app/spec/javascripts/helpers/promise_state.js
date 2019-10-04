@@ -16,3 +16,5 @@ function promiseState(promise) {
   var race = [promise, Promise.resolve(uniqueValue)]
   return Promise.race(race).then(notifyPendingOrResolved, notifyRejected)
 }
+
+window.promiseState = promiseState
