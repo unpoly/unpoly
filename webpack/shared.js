@@ -75,4 +75,39 @@ function scriptPipeline(target) {
   }
 }
 
-module.exports = { file, scriptPipeline, minify }
+function merge(...configs) {
+  let merged = {
+    module: {
+      rules: []
+    },
+    resolve: {
+      extensions: []
+    },
+    plugins: []
+  }
+
+  for (let config of configs) {
+
+    // First set all the config keys that never existed in merged
+    for (let key in config) {
+      if (merged[key] == null) {
+        merged[key] = config[key]
+      }
+    }
+
+    // Now merge all keys with array values
+    if (config.module && config.module.rules) {
+      merged.module.rules.push(...config.module.rules)
+    }
+    if (config.resolve && config.resolve.extensions) {
+      merged.resolve.extensions.push(...config.resolve.extensions)
+    }
+    if (config.plugins) {
+      merged.plugins.push(...config.plugins)
+    }
+  }
+
+  return merged
+}
+
+module.exports = { merge, file, scriptPipeline, minify }

@@ -10,3 +10,4 @@ tmp
 npm-debug.log
 node_modules
 /dist/*.development.*
+/dist/specs.js

@@ -36,6 +36,11 @@
   "devDependencies": {
     "coffee-loader": "^0.9.0",
     "coffeescript": "^2.3.2",
+    "express": "^4.17.1",
+    "jasmine": "^2.99.0",
+    "jasmine-ajax": "^4.0.0",
+    "jasmine-core": "^2.99.0",
+    "jquery": "^3.4.1",
     "rails-erb-loader": "^5.5.0",
     "ts-loader": "^5.3.2",
     "typescript": "^3.2.2",

@@ -8,9 +8,9 @@ spec/index.html -- lädt den runner
 
 
 development:
-  dist/tests.js
-    Jasmine
+  dist/specs.js
     JS spec helpers
+
 
   dist/unpoly.development.es5.js
     transpilet
