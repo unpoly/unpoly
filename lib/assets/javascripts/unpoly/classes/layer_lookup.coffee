@@ -39,7 +39,10 @@ class up.LayerLookup
         [@stack.root]
       when 'current'
         [@givenCurrentLayer()]
+      when 'leaf'
+        [@stack.leaf]
       when 'any'
+        # Return all layers, but prefer a layer closer to the leaf.
         @stack.allReversed()
       when 'origin'
         [@givenOriginLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]

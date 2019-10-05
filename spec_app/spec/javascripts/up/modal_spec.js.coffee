@@ -2,7 +2,7 @@ u = up.util
 e = up.element
 $ = jQuery
 
-describe 'up.modal', ->
+describe 'up.modal (deprecated)', ->
 
   beforeEach ->
     up.modal.config.openDuration = 5

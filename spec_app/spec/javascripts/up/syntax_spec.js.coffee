@@ -21,6 +21,8 @@ describe 'up.syntax', ->
         expect(observeElement).not.toHaveBeenCalledWith($otherChild[0])
         expect(observeElement).toHaveBeenCalledWith($child[0])
 
+      it "sets the compiled fragment's layer as layer.current, even if the fragment is not in the leaf layer"
+
       describe 'destructors', ->
 
         it 'allows compilers to return a function to call when the compiled element is destroyed', asyncSpec (next) ->

@@ -1002,7 +1002,31 @@ describe 'up.fragment', ->
 
         it 'updates the layer of the given { origin }'
 
+        it 'updates the current layer with { layer: "current" }'
+
+        it 'updates the parent layer with { layer: "parent" }'
+
+        it 'updates the layer of the { origin } with { layer: "origin" }'
+
+        it 'seeks the target in any layer with { layer: "any" }'
+
+        it 'updates the root layer with { layer: "root" }'
+
+        it 'updates the root layer with { layer: "page" } (deprecated)'
+
+        it 'updates an ancestor layer with { layer: "ancestors" }'
+
+        it 'updates the closest layer with { layer: "closest" }'
+
         it 'opens a new layer when given { layer: "new" }'
+
+        it 'opens a new layer with the given { flavor }'
+
+        it 'allows to pass the flavor for the new layer as { layer } (as a shortcut)'
+
+        it 'opens a new layer with the default flavor from up.layer.config.flavor'
+
+        it 'opens a new layer if given a { flavor } but no { layer }'
 
         it 'updates the current layer if nothing else is specified'
 
