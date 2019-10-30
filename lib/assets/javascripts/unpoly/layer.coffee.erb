@@ -20,11 +20,10 @@ up.layer = do ->
   config = new up.Config ->
     newConfig =
       flavor: 'modal'
-      resetWorld: true
       all:
         targets: []
       root:
-        targets: ['body']
+        targets: []
       overlay:
         history: true
         targets: []
@@ -42,11 +41,10 @@ up.layer = do ->
         dismissLabel: '×'
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
-      popup:
-        position: 'bottom'
-        align: 'left'
-        history: false
+      cover:
+        targets: []
       drawer:
+        targets: []
         position: 'left'
         openAnimation: (layer) ->
           switch layer.position
@@ -56,6 +54,14 @@ up.layer = do ->
           switch layer.position
             when 'left' then 'move-to-left'
             when 'right' then 'move-to-right'
+      modal:
+        targets: []
+      popup:
+        targets: []
+        position: 'bottom'
+        align: 'left'
+        history: false
+
 
     for implementation in DEFAULT_IMPLEMENTATIONS
       registerFlavor(implementation, newConfig)
@@ -67,10 +73,7 @@ up.layer = do ->
   handlers = []
 
   isOverlayFlavor = (name) ->
-    name != 'root' && name != 'overlay' && !!config[name]
-
-#  flavorFromOptions = (options) ->
-#    options.flavor ? config.flavor
+    !!config[name]?.Implementation
 
   defaultTargets = (flavor) ->
     return u.flatMap flavorConfigs(flavor), 'targets'
@@ -139,11 +142,20 @@ up.layer = do ->
     layers = stack.lookupAll(options)
     u.findResult layers, -> layer.firstElement(selector)
 
+  ###**
   # Event handlers for [up-target] etc. are registered to each layer instead of
   # only once to the document. See https://github.com/unpoly/unpoly/issues/79
+  #
+  # @function up.layer.onEach
+  # @internal
+  ###
   registerHandler = (handler...) ->
     handler.isDefault = up.framework.isBooting()
+
+    # Remember handler for future layers
     handlers.push(handler)
+
+    # Apply to existing layers
     for layer in stack.layers
       layer.on(handler...)
 

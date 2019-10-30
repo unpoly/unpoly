@@ -15,8 +15,8 @@ appendDefaultFallback = (parent) ->
 
 beforeEach ->
   up.layer.config.all.targets = ['.default-fallback']
-  up.layer.config.root.targets = [] # no 'body'
-  up.layer.config.resetWorld = false
+  up.fragment.config.targets = [] # no 'body'
+  up.fragment.config.resetWorld = false
   up.history.config.popTargets = ['.default-fallback']
   appendDefaultFallback(document.body)
 

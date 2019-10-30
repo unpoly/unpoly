@@ -7,6 +7,4 @@ class up.Change.ResetWorld extends up.Change.UpdateLayer
       layer: 'root',
       target: 'body',
       peel: true,
-      keep: false,
-      resetScroll: true
     )

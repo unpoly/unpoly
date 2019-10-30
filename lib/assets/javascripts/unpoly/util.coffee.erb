@@ -29,6 +29,8 @@ up.util = do ->
   ###
   asyncNoop = -> Promise.resolve()
 
+  asyncError = (message) -> Promise.reject(new Error(message))
+
   ###**
   Ensures that the given function can only be called a single time.
   Subsequent calls will return the return value of the first call.
@@ -1628,14 +1630,18 @@ up.util = do ->
   defineGetter = (object, prop, get) ->
     Object.defineProperty(object, prop, { get })
 
-  defineDelegates = (object, props, targetProp) ->
+  defineDelegates = (object, props, targetProvider) ->
     wrapList(props).forEach (prop) ->
-      defineGetter object, prop, ->
-        target = this[targetProp]
-        value = target[prop]
-        if isFunction(value)
-          value = value.bind(target)
-        return value
+      Object.defineProperty object, prop,
+        get: ->
+          target = targetProvider.call(this)
+          value = target[prop]
+          if isFunction(value)
+            value = value.bind(target)
+          return value
+        set: (newValue) ->
+          target = targetProvider.call(this)
+          target[prop] = newValue
 
   literal = (obj) ->
     result = {}
@@ -1749,6 +1755,7 @@ up.util = do ->
   extractCallback: extractCallback
   noop: noop
   asyncNoop: asyncNoop
+  asyncError: asyncError
   identity: identity
   escapeHtml: escapeHtml
   escapeRegexp: escapeRegexp
@@ -1798,5 +1805,3 @@ up.util = do ->
   unprefixCamelCase: unprefixCamelCase
   camelToKebabCase: camelToKebabCase
   nullToUndefined: nullToUndefined
-
-

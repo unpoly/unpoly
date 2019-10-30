@@ -19,10 +19,19 @@ up.fragment = do ->
   u = up.util
   e = up.element
 
+  config = new up.Config ->
+    resetWorld: true
+
+  # Users who are not using layers will prefer settings default targets
+  # as up.fragment.config.targets.
+  u.delegate(config, 'targets', -> up.layer.config.all)
+
+  reset = ->
+    config.reset()
+
   setSource = (element, sourceURL) ->
     if sourceURL
-      sourceURL = u.normalizeURL(sourceURL)
-      element.setAttribute("up-source", sourceURL)
+      element.setAttribute("up-source", u.normalizeURL(sourceURL))
 
   ###**
   Returns the URL the given element was retrieved from.
@@ -90,11 +99,6 @@ up.fragment = do ->
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise
-
-#  navigate = (args...) ->
-#    options = parseTargetAndOptions(args)
-#    options.navigate = true
-#    return makeChange(options)
 
   makeChangeNow = (options) ->
     if options.content || options.document
@@ -450,28 +454,23 @@ up.fragment = do ->
       origin: options.origin
 
   emitFragmentKeep = (keepPlan) ->
+    emitFromKeepPlan(keepPlan, 'up:fragment:keep', 'Keeping fragment %o')
+
+  emitFragmentKept = (keepPlan) ->
+    emitFromKeepPlan(keepPlan, 'up:fragment:kept', 'Kept fragment %o')
+
+  emitFromKeepPlan = (keepPlan, eventName, log) ->
     keepable = keepPlan.oldElement
     eventAttrs =
       target: keepable
       newFragment: keepPlan.newElement
       newData: keepPlan.newData
-      log: ['Keeping element %o', keepable]
+      log: [log, keepable]
 
-    up.emit('up:fragment:keep', eventAttrs)
-
-  emitFragmentKept = (keepPlan) ->
-    keptElement = keepPlan.oldElement
-    eventAttrs =
-      target: keptElement,
-      newFragment: keepPlan.newElement
-      newData: keepPlan.newData
-      log: ['Kept fragment %o', keptElement]
-
-    up.emit('up:fragment:kept', eventAttrs)
+    up.emit(eventName, eventAttrs)
 
   emitFragmentDestroyed = (fragment, options) ->
-    if shouldLogDestruction(fragment, options)
-      log = ['Destroyed fragment %o', fragment]
+    log = options.log ? ['Destroyed fragment %o', fragment]
     parent = options.parent or up.fail("Missing { parent } option")
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
@@ -599,8 +598,6 @@ up.fragment = do ->
     # we operate in the given element's layer.
     if !options.layer && u.isElementish(target)
       options.layer = up.layer.of(target)
-#    else
-#      options.layer = up.layer.lookup(options)
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgAndOptions(args, 'target')
@@ -698,10 +695,12 @@ up.fragment = do ->
     setSource(body, up.history.location)
     hello(body)
 
+  # The framework is reset between tests, so also close a currently open tooltip.
+  up.on 'up:framework:reset', reset
+
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-    get_config: ->
-      up.fail('up.fragment.config has been removed. You may instead configure default targets in up.layer.config. Also Unpoly will now always replace the <body> if no target matches.')
+    config: config
     replace: replace
     reload: reload
     destroy: destroy

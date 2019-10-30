@@ -9,7 +9,7 @@ class up.Class
     Object.defineProperty(@prototype, prop, descriptor)
 
   @delegate: (props, targetProp) ->
-    u.delegate(@prototype, props, targetProp)
+    u.delegate(@prototype, props, -> this[targetProp])
 
 #  @include: (mixin) ->
 #    for key in Object.keys(mixin.prototype)

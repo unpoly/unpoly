@@ -55,7 +55,7 @@ class up.Change.FromContent extends up.Change
           @plans.push(new up.Change.UpdateLayer(plan))
 
     # Make sure we always succeed
-    if up.layer.config.resetWorld
+    if up.fragment.config.resetWorld
       @plans.push(new up.Change.ResetWorld())
 
   firstDefaultTarget: ->

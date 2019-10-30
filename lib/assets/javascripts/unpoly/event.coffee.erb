@@ -289,7 +289,7 @@ up.event = do ->
     # See discussion here: https://stackoverflow.com/questions/23349191
     if up.browser.isIE11()
       event.preventDefault = ->
-        u.getter(event, 'defaultPrevented', get: -> true)
+        u.getter(event, 'defaultPrevented', -> true)
 
     return event
 

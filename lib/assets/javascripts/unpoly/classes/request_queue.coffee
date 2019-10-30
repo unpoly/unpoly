@@ -119,7 +119,8 @@ class up.RequestQueue extends up.Class
 
   requestMatches: (request, conditions) ->
     return conditions == true ||
-      u.objectContains(request, conditions)
+      (u.isFunction(conditions) && conditions(request)) ||
+      (u.isOptions(conditions) && u.objectContains(request, conditions))
 
   checkSlow: =>
     currentSlow = @isSlow()

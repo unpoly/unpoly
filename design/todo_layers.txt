@@ -1,7 +1,6 @@
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
-
 - Should we keep up.history.popTargets?
   - Should this always reset the world?
   - up.config.root.targets might not be appropriate
@@ -102,8 +101,10 @@
   - Test up.proxy.cancel()
   - Test that closing a layer cancels all requests for that layer
   - Test that up.change(document: Element) works
+  - Test that forms can submit as arbitrary layer changes (success and failure)
 
 - Docs
+  - All layer-related options should be moved to a[up-layer] or form[up-layer] or both
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
   - Documentation from Diff
   - up.preload() can now fail if preloading is disabled
@@ -176,7 +177,7 @@ Later?
 - { layer: 'solo' } - replaces all overlays with the new overlay
 - form[up-target] without a target now looks funny
   - I now have form[up-follow] as a workaround
-- When up:procxy:load is prevented, the request should be resolved with an AbortError
+- When up:proxy:load is prevented, the request should be resolved with an AbortError
 - Replace up.Response.isSuccess() with up.Response#ok
 - Replace up.Response.isFatal() with !up.Response#body
 - Emit up:proxy:fatal when responses are aborted due to user or timeout

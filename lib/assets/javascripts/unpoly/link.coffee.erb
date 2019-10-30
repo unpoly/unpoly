@@ -79,14 +79,28 @@ up.link = do ->
   preloadDelayTimer = undefined
   waitingLink = undefined
 
-  config = new up.Config ->
-    preloadDelay: 75
-    selectors: ['a[up-target]', '[up-href][up-target]', 'a[up-follow]', '[up-href][up-follow]']
-
   preloadDelay = new up.LinkPreloadDelay()
 
-  fullSelector = ->
-    config.selectors.join(',')
+  linkishSelectors = (suffixes) ->
+    u.flatMap suffixes, (suffix) -> ['a' + suffix, '[up-href]' + suffix]
+
+  config = new up.Config ->
+    preloadDelay: 75
+    follow: linkishSelectors(['[up-target]', '[up-follow]', '[up-layer]'])
+    preload: linkishSelectors(['[up-preload]'])
+    instant: linkishSelectors(['[up-instant]'])
+
+  fullFollowSelector = ->
+    config.follow.join(',')
+
+  fullPreloadSelector = ->
+    config.preload.join(',')
+
+  fullInstantSelector = ->
+    config.instant.join(',')
+
+  isInstant = (link) ->
+    e.matches(link, fullInstantSelector())
 
   ###**
   @property up.link.config
@@ -152,7 +166,7 @@ up.link = do ->
     link = e.get(link)
     options = u.options(options)
 
-    # TODO: Document new follow options like onOpened, [up-on-opened]
+    # TODO: Document new follow options like onOpened, [up-on-opened], ...
     parser = new up.OptionParser(options, link, fail: true)
     parser.string('failOptions')                      # controls fail options inheritance behavior
     parser.string('url', attr: ['up-href', 'href'])   # preflight
@@ -233,11 +247,10 @@ up.link = do ->
     link = e.get(link)
 
     if up.link.isSafe(link)
-      preloadEventAttrs = { log: ['Preloading link %o', link], target: link }
-      up.event.whenEmitted 'up:link:preload', preloadEventAttrs, ->
+      up.event.whenEmitted link, 'up:link:preload', log: ['Preloading link %o', link], ->
         follow(link, u.merge(options, preload: true))
     else
-      Promise.reject(new Error("Won't preload unsafe link"))
+      return u.asyncError("Won't preload unsafe link")
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
@@ -262,8 +275,7 @@ up.link = do ->
   @internal
   ###
   followMethod = (link, options = {}) ->
-    rawMethod = options.method ? link.getAttribute('up-method') ? link.getAttribute('data-method') ? 'GET'
-    rawMethod.toUpperCase()
+    u.normalizeMethod(options.method ? link.getAttribute('up-method') ? link.getAttribute('data-method'))
 
   ###**
   No-op that is called when we allow a browser's default action to go through,
@@ -288,7 +300,7 @@ up.link = do ->
   ###
   isFollowable = (linkOrSelector) ->
     link = e.get(linkOrSelector)
-    e.matches(link, fullSelector())
+    e.matches(link, fullFollowSelector())
 
   ###**
   Makes sure that the given link will be [followed](/up.follow)
@@ -308,10 +320,13 @@ up.link = do ->
 
   shouldProcessEvent = (event, link) ->
     target = event.target
+
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
     return false unless u.isUnmodifiedMouseEvent(event)
+
     # If we actually targeted `link`, save ourselves the expensive DOM traversal below
     return true if target == link
+
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
     betterTargetSelector = "a, [up-href], #{up.form.fieldSelector()}"
@@ -499,9 +514,9 @@ up.link = do ->
   @stable
   ###
   up.on 'up:framework:boot', ->
-    up.layer.onEach 'click', fullSelector, (event, link) ->
+    up.layer.onEach 'click', fullFollowSelector, (event, link) ->
       if shouldProcessEvent(event, link)
-        if e.matches(link, '[up-instant]')
+        if isInstant(link)
           # If the link was already processed on mousedown, we still need
           # to prevent this later click event's chain.
           up.event.halt(event)
@@ -511,8 +526,8 @@ up.link = do ->
         # For tests
         allowDefault(event)
 
-    up.layer.onEach 'mousedown', fullSelector, (event, link) ->
-      if shouldProcessEvent(event, link) && e.matches(link, '[up-instant]')
+    up.layer.onEach 'mousedown', fullFollowSelector, (event, link) ->
+      if shouldProcessEvent(event, link) && isInstant(link)
         consumeFollowEvent(event, link)
       else
         # For tests
@@ -566,9 +581,7 @@ up.link = do ->
     Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
   @stable
   ###
-  targetMacro 'up-dash',
-    'up-preload': '',
-    'up-instant': ''
+  targetMacro 'up-dash', { 'up-preload': '', 'up-instant': '' }
 
   ###**
   Add an `[up-expand]` attribute to any element to enlarge the click area of a
@@ -618,18 +631,11 @@ up.link = do ->
   ###
   up.macro '[up-expand]', (area) ->
     selector = area.getAttribute('up-expand') || 'a, [up-href]'
-    childLinks = e.all(area, selector)
 
-    if childLink = childLinks[0]
-      upAttributePattern = /^up-/
-      newAttrs = {}
-      newAttrs['up-href'] = childLink.getAttribute('href')
-      for attribute in childLink.attributes
-        name = attribute.name
-        if name.match(upAttributePattern)
-          newAttrs[name] = attribute.value
-      e.setMissingAttrs(area, newAttrs)
-      area.removeAttribute('up-expand')
+    if childLink = e.first(area, selector)
+      areaAttrs = e.upAttrs(childLink)
+      areaAttrs['up-href'] = childLink.getAttribute('href')
+      e.setMissingAttrs(area, areaAttrs)
       makeFollowable(area)
 
   ###**
@@ -647,7 +653,7 @@ up.link = do ->
     but will also make the interaction feel less instant.
   @stable
   ###
-  up.compiler 'a[up-preload], [up-href][up-preload]', (link) ->
+  up.compiler fullPreloadSelector, (link) ->
     preloadDelay.observeLink(link)
 
   up.on 'up:framework:reset', reset

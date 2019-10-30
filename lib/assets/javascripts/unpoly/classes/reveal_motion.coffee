@@ -29,7 +29,7 @@ class up.RevealMotion
     @substractObstructions(viewportRect)
 
     if viewportRect.height <= 0
-      return Promise.reject(new Error('Viewport has no visible area'))
+      return u.asyncError('Viewport has no visible area')
 
     originalScrollTop = @viewport.scrollTop
     newScrollTop = originalScrollTop
