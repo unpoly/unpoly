@@ -8,30 +8,15 @@
 - up.history.replace() is kinda dangerous API
   - the current layer still has the previous URL
 - Move up.browser.location to up.history.location
-- Deprecate shortcuts like [up-modal] for shrink the API surface
-  - people can use [up-layer=modal] to open a new modal
-  - the original shortcuts could then be backwards compatible (up-layer="solo" up-flavor="modal")
 - Have up.layer.build delegate to up.Layer class
-- Florian hatte Requirement nur Klick auf Backdrop zu vermeiden.
-  - [X] close-Event sollte { origin } haben
-  - [X] close-Event sollte { layer } haben
-  - Ist { dismissable: true } genug zur Config?
-    - { buttonDismissable: true }
-    - { escapeDismissable: true }
-    - { backdropDismissable: true }
-- Allow to emit an event with a response
-  - X-Up-Event: app:message:new  # globaler Event auf document
-  - X-Up-Layer-Event: flight:picked { flight_id: 5 }  # event auf layer element
 - Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
-- Allow to pass up.Layer instances as arguments to up.emit(), up.on(), up.first() and up.all()
+- Allow to pass up.Layer instances as first arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
 - Update Rails integration
   - up.layer.accept(value)
   - up.layer.dismiss(value)
   - up.layer.emit(name, props)
   - up.emit(name, props)
-- Reconsider whether up.first and up.all without element reference should only see the current layer
-  - Isn't this surprising to the developer?
 - Review up.Request#preflightLayer
   - This should always be set, even for new layers
   - Emit layer-bound proxy events with up.layer.emit(), not up.emit()
@@ -49,9 +34,6 @@
       - up-on-accepted kriegt noch `layer` als Argument?
 - Present tense events still have event log messages with gerund
 - up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
-- Rename some config options
-  - up.link.config.selectors => up.link.config.followSelectors
-  - up.radio.config.hungry => up.radio.config.hungrySelectors
 - up:fragment:inserted should receive the entire document from which the fragment was extracted
 - Rename { document } to { page }?
 - Publish up.Request#loadPage()
@@ -60,15 +42,13 @@
 - I see no up:layer:opened events in the console?
 - Check that up.layer forwards getters for all layer properties to stack.current
 - Easy way to check that an error is an AbortError
-- Easy way to check that an error-Response has content (instead of being fatal or aborted)
-- Can we save code by no longer having up.proxy wrapping up.Request's promise with more functionality?
+  - We have isAbortError but Request#aborted
+  - I think we should just do #aborted because it's easier to check
 - Can we get rid of the up.Task wrapper and have up.Request implement the interface?
 - Deprecate unpoly-bootstrap3
 - Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
 - Opening a new layer should cancel requests that also open a new layer
 - { peel } option for up.destroy
-- Should up:layer:open and up:layer:closed be emitted on parent layer to enable story pattern?
-  - Check if all other events are emitted on a close element
 - Reconsider if it should be .up-overlay (more precise) or .up-layer (shorter and expected)
 
 
@@ -156,7 +136,6 @@ Bootstrap integration
 Later?
 ------
 
-- Introduce up.link.config.instantSelectors
 - Instead of a single event listener slot per layer, allow layer.addEventListener('closing')?
   - How is this different from up.layer.on('up:layer:closing') ?
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
