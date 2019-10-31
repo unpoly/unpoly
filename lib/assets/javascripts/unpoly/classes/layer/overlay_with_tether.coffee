@@ -5,7 +5,6 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
   openNow: (options) ->
     @createElement()
-    @element.classList.add('up-layer-with-tether')
     @frameInnerContent(@element, options)
     @tether = new up.Tether(
       element: @frameElement
