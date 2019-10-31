@@ -35,27 +35,27 @@ class up.Change.OpenLayer extends up.Change.Addition
     # might confuse this with the event for @layer.parent itself opening.
     #
     # There is no @layer.onOpen() handler to accompany the DOM event.
-    promise = up.event.whenEmitted 'up:layer:open', @eventProps(), =>
+    if up.event.nobodyPrevents('up:layer:open', @eventProps())
       # Make sure that the ground layer doesn't already have a child layer.
       @currentLayer.peel()
 
-      # Don't wait for peeling to finish.
+      # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)
-      return @layer.openNow({ @content, @onContentAttached })
+      promise = @layer.openNow({ @content, @onContentAttached })
 
-    promise = promise.then =>
-      openedEvent = up.event.build('up:layer:opened', @eventProps())
-      @layer.emit(openedEvent)
-      @layer.onOpened?(openedEvent)
+      promise = promise.then =>
+        openedEvent = up.event.build('up:layer:opened', @eventProps())
+        @layer.emit(openedEvent)
+        @layer.onOpened?(openedEvent)
 
-      # don't delay `promise` until layer change requests have finished closing
-      @handleLayerChangeRequests()
+        # don't delay `promise` until layer change requests have finished closing
+        @handleLayerChangeRequests()
 
-      # Resolve the promise with the layer instance, so callers can do:
-      # layer = await up.layer.open(...)
-      return @layer
-
-    promise
+        # Resolve the promise with the layer instance, so callers can do:
+        # layer = await up.layer.open(...)
+        return @layer
+    else
+      return up.event.abortRejection()
 
   handleHistory: ->
     @layer.parent.saveHistory()

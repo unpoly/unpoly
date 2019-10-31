@@ -25,17 +25,10 @@ up.layer = do ->
       root:
         targets: []
       overlay:
-        history: true
         targets: []
-        position: null
-        align: null
-        size: null
+        history: true
         openAnimation: 'fade-in'
         closeAnimation: 'fade-out'
-        openDuration: null
-        closeDuration: null
-        openEasing: null
-        closeEasing: null
         backdropOpenAnimation: 'fade-in'
         backdropCloseAnimation: 'fade-out'
         dismissLabel: '×'
@@ -165,7 +158,7 @@ up.layer = do ->
 
   up.event.onEscape (event) ->
     layer = stack.current
-    if layer.dismissable
+    if layer.escapeDismissable
       u.muteRejection layer.dismiss()
       up.event.halt(event)
 

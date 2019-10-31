@@ -8,21 +8,16 @@ class up.Layer extends up.Record
 
   keys: ->
     [
-      'history'
+      'stack',
+      'history',
       'flavor',
-      'context'
+      'context',
     ]
 
   defaults: ->
     context: {}
 
   constructor: (options = {}) ->
-    @stack = options.stack
-
-    if u.isGiven(options.closable)
-      up.legacy.warn('Layer options { closable } has been renamed to { dismissable }')
-      options.dismissable = options.closable
-
     super(options)
 
     unless @flavor
@@ -32,17 +27,6 @@ class up.Layer extends up.Record
     # this child layer should not affect it either.
     if parent = @parent
       @history &&= parent.history
-
-#  @defaults: ->
-#    return @config
-
-#    defaults = @config
-#    # Reverse-merge @config with the config property of our inheritance
-#    # chain. We need to do this manually, super() does not help us here.
-#    throw "i don't think that even works. there is no way to get the superclass of a JS class"
-#    if (proto = Object.getPrototypeOf(this)) && proto.defaults
-#      defaults = u.merge(proto.defaults(), defaults)
-#    defaults
 
   isCurrent: ->
     @stack.current == this

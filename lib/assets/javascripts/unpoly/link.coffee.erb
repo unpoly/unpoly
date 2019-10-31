@@ -168,46 +168,49 @@ up.link = do ->
 
     # TODO: Document new follow options like onOpened, [up-on-opened], ...
     parser = new up.OptionParser(options, link, fail: true)
-    parser.string('failOptions')                      # controls fail options inheritance behavior
-    parser.string('url', attr: ['up-href', 'href'])   # preflight
-    options.method ?= followMethod(link, options)     # preflight
-    options.origin ?= link                            # both
-    parser.json('headers')                            # preflight
-    parser.json('query') # TODO                       # preflight
-    parser.json('params')                             # preflight
-    parser.boolean('cache')                           # preflight (but failed responses will be uncached)
-    parser.boolean('navigate')                        # macro to set multiple options, see up.change()
-    parser.boolean('solo')                            # preflight
-    parser.string('confirm')                          # preflight
-    parser.boolean('feedback')                        # preflight
-    parser.string('target')                           # success only
-    parser.booleanOrString('fallback')                # success only
-    parser.booleanOrString('reveal')                  # success only
-    parser.boolean('restoreScroll')                   # success only
-    parser.booleanOrString('transition')              # success only
+    parser.string('failOptions')
+    parser.string('url', attr: ['up-href', 'href'])
+    options.method ?= followMethod(link, options)
+    options.origin ?= link
+    parser.json('headers')
+    parser.json('query') # TODO
+    parser.json('params')
+    parser.boolean('cache')
+    parser.boolean('navigate')
+    parser.boolean('solo')
+    parser.string('confirm')
+    parser.boolean('feedback')
+    parser.string('target')
+    parser.booleanOrString('fallback')
+    parser.booleanOrString('reveal')
+    parser.boolean('restoreScroll')
+    parser.booleanOrString('transition')
     # { history } is actually a boolean, but we keep the deprecated string
     # variant which should now be passed as { location }.
-    parser.booleanOrString('history')                 # success only
-    parser.booleanOrString('location')                # success only
-    parser.booleanOrString('title')                   # success only
-    parser.string('layer')                            # success only
-    parser.string('flavor')                           # success only
-    parser.json('context')                            # success only
-    parser.boolean('peel')                            # success only
-    parser.string('align')                            # success only
-    parser.string('position')                         # success only
-    parser.string('class')                            # success only
-    parser.string('size')                             # success only
-    parser.boolean('closable') # Deprecated. Is handled by up.layer.  # success only
-    parser.boolean('dismissable')                                     # success only
-    parser.parse(up.layer.openCallbackAttr, 'onOpening')      # success only
-    parser.parse(up.layer.openCallbackAttr, 'onOpened')       # success only
-    parser.parse(up.layer.closeCallbackAttr, 'onAccept')      # success only
-    parser.parse(up.layer.closeCallbackAttr, 'onAccepting')   # success only
-    parser.parse(up.layer.closeCallbackAttr, 'onAccepted')    # success only
-    parser.parse(up.layer.closeCallbackAttr, 'onDismiss')     # success only
-    parser.parse(up.layer.closeCallbackAttr, 'onDismissing')  # success only
-    parser.parse(up.layer.closeCallbackAttr, 'onDismissed')   # success only
+    parser.booleanOrString('history')
+    parser.booleanOrString('location')
+    parser.booleanOrString('title')
+    parser.string('layer')
+    parser.string('flavor')
+    parser.json('context')
+    parser.boolean('peel')
+    parser.string('align')
+    parser.string('position')
+    parser.string('class')
+    parser.string('size')
+    parser.boolean('closable') # Deprecated. Is handled by up.layer.
+    parser.boolean('dismissable')
+    parser.boolean('buttonDismissable')
+    parser.boolean('escapeDismissable')
+    parser.boolean('backdropDismissable')
+    parser.parse(up.layer.openCallbackAttr, 'onOpening')
+    parser.parse(up.layer.openCallbackAttr, 'onOpened')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccept')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccepting')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccepted')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismiss')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismissing')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
     parser.string('acceptOn')
     parser.string('dismissOn')
     u.assign(options, up.motion.animateOptions(options, link))

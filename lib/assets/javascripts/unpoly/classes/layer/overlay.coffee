@@ -25,14 +25,33 @@ class up.Layer.Overlay extends up.Layer
       'closeEasing',
       'backdropOpenAnimation',
       'backdropCloseAnimation',
+      'dismissable',
+      'buttonDismissable',
+      'escapeDismissable',
+      'backdropDismissable',
       'dismissLabel',
       'dismissAriaLabel',
-      'dismissable',
+      'onOpening',
+      'onOpened',
+      'onAccept',
+      'onAccepting',
       'onAccepted',
+      'onDismiss',
+      'onDismissing',
       'onDismissed',
       'onContentAttached',
-      'onOpened'
     ]
+
+  constructor: (options = {}) ->
+    if u.isGiven(options.closable)
+      up.legacy.warn('Layer option { closable } has been renamed to { dismissable }')
+      options.dismissable = options.closable
+
+    options.buttonDismissable ?= options.dismissable
+    options.escapeDismissable ?= options.dismissable
+    options.backdropDismissable ?= options.dismissable
+
+    super(options)
 
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
@@ -62,7 +81,6 @@ class up.Layer.Overlay extends up.Layer
 
   createElement: (parentElement = @stack.overlayContainer) ->
     attrs = u.compactObject
-      'up-dismissable': @dismissable
       'up-flavor': @constructor.flavor
       'up-align': @align
       'up-position': @position,
@@ -72,7 +90,7 @@ class up.Layer.Overlay extends up.Layer
     if @class
       @element.classList.add(@class)
 
-    if @dismissable
+    if @backdropDismissable
       @element.addEventListener 'click', (event) =>
         unless e.closest(event.target, '.up-overlay-frame')
           u.muteRejection @dismiss()
@@ -90,7 +108,7 @@ class up.Layer.Overlay extends up.Layer
     up.destroy(@element, options)
 
   createDismissElement: (parentElement) ->
-    if @dismissable
+    if @buttonDismissable
       @dismissElement = e.affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
         'aria-label': @dismissAriaLabel
       )
