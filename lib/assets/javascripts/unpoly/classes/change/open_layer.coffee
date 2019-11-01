@@ -9,6 +9,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @source = options.source
+    @origin = options.origin
     @currentLayer = options.currentLayer
 
   preflightLayer: ->
@@ -29,13 +30,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @layer = up.layer.build(@options)
 
-    # The initial up:layer:open event is emitted on the document, since the layer
-    # element has not been attached yet and there is no other element it should be
-    # emitted on. We don't want to emit it on @layer.parent.element since developers
-    # might confuse this with the event for @layer.parent itself opening.
-    #
-    # There is no @layer.onOpen() handler to accompany the DOM event.
-    if up.event.nobodyPrevents('up:layer:open', @eventProps())
+    unless @emitOpenEvent().defaultPrevented
       # Make sure that the ground layer doesn't already have a child layer.
       @currentLayer.peel()
 
@@ -44,9 +39,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       promise = @layer.openNow({ @content, @onContentAttached })
 
       promise = promise.then =>
-        openedEvent = up.event.build('up:layer:opened', @eventProps())
-        @layer.emit(openedEvent)
-        @layer.onOpened?(openedEvent)
+        @emitOpenedEvent()
 
         # don't delay `promise` until layer change requests have finished closing
         @handleLayerChangeRequests()
@@ -73,8 +66,12 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @layer.updateHistory(historyOptions)
 
-  eventProps: =>
-    { @layer, log: true}
+  buildEvent: (name) =>
+    return up.event.build(name,
+      layer: @layer
+      origin: @origin
+      log: true
+    )
 
   onContentAttached: =>
     @handleHistory()
@@ -85,8 +82,25 @@ class up.Change.OpenLayer extends up.Change.Addition
     up.layer.applyHandlers(@layer)
 
     # Compile the new content and emit up:fragment:inserted.
-    @responseDoc.activateElement(@content, { @layer })
+    @responseDoc.activateElement(@content, { @layer, @origin })
 
-    openingEvent = up.event.build('up:layer:opening', @eventProps())
+    @emitOpeningEvent()
+
+  emitOpenEvent: ->
+    # The initial up:layer:open event is emitted on the document, since the layer
+    # element has not been attached yet and there is no other element it should be
+    # emitted on. We don't want to emit it on @layer.parent.element since developers
+    # might confuse this with the event for @layer.parent itself opening.
+    #
+    # There is no @layer.onOpen() handler to accompany the DOM event.
+    return up.emit(@buildEvent('up:layer:open'))
+
+  emitOpeningEvent: ->
+    openingEvent = @buildEvent('up:layer:opening')
     @layer.onOpening?(openingEvent)
-    @layer.emit(openingEvent)
+    return @layer.emit(openingEvent)
+
+  emitOpenedEvent: ->
+    openedEvent = @buildEvent('up:layer:opened')
+    @layer.emit(openedEvent)
+    @layer.onOpened?(openedEvent)
