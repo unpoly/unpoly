@@ -1665,8 +1665,9 @@ describe 'up.fragment', ->
 
           it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
             $origin = $fixture('.origin').text('origin text')
-            $failTarget = $fixture('.fail-target').text('old fail-target text')
-            up.change('.middle', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
+            $fixture('.target').text('old target text')
+            $fixture('.fail-target').text('old fail-target text')
+            up.change('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
 
             next =>
               @respondWith
