@@ -164,3 +164,6 @@ class up.Layer extends up.Record
 
   hasLiveHistory: ->
     @history && @isLeaf()
+
+  toString: ->
+    "#{@flavor} layer"

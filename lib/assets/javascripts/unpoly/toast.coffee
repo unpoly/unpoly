@@ -46,7 +46,7 @@ up.toast = do ->
       </div>
     """
 
-    if action = (options.action || options.inspect)
+    if action = options.action
       addAction(action.label, action.callback)
 
     addAction('Close', close)

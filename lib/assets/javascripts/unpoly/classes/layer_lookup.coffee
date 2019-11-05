@@ -32,6 +32,8 @@ class up.LayerLookup
 #      return [@value]
 
     return switch @value
+      when 'new'
+        ['new'] # pass-through
       when 'root'
         [@stack.root]
       when 'page'

@@ -10,8 +10,8 @@ class up.Change extends up.Class
 
     @options = options
 
-  notApplicable: ->
-    throw @constructor.NOT_APPLICABLE
+  notApplicable: (reason) ->
+    return up.error.notApplicable(this, reason)
 
   ###**
   The `execute()` method has a somewhat weird signature:
@@ -26,5 +26,3 @@ class up.Change extends up.Class
   ###
   executeAsync: ->
     u.rejectOnError => @execute()
-
-  @NOT_APPLICABLE: 'n/a'

@@ -130,7 +130,7 @@ up.log = do ->
   @param {Array} ...args
   @internal
   ###
-  debug = (message, args...) ->
+  printToDebug = (message, args...) ->
     if config.enabled && message
       console.debug(prefix(message), args...)
 
@@ -142,7 +142,7 @@ up.log = do ->
   @param {Array} ...args
   @internal
   ###
-  puts = (message, args...) ->
+  printToStandard = (message, args...) ->
     if config.enabled && message
       console.log(prefix(message), args...)
 
@@ -150,7 +150,7 @@ up.log = do ->
   @function up.warn
   @internal
   ###
-  warn = (message, args...) ->
+  printToWarn = (message, args...) ->
     if message
       console.warn(prefix(message), args...)
 
@@ -176,7 +176,7 @@ up.log = do ->
   @function up.log.error
   @internal
   ###
-  error = (message, args...) ->
+  printToError = (message, args...) ->
     if message
       console.error(prefix(message), args...)
 
@@ -254,37 +254,26 @@ up.log = do ->
       messageArgs = args
       toastOptions = {}
 
-    error(messageArgs...)
+    printToError(messageArgs...)
 
     if config.toast
       up.event.onReady(-> up.toast.open(messageArgs, toastOptions))
 
-    asString = sprintf(messageArgs...)
-    throw new Error(asString)
+    throw up.error.failure(messageArgs)
 
-  ###**
-  @function up.asyncFail
-  @internal
-  ###
-  asyncFail = (args...) ->
-    u.rejectOnError -> fail(args...)
-
-  puts: puts
+  puts: printToStandard
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
-  puts: puts
-  debug: debug
-  error: error
-  warn: warn
+  debug: printToDebug
+  error: printToError
+  warn: printToWarn
   group: group
   config: config
   enable: enable
   disable: disable
   fail: fail
-  asyncFail: asyncFail
   isEnabled: -> config.enabled
 
 up.puts = up.log.puts
 up.warn = up.log.warn
 up.fail = up.log.fail
-up.asyncFail = up.log.asyncFail

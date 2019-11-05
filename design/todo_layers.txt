@@ -19,24 +19,12 @@
   - up.emit(name, props)
 - Review up.Request#preflightLayer
   - This should always be set, even for new layers
-  - Emit layer-bound proxy events with up.layer.emit(), not up.emit()
   - Why is it Request#preflightLayer instead of #layer?
-- Das mit dem impliziten up.layer.foo() ist up.layer.current.foo() ist nicht so toll
-  - Ich weiß nicht ob wir es korrekter machen können
-    - Z.b. während dem Update von Hintergrund-Layer ist up.layer nicht der aktualisierte Layer
-      - Evtl. up.layer.current umbiegen während Compilation
-      - Evtl. up.layer.current umbiegen während up-on-accepted Callbacks
-      - up.layer.face oder up.layer.leaf für wirklich den letzten Callback, ohne Umbiegung
-    - Evtl. müssen wir den Case mit [up-on-accepted] auch aufgeben
-    - Mindestens sollten wir es für Entwickler, die sich die Mühe geben wollen, MÖGLICH machen
-      - up.layer.of(Element) oder up.layer.get(Element) oder up.layer.for(Element)
-      - Compiler kriegen { layer } in ihrem data-Argument?
-      - up-on-accepted kriegt noch `layer` als Argument?
-- Present tense events still have event log messages with gerund
+- Emit layer-bound proxy events with up.layer.emit(), not up.emit()
+- Present tense events still have long-form event log messages with gerund
 - up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
 - up:fragment:inserted should receive the entire document from which the fragment was extracted
-- Rename { document } to { page }?
-- Publish up.Request#loadPage()
+- Rename change({ document }) to change({ page })?
 - Rename up.element.*fromHtml to ...fromHTML
 - Reanem up.util.escapeHtml to up.util.escapeHTML
 - I see no up:layer:opened events in the console?
@@ -44,12 +32,21 @@
 - Easy way to check that an error is an AbortError
   - We have isAbortError but Request#aborted
   - I think we should just do #aborted because it's easier to check
-- Can we get rid of the up.Task wrapper and have up.Request implement the interface?
-- Deprecate unpoly-bootstrap3
-- Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
+- Move abortRejection / abortError to up.error
 - Opening a new layer should cancel requests that also open a new layer
-- { peel } option for up.destroy
 - Reconsider if it should be .up-overlay (more precise) or .up-layer (shorter and expected)
+  - I decided to go with "layer" to not introduce one more term for "overlay", "dialog", etc.
+  - We want .up-layer, but keep .up-overlays
+  - Re-re-name overlay.sass to layer.sass
+- We now have unpoly-bootstrap3 and unpoly-bootstrap4
+- Rework logging
+  - Remove all groups
+  - Distinguish between puts and debug
+- Rename { flavor } to { mode }, provide legacy fallbacks
+- Better name for up.fragment.config.resetWorld
+- Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
+- Move up.log.sprintf to up.util.sprintf
+- ResetWorld should allow other selectors? e.g. up.fragment.config.explodeInto = ['body', '.container']
 
 
 - Tests
@@ -82,6 +79,7 @@
   - Test that closing a layer cancels all requests for that layer
   - Test that up.change(document: Element) works
   - Test that forms can submit as arbitrary layer changes (success and failure)
+  - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
 
 - Docs
   - All layer-related options should be moved to a[up-layer] or form[up-layer] or both
@@ -99,6 +97,8 @@
   - { failOptions }
   - up.link.config
   - New up.Request properties (at least { origin }, { preflightLayer })
+  - Publish up.Request#loadPage()
+  - Document that { target } can be an array
 
 
 Finishing up
@@ -136,6 +136,8 @@ Bootstrap integration
 Later?
 ------
 
+- Does up.remove() clean up jQuery data?
+- { peel } option for up.destroy
 - Instead of a single event listener slot per layer, allow layer.addEventListener('closing')?
   - How is this different from up.layer.on('up:layer:closing') ?
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.

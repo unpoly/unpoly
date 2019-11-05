@@ -27,9 +27,15 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @findOld()
     return @compressedTarget()
 
+  toString: ->
+    "Update \"#{@target}\" in #{@layer}"
+
   execute: ->
     @findOld()
     @findNew()
+
+    up.puts("Updating \"#{@target}\" in #{@layer}")
+
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
     @addHungrySteps()
@@ -40,7 +46,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       return u.unresolvablePromise()
 
     unless @layer.isOpen()
-      @notApplicable('Could not update %o: Target layer was closed', @target)
+      throw @notApplicable('Layer was closed')
 
     if @peel
       @layer.peel()
@@ -60,7 +66,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return promise
 
   swapStep: (step) =>
-    up.puts('Swapping fragment %s', step.selector)
+    up.puts('Swapping fragment \"%s\"', step.selector)
 
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
@@ -212,7 +218,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return if @foundOld
     for step in @steps
       # Try to find fragments matchin step.selector within step.layer
-      step.oldElement = up.fragment.first(step.selector, step) or @notApplicable()
+      step.oldElement = up.fragment.first(step.selector, step) or
+        throw @notApplicable("Could not find element \"#{@target}\" in current page")
     @resolveOldNesting()
     @foundOld = true
 
@@ -220,7 +227,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return if @foundNew
     for step in @steps
       # The responseDoc has no layers.
-      step.newElement = @responseDoc.select(step.selector) or @notApplicable()
+      step.newElement = @responseDoc.select(step.selector) or
+        throw @notApplicable("Could not find element \"#{@target}\" in server response")
     @foundNew = true
 
   addHungrySteps: ->

@@ -49,6 +49,8 @@ class up.LayerStack extends up.Class
   indexOf: (layer) ->
     @layers.indexOf(layer)
 
+
+
   isOpen: (layer) ->
     @indexOf(layer) >= 0
 

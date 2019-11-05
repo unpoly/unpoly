@@ -17,6 +17,8 @@ class up.Change.FromURL extends up.Change
   # These options are used before the request is sent.
   # Hence there is no failVariant.
   @PREFLIGHT_KEYS: [
+    'currentLayer',
+    'inspectResponse',
     'url',
     'method',
     'origin',
@@ -99,6 +101,15 @@ class up.Change.FromURL extends up.Change
       preflightLayer: @successOptions.layer
 
     @request = new up.Request(requestAttrs)
+
+#  ignoreNotApplicable: (fn) ->
+#    try
+#      return fn()
+#    catch error
+#      if error.name == 'up.NotApplicable'
+#        return undefined
+#      else
+#        throw error
 
   onRequestSuccess: (response) =>
     @processResponse(response, @successOptions)

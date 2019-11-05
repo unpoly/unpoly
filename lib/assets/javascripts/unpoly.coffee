@@ -1,5 +1,6 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
+#= require ./unpoly/error
 #= require ./unpoly/legacy
 #= require ./unpoly/browser
 #= require ./unpoly/element

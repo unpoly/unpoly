@@ -17,16 +17,22 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   preflightTarget: ->
     # The target will always exist in the current page, since
-    # we're opening a new layer that will always match the target.
+    # we're opening a new layer that will match the target.
     @target
 
+  toString: ->
+    "Open \"#{@target}\" in new layer"
+
   execute: ->
-    # Selecting the content needs to happen sync, since our caller
-    # might want catch up.Change.NOT_APPLICABLE.
-    @content = @responseDoc.select(@target) or @notApplicable()
+    @content = @responseDoc.select(@target)
+
+    unless @content
+      throw @notApplicable("Could not find element \"#{@target}\" in server response")
 
     unless @currentLayer.isOpen()
-      @notApplicable('Could not open %o in new layer: Parent layer was closed', @target)
+      throw @notApplicable('Parent layer was closed')
+
+    up.puts("Opening \"#{@target}\" in new layer")
 
     @layer = up.layer.build(@options)
 

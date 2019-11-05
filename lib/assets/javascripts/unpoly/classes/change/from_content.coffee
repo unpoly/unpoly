@@ -12,7 +12,7 @@ class up.Change.FromContent extends up.Change
     # change until the queued layer change is executed.
     #
     # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
-    # since the current layer might change before the response is received.
+    # since the current layer might change between request and response.
     @options.currentLayer ?= up.layer.current
     @extractFlavorFromLayerOption()
     @setDefaultLayer()
@@ -39,6 +39,70 @@ class up.Change.FromContent extends up.Change
       # If no origin is given, we assume the highest layer.
       @options.layer = 'current'
 
+  toTargetList = (target, props) ->
+    list = u.wrapArray(target)
+    list = u.filter(list, u.isTruthy) # remove undefined and null
+    list = u.map list, (target) => @toTargetObj(target, props)
+    list
+
+  toTargetObj = (target, props) ->
+    base = u.merge(@options, props)
+
+    if u.isString(target)
+      target = { target }
+    else if u.isFunction(target)
+      target = target(base)
+
+    return u.merge(base, target)
+
+  buildPlans2: ->
+    targets = [@options.target]
+
+    if @options.fallback != false
+      targets.push(@options.fallback)
+
+      if @options.layer == 'new'
+        defaultTargets = up.layer.defaultTargets(@options.flavor)
+        targets.push(defaultTargets...)
+      else
+        for layer in up.layer.lookupAll(@options)
+          for defaultTarget in layer.defaultTargets()
+            targetObj = @toTargetObj(defaultTarget, { layer })
+            targets.push(targetObj)
+
+    targets = u.flatten(targets)
+    targets = u.filter(targets, u.isTruthy) # remove undefined and null
+    targets = u.map(targets, @toTargetObj)
+
+    @plans = []
+
+    for target in targets
+      for layer in up.layer.lookupAll(@options)
+        obj = u.merge(target, { layer })
+        if layer == 'new'
+          @plans.push(new up.Change.OpenLayer(obj))
+        else
+          @plans.push(new up.Change.UpdateLayer(obj))
+
+  buildPlans3: ->
+    @addPlansForTarget(@options.target)
+
+    if @options.fallback != false
+      @addPlansForTarget(@options.fallback)
+
+      if @options.layer == 'new'
+        @addPlansForTarget(up.layer.defaultTargets(@options.flavor))
+      else
+        for layer in up.layer.lookupAll(@options)
+          @addPlansForTarget(layer.defaultTargets(), { layer })
+
+
+  addPlansForTarget: (target, props) ->
+    for targetObj in @toTargetList(target, props)
+      for layer in up.layer.lookupAll(targetObj)
+        ChangeImpl = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
+        @plans.push(new ChangeImpl(u.merge(targetObj, { layer })))
+
   buildPlans: ->
     @plans = []
 
@@ -54,8 +118,7 @@ class up.Change.FromContent extends up.Change
         @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
           @plans.push(new up.Change.UpdateLayer(plan))
 
-    # Make sure we always succeed
-    if up.fragment.config.resetWorld
+    if @options.fallback != false && up.fragment.config.resetWorld
       @plans.push(new up.Change.ResetWorld())
 
   firstDefaultTarget: ->
@@ -71,17 +134,11 @@ class up.Change.FromContent extends up.Change
       fn(plan)
 
   buildTargetCandidates: (layerDefaultTargets) ->
-    targetCandidates = [@options.target, @options.fallback, layerDefaultTargets]
-    # Remove undefined, null and { fallback: false } from the list
-    targetCandidates = u.flatten(targetCandidates)
-    targetCandidates = u.filter(targetCandidates, u.isTruthy)
-    targetCandidates = u.uniq(targetCandidates)
-
-    if @options.fallback == false || @options.content
-      # Use the first defined candidate, but not @options.target (which might be missing)
-      targetCandidates = [targetCandidates[0]]
-
-    targetCandidates
+    targetCandidates = [@options.target]
+    if @options.fallback != false
+      targetCandidates.push(@options.fallback, layerDefaultTargets)
+    # Remove list items that are undefined, null or true
+    return u.uniq(u.filter(u.flatten(targetCandidates), u.isString))
 
   execute: ->
     @buildResponseDoc()
@@ -95,12 +152,8 @@ class up.Change.FromContent extends up.Change
 
     return @seekPlan
       attempt: (plan) -> plan.execute()
-      noneApplicable: => @executeNotApplicable()
-
-  executeNotApplicable: ->
-    if @options.inspectResponse
-      inspectAction = { label: 'Open response', callback: @options.inspectResponse }
-    up.fail(["Could not match target in current page and response"], action: inspectAction)
+      debug: true
+      noneApplicable: => @postflightTargetNotApplicable()
 
   buildResponseDoc: ->
     docOptions = u.copy(@options)
@@ -117,25 +170,49 @@ class up.Change.FromContent extends up.Change
 
   preflightTarget: ->
     @seekPlan
-      attempt: (plan) ->
-        plan.preflightTarget()
+      attempt: (plan) -> plan.preflightTarget()
       noneApplicable: => @preflightTargetNotApplicable()
 
   preflightTargetNotApplicable: ->
-    up.fail("Could not find target in current page")
+    if @plans.length
+      up.fail("Could not find target in current page (tried selectors %o)", @planTargets())
+    else
+      up.fail('No target given for change')
+
+  postflightTargetNotApplicable: ->
+    if @options.inspectResponse
+      toastOpts = { label: 'Open response', callback: @options.inspectResponse }
+
+    if @plans.length
+      up.fail(["Could not find matching targets in current page and server response (tried selectors %o)", @planTargets()], toastOpts)
+    else
+      up.fail('No target given for change', toastOpts)
+
+  planTargets: ->
+    return u.map(@plans, 'target')
 
   seekPlan: (opts) ->
     @ensurePlansBuilt()
-    for plan, index in @plans
+    unprintedMessages = []
+
+    console.error("Seeking plan in %o", @plans)
+
+    for plan in @plans
       try
         return opts.attempt(plan)
       catch error
-        if error == up.Change.NOT_APPLICABLE
-          if index < @plans.length - 1
-            # Retry with next plan
+        if error.name == 'up.NotApplicable'
+          message = error.message
+          if opts.debug
+            up.log.debug(message)
           else
-            # No next plan to try
-            return opts.noneApplicable()
+            unprintedMessages.push(message)
         else
-          # Any other exception is re-thrown
+          # Re-throw any unexpected type of error
           throw error
+
+    # If we're about to explode with a fatal error we print everything
+    # we have tried so far, regardless of `opts.debug`.
+    unprintedMessages.forEach(up.log.debug)
+
+    return opts.noneApplicable?()
