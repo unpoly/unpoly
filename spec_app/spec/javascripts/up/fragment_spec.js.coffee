@@ -286,7 +286,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not match target in current page and response/i)
+              expect(result.value).toMatch(/Could not find matching targets/i)
               done()
 
       describe 'choice of target', ->
@@ -314,7 +314,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not match target/i)
+              expect(result.value).toMatch(/Could not find matching targets/i)
               done()
 
         it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
@@ -326,7 +326,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not match target/i)
+              expect(result.value).toMatch(/Could not find matching targets/i)
               done()
 
         it 'only replaces the first element matching the selector', asyncSpec (next) ->
@@ -842,7 +842,7 @@ describe 'up.fragment', ->
               u.task =>
                 promiseState(promise).then (result) ->
                   expect(result.state).toEqual('rejected')
-                  expect(result.value).toBeError(/Could not match target in current page and response/i)
+                  expect(result.value).toBeError(/Could not find matching targets/i)
                   done()
 
           it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
@@ -893,7 +893,7 @@ describe 'up.fragment', ->
               """
 
               promise.catch (e) ->
-                expect(e).toBeError(/Could not match target/i)
+                expect(e).toBeError(/Could not find matching targets/i)
                 done()
 
         describe 'when selectors are missing in the response', ->
@@ -926,7 +926,7 @@ describe 'up.fragment', ->
                 @respondWith '<div class="unexpected">new unexpected</div>'
 
               promise.catch (e) ->
-                expect(e).toBeError(/Could not match target/i)
+                expect(e).toBeError(/Could not find matching targets/i)
                 done()
 
             it 'shows a link to open the unexpected response', (done) ->
@@ -991,7 +991,7 @@ describe 'up.fragment', ->
               @respondWith '<div class="fallback">new fallback</div>'
 
             promise.catch (e) ->
-              expect(e).toBeError(/Could not match target/i)
+              expect(e).toBeError(/Could not find matching targets/i)
               done()
 
       describe 'choice of layer', ->

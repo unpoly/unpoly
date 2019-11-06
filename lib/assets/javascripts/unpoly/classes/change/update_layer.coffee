@@ -193,6 +193,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     step.keepPlans = keepPlans
 
   parseSteps: ->
+    console.debug("parseSteps with target %o", @target)
+
     # resolveSelector was already called by up.Change.FromContent
     disjunction = u.splitValues(@target, ',')
 

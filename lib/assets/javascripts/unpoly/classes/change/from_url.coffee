@@ -93,11 +93,11 @@ class up.Change.FromURL extends up.Change
     failurePreview = new up.Change.FromContent(@failureOptions)
 
     @successOptions.layer = successPreview.preflightLayer()
-    @failureOptions.layer = failurePreview.preflightLayer()
+    @failureOptions.layer = failurePreview.preflightLayer(optional: true)
 
     requestAttrs = u.merge @successOptions,
       target: successPreview.preflightTarget()
-      failTarget: failurePreview.preflightTarget()
+      failTarget: failurePreview.preflightTarget(optional: true)
       preflightLayer: @successOptions.layer
 
     @request = new up.Request(requestAttrs)
@@ -112,16 +112,19 @@ class up.Change.FromURL extends up.Change
 #        throw error
 
   onRequestSuccess: (response) =>
+    up.log.debug('Updating page with successful response')
     @processResponse(response, @successOptions)
 
   onRequestFailure: (response) =>
     rejectWithFailedResponse = -> Promise.reject(response)
     if @failedResponseHasContent(response)
+      up.log.debug('Updating page with failed response')
       promise = @processResponse(response, @failureOptions)
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
       return u.always(promise, rejectWithFailedResponse)
     else
+      up.log.debug('Response failed without content')
       return rejectWithFailedResponse()
 
   processResponse: (response, options) ->

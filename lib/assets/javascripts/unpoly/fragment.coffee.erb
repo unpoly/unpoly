@@ -19,15 +19,10 @@ up.fragment = do ->
   u = up.util
   e = up.element
 
-  config = new up.Config ->
-    resetWorld: true
-
-  # Users who are not using layers will prefer settings default targets
-  # as up.fragment.config.targets.
-  u.delegate(config, 'targets', -> up.layer.config.all)
-
-  reset = ->
-    config.reset()
+  config = u.literal
+    # Users who are not using layers will prefer settings default targets
+    # as up.fragment.config.targets.
+    get_targets: -> up.layer.config.all
 
   setSource = (element, sourceURL) ->
     if sourceURL
@@ -694,9 +689,6 @@ up.fragment = do ->
     body = document.body
     setSource(body, up.history.location)
     hello(body)
-
-  # The framework is reset between tests, so also close a currently open tooltip.
-  up.on 'up:framework:reset', reset
 
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>

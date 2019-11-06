@@ -19,6 +19,8 @@ class up.Change.FromContent extends up.Change
 
   ensurePlansBuilt: ->
     @plans or @buildPlans()
+    unless @plans.length
+      @notApplicable(['No target for change %o', @options])
 
   extractFlavorFromLayerOption: ->
     if up.layer.isOverlayFlavor(@options.layer)
@@ -30,61 +32,37 @@ class up.Change.FromContent extends up.Change
       @options.layer = 'new'
 
   setDefaultLayer: ->
-    return if @options.layer
-
-    if @options.origin
+    if @options.layer
+      return
+    else if @options.origin
       # Links update their own layer by default.
       @options.layer = 'origin'
     else
-      # If no origin is given, we assume the highest layer.
+      # If no origin is given, we assume the current layer.
       @options.layer = 'current'
 
-  toTargetList = (target, props) ->
-    list = u.wrapArray(target)
-    list = u.filter(list, u.isTruthy) # remove undefined and null
+  toTargetList: (target, props) ->
+    list = u.wrapList(target)
+    list = u.filter(list, u.isGiven)
     list = u.map list, (target) => @toTargetObj(target, props)
-    list
+    return list
 
-  toTargetObj = (target, props) ->
+  toTargetObj: (target, props) ->
     base = u.merge(@options, props)
+
+    if u.isFunction(target)
+      target = target(base)
+    else if u.isElementish(target)
+      target = up.element.toSelector(target)
 
     if u.isString(target)
       target = { target }
-    else if u.isFunction(target)
-      target = target(base)
 
     return u.merge(base, target)
 
-  buildPlans2: ->
-    targets = [@options.target]
-
-    if @options.fallback != false
-      targets.push(@options.fallback)
-
-      if @options.layer == 'new'
-        defaultTargets = up.layer.defaultTargets(@options.flavor)
-        targets.push(defaultTargets...)
-      else
-        for layer in up.layer.lookupAll(@options)
-          for defaultTarget in layer.defaultTargets()
-            targetObj = @toTargetObj(defaultTarget, { layer })
-            targets.push(targetObj)
-
-    targets = u.flatten(targets)
-    targets = u.filter(targets, u.isTruthy) # remove undefined and null
-    targets = u.map(targets, @toTargetObj)
-
+  buildPlans: ->
     @plans = []
 
-    for target in targets
-      for layer in up.layer.lookupAll(@options)
-        obj = u.merge(target, { layer })
-        if layer == 'new'
-          @plans.push(new up.Change.OpenLayer(obj))
-        else
-          @plans.push(new up.Change.UpdateLayer(obj))
-
-  buildPlans3: ->
     @addPlansForTarget(@options.target)
 
     if @options.fallback != false
@@ -96,49 +74,19 @@ class up.Change.FromContent extends up.Change
         for layer in up.layer.lookupAll(@options)
           @addPlansForTarget(layer.defaultTargets(), { layer })
 
-
   addPlansForTarget: (target, props) ->
     for targetObj in @toTargetList(target, props)
+      # One target may expand to more than one plan if it has a { layer } option that
+      # needs to try multiple layers, like { layer: 'closest' }.
       for layer in up.layer.lookupAll(targetObj)
-        ChangeImpl = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
-        @plans.push(new ChangeImpl(u.merge(targetObj, { layer })))
-
-  buildPlans: ->
-    @plans = []
-
-    if @options.layer == 'new'
-      layerDefaultTargets = up.layer.defaultTargets(@options.flavor)
-      @eachTargetCandidatePlan layerDefaultTargets, {}, (plan) =>
-        # We cannot open a <body> in a new layer
-        unless up.fragment.targetsBody(plan.target)
-          @plans.push(new up.Change.OpenLayer(plan))
-
-    else
-      for layer in up.layer.lookupAll(@options)
-        @eachTargetCandidatePlan layer.defaultTargets(), { layer }, (plan) =>
-          @plans.push(new up.Change.UpdateLayer(plan))
-
-    if @options.fallback != false && up.fragment.config.resetWorld
-      @plans.push(new up.Change.ResetWorld())
+        ChangeImplementation = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
+        @plans.push(new ChangeImplementation(u.merge(targetObj, { layer })))
 
   firstDefaultTarget: ->
     if @options.layer == 'new'
       up.layer.defaultTargets(@options.flavor)[0]
     else
-      up.layer.lookupOne(@options).defaultTargets()
-
-  eachTargetCandidatePlan: (layerDefaultTargets, planOptions, fn) ->
-    for target, i in @buildTargetCandidates(layerDefaultTargets)
-      target = e.resolveSelector(target, @options.origin)
-      plan = u.merge(@options, planOptions, { target })
-      fn(plan)
-
-  buildTargetCandidates: (layerDefaultTargets) ->
-    targetCandidates = [@options.target]
-    if @options.fallback != false
-      targetCandidates.push(@options.fallback, layerDefaultTargets)
-    # Remove list items that are undefined, null or true
-    return u.uniq(u.filter(u.flatten(targetCandidates), u.isString))
+      up.layer.lookupOne(@options).defaultTargets()[0]
 
   execute: ->
     @buildResponseDoc()
@@ -163,18 +111,20 @@ class up.Change.FromContent extends up.Change
       docOptions.target = @firstDefaultTarget()
     @options.responseDoc = new up.ResponseDoc(docOptions)
 
-  preflightLayer: ->
+  preflightLayer: (opts) ->
     @seekPlan
       attempt: (plan) -> plan.preflightLayer()
-      noneApplicable: => @preflightTargetNotApplicable()
+      noneApplicable: => @preflightTargetNotApplicable(opts)
 
-  preflightTarget: ->
+  preflightTarget: (opts) ->
     @seekPlan
       attempt: (plan) -> plan.preflightTarget()
-      noneApplicable: => @preflightTargetNotApplicable()
+      noneApplicable: => @preflightTargetNotApplicable(opts)
 
-  preflightTargetNotApplicable: ->
-    if @plans.length
+  preflightTargetNotApplicable: (opts = {}) ->
+    if opts.optional
+      return
+    else if @plans.length
       up.fail("Could not find target in current page (tried selectors %o)", @planTargets())
     else
       up.fail('No target given for change')

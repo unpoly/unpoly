@@ -21,7 +21,9 @@ up.layer = do ->
     newConfig =
       flavor: 'modal'
       all:
-        targets: []
+        # Define a default target that will close all overlays
+        # and show an unpexpected response in the <body>
+        targets: [{ layer: 'root', target: 'body', peel: true }]
       root:
         targets: []
       overlay:
