@@ -43,7 +43,7 @@ class up.Change.FromContent extends up.Change
 
   toTargetList: (target, props) ->
     list = u.wrapList(target)
-    list = u.filter(list, u.isGiven)
+    list = u.compact(list)
     list = u.map list, (target) => @toTargetObj(target, props)
     return list
 
@@ -53,7 +53,7 @@ class up.Change.FromContent extends up.Change
     if u.isFunction(target)
       target = target(base)
     else if u.isElementish(target)
-      target = up.element.toSelector(target)
+      target = e.toSelector(target)
 
     if u.isString(target)
       target = { target }
@@ -131,7 +131,7 @@ class up.Change.FromContent extends up.Change
 
   postflightTargetNotApplicable: ->
     if @options.inspectResponse
-      toastOpts = { label: 'Open response', callback: @options.inspectResponse }
+      toastOpts = { action: { label: 'Open response', callback: @options.inspectResponse } }
 
     if @plans.length
       up.fail(["Could not find matching targets in current page and server response (tried selectors %o)", @planTargets()], toastOpts)
