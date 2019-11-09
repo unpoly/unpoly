@@ -5,6 +5,20 @@ u = up.util
 class up.Change.OpenLayer extends up.Change.Addition
 
   constructor: (options) ->
+    if u.isGiven(options.closable)
+      up.legacy.warn('Layer option { closable } has been renamed to { dismissable }')
+      options.dismissable = options.closable
+
+    if u.isGiven(options.flavor)
+      up.legacy.warn('Layer option { flavor } has been renamed to { mode }')
+      options.mode = options.flavor
+
+    # Allow to whitelist the ways how the overlay will be dismissable,
+    # but still allow to enable/disable all ways with { dismissable }.
+    options.buttonDismissable ?= options.dismissable
+    options.escapeDismissable ?= options.dismissable
+    options.backdropDismissable ?= options.dismissable
+
     super(options)
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target

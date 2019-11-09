@@ -28,7 +28,7 @@ class up.LayerLookup
     if u.isElement(@value) || u.isJQuery(@value)
       return [@of(@value)]
 
-#    if up.layer.isOverlayFlavor(@value)
+#    if up.layer.isOverlayMode(@value)
 #      return [@value]
 
     return switch @value

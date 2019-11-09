@@ -10,7 +10,7 @@ class up.Layer extends up.Record
     [
       'stack',
       'history',
-      'flavor',
+      'mode',
       'context',
     ]
 
@@ -20,8 +20,8 @@ class up.Layer extends up.Record
   constructor: (options = {}) ->
     super(options)
 
-    unless @flavor
-      throw "missing { flavor } option"
+    unless @mode
+      throw "missing { mode } option"
 
     # If an ancestor layer was opened with the wish to not affect history,
     # this child layer should not affect it either.
@@ -44,10 +44,10 @@ class up.Layer extends up.Record
     @stack.isOpen(this)
 
   defaultTargets: ->
-    up.layer.defaultTargets(@flavor)
+    up.layer.defaultTargets(@mode)
 
   sync: ->
-    # no-op so users can blindly sync without knowing the current flavor
+    # no-op so users can blindly sync without knowing the current mode
 
   # no-op so users can blindly accept even though they might be on the root layer
   accept: u.asyncNoop
@@ -166,4 +166,4 @@ class up.Layer extends up.Record
     @history && @isLeaf()
 
   toString: ->
-    "#{@flavor} layer"
+    "#{@mode} layer"

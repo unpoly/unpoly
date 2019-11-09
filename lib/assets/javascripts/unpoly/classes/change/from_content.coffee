@@ -14,7 +14,7 @@ class up.Change.FromContent extends up.Change
     # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
     # since the current layer might change between request and response.
     @options.currentLayer ?= up.layer.current
-    @extractFlavorFromLayerOption()
+    @extractModeFromLayerOption()
     @setDefaultLayer()
 
   ensurePlansBuilt: ->
@@ -22,13 +22,13 @@ class up.Change.FromContent extends up.Change
     unless @plans.length
       @notApplicable(['No target for change %o', @options])
 
-  extractFlavorFromLayerOption: ->
-    if up.layer.isOverlayFlavor(@options.layer)
-      @options.flavor = @options.layer
+  extractModeFromLayerOption: ->
+    if up.layer.isOverlayMode(@options.layer)
+      @options.mode = @options.layer
 
-    # If user passes a { flavor } option without a { layer } option
+    # If user passes a { mode } option without a { layer } option
     # we assume they want to open a new layer.
-    if @options.flavor
+    if @options.mode
       @options.layer = 'new'
 
   setDefaultLayer: ->
@@ -69,7 +69,7 @@ class up.Change.FromContent extends up.Change
       @addPlansForTarget(@options.fallback)
 
       if @options.layer == 'new'
-        @addPlansForTarget(up.layer.defaultTargets(@options.flavor))
+        @addPlansForTarget(up.layer.defaultTargets(@options.mode))
       else
         for layer in up.layer.lookupAll(@options)
           @addPlansForTarget(layer.defaultTargets(), { layer })
@@ -84,7 +84,7 @@ class up.Change.FromContent extends up.Change
 
   firstDefaultTarget: ->
     if @options.layer == 'new'
-      up.layer.defaultTargets(@options.flavor)[0]
+      up.layer.defaultTargets(@options.mode)[0]
     else
       up.layer.lookupOne(@options).defaultTargets()[0]
 

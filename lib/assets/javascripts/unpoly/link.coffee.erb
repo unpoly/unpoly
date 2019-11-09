@@ -191,14 +191,15 @@ up.link = do ->
     parser.booleanOrString('location')
     parser.booleanOrString('title')
     parser.string('layer')
-    parser.string('flavor')
+    parser.string('mode') # Renamed to { close }. Legacy calls handled by up.Change.OpenLayer.
+    parser.string('mode')
     parser.json('context')
     parser.boolean('peel')
     parser.string('align')
     parser.string('position')
     parser.string('class')
     parser.string('size')
-    parser.boolean('closable') # Deprecated. Is handled by up.layer.
+    parser.boolean('closable') # Renamed to { closable }. Legacy calls handled by up.Change.OpenLayer.
     parser.boolean('dismissable')
     parser.boolean('buttonDismissable')
     parser.boolean('escapeDismissable')

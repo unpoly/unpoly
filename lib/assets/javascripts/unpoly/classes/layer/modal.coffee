@@ -3,6 +3,6 @@
 
 class up.Layer.Modal extends up.Layer.OverlayWithViewport
 
-  @flavor: 'modal'
+  @mode: 'modal'
 
   @attr: 'up-modal'

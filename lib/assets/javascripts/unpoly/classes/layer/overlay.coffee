@@ -4,7 +4,7 @@ e = up.element
 u = up.util
 
 ###**
-Base class for all non-root layer flavors
+Base class for all non-root layer modes
 
 @class up.Layer.Overlay
 ###
@@ -25,7 +25,6 @@ class up.Layer.Overlay extends up.Layer
       'closeEasing',
       'backdropOpenAnimation',
       'backdropCloseAnimation',
-      'dismissable',
       'buttonDismissable',
       'escapeDismissable',
       'backdropDismissable',
@@ -41,17 +40,6 @@ class up.Layer.Overlay extends up.Layer
       'onDismissed',
       'onContentAttached',
     ]
-
-  constructor: (options = {}) ->
-    if u.isGiven(options.closable)
-      up.legacy.warn('Layer option { closable } has been renamed to { dismissable }')
-      options.dismissable = options.closable
-
-    options.buttonDismissable ?= options.dismissable
-    options.escapeDismissable ?= options.dismissable
-    options.backdropDismissable ?= options.dismissable
-
-    super(options)
 
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
@@ -81,7 +69,7 @@ class up.Layer.Overlay extends up.Layer
 
   createElement: (parentElement = @stack.overlayContainer) ->
     attrs = u.compactObject
-      'up-flavor': @constructor.flavor
+      'up-mode': @constructor.mode
       'up-align': @align
       'up-position': @position,
       'up-size': @size,

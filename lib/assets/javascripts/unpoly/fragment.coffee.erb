@@ -677,7 +677,6 @@ up.fragment = do ->
   ###
   visit = (url, options = {}) ->
     up.legacy.warn("up.visit(url) has been deprecated. Use up.change({ url }) instead.")
-    up.change(u.merge(options, { url, flavor: 'modal' }))
     up.change(u.merge(options, { url }))
 
   BODY_TARGET_PATTERN = /(^|\s|,)(body|html)(,|\s|$)/i

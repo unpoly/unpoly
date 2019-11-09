@@ -3,7 +3,7 @@ e = up.element
 
 up.layer = do ->
 
-  DEFAULT_IMPLEMENTATIONS = [
+  DEFAULT_CLASSES = [
     up.Layer.Root
     up.Layer.Modal
     up.Layer.Popup
@@ -11,15 +11,15 @@ up.layer = do ->
     up.Layer.Cover
   ]
 
-  registerFlavor = (Implementation, store = config) ->
-    flavor = Implementation.flavor
-    store[flavor] ||= {}
-    store[flavor].Implementation = Implementation
+  registerMode = (Class, store = config) ->
+    mode = Class.mode
+    store[mode] ||= {}
+    store[mode].Class = Class
 
   # TODO: Document up.layer.config
   config = new up.Config ->
     newConfig =
-      flavor: 'modal'
+      mode: 'modal'
       all:
         # Define a default target that will close all overlays
         # and show an unpexpected response in the <body>
@@ -58,8 +58,8 @@ up.layer = do ->
         history: false
 
 
-    for implementation in DEFAULT_IMPLEMENTATIONS
-      registerFlavor(implementation, newConfig)
+    for Class in DEFAULT_CLASSES
+      registerMode(Class, newConfig)
 
     return newConfig
 
@@ -67,33 +67,33 @@ up.layer = do ->
 
   handlers = []
 
-  isOverlayFlavor = (name) ->
-    !!config[name]?.Implementation
+  isOverlayMode = (name) ->
+    !!config[name]?.Class
 
-  defaultTargets = (flavor) ->
-    return u.flatMap flavorConfigs(flavor), 'targets'
+  defaultTargets = (mode) ->
+    return u.flatMap modeConfigs(mode), 'targets'
 
   ###**
-  Returns an array of config objects that apply to the given flavor name.
+  Returns an array of config objects that apply to the given mode name.
 
   The config objects are in descending order of specificity.
   ###
-  flavorConfigs = (flavor = config.flavor) ->
-    if flavor == 'root'
+  modeConfigs = (mode = config.mode) ->
+    if mode == 'root'
       return [config.root, config.all]
     else
-      return [config[flavor], config.overlay, config.all]
+      return [config[mode], config.overlay, config.all]
 
   build = (options) ->
-    flavor = options.flavor ? config.flavor
-    Implementation = config[flavor].Implementation
-    configs = u.reverse(flavorConfigs(flavor))
-    options = u.mergeDefined(configs..., { flavor, stack }, options)
-    return new Implementation(options)
+    mode = options.mode ? config.mode
+    Class = config[mode].Class
+    configs = u.reverse(modeConfigs(mode))
+    options = u.mergeDefined(configs..., { mode, stack }, options)
+    return new Class(options)
 
-#  flavorImplementation = (options = {}) ->
-#    flavor = options.flavor ? config.flavor
-#    config[flavor].Implementation or up.fail("Unknown layer flavor: #{flavor}")
+#  modeClass = (options = {}) ->
+#    mode = options.mode ? config.mode
+#    config[mode].Class or up.fail("Unknown layer mode: #{mode}")
 
   openCallbackAttr = (link, attr) ->
     if code = link.getAttribute(attr)
@@ -169,10 +169,10 @@ up.layer = do ->
     # TODO: Docs for [up-popup]
     # TODO: Docs for [up-drawer]
     # TODO: Docs for [up-cover]
-    for implementation in DEFAULT_IMPLEMENTATIONS
-      if attr = implementation.attr
+    for Class in DEFAULT_CLASSES
+      if attr = Class.attr
         up.link.targetMacro attr,
-          'up-layer': implementation.flavor
+          'up-layer': Class.mode
 
   registerCloseHandler = (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
@@ -228,8 +228,8 @@ up.layer = do ->
     isRoot: -> stack.isRoot()
     isOverlay: -> stack.isOverlay()
     push: (args...) -> stack.push(args...)
-    flavor: registerFlavor
-    isOverlayFlavor: isOverlayFlavor
+    mode: registerMode
+    isOverlayMode: isOverlayMode
     on: (args...) -> stack.current.on(args...)
     off: (args...) -> stack.current.off(args...)
     emit: (args...) -> stack.current.emit(args...)
@@ -244,7 +244,7 @@ up.layer = do ->
     get_location: -> stack.current.location
     get_history: -> stack.current.history
     get_title: -> stack.current.title
-    get_flavor: -> stack.current.flavor
+    get_mode: -> stack.current.mode
     get_position: -> stack.current.position
     get_element: -> stack.current.element
     get_context: -> stack.current.context

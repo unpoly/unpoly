@@ -43,7 +43,7 @@ class up.LayerStack extends up.Class
 
   resetLayers: ->
     @layers = []
-    rootLayer = up.layer.build(flavor: 'root', stack: this)
+    rootLayer = up.layer.build(mode: 'root', stack: this)
     @layers.push(rootLayer)
 
   indexOf: (layer) ->

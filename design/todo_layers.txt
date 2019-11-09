@@ -44,7 +44,7 @@
   - Distinguish between puts and debug
 - Rename { flavor } to { mode }, provide legacy fallbacks
 - Better name for up.fragment.config.resetWorld
-- Fix unpoly-guide; The fullscreen-flavor should just be up-flavor="cover"
+- Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
 - Move up.log.sprintf to up.util.sprintf
 - ResetWorld should allow other selectors? e.g. up.fragment.config.explodeInto = ['body', '.container']
 

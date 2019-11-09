@@ -1020,13 +1020,13 @@ describe 'up.fragment', ->
 
         it 'opens a new layer when given { layer: "new" }'
 
-        it 'opens a new layer with the given { flavor }'
+        it 'opens a new layer with the given { mode }'
 
-        it 'allows to pass the flavor for the new layer as { layer } (as a shortcut)'
+        it 'allows to pass the mode for the new layer as { layer } (as a shortcut)'
 
-        it 'opens a new layer with the default flavor from up.layer.config.flavor'
+        it 'opens a new layer with the default mode from up.layer.config.mode'
 
-        it 'opens a new layer if given a { flavor } but no { layer }'
+        it 'opens a new layer if given a { mode } but no { layer }'
 
         it 'updates the current layer if nothing else is specified'
 

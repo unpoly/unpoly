@@ -3,6 +3,6 @@
 
 class up.Layer.Cover extends up.Layer.OverlayWithViewport
 
-  @flavor: 'cover'
+  @mode: 'cover'
 
   @attr: 'up-cover'

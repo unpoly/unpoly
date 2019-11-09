@@ -5,7 +5,7 @@ e = up.element
 
 class up.Layer.Root extends up.Layer
 
-  @flavor: 'root'
+  @mode: 'root'
 
   constructor: (options) ->
     super(options)

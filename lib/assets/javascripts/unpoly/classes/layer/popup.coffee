@@ -3,6 +3,6 @@
 
 class up.Layer.Popup extends up.Layer.OverlayWithTether
 
-  @flavor: 'popup'
+  @mode: 'popup'
 
   @attr: 'up-popup'
