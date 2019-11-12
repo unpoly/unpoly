@@ -21,6 +21,9 @@ up.error = do ->
   notApplicable = (change, reason) ->
     build('up.NotApplicable', "Cannot apply change: #{change} (#{reason}")
 
+  notImplemented = ->
+    build('up.NotImplemented')
+
   {
     build,
     failure,

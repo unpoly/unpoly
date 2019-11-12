@@ -53,7 +53,7 @@ class up.Layer.Overlay extends up.Layer
   @param {number} [options.delay]
   ###
   openNow: (options) ->
-    throw "implement me"
+    throw up.error.notImplemented()
 
   # TODO: Rename closeNow to something that doesn't have the sync/async connotation
   ###**
@@ -65,7 +65,7 @@ class up.Layer.Overlay extends up.Layer
   @param {number} [options.delay]
   ###
   closeNow: (options) ->
-    throw "implement me"
+    throw up.error.notImplemented()
 
   createElement: (parentElement = @stack.overlayContainer) ->
     attrs = u.compactObject
@@ -100,6 +100,8 @@ class up.Layer.Overlay extends up.Layer
       @dismissElement = e.affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
         'aria-label': @dismissAriaLabel
       )
+      # Since the dismiss button already has an accessible [aria-label]
+      # we hide the "X" label from screen readers.
       e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
   frameInnerContent: (parentElement, options) ->

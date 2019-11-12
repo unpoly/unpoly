@@ -95,7 +95,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       for child in wrapper.children
         # Compile the new content and emit up:fragment:inserted.
-        # @responseDoc.activateElement(child, { layer: @layer, keep: step.keep })
         @responseDoc.activateElement(child, step)
 
       # Reveal element that was being prepended/appended.

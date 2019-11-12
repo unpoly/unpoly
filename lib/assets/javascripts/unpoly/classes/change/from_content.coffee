@@ -41,52 +41,50 @@ class up.Change.FromContent extends up.Change
       # If no origin is given, we assume the current layer.
       @options.layer = 'current'
 
-  toTargetList: (target, props) ->
+  toTargetObjList: (target, props) ->
     list = u.wrapList(target)
     list = u.compact(list)
     list = u.map list, (target) => @toTargetObj(target, props)
     return list
 
-  toTargetObj: (target, props) ->
+  toTargetObj: (target, props) =>
     base = u.merge(@options, props)
 
-    if u.isFunction(target)
-      target = target(base)
-    else if u.isElementish(target)
-      target = e.toSelector(target)
-
-    if u.isString(target)
+    if u.isElementish(target)
+      target = { target: e.toSelector(target) }
+    else if u.isString(target)
       target = { target }
 
     return u.merge(base, target)
 
   buildPlans: ->
     @plans = []
-
     @addPlansForTarget(@options.target)
-
     if @options.fallback != false
       @addPlansForTarget(@options.fallback)
-
-      if @options.layer == 'new'
-        @addPlansForTarget(up.layer.defaultTargets(@options.mode))
-      else
-        for layer in up.layer.lookupAll(@options)
-          @addPlansForTarget(layer.defaultTargets(), { layer })
+      @addPlansForTarget(@defaultTargetObjs())
 
   addPlansForTarget: (target, props) ->
-    for targetObj in @toTargetList(target, props)
+    for targetObj in @toTargetObjList(target, props)
       # One target may expand to more than one plan if it has a { layer } option that
       # needs to try multiple layers, like { layer: 'closest' }.
       for layer in up.layer.lookupAll(targetObj)
-        ChangeImplementation = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
-        @plans.push(new ChangeImplementation(u.merge(targetObj, { layer })))
+        planOpts = u.merge(targetObj, { layer })
+        if layer == 'new'
+          unless up.fragment.targetsBody(planOpts.target)
+            @plans.push(new up.Change.OpenLayer(planOpts))
+        else
+          @plans.push(new up.Change.UpdateLayer(planOpts))
+
+  defaultTargetObjs: ->
+    if @options.layer == 'new'
+      return @toTargetObjList(up.layer.defaultTargets(@options.mode))
+    else
+      return u.flatMap up.layer.lookupAll(@options), (layer) =>
+        return @toTargetObjList(layer.defaultTargets(), { layer })
 
   firstDefaultTarget: ->
-    if @options.layer == 'new'
-      up.layer.defaultTargets(@options.mode)[0]
-    else
-      up.layer.lookupOne(@options).defaultTargets()[0]
+    @defaultTargetObjs()[0]?.target
 
   execute: ->
     @buildResponseDoc()
@@ -94,6 +92,8 @@ class up.Change.FromContent extends up.Change
     if @options.saveScroll
       up.viewport.saveScroll()
 
+    # In up.Change.FromURL we already set an X-Up-Title header as options.title.
+    # Now that we process an HTML document
     shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
     if shouldExtractTitle && (title = @options.responseDoc.title())
       @options.title = title

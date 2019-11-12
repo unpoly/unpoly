@@ -49,6 +49,7 @@
 - up.fragment.config.fallbackTransition wieder rein?
 - up.fragment.config.fallbacks sollte auf up.fragment.config.targets delegieren, oder wir nennen { targets } um auf { fallbacks }
 - Layer HTML doch wieder wie früher: .up-modal .up-modal-viewport .up-modal-frame .up-modal-content
+- backdropDismissable => outsideDismissable
 
 
 - Tests

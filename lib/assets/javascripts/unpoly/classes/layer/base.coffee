@@ -61,6 +61,9 @@ class up.Layer extends up.Record
   evalOption: (option) ->
     u.evalOption(option, this)
 
+  allElements: (selector) ->
+    throw up.error.notImplemented()
+
   firstElement: (selector) ->
     @allElements(selector)[0]
 

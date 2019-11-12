@@ -3,18 +3,13 @@ e = up.element
 
 up.layer = do ->
 
-  DEFAULT_CLASSES = [
+  OVERLAY_CLASSES = [
     up.Layer.Root
     up.Layer.Modal
     up.Layer.Popup
     up.Layer.Drawer
     up.Layer.Cover
   ]
-
-  registerMode = (Class, store = config) ->
-    mode = Class.mode
-    store[mode] ||= {}
-    store[mode].Class = Class
 
   # TODO: Document up.layer.config
   config = new up.Config ->
@@ -57,9 +52,8 @@ up.layer = do ->
         align: 'left'
         history: false
 
-
-    for Class in DEFAULT_CLASSES
-      registerMode(Class, newConfig)
+    for Class in OVERLAY_CLASSES
+      newConfig[Class.mode].Class = Class
 
     return newConfig
 
@@ -71,7 +65,7 @@ up.layer = do ->
     !!config[name]?.Class
 
   defaultTargets = (mode) ->
-    return u.flatMap modeConfigs(mode), 'targets'
+    return u.flatMap(modeConfigs(mode), 'targets')
 
   ###**
   Returns an array of config objects that apply to the given mode name.
@@ -169,10 +163,8 @@ up.layer = do ->
     # TODO: Docs for [up-popup]
     # TODO: Docs for [up-drawer]
     # TODO: Docs for [up-cover]
-    for Class in DEFAULT_CLASSES
-      if attr = Class.attr
-        up.link.targetMacro attr,
-          'up-layer': Class.mode
+    for Class in OVERLAY_CLASSES
+      up.link.targetMacro Class.attr, 'up-layer': Class.mode
 
   registerCloseHandler = (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
@@ -228,7 +220,6 @@ up.layer = do ->
     isRoot: -> stack.isRoot()
     isOverlay: -> stack.isOverlay()
     push: (args...) -> stack.push(args...)
-    mode: registerMode
     isOverlayMode: isOverlayMode
     on: (args...) -> stack.current.on(args...)
     off: (args...) -> stack.current.off(args...)
