@@ -46,7 +46,10 @@ class up.FollowVariant
       up.feedback.start(link) unless options.preload
       @followNow(link, options)
     unless options.preload
-      promise = promise.then -> up.feedback.stop(link)
+      # Make sure we always remove .up-active, even if the follow fails or the user
+      # does not confirm an [up-confirm] link. However, don't re-assign promise
+      # to the result of up.always() since that would change the state of promise.
+      u.always promise, -> up.feedback.stop(link)
     promise
 
   matchesLink: (link) =>

@@ -35,7 +35,7 @@ up.form = do ->
   @stable
   ###
   config = new up.Config
-    validateTargets: ['fieldset:has(&)', 'label:has(&)', 'form:has(&)']
+    validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
@@ -51,10 +51,23 @@ up.form = do ->
     config.fields.join(',')
 
   ###**
+  Returns a list of form fields within the given element.
+
+  You can configure what Unpoly considers a form field by adding CSS selectors to the
+  [`up.form.config.fields`](/up.form.config#config.fields) array.
+
+  If the given element is itself a form field, a list of that given element is returned.
+
   @function up.form.fields
-  @internal
+  @param {Element|jQuery} root
+    The element to scan for contained form fields.
+
+    If the element is itself a form field, a list of that element is returned.
+  @return {NodeList<Element>|Array<Element>}
+  @experimental
   ###
   findFields = (root) ->
+    root = e.get(root)
     e.subtree(root, fieldSelector())
 
 #  findFields = (rootOrRoots) ->
@@ -190,7 +203,6 @@ up.form = do ->
     form = e.closest(form, 'form')
 
     target = options.target ? form.getAttribute('up-target') ? 'body'
-    url = options.url ? form.getAttribute('action') ? up.browser.url()
     options.failTarget ?= form.getAttribute('up-fail-target') ? e.toSelector(form)
     options.reveal ?= e.booleanOrStringAttr(form, 'up-reveal') ? true
     options.failReveal ?= e.booleanOrStringAttr(form, 'up-fail-reveal') ? true
@@ -198,7 +210,7 @@ up.form = do ->
     options.history ?= e.booleanOrStringAttr(form, 'up-history') ? true
     options.transition ?= e.booleanOrStringAttr(form, 'up-transition')
     options.failTransition ?= e.booleanOrStringAttr(form, 'up-fail-transition')
-    options.method ?= form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post'
+    options.method ?= u.normalizeMethod(form.getAttribute('up-method') ? form.getAttribute('data-method') ? form.getAttribute('method') ? 'post')
     options.cache ?= e.booleanAttr(form, 'up-cache')
     options.restoreScroll ?= e.booleanAttr(form, 'up-restore-scroll') # the option supports an object value, but not the attr
     options.origin ?= form
@@ -212,6 +224,15 @@ up.form = do ->
       options.transition = false
       options.failTransition = false
       options.headers[up.protocol.config.validateHeader] = options.validate
+
+    url = options.url ? form.getAttribute('action') ? up.browser.url()
+
+    if options.method == 'GET'
+      # Only for GET forms, browsers discard all query params from the form's [action] URL.
+      # The URLs search part will be replaced with the serialized form data.
+      # See design/query-params-in-form-actions/cases.html for
+      # a demo of vanilla browser behavior.
+      url = up.Params.stripURL(url)
 
     up.event.whenEmitted('up:form:submit', log: 'Submitting form', target: form).then ->
       up.feedback.start(form)
@@ -758,7 +779,18 @@ up.form = do ->
     This defaults to a fieldset or form group around the validating field.
   @stable
   ###
-  up.on 'change', '[up-validate]', (event, field) ->
+
+  ###**
+  Performs [server-side validation](/input-up-validate) when any fieldset within this form changes.
+
+  You can configure what Unpoly considers a fieldset by adding CSS selectors to the
+  [`up.form.config.validateTargets`](/up.form.config#config.validateTargets) array.
+
+  @selector form[up-validate]
+  @stable
+  ###
+  up.on 'change', '[up-validate]', (event) ->
+    field = findFields(event.target)[0]
     u.muteRejection validate(field)
 
   ###**
@@ -874,24 +906,36 @@ up.form = do ->
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
-  \#\#\# Examples
+  \#\#\# Example
 
   The following would run a global `showSuggestions(value)` function
   whenever the `<input>` changes:
 
-      <form>
-        <input name="query" up-observe="showSuggestions(value)">
-      </form>
+      <input name="query" up-observe="showSuggestions(value)">
 
   \#\#\# Callback context
 
-  The script given to `up-observe` runs with the following context:
+  The script given to `[up-observe]` runs with the following context:
 
   | Name     | Type      | Description                           |
   | -------- | --------- | ------------------------------------- |
   | `value`  | `string`  | The current value of the field        |
   | `this`   | `Element` | The form field                        |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
+
+  \#\#\# Observing radio buttons
+
+  Multiple radio buttons with the same `[name]` (a radio button group)
+  produce a single value for the form.
+
+  To observe radio buttons group, use the `[up-observe]` attribute on an
+  element that contains all radio button elements with a given name:
+
+      <div up-observe="formatSelected(value)">
+        <input type="radio" name="format" value="html"> HTML format
+        <input type="radio" name="format" value="pdf"> PDF format
+        <input type="radio" name="format" value="txt"> Text format
+      </div>
 
   @selector input[up-observe]
   @param {string} up-observe
@@ -939,7 +983,7 @@ up.form = do ->
   up.compiler '[up-observe]', (formOrField) -> observe(formOrField)
 
   ###**
-  [Observes](/up.observe) this form field and submits the form when its value changes.
+  Submits this field's form when this field changes its values.
 
   Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
   while the autosubmitted form is loading.
@@ -955,6 +999,20 @@ up.form = do ->
         <input type="checkbox" name="archive"> Include archive
       </form>
 
+  \#\#\# Auto-submitting radio buttons
+
+  Multiple radio buttons with the same `[name]` (a radio button group)
+  produce a single value for the form.
+
+  To auto-submit radio buttons group, use the `[up-submit]` attribute on an
+  element that contains all radio button elements with a given name:
+
+      <div up-autosubmit>
+        <input type="radio" name="format" value="html"> HTML format
+        <input type="radio" name="format" value="pdf"> PDF format
+        <input type="radio" name="format" value="txt"> Text format
+      </div>
+
   @selector input[up-autosubmit]
   @param {string} up-delay
     The number of miliseconds to wait after a change before the form is submitted.
@@ -962,7 +1020,7 @@ up.form = do ->
   ###
 
   ###**
-  [Observes](/up.observe) this form and submits the form when *any* field changes.
+  Submits the form when *any* field changes.
 
   Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
   while the autosubmitted form is loading.

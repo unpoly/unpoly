@@ -42,7 +42,10 @@ end
 
 namespace :publish do
   task :confirm do
-    puts "Are you ready to publish a new Unpoly version to all release channels? [y/N] "
+    puts "Before publishing new Unpoly version:"
+    puts "- Bump the version in version.rb"
+    puts "- Update the CHANGELOG"
+    puts "Ready to publish to all release channels? [y/N] "
     reply = STDIN.gets.strip.downcase
     unless reply == 'y'
       puts "Aborted"
@@ -105,6 +108,7 @@ namespace :publish do
     puts "Now remember to:"
     puts "- update unpoly.com so user see the updated CHANGELOG and CDN link"
     puts "- send a message to the e-mail group announcing the new release"
+    puts "- tweet a link to the CHANGELOG as @unpolyjs"
   end
 
   desc 'Build artifacts, push to git and release to package managers'

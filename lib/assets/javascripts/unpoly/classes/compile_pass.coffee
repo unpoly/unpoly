@@ -38,7 +38,7 @@ class up.CompilePass
           match.setAttribute('up-keep', value)
 
   compileOneElement: (compiler, element) ->
-    elementArg = if compiler.jQuery then jQuery(element) else element
+    elementArg = if compiler.jQuery then up.browser.jQuery(element) else element
     compileArgs = [elementArg]
     # Do not retrieve and parse [up-data] unless the compiler function
     # expects a second argument. Note that we must pass data for an argument
@@ -53,7 +53,7 @@ class up.CompilePass
       up.destructor(element, destructorOrDestructors)
 
   compileBatch: (compiler, elements) ->
-    elementsArgs = if compiler.jQuery then jQuery(elements) else elements
+    elementsArgs = if compiler.jQuery then up.browser.jQuery(elements) else elements
     compileArgs = [elementsArgs]
     # Do not retrieve and parse [up-data] unless the compiler function
     # expects a second argument. Note that we must pass data for an argument

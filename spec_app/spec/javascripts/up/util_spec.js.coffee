@@ -1404,3 +1404,17 @@ describe 'up.util', ->
       it 'returns false for NaN', ->
         value = NaN
         expect(up.util.isList(value)).toBe(false)
+
+    describe 'up.util.isJQuery', ->
+
+      it 'returns true for a jQuery collection', ->
+        value = $('body')
+        expect(up.util.isJQuery(value)).toBe(true)
+
+      it 'returns false for a native element', ->
+        value = document.body
+        expect(up.util.isJQuery(value)).toBe(false)
+
+      it 'returns false (and does not crash) for undefined', ->
+        value = undefined
+        expect(up.util.isJQuery(value)).toBe(false)

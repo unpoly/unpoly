@@ -511,6 +511,24 @@ class up.Params
     params
 
   ###**
+  Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
+
+  \#\#\# Example
+
+      var url = up.Params.stripURL('http://foo.com?key=value')
+      // url is now: 'http://foo.com'
+
+  @function up.Params.stripURL
+  @param {string} url
+    A URL (with or without a query string).
+  @return {string}
+    The given URL without its query string.
+  @experimental
+  ###
+  @stripURL: (url) ->
+    return u.normalizeUrl(url, search: false)
+
+  ###**
   If passed an `up.Params` instance, it is returned unchanged.
   Otherwise constructs an `up.Params` instance from the given value.
 

@@ -6,6 +6,77 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+0.61.0
+------
+
+This release makes it easier to migrate to a recent version of Unpoly when your app still depends on jQuery.
+Unpoly dropped its jQuery dependency with version 0.60.0, but retains optional jQuery support through functions like
+[`up.$compiler()`](/up.$compiler) and [`up.$on()`](/up.$on). All Unpoly functions that take a native element as an
+argument may also be called with a jQuery collection as an argument.
+
+The following changes to the optional jQuery support were implemented:
+
+- In an ES6 build pipeline, Unpoly's jQuery support no longer requires `window.jQuery` to be defined before
+  Unpoly is imported into the build. You still need to define `window.jQuery`, but you may do so at any time in your
+  scripts, regardless of load order.
+- jQuery support functions like [`up.$compiler()`](/up.$compiler) now fail with a helpful message if the developer
+  forgets to define `window.jQuery`.
+
+This release also exposes some convenience functions and selectors:
+
+- New experimental function [`up.event.halt()`](/up.event.halt). It prevents the event from bubbling up the DOM.
+  It also prevents other event handlers bound on the same element. It also prevents the event's default action.
+- New experimental function [`up.form.fields()`](/up.form.fields).  It returns a list of form fields within the given element.
+- The selector [`form[up-validate]`](/form-up-validate) is now supported. It performs
+  [server-side validation](/input-up-validate) when any fieldset within this form changes. Previously only the variant
+  [`input[up-validate]`](/input-up-validate) was supported.
+
+
+
+0.60.3
+------
+
+[`[up-validate]`](/up-validate) again recognizes the `[up-fieldset]` attribute to find the form fragment
+that should be replaced with validation results.
+
+In the example below, changing the `email` input would only validate the first fieldset:
+
+```html
+<form action="/users" id="registration">
+
+  <div up-fieldset>
+    Validation message
+    <input type="text" name="email" up-validate />
+  </div>
+
+  <div up-fieldset>
+    Validation message
+    <input type="password" name="password" up-validate />
+  </div>
+
+</form>
+```
+
+
+0.60.2
+------
+
+- When [submitting](/up-form) a form with a GET method, any query parameters in the form's `[action]` URL are now discarded.
+  This matches the standard browser behavior when submitting a form without Unpoly.
+- When [submitting](/up-form) a form with a POST method, any query parameters in the form's `[action]` URL are now kept in the
+  URL, instead of being merged into the form's data payload.
+  This matches the standard browser behavior when submitting a form without Unpoly.
+- New experimental function [`up.Params.stripURL(url)`](/up.Params.stripURL).
+  It returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
+
+
+0.60.1
+------
+
+- When user does not confirm an [`[up-confirm]`](/a-up-target#up-confirm) link,
+  the link's [`.up-active`](/a.up-active) class is now removed (fixes #89)
+
+
 0.60.0
 ------
 

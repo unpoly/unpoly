@@ -6,6 +6,25 @@ describe 'up.form', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.form.fields', ->
+
+      it 'returns a list of form fields within the given element', ->
+        form = fixture('form')
+        textField = e.affix(form, 'input[type=text]')
+        select = e.affix(form, 'select')
+        results = up.form.fields(form)
+        expect(results).toMatchList([textField, select])
+
+      it 'returns an empty list if the given element contains no form fields', ->
+        form = fixture('form')
+        results = up.form.fields(form)
+        expect(results).toMatchList([])
+
+      it 'returns a list of the given element if the element is itself a form field', ->
+        textArea = fixture('textarea')
+        results = up.form.fields(textArea)
+        expect(results).toMatchList([textArea])
+
     describe 'up.observe', ->
 
       beforeEach ->
@@ -419,6 +438,46 @@ describe 'up.form', ->
           next =>
             expect(up.browser.url()).toMatchUrl('/other-path')
 
+        it 'submits the form to the current URL if the form has no [action] attribute', asyncSpec (next) ->
+          form = fixture('form')
+          hrefBeforeSubmit = location.href
+
+          up.submit(form)
+
+          next =>
+            expect(@lastRequest().url).toMatchUrl(hrefBeforeSubmit)
+
+        describe 'handling of query params in the [action] URL', ->
+
+          describe 'for forms with GET method', ->
+
+            it 'discards query params from an [action] attribute (like browsers do)', asyncSpec (next) ->
+              # See design/query-params-in-form-actions/cases.html for
+              # a demo of vanilla browser behavior.
+
+              form = fixture('form[method="GET"][action="/action?foo=value-from-action"]')
+              input1 = e.affix(form, 'input[name="foo"][value="value-from-input"]')
+              input2 = e.affix(form, 'input[name="foo"][value="other-value-from-input"]')
+
+              up.submit(form)
+
+              next =>
+                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-input&foo=other-value-from-input')
+
+          describe 'for forms with POST method' ,->
+
+            it 'keeps all query params in the URL', asyncSpec (next) ->
+
+              form = fixture('form[method="POST"][action="/action?foo=value-from-action"]')
+              input1 = e.affix(form, 'input[name="foo"][value="value-from-input"]')
+              input2 = e.affix(form, 'input[name="foo"][value="other-value-from-input"]')
+
+              up.submit(form)
+
+              next =>
+                expect(@lastRequest().url).toMatchUrl('/action?foo=value-from-action')
+                expect(@lastRequest().data()['foo']).toEqual ['value-from-input', 'other-value-from-input']
+
         describe 'with { history } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->
@@ -818,6 +877,23 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
+      it 'submits the form when a change is observed on a container for a radio button group', asyncSpec (next) ->
+        form = fixture('form')
+        group = e.affix(form, '.group[up-autosubmit][up-delay=0]')
+        radio1 = e.affix(group, 'input[type=radio][name=foo][value=1]')
+        radio2 = e.affix(group, 'input[type=radio][name=foo][value=2]')
+        up.hello(form)
+        submitSpy = up.form.knife.mock('submit').and.returnValue(Promise.reject())
+        Trigger.clickSequence(radio1)
+        next =>
+          expect(submitSpy.calls.count()).toBe(1)
+          Trigger.clickSequence(radio2)
+        next =>
+          expect(submitSpy.calls.count()).toBe(2)
+          Trigger.clickSequence(radio1)
+        next =>
+          expect(submitSpy.calls.count()).toBe(3)
+
     describe 'form[up-autosubmit]', ->
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
@@ -973,16 +1049,17 @@ describe 'up.form', ->
           container.innerHTML = """
             <form action="/users" id="registration">
 
-              <label>
+              <div up-fieldset>
                 <input type="text" name="email" up-validate />
-              </label>
+              </div>
 
-              <label>
+              <div up-fieldset>
                 <input type="password" name="password" up-validate />
-              </label>
+              </div>
 
             </form>
           """
+          up.hello(container)
 
           Trigger.change $('#registration input[name=password]')
 
@@ -990,23 +1067,92 @@ describe 'up.form', ->
             @respondWith """
               <form action="/users" id="registration">
 
-                <label>
+                <div up-fieldset>
                   Validation message
                   <input type="text" name="email" up-validate />
-                </label>
+                </div>
 
-                <label>
+                <div up-fieldset>
                   Validation message
                   <input type="password" name="password" up-validate />
-                </label>
+                </div>
 
               </form>
             """
 
           next =>
-            $labels = $('#registration label')
+            $labels = $('#registration [up-fieldset]')
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
+
+    describe 'form[up-validate]', ->
+
+      # it 'prints an error saying that this form is not yet supported', ->
+
+      it 'performs server-side validation for all fieldsets contained within the form', asyncSpec (next) ->
+        container = fixture('.container')
+        container.innerHTML = """
+          <form action="/users" id="registration" up-validate>
+
+            <div up-fieldset>
+              <input type="text" name="email">
+            </div>
+
+            <div up-fieldset>
+              <input type="password" name="password">
+            </div>
+
+          </form>
+        """
+        up.hello(container)
+
+        Trigger.change $('#registration input[name=password]')
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(@lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-fieldset]:has(input[name="password"])')
+
+
+          @respondWith """
+            <form action="/users" id="registration" up-validate>
+
+              <div up-fieldset>
+                Validation message
+                <input type="text" name="email">
+              </div>
+
+              <div up-fieldset>
+                Validation message
+                <input type="password" name="password">
+              </div>
+
+            </form>
+          """
+
+        next =>
+          $labels = $('#registration [up-fieldset]')
+          expect($labels[0]).not.toHaveText('Validation message')
+          expect($labels[1]).toHaveText('Validation message')
+
+      it 'only sends a single request when a radio button group changes', asyncSpec (next) ->
+        container = fixture('.container')
+        container.innerHTML = """
+          <form action="/users" id="registration" up-validate>
+
+            <div up-fieldset>
+              <input type="radio" name="foo" value="1" checked>
+              <input type="radio" name="foo" value="2">
+            </div>
+
+          </form>
+        """
+        up.hello(container)
+
+        Trigger.change $('#registration input[value="2"]')
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
     describe '[up-switch]', ->
 

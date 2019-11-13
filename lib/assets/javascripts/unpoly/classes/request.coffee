@@ -108,9 +108,7 @@ class up.Request extends up.Record
     @headers ||= {}
     @extractHashFromUrl()
 
-    if u.methodAllowsPayload(@method)
-      @transferSearchToParams()
-    else
+    unless u.methodAllowsPayload(@method)
       @transferParamsToUrl()
 
   extractHashFromUrl: =>
