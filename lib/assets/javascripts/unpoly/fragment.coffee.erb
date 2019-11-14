@@ -643,6 +643,10 @@ up.fragment = do ->
 
   @function up.reload
   @param {string|Element|jQuery} [target]
+    The element that should be reloaded.
+
+    If omitted, an element matching a selector in [`up.fragment.config.targets`](/up.fragment.config#targets)
+    will be reloaded.
   @param {Object} [options]
     See options for [`up.replace()`](/up.replace)
   @param {string} [options.url]

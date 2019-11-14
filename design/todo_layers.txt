@@ -1,14 +1,9 @@
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
-- Should we keep up.history.popTargets?
-  - Should this always reset the world?
-  - up.config.root.targets might not be appropriate
-  - but the layer targets will always be options after .popTargets
 - up.history.replace() is kinda dangerous API
   - the current layer still has the previous URL
 - Move up.browser.location to up.history.location
-- Have up.layer.build delegate to up.Layer class
 - Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
 - Allow to pass up.Layer instances as first arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
@@ -23,38 +18,29 @@
 - Emit layer-bound proxy events with up.layer.emit(), not up.emit()
 - Present tense events still have long-form event log messages with gerund
 - up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
-- up:fragment:inserted should receive the entire document from which the fragment was extracted
 - Rename change({ document }) to change({ page })?
+  - Or is it change({ outer }), change({ inner })?
 - Rename up.element.*fromHtml to ...fromHTML
-- Reanem up.util.escapeHtml to up.util.escapeHTML
-- I see no up:layer:opened events in the console?
-- Check that up.layer forwards getters for all layer properties to stack.current
+- Rename up.util.escapeHtml to up.util.escapeHTML
 - Easy way to check that an error is an AbortError
   - We have isAbortError but Request#aborted
   - I think we should just do #aborted because it's easier to check
 - Move abortRejection / abortError to up.error
-- Opening a new layer should cancel requests that also open a new layer
-- Reconsider if it should be .up-overlay (more precise) or .up-layer (shorter and expected)
-  - I decided to go with "layer" to not introduce one more term for "overlay", "dialog", etc.
-  - We want .up-layer, but keep .up-overlays
-  - Re-re-name overlay.sass to layer.sass
-- We now have unpoly-bootstrap3 and unpoly-bootstrap4
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- Rename { flavor } to { mode }, provide legacy fallbacks
-- Better name for up.fragment.config.resetWorld
-- Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
 - Move up.log.sprintf to up.util.sprintf
 - up.fragment.config.fallbackTransition wieder rein?
 - up.fragment.config.fallbacks sollte auf up.fragment.config.targets delegieren, oder wir nennen { targets } um auf { fallbacks }
 - Layer HTML doch wieder wie früher: .up-modal .up-modal-viewport .up-modal-frame .up-modal-content
 - backdropDismissable => outsideDismissable
+- Should Layer.Root#element be body?
 
 
 - Tests
   - Get tests green again
   - Test layer { context } transmission
+  - Test that opening a new layer cancels requests that also open a new layer
   - Test that back button closes all layers
   - Test that up.change() can be called with { target: Element }
   - Test that up.change() can be called with { target: Element } and will find in any layer
@@ -83,8 +69,11 @@
   - Test that up.change(document: Element) works
   - Test that forms can submit as arbitrary layer changes (success and failure)
   - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
+  - Check that up.layer forwards getters for all layer properties to stack.current
 
 - Docs
+  - We now have unpoly-bootstrap3 and unpoly-bootstrap4
+  - Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
   - All layer-related options should be moved to a[up-layer] or form[up-layer] or both
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
   - Documentation from Diff
@@ -165,6 +154,7 @@ Later?
 - Replace up.Response.isSuccess() with up.Response#ok
 - Replace up.Response.isFatal() with !up.Response#body
 - Emit up:proxy:fatal when responses are aborted due to user or timeout
+up:fragment:inserted should receive the entire document from which the fragment was extracted
 
 
 Decisions
@@ -194,5 +184,8 @@ Decisions
   - Yes, if we cannot match an overlay target we want to reset the world
   - One could argue that we only need ResetWorld when we're creating a layer or updating an overlay
 - Should up.emit without an element emit on the document or on the current layer? => Keep it on document, as it is now!
+- Should we keep up.history.popTargets?
+  - up.config.root.targets might not be appropriate
+  - but the layer targets will always be options after .popTargets, so we can keep popTargets as empty
 
 

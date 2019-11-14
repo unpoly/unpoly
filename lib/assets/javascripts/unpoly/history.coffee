@@ -28,8 +28,10 @@ up.history = do ->
   ###
   config = new up.Config ->
     enabled: true
-    popTargets: [] # will be prepended to the root layer's default target
+    restoreTargets: ['body'] # will be prepended to the root layer's default target
     restoreScroll: true
+
+  up.legacy.renamedProperty(config, 'popTargets', 'restoreTargets')
 
   ###**
   Returns the previous URL in the browser history.
@@ -160,7 +162,7 @@ up.history = do ->
       replaced = up.change
         layer: 'root'        # Don't replace elements in a modal that might still be open
         peel: true           # Close all overlays
-        target: config.popTargets,
+        target: config.restoreTargets,
         url: url
         location: false,    # don't push a new state
         restoreScroll: config.restoreScroll

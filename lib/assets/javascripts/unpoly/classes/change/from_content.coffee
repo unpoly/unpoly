@@ -145,8 +145,6 @@ class up.Change.FromContent extends up.Change
     @ensurePlansBuilt()
     unprintedMessages = []
 
-    console.error("Seeking plan in %o", @plans)
-
     for plan in @plans
       try
         return opts.attempt(plan)
