@@ -162,12 +162,12 @@ up.history = do ->
       replaced = up.change
         layer: 'root'        # Don't replace elements in a modal that might still be open
         peel: true           # Close all overlays
+        keep: false
         target: config.restoreTargets,
         url: url
         location: false,    # don't push a new state
         restoreScroll: config.restoreScroll
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
-        keep: false
       replaced.then ->
         url = currentLocation()
         up.emit('up:history:restored', url: url, log: "Restored location #{url}")
