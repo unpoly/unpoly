@@ -4,7 +4,6 @@
 - up.history.replace() is kinda dangerous API
   - the current layer still has the previous URL
 - Move up.browser.location to up.history.location
-- Make sure all Change#execute() functions check if they're still applicable (or if the layer has been removed)
 - Allow to pass up.Layer instances as first arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
 - Update Rails integration
@@ -28,8 +27,6 @@
   - Remove all groups
   - Distinguish between puts and debug
 - Move up.log.sprintf to up.util.sprintf
-- up.fragment.config.fallbacks sollte auf up.fragment.config.targets delegieren, oder wir nennen { targets } um auf { fallbacks }
-- Layer HTML doch wieder wie früher: .up-modal .up-modal-viewport .up-modal-frame .up-modal-content
 - backdropDismissable => outsideDismissable
 - Should Layer.Root#element be body?
 
@@ -37,6 +34,7 @@
 - Tests
   - Get tests green again
   - Test layer { context } transmission
+  - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
   - Test that opening a new layer cancels requests that also open a new layer
   - Test that back button closes all layers
   - Test that up.change() can be called with { target: Element }
