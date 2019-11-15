@@ -27,7 +27,7 @@ class up.Layer.Overlay extends up.Layer
       'backdropCloseAnimation',
       'buttonDismissable',
       'escapeDismissable',
-      'backdropDismissable',
+      'outsideDismissable',
       'dismissLabel',
       'dismissAriaLabel',
       'onOpening',
@@ -78,7 +78,7 @@ class up.Layer.Overlay extends up.Layer
     if @class
       @element.classList.add(@class)
 
-    if @backdropDismissable
+    if @outsideDismissable
       @element.addEventListener 'click', (event) =>
         unless e.closest(event.target, '.up-overlay-frame')
           u.muteRejection @dismiss()

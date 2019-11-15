@@ -26,7 +26,6 @@
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- backdropDismissable => outsideDismissable
 - Should Layer.Root#element be body?
 
 

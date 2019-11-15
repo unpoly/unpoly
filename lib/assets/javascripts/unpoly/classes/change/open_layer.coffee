@@ -17,7 +17,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # but still allow to enable/disable all ways with { dismissable }.
     options.buttonDismissable ?= options.dismissable
     options.escapeDismissable ?= options.dismissable
-    options.backdropDismissable ?= options.dismissable
+    options.outsideDismissable ?= options.dismissable
 
     super(options)
     # Plan#target is required by FromContent#firstDefaultTarget
