@@ -164,7 +164,7 @@ up.history = do ->
         keep: false
         target: config.restoreTargets,
         url: url
-        location: false,    # don't push a new state
+        location: false,    # don't push a new state. the browser will automatically set the URL from the ppped state.
         restoreScroll: true
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
       replaced.then ->
