@@ -68,7 +68,7 @@ class up.Change.FromContent extends up.Change
     for targetObj in @toTargetObjList(target, props)
       # One target may expand to more than one plan if it has a { layer } option that
       # needs to try multiple layers, like { layer: 'closest' }.
-      for layer in up.layer.lookupAll(targetObj)
+      for layer in up.layer.list(targetObj)
         planOpts = u.merge(targetObj, { layer })
         if layer == 'new'
           unless up.fragment.targetsBody(planOpts.target)
@@ -80,7 +80,7 @@ class up.Change.FromContent extends up.Change
     if @options.layer == 'new'
       return @toTargetObjList(up.layer.defaultTargets(@options.mode))
     else
-      return u.flatMap up.layer.lookupAll(@options), (layer) =>
+      return u.flatMap up.layer.list(@options), (layer) =>
         return @toTargetObjList(layer.defaultTargets(), { layer })
 
   firstDefaultTarget: ->

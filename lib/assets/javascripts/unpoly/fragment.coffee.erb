@@ -592,10 +592,10 @@ up.fragment = do ->
     # However, if we are passed an actual Element or jQuery collection,
     # we operate in the given element's layer.
     if !options.layer && u.isElementish(target)
-      options.layer = up.layer.of(target)
+      options.layer = up.layer.get(target)
 
   parseTargetAndOptions = (args) ->
-    options = u.parseArgAndOptions(args, 'target')
+    options = u.parseArgIntoOptions(args, 'target')
     setLayerOption(options.target, options)
     options
 

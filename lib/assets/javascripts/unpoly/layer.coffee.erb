@@ -124,11 +124,11 @@ up.layer = do ->
       open(options)
 
   allElements = (selector, options) ->
-    layers = stack.lookupAll(options)
+    layers = stack.list(options)
     u.flatMap layers, (layer) -> layer.allElements(selector)
 
   firstElement = (selector, options) ->
-    layers = stack.lookupAll(options)
+    layers = stack.list(options)
     u.findResult layers, -> layer.firstElement(selector)
 
   ###**
@@ -170,7 +170,7 @@ up.layer = do ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
     registerHandler 'click up:link:follow', "[#{attribute}]", (event) ->
       origin = event.target
-      layer = stack.of(origin)
+      layer = stack.get(origin)
       # To make a view usable both as a root layer and as an overlay, the programmer might
       # define a fallback like this:
       #
@@ -201,9 +201,8 @@ up.layer = do ->
   up.on 'up:framework:reset', reset
 
   u.literal
-    of: (args...) -> stack.of(args...)
-    lookup: (args...) -> stack.lookupOne(args...)
-    lookupAll: (args...) -> stack.lookupAll(args...)
+    get: (args...) -> stack.get(args...)
+    list: (args...) -> stack.list(args...)
     get_overlayContainer: -> stack.overlayContainer
     attachOverlayContainer: -> stack.attachOverlayContainer()
     allElements: allElements

@@ -122,7 +122,7 @@ class up.Request extends up.Record
     @headers ||= {}
 
     if @origin
-      @preflightLayer ||= up.layer.of(@origin)
+      @preflightLayer ||= up.layer.get(@origin)
 
     # Make sure @context is always an object, even if no preflightLayer is given.
     # Note that @context is a part of our @cacheKey(), since different contexts

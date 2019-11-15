@@ -101,7 +101,7 @@ up.feedback = do ->
   updateLinks = (links, options = {}) ->
     return unless links.length
 
-    layer = options.layer || up.layer.of(links[0])
+    layer = options.layer || up.layer.get(links[0])
     if layerLocation = layer.feedbackLocation
       u.each links, (link) ->
         isCurrent = linkURLs(link).isCurrent(layerLocation)

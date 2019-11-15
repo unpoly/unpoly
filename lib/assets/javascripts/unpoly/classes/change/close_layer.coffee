@@ -7,7 +7,7 @@ class up.Change.CloseLayer extends up.Change.Removal
 
   constructor: (options) ->
     super(options)
-    @layer = up.layer.lookup(options)
+    @layer = up.layer.get(options)
     @origin = options.origin
     @value = options.value
     @preventable = options.preventable ? true

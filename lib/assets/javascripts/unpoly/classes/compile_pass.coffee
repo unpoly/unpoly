@@ -15,7 +15,7 @@ class up.CompilePass
       @skipSubtrees = undefined
 
     # If a caller has already looked up the layer we don't want to look it up again.
-    @layer = options.layer || up.layer.of(@root)
+    @layer = options.layer || up.layer.get(@root)
 
   compile: ->
     up.log.group "Compiling fragment %o", @root, =>

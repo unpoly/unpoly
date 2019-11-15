@@ -101,16 +101,11 @@ class up.LayerStack extends up.Class
     if @_overlayContainer
       document.body.appendChild(@_overlayContainer)
 
-  lookupOne: (args...) ->
+  get: (args...) ->
     new up.LayerLookup(this, args...).first()
 
-  lookupAll: (args...) ->
+  list: (args...) ->
     new up.LayerLookup(this, args...).all()
-
-  of: (element) ->
-    element = e.get(element)
-    u.find @allReversed(), (layer) ->
-      layer.contains(element)
 
   asCurrent: (layer, fn) ->
     try

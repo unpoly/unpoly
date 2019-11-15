@@ -795,7 +795,7 @@ up.util = do ->
     else
       {}
 
-  parseArgAndOptions = (args, argKey) ->
+  parseArgIntoOptions = (args, argKey) ->
     options = extractOptions(args)
     if isDefined(args[0])
       options[argKey] = args[0]
@@ -1723,7 +1723,7 @@ up.util = do ->
 #  deepAssign: deepAssign
 #  deepMerge: deepMerge
   options: newOptions
-  parseArgAndOptions: parseArgAndOptions
+  parseArgIntoOptions: parseArgIntoOptions
   each: each
   eachIterator: eachIterator
   map: map

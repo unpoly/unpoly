@@ -3,7 +3,7 @@ u = up.util
 class up.LayerLookup
 
   constructor: (@stack, args...) ->
-    options = u.parseArgAndOptions(args, 'layer')
+    options = u.parseArgIntoOptions(args, 'layer')
     @value = options.layer
     @customCurrent = options.currentLayer
     @origin = options.origin
@@ -13,7 +13,12 @@ class up.LayerLookup
 
   givenOriginLayer: ->
     if @origin
-      return @stack.of(@origin)
+      return @ofElement(@origin)
+
+  ofElement: (element) ->
+    element = e.get(element)
+    u.find @stack.allReversed(), (layer) ->
+      layer.contains(element)
 
   givenBaseLayer: ->
     @customCurrent || @givenOriginLayer() || @stack.current
@@ -26,7 +31,7 @@ class up.LayerLookup
       return [@value]
 
     if u.isElement(@value) || u.isJQuery(@value)
-      return [@of(@value)]
+      return [@ofElement(@value)]
 
 #    if up.layer.isOverlayMode(@value)
 #      return [@value]
