@@ -602,17 +602,6 @@ up.util = do ->
   isHTMLCollection = (value) ->
     value instanceof HTMLCollection
 
-#  ###**
-#  Returns whether the given value is an [`HTMLCollection`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCollection).
-#
-#  @function up.util.isHtmlCollection
-#  @param value
-#  @return {Boolean}
-#  @experimental
-#  ###
-#  isHtmlCollection = (value) ->
-#    value instanceof HTMLCollection
-
   ###**
   Returns whether the given value is an [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments).
 
@@ -1203,12 +1192,12 @@ up.util = do ->
   ###**
   Escapes the given string of HTML by replacing control chars with their HTML entities.
 
-  @function up.util.escapeHtml
+  @function up.util.escapeHTML
   @param {string} string
     The text that should be escaped
   @stable
   ###
-  escapeHtml = (string) ->
+  escapeHTML = (string) ->
     string.replace /[&<>"]/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
 
   ###**
@@ -1658,12 +1647,9 @@ up.util = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseURL: parseURL
-  parseUrl: ->
+  parseUrl: (args...) ->
     up.legacy.warn('up.util.parseUrl() has been renamed to up.util.parseURL()')
-    parseURL.apply(null, arguments)
-  normalizeUrl: ->
-    up.legacy.warn('up.util.normalizeUrl() has been renamed to up.util.normalizeURL()')
-    normalizeURL.apply(null, arguments)
+    parseURL(args...)
   normalizeURL: normalizeURL
   normalizeMethod: normalizeMethod
   methodAllowsPayload: methodAllowsPayload
@@ -1686,20 +1672,20 @@ up.util = do ->
   times: times
   findResult: findResult
   some: some
-  any: ->
+  any: (args...) ->
     up.legacy.warn('up.util.any() has been renamed to up.util.some()')
-    some.apply(null, arguments)
+    some(args...)
   every: every
-  all: ->
+  all: (args...) ->
     up.legacy.warn('up.util.all() has been renamed to up.util.every()')
-    every.apply(null, arguments)
-  detect: ->
+    every(args...)
+  detect: (args...) ->
     up.legacy.warn('up.util.detect() has been renamed to up.util.find()')
-    findInList.apply(null, arguments)
+    findInList(args...)
   find: findInList
-  select: ->
+  select: (args...) ->
     up.legacy.warn('up.util.select() has been renamed to up.util.filter()')
-    filterList.apply(null, arguments)
+    filterList(args...)
   filter: filterList
   reject: reject
   intersect: intersect
@@ -1734,9 +1720,9 @@ up.util = do ->
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   timer: scheduleTimer
-  setTimer: ->
+  setTimer: (args...) ->
     up.legacy.warn('up.util.setTimer() has been renamed to up.util.timer()')
-    scheduleTimer.apply(null, arguments)
+    scheduleTimer(args...)
   escapePressed: escapePressed
   contains: contains
   objectContains: objectContains
@@ -1757,7 +1743,10 @@ up.util = do ->
   asyncNoop: asyncNoop
   asyncError: asyncError
   identity: identity
-  escapeHtml: escapeHtml
+  escapeHtml: (args...) ->
+    up.legacy.deprecated('up.util.escapeHtml', 'up.util.escapeHTML')
+    escapeHTML(args...)
+  escapeHTML: escapeHTML
   escapeRegexp: escapeRegexp
   sequence: sequence
   # previewable: previewable
@@ -1772,12 +1761,12 @@ up.util = do ->
   rejectOnError: rejectOnError
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
-  selectorForElement: ->
+  selectorForElement: (args...) ->
     up.legacy.warn('up.util.selectorForElement() has been renamed to up.element.toSelector()')
-    up.element.toSelector.apply(null, arguments)
-  nextFrame: ->
+    up.element.toSelector(args...)
+  nextFrame: (args...) ->
     up.legacy.warn('up.util.nextFrame() has been renamed to up.util.task()')
-    queueTask.apply(null, arguments)
+    queueTask(args...)
   task: queueTask
   microtask: queueMicrotask
   isEqual: isEqual

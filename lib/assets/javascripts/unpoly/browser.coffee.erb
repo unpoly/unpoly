@@ -88,11 +88,11 @@ up.browser = do ->
   CSS transitions (e.g. through [`up.animate()`](/up.animate)), it will skip the
   animation by instantly jumping to the last frame.
 
-  @function up.browser.canCssTransition
+  @function up.browser.canCSSTransition
   @return {boolean}
   @internal
   ###
-  canCssTransition = u.memoize ->
+  canCSSTransition = u.memoize ->
     'transition' of document.documentElement.style
 
   ###**
@@ -208,7 +208,7 @@ up.browser = do ->
       # canPushState() &&
       canDOMParser() &&
       canFormData() &&
-      canCssTransition() &&
+      canCSSTransition() &&
       canInputEvent() &&
       canPromise() &&
       canAnimationFrame()

@@ -554,7 +554,7 @@ describe 'up.element', ->
       $element.attr('aria-label', 'foo"bar')
       expect(up.element.toSelector($element)).toBe('[aria-label="foo\\"bar"]')
 
-  describe 'up.element.createDocumentFromHtml', ->
+  describe 'up.element.createDocumentFromHTML', ->
 
     it 'parses a string that contains a serialized HTML document', ->
       string = """
@@ -569,7 +569,7 @@ describe 'up.element', ->
         </html>
         """
 
-      element = up.element.createDocumentFromHtml(string)
+      element = up.element.createDocumentFromHTML(string)
 
       expect(element.querySelector('head title').textContent).toEqual('document title')
       expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
@@ -586,7 +586,7 @@ describe 'up.element', ->
         </html>\r
         """
 
-      $element = up.element.createDocumentFromHtml(string)
+      $element = up.element.createDocumentFromHTML(string)
       expect($element.querySelector('body')).toBeGiven()
       expect($element.querySelector('body div').textContent).toEqual('line')
 
@@ -622,7 +622,7 @@ describe 'up.element', ->
           </body>
         </html>
         """
-      element = up.element.createDocumentFromHtml(html)
+      element = up.element.createDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -634,7 +634,7 @@ describe 'up.element', ->
           </body>
         </html>
         """
-      element = up.element.createDocumentFromHtml(html)
+      element = up.element.createDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -642,17 +642,17 @@ describe 'up.element', ->
       html = """
         <h1>Full story</h1>
         """
-      element = up.element.createDocumentFromHtml(html)
+      element = up.element.createDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
-  describe 'up.element.createFromHtml', ->
+  describe 'up.element.createFromHTML', ->
 
     it 'creates an element from the given HTML fragment', ->
       html = """
         <h1>Full story</h1>
         """
-      element = up.element.createFromHtml(html)
+      element = up.element.createFromHTML(html)
       expect(element.tagName).toEqual('H1')
       expect(element.textContent).toEqual('Full story')
 
@@ -660,7 +660,7 @@ describe 'up.element', ->
       html = """
         <noscript>alternative content</noscript>
         """
-      element = up.element.createFromHtml(html)
+      element = up.element.createFromHTML(html)
       expect(element.tagName).toEqual('NOSCRIPT')
       expect(element.textContent).toEqual('alternative content')
 
@@ -759,73 +759,73 @@ describe 'up.element', ->
   describe 'up.element.attr', ->
 
     it 'returns the attribute with the given name from the given element', ->
-      element = up.element.createFromHtml('<div foo="bar"></div>')
+      element = up.element.createFromHTML('<div foo="bar"></div>')
       expect(up.element.attr(element, 'foo')).toEqual('bar')
 
     it 'returns an empty string if the attribute is set without value', ->
-      element = up.element.createFromHtml('<div foo></div>')
+      element = up.element.createFromHTML('<div foo></div>')
       expect(up.element.attr(element, 'foo')).toEqual('')
 
     it 'returns undefined if the element does not have the given attribute (unlike Element#getAttribute(), which would return null)', ->
-      element = up.element.createFromHtml('<div></div>')
+      element = up.element.createFromHTML('<div></div>')
       expect(up.element.attr(element, 'foo')).toBeUndefined()
 
   describe 'up.element.booleanAttr', ->
     
     it 'returns true if the attribute value is the string "true"', ->
-      element = up.element.createFromHtml('<div foo="true"></div>')
+      element = up.element.createFromHTML('<div foo="true"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the name of the attribute', ->
-      element = up.element.createFromHtml('<div foo="foo"></div>')
+      element = up.element.createFromHTML('<div foo="foo"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(true)
 
     it 'returns false if the attribute value is the string "false"', ->
-      element = up.element.createFromHtml('<div foo="false"></div>')
+      element = up.element.createFromHTML('<div foo="false"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(false)
 
     it 'returns undefined if the element has no such attribute', ->
-      element = up.element.createFromHtml('<div></div>')
+      element = up.element.createFromHTML('<div></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
 
     it 'returns undefined if the attribute value cannot be cast to a boolean', ->
-      element = up.element.createFromHtml('<div foo="some text"></div>')
+      element = up.element.createFromHTML('<div foo="some text"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
 
   describe 'up.element.booleanOrStringAttr', ->
 
     it 'returns true if the attribute value is the string "true"', ->
-      element = up.element.createFromHtml('<div foo="true"></div>')
+      element = up.element.createFromHTML('<div foo="true"></div>')
       expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the name of the attribute', ->
-      element = up.element.createFromHtml('<div foo="foo"></div>')
+      element = up.element.createFromHTML('<div foo="foo"></div>')
       expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
 
     it 'returns false if the attribute value is the string "false"', ->
-      element = up.element.createFromHtml('<div foo="false"></div>')
+      element = up.element.createFromHTML('<div foo="false"></div>')
       expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(false)
 
     it 'returns undefined if the element has no such attribute', ->
-      element = up.element.createFromHtml('<div></div>')
+      element = up.element.createFromHTML('<div></div>')
       expect(up.element.booleanOrStringAttr(element, 'foo')).toBeUndefined()
 
     it "returns the attribute's raw string value if that value cannot be cast to a boolean", ->
-      element = up.element.createFromHtml('<div foo="some text"></div>')
+      element = up.element.createFromHTML('<div foo="some text"></div>')
       expect(up.element.booleanOrStringAttr(element, 'foo')).toEqual('some text')
 
   describe 'up.element.jsonAttr', ->
 
     it "returns the given attribute's value parsed as JSON", ->
-      element = up.element.createFromHtml('<div foo=\'{ "key": "value" }\'></div>')
+      element = up.element.createFromHTML('<div foo=\'{ "key": "value" }\'></div>')
       expect(up.element.jsonAttr(element, 'foo')).toEqual({ 'key': 'value'})
 
     it "returns undefined if the given attribute's value is blank", ->
-      element = up.element.createFromHtml('<div foo=""></div>')
+      element = up.element.createFromHTML('<div foo=""></div>')
       expect(up.element.jsonAttr(element, 'foo')).toBeUndefined()
 
     it "returns undefined if the element has no such attribute", ->
-      element = up.element.createFromHtml('<div></div>')
+      element = up.element.createFromHTML('<div></div>')
       expect(up.element.jsonAttr(element, 'foo')).toBeUndefined()
 
   describe 'up.element.setTemporaryStyle', ->

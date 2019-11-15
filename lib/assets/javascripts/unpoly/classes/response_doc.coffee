@@ -18,11 +18,11 @@ class up.ResponseDoc
     #
     # We will unwrap the wrapped <noscript> tags when a fragment is requested with
     # #first(), and only in the requested fragment.
-    @noscriptWrapper = new up.HtmlWrapper('noscript')
+    @noscriptWrapper = new up.HTMLWrapper('noscript')
 
     # We wrap <script> tags into a <div> because <script> tags parsed by
     # HTMLParser will not execute their content once appended to the DOM.
-    @scriptWrapper = new up.HtmlWrapper('script', guard: @isInlineScript)
+    @scriptWrapper = new up.HTMLWrapper('script', guard: @isInlineScript)
 
     @parsedRoot =
       @parseOuterContent(options) ||
@@ -33,7 +33,7 @@ class up.ResponseDoc
     if document = options.document
       if u.isString(document)
         document = @wrapHTML(document)
-        document = e.createDocumentFromHtml(document)
+        document = e.createDocumentFromHTML(document)
       return document
 
   parseInnerContent: (options) ->

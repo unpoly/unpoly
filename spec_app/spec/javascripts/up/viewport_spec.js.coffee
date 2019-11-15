@@ -478,8 +478,8 @@ describe 'up.viewport', ->
       describe 'when no configured viewport matches', ->
 
         afterEach ->
-          @resetBodyCss?()
-          @resetHtmlCss?()
+          @resetBodyCSS?()
+          @resetHTMLCSS?()
 
         it 'falls back to the scrolling element', ->
           $element = $fixture('.element').css(height: '3000px')
@@ -488,15 +488,15 @@ describe 'up.viewport', ->
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = $fixture('.element').css(height: '3000px')
-          @resetHtmlCss = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'hidden')
-          @resetBodyCss = e.setTemporaryStyle(document.body, 'overflow-y': 'scroll')
+          @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'hidden')
+          @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'scroll')
           $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = $fixture('.element').css(height: '3000px')
-          @resetHtmlCss = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'scroll')
-          @resetBodyCss = e.setTemporaryStyle(document.body, 'overflow-y': 'hidden')
+          @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'scroll')
+          @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'hidden')
           $result = up.viewport.closest($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
@@ -533,11 +533,11 @@ describe 'up.viewport', ->
         @body = document.body
         @html = document.documentElement
         @restoreBodyOverflowY = e.setTemporaryStyle(@body, 'overflow-y': 'visible')
-        @restoreHtmlOverflowY = e.setTemporaryStyle(@html, 'overflow-y': 'visible')
+        @restoreHTMLOverflowY = e.setTemporaryStyle(@html, 'overflow-y': 'visible')
 
       afterEach ->
         @restoreBodyOverflowY()
-        @restoreHtmlOverflowY()
+        @restoreHTMLOverflowY()
 
       it 'returns the <html> element if the developer set { overflow-y: scroll } on it', ->
         @html.style.overflowY = 'scroll'

@@ -653,10 +653,10 @@ up.element = do ->
     u.reject classes, (klass) -> klass.match(/^up-/)
 
   ###**
-  @function up.element.createDocumentFromHtml
+  @function up.element.createDocumentFromHTML
   @internal
   ###
-  createDocumentFromHtml = (html) ->
+  createDocumentFromHTML = (html) ->
     # IE9 cannot set innerHTML on a <html> or <head> element.
     parser = new DOMParser()
     return parser.parseFromString(html, 'text/html')
@@ -666,16 +666,16 @@ up.element = do ->
 
   \#\#\# Example
 
-      element = up.element.createFromHtml('<div class="foo"><span>text</span></div>')
+      element = up.element.createFromHTML('<div class="foo"><span>text</span></div>')
       element.className // returns 'foo'
       element.children[0] // returns <span> element
       element.children[0].textContent // returns 'text'
 
-  @function up.element.createFromHtml
+  @function up.element.createFromHTML
   @experimental
   ###
-  createFromHtml = (html) ->
-    # We cannot use createDocumentFromHtml() here, since up.ResponseDoc
+  createFromHTML = (html) ->
+    # We cannot use createDocumentFromHTML() here, since up.ResponseDoc
     # needs to create <noscript> elements with that, and DOMParser cannot
     # create those.
     mother = document.createElement('div')
@@ -699,10 +699,10 @@ up.element = do ->
     element.offsetHeight
 
   ###**
-  @function up.element.concludeCssTransition
+  @function up.element.concludeCSSTransition
   @internal
   ###
-  concludeCssTransition = (element) ->
+  concludeCSSTransition = (element) ->
     undo = setTemporaryStyle(element, transition: 'none')
     # Browsers need to paint at least one frame without a transition to stop the
     # animation. In theory we could just wait until the next paint, but in case
@@ -713,11 +713,11 @@ up.element = do ->
   ###**
   Returns whether the given element has a CSS transition set.
 
-  @function up.element.hasCssTransition
+  @function up.element.hasCSSTransition
   @return {boolean}
   @internal
   ###
-  hasCssTransition = (elementOrStyleHash) ->
+  hasCSSTransition = (elementOrStyleHash) ->
     if u.isOptions(elementOrStyleHash)
       styleHash = elementOrStyleHash
     else
@@ -1123,12 +1123,15 @@ up.element = do ->
     toSelector: toSelector # practical
     isSingleton: isSingleton # internal
     attributeSelector: attributeSelector # internal
-    createDocumentFromHtml: createDocumentFromHtml # internal
-    createFromHtml: createFromHtml # practical for element creation
+    createDocumentFromHTML: createDocumentFromHTML # internal
+    createFromHTML: createFromHTML # practical for element creation
+    createFromHtml: (args...) ->
+      up.legacy.deprecated('up.element.createFromHtml', 'up.element.createFromHTML')
+      up.element.createFromHTML(args...)
     get_root: getRoot # internal
     paint: paint # internal
-    concludeCssTransition: concludeCssTransition # internal
-    hasCssTransition: hasCssTransition # internal
+    concludeCSSTransition: concludeCSSTransition # internal
+    hasCSSTransition: hasCSSTransition # internal
     fixedToAbsolute: fixedToAbsolute # internal
     setMissingAttrs: setMissingAttrs # internal
     unwrap: unwrap # practical for jQuery migration

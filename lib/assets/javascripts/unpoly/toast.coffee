@@ -8,7 +8,7 @@ up.toast = do ->
   u = up.util
   e = up.element
 
-  VARIABLE_FORMATTER = (arg) -> "<span class='up-toast-variable'>#{u.escapeHtml(arg)}</span>"
+  VARIABLE_FORMATTER = (arg) -> "<span class='up-toast-variable'>#{u.escapeHTML(arg)}</span>"
 
   state = new up.Config ->
     element: null
@@ -17,12 +17,12 @@ up.toast = do ->
     close()
     state.reset()
 
-  messageToHtml = (message) ->
+  messageToHTML = (message) ->
     if u.isArray(message)
-      message[0] = u.escapeHtml(message[0])
+      message[0] = u.escapeHTML(message[0])
       message = up.log.sprintfWithFormattedArgs(VARIABLE_FORMATTER, message...)
     else
-      message = u.escapeHtml(message)
+      message = u.escapeHTML(message)
     message
 
   isOpen = ->
@@ -37,9 +37,9 @@ up.toast = do ->
   open = (message, options = {}) ->
     close()
 
-    message = messageToHtml(message)
+    message = messageToHTML(message)
 
-    state.element = e.createFromHtml """
+    state.element = e.createFromHTML """
       <div class="up-toast">
         <div class="up-toast-message">#{message}</div>
         <div class="up-toast-actions"></div>

@@ -21,8 +21,7 @@
 - Rename change({ document }) to change({ page })?
   - Or is it change({ outer }), change({ inner })?
 - Rename up.element.*fromHtml to ...fromHTML
-- Rename up.util.escapeHtml to up.util.escapeHTML
-- Rename ...HTML back to ...Html
+- Rename up.util.escapeHTML to up.util.escapeHTML
 - Easy way to check that an error is an AbortError
   - We have isAbortError but Request#aborted
   - I think we should just do #aborted because it's easier to check

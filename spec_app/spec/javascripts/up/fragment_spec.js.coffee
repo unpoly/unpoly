@@ -273,7 +273,7 @@ describe 'up.fragment', ->
 
         it 'replaces the given selector with a matching element that has the outer HTML from the given { document } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
-          document = e.createFromHtml('<div class="target">new text</div>')
+          document = e.createFromHTML('<div class="target">new text</div>')
           up.change('.target', { document })
 
           next =>
@@ -2554,14 +2554,14 @@ describe 'up.fragment', ->
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
             """
-          newHtml = """
+          newHTML = """
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar' up-keep>new-bar</div>
             </div>
             """
           promise = up.change('.container',
-            document: newHtml,
+            document: newHTML,
             transition: transition
           )
           promise.then ->

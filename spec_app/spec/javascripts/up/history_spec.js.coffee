@@ -115,15 +115,15 @@ describe 'up.history', ->
 
         it 'restores the scroll position of viewports when the user hits the back button', asyncSpec (next) ->
 
-          longContentHtml = """
+          longContentHTML = """
             <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
               <div class="content" style="height: 1000px"></div>
             </div>
           """
 
-          respond = => @respondWith(longContentHtml)
+          respond = => @respondWith(longContentHTML)
 
-          $viewport = $(longContentHtml).appendTo(document.body)
+          $viewport = $(longContentHTML).appendTo(document.body)
 
           up.viewport.config.viewports = ['.viewport']
           up.history.config.popTargets = ['.viewport']

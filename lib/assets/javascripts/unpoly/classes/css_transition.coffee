@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.CssTransition
+class up.CSSTransition
 
   constructor: (@element, @lastFrameKebab, options) ->
     @lastFrameKeysKebab = Object.keys(@lastFrameKebab)
@@ -78,7 +78,7 @@ class up.CssTransition
 
     # Cleanly finish our own transition so the old transition
     # (or any other transition set right after that) will be able to take effect.
-    e.concludeCssTransition(@element)
+    e.concludeCSSTransition(@element)
 
     @resumeOldTransition()
 
@@ -92,7 +92,7 @@ class up.CssTransition
       'transitionTimingFunction'
     ])
 
-    if e.hasCssTransition(oldTransition)
+    if e.hasCSSTransition(oldTransition)
       # Freeze the previous transition at its current place, by setting the currently computed,
       # animated CSS properties as inline styles. Transitions on all properties will not be frozen,
       # since that would involve setting every single CSS property as an inline style.
@@ -102,7 +102,7 @@ class up.CssTransition
         @setOldTransitionTargetFrame = e.setTemporaryStyle(@element, oldTransitionFrameKebab)
 
       # Stop the existing CSS transition so it does not emit transitionEnd events
-      @setOldTransition = e.concludeCssTransition(@element)
+      @setOldTransition = e.concludeCSSTransition(@element)
 
   resumeOldTransition: =>
     @setOldTransitionTargetFrame?()

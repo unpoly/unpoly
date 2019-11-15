@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.HtmlWrapper
+class up.HTMLWrapper
 
   constructor: (@tagName, options = {}) ->
     openTag = "<#{@tagName}[^>]*>"
@@ -16,13 +16,13 @@ class up.HtmlWrapper
 
   wrapMatch: (match) =>
     @didWrap = true
-    "<div class='#{@className}' data-html='#{u.escapeHtml(match)}'></div>"
+    "<div class='#{@className}' data-html='#{u.escapeHTML(match)}'></div>"
 
   unwrap: (element) ->
     return unless @didWrap
     for wrappedChild in element.querySelectorAll(".#{@className}")
-      originalHtml = wrappedChild.getAttribute('data-html')
-      restoredElement = e.createFromHtml(originalHtml)
+      originalHTML = wrappedChild.getAttribute('data-html')
+      restoredElement = e.createFromHTML(originalHTML)
       if @guard(restoredElement)
         e.replace(wrappedChild, restoredElement)
       else

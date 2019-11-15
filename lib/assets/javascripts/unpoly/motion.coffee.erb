@@ -217,7 +217,7 @@ up.motion = do ->
   ###
   animateNow = (element, lastFrame, options) ->
     options = u.merge(options, finishEvent: motionController.finishEvent)
-    cssTransition = new up.CssTransition(element, lastFrame, options)
+    cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()
 
   ###**
@@ -567,67 +567,67 @@ up.motion = do ->
     animateNow(element, { opacity: 0 }, options)
   )
 
-  translateCss = (x, y) ->
+  translateCSS = (x, y) ->
     { transform: "translate(#{x}px, #{y}px)" }
 
   registerAnimation('move-to-top', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.top + box.height
-    animateNow(element, translateCss(0, -travelDistance), options)
+    animateNow(element, translateCSS(0, -travelDistance), options)
   )
 
   registerAnimation('move-from-top', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.top + box.height
-    e.setStyle(element, translateCss(0, -travelDistance))
-    animateNow(element, translateCss(0, 0), options)
+    e.setStyle(element, translateCSS(0, -travelDistance))
+    animateNow(element, translateCSS(0, 0), options)
   )
 
   registerAnimation('move-to-bottom', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = e.root.clientHeight - box.top
-    animateNow(element, translateCss(0, travelDistance), options)
+    animateNow(element, translateCSS(0, travelDistance), options)
   )
 
   registerAnimation('move-from-bottom', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = up.viewport.rootHeight() - box.top
-    e.setStyle(element, translateCss(0, travelDistance))
-    animateNow(element, translateCss(0, 0), options)
+    e.setStyle(element, translateCSS(0, travelDistance))
+    animateNow(element, translateCSS(0, 0), options)
   )
 
   registerAnimation('move-to-left', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.left + box.width
-    animateNow(element, translateCss(-travelDistance, 0), options)
+    animateNow(element, translateCSS(-travelDistance, 0), options)
   )
 
   registerAnimation('move-from-left', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = box.left + box.width
-    e.setStyle(element, translateCss(-travelDistance, 0))
-    animateNow(element, translateCss(0, 0), options)
+    e.setStyle(element, translateCSS(-travelDistance, 0))
+    animateNow(element, translateCSS(0, 0), options)
   )
 
   registerAnimation('move-to-right', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = up.viewport.rootWidth() - box.left
-    animateNow(element, translateCss(travelDistance, 0), options)
+    animateNow(element, translateCSS(travelDistance, 0), options)
   )
 
   registerAnimation('move-from-right', (element, options) ->
-    e.setStyle(element, translateCss(0, 0))
+    e.setStyle(element, translateCSS(0, 0))
     box = element.getBoundingClientRect()
     travelDistance = up.viewport.rootWidth() - box.left
-    e.setStyle(element, translateCss(travelDistance, 0))
-    animateNow(element, translateCss(0, 0), options)
+    e.setStyle(element, translateCSS(travelDistance, 0))
+    animateNow(element, translateCSS(0, 0), options)
   )
 
   registerAnimation('roll-down', (element, options) ->
