@@ -45,7 +45,7 @@ up.legacy = do ->
 
   warn = (message, args...) ->
     message = "[DEPRECATION] #{message}"
-    message = up.log.sprintf(message, args...)
+    message = u.sprintf(message, args...)
     unless warnedMessages[message]
       warnedMessages[message] = true
       up.warn(message)

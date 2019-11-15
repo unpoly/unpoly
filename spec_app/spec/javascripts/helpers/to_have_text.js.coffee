@@ -13,9 +13,9 @@ beforeEach ->
         result.pass = (element && actualText == expectedText)
 
         if result.pass
-          result.message = up.log.sprintf('Expected element %o to not have text %s', element, actualText)
+          result.message = u.sprintf('Expected element %o to not have text %s', element, actualText)
         else
-          result.message = up.log.sprintf('Expected element %o to have text %s, but its text was %s', element, expectedText, actualText)
+          result.message = u.sprintf('Expected element %o to have text %s, but its text was %s', element, expectedText, actualText)
 
         return result
 

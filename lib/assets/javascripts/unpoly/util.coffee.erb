@@ -1641,6 +1641,66 @@ up.util = do ->
         result[key] = value
     result
 
+  stringifyArg = (arg) ->
+    maxLength = 200
+    closer = ''
+
+    if isString(arg)
+      string = arg.replace(/[\n\r\t ]+/g, ' ')
+      string = string.replace(/^[\n\r\t ]+/, '')
+      string = string.replace(/[\n\r\t ]$/, '')
+      string = "\"#{string}\""
+      closer = '"'
+    else if isUndefined(arg)
+      # JSON.stringify(undefined) is actually undefined
+      string = 'undefined'
+    else if isNumber(arg) || isFunction(arg)
+      string = arg.toString()
+    else if isArray(arg)
+      string = "[#{map(arg, stringifyArg).join(', ')}]"
+      closer = ']'
+    else if isJQuery(arg)
+      string = "$(#{map(arg, stringifyArg).join(', ')})"
+      closer = ')'
+    else if isElement(arg)
+      string = "<#{arg.tagName.toLowerCase()}"
+      for attr in ['id', 'name', 'class']
+        if value = arg.getAttribute(attr)
+          string += " #{attr}=\"#{value}\""
+      string += ">"
+      closer = '>'
+    else # object
+      string = JSON.stringify(arg)
+    if string.length > maxLength
+      string = "#{string.substr(0, maxLength)} …"
+      string += closer
+    string
+
+  SPRINTF_PLACEHOLDERS = /\%[odisf]/g
+
+  ###**
+  See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
+
+  @function up.util.sprintf
+  @internal
+  ###
+  sprintf = (message, args...) ->
+    sprintfWithFormattedArgs(identity, message, args...)
+
+  ###**
+  @function up.util.sprintfWithFormattedArgs
+  @internal
+  ###
+  sprintfWithFormattedArgs = (formatter, message, args...) ->
+    return '' unless message
+
+    i = 0
+    message.replace SPRINTF_PLACEHOLDERS, ->
+      arg = args[i]
+      arg = formatter(stringifyArg(arg))
+      i += 1
+      arg
+
 #  asyncWrap = (fn, before, after) ->
 #    before()
 #    return fn().finally(after)
@@ -1794,3 +1854,5 @@ up.util = do ->
   unprefixCamelCase: unprefixCamelCase
   camelToKebabCase: camelToKebabCase
   nullToUndefined: nullToUndefined
+  sprintf: sprintf
+  sprintfWithFormattedArgs: sprintfWithFormattedArgs

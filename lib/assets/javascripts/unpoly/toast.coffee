@@ -20,7 +20,7 @@ up.toast = do ->
   messageToHTML = (message) ->
     if u.isArray(message)
       message[0] = u.escapeHTML(message[0])
-      message = up.log.sprintfWithFormattedArgs(VARIABLE_FORMATTER, message...)
+      message = u.sprintfWithFormattedArgs(VARIABLE_FORMATTER, message...)
     else
       message = u.escapeHTML(message)
     message

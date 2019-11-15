@@ -4,7 +4,7 @@ up.error = do ->
 
   build = (name, message, props = {}) ->
     if u.isArray(message)
-      message = up.log.sprintf(message...)
+      message = u.sprintf(message...)
     error = new Error(message)
     u.assign(error, props)
     error.name = name

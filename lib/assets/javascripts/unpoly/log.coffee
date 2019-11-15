@@ -45,84 +45,6 @@ up.log = do ->
     "#{config.prefix}#{message}"
 
   ###**
-  A cross-browser way to interact with `console.log`, `console.error`, etc.
-
-  This function falls back to `console.log` if the output stream is not implemented.
-  It also prints substitution strings (e.g. `console.log("From %o to %o", "a", "b")`)
-  as a single string if the browser console does not support substitution strings.
-
-  \#\#\# Example
-
-      up.browser.puts('log', 'Hi world')
-      up.browser.puts('error', 'There was an error in %o', obj)
-
-  @function up.browser.puts
-  @internal
-  ###
-  callConsole = (stream, args...) ->
-    console[stream](args...)
-
-  CONSOLE_PLACEHOLDERS = /\%[odisf]/g
-
-  stringifyArg = (arg) ->
-    maxLength = 200
-    closer = ''
-
-    if u.isString(arg)
-      string = arg.replace(/[\n\r\t ]+/g, ' ')
-      string = string.replace(/^[\n\r\t ]+/, '')
-      string = string.replace(/[\n\r\t ]$/, '')
-      string = "\"#{string}\""
-      closer = '"'
-    else if u.isUndefined(arg)
-      # JSON.stringify(undefined) is actually undefined
-      string = 'undefined'
-    else if u.isNumber(arg) || u.isFunction(arg)
-      string = arg.toString()
-    else if u.isArray(arg)
-      string = "[#{u.map(arg, stringifyArg).join(', ')}]"
-      closer = ']'
-    else if u.isJQuery(arg)
-      string = "$(#{u.map(arg, stringifyArg).join(', ')})"
-      closer = ')'
-    else if u.isElement(arg)
-      string = "<#{arg.tagName.toLowerCase()}"
-      for attr in ['id', 'name', 'class']
-        if value = arg.getAttribute(attr)
-          string += " #{attr}=\"#{value}\""
-      string += ">"
-      closer = '>'
-    else # object
-      string = JSON.stringify(arg)
-    if string.length > maxLength
-      string = "#{string.substr(0, maxLength)} …"
-      string += closer
-    string
-
-  ###**
-  See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
-
-  @function up.log.sprintf
-  @internal
-  ###
-  sprintf = (message, args...) ->
-    sprintfWithFormattedArgs(u.identity, message, args...)
-
-  ###**
-  @function up.log.sprintfWithFormattedArgs
-  @internal
-  ###
-  sprintfWithFormattedArgs = (formatter, message, args...) ->
-    return '' unless message
-
-    i = 0
-    message.replace CONSOLE_PLACEHOLDERS, ->
-      arg = args[i]
-      arg = formatter(stringifyArg(arg))
-      i += 1
-      arg
-
-  ###**
   Prints a debugging message to the browser console.
 
   @function up.log.debug
@@ -262,8 +184,6 @@ up.log = do ->
     throw up.error.failure(messageArgs)
 
   puts: printToStandard
-  sprintf: sprintf
-  sprintfWithFormattedArgs: sprintfWithFormattedArgs
   debug: printToDebug
   error: printToError
   warn: printToWarn

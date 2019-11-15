@@ -26,7 +26,6 @@
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- Move up.log.sprintf to up.util.sprintf
 - backdropDismissable => outsideDismissable
 - Should Layer.Root#element be body?
 

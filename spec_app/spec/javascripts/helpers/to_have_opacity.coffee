@@ -11,5 +11,5 @@ beforeEach ->
         result = {}
         result.pass =  Math.abs(expectedOpacity - actualOpacity) <= tolerance
         unless result.pass
-          result.message = up.log.sprintf("Expected %o to have opacity %o, but it was %o", element, expectedOpacity, actualOpacity)
+          result.message = u.sprintf("Expected %o to have opacity %o, but it was %o", element, expectedOpacity, actualOpacity)
         return result
