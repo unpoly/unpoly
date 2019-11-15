@@ -12,6 +12,7 @@ Unreleased
 - Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
 - Failed responses now change the URL
 - TODO ...
+- up.history.config.restoreScroll has been removed. You can use up.history.config.restoreTargets = { target: 'body', restoreScroll: false } instead.
 
 
 0.61.0

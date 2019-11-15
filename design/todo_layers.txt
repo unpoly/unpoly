@@ -20,8 +20,6 @@
 - up.layer.lookup and up.layer.lookupAll sound like they would take a value, but they only take an options hash
 - Rename change({ document }) to change({ page })?
   - Or is it change({ outer }), change({ inner })?
-- Rename up.element.*fromHtml to ...fromHTML
-- Rename up.util.escapeHTML to up.util.escapeHTML
 - Easy way to check that an error is an AbortError
   - We have isAbortError but Request#aborted
   - I think we should just do #aborted because it's easier to check
@@ -30,7 +28,6 @@
   - Remove all groups
   - Distinguish between puts and debug
 - Move up.log.sprintf to up.util.sprintf
-- up.fragment.config.fallbackTransition wieder rein?
 - up.fragment.config.fallbacks sollte auf up.fragment.config.targets delegieren, oder wir nennen { targets } um auf { fallbacks }
 - Layer HTML doch wieder wie früher: .up-modal .up-modal-viewport .up-modal-frame .up-modal-content
 - backdropDismissable => outsideDismissable
@@ -187,5 +184,7 @@ Decisions
 - Should we keep up.history.popTargets?
   - up.config.root.targets might not be appropriate
   - but the layer targets will always be options after .popTargets, so we can keep popTargets as empty
+- up.fragment.config.fallbackTransition wieder rein?
+  => Nein, man kann ja das fallback als { objekt } machen
 
 

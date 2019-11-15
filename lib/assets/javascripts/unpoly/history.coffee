@@ -29,7 +29,6 @@ up.history = do ->
   config = new up.Config ->
     enabled: true
     restoreTargets: ['body'] # will be prepended to the root layer's default target
-    restoreScroll: true
 
   up.legacy.renamedProperty(config, 'popTargets', 'restoreTargets')
 
@@ -166,7 +165,7 @@ up.history = do ->
         target: config.restoreTargets,
         url: url
         location: false,    # don't push a new state
-        restoreScroll: config.restoreScroll
+        restoreScroll: true
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
       replaced.then ->
         url = currentLocation()
