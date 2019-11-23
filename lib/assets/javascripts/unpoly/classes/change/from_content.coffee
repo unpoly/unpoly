@@ -14,32 +14,11 @@ class up.Change.FromContent extends up.Change
     # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
     # since the current layer might change between request and response.
     @options.currentLayer ?= up.layer.current
-    @extractModeFromLayerOption()
-    @setDefaultLayer()
 
   ensurePlansBuilt: ->
     @plans or @buildPlans()
     unless @plans.length
       @notApplicable(['No target for change %o', @options])
-
-  extractModeFromLayerOption: ->
-    if up.layer.isOverlayMode(@options.layer)
-      @options.mode = @options.layer
-
-    # If user passes a { mode } option without a { layer } option
-    # we assume they want to open a new layer.
-    if @options.mode
-      @options.layer = 'new'
-
-  setDefaultLayer: ->
-    if @options.layer
-      return
-    else if @options.origin
-      # Links update their own layer by default.
-      @options.layer = 'origin'
-    else
-      # If no origin is given, we assume the current layer.
-      @options.layer = 'current'
 
   toTargetObjList: (target, props) ->
     list = u.wrapList(target)

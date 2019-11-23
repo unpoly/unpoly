@@ -28,6 +28,7 @@ up.error = do ->
     build,
     failure,
     notApplicable,
+    notImplemented,
   }
 
 #  build: build

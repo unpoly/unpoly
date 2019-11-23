@@ -37,9 +37,9 @@ up.fragment = do ->
   @return {string|undefined}
   @experimental
   ###
-  source = (target, options = {}) ->
-    setLayerOption(target, options)
-    element = first(target, options)
+  source = (args...) ->
+    options = parseTargetAndOptions(args)
+    element = first(options.target, options)
     if sourceElement = e.closest(element, '[up-source]')
       sourceElement.getAttribute("up-source")
 
@@ -248,7 +248,7 @@ up.fragment = do ->
   @stable
   ###
   replace = (target, url, options) ->
-    up.legacy.deprecated('up.replace(target, url)', 'up.change(target, { url: url })')
+    up.legacy.deprecated('up.replace(target, url)', 'up.change(target, { url })')
     return makeChange(target, u.merge(options, { url }))
 
   ###**
@@ -575,10 +575,10 @@ up.fragment = do ->
     A promise that will be fulfilled once the element has been removed from the DOM.
   @stable
   ###
-  destroy = (target, options = {}) ->
-    setLayerOption(target, options)
+  destroy = (args...) ->
+    options = parseTargetAndOptions(args)
 
-    if options.element = first(target, options)
+    if options.element = first(options.target, options)
       return new up.Change.DestroyFragment(options).executeAsync()
     else
       return Promise.resolve()
@@ -587,16 +587,9 @@ up.fragment = do ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
     options.log != false && !e.matches(element, '.up-overlay')
 
-  setLayerOption = (target, options) ->
-    # up.fragment functions usually only see elements in the current layer.
-    # However, if we are passed an actual Element or jQuery collection,
-    # we operate in the given element's layer.
-    if !options.layer && u.isElementish(target)
-      options.layer = up.layer.get(target)
-
   parseTargetAndOptions = (args) ->
     options = u.parseArgIntoOptions(args, 'target')
-    setLayerOption(options.target, options)
+    up.layer.normalizeOptions(options)
     options
 
   ###**

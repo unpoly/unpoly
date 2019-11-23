@@ -61,6 +61,9 @@ up.layer = do ->
 
   handlers = []
 
+#  overlayModes: ->
+#    u.map(OVERLAY_CLASSES, 'mode')
+
   isOverlayMode = (name) ->
     !!config[name]?.Class
 
@@ -72,14 +75,41 @@ up.layer = do ->
 
   The config objects are in descending order of specificity.
   ###
-  modeConfigs = (mode = config.mode) ->
+  modeConfigs = (mode) ->
     if mode == 'root'
       return [config.root, config.all]
     else
       return [config[mode], config.overlay, config.all]
 
+  normalizeOptions = (options) ->
+    if options.layer
+      if options.layer == 'new'
+        # If the user wants to open a new layer, but does not pass a { mode },
+        # we assume the default mode from up.layer.config.mode.
+        options.mode ||= config.mode
+      else if isOverlayMode(options.layer)
+        # We allow passing an overlay mode in { layer }, which will
+        # open a new layer with that mode.
+        options.mode = options.layer
+        options.layer = 'new'
+    else
+      if options.mode
+        # If user passes a { mode } option without a { layer } option
+        # we assume they want to open a new layer.
+        options.layer = 'new'
+      else if u.isElementish(options.target)
+        # If we are targeting an actual Element or jQuery collection (anot not
+        # a selector string) we operate in that element's layer.
+        options.layer = stack.get(options.target)
+      else if options.origin
+        # Links update their own layer by default.
+        options.layer = 'origin'
+      else
+        # If nothing is given, we assume the current layer.
+        options.layer = 'current'
+
   build = (options) ->
-    mode = options.mode ? config.mode
+    mode = options.mode
     Class = config[mode].Class
     configs = u.reverse(modeConfigs(mode))
     options = u.mergeDefined(configs..., { mode, stack }, options)
@@ -211,6 +241,7 @@ up.layer = do ->
     defaultTargets: defaultTargets
     open: open
     build: build
+    normalizeOptions: normalizeOptions
     accept: (args...) -> stack.current.accept(args...)
     dismiss: (args...) -> stack.current.dismiss(args...)
     sync: (args...) -> stack.current.sync(args...)

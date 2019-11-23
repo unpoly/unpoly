@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 class up.LayerLookup
 
@@ -33,9 +34,6 @@ class up.LayerLookup
     if u.isElement(@value) || u.isJQuery(@value)
       return [@ofElement(@value)]
 
-#    if up.layer.isOverlayMode(@value)
-#      return [@value]
-
     return switch @value
       when 'new'
         ['new'] # pass-through
@@ -55,12 +53,12 @@ class up.LayerLookup
         [@givenOriginLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
       when 'parent'
         u.compact [@stack.parentOf(@givenBaseLayer())]
-      when 'ancestors'
+      when 'ancestor'
         @stack.ancestorsOf(@givenBaseLayer())
       when 'closest'
         @stack.selfAndAncestorsOf(@givenBaseLayer())
       else
-        up.fail("Unknown option value: { layer: '%s' }", @value)
+        up.fail("Unknown { layer } option: %o", @value)
 
   first: ->
     @all()[0]
