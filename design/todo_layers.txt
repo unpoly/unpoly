@@ -1,8 +1,6 @@
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
-- up.history.replace() is kinda dangerous API
-  - the current layer still has the previous URL
 - Move up.browser.location to up.history.location
 - Allow to pass up.Layer instances as first arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
@@ -29,22 +27,21 @@
 
 - Tests
   - Get tests green again
-  - Test that up.layer.get and up.layer.list take both an argument like "root" or an options hash or an element or a jquery collection
+  - Test that up.layer.get and up.layer.list take both a layer name like "root" or an options hash or an element or a jquery collection
   - Test layer { context } transmission
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
-  - Test that opening a new layer cancels requests that also open a new layer
   - Test that back button closes all layers
   - Test that up.change() can be called with { target: Element }
   - Test that up.change() can be called with { target: Element } and will find in any layer
   - Test that up.change() without { layer } option will only find in current layer
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
-  - Test that [up-dismiss][up-follow] inside a layer will dismiss
+  - Test that [up-dismiss][up-follow] inside a layer will dismiss, not follow
   - Test that [up-dismiss][up-follow] outside a layer will follow
   - Test that peeling is not preventable by preventing up:layer:dismiss
   - Test that opening/updating an layer can reset the world if selector is unavailable
   - Test against https://github.com/unpoly/unpoly/issues/79
-    - We might need to register all link handlers to a new .up-modal instead of the document
-  - Test defaults inheritance in layer hierarchy
+    - Should be fixed by up.layer.onEach()
+  - Test defaults inheritance in layer hierarchy (all => overlay => mode)
   - Test that a layer cannot have history: true if its parent has history: false
   - Test that making a layer change in an { onAccepted } callback will not deadlock the acceptance change
   - Test that layers are assigned .up-destroyed class while closing
@@ -56,12 +53,15 @@
   - Test that ResetWorld is actually happening
   - Test that up.change({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
   - Test that we can submit a form into a new layer (success / fail)
-  - Test up.proxy.cancel()
+  - Test up.proxy.abort()
+  - Test that opening a new layer cancels requests that also open a new layer
+  - Test { abort: 'conflict' }
   - Test that closing a layer cancels all requests for that layer
   - Test that up.change(document: Element) works
   - Test that forms can submit as arbitrary layer changes (success and failure)
   - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
   - Check that up.layer forwards getters for all layer properties to stack.current
+  - Test that compilers always see their up.layer.current, even if it is a background update and there is another layer above it
 
 - Docs
   - We now have unpoly-bootstrap3 and unpoly-bootstrap4
@@ -146,7 +146,9 @@ Later?
 - Replace up.Response.isSuccess() with up.Response#ok
 - Replace up.Response.isFatal() with !up.Response#body
 - Emit up:proxy:fatal when responses are aborted due to user or timeout
-up:fragment:inserted should receive the entire document from which the fragment was extracted
+- up:fragment:inserted should receive the entire document from which the fragment was extracted
+- Support named layers
+
 
 
 Decisions
@@ -181,5 +183,7 @@ Decisions
   - but the layer targets will always be options after .popTargets, so we can keep popTargets as empty
 - up.fragment.config.fallbackTransition wieder rein?
   => Nein, man kann ja das fallback als { objekt } machen
+- It's stupid to have both { layer } and { mode } when one can set both
+  => No, we don't want up.layer.open({ layer: 'modal' })
 
 
