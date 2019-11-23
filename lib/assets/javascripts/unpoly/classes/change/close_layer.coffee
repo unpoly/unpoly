@@ -57,6 +57,7 @@ class up.Change.CloseLayer extends up.Change.Removal
     return @layer.emit(closeEvent) # will bubble up to document
 
   emitClosingEvent: ->
+    closingEvent = @buildEvent(@closingEventName)
     # Emit the "closing" event to indicate that the "close" event was not
     # prevented and the closing animation is about to start.
     @layer[@closingCallbackName]?(closingEvent)
@@ -74,6 +75,6 @@ class up.Change.CloseLayer extends up.Change.Removal
   buildEvent: (name) ->
     return up.event.build(name,
       layer: @layer
-      value: value
+      value: @value
       origin: @origin
     )

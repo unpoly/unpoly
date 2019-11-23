@@ -4,12 +4,13 @@ e = up.element
 up.layer = do ->
 
   OVERLAY_CLASSES = [
-    up.Layer.Root
     up.Layer.Modal
     up.Layer.Popup
     up.Layer.Drawer
     up.Layer.Cover
   ]
+  OVERLAY_MODES = u.map(OVERLAY_CLASSES, 'mode')
+  LAYER_CLASSES = [up.Layer.Root].concat(OVERLAY_CLASSES)
 
   # TODO: Document up.layer.config
   config = new up.Config ->
@@ -52,7 +53,7 @@ up.layer = do ->
         align: 'left'
         history: false
 
-    for Class in OVERLAY_CLASSES
+    for Class in LAYER_CLASSES
       newConfig[Class.mode].Class = Class
 
     return newConfig
@@ -61,11 +62,8 @@ up.layer = do ->
 
   handlers = []
 
-#  overlayModes: ->
-#    u.map(OVERLAY_CLASSES, 'mode')
-
-  isOverlayMode = (name) ->
-    !!config[name]?.Class
+  isOverlayMode = (mode) ->
+    return u.contains(OVERLAY_MODES, mode)
 
   defaultTargets = (mode) ->
     return u.flatMap(modeConfigs(mode), 'targets')
@@ -113,6 +111,7 @@ up.layer = do ->
     Class = config[mode].Class
     configs = u.reverse(modeConfigs(mode))
     options = u.mergeDefined(configs..., { mode, stack }, options)
+    console.debug("building layer for mode %o (class %o)", mode, Class)
     return new Class(options)
 
 #  modeClass = (options = {}) ->
@@ -194,6 +193,7 @@ up.layer = do ->
     # TODO: Docs for [up-drawer]
     # TODO: Docs for [up-cover]
     for Class in OVERLAY_CLASSES
+      console.debug("Registering macro %o for %o (mode %o)", Class.attr, Class.mode)
       up.link.targetMacro Class.attr, 'up-layer': Class.mode
 
   registerCloseHandler = (attribute, closeFn) ->
@@ -210,8 +210,8 @@ up.layer = do ->
       # If the link is in the root layer, we allow the event to bubble up.
       unless layer.isRoot()
         value = e.jsonAttr(origin, attribute)
-        u.muteRejection closeFn(layer, { value, origin })
-        # closeFn(layer, { value, origin })
+        # u.muteRejection closeFn(layer, { value, origin })
+        closeFn(layer, { value, origin })
         up.event.halt(event)
 
   up.on 'up:framework:boot', ->

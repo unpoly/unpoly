@@ -13,6 +13,9 @@ class up.Change.OpenLayer extends up.Change.Addition
       up.legacy.warn('Layer option { flavor } has been renamed to { mode }')
       options.mode = options.flavor
 
+    # Modals are dismissable by default
+    options.dismissable ?= true
+
     # Allow to whitelist the ways how the overlay will be dismissable,
     # but still allow to enable/disable all ways with { dismissable }.
     options.buttonDismissable ?= options.dismissable
