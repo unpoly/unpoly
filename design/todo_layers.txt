@@ -1,8 +1,6 @@
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
-- Allow to pass up.Layer instances as first arguments to up.emit(), up.on(), up.first() and up.all()
-  - This requires some more changes than I thought
 - Update Rails integration
   - up.layer.accept(value)
   - up.layer.dismiss(value)
