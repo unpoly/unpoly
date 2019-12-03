@@ -95,7 +95,7 @@ class up.Change.FromURL extends up.Change
     requestAttrs = u.merge @successOptions,
       target: successPreview.preflightTarget()
       failTarget: failurePreview.preflightTarget(optional: true)
-      preflightLayer: @successOptions.layer
+      layer: @successOptions.layer
 
     @request = new up.Request(requestAttrs)
 

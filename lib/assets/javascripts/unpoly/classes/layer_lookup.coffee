@@ -6,11 +6,11 @@ class up.LayerLookup
   constructor: (@stack, args...) ->
     options = u.parseArgIntoOptions(args, 'layer')
     @value = options.layer
-    @customCurrent = options.base
+    @base = options.base
     @origin = options.origin
 
   givenCurrentLayer: ->
-    @customCurrent || @stack.current
+    @base || @stack.current
 
   givenOriginLayer: ->
     if @origin
@@ -22,7 +22,7 @@ class up.LayerLookup
       layer.contains(element)
 
   givenBaseLayer: ->
-    @customCurrent || @givenOriginLayer() || @stack.current
+    @base || @givenOriginLayer() || @stack.current
 
   all: ->
     if !@value

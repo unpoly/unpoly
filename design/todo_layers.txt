@@ -8,9 +8,6 @@
   - up.layer.dismiss(value)
   - up.layer.emit(name, props)
   - up.emit(name, props)
-- Review up.Request#preflightLayer
-  - This should always be set, even for new layers
-  - Why is it Request#preflightLayer instead of #layer?
 - Emit layer-bound proxy events with up.layer.emit(), not up.emit()
 - Present tense events still have long-form event log messages with gerund
 - Rename change({ document }) to ({ html })
@@ -78,7 +75,7 @@ Have you noticed how noticed how pages fade in
   - New gerund-events (up:layer:opening)
   - { failOptions }
   - up.link.config
-  - New up.Request properties (at least { origin }, { preflightLayer })
+  - New up.Request properties (at least { origin }, { layer })
   - Publish up.Request#loadPage()
   - Document that { target } can be an array
 

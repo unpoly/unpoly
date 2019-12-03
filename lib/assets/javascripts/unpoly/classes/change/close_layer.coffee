@@ -28,7 +28,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       value = e.jsonAttr(@origin, @valueAttr)
 
     # Abort all pending requests targeting the layer we're now closing.
-    up.proxy.abort(preflightLayer: this)
+    up.proxy.abort(layer: this)
 
     if !@emitCloseEvent().defaultPrevented || !@preventable
       unless @layer.isOpen()

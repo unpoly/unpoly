@@ -84,7 +84,7 @@ class up.Request extends up.Record
       'cache',  # since up.proxy.request() options are sometimes wrapped in this class
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
-      'preflightLayer',
+      'layer',
       'origin',
       'context',
       'solo',
@@ -122,12 +122,12 @@ class up.Request extends up.Record
     @headers ||= {}
 
     if @origin
-      @preflightLayer ||= up.layer.get(@origin)
+      @layer ||= up.layer.get(@origin)
 
-    # Make sure @context is always an object, even if no preflightLayer is given.
+    # Make sure @context is always an object, even if no @layer is given.
     # Note that @context is a part of our @cacheKey(), since different contexts
     # might yield different server responses.
-    @context ||= @preflightLayer?.context || {}
+    @context ||= @layer?.context || {}
 
     @extractHashFromURL()
     unless u.methodAllowsPayload(@method)
@@ -146,10 +146,10 @@ class up.Request extends up.Record
     u.task =>
       # While the request is still in flight, we require the target layer
       # to be able to cancel it when the layers gets closed. We now
-      # evict this property, since response.request.preflightLayer.element will
+      # evict this property, since response.request.layer.element will
       # prevent the layer DOM tree from garbage collection while the response
       # is cached by up.proxy.
-      @preflightLayer = undefined
+      @layer = undefined
 
       # We want to provide the triggering element as { origin } to the function
       # providing the CSRF function. We now evict this property, since
