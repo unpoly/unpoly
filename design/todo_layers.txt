@@ -1,7 +1,6 @@
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
-- Move up.browser.location to up.history.location
 - Allow to pass up.Layer instances as first arguments to up.emit(), up.on(), up.first() and up.all()
   - This requires some more changes than I thought
 - Update Rails integration
@@ -18,7 +17,7 @@
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- Should Layer.Root#element be body?
+- Layer.Root#element should be the body
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
@@ -61,6 +60,7 @@ Have you noticed how noticed how pages fade in
   - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
   - Check that up.layer forwards getters for all layer properties to stack.current
   - Test that compilers always see their up.layer.current, even if it is a background update and there is another layer above it
+  - Test Rails integration
 
 - Docs
   - We now have unpoly-bootstrap3 and unpoly-bootstrap4

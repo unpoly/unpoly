@@ -86,6 +86,9 @@ class up.Layer extends up.Record
     )
 
   containsEventTarget: (event) =>
+    # Since the root layer will receive events emitted on descendant layers
+    # we need to manually check whether the event target is contained
+    # by this layer.
     @contains(event.target)
 
   buildEventEmitter: (args) ->
