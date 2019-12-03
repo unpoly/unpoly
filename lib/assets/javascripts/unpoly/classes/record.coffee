@@ -5,11 +5,11 @@ class up.Record extends up.Class
   keys: ->
     throw 'Return an array of keys'
 
-  defaults: ->
+  defaults: (options) ->
     {}
 
   constructor: (options) ->
-    u.assign(this, @defaults(), @attributes(options))
+    u.assign(this, @defaults(options), @attributes(options))
 
   attributes: (source = @) ->
     u.pick(source, @keys())
@@ -18,8 +18,7 @@ class up.Record extends up.Class
     @variant()
 
   variant: (changes = {}) ->
-    attributesWithChanges = u.merge(@attributes(), changes)
-    new @constructor(attributesWithChanges)
+    new @constructor(u.merge(@attributes(), changes))
 
   "#{u.isEqual.key}": (other) ->
     @constructor == other.constructor && u.isEqual(@attributes(), other.attributes())

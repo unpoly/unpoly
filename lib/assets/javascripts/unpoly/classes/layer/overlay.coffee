@@ -41,6 +41,11 @@ class up.Layer.Overlay extends up.Layer
       'onContentAttached',
     ]
 
+  defaults: (options) ->
+    buttonDismissable: options.dismissable
+    escapeDismissable: options.dismissable
+    outsideDismissable: options.dismissable
+
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
   @function up.Layer.Overlay#openNow
@@ -67,13 +72,13 @@ class up.Layer.Overlay extends up.Layer
   closeNow: (options) ->
     throw up.error.notImplemented()
 
-  createElement: (parentElement = @stack.overlayContainer) ->
+  createElement: ->
     attrs = u.compactObject
       'up-mode': @constructor.mode
       'up-align': @align
       'up-position': @position,
       'up-size': @size,
-    @element = e.affix(parentElement, '.up-overlay', attrs)
+    @element = e.affix(@stack.overlayContainer, '.up-overlay', attrs)
 
     if @class
       @element.classList.add(@class)

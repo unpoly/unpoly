@@ -78,9 +78,19 @@ up.layer = do ->
       return [config.root, config.all]
     else
       return [config[mode], config.overlay, config.all]
-
+      
   normalizeOptions = (options) ->
+    up.legacy.fixKey(options, 'closable', 'dismissable')
+    up.legacy.fixKey(options, 'flavor', 'mode')
+
     if options.layer
+      if options.layer == 'swap'
+        if up.layer.isRoot()
+          options.layer = 'root'
+        else
+          options.layer = 'new'
+          options.base = 'parent'
+
       if options.layer == 'new'
         # If the user wants to open a new layer, but does not pass a { mode },
         # we assume the default mode from up.layer.config.mode.
@@ -105,6 +115,11 @@ up.layer = do ->
       else
         # If nothing is given, we assume the current layer.
         options.layer = 'current'
+
+    # Remember the layer that was current when the request was made,
+    # so changes with `{ layer: 'new' }` will know what to stack on.
+    # This also sets up.layer.current as default.
+    options.base = up.layer.get(options.base)
 
   build = (options) ->
     mode = options.mode

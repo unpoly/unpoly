@@ -6,7 +6,7 @@ class up.LayerLookup
   constructor: (@stack, args...) ->
     options = u.parseArgIntoOptions(args, 'layer')
     @value = options.layer
-    @customCurrent = options.currentLayer
+    @customCurrent = options.base
     @origin = options.origin
 
   givenCurrentLayer: ->

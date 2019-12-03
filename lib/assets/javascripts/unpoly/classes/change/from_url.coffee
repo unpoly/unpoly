@@ -8,16 +8,13 @@ class up.Change.FromURL extends up.Change
     super(options)
 
     @successOptions = u.copy(@options)
-    # Remember the layer that was current when the request was made,
-    # so changes with `{ layer: 'new' }` will know what to stack on.
-    @successOptions.currentLayer = up.layer.current
     @successOptions.inspectResponse = @fullLoad
     @deriveFailureOptions()
 
   # These options are used before the request is sent.
   # Hence there is no failVariant.
   @PREFLIGHT_KEYS: [
-    'currentLayer',
+    'base',
     'inspectResponse',
     'url',
     'method',

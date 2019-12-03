@@ -5,16 +5,6 @@ e = up.element
 
 class up.Change.FromContent extends up.Change
 
-  constructor: (options) ->
-    super(options)
-    # Remember the layer that was current when the request was made, so changes
-    # with `{ layer: 'new' }` will know what to stack on. The current layer might
-    # change until the queued layer change is executed.
-    #
-    # The `{ currentLayer }` option might also be set from `new up.Change.FromURL()`
-    # since the current layer might change between request and response.
-    @options.currentLayer ?= up.layer.current
-
   ensurePlansBuilt: ->
     @plans or @buildPlans()
     unless @plans.length

@@ -1,5 +1,4 @@
 #= require ../record
-#= require ../config
 
 e = up.element
 u = up.util
@@ -136,7 +135,7 @@ class up.Layer extends up.Record
     get: ->
       if @hasLiveHistory()
         # Allow Unpoly-unaware code to set the document title directly.
-        # This will implicitely change the current layer's title.
+        # This will implicitey change the leaf layer's title.
         document.title
       else
         @savedTitle
@@ -151,7 +150,7 @@ class up.Layer extends up.Record
     get: ->
       if @hasLiveHistory()
         # Allow Unpoly-unaware code to use the pushState API directly.
-        # This will implicitely change the current layer's location.
+        # This will implicitly change the leaf layer's location.
         up.browser.location
       else
         @savedLocation

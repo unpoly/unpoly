@@ -5,29 +5,12 @@ u = up.util
 class up.Change.OpenLayer extends up.Change.Addition
 
   constructor: (options) ->
-    if u.isGiven(options.closable)
-      up.legacy.warn('Layer option { closable } has been renamed to { dismissable }')
-      options.dismissable = options.closable
-
-    if u.isGiven(options.flavor)
-      up.legacy.warn('Layer option { flavor } has been renamed to { mode }')
-      options.mode = options.flavor
-
-    # Modals are dismissable by default
-    options.dismissable ?= true
-
-    # Allow to whitelist the ways how the overlay will be dismissable,
-    # but still allow to enable/disable all ways with { dismissable }.
-    options.buttonDismissable ?= options.dismissable
-    options.escapeDismissable ?= options.dismissable
-    options.outsideDismissable ?= options.dismissable
-
     super(options)
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @source = options.source
     @origin = options.origin
-    @currentLayer = options.currentLayer
+    @base = options.base
 
   preflightLayer: ->
     'new'
@@ -46,7 +29,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @content
       throw @notApplicable("Could not find element \"#{@target}\" in server response")
 
-    unless @currentLayer.isOpen()
+    unless @base.isOpen()
       throw @notApplicable('Parent layer was closed')
 
     up.puts("Opening \"#{@target}\" in new layer")
@@ -54,8 +37,9 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer = up.layer.build(@options)
 
     unless @emitOpenEvent().defaultPrevented
-      # Make sure that the ground layer doesn't already have a child layer.
-      @currentLayer.peel()
+      # Make sure that the base layer doesn't already have a child layer.
+      # Note that this cannot be prevented with { peel: false }!
+      @base.peel()
 
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)
