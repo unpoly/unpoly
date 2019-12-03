@@ -29,8 +29,6 @@ up.util = do ->
   ###
   asyncNoop = -> Promise.resolve()
 
-  asyncError = (message) -> Promise.reject(new Error(message))
-
   ###**
   Ensures that the given function can only be called a single time.
   Subsequent calls will return the return value of the first call.
@@ -1801,7 +1799,6 @@ up.util = do ->
   extractCallback: extractCallback
   noop: noop
   asyncNoop: asyncNoop
-  asyncError: asyncError
   identity: identity
   escapeHtml: (args...) ->
     up.legacy.deprecated('up.util.escapeHtml', 'up.util.escapeHTML')

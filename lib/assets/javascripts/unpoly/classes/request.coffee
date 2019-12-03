@@ -229,7 +229,7 @@ class up.Request extends up.Record
 
   setAbortedState: (message = 'Request was aborted') =>
     @aborted = true
-    @deferred.reject(up.event.abortError(message))
+    @deferred.reject(up.error.aborted(message))
 
   responseReceived: =>
     @respondWith(@extractResponseFromXhr())

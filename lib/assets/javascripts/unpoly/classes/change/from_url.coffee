@@ -99,15 +99,6 @@ class up.Change.FromURL extends up.Change
 
     @request = new up.Request(requestAttrs)
 
-#  ignoreNotApplicable: (fn) ->
-#    try
-#      return fn()
-#    catch error
-#      if error.name == 'up.NotApplicable'
-#        return undefined
-#      else
-#        throw error
-
   onRequestSuccess: (response) =>
     up.log.debug('Updating page with successful response')
     @processResponse(response, @successOptions)

@@ -38,7 +38,7 @@ class up.ScrollMotion
     # When the scroll position is not the one we previously set, we assume
     # that the user has tried scrolling on her own. We then cancel the scrolling animation.
     if @frameTop && Math.abs(@frameTop - @scrollable.scrollTop) > 1.5
-      @cancel('Animation aborted due to user intervention')
+      @abort('Animation aborted due to user intervention')
 
     currentTime = Date.now()
     timeElapsed = currentTime - @startTime
@@ -54,9 +54,9 @@ class up.ScrollMotion
       @scrollable.scrollTop = @frameTop
       requestAnimationFrame(@animationFrame)
 
-  cancel: (reason) =>
+  abort: (reason) =>
     @settled = true
-    @reject(new Error(reason))
+    @reject(up.error.aborted(reason))
 
   finish: =>
     # In case we're animating with emulation, cancel the next scheduled frame

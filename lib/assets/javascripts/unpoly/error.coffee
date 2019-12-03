@@ -2,35 +2,43 @@ up.error = do ->
 
   u = up.util
 
-  build = (name, message, props = {}) ->
-    if u.isArray(message)
-      message = u.sprintf(message...)
+  build = (message, props = {}) ->
+    # if u.isArray(message)
+    #   message = u.sprintf(message...)
     error = new Error(message)
     u.assign(error, props)
-    error.name = name
     return error
 
-#  errorInterface = (name) ->
-#    fn = (args...) -> build(name, args...)
-#    fn.is = (error) -> error.name == name
-#    return fn
+  errorInterface = (name, init = build) ->
+    fn = (args...) ->
+      error = init(args...)
+      error.name = name
+      error
 
-  failure = (message) ->
-    build('up.Failure', message)
+    fn.is = (error) ->
+      return error.name == name
 
-  notApplicable = (change, reason) ->
-    build('up.NotApplicable', "Cannot apply change: #{change} (#{reason}")
+    fn.async = (args...) ->
+      return Promise.reject(fn(args...))
 
-  notImplemented = ->
-    build('up.NotImplemented')
+    return fn
+
+  failed = errorInterface('up.Failed')
+
+  # Emulate the exception that aborted fetch() would throw
+  aborted = errorInterface('AbortError', ->
+    build('Aborted', aborted: true)
+  )
+
+  notImplemented = errorInterface('up.NotImplemented')
+
+  notApplicable = errorInterface('up.NotApplicable', (change, reason) ->
+    build("Cannot apply change: #{change} (#{reason}")
+  )
 
   {
-    build,
-    failure,
+    failed,
+    aborted,
     notApplicable,
     notImplemented,
   }
-
-#  build: build
-#  failure: errorInterface('up.Fatal')
-#  notApplicable: errorInterface('up.NotApplicable')

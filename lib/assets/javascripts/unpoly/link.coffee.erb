@@ -254,7 +254,7 @@ up.link = do ->
       up.event.whenEmitted link, 'up:link:preload', log: ['Preloading link %o', link], ->
         follow(link, u.merge(options, preload: true))
     else
-      return u.asyncError("Won't preload unsafe link")
+      return up.error.failed.async("Won't preload unsafe link")
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).

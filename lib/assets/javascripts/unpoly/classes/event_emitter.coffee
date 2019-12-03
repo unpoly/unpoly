@@ -26,7 +26,7 @@ class up.EventEmitter extends up.Record
     return new Promise (resolve, reject) =>
       event = @emit()
       if event.defaultPrevented
-        reject(up.event.abortError("Event #{event.type} was prevented"))
+        reject(up.error.aborted("Event #{event.type} was prevented"))
       else
         resolve(@onEmitted?())
 

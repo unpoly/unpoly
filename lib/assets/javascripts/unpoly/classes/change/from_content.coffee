@@ -118,7 +118,7 @@ class up.Change.FromContent extends up.Change
       try
         return opts.attempt(plan)
       catch error
-        if error.name == 'up.NotApplicable'
+        if up.error.notApplicable.is(error)
           message = error.message
           if opts.debug
             up.log.debug(message)

@@ -181,7 +181,7 @@ up.log = do ->
     if config.toast
       up.event.onReady(-> up.toast.open(messageArgs, toastOptions))
 
-    throw up.error.failure(messageArgs)
+    throw up.error.failed(messageArgs)
 
   puts: printToStandard
   debug: printToDebug

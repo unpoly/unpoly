@@ -326,18 +326,6 @@ up.event = do ->
   whenEmitted = (args...) ->
     buildEmitter(args).whenEmitted()
 
-  abortError = (message) ->
-    error = new Error('Aborted')
-    # Emulate the exception that aborted fetch() would throw
-    error.name = 'AbortError'
-    error
-
-  isAbortError = (error) ->
-    error && (error.name == 'AbortError' || (error.isAborted?()))
-
-  abortRejection = (message) ->
-    Promise.reject(abortError(message))
-
   ###**
   Registers an event listener to be called when the user
   presses the `Escape` key.
@@ -409,9 +397,6 @@ up.event = do ->
   halt: halt
   consumeAction: consumeAction
   onReady: onReady
-  abortError: abortError
-  abortRejection: abortRejection
-  isAbortError: isAbortError
 
 up.on = up.event.on
 up.$on = up.event.$on
