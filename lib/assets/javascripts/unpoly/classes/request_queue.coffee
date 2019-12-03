@@ -71,11 +71,10 @@ class up.RequestQueue extends up.Class
     @queuedRequests.shift()
 
   sendRequestNow: (request) ->
-    eventProps =
-      request: request
-      log: ['Loading %s %s', request.method, request.url]
+    log = ['Loading %s %s', request.method, request.url]
+    event = request.emit('up:proxy:load', { log })
 
-    if up.event.nobodyPrevents('up:proxy:load', eventProps)
+    if !event.defaultPrevented
       @currentRequests.push(request)
       request.send()
       u.always request, (value) => @onRequestSettled(request, value)
@@ -90,14 +89,12 @@ class up.RequestQueue extends up.Class
       if value.isSuccess()
         up.proxy.registerAliasForRedirect(request, value)
 
-      up.emit 'up:proxy:loaded',
+      request.emit 'up:proxy:loaded',
         log: ['Server responded with HTTP %d (%d bytes)', value.status, value.text.length]
-        request: request
         response: value
     else
-      up.emit 'up:proxy:fatal',
+      request.emit 'up:proxy:fatal',
         log: 'Fatal error during request'
-        request: request
         error: value
 
     @checkSlow()

@@ -324,3 +324,7 @@ class up.Request extends up.Record
 
   @wrap: (args...) ->
     u.wrapValue(@, args...)
+
+  emit: (name, props) ->
+    emitter = @layer || up
+    emitter.emit(name, u.merge(props, request: this))

@@ -8,12 +8,14 @@
   - up.layer.dismiss(value)
   - up.layer.emit(name, props)
   - up.emit(name, props)
-- Emit layer-bound proxy events with up.layer.emit(), not up.emit()
 - Present tense events still have long-form event log messages with gerund
 - Rename change({ document }) to ({ html })
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
+- onDismissed and onAccepted should always work on the origin layer
+  - ist das eh schon so weil der follow ein { origin } hat?
+    - ist das doof?
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
@@ -115,27 +117,18 @@ Bootstrap integration
 Later?
 ------
 
+- Rename up:proxy:load etc. to up:request:load
 - Events like up:layer:child:open
 - Does up.remove() clean up jQuery data?
 - { peel } option for up.destroy
-- Instead of a single event listener slot per layer, allow layer.addEventListener('closing')?
-  - How is this different from up.layer.on('up:layer:closing') ?
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
-- Turn property-like API symbols into getter
-  - e.g. up.layer.root instead of up.layer.root()
-  - e.g. up.layer.current instead of up.layer.current()
 - Support [up-target][up-class] and [up-target][up-fail-class] to set a class on the new fragment
   - But think how that would go together with [up-layer="new"][up-class="warning"]
 - Support :destroy pseudo-class up up.change() target
 - Do we need an API to change context from JS? from server via header?
-- Make all module names uppercase.
-  - In a ES6 world this would not even be so bad, or even necessary. import { Event } from 'up'. Event.emit(...).
-  - Even consider dropping shortcuts so we always do up.Fragment.change(), up.Event.emit(...)
 - Should up.reload / up.change etc. resolve to the updated elements?
 - There should be a preload() function in up.proxy, but that should also take a request
   - For this we also need to decide whether up.proxy.preload() would reject unsafe requests
-- { layer: 'swap' } - replaces the current overlay with the new layer
-- { layer: 'solo' } - replaces all overlays with the new overlay
 - form[up-target] without a target now looks funny
   - I now have form[up-follow] as a workaround
 - When up:proxy:load is prevented, the request should be resolved with an AbortError
