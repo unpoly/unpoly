@@ -151,7 +151,7 @@ class up.Layer extends up.Record
       if @hasLiveHistory()
         # Allow Unpoly-unaware code to use the pushState API directly.
         # This will implicitly change the leaf layer's location.
-        up.browser.location
+        up.history.location
       else
         @savedLocation
 

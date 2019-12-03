@@ -32,16 +32,6 @@ up.history = do ->
 
   up.legacy.renamedProperty(config, 'popTargets', 'restoreTargets')
 
-  ###**
-  Returns the previous URL in the browser history.
-
-  Note that this will only work reliably for history changes that
-  were applied by [`up.history.push()`](/up.history.replace) or
-  [`up.history.replace()`](/up.history.replace).
-
-  @function up.history.previousURL
-  @internal
-  ###
   previousURL = undefined
   nextPreviousURL = undefined
 
@@ -61,7 +51,7 @@ up.history = do ->
   @experimental
   ###
   currentLocation = (normalizeOptions) ->
-    normalizeURL(up.browser.location, normalizeOptions)
+    normalizeURL(location.href, normalizeOptions)
 
   isCurrentLocation = (url) ->
     # Some web frameworks care about a trailing slash, some consider it optional.
@@ -70,7 +60,7 @@ up.history = do ->
     normalizeURL(url, normalizeOptions) == currentLocation(normalizeOptions)
 
   ###**
-  Remembers the given URL so we can offer `up.history.previousURL()`.
+  Remembers the given URL so we can use previousURL on pop.
 
   @function observeNewURL
   @internal
@@ -259,6 +249,5 @@ up.history = do ->
     replace: replace
     get_location: currentLocation
     isLocation: isCurrentLocation
-    previousURL: -> previousURL
     normalizeURL: normalizeURL
 
