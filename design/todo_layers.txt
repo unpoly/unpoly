@@ -17,7 +17,6 @@
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- Layer.Root#element should be the body
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 

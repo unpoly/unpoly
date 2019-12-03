@@ -11,10 +11,10 @@ class up.Layer.Root extends up.Layer
     super(options)
     @history = true
 
-  # Always return the current documentElement, since the developer
-  # might replace it with a new version.
+  # Always return the current <body> instead of caching it,
+  # since the developer might replace it with a new version.
   @getter 'element', ->
-    e.root
+    document.body
 
   allElements: (selector) ->
     matches = e.all(selector)
