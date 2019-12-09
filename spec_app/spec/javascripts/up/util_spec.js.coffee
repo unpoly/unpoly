@@ -332,9 +332,9 @@ describe 'up.util', ->
         expect(result).toEqual [one, two]
 
       it 'preserves insertion order', ->
-        input = [1, 2, 1]
+        input = [1, 2, 3, 4, 2, 1]
         result = up.util.uniq(input)
-        expect(result).toEqual [1, 2]
+        expect(result).toEqual [1, 2, 3, 4]
 
     describe 'up.util.uniqBy', ->
 

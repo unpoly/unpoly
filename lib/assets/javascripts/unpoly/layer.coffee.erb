@@ -80,6 +80,9 @@ up.layer = do ->
       return [config[mode], config.overlay, config.all]
       
   normalizeOptions = (options) ->
+    return if options.normalizedLayerOptions
+    options.normalizedLayerOptions = true
+
     up.legacy.fixKey(options, 'closable', 'dismissable')
     up.legacy.fixKey(options, 'flavor', 'mode')
 
@@ -100,6 +103,9 @@ up.layer = do ->
         # open a new layer with that mode.
         options.mode = options.layer
         options.layer = 'new'
+      else if options.layer == 'page'
+        up.legacy.warn('Layer "page" has been renamed to "root"')
+        options.layer = 'root'
     else
       if options.mode
         # If user passes a { mode } option without a { layer } option
@@ -118,8 +124,7 @@ up.layer = do ->
 
     # Remember the layer that was current when the request was made,
     # so changes with `{ layer: 'new' }` will know what to stack on.
-    # This also sets up.layer.current as default.
-    options.base = up.layer.get(options.base)
+    options.base = up.layer.get(options.base || options.origin || 'current')
 
   build = (options) ->
     mode = options.mode
