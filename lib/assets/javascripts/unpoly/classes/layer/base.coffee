@@ -30,8 +30,8 @@ class up.Layer extends up.Record
   isCurrent: ->
     @stack.current == this
 
-  isLeaf: ->
-    @stack.isLeaf(this)
+  isFront: ->
+    @stack.isFront(this)
 
   isRoot: ->
     @stack.isRoot(this)
@@ -138,7 +138,7 @@ class up.Layer extends up.Record
     get: ->
       if @hasLiveHistory()
         # Allow Unpoly-unaware code to set the document title directly.
-        # This will implicitey change the leaf layer's title.
+        # This will implicitey change the front layer's title.
         document.title
       else
         @savedTitle
@@ -153,7 +153,7 @@ class up.Layer extends up.Record
     get: ->
       if @hasLiveHistory()
         # Allow Unpoly-unaware code to use the pushState API directly.
-        # This will implicitly change the leaf layer's location.
+        # This will implicitly change the front layer's location.
         up.history.location
       else
         @savedLocation
@@ -168,7 +168,7 @@ class up.Layer extends up.Record
         up.feedback.updateLayer(this)
 
   hasLiveHistory: ->
-    @history && @isLeaf()
+    @history && @isFront()
 
   toString: ->
     "#{@mode} layer"

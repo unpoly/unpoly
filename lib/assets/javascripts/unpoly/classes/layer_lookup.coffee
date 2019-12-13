@@ -28,7 +28,7 @@ class up.LayerLookup
     return switch (@value || 'any')
       when 'any'
         # Return all layers, but prefer a layer that's either the current
-        # layer, or closer to the leaf.
+        # layer, or closer to the front.
         u.uniq [@base, @stack.allReversed()...]
       when 'closest'
         @stack.selfAndAncestorsOf(@base)
@@ -40,8 +40,8 @@ class up.LayerLookup
         ['new'] # pass-through
       when 'root'
         [@stack.root]
-      when 'leaf'
-        [@stack.leaf]
+      when 'front'
+        [@stack.front]
       when 'origin'
         [@originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
       when 'ancestor'

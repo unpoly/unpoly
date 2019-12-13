@@ -20,7 +20,7 @@ class up.CompilePass
   compile: ->
     up.log.group "Compiling fragment %o", @root, =>
       # If we're compiling a fragment in a background layer, we want
-      # up.layer.current to resolve to that background layer, not the leaf layer.
+      # up.layer.current to resolve to that background layer, not the front layer.
       @layer.asCurrent =>
         for compiler in @compilers
           @runCompiler(compiler)

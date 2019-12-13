@@ -279,7 +279,7 @@ up.layer = do ->
     get_root: -> stack.root
     get_all: -> stack.layers
     get_current: -> stack.current
-    get_leaf: -> stack.leaf
+    get_front: -> stack.front
     get_parent: -> stack.parent
     parentOf: (args...) -> stack.parentOf(args...)
     get_location: -> stack.current.location

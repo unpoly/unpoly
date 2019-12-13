@@ -318,12 +318,12 @@ up.feedback = do ->
       updateLinksWithinNavs(layer.element, { layer })
 
   onHistoryChanged = ->
-    leafLayer = up.layer.leaf
+    frontLayer = up.layer.front
 
     # We allow Unpoly-unaware code to use the pushState API and change the
-    # leaf layer in the process.
-    if leafLayer.hasLiveHistory()
-      updateLayerIfLocationChanged(leafLayer)
+    # front layer in the process.
+    if frontLayer.hasLiveHistory()
+      updateLayerIfLocationChanged(frontLayer)
 
   # Even when the modal or popup does not change history, we consider the URLs of the content it displays.
   up.on 'up:history:pushed up:history:replaced up:history:restored', (event) -> # take 1 arg to prevent data parsing

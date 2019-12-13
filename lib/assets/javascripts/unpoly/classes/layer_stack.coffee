@@ -14,8 +14,8 @@ class up.LayerStack extends up.Class
   isOverlay: (layer) ->
     !@isRoot(layer)
 
-  isLeaf: (layer = @current) ->
-    @leaf == layer
+  isFront: (layer = @current) ->
+    @front == layer
 
   at: (i) ->
     @layers[i]
@@ -75,9 +75,9 @@ class up.LayerStack extends up.Class
     @layers[0]
 
   @getter 'current', ->
-    u.last(@currentOverrides) || @leaf
+    u.last(@currentOverrides) || @front
 
-  @getter 'leaf', ->
+  @getter 'front', ->
     u.last(@layers)
 
   @getter 'parent', ->
