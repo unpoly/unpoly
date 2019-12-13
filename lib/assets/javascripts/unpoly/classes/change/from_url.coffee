@@ -120,7 +120,7 @@ class up.Change.FromURL extends up.Change
     new up.Change.FromContent(options).execute()
 
   augmentOptionsFromResponse: (response, options) ->
-    options.document = response.text
+    options.html = response.text
 
     responseURL = response.url
     locationFromExchange = responseURL

@@ -264,24 +264,24 @@ describe 'up.fragment', ->
             <div class="after">new-after</div>
             """
 
-          up.change('.middle', document: html)
+          up.change('.middle', { html })
 
           next ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-after')
 
-        it 'replaces the given selector with a matching element that has the outer HTML from the given { document } element', asyncSpec (next) ->
+        it 'replaces the given selector with a matching element that has the outer HTML from the given { html } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
-          document = e.createFromHTML('<div class="target">new text</div>')
-          up.change('.target', { document })
+          element = e.createFromHTML('<div class="target">new text</div>')
+          up.change('.target', { html: element })
 
           next =>
             expect('.target').toHaveText('new text')
 
         it "rejects if the selector can't be found in the given HTML string", (done) ->
           $fixture('.foo-bar')
-          promise = up.change('.foo-bar', document: 'html without match')
+          promise = up.change('.foo-bar', html: 'html without match')
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -297,7 +297,7 @@ describe 'up.fragment', ->
 
         it 'derives a selector from an element given as { target } option', asyncSpec (next) ->
           target = fixture('.target', text: 'old-text')
-          up.change(target, document: '<div class="target">new-text</div>')
+          up.change(target, html: '<div class="target">new-text</div>')
 
           next =>
             expect('.target').toHaveText('new-text')
@@ -309,7 +309,7 @@ describe 'up.fragment', ->
         it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
           html = '<div class="foo-bar">text</div>'
           $fixture('.foo-bar.up-destroying')
-          promise = up.change('.foo-bar', document: html)
+          promise = up.change('.foo-bar', { html })
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -321,7 +321,7 @@ describe 'up.fragment', ->
           html = '<div class="foo-bar">text</div>'
           $parent = $fixture('.up-destroying')
           $child = $fixture('.foo-bar').appendTo($parent)
-          promise = up.change('.foo-bar', document: html)
+          promise = up.change('.foo-bar', { html })
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -333,7 +333,7 @@ describe 'up.fragment', ->
           html = '<div class="foo-bar">text</div>'
           $fixture('.foo-bar')
           $fixture('.foo-bar')
-          up.change('.foo-bar', document: html)
+          up.change('.foo-bar', { html })
 
           next =>
             $elements = $('.foo-bar')
@@ -345,7 +345,7 @@ describe 'up.fragment', ->
         it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
           target = fixture('.target')
           e.affix(target, '.child', text: 'old')
-          up.change('.target:before', document: """
+          up.change('.target:before', html: """
             <div class='target'>
               <div class='child'>new</div>
             </div>"
@@ -361,7 +361,7 @@ describe 'up.fragment', ->
         it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
           target = fixture('.target')
           e.affix(target, '.child', text: 'old')
-          up.change('.target:after', document: """
+          up.change('.target:after', html: """
             <div class='target'>
               <div class='child'>new</div>
             </div>
@@ -378,7 +378,7 @@ describe 'up.fragment', ->
           fixture('.before', text: 'old-before')
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
-          up.change '.before:before, .middle, .after:after', document: """
+          up.change '.before:before, .middle, .after:after', html: """
             <div class="before">new-before</div>
             <div class="middle">new-middle</div>
             <div class="after">new-after</div>
@@ -413,7 +413,7 @@ describe 'up.fragment', ->
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
 
-          up.change '.middle, .after', document: """
+          up.change '.middle, .after', html: """
             <div class="before">new-before</div>
             <div class="middle">new-middle</div>
             <div class="after">new-after</div>
@@ -1332,7 +1332,7 @@ describe 'up.fragment', ->
         it 'morphs between the old and new element', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')
           up.change('.element',
-            document: '<div class="element v2">version 2</div>',
+            html: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
             duration: 200,
             easing: 'linear'
@@ -1368,7 +1368,7 @@ describe 'up.fragment', ->
 
           extractDone = jasmine.createSpy()
           promise = up.change('.container',
-            document: '<div class="container">new text</div>',
+            html: '<div class="container">new text</div>',
             transition: 'cross-fade',
             duration: 200
           )
@@ -1383,7 +1383,7 @@ describe 'up.fragment', ->
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
           $fixture('.element').text('version 1')
           up.change('.element',
-            document: '<div class="element">version 2</div>',
+            html: '<div class="element">version 2</div>',
             transition: 'cross-fade',
             duration: 200
           )
@@ -1408,7 +1408,7 @@ describe 'up.fragment', ->
             spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
           extractDone = up.change('.element',
-            document: '<div class="element v2">v2</div>',
+            html: '<div class="element v2">v2</div>',
             transition: 'cross-fade',
             duration: 50
           )
@@ -1422,7 +1422,7 @@ describe 'up.fragment', ->
           $fixture('.element.v1').text('version 1')
 
           up.change('.element',
-            document: '<div class="element v2">version 2</div>',
+            html: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
             duration: 200
           )
@@ -1438,7 +1438,7 @@ describe 'up.fragment', ->
 
           next =>
             up.change('.element',
-              document: '<div class="element v3">version 3</div>',
+              html: '<div class="element v3">version 3</div>',
               transition: 'cross-fade',
               duration: 200
             )
@@ -1460,7 +1460,7 @@ describe 'up.fragment', ->
           $fixture('.element').text('version 1')
           resolution = jasmine.createSpy()
           promise = up.change('.element',
-            document: '<div class="element">version 2</div>',
+            html: '<div class="element">version 2</div>',
             transition: 'cross-fade',
             duration: 60
           )
@@ -1480,7 +1480,7 @@ describe 'up.fragment', ->
           spy = jasmine.createSpy('parent spy')
           up.$compiler '.element', ($element) -> spy($element.text(), $element.parent())
           up.change '.element',
-            document: '<div class="element">new text</div>',
+            html: '<div class="element">new text</div>',
             transition: 'cross-fade',
             duration: 50
 
@@ -1502,7 +1502,7 @@ describe 'up.fragment', ->
             up.on 'up:fragment:inserted', insertedListener
 
             extractDone = up.change('.element',
-              document: '<div class="element">new content</div>',
+              html: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
               easing: 'linear'
@@ -1523,7 +1523,7 @@ describe 'up.fragment', ->
             up.$compiler '.element', compiler
 
             extractDone = up.change('.element',
-              document: '<div class="element">new content</div>',
+              html: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
               easing: 'linear'
@@ -1546,7 +1546,7 @@ describe 'up.fragment', ->
             up.hello($element)
 
             extractDone = up.change('.element',
-              document: '<div class="element">new content</div>',
+              html: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
               easing: 'linear'
@@ -1565,7 +1565,7 @@ describe 'up.fragment', ->
           it 'immediately swaps the old and new elements without creating unnecessary ghosts', asyncSpec (next) ->
             $fixture('.element').text('version 1')
             up.change('.element',
-              document: '<div class="element">version 2</div>',
+              html: '<div class="element">version 2</div>',
               transition: 'cross-fade',
               duration: 200
             )
@@ -1577,7 +1577,7 @@ describe 'up.fragment', ->
             swapDirectlySpy = up.motion.knife.mock('swapElementsDirectly')
             $fixture('.element').text('version 1')
             up.change('.element',
-              document: '<div class="element">version 2</div>',
+              html: '<div class="element">version 2</div>',
               transition: false
             )
 
@@ -1825,7 +1825,7 @@ describe 'up.fragment', ->
           it 'animates the revealing when prepending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.change('.element:before',
-              document: '<div class="element">version 2</div>',
+              html: '<div class="element">version 2</div>',
               reveal: true,
               scrollBehavior: 'smooth'
             )
@@ -1835,7 +1835,7 @@ describe 'up.fragment', ->
           it 'animates the revealing when appending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.change('.element:after',
-              document: '<div class="element">version 2</div>',
+              html: '<div class="element">version 2</div>',
               reveal: true,
               scrollBehavior: 'smooth'
             )
@@ -1845,7 +1845,7 @@ describe 'up.fragment', ->
           it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.change('.element',
-              document: '<div class="element">version 2</div>',
+              html: '<div class="element">version 2</div>',
               reveal: true,
               scrollBehavior: 'smooth'
             )
@@ -2016,7 +2016,7 @@ describe 'up.fragment', ->
           $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
             spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
-          extractDone = up.change('.element', document: '<div class="element v2">v2</div>')
+          extractDone = up.change('.element', html: '<div class="element v2">v2</div>')
 
           extractDone.then ->
             expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
@@ -2028,7 +2028,7 @@ describe 'up.fragment', ->
             -> destructor($element.text())
           $container = $fixture('.container').text('old text')
           up.hello($container)
-          up.change('.container', document: '<div class="container">new text</div>')
+          up.change('.container', html: '<div class="container">new text</div>')
 
           next =>
             expect('.container').toHaveText('new text')
@@ -2041,7 +2041,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
-          up.change('.container', document: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
+          up.change('.container', html: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
 
           u.timer 50, =>
             expect(destructor).not.toHaveBeenCalled()
@@ -2058,7 +2058,7 @@ describe 'up.fragment', ->
           up.$compiler '.container', -> destructor
           $container = $fixture('.container')
           up.hello($container)
-          up.change('.container', document: '<div class="container">new text</div>')
+          up.change('.container', html: '<div class="container">new text</div>')
 
           next =>
             expect('.container').toHaveText('new text')
@@ -2071,7 +2071,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
-          extractDone = up.change('.container', document: '<div class="container">new text</div>')
+          extractDone = up.change('.container', html: '<div class="container">new text</div>')
 
           extractDone.then ->
             expect('.container').toHaveText('new text')
@@ -2086,7 +2086,7 @@ describe 'up.fragment', ->
           up.hello($container)
 
           extractDone = up.change('.container',
-            document: '<div class="container">new text</div>',
+            html: '<div class="container">new text</div>',
             transition: 'cross-fade',
             duration: 100
           )
@@ -2105,7 +2105,7 @@ describe 'up.fragment', ->
           $element = $parent.affix('.element').text('old text')
           up.hello($element)
 
-          up.change('.element', document: '<div class="element">new text</div>')
+          up.change('.element', html: '<div class="element">new text</div>')
 
           next =>
             expect(spy).toHaveBeenCalledWith('old text', $parent)
@@ -2122,7 +2122,7 @@ describe 'up.fragment', ->
           up.hello($element)
 
           extractDone = up.change('.element',
-            document: '<div class="element">new text</div>',
+            html: '<div class="element">new text</div>',
             transition: 'cross-fade',
             duration: 30
           )
@@ -2135,7 +2135,7 @@ describe 'up.fragment', ->
 
         it 'focuses an [autofocus] element in the new fragment', asyncSpec (next) ->
           $fixture('.foo-bar')
-          up.change '.foo-bar', document: """
+          up.change '.foo-bar', html: """
             <form class='foo-bar'>
               <input class="autofocused-input" autofocus>
             </form>
@@ -2165,7 +2165,7 @@ describe 'up.fragment', ->
           $container.affix('.middle[up-keep]').text('old-middle')
           $container.affix('.after').text('old-after')
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class='before'>new-before</div>
               <div class='middle' up-keep>new-middle</div>
@@ -2186,7 +2186,7 @@ describe 'up.fragment', ->
             old-after
             """
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               new-before
               <div class='element' up-keep>new-inside</div>
@@ -2207,7 +2207,7 @@ describe 'up.fragment', ->
 
           up.change '.container',
             keep: false
-            document: """
+            html: """
               <div class='container'>
                 new-before
                 <div class='element' up-keep>new-inside</div>
@@ -2222,7 +2222,7 @@ describe 'up.fragment', ->
 
           it "keeps that element", asyncSpec (next) ->
             $fixture('.keeper[up-keep]').text('old-inside')
-            up.change '.keeper', document: "<div class='keeper' up-keep>new-inside</div>"
+            up.change '.keeper', html: "<div class='keeper' up-keep>new-inside</div>"
 
             next =>
               expect($('.keeper')).toHaveText('old-inside')
@@ -2233,7 +2233,7 @@ describe 'up.fragment', ->
             up.on('up:fragment:kept', keptListener)
             up.on('up:fragment:inserted', insertedListener)
             $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-            up.change '.keeper', document: "<div class='keeper new' up-keep>new-inside</div>"
+            up.change '.keeper', html: "<div class='keeper new' up-keep>new-inside</div>"
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
@@ -2261,7 +2261,7 @@ describe 'up.fragment', ->
           expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
           expect(barDestructor.calls.allArgs()).toEqual []
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class='foo'>new-foo</div>
             </div>
@@ -2292,7 +2292,7 @@ describe 'up.fragment', ->
           expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
           expect(barDestructor.calls.allArgs()).toEqual []
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar'>new-bar</div>
@@ -2315,7 +2315,7 @@ describe 'up.fragment', ->
             <div class="parent2">
             </div>
             """
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class="parent1">
               </div>
@@ -2334,7 +2334,7 @@ describe 'up.fragment', ->
           $container.html """
             <div class="keeper" up-keep=".stayer"></div>
             """
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div up-keep class="stayer"></div>
             </div>
@@ -2354,7 +2354,7 @@ describe 'up.fragment', ->
           up.hello($container)
           expect(compiler.calls.count()).toEqual(1)
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
@@ -2375,7 +2375,7 @@ describe 'up.fragment', ->
             """
           up.hello($container)
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
@@ -2401,7 +2401,7 @@ describe 'up.fragment', ->
             """
           up.hello($container)
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
@@ -2424,7 +2424,7 @@ describe 'up.fragment', ->
             """
           up.hello($container)
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class="keeper">new-text</div>
             </div>
@@ -2439,7 +2439,7 @@ describe 'up.fragment', ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           listener = jasmine.createSpy('event listener')
           $keeper[0].addEventListener('up:fragment:keep', listener)
-          up.change '.keeper', document: "<div class='keeper new' up-keep up-data='{ \"key\": \"new-value\" }'>new-inside</div>"
+          up.change '.keeper', html: "<div class='keeper new' up-keep up-data='{ \"key\": \"new-value\" }'>new-inside</div>"
           next =>
             expect(listener).toHaveBeenCalledWith(
               jasmine.objectContaining(
@@ -2452,7 +2452,7 @@ describe 'up.fragment', ->
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
-          up.change '.keeper', document: "<div class='keeper' up-keep>new-inside</div>"
+          up.change '.keeper', html: "<div class='keeper' up-keep>new-inside</div>"
           next => expect($('.keeper')).toHaveText('new-inside')
 
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
@@ -2460,9 +2460,9 @@ describe 'up.fragment', ->
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
             event.preventDefault() if event.newFragment.textContent.trim() == 'version 3'
 
-          next => up.change '.keeper', document: "<div class='keeper' up-keep>version 2</div>"
+          next => up.change '.keeper', html: "<div class='keeper' up-keep>version 2</div>"
           next => expect($('.keeper')).toHaveText('version 1')
-          next => up.change '.keeper', document: "<div class='keeper' up-keep>version 3</div>"
+          next => up.change '.keeper', html: "<div class='keeper' up-keep>version 3</div>"
           next => expect($('.keeper')).toHaveText('version 3')
 
         it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on the targeted parent parent', asyncSpec (next) ->
@@ -2476,7 +2476,7 @@ describe 'up.fragment', ->
             <div class="keeper" up-keep></div>
             """
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class="keeper" up-keep></div>
             </div>
@@ -2492,7 +2492,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
-          up.change '.container', document: """
+          up.change '.container', html: """
             <div class='container'>
               <div class='keeper' up-keep up-data='{ "foo": "bar" }'>new-inside</div>
             </div>
@@ -2507,7 +2507,7 @@ describe 'up.fragment', ->
           up.on('up:fragment:kept', keptListener)
           $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
-          up.change '.keeper', document: """
+          up.change '.keeper', html: """
             <div class='container'>
               <div class='keeper' up-keep>new-inside</div>
             </div>
@@ -2524,14 +2524,14 @@ describe 'up.fragment', ->
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
           next =>
-            up.change '.keeper', document: """
+            up.change '.keeper', html: """
               <div class='container'>
                 <div class='keeper' up-keep up-data='{ \"key\": \"value1\" }'>new-inside</div>
               </div>
             """
 
           next =>
-            up.change '.keeper', document: """
+            up.change '.keeper', html: """
               <div class='container'>
                 <div class='keeper' up-keep up-data='{ \"key\": \"value2\" }'>new-inside</div>
             """
@@ -2561,7 +2561,7 @@ describe 'up.fragment', ->
             </div>
             """
           promise = up.change('.container',
-            document: newHTML,
+            html: newHTML,
             transition: transition
           )
           promise.then ->
@@ -2599,7 +2599,7 @@ describe 'up.fragment', ->
             constructorSpy = jasmine.createSpy('constructor called')
             up.on('test-component:new', constructorSpy)
 
-            up.change '.target', document: """
+            up.change '.target', html: """
               <div class="target">
                 <test-component-activation></test-component-activation>
               </div>
@@ -2623,7 +2623,7 @@ describe 'up.fragment', ->
       it 'delegates to up.change(target, { document })', ->
         changeSpy = up.fragment.knife.mock('makeChange')
         up.extract('target', 'document')
-        expect(changeSpy).toHaveBeenCalledWith('target', { document: 'document' })
+        expect(changeSpy).toHaveBeenCalledWith('target', { html: 'document' })
 
     describe 'up.destroy()', ->
 

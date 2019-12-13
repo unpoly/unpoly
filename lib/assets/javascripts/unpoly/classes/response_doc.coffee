@@ -27,14 +27,14 @@ class up.ResponseDoc
     @parsedRoot =
       @parseOuterContent(options) ||
       @parseInnerContent(options) ||
-      throw "must pass either { document } or { content }"
+      throw "must pass either { html } or { content }"
 
   parseOuterContent: (options) ->
-    if document = options.document
-      if u.isString(document)
-        document = @wrapHTML(document)
-        document = e.createDocumentFromHTML(document)
-      return document
+    if html = options.html
+      if u.isString(html)
+        html = @wrapHTML(html)
+        html = e.createDocumentFromHTML(html)
+      return html
 
   parseInnerContent: (options) ->
     if content = options.content

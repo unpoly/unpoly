@@ -51,7 +51,7 @@ Have you noticed how noticed how pages fade in
   - Test that opening a new layer cancels requests that also open a new layer
   - Test { abort: 'conflict' }
   - Test that closing a layer cancels all requests for that layer
-  - Test that up.change(document: Element) works
+  - Test that up.change(html: Element) works
   - Test that forms can submit as arbitrary layer changes (success and failure)
   - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
   - Check that up.layer forwards getters for all layer properties to stack.current

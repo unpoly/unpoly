@@ -48,7 +48,7 @@ up.fragment = do ->
   @param {string|Element|jQuery} [target]
   @param {Object} options
     TODO: Copy from replace()
-    TODO: New options like { document } or { content } or { url } or { target }
+    TODO: New options like { html } or { content } or { url } or { target }
   @stable
   ###
   makeChange = (args...) ->
@@ -96,12 +96,12 @@ up.fragment = do ->
     return promise
 
   makeChangeNow = (options) ->
-    if options.content || options.document
+    if options.content || options.html
       return new up.Change.FromContent(options).executeAsync()
     else if options.url
       return new up.Change.FromURL(options).executeAsync()
     else
-      up.fail('up.change() requires either { content }, { document } or { url } option')
+      up.fail('up.change() requires either { content }, { html } or { url } option')
 
   ###**
   Replaces elements on the current page with corresponding elements
@@ -289,9 +289,9 @@ up.fragment = do ->
     and all animation has finished.
   @stable
   ###
-  extract = (target, document, options) ->
-    up.legacy.deprecated('up.extract(target, html)', 'up.change(target, { document: html })')
-    return makeChange(target, u.merge(options, { document }))
+  extract = (target, html, options) ->
+    up.legacy.deprecated('up.extract(target, html)', 'up.change(target, { html })')
+    return makeChange(target, u.merge(options, { html }))
 
   ###**
   Elements with an `up-keep` attribute will be persisted during

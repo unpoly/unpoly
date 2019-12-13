@@ -2,10 +2,7 @@ u = up.util
 
 up.popup = u.literal
   attach: (origin, options = {}) ->
-    up.legacy.deprecated('up.popup.attach(origin, options)', "up.layer.open({ origin: origin, layer: 'popup', ...options })")
-    if options.html
-      up.legacy.deprecated('{ html } option', '{ document }')
-      options.document = options.html
+    up.legacy.deprecated('up.popup.attach(origin, options)', "up.layer.open({ origin, layer: 'popup', ...options })")
     up.layer.open(u.merge(options, { origin, layer: 'popup' }))
 
   close: (options = {}) ->
