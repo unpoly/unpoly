@@ -14,6 +14,8 @@
 - onDismissed and onAccepted should always work on the origin layer
   - ist das eh schon so weil der follow ein { origin } hat?
     - ist das doof?
+- Rename up.layer.leaf to up.layer.front, { layer: 'leaf' } to { layer: 'front' }
+- Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
@@ -172,5 +174,3 @@ Decisions
   => Nein, man kann ja das fallback als { objekt } machen
 - It's stupid to have both { layer } and { mode } when one can set both
   => No, we don't want up.layer.open({ layer: 'modal' })
-
-
