@@ -7,19 +7,26 @@ class up.EventEmitter extends up.Record
     [
       'element',
       'event',
+      'layer'
       # 'boundary'
     ]
 
   emit: ->
     @logEmission()
     # destroyBoundary = @createBoundary()
-    @element.dispatchEvent(@event)
+    if @layer
+      @layer.asCurrent(=> @dispatchEvent())
+    else
+      @dispatchEvent()
 #    if destroyBoundary
 #      destroyBoundary()
 #      # Even with a { boundary } we want event listeners bound to document
 #      # to receive our event.
 #      document.dispatchEvent(@event)
     return @event
+
+  dispatchEvent: ->
+    @element.dispatchEvent(@event)
 
   whenEmitted: ->
     return new Promise (resolve, reject) =>
