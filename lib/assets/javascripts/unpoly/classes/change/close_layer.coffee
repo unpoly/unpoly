@@ -31,6 +31,10 @@ class up.Change.CloseLayer extends up.Change.Removal
     up.proxy.abort(layer: this)
 
     if !@emitCloseEvent().defaultPrevented || !@preventable
+      # Remember the parent, which will no longer be accessible once we
+      # remove @layer from the @stack.
+      parent = @layer.parent
+
       unless @layer.isOpen()
         return Promise.resolve()
 
@@ -43,34 +47,37 @@ class up.Change.CloseLayer extends up.Change.Removal
       @layer.stack.remove(@layer)
 
       # Restore the history of the parent layer we just uncovered.
-      @layer.stack.current.restoreHistory()
+      parent.restoreHistory()
 
       @emitClosingEvent()
 
-      return @layer.closeNow().then(=> @emitClosedEvent())
+      return @layer.closeNow().then(=> @emitClosedEvent(parent))
     else
       return up.event.abortRejection()
 
   emitCloseEvent: ->
-    closeEvent = @buildEvent(@closeEventName)
-    @layer[@closeCallbackName]?(closeEvent)
-    return @layer.emit(closeEvent) # will bubble up to document
+    @layer.asCurrent =>
+      closeEvent = @buildEvent(@closeEventName)
+      @layer[@closeCallbackName]?(closeEvent)
+      return @layer.emit(closeEvent) # will bubble up to document
 
   emitClosingEvent: ->
-    closingEvent = @buildEvent(@closingEventName)
-    # Emit the "closing" event to indicate that the "close" event was not
-    # prevented and the closing animation is about to start.
-    @layer[@closingCallbackName]?(closingEvent)
-    return @layer.emit(closingEvent) # will bubble up to document
+    @layer.asCurrent =>
+      closingEvent = @buildEvent(@closingEventName)
+      # Emit the "closing" event to indicate that the "close" event was not
+      # prevented and the closing animation is about to start.
+      @layer[@closingCallbackName]?(closingEvent)
+      return @layer.emit(closingEvent) # will bubble up to document
 
-  emitClosedEvent: ->
-    closedEvent = @buildEvent(@closedEventName)
-    @layer[@closedCallbackName]?(closedEvent)
-    @layer.emit(closedEvent)
-    # Since @layer.element is now detached, the event will no longer bubble up to
-    # the document where global event listeners can receive it. So we explicitely emit
-    # the event a second time on the document.
-    return up.emit(closedEvent)
+  emitClosedEvent: (parent) ->
+    parent.asCurrent =>
+      closedEvent = @buildEvent(@closedEventName)
+      @layer[@closedCallbackName]?(closedEvent)
+      @layer.emit(closedEvent)
+      # Since @layer.element is now detached, the event will no longer bubble up to
+      # the document where global event listeners can receive it. So we explicitely emit
+      # the event a second time on the document.
+      return up.emit(closedEvent)
 
   buildEvent: (name) ->
     return up.event.build(name,

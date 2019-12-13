@@ -94,20 +94,23 @@ class up.Change.OpenLayer extends up.Change.Addition
     @emitOpeningEvent()
 
   emitOpenEvent: ->
-    # The initial up:layer:open event is emitted on the document, since the layer
-    # element has not been attached yet and there is no other element it should be
-    # emitted on. We don't want to emit it on @layer.parent.element since developers
-    # might confuse this with the event for @layer.parent itself opening.
-    #
-    # There is no @layer.onOpen() handler to accompany the DOM event.
-    return up.emit(@buildEvent('up:layer:open'))
+    @layer.parent.asCurrent =>
+      # The initial up:layer:open event is emitted on the document, since the layer
+      # element has not been attached yet and there is no other element it should be
+      # emitted on. We don't want to emit it on @layer.parent.element since developers
+      # might confuse this with the event for @layer.parent itself opening.
+      #
+      # There is no @layer.onOpen() handler to accompany the DOM event.
+      return up.emit(@buildEvent('up:layer:open'))
 
   emitOpeningEvent: ->
-    openingEvent = @buildEvent('up:layer:opening')
-    @layer.onOpening?(openingEvent)
-    return @layer.emit(openingEvent)
+    @layer.asCurrent =>
+      openingEvent = @buildEvent('up:layer:opening')
+      @layer.onOpening?(openingEvent)
+      return @layer.emit(openingEvent)
 
   emitOpenedEvent: ->
-    openedEvent = @buildEvent('up:layer:opened')
-    @layer.emit(openedEvent)
-    @layer.onOpened?(openedEvent)
+    @layer.asCurrent =>
+      openedEvent = @buildEvent('up:layer:opened')
+      @layer.emit(openedEvent)
+      @layer.onOpened?(openedEvent)

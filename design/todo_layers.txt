@@ -11,9 +11,6 @@
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- onDismissed and onAccepted should always work on the origin layer
-  - ist das eh schon so weil der follow ein { origin } hat?
-    - ist das doof?
 - Rename up.layer.leaf to up.layer.front, { layer: 'leaf' } to { layer: 'front' }
 - Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
 
