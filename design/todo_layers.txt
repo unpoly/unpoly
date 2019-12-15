@@ -14,6 +14,9 @@
 - Rename up.layer.front to up.layer.front, { layer: 'front' } to { layer: 'front' }
 - Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
 - up:fragment:destroyed and destructors should fix up.layer.current
+- throw "support multiple events sent from server -- here came the idea to use a single hash for all opts"
+
+
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
@@ -64,6 +67,7 @@ Have you noticed how noticed how pages fade in
   - All layer-related options should be moved to a[up-layer] or form[up-layer] or both
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
   - Documentation from Diff
+  - Document new emit options { layer, base }
   - up.preload() can now fail if preloading is disabled
   - Docs: up:form:submit event now has { options } to manipulate
   - Docs: up:link:follow event now has { options } to manipulate

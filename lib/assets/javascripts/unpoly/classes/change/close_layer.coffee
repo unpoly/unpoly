@@ -56,28 +56,34 @@ class up.Change.CloseLayer extends up.Change.Removal
       return up.event.abortRejection()
 
   emitCloseEvent: ->
-    @layer.asCurrent =>
-      closeEvent = @buildEvent(@closeEventName)
-      @layer[@closeCallbackName]?(closeEvent)
-      return @layer.emit(closeEvent) # will bubble up to document
+    return @layer.emit(
+      @buildEvent(@closeEventName),
+      callback: @layer.callback(@closeCallbackName)
+    )
 
+  # Emit the "closing" event to indicate that the "close" event was not
+  # prevented and the closing animation is about to start.
   emitClosingEvent: ->
-    @layer.asCurrent =>
-      closingEvent = @buildEvent(@closingEventName)
-      # Emit the "closing" event to indicate that the "close" event was not
-      # prevented and the closing animation is about to start.
-      @layer[@closingCallbackName]?(closingEvent)
-      return @layer.emit(closingEvent) # will bubble up to document
+    return @layer.emit(
+      @buildEvent(@closingEventName),
+      callback: @layer.callback(@closingCallbackName)
+    )
 
-  emitClosedEvent: (parent) ->
-    parent.asCurrent =>
-      closedEvent = @buildEvent(@closedEventName)
-      @layer[@closedCallbackName]?(closedEvent)
-      @layer.emit(closedEvent)
-      # Since @layer.element is now detached, the event will no longer bubble up to
-      # the document where global event listeners can receive it. So we explicitely emit
-      # the event a second time on the document.
-      return up.emit(closedEvent)
+  emitClosedEvent: (formerParent) ->
+    return up.emit(
+      @buildEvent(@closedEventName),
+      # Emit the "closed" event on the detached layer so listeners bound to that will
+      # receive the event. We do not want to emit it on the parent layer where users
+      # might confuse it with an event for the parent layer itself. Since @layer.element
+      # is now detached, the event will no longer bubble up to the document where global
+      # event listeners can receive it. So we explicitely emit the event a second time
+      # on the document.
+      target: [@layer.element, document],
+      # Set up.layer.current to the parent of the closed layer, which is now likely
+      # to be the front layer.
+      base: formerParent,
+      callback: @layer.callback(@closedCallbackName)
+    )
 
   buildEvent: (name) ->
     return up.event.build(name,

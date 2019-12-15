@@ -442,22 +442,22 @@ describe 'up.event', ->
 
         expect(emittedEvent.customField).toEqual('custom-value')
 
-      it 'triggers an event on an element passed as { target } option', ->
-        emittedEvent = undefined
-        emittedElement = undefined
-
-        element = fixture('.element')
-
-        up.on 'foo', (event, element) ->
-          emittedEvent = event
-          emittedElement = element
-
-        up.emit('foo', target: element)
-
-        expect(emittedEvent).toBeDefined()
-        expect(emittedElement).toEqual(element)
-
-        expect(emittedEvent.target).toEqual(element)
+#      it 'triggers an event on an element passed as { target } option', ->
+#        emittedEvent = undefined
+#        emittedElement = undefined
+#
+#        element = fixture('.element')
+#
+#        up.on 'foo', (event, element) ->
+#          emittedEvent = event
+#          emittedElement = element
+#
+#        up.emit('foo', target: element)
+#
+#        expect(emittedEvent).toBeDefined()
+#        expect(emittedElement).toEqual(element)
+#
+#        expect(emittedEvent.target).toEqual(element)
 
       it 'triggers an event on an element passed as the first argument', ->
         emittedEvent = undefined

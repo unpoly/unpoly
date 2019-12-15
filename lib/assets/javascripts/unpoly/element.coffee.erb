@@ -186,7 +186,7 @@ up.element = do ->
       value
     else if u.isString(value)
       first(value)
-    else if u.isJQuery(value)
+    else if u.isList(value)
       if value.length > 1
         up.fail('up.element.get(): Cannot cast multiple elements (%o) to a single element', value)
       value[0]

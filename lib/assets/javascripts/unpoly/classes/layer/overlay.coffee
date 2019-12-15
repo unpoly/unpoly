@@ -46,6 +46,10 @@ class up.Layer.Overlay extends up.Layer
     escapeDismissable: options.dismissable
     outsideDismissable: options.dismissable
 
+  callback: (name) ->
+    if fn = this[name]
+      return fn.bind(this)
+
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
   @function up.Layer.Overlay#openNow

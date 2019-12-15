@@ -5,17 +5,18 @@ class up.EventEmitter extends up.Record
 
   keys: ->
     [
-      'element',
+      'target',
       'event',
-      'layer'
+      'base',
+      'callback'
       # 'boundary'
     ]
 
   emit: ->
     @logEmission()
     # destroyBoundary = @createBoundary()
-    if @layer
-      @layer.asCurrent(=> @dispatchEvent())
+    if @base
+      @base.asCurrent(=> @dispatchEvent())
     else
       @dispatchEvent()
 #    if destroyBoundary
@@ -26,7 +27,8 @@ class up.EventEmitter extends up.Record
     return @event
 
   dispatchEvent: ->
-    @element.dispatchEvent(@event)
+    u.wrapArray(@target).forEach (target) => target.dispatchEvent(@event)
+    @callback?(@event)
 
   whenEmitted: ->
     return new Promise (resolve, reject) =>
@@ -62,21 +64,38 @@ class up.EventEmitter extends up.Record
     else if message == true
       up.puts('Event %s (%o)', name, @event)
 
-  @fromEmitArgs: (args, emitterOptions) ->
-    if args[0].addEventListener
-      element = args.shift()
-    else if u.isJQuery(args[0])
-      element = e.get(args.shift())
+  @fromEmitArgs: (args, defaults) ->
+    options = u.extractOptions(args)
+
+    if u.isElementish(args[0])
+      options.target = args.shift()
+    else if args[0] instanceof up.Layer
+      options.layer = args.shift()
+
+    # Setting a { layer } is a shorthand to (1) emit the event on the layer's
+    # element and (2) to set up.layer.current to that layer during emission.
+    if options.layer
+      layer = up.layer.get(options.layer)
+      options.base ?= layer
+      options.target ?= layer.element
+
+    # Setting { base } will fix up.layer.current to that layer during emission.
+    if options.base
+      options.base = up.layer.get(options.base)
+
+    # If no element is given, we emit the event on the document.
+    options.target ||= document
 
     if args[0].preventDefault
-      event = args[0]
+      # In this branch we receive an Event object that was already built:
+      # up.emit([target], event, [emitOptions])
+      options.event = args[0]
+
     else
-      eventName = args[0]
-      eventProps = args[1] || {}
-      element ||= u.pluckKey(eventProps, 'target')
-      event = up.event.build(eventName, eventProps)
+      # In this branch we receive an Event name and props object.
+      # The props object may also include options for the emission, such as
+      # { layer }, { target } or { base }.
+      # up.emit([target], eventName, [eventPropsAndEmitOptions])
+      options.event = up.event.build(args[0], u.except(options, 'target'))
 
-    element ||= document
-
-    attributes = u.merge({ element, event }, emitterOptions)
-    new @(attributes)
+    new @(u.merge(defaults, options))

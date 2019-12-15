@@ -1390,6 +1390,10 @@ describe 'up.util', ->
         value = document.querySelectorAll('div')
         expect(up.util.isList(value)).toBe(true)
 
+      it 'returns true for a jQuery collection', ->
+        value = jQuery('body')
+        expect(up.util.isList(value)).toBe(true)
+
       it 'returns true for an arguments object', ->
         value = undefined
         (-> value = arguments)()

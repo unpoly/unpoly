@@ -92,7 +92,7 @@ class up.Layer extends up.Record
     @contains(event.target)
 
   buildEventEmitter: (args) ->
-    return up.EventEmitter.fromEmitArgs(args, element: @element, layer: this)
+    return up.EventEmitter.fromEmitArgs(args, layer: this)
 
   emit: (args...) ->
     return @buildEventEmitter(args).emit()
