@@ -301,8 +301,7 @@ class up.Request extends up.Record
       title: up.protocol.titleFromXhr(@xhr)
       acceptLayer: up.protocol.acceptLayerFromXhr(@xhr)
       dismissLayer: up.protocol.dismissLayerFromXhr(@xhr)
-      event: up.protocol.eventFromXhr(@xhr)
-      layerEvent: up.protocol.layerEventFromXhr(@xhr)
+      events: up.protocol.eventsFromXhr(@xhr)
 
     if urlFromServer = up.protocol.locationFromXhr(@xhr)
       responseAttrs.url = urlFromServer

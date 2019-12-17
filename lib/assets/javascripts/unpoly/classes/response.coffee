@@ -97,8 +97,7 @@ class up.Response extends up.Record
       'title',
       'acceptLayer'
       'dismissLayer'
-      'event'
-      'layerEvent'
+      'events'
     ]
 
   ###**
