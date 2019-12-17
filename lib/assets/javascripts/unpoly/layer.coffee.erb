@@ -253,8 +253,7 @@ up.layer = do ->
   u.literal
     get: (args...) -> stack.get(args...)
     list: (args...) -> stack.list(args...)
-    get_overlayContainer: -> stack.overlayContainer
-    attachOverlayContainer: -> stack.attachOverlayContainer()
+    attachAll: -> stack.attach()
     allElements: allElements
     firstElement: firstElement
     config: config

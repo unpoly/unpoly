@@ -1,8 +1,6 @@
 u = up.util
 e = up.element
 
-OVERLAY_CONTAINER_SELECTOR = '.up-overlays'
-
 class up.LayerStack extends up.Class
 
   constructor: ->
@@ -32,16 +30,11 @@ class up.LayerStack extends up.Class
 
   reset: ->
     up.Layer.OverlayWithViewport.bodyShifter.reset()
-
     @resetLayers()
-
     @currentOverrides = []
 
-    if c = @_overlayContainer
-      e.remove(c)
-      @_overlayContainer = null
-
   resetLayers: ->
+    @layers?.forEach (layer) -> e.remove(layer.element)
     @layers = []
     rootLayer = up.layer.build(mode: 'root', stack: this)
     @layers.push(rootLayer)
@@ -74,6 +67,9 @@ class up.LayerStack extends up.Class
   @getter 'root', ->
     @layers[0]
 
+  @getter 'overlays', ->
+    @layers.slice(1)
+
   @getter 'current', ->
     u.last(@currentOverrides) || @front
 
@@ -83,21 +79,14 @@ class up.LayerStack extends up.Class
   @getter 'parent', ->
     @parentOf(@current)
 
-  @getter 'overlayContainer', ->
-    unless @_overlayContainer
-      @_overlayContainer = e.createFromSelector(OVERLAY_CONTAINER_SELECTOR)
-      @attachOverlayContainer()
-    @_overlayContainer
-
   ###**
-  Attaches the overlay container to the body.
+  Attaches all overlays to the body.
 
-  Also re-attaches the container to the body in case it was detached
+  Also re-attaches overlays to the body in case it was detached
   by swapping the body element.
   ###
-  attachOverlayContainer: ->
-    if @_overlayContainer
-      document.body.appendChild(@_overlayContainer)
+  attach: ->
+    @overlays.each (overlay) -> document.body.attachChild(overlay.element)
 
   get: (args...) ->
     new up.LayerLookup(this, args...).first()

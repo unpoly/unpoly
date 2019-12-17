@@ -15,18 +15,12 @@
 =small-shadow
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3)
 
-.up-overlays
-  // Create a stacking context for .up-overlay children
-  // by giving a position and z-index.
-  position: absolute
-  z-index: 10000
-
 .up-overlay
   +maximize
   // Create a stacking context for layer elements
   // by giving a position and z-index.
   position: fixed
-  z-index: 0
+  z-index: 10000
 
 .up-overlay-backdrop
   position: absolute

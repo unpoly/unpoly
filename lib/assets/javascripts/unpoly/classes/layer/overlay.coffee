@@ -82,7 +82,7 @@ class up.Layer.Overlay extends up.Layer
       'up-align': @align
       'up-position': @position,
       'up-size': @size,
-    @element = e.affix(@stack.overlayContainer, '.up-overlay', attrs)
+    @element = e.affix(document.body, '.up-overlay', attrs)
 
     if @class
       @element.classList.add(@class)

@@ -45,14 +45,17 @@ class up.Layer extends up.Record
   defaultTargets: ->
     up.layer.defaultTargets(@mode)
 
+  # no-op so users can blindly sync without knowing the current mode
   sync: ->
-    # no-op so users can blindly sync without knowing the current mode
 
   # no-op so users can blindly accept even though they might be on the root layer
   accept: u.asyncNoop
 
   # no-op so users can blindly dismiss even though they might be on the root layer
   dismiss: u.asyncNoop
+
+  # no-op so users can blindly attach even though they might be on the root layer
+  attach: ->
 
   peel: (options) ->
     @stack.peel(this, options)
