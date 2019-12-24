@@ -21,9 +21,10 @@ class up.Change.DestroyFragment extends up.Change.Removal
     up.motion.animate(@element, @animation, animateOptions)
 
   wipe: =>
-    # Save the parent so we can emit up:fragment:destroyed on it
-    # after removing @element.
-    parent = @element.parentNode
-    up.syntax.clean(@element)
-    e.remove(@element)
-    up.fragment.emitDestroyed(@element, { parent, @log })
+    @layer.asCurrent =>
+      # Save the parent so we can emit up:fragment:destroyed on it
+      # after removing @element.
+      parent = @element.parentNode
+      up.syntax.clean(@element)
+      e.remove(@element)
+      up.fragment.emitDestroyed(@element, { parent, @log })

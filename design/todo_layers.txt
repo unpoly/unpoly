@@ -13,9 +13,6 @@
   - Distinguish between puts and debug
 - Rename up.layer.front to up.layer.front, { layer: 'front' } to { layer: 'front' }
 - Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
-- up:fragment:destroyed and destructors should fix up.layer.current
-- throw "support multiple events sent from server -- here came the idea to use a single hash for all opts"
-
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
