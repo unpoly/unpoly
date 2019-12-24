@@ -7,11 +7,9 @@
   - up.layer.emit(name, props)
   - up.emit(name, props)
 - Present tense events still have long-form event log messages with gerund
-- Rename change({ document }) to ({ html })
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- Rename up.layer.front to up.layer.front, { layer: 'front' } to { layer: 'front' }
 - Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
 
 
@@ -104,13 +102,6 @@ Accessibility
 - A11Y: check if [inert] etc. are enough to have the browser rotate focus within the layer
 - A11Y: opening a layer should focus the layer, optionally to [autofocus]
 - A11Y: closing a layer should focus the element that opened the layer
-
-
-Bootstrap integration
----------------------
-
-- update or stop supporting unpoly-boostrap3
-- should we have unpoly-bootstrap4?
 
 
 Later?
