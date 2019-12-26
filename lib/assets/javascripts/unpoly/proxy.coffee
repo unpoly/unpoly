@@ -99,45 +99,71 @@ up.proxy = do ->
 
   up.legacy.renamedProperty(config, 'maxRequests', 'concurrency')
 
-  cache = new up.Cache
-    size: -> config.cacheSize
-    expiry: -> config.cacheExpiry
-    key: (request) -> up.Request.wrap(request).cacheKey()
-    cachable: (request) -> up.Request.wrap(request).isCachable()
-    # logPrefix: 'up.proxy'
-
   queue = new up.RequestQueue()
+
+  cache = new up.ProxyCache()
 
   ###**
   Returns a cached response for the given request.
 
   Returns `undefined` if the given request is not currently cached.
 
-  @function up.proxy.get
+  @function up.proxy.cache.get
   @return {Promise<up.Response>}
     A promise for the response.
   @experimental
   ###
-  get = (request) ->
-    request = up.Request.wrap(request)
-    candidates = [request]
 
-    if request.target != 'html'
-      # Since <html> is the root tag, a request for the `html` selector
-      # will contain all other selectors.
-      requestForHtml = request.variant(target: 'html')
-      candidates.push(requestForHtml)
+  ###**
+  Removes all cache entries.
 
-      # Although <body> is not the root tag, we consider it the selector developers
-      # will use when they want to replace the entire page. Hence we consider it
-      # a suitable match for all other selectors, including `html`.
-      if request.target != 'body'
-        requestForBody = request.variant(target: 'body')
-        candidates.push(requestForBody)
+  Unpoly also automatically clears the cache whenever it processes
+  a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
+  HTTP method like `POST`.
 
-    for candidate in candidates
-      if response = cache.get(candidate)
-        return response
+  @function up.proxy.cache.clear
+  @stable
+  ###
+
+  ###**
+  Makes the proxy assume that `newRequest` has the same response as the
+  already cached `oldRequest`.
+
+  Unpoly uses this internally when the user redirects from `/old` to `/new`.
+  In that case, both `/old` and `/new` will cache the same response from `/new`.
+
+  @function up.proxy.cache.alias
+  @param {Object} oldRequest
+  @param {Object} newRequest
+  @experimental
+  ###
+
+  ###**
+  TODO: Remove this method. It's hard to use it.
+
+  Manually stores a promise for the response to the given request.
+
+  @function up.proxy.cache.set
+  @param {string} request.url
+  @param {string} [request.method='GET']
+  @param {string} [request.target='body']
+  @param {Promise<up.Response>} response
+    A promise for the response.
+  @experimental
+  ###
+
+  ###**
+  Manually removes the given request from the cache.
+
+  You can also [configure](/up.proxy.config) when the proxy
+  automatically removes cache entries.
+
+  @function up.proxy.cache.remove
+  @param {string} request.url
+  @param {string} [request.method='GET']
+  @param {string} [request.target='body']
+  @experimental
+  ###
 
   reset = ->
     abortRequests()
@@ -211,14 +237,14 @@ up.proxy = do ->
 
     # We clear the entire cache before an unsafe request, since we
     # assume the user is writing a change.
-    clearCache() unless request.isSafe()
+    cache.clear() unless request.isSafe()
 
     if request.solo && !request.preload
       abortRequests(solo: true)
 
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
-    if (request.cache != false) && (cachedRequest = get(request))
+    if (request.cache != false) && (cachedRequest = cache.get(request))
       up.puts 'Re-using cached response for %s %s', request.method, request.url
 
       # Check if we need to upgrade a cached background request to a foreground request.
@@ -240,12 +266,12 @@ up.proxy = do ->
 
       # Cache the request for calls for calls with the same URL, method, params
       # and target. See up.Request#cacheKey().
-      set(request, request)
+      cache.set(request, request)
 
       # Immediately uncache failed requests.
       # We have no control over the server, and another request with the
       # same properties might succeed.
-      request.catch -> remove(request)
+      request.catch -> cache.remove(request)
 
       queue.asap(request)
 
@@ -410,7 +436,7 @@ up.proxy = do ->
         method: response.method
         url: response.url
       )
-      up.proxy.alias(request, newRequest)
+      cache.alias(request, newRequest)
 
   ###**
   This event is [emitted](/up.emit) when the response to an
@@ -440,61 +466,6 @@ up.proxy = do ->
   ###
 
   ###**
-  Makes the proxy assume that `newRequest` has the same response as the
-  already cached `oldRequest`.
-
-  Unpoly uses this internally when the user redirects from `/old` to `/new`.
-  In that case, both `/old` and `/new` will cache the same response from `/new`.
-
-  @function up.proxy.alias
-  @param {Object} oldRequest
-  @param {Object} newRequest
-  @experimental
-  ###
-  alias = cache.alias
-
-  ###**
-  TODO: Remove this method. It's hard to use it.
-
-  Manually stores a promise for the response to the given request.
-
-  @function up.proxy.set
-  @param {string} request.url
-  @param {string} [request.method='GET']
-  @param {string} [request.target='body']
-  @param {Promise<up.Response>} response
-    A promise for the response.
-  @experimental
-  ###
-  set = cache.set
-
-  ###**
-  Manually removes the given request from the cache.
-
-  You can also [configure](/up.proxy.config) when the proxy
-  automatically removes cache entries.
-
-  @function up.proxy.remove
-  @param {string} request.url
-  @param {string} [request.method='GET']
-  @param {string} [request.target='body']
-  @experimental
-  ###
-  remove = cache.remove
-
-  ###**
-  Removes all cache entries.
-
-  Unpoly also automatically clears the cache whenever it processes
-  a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
-  HTTP method like `POST`.
-
-  @function up.proxy.clear
-  @stable
-  ###
-  clearCache = cache.clear
-
-  ###**
   @internal
   ###
   isSafeMethod = (method) ->
@@ -516,10 +487,19 @@ up.proxy = do ->
     up.link.preload(args...)
   ajax: ajax
   request: makeRequest
-  get: get # TODO: Rename to up.proxy.cache.get()
-  alias: alias # TODO: Rename to up.proxy.cache.alias()
-  clear: clearCache # TODO: Rename to up.proxy.cache.clear()
-  remove: remove # TODO: Rename to up.proxy.cache.remove()
+  cache: cache
+  get: (args...) ->
+    up.legacy.deprecated('up.proxy.get()', 'up.proxy.cache.get()')
+    return cache.get(args...)
+  alias: (args...) ->
+    up.legacy.deprecated('up.proxy.alias()', 'up.proxy.cache.alias')
+    return cache.alias(args...)
+  clear: (args...) ->
+    up.legacy.deprecated('up.proxy.clear()', 'up.proxy.cache.clear()')
+    return cache.clear(args...)
+  remove: (args...) ->
+    up.legacy.deprecated('up.proxy.remove()', 'up.proxy.cache.remove()')
+    return cache.remove(args...)
   isIdle: isIdle
   isBusy: isBusy
   isSafeMethod: isSafeMethod
