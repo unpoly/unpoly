@@ -46,7 +46,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)
-      promise = @layer.openNow({ @content, @onContentAttached })
+      promise = @layer.open({ @content, @onContentAttached })
 
       promise = promise.then =>
         @emitOpenedEvent()

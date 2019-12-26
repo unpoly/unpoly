@@ -10,11 +10,11 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   @bodyShifter: new up.BodyShifter()
 
   ###**
-  @function up.Layer.OverlayWithViewport#openNow
+  @function up.Layer.OverlayWithViewport#open
   @param {Element} options.content
   @param {Function} options.onContentAttached
   ###
-  openNow: (options) ->
+  open: (options) ->
     @createElement()
     @backdropElement = e.affix(@element, '.up-overlay-backdrop')
     @viewportElement = e.affix(@element, '.up-overlay-viewport')
@@ -23,7 +23,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @shiftBody()
     return @startOpenAnimation(options)
 
-  closeNow: (options) ->
+  close: (options) ->
     animation = => @startCloseAnimation(options)
     @destroyElement({ animation }).then =>
       @unshiftBody()
