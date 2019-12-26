@@ -17,6 +17,9 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test and document up.proxy.abort().
+  - Test and document up.proxy.abort(request)
+  - Test and document up.proxy.abort(conditionsObj)
   - Get tests green again
   - Test that up.layer.get and up.layer.list take both a layer name like "root" or an options hash or an element or a jquery collection
   - Test layer { context } transmission
@@ -79,6 +82,9 @@ Have you noticed how noticed how pages fade in
   - New up.Request properties (at least { origin }, { layer })
   - Publish up.Request#loadPage()
   - Document that { target } can be an array
+  - Document up.proxy.abort().
+  - Document up.proxy.abort(request)
+  - Document up.proxy.abort(conditionsObj)
 
 
 Finishing up

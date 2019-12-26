@@ -20,7 +20,6 @@ class up.Change.FromURL extends up.Change
     'method',
     'origin',
     'headers',
-    'query', # TODO
     'params',
     'cache',
     'solo',

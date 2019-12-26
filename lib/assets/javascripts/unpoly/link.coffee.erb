@@ -173,7 +173,6 @@ up.link = do ->
     options.method ?= followMethod(link, options)
     options.origin ?= link
     parser.json('headers')
-    parser.json('query') # TODO
     parser.json('params')
     parser.boolean('cache')
     parser.boolean('navigate')

@@ -328,9 +328,6 @@ up.proxy = do ->
   isBusy = ->
     queue.isBusy()
 
-  # TODO: Test and document up.proxy.abort().
-  # TODO: Test and document up.proxy.abort(request)
-  # TODO: Test and document up.proxy.abort(conditionsObj)
   abortRequests = (args...) ->
     queue.abort(args...)
 
