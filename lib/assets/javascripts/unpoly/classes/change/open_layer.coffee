@@ -41,6 +41,9 @@ class up.Change.OpenLayer extends up.Change.Addition
       # Note that this cannot be prevented with { peel: false }!
       @base.peel()
 
+      # A11Y: User agent should ignore the parent layer.
+      @base.setInert(true)
+
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)
       promise = @layer.openNow({ @content, @onContentAttached })
@@ -81,6 +84,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     )
 
   onContentAttached: =>
+    @layer.element.focus()
     @handleHistory()
     up.fragment.setSource(@content, @source)
 

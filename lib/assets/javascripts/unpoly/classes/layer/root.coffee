@@ -22,3 +22,7 @@ class up.Layer.Root extends up.Layer
     # to filter matches to exclude elements that belong to another layer.
     matches = u.filter(matches, @contains)
     return matches
+
+  setInert: (inert) ->
+    for element in e.all('body>:not(.up-layer)')
+      e.setInert(element, inert)

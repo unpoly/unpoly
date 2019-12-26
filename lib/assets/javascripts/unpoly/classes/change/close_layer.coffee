@@ -46,9 +46,17 @@ class up.Change.CloseLayer extends up.Change.Removal
       # Remove ourselves from the layer stack.
       @layer.stack.remove(@layer)
 
+      # A11Y: User agent should un-ignore the parent layer
+      parent.setInert(false)
+
+      # A11Y: Focus the element that originally opened this layer.
+      (@layer.origin || parent.element).focus()
+
       # Restore the history of the parent layer we just uncovered.
       parent.restoreHistory()
 
+      # Emit the "closing" event to indicate that the "close" event was not
+      # prevented and the closing animation is about to start.
       @emitClosingEvent()
 
       return @layer.closeNow().then(=> @emitClosedEvent(parent))
@@ -61,8 +69,6 @@ class up.Change.CloseLayer extends up.Change.Removal
       callback: @layer.callback(@closeCallbackName)
     )
 
-  # Emit the "closing" event to indicate that the "close" event was not
-  # prevented and the closing animation is about to start.
   emitClosingEvent: ->
     return @layer.emit(
       @buildEvent(@closingEventName),

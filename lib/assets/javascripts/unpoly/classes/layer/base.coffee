@@ -11,6 +11,7 @@ class up.Layer extends up.Record
       'history',
       'mode',
       'context',
+      'origin' # the element that opened this layer
     ]
 
   defaults: ->
@@ -172,6 +173,9 @@ class up.Layer extends up.Record
 
   hasLiveHistory: ->
     @history && @isFront()
+
+  setInert: (inert) ->
+    throw up.error.notImplemented()
 
   toString: ->
     "#{@mode} layer"

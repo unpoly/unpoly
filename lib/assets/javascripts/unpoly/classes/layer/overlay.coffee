@@ -82,6 +82,8 @@ class up.Layer.Overlay extends up.Layer
       'up-align': @align
       'up-position': @position,
       'up-size': @size,
+      role: 'dialog',
+      'aria-modal': true
     @element = e.affix(document.body, '.up-overlay', attrs)
 
     if @class
@@ -137,3 +139,6 @@ class up.Layer.Overlay extends up.Layer
 
   dismiss: (value, options = {}) ->
     new up.Change.DismissLayer(u.merge(options, { value: value, layer: this })).executeAsync()
+
+  setInert: (inert) ->
+    e.setInert(@element, inert)

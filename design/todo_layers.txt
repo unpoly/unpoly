@@ -11,6 +11,7 @@
   - Remove all groups
   - Distinguish between puts and debug
 - Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
+- Rename Layer#openNow to Layer#open and #closeNow to #close
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -54,6 +55,9 @@ Have you noticed how noticed how pages fade in
   - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
   - Check that up.layer forwards getters for all layer properties to stack.current
   - Test that compilers always see their up.layer.current, even if it is a background update and there is another layer above it
+  - A11Y: current layer should get [role=dialog] and [aria-modal=true], all parent layers should get [inert] and [aria-hidden: true]. Since the root layer has no containers, we should apply this to direct children
+  - A11Y: opening a layer should focus the layer, optionally to [autofocus]
+  - A11Y: closing a layer should focus the element that opened the layer, or if the opener is unknown, the parent layer
   - Test Rails integration
 
 - Docs
@@ -98,11 +102,8 @@ Finishing up
 Accessibility
 --------------
 
-- A11Y: current layer should get [role=dialog] and [aria-modal=true], all parent layers should get [inert] and [aria-hidden: true]. Since the root layer has no containers, we should apply this to direct children
 - A11Y: check if [inert] etc. are enough to have the browser rotate focus within the layer
-- A11Y: opening a layer should focus the layer, optionally to [autofocus]
-- A11Y: closing a layer should focus the element that opened the layer
-
+-
 
 Later?
 ------
