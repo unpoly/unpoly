@@ -10,7 +10,6 @@
 - Rework logging
   - Remove all groups
   - Distinguish between puts and debug
-- Wasn't up.layer.of(element) a nice expressive API vs. up.layer.get(element)?
 - Rename Layer#openNow to Layer#open and #closeNow to #close
 
 
