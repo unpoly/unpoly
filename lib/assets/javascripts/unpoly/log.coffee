@@ -77,24 +77,6 @@ up.log = do ->
       console.warn(prefix(message), args...)
 
   ###**
-  - Makes sure the group always closes
-  - Does not make a group if the message is nil
-
-  @function up.log.group
-  @internal
-  ###
-  group = (message, args...) ->
-    block = args.pop() # Coffeescript copies the arguments array
-    if config.enabled && message
-      console.group(prefix(message), args...)
-      try
-        block()
-      finally
-        console.groupEnd() if message
-    else
-      block()
-
-  ###**
   @function up.log.error
   @internal
   ###
@@ -187,7 +169,6 @@ up.log = do ->
   debug: printToDebug
   error: printToError
   warn: printToWarn
-  group: group
   config: config
   enable: enable
   disable: disable

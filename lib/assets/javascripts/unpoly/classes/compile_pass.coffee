@@ -18,30 +18,32 @@ class up.CompilePass
     @layer = options.layer || up.layer.get(@root)
 
   compile: ->
-    up.log.group "Compiling fragment %o", @root, =>
-      # If we're compiling a fragment in a background layer, we want
-      # up.layer.current to resolve to that background layer, not the front layer.
-      @layer.asCurrent =>
-        for compiler in @compilers
-          @runCompiler(compiler)
+    up.puts "Compiling fragment %o", @root
+    # If we're compiling a fragment in a background layer, we want
+    # up.layer.current to resolve to that background layer, not the front layer.
+    @layer.asCurrent =>
+      for compiler in @compilers
+        @runCompiler(compiler)
 
   runCompiler: (compiler) ->
     matches = @select(compiler.selector)
     return unless matches.length
 
-    up.log.group ("Compiling \"%s\" on %d element(s)" unless compiler.isDefault), compiler.selector, matches.length, =>
-      if compiler.batch
-        @compileBatch(compiler, matches)
-      else
-        for match in matches
-          @compileOneElement(compiler, match)
+    unless compiler.isDefault
+      up.log.puts 'Compiling "%s" on %d element(s)', compiler.selector, matches.length
 
-      # up.compiler() has a legacy { keep } option that will automatically
-      # set [up-keep] on the elements it compiles
-      if keepValue = compiler.keep
-        value = if u.isString(keepValue) then keepValue else ''
-        for match in matches
-          match.setAttribute('up-keep', value)
+    if compiler.batch
+      @compileBatch(compiler, matches)
+    else
+      for match in matches
+        @compileOneElement(compiler, match)
+
+    # up.compiler() has a legacy { keep } option that will automatically
+    # set [up-keep] on the elements it compiles
+    if keepValue = compiler.keep
+      value = if u.isString(keepValue) then keepValue else ''
+      for match in matches
+        match.setAttribute('up-keep', value)
 
   compileOneElement: (compiler, element) ->
     elementArg = if compiler.jQuery then up.browser.jQuery(element) else element

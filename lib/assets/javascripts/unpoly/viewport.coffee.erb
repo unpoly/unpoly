@@ -541,13 +541,13 @@ up.viewport = do ->
     viewports = if options.around then getAround(options.around) else getAll()
     scrollTopsForURL = options.scrollTops || lastScrollTops.get(url) || {}
 
-    up.log.group 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL, ->
-      allScrollPromises = u.map viewports, (viewport) ->
-        key = scrollTopKey(viewport)
-        scrollTop = scrollTopsForURL[key] || 0
-        scroll(viewport, scrollTop, duration: 0)
+    up.puts 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL
+    allScrollPromises = u.map viewports, (viewport) ->
+      key = scrollTopKey(viewport)
+      scrollTop = scrollTopsForURL[key] || 0
+      scroll(viewport, scrollTop, duration: 0)
 
-      Promise.all(allScrollPromises)
+    Promise.all(allScrollPromises)
 
   resetScroll: (options = {}) ->
     return restoreScroll(u.merge(options, scrollTops: {}))
