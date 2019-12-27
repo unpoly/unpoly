@@ -127,7 +127,7 @@ class up.Change.FromContent extends up.Change
         if up.error.notApplicable.is(error)
           message = error.message
           if opts.debug
-            up.log.debug(message)
+            up.puts(message)
           else
             unprintedMessages.push(message)
         else
@@ -136,6 +136,6 @@ class up.Change.FromContent extends up.Change
 
     # If we're about to explode with a fatal error we print everything
     # we have tried so far, regardless of `opts.debug`.
-    unprintedMessages.forEach(up.log.debug)
+    unprintedMessages.forEach(up.puts)
 
     return opts.noneApplicable?()

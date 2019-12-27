@@ -44,17 +44,17 @@ up.log = do ->
   prefix = (message) ->
     "#{config.prefix}#{message}"
 
-  ###**
-  Prints a debugging message to the browser console.
-
-  @function up.log.debug
-  @param {string} message
-  @param {Array} ...args
-  @internal
-  ###
-  printToDebug = (message, args...) ->
-    if config.enabled && message
-      console.debug(prefix(message), args...)
+#  ###**
+#  Prints a debugging message to the browser console.
+#
+#  @function up.log.debug
+#  @param {string} message
+#  @param {Array} ...args
+#  @internal
+#  ###
+#  printToDebug = (message, args...) ->
+#    if config.enabled && message
+#      console.debug(prefix(message), args...)
 
   ###**
   Prints a logging message to the browser console.
@@ -166,7 +166,7 @@ up.log = do ->
     throw up.error.failed(messageArgs)
 
   puts: printToStandard
-  debug: printToDebug
+  # debug: printToDebug
   error: printToError
   warn: printToWarn
   config: config

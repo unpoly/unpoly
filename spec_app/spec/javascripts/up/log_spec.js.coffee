@@ -18,18 +18,18 @@ describe 'up.log', ->
         up.log.puts('message')
         expect(console.log).toHaveBeenCalledWith('[UP] message')
 
-    describe 'up.log.debug', ->
-
-      it 'sends a debug message to the developer console iff the log is enabled', ->
-        spyOn(console, 'debug')
-
-        up.log.disable()
-        up.log.debug('message')
-        expect(console.debug).not.toHaveBeenCalled()
-
-        up.log.enable()
-        up.log.debug('message')
-        expect(console.debug).toHaveBeenCalledWith('[UP] message')
+#    describe 'up.log.debug', ->
+#
+#      it 'sends a debug message to the developer console iff the log is enabled', ->
+#        spyOn(console, 'debug')
+#
+#        up.log.disable()
+#        up.log.debug('message')
+#        expect(console.debug).not.toHaveBeenCalled()
+#
+#        up.log.enable()
+#        up.log.debug('message')
+#        expect(console.debug).toHaveBeenCalledWith('[UP] message')
 
     describe 'up.log.error', ->
 

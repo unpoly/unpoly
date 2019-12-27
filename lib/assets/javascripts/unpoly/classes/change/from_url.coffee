@@ -99,19 +99,19 @@ class up.Change.FromURL extends up.Change
     @request = new up.Request(requestAttrs)
 
   onRequestSuccess: (response) =>
-    up.log.debug('Updating page with successful response')
+    up.puts('Updating page with successful response')
     @processResponse(response, @successOptions)
 
   onRequestFailure: (response) =>
     rejectWithFailedResponse = -> Promise.reject(response)
     if @failedResponseHasContent(response)
-      up.log.debug('Updating page with failed response')
+      up.puts('Updating page with failed response')
       promise = @processResponse(response, @failureOptions)
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
       return u.always(promise, rejectWithFailedResponse)
     else
-      up.log.debug('Response failed without content')
+      up.puts('Response failed without content')
       return rejectWithFailedResponse()
 
   processResponse: (response, options) ->

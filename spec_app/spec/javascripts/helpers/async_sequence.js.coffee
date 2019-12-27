@@ -27,7 +27,7 @@ window.asyncSpec = (args...) ->
     log = (args...) ->
       if LOG_ENABLED
         args[0] = "[asyncSpec] #{args[0]}"
-        up.log.debug(args...)
+        console.debug(args...)
 
     insertAtCursor = (task) ->
       log('Inserting task at index %d: %o', insertCursor, task)
