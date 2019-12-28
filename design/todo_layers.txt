@@ -7,9 +7,7 @@
   - up.layer.emit(name, props)
   - up.emit(name, props)
 - Present tense events still have long-form event log messages with gerund
-- Rework logging
-  - Remove all groups
-  - Distinguish between puts and debug
+- Check if all up.emit and layer.emit have { log: options }
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
