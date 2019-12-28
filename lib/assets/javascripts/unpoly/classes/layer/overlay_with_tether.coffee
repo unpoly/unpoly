@@ -3,7 +3,7 @@
 
 class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
-  open: (options) ->
+  openNow: (options) ->
     @createElement()
     @frameInnerContent(@element, options)
     @tether = new up.Tether(
@@ -14,7 +14,7 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     )
     return @startOpenAnimation(options)
 
-  close: (options) ->
+  closeNow: (options) ->
     animation = => @startCloseAnimation(options)
     @destroyElement({ animation }).then =>
       @tether.stop()

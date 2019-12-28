@@ -19,7 +19,7 @@ up.framework = do ->
   @internal
   ###
   emitReset = ->
-    up.emit('up:framework:reset', log: 'Resetting framework')
+    up.emit('up:framework:reset', log: 'Reset framework')
 
   ###**
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
@@ -58,7 +58,7 @@ up.framework = do ->
         u.task ->
           # At this point all user-code has been called.
           # The following event will cause Unpoly to compile the <body>.
-          up.emit('up:app:boot', log: 'Booting user application')
+          up.emit('up:app:boot', log: 'Boot user application')
           up.emit('up:app:booted', log: 'User application booted')
     else
       console.log?("Unpoly doesn't support this browser. Framework was not booted.")

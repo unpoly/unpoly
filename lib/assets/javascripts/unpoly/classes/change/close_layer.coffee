@@ -63,7 +63,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       # prevented and the closing animation is about to start.
       @emitClosingEvent()
 
-      return @layer.close().then(=> @emitClosedEvent(parent))
+      return @layer.closeNow().then(=> @emitClosedEvent(parent))
     else
       return up.event.abortRejection()
 

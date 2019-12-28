@@ -50,8 +50,9 @@ class up.Layer.Overlay extends up.Layer
     if fn = this[name]
       return fn.bind(this)
 
+  # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
-  @function up.Layer.Overlay#open
+  @function up.Layer.Overlay#openNow
   @param {Element} options.parent
   @param {Element} options.content
   @param {string|Object|Function(element, options): Promise} [options.animation]
@@ -60,18 +61,19 @@ class up.Layer.Overlay extends up.Layer
   @param {number} [options.duration]
   @param {number} [options.delay]
   ###
-  open: (options) ->
+  openNow: (options) ->
     throw up.error.notImplemented()
 
+  # TODO: Rename closeNow to something that doesn't have the sync/async connotation
   ###**
-  @function up.Layer.Overlay#close
+  @function up.Layer.Overlay#closeNow
   @param {string|Object|Function(element, options): Promise} [options.animation]
   @param {string|Object|Function(element, options): Promise} [options.backdropAnimation]
   @param {string} [options.easing]
   @param {number} [options.duration]
   @param {number} [options.delay]
   ###
-  close: (options) ->
+  closeNow: (options) ->
     throw up.error.notImplemented()
 
   createElement: ->

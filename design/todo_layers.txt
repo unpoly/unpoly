@@ -8,6 +8,7 @@
   - up.emit(name, props)
 - Present tense events still have long-form event log messages with gerund
 - Check if all up.emit and layer.emit have { log: options }
+- Rename Layer#openNow/closeNow to something else, but not  Layer#open/close since that looks like public API
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
