@@ -145,9 +145,6 @@ up.history = do ->
     if state?.fromUp
       url = currentLocation()
 
-      # We can't let people prevent this event, since `popstate` is also unpreventable.
-      up.emit('up:history:restore', url: url, log: "Restoring location #{url}")
-
       replaced = up.change
         layer: 'root'        # Don't replace elements in a modal that might still be open
         peel: true           # Close all overlays
@@ -168,17 +165,6 @@ up.history = do ->
     up.viewport.saveScroll(url: previousURL)
     state = event.state
     restoreStateOnPop(state)
-
-  ###**
-  This event is [emitted](/up.emit) before a history entry will be restored.
-
-  History entries are restored when the user uses the *Back* or *Forward* button.
-
-  @event up:history:restore
-  @param {string} event.url
-    The URL for the history entry that has been restored.
-  @internal
-  ###
 
   ###**
   This event is [emitted](/up.emit) after a history entry has been restored.
