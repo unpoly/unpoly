@@ -7,21 +7,25 @@ class up.Change.CloseLayer extends up.Change.Removal
 
   constructor: (options) ->
     super(options)
+
+    verb = options.verb
+    verbGerund = "#{verb}ing"
+    verbPast = "#{verb}ed"
+    @valueAttr = "up-#{verb}"
+
+    @closeEventName = "up:layer:#{verb}"
+    @closeCallbackName = "on#{u.uppercaseFirst(verb)}"
+
+    @closingEventName = "up:layer:#{verbGerund}"
+    @closingCallbackName = "on#{u.uppercaseFirst(verbGerund)}"
+
+    @closedEventName = "up:layer:#{verbPast}"
+    @closedCallbackName = "on#{u.uppercaseFirst(verbPast)}"
+
     @layer = up.layer.get(options)
     @origin = options.origin
     @value = options.value
     @preventable = options.preventable ? true
-
-  valueAttr: null       # implement in child class
-
-  closeEventName: null      # implement in child class
-  closeCallbackName: null   # implement in child class
-
-  closingEventName: null    # implement in child class
-  closingCallbackName: null # implement in child class
-
-  closedEventName: null     # implement in child class
-  closedCallbackName: null  # implement in child class
 
   execute: ->
     if @origin && u.isUndefined(value)

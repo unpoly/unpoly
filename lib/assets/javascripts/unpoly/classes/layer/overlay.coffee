@@ -132,11 +132,15 @@ class up.Layer.Overlay extends up.Layer
   allElements: (selector) ->
     e.all(@contentElement, selector)
 
+  executeCloseChange: (verb, value, options) ->
+    options = u.merge(options, { verb, value, layer: this })
+    return new up.Change.CloseLayer(options).executeAsync()
+
   accept: (value, options = {}) ->
-    new up.Change.AcceptLayer(u.merge(options, { value: value, layer: this })).executeAsync()
+    @executeCloseChange('accept', value, options)
 
   dismiss: (value, options = {}) ->
-    new up.Change.DismissLayer(u.merge(options, { value: value, layer: this })).executeAsync()
+    @executeCloseChange('dismiss', value, options)
 
   setInert: (inert) ->
     e.setInert(@element, inert)
