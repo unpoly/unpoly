@@ -8,7 +8,8 @@ class up.EventEmitter extends up.Record
       'target',
       'event',
       'base',
-      'callback'
+      'callback',
+      'log',
       # 'boundary'
     ]
 
@@ -50,7 +51,7 @@ class up.EventEmitter extends up.Record
   logEmission: ->
     return unless up.log.isEnabled()
 
-    message = u.pluckKey(@event, 'log')
+    message = @log
 
     if u.isArray(message)
       [message, messageArgs...] = message
@@ -94,7 +95,7 @@ class up.EventEmitter extends up.Record
     else
       # In this branch we receive an Event name and props object.
       # The props object may also include options for the emission, such as
-      # { layer }, { target } or { base }.
+      # { layer }, { target }, { base } or { log }.
       # up.emit([target], eventName, [eventPropsAndEmitOptions])
       options.event = up.event.build(args[0], u.except(options, 'target'))
 
