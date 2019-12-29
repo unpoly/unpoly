@@ -61,6 +61,11 @@ Have you noticed how noticed how pages fade in
   - Test Rails integration
 
 - Docs
+  - [up-follow] vs. [up-target] vs. [up-layer] vs. [up-modal] etc.
+    - Move all fragment update docs to a[up-follow] and form[up-follow]
+    - There are separate doc entries for a[up-target] and form[up-target]
+    - There are separate doc entries for a[up-layer] and form[up-layer]
+      - These have all the layer-specific options
   - We now have unpoly-bootstrap3 and unpoly-bootstrap4
   - Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
   - All layer-related options should be moved to a[up-layer] or form[up-layer] or both
