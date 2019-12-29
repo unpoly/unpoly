@@ -120,3 +120,4 @@ class up.Change.OpenLayer extends up.Change.Addition
       @buildEvent('up:layer:opened'),
       callback: @layer.callback('onOpened')
     )
+

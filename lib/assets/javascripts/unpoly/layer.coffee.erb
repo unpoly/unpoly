@@ -207,15 +207,6 @@ up.layer = do ->
       u.muteRejection layer.dismiss()
       up.event.halt(event)
 
-  up.on 'up:framework:boot', ->
-    # TODO: Docs for [up-modal]
-    # TODO: Docs for [up-popup]
-    # TODO: Docs for [up-drawer]
-    # TODO: Docs for [up-cover]
-    for Class in OVERLAY_CLASSES
-      console.debug("Registering macro %o for %o (mode %o)", Class.attr, Class.mode)
-      up.link.targetMacro Class.attr, 'up-layer': Class.mode
-
   registerCloseHandler = (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
     registerHandler 'click up:link:follow', "[#{attribute}]", (event) ->
