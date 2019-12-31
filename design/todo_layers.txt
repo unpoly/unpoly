@@ -89,6 +89,7 @@ Have you noticed how noticed how pages fade in
   - Document up.proxy.abort().
   - Document up.proxy.abort(request)
   - Document up.proxy.abort(conditionsObj)
+  - Document [up-dismiss-on="click .button"]
 
 
 Finishing up

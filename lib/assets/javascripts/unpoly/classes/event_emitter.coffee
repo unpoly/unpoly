@@ -28,7 +28,7 @@ class up.EventEmitter extends up.Record
     return @event
 
   dispatchEvent: ->
-    u.wrapArray(@target).forEach (target) => target.dispatchEvent(@event)
+    u.each u.wrapList(@target), (target) => target.dispatchEvent(@event)
     @callback?(@event)
 
   whenEmitted: ->

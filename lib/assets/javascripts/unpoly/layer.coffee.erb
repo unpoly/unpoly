@@ -188,14 +188,16 @@ up.layer = do ->
   # @internal
   ###
   registerHandler = (handler...) ->
-    handler.isDefault = up.framework.isBooting()
+    # The <body> element used by the root.layer is undefined until the DOM is ready.
+    up.event.onReady ->
+      handler.isDefault = up.framework.isBooting()
 
-    # Remember handler for future layers
-    handlers.push(handler)
+      # Remember handler for future layers
+      handlers.push(handler)
 
-    # Apply to existing layers
-    for layer in stack.layers
-      layer.on(handler...)
+      # Apply to existing layers
+      for layer in stack.layers
+        layer.on(handler...)
 
   applyHandlers = (layer) ->
     for handler in handlers

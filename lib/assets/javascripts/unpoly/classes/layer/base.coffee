@@ -84,6 +84,8 @@ class up.Layer extends up.Record
     return @buildEventListenerGroup(args).unbind()
 
   buildEventListenerGroup: (args) ->
+    console.debug("document.body: %o", document.body)
+    console.debug("buildEventListenerGroups(%o); layer: %o; layer.element: %o", args, this, @element)
     return up.EventListenerGroup.fromBindArgs(args,
       guard: @containsEventTarget,
       elements: [@element]
