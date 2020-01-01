@@ -287,6 +287,32 @@ describe 'up.util', ->
 
           expect(up.util.isEqual(account, 'foo@example.com')).toBe(false)
 
+    describe 'up.util.isElementish', ->
+
+      it 'returns true for an element', ->
+        value = document.body
+        expect(up.util.isElementish(value)).toBe(true)
+
+      it 'returns true for a jQuery collection', ->
+        value = $('body')
+        expect(up.util.isElementish(value)).toBe(true)
+
+      it 'returns true for a NodeList', ->
+        value = document.querySelectorAll('body')
+        expect(up.util.isElementish(value)).toBe(true)
+
+      it 'returns true for an array of elements', ->
+        value = [document.body]
+        expect(up.util.isElementish(value)).toBe(true)
+
+      it 'returns false for an array of non-element values', ->
+        value = ['foo']
+        expect(up.util.isElementish(value)).toBe(false)
+
+      it 'returns false for undefined', ->
+        value = undefined
+        expect(up.util.isElementish(value)).toBe(false)
+
     describe 'up.util.flatMap', ->
 
       it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->

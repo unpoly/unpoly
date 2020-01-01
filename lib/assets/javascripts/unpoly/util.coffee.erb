@@ -509,7 +509,7 @@ up.util = do ->
   @internal
   ###
   isElementish = (object) ->
-    !!(object.querySelector || object[0]?.querySelector)
+    !!(object && (object.querySelector || object[0]?.querySelector))
 
   ###**
   Returns whether the given argument is an object with a `then` method.
