@@ -38,12 +38,8 @@ class up.Change.FromContent extends up.Change
       # One target may expand to more than one plan if it has a { layer } option that
       # needs to try multiple layers, like { layer: 'closest' }.
       for layer in up.layer.list(targetObj)
-        planOpts = u.merge(targetObj, { layer })
-        if layer == 'new'
-          unless up.fragment.targetsBody(planOpts.target)
-            @plans.push(new up.Change.OpenLayer(planOpts))
-        else
-          @plans.push(new up.Change.UpdateLayer(planOpts))
+        ChangeClass = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
+        @plans.push(new ChangeClass(u.merge(targetObj, { layer })))
 
   defaultTargetObjs: ->
     if @options.layer == 'new'

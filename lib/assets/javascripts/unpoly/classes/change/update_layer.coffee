@@ -217,6 +217,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   findOld: ->
     return if @foundOld
+
+    if up.fragment.targetsBody(@target)
+      throw @notApplicable("Cannot place element \"#{@target}\" in an overlay")
+
     for step in @steps
       # Try to find fragments matchin step.selector within step.layer
       step.oldElement = up.fragment.first(step.selector, step) or

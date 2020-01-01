@@ -24,6 +24,9 @@ class up.Change.OpenLayer extends up.Change.Addition
     "Open \"#{@target}\" in new layer"
 
   execute: ->
+    if up.fragment.targetsBody(@target)
+      throw @notApplicable("Cannot place element \"#{@target}\" in an overlay")
+
     @content = @responseDoc.select(@target)
 
     unless @content
@@ -32,7 +35,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @base.isOpen()
       throw @notApplicable('Parent layer was closed')
 
-    up.puts("Opening \"#{@target}\" in new layer")
+    up.puts("Opening element \"#{@target}\" in new layer")
 
     @layer = up.layer.build(@options)
 
