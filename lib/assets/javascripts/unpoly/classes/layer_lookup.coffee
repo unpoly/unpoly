@@ -6,11 +6,15 @@ class up.LayerLookup
   constructor: (@stack, args...) ->
     options = u.parseArgIntoOptions(args, 'layer')
     up.layer.normalizeOptions(options)
+
     @value = options.layer
-    @base = options.base
     @origin = options.origin
+    @base = options.base || @originLayer() || @stack.current
+    if u.isString(@base)
+      @base = new @constructor(@stack, @base, u.merge(options, base: @stack.current)).first()
 
   originLayer: ->
+
     if @origin
       return @ofElement(@origin)
 
@@ -30,10 +34,10 @@ class up.LayerLookup
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
         u.uniq [@base, @stack.allReversed()...]
-      when 'closest'
-        @stack.selfAndAncestorsOf(@base)
       when 'current'
         [@base]
+      when 'closest'
+        @stack.selfAndAncestorsOf(@base)
       when 'parent'
         u.compact [@stack.parentOf(@base)]
       when 'new'

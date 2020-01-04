@@ -105,6 +105,9 @@ class up.Cache
       true
 
   get: (key, options = {}) =>
+    unless u.isFunction(@isCachable)
+      debugger
+
     if @isCachable(key) && (entry = @store.get(@normalizeStoreKey(key)))
       if @isFresh(entry)
         @log("Cache hit for '%s'", key) unless options.silent

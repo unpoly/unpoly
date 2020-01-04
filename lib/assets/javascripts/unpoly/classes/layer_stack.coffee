@@ -34,7 +34,8 @@ class up.LayerStack extends up.Class
     @currentOverrides = []
 
   resetLayers: ->
-    @layers?.forEach (layer) -> e.remove(layer.element)
+    if @layers
+      @layers.slice(1).forEach (layer) -> e.remove(layer.element)
     @layers = []
     rootLayer = up.layer.build(mode: 'root', stack: this)
     @layers.push(rootLayer)

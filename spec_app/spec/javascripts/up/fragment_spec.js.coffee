@@ -57,13 +57,9 @@ describe 'up.fragment', ->
             @overlayElement = element
             done()
 
-        it 'only matches elements in the current layer', ->
+        it 'matches elements in any layer, but returns elements in the current layer first', ->
           results = up.fragment.all('.element')
-          expect(results).toEqual [@overlayElement]
-
-        it 'returns undefined if the only match is in a non-current layer', ->
-          results = up.fragment.all('.element.in-root')
-          expect(results).toEqual []
+          expect(results).toEqual [@overlayElement, @rootElement]
 
         it "only matches elements in the layer of the given { origin }", ->
           otherRootElement = fixture('.element.other.in-root')
@@ -73,6 +69,10 @@ describe 'up.fragment', ->
         it 'only matches elements in the given { layer }', ->
           results = up.fragment.all('.element', layer: 'root')
           expect(results).toEqual [@rootElement]
+
+        it 'returns an empty array if no element matches', ->
+          results = up.fragment.all('.other')
+          expect(results).toEqual []
 
         it 'returns the first argument if the first argument is already an element, even if { layer } is given', ->
           match = fixture('.match')

@@ -1100,13 +1100,13 @@ up.element = do ->
 
   setInert = (element, isInert = true) ->
     if isInert
-      u.setAttrs(@element,
+      setAttrs(element,
         inert: '', # modern agents
         'aria-hidden': true # legacy agents
       )
     else
-      @element.removeAttribute('inert')
-      @element.removeAttribute('aria-hidden')
+      element.removeAttribute('inert')
+      element.removeAttribute('aria-hidden')
 
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>

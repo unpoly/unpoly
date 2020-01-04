@@ -11,6 +11,7 @@
 - Rename Layer#openNow/closeNow to something else, but not  Layer#open/close since that looks like public API
 - Make backdrop a layer option (defaults to false for cover)
 - I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
+- Does up.layer.onEach really need onReady? Because for a while I had up:framework:reset remove the <body>
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).

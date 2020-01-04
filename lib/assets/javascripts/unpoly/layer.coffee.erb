@@ -80,8 +80,8 @@ up.layer = do ->
       return [config[mode], config.overlay, config.all]
       
   normalizeOptions = (options) ->
-    return if options.normalizedLayerOptions
-    options.normalizedLayerOptions = true
+    return if options.normalizeLayerOptions == false
+    options.normalizeLayerOptions = false
 
     up.legacy.fixKey(options, 'closable', 'dismissable')
     up.legacy.fixKey(options, 'flavor', 'mode')
@@ -119,12 +119,15 @@ up.layer = do ->
         # Links update their own layer by default.
         options.layer = 'origin'
       else
-        # If nothing is given, we assume the current layer.
-        options.layer = 'current'
+        # If nothing is given, we allow changes of any layer (preferring the current layer)
+        options.layer = 'any'
 
     # Remember the layer that was current when the request was made,
     # so changes with `{ layer: 'new' }` will know what to stack on.
-    options.base = up.layer.get(options.base || options.origin || 'current')
+    # Note if options.base is given, up.layer.get('current', options) will
+    # return the resolved version of that.
+    # TODO: Test this
+    options.base = up.layer.get('current', options)
 
   build = (options) ->
     mode = options.mode

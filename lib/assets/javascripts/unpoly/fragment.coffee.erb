@@ -53,6 +53,7 @@ up.fragment = do ->
   ###
   makeChange = (args...) ->
     options = parseTargetAndOptions(args)
+    up.layer.normalizeOptions(options)
 
     options.hungry ?= true
     options.keep ?= true
@@ -101,7 +102,7 @@ up.fragment = do ->
     else if options.url
       return new up.Change.FromURL(options).executeAsync()
     else
-      up.fail('up.change() requires either { content }, { html } or { url } option')
+      up.fail('up.change() requires either { content }, { html } or { url } option, but options were %o', options)
 
   ###**
   Replaces elements on the current page with corresponding elements
@@ -589,7 +590,6 @@ up.fragment = do ->
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgIntoOptions(args, 'target')
-    up.layer.normalizeOptions(options)
     options
 
   ###**

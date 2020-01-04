@@ -796,6 +796,7 @@ up.util = do ->
   parseArgIntoOptions = (args, argKey) ->
     options = extractOptions(args)
     if isDefined(args[0])
+      options = copy(options)
       options[argKey] = args[0]
     options
 

@@ -75,7 +75,7 @@ class up.Layer extends up.Record
 
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
-    e.closest(element, '.up-overlay, html') == @element
+    e.closest(element, '.up-overlay, body') == @element
 
   on: (args...) ->
     return @buildEventListenerGroup(args).bind()
@@ -84,8 +84,6 @@ class up.Layer extends up.Record
     return @buildEventListenerGroup(args).unbind()
 
   buildEventListenerGroup: (args) ->
-    console.debug("document.body: %o", document.body)
-    console.debug("buildEventListenerGroups(%o); layer: %o; layer.element: %o", args, this, @element)
     return up.EventListenerGroup.fromBindArgs(args,
       guard: @containsEventTarget,
       elements: [@element]

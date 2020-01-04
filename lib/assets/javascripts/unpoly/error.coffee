@@ -3,8 +3,8 @@ up.error = do ->
   u = up.util
 
   build = (message, props = {}) ->
-    # if u.isArray(message)
-    #   message = u.sprintf(message...)
+    if u.isArray(message)
+      message = u.sprintf(message...)
     error = new Error(message)
     u.assign(error, props)
     return error

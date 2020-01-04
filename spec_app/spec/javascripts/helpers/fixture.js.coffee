@@ -25,6 +25,6 @@ window.$fixture = $appendFixture
 $.fn.affix = (args...) -> $(e.affix(this[0], args...))
 
 window.fixtureInOverlay = (target, args...) ->
-  document = e.createFromSelector(target, args...)
-  up.layer.open({ target, document }).then ->
-    return document
+  element = e.createFromSelector(target, args...)
+  up.layer.open({ target, html: element }).then ->
+    return element

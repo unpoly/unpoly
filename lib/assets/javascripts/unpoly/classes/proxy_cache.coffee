@@ -1,5 +1,7 @@
 #= require ./cache
 
+u = up.util
+
 class up.ProxyCache extends up.Cache
 
   maxKeys: ->
@@ -29,4 +31,4 @@ class up.ProxyCache extends up.Cache
       if request.target != 'body'
         candidates.push(request.variant(target: 'body'))
 
-    u.findResult candidates, (candidate) -> super(candidate)
+    u.findResult candidates, (candidate) => super(candidate)
