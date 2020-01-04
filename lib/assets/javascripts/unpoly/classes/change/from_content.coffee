@@ -22,7 +22,7 @@ class up.Change.FromContent extends up.Change
     if u.isElementish(target)
       target = { target: e.toSelector(target) }
     else if u.isString(target)
-      target = { target }
+      target = { target: e.resolveSelector(target, base.origin) }
 
     return u.merge(base, target)
 
