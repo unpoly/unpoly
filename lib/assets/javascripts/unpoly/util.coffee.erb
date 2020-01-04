@@ -1648,8 +1648,8 @@ up.util = do ->
       string = arg.replace(/[\n\r\t ]+/g, ' ')
       string = string.replace(/^[\n\r\t ]+/, '')
       string = string.replace(/[\n\r\t ]$/, '')
-      string = "\"#{string}\""
-      closer = '"'
+      # string = "\"#{string}\""
+      # closer = '"'
     else if isUndefined(arg)
       # JSON.stringify(undefined) is actually undefined
       string = 'undefined'

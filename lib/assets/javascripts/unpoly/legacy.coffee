@@ -19,7 +19,7 @@ up.legacy = do ->
 #      set: failure
 
   fixKey = (object, oldKey, newKey) ->
-    if oldKey of object
+    if u.isDefined(object[oldKey])
       warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       u.renameKey(object, oldKey, newKey)
 

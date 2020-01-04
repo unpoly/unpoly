@@ -74,7 +74,7 @@ describe 'up.fragment', ->
           results = up.fragment.all('.other')
           expect(results).toEqual []
 
-        it 'returns the first argument if the first argument is already an element, even if { layer } is given', ->
+        it 'returns the first argument if that is already an element, even if { layer } is given', ->
           match = fixture('.match')
           result = up.fragment.first(match, layer: 'root')
           expect(result).toBe(match)
@@ -250,9 +250,9 @@ describe 'up.fragment', ->
           next =>
             expect('.target').toHaveText('new text')
 
-      describe 'with { document } option', ->
+      describe 'with { html } option', ->
 
-        it 'replaces the given selector with a matching element that has the outer HTML from the given { document } string', asyncSpec (next) ->
+        it 'replaces the given selector with a matching element that has the outer HTML from the given { html } string', asyncSpec (next) ->
           $fixture('.before').text('old-before')
           $fixture('.middle').text('old-middle')
           $fixture('.after').text('old-after')
@@ -279,7 +279,7 @@ describe 'up.fragment', ->
           next =>
             expect('.target').toHaveText('new text')
 
-        it "rejects if the selector can't be found in the given HTML string", (done) ->
+        it "rejects if the selector can't be found in the given { html } string", (done) ->
           $fixture('.foo-bar')
           promise = up.change('.foo-bar', html: 'html without match')
 

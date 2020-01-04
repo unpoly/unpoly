@@ -110,7 +110,7 @@ class up.Change.FromContent extends up.Change
       up.fail('No target given for change', toastOpts)
 
   planTargets: ->
-    return u.map(@plans, 'target')
+    return u.uniq(u.map(@plans, 'target'))
 
   seekPlan: (opts) ->
     @ensurePlansBuilt()

@@ -12,6 +12,7 @@
 - Make backdrop a layer option (defaults to false for cover)
 - I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
 - Does up.layer.onEach really need onReady? Because for a while I had up:framework:reset remove the <body>
+- up.link.follow: Animation Options are not parsed for fail variant (we just do u.assign(options, up.motion.animateOptions(options, link)))
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -120,6 +121,7 @@ Accessibility
 Later?
 ------
 
+- up.nav should also set [aria-current]
 - Rename up:proxy:load etc. to up:request:load
 - Events like up:layer:child:open
 - Does up.remove() clean up jQuery data?
