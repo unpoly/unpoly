@@ -571,7 +571,7 @@ describe 'up.modal (deprecated)', ->
       it 'adds a history entry and allows the user to use the back button', asyncSpec (next) ->
         up.motion.config.enabled = false
         up.history.config.enabled = true
-        up.history.config.popTargets = ['.container']
+        up.history.config.restoreTargets = ['.container']
 
         up.history.push('/original-path')
 

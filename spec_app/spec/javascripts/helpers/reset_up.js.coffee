@@ -26,4 +26,5 @@ afterEach (done) ->
         if $('.up-overlay').length
           throw "Overlay was not removed after reset"
 
+        up.puts("Framework was reset")
         done()

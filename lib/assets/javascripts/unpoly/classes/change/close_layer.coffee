@@ -65,7 +65,7 @@ class up.Change.CloseLayer extends up.Change.Removal
 
       return @layer.closeNow().then(=> @emitClosedEvent(parent))
     else
-      return up.event.abortRejection()
+      return up.error.aborted.async()
 
   emitCloseEvent: ->
     return @layer.emit(

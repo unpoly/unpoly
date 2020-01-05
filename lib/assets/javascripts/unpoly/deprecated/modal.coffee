@@ -49,3 +49,4 @@ up.legacy.renamedEvent('up:modal:close', 'up:layer:dismiss')
 up.legacy.renamedEvent('up:modal:closed', 'up:layer:dismissed')
 
 up.link.targetMacro('up-modal', { 'up-layer': 'modal' }, -> up.legacy.deprecated('[up-modal]', '[up-layer=modal]'))
+up.link.targetMacro('up-drawer', { 'up-layer': 'drawer' }, -> up.legacy.deprecated('[up-drawer]', '[up-layer=drawer]'))

@@ -54,7 +54,7 @@ describe 'up.history', ->
         # By default, up.history will replace the <body> tag when
         # the user presses the back-button. We reconfigure this
         # so we don't lose the Jasmine runner interface.
-        up.history.config.popTargets = ['.container']
+        up.history.config.restoreTargets = ['.container']
 
         constructorSpy = jasmine.createSpy('constructor')
         destructorSpy = jasmine.createSpy('destructor')
@@ -126,7 +126,7 @@ describe 'up.history', ->
           $viewport = $(longContentHTML).appendTo(document.body)
 
           up.viewport.config.viewports = ['.viewport']
-          up.history.config.popTargets = ['.viewport']
+          up.history.config.restoreTargets = ['.viewport']
 
           up.replace('.content', '/one')
 
@@ -178,7 +178,7 @@ describe 'up.history', ->
             expect($('.viewport').scrollTop()).toBe(250)
 
         it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', asyncSpec (next) ->
-          up.history.config.popTargets = ['.container']
+          up.history.config.restoreTargets = ['.container']
 
           html = """
             <div class="container">
@@ -231,7 +231,7 @@ describe 'up.history', ->
 
         it 'emits up:history:* events as the user goes forwards and backwards through history', asyncSpec (next) ->
           up.proxy.config.cacheSize = 0
-          up.history.config.popTargets = ['.viewport']
+          up.history.config.restoreTargets = ['.viewport']
 
           fixture('.viewport .content')
           respond = =>

@@ -74,7 +74,7 @@ describe 'up.link', ->
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
           # so we don't lose the Jasmine runner interface.
-          up.history.config.popTargets = ['.container']
+          up.history.config.restoreTargets = ['.container']
 
           respondWith = (html, title) =>
             @lastRequest().respondWith
@@ -158,7 +158,7 @@ describe 'up.link', ->
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
           # so we don't lose the Jasmine runner interface.
-          up.history.config.popTargets = ['.container']
+          up.history.config.restoreTargets = ['.container']
 
           up.proxy.config.cacheExpiry = 0
 
@@ -227,7 +227,7 @@ describe 'up.link', ->
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
           # so we don't lose the Jasmine runner interface.
-          up.history.config.popTargets = ['.container']
+          up.history.config.restoreTargets = ['.container']
 
           up.proxy.config.cacheExpiry = 0
 

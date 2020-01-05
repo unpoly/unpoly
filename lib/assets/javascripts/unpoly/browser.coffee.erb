@@ -182,9 +182,9 @@ up.browser = do ->
   ###
   whenConfirmed = (options) ->
     if !options.confirm || window.confirm(options.confirm)
-      Promise.resolve()
+      return Promise.resolve()
     else
-      up.event.abortRejection('User canceled action')
+      return up.error.aborted.async('User canceled action')
 
   ###**
   Returns whether Unpoly supports the current browser.

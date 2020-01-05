@@ -61,7 +61,7 @@ class up.Change.OpenLayer extends up.Change.Addition
         # layer = await up.layer.open(...)
         return @layer
     else
-      return up.event.abortRejection()
+      return up.error.aborted.async()
 
   handleHistory: ->
     @layer.parent.saveHistory()
