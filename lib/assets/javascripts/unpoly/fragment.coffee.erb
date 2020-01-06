@@ -676,10 +676,8 @@ up.fragment = do ->
     up.legacy.warn("up.visit(url) has been deprecated. Use up.change({ url }) instead.")
     up.change(u.merge(options, { url }))
 
-  BODY_TARGET_PATTERN = /(^|\s|,)(body|html)(,|\s|$)/i
-
   targetsBody = (selector) ->
-    BODY_TARGET_PATTERN.test(selector)
+    /(^|,)\s*(body|html)\s*(\,|$)/i.test(selector)
 
   up.on 'up:app:boot', ->
     body = document.body
