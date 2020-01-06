@@ -41,10 +41,11 @@ up.framework = do ->
   ###
   boot = ->
     if up.browser.isSupported()
-      up.emit('up:framework:boot', log: 'Boot framework')
       # This is called synchronously after all Unpoly modules have been parsed
-      # and executed. User code hasn't been executed yet. Use this moment to
-      # tell everyone to snapshot
+      # and executed. We cannot delay booting until the DOM is ready, since by then
+      # all user-defined event listeners and compilers will have registered.
+      up.emit('up:framework:boot', log: 'Boot framework')
+      # Tell everyone to snapshot.
       up.emit('up:framework:booted', log: 'Framework booted')
       isBooting = false
 

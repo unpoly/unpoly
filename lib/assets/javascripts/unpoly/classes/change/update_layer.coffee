@@ -129,15 +129,12 @@ class up.Change.UpdateLayer extends up.Change.Addition
           up.fragment.markAsDestroying(step.oldElement)
         afterInsert: =>
           @responseDoc.activateElement(step.newElement, step)
-          # Make sure that we didn't lose .up-overlay element
-          # while replacing <body> or <html>
-          if up.fragment.targetsBody(step.selector)
-            up.layer.attachAll()
         beforeDetach: ->
           up.syntax.clean(step.oldElement)
-        afterDetach: ->
+        afterDetach: =>
           e.remove(step.oldElement) # clean up jQuery data
           up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
+          @layer.onUpdated(step.newElement)
 
       return up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
 

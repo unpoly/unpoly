@@ -4,7 +4,10 @@ e = up.element
 class up.LayerStack extends up.Class
 
   constructor: ->
-    @reset()
+    @layers = []
+    rootLayer = up.layer.build(mode: 'root', stack: this)
+    @layers.push(rootLayer)
+    @currentOverrides = []
 
   isRoot: (layer = @current) ->
     @layers[0] == layer
@@ -30,15 +33,10 @@ class up.LayerStack extends up.Class
 
   reset: ->
     up.Layer.OverlayWithViewport.bodyShifter.reset()
-    @resetLayers()
+    @overlays.forEach (layer) -> e.remove(layer.element)
+    @layers = [@root]
     @currentOverrides = []
-
-  resetLayers: ->
-    if @layers
-      @layers.slice(1).forEach (layer) -> e.remove(layer.element)
-    @layers = []
-    rootLayer = up.layer.build(mode: 'root', stack: this)
-    @layers.push(rootLayer)
+    @root.setInert(false)
 
   indexOf: (layer) ->
     @layers.indexOf(layer)

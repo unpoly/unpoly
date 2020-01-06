@@ -75,7 +75,7 @@ class up.Layer extends up.Record
 
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
-    e.closest(element, '.up-overlay, body') == @element
+    e.closest(element, '.up-overlay, html') == @element
 
   on: (args...) ->
     return @buildEventListenerGroup(args).bind()
@@ -176,6 +176,9 @@ class up.Layer extends up.Record
 
   setInert: (inert) ->
     throw up.error.notImplemented()
+
+  onUpdated: (newElement) ->
+    # optional callback
 
   toString: ->
     "#{@mode} layer"

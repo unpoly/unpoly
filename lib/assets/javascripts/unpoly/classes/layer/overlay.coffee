@@ -145,4 +145,4 @@ class up.Layer.Overlay extends up.Layer
     @executeCloseChange('dismiss', value, options)
 
   setInert: (inert) ->
-    e.setInert(@element, inert)
+    e.toggleInert(@element, inert)

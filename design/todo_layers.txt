@@ -20,6 +20,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that updating <body> or <html> we keep layer.onEach handlers
+  - Test that updating <body> will re-attach .up-overlay
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)
@@ -121,6 +123,7 @@ Accessibility
 Later?
 ------
 
+- Get rid of up:framework:booted event
 - up.nav should also set [aria-current]
 - Rename up:proxy:load etc. to up:request:load
 - Events like up:layer:child:open
