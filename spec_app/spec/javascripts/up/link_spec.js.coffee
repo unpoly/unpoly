@@ -34,7 +34,7 @@ describe 'up.link', ->
           $fixture('.middle').text('old-middle')
           $fixture('.after').text('old-after')
           $link = $fixture('a[href="/path"][up-target=".middle"]')
-    
+
           up.follow($link)
 
           next =>
@@ -594,6 +594,21 @@ describe 'up.link', ->
 
       it 'returns true for an [up-target] link', ->
         $link = $fixture('a[href="/foo"][up-target=".target"]')
+        up.hello $link
+        expect(up.link.isFollowable($link)).toBe(true)
+
+      it 'returns true for an [up-follow] link', ->
+        $link = $fixture('a[href="/foo"][up-follow]')
+        up.hello $link
+        expect(up.link.isFollowable($link)).toBe(true)
+
+      it 'returns true for an [up-layer] link', ->
+        $link = $fixture('a[href="/foo"][up-layer="modal"]')
+        up.hello $link
+        expect(up.link.isFollowable($link)).toBe(true)
+
+      it 'returns true for an [up-mode] link', ->
+        $link = $fixture('a[href="/foo"][up-mode="modal"]')
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
