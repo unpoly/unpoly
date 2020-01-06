@@ -17,6 +17,7 @@ class up.EventListener extends up.Record
     super(attributes)
     @key = @constructor.buildKey(attributes)
     @isDefault = up.framework.isBooting()
+    # console.debug("Listening to %o on %o with %o (isDefault = %o)", @eventName, @element, @callback, @isDefault)
 
   bind: ->
     map = (@element.upEventListeners ||= {})
@@ -78,5 +79,6 @@ class up.EventListener extends up.Record
       listeners = u.values(map)
       for listener in listeners
         unless listener.isDefault
+          # console.debug("Unbinding non-default on %o: %o", element, listener.callback)
           # Calling unbind() also removes the listener from element.upEventListeners
           listener.unbind()
