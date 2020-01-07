@@ -21,6 +21,8 @@ Have you noticed how noticed how pages fade in
 
 - Tests
   - Test that accepting/dismissing the root layer will just follow the link
+  - Test that proxy-events are emitted on their layer, not the document
+  - Test that proxy-events don't crash when a request has { layer: 'new' }
   - Test that updating <body> or <html> we keep layer.onEach handlers
   - Test that updating <body> will re-attach .up-overlay
   - Test and document up.proxy.abort().

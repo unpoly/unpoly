@@ -325,5 +325,5 @@ class up.Request extends up.Record
     u.wrapValue(@, args...)
 
   emit: (name, props) ->
-    emitter = @layer || up
+    emitter = if @layer && @layer != 'new' then @layer else up
     emitter.emit(name, u.merge(props, request: this))

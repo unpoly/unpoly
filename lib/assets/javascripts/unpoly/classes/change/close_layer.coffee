@@ -14,13 +14,13 @@ class up.Change.CloseLayer extends up.Change.Removal
     @valueAttr = "up-#{verb}"
 
     @closeEventName = "up:layer:#{verb}"
-    @closeCallbackName = "on#{u.uppercaseFirst(verb)}"
+    @closeCallbackName = "on#{u.upperCaseFirst(verb)}"
 
     @closingEventName = "up:layer:#{verbGerund}"
-    @closingCallbackName = "on#{u.uppercaseFirst(verbGerund)}"
+    @closingCallbackName = "on#{u.upperCaseFirst(verbGerund)}"
 
     @closedEventName = "up:layer:#{verbPast}"
-    @closedCallbackName = "on#{u.uppercaseFirst(verbPast)}"
+    @closedCallbackName = "on#{u.upperCaseFirst(verbPast)}"
 
     @layer = up.layer.get(options)
     @origin = options.origin
