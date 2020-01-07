@@ -2,7 +2,7 @@ u = up.util
 e = up.element
 $ = jQuery
 
-describe 'up.popup', ->
+describe 'up.popup (deprecated)', ->
   return
 
   u = up.util

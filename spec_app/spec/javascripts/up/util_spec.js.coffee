@@ -1476,9 +1476,9 @@ describe 'up.util', ->
 
       describe 'with string argument', ->
 
-        it 'serializes with surrounding quotes', ->
+        it 'serializes the string verbatim', ->
           formatted = up.util.sprintf('before %o after', 'argument')
-          expect(formatted).toEqual('before "argument" after')
+          expect(formatted).toEqual('before argument after')
 
       describe 'with undefined argument', ->
 
@@ -1508,7 +1508,7 @@ describe 'up.util', ->
 
         it 'recursively serializes the elements', ->
           formatted = up.util.sprintf('before %o after', [1, "foo"])
-          expect(formatted).toEqual('before [1, "foo"] after')
+          expect(formatted).toEqual('before [1, foo] after')
 
       describe 'with element argument', ->
 
