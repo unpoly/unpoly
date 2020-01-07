@@ -1160,14 +1160,18 @@ up.util = do ->
 
   @function up.util.remove
   @param {Array<T>} array
+    The array to change.
   @param {T} element
+    The element to remove.
+  @return {T|undefined}
+    The removed element, or `undefined` if the array didn't contain the element.
   @stable
   ###
   remove = (array, element) ->
     index = array.indexOf(element)
     if index >= 0
       array.splice(index, 1)
-      element
+      return element
 
   ###**
   If the given `value` is a function, calls the function with the given `args`.

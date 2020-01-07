@@ -898,30 +898,38 @@ describe 'up.link', ->
       beforeEach ->
         @$link = $fixture('a[href="/follow-path"][up-follow]')
         @followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
-        @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it "calls up.follow with the clicked link", asyncSpec (next) ->
         Trigger.click(@$link)
         next =>
           expect(@followSpy).toHaveBeenCalledWith(@$link[0])
+          expect(@$link).not.toHaveBeenDefaultFollowed()
 
       # IE does not call JavaScript and always performs the default action on right clicks
       unless AgentDetector.isIE() || AgentDetector.isEdge()
         it 'does nothing if the right mouse button is used', asyncSpec (next) ->
           Trigger.click(@$link, button: 2)
-          next => expect(@followSpy).not.toHaveBeenCalled()
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).toHaveBeenDefaultFollowed()
 
       it 'does nothing if shift is pressed during the click', asyncSpec (next) ->
         Trigger.click(@$link, shiftKey: true)
-        next => expect(@followSpy).not.toHaveBeenCalled()
+        next =>
+          expect(@followSpy).not.toHaveBeenCalled()
+          expect(@$link).toHaveBeenDefaultFollowed()
 
       it 'does nothing if ctrl is pressed during the click', asyncSpec (next)->
         Trigger.click(@$link, ctrlKey: true)
-        next => expect(@followSpy).not.toHaveBeenCalled()
+        next =>
+          expect(@followSpy).not.toHaveBeenCalled()
+          expect(@$link).toHaveBeenDefaultFollowed()
 
       it 'does nothing if meta is pressed during the click', asyncSpec (next)->
         Trigger.click(@$link, metaKey: true)
-        next => expect(@followSpy).not.toHaveBeenCalled()
+        next =>
+          expect(@followSpy).not.toHaveBeenCalled()
+          expect(@$link).toHaveBeenDefaultFollowed()
 
       describe 'with [up-instant] modifier', ->
 

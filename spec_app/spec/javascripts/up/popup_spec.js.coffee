@@ -163,7 +163,6 @@ describe 'up.popup', ->
           @$link = $fixture('a[href="/path"][up-popup=".target"]')
           up.hello(@$link)
           @attachSpy = up.popup.knife.mock('attachAsap').and.returnValue(Promise.resolve())
-          @defaultSpy = spyOn(up.link, 'allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a popup', asyncSpec (next) ->
         @stubAttach()

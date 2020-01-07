@@ -281,15 +281,6 @@ up.link = do ->
     u.normalizeMethod(options.method ? link.getAttribute('up-method') ? link.getAttribute('data-method'))
 
   ###**
-  No-op that is called when we allow a browser's default action to go through,
-  so we can spy on it in unit tests. See `link_spec.js`.
-
-  @function allowDefault
-  @internal
-  ###
-  allowDefault = (event) ->
-
-  ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly
   instead of making a full page load.
 
@@ -526,16 +517,10 @@ up.link = do ->
           up.event.halt(event)
         else
           consumeFollowEvent(event, link)
-      else
-        # For tests
-        allowDefault(event)
 
     up.layer.onEach 'mousedown', fullFollowSelector, (event, link) ->
       if shouldProcessEvent(event, link) && isInstant(link)
         consumeFollowEvent(event, link)
-      else
-        # For tests
-        allowDefault(event)
 
   ###**
   By adding an `up-instant` attribute to a link, the destination will be

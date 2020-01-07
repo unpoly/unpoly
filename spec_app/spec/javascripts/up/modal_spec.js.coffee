@@ -481,7 +481,6 @@ describe 'up.modal (deprecated)', ->
           @$link = $fixture('a[href="/path"][up-modal=".target"]')
           up.hello(@$link)
           @followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
-          @defaultSpy = up.link.knife.mock('allowDefault').and.callFake((event) -> event.preventDefault())
 
       it 'opens the clicked link in a modal', asyncSpec (next) ->
         @$link = $fixture('a[href="/path"][up-modal=".target"]')
