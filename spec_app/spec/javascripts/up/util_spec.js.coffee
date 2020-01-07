@@ -313,6 +313,14 @@ describe 'up.util', ->
         value = undefined
         expect(up.util.isElementish(value)).toBe(false)
 
+      it 'returns true for the document', ->
+        value = document
+        expect(up.util.isElementish(value)).toBe(true)
+
+      it 'returns true for the window', ->
+        value = window
+        expect(up.util.isElementish(value)).toBe(true)
+
     describe 'up.util.flatMap', ->
 
       it 'collects the Array results of the given map function, then concatenates the result arrays into one flat array', ->
