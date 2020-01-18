@@ -36,9 +36,14 @@ up.error = do ->
     build("Cannot apply change: #{change} (#{reason}")
   )
 
+  invalidSelector = errorInterface('up.InvalidSelector', (selector) ->
+    build("Cannot parse selector: #{selector}")
+  )
+
   {
     failed,
     aborted,
+    invalidSelector,
     notApplicable,
     notImplemented,
   }

@@ -12,6 +12,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @target = options.target
     @peel = options.peel
     @reveal = options.reveal
+    @placement = options.placement
     @location = options.location
     @hungry = options.hungry
     @transition = options.transition
@@ -25,7 +26,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   preflightTarget: ->
     # Make sure this plan is applicable before returning a target
     @findOld()
-    return @compressedTarget()
+    return u.map(@steps, 'selector').join(', ')
 
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
@@ -76,67 +77,72 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Remember where the element came from in case someone needs to up.reload(newElement) later.
     up.fragment.setSource(step.newElement, step.source)
 
-    if step.pseudoClass
-      # We're either appending or prepending. No keepable elements must be honored.
+    switch step.placement
+      when 'swap'
+        if keepPlan = @findKeepPlan(step)
+          # Since we're keeping the element that was requested to be swapped,
+          # there is nothing left to do here, except notify event listeners.
+          up.fragment.emitKept(keepPlan)
+          return Promise.resolve()
 
-      # Text nodes are wrapped in a .up-insertion container so we can
-      # animate them and measure their position/size for scrolling.
-      # This is not possible for container-less text nodes.
-      wrapper = e.createFromSelector('.up-insertion')
-      while childNode = step.newElement.firstChild
-        wrapper.appendChild(childNode)
+        else
+          # This needs to happen before up.syntax.clean() below.
+          # Otherwise we would run destructors for elements we want to keep.
+          @transferKeepableElements(step)
 
-      # Note that since we're prepending/appending instead of replacing,
-      # newElement will not actually be inserted into the DOM, only its children.
-      if step.pseudoClass == 'before'
-        step.oldElement.insertAdjacentElement('afterbegin', wrapper)
-      else
-        step.oldElement.insertAdjacentElement('beforeend', wrapper)
+          parent = step.oldElement.parentNode
 
-      for child in wrapper.children
-        # Compile the new content and emit up:fragment:inserted.
-        @responseDoc.activateElement(child, step)
+          morphOptions = u.merge step,
+            beforeStart: ->
+              up.fragment.markAsDestroying(step.oldElement)
+            afterInsert: =>
+              @responseDoc.activateElement(step.newElement, step)
+            beforeDetach: ->
+              up.syntax.clean(step.oldElement)
+            afterDetach: =>
+              e.remove(step.oldElement) # clean up jQuery data
+              up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
 
-      # Reveal element that was being prepended/appended.
-      # Since we will animate (not morph) it's OK to allow animation of scrolling
-      # if options.scrollBehavior is given.
-      promise = up.viewport.scrollAfterInsertFragment(wrapper, step)
+          return up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
 
-      # Since we're adding content instead of replacing, we'll only
-      # animate newElement instead of morphing between oldElement and newElement
-      promise = u.always promise, -> up.animate(wrapper, step.transition, step)
+      when 'before', 'after'
+        # We're either appending or prepending. No keepable elements must be honored.
 
-      # Remove the wrapper now that is has served it purpose
-      promise = u.always promise, -> e.unwrap(wrapper)
+        # Text nodes are wrapped in a .up-insertion container so we can
+        # animate them and measure their position/size for scrolling.
+        # This is not possible for container-less text nodes.
+        wrapper = e.createFromSelector('.up-insertion')
+        while childNode = step.newElement.firstChild
+          wrapper.appendChild(childNode)
 
-      return promise
+        # Note that since we're prepending/appending instead of replacing,
+        # newElement will not actually be inserted into the DOM, only its children.
+        if step.placement == 'before'
+          step.oldElement.insertAdjacentElement('afterbegin', wrapper)
+        else
+          step.oldElement.insertAdjacentElement('beforeend', wrapper)
 
-    else if keepPlan = @findKeepPlan(step)
-      # Since we're keeping the element that was requested to be swapped,
-      # there is nothing left to do here, except notify event listeners.
-      up.fragment.emitKept(keepPlan)
-      return Promise.resolve()
+        for child in wrapper.children
+          # Compile the new content and emit up:fragment:inserted.
+          @responseDoc.activateElement(child, step)
 
-    else
-      # This needs to happen before up.syntax.clean() below.
-      # Otherwise we would run destructors for elements we want to keep.
-      @transferKeepableElements(step)
+        # Reveal element that was being prepended/appended.
+        # Since we will animate (not morph) it's OK to allow animation of scrolling
+        # if options.scrollBehavior is given.
+        promise = up.viewport.scrollAfterInsertFragment(wrapper, step)
 
-      parent = step.oldElement.parentNode
+        # Since we're adding content instead of replacing, we'll only
+        # animate newElement instead of morphing between oldElement and newElement
+        promise = u.always promise, -> up.animate(wrapper, step.transition, step)
 
-      morphOptions = u.merge step,
-        beforeStart: ->
-          up.fragment.markAsDestroying(step.oldElement)
-        afterInsert: =>
-          @responseDoc.activateElement(step.newElement, step)
-        beforeDetach: ->
-          up.syntax.clean(step.oldElement)
-        afterDetach: =>
-          e.remove(step.oldElement) # clean up jQuery data
-          up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
-          @layer.onUpdated(step.newElement)
+        # Remove the wrapper now that is has served it purpose
+        promise = u.always promise, -> e.unwrap(wrapper)
 
-      return up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
+        return promise
+
+    # Give the layer a chance to fix any damage caused by the change.
+    # E.g. the root layer needs to re-attach <up-overlay> elements lost by swapping <body>.
+    @layer.onUpdated(step.newElement)
 
   # Returns a object detailling a keep operation iff the given element is [up-keep] and
   # we can find a matching partner in newElement. Otherwise returns undefined.
@@ -163,7 +169,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
           newElement: partner # the element that would have replaced it but now does not
           newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
 
-        return plan unless up.fragment.emitKeep(plan).defaultPrevented
+        unless up.fragment.emitKeep(plan).defaultPrevented
+          return plan
 
   # This will find all [up-keep] descendants in oldElement, overwrite their partner
   # element in newElement and leave a visually identical clone in oldElement for a later transition.
@@ -193,29 +200,36 @@ class up.Change.UpdateLayer extends up.Change.Addition
     disjunction = u.splitValues(@target, ',')
 
     @steps = disjunction.map (target, i) =>
-      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or
-        up.fail('Could not parse selector "%s"', target)
+      expressionParts = target.match(/^(.+?)(?:\:(before|after|root))?$/) or
+        throw up.error.invalidSelector(target)
 
       # When extracting multiple selectors, we only want to reveal the first element.
       # So we set the { reveal } option to false for the next iteration.
-      doReveal = if i == 0 then @reveal else false
+      reveal = (i == 0 && @reveal)
 
       selector = expressionParts[1]
+      # We cannot replace <html> with the current e.replace() implementation.
       if selector == 'html'
-        # We cannot replace <html> with the current e.replace() implementation.
         selector = 'body'
 
-      return u.merge @options,
-        selector: selector
-        pseudoClass: expressionParts[2]
-        reveal: doReveal
+      placement = expressionParts[2] || @placement || 'swap'
+      if placement == 'root'
+        # The `root` placement can be modeled as a `swap` of the new element and
+        # the first child of the current layer's' root element.
+        placement = 'swap'
+        # If someone wants to target `body:root` in the root layer,
+        # they probably wanted to target `body:swap` instead.
+        unless @layer.isRoot() && up.fragment.targetsBody(selector)
+          oldElement = @layer.element.children[0]
+
+      return u.merge(@options, { selector, placement, reveal, oldElement })
 
   findOld: ->
     return if @foundOld
-
     for step in @steps
-      # Try to find fragments matchin step.selector within step.layer
-      step.oldElement = up.fragment.first(step.selector, step) or
+      # Try to find fragments matching step.selector within step.layer.
+      # Note that step.oldElement might already have been set by @parseSteps().
+      step.oldElement ||= up.fragment.first(step.selector, step) or
         throw @notApplicable("Could not find element \"#{@target}\" in current page")
     @resolveOldNesting()
     @foundOld = true
@@ -233,39 +247,30 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # Find all [up-hungry] fragments within @layer
       hungries = up.fragment.all(up.radio.hungrySelector(), @options)
       transition = up.radio.config.hungryTransition ? @transition
-      for hungry in hungries
-        selector = e.toSelector(hungry)
-        if newHungry = @responseDoc.select(selector)
-          @steps.push
-            selector: selector
-            oldElement: hungry
-            newElement: newHungry
-            transition: transition
-            reveal: false # we never auto-reveal a hungry element
+      for oldElement in hungries
+        selector = e.toSelector(oldElement)
+        if newElement = @responseDoc.select(selector)
+          @steps.push({ selector, oldElement, newElement, transition, reveal: false })
+
+  containedByRivalStep: (steps, candidateStep) ->
+    return u.some steps, (rivalStep) ->
+      rivalStep != candidateStep &&
+        rivalStep.placement == 'swap' &&
+        rivalStep.oldElement.contains(candidateStep.oldElement)
 
   resolveOldNesting: ->
-    return if @steps.length < 2
+    console.debug("resolveOldNesting for steps %o", u.copy(@steps))
+    compressed = u.uniqBy(@steps, 'oldElement')
+    console.debug("after uniqBy it is", u.copy(compressed))
 
-    compressed = u.copy(@steps)
-
-    # When two replacements target the same element, we would process
-    # the same content twice. We never want that, so we only keep the first step.
-    compressed = u.uniqBy(compressed, (step) -> step.oldElement)
-
-    compressed = u.filter compressed, (candidateStep, candidateIndex) =>
-      u.every compressed, (rivalStep, rivalIndex) =>
-        if rivalIndex == candidateIndex
-          true
-        else
-          candidateElement = candidateStep.oldElement
-          rivalElement = rivalStep.oldElement
-          rivalStep.pseudoClass || !rivalElement.contains(candidateElement)
+    compressed = u.reject compressed, (step) => @containedByRivalStep(compressed, step)
+    console.debug("compressed steps are %o", u.copy(compressed))
 
     # If we revealed before, we should do so now
-    compressed[0].reveal = @steps[0].reveal
+    compressed[0].reveal = @reveal
 
     @steps = compressed
 
-  compressedTarget: ->
-    serializeStep = (step) -> u.compact([step.selector, step.pseudoClass]).join(':')
-    return u.map(@steps, serializeStep).join(', ')
+#  compressedTarget: ->
+#    serializeStep = (step) -> u.compact([step.selector, step.pseudoClass]).join(':')
+#    return u.map(@steps, serializeStep).join(', ')

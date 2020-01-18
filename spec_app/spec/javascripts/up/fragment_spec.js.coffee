@@ -461,7 +461,8 @@ describe 'up.fragment', ->
             replacePromise = up.change('.outer:before, .inner', url: '/path')
 
             next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:before, .inner')
+              # Placement pseudo-selectors are removed from X-Up-Target
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
               @respondWith """
                 <div class="outer">
@@ -490,7 +491,7 @@ describe 'up.fragment', ->
             replacePromise = up.change('.outer:after, .inner', url: '/path')
 
             next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
 
               @respondWith """
                 <div class="outer">
@@ -512,14 +513,14 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-          it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
-            $outer = $fixture('.outer').text('old outer text')
-            $inner = $outer.affix('.inner').text('old inner text')
-
-            replacePromise = up.change('.outer:after, .inner', url: '/path')
-
-            next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
+#          it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
+#            $outer = $fixture('.outer').text('old outer text')
+#            $inner = $outer.affix('.inner').text('old inner text')
+#
+#            replacePromise = up.change('.outer:after, .inner', url: '/path')
+#
+#            next =>
+#              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
 
           it 'replaces a single fragment if a selector contains a previous selector in the current page', asyncSpec (next) ->
             $outer = $fixture('.outer').text('old outer text')
@@ -715,7 +716,8 @@ describe 'up.fragment', ->
             replacePromise = up.change('.one:before, .one:after', url: '/path')
 
             next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one:before')
+              # Placement pseudo-selectors are removed from X-Up-Target
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
 
               @respondWith """
                 <div class="one">
@@ -737,7 +739,8 @@ describe 'up.fragment', ->
             replacePromise = up.change('.elem:before, .alias1, .alias2:after', url: '/path')
 
             next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem:before')
+              # Placement pseudo-selectors are removed from X-Up-Target
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.elem')
 
               @respondWith """
                 <div class="elem alias1 alias2">

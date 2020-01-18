@@ -496,7 +496,7 @@ up.element = do ->
           ''
 
       unless depthSelector == ''
-        throw up.error.failed('Cannot parse selector: ' + selector)
+        throw up.error.invalidSelector(selector)
 
       previousElement?.appendChild(depthElement)
       previousElement = depthElement

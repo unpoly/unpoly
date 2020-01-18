@@ -370,17 +370,17 @@ describe 'up.util', ->
         result = up.util.uniq(input)
         expect(result).toEqual [1, 2, 3, 4]
 
-    describe 'up.util.uniqBy', ->
-
-      it 'returns the given array with duplicate elements removed, calling the given function to determine value for uniqueness', ->
-        input = ["foo", "bar", "apple", 'orange', 'banana']
-        result = up.util.uniqBy(input, (element) -> element.length)
-        expect(result).toEqual ['foo', 'apple', 'orange']
-
-      it 'accepts a property name instead of a function, which collects that property from each item to compute uniquness', ->
-        input = ["foo", "bar", "apple", 'orange', 'banana']
-        result = up.util.uniqBy(input, 'length')
-        expect(result).toEqual ['foo', 'apple', 'orange']
+#    describe 'up.util.uniqBy', ->
+#
+#      it 'returns the given array with duplicate elements removed, calling the given function to determine value for uniqueness', ->
+#        input = ["foo", "bar", "apple", 'orange', 'banana']
+#        result = up.util.uniqBy(input, (element) -> element.length)
+#        expect(result).toEqual ['foo', 'apple', 'orange']
+#
+#      it 'accepts a property name instead of a function, which collects that property from each item to compute uniquness', ->
+#        input = ["foo", "bar", "apple", 'orange', 'banana']
+#        result = up.util.uniqBy(input, 'length')
+#        expect(result).toEqual ['foo', 'apple', 'orange']
 
 #    describe 'up.util.parsePath', ->
 #

@@ -10,8 +10,8 @@ class up.Change.FromContent extends up.Change
     unless @plans.length
       @notApplicable(['No target for change %o', @options])
 
-  toTargetObjList: (target, props) ->
-    list = u.wrapList(target)
+  toTargetObjList: (targetOrTargets, props) ->
+    list = u.wrapList(targetOrTargets)
     list = u.compact(list)
     list = u.map list, (target) => @toTargetObj(target, props)
     return list
@@ -30,16 +30,26 @@ class up.Change.FromContent extends up.Change
     @plans = []
     @addPlansForTarget(@options.target)
     if @options.fallback != false
-      @addPlansForTarget(@options.fallback)
-      @addPlansForTarget(@defaultTargetObjs())
+      @addPlansForTarget(@options.fallback, isFallback: true)
+      @addPlansForTarget(@defaultTargetObjs(), isFallback: true)
 
-  addPlansForTarget: (target, props) ->
-    for targetObj in @toTargetObjList(target, props)
+  addPlansForTarget: (targetOrTargets, props = {}) ->
+    for targetObj in @toTargetObjList(targetOrTargets, props)
       # One target may expand to more than one plan if it has a { layer } option that
       # needs to try multiple layers, like { layer: 'closest' }.
       for layer in up.layer.list(targetObj)
-        ChangeClass = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
-        @plans.push(new ChangeClass(u.merge(targetObj, { layer })))
+        changeProps = u.merge(targetObj, { layer })
+        @addPlan(layer, changeProps)
+        # Only for existing overlays we open will also attempt to place a new element as the
+        # new first child of the layer's root element. This mirrors the behavior that we get when
+        # opening a layer: The new element does not need to match anything in the current document.
+        if props.isFallback && layer.isOverlay?()
+          @addPlan(u.merge(changeProps, placement: 'root'))
+
+  addPlan: (layer, props) ->
+    ChangeClass = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
+    change = new ChangeClass(props)
+    @plans.push(change)
 
   defaultTargetObjs: ->
     if @options.layer == 'new'
