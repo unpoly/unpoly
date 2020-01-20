@@ -20,7 +20,6 @@
 - UpdateLayer needs to refuse placing <body> in an overlay (but not the root layer)
 - Should we allow placing the body in overlays with <up-body>?
 - X-Up-Layer-Mode: 'modal' und up.layer.overlay? / up.layer.root? / up.layer.mode
-- Publish up.history.config.enabled
 - All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
 
 

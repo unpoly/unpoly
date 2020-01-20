@@ -21,6 +21,10 @@ up.history = do ->
     A list of possible CSS selectors to [replace](/up.change) when the user goes back in history.
 
     If this array is empty, the [root layer's default targets](/up.layer.config.root) will be replaced.
+  @param {boolean} [config.enabled=true]
+    Defines whether [fragment updates](/up.change) will update the browser's current URL.
+
+    If set to `false` Unpoly will never change the browser URL.
   @param {boolean} [config.restoreScroll=true]
     Whether to restore the known scroll positions
     when the user goes back or forward in history.

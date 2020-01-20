@@ -20,6 +20,7 @@ Unreleased
   - focus new
   - focus return on close
 - up.nav sets [aria-current]
+- up.history.config.enabled
 
 
 
