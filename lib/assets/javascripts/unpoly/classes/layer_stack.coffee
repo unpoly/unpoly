@@ -5,9 +5,12 @@ class up.LayerStack extends up.Class
 
   constructor: ->
     @layers = []
-    rootLayer = up.layer.build(mode: 'root', stack: this)
+    rootLayer = @buildRoot()
     @layers.push(rootLayer)
     @currentOverrides = []
+
+  buildRoot: ->
+    return up.layer.build(mode: 'root', stack: this)
 
   isRoot: (layer = @current) ->
     @layers[0] == layer
@@ -36,7 +39,7 @@ class up.LayerStack extends up.Class
     @overlays.forEach (layer) -> e.remove(layer.element)
     @layers = [@root]
     @currentOverrides = []
-    @root.setInert(false)
+    @root.reset()
 
   indexOf: (layer) ->
     @layers.indexOf(layer)

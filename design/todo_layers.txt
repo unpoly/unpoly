@@ -20,12 +20,8 @@
 - UpdateLayer needs to refuse placing <body> in an overlay (but not the root layer)
 - Should we allow placing the body in overlays with <up-body>?
 - X-Up-Layer-Mode: 'modal' und up.layer.overlay? / up.layer.root? / up.layer.mode
-- up.viewport needs to become layer-aware
-  - I think most functions do not use a { layer } option
-  - up.viewport.scrollAfterInsertFragment() finds element across layers
-    - { hash: 'foo' } will find anchors in other layers
-    - { restoreScroll: true } will find the body viewport that encloses all layers
 - Publish up.history.config.enabled
+- All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -34,6 +30,7 @@ Have you noticed how noticed how pages fade in
 
 - Tests
   - Test that validations keep focus
+  - Test that layers without history updates still return their current #location
   - Change with { reveal: 'selector' } should not find elements in another layer
   - Test that this doesn't crash when we don't have parent
     - <form up-layer="parent" up-target=".list">
@@ -149,8 +146,8 @@ Accessibility
 Later?
 ------
 
+- Should we track/stop animations and scrolling per layer instead of globally?
 - Get rid of up:framework:booted event
-- up.nav should also set [aria-current]
 - Rename up:proxy:load etc. to up:request:load
 - Events like up:layer:child:open
 - Does up.remove() clean up jQuery data?

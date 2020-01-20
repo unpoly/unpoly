@@ -49,3 +49,8 @@ class up.Layer.Root extends up.Layer
 
     if bodySwapped
       up.layer.attachAll()
+
+  reset: ->
+    @setInert(false)
+    @lastScrollTops.clear()
+

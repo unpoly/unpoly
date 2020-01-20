@@ -13,6 +13,14 @@ Unreleased
 - Failed responses now change the URL
 - TODO ...
 - up.history.config.restoreScroll has been removed. You can use up.history.config.restoreTargets = { target: 'body', restoreScroll: false } instead.
+- Feedback works when a layer has no history
+- Layer A11Y
+  - inert
+  - aria-hidden
+  - focus new
+  - focus return on close
+- up.nav sets [aria-current]
+
 
 
 0.61.0

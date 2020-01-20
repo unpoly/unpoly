@@ -529,6 +529,7 @@ up.fragment = do ->
 
   # TODO: Docs for up.fragment.all
   all = (args...) ->
+    console.debug("up.fragment.all(%o)", args)
     options = u.extractOptions(args)
     lastArg = u.last(args)
 

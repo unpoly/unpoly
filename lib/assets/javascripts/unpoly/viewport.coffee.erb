@@ -33,6 +33,7 @@ up.viewport = do ->
 
   u = up.util
   e = up.element
+  f = up.fragment
 
   ###**
   Configures the application layout.
@@ -76,15 +77,10 @@ up.viewport = do ->
     revealPadding: 0,
     scrollSpeed: 1
 
-  lastScrollTops = new up.Cache
-    size: 30,
-    key: up.history.normalizeURL
-
   scrollingController = new up.MotionController('scrolling')
 
   reset = ->
     config.reset()
-    lastScrollTops.clear()
     scrollingController.reset()
 
   ###**
@@ -126,7 +122,8 @@ up.viewport = do ->
     A promise that will be fulfilled when the scrolling ends.
   @experimental
   ###
-  scroll = (viewport, scrollTop, options) ->
+  scroll = (viewport, scrollTop, options = {}) ->
+    viewport = f.first(viewport, options)
     motion = new up.ScrollMotion(viewport, scrollTop, options)
     scrollingController.startMotion(viewport, motion, options)
 
@@ -151,32 +148,7 @@ up.viewport = do ->
   ###
   anchoredRight = ->
     selector = config.anchoredRight.join(',')
-    e.all(selector)
-
-  ###**
-  @function measureObstruction
-  @return {Object}
-  @internal
-  ###
-  measureObstruction = (viewportHeight) ->
-    composeHeight = (obstructor, distanceFromEdgeProps) ->
-      distanceFromEdge = u.sum(distanceFromEdgeProps, (prop) -> e.styleNumber(obstructor, prop)) || 0
-      distanceFromEdge + obstructor.offsetHeight
-
-    measureTopObstructor = (obstructor) ->
-      composeHeight(obstructor, ['top', 'margin-top'])
-
-    measureBottomObstructor = (obstructor) ->
-      composeHeight(obstructor, ['bottom', 'margin-bottom'])
-
-    topObstructors = e.all(config.fixedTop.join(', '))
-    bottomObstructors = e.all(config.fixedBottom.join(', '))
-
-    topObstructions = u.map(topObstructors, measureTopObstructor)
-    bottomObstructions = u.map(bottomObstructors, measureBottomObstructor)
-
-    top: Math.max(0, topObstructions...)
-    bottom: Math.max(0, bottomObstructions...)
+    up.layer.root.allElements(selector)
 
   ###**
   Scroll's the given element's viewport so the first rows of the
@@ -240,8 +212,10 @@ up.viewport = do ->
     A promise that fulfills when the element is revealed.
   @stable
   ###
-  reveal = (elementOrSelector, options) ->
-    element = e.get(elementOrSelector)
+  reveal = (elementOrSelector, options = {}) ->
+    console.debug("--- f.first(%o)", elementOrSelector)
+    element = f.first(elementOrSelector, options)
+    console.debug("--- returned element %o", element)
     motion = new up.RevealMotion(element, options)
     return scrollingController.startMotion(element, motion, options)
 
@@ -262,24 +236,24 @@ up.viewport = do ->
     restoreScrollOpt = options.restoreScroll
     focusOpt = options.focus
 
-    animateOptions = u.pick(options, ['scrollBehavior', 'scrollSpeed'])
+    # animateOptions = u.pick(options, ['scrollBehavior', 'scrollSpeed'])
 
     if focusOpt
+      # Don't return since up.Focus.set() is a sync function.
       up.Focus.set(options.layer, focusOpt)
-      return Promise.resolve() # up.Focus.set() is a sync function
 
     else if resetScrollOpt
-      return resetScroll(around: element)
+      return resetScroll(u.merge(options, around: element))
 
     else if restoreScrollOpt
       # If options.restoreScroll is an object, its keys map viewport selectors
       # to scroll positions. If it is just true, we leave the scrollTops option
       # undefined and let restoreScroll() retrieve previous scrollTops from cache.
       givenTops = u.presence(restoreScrollOpt, u.isObject)
-      return restoreScroll(around: element, scrollTops: givenTops)
+      return restoreScroll(u.merge(options, around: element, scrollTops: givenTops))
 
     else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      return revealHash(hashOpt, animateOptions)
+      return revealHash(hashOpt, options)
 
     else if revealOpt
       # We allow to pass another element as { reveal } option
@@ -289,7 +263,7 @@ up.viewport = do ->
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         selector = e.resolveSelector(revealOpt, options.origin)
-        element = up.fragment.first(selector, options)
+        element = f.first(selector, options)
 
       else
         # We reveal the given element
@@ -299,7 +273,7 @@ up.viewport = do ->
       # reveals the first validation error message, but the error is shown in an
       # unexpected element.
       if element
-        value = reveal(element, animateOptions)
+        value = reveal(element, options)
         return value
 
     # If we didn't need to scroll above, just return a resolved promise
@@ -329,8 +303,8 @@ up.viewport = do ->
     A promise that is fulfilled when scroll position has changed to match the location hash.
   @experimental
   ###
-  revealHash = (hash) ->
-    if (hash) && (match = firstHashTarget(hash))
+  revealHash = (hash, options) ->
+    if (hash) && (match = firstHashTarget(hash, options))
       reveal(match, top: true)
     else
       Promise.resolve()
@@ -350,8 +324,9 @@ up.viewport = do ->
   @return {Element}
   @experimental
   ###
-  closest = (target) ->
-    element = e.get(target)
+  closest = (target, options = {}) ->
+    console.debug("up.viewport.closest(%o)", target)
+    element = f.first(target, options)
     e.closest(element, allSelector())
 
   ###**
@@ -363,13 +338,13 @@ up.viewport = do ->
   @return List<Element>
   @internal
   ###
-  getSubtree = (target) ->
-    element = e.get(target)
+  getSubtree = (target, options = {}) ->
+    element = f.first(target, options)
     e.subtree(element, allSelector())
 
-  getAround = (target) ->
-    element = e.get(target)
-    e.list(closest(element), getSubtree(element))
+  getAround = (target, options = {}) ->
+    element = f.first(target, options)
+    e.list(closest(element, options), getSubtree(element, options))
 
   ###**
   Returns a list of all the viewports on the screen.
@@ -377,8 +352,8 @@ up.viewport = do ->
   @function up.viewport.all
   @internal
   ###
-  getAll = ->
-    e.all(allSelector())
+  getAll = (options = {}) ->
+    f.all(allSelector(), options)
 
   rootSelector = ->
     # The spec says this should be <html> in standards mode
@@ -494,8 +469,8 @@ up.viewport = do ->
   @return Object<string, number>
   @internal
   ###
-  scrollTops = ->
-    u.mapObject getAll(), (viewport) ->
+  scrollTops = (options = {}) ->
+    u.mapObject getAll(options), (viewport) ->
       [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
@@ -522,9 +497,11 @@ up.viewport = do ->
   @experimental
   ###
   saveScroll = (options = {}) ->
-    url = options.url ? up.history.location
-    tops = options.tops ? scrollTops()
-    lastScrollTops.set(url, tops)
+    layer = up.layer.get(options)
+    url = options.url || layer.location
+    tops = options.tops ? scrollTops(options)
+    console.log("--- saveScroll layer=%o, tops=%o", layer, layer.lastScrollTops)
+    layer.lastScrollTops.set(url, tops)
 
   ###**
   Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
@@ -542,9 +519,10 @@ up.viewport = do ->
   @experimental
   ###
   restoreScroll = (options = {}) ->
-    url = up.history.location
-    viewports = if options.around then getAround(options.around) else getAll()
-    scrollTopsForURL = options.scrollTops || lastScrollTops.get(url) || {}
+    layer = up.layer.get(options)
+    url = layer.location
+    viewports = if options.around then getAround(options.around, options) else getAll(options)
+    scrollTopsForURL = options.scrollTops || layer.lastScrollTops.get(url) || {}
 
     up.puts 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL
     allScrollPromises = u.map viewports, (viewport) ->
@@ -749,7 +727,7 @@ up.viewport = do ->
   @function up.viewport.firstHashTarget
   @internal
   ###
-  firstHashTarget = (hash) ->
+  firstHashTarget = (hash, options = {}) ->
     if hash = pureHash(hash)
       selector = [
         # First match an <* up-id="hash">. This won't be picked up without JS,
@@ -761,7 +739,7 @@ up.viewport = do ->
         # Match an <a name="hash">
         'a' + e.attributeSelector('name', hash)
       ].join(',')
-      up.fragment.first(selector)
+      f.first(selector, options)
 
   ###**
   Returns `'foo'` if the hash is `'#foo'`.
@@ -775,8 +753,6 @@ up.viewport = do ->
     if value && value[0] == '#'
       value = value.substr(1)
     u.presence(value)
-
-
 
   up.on 'up:app:booted', -> revealHash(location.hash)
 

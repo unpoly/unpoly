@@ -11,11 +11,13 @@ class up.Layer extends up.Record
       'history',
       'mode',
       'context',
-      'origin' # the element that opened this layer
+      'origin', # the element that opened this layer
+      'lastScrollTops'
     ]
 
   defaults: ->
     context: {}
+    lastScrollTops: new up.Cache(size: 30, key: up.history.normalizeURL)
 
   constructor: (options = {}) ->
     super(options)

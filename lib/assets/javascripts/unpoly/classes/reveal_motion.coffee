@@ -1,10 +1,12 @@
 e = up.element
+u = up.util
 
 class up.RevealMotion
 
   constructor: (@element, options = {}) ->
     layoutConfig = up.viewport.config
-    @viewport = options.viewport ? up.viewport.closest(@element)
+    @viewport = options.viewport || up.viewport.closest(@element)
+    @layer = options.layer || up.layer.get(@viewport)
     up.legacy.fixKey(layoutConfig, 'snap', 'revealSnap')
     snapDefault = layoutConfig.revealSnap
     @snap = options.snap ? options.revealSnap ? snapDefault
@@ -84,15 +86,18 @@ class up.RevealMotion
     elementRect.top -= @padding
     elementRect.height += 2 * @padding
 
+  selectObstructions: (selectors) ->
+    u.flatMap selectors, (selector) => @layer.allElements(selector)
+
   substractObstructions: (viewportRect) ->
-    for obstruction in e.list(@fixedTop...)
+    for obstruction in @selectObstructions(@fixedTop)
       obstructionRect = up.Rect.fromElement(obstruction)
       diff = obstructionRect.bottom - viewportRect.top
       if diff > 0
         viewportRect.top += diff
         viewportRect.height -= diff
 
-    for obstruction in e.list(@fixedBottom...)
+    for obstruction in @selectObstructions(@fixedBottom)
       obstructionRect = up.Rect.fromElement(obstruction)
       diff = viewportRect.bottom - obstructionRect.top
       if diff > 0

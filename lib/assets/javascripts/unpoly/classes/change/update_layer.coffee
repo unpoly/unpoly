@@ -58,7 +58,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # We don't wait for the peeling animation to finish.
 
     @layer.updateHistory(@options)
-    swapPromises = @steps.map(@swapStep)
+    swapPromises = @steps.map(@executeStep)
 
     promise = Promise.all(swapPromises)
 
@@ -69,7 +69,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     return promise
 
-  swapStep: (step) =>
+  executeStep: (step) =>
     up.puts('Swapping fragment \"%s\"', step.selector)
 
     # When the server responds with an error, or when the request method is not

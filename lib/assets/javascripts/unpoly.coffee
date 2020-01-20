@@ -14,8 +14,8 @@
 #= require ./unpoly/toast
 #= require ./unpoly/syntax
 #= require ./unpoly/history
-#= require ./unpoly/viewport
 #= require ./unpoly/fragment
+#= require ./unpoly/viewport
 #= require ./unpoly/motion
 #= require ./unpoly/proxy
 #= require ./unpoly/layer

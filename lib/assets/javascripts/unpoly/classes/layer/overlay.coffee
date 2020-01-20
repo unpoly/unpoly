@@ -11,7 +11,7 @@ Base class for all non-root layer modes
 class up.Layer.Overlay extends up.Layer
 
   keys: ->
-    super.concat [
+    super().concat [
       'position',
       'align',
       'size',
@@ -42,9 +42,10 @@ class up.Layer.Overlay extends up.Layer
     ]
 
   defaults: (options) ->
-    buttonDismissable: options.dismissable
-    escapeDismissable: options.dismissable
-    outsideDismissable: options.dismissable
+    u.merge super(options),
+      buttonDismissable: options.dismissable
+      escapeDismissable: options.dismissable
+      outsideDismissable: options.dismissable
 
   callback: (name) ->
     if fn = this[name]
