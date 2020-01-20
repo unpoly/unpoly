@@ -20,6 +20,12 @@
 - UpdateLayer needs to refuse placing <body> in an overlay (but not the root layer)
 - Should we allow placing the body in overlays with <up-body>?
 - X-Up-Layer-Mode: 'modal' und up.layer.overlay? / up.layer.root? / up.layer.mode
+- up.viewport needs to become layer-aware
+  - I think most functions do not use a { layer } option
+  - up.viewport.scrollAfterInsertFragment() finds element across layers
+    - { hash: 'foo' } will find anchors in other layers
+    - { restoreScroll: true } will find the body viewport that encloses all layers
+- Publish up.history.config.enabled
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -27,6 +33,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that validations keep focus
+  - Change with { reveal: 'selector' } should not find elements in another layer
   - Test that this doesn't crash when we don't have parent
     - <form up-layer="parent" up-target=".list">
   - Test that accepting/dismissing the root layer will just follow the link

@@ -260,10 +260,15 @@ up.viewport = do ->
     revealOpt = options.reveal
     resetScrollOpt = options.resetScroll
     restoreScrollOpt = options.restoreScroll
+    focusOpt = options.focus
 
     animateOptions = u.pick(options, ['scrollBehavior', 'scrollSpeed'])
 
-    if resetScrollOpt
+    if focusOpt
+      up.Focus.set(options.layer, focusOpt)
+      return Promise.resolve() # up.Focus.set() is a sync function
+
+    else if resetScrollOpt
       return resetScroll(around: element)
 
     else if restoreScrollOpt
@@ -278,13 +283,13 @@ up.viewport = do ->
 
     else if revealOpt
       # We allow to pass another element as { reveal } option
-      if u.isElement(revealOpt) || u.isJQuery(revealOpt)
+      if u.isElementish(revealOpt)
         element = e.get(revealOpt)
 
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         selector = e.resolveSelector(revealOpt, options.origin)
-        element = up.fragment.first(selector)
+        element = up.fragment.first(selector, options)
 
       else
         # We reveal the given element

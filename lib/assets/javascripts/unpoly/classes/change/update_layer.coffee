@@ -12,6 +12,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @target = options.target
     @peel = options.peel
     @reveal = options.reveal
+    @focus = options.focus
     @placement = options.placement
     @location = options.location
     @hungry = options.hungry
@@ -40,6 +41,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
     @addHungrySteps()
+
+    @keepFocus()
 
     # If we cannot push state on the root layer, a full page load will fix this.
     if @location && !up.browser.canPushState() && @layer.isRoot()
@@ -251,6 +254,12 @@ class up.Change.UpdateLayer extends up.Change.Addition
         selector = e.toSelector(oldElement)
         if newElement = @responseDoc.select(selector)
           @steps.push({ selector, oldElement, newElement, transition, reveal: false })
+
+  keepFocus: ->
+    if @focus == 'keep'
+      for step in @steps
+        if step.placement == 'swap'
+          step.focus = up.Focus.preserveWithin(step.oldElement)
 
   containedByRivalStep: (steps, candidateStep) ->
     return u.some steps, (rivalStep) ->

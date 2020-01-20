@@ -383,6 +383,7 @@ up.form = do ->
     options.headers ||= {}
     options.headers[up.protocol.config.validateHeader] = options.validate
     options.reveal ?= false
+    options.focus ?= 'keep'
 
     return submit(field, options)
 

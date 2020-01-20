@@ -120,6 +120,10 @@ up.element = do ->
   subtree = (root, selector) ->
     parseSelector(selector).subtree(root)
 
+  isInSubtree = (root, selectorOrElement) ->
+    element = getOne(selectorOrElement)
+    return (root == element) || root.contains(element)
+
   ###**
   Returns the first element that matches the selector by testing the element itself
   and traversing up through its ancestors in the DOM tree.
@@ -1115,6 +1119,7 @@ up.element = do ->
     first: first # same as document.querySelector
     all: all # same as document.querySelectorAll
     subtree: subtree # practical
+    isInSubtree: isInSubtree
     closest: closest # needed for IE11
     matches: matches # needed for IE11
     ancestor: ancestor # not practical. we use it to implement closest

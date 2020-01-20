@@ -182,6 +182,8 @@ up.link = do ->
     parser.string('target')
     parser.booleanOrString('fallback')
     parser.booleanOrString('reveal')
+    parser.booleanOrString('focus')
+    parser.boolean('resetScroll')
     parser.boolean('restoreScroll')
     parser.booleanOrString('transition')
     # { history } is actually a boolean, but we keep the deprecated string

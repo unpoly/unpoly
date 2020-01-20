@@ -87,7 +87,6 @@ class up.Change.OpenLayer extends up.Change.Addition
     )
 
   onContentAttached: =>
-    @layer.element.focus()
     @handleHistory()
     up.fragment.setSource(@content, @source)
 
@@ -98,7 +97,20 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Compile the new content and emit up:fragment:inserted.
     @responseDoc.activateElement(@content, { @layer, @origin })
 
+    @focus()
+
     @emitOpeningEvent()
+
+  focus: ->
+    # By default we focus the newly created layer, which is an A11Y recommendation.
+    @options.focus ?= 'layer'
+
+    # Since we're opening a new layer element, keeping the focus means not
+    # changing the focus at all.
+    if @options.focus == 'keep'
+      @options.focus = false
+
+    up.viewport.scrollAfterInsertFragment(@content, u.merge(@options, { @layer }))
 
   emitOpenEvent: ->
     # The initial up:layer:open event is emitted on the document, since the layer
