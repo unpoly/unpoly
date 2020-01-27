@@ -26,7 +26,7 @@ class up.OptionParser
     @options[key] ?= keyOptions.default
 
     if keyOptions.fail ? @parserOptions.fail
-      failKey = u.prefixCamelCase(key, 'fail')
+      failKey = u.fragment.failKey(key)
       failAttrs = u.compact(u.map(attrs, @deriveFailAttrName))
       failKeyOptions = u.merge(keyOptions,
         attr: failAttrs,

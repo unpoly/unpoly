@@ -99,7 +99,7 @@ up.proxy = do ->
 
   up.legacy.renamedProperty(config, 'maxRequests', 'concurrency')
 
-  queue = new up.RequestQueue()
+  queue = new up.Request.Queue()
 
   cache = new up.ProxyCache()
 

@@ -85,8 +85,11 @@ class up.Request extends up.Record
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
       'layer',
-      'origin',
+      'mode',
+      'failMode',
       'context',
+      'failContext',
+      'origin',
       'solo',
     ]
 
@@ -171,12 +174,6 @@ class up.Request extends up.Record
       # Now that we have transfered the params into the URL, we delete them from the { params } option.
       @params.clear()
 
-  transferSearchToParams: =>
-    paramsFromQuery = up.Params.fromURL(@url)
-    unless u.isBlank(paramsFromQuery)
-      @params.addAll(paramsFromQuery)
-      @url = u.normalizeURL(@url, search: false)
-
   isSafe: =>
     up.proxy.isSafeMethod(@method)
 
@@ -185,43 +182,13 @@ class up.Request extends up.Record
     # we don't send it.
     return if @aborted
 
-    # We will modify this request below.
-    # This would confuse API clients and cache key logic in up.proxy.
-    @xhr = new XMLHttpRequest()
-
-    xhrHeaders = u.copy(@headers)
-    xhrURL = @url
-    xhrParams = u.copy(@params)
-    xhrMethod = up.proxy.wrapMethod(@method, xhrParams)
-
-    xhrPayload = null
-    unless u.isBlank(xhrParams)
-      delete xhrHeaders['Content-Type'] # let the browser set the content type
-      xhrPayload = xhrParams.toFormData()
-
-    xhrHeaders[up.protocol.config.targetHeader] = @target if @target
-    xhrHeaders[up.protocol.config.failTargetHeader] = @failTarget if @failTarget
-    xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
-    if (csrfHeader= @csrfHeader()) && (csrfToken = @csrfToken())
-      xhrHeaders[csrfHeader] = csrfToken
-
-    if @context
-      xhrHeaders[up.protocol.config.contextHeader] = JSON.stringify(@context)
-
-    @xhr.open(xhrMethod, xhrURL)
-
-    for header, value of xhrHeaders
-      @xhr.setRequestHeader(header, value)
-
-    # Convert from XHR API to promise API
-    @xhr.onload = @responseReceived
-    @xhr.onerror = @responseReceived
-    @xhr.ontimeout =  @setAbortedState
-    @xhr.onabort = @setAbortedState
-
-    @xhr.timeout = @timeout if @timeout
-
-    @xhr.send(xhrPayload)
+    # Convert from XHR's callback-based API to up.Request's promise-based API
+    @xhr = new up.Request.XhrRenderer(this).buildAndSend(
+      onload: @responseReceived,
+      onerror: @responseReceived,
+      ontimeout: @setAbortedState
+      onabort: @setAbortedState
+    )
 
   abort: (message) =>
     @xhr?.abort()
@@ -245,36 +212,7 @@ class up.Request extends up.Record
     @loadPage()
 
   loadPage: =>
-    # GET forms cannot have an URL with a query section in their [action] attribute.
-    # The query section would be overridden by the serialized input values on submission.
-    @transferSearchToParams()
-
-    form = e.affix(document.body, 'form.up-page-loader')
-
-    addField = (attrs) ->
-      e.affix(form, 'input[type=hidden]', attrs)
-
-    if @method == 'GET'
-      formMethod = 'GET'
-    else
-      # Browser forms can only have GET or POST methods.
-      # When we want to make a request with another method, most backend
-      # frameworks allow to pass the method as a param.
-      addField(name: up.protocol.config.methodParam, value: @method)
-      formMethod = 'POST'
-
-    e.setAttrs(form, method: formMethod, action: @url)
-
-    if (csrfParam = @csrfParam()) && (csrfToken = @csrfToken())
-      addField(name: csrfParam, value: csrfToken)
-
-    # @params will be undefined for GET requests, since we have already
-    # transfered all params to the URL during normalize().
-    u.each(@params.toArray(), addField)
-
-    e.hide(form)
-
-    up.browser.submitForm(form)
+    new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
     up.protocol.csrfHeader(this)
@@ -311,14 +249,18 @@ class up.Request extends up.Record
     return new up.Response(responseAttrs)
 
   isCachable: =>
-    @isSafe() && !u.isFormData(@params)
+    @isSafe() && @params.hasOnlyPrimitiveValues()
 
   cacheKey: =>
     [ @url,
       @method,
       @params.toQuery(),
       @target,
+      @failTarget,
+      @mode,
+      @failMode,
       JSON.stringify(@context)
+      JSON.stringify(@failContext)
     ].join('|')
 
   @wrap: (args...) ->

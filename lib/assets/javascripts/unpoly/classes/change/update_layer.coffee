@@ -19,15 +19,14 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @transition = options.transition
     @parseSteps()
 
-  preflightLayer: ->
-    # Make sure this plan is applicable before returning a layer
+  requestAttributes: ->
     @findOld()
-    return @layer
-
-  preflightTarget: ->
-    # Make sure this plan is applicable before returning a target
-    @findOld()
-    return u.map(@steps, 'selector').join(', ')
+    return {
+      layer: @layer
+      mode: @layer.mode
+      context: @layer.context
+      target: u.map(@steps, 'selector').join(', '),
+    }
 
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
@@ -268,12 +267,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
         rivalStep.oldElement.contains(candidateStep.oldElement)
 
   resolveOldNesting: ->
-    console.debug("resolveOldNesting for steps %o", u.copy(@steps))
     compressed = u.uniqBy(@steps, 'oldElement')
-    console.debug("after uniqBy it is", u.copy(compressed))
 
     compressed = u.reject compressed, (step) => @containedByRivalStep(compressed, step)
-    console.debug("compressed steps are %o", u.copy(compressed))
 
     # If we revealed before, we should do so now
     compressed[0].reveal = @reveal

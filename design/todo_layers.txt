@@ -1,3 +1,9 @@
+- Allow placement of body in overlays with <up-body>
+  - Then <body> can really be a default target for all fragments
+- Make backdrop a layer option (defaults to false for cover)
+- I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
+  - Or would this just be { params }?
+  - Or would this be { addParams }?
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
@@ -6,21 +12,39 @@
   - up.layer.dismiss(value)
   - up.layer.emit(name, props)
   - up.emit(name, props)
-- Present tense events still have long-form event log messages with gerund
-- Check if all up.emit and layer.emit have { log: options }
-- Rename Layer#openNow/closeNow to something else, but not  Layer#open/close since that looks like public API
-- Make backdrop a layer option (defaults to false for cover)
-- I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
-- Does up.layer.onEach really need onReady? Because for a while I had up:framework:reset remove the <body>
+  - [DONE] up.target
+  - [DONE] up.fail_target
+  - up? should check presence of X-Up-Version
+  - up.version
+  - up.layer.target
+  - up.layer.context
+  - up.layer.mode
+  - up.layer.root?
+  - up.layer.overlay?
+  - up.fail_layer.target    => no, up.layer.emit will emit on whatever layer the change cascade selected! it might even be the fail layer!
+  - up.fail_layer.context
+  - up.fail_layer.mode
+  - up.fail_layer.root?
+  - up.fail_layer.overlay?
+  - Better cache hits (uhm really?)
+    - When accessing up.target etc. the server should track this and respond with
+          X-Up-Tailored: ["target", "mode"]
+    - We can then use this information to resolve other requests in the queue
+    - => But this would only help for requests already in the queue, yes? Because new requests would need to wait what the server responds.
+- Check all occurences of up.emit and layer.emit:
+  - Do they have a { log } option?
+  - Do present tense events still have long-form event log messages with gerund?
 - up.link.follow: Animation Options are not parsed for fail variant (we just do u.assign(options, up.motion.animateOptions(options, link)))
 - Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
-- Is it really cool to have failOptions == explicit instead of failOption == inherit ?
-- Should new elements just be <up-overlay>?
+- Internal Unpoly-Elements should just be <up-overlay>?
 - up.layer.open should resolve to the opened layer
 - UpdateLayer needs to refuse placing <body> in an overlay (but not the root layer)
-- Should we allow placing the body in overlays with <up-body>?
-- X-Up-Layer-Mode: 'modal' und up.layer.overlay? / up.layer.root? / up.layer.mode
 - All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
+- Protocol options should not be configurable
+  - Constants should just be props
+  - Document headers in the main class docs
+- Deprecate up.util.only() against up.util.pick() and up.util.except() against up.util.omit()
+  - OR roll back the change
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -28,6 +52,17 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test focus behavior:
+    - New layers should be focused
+    - autofocus in new layers will be respected
+    - when closing layers
+  - Test that we can actually hit another layer if the initial plan failed
+    - We had this for a while:
+    - @successOptions.layer = successPreview.preflightLayer()
+  - Test that all events during fragment change set up.layer.current
+    - check if up:fragment:inserted sets up.layer.current
+    - check if keep events sets up.layer.current
+    - check if follow event sets up.layer.current
   - Test that validations keep focus
   - Test that layers without history updates still return their current #location
   - Change with { reveal: 'selector' } should not find elements in another layer
@@ -145,6 +180,11 @@ Accessibility
 Later?
 ------
 
+- Allow per-Layer fragment access like
+  - layer.fragment.first()
+  - layer.fragment.all()
+  - layer.fragment.destroy()
+  - layer.fragment.reload()
 - Should we track/stop animations and scrolling per layer instead of globally?
 - Get rid of up:framework:booted event
 - Rename up:proxy:load etc. to up:request:load
@@ -204,3 +244,6 @@ Decisions
   => Nein, man kann ja das fallback als { objekt } machen
 - It's stupid to have both { layer } and { mode } when one can set both
   => No, we don't want up.layer.open({ layer: 'modal' })
+- Should it be up.accept(), up.dismiss(), X-Up-Accept, X-Up-Dismiss? => No
+- Should the default layer be current again?
+  => Not now, maybe change that leter

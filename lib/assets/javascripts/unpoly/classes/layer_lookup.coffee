@@ -5,7 +5,8 @@ class up.LayerLookup
 
   constructor: (@stack, args...) ->
     options = u.parseArgIntoOptions(args, 'layer')
-    up.layer.normalizeOptions(options)
+    if options.normalizeLayerOptions != false
+      up.layer.normalizeOptions(options)
 
     @value = options.layer
     @origin = options.origin

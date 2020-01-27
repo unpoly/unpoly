@@ -5,6 +5,10 @@ e = up.element
 
 class up.Change.FromContent extends up.Change
 
+  constructor: (options) ->
+    up.layer.normalizeOptions(options)
+    super(options)
+
   ensurePlansBuilt: ->
     @plans or @buildPlans()
     unless @plans.length
@@ -86,26 +90,16 @@ class up.Change.FromContent extends up.Change
       docOptions.target = @firstDefaultTarget()
     @options.responseDoc = new up.ResponseDoc(docOptions)
 
-  # Returns the layer that is likely to change.
-  # This might change postflight if the response does not contain
-  # the desired target.
-  preflightLayer: (opts) ->
+  # Returns information about the change that is most likely before the request was dispatched.
+  # This might change postflight if the response does not contain the desired target.
+  requestAttributes: (opts = {}) ->
     @seekPlan
-      attempt: (plan) -> plan.preflightLayer()
-      noneApplicable: => @preflightTargetNotApplicable(opts)
+      attempt: (plan) -> plan.requestAttributes()
+      noneApplicable: =>
+        opts.optional or @preflightTargetNotApplicable(opts)
 
-  # Returns the target selector that is likely to change.
-  # This might change postflight if the response does not contain
-  # the desired target.
-  preflightTarget: (opts) ->
-    @seekPlan
-      attempt: (plan) -> plan.preflightTarget()
-      noneApplicable: => @preflightTargetNotApplicable(opts)
-
-  preflightTargetNotApplicable: (opts = {}) ->
-    if opts.optional
-      return
-    else if @plans.length
+  preflightTargetNotApplicable: ->
+    if @plans.length
       up.fail("Could not find target in current page (tried selectors %o)", @planTargets())
     else
       up.fail('No target given for change')

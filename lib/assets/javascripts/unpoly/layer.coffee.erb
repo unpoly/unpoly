@@ -80,9 +80,6 @@ up.layer = do ->
       return [config[mode], config.overlay, config.all]
       
   normalizeOptions = (options) ->
-    return if options.normalizeLayerOptions == false
-    options.normalizeLayerOptions = false
-
     up.legacy.fixKey(options, 'closable', 'dismissable')
     up.legacy.fixKey(options, 'flavor', 'mode')
 
@@ -107,14 +104,17 @@ up.layer = do ->
         up.legacy.warn('Layer "page" has been renamed to "root"')
         options.layer = 'root'
     else
+      # If no options.layer is given we still want to avoid updating "any" layer.
+      # Other options might have a hint for a more appropriate layer.
+
       if options.mode
         # If user passes a { mode } option without a { layer } option
         # we assume they want to open a new layer.
         options.layer = 'new'
       else if u.isElementish(options.target)
-        # If we are targeting an actual Element or jQuery collection (anot not
+        # If we are targeting an actual Element or jQuery collection (and not
         # a selector string) we operate in that element's layer.
-        options.layer = stack.get(options.target)
+        options.layer = stack.get(options.target, normalizeLayerOptions: false)
       else if options.origin
         # Links update their own layer by default.
         options.layer = 'origin'
@@ -122,19 +122,20 @@ up.layer = do ->
         # If nothing is given, we allow changes of any layer (preferring the current layer)
         options.layer = 'any'
 
+    options.context ||= {}
+
     # Remember the layer that was current when the request was made,
     # so changes with `{ layer: 'new' }` will know what to stack on.
     # Note if options.base is given, up.layer.get('current', options) will
     # return the resolved version of that.
     # TODO: Test this
-    options.base = up.layer.get('current', options)
+    options.base = stack.get('current', u.merge(options, normalizeLayerOptions: false))
 
   build = (options) ->
     mode = options.mode
     Class = config[mode].Class
     configs = u.reverse(modeConfigs(mode))
     options = u.mergeDefined(configs..., { mode, stack }, options)
-    console.debug("building layer for mode %o (class %o)", mode, Class)
     return new Class(options)
 
 #  modeClass = (options = {}) ->
@@ -283,6 +284,3 @@ up.layer = do ->
     get_element: -> stack.current.element
     get_context: -> stack.current.context
     contains: (args...) -> stack.current.contains(args...)
-
-# TODO: Docs for up.context
-u.getter(up, 'context', -> up.layer.context)

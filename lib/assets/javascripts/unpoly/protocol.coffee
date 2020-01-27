@@ -284,12 +284,9 @@ up.protocol = do ->
   @experimental
   ###
   config = new up.Config ->
-    targetHeader: 'X-Up-Target'
-    failTargetHeader: 'X-Up-Fail-Target'
     locationHeader: 'X-Up-Location'
     validateHeader: 'X-Up-Validate'
     titleHeader: 'X-Up-Title'
-    contextHeader: 'X-Up-Context' # TODO: Docs
     methodHeader: 'X-Up-Method'
     methodCookie: '_up_method'
     methodParam: '_method'
@@ -299,6 +296,13 @@ up.protocol = do ->
     acceptLayerHeader: 'X-Up-Accept-Layer'
     dismissLayerHeader: 'X-Up-Dismiss-Layer'
     eventsHeader: 'X-Up-Events'
+    versionHeader: 'X-Up-Version'
+
+  successHeader = (key) ->
+    "X-Up-#{u.upperCaseFirst(key)}"
+
+  failHeader = (key) ->
+    "X-Up-Fail-#{u.upperCaseFirst(key)}"
 
   csrfHeader = (request) ->
     u.evalOption(config.csrfHeader, request)
@@ -326,3 +330,6 @@ up.protocol = do ->
   csrfParam: csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod
+  successHeader: successHeader,
+  failHeader: failHeader
+

@@ -53,7 +53,6 @@ up.fragment = do ->
   ###
   makeChange = (args...) ->
     options = parseTargetAndOptions(args)
-    up.layer.normalizeOptions(options)
 
     options.hungry ?= true # preflight option has no failVariant
     options.keep ?= true
@@ -529,7 +528,6 @@ up.fragment = do ->
 
   # TODO: Docs for up.fragment.all
   all = (args...) ->
-    console.debug("up.fragment.all(%o)", args)
     options = u.extractOptions(args)
     lastArg = u.last(args)
 
@@ -681,6 +679,12 @@ up.fragment = do ->
   targetsBody = (selector) ->
     /(^|,)\s*(body|html)\s*(\,|$)/i.test(selector)
 
+  successKey = (key) ->
+    return u.unprefixCamelCase(key, 'fail')
+
+  failKey = (key) ->
+    return u.prefixCamelCase(key, 'fail')
+
   up.on 'up:app:boot', ->
     body = document.body
     setSource(body, up.history.location)
@@ -706,6 +710,9 @@ up.fragment = do ->
     emitKeep: emitFragmentKeep
     emitKept: emitFragmentKept
     targetsBody: targetsBody
+    successKey: successKey,
+    failKey: failKey
+
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

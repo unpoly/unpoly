@@ -12,13 +12,15 @@ class up.Change.OpenLayer extends up.Change.Addition
     @origin = options.origin
     @base = options.base
 
-  preflightLayer: ->
-    'new'
-
-  preflightTarget: ->
-    # The target will always exist in the current page, since
-    # we're opening a new layer that will match the target.
-    @target
+  requestAttributes: ->
+    return {
+      layer: 'new',
+      mode: @options.mode,
+      context: @options.context
+      # The target will always exist in the current page, since
+      # we're opening a new layer that will match the target.
+      target: @target,
+    }
 
   toString: ->
     "Open \"#{@target}\" in new layer"

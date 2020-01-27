@@ -1117,6 +1117,9 @@ up.util = do ->
   @stable
   ###
   except = (object, properties...) ->
+    omit(object, properties)
+
+  omit = (object, properties) ->
     filtered = copy(object)
     for property in properties
       delete filtered[property]
@@ -1603,6 +1606,12 @@ up.util = do ->
 #      unprefixed[key] = value
 #    unprefixed
 
+  renameKeys = (object, renameKeyFn) ->
+    renamed = {}
+    for key, value of object
+      renamed[renameKeyFn(key)] = value
+    return renamed
+
   camelToKebabCase = (str) ->
     str.replace /[A-Z]/g, (char) -> '-' + char.toLowerCase()
 
@@ -1794,7 +1803,7 @@ up.util = do ->
   pick: pick
   pickBy: pickBy
   except: except
-#  pickBy: pickBy
+  omit: omit
   unresolvablePromise: unresolvablePromise
   remove: remove
   memoize: memoize
@@ -1858,3 +1867,5 @@ up.util = do ->
   nullToUndefined: nullToUndefined
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
+  renameKeys: renameKeys
+

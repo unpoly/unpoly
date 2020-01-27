@@ -178,6 +178,10 @@ class up.Params
   isPrimitiveValue: (value) ->
     u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
 
+  hasOnlyPrimitiveValues: ->
+    values = u.map(@entries, 'value')
+    u.every(values, @isPrimitiveValue)
+
   ###**
   Builds an URL string from the given base URL and
   this `up.Params` instance as a [query string](/up.Params.toString).

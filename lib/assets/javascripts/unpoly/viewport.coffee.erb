@@ -213,9 +213,7 @@ up.viewport = do ->
   @stable
   ###
   reveal = (elementOrSelector, options = {}) ->
-    console.debug("--- f.first(%o)", elementOrSelector)
     element = f.first(elementOrSelector, options)
-    console.debug("--- returned element %o", element)
     motion = new up.RevealMotion(element, options)
     return scrollingController.startMotion(element, motion, options)
 
@@ -325,7 +323,6 @@ up.viewport = do ->
   @experimental
   ###
   closest = (target, options = {}) ->
-    console.debug("up.viewport.closest(%o)", target)
     element = f.first(target, options)
     e.closest(element, allSelector())
 

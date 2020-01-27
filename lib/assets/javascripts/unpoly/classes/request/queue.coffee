@@ -1,6 +1,8 @@
+#= require ../request
+
 u = up.util
 
-class up.RequestQueue extends up.Class
+class up.Request.Queue extends up.Class
 
   constructor: (options = {}) ->
     @concurrency = options.concurrency ? -> up.proxy.config.concurrency

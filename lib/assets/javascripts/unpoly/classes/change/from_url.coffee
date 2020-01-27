@@ -9,7 +9,7 @@ class up.Change.FromURL extends up.Change
 
     @successOptions = u.copy(@options)
     @successOptions.inspectResponse = @fullLoad
-    @deriveFailureOptions()
+    @deriveFailOptions()
 
   # These options are used before the request is sent.
   # Hence there is no failVariant.
@@ -29,7 +29,7 @@ class up.Change.FromURL extends up.Change
     'hungry'
   ]
 
-  deriveFailureOptions: ->
+  deriveFailOptions: ->
     # `successOptions` is an object like
     #
     #     { foo: 1, failFoo: undefined, bar: 2, failBar: 3, baz: 4 }
@@ -40,7 +40,7 @@ class up.Change.FromURL extends up.Change
     #     { foo: 1, bar: 3, baz: 4 }
     #
     # Note how we *don't* override `foo` with `undefined`.
-    mode = @successOptions.failOptions ? 'explicit'
+    mode = @successOptions.failOptions || 'explicit'
 
     switch mode
       when 'explicit'
@@ -49,22 +49,25 @@ class up.Change.FromURL extends up.Change
         # we only inherit keys that need to be known before the request goes out,
         # like { method }, { url } or { params }.
         preflightOptions = u.pick(@successOptions, @constructor.PREFLIGHT_KEYS)
-        @failureOptions = u.merge(preflightOptions, @explicitFailureOptions())
+        @failOptions = u.merge(preflightOptions, @explicitFailOptions())
       when 'inherit'
         # In inherit mode all success options are copied and can then be
         # overridden with failVariant keys.
-        @failureOptions = u.merge(@successOptions, @explicitFailureOptions())
+        @failOptions = u.merge(@successOptions, @explicitFailOptions())
       when 'mirror'
-        # In mirror mode we use the same options for failure that we use for success.
+        # In mirror mode we use the same options for fail that we use for success.
         # This is useful for up.validate(), where we want to always use the form's
         # success options regardless of the response status.
-        @failureOptions = u.copy(@successOptions)
+        @failOptions = u.copy(@successOptions)
 
-  explicitFailureOptions: ->
+  explicitFailOptions: ->
     opts = {}
     for key, value of @successOptions
-      # Drop key/value pair unless there is a defined failOverride
-      if unprefixedKey = u.unprefixCamelCase(key, 'fail')
+      # Only add a key/value pair if there is a defined failOverride.
+      # The condition below looks wrong at first, but really isn't. Be aware that
+      # up.fragment.successKey(key) only returns a value if the given key is prefixed with
+      # "fail"!
+      if unprefixedKey = up.fragment.successKey(key)
         failValue = @successOptions[key]
         # up.OptionParser sets keys to undefined, even if neither options nor element
         # produces that option. Hence we ignore undefined values. To override it with
@@ -87,15 +90,13 @@ class up.Change.FromURL extends up.Change
 
   buildRequest: ->
     successPreview = new up.Change.FromContent(@successOptions)
-    failurePreview = new up.Change.FromContent(@failureOptions)
+    failPreview = new up.Change.FromContent(@failOptions)
 
-    @successOptions.layer = successPreview.preflightLayer()
-    @failureOptions.layer = failurePreview.preflightLayer(optional: true)
-
-    requestAttrs = u.merge @successOptions,
-      target: successPreview.preflightTarget()
-      failTarget: failurePreview.preflightTarget(optional: true)
-      layer: @successOptions.layer
+    requestAttrs = u.merge(
+      @successOptions,
+      successPreview.requestAttributes(),
+      u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
+    )
 
     @request = new up.Request(requestAttrs)
 
@@ -107,7 +108,7 @@ class up.Change.FromURL extends up.Change
     rejectWithFailedResponse = -> Promise.reject(response)
     if @failedResponseHasContent(response)
       up.puts('Updating page with failed response')
-      promise = @processResponse(response, @failureOptions)
+      promise = @processResponse(response, @failOptions)
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
       return u.always(promise, rejectWithFailedResponse)

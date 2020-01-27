@@ -1031,7 +1031,11 @@ describe 'up.fragment', ->
 
         it 'opens a new layer if given a { mode } but no { layer }'
 
-        it 'updates the current layer if nothing else is specified'
+        describe 'if nothing else is specified', ->
+
+          it 'prefers updating the current layer'
+
+          it 'updates the background layer closest to the front if the current layer does not match'
 
       describe 'browser location URL', ->
 
@@ -2779,3 +2783,19 @@ describe 'up.fragment', ->
 
           next =>
             expect(up.browser.loadPage).toHaveBeenCalledWith('/source', jasmine.anything())
+
+    describe 'up.fragment.failKey', ->
+
+      it 'returns a failVariant for the given object key', ->
+        result = up.fragment.failKey('foo')
+        expect(result).toEqual('failFoo')
+
+    describe 'up.fragment.successKey', ->
+
+      it 'returns the unprefixed key for the given failVariant', ->
+        result = up.fragment.successKey('failFoo')
+        expect(result).toEqual('foo')
+
+      it 'returns undefined if the given key is not prefixed with "fail"', ->
+        result = up.fragment.successKey('foo')
+        expect(result).toBeUndefined()

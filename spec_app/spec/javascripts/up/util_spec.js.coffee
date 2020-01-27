@@ -1542,3 +1542,18 @@ describe 'up.util', ->
           object.bar = 'bar'
           formatted = up.util.sprintf('before %o after', object)
           expect(formatted).toEqual('before {"bar":"bar"} after')
+
+    describe 'up.util.renameKeys', ->
+
+      it 'returns a copy of the given object, but with keys transformed by the given function', ->
+        source = { foo: 1, bar: 2 }
+        upcase = (str) -> str.toUpperCase()
+        copy = up.util.renameKeys(source, upcase)
+        expect(copy).toEqual { FOO: 1, BAR: 2 }
+
+      it 'does not change the given object', ->
+        source = { foo: 1 }
+        upcase = (str) -> str.toUpperCase()
+        up.util.renameKeys(source, upcase)
+        expect(source).toEqual { foo: 1  }
+
