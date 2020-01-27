@@ -17,6 +17,7 @@ class up.Layer.Overlay extends up.Layer
       'size',
       'origin', # for tethered anchor element
       'class',
+      'backdrop',
       'openAnimation',
       'closeAnimation',
       'openDuration',
@@ -87,6 +88,9 @@ class up.Layer.Overlay extends up.Layer
       'aria-modal': true
     @element = e.affix(document.body, '.up-overlay', attrs)
 
+    if @backdrop
+      @backdropElement = e.affix(@element, '.up-overlay-backdrop')
+
     if @class
       @element.classList.add(@class)
 
@@ -124,13 +128,29 @@ class up.Layer.Overlay extends up.Layer
     @createDismissElement(@frameElement)
     options.onContentAttached?({ layer: this, content })
 
-  openAnimateOptions: ->
-    easing: @openEasing
-    duration: @openDuration
+  startAnimation: (options = {}) ->
+    whenFrameClosed = up.animate(@frameElement, options.frameAnimation, options)
+    if @backdrop
+      whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
 
-  closeAnimateOptions: ->
-    easing: @closeEasing
-    duration: @closeDuration
+    # Promise.all() ignores non-Thenables in the given array
+    return Promise.all([whenFrameClosed, whenBackdropClosed])
+
+  startOpenAnimation: (options = {}) ->
+    @startAnimation(
+      frameAnimation: options.animation ? @evalOption(@openAnimation),
+      backdropAnimation: 'fade-in',
+      easing: options.easing || @openEasing,
+      duration: options.duration || @openDuration,
+    )
+
+  startCloseAnimation: (options = {}) ->
+    @startAnimation(
+      frameAnimation: options.animation ? @evalOption(@openAnimation),
+      backdropAnimation: 'fade-out',
+      easing: options.easing || @closeEasing,
+      duration: options.duration || @closeDuration,
+    )
 
   allElements: (selector) ->
     e.all(@contentElement, selector)

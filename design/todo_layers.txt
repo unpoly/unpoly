@@ -1,6 +1,3 @@
-- Allow placement of body in overlays with <up-body>
-  - Then <body> can really be a default target for all fragments
-- Make backdrop a layer option (defaults to false for cover)
 - I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
   - Or would this just be { params }?
   - Or would this be { addParams }?
@@ -180,6 +177,9 @@ Accessibility
 Later?
 ------
 
+- Allow placement of body in overlays with <up-body>
+  - Then <body> can really be a default target for all fragments
+  - Is this really a good idea? It would break for all pages that use fixed elements in their layout
 - Allow per-Layer fragment access like
   - layer.fragment.first()
   - layer.fragment.all()

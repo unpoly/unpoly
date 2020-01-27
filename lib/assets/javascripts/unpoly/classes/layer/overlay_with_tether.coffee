@@ -21,11 +21,3 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
   sync: ->
     @tether.sync()
-
-  startOpenAnimation: (options = {}) ->
-    frameAnimation = options.animation ? @evalOption(@openAnimation)
-    return up.animate(@frameElement, frameAnimation, @openAnimateOptions())
-
-  startCloseAnimation: (options = {}) ->
-    frameAnimation = options.animation ? @evalOption(@closeAnimation)
-    up.animate(@frameElement, frameAnimation, @closeAnimateOptions())

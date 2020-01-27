@@ -27,8 +27,6 @@ up.layer = do ->
         history: true
         openAnimation: 'fade-in'
         closeAnimation: 'fade-out'
-        backdropOpenAnimation: 'fade-in'
-        backdropCloseAnimation: 'fade-out'
         dismissLabel: '×'
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
@@ -36,6 +34,7 @@ up.layer = do ->
         targets: []
       drawer:
         targets: []
+        backdrop: true
         position: 'left'
         openAnimation: (layer) ->
           switch layer.position
@@ -46,6 +45,7 @@ up.layer = do ->
             when 'left' then 'move-to-left'
             when 'right' then 'move-to-right'
       modal:
+        backdrop: true
         targets: []
       popup:
         targets: []

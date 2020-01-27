@@ -16,7 +16,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   ###
   openNow: (options) ->
     @createElement()
-    @backdropElement = e.affix(@element, '.up-overlay-backdrop')
+    # @backdropElement = e.affix(@element, '.up-overlay-backdrop')
     @viewportElement = e.affix(@element, '.up-overlay-viewport')
     @frameInnerContent(@viewportElement, options)
 
@@ -33,23 +33,3 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
 
   unshiftBody: ->
     @constructor.bodyShifter.unshift()
-
-  startOpenAnimation: (options = {}) ->
-    animateOptions = @openAnimateOptions(options)
-    frameAnimation = options.animation ? @evalOption(@openAnimation)
-    backdropAnimation = options.backdropAnimation ? @evalOption(@backdropOpenAnimation)
-
-    return Promise.all([
-      up.animate(@frameElement, frameAnimation, animateOptions),
-      up.animate(@backdropElement, backdropAnimation, animateOptions),
-    ])
-
-  startCloseAnimation: (options = {}) ->
-    animateOptions = @closeAnimateOptions(options)
-    frameAnimation = options.animation ? @evalOption(@closeAnimation)
-    backdropAnimation = options.backdropAnimation ? @evalOption(@backdropCloseAnimation)
-
-    return Promise.all([
-      up.animate(@frameElement, frameAnimation, animateOptions),
-      up.animate(@backdropElement, backdropAnimation, animateOptions),
-    ])
