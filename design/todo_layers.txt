@@ -1,6 +1,8 @@
+- Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
 - I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
   - Or would this just be { params }?
   - Or would this be { addParams }?
+  - What's the behavior of { params } when passed to up.submit() or up.follow()?
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
@@ -33,9 +35,7 @@
   - Do present tense events still have long-form event log messages with gerund?
 - up.link.follow: Animation Options are not parsed for fail variant (we just do u.assign(options, up.motion.animateOptions(options, link)))
 - Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
-- Internal Unpoly-Elements should just be <up-overlay>?
 - up.layer.open should resolve to the opened layer
-- UpdateLayer needs to refuse placing <body> in an overlay (but not the root layer)
 - All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
 - Protocol options should not be configurable
   - Constants should just be props

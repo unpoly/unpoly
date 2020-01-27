@@ -32,6 +32,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
     "Update \"#{@target}\" in #{@layer}"
 
   execute: ->
+    if @layer.isOverlay() && up.fragment.targetsBody(@target)
+      throw @notApplicable("Cannot place element \"#{@target}\" in an overlay")
+
     @findOld()
     @findNew()
 
