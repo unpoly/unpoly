@@ -1,10 +1,4 @@
 - Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
-- I think we now need { query } to support this: <a href="/flights" up-layer="modal" up-on-accepted="up.reload('.departure', { query: { flight_id: value.flight_id }})">
-  - Or would this just be { params }?
-  - Or would this be { addParams }?
-  - What's the behavior of { params } when passed to up.submit() or up.follow()?
-    - up.submit() merges, but up.follow() does nothing with it
-    - i don't know if up.reload() processes { params } at all!
 - { failOptions } sounds like it would take an options hash. Maybe just { fail }?
 - Check new layer styles visually
   - Nested layers should have more padding
@@ -51,6 +45,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that [up-params] will add additional query params to a followed links that already has query params
+  - Test that [up-params] will add additional payload to a submited form that already has some fields
   - Test that up-hungry will not activate in a background layer
   - Test focus behavior:
     - New layers should be focused
