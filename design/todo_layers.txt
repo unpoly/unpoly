@@ -30,14 +30,13 @@
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
-- Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
-- up.layer.open should resolve to the opened layer
 - All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
 - Protocol options should not be configurable
   - Constants should just be props
   - Document headers in the main class docs
 - Deprecate up.util.only() against up.util.pick() and up.util.except() against up.util.omit()
   - OR roll back the change
+- Try changes in demo.unpoly.com
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -118,6 +117,7 @@ Have you noticed how noticed how pages fade in
     - The next request only has .content
     - => We should clear out the modal and build a new .content, since that is also what we would do on "new"!
     - => In case that the current modal DOES have .content we should update this instead of re-rooting
+  - Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
 
 - Docs
   - Don't document each option a second time as failVariant. Instead explain in the method doc and { failOptions } what to do here.

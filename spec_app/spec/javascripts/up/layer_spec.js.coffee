@@ -9,6 +9,11 @@ describe 'up.layer', ->
         up.layer.open(option: 'value')
         expect(changeSpy).toHaveBeenCalledWith(layer: 'new', option: 'value')
 
+      it 'resolves to an up.Layer instance', (done) ->
+        up.layer.open(target: '.foo', content: 'foo').then (value) ->
+          expect(value).toEqual(jasmine.any(up.Layer))
+          done()
+
       it 'aborts an previous pending request that would result in opening a new layer, even if { solo: false } is also passed'
 
     describe 'up.layer.close()', ->

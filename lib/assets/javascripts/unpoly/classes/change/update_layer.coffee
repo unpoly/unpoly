@@ -138,10 +138,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
         # Since we're adding content instead of replacing, we'll only
         # animate newElement instead of morphing between oldElement and newElement
-        promise = u.always promise, -> up.animate(wrapper, step.transition, step)
+        promise = promise.then -> up.animate(wrapper, step.transition, step)
 
         # Remove the wrapper now that is has served it purpose
-        promise = u.always promise, -> e.unwrap(wrapper)
+        promise = promise.then -> e.unwrap(wrapper)
 
         return promise
 
