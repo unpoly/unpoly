@@ -1,5 +1,4 @@
 - Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
-- { failOptions } sounds like it would take an options hash. Maybe just { fail }?
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
@@ -92,6 +91,9 @@ Have you noticed how noticed how pages fade in
   - Test that layers are assigned .up-destroyed class while closing
   - Test that default targets are selectable per layer-type
   - Test that default targets are also fallbacks per layer-type
+  - Test non-standard failOptions:
+    - failOptions: mirror
+    - failOptions: inherit
   - Test that that all layer methods manipulate the stack in sync (peel, push, remove)
     - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
     - It's OK for animations to run async after that

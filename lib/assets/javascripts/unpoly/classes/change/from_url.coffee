@@ -55,7 +55,8 @@ class up.Change.FromURL extends up.Change
         # overridden with failVariant keys.
         @failOptions = u.merge(@successOptions, @explicitFailOptions())
       when 'mirror'
-        # In mirror mode we use the same options for fail that we use for success.
+        # In mirror mode we use the same options for fail that we use for success,
+        # ignoring all failVariant keys.
         # This is useful for up.validate(), where we want to always use the form's
         # success options regardless of the response status.
         @failOptions = u.copy(@successOptions)
