@@ -167,30 +167,28 @@ up.link = do ->
     options = u.options(options)
 
     # TODO: Document new follow options like onOpened, [up-on-opened], ...
-    parser = new up.OptionParser(options, link, fail: true)
-    parser.string('failOptions')
+    parser = new up.OptionParser(options, link)
+
+    # Request options
     parser.string('url', attr: ['up-href', 'href'])
-    options.method ?= followMethod(link, options)
-    options.origin ?= link
+    options.method = followMethod(link, options)
     parser.json('headers')
     parser.json('params')
     parser.boolean('cache')
-    parser.boolean('navigate')
     parser.boolean('solo')
-    parser.string('confirm')
+
+    # Feedback options
     parser.boolean('feedback')
+
+    # Fragment options
+    parser.string('failOptions')
+    parser.options.origin ?= parser.element
+    parser.boolean('navigate')
+    parser.string('confirm')
     parser.string('target')
     parser.booleanOrString('fallback')
-    parser.booleanOrString('reveal')
-    parser.booleanOrString('focus')
-    parser.boolean('resetScroll')
-    parser.boolean('restoreScroll')
-    parser.booleanOrString('transition')
-    # { history } is actually a boolean, but we keep the deprecated string
-    # variant which should now be passed as { location }.
-    parser.booleanOrString('history')
-    parser.booleanOrString('location')
-    parser.booleanOrString('title')
+
+    # Layer options
     parser.string('layer')
     parser.string('mode') # Renamed to { close }. Legacy calls handled by up.Change.OpenLayer.
     parser.string('mode')
@@ -215,8 +213,29 @@ up.link = do ->
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
     parser.string('acceptOn')
     parser.string('dismissOn')
-    u.assign(options, up.motion.animateOptions(options, link))
-    options.guardEvent ?= up.event.build('up:link:follow', log: 'Following link')
+
+    # Viewport options
+    parser.booleanOrString('reveal')
+    parser.booleanOrString('focus')
+    parser.boolean('resetScroll')
+    parser.boolean('restoreScroll')
+
+    # History options
+    # { history } is actually a boolean, but we keep the deprecated string
+    # variant which should now be passed as { location }.
+    parser.booleanOrString('history')
+    parser.booleanOrString('location')
+    parser.booleanOrString('title')
+
+    # Motion options
+    parser.booleanOrString('animation')
+    parser.booleanOrString('transition')
+    parser.string('easing')
+    parser.number('duration')
+
+    # This is the event that may be prevented to stop the follow.
+    # up.form.submit() changes this to be up:form:submit instead.
+    options.guardEvent ||= up.event.build('up:link:follow', log: 'Following link')
 
     return up.change(options)
 
@@ -251,7 +270,7 @@ up.link = do ->
   preload = (link, options) ->
     link = e.get(link)
 
-    if up.link.isSafe(link)
+    if isSafe(link)
       up.event.whenEmitted(link, 'up:link:preload', log: ['Preloading link %o', link]).then ->
         follow(link, u.merge(options, preload: true))
     else
@@ -280,7 +299,7 @@ up.link = do ->
   @internal
   ###
   followMethod = (link, options = {}) ->
-    u.normalizeMethod(options.method ? link.getAttribute('up-method') ? link.getAttribute('data-method'))
+    u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
 
   ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly

@@ -49,8 +49,6 @@ up.motion = do ->
   @property up.motion.config
   @param {number} [config.duration=300]
     The default duration for all animations and transitions (in milliseconds).
-  @param {number} [config.delay=0]
-    The default delay for all animations and transitions (in milliseconds).
   @param {string} [config.easing='ease']
     The default timing function that controls the acceleration of animations and transitions.
 
@@ -68,7 +66,6 @@ up.motion = do ->
   ###
   config = new up.Config ->
     duration: 200
-    delay: 0
     easing: 'ease'
     enabled: true
 
@@ -100,7 +97,6 @@ up.motion = do ->
   You can pass additional options:
 
       up.animate('warning', '.fade-in', {
-        delay: 1000,
         duration: 250,
         easing: 'linear'
       })
@@ -153,8 +149,6 @@ up.motion = do ->
     - An object of CSS attributes describing the last frame of the animation (using kebeb-case property names)
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
-  @param {number} [options.delay=0]
-    The delay before the animation starts, in milliseconds.
   @param {string} [options.easing='ease']
     The timing function that controls the animation's acceleration.
 
@@ -166,7 +160,7 @@ up.motion = do ->
   ###
   animate = (elementOrSelector, animation, options) ->
     element = e.get(elementOrSelector)
-    options = animateOptions(options)
+    applyConfig(options)
 
     animationFn = findAnimationFn(animation)
     willRun = willAnimate(element, animation, options)
@@ -178,7 +172,6 @@ up.motion = do ->
       skipAnimate(element, animation)
 
   willAnimate = (element, animationOrTransition, options) ->
-    options = animateOptions(options)
     isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !e.isSingleton(element)
 
   skipAnimate = (element, animation) ->
@@ -205,8 +198,6 @@ up.motion = do ->
     The CSS properties that should be transitioned to.
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
-  @param {number} [options.delay=0]
-    The delay before the animation starts, in milliseconds.
   @param {string} [options.easing='ease']
     The timing function that controls the animation's acceleration.
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
@@ -220,29 +211,10 @@ up.motion = do ->
     cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()
 
-  ###**
-  Extracts animation-related options from the given options hash.
-  If `element` is given, also inspects the element for animation-related
-  attributes like `up-easing` or `up-duration`.
+  applyConfig = (options) ->
+    options.easing ||= config.easing
+    options.duration ||= config.duration
 
-  @param {Object} userOptions
-  @param {Element|jQuery} [element]
-  @param {Object} [moduleDefaults]
-  @function up.motion.animateOptions
-  @internal
-  ###
-  animateOptions = (args...) ->
-    userOptions = args.shift() ? {}
-    moduleDefaults = u.extractOptions(args)
-    element = args.pop() || e.none()
-
-    consolidatedOptions = {}
-    consolidatedOptions.easing = userOptions.easing ? element.getAttribute('up-easing') ? moduleDefaults.easing ? config.easing
-    consolidatedOptions.duration = userOptions.duration ? e.numberAttr(element, 'up-duration') ? moduleDefaults.duration ? config.duration
-    consolidatedOptions.delay = userOptions.delay ? e.numberAttr(element, 'up-delay') ? moduleDefaults.delay ? config.delay
-    consolidatedOptions.trackMotion = userOptions.trackMotion # required by up.MotionController
-    consolidatedOptions
-      
   findNamedAnimation = (name) ->
     namedAnimations[name] or up.fail("Unknown animation %o", name)
 
@@ -338,8 +310,6 @@ up.motion = do ->
   @param {Function(oldElement, newElement)|string} transition
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
-  @param {number} [options.delay=0]
-    The delay before the animation starts, in milliseconds.
   @param {string} [options.easing='ease']
     The timing function that controls the transition's acceleration.
 
@@ -353,7 +323,7 @@ up.motion = do ->
   ###  
   morph = (oldElement, newElement, transitionObject, options) ->
     options = u.options(options)
-    u.assign(options, animateOptions(options))
+    applyConfig(options)
 
     oldElement = e.get(oldElement)
     newElement = e.get(newElement)
@@ -489,7 +459,7 @@ up.motion = do ->
   If you choose to *not* use `up.animate()` and roll your own
   logic instead, your code must honor the following contract:
 
-  1. It must honor the options `{ delay, duration, easing }` if given.
+  1. It must honor the options `{ duration, easing }` if given.
   2. It must *not* remove any of the given elements from the DOM.
   3. It returns a promise that is fulfilled when the transition has ended.
   4. If during the animation an event `up:motion:finish` is emitted on
@@ -524,7 +494,7 @@ up.motion = do ->
   If you choose to *not* use `up.animate()` and roll your own
   animation code instead, your code must honor the following contract:
 
-  1. It must honor the options `{ delay, duration, easing }` if given
+  1. It must honor the options `{ duration, easing }` if given
   2. It must *not* remove any of the given elements from the DOM.
   3. It returns a promise that is fulfilled when the transition has ended
   4. If during the animation an event `up:motion:finish` is emitted on
@@ -653,7 +623,6 @@ up.motion = do ->
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   morph: morph
   animate: animate
-  animateOptions: animateOptions
   finish: finish
   finishCount: -> motionController.finishCount
   transition: registerTransition

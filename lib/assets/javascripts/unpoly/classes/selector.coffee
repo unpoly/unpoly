@@ -2,7 +2,7 @@ u = up.util
 
 class up.Selector
 
-  CSS_HAS_SUFFIX_PATTERN = new RegExp("\\:has\\(([^\\)]+)\\)$")
+  CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
   MATCH_FN_NAME = if up.browser.isIE11() then 'msMatchesSelector' else 'matches'
 
   constructor: (@selector, @filterFn) ->

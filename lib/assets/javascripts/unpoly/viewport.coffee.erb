@@ -234,8 +234,6 @@ up.viewport = do ->
     restoreScrollOpt = options.restoreScroll
     focusOpt = options.focus
 
-    # animateOptions = u.pick(options, ['scrollBehavior', 'scrollSpeed'])
-
     if focusOpt
       # Don't return since up.Focus.set() is a sync function.
       up.Focus.set(options.layer, focusOpt)

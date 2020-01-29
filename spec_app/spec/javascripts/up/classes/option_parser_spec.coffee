@@ -77,38 +77,36 @@ describe 'up.OptionParser', ->
       parser.parse(e.numberAttr, 'foo')
       expect(options.foo).toBe('456')
 
-    describe 'with { fail: true } option', ->
+    it 'uses a fail-prefixed option from the observed options', ->
+      element = fixture('.element')
+      options = { foo: 1, failFoo: 2 }
+      parser = new up.OptionParser(options, element)
+      parser.parse(stringAttr, 'foo', fail: true)
+      expect(options.foo).toBe(1)
+      expect(options.failFoo).toBe(2)
 
-      it 'uses a fail-prefixed option from the observed options', ->
-        element = fixture('.element')
-        options = { foo: 1, failFoo: 2 }
-        parser = new up.OptionParser(options, element)
-        parser.parse(stringAttr, 'foo', fail: true)
-        expect(options.foo).toBe(1)
-        expect(options.failFoo).toBe(2)
+    it 'writes a fail-prefixed option from the observed element', ->
+      element = fixture('.element')
+      element.setAttribute('up-foo', 'success value')
+      element.setAttribute('up-fail-foo', 'failure value')
+      options = {}
+      parser = new up.OptionParser(options, element)
+      parser.parse(stringAttr, 'foo', fail: true)
+      expect(options.foo).toBe('success value')
+      expect(options.failFoo).toBe('failure value')
 
-      it 'writes a fail-prefixed option from the observed element', ->
-        element = fixture('.element')
-        element.setAttribute('up-foo', 'success value')
-        element.setAttribute('up-fail-foo', 'failure value')
-        options = {}
-        parser = new up.OptionParser(options, element)
-        parser.parse(stringAttr, 'foo', fail: true)
-        expect(options.foo).toBe('success value')
-        expect(options.failFoo).toBe('failure value')
+    it 'writes undefined if neither observed options nor observed element produces a fail-prefixed value', ->
+      element = fixture('.element')
+      options = {}
+      parser = new up.OptionParser(options, element)
+      parser.parse(stringAttr, 'foo', fail: true)
+      expect(options.foo).toBeUndefined()
+      expect(options.failFoo).toBeUndefined()
 
-      it 'writes undefined if neither observed options nor observed element produces a fail-prefixed value', ->
-        element = fixture('.element')
-        options = {}
-        parser = new up.OptionParser(options, element)
-        parser.parse(stringAttr, 'foo', fail: true)
-        expect(options.foo).toBeUndefined()
-        expect(options.failFoo).toBeUndefined()
-
-      it 'also uses the default value for the fail-prefixed option', ->
-        element = fixture('.element')
-        options = {}
-        parser = new up.OptionParser(options, element)
-        parser.parse(stringAttr, 'foo', fail: true, default: 'default value')
-        expect(options.foo).toBe('default value')
-        expect(options.failFoo).toBe('default value')
+    it 'also uses the default value for the fail-prefixed option', ->
+      element = fixture('.element')
+      options = {}
+      parser = new up.OptionParser(options, element)
+      parser.parse(stringAttr, 'foo', fail: true, default: 'default value')
+      expect(options.foo).toBe('default value')
+      expect(options.failFoo).toBe('default value')

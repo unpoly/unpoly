@@ -9,8 +9,6 @@ class up.CSSTransition
       up.fail('Animation keys must be kebab-case')
     @finishEvent = options.finishEvent
     @duration = options.duration
-    @delay = options.delay
-    @totalDuration = @delay + @duration
     @easing = options.easing
     @finished = false
 
@@ -43,7 +41,7 @@ class up.CSSTransition
 
   startFallbackTimer: =>
     timingTolerance = 100
-    @fallbackTimer = u.timer (@totalDuration + timingTolerance), =>
+    @fallbackTimer = u.timer (@duration + timingTolerance), =>
       @finish()
 
   stopFallbackTimer: =>
@@ -60,7 +58,7 @@ class up.CSSTransition
     # Check if we are receiving a late transitionEnd event
     # from a previous CSS transition.
     elapsed = new Date() - @startTime
-    return unless elapsed > 0.25 * @totalDuration
+    return unless elapsed > 0.25 * @duration
 
     completedPropertyKebab = event.propertyName
     return unless u.contains(@lastFrameKeysKebab, completedPropertyKebab)
@@ -112,7 +110,6 @@ class up.CSSTransition
     e.setStyle @element,
       transitionProperty: Object.keys(@lastFrameKebab).join(', ')
       transitionDuration: "#{@duration}ms"
-      transitionDelay: "#{@delay}ms"
       transitionTimingFunction: @easing
     e.setStyle(@element, @lastFrameKebab)
 

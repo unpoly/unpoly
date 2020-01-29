@@ -17,8 +17,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
     @animate().then(@wipe)
 
   animate: ->
-    animateOptions = up.motion.animateOptions(@options)
-    up.motion.animate(@element, @animation, animateOptions)
+    up.motion.animate(@element, @animation, @options)
 
   wipe: =>
     @layer.asCurrent =>

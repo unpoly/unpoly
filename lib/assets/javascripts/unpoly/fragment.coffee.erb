@@ -683,7 +683,8 @@ up.fragment = do ->
     return u.unprefixCamelCase(key, 'fail')
 
   failKey = (key) ->
-    return u.prefixCamelCase(key, 'fail')
+    unless key.match(/^fail[A-Z]/)
+      return u.prefixCamelCase(key, 'fail')
 
   up.on 'up:app:boot', ->
     body = document.body

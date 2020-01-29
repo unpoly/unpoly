@@ -1120,7 +1120,7 @@ describe 'up.util', ->
         expect(up.util.isOptions(new Date())).toBe(false)
 
       it 'returns false for a RegExp', ->
-        expect(up.util.isOptions(new RegExp('foo'))).toBe(false)
+        expect(up.util.isOptions(/foo/)).toBe(false)
 
     describe 'up.util.isObject', ->
 

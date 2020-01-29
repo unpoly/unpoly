@@ -2790,6 +2790,10 @@ describe 'up.fragment', ->
         result = up.fragment.failKey('foo')
         expect(result).toEqual('failFoo')
 
+      it 'returns undefined if the given key is already prefixed with "fail"', ->
+        result = up.fragment.failKey('failFoo')
+        expect(result).toBeUndefined()
+
     describe 'up.fragment.successKey', ->
 
       it 'returns the unprefixed key for the given failVariant', ->

@@ -3,13 +3,17 @@ e = up.element
 
 class up.OptionParser
 
-  constructor: (@options, @element, @parserOptions = {}) ->
+  constructor: (@options, @element, parserOptions) ->
+    @fail = parserOptions?.fail
 
   string: (key, keyOptions) ->
     @parse(e.attr, key, keyOptions)
 
   boolean: (key, keyOptions) ->
     @parse(e.booleanAttr, key, keyOptions)
+
+  number: (key, keyOptions) ->
+    @parse(e.numberAttr, key, keyOptions)
 
   booleanOrString: (key, keyOptions) ->
     @parse(e.booleanOrStringAttr, key, keyOptions)
@@ -20,13 +24,16 @@ class up.OptionParser
   parse: (attrValueFn, key, keyOptions = {}) ->
     attrs = u.wrapList(keyOptions.attr ? @attrNameForKey(key))
 
-    for attr in attrs
-      @options[key] ?= attrValueFn(@element, attr)
+    if @element
+      for attr in attrs
+        @options[key] ?= attrValueFn(@element, attr)
 
     @options[key] ?= keyOptions.default
 
-    if keyOptions.fail ? @parserOptions.fail
-      failKey = u.fragment.failKey(key)
+    if normalizeFn = keyOptions.normalize
+      @options[key] = normalizeFn(@options[key])
+
+    if keyOptions.fail && @fail && failKey = u.fragment.failKey(key)
       failAttrs = u.compact(u.map(attrs, @deriveFailAttrName))
       failKeyOptions = u.merge(keyOptions,
         attr: failAttrs,

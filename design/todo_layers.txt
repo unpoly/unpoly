@@ -3,6 +3,9 @@
   - Or would this just be { params }?
   - Or would this be { addParams }?
   - What's the behavior of { params } when passed to up.submit() or up.follow()?
+    - up.submit() merges, but up.follow() does nothing with it
+    - i don't know if up.reload() processes { params } at all!
+- { failOptions } sounds like it would take an options hash. Maybe just { fail }?
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
@@ -33,7 +36,6 @@
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
-- up.link.follow: Animation Options are not parsed for fail variant (we just do u.assign(options, up.motion.animateOptions(options, link)))
 - Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
 - up.layer.open should resolve to the opened layer
 - All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
@@ -49,6 +51,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that up-hungry will not activate in a background layer
   - Test focus behavior:
     - New layers should be focused
     - autofocus in new layers will be respected
@@ -121,6 +124,7 @@ Have you noticed how noticed how pages fade in
     - => In case that the current modal DOES have .content we should update this instead of re-rooting
 
 - Docs
+  - Don't document each option a second time as failVariant. Instead explain in the method doc and { failOptions } what to do here.
   - [up-follow] vs. [up-target] vs. [up-layer] vs. [up-modal] etc.
     - Move all fragment update docs to a[up-follow] and form[up-follow]
     - There are separate doc entries for a[up-target] and form[up-target]
@@ -177,6 +181,7 @@ Accessibility
 Later?
 ------
 
+- Allow shortcuts like up-any-target that set both success and fail options (if up-fail-options is not sufficient)
 - Allow placement of body in overlays with <up-body>
   - Then <body> can really be a default target for all fragments
   - Is this really a good idea? It would break for all pages that use fixed elements in their layout
