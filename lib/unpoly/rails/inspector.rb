@@ -8,6 +8,16 @@ module Unpoly
     class Inspector
       include Memoized
 
+      REQUEST_FIELDS = [
+        :target,
+        :fail_target,
+        :mode,
+        :fail_mode,
+        :context,
+        :fail_context,
+        :validate
+      ].freeze
+
       def initialize(controller)
         @controller = controller
         @events = []
@@ -33,7 +43,7 @@ module Unpoly
       # Server-side code is free to optimize its successful response by only returning HTML
       # that matches this selector.
       memoize def target
-        up_field(:target)
+        up_request_field(:target)
       end
 
       ##
@@ -47,7 +57,7 @@ module Unpoly
       # Server-side code is free to optimize its response by only returning HTML
       # that matches this selector.
       memoize def fail_target
-        up_field(:fail_target)
+        up_request_field(:fail_target)
       end
 
       ##
@@ -104,7 +114,7 @@ module Unpoly
       # this returns the name attribute of the form field that has triggered
       # the validation.
       memoize def validate
-        up_field(:validate)
+        up_request_field(:validate)
       end
 
       def validate_name
@@ -112,14 +122,44 @@ module Unpoly
         validate
       end
 
+      ##
+      # TODO: Docs
       memoize def layer
         LayerInspector.new(self, mode: mode, context: context)
       end
 
+      ##
+      # TODO: Docs
       memoize def fail_layer
         LayerInspector.new(self, mode: fail_mode, context: fail_context)
       end
 
+      ##
+      # TODO: Docs
+      memoize def context
+        up_request_field(:context, type: :hash)
+      end
+
+      ##
+      # TODO: Docs
+      memoize def fail_context
+        up_request_field(:fail_context, type: :hash)
+      end
+
+      ##
+      # TODO: Docs
+      memoize def mode
+        up_request_field(:mode)
+      end
+
+      ##
+      # TODO: Docs
+      memoize def fail_mode
+        up_request_field(:fail_mpde)
+      end
+      
+      ##
+      # TODO: Docs
       def emit(event_props)
         # Track the given props in case the method is called another time.
         @events.push(event_props)
@@ -135,21 +175,13 @@ module Unpoly
         response.headers['X-Up-Title'] = new_title
       end
 
-      memoize def context
-        up_field(:context, :hash)
-      end
-
-      memoize def fail_context
-        up_field(:fail_context, :hash)
-      end
-
       def redirect_to(options, *args)
         if up?
           url = url_for(options)
+
           # Since our JS has no way to inject those headers into the redirect request,
-          # we transport the headers over params. HTTP ceaders are case-insensitive.
-          up_headers = headers.select { |name, _value| name.downcase.starts_with?('x-up-') }
-          url = append_params_to_url(url, up_headers)
+          # we transport the headers over params.
+          url = append_params_to_url(url, up_request_headers_as_params)
           controller.send(:redirect_to, url, *args)
         else
           controller.send(:redirect_to, options, *args)
@@ -161,15 +193,16 @@ module Unpoly
       def request_url_without_up_params
         original_url = request.original_url
 
-        if original_url =~ /\bup(\[|%5B)/
+        if original_url =~ /\b_up(\[|%5B)/
           uri = URI.parse(original_url)
+
           # This parses the query as a flat list of key/value pairs, which
           # in this case is easier to work with than a nested hash.
           params = Rack::Utils.parse_query(uri.query)
 
           # We only used the up[...] params to transport headers, but we don't
           # want them to appear in a history URL.
-          non_up_params = params.reject { |key, _value| key.starts_with?('up[') }
+          non_up_params = params.reject { |key, _value| key.starts_with?('_up[') }
 
           append_params_to_url(uri.path, non_up_params)
         else
@@ -181,10 +214,10 @@ module Unpoly
 
       attr_reader :controller
 
-      delegate :request, :params, :response, to: :controller
+      delegate :request, :params, :response, :url_for, to: :controller
 
-      def up_field(name, type: :string)
-        raw_value = up_header(name) || up_param(name)
+      def up_request_field(name, type: :string)
+        raw_value = up_request_header(name) || up_param(name)
         case type
         when :string
           raw_value
@@ -194,17 +227,8 @@ module Unpoly
         end
       end
 
-      def append_params_to_url(url, params)
-        if params.blank?
-          url
-        else
-          separator = url.include?('?') ? '&' : '?'
-          [url, params.to_query].join(separator)
-        end
-      end
-
       def up_param(name)
-        if up_params = params['up']
+        if up_params = params['_up']
           name = up_param_name(name, full: false)
           up_params[name]
         end
@@ -212,12 +236,13 @@ module Unpoly
 
       def up_param_name(name, full: false)
         name = name.to_s
+        name = name.downcase
         name = name.dasherize
-        name = "up[#{name}]" if full
+        name = "_up[#{name}]" if full
         name
       end
 
-      def up_header(name)
+      def up_request_header(name)
         name = up_header_name(name)
         request.headers[name]
       end
@@ -228,6 +253,13 @@ module Unpoly
         name = name.classify
         name = "X-Up-#{name}"
         name
+      end
+
+      def up_request_headers_as_params
+        pairs = REQUEST_FIELDS.map { |field|
+          [up_param_name(field, full: true), send(field)]
+        }
+        pairs.to_h.compact
       end
 
       def test_target(actual_target, tested_target)
@@ -243,6 +275,15 @@ module Unpoly
           end
         else
           true
+        end
+      end
+
+      def append_params_to_url(url, params)
+        if params.blank?
+          url
+        else
+          separator = url.include?('?') ? '&' : '?'
+          [url, params.to_query].join(separator)
         end
       end
 
