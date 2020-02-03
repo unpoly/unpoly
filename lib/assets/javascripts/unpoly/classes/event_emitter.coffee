@@ -10,6 +10,7 @@ class up.EventEmitter extends up.Record
       'base',
       'callback',
       'log',
+      'ensureBubbles'
       # 'boundary'
     ]
 
@@ -28,7 +29,11 @@ class up.EventEmitter extends up.Record
     return @event
 
   dispatchEvent: ->
-    u.each u.wrapList(@target), (target) => target.dispatchEvent(@event)
+    @target.dispatchEvent(@event)
+
+    if @ensureBubbles && e.isDetached(@target)
+      document.dispatchEvent(@event)
+
     @callback?(@event)
 
   whenEmitted: ->
@@ -65,11 +70,11 @@ class up.EventEmitter extends up.Record
     else if message == true
       up.puts('Event %s (%o)', name, @event)
 
-  @fromEmitArgs: (args, defaults) ->
+  @fromEmitArgs: (args, defaults = {}) ->
     options = u.extractOptions(args)
 
     if u.isElementish(args[0])
-      options.target = args.shift()
+      options.target = e.get(args.shift())
     else if args[0] instanceof up.Layer
       options.layer = args.shift()
 
@@ -91,7 +96,6 @@ class up.EventEmitter extends up.Record
       # In this branch we receive an Event object that was already built:
       # up.emit([target], event, [emitOptions])
       options.event = args[0]
-
     else
       # In this branch we receive an Event name and props object.
       # The props object may also include options for the emission, such as

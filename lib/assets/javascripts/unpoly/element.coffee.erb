@@ -1109,6 +1109,9 @@ up.element = do ->
         attrs[name] = attribute.value
     attrs
 
+  isDetached = (element) ->
+    element != document && !getRoot().contains(element)
+
   toggleInert = (element, isInert) ->
     toggleAttr(element, 'inert', '', isInert) # modern agents
     toggleAttr(element, 'aria-hidden', true, isInert) # legacy agents
@@ -1168,3 +1171,4 @@ up.element = do ->
     upAttrs: upAttrs
     toggleAttr: toggleAttr
     toggleInert: toggleInert
+    isDetached: isDetached

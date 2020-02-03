@@ -109,6 +109,9 @@ class up.Layer extends up.Record
   isOpen: ->
     @stack.isOpen(this)
 
+  isDetached: ->
+    e.isDetached(@element)
+
   saveHistory: ->
     return unless @history
 

@@ -123,7 +123,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # There is no @layer.onOpen() handler to accompany the DOM event.
     return up.emit(
       @buildEvent('up:layer:open'),
-      base: @layer.parent
+      base: @layer.parent # sets up.layer.current
     )
 
   emitOpeningEvent: ->

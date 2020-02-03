@@ -195,8 +195,10 @@ class up.Request extends up.Record
     @setAbortedState(message)
 
   setAbortedState: (message = 'Request was aborted') =>
-    @aborted = true
-    @deferred.reject(up.error.aborted(message))
+    unless @aborted
+      @emit('up:proxy:aborted')
+      @aborted = true
+      @deferred.reject(up.error.aborted(message))
 
   responseReceived: =>
     @respondWith(@extractResponseFromXhr())
@@ -266,6 +268,8 @@ class up.Request extends up.Record
   @wrap: (args...) ->
     u.wrapValue(@, args...)
 
+  # If the request is marked for a { layer }, up.proxy-related events are emitted
+  # ob that layer.  up.proxy delegates event submission to this method.
   emit: (name, props) ->
     emitter = if @layer && @layer != 'new' then @layer else up
     emitter.emit(name, u.merge(props, request: this))

@@ -3,6 +3,7 @@
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
 - Update Rails integration
+  - Move tests to controller specs and get rid of the embedded Rails app
   - up.layer.accept(value)
   - up.layer.dismiss(value)
   - up.layer.emit(name, props)
@@ -11,25 +12,19 @@
   - [DONE] up.fail_target
   - up? should check presence of X-Up-Version
   - up.version
-  - up.layer.target
   - up.layer.context
   - up.layer.mode
   - up.layer.root?
   - up.layer.overlay?
   - up.fail_layer.target    => no, up.layer.emit will emit on whatever layer the change cascade selected! it might even be the fail layer!
-  - up.fail_layer.context
-  - up.fail_layer.mode
-  - up.fail_layer.root?
-  - up.fail_layer.overlay?
-  - Better cache hits (uhm really?)
-    - When accessing up.target etc. the server should track this and respond with
-          X-Up-Tailored: ["target", "mode"]
-    - We can then use this information to resolve other requests in the queue
-    - => But this would only help for requests already in the queue, yes? Because new requests would need to wait what the server responds.
+  - up.fail_layer.context => yes
+  - up.fail_layer.mode => yes
+  - up.fail_layer.root? => yes
+  - up.fail_layer.overlay? => yes
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
-- All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector)
+- All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
 - Protocol options should not be configurable
   - Constants should just be props
   - Document headers in the main class docs
@@ -45,11 +40,12 @@ Have you noticed how noticed how pages fade in
 - Tests
   - Test that [up-params] will add additional query params to a followed links that already has query params
   - Test that [up-params] will add additional payload to a submited form that already has some fields
+  - Test for up.element.isDetached()
   - Test that up-hungry will not activate in a background layer
   - Test focus behavior:
     - New layers should be focused
     - autofocus in new layers will be respected
-    - when closing layers
+    - when closing a layer, the element that originally opened the layer re-gains focus
   - Test that we can actually hit another layer if the initial plan failed
     - We had this for a while:
     - @successOptions.layer = successPreview.preflightLayer()
@@ -64,9 +60,11 @@ Have you noticed how noticed how pages fade in
     - <form up-layer="parent" up-target=".list">
   - Test that accepting/dismissing the root layer will just follow the link
   - Test that proxy-events are emitted on their layer, not the document
+  - Test that proxy-events are emitted a second time on the document if the layer has been detached
   - Test that proxy-events don't crash when a request has { layer: 'new' }
+  - Test that proxy-events don't crash when a request has no { layer }
   - Test that updating <body> or <html> we keep layer.onEach handlers
-  - Test that updating <body> will re-attach .up-overlay
+  - Test that updating <body> will re-attach .up-overlay elements
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)
@@ -152,6 +150,7 @@ Have you noticed how noticed how pages fade in
   - Document up.proxy.abort(request)
   - Document up.proxy.abort(conditionsObj)
   - Document [up-dismiss-on="click .button"]
+  - Document up:proxy:aborted
 
 
 Finishing up
@@ -168,6 +167,7 @@ Finishing up
   - Simplify content-link, modal-link, drawer-link
     - This should just be layer-link
   - up_modal.sass
+- E-Mail maintainers of rack-unpoly und unpoly_ex
 
 
 Accessibility
@@ -178,6 +178,17 @@ Accessibility
 
 Later?
 ------
+
+- Rename request-related events
+  - up:request:load
+    up:request:loaded
+    up:request:fatal
+    up:request:aborted
+    up:network:slow
+    up:network:recover
+  - Possibly rename up.proxy to up.request?
+    - What about the up.request method?
+      - up.request.fetch()?
 
 - Allow shortcuts like up-any-target that set both success and fail options (if up-fail-options is not sufficient)
 - Allow placement of body in overlays with <up-body>
@@ -210,7 +221,11 @@ Later?
 - Emit up:proxy:fatal when responses are aborted due to user or timeout
 - up:fragment:inserted should receive the entire document from which the fragment was extracted
 - Support named layers
-
+- Better cache hits (uhm really?)
+  - When accessing up.target etc. the server should track this and respond with
+        X-Up-Tailored: ["target", "mode"]
+  - We can then use this information to resolve other requests in the queue
+  - => But this would only help for requests already in the queue, yes? Because new requests would need to wait what the server responds.
 
 
 Decisions
@@ -250,3 +265,5 @@ Decisions
 - Should it be up.accept(), up.dismiss(), X-Up-Accept, X-Up-Dismiss? => No
 - Should the default layer be current again?
   => Not now, maybe change that leter
+- Rename { base } back to { currentLayer }?
+  => No, I like short options too much.

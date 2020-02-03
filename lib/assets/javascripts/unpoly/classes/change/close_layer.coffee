@@ -80,19 +80,19 @@ class up.Change.CloseLayer extends up.Change.Removal
     )
 
   emitClosedEvent: (formerParent) ->
-    return up.emit(
+    # layer.emit({ ensureBubbles: true }) will automatically emit a second event on document
+    # because the layer is detached. We do not want to emit it on the parent layer where users
+    # might confuse it with an event for the parent layer itself. Since @layer.element
+    # is now detached, the event will no longer bubble up to the document where global
+    # event listeners can receive it. So we explicitely emit the event a second time
+    # on the document.
+    return @up.layer.emit(
       @buildEvent(@closedEventName),
-      # Emit the "closed" event on the detached layer so listeners bound to that will
-      # receive the event. We do not want to emit it on the parent layer where users
-      # might confuse it with an event for the parent layer itself. Since @layer.element
-      # is now detached, the event will no longer bubble up to the document where global
-      # event listeners can receive it. So we explicitely emit the event a second time
-      # on the document.
-      target: [@layer.element, document],
       # Set up.layer.current to the parent of the closed layer, which is now likely
       # to be the front layer.
       base: formerParent,
-      callback: @layer.callback(@closedCallbackName)
+      callback: @layer.callback(@closedCallbackName),
+      ensureBubbles: true
     )
 
   buildEvent: (name) ->
