@@ -11,7 +11,6 @@
   - [DONE] up.target
   - [DONE] up.fail_target
   - up? should check presence of X-Up-Version
-  - up.version
   - up.layer.context
   - up.layer.mode
   - up.layer.root?
@@ -24,7 +23,8 @@
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
-- All calls of e.get(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
+- All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
+  - e. g. findValidateTarget
 - Protocol options should not be configurable
   - Constants should just be props
   - Document headers in the main class docs
@@ -151,6 +151,9 @@ Have you noticed how noticed how pages fade in
   - Document up.proxy.abort(conditionsObj)
   - Document [up-dismiss-on="click .button"]
   - Document up:proxy:aborted
+  - Document new Rails integration
+    - Document up.redirect_to
+
 
 
 Finishing up

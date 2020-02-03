@@ -45,8 +45,6 @@ class up.Request.XhrRenderer
     if (csrfHeader = @request.csrfHeader()) && (csrfToken = @request.csrfToken())
       @addHeader(csrfHeader, csrfToken)
 
-    @addHeader(up.protocol.config.versionHeader, up.version)
-
     u.assign(@xhr, handlers)
     @xhr.send(@xhrPayload)
 

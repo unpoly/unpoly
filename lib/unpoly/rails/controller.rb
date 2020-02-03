@@ -4,7 +4,7 @@ module Unpoly
     # This adds two methods `#up` and `#up?` to all controllers,
     # helpers and views, allowing the server to inspect the current request
     # for Unpoly-related concerns such as "is this a page fragment update?".
-    module InspectorAccessor
+    module Controller
 
       def self.included(base)
         base.helper_method :up, :up?
