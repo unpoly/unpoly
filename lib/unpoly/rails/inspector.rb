@@ -13,10 +13,12 @@ module Unpoly
       end
 
       def self.request_field(name, type)
-        request_fields << name
+        field = type.new(name)
+
+        request_fields << field
 
         memoize define_method(name) {
-          up_request_field(name, type: type)
+          request_field_value(field)
         }
       end
 
@@ -44,7 +46,7 @@ module Unpoly
       #
       # Server-side code is free to optimize its successful response by only returning HTML
       # that matches this selector.
-      request_field :target, :string
+      request_field :target, Field::String
 
       ##
       # Returns whether the given CSS selector is targeted by the current fragment
@@ -70,7 +72,7 @@ module Unpoly
       #
       # Server-side code is free to optimize its response by only returning HTML
       # that matches this selector.
-      request_field :fail_target, :string
+      request_field :fail_target, Field::String
 
       ##
       # Returns whether the given CSS selector is targeted by the current fragment
@@ -111,29 +113,29 @@ module Unpoly
       # If the current form submission is a [validation](https://unpoly.com/input-up-validate),
       # this returns the name attribute of the form field that has triggered
       # the validation.
-      request_field :validate, :string
+      request_field :validate, Field::String
 
       alias :validate_name :validate
 
       ##
       # TODO: Docs
-      request_field :mode, :string
+      request_field :mode, Field::String
 
       ##
       # TODO: Docs
-      request_field :fail_mode, :string
+      request_field :fail_mode, Field::String
 
       ##
       # TODO: Docs
-      request_field :mode, :string
+      request_field :mode, Field::String
 
       ##
       # TODO: Docs
-      request_field :context, :hash
+      request_field :context, Field::Hash
 
       ##
       # TODO: Docs
-      request_field :fail_context, :hash
+      request_field :fail_context, Field::Hash
 
       ##
       # TODO: Docs
@@ -193,48 +195,26 @@ module Unpoly
 
       delegate :request, :params, :response, :url_for, to: :controller
 
-      def up_request_field(name, type: :string)
-        raw_value = up_request_header(name) || up_param(name)
-        case type
-        when :string
-          raw_value
-        when :hash
-          hash = raw_value.present? ? JSON.parse(raw_value) : {}
-          ActiveSupport::HashWithIndifferentAccess.new(hash)
-        end
+      def request_field_value(field)
+        raw_value = up_request_header(field) || up_param(field)
+        field.parse(raw_value)
       end
 
-      def up_param(name)
+      def up_param(field)
         if up_params = params['_up']
-          name = up_param_name(name, full: false)
+          name = field.param_name
           up_params[name]
         end
       end
 
-      def up_param_name(name, full: false)
-        name = name.to_s
-        name = name.downcase
-        name = name.dasherize
-        name = "_up[#{name}]" if full
-        name
-      end
-
-      def up_request_header(name)
-        name = up_header_name(name)
-        request.headers[name]
-      end
-
-      def up_header_name(name)
-        name = name.to_s
-        name = name.gsub('_', '-')
-        name = name.classify
-        name = "X-Up-#{name}"
-        name
+      def up_request_header(field)
+        request.headers[field.header_name]
       end
 
       def up_request_headers_as_params
         pairs = self.class.request_fields.map { |field|
-          [up_param_name(field, full: true), send(field)]
+          value = send(field.name)
+          [field.param_name(full: true), field.stringify(value)]
         }
         pairs.to_h.compact
       end
