@@ -8,15 +8,17 @@ module Unpoly
     class Inspector
       include Memoized
 
-      REQUEST_FIELDS = [
-        :target,
-        :fail_target,
-        :mode,
-        :fail_mode,
-        :context,
-        :fail_context,
-        :validate
-      ].freeze
+      def self.request_fields
+        @request_fields ||= []
+      end
+
+      def self.request_field(name, type)
+        request_fields << name
+
+        memoize define_method(name) {
+          up_request_field(name, type: type)
+        }
+      end
 
       def initialize(controller)
         @controller = controller
@@ -42,23 +44,7 @@ module Unpoly
       #
       # Server-side code is free to optimize its successful response by only returning HTML
       # that matches this selector.
-      memoize def target
-        up_request_field(:target)
-      end
-
-      ##
-      # Returns the CSS selector for a fragment that Unpoly will update in
-      # case of an failed response. Server errors or validation failures are
-      # all examples for a failed response (non-200 status code).
-      #
-      # The Unpoly frontend will expect an HTML response containing an element
-      # that matches this selector.
-      #
-      # Server-side code is free to optimize its response by only returning HTML
-      # that matches this selector.
-      memoize def fail_target
-        up_request_field(:fail_target)
-      end
+      request_field :target, :string
 
       ##
       # Returns whether the given CSS selector is targeted by the current fragment
@@ -73,6 +59,18 @@ module Unpoly
       def target?(tested_target)
         test_target(target, tested_target)
       end
+
+      ##
+      # Returns the CSS selector for a fragment that Unpoly will update in
+      # case of an failed response. Server errors or validation failures are
+      # all examples for a failed response (non-200 status code).
+      #
+      # The Unpoly frontend will expect an HTML response containing an element
+      # that matches this selector.
+      #
+      # Server-side code is free to optimize its response by only returning HTML
+      # that matches this selector.
+      request_field :fail_target, :string
 
       ##
       # Returns whether the given CSS selector is targeted by the current fragment
@@ -113,51 +111,30 @@ module Unpoly
       # If the current form submission is a [validation](https://unpoly.com/input-up-validate),
       # this returns the name attribute of the form field that has triggered
       # the validation.
-      memoize def validate
-        up_request_field(:validate)
-      end
+      request_field :validate, :string
 
-      def validate_name
-        ActiveSupport::Deprecation.warn('up.validate_name is deprecated. Use up.validate instead.')
-        validate
-      end
+      alias :validate_name :validate
 
       ##
       # TODO: Docs
-      memoize def layer
-        LayerInspector.new(self, mode: mode, context: context)
-      end
+      request_field :mode, :string
 
       ##
       # TODO: Docs
-      memoize def fail_layer
-        LayerInspector.new(self, mode: fail_mode, context: fail_context)
-      end
+      request_field :fail_mode, :string
 
       ##
       # TODO: Docs
-      memoize def context
-        up_request_field(:context, type: :hash)
-      end
+      request_field :mode, :string
 
       ##
       # TODO: Docs
-      memoize def fail_context
-        up_request_field(:fail_context, type: :hash)
-      end
+      request_field :context, :hash
 
       ##
       # TODO: Docs
-      memoize def mode
-        up_request_field(:mode)
-      end
+      request_field :fail_context, :hash
 
-      ##
-      # TODO: Docs
-      memoize def fail_mode
-        up_request_field(:fail_mpde)
-      end
-      
       ##
       # TODO: Docs
       def emit(event_props)
@@ -256,7 +233,7 @@ module Unpoly
       end
 
       def up_request_headers_as_params
-        pairs = REQUEST_FIELDS.map { |field|
+        pairs = self.class.request_fields.map { |field|
           [up_param_name(field, full: true), send(field)]
         }
         pairs.to_h.compact
