@@ -1,1 +1,2 @@
---markup=markdown --main=README_RAILS.md
+--markup=markdown --main=README_RAILS.md --exclude .
+

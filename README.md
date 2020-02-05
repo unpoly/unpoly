@@ -31,7 +31,7 @@ Overview:
 
 Install dependencies for tests:
 
-- Install Ruby 2.1.2
+- Install Ruby 2.3.8
 - Install Bundler by running `gem install bundler`
 - `cd` into `spec_app`
 - Install dependencies by running `bundle install`

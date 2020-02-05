@@ -1,7 +1,9 @@
 unpoly-rails: Ruby on Rails bindings for Unpoly
 ===============================================
 
-[Unpoly](https://unpoly.com) is a backend-agnostic [unobtrusive JavaScript](https://en.wikipedia.org/wiki/Unobtrusive_JavaScript) framework. `unpoly-rails` gives your [Ruby on Rails](http://rubyonrails.org/) application some convenience candy when you are using Unpoly in your frontend.
+[Unpoly](https://unpoly.com) is a backend-agnostic [unobtrusive JavaScript](https://en.wikipedia.org/wiki/Unobtrusive_JavaScript) framework. `unpoly-rails` gives a [Ruby on Rails](http://rubyonrails.org/) application some convenience methods to communicate with an Unpoly-enhanced frontend.
+
+Note that bindings provided by `unpoly-rails` are entirely optional. You are free to use Unpoly with Rails without the `unpoly-rails` gem.
 
 
 Features
@@ -11,27 +13,32 @@ The methods documented below are available in all controllers, views and helpers
 
 ### Detecting a fragment update
 
-To test whether the current request is a [fragment update](https://unpoly.com/up.link):
+Use `up?` to test whether the current request is a [fragment update](https://unpoly.com/up.link):
 
 ```ruby
-up?
+up? # => true or false
 ```
 
-To retrieve the CSS selector that is being [updated](https://unpoly.com/up.link):
+To retrieve the CSS selector that is being [updated](https://unpoly.com/up.link), use `up.target`:
 
 ```ruby
-up.target
+up.target # => '.content'
 ```
 
-The Unpoly frontend will expect an HTML response containing an element that matches this selector. If no such element is found, an error is shown to the user.
-
-Server-side code is free to optimize its response by only returning HTML that matches this selector:
+The Unpoly frontend will expect an HTML response containing an element that matches this selector. Your Rails app is free to render a smaller response that only contains HTML matching the targeted selector. You may call `up.target?` to test whether a given CSS selector has been targeted:
 
 ```ruby
 if up.target?('.sidebar')
-  = render 'expensive_sidebar_partial'
+  render('expensive_sidebar_partial')
 end
 ```
+
+Fragment updates may target different selectors for successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
+Use these methods to inspect the target for failed responses:
+
+- `up.fail_target`: The CSS selector targeted for a failed response
+- `up.fail_target?(selector)`: Whether the given selector is targeted for a failed response
+- `up.any_target?(selector)`: Whether the given selector is targeted for either a successful or a failed response
 
 ### Pushing a document title to the client
 
@@ -42,6 +49,38 @@ up.title = 'Title from server'
 ```
 
 This is useful when you skip rendering the `<head>` in an Unpoly request.
+
+
+### Emitting events on the frontend
+
+You may use `up.emit` to emit an event on the `document` after the
+fragment was updated:
+
+```ruby
+class UsersController < ApplicationController
+
+  def show
+    @user = User.find(params[:id])
+    up.emit('user:selected', id: @user.id)
+  end
+
+end
+```
+
+If you wish to emit an event on the current [layer](https://unpoly.com/up.layer)
+instead of the `document`, use `up.layer.emit`:
+
+```ruby
+class UsersController < ApplicationController
+
+  def show
+    @user = User.find(params[:id])
+    up.layer.emit('user:selected', id: @user.id)
+  end
+
+end
+```
+
 
 ### Detecting an Unpoly form validation
 
@@ -72,12 +111,41 @@ class UsersController < ApplicationController
 end
 ```
 
+### Accessing the targeted layer
+
+Use the methods below to interact with the [layer](/up.layer) of the fragment being targeted:
+
+- `up.layer.mode`: Returns the [mode](https://unpoly.com/up.layer.mode) of the targeted layer (e.g. `"root"` or `"modal"`).
+- `up.layer.root?`: Returns whether the targeted layer is the root layer.
+- `up.layer.overlay?`: Returns whether the targeted layer is an overlay (not the root layer).
+- `up.layer.context`: Returns the [context](https://unpoly.com/up.layer.context) hash of the targeted layer. Keys can be accessed as either strings or symbols. Returns an empty hash if the targeted layer has no given context.
+- `up.layer.accept(value)`: [Accepts](https://unpoly.com/up.layer.accept) the current layer. Does nothing if the targeted layer is the root layer.
+- `up.layer.dismiss(value)`: [Dismisses](https://unpoly.com/up.layer.dismisses) the current layer. Does nothing if the targeted layer is the root layer.
+- `up.layer.emit(type, options)`: [Emits an event](https://unpoly.com/up.layer.emit) on the targeted layer.
+
+Fragment updates may target different layers for successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
+Use these methods to inspect the layer target for failed responses:
+
+- `up.fail_layer.mode`: Returns the [mode](https://unpoly.com/up.layer.mode) of the layer targeted for a failed response.
+- `up.fail_layer.root?`: Returns whether the layer targeted for a failed response is the root layer.
+- `up.fail_layer.overlay?`: Returns whether the layer targeted for a failed response is an overlay.
+- `up.fail_layer.context`: Returns the [context](https://unpoly.com/up.layer.context) hash of the layer targeted for a failed response.
+
+
+### Preserving Unpoly-related request information through redirects
+
+`unpoly-rails` patches [`redirect_to`](https://api.rubyonrails.org/classes/ActionController/Redirecting.html#method-i-redirect_to)
+so Unpoly-related request information (like the CSS selector being targeted for a fragment
+update) will be preserved for the action you redirect to.
+
+
 ### Automatic redirect detection
 
-`unpoly-rails` installs a `before_action` into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
+`unpoly-rails` installs a [`before_action`](https://api.rubyonrails.org/classes/AbstractController/Callbacks/ClassMethods.html#method-i-before_action) into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
 HTTP method as `X-Up-Method`.
 
 The Unpoly frontend [requires these headers to detect redirects](https://unpoly.com/form-up-target#redirects), which are otherwise undetectable for an AJAX client.
+
 
 ### Automatic method detection for initial page load
 
@@ -122,11 +190,11 @@ Development
 
 ### Before you make a PR
 
-Before you make a PR, please have some discussion about the proposed change by [opening an issue on GitHub](https://github.com/unpoly/unpoly/issues/new).
+Before you create a pull request, please have some discussion about the proposed change by [opening an issue on GitHub](https://github.com/unpoly/unpoly/issues/new).
 
 ### Running tests
 
-- Install Ruby 2.1.2
+- Install Ruby 2.3.8
 - Install Bundler by running `gem install bundler`
 - `cd` into `spec_app`
 - Install dependencies by running `bundle install`
