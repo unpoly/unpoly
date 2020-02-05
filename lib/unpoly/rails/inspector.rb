@@ -7,20 +7,7 @@ module Unpoly
     # Available through the `#up` method in all controllers, helpers and views.
     class Inspector
       include Memoized
-
-      def self.request_fields
-        @request_fields ||= []
-      end
-
-      def self.request_field(name, type)
-        field = type.new(name)
-
-        request_fields << field
-
-        memoize define_method(name) {
-          request_field_value(field)
-        }
-      end
+      include FieldRegistry
 
       def initialize(controller)
         @controller = controller
@@ -140,7 +127,8 @@ module Unpoly
       ##
       # TODO: Docs
       def emit(event_props)
-        # Track the given props in case the method is called another time.
+        # Track the given props in an array. If the method is called a second time,
+        # we can re-set the X-Up-Events header with the first and second props hash.
         @events.push(event_props)
         headers['X-Up-Events'] = @events.to_json
       end
@@ -160,7 +148,7 @@ module Unpoly
 
           # Since our JS has no way to inject those headers into the redirect request,
           # we transport the headers over params.
-          url = append_params_to_url(url, up_request_headers_as_params)
+          url = append_params_to_url(url, request_fields_as_params)
           controller.send(:redirect_to, url, *args)
         else
           controller.send(:redirect_to, options, *args)
@@ -196,27 +184,29 @@ module Unpoly
       delegate :request, :params, :response, :url_for, to: :controller
 
       def request_field_value(field)
-        raw_value = up_request_header(field) || up_param(field)
+        raw_value = request_value_from_headers(field) || request_value_from_params(field)
         field.parse(raw_value)
       end
 
-      def up_param(field)
+      def request_value_from_params(field)
         if up_params = params['_up']
           name = field.param_name
           up_params[name]
         end
       end
 
-      def up_request_header(field)
+      def request_value_from_headers(field)
         request.headers[field.header_name]
       end
 
-      def up_request_headers_as_params
-        pairs = self.class.request_fields.map { |field|
+      def request_fields_as_params
+        pairs = request_fields.map { |field|
           value = send(field.name)
           [field.param_name(full: true), field.stringify(value)]
         }
-        pairs.to_h.compact
+        params = pairs.to_h
+        params = params.select { |_key, value| value.present? }
+        params
       end
 
       def test_target(actual_target, tested_target)
