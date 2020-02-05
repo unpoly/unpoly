@@ -25,11 +25,13 @@
   - Do present tense events still have long-form event log messages with gerund?
 - All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
   - e. g. findValidateTarget
+- Decide whether to do up.layer.accept({ value: { flight_id: 5 }}) or up.layer.accept({ flight_id: 5 })
 - Protocol options should not be configurable
   - Constants should just be props
   - Document headers in the main class docs
 - Deprecate up.util.only() against up.util.pick() and up.util.except() against up.util.omit()
   - OR roll back the change
+- Rename { base } back to { currentLayer }?
 - Try changes in demo.unpoly.com
 
 
@@ -182,6 +184,7 @@ Accessibility
 Later?
 ------
 
+- When xhr.responseURL is not the requested URL, assume that there was a redirect and the response method is now GET
 - Rename request-related events
   - up:request:load
     up:request:loaded
@@ -268,5 +271,3 @@ Decisions
 - Should it be up.accept(), up.dismiss(), X-Up-Accept, X-Up-Dismiss? => No
 - Should the default layer be current again?
   => Not now, maybe change that leter
-- Rename { base } back to { currentLayer }?
-  => No, I like short options too much.
