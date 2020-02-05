@@ -35,7 +35,7 @@ module Unpoly
         super(target, *args)
       end
 
-      ActionController::Base.send(:prepend, self)
+      ActionController::Base.prepend(self)
 
     end
   end
