@@ -142,17 +142,8 @@ module Unpoly
         response.headers['X-Up-Title'] = new_title
       end
 
-      def redirect_to(options, *args)
-        if up?
-          url = url_for(options)
-
-          # Since our JS has no way to inject those headers into the redirect request,
-          # we transport the headers over params.
-          url = append_params_to_url(url, request_fields_as_params)
-          controller.send(:redirect_to, url, *args)
-        else
-          controller.send(:redirect_to, options, *args)
-        end
+      def url_with_request_values(url)
+        append_params_to_url(url, request_fields_as_params)
       end
 
       # Used by RequestEchoHeaders to prevent up[...] params from showing up
@@ -181,7 +172,7 @@ module Unpoly
 
       attr_reader :controller
 
-      delegate :request, :params, :response, :url_for, to: :controller
+      delegate :request, :params, :response, to: :controller
 
       def request_field_value(field)
         raw_value = request_value_from_headers(field) || request_value_from_params(field)

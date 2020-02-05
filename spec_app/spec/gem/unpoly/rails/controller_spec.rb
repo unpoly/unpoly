@@ -44,11 +44,11 @@ describe Unpoly::Rails::Controller, type: :request do
     end
 
     def redirect0
-      up.redirect_to action: :redirect1
+      redirect_to action: :redirect1
     end
 
     def redirect1
-      up.redirect_to action: :redirect2
+      redirect_to action: :redirect2
     end
 
     def redirect2
@@ -251,7 +251,7 @@ describe Unpoly::Rails::Controller, type: :request do
 
   end
 
-  describe 'up.redirect_to' do
+  describe 'redirect_to' do
 
     it 'preserves Unpoly-related headers for the redirect' do
       get '/binding_test/redirect1', nil, { 'X-Up-Target' => '.foo' }
