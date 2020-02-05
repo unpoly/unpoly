@@ -241,7 +241,7 @@ class up.Request extends up.Record
       title: up.protocol.titleFromXhr(@xhr)
       acceptLayer: up.protocol.acceptLayerFromXhr(@xhr)
       dismissLayer: up.protocol.dismissLayerFromXhr(@xhr)
-      events: up.protocol.eventsFromXhr(@xhr)
+      eventPlans: up.protocol.eventPlansFromXhr(@xhr)
 
     if urlFromServer = up.protocol.locationFromXhr(@xhr)
       responseAttrs.url = urlFromServer

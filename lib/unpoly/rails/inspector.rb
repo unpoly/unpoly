@@ -126,10 +126,11 @@ module Unpoly
 
       ##
       # TODO: Docs
-      def emit(event_props)
+      def emit(type, options = {})
         # Track the given props in an array. If the method is called a second time,
         # we can re-set the X-Up-Events header with the first and second props hash.
-        @events.push(event_props)
+        event_plan = { type: type, options: options }
+        @events.push(event_plan)
         headers['X-Up-Events'] = @events.to_json
       end
 

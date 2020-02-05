@@ -7,13 +7,13 @@ class up.Change.Addition extends up.Change
     @responseDoc = options.responseDoc
     @acceptLayer = options.acceptLayer
     @dismissLayer = options.dismissLayer
-    @events = options.events
+    @eventPlans = options.eventPlans
 
   handleLayerChangeRequests: ->
     if @acceptLayer
-      up.layer.accept(value: @acceptLayer)
+      up.layer.accept(@acceptLayer)
     else if @dismissLayer
-      up.layer.dismiss(value: @dismissLayer)
+      up.layer.dismiss(@dismissLayer)
 
-    if @events
-      @events.forEach(up.emit)
+    @eventPlans?.forEach (eventPlan) ->
+      up.emit(eventPlan.type, eventPlan.options)

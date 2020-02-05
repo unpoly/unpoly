@@ -261,7 +261,7 @@ up.event = do ->
     The element on which the event is triggered.
 
     If omitted, the event will be emitted on the `document`.
-  @param {string} eventName
+  @param {string} eventType
     The name of the event.
   @param {Object} [eventProps={}]
     A list of properties to become part of the event object
@@ -299,7 +299,7 @@ up.event = do ->
   has prevented the default action.
 
   @function up.event.nobodyPrevents
-  @param {string} eventName
+  @param {string} eventType
   @param {Object} eventProps
   @param {string|Array} [eventProps.log]
   @return {boolean}
@@ -318,7 +318,7 @@ up.event = do ->
   the returned promise will never be resolved.
 
   @function up.event.whenEmitted
-  @param {string} eventName
+  @param {string} eventType
   @param {Object} eventProps
   @param {string|Array} [eventProps.message]
   @return {Promise}

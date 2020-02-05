@@ -6,7 +6,7 @@ class up.EventListener extends up.Record
   keys: ->
     [
       'element',
-      'eventName',
+      'eventType',
       'selector',
       'callback',
       'jQuery',
@@ -21,14 +21,14 @@ class up.EventListener extends up.Record
   bind: ->
     map = (@element.upEventListeners ||= {})
     if map[@key]
-      up.fail('up.on(): The %o callback %o cannot be registered more than once', @eventName, @callback)
+      up.fail('up.on(): The %o callback %o cannot be registered more than once', @eventType, @callback)
     map[@key] = this
-    @element.addEventListener(@eventName, @nativeCallback)
+    @element.addEventListener(@eventType, @nativeCallback)
 
   unbind: =>
     if map = @element.upEventListeners
       delete map[@key]
-    @element.removeEventListener(@eventName, @nativeCallback)
+    @element.removeEventListener(@eventType, @nativeCallback)
 
   nativeCallback: (event) =>
     # 1. Since we're listing on `document`, event.currentTarget is now `document`.
@@ -68,7 +68,7 @@ class up.EventListener extends up.Record
     attributes.callback.upUid ||= u.uid()
 
     return [
-      attributes.eventName,
+      attributes.eventType,
       attributes.selector,
       attributes.callback.upUid
     ].join('|')

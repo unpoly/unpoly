@@ -49,16 +49,20 @@ module Unpoly
 
         def parse(raw)
           if raw.present?
-            hash = JSON.parse(raw)
+            result = ActiveSupport::JSON.decode(raw)
           else
-            hash = {}
+            result = {}
           end
 
-          ActiveSupport::HashWithIndifferentAccess.new(hash)
+          if result.is_a?(Hash)
+            result = ActiveSupport::HashWithIndifferentAccess.new(result)
+          end
+
+          result
         end
 
         def stringify(value)
-          JSON.generate(value)
+          ActiveSupport::JSON.encode(value)
         end
 
       end

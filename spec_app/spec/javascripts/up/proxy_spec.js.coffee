@@ -598,9 +598,9 @@ describe 'up.proxy', ->
         beforeEach ->
           up.proxy.config.slowDelay = 0
           @events = []
-          u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover', 'up:proxy:fatal'], (eventName) =>
-            up.on eventName, =>
-              @events.push eventName
+          u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover', 'up:proxy:fatal'], (eventType) =>
+            up.on eventType, =>
+              @events.push eventType
 
         it 'emits an up:proxy:slow event if the server takes too long to respond'
 

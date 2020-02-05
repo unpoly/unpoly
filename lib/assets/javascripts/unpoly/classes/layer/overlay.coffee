@@ -105,8 +105,8 @@ class up.Layer.Overlay extends up.Layer
 
   registerCloser: (closer, close) ->
     if closer
-      [eventName, selector] = closer.match(/^([^ ]+)(?: (.*))?$/)
-      @on(@eventName, selector, close.bind(this))
+      [eventType, selector] = closer.match(/^([^ ]+)(?: (.*))?$/)
+      @on(@eventType, selector, close.bind(this))
 
   destroyElement: (options) ->
     up.destroy(@element, options)

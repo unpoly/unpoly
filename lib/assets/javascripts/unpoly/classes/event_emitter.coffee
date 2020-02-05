@@ -51,7 +51,7 @@ class up.EventEmitter extends up.Record
 #      stopEvent = (event) ->
 #        if event.upUid == uid
 #          event.stopPropagation()
-#      return up.on(@boundary, @eventName, stopEvent)
+#      return up.on(@boundary, @eventType, stopEvent)
 
   logEmission: ->
     return unless up.log.isEnabled()
@@ -100,7 +100,7 @@ class up.EventEmitter extends up.Record
       # In this branch we receive an Event name and props object.
       # The props object may also include options for the emission, such as
       # { layer }, { target }, { base } or { log }.
-      # up.emit([target], eventName, [eventPropsAndEmitOptions])
+      # up.emit([target], eventType, [eventPropsAndEmitOptions])
       options.event = up.event.build(args[0], u.except(options, 'target'))
 
     new @(u.merge(defaults, options))

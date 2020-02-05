@@ -24,15 +24,15 @@ module Unpoly
 
       ##
       # TODO: Docs
+      # TODO: Test that this returns "root" for a non-Unpoly request
       def root?
         mode == 'root'
       end
 
       ##
       # TODO: Docs
-      def emit(event_props)
-        event_props[:layer] = 'current'
-        inspector.emit(event_props)
+      def emit(type, options = {})
+        inspector.emit(type, options.merge(layer: 'current'))
       end
 
       ##

@@ -455,7 +455,7 @@ up.fragment = do ->
   emitFragmentKept = (keepPlan) ->
     emitFromKeepPlan(keepPlan, 'up:fragment:kept', 'Kept fragment %o')
 
-  emitFromKeepPlan = (keepPlan, eventName, log) ->
+  emitFromKeepPlan = (keepPlan, eventType, log) ->
     keepable = keepPlan.oldElement
     eventAttrs =
       target: keepable
@@ -463,7 +463,7 @@ up.fragment = do ->
       newData: keepPlan.newData
       log: [log, keepable]
 
-    up.emit(eventName, eventAttrs)
+    up.emit(eventType, eventAttrs)
 
   emitFragmentDestroyed = (fragment, options) ->
     log = options.log ? ['Destroyed fragment %o', fragment]

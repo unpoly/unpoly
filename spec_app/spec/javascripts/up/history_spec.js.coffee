@@ -242,9 +242,9 @@ describe 'up.history', ->
               """
 
           events = []
-          u.each ['up:history:pushed', 'up:history:restored'], (eventName) ->
-            up.on eventName, (event) ->
-              events.push [eventName, event.url]
+          u.each ['up:history:pushed', 'up:history:restored'], (eventType) ->
+            up.on eventType, (event) ->
+              events.push [eventType, event.url]
 
           normalize = up.history.normalizeURL
 

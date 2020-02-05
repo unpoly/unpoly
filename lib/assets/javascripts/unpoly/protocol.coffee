@@ -184,6 +184,15 @@ up.protocol = do ->
   @internal
   ###
   locationFromXhr = (xhr) ->
+    # We prefer the X-Up-Location header to xhr.responseURL.
+    # If the server redirected to a new location, Unpoly-related headers
+    # will be encoded in the request's query params like this:
+    #
+    #     /redirect-target?_up[target]=.foo
+    #
+    # To prevent these these `_up` params from showing up in the browser URL,
+    # the X-Up-Location header will omit these params while `xhr.responseURL`
+    # will still contain them.
     extractHeader(xhr, config.locationHeader) || xhr.responseURL
 
   ###**
@@ -210,7 +219,7 @@ up.protocol = do ->
     # X-Up-Dismiss-Layer: null
     extractHeader(xhr, config.dismissLayerHeader, JSON.parse)
 
-  eventsFromXhr = (xhr) ->
+  eventPlansFromXhr = (xhr) ->
     extractHeader(xhr, config.eventsHeader, JSON.parse)
 
   extractHeader = (xhr, header, parseFn = u.identity) ->
@@ -325,7 +334,7 @@ up.protocol = do ->
   methodFromXhr: methodFromXhr
   acceptLayerFromXhr: acceptLayerFromXhr
   dismissLayerFromXhr: dismissLayerFromXhr
-  eventsFromXhr: eventsFromXhr
+  eventPlansFromXhr: eventPlansFromXhr
   csrfHeader: csrfHeader
   csrfParam: csrfParam
   csrfToken: csrfToken

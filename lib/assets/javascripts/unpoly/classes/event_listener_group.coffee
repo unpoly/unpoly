@@ -7,7 +7,7 @@ class up.EventListenerGroup extends up.Record
   keys: ->
     [
       'elements',
-      'eventNames',
+      'eventTypes',
       'selector',
       'callback',
       'jQuery',
@@ -18,29 +18,29 @@ class up.EventListenerGroup extends up.Record
     unbindFns = []
 
     for element in @elements
-      for eventName in @eventNames
-        listener = new up.EventListener(@listenerAttributes(element, eventName))
+      for eventType in @eventTypes
+        listener = new up.EventListener(@listenerAttributes(element, eventType))
         listener.bind()
         unbindFns.push(listener.unbind)
 
     u.sequence(unbindFns)
 
-  listenerAttributes: (element, eventName) ->
-    u.merge(@attributes(), { element, eventName })
+  listenerAttributes: (element, eventType) ->
+    u.merge(@attributes(), { element, eventType })
 
   unbind: ->
     for element in @elements
-      for eventName in @eventNames
-        if listener = up.EventListener.fromElement(@listenerAttributes(element, eventName))
+      for eventType in @eventTypes
+        if listener = up.EventListener.fromElement(@listenerAttributes(element, eventType))
           listener.unbind()
 
   ###
   Constructs a new up.EventListenerGroup from the following arg variants:
 
-  - [elements, eventNames, selector, callback]
-  - [elements, eventNames,           callback]
-  - [          eventNames, selector, callback]
-  - [          eventNames,           callback]
+  - [elements, eventTypes, selector, callback]
+  - [elements, eventTypes,           callback]
+  - [          eventTypes, selector, callback]
+  - [          eventTypes,           callback]
 
   @function up.EventListenerGroup.fromBindArgs
   @internal
@@ -61,12 +61,12 @@ class up.EventListenerGroup extends up.Record
       elements = [document]
 
     # Event names are given in all arg variants
-    eventNames = u.splitValues(args.shift())
-    eventNames = u.map(eventNames, up.legacy.fixEventName)
+    eventTypes = u.splitValues(args.shift())
+    eventTypes = u.map(eventTypes, up.legacy.fixEventType)
 
     # A selector is given if the user wants to delegate events.
     # It might be undefined.
     selector = args[0]
 
-    attributes = u.merge({ elements, eventNames, selector, callback }, options)
+    attributes = u.merge({ elements, eventTypes, selector, callback }, options)
     new @(attributes)

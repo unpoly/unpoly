@@ -29,12 +29,12 @@ up.legacy = do ->
   renamedEvent = (oldName, newName) ->
     renamedEvents[oldName] = newName
 
-  fixEventName = (eventName) ->
-    if newEventName = renamedEvents[eventName]
-      warn("Event #{eventName} has been renamed to #{newEventName}")
-      newEventName
+  fixEventType = (eventType) ->
+    if newEventType = renamedEvents[eventType]
+      warn("Event #{eventType} has been renamed to #{newEventType}")
+      newEventType
     else
-      eventName
+      eventType
 
   renamedModule = (oldName, newName) ->
     Object.defineProperty up, oldName, get: ->
@@ -58,6 +58,6 @@ up.legacy = do ->
   renamedProperty: renamedProperty
 #  removedProperty: removedProperty
   renamedEvent: renamedEvent
-  fixEventName: fixEventName
+  fixEventType: fixEventType
   fixKey: fixKey
   warn: warn

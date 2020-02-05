@@ -36,16 +36,16 @@ describe 'up.form', ->
 
       describe 'when the first argument is a form field', ->
 
-        u.each changeEvents, (eventName) ->
+        u.each changeEvents, (eventType) ->
 
-          describe "when the input receives a #{eventName} event", ->
+          describe "when the input receives a #{eventType} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
               $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
-              u.times 2, -> Trigger[eventName]($input)
+              u.times 2, -> Trigger[eventType]($input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
                 expect(callback.calls.count()).toEqual(1)
@@ -54,7 +54,7 @@ describe 'up.form', ->
               $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
-              Trigger[eventName]($input)
+              Trigger[eventType]($input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
@@ -63,7 +63,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($input, { delay: 200 }, callback)
               $input.val('new-value-1')
-              Trigger[eventName]($input)
+              Trigger[eventType]($input)
 
               next.after 100, ->
                 # 100 ms after change 1: We're still waiting for the 200ms delay to expire
@@ -74,13 +74,13 @@ describe 'up.form', ->
                 expect(callback.calls.count()).toEqual(1)
                 expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
                 $input.val('new-value-2')
-                Trigger[eventName]($input)
+                Trigger[eventType]($input)
 
               next.after 80, ->
                 # 80 ms after change 2: We change again, resetting the delay
                 expect(callback.calls.count()).toEqual(1)
                 $input.val('new-value-3')
-                Trigger[eventName]($input)
+                Trigger[eventType]($input)
 
               next.after 170, ->
                 # 250 ms after change 2, which was superseded by change 3
@@ -101,13 +101,13 @@ describe 'up.form', ->
                 return up.specUtil.promiseTimer(100)
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
-              Trigger[eventName]($input)
+              Trigger[eventType]($input)
 
               next.after 30, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackCount).toEqual(1)
                 $input.val('new-value-2')
-                Trigger[eventName]($input)
+                Trigger[eventType]($input)
 
               next.after 30, ->
                 # Second callback is triggerd, but waits for first callback to complete
@@ -127,18 +127,18 @@ describe 'up.form', ->
 
               up.observe($input, { delay: 1 }, callback)
               $input.val('new-value-1')
-              Trigger[eventName]($input)
+              Trigger[eventType]($input)
 
               next.after 10, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackArgs).toEqual ['new-value-1']
                 $input.val('new-value-2')
-                Trigger[eventName]($input)
+                Trigger[eventType]($input)
 
               next.after 10, ->
                 expect(callbackArgs).toEqual ['new-value-1']
                 $input.val('new-value-3')
-                Trigger[eventName]($input)
+                Trigger[eventType]($input)
 
               next.after 100, ->
                 expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
@@ -252,9 +252,9 @@ describe 'up.form', ->
 
       describe 'when the first argument is a form', ->
 
-        u.each changeEvents, (eventName) ->
+        u.each changeEvents, (eventType) ->
 
-          describe "when any of the form's inputs receives a #{eventName} event", ->
+          describe "when any of the form's inputs receives a #{eventType} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
               $form = $fixture('form')
@@ -262,7 +262,7 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               $input.val('new-value')
-              u.times 2, -> Trigger[eventName]($input)
+              u.times 2, -> Trigger[eventType]($input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
                 expect(callback.calls.count()).toEqual(1)
@@ -272,7 +272,7 @@ describe 'up.form', ->
               $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
-              Trigger[eventName]($input)
+              Trigger[eventType]($input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
 

@@ -13,13 +13,13 @@ class up.Change.CloseLayer extends up.Change.Removal
     verbPast = "#{verb}ed"
     @valueAttr = "up-#{verb}"
 
-    @closeEventName = "up:layer:#{verb}"
+    @closeEventType = "up:layer:#{verb}"
     @closeCallbackName = "on#{u.upperCaseFirst(verb)}"
 
-    @closingEventName = "up:layer:#{verbGerund}"
+    @closingEventType = "up:layer:#{verbGerund}"
     @closingCallbackName = "on#{u.upperCaseFirst(verbGerund)}"
 
-    @closedEventName = "up:layer:#{verbPast}"
+    @closedEventType = "up:layer:#{verbPast}"
     @closedCallbackName = "on#{u.upperCaseFirst(verbPast)}"
 
     @layer = up.layer.get(options)
@@ -69,13 +69,13 @@ class up.Change.CloseLayer extends up.Change.Removal
 
   emitCloseEvent: ->
     return @layer.emit(
-      @buildEvent(@closeEventName),
+      @buildEvent(@closeEventType),
       callback: @layer.callback(@closeCallbackName)
     )
 
   emitClosingEvent: ->
     return @layer.emit(
-      @buildEvent(@closingEventName),
+      @buildEvent(@closingEventType),
       callback: @layer.callback(@closingCallbackName)
     )
 
@@ -87,7 +87,7 @@ class up.Change.CloseLayer extends up.Change.Removal
     # event listeners can receive it. So we explicitely emit the event a second time
     # on the document.
     return @up.layer.emit(
-      @buildEvent(@closedEventName),
+      @buildEvent(@closedEventType),
       # Set up.layer.current to the parent of the closed layer, which is now likely
       # to be the front layer.
       base: formerParent,

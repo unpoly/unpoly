@@ -147,7 +147,7 @@ class up.Change.FromURL extends up.Change
     options.title = @improveHistoryValue(options.title, response.title)
     options.acceptLayer = response.acceptLayer
     options.dismissLayer = response.dismissLayer
-    options.event = response.events
+    options.eventPlans = response.eventPlans
 
   # Values we want to keep:
   # - false (no update)
