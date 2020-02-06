@@ -14762,7 +14762,7 @@ or function.
         var link = document.querySelector('a')
         up.modal.follow(link)
     
-    Any option attributes for [`a[up-modal]`](/a.up-modal) will be honored.
+    Any option attributes for [`a[up-modal]`](/a-up-modal) will be honored.
     
     Emits events [`up:modal:open`](/up:modal:open) and [`up:modal:opened`](/up:modal:opened).
     
