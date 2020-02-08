@@ -11,8 +11,8 @@ module Unpoly
 
         def header_name
           result = name.to_s
-          result = result.gsub('_', '-')
-          result = result.classify
+          result = result.capitalize
+          result = result.gsub(/_(.)/) { "-#{$1.upcase}" }
           result= "X-Up-#{result}"
           result
         end
@@ -55,8 +55,9 @@ module Unpoly
               result = {}
             end
 
-            if result.is_a?(Hash)
+            if result.is_a?(::Hash)
               result = ActiveSupport::HashWithIndifferentAccess.new(result)
+            else
             end
 
             result

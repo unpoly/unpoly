@@ -1,6 +1,6 @@
 describe Unpoly::Rails::Controller, type: :request do
 
-  class BindingTestController < ActionController::Base
+    class BindingTestController < ActionController::Base
 
     def is_up
       render plain: up?.to_s
@@ -85,21 +85,58 @@ describe Unpoly::Rails::Controller, type: :request do
 
   describe 'up' do
 
+    let :controller do
+      BindingTestController.new
+    end
+
+    shared_examples_for 'string field' do |header:|
+      it "returns the value of the #{header} request header" do
+        allow(controller).to receive(:params).and_return({})
+        allow(controller).to receive_message_chain(:request, :headers).and_return(header => 'header value')
+        expect(subject).to eq('header value')
+      end
+
+      it "returns nil if no #{header} request header is set" do
+        allow(controller).to receive(:params).and_return({})
+        allow(controller).to receive_message_chain(:request, :headers).and_return({})
+        expect(subject).to be_nil
+      end
+    end
+
+    shared_examples_for 'hash field' do |header:|
+      it "returns value of the #{header} request header, parsed as JSON" do
+        allow(controller).to receive(:params).and_return({})
+        allow(controller).to receive_message_chain(:request, :headers).and_return(header => '{ "foo": "bar" }')
+        expect(subject).to be_a(Hash)
+        expect(subject['foo']).to eq('bar')
+      end
+
+      it "allows to access the hash with symbol keys instead of string keys" do
+        allow(controller).to receive(:params).and_return({})
+        allow(controller).to receive_message_chain(:request, :headers).and_return(header => '{ "foo": "bar" }')
+        expect(subject[:foo]).to eq('bar')
+      end
+
+      it "returns an empty hash if no #{header} request header is set" do
+        allow(controller).to receive(:params).and_return({})
+        allow(controller).to receive_message_chain(:request, :headers).and_return({})
+        expect(subject).to eq({})
+      end
+    end
+
     describe '#target' do
 
-      it 'returns the CSS selector that Unpoly requested for a sucessful response' do
-        get '/binding_test/up_target', nil, { 'X-Up-Target' => '.foo' }
-        expect(response.body).to eq('.foo')
-      end
+      subject { controller.up.target }
+
+      it_behaves_like 'string field', header: 'X-Up-Target'
 
     end
 
     describe '#fail_target' do
 
-      it 'returns the CSS selector that Unpoly requested for an error response' do
-        get '/binding_test/up_fail_target', nil, { 'X-Up-Target' => '.foo', 'X-Up-Fail-Target' => '.bar' }
-        expect(response.body).to eq('.bar')
-      end
+      subject { controller.up.fail_target }
+
+      it_behaves_like 'string field', header: 'X-Up-Fail-Target'
 
     end
 
@@ -233,11 +270,42 @@ describe Unpoly::Rails::Controller, type: :request do
 
     describe 'up.validate' do
 
-      it 'returns the name of the field that is being validated' do
-        get '/binding_test/up_validate_name', nil, 'X-Up-Validate' => 'user[email]'
-        expect(response.body).to eq('user[email]')
-      end
+      subject { controller.up.validate }
 
+      it_behaves_like 'string field', header: 'X-Up-Validate'
+
+    end
+    
+    describe 'up.mode' do
+      
+      subject { controller.up.mode }
+      
+      it_behaves_like 'string field', header: 'X-Up-Mode'
+      
+    end
+    
+    describe 'up.fail_mode' do
+      
+      subject { controller.up.fail_mode }
+      
+      it_behaves_like 'string field', header: 'X-Up-Fail-Mode'
+      
+    end
+    
+    describe 'up.context' do
+      
+      subject { controller.up.context }
+
+      it_behaves_like 'hash field', header: 'X-Up-Context'
+      
+    end
+    
+    describe 'up.fail_context' do
+      
+      subject { controller.up.fail_context }
+      
+      it_behaves_like 'hash field', header: 'X-Up-Fail-Context'
+      
     end
 
     describe 'up.title=' do
