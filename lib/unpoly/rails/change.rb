@@ -5,7 +5,7 @@ module Unpoly
     # for Unpoly-related concerns such as "is this a page fragment update?".
     #
     # Available through the `#up` method in all controllers, helpers and views.
-    class Inspector
+    class Change
       include Memoized
       include FieldRegistry
 

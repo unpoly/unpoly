@@ -3,29 +3,26 @@
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
 - Update Rails integration
-  - Move tests to controller specs and get rid of the embedded Rails app
-  - up.layer.accept(value)
-  - up.layer.dismiss(value)
-  - up.layer.emit(name, props)
-  - up.emit(name, props)
-  - [DONE] up.target
-  - [DONE] up.fail_target
-  - up? should check presence of X-Up-Version
-  - up.layer.context
-  - up.layer.mode
-  - up.layer.root?
-  - up.layer.overlay?
-  - up.fail_layer.target    => no, up.layer.emit will emit on whatever layer the change cascade selected! it might even be the fail layer!
-  - up.fail_layer.context => yes
-  - up.fail_layer.mode => yes
-  - up.fail_layer.root? => yes
-  - up.fail_layer.overlay? => yes
+  - Tests for new Rails integration methods
+    - up.layer.accept(value)
+    - up.layer.dismiss(value)
+    - up.layer.emit(name, props)
+    - up.emit(name, props)
+    - [DONE] up.target
+    - [DONE] up.fail_target
+    - up.layer.context
+    - up.layer.mode
+    - up.layer.root?
+    - up.layer.overlay?
+    - up.fail_layer.context => yes
+    - up.fail_layer.mode => yes
+    - up.fail_layer.root? => yes
+    - up.fail_layer.overlay? => yes
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
 - All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
   - e. g. findValidateTarget
-- Decide whether to do up.layer.accept({ value: { flight_id: 5 }}) or up.layer.accept({ flight_id: 5 })
 - Protocol options should not be configurable
   - Constants should just be props
   - Document headers in the main class docs
@@ -155,6 +152,7 @@ Have you noticed how noticed how pages fade in
   - Document up:proxy:aborted
   - Document new Rails integration
     - Document up.redirect_to
+  - Document Protocol changes for other integrators
 
 
 
@@ -271,3 +269,5 @@ Decisions
 - Should it be up.accept(), up.dismiss(), X-Up-Accept, X-Up-Dismiss? => No
 - Should the default layer be current again?
   => Not now, maybe change that leter
+- Decide whether to do up.layer.accept({ value: { flight_id: 5 }}) or up.layer.accept({ flight_id: 5 })
+  => We keep the value as first argument for the symmetry to resolve / reject

@@ -13,7 +13,7 @@ module Unpoly
       ##
       # TODO: Docs
       def up
-        @up_inspector ||= Inspector.new(self)
+        @up_change ||= Change.new(self)
       end
 
       alias_method :unpoly, :up
@@ -30,14 +30,7 @@ module Unpoly
       def redirect_to(target, *args)
         if up?
           target = url_for(target)
-
-          # Don't reveal Unpoly headers when redirecting to another host.
-          # Controllers that redirect to another host should not be targeted
-          # by a fragment update anyway, but let's keep this safeguard in case
-          # someone does it anyway.
-          unless target =~ /^\w+\:\/\//i
-            target = up.url_with_request_values(target)
-          end
+          target = up.url_with_request_values(target)
         end
         super(target, *args)
       end
