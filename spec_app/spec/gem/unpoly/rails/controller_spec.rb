@@ -1,43 +1,18 @@
 describe Unpoly::Rails::Controller, type: :request do
 
-    class BindingTestController < ActionController::Base
+  class BindingTestController < ActionController::Base
 
-    def is_up
-      render plain: up?.to_s
+    class_attribute :next_eval_proc
+
+    def eval
+      expression = self.class.next_eval_proc or raise "No eval expression given"
+      self.eval_result = nil
+      self.class.next_eval_proc = nil
+      self.eval_result = instance_exec(&expression)
+      render nothing: true
     end
 
-    def up_target
-      render plain: up.target
-    end
-
-    def up_fail_target
-      render plain: up.fail_target
-    end
-
-    def up_is_target
-      render plain: up.target?(tested_target).to_s
-    end
-
-    def up_is_fail_target
-      render plain: up.fail_target?(tested_target).to_s
-    end
-
-    def up_is_any_target
-      render plain: up.any_target?(tested_target).to_s
-    end
-
-    def is_up_validate
-      render plain: up.validate?.to_s
-    end
-
-    def up_validate_name
-      render plain: up.validate
-    end
-
-    def set_up_title
-      up.title = 'Pushed document title'
-      render plain: 'text'
-    end
+    attr_accessor :eval_result
 
     def text
       render plain: 'text from controller'
@@ -55,13 +30,6 @@ describe Unpoly::Rails::Controller, type: :request do
       render plain: up.target
     end
 
-    private
-
-    def tested_target
-      tested_target = params[:tested_target].presence
-      tested_target or raise "No target given"
-    end
-
   end
 
   Rails.application.routes.draw do
@@ -69,84 +37,79 @@ describe Unpoly::Rails::Controller, type: :request do
     put '/binding_test/:action', controller: 'binding_test'
   end
 
+  def controller_eval(expression, headers: {})
+    BindingTestController.next_eval_proc = expression
+    get '/binding_test/eval', {}, headers
+    controller.eval_result
+  end
+
   describe 'up?' do
 
     it 'returns true if the request has an X-Up-Target header' do
-      get '/binding_test/is_up', nil, { 'X-Up-Target' => 'body' }
-      expect(response.body).to eq('true')
+      expression = -> { up? }
+      result = controller_eval(expression, headers: { 'X-Up-Target' => 'body' })
+      expect(result).to eq(true)
     end
 
     it 'returns false if the request has no X-Up-Target header' do
-      get '/binding_test/is_up'
-      expect(response.body).to eq('false')
+      expression = -> { up? }
+      result = controller_eval(expression)
+      expect(result).to eq(false)
     end
 
   end
 
   describe 'up' do
 
-    let :controller do
-      BindingTestController.new
-    end
-
-    shared_examples_for 'string field' do |header:|
+    shared_examples_for 'string field' do |reader:, header:|
       it "returns the value of the #{header} request header" do
-        allow(controller).to receive(:params).and_return({})
-        allow(controller).to receive_message_chain(:request, :headers).and_return(header => 'header value')
-        expect(subject).to eq('header value')
+        result = controller_eval(reader, headers: { header => 'header value' })
+        expect(result).to eq('header value')
       end
 
       it "returns nil if no #{header} request header is set" do
-        allow(controller).to receive(:params).and_return({})
-        allow(controller).to receive_message_chain(:request, :headers).and_return({})
-        expect(subject).to be_nil
+        result = controller_eval(reader)
+        expect(result).to be_nil
       end
     end
 
-    shared_examples_for 'hash field' do |header:|
+    shared_examples_for 'hash field' do |reader:, header:|
       it "returns value of the #{header} request header, parsed as JSON" do
-        allow(controller).to receive(:params).and_return({})
-        allow(controller).to receive_message_chain(:request, :headers).and_return(header => '{ "foo": "bar" }')
-        expect(subject).to be_a(Hash)
-        expect(subject['foo']).to eq('bar')
+        result = controller_eval(reader, headers: { header => '{ "foo": "bar" }'})
+        expect(result).to be_a(Hash)
+        expect(result['foo']).to eq('bar')
       end
 
       it "allows to access the hash with symbol keys instead of string keys" do
-        allow(controller).to receive(:params).and_return({})
-        allow(controller).to receive_message_chain(:request, :headers).and_return(header => '{ "foo": "bar" }')
-        expect(subject[:foo]).to eq('bar')
+        result = controller_eval(reader, headers: { header => '{ "foo": "bar" }'})
+        expect(result[:foo]).to eq('bar')
       end
 
       it "returns an empty hash if no #{header} request header is set" do
-        allow(controller).to receive(:params).and_return({})
-        allow(controller).to receive_message_chain(:request, :headers).and_return({})
-        expect(subject).to eq({})
+        result = controller_eval(reader)
+        expect(result).to eq({})
       end
     end
 
     describe '#target' do
 
-      subject { controller.up.target }
-
-      it_behaves_like 'string field', header: 'X-Up-Target'
+      it_behaves_like 'string field',
+        header: 'X-Up-Target',
+        reader: -> { up.target }
 
     end
 
     describe '#fail_target' do
 
-      subject { controller.up.fail_target }
-
-      it_behaves_like 'string field', header: 'X-Up-Fail-Target'
+      it_behaves_like 'string field',
+        header: 'X-Up-Fail-Target',
+        reader: -> { up.fail_target }
 
     end
 
-    shared_examples_for 'target query' do |opts|
+    shared_examples_for 'target query' do |header:, reader:|
 
-      let(:header) { opts.fetch(:header) }
-
-      let (:action) { opts.fetch(:action)}
-
-      def target_headers(target)
+      define_method :target_headers do |target|
         headers = { header => target}
         if header != 'X-Up-Target'
           # Make sure that it's considered a fragment update
@@ -156,78 +119,95 @@ describe Unpoly::Rails::Controller, type: :request do
       end
 
       it 'returns true if the tested CSS selector is requested via Unpoly' do
-        get "/binding_test/#{action}", { tested_target: '.foo' }, target_headers('.foo')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('.foo', &reader) }
+        result = controller_eval(test, headers: target_headers('.foo'))
+        expect(result).to eq(true)
       end
 
       it 'returns false if Unpoly is requesting another CSS selector' do
-        get "/binding_test/#{action}", { tested_target: '.foo' }, target_headers('.bar')
-        expect(response.body).to eq('false')
+        test = -> { instance_exec('.foo', &reader) }
+        result = controller_eval(test, headers: target_headers('.bar'))
+        expect(result).to eq(false)
       end
 
       it 'returns true if the request is not an Unpoly request' do
-        get "/binding_test/#{action}", { tested_target: '.foo' }
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('.foo', &reader) }
+        result = controller_eval(test)
+        expect(result).to eq(true)
       end
 
       it 'returns true if testing a custom selector, and Unpoly requests "body"' do
-        get "/binding_test/#{action}", { tested_target: '.foo' }, target_headers('body')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('foo', &reader) }
+        result = controller_eval(test, headers: target_headers('body'))
+        expect(result).to eq(true)
       end
 
       it 'returns true if testing a custom selector, and Unpoly requests "html"' do
-        get "/binding_test/#{action}", { tested_target: '.foo' }, target_headers('html')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('foo', &reader) }
+        result = controller_eval(test, headers: target_headers('html'))
+        expect(result).to eq(true)
       end
 
       it 'returns true if testing "body", and Unpoly requests "html"' do
-        get "/binding_test/#{action}", { tested_target: 'body' }, target_headers('html')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('body', &reader) }
+        result = controller_eval(test, headers: target_headers('html'))
+        expect(result).to eq(true)
       end
 
       it 'returns true if testing "head", and Unpoly requests "html"' do
-        get "/binding_test/#{action}", { tested_target: 'head' }, target_headers('html')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('header', &reader) }
+        result = controller_eval(test, headers: target_headers('html'))
+        expect(result).to eq(true)
       end
 
       it 'returns false if the tested CSS selector is "head" but Unpoly requests "body"' do
-        get "/binding_test/#{action}", { tested_target: 'head' }, target_headers('body')
-        expect(response.body).to eq('false')
+        test = -> { instance_exec('head', &reader) }
+        result = controller_eval(test, headers: target_headers('body'))
+        expect(result).to eq(false)
       end 
 
       it 'returns false if the tested CSS selector is "title" but Unpoly requests "body"' do
-        get "/binding_test/#{action}", { tested_target: 'title' }, target_headers('body')
-        expect(response.body).to eq('false')
+        test = -> { instance_exec('title', &reader) }
+        result = controller_eval(test, headers: target_headers('body'))
+        expect(result).to eq(false)
       end
 
       it 'returns false if the tested CSS selector is "meta" but Unpoly requests "body"' do
-        get "/binding_test/#{action}", { tested_target: 'meta' }, target_headers('body')
-        expect(response.body).to eq('false')
+        test = -> { instance_exec('meta', &reader) }
+        result = controller_eval(test, headers: target_headers('body'))
+        expect(result).to eq(false)
       end
 
       it 'returns true if the tested CSS selector is "head", and Unpoly requests "html"' do
-        get "/binding_test/#{action}", { tested_target: 'head' }, target_headers('html')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('head', &reader) }
+        result = controller_eval(test, headers: target_headers('html'))
+        expect(result).to eq(true)
       end
 
       it 'returns true if the tested CSS selector is "title", Unpoly requests "html"' do
-        get "/binding_test/#{action}", { tested_target: 'title' }, target_headers('html')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('title', &reader) }
+        result = controller_eval(test, headers: target_headers('html'))
+        expect(result).to eq(true)
       end
 
       it 'returns true if the tested CSS selector is "meta", and Unpoly requests "html"' do
-        get "/binding_test/#{action}", { tested_target: 'meta' }, target_headers('html')
-        expect(response.body).to eq('true')
+        test = -> { instance_exec('meta', &reader) }
+        result = controller_eval(test, headers: target_headers('html'))
+        expect(result).to eq(true)
       end
 
     end
 
     describe 'up.target?' do
-      it_behaves_like 'target query', action: :up_is_target, header: 'X-Up-Target'
+      it_behaves_like 'target query',
+        header: 'X-Up-Target',
+        reader: -> (selector) { up.target?(selector) }
     end
 
     describe 'up.fail_target?' do
-      it_behaves_like 'target query', action: :up_is_fail_target, header: 'X-Up-Fail-Target'
+      it_behaves_like 'target query',
+        header: 'X-Up-Fail-Target',
+        reader: -> (selector) { up.fail_target?(selector) }
     end
 
     describe 'up.any_target?' do
@@ -238,18 +218,21 @@ describe Unpoly::Rails::Controller, type: :request do
       end
 
       it 'returns true if the tested CSS selector is the target for a successful response' do
-        get '/binding_test/up_is_any_target', { tested_target: '.success' }, headers
-        expect(response.body).to eq('true')
+        test = -> { up.any_target?('.success') }
+        result = controller_eval(test, headers: headers)
+        expect(result).to be(true)
       end
 
       it 'returns true if the tested CSS selector is the target for a failed response' do
-        get '/binding_test/up_is_any_target', { tested_target: '.failure' }, headers
-        expect(response.body).to eq('true')
+        test = -> { up.any_target?('.failure') }
+        result = controller_eval(test, headers: headers)
+        expect(result).to eq(true)
       end
 
       it 'returns false if the tested CSS selector is a target for neither successful nor failed response' do
-        get '/binding_test/up_is_any_target', { tested_target: '.other' }, headers
-        expect(response.body).to eq('false')
+        test = -> { up.any_target?('.other') }
+        result = controller_eval(test, headers: headers)
+        expect(result).to eq(false)
       end
 
     end
@@ -257,46 +240,48 @@ describe Unpoly::Rails::Controller, type: :request do
     describe 'up.validate?' do
 
       it 'returns true the request is an Unpoly validation call' do
-        get '/binding_test/is_up_validate', nil, 'X-Up-Validate' => 'user[email]'
-        expect(response.body).to eq('true')
+        test = -> { up.validate? }
+        result = controller_eval(test, headers: { 'X-Up-Validate' => 'user[email]' })
+        expect(result).to eq(true)
       end
 
       it 'returns false if the request is not an Unpoly validation call' do
-        get '/binding_test/is_up_validate'
-        expect(response.body).to eq('false')
+        test = -> { up.validate? }
+        result = controller_eval(test)
+        expect(result).to eq(false)
       end
 
     end
 
     describe 'up.validate' do
 
-      subject { controller.up.validate }
-
-      it_behaves_like 'string field', header: 'X-Up-Validate'
+      it_behaves_like 'string field',
+        header: 'X-Up-Validate',
+        reader: -> { up.validate }
 
     end
     
     describe 'up.mode' do
-      
-      subject { controller.up.mode }
-      
-      it_behaves_like 'string field', header: 'X-Up-Mode'
+
+      it_behaves_like 'string field',
+        header: 'X-Up-Mode',
+        reader: -> { up.mode }
       
     end
     
     describe 'up.fail_mode' do
       
-      subject { controller.up.fail_mode }
-      
-      it_behaves_like 'string field', header: 'X-Up-Fail-Mode'
+      it_behaves_like 'string field',
+        header: 'X-Up-Fail-Mode',
+        reader: -> { up.fail_mode }
       
     end
     
     describe 'up.context' do
       
-      subject { controller.up.context }
-
-      it_behaves_like 'hash field', header: 'X-Up-Context'
+      it_behaves_like 'hash field',
+        header: 'X-Up-Context',
+        reader: -> { up.context }
       
     end
     
@@ -304,15 +289,18 @@ describe Unpoly::Rails::Controller, type: :request do
       
       subject { controller.up.fail_context }
       
-      it_behaves_like 'hash field', header: 'X-Up-Fail-Context'
+      it_behaves_like 'hash field',
+        header: 'X-Up-Fail-Context',
+        reader: -> { up.fail_context }
       
     end
 
     describe 'up.title=' do
 
       it 'sets an X-Up-Title header to push a document title to the client' do
-        get '/binding_test/set_up_title'
-        expect(response.headers['X-Up-Title']).to eq('Pushed document title')
+        setter = -> { up.title = 'Title from controller' }
+        controller_eval(setter)
+        expect(response.headers['X-Up-Title']).to eq('Title from controller')
       end
 
     end
@@ -433,357 +421,3 @@ describe Unpoly::Rails::Controller, type: :request do
 
 end
 
-#
-#
-#
-#   describe 'up?' do
-#
-#     controller do
-#       def index
-#         render text: up?.to_s
-#       end
-#     end
-#
-#     it 'returns true if the request has an X-Up-Target header' do
-#       request.headers['X-Up-Target'] = 'body'
-#       get :index
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns false if the request has no X-Up-Target header' do
-#       get :index
-#       expect(response.body).to eq('false')
-#     end
-#
-#   end
-#
-#   describe 'up.target' do
-#
-#     controller do
-#       def index
-#         render text: up.target
-#       end
-#     end
-#
-#     it 'returns the CSS selector that Unpoly requested for a sucessful response' do
-#       request.headers['X-Up-Target'] = '.foo'
-#       get :index
-#       expect(response.body).to eq('.foo')
-#     end
-#
-#   end
-#
-#   describe 'up.fail_target' do
-#
-#     controller do
-#       def index
-#         render text: up.fail_target
-#       end
-#     end
-#
-#     it 'returns the CSS selector that Unpoly requested for an error response' do
-#       request.headers['X-Up-Target'] = '.foo'
-#       request.headers['X-Up-Fail-Target'] = '.bar'
-#       get :index
-#       expect(response.body).to eq('.bar')
-#     end
-#
-#   end
-#
-#   shared_examples_for 'target query' do |opts|
-#
-#     let(:header) { opts.fetch(:header) }
-#
-#     let(:test_method) { opts.fetch(:method)}
-#
-#     controller do
-#       define_method :index do
-#         is_target = up.send(opts.fetch(:test_method), tested_target)
-#         render text: is_target
-#       end
-#
-#       private
-#
-#       def tested_target
-#         params[:tested_target].presence or raise "No target given"
-#       end
-#     end
-#
-#     def set_header(value)
-#       request.headers[header] = value
-#       if header != 'X-Up-Target'
-#         # Make sure that it's considered a fragment update
-#         request.headers['X-Up-Target'] = '.other-selector'
-#       end
-#     end
-#
-#     it 'returns true if the tested CSS selector is requested via Unpoly' do
-#       set_header '.foo'
-#       get :index, tested_target: '.foo'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns false if Unpoly is requesting another CSS selector' do
-#       set_header '.bar'
-#       get :index, tested_target: '.foo'
-#       expect(response.body).to eq('false')
-#     end
-#
-#     it 'returns true if the request is not an Unpoly request' do
-#       get :index, tested_target: '.foo'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if testing a custom selector, and Unpoly requests "body"' do
-#       set_header 'body'
-#       get :index, tested_target: '.foo'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if testing a custom selector, and Unpoly requests "html"' do
-#       set_header 'html'
-#       get :index, tested_target: '.foo'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if testing "body", and Unpoly requests "html"' do
-#       set_header 'html'
-#       get :index, tested_target: 'body'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if testing "head", and Unpoly requests "html"' do
-#       set_header 'html'
-#       get :index, tested_target: 'head'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns false if the tested CSS selector is "head" but Unpoly requests "body"' do
-#       set_header 'body'
-#       get :index, tested_target: 'head'
-#       expect(response.body).to eq('false')
-#     end
-#
-#     it 'returns false if the tested CSS selector is "title" but Unpoly requests "body"' do
-#       set_header 'body'
-#       get :index, tested_target: 'title'
-#       expect(response.body).to eq('false')
-#     end
-#
-#     it 'returns false if the tested CSS selector is "meta" but Unpoly requests "body"' do
-#       set_header 'body'
-#       get :index, tested_target: 'meta'
-#       expect(response.body).to eq('false')
-#     end
-#
-#     it 'returns true if the tested CSS selector is "head", and Unpoly requests "html"' do
-#       set_header 'html'
-#       get :index, tested_target: 'head'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if the tested CSS selector is "title", Unpoly requests "html"' do
-#       set_header 'html'
-#       get :index, tested_target: 'title'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if the tested CSS selector is "meta", and Unpoly requests "html"' do
-#       set_header 'html'
-#       get :index, tested_target: 'meta'
-#       expect(response.body).to eq('true')
-#     end
-#
-#   end
-#
-#   describe 'up.target?' do
-#     it_behaves_like 'target query', test_method: :target?, header: 'X-Up-Target'
-#   end
-#
-#   describe 'up.fail_target?' do
-#     it_behaves_like 'target query', test_method: :fail_target?, header: 'X-Up-Fail-Target'
-#   end
-#
-#   describe '#any_target?' do
-#
-#     before :each do
-#       request.headers['X-Up-Target'] = '.success'
-#       request.headers['X-Up-Fail-Target'] = '.failure'
-#     end
-#
-#     controller do
-#       def index
-#         render text: up.any_target?(tested_target)
-#       end
-#
-#       private
-#
-#       def tested_target
-#         params[:tested_target].presence or raise "No target given"
-#       end
-#
-#     end
-#
-#     it 'returns true if the tested CSS selector is the target for a successful response' do
-#       get :index, tested_target: '.success'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns true if the tested CSS selector is the target for a failed response' do
-#       get :index, tested_target: '.failure'
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns false if the tested CSS selector is a target for neither successful nor failed response' do
-#       get :index, tested_target: '.other'
-#       expect(response.body).to eq('false')
-#     end
-#
-#   end
-#
-#   describe 'up.validate?' do
-#
-#     controller do
-#       def index
-#         render text: up.validate?
-#       end
-#     end
-#
-#     it 'returns true the request is an Unpoly validation call' do
-#       request.headers['X-Up-Validate'] = 'user[email]'
-#       get :index
-#       expect(response.body).to eq('true')
-#     end
-#
-#     it 'returns false if the request is not an Unpoly validation call' do
-#       get :index
-#       expect(response.body).to eq('false')
-#     end
-#
-#   end
-#
-#   describe 'up.validate' do
-#
-#     controller do
-#       def index
-#         render text: up.validate
-#       end
-#     end
-#
-#     it 'returns the name of the field that is being validated' do
-#       request.headers['X-Up-Validate'] = 'user[email]'
-#       get :index
-#       expect(response.body).to eq('user[email]')
-#     end
-#
-#   end
-#
-#   describe 'up.title=' do
-#
-#     controller do
-#       def index
-#         up.title = 'Title from server'
-#         render text: 'text'
-#       end
-#     end
-#
-#     it 'sets an X-Up-Title header to push a document title to the client' do
-#       get :index
-#       expect(response.headers['X-Up-Title']).to eq('Title from server')
-#     end
-#
-#   end
-#
-#   describe 'up.redirect_to' do
-#
-#     controller do
-#       def one
-#         up.redirect_to '/two'
-#       end
-#
-#       def two
-#         render text: up.target
-#       end
-#     end
-#
-#     before :each do
-#       routes.draw do
-#         get 'one' => 'anonymous#one'
-#         get 'two' => 'anonymous#two'
-#       end
-#     end
-#
-#     it 'preserves Unpoly-related headers for the redirect' do
-#       request.headers['X-Up-Target'] = '.foo'
-#       get :one
-#       follow_redirect!
-#       expect(response.body).to eq('.foo')
-#     end
-#
-#     it 'does not change the history' do
-#       request.headers['X-Up-Target'] = '.foo'
-#       get :one
-#       follow_redirect!
-#       expect(response.headers['X-Up-Location']).to eq('/two')
-#     end
-#
-#   end
-#
-#   describe 'request method cookie' do
-#
-#     controller do
-#
-#       def create
-#         render text: 'text'
-#       end
-#
-#       def index
-#         render text: 'text'
-#       end
-#
-#     end
-#
-#     describe 'if the request is both non-GET and not a fragment update' do
-#
-#       it 'echoes the request method in an _up_method cookie ' do
-#         post :create
-#         expect(response.cookies['_up_method']).to eq('POST')
-#       end
-#
-#     end
-#
-#     describe 'if the request is not a fragment update, but GET' do
-#
-#       it 'does not set the cookie' do
-#         get :index
-#         expect(response.cookies['_up_method']).to be_nil
-#       end
-#
-#       it 'deletes an existing cookie' do
-#         request.cookies['_up_method'] = 'PUT'
-#         get :index
-#         expect(response.cookies['_up_method']).to be_nil
-#       end
-#
-#     end
-#
-#     describe 'if the request is non-GET but a fragment update' do
-#
-#       it 'does not set the cookie' do
-#         request.headers['X-Up-Target'] = '.target'
-#         post :create
-#         expect(response.cookies['_up_method']).to be_nil
-#       end
-#
-#       it 'deletes an existing cookie' do
-#         request.cookies['_up_method'] = 'PUT'
-#         request.headers['X-Up-Target'] = '.target'
-#         post :create
-#         expect(response.cookies['_up_method']).to be_nil
-#       end
-#
-#     end
-#
-#   end
-#
-# end
