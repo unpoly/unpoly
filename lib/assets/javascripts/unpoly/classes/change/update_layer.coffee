@@ -113,7 +113,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       when 'before', 'after'
         # We're either appending or prepending. No keepable elements must be honored.
 
-        # Text nodes are wrapped in a .up-insertion container so we can
+        # Text nodes are wrapped in a up-insertion container so we can
         # animate them and measure their position/size for scrolling.
         # This is not possible for container-less text nodes.
         wrapper = e.createFromSelector('up-insertion')

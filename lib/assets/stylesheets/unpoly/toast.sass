@@ -1,7 +1,7 @@
 $highlight-color: #28b
 $text-color: #333
 
-.up-toast
+up-toast
   border-top: 3px solid $highlight-color
   background-color: white
   color: $text-color
@@ -15,19 +15,23 @@ $text-color: #333
   right: 0
   z-index: 99999999
 
-.up-toast-variable
+up-toast-variable
   font-weight: normal
   color: lighten($text-color, 30%)
 
-.up-toast-actions
-  margin-top: 7px
+up-toast-message
+  display: block
 
-.up-toast-action
+up-toast-actions
+  display: block
+  margin-top: 6px
+
+up-toast-action
   display: inline-block
   word-spacing: -4px
   text-decoration: underline
   color: $highlight-color
   cursor: pointer
 
-  &+.up-toast-action
+  &+up-toast-action
     margin-left: 12px

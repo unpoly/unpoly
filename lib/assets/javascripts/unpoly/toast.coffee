@@ -8,7 +8,7 @@ up.toast = do ->
   u = up.util
   e = up.element
 
-  VARIABLE_FORMATTER = (arg) -> "<span class='up-toast-variable'>#{u.escapeHTML(arg)}</span>"
+  VARIABLE_FORMATTER = (arg) -> "<up-toast-variable>#{u.escapeHTML(arg)}</up-toast-variable>"
 
   state = new up.Config ->
     element: null
@@ -28,10 +28,8 @@ up.toast = do ->
   isOpen = ->
     !!state.element
     
-  addAction = (label, callback) ->
-    actions = state.element.querySelector('.up-toast-actions')
-    action = e.affix(actions, '.up-toast-action')
-    action.innerText = label
+  addAction = (actions, label, callback) ->
+    action = e.affix(actions, 'up-toast-action', text: label)
     action.addEventListener('click', callback)
 
   open = (message, options = {}) ->
@@ -39,17 +37,14 @@ up.toast = do ->
 
     message = messageToHTML(message)
 
-    state.element = e.createFromHTML """
-      <div class="up-toast">
-        <div class="up-toast-message">#{message}</div>
-        <div class="up-toast-actions"></div>
-      </div>
-    """
+    state.element = e.createFromSelector('up-toast')
+    e.affix(state.element, 'up-toast-message', text: message)
+    actions = e.affix(state.element, 'up-toast-actions')
 
     if action = options.action
-      addAction(action.label, action.callback)
+      addAction(actions, action.label, action.callback)
 
-    addAction('Close', close)
+    addAction(actions, 'Close', close)
 
     document.body.appendChild(state.element)
 

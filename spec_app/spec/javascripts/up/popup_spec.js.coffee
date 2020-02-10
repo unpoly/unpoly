@@ -75,7 +75,7 @@ describe 'up.popup (deprecated)', ->
           expect(respond).not.toThrowError()
 
         next.await =>
-          expect($('.up-toast')).not.toBeAttached()
+          expect($('up-toast')).not.toBeAttached()
           promise = promiseState(openPromise)
           promise.then (result) => expect(result.state).toEqual('pending')
 

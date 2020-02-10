@@ -21,7 +21,7 @@ afterEach (done) ->
       # Give async reset behavior another frame to play out,
       # then start the next example.
       up.util.task ->
-        $('.up-toast').remove()
+        $('up-toast').remove()
 
         if $('.up-overlay').length
           throw "Overlay was not removed after reset"

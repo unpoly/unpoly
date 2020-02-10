@@ -942,9 +942,9 @@ describe 'up.fragment', ->
                 @respondWith '<div class="unexpected">new unexpected</div>'
 
               promise.catch (e) ->
-                $toast = $('.up-toast')
+                $toast = $('up-toast')
                 expect($toast).toBeAttached()
-                $inspectLink = $toast.find(".up-toast-action:contains('Open response')")
+                $inspectLink = $toast.find("up-toast-action:contains('Open response')")
                 expect($inspectLink).toBeAttached()
                 expect(loadPage).not.toHaveBeenCalled()
 
