@@ -109,120 +109,117 @@ describe Unpoly::Rails::Controller, type: :request do
 
     end
 
-    shared_examples_for 'target query' do |header:, reader:|
-
-      define_method :target_headers do |target|
-        headers = { header => target}
-        if header != 'X-Up-Target'
-          # Make sure that it's considered a fragment update
-          headers['X-Up-Target'] = '.other-selector'
-        end
-        headers
-      end
+    describe 'up.target?' do
 
       it 'returns true if the tested CSS selector is requested via Unpoly' do
-        result = controller_eval(headers: target_headers('.foo')) do
-          instance_exec('.foo', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': '.foo' }) do
+          up.target?('.foo')
         end
         expect(result).to eq(true)
       end
 
       it 'returns false if Unpoly is requesting another CSS selector' do
-        result = controller_eval(headers: target_headers('.bar')) do
-          instance_exec('.foo', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': '.bar' }) do
+          up.target?('.foo')
         end
         expect(result).to eq(false)
       end
 
       it 'returns true if the request is not an Unpoly request' do
         result = controller_eval do
-          instance_exec('.foo', &reader)
+          up.target?('.foo')
         end
         expect(result).to eq(true)
       end
 
       it 'returns true if testing a custom selector, and Unpoly requests "body"' do
-        result = controller_eval(headers: target_headers('body')) do
-          instance_exec('foo', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'body' }) do
+          up.target?('foo')
         end
         expect(result).to eq(true)
       end
 
       it 'returns true if testing a custom selector, and Unpoly requests "html"' do
-        result = controller_eval(headers: target_headers('html')) do
-          instance_exec('foo', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'html' }) do
+          up.target?('foo')
         end
         expect(result).to eq(true)
       end
 
       it 'returns true if testing "body", and Unpoly requests "html"' do
-        result = controller_eval(headers: target_headers('html')) do
-          instance_exec('body', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'html' }) do
+          up.target?('body')
         end
         expect(result).to eq(true)
       end
 
       it 'returns true if testing "head", and Unpoly requests "html"' do
-        result = controller_eval( headers: target_headers('html')) do
-          instance_exec('header', &reader)
+        result = controller_eval( headers: { 'X-Up-Target': 'html' }) do
+          up.target?('header')
         end
         expect(result).to eq(true)
       end
 
       it 'returns false if the tested CSS selector is "head" but Unpoly requests "body"' do
-        result = controller_eval(headers: target_headers('body')) do
-          instance_exec('head', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'body' }) do
+          up.target?('head')
         end
         expect(result).to eq(false)
-      end 
+      end
 
       it 'returns false if the tested CSS selector is "title" but Unpoly requests "body"' do
-        result = controller_eval(headers: target_headers('body')) do
-          instance_exec('title', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'body' }) do
+          up.target?('title')
         end
         expect(result).to eq(false)
       end
 
       it 'returns false if the tested CSS selector is "meta" but Unpoly requests "body"' do
-        result = controller_eval(headers: target_headers('body')) do
-          instance_exec('meta', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'body' }) do
+          up.target?('meta')
         end
         expect(result).to eq(false)
       end
 
       it 'returns true if the tested CSS selector is "head", and Unpoly requests "html"' do
-        result = controller_eval(headers: target_headers('html')) do
-          instance_exec('head', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'html' }) do
+          up.target?('head')
         end
         expect(result).to eq(true)
       end
 
       it 'returns true if the tested CSS selector is "title", Unpoly requests "html"' do
-        result = controller_eval(headers: target_headers('html')) do
-          instance_exec('title', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'html' }) do
+          up.target?('title')
         end
         expect(result).to eq(true)
       end
 
       it 'returns true if the tested CSS selector is "meta", and Unpoly requests "html"' do
-        result = controller_eval(headers: target_headers('html')) do
-          instance_exec('meta', &reader)
+        result = controller_eval(headers: { 'X-Up-Target': 'html' }) do
+          up.target?('meta')
         end
         expect(result).to eq(true)
       end
 
     end
 
-    describe 'up.target?' do
-      it_behaves_like 'target query',
-        header: 'X-Up-Target',
-        reader: -> (selector) { up.target?(selector) }
-    end
-
     describe 'up.fail_target?' do
-      it_behaves_like 'target query',
-        header: 'X-Up-Fail-Target',
-        reader: -> (selector) { up.fail_target?(selector) }
+
+      it 'returns false if the tested CSS selector matches the X-Up-Target header' do
+        result = controller_eval(headers: { 'X-Up-Target': '.foo' }) do
+          up.fail_target?('.foo')
+        end
+        expect(result).to eq(false)
+      end
+
+      it 'returns true if the tested CSS selector matches the X-Up-Fail-Target header' do
+        result = controller_eval(headers: { 'X-Up-Target': '.foo', 'X-Up-Fail-Target': '.bar' }) do
+          up.fail_target?('.bar')
+        end
+        expect(result).to eq(true)
+      end
+
     end
 
     describe 'up.any_target?' do
