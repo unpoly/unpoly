@@ -312,6 +312,150 @@ describe Unpoly::Rails::Controller, type: :request do
       
     end
 
+    describe 'up.layer.mode' do
+
+      it 'returns the value of the X-Up-Mode header' do
+        result = controller_eval(headers: { 'X-Up-Mode': 'foo' }) do
+          up.layer.mode
+        end
+        expect(result).to eq('foo')
+      end
+
+    end
+
+    describe 'up.layer.root?' do
+
+      it 'returns true if the X-Up-Mode header is "root"' do
+        result = controller_eval(headers: { 'X-Up-Mode': 'root' }) do
+          up.layer.root?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns true if the request is a full page load (which always replaces the entire page)' do
+        result = controller_eval do
+          up.layer.root?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns false if the X-Up-Mode header is not "root"' do
+        result = controller_eval(headers: { 'X-Up-Mode': 'drawer' }) do
+          up.layer.root?
+        end
+        expect(result).to eq(false)
+      end
+
+    end
+
+    describe 'up.layer.overlay?' do
+
+      it 'returns true if the X-Up-Mode header is "overlay"' do
+        result = controller_eval(headers: { 'X-Up-Mode': 'overlay' }) do
+          up.layer.overlay?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns false if the request is a full page load (which always replaces the entire page)' do
+        result = controller_eval do
+          up.layer.overlay?
+        end
+        expect(result).to eq(false)
+      end
+
+      it 'returns false if the X-Up-Mode header is "root"' do
+        result = controller_eval(headers: { 'X-Up-Mode': 'root' }) do
+          up.layer.overlay?
+        end
+        expect(result).to eq(false)
+      end
+
+    end
+
+    describe 'up.layer.context' do
+
+      it 'returns the parsed JSON object from the X-Up-Context header' do
+        result = controller_eval(headers: { 'X-Up-Context': { 'foo' => 'bar' }.to_json}) do
+          up.layer.context
+        end
+        expect(result).to eq('foo' => 'bar')
+      end
+
+    end
+
+    describe 'up.fail_layer.mode' do
+
+      it 'returns the value of the X-Up-Fail-Mode header' do
+        result = controller_eval(headers: { 'X-Up-Fail-Mode': 'foo' }) do
+          up.fail_layer.mode
+        end
+        expect(result).to eq('foo')
+      end
+
+    end
+
+    describe 'up.fail_layer.root?' do
+
+      it 'returns true if the X-Up-Fail-Mode header is "root"' do
+        result = controller_eval(headers: { 'X-Up-Fail-Mode': 'root' }) do
+          up.fail_layer.root?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns true if the request is a full page load (which always replaces the entire page)' do
+        result = controller_eval do
+          up.fail_layer.root?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns false if the X-Up-Fail-Mode header is not "root"' do
+        result = controller_eval(headers: { 'X-Up-Fail-Mode': 'drawer' }) do
+          up.fail_layer.root?
+        end
+        expect(result).to eq(false)
+      end
+
+    end
+
+    describe 'up.fail_layer.overlay?' do
+
+      it 'returns true if the X-Up-Fail-Mode header is "overlay"' do
+        result = controller_eval(headers: { 'X-Up-Fail-Mode': 'overlay' }) do
+          up.fail_layer.overlay?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns false if the request is a full page load (which always replaces the entire page)' do
+        result = controller_eval do
+          up.fail_layer.overlay?
+        end
+        expect(result).to eq(false)
+      end
+
+      it 'returns false if the X-Up-Fail-Mode header is "root"' do
+        result = controller_eval(headers: { 'X-Up-Fail-Mode': 'root' }) do
+          up.fail_layer.overlay?
+        end
+        expect(result).to eq(false)
+      end
+
+    end
+
+    describe 'up.fail_layer.context' do
+
+      it 'returns the parsed JSON object from the X-Up-Fail-Context header' do
+        result = controller_eval(headers: { 'X-Up-Fail-Context': { 'foo' => 'bar' }.to_json}) do
+          up.fail_layer.context
+        end
+        expect(result).to eq('foo' => 'bar')
+      end
+
+    end
+
     describe 'up.title=' do
 
       it 'sets an X-Up-Title header to push a document title to the client' do

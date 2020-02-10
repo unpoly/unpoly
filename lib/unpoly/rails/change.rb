@@ -169,6 +169,14 @@ module Unpoly
         end
       end
 
+      memoize def layer
+        Layer.new(self, mode: mode, context: context)
+      end
+
+      memoize def fail_layer
+        Layer.new(self, mode: fail_mode, context: fail_context)
+      end
+
       private
 
       attr_reader :controller
