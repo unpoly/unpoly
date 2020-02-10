@@ -131,7 +131,7 @@ module Unpoly
         # we can re-set the X-Up-Events header with the first and second props hash.
         event_plan = { type: type, options: options }
         @events.push(event_plan)
-        headers['X-Up-Events'] = @events.to_json
+        response.headers['X-Up-Events'] = @events.to_json
       end
 
       ##

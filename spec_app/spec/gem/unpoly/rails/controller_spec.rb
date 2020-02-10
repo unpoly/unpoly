@@ -312,6 +312,46 @@ describe Unpoly::Rails::Controller, type: :request do
       
     end
 
+    describe 'up.emit' do
+
+      it 'adds an entry into the X-Up-Events response header' do
+        controller_eval do
+          up.emit('my:event', { 'foo' => 'bar' })
+        end
+
+        expect(response.headers['X-Up-Events']).to eq(
+          [{ type: 'my:event', options: { 'foo' => 'bar' }}].to_json
+        )
+      end
+
+      it 'adds multiple entries to the X-Up-Events response headers' do
+        controller_eval do
+          up.emit('my:event', { 'foo' => 'bar' })
+          up.emit('other:event', { 'bam' => 'baz' })
+        end
+
+        expect(response.headers['X-Up-Events']).to eq([
+          { type: 'my:event', options: { 'foo' => 'bar' }},
+          { type: 'other:event', options: { 'bam' => 'baz' }}
+        ].to_json)
+      end
+
+    end
+
+    describe 'up.layer.emit' do
+
+      it 'adds an entry into the X-Up-Events response header with { layer: "current" } option' do
+        controller_eval do
+          up.layer.emit('my:event', { 'foo' => 'bar' })
+        end
+
+        expect(response.headers['X-Up-Events']).to eq(
+          [{ type: 'my:event', options: { 'foo' => 'bar', 'layer' => 'current' }}].to_json
+        )
+      end
+
+    end
+
     describe 'up.layer.mode' do
 
       it 'returns the value of the X-Up-Mode header' do
