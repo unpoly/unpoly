@@ -55,3 +55,19 @@ body.up-layer[mode=root]
     .up-layer-dismiss
     .up-layer-content
 
+
+Refactor auf Custom Element
+===========================
+
+Pro: netteres HTML! Aus <div class="overlay" mode="modal"> with <up-overlay mode="modal">
+
+up-overlay[mode=modal]       # full screen, catches clicks
+  up-overlay-backdrop        # backdrop (optional), only for visuals
+  up-overlay-viewport        # scroll bars
+    up-overlay-frame         # padding
+      up-overlay-dismiss     # dismiss icon
+      up-overlay-content     # pure content
+up-overlay[mode=popup]
+  up-overlay-frame
+    up-overlay-dismiss
+    up-overlay-content
