@@ -384,6 +384,46 @@ describe Unpoly::Rails::Controller, type: :request do
 
     end
 
+    describe 'up.layer.accept' do
+
+      it 'sets an X-Up-Accept-Layer response header with the given value' do
+        controller_eval do
+          up.layer.accept('foo')
+        end
+
+        expect(response.headers['X-Up-Accept-Layer']).to eq('"foo"')
+      end
+
+      it 'sets an X-Up-Accept-Layer response header with a null value if no value is given' do
+        controller_eval do
+          up.layer.accept
+        end
+
+        expect(response.headers['X-Up-Accept-Layer']).to eq('null')
+      end
+
+    end
+
+    describe 'up.layer.dismiss' do
+
+      it 'sets an X-Up-Dismiss-Layer response header with the given value' do
+        controller_eval do
+          up.layer.dismiss('foo')
+        end
+
+        expect(response.headers['X-Up-Dismiss-Layer']).to eq('"foo"')
+      end
+
+      it 'sets an X-Up-Dismiss-Layer response header with a null value if no value is given' do
+        controller_eval do
+          up.layer.dismiss
+        end
+
+        expect(response.headers['X-Up-Dismiss-Layer']).to eq('null')
+      end
+
+    end
+
     describe 'up.fail_layer.mode' do
 
       it 'returns the value of the X-Up-Fail-Mode header' do
