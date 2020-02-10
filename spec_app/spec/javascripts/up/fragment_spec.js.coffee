@@ -1712,12 +1712,12 @@ describe 'up.fragment', ->
             @respondWithSelector('.target', text: 'new target text')
 
           next =>
-            # Text nodes are wrapped in a .up-insertion container so we can
+            # Text nodes are wrapped in a up-insertion container so we can
             # animate them and measure their position/size for scrolling.
             # This is not possible for container-less text nodes.
-            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
+            expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
             # Show that the wrapper is done after the insertion.
-            expect($('.up-insertion')).not.toBeAttached()
+            expect($('up-insertion')).not.toBeAttached()
 
         it 'reveals a new element that is being prepended', asyncSpec (next) ->
           fixture('.target')
@@ -1727,12 +1727,12 @@ describe 'up.fragment', ->
             @respondWithSelector('.target', text: 'new target text')
 
           next =>
-            # Text nodes are wrapped in a .up-insertion container so we can
+            # Text nodes are wrapped in a up-insertion container so we can
             # animate them and measure their position/size for scrolling.
             # This is not possible for container-less text nodes.
-            expect(@revealedHTML).toEqual ['<div class="up-insertion">new target text</div>']
+            expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
             # Show that the wrapper is done after the insertion.
-            expect($('.up-insertion')).not.toBeAttached()
+            expect($('up-insertion')).not.toBeAttached()
 
         describe 'when there is an anchor #hash in the URL', ->
 
