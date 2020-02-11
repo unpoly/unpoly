@@ -563,7 +563,7 @@ describe 'up.viewport', ->
     describe 'up.viewport.absolutize', ->
 
       afterEach ->
-        $('.up-bounds, .fixture').remove()
+        $('up-bounds, .fixture').remove()
 
       it 'absolutely positions the element, preserving visual position and size', ->
         $element = $fixture('.element').text('element text').css(paddingTop: '20px', paddingLeft: '20px')
@@ -573,7 +573,7 @@ describe 'up.viewport', ->
 
         up.viewport.absolutize($element)
 
-        expect($element.closest('.up-bounds').css('position')).toEqual('absolute')
+        expect($element.closest('up-bounds').css('position')).toEqual('absolute')
 
         newDims = $element[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)

@@ -557,13 +557,13 @@ up.viewport = do ->
       right:  'auto' # CSS default
       bottom: 'auto' # CSS default
       left:   'auto' # CSS default
-      width:  '100%' # stretch to the .up-bounds width we set below
-      height: '100%' # stretch to the .up-bounds height we set below
+      width:  '100%' # stretch to the <up-bounds> width we set below
+      height: '100%' # stretch to the <up-bounds> height we set below
 
     # Wrap the ghost in another container so its margin can expand
     # freely. If we would position the element directly (old implementation),
     # it would gain a layout context which cannot be crossed by margins.
-    bounds = e.createFromSelector('.up-bounds')
+    bounds = e.createFromSelector('up-bounds')
     # Insert the bounds object before our element, then move element into it.
     e.insertBefore(element, bounds)
     bounds.appendChild(element)

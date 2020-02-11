@@ -257,7 +257,7 @@ describe 'up.motion', ->
             expect($new).toHaveOpacity(1.0)
 
 
-        it 'does not leave .up-bounds elements in the DOM', asyncSpec (next) ->
+        it 'does not leave <up-bounds> elements in the DOM', asyncSpec (next) ->
           $old = $fixture('.old').text('old content')
           $new = $fixture('.new').text('new content')
 
@@ -268,7 +268,7 @@ describe 'up.motion', ->
 
           next =>
             expect($old).toBeDetached()
-            expect($('.up-bounds').length).toBe(0)
+            expect($('up-bounds').length).toBe(0)
 
 
         it 'emits an up:motion:finish event on the given animating element, so custom animation functions can react to the finish request', asyncSpec (next) ->
@@ -413,14 +413,14 @@ describe 'up.motion', ->
           expect($v2).toBeAttached()
           done()
 
-      it 'does not leave .up-bounds elements in the DOM', (done) ->
+      it 'does not leave <up-bounds> elements in the DOM', (done) ->
         $v1 = $fixture('.element').text('v1')
         $v2 = $fixture('.element').text('v2')
 
         morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
 
         morphDone.then ->
-          expect('.up-bounds').not.toBeAttached()
+          expect($('up-bounds').length).toBe(0)
           done()
 
 

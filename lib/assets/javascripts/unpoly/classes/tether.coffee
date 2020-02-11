@@ -16,7 +16,7 @@ class up.Tether
     @alignAxis = if @position == 'top' || @position == 'bottom' then 'horizontal' else 'vertical'
 
     @viewport = up.viewport.closest(@anchor)
-    @element.classList.add('.up-bounds')
+    @element.style.position = 'absolute'
     @setBoundsOffset(0, 0)
 
     @changeEventSubscription('on')
