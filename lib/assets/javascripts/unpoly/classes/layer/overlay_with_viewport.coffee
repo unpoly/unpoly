@@ -16,8 +16,8 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   ###
   openNow: (options) ->
     @createElement()
-    # @backdropElement = e.affix(@element, '.up-overlay-backdrop')
-    @viewportElement = e.affix(@element, '.up-overlay-viewport')
+    # @backdropElement = e.affix(@element, 'up-overlay-backdrop')
+    @viewportElement = e.affix(@element, 'up-overlay-viewport')
     @frameInnerContent(@viewportElement, options)
 
     @shiftBody()

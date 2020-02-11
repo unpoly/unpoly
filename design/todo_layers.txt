@@ -2,6 +2,7 @@
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
+  - Modals should not have margin on small screens
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
@@ -47,7 +48,7 @@ Have you noticed how noticed how pages fade in
   - Test that proxy-events don't crash when a request has { layer: 'new' }
   - Test that proxy-events don't crash when a request has no { layer }
   - Test that updating <body> or <html> we keep layer.onEach handlers
-  - Test that updating <body> will re-attach .up-overlay elements
+  - Test that updating <body> will re-attach up-overlay elements
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)

@@ -759,7 +759,7 @@ describe 'up.fragment', ->
         describe 'when selectors are missing on the page before the request was made', ->
 
           beforeEach ->
-            # In helpers/protect_jasmine_runner wie have configured .default-fallback
+            # In helpers/protect_jasmine_runner wie have configured <default-fallback>
             # as a default target for all layers.
             up.layer.config.all.targets = []
 

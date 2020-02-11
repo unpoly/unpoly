@@ -86,7 +86,7 @@ class up.Change.CloseLayer extends up.Change.Removal
     # is now detached, the event will no longer bubble up to the document where global
     # event listeners can receive it. So we explicitely emit the event a second time
     # on the document.
-    return @up.layer.emit(
+    return @layer.emit(
       @buildEvent(@closedEventType),
       # Set up.layer.current to the parent of the closed layer, which is now likely
       # to be the front layer.

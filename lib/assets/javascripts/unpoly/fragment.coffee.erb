@@ -471,7 +471,7 @@ up.fragment = do ->
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isRealElement = (element) ->
-    !e.closest(element, '.up-destroying') && !e.matches(element, '.up-overlay, .up-bounds')
+    !e.closest(element, '.up-destroying') && !e.matches(element, 'up-overlay, up-bounds')
 
   ###**
   Returns the first element matching the given selector, but
@@ -586,7 +586,7 @@ up.fragment = do ->
 
   shouldLogDestruction = (element, options) ->
     # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
-    options.log != false && !e.matches(element, '.up-overlay')
+    options.log != false && !e.matches(element, 'up-overlay')
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgIntoOptions(args, 'target')

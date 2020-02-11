@@ -166,6 +166,7 @@ up.motion = do ->
     willRun = willAnimate(element, animation, options)
 
     if willRun
+      # up.puts 'Animating %o with animation %o', element, animation
       runNow = -> animationFn(element, options)
       motionController.startFunction(element, runNow, options)
     else

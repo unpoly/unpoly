@@ -80,23 +80,23 @@ class up.Layer.Overlay extends up.Layer
 
   createElement: ->
     attrs = u.compactObject
-      'up-mode': @constructor.mode
-      'up-align': @align
-      'up-position': @position,
-      'up-size': @size,
-      role: 'dialog',
-      'aria-modal': true
-    @element = e.affix(document.body, '.up-overlay', attrs)
+      mode: @constructor.mode
+      align: @align
+      position: @position,
+      size: @size,
+      role: 'dialog', # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/dialog_role
+      'aria-modal': true # https://www.w3.org/TR/wai-aria-1.1/#aria-modal
+    @element = e.affix(document.body, 'up-overlay', attrs)
 
     if @backdrop
-      @backdropElement = e.affix(@element, '.up-overlay-backdrop')
+      @backdropElement = e.affix(@element, 'up-overlay-backdrop')
 
     if @class
       @element.classList.add(@class)
 
     if @outsideDismissable
       @element.addEventListener 'click', (event) =>
-        unless e.closest(event.target, '.up-overlay-frame')
+        unless e.closest(event.target, 'up-overlay-frame')
           u.muteRejection @dismiss()
           up.event.halt(event)
 
@@ -109,11 +109,11 @@ class up.Layer.Overlay extends up.Layer
       @on(@eventType, selector, close.bind(this))
 
   destroyElement: (options) ->
-    up.destroy(@element, options)
+    up.destroy(@element, u.merge(options, log: false))
 
   createDismissElement: (parentElement) ->
     if @buttonDismissable
-      @dismissElement = e.affix(parentElement, '.up-overlay-dismiss[up-dismiss]',
+      @dismissElement = e.affix(parentElement, 'up-overlay-dismiss[up-dismiss]',
         'aria-label': @dismissAriaLabel
       )
       # Since the dismiss button already has an accessible [aria-label]
@@ -122,8 +122,8 @@ class up.Layer.Overlay extends up.Layer
 
   frameInnerContent: (parentElement, options) ->
     content = options.content
-    @frameElement = e.affix(parentElement, '.up-overlay-frame')
-    @contentElement = e.affix(@frameElement, '.up-overlay-content')
+    @frameElement = e.affix(parentElement, 'up-overlay-frame')
+    @contentElement = e.affix(@frameElement, 'up-overlay-content')
     @contentElement.appendChild(content)
     @createDismissElement(@frameElement)
     options.onContentAttached?({ layer: this, content })
@@ -145,8 +145,9 @@ class up.Layer.Overlay extends up.Layer
     )
 
   startCloseAnimation: (options = {}) ->
+    console.log("CLOSE ANIMATION IS %o", options.animation ? @evalOption(@closeAnimation))
     @startAnimation(
-      frameAnimation: options.animation ? @evalOption(@openAnimation),
+      frameAnimation: options.animation ? @evalOption(@closeAnimation),
       backdropAnimation: 'fade-out',
       easing: options.easing || @closeEasing,
       duration: options.duration || @closeDuration,

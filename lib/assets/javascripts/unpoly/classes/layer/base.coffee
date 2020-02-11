@@ -77,7 +77,7 @@ class up.Layer extends up.Record
 
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
-    e.closest(element, '.up-overlay, html') == @element
+    e.closest(element, 'up-overlay, html') == @element
 
   on: (args...) ->
     return @buildEventListenerGroup(args).bind()

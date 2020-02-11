@@ -7,7 +7,7 @@
   right: 0
 
 =mode($mode)
-  .up-overlay[up-mode="#{$mode}"]
+  up-overlay[mode="#{$mode}"]
     @content
 
 =large-shadow
@@ -15,19 +15,19 @@
 =small-shadow
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3)
 
-.up-overlay
+up-overlay
   +maximize
   // Create a stacking context for layer elements
   // by giving a position and z-index.
   position: fixed
   z-index: 10000
 
-.up-overlay-backdrop
+up-overlay-backdrop
   position: absolute
   +maximize
   background-color: rgba(90, 90, 90, 0.4)
 
-.up-overlay-viewport
+up-overlay-viewport
   position: absolute
   +maximize
 
@@ -39,12 +39,12 @@
   // into the end of this layer's viewport.
   overscroll-behavior: contain
 
-  // Center .up-overlay-frame within the viewport
+  // Center up-overlay-frame within the viewport
   text-align: center
 
-.up-overlay-frame
+up-overlay-frame
 
-  // Make it grow with the width of .up-overlay-content
+  // Make it grow with the width of up-overlay-content
   display: inline-block
   text-align: left
 
@@ -57,7 +57,7 @@
 
   overflow-x: hidden
 
-.up-overlay-dismiss
+up-overlay-dismiss
   color: #666
   position: absolute
   top: 5px
@@ -67,9 +67,9 @@
   cursor: pointer
 
 +mode('modal')
-  .up-overlay-viewport
+  up-overlay-viewport
     // Implement the margin around the dialog box with a padding of the viewport.
-    // This way we can give .up-overlay-frame a max-width of 100%, (1) preventing people
+    // This way we can give up-overlay-frame a max-width of 100%, (1) preventing people
     // from setting withs larger than the viewport, and (2) sizing approproately
     // if the modal contents are very wide and cannot wrap (e.g. code blocks).
     padding: 30px 10px
@@ -77,29 +77,29 @@
     // Allow frame to grow from the center, up to its max-width of 100%
     justify-content: center
 
-  .up-overlay-frame
+  up-overlay-frame
     +large-shadow
 
 +mode('drawer')
-  .up-overlay-viewport
+  up-overlay-viewport
     // Allow frame to grow from the left, up to its max-width of 100%
     text-align: left
 
-  &[up-position=right]
-    .up-overlay-viewport
+  &[position=right]
+    up-overlay-viewport
       // Allow frame to grow from the right, up to its max-width of 100%
       text-align: right
 
-  .up-overlay-frame
+  up-overlay-frame
     min-height: 100vh
     +large-shadow
 
 +mode('cover')
-  .up-overlay-frame
+  up-overlay-frame
     width: 100%
     min-height: 100vh
 
 +mode('popup')
-  .up-overlay-frame
+  up-overlay-frame
     padding: 15px
     +small-shadow

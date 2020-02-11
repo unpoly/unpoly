@@ -46,7 +46,7 @@ describe 'up.popup (deprecated)', ->
             """
 
         next =>
-          $popup = $('.up-overlay[up-mode=popup]')
+          $popup = $('up-overlay[up-mode=popup]')
           expect($popup).toBeAttached()
           expect($popup.find('.middle')).toHaveText('new-middle')
           expect($popup.find('.before')).not.toBeAttached()
@@ -84,7 +84,7 @@ describe 'up.popup (deprecated)', ->
         it 'extracts the selector from the given HTML string', asyncSpec (next) ->
           $span = $fixture('span')
           next.await up.popup.attach($span, target: '.container', html: "<div class='container'>container contents</div>")
-          next => expect($('.up-overlay[up-mode=popup]')).toHaveText('container contents')
+          next => expect($('up-overlay[up-mode=popup]')).toHaveText('container contents')
 
       describe 'opening a popup while another modal is open', ->
 
@@ -284,7 +284,7 @@ describe 'up.popup (deprecated)', ->
           up.popup.attach($opener, html: '<div class="target">text</div>', target: '.target')
 
           next =>
-            $popup = $fixture('.up-overlay[up-mode=popup]')
+            $popup = $fixture('up-overlay[up-mode=popup]')
             $closer = $popup.affix('a[up-close]') # link is within the popup
             up.hello($closer)
             Trigger.clickSequence($closer)
@@ -299,12 +299,12 @@ describe 'up.popup (deprecated)', ->
           up.modal.extract '.modalee', '<div class="modalee"></div>'
 
           next =>
-            $modalee = $('.up-overlay[up-mode=modal] .modalee')
+            $modalee = $('up-overlay[up-mode=modal] .modalee')
             $opener = $modalee.affix('a')
             up.popup.attach($opener, html: '<div class="popupee">text</div>', target: '.popupee')
 
           next =>
-            $popupee = $('.up-overlay[up-mode=popup] .popupee')
+            $popupee = $('up-overlay[up-mode=popup] .popupee')
             $closer = $popupee.affix('a[up-close]') # link is within the popup
             up.hello($closer)
             Trigger.clickSequence($closer)
@@ -341,7 +341,7 @@ describe 'up.popup (deprecated)', ->
         next =>
           expect($outside).toBeAttached()
           expect($outside).toHaveText('old outside')
-          expect($('.up-overlay[up-mode=popup]')).toHaveText('new text')
+          expect($('up-overlay[up-mode=popup]')).toHaveText('new text')
 
       it 'auto-closes the popup when a replacement from inside the popup affects a selector behind the popup', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -353,7 +353,7 @@ describe 'up.popup (deprecated)', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-overlay[up-mode=popup]')).not.toBeAttached()
+          expect($('up-overlay[up-mode=popup]')).not.toBeAttached()
 
       it 'does not restore the covered URL when auto-closing (since it would override the URL from the triggering update)', asyncSpec (next) ->
         up.history.config.enabled = true
@@ -386,7 +386,7 @@ describe 'up.popup (deprecated)', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-overlay[up-mode=popup]')).toBeAttached()
+          expect($('up-overlay[up-mode=popup]')).toBeAttached()
 
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector outside the popup', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -398,7 +398,7 @@ describe 'up.popup (deprecated)', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-overlay[up-mode=popup]')).toBeAttached()
+          expect($('up-overlay[up-mode=popup]')).toBeAttached()
 
       it 'does not auto-close the popup when a replacement from outside the popup affects a selector inside the popup', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -410,7 +410,7 @@ describe 'up.popup (deprecated)', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-overlay[up-mode=popup]')).toBeAttached()
+          expect($('up-overlay[up-mode=popup]')).toBeAttached()
 
     describe 'when clicking on the body', ->
 

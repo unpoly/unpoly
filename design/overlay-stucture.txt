@@ -2,20 +2,20 @@ Aktueller Stand
 ===============
 
 body
-  .up-overlays
-    .up-overlay[mode=modal]       # full screen, catches clicks
-      .up-overlay-backdrop        # backdrop (optional), only for visuals
-      .up-overlay-viewport        # scroll bars
-        .up-overlay-frame         # padding
-          .up-overlay-dismiss     # dismiss icon
-          .up-overlay-content     # pure content
-    .up-overlay[mode=popup]
-      .up-overlay-frame
-        .up-overlay-dismiss
-        .up-overlay-content
+  up-overlays
+    up-overlay[mode=modal]       # full screen, catches clicks
+      up-overlay-backdrop        # backdrop (optional), only for visuals
+      up-overlay-viewport        # scroll bars
+        up-overlay-frame         # padding
+          up-overlay-dismiss     # dismiss icon
+          up-overlay-content     # pure content
+    up-overlay[mode=popup]
+      up-overlay-frame
+        up-overlay-dismiss
+        up-overlay-content
 
 
-.up-layer statt .up-overlay
+.up-layer statt up-overlay
 ===========================
 
 Pro: Kürzer
@@ -23,8 +23,8 @@ Con: Body müsste auch .up-layer[mode=root] kriegen um logisch zu sein.
 Pro: Damit wären dann auch lookups schneller.
 Con: Nur Overlays stylen wär dann die Regel: .up-layer:not([mode=root])
 
-body.up-layer[mode=root]
-  .up-overlays
+body.up-layer[up-mode=root]
+  up-overlays
     .up-layer[mode=modal]       # full screen, catches clicks
       .up-layer-backdrop        # backdrop (optional), only for visuals
       .up-layer-viewport        # scroll bars
@@ -43,7 +43,7 @@ body.up-layer[mode=root]
 Gleiche Pros und Cons wie oben
 Und ein Element weniger
 
-body.up-layer[mode=root]
+body.up-layer[up-mode=root]
 .up-layer[mode=modal]       # full screen, catches clicks
   .up-layer-backdrop        # backdrop (optional), only for visuals
   .up-layer-viewport        # scroll bars

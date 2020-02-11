@@ -23,7 +23,7 @@ afterEach (done) ->
       up.util.task ->
         $('up-toast').remove()
 
-        if $('.up-overlay').length
+        if $('up-overlay').length
           throw "Overlay was not removed after reset"
 
         up.puts("Framework was reset")

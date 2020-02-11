@@ -47,16 +47,16 @@ afterEach ->
 # Add a .default-fallback container to every layer, so we never
 # end up swapping the <body> element.
 appendDefaultFallback = (parent) ->
-  e.affix(parent, '.default-fallback')
+  e.affix(parent, 'default-fallback')
 
 beforeEach ->
-  up.layer.config.all.targets = ['.default-fallback']
+  up.layer.config.all.targets = ['default-fallback']
   up.fragment.config.targets = [] # no 'body'
-  up.history.config.restoreTargets = ['.default-fallback']
+  up.history.config.restoreTargets = ['default-fallback']
   appendDefaultFallback(document.body)
 
   up.on 'up:layer:opening', (event) ->
-    appendDefaultFallback(event.layer.element.querySelector('.up-overlay-content'))
+    appendDefaultFallback(event.layer.element.querySelector('up-overlay-content'))
 
 afterEach ->
-  up.destroy('.default-fallback', log: false)
+  up.destroy('default-fallback', log: false)

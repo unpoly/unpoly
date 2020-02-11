@@ -33,7 +33,7 @@ up.error = do ->
   notImplemented = errorInterface('up.NotImplemented')
 
   notApplicable = errorInterface('up.NotApplicable', (change, reason) ->
-    build("Cannot apply change: #{change} (#{reason}")
+    build("Cannot apply change: #{change} (#{reason})")
   )
 
   invalidSelector = errorInterface('up.InvalidSelector', (selector) ->

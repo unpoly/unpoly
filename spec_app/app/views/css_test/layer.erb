@@ -1,0 +1,109 @@
+<script>
+  var u = up.util;
+  up.compiler('.clamped-open', function(link) {
+    link.addEventListener('click', function(event) {
+      event.preventDefault();
+      u.task(function() {
+        u.task(function() {
+          u.task(function() {
+            u.task(function() {
+              u.task(function() {
+                u.task(function() {
+                  up.modal.follow(link, {
+                    target: '.contents',
+                    duration: 1000
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+</script>
+
+<div class="spacer">
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/modal_contents" up-target=".contents" up-layer="modal">Modal</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/modal_contents_wide" up-target=".contents" up-layer="modal">Modal (wide contents)</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/layer" up-target=".contents" up-layer="modal">Modal (nested)</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/modal_contents" up-layer="cover" up-target=".contents">Cover</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/modal_contents" up-target=".contents" up-layer="drawer" up-position="left">Drawer (left)</a>
+  <a class="button" href="/css_test/modal_contents" up-target=".contents" up-layer="drawer" up-position="right">Drawer (right)</a>
+</div>
+
+<div class="example">
+  <a class="button clamped-open" href="/css_test/modal_contents">Clamped open</a>
+</div>
+
+
+
+<div class="fixed-top-bar" up-fixed="top">
+  <a class="button" href="/css_test/popup_contents?1" up-layer="popup" up-target=".contents" up-position="top" up-align="left">top/left popup</a>
+  <a class="button" href="/css_test/popup_contents?2" up-layer="popup" up-target=".contents" up-position="top" up-align="right">top/right popup</a>
+  <a class="button" href="/css_test/popup_contents?3" up-layer="popup" up-target=".contents" up-position="bottom" up-align="right">bottom/right popup</a>
+  <a class="button" href="/css_test/popup_contents?4" up-layer="popup" up-target=".contents" up-position="bottom" up-align="left">bottom/left popup</a>
+</div>
+
+<div class="spacer">
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/popup_contents?5" up-layer="popup" up-target=".contents" up-position="top" up-align="left">top/left popup</a>
+  <a class="button" href="/css_test/popup_contents?6" up-layer="popup" up-target=".contents" up-position="top" up-align="center">top/center popup</a>
+  <a class="button" href="/css_test/popup_contents?7" up-layer="popup" up-target=".contents" up-position="top" up-align="right">top/right popup</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/popup_contents?8" up-layer="popup" up-target=".contents" up-position="right" up-align="top">right/top popup</a>
+  <a class="button" href="/css_test/popup_contents?9" up-layer="popup" up-target=".contents" up-position="right" up-align="center">right/center popup</a>
+  <a class="button" href="/css_test/popup_contents?a" up-layer="popup" up-target=".contents" up-position="right" up-align="bottom">right/bottom popup</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/popup_contents?b" up-layer="popup" up-target=".contents" up-position="bottom" up-align="right">  bottom/right popup</a>
+  <a class="button" href="/css_test/popup_contents?c" up-layer="popup" up-target=".contents" up-position="bottom" up-align="center">bottom/center popup</a>
+  <a class="button" href="/css_test/popup_contents?d" up-layer="popup" up-target=".contents" up-position="bottom" up-align="left"> bottom/left popup</a>
+</div>
+
+<div class="example">
+  <a class="button" href="/css_test/popup_contents?e" up-layer="popup" up-target=".contents" up-position="left" up-align="bottom">left/bottom popup</a>
+  <a class="button" href="/css_test/popup_contents?f" up-layer="popup" up-target=".contents" up-position="left" up-align="top">left/top popup</a>
+  <a class="button" href="/css_test/popup_contents?g" up-layer="popup" up-target=".contents" up-position="left" up-align="center">left/center popup</a>
+</div>
+
+
+<div class="example">
+  <a class="button clamped-open" href="/css_test/popup_contents">Clamped open</a>
+</div>
+
+<div class="example">
+  <div up-viewport style="height: 300px; width: 500px; overflow-y: scroll; background-color: rgba(0,0,0,0.2)">
+    <div class="spacer"></div>
+    <a class="button" href="/css_test/popup_contents?8" up-layer="popup" up-target=".contents" up-position="bottom">Popup within a viewport that has no position</a>
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<div class="example">
+  <div up-viewport style="height: 300px; width: 500px; overflow-y: scroll; background-color: rgba(0,0,0,0.2); position: relative">
+    <div class="spacer"></div>
+    <a class="button" href="/css_test/popup_contents?8" up-layer="popup" up-target=".contents" up-position="bottom">Popup within a viewport that has position</a>
+    <div class="spacer"></div>
+  </div>
+</div>

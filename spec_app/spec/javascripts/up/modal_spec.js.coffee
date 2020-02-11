@@ -27,12 +27,12 @@ describe 'up.modal (deprecated)', ->
             """
 
           promise.then =>
-            expect($('.up-overlay[up-mode=modal]')).toBeAttached()
-            expect($('.up-overlay-content')).toBeAttached()
-            expect($('.up-overlay-content .middle')).toBeAttached()
-            expect($('.up-overlay-content .middle')).toHaveText('new-middle')
-            expect($('.up-overlay-content .before')).not.toBeAttached()
-            expect($('.up-overlay-content .after')).not.toBeAttached()
+            expect($('up-overlay[up-mode=modal]')).toBeAttached()
+            expect($('up-overlay-content')).toBeAttached()
+            expect($('up-overlay-content .middle')).toBeAttached()
+            expect($('up-overlay-content .middle')).toHaveText('new-middle')
+            expect($('up-overlay-content .before')).not.toBeAttached()
+            expect($('up-overlay-content .after')).not.toBeAttached()
             done()
 
     describe 'up.modal.extract', ->
@@ -48,12 +48,12 @@ describe 'up.modal (deprecated)', ->
           """
 
         promise.then =>
-          expect($('.up-overlay[up-mode=modal]')).toBeAttached()
-          expect($('.up-overlay-content')).toBeAttached()
-          expect($('.up-overlay-content .middle')).toBeAttached()
-          expect($('.up-overlay-content .middle')).toHaveText('new-middle')
-          expect($('.up-overlay-content .before')).not.toBeAttached()
-          expect($('.up-overlay-content .after')).not.toBeAttached()
+          expect($('up-overlay[up-mode=modal]')).toBeAttached()
+          expect($('up-overlay-content')).toBeAttached()
+          expect($('up-overlay-content .middle')).toBeAttached()
+          expect($('up-overlay-content .middle')).toHaveText('new-middle')
+          expect($('up-overlay-content .before')).not.toBeAttached()
+          expect($('up-overlay-content .after')).not.toBeAttached()
 
           # Can't change URLs
           expect(location.href).toEqual(oldHref)
@@ -74,12 +74,12 @@ describe 'up.modal (deprecated)', ->
           """
 
         promise.then =>
-          expect('.up-overlay').toBeAttached()
-          expect('.up-overlay-content').toBeAttached()
-          expect('.up-overlay-content .middle').toBeAttached()
-          expect('.up-overlay-content .middle').toHaveText('new-middle')
-          expect('.up-overlay-content .before').not.toBeAttached()
-          expect('.up-overlay-content .after').not.toBeAttached()
+          expect('up-overlay').toBeAttached()
+          expect('up-overlay-content').toBeAttached()
+          expect('up-overlay-content .middle').toBeAttached()
+          expect('up-overlay-content .middle').toHaveText('new-middle')
+          expect('up-overlay-content .before').not.toBeAttached()
+          expect('up-overlay-content .after').not.toBeAttached()
           expect(location.pathname).toMatchURL('/foo')
           done()
 
@@ -97,7 +97,7 @@ describe 'up.modal (deprecated)', ->
               """
 
         promise.catch =>
-          expect('.up-overlay').not.toBeAttached()
+          expect('up-overlay').not.toBeAttached()
           expect('.error').toHaveText('new error')
           done()
 
@@ -126,8 +126,8 @@ describe 'up.modal (deprecated)', ->
               @respondWith('<div class="container">text</div>')
 
             promise.then ->
-              $modal = $('.up-overlay')
-              $viewport = $modal.find('.up-overlay-viewport')
+              $modal = $('up-overlay')
+              $viewport = $modal.find('up-overlay-viewport')
               scrollbarWidth = up.viewport.scrollbarWidth()
 
               expect($modal).toBeAttached()
@@ -171,7 +171,7 @@ describe 'up.modal (deprecated)', ->
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
-            expect($('.up-overlay[up-mode=modal]')).toBeAttached()
+            expect($('up-overlay[up-mode=modal]')).toBeAttached()
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
             up.modal.close().then ->
@@ -185,7 +185,7 @@ describe 'up.modal (deprecated)', ->
 
           up.modal.extract('.container', '<div class="container">text</div>').then ->
             $body = $('body')
-            expect($('.up-overlay[up-mode=modal]')).toBeAttached()
+            expect($('up-overlay[up-mode=modal]')).toBeAttached()
             expect(parseInt($body.css('padding-right'))).toBe(0)
 
             up.modal.close().then ->
@@ -259,8 +259,8 @@ describe 'up.modal (deprecated)', ->
 
                   u.timer 180, =>
                     expect(jasmine.Ajax.requests.count()).toEqual(2)
-                    expect($('.up-overlay[up-mode=modal]').length).toBe(1)
-                    expect($('.up-overlay-frame').length).toBe(1)
+                    expect($('up-overlay[up-mode=modal]').length).toBe(1)
+                    expect($('up-overlay-frame').length).toBe(1)
                     expect($('.container')).toHaveText('response3')
                     bodyPadding = parseInt($('body').css('padding-right'))
                     expect(bodyPadding).toBeAround(scrollbarWidth, 10)
@@ -343,7 +343,7 @@ describe 'up.modal (deprecated)', ->
 #
 #          animations = []
 #          spyOn(up, 'animate').and.callFake (element, animation, options) ->
-#            if e.matches(element, '.up-overlay-viewport')
+#            if e.matches(element, 'up-overlay-viewport')
 #              animations.push
 #                text: element.querySelector('.target').innerText.trim()
 #                animation: animation
@@ -379,7 +379,7 @@ describe 'up.modal (deprecated)', ->
 #              { animation: 'move-from-right', text: 'response2' }
 #            ]
 #
-#            expect($('.up-overlay').attr('up-mode')).toEqual('custom-drawer')
+#            expect($('up-overlay').attr('up-mode')).toEqual('custom-drawer')
 
 
         it 'never resolves the open() promise and shows no error if close() was called before the response was received', asyncSpec (next) ->
@@ -454,10 +454,10 @@ describe 'up.modal (deprecated)', ->
         up.modal.extract('.content', '<div class="content">Modal content</div>')
 
         u.task =>
-          expect('.up-overlay[up-mode=modal] .content').toBeAttached()
+          expect('up-overlay[up-mode=modal] .content').toBeAttached()
 
           up.modal.close().then ->
-            expect('.up-overlay[up-mode=modal] .content').not.toBeAttached()
+            expect('up-overlay[up-mode=modal] .content').not.toBeAttached()
             done()
 
       it 'does nothing if no modal is open', (done) ->
@@ -494,8 +494,8 @@ describe 'up.modal (deprecated)', ->
           @respondWith '<div class="target">new content</div>'
 
         next =>
-          expect('.up-overlay[up-mode=modal]').toBeAttached()
-          expect('.up-overlay-content').toHaveText('new content')
+          expect('up-overlay[up-mode=modal]').toBeAttached()
+          expect('up-overlay-content').toHaveText('new content')
 
       describe 'when modifier keys are held', ->
 
@@ -588,7 +588,7 @@ describe 'up.modal (deprecated)', ->
 
         next =>
           expect(location.pathname).toEqual('/new-path')
-          expect('.up-overlay[up-mode=modal] .target').toHaveText('modal content')
+          expect('up-overlay[up-mode=modal] .target').toHaveText('modal content')
 
           history.back()
 
@@ -598,7 +598,7 @@ describe 'up.modal (deprecated)', ->
         next =>
           expect(location.pathname).toEqual('/original-path')
           expect('.container').toHaveText('restored container content')
-          expect('.up-overlay').not.toBeAttached()
+          expect('up-overlay').not.toBeAttached()
 
       it 'allows to open a modal after closing a previous modal with the escape key (bugfix)', asyncSpec (next) ->
         up.motion.config.enabled = false
@@ -644,11 +644,11 @@ describe 'up.modal (deprecated)', ->
 
         next =>
           expect(up.modal.isOpen()).toBe(true)
-          expect($('.up-overlay').attr('up-mode')).toEqual('drawer')
+          expect($('up-overlay').attr('up-mode')).toEqual('drawer')
           windowHeight = up.viewport.rootHeight()
-          modalHeight = $('.up-overlay-frame').outerHeight()
+          modalHeight = $('up-overlay-frame').outerHeight()
           expect(modalHeight).toEqual(windowHeight)
-          expect($('.up-overlay-frame').offset()).toEqual(top: 0, left: 0)
+          expect($('up-overlay-frame').offset()).toEqual(top: 0, left: 0)
 
       it 'puts the drawer on the right with [up-position=right]', asyncSpec (next) ->
         $link = $fixture('a[href="/foo"][up-drawer=".target"][up-position="right"]').text('label')
@@ -661,9 +661,9 @@ describe 'up.modal (deprecated)', ->
         next =>
           expect(up.modal.isOpen()).toBe(true)
           windowWidth = up.viewport.rootWidth()
-          modalWidth = $('.up-overlay-frame').outerWidth()
+          modalWidth = $('up-overlay-frame').outerWidth()
           scrollbarWidth = up.viewport.scrollbarWidth()
-          expect($('.up-overlay-frame').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
+          expect($('up-overlay-frame').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
 
     describe '[up-dismiss]', ->
 
@@ -680,7 +680,7 @@ describe 'up.modal (deprecated)', ->
           up.modal.extract('.target', '<div class="target"><a up-close>text</a></div>', animation: false)
 
           next =>
-            $link = $('.up-overlay .up-overlay-dismiss') # link is within the modal
+            $link = $('up-overlay up-overlay-dismiss') # link is within the modal
             Trigger.clickSequence($link)
 
           next =>
@@ -704,7 +704,7 @@ describe 'up.modal (deprecated)', ->
         up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false)
 
         next =>
-          $closeIcon = $('.up-overlay-dismiss')
+          $closeIcon = $('up-overlay-dismiss')
           Trigger.clickSequence($closeIcon)
 
         next =>
@@ -765,7 +765,7 @@ describe 'up.modal (deprecated)', ->
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, dismissable: false)
 
           next =>
-            expect('.up-overlay').not.toHaveDescendant('.up-overlay-dismiss')
+            expect('up-overlay').not.toHaveDescendant('up-overlay-dismiss')
 
         it 'does not close the modal on backdrop click', asyncSpec (next) ->
           up.modal.extract('.modal', '<div class="modal">Modal content</div>', animation: false, dismissable: false)
@@ -804,7 +804,7 @@ describe 'up.modal (deprecated)', ->
         next =>
           expect($outside).toBeAttached()
           expect($outside).toHaveText('old outside')
-          expect($('.up-overlay-content')).toHaveText('new text')
+          expect($('up-overlay-content')).toHaveText('new text')
 
       it 'auto-closes the modal when a replacement from inside the modal affects a selector behind the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -818,7 +818,7 @@ describe 'up.modal (deprecated)', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-overlay')).not.toBeAttached()
+          expect($('up-overlay')).not.toBeAttached()
 
       it 'does not restore the covered URL when auto-closing (since it would override the URL from the triggering update)', asyncSpec (next) ->
         up.history.config.enabled = true
@@ -851,7 +851,7 @@ describe 'up.modal (deprecated)', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-overlay')).toBeAttached()
+          expect($('up-overlay')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector outside the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -867,7 +867,7 @@ describe 'up.modal (deprecated)', ->
 
         next =>
           expect($('.outside')).toHaveText('new outside')
-          expect($('.up-overlay')).toBeAttached()
+          expect($('up-overlay')).toBeAttached()
 
       it 'does not auto-close the modal when a replacement from outside the modal affects a selector inside the modal', asyncSpec (next) ->
         $fixture('.outside').text('old outside')
@@ -881,7 +881,7 @@ describe 'up.modal (deprecated)', ->
 
         next =>
           expect($('.inside')).toHaveText('new inside')
-          expect($('.up-overlay')).toBeAttached()
+          expect($('up-overlay')).toBeAttached()
 
       it 'does not auto-close the modal when the new fragment is within a popup', asyncSpec (next) ->
         up.modal.visit('/modal', target: '.modal-content')
@@ -896,8 +896,8 @@ describe 'up.modal (deprecated)', ->
           @respondWith("<div class='popup-content'></div>")
 
         next =>
-          expect($('.up-overlay[up-mode=modal]')).toBeAttached()
-          expect($('.up-overlay[up-mode=popup]')).toBeAttached()
+          expect($('up-overlay[up-mode=modal]')).toBeAttached()
+          expect($('up-overlay[up-mode=popup]')).toBeAttached()
 
       it 'does not close the modal when a clicked [up-target] link within the modal links to cached content (bugfix)', asyncSpec (next) ->
         up.modal.extract '.content', """
@@ -907,7 +907,7 @@ describe 'up.modal (deprecated)', ->
           """
 
         next =>
-          $link = $('.up-overlay .content a')
+          $link = $('up-overlay .content a')
           expect($link).toBeAttached()
           up.proxy.preload($link)
 
@@ -919,8 +919,8 @@ describe 'up.modal (deprecated)', ->
           """
 
         next =>
-          Trigger.clickSequence('.up-overlay .content a')
+          Trigger.clickSequence('up-overlay .content a')
 
         next =>
-          expect($('.up-overlay')).toBeAttached()
-          expect($('.up-overlay .content')).toHaveText('new text')
+          expect($('up-overlay')).toBeAttached()
+          expect($('up-overlay .content')).toHaveText('new text')
