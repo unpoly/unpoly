@@ -22,6 +22,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that responses for a closed layer will not update anything
   - Test that [up-params] will add additional query params to a followed links that already has query params
   - Test that [up-params] will add additional payload to a submited form that already has some fields
   - Test for up.element.isDetached()
