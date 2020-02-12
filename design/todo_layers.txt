@@ -1,4 +1,5 @@
 - Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
+- Move layer defaults back into the overlay classes. We don't need to integrate it with up.Record.
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
