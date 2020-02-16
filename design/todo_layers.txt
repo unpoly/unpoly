@@ -1,3 +1,14 @@
+- result = await up.layer.ask({ acceptLocation: "/users/:id"})
+  up.reload('.author-select', { params: result.id }) } }
+- Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
+- Layers often terminate once e.g. a show view is reached.
+  - Do we want this? <a up-accept-location="/users/*">
+  - It would require another line of code to extract the user ID from the result
+- New attribute [up-emit]
+  - For Unpoly links and forms this is another guardEvent
+  - For other elements this reacts on click
+- Konfigurierbares form.config.submit mit Selektoren
+- Option to send XHR Headers or not
 - Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
 - Check new layer styles visually
   - Nested layers should have more padding
