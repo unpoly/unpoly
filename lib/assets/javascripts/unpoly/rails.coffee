@@ -9,7 +9,9 @@ up.rails = do ->
   e = up.element
 
   isRails = ->
-    !!(window.Rails || (window.jQuery?.rails))
+    window._rails_loaded || # current rails-ujs integrated with Rails 5.2+
+      window.Rails ||       # legacy rails/rails-ujs gem
+      window.jQuery?.rails  # legacy rails/jquery-ujs gem
 
   u.each ['method', 'confirm'], (feature) ->
 
