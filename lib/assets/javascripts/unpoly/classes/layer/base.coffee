@@ -168,13 +168,14 @@ class up.Layer extends up.Record
         @savedLocation
 
     set: (location) ->
-      @savedLocation = location
+      previousLocation = @savedLocation
+      @savedLocation = up.feedback.normalizeURL(location)
 
-      if @hasLiveHistory()
-        up.history.push(location)
-      else
-        # up.feedback won't receive an up:history:push event
-        up.feedback.updateLayer(this)
+      if previousLocation != location
+        @emit('up:layer:location:changed', { location })
+
+        if @hasLiveHistory()
+          up.history.push(location)
 
   hasLiveHistory: ->
     @history && @isFront()

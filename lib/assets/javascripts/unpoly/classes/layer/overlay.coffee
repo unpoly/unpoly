@@ -100,15 +100,30 @@ class up.Layer.Overlay extends up.Layer
           u.muteRejection @dismiss()
           up.event.halt(event)
 
-    @registerCloser(@acceptOn, @accept)
-    @registerCloser(@dismissOn, @dismiss)
+    @registerLocationCloser(@acceptLocation, @accept)
+    @registerLocationCloser(@denyLocation, @accept)
 
-  registerCloser: (closer, close) ->
+    @registerEventCloser(@acceptOn, @accept)
+    @registerEventCloser(@dismissOn, @dismiss)
+
+  registerEventCloser: (closer, closeFn) ->
     if closer
       [eventType, selector] = closer.match(/^([^ ]+)(?: (.*))?$/)
       @on @eventType, selector, (event) =>
         event.preventDefault()
-        close.call(this, event)
+        closeFn.call(this, event)
+
+  registerLocationCloser: (urlPattern, closeFn) ->
+    if urlPattern
+      # TODO: Build up.UrlPattern and use it from up.LinkFeedbackUrls
+      urlPattern = new up.UrlPattern(urlPattern)
+      @on 'up:layer:location:changed', selector, (event) =>
+        location = event.location
+        if match = urlPattern.match(location)
+          # match now contains named capture groups, e.g. when
+          # '/decks/:deckId/cards/:cardId' is matched against
+          # '/decks/123/cards/456' match is { deckId: 123, cardId: 456 }.
+          closeFn.call(this, u.merge(match, { location }))
 
   destroyElement: (options) ->
     up.destroy(@element, u.merge(options, log: false))

@@ -26,7 +26,8 @@
   - OR roll back the change
 - Rename { base } back to { currentLayer }?
 - Try changes in demo.unpoly.com
-- Rails detection does not work that way! It's window._rails_loaded now.
+- Should history events be triggered on the front layer?
+- What's our policy on acronym casing? We still have up.util.normalizeURL
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).

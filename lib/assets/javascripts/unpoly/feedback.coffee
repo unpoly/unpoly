@@ -312,17 +312,25 @@ up.feedback = do ->
   ###
 
   updateLayerIfLocationChanged = (layer) ->
-    previousLocation = layer.feedbackLocation
-    newLocation = normalizeURL(layer.location)
-    if !previousLocation || previousLocation != newLocation
-      layer.feedbackLocation = newLocation
+    processedLocation = layer.feedbackLocation
+
+    # layer.location is already normalized with up.feedback.normalizedUrl.
+    # See up.Layer.Base#location setter for details.
+    currentLocation = layer.location
+
+    # A history change might call this function multiple times,
+    # since we listed to up:history:pushed and up:layer:location:changed.
+    # For this reason we check whether the current location differs from
+    # the last processed location.
+    if !processedLocation || processedLocation != currentLocation
+      layer.feedbackLocation = currentLocation
       updateLinksWithinNavs(layer.element, { layer })
 
   onHistoryChanged = ->
     frontLayer = up.layer.front
 
     # We allow Unpoly-unaware code to use the pushState API and change the
-    # front layer in the process.
+    # front layer in the process. See up.Layer.Base#location setter.
     if frontLayer.hasLiveHistory()
       updateLayerIfLocationChanged(frontLayer)
 
@@ -333,6 +341,9 @@ up.feedback = do ->
   up.on 'up:fragment:inserted', (event, newFragment) ->
     updateFragment(newFragment, event)
 
+  up.on 'up:layer:location:changed', (event) ->
+    updateLayerIfLocationChanged(event.layer)
+
   # The framework is reset between tests
   up.on 'up:framework:reset', reset
 
@@ -342,5 +353,6 @@ up.feedback = do ->
   around: around
   aroundForOptions: aroundForOptions
   updateLayer: updateLayerIfLocationChanged
+  normalizeURL: normalizeURL
 
 up.legacy.renamedModule 'navigation', 'feedback'
