@@ -28,7 +28,7 @@
 - Try changes in demo.unpoly.com
 - Should history events be triggered on the front layer?
 - What's our policy on acronym casing? We still have up.util.normalizeURL
-- Rename acceptOn to acceptEvent to prevent confusion with onAccepted and also be symmetrical to acceptLocation
+- Re-use UrlPattern in LinkFeedbackUrls, but don't normalize more than necessary
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).

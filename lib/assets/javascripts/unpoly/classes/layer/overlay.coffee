@@ -103,8 +103,8 @@ class up.Layer.Overlay extends up.Layer
     @registerLocationCloser(@acceptLocation, @accept)
     @registerLocationCloser(@denyLocation, @accept)
 
-    @registerEventCloser(@acceptOn, @accept)
-    @registerEventCloser(@dismissOn, @dismiss)
+    @registerEventCloser(@acceptEvent, @accept)
+    @registerEventCloser(@dismissEvent, @dismiss)
 
   registerEventCloser: (closer, closeFn) ->
     if closer
@@ -115,15 +115,14 @@ class up.Layer.Overlay extends up.Layer
 
   registerLocationCloser: (urlPattern, closeFn) ->
     if urlPattern
-      # TODO: Build up.UrlPattern and use it from up.LinkFeedbackUrls
-      urlPattern = new up.UrlPattern(urlPattern)
+      urlPattern = new up.UrlPattern(urlPattern, up.feedback.normalizeURL)
       @on 'up:layer:location:changed', selector, (event) =>
         location = event.location
-        if match = urlPattern.match(location)
-          # match now contains named capture groups, e.g. when
+        if resolution = urlPattern.recognize(location)
+          # resolution now contains named capture groups, e.g. when
           # '/decks/:deckId/cards/:cardId' is matched against
-          # '/decks/123/cards/456' match is { deckId: 123, cardId: 456 }.
-          closeFn.call(this, u.merge(match, { location }))
+          # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
+          closeFn.call(this, u.merge(resolution, { location }))
 
   destroyElement: (options) ->
     up.destroy(@element, u.merge(options, log: false))

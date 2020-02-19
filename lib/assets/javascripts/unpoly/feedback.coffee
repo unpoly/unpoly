@@ -352,7 +352,6 @@ up.feedback = do ->
   stop: stop
   around: around
   aroundForOptions: aroundForOptions
-  updateLayer: updateLayerIfLocationChanged
   normalizeURL: normalizeURL
 
 up.legacy.renamedModule 'navigation', 'feedback'
