@@ -30,7 +30,7 @@ class up.LinkFeedbackURLs
   regExpFromPattern: (pattern) ->
     placeholder = "__ASTERISK__"
     pattern = pattern.replace(/\*/g, placeholder)
-    pattern = u.escapeRegexp(pattern)
+    pattern = u.escapeRegExp(pattern)
     pattern = pattern.replace(new RegExp(placeholder, 'g'), '.*?')
     pattern = new RegExp('^' + pattern + '$')
 
@@ -53,7 +53,7 @@ class up.LinkFeedbackURLs
 #  doesMatchPattern: (pattern) =>
 #    placeholder = "__ASTERISK__"
 #    pattern = pattern.replace(/\*/g, placeholder)
-#    pattern = u.escapeRegexp(pattern)
+#    pattern = u.escapeRegExp(pattern)
 #    pattern = pattern.replace(new RegExp(placeholder, 'g'), '.*?')
 #    pattern = new RegExp('^' + pattern + '$')
 #

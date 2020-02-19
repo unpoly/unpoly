@@ -22,4 +22,12 @@ describe 'up.UrlPattern', ->
       pattern = new up.UrlPattern('/foo/:middle/baz')
       expect(pattern.matches('/foo/bar/baz')).toBe(true)
 
-    
+    it 'returns true if the given URL matches either of two space-separated URLs', ->
+      pattern = new up.UrlPattern('/foo /bar')
+      expect(pattern.matches('/foo')).toBe(true)
+      expect(pattern.matches('/bar')).toBe(true)
+
+    it 'returns false if the given URL matchers neither of two space-separated URLs', ->
+      pattern = new up.UrlPattern('/foo /bar')
+      expect(pattern.matches('/baz')).toBe(false)
+

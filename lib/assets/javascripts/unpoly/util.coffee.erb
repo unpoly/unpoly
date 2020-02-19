@@ -1207,10 +1207,10 @@ up.util = do ->
     string.replace /[&<>"]/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
 
   ###**
-  @function up.util.escapeRegexp
+  @function up.util.escapeRegExp
   @internal
   ###
-  escapeRegexp = (string) ->
+  escapeRegExp = (string) ->
     # From https://github.com/benjamingr/RegExp.escape
     string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 
@@ -1818,7 +1818,7 @@ up.util = do ->
     up.legacy.deprecated('up.util.escapeHtml', 'up.util.escapeHTML')
     escapeHTML(args...)
   escapeHTML: escapeHTML
-  escapeRegexp: escapeRegexp
+  escapeRegExp: escapeRegExp
   sequence: sequence
   # previewable: previewable
   # parsePath: parsePath
