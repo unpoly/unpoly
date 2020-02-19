@@ -31,3 +31,13 @@ describe 'up.UrlPattern', ->
       pattern = new up.UrlPattern('/foo /bar')
       expect(pattern.matches('/baz')).toBe(false)
 
+  describe '#recognize', ->
+
+    it 'returns an object mapping named segments to their value', ->
+      pattern = new up.UrlPattern('/foo/:one/:two/baz')
+      expect(pattern.recognize('/foo/bar/bam/baz')).toEqual { one: 'bar', two: 'bam' }
+
+    it 'returns a missing value if the given URL does not match the pattern', ->
+      pattern = new up.UrlPattern('/foo')
+      expect(pattern.recognize('/bar')).toBeMissing()
+      
