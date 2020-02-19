@@ -19,5 +19,8 @@ class up.UrlPattern
   recognize: (url) ->
     url = @normalizeUrl(url)
     if match = @regexp.exec(url)
-      u.mapObject @groupNames, (groupName, groupIndex) ->
-        [groupName, match[groupIndex + 1]]
+      resolution = {}
+      @groupNames.forEach (groupName, groupIndex) =>
+        if value = match[groupIndex + 1]
+          resolution[groupName] = value
+      return resolution
