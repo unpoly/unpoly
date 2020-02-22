@@ -1,23 +1,26 @@
 u = up.util
 
-class up.UrlPattern
+class up.URLPattern
 
-  constructor: (pattern, @normalizeUrl = u.identity) ->
+  constructor: (pattern, @normalizeURL = u.normalizeURL) ->
     @groupNames = []
 
-    pattern = pattern.split(' ').map(@normalizeUrl).map(u.escapeRegExp).join('|')
+    if u.isArray(pattern)
+      pattern = pattern.join(' ')
+
+    pattern = u.splitValues(pattern).map(@normalizeURL).map(u.escapeRegExp).join('|')
     pattern = pattern.replace /\\\*/g, '.*?'
     pattern = pattern.replace /\:([\w-]+)/ig, (match, name) =>
       @groupNames.push(name)
       return '([^/?#]+)'
     @regexp = new RegExp('^' + pattern + '$')
 
-  matches: (url) ->
-    url = @normalizeUrl(url)
+  matches: (url, doNormalize = true) ->
+    url = @normalizeURL(url) if doNormalize
     return @regexp.test(url)
 
-  recognize: (url) ->
-    url = @normalizeUrl(url)
+  recognize: (url, doNormalize = true) ->
+    url = @normalizeURL(url) if doNormalize
     if match = @regexp.exec(url)
       resolution = {}
       @groupNames.forEach (groupName, groupIndex) =>

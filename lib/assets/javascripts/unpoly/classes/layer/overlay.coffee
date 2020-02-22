@@ -115,7 +115,7 @@ class up.Layer.Overlay extends up.Layer
 
   registerLocationCloser: (urlPattern, closeFn) ->
     if urlPattern
-      urlPattern = new up.UrlPattern(urlPattern, up.feedback.normalizeURL)
+      urlPattern = new up.URLPattern(urlPattern)
       @on 'up:layer:location:changed', selector, (event) =>
         location = event.location
         if resolution = urlPattern.recognize(location)

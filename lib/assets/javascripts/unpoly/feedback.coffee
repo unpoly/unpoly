@@ -77,7 +77,7 @@ up.feedback = do ->
     # Check if we have computed the URLs before.
     # Computation is sort of expensive (multiplied by number of links),
     # so we cache the results in a link property
-    return link.upFeedbackURLs ||= new up.LinkFeedbackURLs(link, normalizeURL)
+    return link.upFeedbackURLs ||= new up.LinkFeedbackURLs(link)
 
   updateFragment = (fragment, options) ->
     if e.closest(fragment, navSelector())
@@ -342,6 +342,7 @@ up.feedback = do ->
     updateFragment(newFragment, event)
 
   up.on 'up:layer:location:changed', (event) ->
+    console.debug("up.feedback go tevent %o", event)
     updateLayerIfLocationChanged(event.layer)
 
   # The framework is reset between tests

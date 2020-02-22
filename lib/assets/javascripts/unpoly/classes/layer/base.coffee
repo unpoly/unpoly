@@ -169,9 +169,10 @@ class up.Layer extends up.Record
 
     set: (location) ->
       previousLocation = @savedLocation
-      @savedLocation = up.feedback.normalizeURL(location)
+      location = up.feedback.normalizeURL(location)
 
       if previousLocation != location
+        @savedLocation = location
         @emit('up:layer:location:changed', { location })
 
         if @hasLiveHistory()

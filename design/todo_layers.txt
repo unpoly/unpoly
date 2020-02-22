@@ -5,7 +5,7 @@
   - Do we want this? <a up-accept-location="/users/*">
   - It would require another line of code to extract the user ID from the result
 - New attribute [up-emit]
-  - For Unpoly links and forms this is another guardEvent
+  - For Unpoly links and forms this is another guardEvent (userGuardEvent)
   - For other elements this reacts on click
 - Konfigurierbares form.config.submit mit Selektoren
 - Option to send XHR Headers or not
@@ -28,7 +28,13 @@
 - Try changes in demo.unpoly.com
 - Should history events be triggered on the front layer?
 - What's our policy on acronym casing? We still have up.util.normalizeURL
-- Re-use UrlPattern in LinkFeedbackUrls, but don't normalize more than necessary
+- What exactly are the variables available in onAccepted and upDismissed? I think it should be layer, event, value
+- Should up-accept-event take an array?
+  - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
+- up.validate() is strange to preview a form change
+  - maybe offer up.form.preview() and up-preview=".selector"
+  - then in the inspector:
+    - def up.preview?; validate? or request['X-Up-Preview']; end
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
