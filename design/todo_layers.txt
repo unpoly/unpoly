@@ -28,11 +28,11 @@
 - Try changes in demo.unpoly.com
 - Should history events be triggered on the front layer?
 - What's our policy on acronym casing? We still have up.util.normalizeURL
-- What exactly are the variables available in onAccepted and upDismissed? I think it should be layer, event, value
 - Should up-accept-event take an array?
   - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
 - up.validate() is strange to preview a form change
   - maybe offer up.form.preview() and up-preview=".selector"
+  - would be useful to preview another field without triggering validations? would this even work in rails, where a lot of logic hangs on validation hook?
   - then in the inspector:
     - def up.preview?; validate? or request['X-Up-Preview']; end
 
@@ -42,6 +42,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that the string callback to up-on-accepted can use the context { event, layer, value }
+  - Test that the string callback to up-on-opening can use the context { event, layer }
   - Test that [up-params] will add additional query params to a followed links that already has query params
   - Test that [up-params] will add additional payload to a submited form that already has some fields
   - Test for up.element.isDetached()
