@@ -37,11 +37,6 @@ class up.Request.XhrRenderer
       @addHeaderFromRequest(up.protocol.successHeader(key), key)
       @addHeaderFromRequest(up.protocol.failHeader(key), up.fragment.failKey(key))
 
-    # Many AJAX libraries add a `X-Requested-With: XMLHttpRequest` header to their requests
-    # to allow the server to distinguish AJAX requests from full page loads.
-    unless @request.isCrossDomain()
-      @addHeader('X-Requested-With', 'XMLHttpRequest')
-
     if (csrfHeader = @request.csrfHeader()) && (csrfToken = @request.csrfToken())
       @addHeader(csrfHeader, csrfToken)
 
