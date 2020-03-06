@@ -34,13 +34,15 @@
 - Instead of normalizing URL strings and carefully making sure to never double-normalize the same string (for performance reasons), have an exposed up.Location object that toString() to its origin URL. Normalizing can happen when comparing.
 - Each mode gets their own implementation
   - Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
-
+- If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
+- Consider renaming { navigate: false } to { background: true }
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that up:proxy:load has access to the { preload } attribute
   - Test [up-accept-location="/foo/:user_id"]
   - Test that the string callback to up-on-accepted can use the context { event, layer, value }
   - Test that the string callback to up-on-opening can use the context { event, layer }
