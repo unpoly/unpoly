@@ -191,6 +191,7 @@ Accessibility
 Later?
 ------
 
+- Make the { request } available to up:fragment:inserted, so we can have a variant of https://makandracards.com/makandra/79164 that does not react to { preload } events
 - When xhr.responseURL is not the requested URL, assume that there was a redirect and the response method is now GET
 - Rename request-related events
   - up:request:load
@@ -202,7 +203,6 @@ Later?
   - Possibly rename up.proxy to up.request?
     - What about the up.request method?
       - up.request.fetch()?
-
 - Allow shortcuts like up-any-target that set both success and fail options (if up-fail-options is not sufficient)
 - Allow placement of body in overlays with <up-body>
   - Then <body> can really be a default target for all fragments
