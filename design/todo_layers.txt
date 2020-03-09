@@ -1,3 +1,10 @@
+- result = await up.layer.ask({ acceptLocation: "/users/:id"})
+  up.reload('.author-select', { params: result.id }) } }
+- Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
+- New attribute [up-emit]
+  - For Unpoly links and forms this is another guardEvent (userGuardEvent)
+  - For other elements this reacts on click
+- Konfigurierbares form.config.submitTargets mit Selektoren
 - Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
 - Move layer defaults back into the overlay classes. We don't need to integrate it with up.Record.
 - Check new layer styles visually
@@ -16,6 +23,18 @@
   - OR roll back the change
 - Rename { base } back to { currentLayer }?
 - Try changes in demo.unpoly.com
+- Should history events be triggered on the front layer?
+- What's our policy on acronym casing? We still have up.util.normalizeURL
+- Should up-accept-event take an array?
+  - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
+- up.validate() is strange to preview a form change
+  - maybe offer up.form.preview() and up-preview=".selector"
+  - would be useful to preview another field without triggering validations? would this even work in rails, where a lot of logic hangs on validation hook?
+  - then in the inspector:
+    - def up.preview?; validate? or request['X-Up-Preview']; end
+- Instead of normalizing URL strings and carefully making sure to never double-normalize the same string (for performance reasons), have an exposed up.Location object that toString() to its origin URL. Normalizing can happen when comparing.
+- Each mode gets their own implementation
+  - Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -24,6 +43,9 @@ Have you noticed how noticed how pages fade in
 
 - Tests
   - Test that responses for a closed layer will not update anything
+  - Test [up-accept-location="/foo/:user_id"]
+  - Test that the string callback to up-on-accepted can use the context { event, layer, value }
+  - Test that the string callback to up-on-opening can use the context { event, layer }
   - Test that [up-params] will add additional query params to a followed links that already has query params
   - Test that [up-params] will add additional payload to a submited form that already has some fields
   - Test for up.element.isDetached()
@@ -217,6 +239,15 @@ Later?
         X-Up-Tailored: ["target", "mode"]
   - We can then use this information to resolve other requests in the queue
   - => But this would only help for requests already in the queue, yes? Because new requests would need to wait what the server responds.
+- If all layers have their own implementation anyway, should we re-visit zones?
+  - <a href="/foo" up-target=".bar" up-mode="zone" up-anchor=".slot"> (oder up-orgin? naa...)
+  - -<div class="slot">
+        <up-zone>
+          <up-zone-content></up-zone-content>
+        </up-zone>
+     </div>
+  - Should the term "layer" be renamed with "zone" everywhere?
+  - This might be more useful if we had multiple children per layer
 
 
 Decisions

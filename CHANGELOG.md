@@ -21,6 +21,8 @@ Unreleased
   - focus return on close
 - up.nav sets [aria-current]
 - up.history.config.enabled
+- Requests sent by Unpoly no longer have a `X-Requested-With: XMLHttpRequest` header.
+  If you need that old behavior: up.on('up:proxy:load', function(event) { event.request.headers['X-Requested-With'] = 'XMLHttpRequest' })
 
 
 

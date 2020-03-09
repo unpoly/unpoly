@@ -211,8 +211,10 @@ up.link = do ->
     parser.parse(up.layer.closeCallbackAttr, 'onDismiss')
     parser.parse(up.layer.closeCallbackAttr, 'onDismissing')
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
-    parser.string('acceptOn')
-    parser.string('dismissOn')
+    parser.string('acceptEvent')
+    parser.string('dismissEvent')
+    parser.string('acceptLocation')
+    parser.string('dismissLocation')
 
     # Viewport options
     parser.booleanOrString('reveal')

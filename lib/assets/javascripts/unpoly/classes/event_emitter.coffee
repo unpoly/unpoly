@@ -72,6 +72,9 @@ class up.EventEmitter extends up.Record
 
   @fromEmitArgs: (args, defaults = {}) ->
     options = u.extractOptions(args)
+    options = u.merge(defaults, options)
+
+    console.debug("fromEmitArgs got options %o, defaults %o", u.copy(options), u.copy(defaults))
 
     if u.isElementish(args[0])
       options.target = e.get(args.shift())
@@ -101,6 +104,7 @@ class up.EventEmitter extends up.Record
       # The props object may also include options for the emission, such as
       # { layer }, { target }, { base } or { log }.
       # up.emit([target], eventType, [eventPropsAndEmitOptions])
+      console.debug("Building event from %o / %o", args[0], u.except(options, 'target'))
       options.event = up.event.build(args[0], u.except(options, 'target'))
 
-    new @(u.merge(defaults, options))
+    new @(options)

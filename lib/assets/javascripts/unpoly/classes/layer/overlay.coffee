@@ -100,13 +100,29 @@ class up.Layer.Overlay extends up.Layer
           u.muteRejection @dismiss()
           up.event.halt(event)
 
-    @registerCloser(@acceptOn, @accept)
-    @registerCloser(@dismissOn, @dismiss)
+    @registerLocationCloser(@acceptLocation, @accept)
+    @registerLocationCloser(@denyLocation, @accept)
 
-  registerCloser: (closer, close) ->
+    @registerEventCloser(@acceptEvent, @accept)
+    @registerEventCloser(@dismissEvent, @dismiss)
+
+  registerEventCloser: (closer, closeFn) ->
     if closer
       [eventType, selector] = closer.match(/^([^ ]+)(?: (.*))?$/)
-      @on(@eventType, selector, close.bind(this))
+      @on @eventType, selector, (event) =>
+        event.preventDefault()
+        closeFn.call(this, event)
+
+  registerLocationCloser: (urlPattern, closeFn) ->
+    if urlPattern
+      urlPattern = new up.URLPattern(urlPattern)
+      @on 'up:layer:location:changed', selector, (event) =>
+        location = event.location
+        if resolution = urlPattern.recognize(location)
+          # resolution now contains named capture groups, e.g. when
+          # '/decks/:deckId/cards/:cardId' is matched against
+          # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
+          closeFn.call(this, u.merge(resolution, { location }))
 
   destroyElement: (options) ->
     up.destroy(@element, u.merge(options, log: false))
