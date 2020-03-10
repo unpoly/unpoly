@@ -16,9 +16,7 @@ class up.Tether
 
     @viewport = up.viewport.closest(@anchor)
     # The document viewport is <html> on some browsers, and we cannot attach children to that.
-    @parent = if @viewport == e.root() then document.body else @viewport
-
-    # TODO: Positionierung vom parent
+    @parent = if @viewport == e.root then document.body else @viewport
 
     # If the offsetParent is within the viewport (or is the viewport) we can simply
     # `position: absolute` and it will move as the viewport scrolls, without JavaScript.
@@ -28,6 +26,7 @@ class up.Tether
   start: (@element) ->
     @element.style.position = 'absolute'
     @setOffset(0, 0)
+    @sync()
     @changeEventSubscription('on')
 
   stop: ->

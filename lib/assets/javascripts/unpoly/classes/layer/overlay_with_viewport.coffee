@@ -26,6 +26,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
+    console.debug("Layer %o is closing", this)
     @teardownClosing()
     animation = => @startCloseAnimation(options)
     @destroyElement({ animation }).then =>

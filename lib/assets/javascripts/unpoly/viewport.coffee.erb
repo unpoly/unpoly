@@ -495,7 +495,6 @@ up.viewport = do ->
     layer = up.layer.get(options)
     url = options.url || layer.location
     tops = options.tops ? scrollTops(options)
-    console.log("--- saveScroll layer=%o, tops=%o", layer, layer.lastScrollTops)
     layer.lastScrollTops.set(url, tops)
 
   ###**

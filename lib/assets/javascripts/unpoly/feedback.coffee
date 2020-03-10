@@ -342,7 +342,6 @@ up.feedback = do ->
     updateFragment(newFragment, event)
 
   up.on 'up:layer:location:changed', (event) ->
-    console.debug("up.feedback go tevent %o", event)
     updateLayerIfLocationChanged(event.layer)
 
   # The framework is reset between tests

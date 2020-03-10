@@ -10,9 +10,6 @@ Base class for all non-root layer modes
 ###
 class up.Layer.Overlay extends up.Layer
 
-  @getter 'tagName', ->
-    "up-#{@mode}"
-
   keys: ->
     super().concat [
       'position',
@@ -126,7 +123,7 @@ class up.Layer.Overlay extends up.Layer
     return e.affix(parentElement, @selector(part), options)
 
   selector: (part) ->
-    u.compact([@constructor.tagName, part]).join('-')
+    u.compact(['up', @mode, part]).join('-')
 
   setupClosing: ->
     if @buttonDismissable
@@ -156,7 +153,7 @@ class up.Layer.Overlay extends up.Layer
       up.event.halt(event)
 
   registerEventCloser: (eventTypes, closeFn) ->
-    return less eventTypes
+    return unless eventTypes
     @on eventTypes, (event) =>
       event.preventDefault()
       closeFn.call(this, event)

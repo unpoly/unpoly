@@ -46,6 +46,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that a modal opener with [up-instant] doesn't immediately close the new layer (because that closes on parent click)
   - Test that responses for a closed layer will not update anything
   - Test [up-accept-location="/foo/:user_id"]
   - Test that the string callback to up-on-accepted can use the context { event, layer, value }

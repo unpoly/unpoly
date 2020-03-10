@@ -29,7 +29,7 @@ class up.Layer.Root extends up.Layer
     #    on Chrome, Firefox, IE11, Safari.
     return e.root
 
-  @selector: ->
+  selector: ->
     'html'
 
   allElements: (selector) ->
