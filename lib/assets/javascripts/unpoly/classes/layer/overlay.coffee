@@ -87,6 +87,9 @@ class up.Layer.Overlay extends up.Layer
   createBackdropElement: (parentElement) ->
     @backdropElement = @affix(parentElement, 'backdrop')
 
+  createViewportElement: (parentElement) ->
+    @viewportElement = @affix(parentElement, 'viewport', 'up-viewport': '')
+
   createFrameElement: (parentElement) ->
     @frameElement = @affix(parentElement, 'frame')
 
