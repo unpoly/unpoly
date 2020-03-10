@@ -10,6 +10,9 @@ Base class for all non-root layer modes
 ###
 class up.Layer.Overlay extends up.Layer
 
+  @getter 'tagName', ->
+    "up-#{@mode}"
+
   keys: ->
     super().concat [
       'position',
@@ -78,74 +81,99 @@ class up.Layer.Overlay extends up.Layer
   closeNow: (options) ->
     throw up.error.notImplemented()
 
-  createElement: ->
-    attrs = u.compactObject
-      mode: @constructor.mode
+  createElement: (parentElement) ->
+    @element = @affix(parentElement, null, @elementAttrs())
+
+  createBackdropElement: (parentElement) ->
+    @backdropElement = @affix(parentElement, 'backdrop')
+
+  createFrameElement: (parentElement) ->
+    @frameElement = @affix(parentElement, 'frame')
+
+  createContentElement: (parentElement) ->
+    @contentElement = @affix(parentElement, 'content')
+
+  setInnerContent: (parentElement, options) ->
+    content = options.content
+    parentElement.appendChild(content)
+    options.onContentAttached?({ layer: this, content })
+
+  createDismissElement: (parentElement) ->
+    @dismissElement = @affix(parentElement, 'dismiss',
+      'up-dismiss': ''
+      'aria-label': @dismissAriaLabel
+    )
+    # Since the dismiss button already has an accessible [aria-label]
+    # we hide the "X" label from screen readers.
+    e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
+
+  getFrameElement: ->
+    @frameElement || @element
+
+  elementAttrs: ->
+    return u.compactObject
       align: @align
       position: @position,
       size: @size,
+      class: @class,
       role: 'dialog', # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/dialog_role
       'aria-modal': true # https://www.w3.org/TR/wai-aria-1.1/#aria-modal
-    @element = e.affix(document.body, 'up-overlay', attrs)
 
-    if @backdrop
-      @backdropElement = e.affix(@element, 'up-overlay-backdrop')
+  affix: (parentElement, part, options) ->
+    return e.affix(parentElement, @selector(part), options)
 
-    if @class
-      @element.classList.add(@class)
+  selector: (part) ->
+    u.compact([@constructor.tagName, part]).join('-')
+
+  setupClosing: ->
+    if @buttonDismissable
+      @createDismissElement(@getFrameElement())
 
     if @outsideDismissable
-      @element.addEventListener 'click', (event) =>
-        unless e.closest(event.target, 'up-overlay-frame')
-          u.muteRejection @dismiss()
-          up.event.halt(event)
+      elements = u.compact([@parent.element, @backdropElement])
+      @unbindOutsideClicked = up.on(elements, 'click up:action:consume', @onOutsideClicked)
 
+    # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
     @registerLocationCloser(@acceptLocation, @accept)
     @registerLocationCloser(@denyLocation, @accept)
 
+    # let { userId } = await up.layer.open({ acceptEvent: 'user:show' })
     @registerEventCloser(@acceptEvent, @accept)
     @registerEventCloser(@dismissEvent, @dismiss)
 
-  registerEventCloser: (closer, closeFn) ->
-    if closer
-      [eventType, selector] = closer.match(/^([^ ]+)(?: (.*))?$/)
-      @on @eventType, selector, (event) =>
-        event.preventDefault()
-        closeFn.call(this, event)
+  teardownClosing: ->
+    @unbindOutsideClicked?()
+
+  onOutsideClicked: (event) =>
+    # Check whether the event actually hit an outside element.
+    # E.g. for popups it is possible that the user clicked on the popup frame (<up-popup>)
+    # and the event bubbled up to the containing parent layer.
+    unless @getFrameElement().contains(event.target)
+      u.muteRejection @dismiss()
+      up.event.halt(event)
+
+  registerEventCloser: (eventTypes, closeFn) ->
+    return less eventTypes
+    @on eventTypes, (event) =>
+      event.preventDefault()
+      closeFn.call(this, event)
 
   registerLocationCloser: (urlPattern, closeFn) ->
-    if urlPattern
-      urlPattern = new up.URLPattern(urlPattern)
-      @on 'up:layer:location:changed', selector, (event) =>
-        location = event.location
-        if resolution = urlPattern.recognize(location)
-          # resolution now contains named capture groups, e.g. when
-          # '/decks/:deckId/cards/:cardId' is matched against
-          # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
-          closeFn.call(this, u.merge(resolution, { location }))
+    return unless urlPattern
+    urlPattern = new up.URLPattern(urlPattern)
+    @on 'up:layer:location:changed', selector, (event) =>
+      location = event.location
+      if resolution = urlPattern.recognize(location)
+        # resolution now contains named capture groups, e.g. when
+        # '/decks/:deckId/cards/:cardId' is matched against
+        # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
+        closeFn.call(this, u.merge(resolution, { location }))
 
   destroyElement: (options) ->
     up.destroy(@element, u.merge(options, log: false))
 
-  createDismissElement: (parentElement) ->
-    if @buttonDismissable
-      @dismissElement = e.affix(parentElement, 'up-overlay-dismiss[up-dismiss]',
-        'aria-label': @dismissAriaLabel
-      )
-      # Since the dismiss button already has an accessible [aria-label]
-      # we hide the "X" label from screen readers.
-      e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
-
-  frameInnerContent: (parentElement, options) ->
-    content = options.content
-    @frameElement = e.affix(parentElement, 'up-overlay-frame')
-    @contentElement = e.affix(@frameElement, 'up-overlay-content')
-    @contentElement.appendChild(content)
-    @createDismissElement(@frameElement)
-    options.onContentAttached?({ layer: this, content })
-
   startAnimation: (options = {}) ->
-    whenFrameClosed = up.animate(@frameElement, options.frameAnimation, options)
+    whenFrameClosed = up.animate(@getFrameElement(), options.frameAnimation, options)
     if @backdrop
       whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
 
@@ -172,15 +200,15 @@ class up.Layer.Overlay extends up.Layer
   allElements: (selector) ->
     e.all(@contentElement, selector)
 
-  executeCloseChange: (verb, value, options) ->
-    options = u.merge(options, { verb, value, layer: this })
-    return new up.Change.CloseLayer(options).executeAsync()
-
   accept: (value, options = {}) ->
     @executeCloseChange('accept', value, options)
 
   dismiss: (value, options = {}) ->
     @executeCloseChange('dismiss', value, options)
+
+  executeCloseChange: (verb, value, options) ->
+    options = u.merge(options, { verb, value, layer: this })
+    return new up.Change.CloseLayer(options).executeAsync()
 
   setInert: (inert) ->
     e.toggleInert(@element, inert)

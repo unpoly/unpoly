@@ -471,6 +471,7 @@ up.fragment = do ->
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isRealElement = (element) ->
+    # TODO: Match new overlay elementss
     !e.closest(element, '.up-destroying') && !e.matches(element, 'up-overlay, up-bounds')
 
   ###**

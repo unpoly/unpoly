@@ -370,11 +370,11 @@ up.event = do ->
   consumeAction = (event) ->
     # Halt the event chain to stop duplicate processing of this user interaction.
     halt(event)
-    unless event.type == 'up:action:consumed'
+    unless event.type == 'up:action:consume'
       # Although we have consumed this action and halted the event chain,
       # other components might still need to react. E.g. a popup needs to close when
       # an outside link consumes the user click. So we emit another event for that.
-      emit(event.target, 'up:action:consumed', log: false)
+      emit(event.target, 'up:action:consume', log: false)
 
   onReady = (callback) ->
     # Values are "loading", "interactive" and "completed".

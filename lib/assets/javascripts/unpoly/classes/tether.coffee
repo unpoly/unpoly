@@ -4,8 +4,7 @@ e = up.element
 class up.Tether
 
   constructor: (options) ->
-    @element = options.element or up.fail("Missing { element } option")
-    @anchor = options.anchor or up.fail("Missing { anchor } option")
+    @anchor = options.anchor
 
     [@position, @align] = options.position.split('-')
     if @align
@@ -16,9 +15,19 @@ class up.Tether
     @alignAxis = if @position == 'top' || @position == 'bottom' then 'horizontal' else 'vertical'
 
     @viewport = up.viewport.closest(@anchor)
-    @element.style.position = 'absolute'
-    @setBoundsOffset(0, 0)
+    # The document viewport is <html> on some browsers, and we cannot attach children to that.
+    @parent = if @viewport == e.root() then document.body else @viewport
 
+    # TODO: Positionierung vom parent
+
+    # If the offsetParent is within the viewport (or is the viewport) we can simply
+    # `position: absolute` and it will move as the viewport scrolls, without JavaScript.
+    # If not however, we have no choice but to move it on every scroll event.
+    @syncOnScroll = !@viewport.contains(@anchor.offsetParent)
+
+  start: (@element) ->
+    @element.style.position = 'absolute'
+    @setOffset(0, 0)
     @changeEventSubscription('on')
 
   stop: ->
@@ -26,14 +35,14 @@ class up.Tether
 
   changeEventSubscription: (fn) ->
     up[fn](window, 'resize', @scheduleSync)
-    up[fn](@viewport, 'scroll', @scheduleSync)
+    up[fn](@viewport, 'scroll', @scheduleSync) if @syncOnScroll
 
   scheduleSync: =>
     clearTimeout(@syncTimer)
     @syncTimer = u.task(@sync)
 
   sync: =>
-    rootBox = @element.getBoundingClientRect()
+    elementBox = @element.getBoundingClientRect()
     anchorBox = @anchor.getBoundingClientRect()
 
     left = undefined
@@ -43,7 +52,7 @@ class up.Tether
       when 'horizontal'
         top = switch @position
           when 'top'
-            anchorBox.top - rootBox.height
+            anchorBox.top - elementBox.height
           when 'bottom'
             anchorBox.top + anchorBox.height
 
@@ -53,10 +62,10 @@ class up.Tether
             anchorBox.left
           when 'center'
             # anchored to anchor's horizontal center, grows equally to left/right
-            anchorBox.left + 0.5 * (anchorBox.width - rootBox.width)
+            anchorBox.left + 0.5 * (anchorBox.width - elementBox.width)
           when 'right'
             # anchored to anchor's right, grows to the left
-            anchorBox.left + anchorBox.width - rootBox.width
+            anchorBox.left + anchorBox.width - elementBox.width
 
       when 'vertical'
         top = switch @align
@@ -65,14 +74,14 @@ class up.Tether
             anchorBox.top
           when 'center'
             # anchored to anchor's vertical center, grows equally to left/right
-            anchorBox.top + 0.5 * (anchorBox.height - rootBox.height)
+            anchorBox.top + 0.5 * (anchorBox.height - elementBox.height)
           when 'bottom'
             # anchored to the bottom, grows to the top
-            anchorBox.top + anchorBox.height - rootBox.height
+            anchorBox.top + anchorBox.height - elementBox.height
 
         left = switch @position
           when 'left'
-            anchorBox.left - rootBox.width
+            anchorBox.left - elementBox.width
           when 'right'
             anchorBox.left + anchorBox.width
 
@@ -85,13 +94,13 @@ class up.Tether
     { @position, @align }
 
   moveTo: (targetLeft, targetTop) ->
-    rootBox = @element.getBoundingClientRect()
-    @setBoundsOffset(
-      targetLeft - rootBox.left + @offsetLeft,
-      targetTop - rootBox.top + @offsetTop
+    elementBox = @element.getBoundingClientRect()
+    @setOffset(
+      targetLeft - elementBox.left + @offsetLeft,
+      targetTop - elementBox.top + @offsetTop
     )
 
-  setBoundsOffset: (left, top) ->
+  setOffset: (left, top) ->
     @offsetLeft = left
     @offsetTop = top
     e.setStyle(@element, { left, top })
