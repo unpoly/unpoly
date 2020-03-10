@@ -131,7 +131,7 @@ class up.Layer.Overlay extends up.Layer
 
     if @outsideDismissable
       elements = u.compact([@parent.element, @backdropElement])
-      @unbindOutsideClicked = up.on(elements, 'click up:action:consume', @onOutsideClicked)
+      @unbindOutsideClicked = up.on(elements, 'mousedown', @onOutsideClicked)
 
     # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
     @registerLocationCloser(@acceptLocation, @accept)

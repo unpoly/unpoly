@@ -38,7 +38,7 @@
   - Should up-modal-frame be up-modal-box?
   - Move layer default config back into the classes
   - JS like "contains()" or "isRealElement()" is broken now => Check out hk/layers-simple-classes
-  -
+- Clicking a popover opener should toggle it, not re-show
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).

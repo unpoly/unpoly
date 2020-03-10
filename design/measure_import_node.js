@@ -13,6 +13,9 @@ function pokeQueue() {
   }
 }
 
+foo("bar  xx")
+
+
 function queue(fn) {
   QUEUE.push(fn);
 }

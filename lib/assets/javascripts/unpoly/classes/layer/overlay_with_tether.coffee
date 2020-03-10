@@ -15,6 +15,7 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     @createContentElement(@element)
     @setInnerContent(@contentElement, options)
     @tether.start(@element)
+    @setupClosing()
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
