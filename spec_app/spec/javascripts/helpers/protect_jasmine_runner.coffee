@@ -56,7 +56,8 @@ beforeEach ->
   appendDefaultFallback(document.body)
 
   up.on 'up:layer:opening', (event) ->
-    appendDefaultFallback(event.layer.element.querySelector('up-overlay-content'))
+    contentSelector = event.layer.selector('content')
+    appendDefaultFallback(event.layer.firstElement(contentSelector))
 
 afterEach ->
   up.destroy('default-fallback', log: false)

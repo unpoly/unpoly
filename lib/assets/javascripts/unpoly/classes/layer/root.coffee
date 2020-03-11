@@ -29,6 +29,9 @@ class up.Layer.Root extends up.Layer
     #    on Chrome, Firefox, IE11, Safari.
     return e.root
 
+  selector: ->
+    'html'
+
   allElements: (selector) ->
     matches = e.all(selector)
     # Since our @element also contains all the other layers we need

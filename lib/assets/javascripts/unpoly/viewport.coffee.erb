@@ -69,7 +69,7 @@ up.viewport = do ->
   ###
   config = new up.Config ->
     duration: 0
-    viewports: ['up-overlay-viewport', '[up-viewport]', '[up-fixed]']
+    viewports: ['[up-viewport]', '[up-fixed]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
@@ -495,7 +495,6 @@ up.viewport = do ->
     layer = up.layer.get(options)
     url = options.url || layer.location
     tops = options.tops ? scrollTops(options)
-    console.log("--- saveScroll layer=%o, tops=%o", layer, layer.lastScrollTops)
     layer.lastScrollTops.set(url, tops)
 
   ###**

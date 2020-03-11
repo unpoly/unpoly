@@ -15,7 +15,6 @@ class up.LayerLookup
       @base = new @constructor(@stack, @base, u.merge(options, base: @stack.current)).first()
 
   originLayer: ->
-
     if @origin
       return @ofElement(@origin)
 

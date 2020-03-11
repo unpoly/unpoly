@@ -470,8 +470,8 @@ up.fragment = do ->
     parent = options.parent or up.fail("Missing { parent } option")
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
-  isRealElement = (element) ->
-    !e.closest(element, '.up-destroying') && !e.matches(element, 'up-overlay, up-bounds')
+  isDestroying = (element) ->
+    !e.closest(element, '.up-destroying')
 
   ###**
   Returns the first element matching the given selector, but
@@ -545,7 +545,7 @@ up.fragment = do ->
       # the descendants of rootElement regardless of rootElement's layer.
       candidates = e.all(args...)
 
-    return u.filter(candidates, isRealElement)
+    return u.filter(candidates, isDestroying)
 
   ###**
   Destroys the given element or selector.
@@ -583,10 +583,6 @@ up.fragment = do ->
       return new up.Change.DestroyFragment(options).executeAsync()
     else
       return Promise.resolve()
-
-  shouldLogDestruction = (element, options) ->
-    # Don't log destruction for elements that are either Unpoly internals or frequently destroyed
-    options.log != false && !e.matches(element, 'up-overlay')
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgIntoOptions(args, 'target')

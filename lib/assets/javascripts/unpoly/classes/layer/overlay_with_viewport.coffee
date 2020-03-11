@@ -15,15 +15,19 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   @param {Function} options.onContentAttached
   ###
   openNow: (options) ->
-    @createElement()
-    # @backdropElement = e.affix(@element, 'up-overlay-backdrop')
-    @viewportElement = e.affix(@element, 'up-overlay-viewport')
-    @frameInnerContent(@viewportElement, options)
-
+    @createElement(document.body)
+    @createBackdropElement(@element) if @backdrop
+    @createViewportElement(@element)
+    @createFrameElement(@viewportElement)
+    @createContentElement(@frameElement)
+    @setInnerContent(@contentElement, options)
+    @setupClosing()
     @shiftBody()
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
+    console.debug("Layer %o is closing", this)
+    @teardownClosing()
     animation = => @startCloseAnimation(options)
     @destroyElement({ animation }).then =>
       @unshiftBody()

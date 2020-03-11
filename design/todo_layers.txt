@@ -6,6 +6,7 @@
   - For other elements this reacts on click
 - Konfigurierbares form.config.submitTargets mit Selektoren
 - Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
+- Move layer defaults back into the overlay classes. We don't need to integrate it with up.Record.
 - Check new layer styles visually
   - Nested layers should have more padding
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
@@ -37,13 +38,24 @@
     => Now, in popups the <up-popup> is the frame. we can position a dismiss icon in that.
 - If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
 - Consider renaming { navigate: false } to { background: true }
+- Should up-modal-frame be up-modal-box?
+- Clicking a popover opener should toggle it, not re-show
+- Re-attaching overlays needs to be reworked
+  - OK when body was replaced we still need to re-attach
+  - But there are now new cases when a popup's tether.parent has been swapped. Should we close it then?
+
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 Have you noticed how noticed how pages fade in
 
 - Tests
+<<<<<<< HEAD
   - Test that up:proxy:load has access to the { preload } attribute
+=======
+  - Test that a modal opener with [up-instant] doesn't immediately close the new layer (because that closes on parent click)
+  - Test that responses for a closed layer will not update anything
+>>>>>>> 567c34a82bffaa82305722bd782aa8dd6bdf61b9
   - Test [up-accept-location="/foo/:user_id"]
   - Test that the string callback to up-on-accepted can use the context { event, layer, value }
   - Test that the string callback to up-on-opening can use the context { event, layer }
@@ -290,3 +302,4 @@ Decisions
   => Not now, maybe change that leter
 - Decide whether to do up.layer.accept({ value: { flight_id: 5 }}) or up.layer.accept({ flight_id: 5 })
   => We keep the value as first argument for the symmetry to resolve / reject
+- Decide whether simple overlays like popups should still get up <up-popup-frame> to more easily position the dismiss icon => No

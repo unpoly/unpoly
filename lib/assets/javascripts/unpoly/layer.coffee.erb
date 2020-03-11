@@ -185,6 +185,9 @@ up.layer = do ->
     layers = stack.list(options)
     u.findResult layers, -> layer.firstElement(selector)
 
+#  anySelector = ->
+#    u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
+
   ###**
   # Event handlers for [up-target] etc. are registered to each layer instead of
   # only once to the document. See https://github.com/unpoly/unpoly/issues/79
@@ -285,3 +288,4 @@ up.layer = do ->
     get_element: -> stack.current.element
     get_context: -> stack.current.context
     contains: (args...) -> stack.current.contains(args...)
+    # anySelector: anySelector
