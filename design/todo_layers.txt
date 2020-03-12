@@ -33,6 +33,11 @@
   - then in the inspector:
     - def up.preview?; validate? or request['X-Up-Preview']; end
 - Instead of normalizing URL strings and carefully making sure to never double-normalize the same string (for performance reasons), have an exposed up.Location object that toString() to its origin URL. Normalizing can happen when comparing.
+- Each mode gets their own implementation
+  - Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
+    => Now, in popups the <up-popup> is the frame. we can position a dismiss icon in that.
+- If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
+- Consider renaming { navigate: false } to { background: true }
 - Should up-modal-frame be up-modal-box?
 - Clicking a popover opener should toggle it, not re-show
 - Re-attaching overlays needs to be reworked
@@ -54,8 +59,12 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+<<<<<<< HEAD
+  - Test that up:proxy:load has access to the { preload } attribute
+=======
   - Test that a modal opener with [up-instant] doesn't immediately close the new layer (because that closes on parent click)
   - Test that responses for a closed layer will not update anything
+>>>>>>> 567c34a82bffaa82305722bd782aa8dd6bdf61b9
   - Test [up-accept-location="/foo/:user_id"]
   - Test that the string callback to up-on-accepted can use the context { event, layer, value }
   - Test that the string callback to up-on-opening can use the context { event, layer }
@@ -205,6 +214,7 @@ Accessibility
 Later?
 ------
 
+- Make the { request } available to up:fragment:inserted, so we can have a variant of https://makandracards.com/makandra/79164 that does not react to { preload } events
 - When xhr.responseURL is not the requested URL, assume that there was a redirect and the response method is now GET
 - Rename request-related events
   - up:request:load
@@ -216,7 +226,6 @@ Later?
   - Possibly rename up.proxy to up.request?
     - What about the up.request method?
       - up.request.fetch()?
-
 - Allow shortcuts like up-any-target that set both success and fail options (if up-fail-options is not sufficient)
 - Allow placement of body in overlays with <up-body>
   - Then <body> can really be a default target for all fragments
