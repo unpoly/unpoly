@@ -38,7 +38,16 @@
 - Re-attaching overlays needs to be reworked
   - OK when body was replaced we still need to re-attach
   - But there are now new cases when a popup's tether.parent has been swapped. Should we close it then?
-
+- Hovering over a new [up-instant] link should abort all queued preload links
+  - Preload links already in flight should not be canceled
+  - Allow to disable this behavior for programmatic access, default could be { abort: { preload: true, state: 'queueud' } }
+  - For this we would need a state machine for requests:
+    - 'initialized' ---> 'queued' --> 'loading' --> 'fatal' / 'success' / 'failure'
+    -                       |              v            |
+    -                       +--------> 'aborted' <------+
+- Consider rename `abort` to `cancel` everywhere
+  - Fetch uses abort
+  - I hate the verb
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
@@ -54,7 +63,8 @@ Have you noticed how noticed how pages fade in
   - Test that [up-params] will add additional payload to a submited form that already has some fields
   - Test for up.element.isDetached()
   - Test that up-hungry will not activate in a background layer
-  - Test focus behavior:
+  - Test that when a request was aborted, re-queuing the request will trigger a new network request (rather than returning the aborted version from cache)
+  - Test layer focus behavior:
     - New layers should be focused
     - autofocus in new layers will be respected
     - when closing a layer, the element that originally opened the layer re-gains focus
