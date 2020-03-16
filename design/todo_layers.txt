@@ -50,12 +50,10 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
-<<<<<<< HEAD
   - Test that up:proxy:load has access to the { preload } attribute
-=======
   - Test that a modal opener with [up-instant] doesn't immediately close the new layer (because that closes on parent click)
   - Test that responses for a closed layer will not update anything
->>>>>>> 567c34a82bffaa82305722bd782aa8dd6bdf61b9
+  - Test that up.validate will never update another layer, even if [up-layer] is set on the form and the server responds with 500
   - Test [up-accept-location="/foo/:user_id"]
   - Test that the string callback to up-on-accepted can use the context { event, layer, value }
   - Test that the string callback to up-on-opening can use the context { event, layer }
