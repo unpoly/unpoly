@@ -113,6 +113,7 @@ up.link = do ->
     preloadDelay.reset()
 
   consumeFollowEvent = (event, link) ->
+    console.debug("+++ consuming link action for %o", link)
     up.event.consumeAction(event)
     u.muteRejection follow(link)
 

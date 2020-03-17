@@ -131,7 +131,7 @@ class up.Layer.Overlay extends up.Layer
 
     if @outsideDismissable
       elements = u.compact([@parent.element, @backdropElement])
-      @unbindOutsideClicked = up.on(elements, 'mousedown', @onOutsideClicked)
+      @unbindOutsideClicked = up.on(elements, 'click up:link:follow', (event) => @onOutsideClicked(event))
 
     # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
     @registerLocationCloser(@acceptLocation, @accept)
@@ -144,13 +144,21 @@ class up.Layer.Overlay extends up.Layer
   teardownClosing: ->
     @unbindOutsideClicked?()
 
-  onOutsideClicked: (event) =>
+  onOutsideClicked: (event) ->
+    target = event.target
     # Check whether the event actually hit an outside element.
     # E.g. for popups it is possible that the user clicked on the popup frame (<up-popup>)
     # and the event bubbled up to the containing parent layer.
-    unless @getFrameElement().contains(event.target)
+    if @getFrameElement().contains(target)
+      return
+
+    up.event.halt(event)
+    unless @opener?.contains(target)
       u.muteRejection @dismiss()
-      up.event.halt(event)
+
+  handleEventWithDismiss: (event) ->
+    up.event.halt(event)
+    u.muteRejection @dismiss()
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes
