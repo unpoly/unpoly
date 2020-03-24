@@ -1,5 +1,4 @@
 u = up.util
-$ = jQuery
 
 beforeEach ->
   jasmine.addMatchers

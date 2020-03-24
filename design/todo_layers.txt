@@ -1,3 +1,4 @@
+- Rails integration: up.emit() should service a redirect
 - result = await up.layer.ask({ acceptLocation: "/users/:id"})
   up.reload('.author-select', { params: result.id }) } }
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
@@ -143,6 +144,7 @@ Have you noticed how noticed how pages fade in
     - => We should clear out the modal and build a new .content, since that is also what we would do on "new"!
     - => In case that the current modal DOES have .content we should update this instead of re-rooting
   - Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
+  - up.Params#has
 
 - Docs
   - Don't document each option a second time as failVariant. Instead explain in the method doc and { failOptions } what to do here.
@@ -155,7 +157,6 @@ Have you noticed how noticed how pages fade in
   - Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
   - All layer-related options should be moved to a[up-layer] or form[up-layer] or both
   - Document changes in options { history } (now boolean) and { location } (now a string) changes
-  - Documentation from Diff
   - Document new emit options { layer, base }
   - up.preload() can now fail if preloading is disabled
   - Docs: up:form:submit event now has { options } to manipulate
@@ -179,6 +180,8 @@ Have you noticed how noticed how pages fade in
   - Document new Rails integration
     - Document up.redirect_to
   - Document Protocol changes for other integrators
+  - More Documentation from Diff
+  - CHANGELOG from diff
 
 
 
