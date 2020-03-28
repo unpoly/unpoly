@@ -19,10 +19,12 @@ describe Unpoly::Rails::Controller, type: :request do
     end
 
     def redirect0
+      up.emit('event0')
       redirect_to action: :redirect1
     end
 
     def redirect1
+      up.emit('event1')
       redirect_to action: :redirect2
     end
 
@@ -556,6 +558,9 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response).to be_redirect
       follow_redirect!
       expect(response.body).to eq('.foo')
+      expect(response.headers['X-Up-Events']).to eq [
+        { type: 'event1', options: {}}
+      ].to_json
     end
 
     it 'preserves Unpoly-releated headers over multiple redirects' do
@@ -565,6 +570,10 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response).to be_redirect
       follow_redirect!
       expect(response.body).to eq('.foo')
+      expect(response.headers['X-Up-Events']).to eq [
+        { type: 'event0', options: {}},
+        { type: 'event1', options: {}},
+      ].to_json
     end
 
     it 'does not change the history' do

@@ -11,7 +11,6 @@ module Unpoly
 
       def initialize(controller)
         @controller = controller
-        @events = []
       end
 
       ##
@@ -130,8 +129,21 @@ module Unpoly
         # Track the given props in an array. If the method is called a second time,
         # we can re-set the X-Up-Events header with the first and second props hash.
         event_plan = { type: type, options: options }
-        @events.push(event_plan)
-        response.headers['X-Up-Events'] = @events.to_json
+        events.push(event_plan)
+      end
+
+      def after_action
+        write_events_to_response
+      end
+
+      def events
+        @events ||= begin
+          if (up_params = params['_up']) && (raw = up_params['events'])
+            JSON.parse(raw)
+          else
+            []
+          end
+        end
       end
 
       ##
@@ -144,7 +156,11 @@ module Unpoly
       end
 
       def url_with_request_values(url)
-        append_params_to_url(url, request_fields_as_params)
+        url = append_params_to_url(url, request_fields_as_params)
+        if events.present?
+          url = append_params_to_url(url, '_up[events]' => events.to_json)
+        end
+        url
       end
 
       # Used by RequestEchoHeaders to prevent up[...] params from showing up
@@ -182,6 +198,12 @@ module Unpoly
       attr_reader :controller
 
       delegate :request, :params, :response, to: :controller
+
+      def write_events_to_response
+        if events.present?
+          response.headers['X-Up-Events'] = events.to_json
+        end
+      end
 
       def request_field_value(field)
         raw_value = request_value_from_headers(field) || request_value_from_params(field)

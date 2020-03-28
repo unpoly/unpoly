@@ -1,4 +1,5 @@
 - Rails integration: up.emit() should service a redirect
+- Test Rails integration: make up, up? etc. available as helper methods
 - result = await up.layer.ask({ acceptLocation: "/users/:id"})
   up.reload('.author-select', { params: result.id }) } }
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
@@ -28,12 +29,6 @@
 - What's our policy on acronym casing? We still have up.util.normalizeURL
 - Should up-accept-event take an array?
   - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
-- up.validate() is strange to preview a form change
-  - maybe offer up.form.preview() and up-preview=".selector"
-  - would be useful to preview another field without triggering validations? would this even work in rails, where a lot of logic hangs on validation hook?
-  - then in the inspector:
-    - def up.preview?; validate? or request['X-Up-Preview']; end
-- Instead of normalizing URL strings and carefully making sure to never double-normalize the same string (for performance reasons), have an exposed up.Location object that toString() to its origin URL. Normalizing can happen when comparing.
 - Each mode gets their own implementation
   - Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
     => Now, in popups the <up-popup> is the frame. we can position a dismiss icon in that.
@@ -221,6 +216,12 @@ Accessibility
 Later?
 ------
 
+- up.validate() is strange to preview a form change
+  - maybe offer up.form.preview() and up-preview=".selector"
+  - would be useful to preview another field without triggering validations? would this even work in rails, where a lot of logic hangs on validation hook?
+  - then in the inspector:
+    - def up.preview?; validate? or request['X-Up-Preview']; end
+- Instead of normalizing URL strings and carefully making sure to never double-normalize the same string (for performance reasons), have an exposed up.Location object that toString() to its origin URL. Normalizing can happen when comparing.
 - Make the { request } available to up:fragment:inserted, so we can have a variant of https://makandracards.com/makandra/79164 that does not react to { preload } events
 - When xhr.responseURL is not the requested URL, assume that there was a redirect and the response method is now GET
 - Rename request-related events

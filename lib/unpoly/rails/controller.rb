@@ -6,8 +6,13 @@ module Unpoly
     # for Unpoly-related concerns such as "is this a page fragment update?".
     module Controller
 
-      def self.included(base)
-        base.helper_method :up, :up?
+      def self.prepended(base)
+        base.helper_method :up, :up?, :unpoly, :unpoly?
+        if base.respond_to?(:after_action)
+          base.after_action { up.after_action }
+        else
+          base.after_filter { up.after_action }
+        end
       end
 
       ##
