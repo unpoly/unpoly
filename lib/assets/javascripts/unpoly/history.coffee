@@ -93,9 +93,9 @@ up.history = do ->
   ###
   replace = (url) ->
     if manipulate('replaceState', url)
-      up.emit('up:history:replaced', url: url)
+      emit('up:history:replaced', url: url)
     else
-      up.emit('up:history:muted', url: url, log: "Did not replace state with #{url} (history is unavailable)")
+      emit('up:history:muted', url: url, log: "Did not replace state with #{url} (history is unavailable)")
 
   ###**
   Adds a new history entry and updates the browser's
@@ -160,7 +160,7 @@ up.history = do ->
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
       replaced.then ->
         url = currentLocation()
-        up.emit('up:history:restored', url: url, log: "Restored location #{url}")
+        emit('up:history:restored', url: url, log: "Restored location #{url}")
     else
       up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
 
@@ -169,6 +169,10 @@ up.history = do ->
     up.viewport.saveScroll(url: previousURL)
     state = event.state
     restoreStateOnPop(state)
+
+  emit = (args...) ->
+    historyLayer = u.detect(up.layer.allReversed, 'history') || up.layer.root
+    historyLayer.emit(args...)
 
   ###**
   This event is [emitted](/up.emit) after a history entry has been restored.

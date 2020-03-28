@@ -1,5 +1,4 @@
-- Rails integration: up.emit() should service a redirect
-- Test Rails integration: make up, up? etc. available as helper methods
+Rails integration: make up, up? etc. available as helper methods
 - result = await up.layer.ask({ acceptLocation: "/users/:id"})
   up.reload('.author-select', { params: result.id }) } }
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
@@ -25,7 +24,6 @@
   - OR roll back the change
 - Rename { base } back to { currentLayer }?
 - Try changes in demo.unpoly.com
-- Should history events be triggered on the front layer?
 - What's our policy on acronym casing? We still have up.util.normalizeURL
 - Should up-accept-event take an array?
   - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
@@ -60,6 +58,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test: History events are emitted on the history-enabled layer closest to the front
   - Test: Re-clicking the popup opener while the popup is open should close the popup instead of re-opening
   - Test that up:proxy:load has access to the { preload } attribute
   - Test that a modal opener with [up-instant] doesn't immediately close the new layer (because that closes on parent click)
