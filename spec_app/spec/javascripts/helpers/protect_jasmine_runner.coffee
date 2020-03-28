@@ -57,7 +57,9 @@ beforeEach ->
 
   up.on 'up:layer:opening', (event) ->
     contentSelector = event.layer.selector('content')
-    appendDefaultFallback(event.layer.firstElement(contentSelector))
+    parent = event.layer.firstElement(contentSelector) || event.layer.element
+    appendDefaultFallback(parent)
 
 afterEach ->
-  up.destroy('default-fallback', log: false)
+  for element in document.querySelectorAll('default-fallback')
+    up.destroy(element, log: false)
