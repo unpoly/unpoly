@@ -125,6 +125,10 @@ module Unpoly
 
       ##
       # TODO: Docs
+      response_field :events, Field::Array
+
+      ##
+      # TODO: Docs
       def emit(type, options = {})
         # Track the given props in an array. If the method is called a second time,
         # we can re-set the X-Up-Events header with the first and second props hash.
@@ -133,17 +137,7 @@ module Unpoly
       end
 
       def after_action
-        write_events_to_response
-      end
-
-      def events
-        @events ||= begin
-          if (up_params = params['_up']) && (raw = up_params['events'])
-            JSON.parse(raw)
-          else
-            []
-          end
-        end
+        write_response_fields
       end
 
       ##
@@ -155,12 +149,8 @@ module Unpoly
         response.headers['X-Up-Title'] = new_title
       end
 
-      def url_with_request_values(url)
-        url = append_params_to_url(url, request_fields_as_params)
-        if events.present?
-          url = append_params_to_url(url, '_up[events]' => events.to_json)
-        end
-        url
+      def url_with_field_values(url)
+        append_params_to_url(url, fields_as_params)
       end
 
       # Used by RequestEchoHeaders to prevent up[...] params from showing up
@@ -199,30 +189,38 @@ module Unpoly
 
       delegate :request, :params, :response, to: :controller
 
-      def write_events_to_response
-        if events.present?
-          response.headers['X-Up-Events'] = events.to_json
+      def write_response_fields
+        response_fields.each do |field|
+          value = send(field.name)
+          if value.present?
+            response.headers[field.header_name] = field.stringify(value)
+          end
         end
       end
 
       def request_field_value(field)
-        raw_value = request_value_from_headers(field) || request_value_from_params(field)
+        raw_value = field_value_from_headers(request.headers, field) || field_value_from_params(field)
         field.parse(raw_value)
       end
 
-      def request_value_from_params(field)
+      def response_field_value(field)
+        raw_value = field_value_from_headers(response.headers, field) || field_value_from_params(field)
+        field.parse(raw_value)
+      end
+
+      def field_value_from_params(field)
         if up_params = params['_up']
           name = field.param_name
           up_params[name]
         end
       end
 
-      def request_value_from_headers(field)
-        request.headers[field.header_name]
+      def field_value_from_headers(headers, field)
+        headers[field.header_name]
       end
 
-      def request_fields_as_params
-        pairs = request_fields.map { |field|
+      def fields_as_params
+        pairs = fields.map { |field|
           value = send(field.name)
           [field.param_name(full: true), field.stringify(value)]
         }

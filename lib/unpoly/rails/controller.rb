@@ -35,7 +35,7 @@ module Unpoly
       def redirect_to(target, *args)
         if up?
           target = url_for(target)
-          target = up.url_with_request_values(target)
+          target = up.url_with_field_values(target)
         end
         super(target, *args)
       end

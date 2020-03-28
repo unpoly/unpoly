@@ -20,8 +20,8 @@ module Unpoly
       private
       
       def set_up_request_echo_headers
-        headers['X-Up-Location'] = up.request_url_without_up_params
-        headers['X-Up-Method'] = request.method
+        response.headers['X-Up-Location'] = up.request_url_without_up_params
+        response.headers['X-Up-Method'] = request.method
       end
 
       ActionController::Base.send(:include, self)

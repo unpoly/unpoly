@@ -57,7 +57,24 @@ module Unpoly
 
             if result.is_a?(::Hash)
               result = ActiveSupport::HashWithIndifferentAccess.new(result)
+            end
+
+            result
+          end
+
+          def stringify(value)
+            ActiveSupport::JSON.encode(value)
+          end
+
+        end
+
+        class Array < Field
+
+          def parse(raw)
+            if raw.present?
+              result = ActiveSupport::JSON.decode(raw)
             else
+              result = []
             end
 
             result
