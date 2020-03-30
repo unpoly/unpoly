@@ -67,7 +67,8 @@ class up.Layer extends up.Record
     u.evalOption(option, this)
 
   allElements: (selector) ->
-    throw up.error.notImplemented()
+    elements = @element.querySelectorAll(selector)
+    u.select(elements, @contains)
 
   firstElement: (selector) ->
     @allElements(selector)[0]
@@ -77,7 +78,7 @@ class up.Layer extends up.Record
 
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
-    e.closest(element, @selector()) == @element
+    e.closest(element, up.layer.anySelector()) == @element
 
   on: (args...) ->
     return @buildEventListenerGroup(args).bind()
@@ -182,6 +183,12 @@ class up.Layer extends up.Record
     @history && @isFront()
 
   setInert: (inert) ->
+    throw up.error.notImplemented()
+
+  selector: (part) ->
+    @constructor.selector(part)
+
+  @selector: (part) ->
     throw up.error.notImplemented()
 
   onUpdated: (newElement) ->

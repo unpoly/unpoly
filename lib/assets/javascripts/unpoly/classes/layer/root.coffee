@@ -29,7 +29,7 @@ class up.Layer.Root extends up.Layer
     #    on Chrome, Firefox, IE11, Safari.
     return e.root
 
-  selector: ->
+  @selector: ->
     'html'
 
   allElements: (selector) ->
@@ -40,7 +40,7 @@ class up.Layer.Root extends up.Layer
     return matches
 
   setInert: (inert) ->
-    for element in e.all('body>:not(.up-layer)')
+    for element in document.body.children
       e.toggleInert(element, inert)
 
   onUpdated: (newElement) ->

@@ -122,7 +122,7 @@ class up.Layer.Overlay extends up.Layer
   affix: (parentElement, part, options) ->
     return e.affix(parentElement, @selector(part), options)
 
-  selector: (part) ->
+  @selector: (part) ->
     u.compact(['up', @mode, part]).join('-')
 
   setupClosing: ->
@@ -155,10 +155,6 @@ class up.Layer.Overlay extends up.Layer
     up.event.halt(event)
     unless @opener?.contains(target)
       u.muteRejection @dismiss()
-
-  handleEventWithDismiss: (event) ->
-    up.event.halt(event)
-    u.muteRejection @dismiss()
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes
@@ -197,16 +193,12 @@ class up.Layer.Overlay extends up.Layer
     )
 
   startCloseAnimation: (options = {}) ->
-    console.log("CLOSE ANIMATION IS %o", options.animation ? @evalOption(@closeAnimation))
     @startAnimation(
       frameAnimation: options.animation ? @evalOption(@closeAnimation),
       backdropAnimation: 'fade-out',
       easing: options.easing || @closeEasing,
       duration: options.duration || @closeDuration,
     )
-
-  allElements: (selector) ->
-    e.all(@contentElement, selector)
 
   accept: (value, options = {}) ->
     @executeCloseChange('accept', value, options)
