@@ -18,8 +18,6 @@
 - Protocol options should not be configurable
   - Constants should just be props
   - Document headers in the main class docs
-- Deprecate up.util.only() against up.util.pick() and up.util.except() against up.util.omit()
-  - OR roll back the change
 - Rename { base } back to { currentLayer }?
 - Try changes in demo.unpoly.com
 - What's our policy on acronym casing? We still have up.util.normalizeURL
