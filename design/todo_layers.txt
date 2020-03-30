@@ -21,17 +21,10 @@
 - Rename { base } back to { currentLayer }?
 - Try changes in demo.unpoly.com
 - What's our policy on acronym casing? We still have up.util.normalizeURL
-- Should up-accept-event take an array?
-  - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
 - If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
 - Consider renaming { navigate: false } to { background: true }
 - Should up-modal-frame be up-modal-box?
 - Clicking a popover opener should toggle it, not re-show
-- Habe ich / will ich up-accept für forms? E. hätte das nicht gebracht, da er erst nach abspeichern
-  - up-dismiss-now
-  - up-dismiss-after
-  - up-dismiss-with-result
-    - aber was ist dann das ergebnis? ich könnte hier nur ein leeres ergebnis geben
 - Hovering over a new [up-instant] link should abort all queued preload links
   - Preload links already in flight should not be canceled
   - Allow to disable this behavior for programmatic access, default could be { abort: { preload: true, state: 'queueud' } }
@@ -48,6 +41,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
   - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.
   - Test: History events are emitted on the history-enabled layer closest to the front
   - Test: Re-clicking the popup opener while the popup is open should close the popup instead of re-opening
@@ -269,6 +263,11 @@ Later?
      </div>
   - Should the term "layer" be renamed with "zone" everywhere?
   - This might be more useful if we had multiple children per layer
+- Habe ich / will ich up-accept für forms? E. hätte das nicht gebracht, da er erst nach abspeichern
+  - up-dismiss-now
+  - up-dismiss-after
+  - up-dismiss-with-result
+    - aber was ist dann das ergebnis? ich könnte hier nur ein leeres ergebnis geben
 
 
 Decisions
