@@ -43,17 +43,11 @@ class up.Layer.Root extends up.Layer
     for element in document.body.children
       e.toggleInert(element, inert)
 
-  onUpdated: (newElement) ->
-    htmlSwapped = e.matches(newElement, 'html')
-    bodySwapped = htmlSwapped || e.matches(newElement, 'body')
-
-    if htmlSwapped
-      up.layer.applyHandlers(this)
-
-    if bodySwapped
-      up.layer.attachAll()
+  repair: ->
+    # In case a fragment update has swapped the <html> element we need to re-apply
+    # up.layer.on() handlers to the new <html> element.
+    up.layer.applyHandlers(this)
 
   reset: ->
     @setInert(false)
     @lastScrollTops.clear()
-

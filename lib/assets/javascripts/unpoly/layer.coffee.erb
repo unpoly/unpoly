@@ -206,14 +206,24 @@ up.layer = do ->
       layer.on(handler...)
 
   applyHandlers = (layer) ->
-    for handler in handlers
-      layer.on(handler...)
+    # applyHandlers() should be idempotent if called multiple times.
+    # We use the layer's element and not the layer object to decide whether layers
+    # have already been applied. E.g. if we swap the <html> element the root layer object
+    # does not change, but we need to re-apply handlers.
+    if !layer.element.upHandlersApplied
+      layer.element.upHandlersApplied = true
+      for handler in handlers
+        layer.on(handler...)
 
   up.event.onEscape (event) ->
     layer = stack.current
     if layer.escapeDismissable
       u.muteRejection layer.dismiss()
       up.event.halt(event)
+
+  up.on 'up:fragment:destroyed', (event) ->
+    for layer in stack.layers
+      layer.repair()
 
   registerCloseHandler = (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
@@ -252,7 +262,6 @@ up.layer = do ->
   u.literal
     get: (args...) -> stack.get(args...)
     list: (args...) -> stack.list(args...)
-    attachAll: -> stack.attach()
     allElements: allElements
     firstElement: firstElement
     config: config

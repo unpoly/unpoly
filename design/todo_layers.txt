@@ -1,15 +1,13 @@
-Rails integration: make up, up? etc. available as helper methods
-- result = await up.layer.ask({ acceptLocation: "/users/:id"})
-  up.reload('.author-select', { params: result.id }) } }
+- Rails integration: make up, up? etc. available as helper methods
+- up.reload('.author-select', { params: result.id }) } }
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
   - For other elements this reacts on click
-- Konfigurierbares form.config.submitTargets mit Selektoren
-- Change internal Unpoly-Elements should just be <up-overlay>, <up-insertion>, <up-bounds>, etc.
 - Move layer defaults back into the overlay classes. We don't need to integrate it with up.Record.
 - Check new layer styles visually
   - Nested layers should have more padding
+  - Cover should have no padding at all
   - Or maybe push background layers down and always keep the top modal at the same Y: https://atlaskit.atlassian.com/examples/core/modal-dialog/multiple
   - Modals should not have margin on small screens
 - Check all occurences of up.emit and layer.emit:
@@ -27,16 +25,10 @@ Rails integration: make up, up? etc. available as helper methods
 - What's our policy on acronym casing? We still have up.util.normalizeURL
 - Should up-accept-event take an array?
   - If we remove the selector in "foo:event .button" we could also take multiple events, just like up.on!
-- Each mode gets their own implementation
-  - Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
-    => Now, in popups the <up-popup> is the frame. we can position a dismiss icon in that.
 - If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
 - Consider renaming { navigate: false } to { background: true }
 - Should up-modal-frame be up-modal-box?
 - Clicking a popover opener should toggle it, not re-show
-- Re-attaching overlays needs to be reworked
-  - OK when body was replaced we still need to re-attach
-  - But there are now new cases when a popup's tether.parent has been swapped. Should we close it then?
 - Habe ich / will ich up-accept für forms? E. hätte das nicht gebracht, da er erst nach abspeichern
   - up-dismiss-now
   - up-dismiss-after
@@ -58,6 +50,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.
   - Test: History events are emitted on the history-enabled layer closest to the front
   - Test: Re-clicking the popup opener while the popup is open should close the popup instead of re-opening
   - Test that up:proxy:load has access to the { preload } attribute
@@ -65,6 +58,7 @@ Have you noticed how noticed how pages fade in
   - Test that responses for a closed layer will not update anything
   - Test that up.validate will never update another layer, even if [up-layer] is set on the form and the server responds with 500
   - Test [up-accept-location="/foo/:user_id"]
+  - TEst result = await up.layer.ask({ acceptLocation: "/users/:id"})
   - Test that the string callback to up-on-accepted can use the context { event, layer, value }
   - Test that the string callback to up-on-opening can use the context { event, layer }
   - Test that [up-params] will add additional query params to a followed links that already has query params
@@ -98,7 +92,6 @@ Have you noticed how noticed how pages fade in
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)
-  - Get tests green again
   - Test that up.layer.get and up.layer.list take both a layer name like "root" or an options hash or an element or a jquery collection
   - Test layer { context } transmission
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
@@ -319,4 +312,5 @@ Decisions
   => Not now, maybe change that leter
 - Decide whether to do up.layer.accept({ value: { flight_id: 5 }}) or up.layer.accept({ flight_id: 5 })
   => We keep the value as first argument for the symmetry to resolve / reject
-- Decide whether simple overlays like popups should still get up <up-popup-frame> to more easily position the dismiss icon => No
+- Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
+  => No, in popups the <up-popup> is the frame. we can position a dismiss icon in that.

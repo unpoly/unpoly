@@ -57,9 +57,6 @@ class up.Layer extends up.Record
   # no-op so users can blindly dismiss even though they might be on the root layer
   dismiss: u.asyncNoop
 
-  # no-op so users can blindly attach even though they might be on the root layer
-  attach: ->
-
   peel: (options) ->
     @stack.peel(this, options)
 
@@ -191,7 +188,7 @@ class up.Layer extends up.Record
   @selector: (part) ->
     throw up.error.notImplemented()
 
-  onUpdated: (newElement) ->
+  repair: ->
     # optional callback
 
   toString: ->

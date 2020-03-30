@@ -145,10 +145,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
         return promise
 
-    # Give the layer a chance to fix any damage caused by the change.
-    # E.g. the root layer needs to re-attach <up-overlay> elements lost by swapping <body>.
-    @layer.onUpdated(step.newElement)
-
   # Returns a object detailling a keep operation iff the given element is [up-keep] and
   # we can find a matching partner in newElement. Otherwise returns undefined.
   #

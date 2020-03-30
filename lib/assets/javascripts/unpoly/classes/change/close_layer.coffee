@@ -31,6 +31,9 @@ class up.Change.CloseLayer extends up.Change.Removal
     if @origin && u.isUndefined(value)
       value = e.jsonAttr(@origin, @valueAttr)
 
+    unless @layer.isOpen()
+      return Promise.resolve()
+
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort(layer: this)
 
@@ -38,9 +41,6 @@ class up.Change.CloseLayer extends up.Change.Removal
       # Remember the parent, which will no longer be accessible once we
       # remove @layer from the @stack.
       parent = @layer.parent
-
-      unless @layer.isOpen()
-        return Promise.resolve()
 
       # Close any child-layers we might have.
       # We don't wait for peeling to finish, since changes that affect the

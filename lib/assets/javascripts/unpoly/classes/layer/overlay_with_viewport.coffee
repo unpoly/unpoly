@@ -37,3 +37,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
 
   unshiftBody: ->
     @constructor.bodyShifter.unshift()
+
+  repair: ->
+    if @isDetached()
+      document.body.appendChild(@element)

@@ -81,15 +81,6 @@ class up.LayerStack extends up.Class
   @getter 'parent', ->
     @parentOf(@current)
 
-  ###**
-  Attaches all overlays to the body.
-
-  Also re-attaches overlays to the body in case it was detached
-  by swapping the body element.
-  ###
-  attach: ->
-    @overlays.each (overlay) -> document.body.attachChild(overlay.element)
-
   get: (args...) ->
     new up.LayerLookup(this, args...).first()
 
