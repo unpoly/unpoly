@@ -1,10 +1,8 @@
 - Rails integration: make up, up? etc. available as helper methods
-- up.reload('.author-select', { params: result.id }) } }
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
   - For other elements this reacts on click
-- Move layer defaults back into the overlay classes. We don't need to integrate it with up.Record.
 - Check new layer styles visually
   - Nested layers should have more padding
   - Cover should have no padding at all
@@ -22,9 +20,7 @@
 - Try changes in demo.unpoly.com
 - What's our policy on acronym casing? We still have up.util.normalizeURL
 - If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
-- Consider renaming { navigate: false } to { background: true }
 - Should up-modal-frame be up-modal-box?
-- Clicking a popover opener should toggle it, not re-show
 - Hovering over a new [up-instant] link should abort all queued preload links
   - Preload links already in flight should not be canceled
   - Allow to disable this behavior for programmatic access, default could be { abort: { preload: true, state: 'queueud' } }
@@ -41,7 +37,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
-  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
+  - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
   - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.
   - Test: History events are emitted on the history-enabled layer closest to the front
   - Test: Re-clicking the popup opener while the popup is open should close the popup instead of re-opening
