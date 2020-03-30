@@ -72,7 +72,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # layer enables handling of location and title in general.
     # When updating history, accept { history: false } as a shortcut to
     # neither change { title } nor { location }.
-    historyOptions = u.except(@options, 'history')
+    historyOptions = u.omit(@options, ['history'])
 
     # If we cannot push state for some reason, we prefer disabling history for
     # child layers instead of blowing up the entire stack with a full page load.

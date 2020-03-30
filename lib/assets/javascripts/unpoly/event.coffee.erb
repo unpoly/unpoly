@@ -283,7 +283,6 @@ up.event = do ->
     event = document.createEvent('Event')
     event.initEvent(name, true, true) # name, bubbles, cancelable
     u.assign(event, props)
-    # u.assign(event, u.except(props, 'target'))
 
     # IE11 does not set { defaultPrevented: true } after #preventDefault()
     # was called on a custom event.

@@ -1082,22 +1082,29 @@ up.util = do ->
 
   ###**
   Returns a copy of the given object that only contains
-  the given properties.
+  the given keys.
 
   @function up.util.only
   @param {Object} object
   @param {Array} keys...
   @stable
+  @deprecated
   ###
-  only = (object, properties...) ->
-    pick(object, properties)
+  only = (object, keys...) ->
+    up.legacy.deprecated('up.util.only(object, keys...)', 'up.util.pick(object, keys)')
+    pick(object, keys)
 
-  pick = (object, properties) ->
-    filtered = {}
-    for property in properties
-      if property of object
-        filtered[property] = object[property]
-    filtered
+  ###**
+  Returns a copy of the given object that only contains
+  the given keys.
+
+  @function up.util.pick
+  @param {Object} object
+  @param {Array} keys
+  @stable
+  ###
+  pick = (object, keys) ->
+    pickBy(object, (value, key) -> contains(keys, key))
 
   pickBy = (object, tester) ->
     tester = iteratee(tester)
@@ -1109,28 +1116,32 @@ up.util = do ->
 
   ###**
   Returns a copy of the given object that contains all except
-  the given properties.
+  the given keys.
 
   @function up.util.except
   @param {Object} object
   @param {Array} keys...
   @stable
+  @deprecated
   ###
-  except = (object, properties...) ->
-    omit(object, properties)
+  except = (object, keys...) ->
+    up.legacy.deprecated('up.util.except(object, keys...)', 'up.util.omit(object, keys)')
+    omit(object, keys)
 
-  omit = (object, properties) ->
+  ###**
+  Returns a copy of the given object that contains all except
+  the given keys.
+
+  @function up.util.omit
+  @param {Object} object
+  @param {Array} keys
+  @stable
+  ###
+  omit = (object, keys) ->
     filtered = copy(object)
-    for property in properties
-      delete filtered[property]
+    for key in keys
+      delete filtered[key]
     filtered
-
-#  pickBy = (obj, predicate) ->
-#    result = {}
-#    for k, v of obj
-#      if predicate(v, k)
-#        result[k] = v
-#    result
 
   ###**
   @function up.util.isUnmodifiedKeyEvent

@@ -698,7 +698,7 @@ describe 'up.util', ->
 #        fun = ($element, data) ->
 #        expect(up.util.argNames(fun)).toEqual(['$element', 'data'])
 
-    describe 'up.util.only', ->
+    describe 'up.util.pick', ->
 
       it 'returns a copy of the given object with only the given whitelisted properties', ->
         original =
@@ -706,7 +706,7 @@ describe 'up.util', ->
           bar: 'bar-value'
           baz: 'baz-value'
           bam: 'bam-value'
-        whitelisted = up.util.only(original, 'bar', 'bam')
+        whitelisted = up.util.pick(original, ['bar', 'bam'])
         expect(whitelisted).toEqual
           bar: 'bar-value'
           bam: 'bam-value'
@@ -720,11 +720,11 @@ describe 'up.util', ->
       it 'does not add empty keys to the returned object if the given object does not have that key', ->
         original =
           foo: 'foo-value'
-        whitelisted = up.util.only(original, 'foo', 'bar')
+        whitelisted = up.util.pick(original, ['foo', 'bar'])
         expect(whitelisted).toHaveOwnProperty('foo')
         expect(whitelisted).not.toHaveOwnProperty('bar')
 
-    describe 'up.util.except', ->
+    describe 'up.util.omit', ->
 
       it 'returns a copy of the given object but omits the given blacklisted properties', ->
         original =
@@ -732,7 +732,7 @@ describe 'up.util', ->
           bar: 'bar-value'
           baz: 'baz-value'
           bam: 'bam-value'
-        whitelisted = up.util.except(original, 'foo', 'baz')
+        whitelisted = up.util.omit(original, ['foo', 'baz'])
         expect(whitelisted).toEqual
           bar: 'bar-value'
           bam: 'bam-value'

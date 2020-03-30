@@ -26,8 +26,8 @@ beforeEach ->
 
   @respondWithSelector = (selector, options = {}) ->
     respondWithKeys = ['contentType', 'status', 'responseURL', 'responseHeaders']
-    respondWithOptions = u.only(options, respondWithKeys...)
-    affixOptions = u.except(options, respondWithKeys...)
+    respondWithOptions = u.pick(options, respondWithKeys)
+    affixOptions = u.omit(options, respondWithKeys)
 
     element = e.createFromSelector(selector, affixOptions)
     responseText = element.outerHTML

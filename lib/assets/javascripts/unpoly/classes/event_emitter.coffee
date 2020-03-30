@@ -102,6 +102,6 @@ class up.EventEmitter extends up.Record
       # The props object may also include options for the emission, such as
       # { layer }, { target }, { base } or { log }.
       # up.emit([target], eventType, [eventPropsAndEmitOptions])
-      options.event = up.event.build(args[0], u.except(options, 'target'))
+      options.event = up.event.build(args[0], u.omit(options, ['target']))
 
     new @(options)

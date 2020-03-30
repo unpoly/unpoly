@@ -4,7 +4,7 @@ e = up.element
 PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
 transferProps = (from, to) ->
-  u.assign(to, u.only(from, PRESERVE_KEYS...))
+  u.assign(to, u.pick(from, PRESERVE_KEYS))
 
 class up.Focus extends up.Record
 
