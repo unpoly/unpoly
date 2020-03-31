@@ -36,7 +36,7 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
       if e.isDetached(@tether.parent) || u.isDetached(@tether.anchor)
         # If our tether parent and anchor is gone, the best thing we can
         # do now is to dismiss ourselves and have a consistent layer stack.
-        @dismiss(
+        @dismiss(null,
           animation: false   # no need to animate since we're already hidden
           preventable: false # since we're cleaning up a broken stack, don't allow user intervention
         )

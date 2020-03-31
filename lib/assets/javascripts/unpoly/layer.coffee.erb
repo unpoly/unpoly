@@ -246,15 +246,15 @@ up.layer = do ->
   up.on 'up:framework:boot', ->
     stack = new up.LayerStack()
 
-    registerCloseHandler 'up-accept', (layer, closeOptions) ->
-      return layer.accept(closeOptions)
+    registerCloseHandler 'up-accept', (layer, value, closeOptions) ->
+      return layer.accept(value, closeOptions)
 
-    registerCloseHandler 'up-dismiss', (layer, closeOptions) ->
-      return layer.dismiss(closeOptions)
+    registerCloseHandler 'up-dismiss', (layer, value, closeOptions) ->
+      return layer.dismiss(value, closeOptions)
 
-    registerCloseHandler 'up-close', (layer, closeOptions) ->
+    registerCloseHandler 'up-close', (layer, value, closeOptions) ->
       up.legacy.deprecated('[up-close]', '[up-dismiss]')
-      return layer.dismiss(closeOptions)
+      return layer.dismiss(value, closeOptions)
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset

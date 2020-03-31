@@ -193,3 +193,12 @@ class up.Layer extends up.Record
 
   toString: ->
     "#{@mode} layer"
+
+  reset: ->
+    # TODO: Instead of this method, can LayerStack instantiate a fresh up.Layer.Root upon reset?
+    @setInert(false)
+    @lastScrollTops.clear()
+    @savedLocation = undefined
+    @savedTitle = undefined
+    @feedbackLocation = undefined
+

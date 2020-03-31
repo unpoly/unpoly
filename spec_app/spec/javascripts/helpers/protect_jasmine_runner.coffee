@@ -56,8 +56,9 @@ beforeEach ->
   appendDefaultFallback(document.body)
 
   up.on 'up:layer:opening', (event) ->
-    contentSelector = event.layer.selector('content')
-    parent = event.layer.firstElement(contentSelector) || event.layer.element
+    layer = event.layer
+    contentSelector = layer.selector('content')
+    parent = layer.firstElement(contentSelector) || layer.element
     appendDefaultFallback(parent)
 
 afterEach ->

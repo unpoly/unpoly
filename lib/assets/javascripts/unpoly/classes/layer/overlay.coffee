@@ -182,7 +182,7 @@ class up.Layer.Overlay extends up.Layer
 
   startAnimation: (options = {}) ->
     whenFrameClosed = up.animate(@getFrameElement(), options.frameAnimation, options)
-    if @backdrop
+    if @backdrop && !up.motion.isNone(options.frameAnimation)
       whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
 
     # Promise.all() ignores non-Thenables in the given array

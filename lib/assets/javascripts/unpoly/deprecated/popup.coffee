@@ -9,7 +9,7 @@ up.popup = u.literal
 
   close: (options = {}) ->
     up.legacy.deprecated('up.popup.close()', 'up.layer.dismiss()')
-    up.layer.dismiss(options)
+    up.layer.dismiss(null, options)
 
   url: ->
     up.legacy.deprecated('up.popup.url()', 'up.layer.location')

@@ -48,6 +48,3 @@ class up.Layer.Root extends up.Layer
     # up.layer.on() handlers to the new <html> element.
     up.layer.applyHandlers(this)
 
-  reset: ->
-    @setInert(false)
-    @lastScrollTops.clear()

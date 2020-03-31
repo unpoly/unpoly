@@ -32,11 +32,11 @@ class up.LayerStack extends up.Class
 
   peel: (layer, options) ->
     for descendant in u.reverse(@descendantsOf(layer))
-      descendant.dismiss(u.merge(options, preventable: false))
+      descendant.dismiss(null, u.merge(options, preventable: false))
 
   reset: ->
     @currentOverrides = []
-    @root.peel(animation: false)
+    @peel(@root, animation: false)
     @root.reset()
 
   indexOf: (layer) ->

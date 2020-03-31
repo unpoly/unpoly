@@ -15,7 +15,7 @@ up.modal = u.literal
 
   close: (options = {}) ->
     up.legacy.deprecated('up.modal.close()', 'up.layer.dismiss()')
-    up.layer.dismiss(options)
+    up.layer.dismiss(null, options)
 
   url: ->
     up.legacy.deprecated('up.modal.url()', 'up.layer.location')

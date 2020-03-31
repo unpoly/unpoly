@@ -39,6 +39,10 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test special overlay fallback:
+    # Only for existing overlays we open will also attempt to place a new element as the
+    # new first child of the layer's root element. This mirrors the behavior that we get when
+    # opening a layer: The new element does not need to match anything in the current document.
   - Test: up:proxy:fatal is not emitted when a request was aborted
   - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
   - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.

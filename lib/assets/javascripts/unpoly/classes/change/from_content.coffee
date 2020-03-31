@@ -48,7 +48,7 @@ class up.Change.FromContent extends up.Change
         # new first child of the layer's root element. This mirrors the behavior that we get when
         # opening a layer: The new element does not need to match anything in the current document.
         if props.isFallback && layer.isOverlay?()
-          @addPlan(u.merge(changeProps, placement: 'root'))
+          @addPlan(layer, u.merge(changeProps, placement: 'root'))
 
   addPlan: (layer, props) ->
     ChangeClass = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer

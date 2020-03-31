@@ -15,6 +15,7 @@ afterEach (done) ->
     # Pending callbacks might change the URL or cause errors that bleed into
     # the next example.
     up.util.task =>
+      console.debug("--- resetting framework ---")
       up.framework.reset()
       up.browser.popCookie(up.protocol.config.methodCookie)
 
@@ -22,6 +23,10 @@ afterEach (done) ->
       # then start the next example.
       up.util.task ->
         $('up-toast').remove()
+
+        overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
+        if overlays.length > 0
+          console.error("Overlays survived reset!", overlays)
 
         up.puts("Framework was reset")
         done()
