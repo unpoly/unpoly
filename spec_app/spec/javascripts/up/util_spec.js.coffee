@@ -1504,6 +1504,28 @@ describe 'up.util', ->
         value = undefined
         expect(up.util.isJQuery(value)).toBe(false)
 
+    describe 'up.util.isPromise', ->
+
+      it 'returns true for a Promise', ->
+        value = new Promise(up.util.noop)
+        expect(up.util.isPromise(value)).toBe(true)
+
+      it 'returns true for an object with a #then() method', ->
+        value = { then: -> }
+        expect(up.util.isPromise(value)).toBe(true)
+
+      it 'returns true for an up.Request', ->
+        value = new up.Request(url: '/path')
+        expect(up.util.isPromise(value)).toBe(true)
+
+      it 'returns false for an object without a #then() method', ->
+        value = { foo: '1' }
+        expect(up.util.isPromise(value)).toBe(false)
+
+      it 'returns false for null', ->
+        value = null
+        expect(up.util.isPromise(value)).toBe(false)
+
 
     describe 'up.util.sprintf', ->
 

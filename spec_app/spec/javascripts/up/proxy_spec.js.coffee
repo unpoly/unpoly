@@ -300,20 +300,6 @@ describe 'up.proxy', ->
             headers = @lastRequest().requestHeaders
             expect(headers['csrf-header']).toBeMissing()
 
-      describe 'X-Requested-With header', ->
-
-        it 'sets the header to "XMLHttpRequest" by default', asyncSpec (next) ->
-          up.request('/path', method: 'post')
-          next =>
-            headers = @lastRequest().requestHeaders
-            expect(headers['X-Requested-With']).toEqual('XMLHttpRequest')
-
-        it 'does not overrride an existing X-Requested-With header', asyncSpec (next) ->
-          up.request('/path', method: 'post', headers: { 'X-Requested-With': 'Love' })
-          next =>
-            headers = @lastRequest().requestHeaders
-            expect(headers['X-Requested-With']).toEqual('Love')
-
       describe 'with { params } option', ->
 
         it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
@@ -598,7 +584,7 @@ describe 'up.proxy', ->
         beforeEach ->
           up.proxy.config.slowDelay = 0
           @events = []
-          u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover', 'up:proxy:fatal'], (eventType) =>
+          u.each ['up:proxy:load', 'up:proxy:loaded', 'up:proxy:slow', 'up:proxy:recover', 'up:proxy:fatal', 'up:proxy:aborted'], (eventType) =>
             up.on eventType, =>
               @events.push eventType
 
@@ -726,7 +712,7 @@ describe 'up.proxy', ->
             ])
 
 
-        it 'emits up:proxy:recover if a request returned but failed fatally', asyncSpec (next) ->
+        it 'emits up:proxy:recover if a request timed out', asyncSpec (next) ->
           up.proxy.config.slowDelay = 10
 
           next =>
@@ -746,9 +732,34 @@ describe 'up.proxy', ->
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:slow',
-              'up:proxy:fatal',
+              'up:proxy:aborted',
               'up:proxy:recover'
             ])
+
+        it 'emits up:proxy:recover if a request was aborted', asyncSpec (next) ->
+          up.proxy.config.slowDelay = 10
+
+          next =>
+            @request = up.request(url: '/foo')
+
+          next.after 50, =>
+            expect(@events).toEqual([
+              'up:proxy:load',
+              'up:proxy:slow'
+            ])
+
+          next =>
+            up.proxy.abort(@request)
+
+          next =>
+            expect(@events).toEqual([
+              'up:proxy:load',
+              'up:proxy:slow',
+              'up:proxy:aborted',
+              'up:proxy:recover'
+            ])
+
+        it 'emits up:proxy:recover if a request failed fatally'
 
 
     describe 'up.ajax', ->
@@ -782,7 +793,10 @@ describe 'up.proxy', ->
           up.proxy.preload($link)
 
           next =>
-            cachedPromise = up.proxy.get(url: '/path', target: '.target')
+            cachedPromise = up.proxy.get
+              url: '/path'
+              target: '.target'
+              failTarget: 'default-fallback'
             expect(u.isPromise(cachedPromise)).toBe(true)
 
         it "does not load a link whose method has side-effects", (done) ->
@@ -795,13 +809,16 @@ describe 'up.proxy', ->
             expect(up.proxy.get(url: '/path', target: '.target')).toBeUndefined()
             done()
 
-        it 'accepts options', asyncSpec (next) ->
+        it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
           $fixture('.target')
           $link = $fixture('a[href="/path"][up-target=".target"]')
           up.proxy.preload($link, url: '/options-path')
 
           next =>
-            cachedPromise = up.proxy.get(url: '/options-path', target: '.target')
+            cachedPromise = up.proxy.get
+              url: '/options-path'
+              target: '.target'
+              failTarget: 'default-fallback'
             expect(u.isPromise(cachedPromise)).toBe(true)
 
         describe 'for an [up-target] link', ->
@@ -828,7 +845,7 @@ describe 'up.proxy', ->
             next =>
               expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
-        describe 'for an [up-modal] link', ->
+        describe 'for an [up-layer=modal] link', ->
 
           beforeEach ->
             up.motion.config.enabled = false
@@ -844,7 +861,7 @@ describe 'up.proxy', ->
             up.hello($link)
             up.proxy.preload($link)
             next =>
-              expect('up-overlay').not.toBeAttached()
+              expect('up-modal').not.toBeAttached()
 
           it 'does not emit an up:modal:open event', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-modal=".target"]')
@@ -856,7 +873,7 @@ describe 'up.proxy', ->
               expect(openListener).not.toHaveBeenCalled()
 
           it 'does not close a currently open modal', asyncSpec (next) ->
-            $link = $fixture('a[href="/path"][up-modal=".target"]')
+            $link = $fixture('a[href="/path"][up-action=".target"][up-layer="modal"]')
             up.hello($link)
             closeListener = jasmine.createSpy('listener')
             up.on('up:modal:close', closeListener)
@@ -864,20 +881,20 @@ describe 'up.proxy', ->
             up.modal.extract('.content', '<div class="content">Modal content</div>')
 
             next =>
-              expect('up-overlay .content').toBeAttached()
+              expect('up-modal .content').toBeAttached()
 
             next =>
               up.proxy.preload($link)
 
             next =>
-              expect('up-overlay .content').toBeAttached()
+              expect('up-modal .content').toBeAttached()
               expect(closeListener).not.toHaveBeenCalled()
 
             next =>
-              up.modal.close()
+              up.layer.dismiss()
 
             next =>
-              expect('up-overlay .content').not.toBeAttached()
+              expect('up-modal .content').not.toBeAttached()
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other modals while the request is still pending', asyncSpec (next) ->
@@ -889,7 +906,7 @@ describe 'up.proxy', ->
               up.modal.extract('.content', '<div class="content">Modal content</div>')
 
             next =>
-              expect('up-overlay .content').toBeAttached()
+              expect('up-modal .content').toBeAttached()
 
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')
@@ -918,7 +935,7 @@ describe 'up.proxy', ->
             up.hello($link)
             up.proxy.preload($link)
             next =>
-              expect('up-overlay[up-mode=popup]').not.toBeAttached()
+              expect('up-popup').not.toBeAttached()
 
           it 'does not emit an up:popup:open event', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-popup=".target"]')
@@ -939,20 +956,20 @@ describe 'up.proxy', ->
             up.popup.attach($existingAnchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
-              expect('up-overlay[up-mode=popup] .content').toBeAttached()
+              expect('up-popup .content').toBeAttached()
 
             next =>
               up.proxy.preload($link)
 
             next =>
-              expect('up-overlay[up-mode=popup] .content').toBeAttached()
+              expect('up-popup .content').toBeAttached()
               expect(closeListener).not.toHaveBeenCalled()
 
             next =>
               up.popup.close()
 
             next =>
-              expect('up-overlay[up-mode=popup] .content').not.toBeAttached()
+              expect('up-popup .content').not.toBeAttached()
               expect(closeListener).toHaveBeenCalled()
 
           it 'does not prevent the opening of other popups while the request is still pending', asyncSpec (next) ->
@@ -965,7 +982,7 @@ describe 'up.proxy', ->
               up.popup.attach($anchor, target: '.content', html: '<div class="content">popup content</div>')
 
             next =>
-              expect('up-overlay[up-mode=popup] .content').toBeAttached()
+              expect('up-popup .content').toBeAttached()
 
           it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
             requestSpy = spyOn(up, 'request')

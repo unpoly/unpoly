@@ -95,6 +95,14 @@ describe Unpoly::Rails::Controller, type: :request do
       end
     end
 
+    describe '#version' do
+
+      it_behaves_like 'string field',
+        header: 'X-Up-Version',
+        reader: -> { up.target }
+
+    end
+
     describe '#target' do
 
       it_behaves_like 'string field',
@@ -374,7 +382,7 @@ describe Unpoly::Rails::Controller, type: :request do
         expect(result).to eq(true)
       end
 
-      it 'returns true if the request is a full page load (which always replaces the entire page)' do
+      it 'returns true if the request is a full page load without Unpoly (which always replaces the entire page)' do
         result = controller_eval do
           up.layer.root?
         end

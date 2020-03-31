@@ -30,15 +30,13 @@ class up.LayerStack extends up.Class
   push: (layer) ->
     @layers.push(layer)
 
-  peel: (layer) ->
-    for descendant in @descendantsOf(layer)
-      descendant.dismiss(preventable: false)
+  peel: (layer, options) ->
+    for descendant in u.reverse(@descendantsOf(layer))
+      descendant.dismiss(u.merge(options, preventable: false))
 
   reset: ->
-    up.Layer.OverlayWithViewport.bodyShifter.reset()
-    @overlays.forEach (layer) -> e.remove(layer.element)
-    @layers = [@root]
     @currentOverrides = []
+    @root.peel(animation: false)
     @root.reset()
 
   indexOf: (layer) ->

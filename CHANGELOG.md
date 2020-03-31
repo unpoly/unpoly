@@ -23,6 +23,8 @@ Unreleased
 - up.history.config.enabled
 - Requests sent by Unpoly no longer have a `X-Requested-With: XMLHttpRequest` header.
   If you need that old behavior: up.on('up:proxy:load', function(event) { event.request.headers['X-Requested-With'] = 'XMLHttpRequest' })
+- up.proxy.config.requestMetaKeys
+- up:link:follow is no longer sent when preloading, up:link:preload still is
 
 
 

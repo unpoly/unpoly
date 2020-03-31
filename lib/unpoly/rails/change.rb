@@ -24,6 +24,11 @@ module Unpoly
       alias_method :unpoly?, :up?
 
       ##
+      # Returns the version of Unpoly running in the browser that made
+      # the request.
+      request_field :version, Field::String
+
+      ##
       # Returns the CSS selector for a fragment that Unpoly will update in
       # case of a successful response (200 status code).
       #

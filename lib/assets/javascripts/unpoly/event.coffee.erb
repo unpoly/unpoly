@@ -359,7 +359,6 @@ up.event = do ->
   @experimental
   ###
   halt = (event) ->
-    console.debug("halting event %o", event)
     event.stopImmediatePropagation()
     event.preventDefault()
 

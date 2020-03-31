@@ -85,7 +85,6 @@ class up.Cache
     if @isEnabled() && @isCachable(key)
       @makeRoomForAnotherKey()
       storeKey = @normalizeStoreKey(key)
-      @log("Setting entry %o to %o", storeKey, value)
       timestampedValue =
         timestamp: @timestamp()
         value: value
@@ -105,7 +104,8 @@ class up.Cache
       true
 
   get: (key, options = {}) =>
-    if @isCachable(key) && (entry = @store.get(@normalizeStoreKey(key)))
+    storeKey = @normalizeStoreKey(key)
+    if @isCachable(key) && (entry = @store.get(storeKey))
       if @isFresh(entry)
         @log("Cache hit for '%s'", key) unless options.silent
         entry.value

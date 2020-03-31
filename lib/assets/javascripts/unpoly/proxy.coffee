@@ -75,6 +75,23 @@ up.proxy = do ->
     An array of uppercase HTTP method names that are considered [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1).
     The proxy cache will only cache safe requests and will clear the entire
     cache after an unsafe request.
+  @param {Function(string): Array<string>} [config.requestMetaKeys]
+    A function that accepts a URL and returns an array of [`up.Request`](/up.Request) property names
+    that are sent to the server. The server may return an optimized response based on these properties,
+    e.g. by omitting a navigation bar that is not targeted.
+
+    Two requests with different `serverFields` are considered cache misses when [caching](/up.proxy) and
+    [preloading](/up.link.preload). To improve cacheability, you may configure a function that returns
+    fewer fields.
+
+    By default the following properties are sent to the reserver:
+
+    - [`up.Request.prototype.target`](/up.Request.prototype.target)
+    - [`up.Request.prototype.failTarget`](/up.Request.prototype.failTarget)
+    - [`up.Request.prototype.context`](/up.Request.prototype.context)
+    - [`up.Request.prototype.failContext`](/up.Request.prototype.failContext)
+    - [`up.Request.prototype.mode`](/up.Request.prototype.mode)
+    - [`up.Request.prototype.failMode`](/up.Request.prototype.failMode)
   @stable
   ###
   config = new up.Config ->
@@ -87,6 +104,7 @@ up.proxy = do ->
     preloadQueueSize: 5
     preloadEnabled: !up.browser.hasSlowConnection()
     preloadTimeout: 10
+    requestMetaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty config, 'preloadDelay',
@@ -231,6 +249,9 @@ up.proxy = do ->
 
     if request.preload
       request.timeout ?= config.preloadTimeout
+
+      # If the user has disabled preloading (default for slow connections)
+      # we immediately abort and return the request, without queuing it.
       unless config.preloadEnabled
         request.abort()
         return request
@@ -240,7 +261,7 @@ up.proxy = do ->
     cache.clear() unless request.isSafe()
 
     if request.solo && !request.preload
-      abortRequests(solo: true)
+      abortRequests((request) -> request.solo)
 
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.

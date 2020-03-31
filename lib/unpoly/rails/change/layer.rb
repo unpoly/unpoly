@@ -25,7 +25,6 @@ module Unpoly
 
         ##
         # TODO: Docs
-        # TODO: Test that this returns "root" for a non-Unpoly request
         def root?
           mode == 'root'
         end

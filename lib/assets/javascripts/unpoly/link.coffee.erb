@@ -113,7 +113,6 @@ up.link = do ->
     preloadDelay.reset()
 
   consumeFollowEvent = (event, link) ->
-    console.debug("+++ consuming link action for %o", link)
     up.event.consumeAction(event)
     u.muteRejection follow(link)
 
@@ -274,8 +273,8 @@ up.link = do ->
     link = e.get(link)
 
     if isSafe(link)
-      up.event.whenEmitted(link, 'up:link:preload', log: ['Preloading link %o', link]).then ->
-        follow(link, u.merge(options, preload: true))
+      guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
+      follow(link, u.merge(options, preload: true, { guardEvent }))
     else
       return up.error.failed.async("Won't preload unsafe link")
 

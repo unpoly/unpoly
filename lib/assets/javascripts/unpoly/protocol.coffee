@@ -307,11 +307,9 @@ up.protocol = do ->
     eventsHeader: 'X-Up-Events'
     versionHeader: 'X-Up-Version'
 
-  successHeader = (key) ->
-    "X-Up-#{u.upperCaseFirst(key)}"
-
-  failHeader = (key) ->
-    "X-Up-Fail-#{u.upperCaseFirst(key)}"
+  headerize = (camel) ->
+    header = camel.replace /(^.|[A-Z])/g, (char) -> '-' + char.toUpperCase()
+    return 'X-Up' + header
 
   csrfHeader = (request) ->
     u.evalOption(config.csrfHeader, request)
@@ -339,6 +337,6 @@ up.protocol = do ->
   csrfParam: csrfParam
   csrfToken: csrfToken
   initialRequestMethod: initialRequestMethod
-  successHeader: successHeader,
-  failHeader: failHeader
+  headerize: headerize
+
 

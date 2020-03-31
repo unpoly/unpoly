@@ -33,12 +33,17 @@ class up.Request.XhrRenderer
 
     # Add information about the response's intended use so the server may
     # customize or shorten its response.
-    for key in ['target', 'mode', 'context']
-      @addHeaderFromRequest(up.protocol.successHeader(key), key)
-      @addHeaderFromRequest(up.protocol.failHeader(key), up.fragment.failKey(key))
+    for key, value of @request.metaProps()
+      header = up.protocol.headerize(key)
+      @addHeader(header, value)
+
+    for header, value of @request.headers
+      @addHeader(header, value)
 
     if (csrfHeader = @request.csrfHeader()) && (csrfToken = @request.csrfToken())
       @addHeader(csrfHeader, csrfToken)
+
+    @addHeader(up.protocol.config.versionHeader, up.version)
 
     u.assign(@xhr, handlers)
     @xhr.send(@xhrPayload)
@@ -46,10 +51,6 @@ class up.Request.XhrRenderer
     return @xhr
 
   addHeader: (header, value) ->
+    if u.isOptions(value) || u.isArray(value)
+      value = JSON.stringify(value)
     @xhr.setRequestHeader(header, value)
-
-  addHeaderFromRequest: (header, key) ->
-    if value = @request[key]
-      if u.isOptions(value)
-        value = JSON.stringify(value)
-      @addHeader(header, value)

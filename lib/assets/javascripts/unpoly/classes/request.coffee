@@ -71,6 +71,35 @@ class up.Request extends up.Record
   @param {Object|undefined} timeout
   @stable
   ###
+
+  ###**
+  TODO: Docs
+
+  @property up.Request#context
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @property up.Request#failContext
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @property up.Request#mode
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @property up.Request#failMode
+  @stable
+  ###
+
   keys: ->
     [
       'method',
@@ -131,6 +160,10 @@ class up.Request extends up.Record
     # Note that @context is a part of our @cacheKey(), since different contexts
     # might yield different server responses.
     @context ||= @layer?.context || {}
+    @failContext ||= {}
+
+    @mode ||= @layer?.mode || 'root'
+    @failMode ||= @layer?.mode || 'root'
 
     @extractHashFromURL()
     unless u.methodAllowsPayload(@method)
@@ -186,17 +219,19 @@ class up.Request extends up.Record
     @xhr = new up.Request.XhrRenderer(this).buildAndSend(
       onload: @responseReceived,
       onerror: @responseReceived,
-      ontimeout: @setAbortedState
-      onabort: @setAbortedState
+      ontimeout: => @setAbortedState('Requested timed out')
+      onabort: => @setAbortedState() # Use default message
     )
 
   abort: (message) =>
-    @xhr?.abort()
+    # setAbortedState() must be called before xhr.abort(), since xhr's event handlers
+    # will call setAbortedState() a second time, without a message.
     @setAbortedState(message)
+    @xhr?.abort()
 
   setAbortedState: (message = 'Request was aborted') =>
     unless @aborted
-      @emit('up:proxy:aborted')
+      @emit('up:proxy:aborted', log: message)
       @aborted = true
       @deferred.reject(up.error.aborted(message))
 
@@ -253,17 +288,21 @@ class up.Request extends up.Record
   isCachable: =>
     @isSafe() && @params.hasOnlyPrimitiveValues()
 
+  metaProps: ->
+    props = {}
+    for key in up.proxy.config.requestMetaKeys(@url)
+      value = this[key]
+      if u.isGiven(value)
+        props[key] = value
+    props
+
   cacheKey: =>
-    [ @url,
+    JSON.stringify [
       @method,
+      @url,
       @params.toQuery(),
-      @target,
-      @failTarget,
-      @mode,
-      @failMode,
-      JSON.stringify(@context)
-      JSON.stringify(@failContext)
-    ].join('|')
+      @metaProps()
+    ]
 
   @wrap: (args...) ->
     u.wrapValue(@, args...)

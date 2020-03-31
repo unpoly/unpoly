@@ -23,20 +23,23 @@
 - Should up-modal-frame be up-modal-box?
 - Hovering over a new [up-instant] link should abort all queued preload links
   - Preload links already in flight should not be canceled
-  - Allow to disable this behavior for programmatic access, default could be { abort: { preload: true, state: 'queueud' } }
+  - Allow to disable this behavior for programmatic access, default could be { abort: { preload: true, queued: 'true' } }
   - For this we would need a state machine for requests:
-    - 'initialized' ---> 'queued' --> 'loading' --> 'fatal' / 'success' / 'failure'
-    -                       |              v            |
-    -                       +--------> 'aborted' <------+
-- Consider rename `abort` to `cancel` everywhere
-  - Fetch uses abort
-  - I hate the verb
+    - 'initialized' ---> 'queued' --> 'loading' --> 'fatal' / 'ok' / 'error'
+    -                       |              v
+    -                       +--------> 'aborted'
+    - Request#ok
+    - Request#queued
+    - Request#fatal
+    - EVEN IF WE DONT DO THIS, it's not good to have isFatalError, but #aborted
+- Move up:proxy:loaded and up:proxy:fatal to the Request that already emits up:proxy:aborted
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test: up:proxy:fatal is not emitted when a request was aborted
   - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
   - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.
   - Test: History events are emitted on the history-enabled layer closest to the front

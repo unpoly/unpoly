@@ -94,7 +94,7 @@ class up.Request.Queue extends up.Class
       request.emit 'up:proxy:loaded',
         log: ['Server responded with HTTP %d (%d bytes)', value.status, value.text.length]
         response: value
-    else
+    else if !value.aborted
       request.emit 'up:proxy:fatal',
         log: 'Fatal error during request'
         error: value
@@ -117,9 +117,7 @@ class up.Request.Queue extends up.Class
       return
 
   requestMatches: (request, conditions) ->
-    return conditions == true ||
-      (u.isFunction(conditions) && conditions(request)) ||
-      (u.isOptions(conditions) && u.objectContains(request, conditions))
+    return conditions == true || request == conditions || conditions(request)
 
   checkSlow: =>
     currentSlow = @isSlow()

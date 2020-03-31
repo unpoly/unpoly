@@ -27,7 +27,6 @@ describe 'up.toast', ->
           label: 'Custom action'
           callback: jasmine.createSpy('action callback')
         up.toast.open('This is a message', { action })
-        debugger
         $actionButton = $('up-toast-action:contains("Custom action")')
         expect($actionButton).toBeAttached()
         expect(action.callback).not.toHaveBeenCalled()
