@@ -33,7 +33,7 @@ class up.OptionParser
     if normalizeFn = keyOptions.normalize
       @options[key] = normalizeFn(@options[key])
 
-    if keyOptions.fail && @fail && failKey = u.fragment.failKey(key)
+    if (keyOptions.fail || @fail) && failKey = up.fragment.failKey(key)
       failAttrs = u.compact(u.map(attrs, @deriveFailAttrName))
       failKeyOptions = u.merge(keyOptions,
         attr: failAttrs,

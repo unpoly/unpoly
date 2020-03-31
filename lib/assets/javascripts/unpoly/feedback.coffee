@@ -314,9 +314,7 @@ up.feedback = do ->
   updateLayerIfLocationChanged = (layer) ->
     processedLocation = layer.feedbackLocation
 
-    # layer.location is already normalized with up.feedback.normalizedUrl.
-    # See up.Layer.Base#location setter for details.
-    currentLocation = layer.location
+    currentLocation = normalizeURL(layer.location)
 
     # A history change might call this function multiple times,
     # since we listed to up:history:pushed and up:layer:location:changed.

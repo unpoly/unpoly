@@ -167,7 +167,7 @@ up.link = do ->
     options = u.options(options)
 
     # TODO: Document new follow options like onOpened, [up-on-opened], ...
-    parser = new up.OptionParser(options, link)
+    parser = new up.OptionParser(options, link, fail: true)
 
     # Request options
     parser.string('url', attr: ['up-href', 'href'])

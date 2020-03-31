@@ -167,7 +167,7 @@ class up.Layer extends up.Record
 
     set: (location) ->
       previousLocation = @savedLocation
-      location = up.feedback.normalizeURL(location)
+      location = up.history.normalizeURL(location)
 
       if previousLocation != location
         @savedLocation = location

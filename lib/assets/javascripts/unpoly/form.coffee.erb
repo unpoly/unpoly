@@ -202,7 +202,7 @@ up.form = do ->
     form = e.get(formOrSelector)
     form = e.closest(form, 'form')
 
-    parser = new up.OptionParser(options, form)
+    parser = new up.OptionParser(options, form, fail: true)
     parser.string('url', attr: ['up-action', 'action'], default: up.fragment.source(form))
     parser.string('method', attr: ['up-method', 'data-method', 'method'], default: 'POST', normalize: u.normalizeMethod)
     if options.method == 'GET'
