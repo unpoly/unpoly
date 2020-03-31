@@ -764,6 +764,18 @@ describe 'up.util', ->
           baz: 'baz-value'
           bam: 'bam-value'
 
+      it 'copies inherited properties', ->
+        parent =
+          foo: 'foo-value'
+          bar: 'bar-value'
+        child = Object.create(parent)
+        child.baz = 'baz-value'
+        child.bam = 'bam-value'
+        whitelisted = up.util.omit(child, ['foo', 'baz'])
+        expect(whitelisted).toEqual
+          bar: 'bar-value'
+          bam: 'bam-value'
+
     describe 'up.util.every', ->
 
       it 'returns true if all element in the array returns true for the given function', ->

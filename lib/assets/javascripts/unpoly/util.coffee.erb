@@ -1138,10 +1138,7 @@ up.util = do ->
   @stable
   ###
   omit = (object, keys) ->
-    filtered = copy(object)
-    for key in keys
-      delete filtered[key]
-    filtered
+    pickBy(object, (value, key) -> !contains(keys, key))
 
   ###**
   @function up.util.isUnmodifiedKeyEvent
