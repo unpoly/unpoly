@@ -18,7 +18,10 @@ module Unpoly
       # [page fragment update](https://unpoly.com/up.replace) triggered by an
       # Unpoly frontend.
       def up?
-        target.present?
+        # This will eventually just check for the X-Up-Version header.
+        # Just in case a user still has an older version of Unpoly running on the frontend,
+        # we also check for the X-Up-Target header.
+        version.present? || target.present?
       end
 
       alias_method :unpoly?, :up?
@@ -234,13 +237,16 @@ module Unpoly
         params
       end
 
-      def test_target(actual_target, tested_target)
-        if up?
-          if actual_target == tested_target
+      def test_target(frontend_target, tested_target)
+        # We must test whether the frontend has passed us a target.
+        # The user may have chosen to not reveal their target for better
+        # cacheability (see up.proxy.config#requestMetaKeys).
+        if up? && frontend_target.present?
+          if frontend_target == tested_target
             true
-          elsif actual_target == 'html'
+          elsif frontend_target == 'html'
             true
-          elsif actual_target == 'body'
+          elsif frontend_target == 'body'
             not ['head', 'title', 'meta'].include?(tested_target)
           else
             false

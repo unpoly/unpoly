@@ -99,7 +99,7 @@ describe Unpoly::Rails::Controller, type: :request do
 
       it_behaves_like 'string field',
         header: 'X-Up-Version',
-        reader: -> { up.target }
+        reader: -> { up.version }
 
     end
 
@@ -137,6 +137,13 @@ describe Unpoly::Rails::Controller, type: :request do
 
       it 'returns true if the request is not an Unpoly request' do
         result = controller_eval do
+          up.target?('.foo')
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns true if the request is an Unpoly request, but does not reveal a target for better cacheability' do
+        result = controller_eval(headers: { 'X-Up-Version': '1.0.0' }) do
           up.target?('.foo')
         end
         expect(result).to eq(true)
@@ -216,8 +223,8 @@ describe Unpoly::Rails::Controller, type: :request do
 
     describe 'up.fail_target?' do
 
-      it 'returns false if the tested CSS selector matches the X-Up-Target header' do
-        result = controller_eval(headers: { 'X-Up-Target': '.foo' }) do
+      it 'returns false if the tested CSS selector only matches the X-Up-Target header' do
+        result = controller_eval(headers: { 'X-Up-Target': '.foo', 'X-Up-Fail-Target': '.bar' }) do
           up.fail_target?('.foo')
         end
         expect(result).to eq(false)
@@ -226,6 +233,20 @@ describe Unpoly::Rails::Controller, type: :request do
       it 'returns true if the tested CSS selector matches the X-Up-Fail-Target header' do
         result = controller_eval(headers: { 'X-Up-Target': '.foo', 'X-Up-Fail-Target': '.bar' }) do
           up.fail_target?('.bar')
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns true if the request is not an Unpoly request' do
+        result = controller_eval do
+          up.fail_target?('.foo')
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns true if the request is an Unpoly request, but does not reveal a target for better cacheability' do
+        result = controller_eval(headers: { 'X-Up-Version': '1.0.0' }) do
+          up.fail_target?('.foo')
         end
         expect(result).to eq(true)
       end
@@ -384,6 +405,13 @@ describe Unpoly::Rails::Controller, type: :request do
 
       it 'returns true if the request is a full page load without Unpoly (which always replaces the entire page)' do
         result = controller_eval do
+          up.layer.root?
+        end
+        expect(result).to eq(true)
+      end
+
+      it 'returns true if the frontend does not reveal its mode for better cacheability' do
+        result = controller_eval(headers: { 'X-Up-Version': '1.0.0' }) do
           up.layer.root?
         end
         expect(result).to eq(true)
