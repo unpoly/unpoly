@@ -4,10 +4,12 @@ e = up.element
 class up.LayerStack extends up.Class
 
   constructor: ->
-    @layers = []
-    rootLayer = @buildRoot()
-    @layers.push(rootLayer)
+    @initialize()
+
+  initialize: ->
     @currentOverrides = []
+    @layers = []
+    @layers.push(@buildRoot())
 
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
@@ -35,9 +37,8 @@ class up.LayerStack extends up.Class
       descendant.dismiss(null, u.merge(options, preventable: false))
 
   reset: ->
-    @currentOverrides = []
     @peel(@root, animation: false)
-    @root.reset()
+    @initialize()
 
   indexOf: (layer) ->
     @layers.indexOf(layer)
