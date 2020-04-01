@@ -944,7 +944,6 @@ describe 'up.element', ->
       div.style.paddingTop = '10px'
       div.style.paddingBottom = '20px'
       value = up.element.style(div, ['padding-top', 'padding-bottom'])
-      debugger
       expect(value).toEqual { 'padding-top': '10px', 'padding-bottom': '20px' }
 
     it 'returns the computed style for multiple CSS properties in camelCase', ->
