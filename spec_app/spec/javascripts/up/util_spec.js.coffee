@@ -724,15 +724,15 @@ describe 'up.util', ->
         expect(whitelisted).toHaveOwnProperty('foo')
         expect(whitelisted).not.toHaveOwnProperty('bar')
 
-#      it 'copies properties that are computed by a getter', ->
-#        original =
-#          foo: 'foo-value'
-#          bar: 'bar-value'
-#        Object.defineProperty(original, 'baz', get: -> return 'baz-value')
-#        whitelisted = up.util.pick(original, ['foo', 'baz'])
-#        expect(whitelisted).toEqual
-#          foo: 'foo-value'
-#          baz: 'baz-value'
+      it 'copies properties that are computed by a getter', ->
+        original =
+          foo: 'foo-value'
+          bar: 'bar-value'
+        Object.defineProperty(original, 'baz', get: -> return 'baz-value')
+        whitelisted = up.util.pick(original, ['foo', 'baz'])
+        expect(whitelisted).toEqual
+          foo: 'foo-value'
+          baz: 'baz-value'
 
       it 'copies inherited properties', ->
         parent =

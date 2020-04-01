@@ -1104,7 +1104,11 @@ up.util = do ->
   @stable
   ###
   pick = (object, keys) ->
-    pickBy(object, (value, key) -> contains(keys, key))
+    filtered = {}
+    for key in keys
+      if key of object
+        filtered[key] = object[key]
+    filtered
 
   pickBy = (object, tester) ->
     tester = iteratee(tester)
