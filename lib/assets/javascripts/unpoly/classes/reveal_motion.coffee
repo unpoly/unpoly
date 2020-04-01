@@ -87,7 +87,7 @@ class up.RevealMotion
     elementRect.height += 2 * @padding
 
   selectObstructions: (selectors) ->
-    u.flatMap selectors, (selector) => @layer.allElements(selector)
+    u.flatMap selectors, (selector) => up.layer.allElements(selector, { @layer })
 
   substractObstructions: (viewportRect) ->
     for obstruction in @selectObstructions(@fixedTop)

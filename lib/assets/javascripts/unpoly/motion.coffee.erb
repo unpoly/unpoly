@@ -160,6 +160,7 @@ up.motion = do ->
   ###
   animate = (elementOrSelector, animation, options) ->
     element = e.get(elementOrSelector)
+    options = u.options(options)
     applyConfig(options)
 
     animationFn = findAnimationFn(animation)
