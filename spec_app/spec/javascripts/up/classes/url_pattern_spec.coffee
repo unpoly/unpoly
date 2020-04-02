@@ -45,3 +45,6 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo')
       expect(pattern.recognize('/bar')).toBeMissing()
 
+    it 'matches query params', ->
+      pattern = new up.URLPattern('/search?query=:query&page=:page')
+      expect(pattern.recognize('/search?query=hello&page=3')).toEqual { query: 'hello', page: '3' }

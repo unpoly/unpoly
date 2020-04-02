@@ -10,7 +10,7 @@ class up.URLPattern
 
     pattern = u.splitValues(pattern).map(@normalizeURL).map(u.escapeRegExp).join('|')
     pattern = pattern.replace /\\\*/g, '.*?'
-    pattern = pattern.replace /\:([\w-]+)/ig, (match, name) =>
+    pattern = pattern.replace /\:([a-z][\w-]*)/ig, (match, name) =>
       @groupNames.push(name)
       return '([^/?#]+)'
     @regexp = new RegExp('^' + pattern + '$')
