@@ -89,6 +89,8 @@ class up.Layer.Overlay extends up.Layer
     @backdropElement = @affix(parentElement, 'backdrop')
 
   createViewportElement: (parentElement) ->
+    # Give the viewport element an [up-viewport] attribute so it will be found
+    # by up.viewport.closest().
     @viewportElement = @affix(parentElement, 'viewport', 'up-viewport': '')
 
   createFrameElement: (parentElement) ->

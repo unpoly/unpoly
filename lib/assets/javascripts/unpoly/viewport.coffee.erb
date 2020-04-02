@@ -73,7 +73,7 @@ up.viewport = do ->
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
-    revealSnap: 50
+    revealSnap: 75
     revealPadding: 0,
     scrollSpeed: 1
 
@@ -185,6 +185,9 @@ up.viewport = do ->
   @param {number} [options.speed]
   @param {string} [options.snap]
   @param {string|Element|jQuery} [options.viewport]
+    The scrolling element to scroll.
+
+    Defaults to the [given element's viewport](/up.viewport.closest).
   @param {boolean} [options.top=false]
     Whether to scroll the viewport so that the first element row aligns
     with the top edge of the viewport.
@@ -196,10 +199,10 @@ up.viewport = do ->
     The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
 
     Defaults to `up.viewport.config.scrollSpeed`.
-  @param {number} [config.padding=0]
+  @param {number} [options.padding=0]
     The desired padding between the revealed element and the
     closest [viewport](/up.viewport) edge (in pixels).
-  @param {number|boolean} [config.snap]
+  @param {number|boolean} [options.snap=true]
     Whether to snap to the top of the viewport if the new scroll position
     after revealing the element is close to the top edge.
 
@@ -208,14 +211,27 @@ up.viewport = do ->
     Passing `false` will disable snapping.
 
     Passing `true` will use the snap pixel value from `up.viewport.config.revealSnap`.
+  @param {boolean} [options.reveal=true]
+    Whether to close overlays obscuring the layer of `element`.
   @return {Promise}
     A promise that fulfills when the element is revealed.
   @stable
   ###
-  reveal = (elementOrSelector, options = {}) ->
+  reveal = (elementOrSelector, options) ->
+    # copy options, since we will mutate it below
+    options = u.options(options, peel: true, snap: true)
     element = f.first(elementOrSelector, options)
+
+    # Now that we have looked up the element with an option like { layer: 'any' },
+    # the only layer relevant from here on is the element's layer.
+    options.layer = up.layer.get(element)
+
     motion = new up.RevealMotion(element, options)
-    return scrollingController.startMotion(element, motion, options)
+
+    promise = Promise.resolve()
+    promise = promise.then(-> options.layer.peel()) if options.peel
+    promise = promise.then(-> scrollingController.startMotion(element, motion, options))
+    return promise
 
   ###**
   @function up.viewport.scrollAfterInsertFragment
@@ -322,6 +338,8 @@ up.viewport = do ->
   ###
   closest = (target, options = {}) ->
     element = f.first(target, options)
+    # It is OK to find a viewport in a parent layer. Layers without its own viewport (like popups)
+    # are scrolled by the parent layer's viewport.
     e.closest(element, allSelector())
 
   ###**

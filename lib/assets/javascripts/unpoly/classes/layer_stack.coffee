@@ -33,8 +33,19 @@ class up.LayerStack extends up.Class
     @layers.push(layer)
 
   peel: (layer, options) ->
-    for descendant in u.reverse(@descendantsOf(layer))
-      descendant.dismiss(null, u.merge(options, preventable: false))
+    # We will dismiss descendants closer to the front first.
+    descendants = u.reverse(@descendantsOf(layer))
+
+    # Callers expect the effects of peel() to manipulate the layer stack sync.
+    # Because of this we will dismiss alle descendants sync rather than waiting
+    # for each descendant to finish its closing animation.
+    dismissOptions = u.merge(options, preventable: false)
+    dismissDescendant = (descendant) -> descendant.dismiss(null, dismissOptions)
+    promises = u.map(descendants, dismissDescendant)
+
+    # In case a caller wants to know when all (concurrent) closing animations
+    # have finished, we return a promise.
+    Promise.all(promises)
 
   reset: ->
     @peel(@root, animation: false)

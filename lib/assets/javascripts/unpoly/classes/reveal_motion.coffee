@@ -4,23 +4,25 @@ u = up.util
 class up.RevealMotion
 
   constructor: (@element, options = {}) ->
-    layoutConfig = up.viewport.config
+    viewportConfig = up.viewport.config
     @viewport = options.viewport || up.viewport.closest(@element)
-    @layer = options.layer || up.layer.get(@viewport)
-    up.legacy.fixKey(layoutConfig, 'snap', 'revealSnap')
-    snapDefault = layoutConfig.revealSnap
-    @snap = options.snap ? options.revealSnap ? snapDefault
-    if @snap == false
+    @obstructionsLayer = up.layer.get(@viewport)
+
+    up.legacy.fixKey(viewportConfig, 'snap', 'revealSnap')
+    if options.snap == true # default set by up.viewport.reveal()
+      @snap = viewportConfig.revealSnap
+    else if options.snap == false
       @snap = 0
-    else if @snap == true
-      @snap = snapDefault
-    @padding = options.padding ? options.revealPadding ? layoutConfig.revealPadding
+    else
+      # snap is now a given pixel value
+
+    @padding = options.padding ? options.revealPadding ? viewportConfig.revealPadding
     @top = options.top
-    @fixedTop = options.fixedTop ? layoutConfig.fixedTop
-    @fixedBottom = options.fixedBottom ? layoutConfig.fixedBottom
+    @topObstructions = viewportConfig.fixedTop
+    @bottomObstructions = viewportConfig.fixedBottom
 
     # Options for up.ScrollMotion
-    @speed = options.speed ? options.scrollSpeed ? layoutConfig.scrollSpeed
+    @speed = options.speed ? options.scrollSpeed ? viewportConfig.scrollSpeed
     @behavior = options.behavior ? options.scrollBehavior
 
   start: ->
@@ -87,17 +89,17 @@ class up.RevealMotion
     elementRect.height += 2 * @padding
 
   selectObstructions: (selectors) ->
-    u.flatMap selectors, (selector) => up.layer.allElements(selector, { @layer })
+    @obstructionsLayer.allElements(selectors.join(','))
 
   substractObstructions: (viewportRect) ->
-    for obstruction in @selectObstructions(@fixedTop)
+    for obstruction in @selectObstructions(@topObstructions)
       obstructionRect = up.Rect.fromElement(obstruction)
       diff = obstructionRect.bottom - viewportRect.top
       if diff > 0
         viewportRect.top += diff
         viewportRect.height -= diff
 
-    for obstruction in @selectObstructions(@fixedBottom)
+    for obstruction in @selectObstructions(@bottomObstructions)
       obstructionRect = up.Rect.fromElement(obstruction)
       diff = viewportRect.bottom - obstructionRect.top
       if diff > 0
