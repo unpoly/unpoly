@@ -13,6 +13,7 @@ class up.Request.Queue extends up.Class
   reset: ->
     @queuedRequests = []
     @currentRequests = []
+    clearTimeout(@checkSlowTimout)
     @emittedSlow = false
 
   @getter 'allRequests', ->
@@ -53,7 +54,7 @@ class up.Request.Queue extends up.Class
   setSlowTimer: (request) ->
     unless request.preload || request.aborted
       slowDelay = u.evalOption(@slowDelay)
-      setTimeout(@checkSlow, slowDelay)
+      @checkSlowTimout = setTimeout(@checkSlow, slowDelay)
 
   hasConcurrencyLeft: ->
     maxConcurrency = u.evalOption(@concurrency)

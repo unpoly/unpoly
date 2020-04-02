@@ -632,7 +632,7 @@ describe 'up.proxy', ->
 
         it 'can delay the up:proxy:slow event to prevent flickering of spinners', asyncSpec (next) ->
           next =>
-            up.proxy.config.slowDelay = 100
+            up.proxy.config.slowDelay = 50
             up.request(url: '/foo')
 
           next =>
@@ -640,12 +640,12 @@ describe 'up.proxy', ->
               'up:proxy:load'
             ])
 
-          next.after 50, =>
+          next.after 25, =>
             expect(@events).toEqual([
               'up:proxy:load'
             ])
 
-          next.after 60, =>
+          next.after 300, =>
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:slow'
@@ -716,9 +716,9 @@ describe 'up.proxy', ->
           up.proxy.config.slowDelay = 10
 
           next =>
-            up.request(url: '/foo', timeout: 75)
+            up.request(url: '/foo')
 
-          next.after 50, =>
+          next.after 200, =>
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:slow'

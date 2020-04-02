@@ -381,7 +381,7 @@ describe 'up.feedback', ->
           next =>
             Trigger.clickSequence($link)
           next =>
-            expect('up-overlay .main').toHaveText('new-text')
+            expect('up-modal .main').toHaveText('new-text')
             expect($link).not.toHaveClass('up-active')
 
         it 'removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec (next) ->

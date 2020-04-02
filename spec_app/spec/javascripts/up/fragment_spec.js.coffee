@@ -1133,7 +1133,7 @@ describe 'up.fragment', ->
         beforeEach ->
           up.history.config.enabled = true
 
-        it "sets the document title to the response <title> xxx", asyncSpec (next) ->
+        it "sets the document title to the response <title>", asyncSpec (next) ->
           $fixture('.container').text('old container text')
           up.change('.container', url: '/path')
 
@@ -1198,7 +1198,7 @@ describe 'up.fragment', ->
             expect($('.container')).toHaveText('new container text')
             expect(document.title).toBe('Title from header')
 
-        it "sets the document title to the response <title> with { location: false, title: true } options (bugfix) xxx", asyncSpec (next) ->
+        it "sets the document title to the response <title> with { location: false, title: true } options (bugfix)", asyncSpec (next) ->
           $fixture('.container').text('old container text')
           up.change('.container', url: '/path', location: false, title: true)
 

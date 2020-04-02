@@ -590,7 +590,7 @@ describe 'up.modal (deprecated)', ->
           expect(location.pathname).toEqual('/new-path')
           expect('up-overlay[up-mode=modal] .target').toHaveText('modal content')
 
-          history.back()
+          safeHistory.back()
 
         next.after (waitForBrowser = 70), =>
           @respondWith('<div class="container">restored container content</div>')

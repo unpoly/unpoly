@@ -145,6 +145,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
         return promise
 
+      else
+        up.fail('Unknown placement: %o', step.placement)
+
   # Returns a object detailling a keep operation iff the given element is [up-keep] and
   # we can find a matching partner in newElement. Otherwise returns undefined.
   #
@@ -251,7 +254,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       for oldElement in hungries
         selector = e.toSelector(oldElement)
         if newElement = @responseDoc.select(selector)
-          @steps.push({ selector, oldElement, newElement, transition, reveal: false })
+          @steps.push({ selector, oldElement, newElement, transition, reveal: false, placement: 'swap' })
 
   keepFocus: ->
     if @focus == 'keep'

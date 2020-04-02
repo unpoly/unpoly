@@ -72,7 +72,7 @@ describe 'up.history', ->
 
         expect(constructorSpy).toHaveBeenCalled()
 
-        history.back()
+        safeHistory.back()
 
         next.after waitForBrowser, =>
           expect(location.pathname).toEqual('/one')
@@ -113,8 +113,7 @@ describe 'up.history', ->
         afterEach ->
           $('.viewport').remove()
 
-        it 'restores the scroll position of viewports when the user hits the back button', asyncSpec (next) ->
-
+        it 'xxx restores the scroll position of viewports when the user hits the back button', asyncSpec (next) ->
           longContentHTML = """
             <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
               <div class="content" style="height: 1000px"></div>
@@ -149,27 +148,27 @@ describe 'up.history', ->
 
           next =>
             $('.viewport').scrollTop(250)
-            history.back()
+            safeHistory.back()
 
           next.after 100, =>
             respond() # we need to respond since we've never requested /two with the popTarget
 
           next =>
             expect($('.viewport').scrollTop()).toBe(150)
-            history.back()
+            safeHistory.back()
 
           next.after 100, =>
             respond() # we need to respond since we've never requested /one with the popTarget
 
           next =>
             expect($('.viewport').scrollTop()).toBe(50)
-            history.forward()
+            safeHistory.forward()
 
           next.after 100, =>
             # No need to respond since we requested /two with the popTarget
             # when we went backwards
             expect($('.viewport').scrollTop()).toBe(150)
-            history.forward()
+            safeHistory.forward()
 
           next.after 100, =>
             respond() # we need to respond since we've never requested /three with the popTarget
@@ -214,7 +213,7 @@ describe 'up.history', ->
 
           next.after 50, =>
             expect(location.href).toMatchURL('/two')
-            history.back()
+            safeHistory.back()
 
           next.after 100, =>
             # we need to respond since we've never requested the original URL with the popTarget
@@ -281,7 +280,7 @@ describe 'up.history', ->
               ['up:history:pushed', normalize('/baz')]
             ]
 
-            history.back()
+            safeHistory.back()
 
           next.after 100, =>
             respond()
@@ -294,21 +293,7 @@ describe 'up.history', ->
               ['up:history:restored', normalize('/bar')]
             ]
 
-            history.back()
-
-          next.after 100, =>
-            respond()
-
-          next =>
-            expect(events).toEqual [
-              ['up:history:pushed', normalize('/foo')]
-              ['up:history:pushed', normalize('/bar')]
-              ['up:history:pushed', normalize('/baz')]
-              ['up:history:restored', normalize('/bar')]
-              ['up:history:restored', normalize('/foo')]
-            ]
-
-            history.forward()
+            safeHistory.back()
 
           next.after 100, =>
             respond()
@@ -320,10 +305,24 @@ describe 'up.history', ->
               ['up:history:pushed', normalize('/baz')]
               ['up:history:restored', normalize('/bar')]
               ['up:history:restored', normalize('/foo')]
+            ]
+
+            safeHistory.forward()
+
+          next.after 100, =>
+            respond()
+
+          next =>
+            expect(events).toEqual [
+              ['up:history:pushed', normalize('/foo')]
+              ['up:history:pushed', normalize('/bar')]
+              ['up:history:pushed', normalize('/baz')]
+              ['up:history:restored', normalize('/bar')]
+              ['up:history:restored', normalize('/foo')]
               ['up:history:restored', normalize('/bar')]
             ]
 
-            history.forward()
+            safeHistory.forward()
 
           next.after 100, =>
             respond() # we need to respond since we've never requested /baz with the popTarget

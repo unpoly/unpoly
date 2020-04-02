@@ -7,7 +7,7 @@ $ = jQuery
 beforeEach ->
   window.defaultSubmittedForms = []
 
-  up.on 'submit', 'form', (event) ->
+  up.on 'submit', (event) ->
     window.defaultSubmittedForms.push(event.target)
     event.preventDefault()
 
@@ -22,6 +22,72 @@ afterEach ->
   if links = u.presence(window.defaultSubmittedForms)
     up.fail('Unhandled default submit behavior for forms %o', links)
 
+window.safeHistory = new class
+  constructor: ->
+    @reset()
+
+  back: ->
+    @log("safeHistory: back(), pointer is %o", @cursor)
+    if @cursor > 0
+      # This will trigger popstate, which we will handle and update @cursor
+      window.history.back()
+    else
+      up.fail('safeHistory: Tried to go too far back in history (prevented)')
+
+  forward: ->
+    @log("safeHistory: forward()")
+    if @cursor < @stateIndexes.length - 1
+      # This will trigger popstate, which we will handle and update @cursor
+      window.history.forward()
+    else
+      up.fail('safeHistory: Tried to go too far forward in history (prevented)')
+
+  pushed: (state) ->
+    @log("safeHistory: pushed(%o)", state.index)
+    if state.up
+      @stateIndexes.splice(@cursor, @stateIndexes.length, state.up.index)
+      @cursor++
+      @log("safeHistory: @stateIndexes are now %o, cursor is %o", u.copy(@stateIndexes), @cursor)
+    else
+      up.fail('safeHistory: Pushed a non-Unpoly state: %o', state)
+
+  replaced: (state) ->
+    @log("safeHistory: replaced(%o)", state.index)
+    if state.up
+      @stateIndexes[@cursor] = state.up.index
+      @log("safeHistory: @stateIndexes are now %o, cursor is %o", u.copy(@stateIndexes), @cursor)
+    else
+      up.fail('safeHistory: Replaced a non-Unpoly state: %o', state)
+
+  restored: (state) ->
+    @log("safeHistory: restored(%o)", state.index)
+    if state.up
+      @cursor = @stateIndexes.indexOf(state.up.index)
+      @log("safeHistory: @stateIndexes are now %o, cursor is %o", u.copy(@stateIndexes), @cursor)
+    else
+      up.fail('safeHistory: Restored a non-Unpoly state: %o', state)
+      
+  log: (args...) ->
+    if @logEnabled
+      console.log(args...)
+
+  reset: ->
+    @logEnabled = true
+    @log("safeHistory: reset()")
+    @cursor = -1
+    @stateIndexes = []
+
+beforeEach ->
+  safeHistory.reset()
+
+  up.on 'up:history:pushed', (event) ->
+    safeHistory.pushed(history.state)
+
+  up.on 'up:history:replaced', (event) ->
+    safeHistory.replaced(history.state)
+
+  up.on 'up:history:restored', (event) ->
+    safeHistory.restored(history.state)
 
 # Make specs fail if a link was followed without Unpoly.
 # This would otherwise navigate away from the spec runner.

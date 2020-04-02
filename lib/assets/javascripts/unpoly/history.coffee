@@ -93,7 +93,7 @@ up.history = do ->
   ###
   replace = (url) ->
     if manipulate('replaceState', url)
-      emit('up:history:replaced', url: url)
+      emit('up:history:replaced', url: url, log: true)
     else
       emit('up:history:muted', url: url, log: "Did not replace state with #{url} (history is unavailable)")
 
@@ -138,15 +138,18 @@ up.history = do ->
       state = buildState()
       window.history[method](state, '', url)
       observeNewURL(currentLocation())
-      true
+      return state
     else
       false
 
+  stateIndex = 0
+
   buildState = ->
-    fromUp: true
+    up:
+      index: stateIndex++
 
   restoreStateOnPop = (state) ->
-    if state?.fromUp
+    if state?.up
       url = currentLocation()
 
       replaced = up.change

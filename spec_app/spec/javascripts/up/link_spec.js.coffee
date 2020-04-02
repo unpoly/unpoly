@@ -124,7 +124,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/three')
             expect(document.title).toEqual('title from three')
 
-            history.back()
+            safeHistory.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two', 'restored title from two')
@@ -134,7 +134,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(document.title).toEqual('restored title from two')
 
-            history.back()
+            safeHistory.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from one', 'restored title from one')
@@ -144,7 +144,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/one')
             expect(document.title).toEqual('restored title from one')
 
-            history.forward()
+            safeHistory.forward()
 
           next.after waitForBrowser, =>
             # Since the response is cached, we don't have to respond
@@ -203,7 +203,7 @@ describe 'up.link', ->
             expect($('.target')).toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
 
-            history.back()
+            safeHistory.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from one')
@@ -212,7 +212,7 @@ describe 'up.link', ->
             expect($('.target')).toHaveText('restored text from one')
             expect(location.pathname).toEqual('/one')
 
-            history.forward()
+            safeHistory.forward()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two')
@@ -276,7 +276,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('#hash')
 
-            history.back()
+            safeHistory.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two')
@@ -286,7 +286,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('')
 
-            history.forward()
+            safeHistory.forward()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two with hash')
