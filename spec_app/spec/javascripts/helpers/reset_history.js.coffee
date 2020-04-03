@@ -15,8 +15,6 @@ beforeEach ->
   # So specs need to explicitely enable history handling.
   up.history.config.enabled = false
 
-  console.debug("--- disabling history ---")
-
-#  # Store original URL and title so specs may use it
+  # Store original URL and title so specs may use it
   @hrefBeforeExample = location.href
   @titleBeforeExample = document.title

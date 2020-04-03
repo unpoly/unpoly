@@ -27,7 +27,7 @@ window.safeHistory = new class
     @reset()
 
   back: ->
-    @log("safeHistory: back(), pointer is %o", @cursor)
+    @log("safeHistory: back(), cursor before is %o, path before is %o", @cursor, location.pathname)
     if @cursor > 0
       # This will trigger popstate, which we will handle and update @cursor
       window.history.back()
@@ -43,36 +43,36 @@ window.safeHistory = new class
       up.fail('safeHistory: Tried to go too far forward in history (prevented)')
 
   pushed: (state) ->
-    @log("safeHistory: pushed(%o)", state.index)
+    @log("safeHistory: pushed(%o)", state.up.index)
     if state.up
-      @stateIndexes.splice(@cursor, @stateIndexes.length, state.up.index)
+      @stateIndexes.splice(@cursor + 1, @stateIndexes.length, state.up.index)
       @cursor++
-      @log("safeHistory: @stateIndexes are now %o, cursor is %o", u.copy(@stateIndexes), @cursor)
+      @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
     else
       up.fail('safeHistory: Pushed a non-Unpoly state: %o', state)
 
   replaced: (state) ->
-    @log("safeHistory: replaced(%o)", state.index)
+    @log("safeHistory: replaced(%o)", state.up.index)
     if state.up
       @stateIndexes[@cursor] = state.up.index
-      @log("safeHistory: @stateIndexes are now %o, cursor is %o", u.copy(@stateIndexes), @cursor)
+      @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
     else
       up.fail('safeHistory: Replaced a non-Unpoly state: %o', state)
 
   restored: (state) ->
-    @log("safeHistory: restored(%o)", state.index)
+    @log("safeHistory: restored(%o)", state.up.index)
     if state.up
       @cursor = @stateIndexes.indexOf(state.up.index)
-      @log("safeHistory: @stateIndexes are now %o, cursor is %o", u.copy(@stateIndexes), @cursor)
+      @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
     else
       up.fail('safeHistory: Restored a non-Unpoly state: %o', state)
-      
+
   log: (args...) ->
     if @logEnabled
       console.log(args...)
 
   reset: ->
-    @logEnabled = true
+    @logEnabled = false
     @log("safeHistory: reset()")
     @cursor = -1
     @stateIndexes = []
@@ -81,13 +81,13 @@ beforeEach ->
   safeHistory.reset()
 
   up.on 'up:history:pushed', (event) ->
-    safeHistory.pushed(history.state)
+    safeHistory.pushed(window.history.state)
 
   up.on 'up:history:replaced', (event) ->
-    safeHistory.replaced(history.state)
+    safeHistory.replaced(window.history.state)
 
   up.on 'up:history:restored', (event) ->
-    safeHistory.restored(history.state)
+    safeHistory.restored(window.history.state)
 
 # Make specs fail if a link was followed without Unpoly.
 # This would otherwise navigate away from the spec runner.

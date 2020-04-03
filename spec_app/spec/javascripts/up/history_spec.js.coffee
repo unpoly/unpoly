@@ -124,54 +124,72 @@ describe 'up.history', ->
 
           $viewport = $(longContentHTML).appendTo(document.body)
 
+          waitForBrowser = 250
+
           up.viewport.config.viewports = ['.viewport']
           up.history.config.restoreTargets = ['.viewport']
 
-          up.replace('.content', '/one')
+          up.history.replace('/scroll-restauration-spec')
+
+          console.debug("SPEC: navigating to /test-one")
+          up.replace('.content', '/test-one')
 
           next =>
             respond()
 
           next =>
+            expect(location.href).toMatchURL('/test-one')
             $viewport.scrollTop(50)
-            up.replace('.content', '/two')
+            console.debug("SPEC: navigating to /test-two")
+            up.replace('.content', '/test-two')
 
-          next =>
+          next.after waitForBrowser, =>
             respond()
 
           next =>
+            expect(location.href).toMatchURL('/test-two')
             $('.viewport').scrollTop(150)
-            up.replace('.content', '/three')
+            console.debug("SPEC: navigating to /test-three")
+            up.replace('.content', '/test-three')
 
-          next =>
+          next.after waitForBrowser, =>
             respond()
 
           next =>
+            expect(location.href).toMatchURL('/test-three')
             $('.viewport').scrollTop(250)
+            console.debug("SPEC: going back to /test-two")
             safeHistory.back()
 
-          next.after 100, =>
-            respond() # we need to respond since we've never requested /two with the popTarget
+          next.after waitForBrowser, =>
+            respond() # we need to respond since we've never requested /test-two with the popTarget
 
           next =>
+            expect(location.href).toMatchURL('/test-two')
             expect($('.viewport').scrollTop()).toBe(150)
+            console.debug("SPEC: going back to /test-one")
             safeHistory.back()
 
-          next.after 100, =>
-            respond() # we need to respond since we've never requested /one with the popTarget
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-one') # cannot delay the browser from restoring the URL on pop
+            respond() # we need to respond since we've never requested /test-one with the popTarget
 
           next =>
             expect($('.viewport').scrollTop()).toBe(50)
+            console.debug("SPEC: going forward to /test-two")
             safeHistory.forward()
 
-          next.after 100, =>
-            # No need to respond since we requested /two with the popTarget
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-two')
+            # No need to respond since we requested /test-two with the popTarget
             # when we went backwards
             expect($('.viewport').scrollTop()).toBe(150)
+            console.debug("SPEC: going forward to /test-three")
             safeHistory.forward()
 
-          next.after 100, =>
-            respond() # we need to respond since we've never requested /three with the popTarget
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-three') # cannot delay the browser from restoring the URL on pop
+            respond() # we need to respond since we've never requested /test-three with the popTarget
 
           next =>
             expect($('.viewport').scrollTop()).toBe(250)
