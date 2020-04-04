@@ -25,6 +25,28 @@ describe 'up.form', ->
         results = up.form.fields(textArea)
         expect(results).toMatchList([textArea])
 
+      it 'ignores fields outside the given form', ->
+        form1 = fixture('form')
+        form1Field = e.affix(form1, 'input[type=text]')
+        form2 = fixture('form')
+        form2Field = e.affix(form2, 'input[type=text]')
+        results = up.form.fields(form1)
+        expect(results).toMatchList([form1Field])
+
+      it "includes fields outside the form with a [form] attribute matching the given form's ID", ->
+        form = fixture('form#form-id')
+        insideField = e.affix(form, 'input[type=text]')
+        outsideField = fixture('input[type=text][form=form-id]')
+        results = up.form.fields(form)
+        expect(results).toMatchList([insideField, outsideField])
+
+      it "does not return duplicate fields if a field with a matching [form] attribute is also a child of the form", ->
+        form = fixture('form#form-id')
+        field = e.affix(form, 'input[type=text][form=form-id]')
+        results = up.form.fields(form)
+        expect(results).toMatchList([field])
+
+
     describe 'up.observe', ->
 
       beforeEach ->

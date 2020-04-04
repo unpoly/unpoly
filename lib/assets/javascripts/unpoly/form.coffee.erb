@@ -47,8 +47,8 @@ up.form = do ->
   @function up.form.fieldSelector
   @internal
   ###
-  fieldSelector = ->
-    config.fields.join(',')
+  fieldSelector = (suffix = '') ->
+    config.fields.map((field) -> field + suffix).join(',')
 
   ###**
   Returns a list of form fields within the given element.
@@ -68,7 +68,13 @@ up.form = do ->
   ###
   findFields = (root) ->
     root = e.get(root)
-    e.subtree(root, fieldSelector())
+    fields = e.subtree(root, fieldSelector())
+    if e.matches(root, 'form[id]')
+      outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.id))
+      outsideFields = e.all(outsideFieldSelector)
+      fields.push(outsideFields...)
+      fields = u.uniq(fields)
+    fields
 
 #  findFields = (rootOrRoots) ->
 #    rootOrRoots = e.list(rootOrRoots)
