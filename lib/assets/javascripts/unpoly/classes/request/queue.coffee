@@ -27,13 +27,14 @@ class up.Request.Queue extends up.Class
       if request.preload
         if @hasPreloadQueueSpaceLeft()
           @queueRequest(request)
-        else if oldestQueuedPreloadRequest = u.find(@queuedRequests, 'preload')
+        else if oldestQueuedPreloadRequest = @oldestPreloadRequest(@queuedRequests)
           @abort(oldestQueuedPreloadRequest)
           @queueRequest(request)
         else
+          # This can only happen if preloadQueueSize is zero.
           @abort(request)
       else
-        if oldestCurrentPreloadRequest = u.find(@currentRequests, 'preload')
+        if oldestCurrentPreloadRequest = @oldestPreloadRequest(@currentRequests)
           @abort(oldestCurrentPreloadRequest)
           @sendRequestNow(request)
         else
@@ -70,8 +71,21 @@ class up.Request.Queue extends up.Class
   queueRequest: (request) ->
     @queuedRequests.push(request)
 
+  oldestPreloadRequest: (list) ->
+    u.find(list, 'preload')
+
   pluckNextRequest: ->
-    @queuedRequests.shift()
+    # We process the most recently queued request first.
+    # The assumption is that recently queued requests are caused by a recent user interaction.
+    lifoQueue = u.reverse(@queuedRequests)
+
+    # We always prioritize foreground requests over preload requests.
+    # Only when there is no foreground request left in the queue we will send a preload request.
+    # Note that if a queued preload request is requested without { preload: true } we will
+    # promote it to the foreground (see @promoteToForeground()).
+    request = u.find(lifoQueue, (request) -> !request.preload)
+    request ||= lifoQueue[0]
+    return u.remove(@queuedRequests, request)
 
   sendRequestNow: (request) ->
     log = ['Loading %s %s', request.method, request.url]

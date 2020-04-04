@@ -1,6 +1,4 @@
-- up.reveal
-  - should only see obstructions on its laayer
-  - should peel by default
+- consume-action
 - Rails integration: test that up, up? etc. are available as helper methods
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
 - New attribute [up-emit]
@@ -42,6 +40,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - test thtat up.reveal should only see obstructions on its laayer
+  - test that up.reveal should peel by default
   - Test that fragment updates peel the targeted layer by default
   - Test that { peel: false } will not peel the targeted layer (especially now that up.viewport.scrollAfterInsertFragment/reveal also peels)
   - Test that up.viewport.closest() will match the closest OverlayWithViewport
