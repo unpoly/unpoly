@@ -826,7 +826,10 @@ up.fragment = do ->
     wipe = ->
       parent = element.parentNode
       up.syntax.clean(element)
-      e.remove(element)
+      if up.browser.canJQuery()
+        jQuery(element).remove()
+      else
+        e.remove(element)
       emitFragmentDestroyed(element, { parent: parent, log: options.log })
 
     animate().then(wipe)

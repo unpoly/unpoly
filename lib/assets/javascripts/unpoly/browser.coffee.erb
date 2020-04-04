@@ -172,6 +172,10 @@ up.browser = do ->
   canControlScrollRestoration = u.memoize ->
     'scrollRestoration' of history
 
+  # Don't memoize so a build may publish window.jQuery after Unpoly was loaded
+  canJQuery = ->
+    !!window.jQuery
+
   popCookie = (name) ->
     value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
     if u.isPresent(value)
@@ -216,7 +220,7 @@ up.browser = do ->
       canAnimationFrame()
 
   callJQuery = (args...) ->
-    jQuery = window.jQuery or up.fail("jQuery must be published as window.jQuery")
+    canJQuery() or up.fail("jQuery must be published as window.jQuery")
     return jQuery(args...)
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
@@ -228,9 +232,9 @@ up.browser = do ->
   canInspectFormData: canInspectFormData
   canCustomElements: canCustomElements
   canControlScrollRestoration: canControlScrollRestoration
+  canJQuery: canJQuery
   whenConfirmed: whenConfirmed
   isSupported: isSupported
   popCookie: popCookie
   jQuery: callJQuery
   isIE11: isIE11
-
