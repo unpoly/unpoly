@@ -6,6 +6,16 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+0.61.1
+------
+
+This is a maintenance release while we're getting ready for the next major version of Unpoly.
+
+- Fix a bug where [`up.destroy()`](/up.destroy) wouldn't clean up the global jQuery cache. This is only relevant when using Unpoly together with jQuery.
+- Fields outside a <form> are now recognized when they have a matching [form] attribute (fixes #85)
+- [`up.form.fields()`](/up.form.fields) now accepts a jQuery collection as a first argument, as was already documented.
+
+
 0.61.0
 ------
 
