@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.61.0"
+    version: "0.61.1"
   };
 
 }).call(this);
@@ -1901,7 +1901,7 @@ Internet Explorer 10 or lower
   var slice = [].slice;
 
   up.browser = (function() {
-    var callJQuery, canAnimationFrame, canConsole, canControlScrollRestoration, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canPromise, canPushState, isIE10OrWorse, isIE11, isSupported, navigate, popCookie, submitForm, u, url, whenConfirmed;
+    var callJQuery, canAnimationFrame, canConsole, canControlScrollRestoration, canCssTransition, canCustomElements, canDOMParser, canFormData, canInputEvent, canInspectFormData, canJQuery, canPromise, canPushState, isIE10OrWorse, isIE11, isSupported, navigate, popCookie, submitForm, u, url, whenConfirmed;
     u = up.util;
 
     /***
@@ -2046,6 +2046,9 @@ Internet Explorer 10 or lower
     canControlScrollRestoration = u.memoize(function() {
       return 'scrollRestoration' in history;
     });
+    canJQuery = function() {
+      return !!window.jQuery;
+    };
     popCookie = function(name) {
       var ref, value;
       value = (ref = document.cookie.match(new RegExp(name + "=(\\w+)"))) != null ? ref[1] : void 0;
@@ -2086,9 +2089,9 @@ Internet Explorer 10 or lower
       return !isIE10OrWorse() && canConsole() && canDOMParser() && canFormData() && canCssTransition() && canInputEvent() && canPromise() && canAnimationFrame();
     };
     callJQuery = function() {
-      var args, jQuery;
+      var args;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-      jQuery = window.jQuery || up.fail("jQuery must be published as window.jQuery");
+      canJQuery() || up.fail("jQuery must be published as window.jQuery");
       return jQuery.apply(null, args);
     };
     return {
@@ -2100,6 +2103,7 @@ Internet Explorer 10 or lower
       canInspectFormData: canInspectFormData,
       canCustomElements: canCustomElements,
       canControlScrollRestoration: canControlScrollRestoration,
+      canJQuery: canJQuery,
       whenConfirmed: whenConfirmed,
       isSupported: isSupported,
       popCookie: popCookie,
@@ -2351,7 +2355,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     @function up.element.closest
     @param {Element} element
       The element on which to start the search.
-    @param {string}
+    @param {string} selector
       The CSS selector to match.
     @return {Element|null|undefined} element
       The matching element.
@@ -7272,7 +7276,14 @@ There are some advantages to using `up.on()`:
     Also prevents other event handlers bound on the same element.
     Also prevents the event's default action.
     
+    \#\#\# Example
+    
+        up.on('click', 'link.disabled', function(event) {
+          up.event.halt(event)
+        })
+    
     @function up.event.halt
+    @param {Event} event
     @experimental
      */
     halt = function(event) {
@@ -8240,7 +8251,7 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
     /***
     Registers a [compiler](/up.compiler) that is run before all other compilers.
     
-    Use `up.macro()` to register a compiler that sets multiply Unpoly attributes.
+    Use `up.macro()` to register a compiler that sets multiple Unpoly attributes.
     
     \#\#\# Example
     
@@ -9386,13 +9397,37 @@ Unpoly will automatically be aware of sticky Bootstrap components such as
     
     The scroll positions will be associated with the current URL.
     They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
-    at the same URL.
+    at the same URL, or by following a link with an [`[up-restore-scroll]`](/a-up-follow#up-restore-scroll)
+    attribute.
     
-    Unpoly automatically saves scroll positions whenever a fragment was updated on the page.
+    Unpoly automatically saves scroll positions before a [fragment update](/up.replace)
+    you will rarely need to call this function yourself.
+    
+    \#\#\# Examples
+    
+    Should you need to save the current scroll positions outside of a [fragment update](/up.replace),
+    you may call:
+    
+        up.viewport.saveScroll()
+    
+    Instead of saving the current scroll positions for the current URL, you may also pass another
+    url or vertical scroll positionsfor each viewport:
+    
+        up.viewport.saveScroll({
+          url: '/inbox',
+          tops: {
+            'body': 0,
+            '.sidebar', 100,
+            '.main', 320
+          }
+        })
     
     @function up.viewport.saveScroll
     @param {string} [options.url]
+      The URL for which to save scroll positions.
+      If omitted, the current browser location is used.
     @param {Object<string, number>} [options.tops]
+      An object mapping viewport selectors to vertical scroll positions in pixels.
     @experimental
      */
     saveScroll = function(options) {
@@ -9773,7 +9808,7 @@ is built from `up.fragment` functions. You may use them to extend Unpoly from yo
     
     \#\#\# Example
     
-    Let's say your curent HTML looks like this:
+    Let's say your current HTML looks like this:
     
         <div class="one">old one</div>
         <div class="two">old two</div>
@@ -10024,7 +10059,7 @@ is built from `up.fragment` functions. You may use them to extend Unpoly from yo
     
     \#\#\# Example
     
-    Let's say your curent HTML looks like this:
+    Let's say your current HTML looks like this:
     
         <div class="one">old one</div>
         <div class="two">old two</div>
@@ -10574,7 +10609,11 @@ is built from `up.fragment` functions. You may use them to extend Unpoly from yo
         var parent;
         parent = element.parentNode;
         up.syntax.clean(element);
-        e.remove(element);
+        if (up.browser.canJQuery()) {
+          jQuery(element).remove();
+        } else {
+          e.remove(element);
+        }
         return emitFragmentDestroyed(element, {
           parent: parent,
           log: options.log
@@ -12113,7 +12152,7 @@ This makes for an unfriendly experience:
 - State changes caused by AJAX updates get lost during the page transition.
 - Unsaved form changes get lost during the page transition.
 - The JavaScript VM is reset during the page transition.
-- If the page layout is composed from multiple srollable containers
+- If the page layout is composed from multiple scrollable containers
   (e.g. a pane view), the scroll positions get lost during the page transition.
 - The user sees a "flash" as the browser loads and renders the new page,
   even if large portions of the old and new page are the same (navigation, layout, etc.).
@@ -12850,8 +12889,13 @@ open dialogs with sub-forms, etc. all without losing form state.
     @function up.form.fieldSelector
     @internal
      */
-    fieldSelector = function() {
-      return config.fields.join(',');
+    fieldSelector = function(suffix) {
+      if (suffix == null) {
+        suffix = '';
+      }
+      return config.fields.map(function(field) {
+        return field + suffix;
+      }).join(',');
     };
 
     /***
@@ -12860,14 +12904,27 @@ open dialogs with sub-forms, etc. all without losing form state.
     You can configure what Unpoly considers a form field by adding CSS selectors to the
     [`up.form.config.fields`](/up.form.config#config.fields) array.
     
-    If the given element is itself a form field, a list of the given element is returned.
+    If the given element is itself a form field, a list of that given element is returned.
     
     @function up.form.fields
+    @param {Element|jQuery} root
+      The element to scan for contained form fields.
+    
+      If the element is itself a form field, a list of that element is returned.
     @return {NodeList<Element>|Array<Element>}
     @experimental
      */
     findFields = function(root) {
-      return e.subtree(root, fieldSelector());
+      var fields, outsideFieldSelector, outsideFields;
+      root = e.get(root);
+      fields = e.subtree(root, fieldSelector());
+      if (e.matches(root, 'form[id]')) {
+        outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.id));
+        outsideFields = e.all(outsideFieldSelector);
+        fields.push.apply(fields, outsideFields);
+        fields = u.uniq(fields);
+      }
+      return fields;
     };
 
     /****
@@ -13393,7 +13450,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     \#\#\# Redirects
     
-    Unpoly requires an additional response headers to detect redirects,
+    Unpoly requires an additional response header to detect redirects,
     which are otherwise undetectable for an AJAX client.
     
     After the form's action performs a redirect, the next response should echo
@@ -13758,24 +13815,36 @@ open dialogs with sub-forms, etc. all without losing form state.
     
     The programmatic variant of this is the [`up.observe()`](/up.observe) function.
     
-    \#\#\# Examples
+    \#\#\# Example
     
     The following would run a global `showSuggestions(value)` function
     whenever the `<input>` changes:
     
-        <form>
-          <input name="query" up-observe="showSuggestions(value)">
-        </form>
+        <input name="query" up-observe="showSuggestions(value)">
     
     \#\#\# Callback context
     
-    The script given to `up-observe` runs with the following context:
+    The script given to `[up-observe]` runs with the following context:
     
     | Name     | Type      | Description                           |
     | -------- | --------- | ------------------------------------- |
     | `value`  | `string`  | The current value of the field        |
     | `this`   | `Element` | The form field                        |
     | `$field` | `jQuery`  | The form field as a jQuery collection |
+    
+    \#\#\# Observing radio buttons
+    
+    Multiple radio buttons with the same `[name]` (a radio button group)
+    produce a single value for the form.
+    
+    To observe radio buttons group, use the `[up-observe]` attribute on an
+    element that contains all radio button elements with a given name:
+    
+        <div up-observe="formatSelected(value)">
+          <input type="radio" name="format" value="html"> HTML format
+          <input type="radio" name="format" value="pdf"> PDF format
+          <input type="radio" name="format" value="txt"> Text format
+        </div>
     
     @selector input[up-observe]
     @param {string} up-observe
@@ -13825,7 +13894,7 @@ open dialogs with sub-forms, etc. all without losing form state.
     });
 
     /***
-    [Observes](/up.observe) this form field and submits the form when its value changes.
+    Submits this field's form when this field changes its values.
     
     Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
     while the autosubmitted form is loading.
@@ -13841,6 +13910,20 @@ open dialogs with sub-forms, etc. all without losing form state.
           <input type="checkbox" name="archive"> Include archive
         </form>
     
+    \#\#\# Auto-submitting radio buttons
+    
+    Multiple radio buttons with the same `[name]` (a radio button group)
+    produce a single value for the form.
+    
+    To auto-submit radio buttons group, use the `[up-submit]` attribute on an
+    element that contains all radio button elements with a given name:
+    
+        <div up-autosubmit>
+          <input type="radio" name="format" value="html"> HTML format
+          <input type="radio" name="format" value="pdf"> PDF format
+          <input type="radio" name="format" value="txt"> Text format
+        </div>
+    
     @selector input[up-autosubmit]
     @param {string} up-delay
       The number of miliseconds to wait after a change before the form is submitted.
@@ -13848,7 +13931,7 @@ open dialogs with sub-forms, etc. all without losing form state.
      */
 
     /***
-    [Observes](/up.observe) this form and submits the form when *any* field changes.
+    Submits the form when *any* field changes.
     
     Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
     while the autosubmitted form is loading.
@@ -15201,7 +15284,7 @@ or function.
     
     Clicking would request the path `/blog` and select `.blog-list` from
     the HTML response. Unpoly will dim the page
-    and place the matching `.blog-list` tag will be placed in
+    and place the matching `.blog-list` tag in
     a modal dialog.
     
     @selector a[up-modal]
