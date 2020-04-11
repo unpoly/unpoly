@@ -147,6 +147,10 @@ Have you noticed how noticed how pages fade in
   - up.Params#has
 
 - Docs
+  - Document request queue changes
+    - Preload limits
+    - New options
+    - It's LIFO now
   - up:fragment:loaded
   - [up-content], [up-content=overlay], ...
   - Update better_errors card
