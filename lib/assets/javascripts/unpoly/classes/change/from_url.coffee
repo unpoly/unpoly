@@ -119,7 +119,12 @@ class up.Change.FromURL extends up.Change
 
   processResponse: (response, options) ->
     @augmentOptionsFromResponse(response, options)
-    new up.Change.FromContent(options).execute()
+
+    # Allow listeners to
+    loadedEvent = up.event.build('up:fragment:loaded', { change: options, response: response })
+    promise = response.request.whenEmitted(loadedEvent)
+    promise = promise.then -> new up.Change.FromContent(options).execute()
+    promise
 
   augmentOptionsFromResponse: (response, options) ->
     options.html = response.text

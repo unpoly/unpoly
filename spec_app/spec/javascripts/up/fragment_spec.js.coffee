@@ -1627,10 +1627,10 @@ describe 'up.fragment', ->
             expect(@revealedText).toEqual ['other text']
 
         it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
-          fixture('.target', text: 'target text')
-          fixture('.origin', text: 'origin text')
+          target = fixture('.target', text: 'target text')
+          origin = fixture('.origin', text: 'origin text')
 
-          up.change('.target', url: '/path', reveal: '&', origin: '.origin')
+          up.change('.target', url: '/path', reveal: '&', origin: origin')
 
           next =>
             @respondWithSelector('.target')

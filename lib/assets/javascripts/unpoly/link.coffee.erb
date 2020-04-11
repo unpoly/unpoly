@@ -237,6 +237,7 @@ up.link = do ->
 
     # This is the event that may be prevented to stop the follow.
     # up.form.submit() changes this to be up:form:submit instead.
+    # The guardEvent will also be assigned an { options } attribute in up.change()
     options.guardEvent ||= up.event.build('up:link:follow', log: 'Following link')
 
     return up.change(options)

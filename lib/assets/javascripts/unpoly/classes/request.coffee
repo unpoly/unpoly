@@ -113,6 +113,9 @@ class up.Request extends up.Record
       'cache',  # since up.proxy.request() options are sometimes wrapped in this class
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
+      # Note that when opening a new layer, this { layer } attribute will be the set to
+      # the base layer. The { mode } and { failMode } attributes will belong to the
+      # new layer being opened.
       'layer',
       'mode',
       'failMode',
@@ -307,8 +310,15 @@ class up.Request extends up.Record
   @wrap: (args...) ->
     u.wrapValue(@, args...)
 
-  # If the request is marked for a { layer }, up.proxy-related events are emitted
-  # ob that layer.  up.proxy delegates event submission to this method.
-  emit: (name, props) ->
-    emitter = if @layer && @layer != 'new' then @layer else up
-    emitter.emit(name, u.merge(props, request: this))
+  buildEventEmitter: (args) ->
+    # We prefer emitting request-related events on the targeted layer.
+    # This way listeners can observe event-related events on a given layer.
+    # This request has an optional { layer } attribute, which is used by
+    # EventEmitter.
+    return up.EventEmitter.fromEmitArgs(args, request: this, layer: @layer)
+
+  emit: (args...) ->
+    return @buildEventEmitter(args).emit()
+
+  whenEmitted: (args...) ->
+    return @buildEventEmitter(args).whenEmitted()
