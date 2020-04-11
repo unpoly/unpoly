@@ -17,13 +17,16 @@ up.layer = do ->
     newConfig =
       mode: 'modal'
       all:
-        # Define a default target that will close all overlays
-        # and show an unpexpected response in the <body>
-        targets: [{ layer: 'root', target: 'body', peel: true }]
+        targets: [
+          '[up-content=""]',
+          # Define a default target that will close all overlays
+          # and show an unpexpected response in the <body>
+          { layer: 'root', target: 'body', peel: true }
+        ]
       root:
-        targets: []
+        targets: ['[up-content~=root]']
       overlay:
-        targets: []
+        targets: ['[up-content~=overlay]']
         history: true
         openAnimation: 'fade-in'
         closeAnimation: 'fade-out'
@@ -31,9 +34,9 @@ up.layer = do ->
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
       cover:
-        targets: []
+        targets: ['[up-content~=cover]']
       drawer:
-        targets: []
+        targets: ['[up-content~=drawer]']
         backdrop: true
         position: 'left'
         openAnimation: (layer) ->
@@ -45,10 +48,10 @@ up.layer = do ->
             when 'left' then 'move-to-left'
             when 'right' then 'move-to-right'
       modal:
+        targets: ['[up-content~=modal]']
         backdrop: true
-        targets: []
       popup:
-        targets: []
+        targets: ['[up-content~=popup]']
         position: 'bottom'
         align: 'left'
         history: false

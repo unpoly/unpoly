@@ -40,6 +40,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 Have you noticed how noticed how pages fade in
 
 - Tests
+  - Test [up-content], [up-content=overlay]
   - test thtat up.reveal should only see obstructions on its laayer
   - test that up.reveal should peel by default
   - Test that fragment updates peel the targeted layer by default
@@ -146,6 +147,11 @@ Have you noticed how noticed how pages fade in
   - up.Params#has
 
 - Docs
+  - up:fragment:loaded
+  - [up-content], [up-content=overlay], ...
+  - Update better_errors card
+    - should use up:fragment:loaded
+    - should use request.loadPage() instead of request.navigate()
   - Don't document each option a second time as failVariant. Instead explain in the method doc and { failOptions } what to do here.
   - [up-follow] vs. [up-target] vs. [up-layer] vs. [up-modal] etc.
     - Move all fragment update docs to a[up-follow] and form[up-follow]
