@@ -903,6 +903,16 @@ up.element = do ->
     if json = element.getAttribute?(attribute)?.trim()
       JSON.parse(json)
 
+  callbackAttr = (link, attr, exposedKeys = []) ->
+    if code = link.getAttribute(attr)
+      # Allow callbacks to refer to an exposed property directly instead of through `event.value`.
+      callback = new Function(exposedKeys..., code)
+      # Emulate the behavior of the `onclick` attribute,
+      # where `this` refers to the clicked element.
+      return (event) ->
+        exposedValues = u.pick(event, exposedKeys)
+        callback.call(link, event, exposedValues...)
+
   ###**
   Temporarily sets the inline CSS styles on the given element.
 
@@ -1159,6 +1169,7 @@ up.element = do ->
     booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?
     numberAttr: numberAttr # practical
     jsonAttr: jsonAttr # practical
+    callbackAttr: callbackAttr
     booleanOrStringAttr: booleanOrStringAttr
     setTemporaryStyle: setTemporaryStyle # practical
     style: computedStyle # practical.

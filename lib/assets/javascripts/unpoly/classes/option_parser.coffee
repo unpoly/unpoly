@@ -22,11 +22,11 @@ class up.OptionParser
     @parse(e.jsonAttr, key, keyOptions)
 
   parse: (attrValueFn, key, keyOptions = {}) ->
-    attrs = u.wrapList(keyOptions.attr ? @attrNameForKey(key))
+    attrNames = u.wrapList(keyOptions.attr ? @attrNameForKey(key))
 
     if @element
-      for attr in attrs
-        @options[key] ?= attrValueFn(@element, attr)
+      for attrName in attrNames
+        @options[key] ?= attrValueFn(@element, attrName)
 
     @options[key] ?= keyOptions.default
 
@@ -34,9 +34,9 @@ class up.OptionParser
       @options[key] = normalizeFn(@options[key])
 
     if (keyOptions.fail || @fail) && failKey = up.fragment.failKey(key)
-      failAttrs = u.compact(u.map(attrs, @deriveFailAttrName))
+      failAttrNames = u.compact(u.map(attrNames, @deriveFailAttrName))
       failKeyOptions = u.merge(keyOptions,
-        attr: failAttrs,
+        attr: failAttrNames,
         fail: false
       )
       @parse(attrValueFn, failKey, failKeyOptions)

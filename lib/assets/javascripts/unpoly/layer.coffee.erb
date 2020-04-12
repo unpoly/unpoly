@@ -146,19 +146,10 @@ up.layer = do ->
 #    config[mode].Class or up.fail("Unknown layer mode: #{mode}")
 
   openCallbackAttr = (link, attr) ->
-    if code = link.getAttribute(attr)
-      # Emulate the behavior of the `onclick` attribute,
-      # where `this` refers to the clicked element.
-      callback = new Function('event', 'layer', code)
-      return (event) -> callback.call(link, event, event.layer)
+    return e.callbackAttr(link, attr, ['layer'])
 
   closeCallbackAttr = (link, attr) ->
-    if code = link.getAttribute(attr)
-      # Allow callbacks to refer to `value` directly instead of through `event.value`.
-      callback = new Function('event', 'value', 'layer', code)
-      # Emulate the behavior of the `onclick` attribute,
-      # where `this` refers to the clicked element.
-      return (event) -> callback.call(link, event, event.value, event.layer)
+    return e.callbackAttr(link, attr, ['layer', 'value'])
 
   reset = ->
     config.reset()

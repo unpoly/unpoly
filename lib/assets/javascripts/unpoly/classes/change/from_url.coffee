@@ -122,7 +122,7 @@ class up.Change.FromURL extends up.Change
 
     # Allow listeners to
     loadedEvent = up.event.build('up:fragment:loaded', { change: options, response: response })
-    promise = response.request.whenEmitted(loadedEvent)
+    promise = response.request.whenEmitted(loadedEvent, callback: options.onLoaded)
     promise = promise.then -> new up.Change.FromContent(options).execute()
     promise
 

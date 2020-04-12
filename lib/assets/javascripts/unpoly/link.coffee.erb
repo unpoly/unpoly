@@ -187,6 +187,7 @@ up.link = do ->
     parser.string('confirm')
     parser.string('target')
     parser.booleanOrString('fallback')
+    parser.parse(((link, attrName) -> e.callbackAttr(link, attrName, ['request', 'response', 'change'])), 'onLoaded')
 
     # Layer options
     parser.string('layer')

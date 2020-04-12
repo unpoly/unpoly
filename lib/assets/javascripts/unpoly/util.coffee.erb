@@ -1250,9 +1250,13 @@ up.util = do ->
   extractOptions = (args) ->
     extractLastArg(args, isOptions) || {}
 
-  partial = (fn, fixedArgs...) ->
-    return (callArgs...) ->
-      fn.apply(this, fixedArgs.concat(callArgs))
+#  partial = (fn, fixedArgs...) ->
+#    return (callArgs...) ->
+#      fn.apply(this, fixedArgs.concat(callArgs))
+#
+#  partialRight = (fn, fixedArgs...) ->
+#    return (callArgs...) ->
+#      fn.apply(this, callArgs.concat(fixedArgs))
 
 #function throttle(callback, limit) { // From https://jsfiddle.net/jonathansampson/m7G64/
 #  var wait = false                   // Initially, we're not waiting
@@ -1856,12 +1860,13 @@ up.util = do ->
   splitValues : splitValues
   endsWith: endsWith
   sum: sum
-#  wrapArray: wrapArray
+  # wrapArray: wrapArray
   wrapList: wrapList
   wrapValue: wrapValue
   simpleEase: simpleEase
   values: objectValues
-  partial: partial
+  # partial: partial
+  # partialRight: partialRight
   arrayToSet: arrayToSet
   setToArray: setToArray
   # unprefixKeys: unprefixKeys
@@ -1871,7 +1876,7 @@ up.util = do ->
   getter: defineGetter
   delegate: defineDelegates
   literal: literal
-#  asyncWrap: asyncWrap
+  # asyncWrap: asyncWrap
   reverse: reverse
   prefixCamelCase: prefixCamelCase
   unprefixCamelCase: unprefixCamelCase
