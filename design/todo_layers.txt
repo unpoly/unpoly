@@ -29,6 +29,9 @@
     - 'initialized' ---> 'queued' --> 'loading' --> 'fatal' / 'ok' / 'error'
     -                       |              v
     -                       +--------> 'aborted'
+    - 'initialized' ---> 'queued' --> 'loading' --> 'loaded' / 'fatal'
+    -                       |              v
+    -                       +--------> 'aborted'
     - Request#ok
     - Request#queued
     - Request#fatal

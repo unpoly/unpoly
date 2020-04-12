@@ -242,7 +242,7 @@ class up.Request extends up.Record
     @respondWith(@extractResponseFromXhr())
 
   respondWith: (response) ->
-    if response.isSuccess()
+    if response.ok
       @deferred.resolve(response)
     else
       @deferred.reject(response)

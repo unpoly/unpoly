@@ -103,7 +103,7 @@ class up.Request.Queue extends up.Class
 
     # Check if the settlement value is a up.Response (which has #text) or an error
     if value.text
-      if value.isSuccess()
+      if value.ok
         up.proxy.registerAliasForRedirect(request, value)
 
       request.emit 'up:proxy:loaded',
