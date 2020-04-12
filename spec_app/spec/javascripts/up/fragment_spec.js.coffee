@@ -1630,7 +1630,7 @@ describe 'up.fragment', ->
           target = fixture('.target', text: 'target text')
           origin = fixture('.origin', text: 'origin text')
 
-          up.change('.target', url: '/path', reveal: '&', origin: origin')
+          up.change('.target', url: '/path', reveal: '&', origin: origin)
 
           next =>
             @respondWithSelector('.target')
