@@ -98,6 +98,70 @@ describe 'up.proxy', ->
             expect(response.url).toMatchURL('/url')
             done()
 
+      describe 'error handling', ->
+
+        it 'rejects with up.Failed when there was a network error', (done) ->
+          request = up.request('/url')
+
+          u.task =>
+            @lastRequest().responseError()
+
+            promiseState(request).then (result) ->
+              expect(result.state).toEqual('rejected')
+              expect(result.value.name).toEqual('up.Failed')
+              expect(result.value.name).toEqual('up.Failed')
+              done()
+
+        it 'rejects with a non-ok up.Response when the server sends a 404 status code', (done) ->
+          request = up.request('/url')
+
+          u.task =>
+            @respondWith('text', status: 404)
+
+            promiseState(request).then (result) ->
+              expect(result.state).toEqual('rejected')
+              expect(result.value).toEqual(jasmine.any(up.Response))
+              expect(result.value.status).toEqual(404)
+              expect(result.value.ok).toEqual(false)
+              done()
+
+        it 'rejects with a non-ok up.Response when the server sends a 500 status code', (done) ->
+          request = up.request('/url')
+
+          u.task =>
+            @respondWith('text', status: 500)
+
+            promiseState(request).then (result) ->
+              expect(result.state).toEqual('rejected')
+              expect(result.value).toEqual(jasmine.any(up.Response))
+              expect(result.value.status).toEqual(500)
+              expect(result.value.ok).toEqual(false)
+              done()
+
+
+        it 'rejects with AbortError when the request was aborted', (done) ->
+          request = up.request('/url')
+
+          u.task =>
+            up.proxy.abort(request)
+
+            promiseState(request).then (result) ->
+              expect(result.state).toEqual('rejected')
+              expect(result.value.name).toEqual('AbortError')
+              done()
+
+        it 'rejects with AbortError when the request times out', (done) ->
+          request = up.request('/url')
+
+          u.task =>
+            jasmine.clock().install() # required by responseTimeout()
+            @lastRequest().responseTimeout()
+
+            promiseState(request).then (result) ->
+              expect(result.state).toEqual('rejected')
+              expect(result.value.name).toEqual('AbortError')
+              done()
+
       describe 'when the server responds with an X-Up-Method header', ->
 
         it 'updates the { method } property in the response object', (done) ->
@@ -758,7 +822,28 @@ describe 'up.proxy', ->
               'up:proxy:recover'
             ])
 
-        it 'emits up:proxy:recover if a request failed fatally'
+        it 'emits up:proxy:recover if a request failed fatally', asyncSpec (next) ->
+          up.proxy.config.slowDelay = 10
+
+          next =>
+            @request = up.request(url: '/foo')
+
+          next.after 50, =>
+            expect(@events).toEqual([
+              'up:proxy:load',
+              'up:proxy:slow'
+            ])
+
+          next =>
+            @lastRequest().responseError()
+
+          next =>
+            expect(@events).toEqual([
+              'up:proxy:load',
+              'up:proxy:slow',
+              'up:proxy:fatal',
+              'up:proxy:recover'
+            ])
 
     describe 'up.ajax', ->
 
