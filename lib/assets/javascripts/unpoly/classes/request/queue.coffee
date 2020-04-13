@@ -44,6 +44,9 @@ class up.Request.Queue extends up.Class
 
     return request
 
+  # Changes a preload request in the queue to a non-preload request.
+  # Does not change the request's position in the queue.
+  # Does nothing if the given request is not a preload request.
   promoteToForeground: (request) ->
     if request.preload && @contains(request)
       request.preload = false
