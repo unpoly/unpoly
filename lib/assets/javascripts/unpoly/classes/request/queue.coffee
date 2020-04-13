@@ -94,31 +94,18 @@ class up.Request.Queue extends up.Class
     if !event.defaultPrevented
       @currentRequests.push(request)
       request.send()
-      u.always request, (value) => @onRequestSettled(request, value)
+      u.always request, (responseOrError) => @onRequestSettled(request, responseOrError)
     else
       request.abort()
 
-  onRequestSettled: (request, value) ->
+  onRequestSettled: (request, responseOrError) ->
     u.remove(@currentRequests, request)
-
-    # Check if the settlement value is a up.Response (which has #text) or an error
-    if value.text
-      if value.ok
-        up.proxy.registerAliasForRedirect(request, value)
-
-      request.emit 'up:proxy:loaded',
-        log: ['Server responded with HTTP %d (%d bytes)', value.status, value.text.length]
-        response: value
-    else if !value.aborted
-      request.emit 'up:proxy:fatal',
-        log: 'Fatal error during request'
-        error: value
-
+    if (responseOrError instanceof up.Response) && responseOrError.ok
+      up.proxy.registerAliasForRedirect(request, responseOrError)
     @checkSlow()
+    u.microtask(=> @poke())
 
-    u.microtask(@poke)
-
-  poke: =>
+  poke: ->
     if @hasConcurrencyLeft() && (request = @pluckNextRequest())
       @sendRequestNow(request)
 

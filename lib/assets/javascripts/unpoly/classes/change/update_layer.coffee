@@ -22,9 +22,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   requestAttributes: ->
     @findOld()
     return {
-      # We associate this request to our base layer. This way other { solo }
-      # navigations on { base } will cancel this request to open a new layer.
-      layer: @base
+      layer: @layer
       mode: @layer.mode
       context: @layer.context
       target: u.map(@steps, 'selector').join(', '),

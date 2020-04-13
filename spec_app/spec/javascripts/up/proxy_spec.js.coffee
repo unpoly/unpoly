@@ -485,9 +485,8 @@ describe 'up.proxy', ->
           responses = []
           trackResponse = (response) -> responses.push(response.text)
 
-          next =>
-            up.request(url: '/foo').then(trackResponse)
-            up.request(url: '/bar').then(trackResponse)
+          up.request(url: '/foo').then(trackResponse)
+          up.request(url: '/bar').then(trackResponse)
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1) # only one request was made

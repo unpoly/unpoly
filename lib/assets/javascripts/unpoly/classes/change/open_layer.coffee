@@ -14,7 +14,9 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   requestAttributes: ->
     return {
-      layer: 'new',
+      # We associate this request to our base layer. This way other { solo }
+      # navigations on { base } will cancel this request to open a new layer.
+      layer: @base
       mode: @options.mode,
       context: @options.context
       # The target will always exist in the current page, since

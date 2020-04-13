@@ -22,6 +22,7 @@
 - What's our policy on acronym casing? We still have up.util.normalizeURL
 - If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
 - Should up-modal-frame be up-modal-box?
+- Don't have a response for a fatal error
 - Hovering over a new [up-instant] link should abort all queued preload links
   - Preload links already in flight should not be canceled
   - Allow to disable this behavior for programmatic access, default could be { abort: { preload: true, queued: 'true' } }

@@ -143,9 +143,6 @@ class up.Response extends up.Record
   ###**
   Returns whether the response was not [successful](/up.Request.prototype.isSuccess).
 
-  This also returns `true` when the request encountered a [fatal error](/up.Request.prototype.isFatalError)
-  like a timeout or loss of network connectivity.
-
   @function up.Response#isError
   @return {boolean}
   @experimental
@@ -153,37 +150,7 @@ class up.Response extends up.Record
   ###
   isError: ->
     up.legacy.deprecated('up.Response#isError()', '!up.Response#ok')
-    return @error
-
-  ###**
-  Returns whether the request encountered a [fatal error](/up.Request.prototype.isFatalError)
-  like a timeout or loss of network connectivity.
-
-  When the server produces an error message with an HTTP status like `500`,
-  this is not considered a fatal error and `false` is returned.
-
-  @function up.Response#isFatalError
-  @return {boolean}
-  @experimental
-  @deprecated
-  ###
-  isFatalError: ->
-    up.legacy.deprecated('up.Response#isFatalError()', 'up.Response#fatal')
-    return @fatal
-
-  ###**
-  Returns whether the request encountered a [fatal error](/up.Request.prototype.isFatalError)
-  like a timeout or loss of network connectivity.
-
-  When the server produces an error message with an HTTP status like `500`,
-  this is not considered a fatal error and `false` is returned.
-
-  @function up.Response#isFatalError
-  @return {boolean}
-  @experimental
-  ###
-  @getter 'fatal', ->
-    !@ok && (!@text || @status == 0)
+    return !@ok
 
   ###**
   Returns the HTTP header value with the given name.

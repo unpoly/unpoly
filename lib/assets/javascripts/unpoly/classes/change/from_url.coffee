@@ -166,10 +166,10 @@ class up.Change.FromURL extends up.Change
     else
       newValue
 
-  failedResponseHasContent: (response) ->
+  failedResponseHasContent: (responseOrError) ->
     # Check if the failed response wasn't cause by a fatal error
     # like a timeout or disconnect.
-    (response instanceof up.Response) && !response.fatal
+    (responseOrError instanceof up.Response) && responseOrError.text
 
   fullLoad: =>
     up.browser.loadPage(@successOptions.url, u.pick(@successOptions, ['method', 'params']))

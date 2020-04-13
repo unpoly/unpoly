@@ -98,7 +98,7 @@ class up.Request extends up.Record
 
   @property up.Request#failMode
   @stable
-  ###
+2  ###
 
   keys: ->
     [
@@ -196,62 +196,82 @@ class up.Request extends up.Record
       # from garbage collection while the response is cached by up.proxy.
       @origin = undefined
 
-  extractHashFromURL: =>
+  extractHashFromURL: ->
     urlParts = u.parseURL(@url)
     # Remember the #hash for later revealing.
     # It will be lost during normalization.
     @hash = u.presence(urlParts.hash)
     @url = u.normalizeURL(urlParts, hash: false)
 
-  transferParamsToURL: =>
+  transferParamsToURL: ->
     unless u.isBlank(@params)
       # GET methods are not allowed to have a payload, so we transfer { params } params to the URL.
       @url = @params.toURL(@url)
       # Now that we have transfered the params into the URL, we delete them from the { params } option.
       @params.clear()
 
-  isSafe: =>
+  isSafe: ->
     up.proxy.isSafeMethod(@method)
 
-  send: =>
+  send: ->
     # If the request was aborted before it was sent (e.g. because it was queued)
     # we don't send it.
     return if @aborted
 
     # Convert from XHR's callback-based API to up.Request's promise-based API
     @xhr = new up.Request.XhrRenderer(this).buildAndSend(
-      onload: @responseReceived,
-      onerror: @responseReceived,
-      ontimeout: => @setAbortedState('Requested timed out')
-      onabort: => @setAbortedState() # Use default message
+      onload: (_event) => @onXhrLoad(_event)
+      onerror: (_event) => @onXhrError(_event)
+      ontimeout: (_event) => @onXhrTimeout(_event)
+      onabort: (_event) => @onXhrAbort(_event)
     )
 
-  abort: (message) =>
+  onXhrLoad: (_progressEvent) ->
+    response = @extractResponseFromXhr()
+    @respondWith(response)
+
+  onXhrError: (_progressEvent) ->
+    # Neither XHR nor fetch() provide any meaningful error message.
+    # Hence we ignore the passed ProgressEvent and use our own error message.
+    log = 'Fatal error during request'
+    @deferred.reject(up.error.failed(log))
+    @emit('up:proxy:fatal', { log })
+
+  onXhrTimeout: (_progressEvent) ->
+    # We treat a timeout like a client-side abort (which is is).
+    @setAbortedState('Requested timed out')
+
+  onXhrAbort: (_progressEvent) ->
+    # Use the default message that callers of request.abort() would also get.
+    @setAbortedState()
+
+  abort: (message) ->
     # setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     # will call setAbortedState() a second time, without a message.
     @setAbortedState(message)
     @xhr?.abort()
 
-  setAbortedState: (message = 'Request was aborted') =>
+  setAbortedState: (message = 'Request was aborted') ->
     unless @aborted
       @emit('up:proxy:aborted', log: message)
       @aborted = true
       @deferred.reject(up.error.aborted(message))
 
-  responseReceived: =>
-    @respondWith(@extractResponseFromXhr())
-
   respondWith: (response) ->
+    log = ['Server responded with HTTP %d (%d characters)', response.status, response.text.length]
+    @emit('up:proxy:loaded', { response, log })
+
     if response.ok
       @deferred.resolve(response)
     else
       @deferred.reject(response)
 
-  navigate: =>
+  navigate: ->
     up.legacy.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
     @loadPage()
 
-  loadPage: =>
+  # TODO: Document API
+  loadPage: ->
     new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
@@ -261,14 +281,14 @@ class up.Request extends up.Record
     up.protocol.csrfParam(this)
 
   # Returns a csrfToken if this request requires it
-  csrfToken: =>
+  csrfToken: ->
     if !@isSafe() && !@isCrossDomain()
       up.protocol.csrfToken(this)
 
   isCrossDomain: =>
     u.isCrossDomain(@url)
 
-  extractResponseFromXhr:  =>
+  extractResponseFromXhr:  ->
     responseAttrs =
       method: @method
       url: @url
@@ -288,9 +308,22 @@ class up.Request extends up.Record
 
     return new up.Response(responseAttrs)
 
-  isCachable: =>
+  isCachable: ->
     @isSafe() && @params.hasOnlyPrimitiveValues()
 
+  cacheKey: ->
+    JSON.stringify [
+      @method,
+      @url,
+      @params.toQuery(),
+      # If we send a meta prop to the server it must also become part of our cache key,
+      # given that server might send a different response based on these props.
+      @metaProps()
+    ]
+
+  # Returns an object like { target: '...', mode: '...' } that will
+  # (1) be sent to the server so it can optimize responses and
+  # (2) become part of our @cacheKey().
   metaProps: ->
     props = {}
     for key in up.proxy.config.requestMetaKeys(@url)
@@ -298,14 +331,6 @@ class up.Request extends up.Record
       if u.isGiven(value)
         props[key] = value
     props
-
-  cacheKey: =>
-    JSON.stringify [
-      @method,
-      @url,
-      @params.toQuery(),
-      @metaProps()
-    ]
 
   @wrap: (args...) ->
     u.wrapValue(@, args...)
