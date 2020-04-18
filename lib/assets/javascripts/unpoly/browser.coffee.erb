@@ -215,9 +215,10 @@ up.browser = do ->
     return jQuery(args...)
 
   hasSlowConnection = ->
-    # https://wicg.github.io/netinfo/
+    # Network Information API Spec: https://wicg.github.io/netinfo/
+    # Browser support: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/connection
     netInfo = navigator.connection
-    netInfo.effectiveType?.includes('2g') || netInfo.saveData
+    netInfo && (netInfo.effectiveType?.includes('2g') || netInfo.saveData)
 
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
