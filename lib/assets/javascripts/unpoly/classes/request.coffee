@@ -219,29 +219,29 @@ class up.Request extends up.Record
     return if @aborted
 
     # Convert from XHR's callback-based API to up.Request's promise-based API
-    @xhr = new up.Request.XhrRenderer(this).buildAndSend(
-      onload: (_event) => @onXhrLoad(_event)
-      onerror: (_event) => @onXhrError(_event)
-      ontimeout: (_event) => @onXhrTimeout(_event)
-      onabort: (_event) => @onXhrAbort(_event)
+    @xhr = new up.Request.XHRRenderer(this).buildAndSend(
+      onload: (_event) => @onXHRLoad(_event)
+      onerror: (_event) => @onXHRError(_event)
+      ontimeout: (_event) => @onXHRTimeout(_event)
+      onabort: (_event) => @onXHRAbort(_event)
     )
 
-  onXhrLoad: (_progressEvent) ->
-    response = @extractResponseFromXhr()
+  onXHRLoad: (_progressEvent) ->
+    response = @extractResponseFromXHR()
     @respondWith(response)
 
-  onXhrError: (_progressEvent) ->
+  onXHRError: (_progressEvent) ->
     # Neither XHR nor fetch() provide any meaningful error message.
     # Hence we ignore the passed ProgressEvent and use our own error message.
     log = 'Fatal error during request'
     @deferred.reject(up.error.failed(log))
     @emit('up:proxy:fatal', { log })
 
-  onXhrTimeout: (_progressEvent) ->
+  onXHRTimeout: (_progressEvent) ->
     # We treat a timeout like a client-side abort (which is is).
     @setAbortedState('Requested timed out')
 
-  onXhrAbort: (_progressEvent) ->
+  onXHRAbort: (_progressEvent) ->
     # Use the default message that callers of request.abort() would also get.
     @setAbortedState()
 
@@ -288,7 +288,7 @@ class up.Request extends up.Record
   isCrossDomain: =>
     u.isCrossDomain(@url)
 
-  extractResponseFromXhr:  ->
+  extractResponseFromXHR:  ->
     responseAttrs =
       method: @method
       url: @url
@@ -296,15 +296,15 @@ class up.Request extends up.Record
       xhr: @xhr
       text: @xhr.responseText
       status: @xhr.status
-      title: up.protocol.titleFromXhr(@xhr)
-      acceptLayer: up.protocol.acceptLayerFromXhr(@xhr)
-      dismissLayer: up.protocol.dismissLayerFromXhr(@xhr)
-      eventPlans: up.protocol.eventPlansFromXhr(@xhr)
+      title: up.protocol.titleFromXHR(@xhr)
+      acceptLayer: up.protocol.acceptLayerFromXHR(@xhr)
+      dismissLayer: up.protocol.dismissLayerFromXHR(@xhr)
+      eventPlans: up.protocol.eventPlansFromXHR(@xhr)
 
-    if urlFromServer = up.protocol.locationFromXhr(@xhr)
+    if urlFromServer = up.protocol.locationFromXHR(@xhr)
       responseAttrs.url = urlFromServer
       # If the server changes a URL, it is expected to signal a new method as well.
-      responseAttrs.method = up.protocol.methodFromXhr(@xhr) ? 'GET'
+      responseAttrs.method = up.protocol.methodFromXHR(@xhr) ? 'GET'
 
     return new up.Response(responseAttrs)
 

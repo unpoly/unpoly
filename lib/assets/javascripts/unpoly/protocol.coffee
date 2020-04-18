@@ -180,10 +180,10 @@ up.protocol = do ->
   e = up.element
 
   ###**
-  @function up.protocol.locationFromXhr
+  @function up.protocol.locationFromXHR
   @internal
   ###
-  locationFromXhr = (xhr) ->
+  locationFromXHR = (xhr) ->
     # We prefer the X-Up-Location header to xhr.responseURL.
     # If the server redirected to a new location, Unpoly-related headers
     # will be encoded in the request's query params like this:
@@ -196,30 +196,30 @@ up.protocol = do ->
     extractHeader(xhr, config.locationHeader) || xhr.responseURL
 
   ###**
-  @function up.protocol.titleFromXhr
+  @function up.protocol.titleFromXHR
   @internal
   ###
-  titleFromXhr = (xhr) ->
+  titleFromXHR = (xhr) ->
     extractHeader(xhr, config.titleHeader)
 
   ###**
-  @function up.protocol.methodFromXhr
+  @function up.protocol.methodFromXHR
   @internal
   ###
-  methodFromXhr = (xhr) ->
+  methodFromXHR = (xhr) ->
     extractHeader(xhr, config.methodHeader, u.normalizeMethod)
 
-  acceptLayerFromXhr = (xhr) ->
+  acceptLayerFromXHR = (xhr) ->
     # Even if acceptance has no value, the server will send
     # X-Up-Accept-Layer: null
     extractHeader(xhr, config.acceptLayerHeader, JSON.parse)
 
-  dismissLayerFromXhr = (xhr) ->
+  dismissLayerFromXHR = (xhr) ->
     # Even if acceptance has no value, the server will send
     # X-Up-Dismiss-Layer: null
     extractHeader(xhr, config.dismissLayerHeader, JSON.parse)
 
-  eventPlansFromXhr = (xhr) ->
+  eventPlansFromXHR = (xhr) ->
     extractHeader(xhr, config.eventsHeader, JSON.parse)
 
   extractHeader = (xhr, header, parseFn = u.identity) ->
@@ -327,12 +327,12 @@ up.protocol = do ->
 
   config: config
   reset: reset
-  locationFromXhr: locationFromXhr
-  titleFromXhr: titleFromXhr
-  methodFromXhr: methodFromXhr
-  acceptLayerFromXhr: acceptLayerFromXhr
-  dismissLayerFromXhr: dismissLayerFromXhr
-  eventPlansFromXhr: eventPlansFromXhr
+  locationFromXHR: locationFromXHR
+  titleFromXHR: titleFromXHR
+  methodFromXHR: methodFromXHR
+  acceptLayerFromXHR: acceptLayerFromXHR
+  dismissLayerFromXHR: dismissLayerFromXHR
+  eventPlansFromXHR: eventPlansFromXHR
   csrfHeader: csrfHeader
   csrfParam: csrfParam
   csrfToken: csrfToken

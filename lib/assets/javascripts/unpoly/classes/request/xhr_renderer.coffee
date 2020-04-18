@@ -2,7 +2,7 @@
 
 u = up.util
 
-class up.Request.XhrRenderer
+class up.Request.XHRRenderer
 
   constructor: (@request) ->
 
