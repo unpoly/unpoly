@@ -136,8 +136,16 @@ class up.Layer.Overlay extends up.Layer
       @createDismissElement(@getFrameElement())
 
     if @outsideDismissable
-      elements = u.compact([@parent.element, @backdropElement])
-      @unbindOutsideClicked = up.on(elements, 'click up:link:follow', (event) => @onOutsideClicked(event))
+      @unbindParentClicked = @parent.on 'click up:link:follow', (event) =>
+        @onOutsideClicked(event)
+
+      # If this overlay has its own viewport, a click outside the frame will hit
+      # the viewport and not the parent element.
+      if @viewportElement
+        up.on @viewportElement, 'click', (event) =>
+          # Don't react when a click into the overlay frame bubbles to the viewportElement
+          if event.target == @viewportElement
+            @onOutsideClicked(event)
 
     # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
     @registerLocationCloser(@acceptLocation, @accept)
@@ -148,19 +156,11 @@ class up.Layer.Overlay extends up.Layer
     @registerEventCloser(@dismissEvent, @dismiss)
 
   teardownClosing: ->
-    @unbindOutsideClicked?()
+    @unbindParentClicked?()
 
   onOutsideClicked: (event) ->
-    target = event.target
-    # Check whether the event actually hit an outside element.
-    # E.g. for popups it is possible that the user clicked on the popup frame (<up-popup>)
-    # and the event bubbled up to the containing parent layer.
-    if @getFrameElement().contains(target)
-      return
-
     up.event.halt(event)
-    unless @opener?.contains(target)
-      u.muteRejection @dismiss()
+    u.muteRejection @dismiss()
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes
