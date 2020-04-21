@@ -21,7 +21,9 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
-  -
+  - Test that when a popup is open, clicking the opener will close that popup
+  - Test that when a popup is open, clicking outside it will close that popup
+  - Test that when a popup is open, clicking on ANOTHER popup opener will close the first popup and open the other (no additional "dead" click required)
   - Test that we can open multiple nested modals by clicking on links (bugfix where parent event listener would close the third layer)
   - Test [up-content], [up-content=overlay]
   - test thtat up.reveal should only see obstructions on its laayer

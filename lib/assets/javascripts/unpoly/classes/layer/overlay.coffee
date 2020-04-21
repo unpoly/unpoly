@@ -137,7 +137,8 @@ class up.Layer.Overlay extends up.Layer
 
     if @outsideDismissable
       @unbindParentClicked = @parent.on 'click up:link:follow', (event) =>
-        @onOutsideClicked(event)
+        originClicked = @origin && @origin.contains(event.target)
+        @onOutsideClicked(event, originClicked)
 
       # If this overlay has its own viewport, a click outside the frame will hit
       # the viewport and not the parent element.
@@ -145,7 +146,7 @@ class up.Layer.Overlay extends up.Layer
         up.on @viewportElement, 'click', (event) =>
           # Don't react when a click into the overlay frame bubbles to the viewportElement
           if event.target == @viewportElement
-            @onOutsideClicked(event)
+            @onOutsideClicked(event, true)
 
     # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
     @registerLocationCloser(@acceptLocation, @accept)
@@ -158,8 +159,9 @@ class up.Layer.Overlay extends up.Layer
   teardownClosing: ->
     @unbindParentClicked?()
 
-  onOutsideClicked: (event) ->
-    up.event.halt(event)
+  onOutsideClicked: (event, halt) ->
+    if halt
+      up.event.halt(event)
     u.muteRejection @dismiss()
 
   registerEventCloser: (eventTypes, closeFn) ->
