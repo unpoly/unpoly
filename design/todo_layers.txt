@@ -10,10 +10,6 @@
   - Do present tense events still have long-form event log messages with gerund?
 - All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
   - e. g. findValidateTarget
-- Protocol options should not be configurable
-  - Constants should just be props
-  - Document headers in the main class docs
-  - But shouldn't some options be configurable, since they are specific to a server-side framework?
 - Rename { base } back to { currentLayer }
 - Try changes in demo.unpoly.com
 
