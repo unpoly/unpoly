@@ -150,7 +150,9 @@ class up.Request extends up.Record
 
     @params = new up.Params(@params) # copies, which we want
     @uid = u.uid() # TODO: Remove me
-    @method = u.normalizeMethod(@method)
+
+    @normalize()
+
     @headers ||= {}
     @aborted = false
     @preload = !!@preload
@@ -168,17 +170,19 @@ class up.Request extends up.Record
     @mode ||= @layer?.mode || 'root'
     @failMode ||= @layer?.mode || 'root'
 
+    @deferred = u.newDeferred()
+
+    @finally => @evictExpensiveAttrs()
+
+  @delegate ['then', 'catch', 'finally'], 'deferred'
+
+  normalize: ->
+    @method = u.normalizeMethod(@method)
     @extractHashFromURL()
     unless u.methodAllowsPayload(@method)
       @transferParamsToURL()
 
-    @deferred = u.newDeferred()
-
-    @finally(@evictExpensiveAttrs)
-
-  @delegate ['then', 'catch', 'finally'], 'deferred'
-
-  evictExpensiveAttrs: =>
+  evictExpensiveAttrs: ->
     # We want to allow up:proxy:loaded events etc. to still access the properties that
     # we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
 
@@ -197,6 +201,7 @@ class up.Request extends up.Record
       @origin = undefined
 
   extractHashFromURL: ->
+    return unless u.contains(@url, '#')
     urlParts = u.parseURL(@url)
     # Remember the #hash for later revealing.
     # It will be lost during normalization.
@@ -217,6 +222,10 @@ class up.Request extends up.Record
     # If the request was aborted before it was sent (e.g. because it was queued)
     # we don't send it.
     return if @aborted
+
+    # In case an up:proxy:load listener changed { url, method, params } we need to
+    # normalize again.
+    @normalize()
 
     # Convert from XHR's callback-based API to up.Request's promise-based API
     @xhr = new up.Request.XHRRenderer(this).buildAndSend(

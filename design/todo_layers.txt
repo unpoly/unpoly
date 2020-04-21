@@ -13,12 +13,9 @@
   - Constants should just be props
   - Document headers in the main class docs
   - But shouldn't some options be configurable, since they are specific to a server-side framework?
-- Rename { base } back to { currentLayer }?
+- Rename { base } back to { currentLayer }
 - Try changes in demo.unpoly.com
-- If we manipulate the { params } of a GET request in up:proxy:load, those params should be transferred to the URL, too (we need to re-normalize the request before we send it)
-  - Isn't this an issue with caching?
 - Should up-modal-frame be up-modal-box?
-- When opening multiple nested modals, we can only nest twice: http://localhost:3000/css_test/layer
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 

@@ -642,6 +642,32 @@ describe 'up.proxy', ->
             expect(@lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
             done()
 
+        it 'allows up:proxy:load listeners to add request params for a POST request', (done) ->
+          listener = (event) ->
+            event.request.params.set('key', 'value')
+
+          up.on('up:proxy:load', listener)
+
+          up.request('/path1', method: 'post')
+
+          u.task =>
+            expect(@lastRequest().params).toMatchParams(key: 'value')
+            done()
+
+        it 'allows up:proxy:load listeners to add request params for a GET request, which are moved to the URL before connecting', (done) ->
+          listener = (event) ->
+            event.request.params.set('key3', 'value3')
+
+          up.on('up:proxy:load', listener)
+
+          up.request('/path1?key1=value1', params: { key2: 'value2' }, method: 'get')
+
+          u.task =>
+
+            expect(@lastRequest().url).toMatchURL('/path1?key1=value1&key2=value2&key3=value3')
+            expect(@lastRequest().params).toMatchParams({})
+            done()
+
       describe 'up:proxy:slow and up:proxy:recover events', ->
 
         beforeEach ->
