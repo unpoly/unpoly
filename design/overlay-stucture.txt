@@ -6,11 +6,11 @@ body
     up-overlay[mode=modal]       # full screen, catches clicks
       up-overlay-backdrop        # backdrop (optional), only for visuals
       up-overlay-viewport        # scroll bars
-        up-overlay-frame         # padding
+        up-overlay-box         # padding
           up-overlay-dismiss     # dismiss icon
           up-overlay-content     # pure content
     up-overlay[mode=popup]
-      up-overlay-frame
+      up-overlay-box
         up-overlay-dismiss
         up-overlay-content
 
@@ -28,11 +28,11 @@ body.up-layer[up-mode=root]
     .up-layer[mode=modal]       # full screen, catches clicks
       .up-layer-backdrop        # backdrop (optional), only for visuals
       .up-layer-viewport        # scroll bars
-        .up-layer-frame         # padding
+        .up-layer-box         # padding
           .up-layer-dismiss     # dismiss icon
           .up-layer-content     # pure content
     .up-layer[mode=popup]
-      .up-layer-frame
+      .up-layer-box
         .up-layer-dismiss
         .up-layer-content
 
@@ -47,11 +47,11 @@ body.up-layer[up-mode=root]
 .up-layer[mode=modal]       # full screen, catches clicks
   .up-layer-backdrop        # backdrop (optional), only for visuals
   .up-layer-viewport        # scroll bars
-    .up-layer-frame         # padding
+    .up-layer-box         # padding
       .up-layer-dismiss     # dismiss icon
       .up-layer-content     # pure content
 .up-layer[mode=popup]
-  .up-layer-frame
+  .up-layer-box
     .up-layer-dismiss
     .up-layer-content
 
@@ -64,10 +64,10 @@ Pro: netteres HTML! Aus <div class="overlay" mode="modal"> with <up-overlay mode
 up-overlay[mode=modal]       # full screen, catches clicks
   up-overlay-backdrop        # backdrop (optional), only for visuals
   up-overlay-viewport        # scroll bars
-    up-overlay-frame         # padding
+    up-overlay-box         # padding
       up-overlay-dismiss     # dismiss icon
       up-overlay-content     # pure content
 up-overlay[mode=popup]
-  up-overlay-frame
+  up-overlay-box
     up-overlay-dismiss
     up-overlay-content

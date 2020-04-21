@@ -61,10 +61,10 @@ html
   // into the end of this layer's viewport.
   overscroll-behavior: contain
 
-  // Center .up-overlay-frame within the viewport
+  // Center .up-overlay-box within the viewport
   text-align: center
 
-%overlay-frame
+%overlay-box
   // Make it grow with the width of .up-overlay-content
   display: inline-block
   text-align: left
@@ -107,7 +107,7 @@ up-modal-viewport
   @extend %overlay-viewport
 
   // Implement the margin around the dialog box with a padding of the viewport.
-  // This way we can give .up-overlay-frame a max-width of 100%, (1) preventing people
+  // This way we can give .up-overlay-box a max-width of 100%, (1) preventing people
   // from setting withs larger than the viewport, and (2) sizing approproately
   // if the modal contents are very wide and cannot wrap (e.g. code blocks).
   +modal-viewport-padding(1)
@@ -124,8 +124,8 @@ up-modal-viewport
   up-modal + up-modal + up-modal + up-modal &
     +modal-viewport-padding(4)
 
-up-modal-frame
-  @extend %overlay-frame
+up-modal-box
+  @extend %overlay-box
   @extend %large-shadow
 
 up-modal-dismiss
@@ -151,8 +151,8 @@ up-drawer-viewport
     // Allow frame to grow from the right, up to its max-width of 100%
     text-align: right
 
-up-drawer-frame
-  @extend %overlay-frame
+up-drawer-box
+  @extend %overlay-box
   @extend %large-shadow
   min-height: 100vh
 
@@ -169,8 +169,8 @@ up-cover
 up-cover-viewport
   @extend %overlay-viewport
 
-up-cover-frame
-  @extend %overlay-frame
+up-cover-box
+  @extend %overlay-box
   width: 100%
   min-height: 100vh
 
@@ -187,7 +187,7 @@ up-cover-dismiss
 // Popup is a small box that is anchored to a link
 ///////////////////////////////////////////////////////////////////////////////
 up-popup
-  @extend %overlay-frame
+  @extend %overlay-box
   @extend %small-shadow
 
   // The small popup box looks better with a tighter padding.

@@ -93,8 +93,8 @@ class up.Layer.Overlay extends up.Layer
     # by up.viewport.closest().
     @viewportElement = @affix(parentElement, 'viewport', 'up-viewport': '')
 
-  createFrameElement: (parentElement) ->
-    @frameElement = @affix(parentElement, 'frame')
+  createBoxElement: (parentElement) ->
+    @boxElement = @affix(parentElement, 'box')
 
   createContentElement: (parentElement) ->
     @contentElement = @affix(parentElement, 'content')
@@ -113,8 +113,8 @@ class up.Layer.Overlay extends up.Layer
     # we hide the "X" label from screen readers.
     e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
-  getFrameElement: ->
-    @frameElement || @element
+  getBoxElement: ->
+    @boxElement || @element
 
   elementAttrs: ->
     return u.compactObject
@@ -133,7 +133,7 @@ class up.Layer.Overlay extends up.Layer
 
   setupClosing: ->
     if @buttonDismissable
-      @createDismissElement(@getFrameElement())
+      @createDismissElement(@getBoxElement())
 
     if @outsideDismissable
       @unbindParentClicked = @parent.on 'click up:link:follow', (event) =>
@@ -183,7 +183,7 @@ class up.Layer.Overlay extends up.Layer
     up.destroy(@element, u.merge(options, log: false))
 
   startAnimation: (options = {}) ->
-    whenFrameClosed = up.animate(@getFrameElement(), options.frameAnimation, options)
+    whenFrameClosed = up.animate(@getBoxElement(), options.frameAnimation, options)
     if @backdrop && !up.motion.isNone(options.frameAnimation)
       whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
 

@@ -18,8 +18,8 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @createElement(document.body)
     @createBackdropElement(@element) if @backdrop
     @createViewportElement(@element)
-    @createFrameElement(@viewportElement)
-    @createContentElement(@frameElement)
+    @createBoxElement(@viewportElement)
+    @createContentElement(@boxElement)
     @setInnerContent(@contentElement, options)
     @setupClosing()
     @shiftBody()

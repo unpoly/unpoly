@@ -3,6 +3,7 @@
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
+  - For input elements this reacts on change
   - For other elements this reacts on click
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
@@ -15,7 +16,6 @@
   - But shouldn't some options be configurable, since they are specific to a server-side framework?
 - Rename { base } back to { currentLayer }
 - Try changes in demo.unpoly.com
-- Should up-modal-frame be up-modal-box?
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 

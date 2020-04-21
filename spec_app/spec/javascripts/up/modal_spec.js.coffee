@@ -260,7 +260,7 @@ describe 'up.modal (deprecated)', ->
                   u.timer 180, =>
                     expect(jasmine.Ajax.requests.count()).toEqual(2)
                     expect($('up-overlay[up-mode=modal]').length).toBe(1)
-                    expect($('up-overlay-frame').length).toBe(1)
+                    expect($('up-overlay-box').length).toBe(1)
                     expect($('.container')).toHaveText('response3')
                     bodyPadding = parseInt($('body').css('padding-right'))
                     expect(bodyPadding).toBeAround(scrollbarWidth, 10)
@@ -646,9 +646,9 @@ describe 'up.modal (deprecated)', ->
           expect(up.modal.isOpen()).toBe(true)
           expect($('up-overlay').attr('up-mode')).toEqual('drawer')
           windowHeight = up.viewport.rootHeight()
-          modalHeight = $('up-overlay-frame').outerHeight()
+          modalHeight = $('up-overlay-box').outerHeight()
           expect(modalHeight).toEqual(windowHeight)
-          expect($('up-overlay-frame').offset()).toEqual(top: 0, left: 0)
+          expect($('up-overlay-box').offset()).toEqual(top: 0, left: 0)
 
       it 'puts the drawer on the right with [up-position=right]', asyncSpec (next) ->
         $link = $fixture('a[href="/foo"][up-drawer=".target"][up-position="right"]').text('label')
@@ -661,9 +661,9 @@ describe 'up.modal (deprecated)', ->
         next =>
           expect(up.modal.isOpen()).toBe(true)
           windowWidth = up.viewport.rootWidth()
-          modalWidth = $('up-overlay-frame').outerWidth()
+          modalWidth = $('up-overlay-box').outerWidth()
           scrollbarWidth = up.viewport.scrollbarWidth()
-          expect($('up-overlay-frame').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
+          expect($('up-overlay-box').offset().left).toBeAround(windowWidth - modalWidth - scrollbarWidth, 1.0)
 
     describe '[up-dismiss]', ->
 
