@@ -4,12 +4,17 @@
 
 $overlay-z-index: 999
 $overlay-backdrop: rgba(90, 90, 90, 0.4)
+$modal-margin-x: 15px
+$modal-margin-y: 25px
 
 html
   // The z-indexes of all overlays depenend on a CSS custom property on the root element.
   // This way users can change the height of all Unpoly overlays with a single CSS override.
   --up-overlay-z-index: $overlay-z-index
   --up-overlay-backdrop: $overlay-backdrop
+
+  --up-modal-margin-x: $modal-margin-x
+  --up-modal-margin-y: $modal-margin-y
 
 %overlay-z-index
   z-index: $overlay-z-index // Fallback for IE11
@@ -65,7 +70,10 @@ html
   text-align: left
 
   position: relative
+
+  // Include the padding in any width that might be set on the frame
   box-sizing: border-box
+
   max-width: 100%
   background-color: #fff
   padding: 20px
@@ -91,6 +99,10 @@ up-modal
 up-modal-backdrop
   @extend %overlay-backdrop
 
+=modal-viewport-padding($factor)
+  padding: ($modal-margin-y * $factor) ($modal-margin-x * $factor)
+  padding: calc(var(--up-modal-margin-y) * #{$factor}) calc(var(--up-modal-margin-x) * #{$factor})
+
 up-modal-viewport
   @extend %overlay-viewport
 
@@ -98,10 +110,19 @@ up-modal-viewport
   // This way we can give .up-overlay-frame a max-width of 100%, (1) preventing people
   // from setting withs larger than the viewport, and (2) sizing approproately
   // if the modal contents are very wide and cannot wrap (e.g. code blocks).
-  padding: 30px 10px
+  +modal-viewport-padding(1)
 
   // Allow frame to grow from the center, up to its max-width of 100%
   justify-content: center
+
+  up-modal + up-modal &
+    +modal-viewport-padding(2)
+
+  up-modal + up-modal + up-modal &
+    +modal-viewport-padding(3)
+
+  up-modal + up-modal + up-modal + up-modal &
+    +modal-viewport-padding(4)
 
 up-modal-frame
   @extend %overlay-frame
@@ -152,6 +173,11 @@ up-cover-frame
   @extend %overlay-frame
   width: 100%
   min-height: 100vh
+
+  // We assume the developer wants to embed a full application layout
+  // into a cover overlay. That layout will either want to touch the screen
+  // edges, so we remove all padding.
+  padding: 0
 
 up-cover-dismiss
   @extend %overlay-dismiss
