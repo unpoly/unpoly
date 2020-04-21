@@ -7,7 +7,7 @@ class up.EventEmitter extends up.Record
     [
       'target',
       'event',
-      'base',
+      'currentLayer',
       'callback',
       'log',
       'ensureBubbles'
@@ -17,8 +17,8 @@ class up.EventEmitter extends up.Record
   emit: ->
     @logEmission()
     # destroyBoundary = @createBoundary()
-    if @base
-      @base.asCurrent(=> @dispatchEvent())
+    if @currentLayer
+      @currentLayer.asCurrent(=> @dispatchEvent())
     else
       @dispatchEvent()
 #    if destroyBoundary
@@ -83,12 +83,12 @@ class up.EventEmitter extends up.Record
     # element and (2) to set up.layer.current to that layer during emission.
     if options.layer
       layer = up.layer.get(options.layer)
-      options.base ?= layer
+      options.currentLayer ?= layer
       options.target ?= layer.element
 
-    # Setting { base } will fix up.layer.current to that layer during emission.
-    if options.base
-      options.base = up.layer.get(options.base)
+    # Setting { currentLayer } will fix up.layer.current to that layer during emission.
+    if options.currentLayer
+      options.currentLayer = up.layer.get(options.currentLayer)
 
     # If no element is given, we emit the event on the document.
     options.target ||= document
@@ -100,7 +100,7 @@ class up.EventEmitter extends up.Record
     else
       # In this branch we receive an Event name and props object.
       # The props object may also include options for the emission, such as
-      # { layer }, { target }, { base } or { log }.
+      # { layer }, { target }, { currentLayer } or { log }.
       # up.emit([target], eventType, [eventPropsAndEmitOptions])
       options.event = up.event.build(args[0], u.omit(options, ['target']))
 

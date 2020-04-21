@@ -10,13 +10,13 @@ class up.Change.OpenLayer extends up.Change.Addition
     @target = options.target
     @source = options.source
     @origin = options.origin
-    @base = options.base
+    @currentLayer = options.currentLayer
 
   requestAttributes: ->
     return {
-      # We associate this request to our base layer. This way other { solo }
-      # navigations on { base } will cancel this request to open a new layer.
-      layer: @base
+      # We associate this request to our current layer. This way other { solo }
+      # navigations on { currentLayer } will cancel this request to open a new layer.
+      layer: @currentLayer
       mode: @options.mode,
       context: @options.context
       # The target will always exist in the current page, since
@@ -36,7 +36,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @content
       throw @notApplicable("Could not find element \"#{@target}\" in server response")
 
-    unless @base.isOpen()
+    unless @currentLayer.isOpen()
       throw @notApplicable('Parent layer was closed')
 
     up.puts("Opening element \"#{@target}\" in new layer")
@@ -44,12 +44,12 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer = up.layer.build(@options)
 
     unless @emitOpenEvent().defaultPrevented
-      # Make sure that the base layer doesn't already have a child layer.
+      # Make sure that the currentLayer layer doesn't already have a child layer.
       # Note that this cannot be prevented with { peel: false }!
-      @base.peel()
+      @currentLayer.peel()
 
       # A11Y: User agent should ignore the parent layer.
-      @base.setInert(true)
+      @currentLayer.setInert(true)
 
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)
@@ -125,7 +125,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # There is no @layer.onOpen() handler to accompany the DOM event.
     return up.emit(
       @buildEvent('up:layer:open'),
-      base: @layer.parent # sets up.layer.current
+      currentLayer: @layer.parent # sets up.layer.current
     )
 
   emitOpeningEvent: ->

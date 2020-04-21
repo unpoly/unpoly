@@ -90,7 +90,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       @buildEvent(@closedEventType),
       # Set up.layer.current to the parent of the closed layer, which is now likely
       # to be the front layer.
-      base: formerParent,
+      currentLayer: formerParent,
       callback: @layer.callback(@closedCallbackName),
       ensureBubbles: true
     )

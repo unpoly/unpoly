@@ -10,9 +10,9 @@ class up.LayerLookup
 
     @value = options.layer
     @origin = options.origin
-    @base = options.base || @originLayer() || @stack.current
-    if u.isString(@base)
-      @base = new @constructor(@stack, @base, u.merge(options, base: @stack.current)).first()
+    @currentLayer = options.currentLayer || @originLayer() || @stack.current
+    if u.isString(@currentLayer)
+      @currentLayer = new @constructor(@stack, @currentLayer, u.merge(options, currentLayer: @stack.current)).first()
 
   originLayer: ->
     if @origin
@@ -33,13 +33,13 @@ class up.LayerLookup
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
-        u.uniq [@base, @stack.allReversed()...]
+        u.uniq [@currentLayer, @stack.allReversed()...]
       when 'current'
-        [@base]
+        [@currentLayer]
       when 'closest'
-        @stack.selfAndAncestorsOf(@base)
+        @stack.selfAndAncestorsOf(@currentLayer)
       when 'parent'
-        u.compact [@stack.parentOf(@base)]
+        u.compact [@stack.parentOf(@currentLayer)]
       when 'new'
         ['new'] # pass-through
       when 'root'
@@ -49,7 +49,7 @@ class up.LayerLookup
       when 'origin'
         [@originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
       when 'ancestor'
-        @stack.ancestorsOf(@base)
+        @stack.ancestorsOf(@currentLayer)
       else
         up.fail("Unknown { layer } option: %o", @value)
 

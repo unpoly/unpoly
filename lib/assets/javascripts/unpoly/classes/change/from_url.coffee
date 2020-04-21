@@ -14,7 +14,7 @@ class up.Change.FromURL extends up.Change
   # These options are used before the request is sent.
   # Hence there is no failVariant.
   @PREFLIGHT_KEYS: [
-    'base',
+    'currentLayer',
     'inspectResponse',
     'url',
     'method',

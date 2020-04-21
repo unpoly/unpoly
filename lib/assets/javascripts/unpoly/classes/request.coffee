@@ -114,7 +114,7 @@ class up.Request extends up.Record
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
       # Note that when opening a new layer, this { layer } attribute will be the set to
-      # the base layer. The { mode } and { failMode } attributes will belong to the
+      # the current layer. The { mode } and { failMode } attributes will belong to the
       # new layer being opened.
       'layer',
       'mode',

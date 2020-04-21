@@ -3,16 +3,16 @@
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
-  - For input elements this reacts on change
+  - For input elements this reacts on input / change
   - For other elements this reacts on click
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
 - All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
   - e. g. findValidateTarget
-- Rename { base } back to { currentLayer }
 - Try changes in demo.unpoly.com
-
+- Support { layer } values: 'descendant', 'child'
+-
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 
@@ -313,3 +313,5 @@ Decisions
   => We keep the value as first argument for the symmetry to resolve / reject
 - Decide whether to still up <up-xxx-frame> to more easily position the dismiss icon
   => No, in popups the <up-popup> is the frame. we can position a dismiss icon in that.
+up.emit: Do we really need a { base } option, could this just be { layer }?
+  - yes, because { layer } also becomes a prop
