@@ -22,9 +22,9 @@
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
-Have you noticed how noticed how pages fade in
 
 - Tests
+  -
   - Test that we can open multiple nested modals by clicking on links (bugfix where parent event listener would close the third layer)
   - Test [up-content], [up-content=overlay]
   - test thtat up.reveal should only see obstructions on its laayer

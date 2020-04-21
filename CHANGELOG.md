@@ -27,6 +27,7 @@ Unreleased
 - up:link:follow is no longer sent when preloading, up:link:preload still is
 - Preserve focus when validating forms; Add { focus } option for fragment update
 - up.Request.prototype.isFatalError() has been removed without replacement. Network errors now reject with an error, and not a response.
+- [up-content], [up-content=overlay], [up-content=modal]
 
 
 0.61.0
