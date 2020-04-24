@@ -5,6 +5,7 @@
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
   - For input elements this reacts on input / change
   - For other elements this reacts on click
+  - do we have { props }, [up-props] with that?
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
@@ -12,7 +13,26 @@
   - e. g. findValidateTarget
 - Try changes in demo.unpoly.com
 - Support { layer } values: 'descendant', 'child'
--
+- Modal sizes
+  - default: grow
+  - can be configured with up.config.overlay.size = "lg"
+  - size="xs" => 180px
+  - size="sm" => 300px
+  - size="md" => 500px
+  - size="lg" => 800px
+  - size="xl" => 1140px
+  - wollen wir das für alle overlays sharen?
+    --up-overlay-size-sm: 300px
+    --up-modal-size-sm: 300px
+    --up-popup-size-sm: 300px
+    --up-drawer-size-ms: 300px
+
+
+
+
+
+
+
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 
