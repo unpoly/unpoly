@@ -519,11 +519,11 @@ up.element = do ->
       element.className // returns 'klass'
 
   @function up.element.affix
-  @params {Element} parent
+  @param {Element} parent
     The parent to which to attach the created element.
-  @params {string} selector
+  @param {string} selector
     The CSS selector from which to create an element.
-  @params {Object} attrs
+  @param {Object} attrs
     An object of attributes to set on the created element.
   @param {Object} attrs.text
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
