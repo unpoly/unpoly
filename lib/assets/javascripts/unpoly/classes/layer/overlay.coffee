@@ -136,7 +136,7 @@ class up.Layer.Overlay extends up.Layer
       @createDismissElement(@getBoxElement())
 
     if @outsideDismissable
-      @unbindParentClicked = @parent.on 'click up:link:follow', (event) =>
+      @unbindParentClicked = @parent.on 'click up:action:consume', (event) =>
         originClicked = @origin && @origin.contains(event.target)
         @onOutsideClicked(event, originClicked)
 

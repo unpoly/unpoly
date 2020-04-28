@@ -372,11 +372,10 @@ up.event = do ->
   consumeAction = (event) ->
     # Halt the event chain to stop duplicate processing of this user interaction.
     halt(event)
-    unless event.type == 'up:action:consume'
-      # Although we have consumed this action and halted the event chain,
-      # other components might still need to react. E.g. a popup needs to close when
-      # an outside link consumes the user click. So we emit another event for that.
-      emit(event.target, 'up:action:consume', log: false)
+    # Although we have consumed this action and halted the event chain,
+    # other components might still need to react. E.g. a popup needs to close when
+    # an outside link consumes the user click. So we emit another event for that.
+    return nobodyPrevents(event.target, 'up:action:consume', log: false)
 
   onReady = (callback) ->
     # Values are "loading", "interactive" and "completed".
@@ -385,6 +384,21 @@ up.event = do ->
       callback()
     else
       document.addEventListener('DOMContentLoaded', callback)
+
+#  bind '[up-emit]', 'click up:action:consume', (consumeEvent, element) ->
+#
+#    # TODO: Support this: up.emit="{ type: foo:bar, prop1: foo, prop2: prop2 }"
+#    # TODO: build. emit, etc. need to support this form2
+#    # TODO: This should then also be the protocol for the server ptotocol
+#    # <a href="foo" up-emit="my:custom:event" up-emit-props="{ foo: 'bar' }">
+#    # <a href="foo" up-emit="{ type: 'my:custom:event', foo: 'bar' }">
+#
+#
+#    eventType = e.attr(element, 'up-emit')
+#    eventProps = e.jsonAttr(element, 'up-emit-props')
+#    emittedEvent = up.emit(element, eventType, eventProps)
+#    if emittedEvent.defaultPrevented
+#      halt(consumeEvent)
 
   bind 'up:framework:reset', reset
 

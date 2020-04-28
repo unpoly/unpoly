@@ -113,8 +113,8 @@ up.link = do ->
     preloadDelay.reset()
 
   consumeFollowEvent = (event, link) ->
-    up.event.consumeAction(event)
-    u.muteRejection follow(link)
+    if up.event.consumeAction(event)
+      u.muteRejection follow(link)
 
   ###**
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
