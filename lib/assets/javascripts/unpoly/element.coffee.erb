@@ -465,7 +465,7 @@ up.element = do ->
     # Attribute values might contain spaces, and then we would incorrectly
     # split depths at that space.
     attrValues = []
-    selectorWithoutAttrValues = selector.replace /\[([\w-]+)(?:=(["'])?([^"'\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
+    selectorWithoutAttrValues = selector.replace /\[([\w-]+)(?:[\~\|\^\$\*]?=(["'])?([^"'\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
       attrValues.push(attrValue || '')
       "[#{attrName}]"
 

@@ -28,6 +28,7 @@ Unreleased
 - Preserve focus when validating forms; Add { focus } option for fragment update
 - up.Request.prototype.isFatalError() has been removed without replacement. Network errors now reject with an error, and not a response.
 - [up-content], [up-content=overlay], [up-content=modal]
+- parseSelector can parse attribute selectors with prefix, infix, suffix, space-separated, dash-separated
 
 
 0.61.0

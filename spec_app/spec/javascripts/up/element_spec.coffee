@@ -437,8 +437,38 @@ describe 'up.element', ->
       expect(parent.firstChild.tagName).toEqual('LI')
       expect(parent.firstChild.className).toEqual('bar')
 
-    it 'creates an element with an attribute', ->
+    it 'creates an element with an attribute set to an exact value', ->
       element = up.element.createFromSelector('ul[foo=bar]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'creates an element with an attribute set to a space-separated value', ->
+      element = up.element.createFromSelector('ul[foo~=bar]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'creates an element with an attribute set to a dash-separated value', ->
+      element = up.element.createFromSelector('ul[foo|=bar]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'creates an element with an attribute set to a prefix', ->
+      element = up.element.createFromSelector('ul[foo^=bar]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'creates an element with an attribute set to a suffix', ->
+      element = up.element.createFromSelector('ul[foo$=bar]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'creates an element with an attribute set to a substring', ->
+      element = up.element.createFromSelector('ul[foo*=bar]')
       expect(element).toBeElement()
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar')
