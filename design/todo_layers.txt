@@ -14,22 +14,30 @@
 - Try changes in demo.unpoly.com
 - Support { layer } values: 'descendant', 'child'
 - Modal sizes
-  - default: grow
-  - can be configured with up.config.overlay.size = "lg"
-  - size="xs" => 180px
-  - size="sm" => 300px
-  - size="md" => 500px
-  - size="lg" => 800px
-  - size="xl" => 1140px
-  - wollen wir das für alle overlays sharen?
-    --up-overlay-size-sm: 300px
-    --up-modal-size-sm: 300px
-    --up-popup-size-sm: 300px
-    --up-drawer-size-ms: 300px
+  - default: grow oder auto
+  - can be configured with up.config.overlay.size = "large"
+  - vielleicht nur 3 größen
+      "small",
+      "medium",
+      "large",
+      "auto"
+  - auto ist selten ein gutes default. hier überlegen, ob default-größe "medium" wäre
+  - wahrscheinlich wären die größen dann ja mode anders
+  - Bootstrap 4 / Arne: Modals haben auch eine minimalbreite, durch width: 100% + max-width
 
 
+- How are we going to document super-overloaded functions like up.emit?
+  - The full signature is insane
+    - up.emit([target], [eventName], [eventOrProps], [emitOptions]) ?
+  - I would rather document
+    - up.emit([target], eventType, eventProps)
+    - up.emit([target], eventPlan)
+    - up.emit([target], event, [emitDetails]) # this might be internal
+  - We could do it with separate @function blocks
+    - I think there's already some logic for multiple guide elements with the same symbol
+    - How would this look in the guide nav? At least we would need to de-dup
 
-
+- Consider promoting some experimental functions to stable
 
 
 
