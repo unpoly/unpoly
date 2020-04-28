@@ -45,6 +45,17 @@ describe Unpoly::Rails::Controller, type: :request do
     controller.eval_result
   end
 
+  matcher :equal_json do |expected|
+    match do |actual_json|
+      # Convert to JSON to stringify keys in arrays
+      expected = expected.to_json unless expected.is_a?(String)
+      expected_parsed = JSON.parse(expected)
+      expect(actual_json).to be_a(String)
+      actual_parsed = JSON.parse(actual_json)
+      expect(actual_parsed).to eq(expected_parsed)
+    end
+  end
+
   describe 'up?' do
 
     it 'returns true if the request has an X-Up-Target header' do
@@ -350,9 +361,9 @@ describe Unpoly::Rails::Controller, type: :request do
           up.emit('my:event', { 'foo' => 'bar' })
         end
 
-        expect(response.headers['X-Up-Events']).to eq(
-          [{ type: 'my:event', options: { 'foo' => 'bar' }}].to_json
-        )
+        expect(response.headers['X-Up-Events']).to equal_json([
+          { type: 'my:event', foo: 'bar' }
+        ])
       end
 
       it 'adds multiple entries to the X-Up-Events response headers' do
@@ -361,10 +372,10 @@ describe Unpoly::Rails::Controller, type: :request do
           up.emit('other:event', { 'bam' => 'baz' })
         end
 
-        expect(response.headers['X-Up-Events']).to eq([
-          { type: 'my:event', options: { 'foo' => 'bar' }},
-          { type: 'other:event', options: { 'bam' => 'baz' }}
-        ].to_json)
+        expect(response.headers['X-Up-Events']).to equal_json([
+          { foo: 'bar', type: 'my:event' },
+          { bam: 'baz', type: 'other:event' }
+        ])
       end
 
     end
@@ -376,9 +387,9 @@ describe Unpoly::Rails::Controller, type: :request do
           up.layer.emit('my:event', { 'foo' => 'bar' })
         end
 
-        expect(response.headers['X-Up-Events']).to eq(
-          [{ type: 'my:event', options: { 'foo' => 'bar', 'layer' => 'current' }}].to_json
-        )
+        expect(response.headers['X-Up-Events']).to equal_json([
+          { type: 'my:event', foo: 'bar', layer: 'current' }
+        ])
       end
 
     end
@@ -594,9 +605,9 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response).to be_redirect
       follow_redirect!
       expect(response.body).to eq('.foo')
-      expect(response.headers['X-Up-Events']).to eq [
-        { type: 'event1', options: {}}
-      ].to_json
+      expect(response.headers['X-Up-Events']).to equal_json([
+        { type: 'event1' }
+      ])
     end
 
     it 'preserves Unpoly-releated headers over multiple redirects' do
@@ -606,10 +617,10 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response).to be_redirect
       follow_redirect!
       expect(response.body).to eq('.foo')
-      expect(response.headers['X-Up-Events']).to eq [
-        { type: 'event0', options: {}},
-        { type: 'event1', options: {}},
-      ].to_json
+      expect(response.headers['X-Up-Events']).to equal_json([
+        { type: 'event0' },
+        { type: 'event1' },
+      ])
     end
 
     it 'does not change the history' do

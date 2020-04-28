@@ -74,6 +74,16 @@ class up.EventEmitter extends up.Record
     options = u.extractOptions(args)
     options = u.merge(defaults, options)
 
+    # args can now be:
+    # - [String]
+    # - [Element]
+    # - [up.Layer]
+    # - [Object]
+    # - [Element, String]
+    # - [up.Layer, String]
+    # - [Element, Object]
+    # - [up.Layer, Object]
+
     if u.isElementish(args[0])
       options.target = e.get(args.shift())
     else if args[0] instanceof up.Layer
@@ -93,15 +103,19 @@ class up.EventEmitter extends up.Record
     # If no element is given, we emit the event on the document.
     options.target ||= document
 
-    if args[0].preventDefault
+    if args[0]?.preventDefault
       # In this branch we receive an Event object that was already built:
       # up.emit([target], event, [emitOptions])
       options.event = args[0]
-    else
-      # In this branch we receive an Event name and props object.
+    else if u.isString(args[0])
+      # In this branch we receive an Event type and props object.
       # The props object may also include options for the emission, such as
       # { layer }, { target }, { currentLayer } or { log }.
       # up.emit([target], eventType, [eventPropsAndEmitOptions])
-      options.event = up.event.build(args[0], u.omit(options, ['target']))
+      options.event = up.event.build(args[0], options)
+    else
+      # In this branch we receive an object that contains the event type as a { type } property:
+      # up.emit([target, { type: 'foo', prop: 'value' }
+      options.event = up.event.build(options)
 
     new @(options)

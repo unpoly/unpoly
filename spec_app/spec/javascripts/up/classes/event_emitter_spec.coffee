@@ -105,3 +105,35 @@ describe 'up.EventEmitter', ->
         expect(emitter.event).toBe(event)
         expect(emitter.target).toBe(element)
         expect(emitter.callback).toBe(callback)
+
+    describe 'with ([Object])', ->
+
+      it "builds an event with the type from the given object's { type } property, which emits on the document", ->
+        emitter = up.EventEmitter.fromEmitArgs([{type: 'my:event', key: 'value'}])
+        expect(emitter.event).toBeEvent('my:event', key: 'value')
+        expect(emitter.target).toBe(document)
+
+      it 'throws an error if the given object does not have a { type } property, which emits on the document', ->
+        build = -> up.EventEmitter.fromEmitArgs([{key: 'value'}])
+        expect(build).toThrowError(/type/i)
+
+    describe 'with ([Element, Object])', ->
+
+      it "builds an event with the type from the given object's { type } property", ->
+        element = fixture('.element')
+        emitter = up.EventEmitter.fromEmitArgs([element, {type: 'my:event', key: 'value'}])
+        expect(emitter.event).toBeEvent('my:event', key: 'value')
+        expect(emitter.target).toBe(element)
+
+      it 'throws an error if the given object does not have a { type } property', ->
+        element = fixture('.element')
+        build = -> up.EventEmitter.fromEmitArgs([element, {key: 'value'}])
+        expect(build).toThrowError(/type/i)
+
+    describe 'with ([Object], Object)', ->
+
+      it "builds an event with the type from the given object's { type } property, using the second argument as default props", ->
+        emitter = up.EventEmitter.fromEmitArgs([{type: 'my:event', key: 'value'}], defaultKey: 'defaultValue')
+        expect(emitter.event).toBeEvent('my:event', key: 'value', defaultKey: 'defaultValue')
+        expect(emitter.target).toBe(document)
+

@@ -137,10 +137,18 @@ module Unpoly
 
       ##
       # TODO: Docs
-      def emit(type, options = {})
+      def emit(*args)
+        event_plan = args.extract_options!
+
+        # We support two call styles:
+        # up.emit('event:type', prop: value)
+        # up.emit(type: 'event:type', prop: value)
+        if args[0].is_a?(String)
+          event_plan[:type] = args[0]
+        end
+
         # Track the given props in an array. If the method is called a second time,
         # we can re-set the X-Up-Events header with the first and second props hash.
-        event_plan = { type: type, options: options }
         events.push(event_plan)
       end
 

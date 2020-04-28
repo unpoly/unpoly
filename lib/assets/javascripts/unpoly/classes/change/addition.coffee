@@ -15,5 +15,5 @@ class up.Change.Addition extends up.Change
     else if @dismissLayer
       up.layer.dismiss(@dismissLayer)
 
-    @eventPlans?.forEach (eventPlan) ->
-      up.emit(eventPlan.type, eventPlan.options)
+    @eventPlans?.forEach(up.emit)
+
