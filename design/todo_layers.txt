@@ -25,6 +25,11 @@
   - wahrscheinlich wären die größen dann ja mode anders
   - Bootstrap 4 / Arne: Modals haben auch eine minimalbreite, durch width: 100% + max-width
 
+- The backdrop will NOT be shared between modes once we do up-mode="lightbox"
+  - Let's do different variables: --up-modal-backdrop and --up-drawer-backdrop,
+    - or get rid of the variable entirely
+- Overlay links with [up-instant] only work once. Using the same link a second time immediately closes the overlay.
+-
 
 - How are we going to document super-overloaded functions like up.emit?
   - The full signature is insane
@@ -37,8 +42,6 @@
     - I think there's already some logic for multiple guide elements with the same symbol
     - How would this look in the guide nav? At least we would need to de-dup
 
-- Consider promoting some experimental functions to stable
-
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -48,6 +51,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that when a popup is open, clicking the opener will close that popup
   - Test that when a popup is open, clicking outside it will close that popup
   - Test that when a popup is open, clicking on ANOTHER popup opener will close the first popup and open the other (no additional "dead" click required)
+  - Test that a slow click on an [up-instant] modal opener (with mousedown and click a second apart) will not close the overlay we just opened
   - Test that we can open multiple nested modals by clicking on links (bugfix where parent event listener would close the third layer)
   - Test [up-content], [up-content=overlay]
   - test thtat up.reveal should only see obstructions on its laayer
@@ -229,6 +233,10 @@ Accessibility
 Later?
 ------
 
+- Consider promoting some experimental functions to stable
+- Validate Requests prevents Submit when clicking out of a focused field into submit button
+  - https://makandra.slack.com/archives/C02KGPZDE/p1588250760006500
+  - https://jsbin.com/fofefokafu/edit?html,js,output
 - get up.layer.of() back
 - up.validate() is strange to preview a form change
   - maybe offer up.form.preview() and up-preview=".selector"
