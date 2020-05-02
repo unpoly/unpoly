@@ -74,7 +74,10 @@ html
   // Include the padding in any width that might be set on the frame
   box-sizing: border-box
 
+  // Regardless of size we never want to grow wider than the viewport,
+  // which would cause horizontal scroll bars.
   max-width: 100%
+
   background-color: #fff
   padding: 20px
 
@@ -127,6 +130,15 @@ up-modal-viewport
 up-modal-box
   @extend %overlay-box
   @extend %large-shadow
+
+  up-modal[size=small] &
+    width: 400px
+
+  up-modal[size=medium] &
+    width: 700px
+
+  up-modal[size=large] &
+    width: 1000px
 
 up-modal-dismiss
   @extend %overlay-dismiss
