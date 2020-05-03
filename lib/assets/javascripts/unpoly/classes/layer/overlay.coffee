@@ -131,22 +131,39 @@ class up.Layer.Overlay extends up.Layer
   @selector: (part) ->
     u.compact(['up', @mode, part]).join('-')
 
-  setupClosing: ->
+  setupHandlers: ->
+    super()
+
     if @buttonDismissable
       @createDismissElement(@getBoxElement())
 
     if @outsideDismissable
-      @unbindParentClicked = @parent.on 'click up:action:consume', (event) =>
-        originClicked = @origin && @origin.contains(event.target)
+      @unbindParentClicked = @parent.on 'up:click', (event, element) =>
+        # When our origin is clicked again, halt the click event
+        # We achieve this by halting the click event.
+        originClicked = @origin && @origin.contains(element)
         @onOutsideClicked(event, originClicked)
 
       # If this overlay has its own viewport, a click outside the frame will hit
       # the viewport and not the parent element.
       if @viewportElement
-        up.on @viewportElement, 'click', (event) =>
+        up.on @viewportElement, 'up:click', (event) =>
           # Don't react when a click into the overlay frame bubbles to the viewportElement
           if event.target == @viewportElement
             @onOutsideClicked(event, true)
+
+    # <a up-accept="value">OK</a>
+    @registerClickCloser 'up-accept', (value, closeOptions) =>
+      @accept(value, closeOptions)
+
+    # <a up-dismiss="value">Cancel</a>
+    @registerClickCloser 'up-dismiss', (value, closeOptions) =>
+      @dismiss(value, closeOptions)
+
+    # <a up-close>Close</a> (legacy close attribute)
+    @registerClickCloser 'up-close', (value, closeOptions) =>
+      up.legacy.deprecated('[up-close]', '[up-dismiss]')
+      @dismiss(value, closeOptions)
 
     # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
     @registerLocationCloser(@acceptLocation, @accept)
@@ -156,13 +173,25 @@ class up.Layer.Overlay extends up.Layer
     @registerEventCloser(@acceptEvent, @accept)
     @registerEventCloser(@dismissEvent, @dismiss)
 
-  teardownClosing: ->
-    @unbindParentClicked?()
-
   onOutsideClicked: (event, halt) ->
     if halt
       up.event.halt(event)
     u.muteRejection @dismiss()
+
+  registerClickCloser: (attribute, closeFn) ->
+    # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
+    @on 'up:click', "[#{attribute}]", (event) ->
+      console.debug("up:click [#{attribute}]")
+      origin = event.target
+      value = e.jsonAttr(origin, attribute)
+      closeOptions = { origin }
+      parser = new up.OptionParser(closeOptions, origin, fail: false)
+      parser.booleanOrString('animation')
+      parser.string('easing')
+      parser.number('duration')
+      up.event.halt(event)
+      # u.muteRejection
+      closeFn(value, closeOptions)
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes
@@ -180,6 +209,10 @@ class up.Layer.Overlay extends up.Layer
         # '/decks/:deckId/cards/:cardId' is matched against
         # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
         closeFn.call(this, u.merge(resolution, { location }))
+
+  teardownHandlers: ->
+    super()
+    @unbindParentClicked()
 
   destroyElement: (options) ->
     up.destroy(@element, u.merge(options, log: false))

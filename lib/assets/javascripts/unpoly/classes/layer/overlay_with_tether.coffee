@@ -16,12 +16,12 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     @createElement(@tether.parent)
     @createContentElement(@element)
     @setInnerContent(@contentElement, options)
+    @setupHandlers()
     @tether.start(@element)
-    @setupClosing()
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
-    @teardownClosing()
+    @teardownHandlers()
     animation = => @startCloseAnimation(options)
     @destroyElement({ animation }).then =>
       @tether.stop()

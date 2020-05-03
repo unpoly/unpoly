@@ -21,12 +21,12 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @createBoxElement(@viewportElement)
     @createContentElement(@boxElement)
     @setInnerContent(@contentElement, options)
-    @setupClosing()
+    @setupHandlers()
     @shiftBody()
     return @startOpenAnimation(options)
 
   closeNow: (options) ->
-    @teardownClosing()
+    @teardownHandlers()
     animation = => @startCloseAnimation(options)
     @destroyElement({ animation }).then =>
       @unshiftBody()

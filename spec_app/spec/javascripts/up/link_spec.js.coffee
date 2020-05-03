@@ -523,7 +523,7 @@ describe 'up.link', ->
           next =>
             expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.objectContaining(method: 'PUT'))
 
-    describe 'up.link.shouldProcessEvent', ->
+    describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->
         event = Trigger.createMouseEvent('mousedown', attrs)
@@ -534,45 +534,45 @@ describe 'up.link', ->
       it "returns true when the given event's target is the given link itself", ->
         $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0])
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(true)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(true)
 
       it "returns true when the given event's target is a non-link child of the given link", ->
         $link = $fixture('a[href="/foo"]')
         $span = $link.affix('span')
         event = buildEvent($span[0])
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(true)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(true)
 
       it "returns false when the given event's target is a child link of the given link (think [up-expand])", ->
         $link = $fixture('div[up-href="/foo"]')
         $childLink = $link.affix('a[href="/bar"]')
         event = buildEvent($childLink[0])
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
       it "returns false when the given event's target is a child input of the given link (think [up-expand])", ->
         $link = $fixture('div[up-href="/foo"]')
         $childInput = $link.affix('input[type="text"]')
         event = buildEvent($childInput[0])
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
       it 'returns false if the right mouse button is used', ->
         $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], button: 2)
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
       it 'returns false if shift is pressed during the click', ->
         $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], shiftKey: 2)
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
       it 'returns false if ctrl is pressed during the click', ->
         $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], ctrlKey: 2)
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
       it 'returns false if meta is pressed during the click', ->
         $link = $fixture('a[href="/foo"]')
         event = buildEvent($link[0], metaKey: 2)
-        expect(up.link.shouldProcessEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
     describe 'up.link.makeFollowable', ->
 

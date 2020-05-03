@@ -30,6 +30,12 @@ class up.Layer extends up.Record
     if parent = @parent
       @history &&= parent.history
 
+  setupHandlers: ->
+    up.link.convertClicks(this)
+
+  teardownHandlers: ->
+    # no-op for overriding
+
   isCurrent: ->
     @stack.current == this
 
@@ -94,6 +100,10 @@ class up.Layer extends up.Record
     # we need to manually check whether the event target is contained
     # by this layer.
     @contains(event.target)
+
+  wasHitByMouseEvent: (layer, mouseEvent) ->
+    hittableElement = document.elementFromPoint(event.clientX, event.clientY)
+    return !hittableElement || @contains(hittableElement)
 
   buildEventEmitter: (args) ->
     return up.EventEmitter.fromEmitArgs(args, layer: this)

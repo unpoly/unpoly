@@ -16,7 +16,7 @@ class up.LinkPreloadDelay
 
   onMouseEnter: (event) =>
     link = event.target
-    if up.link.shouldProcessEvent(event, link)
+    if up.link.shouldFollowEvent(event, link)
       @preloadAfterDelay(link)
 
   onMouseLeave: (event) =>

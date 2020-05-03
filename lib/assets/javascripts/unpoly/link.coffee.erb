@@ -99,8 +99,8 @@ up.link = do ->
   fullInstantSelector = ->
     config.instant.join(',')
 
-  isInstant = (link) ->
-    e.matches(link, fullInstantSelector())
+  isInstant = (linkOrDescendant) ->
+    !!e.closest(linkOrDescendant, fullInstantSelector())
 
   ###**
   @property up.link.config
@@ -111,10 +111,6 @@ up.link = do ->
   reset = ->
     config.reset()
     preloadDelay.reset()
-
-  consumeFollowEvent = (event, link) ->
-    if up.event.consumeAction(event)
-      u.muteRejection follow(link)
 
   ###**
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
@@ -337,20 +333,63 @@ up.link = do ->
     unless isFollowable(link)
       link.setAttribute('up-follow', '')
 
-  shouldProcessEvent = (event, link) ->
-    target = event.target
-
+  shouldFollowEvent = (event, link) ->
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
     return false unless u.isUnmodifiedMouseEvent(event)
-
-    # If we actually targeted `link`, save ourselves the expensive DOM traversal below
-    return true if target == link
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
     betterTargetSelector = "a, [up-href], #{up.form.fieldSelector()}"
-    betterTarget = e.closest(target, betterTargetSelector)
+    betterTarget = e.closest(event.target, betterTargetSelector)
     return !betterTarget || betterTarget == link
+
+  ###**
+  Provide an up:click event that improves on standard click
+  in several ways:
+
+  - It is emitted on mousedown for [up-instant] elements
+  - It is not emitted if the element has disappeared (or was overshadowed)
+    between mousedown and click. This can happen if mousedown creates a layer
+    over the element, or if a mousedown handler removes a handler.
+
+  Stopping an up:click event will also stop the underlying event.
+
+  @function up.link.convertClicks
+  @param {up.Layer} layer
+  ###
+  convertClicks = (layer) ->
+    layer.on 'click', (event, element) ->
+      if isInstant(element)
+        # Instant links should not have a `click` event.
+        # This would follow vanilla links and activate JS libs.
+        up.event.halt(event)
+
+      # In case mousedown has created a layer over the click coordinates,
+      # Chrome will emit an event with { target: document.body } on click.
+      # Ignore that event.
+      else if layer.wasHitByMouseEvent(event)
+        convertClick(event)
+
+    layer.on 'mousedown', (event, element) ->
+      if isInstant(element)
+        convertClick(event)
+
+  convertClick = (originalEvent) ->
+    copiedKeys = ['clientX', 'clientY', 'button', 'metaKey', 'shiftKey', 'ctrlKey']
+    forwardedKeys = ['stopPropagation', 'stopImmediatePropagation', 'preventDefault']
+
+    newEvent = up.event.build('up:click', u.pick(originalEvent, copiedKeys))
+
+    forwardedKeys.forEach (key) ->
+      originalMethod = newEvent[key]
+
+      newEvent[key] = ->
+        console.debug("on up:click: called %s()", key)
+        originalEvent[key]()
+        console.debug("on %s: called %s()", originalEvent.type, key)
+        return originalMethod.call(newEvent)
+
+    up.emit(originalEvent.target, newEvent)
 
   ###**
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
@@ -533,19 +572,10 @@ up.link = do ->
     within the response.
   @stable
   ###
-  up.on 'up:framework:boot', ->
-    up.layer.onEach 'click', fullFollowSelector, (event, link) ->
-      if shouldProcessEvent(event, link)
-        if isInstant(link)
-          # If the link was already processed on mousedown, we still need
-          # to prevent this later click event's chain.
-          up.event.halt(event)
-        else
-          consumeFollowEvent(event, link)
-
-    up.layer.onEach 'mousedown', fullFollowSelector, (event, link) ->
-      if shouldProcessEvent(event, link) && isInstant(link)
-        consumeFollowEvent(event, link)
+  up.on 'up:click', fullFollowSelector, (event, link) ->
+    if shouldFollowEvent(event, link)
+      up.event.halt(event)
+      u.muteRejection follow(link)
 
   ###**
   By adding an `up-instant` attribute to a link, the destination will be
@@ -678,9 +708,10 @@ up.link = do ->
   makeFollowable: makeFollowable
   isSafe: isSafe
   isFollowable: isFollowable
-  shouldProcessEvent: shouldProcessEvent
+  shouldFollowEvent: shouldFollowEvent
   followMethod: followMethod
   targetMacro: targetMacro
+  convertClicks: convertClicks
   config: config
 
 up.follow = up.link.follow

@@ -615,8 +615,8 @@ up.form = do ->
   @stable
   ###
   up.on 'submit', 'form[up-target], form[up-follow]', (event, form) ->
-    if up.event.consumeAction(event)
-      u.muteRejection submit(form)
+    up.event.halt(event)
+    u.muteRejection submit(form)
 
   ###**
   When a form field with this attribute is changed, the form is validated on the server

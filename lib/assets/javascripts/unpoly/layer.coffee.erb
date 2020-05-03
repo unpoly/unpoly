@@ -182,33 +182,6 @@ up.layer = do ->
   anySelector = ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
-  ###**
-  # Event handlers for [up-target] etc. are registered to each layer instead of
-  # only once to the document. See https://github.com/unpoly/unpoly/issues/79
-  #
-  # @function up.layer.onEach
-  # @internal
-  ###
-  registerHandler = (handler...) ->
-    handler.isDefault = up.framework.isBooting()
-
-    # Remember handler for future layers
-    handlers.push(handler)
-
-    # Apply to existing layers
-    for layer in stack.layers
-      layer.on(handler...)
-
-  applyHandlers = (layer) ->
-    # applyHandlers() should be idempotent if called multiple times.
-    # We use the layer's element and not the layer object to decide whether layers
-    # have already been applied. E.g. if we swap the <html> element the root layer object
-    # does not change, but we need to re-apply handlers.
-    if !layer.element.upHandlersApplied
-      layer.element.upHandlersApplied = true
-      for handler in handlers
-        layer.on(handler...)
-
   up.event.onEscape (event) ->
     layer = stack.current
     if layer.escapeDismissable
@@ -219,36 +192,8 @@ up.layer = do ->
     for layer in stack.layers
       layer.repair()
 
-  registerCloseHandler = (attribute, closeFn) ->
-    # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
-    registerHandler 'click up:link:follow', "[#{attribute}]", (event) ->
-      origin = event.target
-      layer = stack.get(origin)
-      # To make a view usable both as a root layer and as an overlay, the programmer might
-      # define a fallback like this:
-      #
-      #     <a href="/fallback" up-accept>...</a>
-      #
-      # We only want to accept the layer (and halt the event chain) if that link is in an overlay.
-      # If the link is in the root layer, we allow the event to bubble up.
-      unless layer.isRoot()
-        value = e.jsonAttr(origin, attribute)
-        # u.muteRejection closeFn(layer, { value, origin })
-        closeFn(layer, { value, origin })
-        up.event.halt(event)
-
   up.on 'up:framework:boot', ->
     stack = new up.LayerStack()
-
-    registerCloseHandler 'up-accept', (layer, value, closeOptions) ->
-      return layer.accept(value, closeOptions)
-
-    registerCloseHandler 'up-dismiss', (layer, value, closeOptions) ->
-      return layer.dismiss(value, closeOptions)
-
-    registerCloseHandler 'up-close', (layer, value, closeOptions) ->
-      up.legacy.deprecated('[up-close]', '[up-dismiss]')
-      return layer.dismiss(value, closeOptions)
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
@@ -275,8 +220,6 @@ up.layer = do ->
     on: (args...) -> stack.current.on(args...)
     off: (args...) -> stack.current.off(args...)
     emit: (args...) -> stack.current.emit(args...)
-    onEach: registerHandler
-    applyHandlers: applyHandlers
     get_root: -> stack.root
     get_all: -> stack.layers
     get_allReversed: -> stack.allReversed()

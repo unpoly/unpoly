@@ -291,7 +291,12 @@ up.event = do ->
     # was called on a custom event.
     # See discussion here: https://stackoverflow.com/questions/23349191
     if up.browser.isIE11()
+      originalPreventDefault = event.preventDefault
+
       event.preventDefault = ->
+        # Even though we're swapping out defaultPrevented() with our own implementation,
+        # we still need to call the original method to trigger the forwarding of up:click.
+        originalPreventDefault.call(event)
         u.getter(event, 'defaultPrevented', -> true)
 
     return event
@@ -365,18 +370,6 @@ up.event = do ->
     event.stopImmediatePropagation()
     event.preventDefault()
 
-  ###**
-  @function up.event.consumeAction
-  @internal
-  ###
-  consumeAction = (event) ->
-    # Halt the event chain to stop duplicate processing of this user interaction.
-    halt(event)
-    # Although we have consumed this action and halted the event chain,
-    # other components might still need to react. E.g. a popup needs to close when
-    # an outside link consumes the user click. So we emit another event for that.
-    return nobodyPrevents(event.target, 'up:action:consume', log: false)
-
   onReady = (callback) ->
     # Values are "loading", "interactive" and "completed".
     # https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
@@ -412,7 +405,6 @@ up.event = do ->
   whenEmitted: whenEmitted
   onEscape: onEscape
   halt: halt
-  consumeAction: consumeAction
   onReady: onReady
 
 up.on = up.event.on

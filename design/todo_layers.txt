@@ -1,4 +1,3 @@
-- I think we no longer need consume-action
 - Rails integration: test that up, up? etc. are available as helper methods
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
 - New attribute [up-emit]
