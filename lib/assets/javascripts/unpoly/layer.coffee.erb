@@ -39,6 +39,7 @@ up.layer = do ->
         targets: ['[up-content~=drawer]']
         backdrop: true
         position: 'left'
+        size: 'medium'
         openAnimation: (layer) ->
           switch layer.position
             when 'left' then 'move-from-left'
@@ -50,9 +51,11 @@ up.layer = do ->
       modal:
         targets: ['[up-content~=modal]']
         backdrop: true
+        size: 'medium'
       popup:
         targets: ['[up-content~=popup]']
         position: 'bottom'
+        size: 'medium'
         align: 'left'
         history: false
 
