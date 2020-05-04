@@ -47,6 +47,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that overlays may have sizes
   - Test that when a popup is open, clicking the opener will close that popup
   - Test that when a popup is open, clicking outside it will close that popup
   - Test that when a popup is open, clicking on ANOTHER popup opener will close the first popup and open the other (no additional "dead" click required)

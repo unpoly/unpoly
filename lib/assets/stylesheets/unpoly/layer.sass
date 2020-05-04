@@ -132,10 +132,10 @@ up-modal-box
   @extend %large-shadow
 
   up-modal[size=small] &
-    width: 400px
+    width: 350px
 
   up-modal[size=medium] &
-    width: 700px
+    width: 650px
 
   up-modal[size=large] &
     width: 1000px
@@ -167,6 +167,15 @@ up-drawer-box
   @extend %overlay-box
   @extend %large-shadow
   min-height: 100vh
+
+  up-drawer[size=small] &
+    width: 150px
+
+  up-drawer[size=medium] &
+    width: 340px
+
+  up-drawer[size=large] &
+    width: 600px
 
 up-drawer-dismiss
   @extend %overlay-dismiss
@@ -201,9 +210,19 @@ up-cover-dismiss
 up-popup
   @extend %overlay-box
   @extend %small-shadow
+  @extend %overlay-with-tether
 
   // The small popup box looks better with a tighter padding.
   padding: 15px
+
+  &[size=small]
+    width: 200px
+
+  &[size=medium]
+    width: 320px
+
+  &[size=large]
+    width: 550px
 
 up-popup-dismiss
   @extend %overlay-dismiss

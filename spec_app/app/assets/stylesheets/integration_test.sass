@@ -9,8 +9,7 @@ $block-spacing: 25px
   margin-bottom: $block-spacing
 
 body
-  margin: 0
-  background: image-url('grid.png') repeat
+  margin: 25px
 
   font-family: arial, sans-serif
 
@@ -26,9 +25,9 @@ a
   min-height: 3000px
 
 .spacer
-  background-color: transparentize(green, 0.5)
-  height: 150px
-  content: 'Free space'
+  // background-color: transparentize(green, 0.7)
+  height: 75px
+  // content: 'Free space'
 
 .fixed-top-bar,
 .fixed-bottom-bar
@@ -37,16 +36,23 @@ a
   top: 0
   left: 0
   right: 0
-  background-color: transparentize(blue, 0.5)
-  padding: 50px
+  background-color: transparentize(blue, 0.7)
+  padding: 25px
 
 .fixed-bottom-bar
   top: auto
   bottom: 0
 
 .example
-  margin: 25px
   +clear-after
+
+  &+.example
+    padding-top: 25px
+    margin-top: 25px
+    border-top: 1px solid #bbb
+
+  //padding: 25px
+  //background: image-url('grid.png') repeat
 
 .area
   +block-spacing
@@ -56,8 +62,8 @@ a
 .button
   display: inline-block
   cursor: pointer
-  height: 25px
-  line-height: 25px
+  height: 30px
+  line-height: 30px
   padding-left: 10px
   padding-right: 10px
   background-color: #37b
