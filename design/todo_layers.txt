@@ -1,10 +1,5 @@
 - Rails integration: test that up, up? etc. are available as helper methods
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
-- New attribute [up-emit]
-  - For Unpoly links and forms this is another guardEvent (userGuardEvent)
-  - For input elements this reacts on input / change
-  - For other elements this reacts on click
-  - do we have { props }, [up-props] with that?
 - Check all occurences of up.emit and layer.emit:
   - Do they have a { log } option?
   - Do present tense events still have long-form event log messages with gerund?
@@ -12,24 +7,10 @@
   - e. g. findValidateTarget
 - Try changes in demo.unpoly.com
 - Support { layer } values: 'descendant', 'child'
-- Modal sizes
-  - default: grow oder auto
-  - can be configured with up.config.overlay.size = "large"
-  - vielleicht nur 3 größen
-      "small",
-      "medium",
-      "large",
-      "auto"
-  - auto ist selten ein gutes default. hier überlegen, ob default-größe "medium" wäre
-  - wahrscheinlich wären die größen dann ja mode anders
-  - Bootstrap 4 / Arne: Modals haben auch eine minimalbreite, durch width: 100% + max-width
-
 - The backdrop will NOT be shared between modes once we do up-mode="lightbox"
   - Let's do different variables: --up-modal-backdrop and --up-drawer-backdrop,
     - or get rid of the variable entirely
-- Overlay links with [up-instant] only work once. Using the same link a second time immediately closes the overlay.
--
-
+- Consider promoting some experimental functions to stable
 - How are we going to document super-overloaded functions like up.emit?
   - The full signature is insane
     - up.emit([target], [eventName], [eventOrProps], [emitOptions]) ?
@@ -233,7 +214,12 @@ Accessibility
 Later?
 ------
 
-- Consider promoting some experimental functions to stable
+
+- New attribute [up-emit]
+  - For Unpoly links and forms this is another guardEvent (userGuardEvent)
+  - For input elements this reacts on input / change
+  - For other elements this reacts on click
+  - do we have { props }, [up-props] with that?
 - Validate Requests prevents Submit when clicking out of a focused field into submit button
   - https://makandra.slack.com/archives/C02KGPZDE/p1588250760006500
   - https://jsbin.com/fofefokafu/edit?html,js,output
