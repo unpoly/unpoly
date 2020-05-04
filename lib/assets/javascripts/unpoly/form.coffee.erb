@@ -198,6 +198,8 @@ up.form = do ->
     If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
   @param {string} [options.failLayer='auto']
     The name of the layer that ought to be updated if the server sends a non-200 status code.
+  @param {Object|FormData|string|Array|up.Params} [options.params=up.Params.fromForm(form)]
+    Override the parameters that will be send with the request.  
   @return {Promise}
     A promise for the successful form submission.
   @stable
@@ -222,7 +224,7 @@ up.form = do ->
     options.origin ?= form
     options.layer ?= form.getAttribute('up-layer')
     options.failLayer ?= form.getAttribute('up-fail-layer')
-    options.params = up.Params.fromForm(form)
+    options.params ?= up.Params.fromForm(form)
     options = u.merge(options, up.motion.animateOptions(options, form))
 
     if options.validate
