@@ -9,7 +9,6 @@ Unpoly can print debugging information to the developer console, e.g.:
 - Which [compilers](/up.syntax) are applied to which elements
 
 You can activate logging by calling [`up.log.enable()`](/up.log.enable).
-The output can be configured using the [`up.log.config`](/up.log.config) property.
 
 @module up.log
 ###
@@ -29,20 +28,14 @@ up.log = do ->
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @param {string} [options.prefix='[UP] ']
-    A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
   @stable
   ###
   config = new up.Config ->
-    prefix: '[UP] '
     enabled: sessionStore.get('enabled')
     toast: true
 
   reset = ->
     config.reset()
-
-  prefix = (message) ->
-    "#{config.prefix}#{message}"
 
 #  ###**
 #  Prints a debugging message to the browser console.
@@ -64,25 +57,34 @@ up.log = do ->
   @param {Array} ...args
   @internal
   ###
-  printToStandard = (message, args...) ->
-    if config.enabled && message
-      console.log(prefix(message), args...)
+  printToStandard = (args...) ->
+    if config.enabled
+      printToStream('log', args...)
 
   ###**
   @function up.warn
   @internal
   ###
-  printToWarn = (message, args...) ->
-    if message
-      console.warn(prefix(message), args...)
+  printToWarn = (args...) ->
+    printToStream('warn', args...)
 
   ###**
   @function up.log.error
   @internal
   ###
-  printToError = (message, args...) ->
+  printToError = (args...) ->
+    printToStream('error', args...)
+
+  printToStream = (stream, trace, message, args...) ->
     if message
-      console.error(prefix(message), args...)
+      if up.browser.canFormatLog()
+        args.unshift('') # Reset
+        args.unshift('color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block')
+        message = "%c#{trace}%c #{message}"
+      else
+        message = "[#{trace}] #{message}"
+
+      console[stream](message, args...)
 
   printBanner = ->
     # The ASCII art looks broken in code since we need to escape backslashes
@@ -158,7 +160,7 @@ up.log = do ->
       messageArgs = args
       toastOptions = {}
 
-    printToError(messageArgs...)
+    printToError('up.fail()', messageArgs...)
 
     if config.toast
       up.event.onReady(-> up.toast.open(messageArgs, toastOptions))

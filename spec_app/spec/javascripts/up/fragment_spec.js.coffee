@@ -1301,7 +1301,8 @@ describe 'up.fragment', ->
             expect(up.fragment.source('.target')).toMatchURL('/path')
 
         it 'keeps the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
-          fixture('.target', 'up-source': '/previous-source')
+          target = fixture('.target')
+          up.fragment.setSource(target, '/previous-source')
           up.change('.target', url: '/path', method: 'post')
           next =>
             @respondWithSelector('.target')
@@ -1327,7 +1328,8 @@ describe 'up.fragment', ->
               expect(up.fragment.source('.target')).toMatchURL('/given-path')
 
           it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
-            fixture('.target', 'up-source': '/previous-source')
+            target = fixture('.target')
+            up.fragment.setSource(target, '/previous-source')
             up.replace('.target', '/path', method: 'post', source: '/given-path', failTarget: '.target')
             next =>
               @respondWithSelector('target', status: 500)
@@ -2758,7 +2760,8 @@ describe 'up.fragment', ->
     describe 'up.reload', ->
 
       it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
-        $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
+        $container = $fixture('.container .element').find('.element').text('old text')
+        up.fragment.setSource($container[0], "/source")
 
         next =>
           up.reload('.element')
@@ -2777,7 +2780,8 @@ describe 'up.fragment', ->
       describeFallback 'canPushState', ->
 
         it 'makes a page load from the closest known source URL', asyncSpec (next) ->
-          $fixture('.container[up-source="/source"] .element').find('.element').text('old text')
+          $container = $fixture('.container .element').find('.element').text('old text')
+          up.fragment.setSource($container[0], "/source")
           spyOn(up.browser, 'loadPage')
           up.reload('.element')
 

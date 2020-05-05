@@ -70,13 +70,15 @@ class up.Change.CloseLayer extends up.Change.Removal
   emitCloseEvent: ->
     return @layer.emit(
       @buildEvent(@closeEventType),
-      callback: @layer.callback(@closeCallbackName)
+      callback: @layer.callback(@closeCallbackName),
+      log: "Will close #{@layer}"
     )
 
   emitClosingEvent: ->
     return @layer.emit(
       @buildEvent(@closingEventType),
-      callback: @layer.callback(@closingCallbackName)
+      callback: @layer.callback(@closingCallbackName),
+      log: "Closing #{@layer}"
     )
 
   emitClosedEvent: (formerParent) ->
@@ -92,7 +94,8 @@ class up.Change.CloseLayer extends up.Change.Removal
       # to be the front layer.
       currentLayer: formerParent,
       callback: @layer.callback(@closedCallbackName),
-      ensureBubbles: true
+      ensureBubbles: true,
+      log: "Closed #{@layer}"
     )
 
   buildEvent: (name) ->

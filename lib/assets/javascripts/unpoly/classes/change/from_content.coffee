@@ -79,7 +79,6 @@ class up.Change.FromContent extends up.Change
 
     return @seekPlan
       attempt: (plan) -> plan.execute()
-      debug: true
       noneApplicable: => @postflightTargetNotApplicable()
 
   buildResponseDoc: ->
@@ -125,17 +124,12 @@ class up.Change.FromContent extends up.Change
         return opts.attempt(plan)
       catch error
         if up.error.notApplicable.is(error)
-          message = error.message
-          if opts.debug
-            up.puts(message)
-          else
-            unprintedMessages.push(message)
+          unprintedMessages.push(error.message)
         else
           # Re-throw any unexpected type of error
           throw error
 
-    # If we're about to explode with a fatal error we print everything
-    # we have tried so far, regardless of `opts.debug`.
-    unprintedMessages.forEach(up.puts)
+    # If we're about to explode with a fatal error we print everything that we tried.
+    unprintedMessages.forEach (message) -> up.puts('up.change()', message)
 
     return opts.noneApplicable?()

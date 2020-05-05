@@ -266,7 +266,7 @@ up.proxy = do ->
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
     if (request.cache != false) && (cachedRequest = cache.get(request))
-      up.puts 'Re-using cached response for %s %s', request.method, request.url
+      up.puts('up.request()', 'Re-using cached response for %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
       # This might affect whether we're going to emit an up:proxy:slow event further

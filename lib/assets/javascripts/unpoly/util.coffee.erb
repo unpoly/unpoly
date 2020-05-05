@@ -74,16 +74,21 @@ up.util = do ->
     Whether to strip a trailing slash from the pathname
   @internal
   ###
-  normalizeURL = (urlOrAnchor, options) ->
+  normalizeURL = (urlOrAnchor, options = {}) ->
     parts = parseURL(urlOrAnchor)
-    normalized = parts.protocol + "//" + parts.hostname
-    normalized += ":#{parts.port}" unless isStandardPort(parts.protocol, parts.port)
+    normalized = ''
+    if options.host != false
+      normalized += parts.protocol + "//" + parts.hostname
+      normalized += ":#{parts.port}" unless isStandardPort(parts.protocol, parts.port)
     pathname = parts.pathname
     pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
     normalized += pathname
-    normalized += parts.search unless options?.search == false
-    normalized += parts.hash if options?.hash == true
+    normalized += parts.search unless options.search == false
+    normalized += parts.hash if options.hash == true
     normalized
+
+  urlWithoutHost = (url) ->
+    normalizeURL(url, host: false)
 
   isCrossDomain = (targetURL) ->
     currentURL = parseURL(location.href)
@@ -1704,7 +1709,7 @@ up.util = do ->
       string += closer
     string
 
-  SPRINTF_PLACEHOLDERS = /\%[odisf]/g
+  SPRINTF_PLACEHOLDERS = /\%[oOdisf]/g
 
   ###**
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
@@ -1739,6 +1744,7 @@ up.util = do ->
     up.legacy.warn('up.util.parseUrl() has been renamed to up.util.parseURL()')
     parseURL(args...)
   normalizeURL: normalizeURL
+  urlWithoutHost: urlWithoutHost
   normalizeMethod: normalizeMethod
   methodAllowsPayload: methodAllowsPayload
 #  isGoodSelector: isGoodSelector

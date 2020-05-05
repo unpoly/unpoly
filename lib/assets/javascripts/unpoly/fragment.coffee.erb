@@ -25,8 +25,7 @@ up.fragment = do ->
     get_targets: -> up.layer.config.all
 
   setSource = (element, sourceURL) ->
-    if sourceURL
-      element.setAttribute("up-source", u.normalizeURL(sourceURL))
+    element.upSource = sourceURL
 
   ###**
   Returns the URL the given element was retrieved from.
@@ -40,8 +39,11 @@ up.fragment = do ->
   source = (args...) ->
     options = parseTargetAndOptions(args)
     element = first(options.target, options)
-    if sourceElement = e.closest(element, '[up-source]')
-      sourceElement.getAttribute("up-source")
+
+    if url = element.upSource
+      url
+    else if parent = element.parentElement
+      source(parent)
 
   ###*
   @function up.change

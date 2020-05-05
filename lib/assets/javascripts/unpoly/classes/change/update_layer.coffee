@@ -38,7 +38,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @findOld()
     @findNew()
 
-    up.puts("Updating \"#{@target}\" in #{@layer}")
+    up.puts('up.change()', "Updating \"#{@target}\" in #{@layer}")
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
@@ -72,8 +72,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return promise
 
   executeStep: (step) =>
-    up.puts('Swapping fragment \"%s\"', step.selector)
-
     # When the server responds with an error, or when the request method is not
     # reloadable (not GET), we keep the same source as before.
     if step.source == 'keep'

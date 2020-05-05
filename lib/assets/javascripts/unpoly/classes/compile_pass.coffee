@@ -18,7 +18,7 @@ class up.CompilePass
     @layer = options.layer || up.layer.get(@root)
 
   compile: ->
-    up.puts "Compiling fragment %o", @root
+    up.puts 'up.hello()', "Compiling fragment %o", @root
     # If we're compiling a fragment in a background layer, we want
     # up.layer.current to resolve to that background layer, not the front layer.
     @layer.asCurrent =>
@@ -30,7 +30,7 @@ class up.CompilePass
     return unless matches.length
 
     unless compiler.isDefault
-      up.log.puts 'Compiling "%s" on %d element(s)', compiler.selector, matches.length
+      up.puts 'up.hello()', 'Compiling "%s" on %d element(s)', compiler.selector, matches.length
 
     if compiler.batch
       @compileBatch(compiler, matches)

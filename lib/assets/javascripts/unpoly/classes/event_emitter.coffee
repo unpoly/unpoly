@@ -63,12 +63,12 @@ class up.EventEmitter extends up.Record
     else
       messageArgs = []
 
-    name = @event.type
+    type = @event.type
 
     if u.isString(message)
-      up.puts("#{message} (%s (%o))", messageArgs..., name, @event)
-    else if message == true
-      up.puts('Event %s (%o)', name, @event)
+      up.puts(type, message, messageArgs...)
+    else if message != false
+      up.puts(type, "Event #{type}")
 
   @fromEmitArgs: (args, defaults = {}) ->
     options = u.extractOptions(args)

@@ -167,7 +167,7 @@ up.motion = do ->
     willRun = willAnimate(element, animation, options)
 
     if willRun
-      # up.puts 'Animating %o with animation %o', element, animation
+      # up.puts 'up.animate()', Animating %o with animation %o', element, animation
       runNow = -> animationFn(element, options)
       motionController.startFunction(element, runNow, options)
     else
@@ -352,7 +352,7 @@ up.motion = do ->
       if motionController.isActive(oldElement) && options.trackMotion is false
         return transitionFn(oldElement, newElement, options)
 
-      up.puts 'Morphing %o to %o with transition %o', oldElement, newElement, transitionObject
+      up.puts('up.morph()', 'Morphing %o to %o with transition %O', oldElement, newElement, transitionObject)
 
       viewport = up.viewport.closest(oldElement)
       scrollTopBeforeReveal = viewport.scrollTop

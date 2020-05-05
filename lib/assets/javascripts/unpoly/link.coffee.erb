@@ -384,9 +384,7 @@ up.link = do ->
       originalMethod = newEvent[key]
 
       newEvent[key] = ->
-        console.debug("on up:click: called %s()", key)
         originalEvent[key]()
-        console.debug("on %s: called %s()", originalEvent.type, key)
         return originalMethod.call(newEvent)
 
     up.emit(originalEvent.target, newEvent)

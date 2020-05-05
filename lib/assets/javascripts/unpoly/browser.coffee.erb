@@ -142,6 +142,9 @@ up.browser = do ->
   canDOMParser = u.memoize ->
     !!window.DOMParser
 
+  canFormatLog = u.memoize ->
+    !isIE11()
+
   ###**
   Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
 
@@ -229,6 +232,7 @@ up.browser = do ->
     canInspectFormData: canInspectFormData
     canCustomElements: canCustomElements
     canControlScrollRestoration: canControlScrollRestoration
+    canFormatLog: canFormatLog
     whenConfirmed: whenConfirmed
     isSupported: isSupported
     popCookie: popCookie

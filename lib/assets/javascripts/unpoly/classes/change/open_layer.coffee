@@ -39,7 +39,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @currentLayer.isOpen()
       throw @notApplicable('Parent layer was closed')
 
-    up.puts("Opening element \"#{@target}\" in new layer")
+    up.puts('up.change()', "Will open element \"#{@target}\" in new layer")
 
     @layer = up.layer.build(@options)
 
@@ -121,18 +121,21 @@ class up.Change.OpenLayer extends up.Change.Addition
     # There is no @layer.onOpen() handler to accompany the DOM event.
     return up.emit(
       @buildEvent('up:layer:open'),
-      currentLayer: @layer.parent # sets up.layer.current
+      currentLayer: @layer.parent, # sets up.layer.current
+      log: "Will open new #{@layer}"
     )
 
   emitOpeningEvent: ->
     return @layer.emit(
       @buildEvent('up:layer:opening'),
       callback: @layer.callback('onOpening')
+      log: "Opening new #{@layer}"
     )
 
   emitOpenedEvent: ->
     return @layer.emit(
       @buildEvent('up:layer:opened'),
-      callback: @layer.callback('onOpened')
+      callback: @layer.callback('onOpened'),
+      log: "Opened new #{@layer}"
     )
 

@@ -267,7 +267,7 @@ class up.Request extends up.Record
       @deferred.reject(up.error.aborted(message))
 
   respondWith: (response) ->
-    log = ['Server responded with HTTP %d (%d characters)', response.status, response.text.length]
+    log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, @method, @url, response.text.length]
     @emit('up:proxy:loaded', { response, log })
 
     if response.ok

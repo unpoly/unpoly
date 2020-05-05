@@ -536,7 +536,7 @@ up.viewport = do ->
     viewports = if options.around then getAround(options.around, options) else getAll(options)
     scrollTopsForURL = options.scrollTops || layer.lastScrollTops.get(url) || {}
 
-    up.puts 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL
+    up.puts 'up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL
     allScrollPromises = u.map viewports, (viewport) ->
       key = scrollTopKey(viewport)
       scrollTop = scrollTopsForURL[key] || 0

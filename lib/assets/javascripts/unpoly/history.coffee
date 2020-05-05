@@ -91,11 +91,13 @@ up.history = do ->
   @param {string} url
   @internal
   ###
-  replace = (url) ->
+  replace = (url, options = {}) ->
+    doLog = options.log ? true
+
     if manipulate('replaceState', url)
-      emit('up:history:replaced', url: url, log: true)
+      emit('up:history:replaced', url: url, log: doLog && "Replaced state for #{u.urlWithoutHost url}")
     else
-      emit('up:history:muted', url: url, log: "Did not replace state with #{url} (history is unavailable)")
+      emit('up:history:muted', url: url, log: doLog && "Did not replace state with #{u.urlWithoutHost url} (history is unavailable)")
 
   ###**
   Adds a new history entry and updates the browser's
@@ -120,9 +122,10 @@ up.history = do ->
     url = normalizeURL(url)
     if (options.force || !isCurrentLocation(url))
       if manipulate('pushState', url)
-        up.emit('up:history:pushed', url: url, log: "Advanced to location #{url}")
+        up.emit('up:history:pushed', url: url, log: "Advanced to location #{u.urlWithoutHost url}")
       else
-        up.emit('up:history:muted', url: url, log: "Did not advance to #{url} (history is unavailable)")
+        up.emit('up:history:muted', url: url, log: "Did not advance to #{u.urlWithoutHost url} (history is unavailable)")
+
 
   ###**
   This event is [emitted](/up.emit) after a new history entry has been added.
@@ -165,7 +168,7 @@ up.history = do ->
         url = currentLocation()
         emit('up:history:restored', url: url, log: "Restored location #{url}")
     else
-      up.puts 'Ignoring a state not pushed by Unpoly (%o)', state
+      up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
 
   pop = (event) ->
     observeNewURL(currentLocation())
@@ -194,7 +197,7 @@ up.history = do ->
         window.history.scrollRestoration = 'manual' if up.browser.canControlScrollRestoration()
         window.addEventListener('popstate', pop)
         # Replace the vanilla state of the initial page load with an Unpoly-enabled state
-        replace(currentLocation(), force: true)
+        replace(currentLocation(), log: false)
 
       if jasmine?
         # Can't delay this in tests.

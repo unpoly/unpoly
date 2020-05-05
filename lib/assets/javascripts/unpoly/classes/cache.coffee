@@ -54,7 +54,7 @@ class up.Cache
   log: (args...) =>
     if @config.logPrefix
       args[0] = "[#{@config.logPrefix}] #{args[0]}"
-      up.puts(args...)
+      up.puts('up.Cache', args...)
 
   keys: =>
     @store.keys()

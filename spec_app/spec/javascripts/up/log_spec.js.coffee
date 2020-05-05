@@ -11,12 +11,12 @@ describe 'up.log', ->
         spyOn(console, 'log')
 
         up.log.disable()
-        up.log.puts('message')
+        up.log.puts('trace', 'message')
         expect(console.log).not.toHaveBeenCalled()
 
         up.log.enable()
-        up.log.puts('message')
-        expect(console.log).toHaveBeenCalledWith('[UP] message')
+        up.log.puts('trace', 'message')
+        expect(console.log.calls.mostRecent().args[0]).toMatch(/message/)
 
 #    describe 'up.log.debug', ->
 #
@@ -37,12 +37,11 @@ describe 'up.log', ->
         spyOn(console, 'error')
 
         up.log.disable()
-        up.log.error('message1')
-        expect(console.error).toHaveBeenCalledWith('[UP] message1')
+        up.log.error('trace', 'message1')
+        expect(console.error.calls.mostRecent().args[0]).toMatch(/message1/)
 
         up.log.enable()
-        up.log.error('message2')
-        expect(console.error.calls.allArgs()).toEqual [
-          ['[UP] message1'],
-          ['[UP] message2']
-        ]
+        up.log.error('trace', 'message2')
+        expect(console.error.calls.argsFor(0)).toMatch(/message1/)
+        expect(console.error.calls.argsFor(1)).toMatch(/message2/)
+

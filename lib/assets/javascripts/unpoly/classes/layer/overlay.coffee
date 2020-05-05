@@ -181,7 +181,6 @@ class up.Layer.Overlay extends up.Layer
   registerClickCloser: (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
     @on 'up:click', "[#{attribute}]", (event) ->
-      console.debug("up:click [#{attribute}]")
       origin = event.target
       value = e.jsonAttr(origin, attribute)
       closeOptions = { origin }
