@@ -12,7 +12,7 @@ GIT
 PATH
   remote: ..
   specs:
-    unpoly-rails (0.61.0)
+    unpoly-rails (0.70.0)
       memoized
       rails (>= 4.2)
 
@@ -114,7 +114,7 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
-    memoized (1.0.1)
+    memoized (1.0.2)
     mime-types (2.99)
     mini_portile2 (2.4.0)
     minitest (5.11.3)
@@ -232,4 +232,4 @@ DEPENDENCIES
   web-console (~> 2.0)
 
 BUNDLED WITH
-   1.16.4
+   1.17.3
