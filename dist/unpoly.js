@@ -2771,11 +2771,11 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
         element.className // returns 'klass'
     
     @function up.element.affix
-    @params {Element} parent
+    @param {Element} parent
       The parent to which to attach the created element.
-    @params {string} selector
+    @param {string} selector
       The CSS selector from which to create an element.
-    @params {Object} attrs
+    @param {Object} attrs
       An object of attributes to set on the created element.
     @param {Object} attrs.text
       The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
@@ -6960,7 +6960,7 @@ There are some advantages to using `up.on()`:
     for [event delegation](https://davidwalsh.name/event-delegate):
     
         var form = document.querySelector('form')
-        document.addEventListener(form, 'click', 'a', function(event, link) {
+        up.on(form, 'click', 'a', function(event, link) {
           console.log("Click on a link %o within %o", link, form)
         })
     
@@ -13051,6 +13051,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
     @param {string} [options.failLayer='auto']
       The name of the layer that ought to be updated if the server sends a non-200 status code.
+    @param {Object|FormData|string|Array|up.Params} [options.params=up.Params.fromForm(form)]
+      Override the parameters that will be send with the request.  
     @return {Promise}
       A promise for the successful form submission.
     @stable
@@ -13100,7 +13102,9 @@ open dialogs with sub-forms, etc. all without losing form state.
       if (options.failLayer == null) {
         options.failLayer = form.getAttribute('up-fail-layer');
       }
-      options.params = up.Params.fromForm(form);
+      if (options.params == null) {
+        options.params = up.Params.fromForm(form);
+      }
       options = u.merge(options, up.motion.animateOptions(options, form));
       if (options.validate) {
         options.headers || (options.headers = {});
