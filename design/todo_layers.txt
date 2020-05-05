@@ -3,9 +3,6 @@
 - All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
   - e. g. findValidateTarget
 - Try changes in demo.unpoly.com
-- The backdrop will NOT be shared between modes once we do up-mode="lightbox"
-  - Let's do different variables: --up-modal-backdrop and --up-drawer-backdrop,
-    - or get rid of the variable entirely
 - Consider promoting some experimental functions to stable
 - How are we going to document super-overloaded functions like up.emit?
   - The full signature is insane
