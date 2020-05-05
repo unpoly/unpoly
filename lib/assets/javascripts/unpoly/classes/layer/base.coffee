@@ -36,21 +36,6 @@ class up.Layer extends up.Record
   teardownHandlers: ->
     # no-op for overriding
 
-  isCurrent: ->
-    @stack.current == this
-
-  isFront: ->
-    @stack.isFront(this)
-
-  isRoot: ->
-    @stack.isRoot(this)
-
-  isOverlay: ->
-    @stack.isOverlay(this)
-
-  isOpen: ->
-    @stack.isOpen(this)
-
   defaultTargets: ->
     up.layer.defaultTargets(@mode)
 
@@ -76,8 +61,35 @@ class up.Layer extends up.Record
   firstElement: (selector) ->
     @allElements(selector)[0]
 
+  isCurrent: ->
+    @stack.isCurrent(this)
+
+  isFront: ->
+    @stack.isFront(this)
+
+  isRoot: ->
+    @stack.isRoot(this)
+
+  isOverlay: ->
+    @stack.isOverlay(this)
+
+  isOpen: ->
+    @stack.isOpen(this)
+
   @getter 'parent', ->
     @stack.parentOf(this)
+
+  @getter 'child', ->
+    @stack.childOf(this)
+
+  @getter 'ancestors', ->
+    @stack.ancestorsOf(this)
+
+  @getter 'descendants', ->
+    @stack.descendantsOf(this)
+
+  @getter 'index', ->
+    @stack.indexOf(this)
 
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.

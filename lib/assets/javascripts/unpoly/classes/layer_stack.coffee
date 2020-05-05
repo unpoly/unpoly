@@ -8,33 +8,28 @@ class up.LayerStack extends up.Class
 
   initialize: ->
     @currentOverrides = []
-    @layers = []
-    @layers.push(@buildRoot())
+
+    # We must initialize @all before building the root layer, since building a layer
+    # will attempt to push it into @all, which would be undefined.
+    @all = []
+    @all.push(@buildRoot())
 
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
 
-  isRoot: (layer = @current) ->
-    @layers[0] == layer
-
-  isOverlay: (layer) ->
-    !@isRoot(layer)
-
-  isFront: (layer = @current) ->
-    @front == layer
-
   at: (i) ->
-    @layers[i]
+    @all[i]
 
   remove: (layer) ->
-    u.remove(@layers, layer)
+    u.remove(@all, layer)
 
   push: (layer) ->
-    @layers.push(layer)
+    @all.push(layer)
 
   peel: (layer, options) ->
-    # We will dismiss descendants closer to the front first.
-    descendants = u.reverse(@descendantsOf(layer))
+    # We will dismiss descendants closer to the front first to prevent
+    # recursive calls of peel().
+    descendants = u.reverse(layer.descendants)
 
     # Callers expect the effects of peel() to manipulate the layer stack sync.
     # Because of this we will dismiss alle descendants sync rather than waiting
@@ -52,44 +47,56 @@ class up.LayerStack extends up.Class
     @initialize()
 
   indexOf: (layer) ->
-    @layers.indexOf(layer)
+    @all.indexOf(layer)
 
   isOpen: (layer) ->
-    @indexOf(layer) >= 0
+    layer.index >= 0
 
   parentOf: (layer) ->
-    layerIndex = @indexOf(layer)
-    @layers[layerIndex - 1]
+    @all[layer.index - 1]
 
-  selfAndAncestorsOf: (layer) ->
-    layerIndex = @indexOf(layer)
-    @layers.slice(0, layerIndex + 1)
+  childOf: (layer) ->
+    @all[layer.index + 1]
 
   ancestorsOf: (layer) ->
-    layerIndex = @indexOf(layer)
-    u.reverse(@layers.slice(0, layerIndex))
+    # Return closest ancestors first
+    u.reverse(@all.slice(0, layer.index))
+
+  selfAndAncestorsOf: (layer) ->
+    # Order for layer.closest()
+    [layer, layer.ancestors...]
 
   descendantsOf: (layer) ->
-    layerIndex = @indexOf(layer)
-    @layers.slice(layerIndex + 1)
-
-  allReversed: ->
-    u.reverse(@layers)
+    @all.slice(layer.index + 1)
 
   @getter 'root', ->
-    @layers[0]
+    @all[0]
+
+  isRoot: (layer) ->
+    @all[0] == layer
 
   @getter 'overlays', ->
-    @layers.slice(1)
+    @root.descendants
+
+  isOverlay: (layer) ->
+    !@isRoot(layer)
 
   @getter 'current', ->
+    # Event listeners and compilers will push into @currentOverrides
+    # to temporarily set up.layer.current to the layer they operate in.
     u.last(@currentOverrides) || @front
 
-  @getter 'front', ->
-    u.last(@layers)
+  isCurrent: (layer) ->
+    @current == layer
 
-  @getter 'parent', ->
-    @parentOf(@current)
+  @getter 'front', ->
+    u.last(@all)
+
+  isFront: (layer) ->
+    @front == layer
+
+  @getter 'allReversed', ->
+    u.reverse(@all)
 
   get: (args...) ->
     new up.LayerLookup(this, args...).first()

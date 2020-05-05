@@ -192,7 +192,7 @@ up.layer = do ->
       up.event.halt(event)
 
   up.on 'up:fragment:destroyed', (event) ->
-    for layer in stack.layers
+    for layer in stack.all
       layer.repair()
 
   up.on 'up:framework:boot', ->
@@ -201,41 +201,51 @@ up.layer = do ->
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  u.literal
-    get: (args...) -> stack.get(args...)
-    list: (args...) -> stack.list(args...)
-    allElements: allElements
-    firstElement: firstElement
-    config: config
-    defaultTargets: defaultTargets
-    open: open
-    build: build
-    normalizeOptions: normalizeOptions
-    accept: (args...) -> stack.current.accept(args...)
-    dismiss: (args...) -> stack.current.dismiss(args...)
-    sync: (args...) -> stack.current.sync(args...)
-    openCallbackAttr: openCallbackAttr
-    closeCallbackAttr: closeCallbackAttr
-    isRoot: -> stack.isRoot()
-    isOverlay: -> stack.isOverlay()
-    push: (args...) -> stack.push(args...)
-    isOverlayMode: isOverlayMode
-    on: (args...) -> stack.current.on(args...)
-    off: (args...) -> stack.current.off(args...)
-    emit: (args...) -> stack.current.emit(args...)
-    get_root: -> stack.root
-    get_all: -> stack.layers
-    get_allReversed: -> stack.allReversed()
-    get_current: -> stack.current
-    get_front: -> stack.front
-    get_parent: -> stack.parent
-    parentOf: (args...) -> stack.parentOf(args...)
-    get_location: -> stack.current.location
-    get_history: -> stack.current.history
-    get_title: -> stack.current.title
-    get_mode: -> stack.current.mode
-    get_position: -> stack.current.position
-    get_element: -> stack.current.element
-    get_context: -> stack.current.context
-    contains: (args...) -> stack.current.contains(args...)
-    anySelector: anySelector
+  api = {
+    allElements
+    firstElement
+    config
+    defaultTargets
+    open
+    build
+    normalizeOptions
+    openCallbackAttr
+    closeCallbackAttr
+    anySelector
+  }
+
+  u.delegate(api, [
+    'get'
+    'list'
+    'push'
+    'root'
+    'all'
+    'overlays'
+    'allReversed'
+    'current'
+    'front'
+  ], -> stack)
+
+  u.delegate(api, [
+    'accept'
+    'dismiss'
+    'sync'
+    'isRoot'
+    'isOverlay'
+    'on'
+    'off'
+    'emit'
+    'parent'
+    'child'
+    'ancestor'
+    'descendants'
+    'history'
+    'location'
+    'title'
+    'mode'
+    'context'
+    'element'
+    'contains'
+  ], -> stack.current)
+
+  return api

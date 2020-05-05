@@ -20,7 +20,7 @@ class up.LayerLookup
 
   ofElement: (element) ->
     element = e.get(element)
-    u.find @stack.allReversed(), (layer) -> layer.contains(element)
+    u.find @stack.allReversed, (layer) -> layer.contains(element)
 
   all: ->
     if @value instanceof up.Layer
@@ -33,13 +33,19 @@ class up.LayerLookup
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
-        u.uniq [@currentLayer, @stack.allReversed()...]
+        u.uniq [@currentLayer, @stack.allReversed...]
       when 'current'
         [@currentLayer]
       when 'closest'
         @stack.selfAndAncestorsOf(@currentLayer)
       when 'parent'
-        u.compact [@stack.parentOf(@currentLayer)]
+        u.compact [@currentLayer.parent]
+      when 'ancestor'
+        @currentLayer.ancestors
+      when 'child'
+        u.compact [@currentLayer.child]
+      when 'descendant'
+        @currentLayer.descendants
       when 'new'
         ['new'] # pass-through
       when 'root'
@@ -48,8 +54,6 @@ class up.LayerLookup
         [@stack.front]
       when 'origin'
         [@originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
-      when 'ancestor'
-        @stack.ancestorsOf(@currentLayer)
       else
         up.fail("Unknown { layer } option: %o", @value)
 
