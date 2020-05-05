@@ -1,24 +1,36 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Virtual elements shared by multiple overlay modes
+// Constants
 ///////////////////////////////////////////////////////////////////////////////
 
-$overlay-z-index: 999
+// We would prefer having only a single z-index for all overlay modes,
+// possibly controlled by a single, shared CSS variable.
+// However, there is an issue when a layer has a fixed navigation bar:
+//
+// - If the bar's z-index is lower than the one from Unpoly's layers,
+//   popups from the underlying page will overlap the bar
+// - If the bar's z-index is higher than the one from Unpoly's layers,
+//   a drawer or modal will no longer overlap the fixed bar
+//
+// Hence we have two z-indexes. A fixed navigation bar needs to have a z-index
+// between those two. The default z-index for a fixed Bootstrap 4 navigation bar
+// (.navbar.fixed-top) is 1030.
+$overlay-with-tether-z-index: 1000
+$overlay-with-viewport-z-index: 2000
+
+// Currently all overlay modes with a viewport have the same backdrop.
+// When we do a lightbox mode, we will need a darker backdrop for that one mode.
+// Hence we cannot share it across all modes using a CSS variable.
 $overlay-backdrop: rgba(90, 90, 90, 0.4)
-$modal-margin-x: 15px
-$modal-margin-y: 25px
 
-html
-  // The z-indexes of all overlays depenend on a CSS custom property on the root element.
-  // This way users can change the height of all Unpoly overlays with a single CSS override.
-  --up-overlay-z-index: $overlay-z-index
-  --up-overlay-backdrop: $overlay-backdrop
+// If multiple modals are nested inside each other, the padding is
+// multiplied by the nesting depth.
+$modal-viewport-padding-x: 15px
+$modal-viewport-padding-y: 25px
 
-  --up-modal-margin-x: $modal-margin-x
-  --up-modal-margin-y: $modal-margin-y
 
-%overlay-z-index
-  z-index: $overlay-z-index // Fallback for IE11
-  z-index: var(--up-overlay-z-index)
+///////////////////////////////////////////////////////////////////////////////
+// Virtual %elements shared by multiple overlay modes
+///////////////////////////////////////////////////////////////////////////////
 
 %maximize
   top: 0
@@ -36,18 +48,17 @@ html
   @extend %maximize
   // Create a stacking context for child elements by giving a position and z-index.
   // This way the z-indexes of our child elements don't need to be defined.
-  @extend %overlay-z-index
+  z-index: $overlay-with-viewport-z-index
   position: fixed
 
 %overlay-with-tether
-  @extend %overlay-z-index
+  z-index: $overlay-with-tether-z-index
   position: absolute
 
 %overlay-backdrop
   @extend %maximize
   position: absolute
-  background: $overlay-backdrop // Fallback for IE11
-  background: var(--up-overlay-backdrop)
+  background: $overlay-backdrop
 
 %overlay-viewport
   @extend %maximize
@@ -93,8 +104,9 @@ html
 [up-dismiss], [up-accept]
   cursor: pointer
 
+
 ///////////////////////////////////////////////////////////////////////////////
-// Modals are a centered window with its own scrollbar, growing with its content
+// Modals are a centered window with its own scrollbar
 ///////////////////////////////////////////////////////////////////////////////
 up-modal
   @extend %overlay-with-viewport
@@ -103,8 +115,7 @@ up-modal-backdrop
   @extend %overlay-backdrop
 
 =modal-viewport-padding($factor)
-  padding: ($modal-margin-y * $factor) ($modal-margin-x * $factor)
-  padding: calc(var(--up-modal-margin-y) * #{$factor}) calc(var(--up-modal-margin-x) * #{$factor})
+  padding: ($modal-viewport-padding-y * $factor) ($modal-viewport-padding-x * $factor)
 
 up-modal-viewport
   @extend %overlay-viewport
