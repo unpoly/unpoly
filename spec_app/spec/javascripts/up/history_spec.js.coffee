@@ -300,7 +300,7 @@ describe 'up.history', ->
 
             safeHistory.back()
 
-          next.after 100, =>
+          next.after 150, =>
             respond()
 
           next =>
@@ -313,7 +313,7 @@ describe 'up.history', ->
 
             safeHistory.back()
 
-          next.after 100, =>
+          next.after 150, =>
             respond()
 
           next =>
@@ -327,7 +327,7 @@ describe 'up.history', ->
 
             safeHistory.forward()
 
-          next.after 100, =>
+          next.after 150, =>
             respond()
 
           next =>
@@ -342,7 +342,7 @@ describe 'up.history', ->
 
             safeHistory.forward()
 
-          next.after 100, =>
+          next.after 150, =>
             respond() # we need to respond since we've never requested /baz with the popTarget
 
           next =>
