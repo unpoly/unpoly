@@ -14,6 +14,10 @@
   - We could do it with separate @function blocks
     - I think there's already some logic for multiple guide elements with the same symbol
     - How would this look in the guide nav? At least we would need to de-dup
+    - => Do we copy-paste the GIANT docs for up.emit()?
+  - Or we do it like this:
+    - up.emit([target], [eventType], [eventProps]) ?
+
 - Are there still cases for up.toast()?
 - When we go back from a non-Unpoly page to an Unpoly page, scroll positions are not restored
   - Test case: https://glitch.com/edit/#!/gaudy-nettle-ash?path=index.html%3A32%3A46
