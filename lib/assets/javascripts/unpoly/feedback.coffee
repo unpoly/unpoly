@@ -9,34 +9,37 @@ provide instant feedback to user interactions. This improves the perceived speed
 
 \#\#\# Example
 
-Let's say we have an navigation bar with two links, pointing to `/foo` and `/bar` respectively:
+Let's say we have an `<nav>` element with two links, pointing to `/foo` and `/bar` respectively:
 
-    <div up-nav>
+    <nav>
       <a href="/foo" up-follow>Foo</a>
       <a href="/bar" up-follow>Bar</a>
-    </div>
+    </nav>
+
+By giving the navigation bar the `[up-nav]` attribute, links pointing to the current browser address are highlighted
+as we navigate through the site.
 
 If the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class:
 
-    <div up-nav>
+    <nav up-nav>
       <a href="/foo" up-follow class="up-current">Foo</a>
       <a href="/bar" up-follow>Bar</a>
-    </div>
+    </nav>
 
 When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
 for the server to respond:
 
-    <div up-nav>
+    <nav up-nav>
       <a href="/foo" up-follow class="up-current">Foo</a>
       <a href="/bar" up-follow class="up-active">Bar</a>
     </div>
 
 Once the response is received the URL will change to `/bar` and the `up-active` class is removed:
 
-    <div up-nav>
+    <nav up-nav>
       <a href="/foo" up-follow>Foo</a>
       <a href="/bar" up-follow class="up-current">Bar</a>
-    </div>
+    </nav>
 
 
 @module up.feedback
@@ -242,7 +245,7 @@ up.feedback = do ->
   ###**
   Marks this element as a navigation component, such as a menu or navigation bar.
 
-  When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
+  When a link within an `[up-nav]` element points to the current location, it is assigned the [`.up-current`](/a.up-current) class. When the browser navigates to another location, the class is removed automatically.
 
   You may also assign `[up-nav]` to an individual link instead of an navigational container.
 
@@ -285,20 +288,50 @@ up.feedback = do ->
 
   A link matches the current location (and is marked as `.up-current`) if it matches either:
 
-  - the link's `href` attribute
-  - the link's `up-href` attribute
-  - a space-separated list of URLs in the link's `up-alias` attribute
-
-  \#\#\# Matching URL by pattern
-
-  You can mark a link as `.up-current` whenever the current URL matches a prefix or suffix.
-  To do so, include an asterisk (`*`) in the `up-alias` attribute.
-
-  For instance, the following `[up-nav]` link is highlighted for both `/reports` and `/reports/123`:
-
-      <a up-nav href="/reports" up-alias="/reports/*">Reports</a>
+  - the link's `[href]` attribute
+  - the link's `[up-href]` attribute
+  - the URL pattern in the link's [`[up-alias]`](/a-up-alias) attribute
 
   @selector [up-nav]
+  @stable
+  ###
+
+  ###**
+  Links within `[up-nav]` may use the `[up-alias]` attribute to pass an URL pattern for which they
+  should also be highlighted as [`.up-current`](a.up-current).
+
+  \#\#\# Examples
+
+  The link below will be highlighted with `.up-current` at both `/profile` and `/profile/edit` locations:
+
+      <nav up-nav>
+        <a href="/profile" up-alias="/profile/edit">Profile</a>
+      </nav>
+
+  To pass more than one alternative URLs, separate them by a space character:
+
+      <nav up-nav>
+        <a href="/profile" up-alias="/profile/new /profile/edit">Profile</a>
+      </nav>
+
+  Often you would like to mark a link as `.up-current` whenever the current URL matches a prefix or suffix.
+  To do so, include an asterisk (`*`) in the `[up-alias]` attribute. For instance, the first link in the
+  below will be highlighted for both `/users` and `/users/123`:
+
+      <nav up-nav>
+        <a href="/users" up-alias="/users/*">Users</a>
+        <a href="/reports" up-alias="/reports/*">Reports</a>
+      </div>
+
+  You may pass multiple patterns separated by a space character:
+
+      <nav up-nav>
+        <a href="/users" up-alias="/users/* /profile/*">Users</a>
+      </nav>
+
+  @selector a[up-alias]
+  @param {String} up-alias
+    A space-separated list of alternative URLs or URL patterns.
   @stable
   ###
 
@@ -307,7 +340,7 @@ up.feedback = do ->
 
   See [`[up-nav]`](/up-nav) for more documentation and examples.
 
-  @selector [up-nav] a.up-current
+  @selector a.up-current
   @stable
   ###
 
