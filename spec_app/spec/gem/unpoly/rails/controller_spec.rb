@@ -56,7 +56,23 @@ describe Unpoly::Rails::Controller, type: :request do
     end
   end
 
+  matcher :expose_helper_method do |helper_name|
+    match do |controller_class|
+      # The helper_method macro defines a method for the controller._helpers module.
+      # This module is eventually included in views.
+      # https://github.com/rails/rails/blob/157920aead96865e3135f496c09ace607d5620dc/actionpack/lib/abstract_controller/helpers.rb#L60
+      helper_module = controller_class._helpers
+      view_like_klass = Class.new { include helper_module }
+      view_like = view_like_klass.new
+      expect(view_like).to respond_to(helper_name)
+    end
+  end
+
   describe 'up?' do
+
+    it 'is available as a helper method' do
+      expect(BindingTestController).to expose_helper_method(:up?)
+    end
 
     it 'returns true if the request has an X-Up-Target header' do
       result = controller_eval(headers: { 'X-Up-Target' => 'body' }) do
@@ -75,6 +91,10 @@ describe Unpoly::Rails::Controller, type: :request do
   end
 
   describe 'up' do
+
+    it 'is available as a helper method' do
+      expect(BindingTestController).to expose_helper_method(:up?)
+    end
 
     shared_examples_for 'string field' do |reader:, header:|
       it "returns the value of the #{header} request header" do
