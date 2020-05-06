@@ -19,7 +19,7 @@ class up.LayerLookup
       return @ofElement(@origin)
 
   ofElement: (element) ->
-    element = e.get(element)
+    element = e.get(element) # unwrap jQuery
     u.find @stack.allReversed, (layer) -> layer.contains(element)
 
   all: ->

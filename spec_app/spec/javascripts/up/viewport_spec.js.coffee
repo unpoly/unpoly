@@ -571,7 +571,7 @@ describe 'up.viewport', ->
         expect($element.css('position')).toEqual('static')
         previousDims = $element[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element)
+        up.viewport.absolutize($element[0])
 
         expect($element.closest('up-bounds').css('position')).toEqual('absolute')
 
@@ -582,7 +582,7 @@ describe 'up.viewport', ->
         $element = $fixture('.element').css(margin: '40px')
         previousDims = $element[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element)
+        up.viewport.absolutize($element[0])
 
         newDims = $element[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -592,7 +592,7 @@ describe 'up.viewport', ->
         $child = $('<div class="child">child text</div>').css(margin: '40px').appendTo($element)
         previousChildDims = $child[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element)
+        up.viewport.absolutize($element[0])
 
         newChildDims = $child[0].getBoundingClientRect()
         expect(newChildDims).toEqual(previousChildDims)
@@ -605,7 +605,7 @@ describe 'up.viewport', ->
 
         previousDims = $element2[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element2)
+        up.viewport.absolutize($element2[0])
 
         newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -621,7 +621,7 @@ describe 'up.viewport', ->
 
         previousDims = $element2[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element2)
+        up.viewport.absolutize($element2[0])
 
         newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -636,7 +636,7 @@ describe 'up.viewport', ->
           left: '77px'
           top: '77px'
         $fixedChild.appendTo($element)
-        up.viewport.absolutize($element)
+        up.viewport.absolutize($element[0])
 
         expect($fixedChild.css(['position', 'left', 'top'])).toEqual
           position: 'absolute',
@@ -649,7 +649,7 @@ describe 'up.viewport', ->
         $fixedChild.appendTo($element)
         $fixedSibling = $fixture('[up-fixed]').css(position: 'fixed')
 
-        up.viewport.absolutize($element)
+        up.viewport.absolutize($element[0])
 
         expect($fixedChild.css('position')).toEqual('absolute')
         expect($fixedSibling.css('position')).toEqual('fixed')

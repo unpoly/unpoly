@@ -368,7 +368,7 @@ up.syntax = do ->
 
   ###**
   Runs any destructor on the given fragment and its descendants.
-  Unlike [`up.destroy()`](/up.destroy), this doesn't emit any events
+  Unlike [`up.destroy()`](/up.destroy), this does not emit any events
   and does not remove the element from the DOM.
 
   @function up.syntax.clean
@@ -398,7 +398,7 @@ up.syntax = do ->
 
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
-  @function up.syntax.data
+  @function up.data
   @param {string|Element|jQuery} elementOrSelector
   @return
     The JSON-decoded value of the `up-data` attribute.
@@ -448,7 +448,8 @@ up.syntax = do ->
   @stable
   ###
   readData = (elementOrSelector) ->
-    element = e.get(elementOrSelector)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    element = up.fragment.first(elementOrSelector)
     e.jsonAttr(element, 'up-data') || {}
 
   ###**
@@ -478,4 +479,5 @@ up.$compiler = up.syntax.$compiler
 up.destructor = up.syntax.destructor
 up.macro = up.syntax.macro
 up.$macro = up.syntax.$macro
+up.data = up.syntax.data
 

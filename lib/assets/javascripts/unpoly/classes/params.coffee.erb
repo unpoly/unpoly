@@ -438,7 +438,8 @@ class up.Params
   @experimental
   ###
   @fromForm: (form) ->
-    if form = e.get(form)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    if form = up.fragment.first(form)
       fields = up.form.submissionFields(form)
       @fromFields(fields)
 
@@ -478,7 +479,11 @@ class up.Params
   ###
   addField: (field) ->
     params = new @constructor()
-    if (field = e.get(field)) && (name = field.name) && (!field.disabled)
+    field = e.get(field) # unwrap jQuery
+
+    # Input fields are excluded from form submissions if they have no [name]
+    # or when they are [disabled].
+    if (name = field.name) && (!field.disabled)
       tagName = field.tagName
       type = field.type
       if tagName == 'SELECT'

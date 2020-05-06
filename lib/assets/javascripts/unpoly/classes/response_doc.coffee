@@ -61,7 +61,6 @@ class up.ResponseDoc
 
   select: (selector) ->
     e.subtree(@parsedRoot, selector)[0]
-    # e.first(@parsedRoot, selector)
 
   isInlineScript: (element) ->
     element.hasAttribute('src')

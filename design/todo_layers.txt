@@ -1,6 +1,4 @@
 - Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
-- All calls of e.get(elementOrSelector) and e.first(elementOrSelector) might need to be changed to up.fragment.first(elementOrSelector) so they prefer the current layer
-  - e. g. findValidateTarget
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH

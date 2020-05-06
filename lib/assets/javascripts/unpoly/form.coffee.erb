@@ -67,7 +67,7 @@ up.form = do ->
   @experimental
   ###
   findFields = (root) ->
-    root = e.get(root)
+    root = e.get(root) # unwrap jQuery
     e.subtree(root, fieldSelector())
 
 #  findFields = (rootOrRoots) ->
@@ -87,6 +87,7 @@ up.form = do ->
 
   ###**
   @function up.form.submittingButton
+  @param {Element} form
   @internal
   ###
   submittingButton = (form) ->
@@ -199,7 +200,8 @@ up.form = do ->
   submit = (formOrSelector, options) ->
     options = u.options(options)
 
-    form = e.get(formOrSelector)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    form = up.fragment.first(formOrSelector)
     form = e.closest(form, 'form')
 
     parser = new up.OptionParser(options, form, fail: true)
@@ -330,12 +332,17 @@ up.form = do ->
 
   findValidateTarget = (field, options) ->
     option = options.target ? field.getAttribute('up-validate')
-    option ||= u.findResult config.validateTargets, (defaultTarget) ->
-      resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
-      if e.first(resolvedDefault)
-        # We want to return the selector, *not* the element. If we returned the element
-        # and derive a selector from that, any :has() expression would be lost.
-        return resolvedDefault
+
+    unless option
+      # If no [up-validate] value is given, we look through config.validateTargets
+      # for the first selector that has a match in the field's layer.
+      fieldLayer = up.layer.get(field)
+      option = u.findResult config.validateTargets, (defaultTarget) ->
+        resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
+        if fieldLayer.firstElement(resolvedDefault)
+          # We want to return the selector, *not* the element. If we returned the element
+          # and derive a selector from that, any :has() expression would be lost.
+          return resolvedDefault
 
     unless option
       up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
@@ -360,15 +367,17 @@ up.form = do ->
 
   @function up.validate
   @param {string|Element|jQuery} fieldOrSelector
-
   @param {string|Element|jQuery} [options.target]
+    The element that will be [updated](/up.change) with the validation results.
   @return {Promise}
     A promise that is fulfilled when the server-side
     validation is received and the form was updated.
   @stable
   ###
   validate = (fieldOrSelector, options) ->
-    field = e.get(fieldOrSelector)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    field = up.fragment.first(fieldOrSelector)
+
     options = u.options(options)
     options.origin = field
     options.history = false

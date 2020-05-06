@@ -159,7 +159,8 @@ up.link = do ->
   @stable
   ###
   follow = (link, options) ->
-    link = e.get(link)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    link = up.fragment.first(link)
     options = u.options(options)
 
     # TODO: Document new follow options like onOpened, [up-on-opened], ...
@@ -268,7 +269,8 @@ up.link = do ->
   @experimental
   ###
   preload = (link, options) ->
-    link = e.get(link)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    link = up.fragment.first(link)
 
     if isSafe(link)
       guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
@@ -314,7 +316,8 @@ up.link = do ->
   @experimental
   ###
   isFollowable = (linkOrSelector) ->
-    link = e.get(linkOrSelector)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    link = up.fragment.first(linkOrSelector)
     e.matches(link, fullFollowSelector())
 
   ###**

@@ -159,7 +159,8 @@ up.motion = do ->
   @stable
   ###
   animate = (elementOrSelector, animation, options) ->
-    element = e.get(elementOrSelector)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    element = up.fragment.first(elementOrSelector)
     options = u.options(options)
     applyConfig(options)
 
@@ -327,8 +328,9 @@ up.motion = do ->
     options = u.options(options)
     applyConfig(options)
 
-    oldElement = e.get(oldElement)
-    newElement = e.get(newElement)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    oldElement = up.fragment.first(oldElement)
+    newElement = up.fragment.first(newElement)
 
     transitionFn = findTransitionFn(transitionObject)
     willMorph = willAnimate(oldElement, transitionFn, options)

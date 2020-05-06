@@ -410,7 +410,8 @@ up.fragment = do ->
   @stable
   ###
   hello = (element, options = {}) ->
-    element = e.get(element)
+    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
+    element = first(element)
 
     # Callers may pass descriptions of child elements that were [kept](/up-keep)
     # as { options.keepPlans }. For these elements up.hello() emits an event
@@ -536,11 +537,16 @@ up.fragment = do ->
     if u.isElementish(lastArg)
       # up.fragment.all([root], element, [options]) should just return [element].
       # The given root and options are ignored. We also don't check if it's a real element.
+      # We do use e.get() to unwrap a jQuery collection.
       return [e.get(lastArg)]
 
     if args.length == 1
       # up.fragment.all(selector, [options]) should lookup the selector
-      # in the current layer, or in options.layer if given.
+      # in all layers (prefering the current layer), or in options.layer if given.
+      if u.isUndefined(args[0])
+        console.log("calling up.layer.allElements(%o, %o)", args[0], options)
+        console.trace()
+
       candidates = up.layer.allElements(args[0], options)
     else
       # up.fragment.all(rootElement, selector) should find selector within

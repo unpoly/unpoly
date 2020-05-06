@@ -270,7 +270,7 @@ up.viewport = do ->
     else if revealOpt
       # We allow to pass another element as { reveal } option
       if u.isElementish(revealOpt)
-        element = e.get(revealOpt)
+        element = e.get(revealOpt) # unwrap jQuery
 
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
@@ -550,8 +550,7 @@ up.viewport = do ->
   ###**
   @internal
   ###
-  absolutize = (elementOrSelector, options = {}) ->
-    element = e.get(elementOrSelector)
+  absolutize = (element, options = {}) ->
     viewport = up.viewport.closest(element)
 
     viewportRect = viewport.getBoundingClientRect()

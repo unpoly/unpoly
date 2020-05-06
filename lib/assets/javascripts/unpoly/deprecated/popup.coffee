@@ -3,7 +3,7 @@ e = up.element
 
 up.popup = u.literal
   attach: (origin, options = {}) ->
-    origin = e.get(origin)
+    origin = up.fragment.first(origin)
     up.legacy.deprecated('up.popup.attach(origin, options)', "up.layer.open({ origin, layer: 'popup', ...options })")
     up.layer.open(u.merge(options, { origin, layer: 'popup' }))
 

@@ -119,7 +119,6 @@ up.feedback = do ->
   @internal
   ###
   findActivatableArea = (element) ->
-    element = e.get(element)
     # Try to enlarge links that are expanded with [up-expand] on a surrounding container.
     # Note that the expression below is not the same as e.closest(area, SELECTOR_LINK)!
     e.ancestor(element, SELECTOR_LINK) || element
@@ -145,7 +144,7 @@ up.feedback = do ->
       })
 
   @method up.feedback.start
-  @param {Element|jQuery|string} element
+  @param {Element} element
     The element to mark as active
   @internal
   ###
@@ -218,7 +217,7 @@ up.feedback = do ->
   Use this function if you make custom network calls from your own JavaScript code.
 
   @function up.feedback.stop
-  @param {Element|jQuery|string} element
+  @param {Element} element
     The link or form that has finished loading.
   @internal
   ###
@@ -234,9 +233,13 @@ up.feedback = do ->
       if u.isBoolean(feedbackOpt)
         element = options.origin
       else
-        element = up.fragment.first(feedbackOpt)
+        element = feedbackOpt
 
     if element
+      # In case we get passed a selector or jQuery collection as { origin }
+      # or { feedback }, unwrap it with up.fragment.first().
+      element = up.fragment.first(element)
+
       return around(element, fn)
     else
       return fn()
