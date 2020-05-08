@@ -81,6 +81,9 @@ describe 'up.fragment', ->
 
     describe 'up.change()', ->
 
+      beforeEach ->
+        up.motion.config.enabled = false
+
       describe 'with { url } option', ->
 
         it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
@@ -999,7 +1002,18 @@ describe 'up.fragment', ->
 
       describe 'choice of layer', ->
 
-        it 'updates the layer given as { layer } option'
+        it 'updates the layer given as { layer } option', asyncSpec (next) ->
+          fixture('.element', content: 'old text in root')
+          up.layer.open({ target: '.element', content: 'old text in modal' })
+
+          next =>
+            [@root, @modal] = up.layer.all
+
+            up.change('.element', content: 'new text', layer: 'root', peel: false)
+
+          next =>
+            expect(@root.element.querySelector('.element')).toHaveText(/new text/)
+            expect(@modal.element.querySelector('.element')).toHaveText(/old text in modal/)
 
         it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
 
@@ -1009,15 +1023,13 @@ describe 'up.fragment', ->
 
         it 'updates the parent layer with { layer: "parent" }'
 
-        it 'updates the layer of the { origin } with { layer: "origin" }'
-
         it 'seeks the target in any layer with { layer: "any" }'
 
         it 'updates the root layer with { layer: "root" }'
 
         it 'updates the root layer with { layer: "page" } (deprecated)'
 
-        it 'updates an ancestor layer with { layer: "ancestors" }'
+        it 'updates an ancestor layer with { layer: "ancestor" }'
 
         it 'updates the closest layer with { layer: "closest" }'
 
@@ -1033,9 +1045,33 @@ describe 'up.fragment', ->
 
         describe 'if nothing else is specified', ->
 
-          it 'prefers updating the current layer'
+          it 'prefers updating the current layer', asyncSpec (next) ->
+            fixture('.element', content: 'old text in root')
+            up.layer.open({ target: '.element', content: 'old text in modal' })
 
-          it 'updates the background layer closest to the front if the current layer does not match'
+            next =>
+              [@root, @modal] = up.layer.all
+
+              up.change('.element', content: 'new text', peel: false)
+
+            next =>
+              expect(@root.element.querySelector('.element')).toHaveText(/old text in root/)
+              expect(@modal.element.querySelector('.element')).toHaveText(/new text/)
+
+          it 'updates the background layer closest to the front if the current layer does not match', asyncSpec (next) ->
+            fixture('.element', content: 'old text in root')
+            up.layer.open({ target: '.element', content: 'old text in modal1' })
+            up.layer.open({ target: '.other', content: 'old text in modal2' })
+
+            next =>
+              [@root, @modal1, @modal2] = up.layer.all
+
+              up.change('.element', content: 'new text', peel: false)
+
+            next =>
+              expect(@root.element.querySelector('.element')).toHaveText(/old text in root/)
+              expect(@modal1.element.querySelector('.element')).toHaveText(/new text/)
+              expect(@modal2.element.querySelector('.other')).toHaveText(/old text in modal2/)
 
       describe 'browser location URL', ->
 
@@ -1337,6 +1373,9 @@ describe 'up.fragment', ->
               expect(up.fragment.source('.target')).toMatchURL('/previous-source')
 
       describe 'with { transition } option', ->
+
+        beforeEach ->
+          up.motion.config.enabled = true
 
         it 'morphs between the old and new element', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')

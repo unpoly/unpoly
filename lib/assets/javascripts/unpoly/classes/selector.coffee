@@ -57,6 +57,9 @@ class up.Selector
         @ancestor(parentElement)
 
   @parse: (selector) ->
+    unless u.isString(selector)
+      up.fail("Expected a CSS selector string, but got #{selector}")
+
     filter = null
     selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
       filter = (element) ->

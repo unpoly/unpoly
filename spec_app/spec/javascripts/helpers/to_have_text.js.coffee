@@ -5,12 +5,17 @@ beforeEach ->
   jasmine.addMatchers
     toHaveText: (util, customEqualityTesters) ->
       compare: (element, expectedText) ->
-        element = up.element.get(element)
+        element = up.fragment.first(element)
         actualText = element?.textContent?.trim()
-        expectedText = expectedText.trim()
 
         result = {}
-        result.pass = (element && actualText == expectedText)
+        result.pass = !!element
+
+        if u.isString(expectedText)
+          expectedText = expectedText.trim()
+          result.pass &&= (actualText == expectedText)
+        else if u.isRegExp(expectedText)
+          result.pass &&= (expectedText.test(actualText))
 
         if result.pass
           result.message = u.sprintf('Expected element %o to not have text %s', element, actualText)

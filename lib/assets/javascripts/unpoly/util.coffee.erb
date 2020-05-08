@@ -496,6 +496,17 @@ up.util = do ->
     object instanceof Element
 
   ###**
+  Returns whether the given argument is a [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp).
+
+  @function up.util.isRegExp
+  @param object
+  @return {boolean}
+  @internal
+  ###
+  isRegExp = (object) ->
+    object instanceof RegExp
+
+  ###**
   Returns whether the given argument is a [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
 
   @function up.util.isJQuery
@@ -1703,8 +1714,11 @@ up.util = do ->
           string += " #{attr}=\"#{value}\""
       string += ">"
       closer = '>'
-    else # object
+    else if isRegExp(arg)
+      string = arg.toString()
+    else # object, array
       string = JSON.stringify(arg)
+
     if string.length > maxLength
       string = "#{string.substr(0, maxLength)} …"
       string += closer
@@ -1812,6 +1826,7 @@ up.util = do ->
   isNodeList: isNodeList
   isArguments: isArguments
   isList: isList
+  isRegExp: isList
   isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
   isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   timer: scheduleTimer
