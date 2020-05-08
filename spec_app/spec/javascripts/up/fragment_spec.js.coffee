@@ -2155,6 +2155,84 @@ describe 'up.fragment', ->
             expect(input).toBeGiven()
             expect(document.activeElement).toBe(input)
 
+      describe 'abortion of existing requests', ->
+
+        it 'aborts the request of an existing change', asyncSpec (next) ->
+          fixture('.element')
+
+          change1Error  = undefined
+          change1Promise = undefined
+          change2Promise = undefined
+
+          change1Promise = up.change('.element', url: '/path1').catch (e) -> change1Error = e
+
+          next =>
+            expect(up.proxy.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+
+            change2Promise = up.change('.element', url: '/path2')
+
+          next =>
+            expect(change1Error).toBeError(/aborted/)
+            expect(up.proxy.queue.allRequests.length).toEqual(1)
+
+        it "does not abort an existing change's request when preloading", asyncSpec (next) ->
+          fixture('.element')
+
+          change1Error  = undefined
+          change1Promise = undefined
+          change2Promise = undefined
+
+          change1Promise = up.change('.element', url: '/path1').catch (e) -> change1Error = e
+
+          next =>
+            expect(up.proxy.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+
+            change2Promise = up.change('.element', url: '/path2', preload: true)
+
+          next =>
+            expect(change1Error).toBeUndefined()
+            expect(up.proxy.queue.allRequests.length).toEqual(2)
+
+        it "does not abort an existing change's request when up.change() was called with { solo: false }", asyncSpec (next) ->
+          fixture('.element')
+
+          change1Error  = undefined
+          change1Promise = undefined
+          change2Promise = undefined
+
+          change1Promise = up.change('.element', url: '/path1').catch (e) -> change1Error = e
+
+          next =>
+            expect(up.proxy.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+
+            change2Promise = up.change('.element', url: '/path2', solo: false)
+
+          next =>
+            expect(change1Error).toBeUndefined()
+            expect(up.proxy.queue.allRequests.length).toEqual(2)
+
+        it "does not abort an existing change's request that itself was queued with { solo: false }", asyncSpec (next) ->
+          fixture('.element')
+
+          change1Error  = undefined
+          change1Promise = undefined
+          change2Promise = undefined
+
+          change1Promise = up.change('.element', url: '/path1', solo: false).catch (e) -> change1Error = e
+
+          next =>
+            expect(up.proxy.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+
+            change2Promise = up.change('.element', url: '/path2')
+
+          next =>
+            expect(change1Error).toBeUndefined()
+            expect(up.proxy.queue.allRequests.length).toEqual(2)
+
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->

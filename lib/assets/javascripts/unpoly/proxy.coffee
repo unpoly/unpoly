@@ -528,6 +528,7 @@ up.proxy = do ->
   config: config
   abort: abortRequests
   registerAliasForRedirect: registerAliasForRedirect
+  queue: queue # for testing
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request
