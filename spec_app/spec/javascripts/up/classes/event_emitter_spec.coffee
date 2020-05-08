@@ -117,6 +117,18 @@ describe 'up.EventEmitter', ->
         build = -> up.EventEmitter.fromEmitArgs([{key: 'value'}])
         expect(build).toThrowError(/type/i)
 
+      it 'accepts an event target as { target } property', ->
+        element = fixture('.element')
+        emitter = up.EventEmitter.fromEmitArgs([{type: 'my:event', target: element}])
+        expect(emitter.event).toBeEvent('my:event')
+        expect(emitter.target).toBe(element)
+
+      it 'accepts a CSS selector string in the { target } property', ->
+        element = fixture('.element')
+        emitter = up.EventEmitter.fromEmitArgs([{type: 'my:event', target: '.element'}])
+        expect(emitter.event).toBeEvent('my:event')
+        expect(emitter.target).toBe(element)
+
     describe 'with ([Element, Object])', ->
 
       it "builds an event with the type from the given object's { type } property", ->

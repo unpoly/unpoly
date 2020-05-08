@@ -110,8 +110,11 @@ class up.EventEmitter extends up.Record
     if options.currentLayer
       options.currentLayer = up.layer.get(options.currentLayer)
 
-    # If no element is given, we emit the event on the document.
-    options.target ||= document
+    if u.isString(options.target)
+      options.target = up.fragment.first(options.target, layer: options.layer)
+    else if !options.target
+      # If no element is given, we emit the event on the document.
+      options.target = document
 
     if args[0]?.preventDefault
       # In this branch we receive an Event object that was already built:
