@@ -9,6 +9,9 @@ up.error = do ->
     u.assign(error, props)
     return error
 
+  # Custom error classes is hard when we transpile to ES5.
+  # Hence we create a class-like construct.
+  # See https://webcodr.io/2018/04/why-custom-errors-in-javascript-with-babel-are-broken/
   errorInterface = (name, init = build) ->
     fn = (args...) ->
       error = init(args...)

@@ -281,7 +281,7 @@ up.event = do ->
 
   build = (args...) ->
     props = u.extractOptions(args)
-    type = args[0] || props.type || throw up.error.failed('Expected event type to be passed as string argument or { type } property')
+    type = args[0] || props.type || up.fail('Expected event type to be passed as string argument or { type } property')
 
     event = document.createEvent('Event')
     event.initEvent(type, true, true) # name, bubbles, cancelable
