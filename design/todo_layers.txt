@@ -9,7 +9,11 @@
   - Why did we disable scroll restauration in https://github.com/unpoly/unpoly/commit/8b22fef9f72ea316f1a855b36abb6d01263d6059 ?
   - Does the browser have any default scroll restauration on popstate handled by a JS app?
   - If we keep the manual scroll restauration we need to keep our lastScrollTops in a way that it survives full page loads (it's currently a variable in memory)
-
+- Move event-related util functions to up.event
+  - isUnmodifiedKeyEvent
+  - isUnmodifiedMouseEvent
+  - others?
+- close-variant events should actually say "dismissing" instead of "closing"
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
