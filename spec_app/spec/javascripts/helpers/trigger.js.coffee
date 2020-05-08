@@ -71,9 +71,10 @@ $ = jQuery
     field.dispatchEvent(event)
 
   escapeSequence = (element, options) ->
-    options = u.options(options,
-      key: 'Escape'
-    )
+    keySequence(element, 'Escape', options)
+
+  keySequence = (element, key, options) ->
+    options = u.options(options, { key })
     for type in ['keydown', 'keypress', 'keyup']
       event = createKeyboardEvent(type, options)
       element.dispatchEvent(event)
@@ -190,6 +191,7 @@ $ = jQuery
   hoverSequence: hoverSequence
   unhoverSequence: unhoverSequence
   escapeSequence: escapeSequence
+  keySequence: keySequence
   submit: submit
   change: change
   input: input

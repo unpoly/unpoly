@@ -348,7 +348,10 @@ up.event = do ->
   onEscape = (listener) ->
     bind('keydown', 'body', (event) ->
       if u.escapePressed(event)
-        listener(event)
+        focusedElement = document.activeElement
+        # Input fields often have their own handling for Escape, to blur, reset, etc.
+        if !focusedElement || !e.closest(focusedElement, up.form.fieldSelector())
+          listener(event)
     )
 
   ###**

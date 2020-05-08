@@ -536,3 +536,43 @@ describe 'up.event', ->
         event = up.emit(element, 'foo')
         expect(event.defaultPrevented).toBe(true)
 
+    describe 'up.event.onEscape', ->
+
+      it 'runs the given callback when the user presses the Escape key', asyncSpec (next) ->
+        callback = jasmine.createSpy()
+        up.event.onEscape(callback)
+        element = fixture('.element')
+        Trigger.keySequence(element, 'Escape')
+
+        next ->
+          expect(callback).toHaveBeenCalled()
+
+      it 'runs the given callback when IE/Edge emits a KeyboardEvent with { key: "Esc" } instead of { key: "Escape" }', asyncSpec (next) ->
+          callback = jasmine.createSpy()
+          up.event.onEscape(callback)
+          element = fixture('.element')
+          Trigger.keySequence(element, 'Esc')
+
+          next ->
+            expect(callback).toHaveBeenCalled()
+
+      it 'does not run the given callback when the user presses another key', asyncSpec (next) ->
+        callback = jasmine.createSpy()
+        up.event.onEscape(callback)
+        element = fixture('.element')
+        Trigger.keySequence(element, 'A')
+
+        next ->
+          expect(callback).not.toHaveBeenCalled()
+
+      it 'does not run the given callback when an input field is focused (which often use Escape to blur, reset, etc.)', asyncSpec (next) ->
+        callback = jasmine.createSpy()
+        up.event.onEscape(callback)
+        select = fixture('select')
+        select.focus()
+
+        next ->
+          Trigger.keySequence(select, 'Escape')
+
+        next ->
+          expect(callback).not.toHaveBeenCalled()

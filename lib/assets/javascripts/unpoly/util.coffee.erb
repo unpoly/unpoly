@@ -1055,6 +1055,7 @@ up.util = do ->
   ###
   escapePressed = (event) ->
     key = event.key
+    # IE/Edge use 'Esc', other browsers use 'Escape'
     key == 'Escape' || key == 'Esc'
 
   ###**
