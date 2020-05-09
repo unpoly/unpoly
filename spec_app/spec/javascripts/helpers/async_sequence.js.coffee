@@ -29,6 +29,10 @@ window.asyncSpec = (args...) ->
         args[0] = "[asyncSpec] #{args[0]}"
         console.debug(args...)
 
+    # task is an array:
+    # task[0] timing (delay in ms)
+    # task[1] block (the callback to run)
+    # task[2] callStyle (async or sync)
     insertAtCursor = (task) ->
       log('Inserting task at index %d: %o', insertCursor, task)
       # We insert at pointer instead of pushing to the end.
