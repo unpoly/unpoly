@@ -2083,6 +2083,8 @@ describe 'up.fragment', ->
             expect(destructor).toHaveBeenCalledWith('old text')
 
         it 'calls destructors on the old element after a { transition }', (done) ->
+          up.motion.config.enabled = true
+
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', ($element) ->
             -> destructor($element.text())
@@ -2669,6 +2671,8 @@ describe 'up.fragment', ->
             expect(keptListener).toHaveBeenCalledWith($keeper[0], { key: 'value2' })
 
         it "doesn't let the discarded element appear in a transition", (done) ->
+          up.motion.config.enabled = true
+
           oldTextDuringTransition = undefined
           newTextDuringTransition = undefined
           transition = (oldElement, newElement) ->
