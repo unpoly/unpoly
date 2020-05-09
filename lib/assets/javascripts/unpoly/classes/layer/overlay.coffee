@@ -113,9 +113,6 @@ class up.Layer.Overlay extends up.Layer
     # we hide the "X" label from screen readers.
     e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
-  getBoxElement: ->
-    @boxElement || @element
-
   elementAttrs: ->
     return u.compactObject
       align: @align

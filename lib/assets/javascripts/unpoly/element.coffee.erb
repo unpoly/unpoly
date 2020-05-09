@@ -436,9 +436,15 @@ up.element = do ->
       element = up.element.createFromSelector('div', { attr: 'value' })
       // element is <div attr="value"></div>
 
-  You may set the element's inner text by passing a `{ text }` option:
+  You may set the element's inner text by passing a `{ text }` option (HTML control characters will
+  be escaped):
 
       element = up.element.createFromSelector('div', { text: 'inner text' })
+      // element is <div>inner text</div>
+
+  You may set the element's inner HTML by passing a `{ content }` option:
+
+      element = up.element.createFromSelector('div', { content: '<span>inner text</span>' })
       // element is <div>inner text</div>
 
   You may set inline styles by passing an object of CSS properties as a second argument:
@@ -453,6 +459,8 @@ up.element = do ->
     An object of attributes to set on the created element.
   @param {Object} [attrs.text]
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
+  @param {Object} [attrs.content]
+    The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) of the created element.
   @param {Object} [attrs.style]
     An object of CSS properties that will be set as the inline style
     of the created element.
@@ -513,6 +521,9 @@ up.element = do ->
         setInlineStyle(rootElement, styleValue)
       if textValue = u.pluckKey(attrs, 'text')
         rootElement.innerText = textValue
+      if contentValue = u.pluckKey(attrs, 'content')
+        rootElement.innerHTML = contentValue
+
       setAttrs(rootElement, attrs)
 
     rootElement

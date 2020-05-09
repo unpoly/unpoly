@@ -4,8 +4,12 @@ $ = jQuery
 beforeEach ->
   jasmine.addMatchers
     toHaveText: (util, customEqualityTesters) ->
-      compare: (element, expectedText) ->
-        element = up.fragment.first(element)
+      compare: (container, expectedText) ->
+        if container instanceof up.Layer
+          element = container.getContentElement()
+        else
+          element = up.fragment.first(container)
+
         actualText = element?.textContent?.trim()
 
         result = {}

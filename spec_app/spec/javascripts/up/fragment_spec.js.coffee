@@ -1003,17 +1003,17 @@ describe 'up.fragment', ->
       describe 'choice of layer', ->
 
         it 'updates the layer given as { layer } option', asyncSpec (next) ->
-          fixture('.element', content: 'old text in root')
-          up.layer.open({ target: '.element', content: 'old text in modal' })
+          fixtureLayers [
+            { target: '.element', content: 'old text in root' }
+            { target: '.element', content: 'old text in modal' }
+          ]
 
-          next =>
-            [@root, @modal] = up.layer.all
-
+          next ->
             up.change('.element', content: 'new text', layer: 'root', peel: false)
 
-          next =>
-            expect(@root.element.querySelector('.element')).toHaveText(/new text/)
-            expect(@modal.element.querySelector('.element')).toHaveText(/old text in modal/)
+          next ->
+            expect(up.layer.all[0]).toHaveText(/new text/)
+            expect(up.layer.all[1]).toHaveText(/old text in modal/)
 
         it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
 
@@ -1046,32 +1046,32 @@ describe 'up.fragment', ->
         describe 'if nothing else is specified', ->
 
           it 'prefers updating the current layer', asyncSpec (next) ->
-            fixture('.element', content: 'old text in root')
-            up.layer.open({ target: '.element', content: 'old text in modal' })
+            fixtureLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
 
-            next =>
-              [@root, @modal] = up.layer.all
-
+            next ->
               up.change('.element', content: 'new text', peel: false)
 
-            next =>
-              expect(@root.element.querySelector('.element')).toHaveText(/old text in root/)
-              expect(@modal.element.querySelector('.element')).toHaveText(/new text/)
+            next ->
+              expect(up.layer.all[0]).toHaveText(/old text in root/)
+              expect(up.layer.all[1]).toHaveText(/new text/)
 
           it 'updates the background layer closest to the front if the current layer does not match', asyncSpec (next) ->
-            fixture('.element', content: 'old text in root')
-            up.layer.open({ target: '.element', content: 'old text in modal1' })
-            up.layer.open({ target: '.other', content: 'old text in modal2' })
+            fixtureLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.other', content: 'old text in modal1' }
+              { target: '.element', content: 'old text in modal2' }
+            ]
 
-            next =>
-              [@root, @modal1, @modal2] = up.layer.all
-
+            next ->
               up.change('.element', content: 'new text', peel: false)
 
-            next =>
-              expect(@root.element.querySelector('.element')).toHaveText(/old text in root/)
-              expect(@modal1.element.querySelector('.element')).toHaveText(/new text/)
-              expect(@modal2.element.querySelector('.other')).toHaveText(/old text in modal2/)
+            next ->
+              expect(up.layer.all[0]).toHaveText(/old text in root/)
+              expect(up.layer.all[1]).toHaveText(/new text/)
+              expect(up.layer.all[2]).toHaveText(/old text in modal2/)
 
       describe 'browser location URL', ->
 
