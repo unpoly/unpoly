@@ -1,9 +1,8 @@
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH
-- Test
+- Write remaining tests
 - Consider promoting some experimental functions to stable
-- Ignore ESC when inside a <input type="search">
 - When we go back from a non-Unpoly page to an Unpoly page, scroll positions are not restored
   - Test case: https://glitch.com/edit/#!/gaudy-nettle-ash?path=index.html%3A32%3A46
   - Why did we disable scroll restauration in https://github.com/unpoly/unpoly/commit/8b22fef9f72ea316f1a855b36abb6d01263d6059 ?
@@ -202,11 +201,12 @@ Accessibility
 --------------
 
 - A11Y: check if [inert] etc. are enough to have the browser rotate focus within the layer
--
+
 
 Later?
 ------
 
+- Stagger initial compilation with a time budget
 
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
