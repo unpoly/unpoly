@@ -15,10 +15,12 @@
 - close-variant events should actually say "dismissing" instead of "closing"
 
 
+
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 
 - Tests
+  - Test { layer: 'swap' }
   - Test that the original [href] or [up-href] of a link are not interpreted as patterns (if they include colons), just [up-alias]
   - Test that overlays may have sizes
   - Test that when a popup is open, clicking the opener will close that popup

@@ -40,11 +40,11 @@ class up.LayerLookup
         @stack.selfAndAncestorsOf(@currentLayer)
       when 'parent'
         u.compact [@currentLayer.parent]
-      when 'ancestor'
+      when 'ancestor', 'ancestors'
         @currentLayer.ancestors
       when 'child'
         u.compact [@currentLayer.child]
-      when 'descendant'
+      when 'descendant', 'descendants'
         @currentLayer.descendants
       when 'new'
         ['new'] # pass-through
