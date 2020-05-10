@@ -49,7 +49,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       @currentLayer.peel()
 
       # A11Y: User agent should ignore the parent layer.
-      @currentLayer.setInert(true)
+      @currentLayer.toggleInert(true)
 
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)

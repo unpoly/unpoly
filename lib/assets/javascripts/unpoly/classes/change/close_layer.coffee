@@ -51,7 +51,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       @layer.stack.remove(@layer)
 
       # A11Y: User agent should un-ignore the parent layer
-      parent.setInert(false)
+      parent.toggleInert(false)
 
       # A11Y: Focus the element that originally opened this layer.
       (@layer.origin || parent.element).focus()

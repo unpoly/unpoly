@@ -1133,10 +1133,6 @@ up.element = do ->
   isDetached = (element) ->
     element != document && !getRoot().contains(element)
 
-  toggleInert = (element, isInert) ->
-    toggleAttr(element, 'inert', '', isInert) # modern agents
-    toggleAttr(element, 'aria-hidden', true, isInert) # legacy agents
-
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     # also document :has()!
@@ -1192,5 +1188,4 @@ up.element = do ->
     isVisible: isVisible # practical
     upAttrs: upAttrs
     toggleAttr: toggleAttr
-    toggleInert: toggleInert
     isDetached: isDetached

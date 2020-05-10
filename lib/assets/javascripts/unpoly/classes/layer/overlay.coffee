@@ -246,6 +246,3 @@ class up.Layer.Overlay extends up.Layer
   executeCloseChange: (verb, value, options) ->
     options = u.merge(options, { verb, value, layer: this })
     return new up.Change.CloseLayer(options).executeAsync()
-
-  setInert: (inert) ->
-    e.toggleInert(@element, inert)
