@@ -67,7 +67,7 @@ up.motion = do ->
   config = new up.Config ->
     duration: 200
     easing: 'ease'
-    enabled: true
+    enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 
   reset = ->
     motionController.reset()
