@@ -680,6 +680,7 @@ up.link = do ->
     if childLink = e.first(area, selector)
       areaAttrs = e.upAttrs(childLink)
       areaAttrs['up-href'] ||= childLink.getAttribute('href')
+      areaAttrs['tabindex'] = childLink.tabIndex || 0
       e.setMissingAttrs(area, areaAttrs)
       makeFollowable(area)
 

@@ -50,12 +50,6 @@ class up.Change.CloseLayer extends up.Change.Removal
       # Remove ourselves from the layer stack.
       @layer.stack.remove(@layer)
 
-      # A11Y: User agent should un-ignore the parent layer
-      parent.toggleInert(false)
-
-      # A11Y: Focus the element that originally opened this layer.
-      (@layer.origin || parent.element).focus()
-
       # Restore the history of the parent layer we just uncovered.
       parent.restoreHistory()
 
@@ -63,7 +57,17 @@ class up.Change.CloseLayer extends up.Change.Removal
       # prevented and the closing animation is about to start.
       @emitClosingEvent()
 
-      return @layer.closeNow(@options).then(=> @emitClosedEvent(parent))
+      # A11Y: User agent should un-ignore the parent layer
+      parent.toggleInert(false)
+
+      # A11Y: Focus the element that originally opened this layer.
+      (@layer.origin || parent.element).focus()
+
+      promise =  @layer.closeNow(@options)
+      promise = promise.then =>
+        @emitClosedEvent(parent)
+
+      return promise
     else
       return up.error.aborted.async()
 

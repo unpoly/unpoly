@@ -13,6 +13,20 @@
   - isUnmodifiedMouseEvent
   - others?
 - close-variant events should actually say "dismissing" instead of "closing"
+- A11Y
+  - inert polyfill
+    - current implementation does not support shift+tab to reach the dismiss button
+    - current implementation relies on [tabindex] attribute and we set { tabindex } in JavaScript
+    - if the screen reader works we don't need the polyfill
+      => Edge does not support [inert]
+      => Should we leave it to the user?
+  - escape in inputs should blur the input, so another escape will close the layer
+  - [up-instant] elements need to trigger up:click on enter
+    - what exactly prevents the regular enter pressing? entering triggering click?
+  - the content element and the dismiss icon need a tabindex
+  - it's not good that multiple elements have role=dialog and aria-modal="modal"
+  - destroying elements should get [inert][aria-hidden=true]
+    - remove those attrs and .up-destroying after transition to pretty-up log
 
 
 

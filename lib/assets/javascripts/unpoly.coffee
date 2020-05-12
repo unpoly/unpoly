@@ -9,6 +9,7 @@
 #= require_tree ./unpoly/classes
 #= require ./unpoly/framework
 #= require ./unpoly/event
+#= require_tree ./unpoly/polyfills
 #= require ./unpoly/protocol
 #= require ./unpoly/log
 #= require ./unpoly/toast

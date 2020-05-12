@@ -48,14 +48,16 @@ class up.Change.OpenLayer extends up.Change.Addition
       # Note that this cannot be prevented with { peel: false }!
       @currentLayer.peel()
 
-      # A11Y: User agent should ignore the parent layer.
-      @currentLayer.toggleInert(true)
-
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)
       promise = @layer.openNow({ @content, @onContentAttached })
 
       promise = promise.then =>
+        # A11Y: User agent should ignore the parent layer.
+        @currentLayer.toggleInert(true)
+
+        @focus()
+
         @emitOpenedEvent()
 
         # don't delay `promise` until layer change requests have finished closing
@@ -96,8 +98,6 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     # Compile the new content and emit up:fragment:inserted.
     @responseDoc.activateElement(@content, { @layer, @origin })
-
-    @focus()
 
     @emitOpeningEvent()
 

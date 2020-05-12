@@ -523,6 +523,8 @@ up.element = do ->
         rootElement.innerText = textValue
       if contentValue = u.pluckKey(attrs, 'content')
         rootElement.innerHTML = contentValue
+#      if props = u.pluckKey(attrs, props)
+#        u.assign(rootElement, props)
 
       setAttrs(rootElement, attrs)
 

@@ -20,6 +20,8 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @createViewportElement(@element)
     @createBoxElement(@viewportElement)
     @createContentElement(@boxElement)
+    @focusEndElement = e.affix(@element, 'up-focus-end')
+    @focusEndElement.tabIndex = 0
     @setInnerContent(@contentElement, options)
     @setupHandlers()
     @shiftBody()

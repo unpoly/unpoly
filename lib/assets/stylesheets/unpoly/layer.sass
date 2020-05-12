@@ -44,14 +44,20 @@ $modal-viewport-padding-y: 25px
 %small-shadow
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3)
 
+%no-focus-outline
+  &:focus
+    outline: none
+
 %overlay-with-viewport
   @extend %maximize
+  @extend %no-focus-outline
   // Create a stacking context for child elements by giving a position and z-index.
   // This way the z-indexes of our child elements don't need to be defined.
   z-index: $overlay-with-viewport-z-index
   position: fixed
 
 %overlay-with-tether
+  @extend %no-focus-outline
   z-index: $overlay-with-tether-z-index
   position: absolute
 

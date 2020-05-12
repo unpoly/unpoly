@@ -53,13 +53,15 @@ class up.LayerInertness
     @isInert = newInert
 
   traverse: (element) ->
+    console.debug("%o has layers (%o): %o", element, @layerSelector, element.querySelector(@layerSelector))
+
     if element.querySelector(@layerSelector)
       for child in element.children
         # Traverse the child unless it is a layer.
         # If child is a layer, we don't want to change its inertness.
         unless e.matches(child, @layerSelector)
           @traverse(child)
-    else if !element.getAttribute('aria-hidden')
+    else if !element.hasAttribute('inert')
       @changedElements.push(element)
       # By making element inert, we also make its descendants inert.
       @toggleElement(element, true)
@@ -67,3 +69,28 @@ class up.LayerInertness
   toggleElement: (element, newInert) ->
     e.toggleAttr(element, 'aria-hidden', true, newInert) # legacy agents
     e.toggleAttr(element, 'inert', '', newInert) # modern agents
+
+
+#class up.LayerAccessibility
+#
+#  constructor: (@layer) ->
+#    # @layer.on('up:layer:opened', (event) => @onOpened(event))
+#    # @layer.on('up:layer:closing', (event) => @onClosing(event))
+#
+#  onOpened: ->
+#    if parent = @layer.parent
+#      parent.accessibility.moveToBackground()
+#    @moveToForeground()
+#
+#  onClosing: ->
+#    @moveToBackground() # lose dialog and make inert during close animation
+#    if parent = @layer.parent
+#      parent.accessibility.moveToForeground()
+#
+#  moveToBackground: ->
+#    @traverse(@layer.getInertnessElement())
+#    @removeDialogRole()
+#
+#  moveToForeground: ->
+#    @restoreDialogRole()
+#    @undoInertness()

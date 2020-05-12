@@ -27,12 +27,17 @@ class up.Focus extends up.Record
       return @fromElement(focusedElement)
 
   @set: (layer, value) ->
+    console.debug("--- setting focus on layer %o to value %o", layer, value)
+
     if value instanceof this
       value.restore(layer)
     if u.isElement(value)
       value.focus()
     else if value == 'layer'
+      console.debug("----- focusing element %o", layer.element)
+      # The content element received a tabIndex = 0 to make it focusable
       layer.element.focus()
+      console.debug("----- focused element is now %o", document.activeElement)
     else if u.isString(value)
       if element = layer.firstElement(value)
         element.focus()
