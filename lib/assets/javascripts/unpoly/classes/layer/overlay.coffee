@@ -26,7 +26,6 @@ class up.Layer.Overlay extends up.Layer
       'closeEasing',
       'backdropOpenAnimation',
       'backdropCloseAnimation',
-      # 'ariaLabel'
       'buttonDismissable',
       'escapeDismissable',
       'outsideDismissable',
@@ -123,7 +122,6 @@ class up.Layer.Overlay extends up.Layer
       class: @class,
       role: 'dialog', # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/dialog_role
       'aria-modal': true # https://www.w3.org/TR/wai-aria-1.1/#aria-modal
-      # 'aria-label': @ariaLabel
 
   affix: (parentElement, part, options) ->
     return e.affix(parentElement, @selector(part), options)
@@ -134,9 +132,7 @@ class up.Layer.Overlay extends up.Layer
   setupHandlers: ->
     super()
 
-    # Giving the modal a tabindex of -1 removes it from the tabbing flow,
-    # but still allows to set focus programatically.
-    @element.tabIndex = 0
+    @overlayFocus = new up.OverlayFocus(this)
 
     if @buttonDismissable
       @createDismissElement(@getBoxElement())
@@ -216,6 +212,7 @@ class up.Layer.Overlay extends up.Layer
   teardownHandlers: ->
     super()
     @unbindParentClicked()
+    @overlayFocus.teardown()
 
   destroyElement: (options) ->
     up.destroy(@element, u.merge(options, log: false))
@@ -253,5 +250,3 @@ class up.Layer.Overlay extends up.Layer
   executeCloseChange: (verb, value, options) ->
     options = u.merge(options, { verb, value, layer: this })
     return new up.Change.CloseLayer(options).executeAsync()
-
-# setInterval((-> console.log(document.activeElement)), 500)

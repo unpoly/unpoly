@@ -57,9 +57,10 @@ class up.Change.CloseLayer extends up.Change.Removal
       # prevented and the closing animation is about to start.
       @emitClosingEvent()
 
-      # A11Y: User agent should un-ignore the parent layer
-      parent.toggleInert(false)
-
+      # A11Y: Stop trapping focus in the layer that's about to close
+      @layer.overlayFocus.teardown()
+      # A11Y: Start trapping focus in the parent layer that is being promoted to front.
+      parent.overlayFocus?.moveToFront()
       # A11Y: Focus the element that originally opened this layer.
       (@layer.origin || parent.element).focus()
 

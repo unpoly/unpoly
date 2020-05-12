@@ -14,6 +14,8 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
       position: @position
     )
     @createElement(@tether.parent)
+
+
     @createContentElement(@element)
     @setInnerContent(@contentElement, options)
     @setupHandlers()

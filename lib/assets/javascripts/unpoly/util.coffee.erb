@@ -1437,7 +1437,8 @@ up.util = do ->
   # @return {Promise}
   ###
   muteRejection = (promise) ->
-    promise?.catch(noop)
+    # promise?.catch(noop)
+    return promise
 
   ###**
   @function up.util.newDeferred

@@ -201,10 +201,6 @@ class up.Layer extends up.Record
   hasLiveHistory: ->
     @history && @isFront()
 
-  toggleInert: (inert) ->
-    @inertness ||= new up.LayerInertness(this)
-    @inertness.toggle(inert)
-
   selector: (part) ->
     @constructor.selector(part)
 
@@ -219,11 +215,6 @@ class up.Layer extends up.Record
 
   getContentElement: ->
     @contentElement || @element
-
-  getInertnessElement: ->
-    # Return an element that contains all text and interactive elements.
-    # Used by up.LayerInertness.
-    @element
 
   toString: ->
     "#{@mode} layer"

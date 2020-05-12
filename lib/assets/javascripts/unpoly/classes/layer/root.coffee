@@ -38,10 +38,6 @@ class up.Layer.Root extends up.Layer
   @selector: ->
     'html'
 
-  getInertnessElement: ->
-    # Return <body> instead of <html> so up.Inertness won't give [aria-hidden] to the <head>.
-    document.body
-
   allElements: (selector) ->
     matches = e.all(selector)
     # Since our @element also contains all the other layers we need

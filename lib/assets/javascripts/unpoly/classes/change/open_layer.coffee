@@ -53,10 +53,9 @@ class up.Change.OpenLayer extends up.Change.Addition
       promise = @layer.openNow({ @content, @onContentAttached })
 
       promise = promise.then =>
-        # A11Y: User agent should ignore the parent layer.
-        @currentLayer.toggleInert(true)
-
-        @focus()
+        @currentLayer.overlayFocus?.moveToBack()
+        @layer.overlayFocus.moveToFront()
+        @layer.overlayFocus.focusStart()
 
         @emitOpenedEvent()
 
@@ -100,17 +99,6 @@ class up.Change.OpenLayer extends up.Change.Addition
     @responseDoc.activateElement(@content, { @layer, @origin })
 
     @emitOpeningEvent()
-
-  focus: ->
-    # By default we focus the newly created layer, which is an A11Y recommendation.
-    @options.focus ?= 'layer'
-
-    # Since we're opening a new layer element, keeping the focus means not
-    # changing the focus at all.
-    if @options.focus == 'keep'
-      @options.focus = false
-
-    up.viewport.scrollAfterInsertFragment(@content, u.merge(@options, { @layer }))
 
   emitOpenEvent: ->
     # The initial up:layer:open event is emitted on the document, since the layer
