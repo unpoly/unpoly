@@ -26,13 +26,29 @@ class up.Focus extends up.Record
     if focusedElement && e.isInSubtree(oldElement, focusedElement)
       return @fromElement(focusedElement)
 
-  @set: (layer, value) ->
+  @set: (value, options = {}) ->
     if value instanceof this
+      # TODO: Test me
       value.restore(layer)
     if u.isElement(value)
-      value.focus()
-    else if value == 'layer'
-      layer.element.focus()
+      @focusElement(value, options)
     else if u.isString(value)
-      if element = layer.firstElement(value)
-        element.focus()
+      # TODO: Document [up-focus] attribute
+      if element = up.fragment.first(value, options)
+        @focusElement(element, options)
+
+  @focusElement: (element, options = {}) ->
+    console.debug("=== focusElement(%o)", element)
+
+    # If we reveal we also want to preserve scroll positions.
+    # We might not need to reveal anything after.
+    if options.scroll == false || options.reveal # polyfill for IE11
+      viewport = up.viewport.closest(element)
+      oldScrollTop = viewport.scrollTop
+      element.focus()
+      viewport.scrollTop = oldScrollTop
+    else
+      element.focus()
+
+    if options.reveal
+      up.viewport.reveal(element, { viewport })

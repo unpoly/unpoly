@@ -210,11 +210,5 @@ class up.Layer extends up.Record
   repair: ->
     # optional callback
 
-  getBoxElement: ->
-    @boxElement || @element
-
-  getContentElement: ->
-    @contentElement || @element
-
   toString: ->
     "#{@mode} layer"

@@ -362,19 +362,27 @@ up.link = do ->
   ###
   convertClicks = (layer) ->
     layer.on 'click', (event, element) ->
-      if isInstant(element)
-        # Instant links should not have a `click` event.
-        # This would follow vanilla links and activate JS libs.
+      # Instant links should not have a `click` event.
+      # This would trigger the browsers default follow-behavior and possibly activate JS libs.
+      # A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
+      # Keyboard navigation will not necessarily trigger a mousedown event.
+      if isInstant(element) && element.upInstantSupported
         up.event.halt(event)
+        element.upInstantSupported = false
 
       # In case mousedown has created a layer over the click coordinates,
       # Chrome will emit an event with { target: document.body } on click.
-      # Ignore that event.
+      # Ignore that event and only process if we would still hit the
+      # expect layers at the click coordinates.
       else if layer.wasHitByMouseEvent(event)
         convertClick(event)
 
     layer.on 'mousedown', (event, element) ->
       if isInstant(element)
+        # A11Y: Keyboard navigation will not necessarily trigger a mousedown event.
+        # We also don't want to listen to the enter key, since some screen readers
+        # use the enter key for something else.
+        element.upInstantSupported = true
         convertClick(event)
 
   convertClick = (originalEvent) ->

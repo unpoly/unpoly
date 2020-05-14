@@ -37,8 +37,12 @@
   - test that up-expand gets a tabindex
   - destroying elements should get [inert][aria-hidden=true]
     - remove those attrs and .up-destroying after transition to pretty-up log
-
-
+  - Check how Bootstrap 4 solves modal focus
+    - I think they only support wrap around at the end, not shift+tab
+- up.fragment.first vs. up.element.get vs. up.viewport.closest
+- What's the default for { focus } in up.change({ focus })?
+- Some API would be nicer if up.viewport would return up.Viewport instances that would then have methods like #reveal()
+- Should revealSnap also snap to the bottom? This is hard because we don't know the buffer height minus obstructions
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
@@ -159,6 +163,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  -
   - Document request queue changes
     - Preload limits
     - New options

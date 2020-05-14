@@ -252,7 +252,7 @@ up.viewport = do ->
 
     if focusOpt
       # Don't return since up.Focus.set() is a sync function.
-      up.Focus.set(options.layer, focusOpt)
+      doFocus(focusOpt)
 
     else if resetScrollOpt
       return resetScroll(u.merge(options, around: element))
@@ -291,6 +291,13 @@ up.viewport = do ->
     # If we didn't need to scroll above, just return a resolved promise
     # to fulfill this function's signature.
     return Promise.resolve()
+
+  doFocus = (value, options) ->
+    up.Focus.set(value, options)
+
+  tryFocus = (element, options) ->
+    up.Focus.focusElement(element, options)
+    return element == document.activeElement
 
   ###**
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
@@ -795,6 +802,8 @@ up.viewport = do ->
     anchoredRight: anchoredRight
     fixedElements: fixedElements
     absolutize: absolutize
+    focus: doFocus
+    tryFocus: tryFocus
 
 up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal

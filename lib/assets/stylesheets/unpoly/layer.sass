@@ -63,11 +63,6 @@ up-focus-trap
   z-index: $overlay-with-viewport-z-index
   position: fixed
 
-%overlay-with-tether
-  @extend %no-focus-outline
-  z-index: $overlay-with-tether-z-index
-  position: absolute
-
 %overlay-backdrop
   @extend %maximize
   position: absolute
@@ -89,6 +84,9 @@ up-focus-trap
   text-align: center
 
 %overlay-box
+  // We focus the box after the overlay was opened.
+  @extend %no-focus-outline
+
   // Make it grow with the width of .up-overlay-content
   display: inline-block
   text-align: left
@@ -106,6 +104,9 @@ up-focus-trap
   padding: 20px
 
   overflow-x: hidden
+
+%overlay-with-tether
+  z-index: $overlay-with-tether-z-index
 
 %overlay-dismiss
   color: #666
@@ -232,12 +233,16 @@ up-cover-dismiss
 // Popup is a small box that is anchored to a link
 ///////////////////////////////////////////////////////////////////////////////
 up-popup
+  @extend %overlay-with-tether
+
+up-popup-box
   @extend %overlay-box
   @extend %small-shadow
-  @extend %overlay-with-tether
 
   // The small popup box looks better with a tighter padding.
   padding: 15px
+
+  // position: absolute is given by up.Tether
 
   &[size=small]
     width: 180px

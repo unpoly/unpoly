@@ -59,6 +59,12 @@ class up.RevealMotion
     if newScrollTop < @snap && elementRect.top < (0.5 * viewportRect.height)
       newScrollTop = 0
 
+    # if elementRect.height < 0.5 * viewportRect.height && viewportRect.height -
+
+    # if (viewportRect.height - newScrollTop < @snap) && (elementRect.height + @snap < viewportRect.height)
+    #   if @viewport
+    #
+
     if newScrollTop != originalScrollTop
       @scrollTo(newScrollTop)
     else

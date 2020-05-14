@@ -6,7 +6,7 @@ beforeEach ->
     toHaveText: (util, customEqualityTesters) ->
       compare: (container, expectedText) ->
         if container instanceof up.Layer
-          element = container.getContentElement()
+          element = container.contentElement
         else
           element = up.fragment.first(container)
 

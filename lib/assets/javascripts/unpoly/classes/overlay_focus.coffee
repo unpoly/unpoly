@@ -5,20 +5,24 @@ class up.OverlayFocus
   constructor: (@layer) ->
 
   moveToFront: ->
-    @return if @enabled
+    return if @enabled
     @enabled = true
 
-    console.debug("--- moveToFront(%o)", @layer)
+    console.debug("--- setup on #{@layer.toString()}")
+
     @untrapFocus = up.on('focusin', (event) => @onFocus(event))
-    @unsetAttrs = e.setTemporaryAttrs(@layer.element,
-      'aria-modal': 'true'
-      'tabindex': '0'
-      'role': 'dialog'
+    @unsetAttrs = e.setTemporaryAttrs(@layer.boxElement,
+      'tabindex': '0'      # make element focusable
+      'role': 'dialog'     # make screen readers speak "dialog field" as we focus the element
+      'aria-modal': 'true' # tell modern screen readers to make all other elements inert
+      # 'aria-label': 'dialog'
     )
-    @focusBeforeElement = e.createFromSelector('up-focus-trap[tabindex=0]')
-    @layer.element.insertAdjacentElement('beforebegin', @focusBeforeElement)
-    @focusAfterElement = e.createFromSelector('up-focus-trap[tabindex=0]')
-    @layer.element.insertAdjacentElement('afterEnd', @focusAfterElement)
+    @focusBeforeElement = e.affix(@layer.boxElement, 'beforebegin', 'up-focus-trap[tabindex=0]',)
+    @focusAfterElement = e.affix(@layer.boxElement, 'afterend', 'up-focus-trap[tabindex=0]')
+
+    # page = document.querySelector('.page')
+    # page.setAttribute('inert', '')
+    # page.setAttribute('aria-hidden', 'true')
 
   moveToBack: ->
     @teardown()
@@ -26,6 +30,8 @@ class up.OverlayFocus
   teardown: ->
     return unless @enabled
     @enabled = false
+
+    console.debug("--- teardown on #{@layer.toString()}")
 
     @untrapFocus()
     # Remove [aria-modal] attribute to not confuse screen readers with multiple
@@ -53,26 +59,21 @@ class up.OverlayFocus
 
     @processingFocusEvent = false
 
-  focusStart: ->
-    console.debug("--- focusStart()")
+  focusStart: (focusOptions = { reveal: true }) ->
     # Focusing the overlay element with its [role=dialog] will read out
     # "dialog field" in many screen readers.
-    @layer.element.focus()
+    up.viewport.focus(@layer.boxElement, focusOptions)
 
   focusEnd: ->
-    console.debug("--- focusEnd()")
     # The end will usually be the dismiss button, if there is one.
     # Otherwise it will be the last focusable element.
     # We focus on the box element since focusing on the layer container
     # would include the viewport, which is focusable due to scroll bars.
-    @focusLastDescendant(@layer.getBoxElement()) || @focusStart()
+    @focusLastDescendant(@layer.boxElement) || @focusStart()
 
   focusLastDescendant: (element) ->
-    console.debug("--- focusLastDescendant(%o)", element)
     # don't use forEach since we need to interrupt the loop with `return`
     for child in u.reverse(element.children)
       if child != @focusEndElement
-        console.debug("--- --- trying to focus %o", child)
-        if e.tryFocus(child) || @focusLastDescendant(child)
-          console.debug("--- --- --- success for %o", child)
+        if up.viewport.tryFocus(child, reveal: true) || @focusLastDescendant(child)
           return true

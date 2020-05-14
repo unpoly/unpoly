@@ -119,11 +119,9 @@ class up.Layer.Overlay extends up.Layer
       align: @align
       position: @position,
       size: @size,
-      class: @class,
-      role: 'dialog', # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/dialog_role
-      'aria-modal': true # https://www.w3.org/TR/wai-aria-1.1/#aria-modal
+      class: @class
 
-  affix: (parentElement, part, options) ->
+  affix: (parentElement, part, options = {}) ->
     return e.affix(parentElement, @selector(part), options)
 
   @selector: (part) ->
@@ -135,7 +133,7 @@ class up.Layer.Overlay extends up.Layer
     @overlayFocus = new up.OverlayFocus(this)
 
     if @buttonDismissable
-      @createDismissElement(@getBoxElement())
+      @createDismissElement(@boxElement)
 
     if @outsideDismissable
       @unbindParentClicked = @parent.on 'up:click', (event, element) =>
@@ -218,12 +216,12 @@ class up.Layer.Overlay extends up.Layer
     up.destroy(@element, u.merge(options, log: false))
 
   startAnimation: (options = {}) ->
-    whenFrameClosed = up.animate(@getBoxElement(), options.frameAnimation, options)
+    whenBoxClosed = up.animate(@boxElement, options.frameAnimation, options)
     if @backdrop && !up.motion.isNone(options.frameAnimation)
       whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
 
     # Promise.all() ignores non-Thenables in the given array
-    return Promise.all([whenFrameClosed, whenBackdropClosed])
+    return Promise.all([whenBoxClosed, whenBackdropClosed])
 
   startOpenAnimation: (options = {}) ->
     @startAnimation(

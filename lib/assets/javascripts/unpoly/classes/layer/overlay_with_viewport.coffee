@@ -22,6 +22,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @createContentElement(@boxElement)
     @setInnerContent(@contentElement, options)
     @setupHandlers()
+
     @shiftBody()
     return @startOpenAnimation(options)
 

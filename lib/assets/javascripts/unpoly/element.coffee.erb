@@ -361,10 +361,12 @@ up.element = do ->
   ###
   setAttrs = (element, attrs) ->
     for key, value of attrs
-      element.setAttribute(key, value)
+      if u.isGiven(value)
+        element.setAttribute(key, value)
+      else
+        element.removeAttribute(key)
 
   setTemporaryAttrs = (element, attrs) ->
-    # up.util.pick() would not returns keys that are not set.
     oldAttrs = {}
     for key in Object.keys(attrs)
       oldAttrs[key] = element.getAttribute(key)
@@ -551,6 +553,14 @@ up.element = do ->
   @function up.element.affix
   @params {Element} parent
     The parent to which to attach the created element.
+  @params {String} [position='beforeend']
+    The position of the new element in relation to `parent`.
+    Can be one of the following values:
+
+    - `'beforebegin'`: Before `parent`, as a new sibling.
+    - `'afterbegin'`: Just inside `parent`, before its first child.
+    - `'beforeend'`: Just inside `parent`, after its last child.
+    - `'afterend'`: After `parent`, as a new sibling.
   @params {string} selector
     The CSS selector from which to create an element.
   @params {Object} attrs
@@ -564,9 +574,19 @@ up.element = do ->
     The created element.
   @experimental
   ###
-  affix = (parent, selector, attributes) ->
+  affix = (parent, args...) ->
+    attributes = u.extractOptions(args)
+
+    if args.length == 2
+      [position, selector] = args
+    else
+      position = 'beforeend'
+      selector = args[0]
+
     element = createFromSelector(selector, attributes)
-    parent.appendChild(element)
+    # https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentElement
+
+    parent.insertAdjacentElement(position, element)
     element
 
   ###**
@@ -1141,10 +1161,6 @@ up.element = do ->
   isDetached = (element) ->
     element != document && !getRoot().contains(element)
 
-  tryFocus = (element) ->
-    element.focus()
-    return element = document.activeElement
-
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     # also document :has()!
@@ -1202,5 +1218,3 @@ up.element = do ->
     upAttrs: upAttrs
     toggleAttr: toggleAttr
     isDetached: isDetached
-    tryFocus: tryFocus
-
