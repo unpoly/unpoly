@@ -43,6 +43,11 @@
 - What's the default for { focus } in up.change({ focus })?
 - Some API would be nicer if up.viewport would return up.Viewport instances that would then have methods like #reveal()
 - Should revealSnap also snap to the bottom? This is hard because we don't know the buffer height minus obstructions
+- validating should submit with another guard event (up:form:validate)
+- Support up.form.validate(form)
+  - This should replace the entire form
+- Support up.form.validate(containerInForm)
+  - This should derive a selector from the container
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
