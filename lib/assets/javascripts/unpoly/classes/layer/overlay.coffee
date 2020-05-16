@@ -133,7 +133,7 @@ class up.Layer.Overlay extends up.Layer
     @overlayFocus = new up.OverlayFocus(this)
 
     if @buttonDismissable
-      @createDismissElement(@boxElement)
+      @createDismissElement(@getBoxElement())
 
     if @outsideDismissable
       @unbindParentClicked = @parent.on 'up:click', (event, element) =>
@@ -216,7 +216,7 @@ class up.Layer.Overlay extends up.Layer
     up.destroy(@element, u.merge(options, log: false))
 
   startAnimation: (options = {}) ->
-    whenBoxClosed = up.animate(@boxElement, options.frameAnimation, options)
+    whenBoxClosed = up.animate(@getBoxElement(), options.boxAnimation, options)
     if @backdrop && !up.motion.isNone(options.frameAnimation)
       whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
 
@@ -225,7 +225,7 @@ class up.Layer.Overlay extends up.Layer
 
   startOpenAnimation: (options = {}) ->
     @startAnimation(
-      frameAnimation: options.animation ? @evalOption(@openAnimation),
+      boxAnimation: options.animation ? @evalOption(@openAnimation),
       backdropAnimation: 'fade-in',
       easing: options.easing || @openEasing,
       duration: options.duration || @openDuration,
@@ -233,7 +233,7 @@ class up.Layer.Overlay extends up.Layer
 
   startCloseAnimation: (options = {}) ->
     @startAnimation(
-      frameAnimation: options.animation ? @evalOption(@closeAnimation),
+      boxAnimation: options.animation ? @evalOption(@closeAnimation),
       backdropAnimation: 'fade-out',
       easing: options.easing || @closeEasing,
       duration: options.duration || @closeDuration,

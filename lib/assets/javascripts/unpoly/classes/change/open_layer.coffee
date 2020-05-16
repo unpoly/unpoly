@@ -55,7 +55,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       promise = promise.then =>
         @currentLayer.overlayFocus?.moveToBack()
         @layer.overlayFocus.moveToFront()
-        @layer.overlayFocus.focusStart(scroll: false)
+        @layer.overlayFocus.focusStart(preventScroll: true)
 
         @emitOpenedEvent()
 

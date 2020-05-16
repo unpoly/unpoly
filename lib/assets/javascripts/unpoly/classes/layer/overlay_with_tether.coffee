@@ -14,11 +14,11 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
       position: @position
     )
     @createElement(@tether.parent)
-    @createBoxElement(@element)
-    @createContentElement(@boxElement, @element)
+    # @createBoxElement(@element)
+    @createContentElement(@element)
     @setInnerContent(@contentElement, options)
     @setupHandlers()
-    @tether.start(@boxElement)
+    @tether.start(@element)
     return @startOpenAnimation(options)
 
   closeNow: (options) ->

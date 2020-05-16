@@ -91,6 +91,12 @@ class up.Layer extends up.Record
   @getter 'index', ->
     @stack.indexOf(this)
 
+  getContentElement: ->
+    @contentElement || @element
+
+  getBoxElement: ->
+    @boxElement || @element
+
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
     e.closest(element, up.layer.anySelector()) == @element
