@@ -83,7 +83,9 @@ class up.Layer.Overlay extends up.Layer
     throw up.error.notImplemented()
 
   createElement: (parentElement) ->
-    @element = @affix(parentElement, null, @elementAttrs())
+    @nesting ||= @suggestVisualNesting()
+    elementAttrs = u.compactObject({ @align, @position, @size, @class, @nesting })
+    @element = @affix(parentElement, null, elementAttrs)
 
   createBackdropElement: (parentElement) ->
     @backdropElement = @affix(parentElement, 'backdrop')
@@ -114,18 +116,18 @@ class up.Layer.Overlay extends up.Layer
     # we hide the "X" label from screen readers.
     e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
-  elementAttrs: ->
-    return u.compactObject
-      align: @align
-      position: @position,
-      size: @size,
-      class: @class
-
   affix: (parentElement, part, options = {}) ->
     return e.affix(parentElement, @selector(part), options)
 
   @selector: (part) ->
     u.compact(['up', @mode, part]).join('-')
+
+  suggestVisualNesting: ->
+    parent = @parent
+    if @mode == parent.mode
+      return 1 + parent.suggestVisualNesting()
+    else
+      return 0
 
   setupHandlers: ->
     super()

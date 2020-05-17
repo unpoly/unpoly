@@ -128,9 +128,6 @@ up-modal
 up-modal-backdrop
   @extend %overlay-backdrop
 
-=modal-viewport-padding($factor)
-  padding: ($modal-viewport-padding-y * $factor) ($modal-viewport-padding-x * $factor)
-
 up-modal-viewport
   @extend %overlay-viewport
 
@@ -138,19 +135,14 @@ up-modal-viewport
   // This way we can give .up-overlay-box a max-width of 100%, (1) preventing people
   // from setting withs larger than the viewport, and (2) sizing approproately
   // if the modal contents are very wide and cannot wrap (e.g. code blocks).
-  +modal-viewport-padding(1)
+  @for $nesting from 0 through 4
+    up-modal[nesting="#{$nesting}"] &
+      $padding-x: $modal-viewport-padding-x * ($nesting + 1)
+      $padding-y: $modal-viewport-padding-y * ($nesting + 1)
+      padding: $padding-y $padding-x
 
   // Allow frame to grow from the center, up to its max-width of 100%
   justify-content: center
-
-  up-modal + up-modal &
-    +modal-viewport-padding(2)
-
-  up-modal + up-modal + up-modal &
-    +modal-viewport-padding(3)
-
-  up-modal + up-modal + up-modal + up-modal &
-    +modal-viewport-padding(4)
 
 up-modal-box
   @extend %overlay-box
