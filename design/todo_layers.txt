@@ -13,46 +13,22 @@
   - isUnmodifiedMouseEvent
   - others?
 - close-variant events should actually say "dismissing" instead of "closing"
-- A11Y
-  - up-focus-trap breaks the up-modal+up-modal CSS rule
-
-    Evtl. muss doch alles eine box haben:
-
-      <up-popup>
-        <up-focus-trap></up-focus-trap>
-        <up-popup-box role="dialog" aria-modal>
-          <up-popup-content>
-            ...
-          </up-popup-content>
-          <up-popup-dismiss></up-popup-dismiss>
-        </up-popup-box>
-        <up-focus-trap></up-focus-trap>
-      </up-popup>
-
-  - focusing up-focus-trap will move the focus of the underlying page
-  - escape in inputs should blur the input, so another escape will close the layer
-  - [up-instant] elements need to trigger up:click on enter
-    - what exactly prevents the regular enter pressing? entering triggering click?
-  - the modal and the dismiss icon need a tabindex
-  - test that up-expand gets a tabindex
-  - destroying elements should get [inert][aria-hidden=true]
-    - remove those attrs and .up-destroying after transition to pretty-up log
-  - Check how Bootstrap 4 solves modal focus
-    - I think they only support wrap around at the end, not shift+tab
+- [up-instant] elements need to trigger up:click on enter
+  - what exactly prevents the regular enter pressing? entering triggering click?
+- test that up-expand gets a tabindex
+- destroying elements should get [inert][aria-hidden=true]
+  - remove those attrs and .up-destroying after transition to pretty-up log
 - up.fragment.first vs. up.element.get vs. up.viewport.closest
 - What's the default for { focus } in up.change({ focus })?
-- Some API would be nicer if up.viewport would return up.Viewport instances that would then have methods like #reveal()
-- Should revealSnap also snap to the bottom? This is hard because we don't know the buffer height minus obstructions
 - validating should submit with another guard event (up:form:validate)
-- Support up.form.validate(form)
-  - This should replace the entire form
-- Support up.form.validate(containerInForm)
-  - This should derive a selector from the container
+- the escape handling introduced in a54aeaaf0a984a58d4780e4c637f9fb8a28d70f8 is not good for A11Y (#118). instead we should, in layers, blur the field if we're in an input in an overlay.
+
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 
 - Tests
+  - Implement up:click tests
   - Test { layer: 'swap' }
   - Test that the original [href] or [up-href] of a link are not interpreted as patterns (if they include colons), just [up-alias]
   - Test that overlays may have sizes
@@ -242,8 +218,13 @@ Accessibility
 Later?
 ------
 
+- Some API would be nicer if up.viewport would return up.Viewport instances that would then have methods like #reveal()
+- Should revealSnap also snap to the bottom? This is hard because we don't know the buffer height minus obstructions
+- Support up.form.validate(form)
+  - This should replace the entire form
+- Support up.form.validate(containerInForm)
+  - This should derive a selector from the container
 - Stagger initial compilation with a time budget
-
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
   - For input elements this reacts on input / change

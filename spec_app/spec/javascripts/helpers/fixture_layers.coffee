@@ -9,6 +9,7 @@ window.fixtureLayers = (stackPlans) ->
 
   overlayPlans.forEach (overlayPlan) ->
     promise = promise.then ->
-      up.layer.open(overlayPlan)
+      openOpts = u.merge(overlayPlan, openAnimation: false, closeAnimation: false)
+      up.layer.open(openOpts)
 
   return promise

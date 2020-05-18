@@ -1227,3 +1227,24 @@ describe 'up.link', ->
 
         next.after 30, =>
           expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+  describe 'up:click', ->
+
+    describe 'on an element that is [up-instant]', ->
+
+      it 'emits on up:click event on mousedown'
+
+      it 'does not emit an up:click event on click'
+
+      it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)'
+
+      it 'prevents the mousedown event when the up:click event is prevented'
+
+    describe 'on an element that is not [up-instant]', ->
+
+      it 'emits an up:click event on click'
+
+      it 'prevents the click event when the up:click event is prevented'
+
+      it 'does not emit an up:click event if an element has covered the click coordinates on mousedown, which would cause browsers to create a click event on body'
+
