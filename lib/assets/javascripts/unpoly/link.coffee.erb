@@ -82,7 +82,7 @@ up.link = do ->
   preloadDelay = new up.LinkPreloadDelay()
 
   linkishSelectors = (suffixes) ->
-    u.flatMap suffixes, (suffix) -> ['a' + suffix, '[up-href]' + suffix]
+    u.flatMap suffixes, (suffix) -> ['a[href]' + suffix, '[up-href]' + suffix]
 
   config = new up.Config ->
     preloadDelay: 75

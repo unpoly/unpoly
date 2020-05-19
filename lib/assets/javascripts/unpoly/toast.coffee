@@ -38,7 +38,7 @@ up.toast = do ->
     message = messageToHTML(message)
 
     state.element = e.createFromSelector('up-toast')
-    e.affix(state.element, 'up-toast-message', text: message)
+    e.affix(state.element, 'up-toast-message', content: message)
     actions = e.affix(state.element, 'up-toast-actions')
 
     if action = options.action

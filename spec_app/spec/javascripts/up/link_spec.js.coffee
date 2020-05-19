@@ -1230,17 +1230,39 @@ describe 'up.link', ->
 
   describe 'up:click', ->
 
-    describe 'on an element that is [up-instant]', ->
+    describe 'on a link that is [up-instant]', ->
 
-      it 'emits on up:click event on mousedown'
+      it 'emits on up:click event on mousedown', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.mousedown(link)
+        expect(listener).toHaveBeenCalled()
 
-      it 'does not emit an up:click event on click'
+      it 'does not emit an up:click event on click IFF there was an earlier mousedown event', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        Trigger.mousedown(link)
+        link.addEventListener('up:click', listener)
+        Trigger.click(link)
+        expect(listener).not.toHaveBeenCalled()
 
-      it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)'
+      it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link)
+        expect(listener).toHaveBeenCalled()
 
-      it 'prevents the mousedown event when the up:click event is prevented'
+      it 'prevents the mousedown event when the up:click event is prevented', ->
+        mousedownEvent = null
+        link = fixture('a[href="#"][up-instant]')
+        link.addEventListener('mousedown', (event) -> mousedownEvent = event)
+        link.addEventListener('up:click', (event) -> event.preventDefault())
+        Trigger.mousedown(link)
+        expect(mousedownEvent.defaultPrevented).toBe(true)
 
-    describe 'on an element that is not [up-instant]', ->
+    describe 'on a link that is not [up-instant]', ->
 
       it 'emits an up:click event on click'
 

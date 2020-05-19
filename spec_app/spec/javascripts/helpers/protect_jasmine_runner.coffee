@@ -95,8 +95,12 @@ beforeEach ->
   window.defaultClickedLinks = []
 
   up.on 'click', 'a[href]', (event) ->
-    window.defaultClickedLinks.push(event.target)
-    event.preventDefault()
+    link = event.target
+    browserWouldNavigate = !(u.contains(link.href, '#') && up.history.isLocation(link.href))
+
+    if browserWouldNavigate
+      window.defaultClickedLinks.push(link)
+      event.preventDefault()
 
   jasmine.addMatchers
     toHaveBeenDefaultFollowed: (util, customEqualityTesters) ->
