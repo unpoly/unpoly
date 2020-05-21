@@ -220,7 +220,7 @@ up.form = do ->
     options.params = up.Params.fromForm(form).addAll(options.params)
 
     # The guardEvent will also be assigned an { options } attribute in up.change()
-    options.guardEvent = up.event.build('up:form:submit', log: 'Submitting form')
+    options.guardEvent ||= up.event.build('up:form:submit', log: 'Submitting form')
 
     # Now that we have extracted everything form-specific into options, we can call
     # up.link.follow(). This will also parse the myriads of other options that are
@@ -394,6 +394,9 @@ up.form = do ->
     options.headers[up.protocol.config.validateHeader] = options.validate
     options.reveal ?= false
     options.focus ?= 'keep'
+
+    # The guardEvent will also be assigned an { options } attribute in up.change()
+    options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')
 
     return submit(field, options)
 
