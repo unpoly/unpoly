@@ -390,6 +390,7 @@ up.link = do ->
     forwardedKeys = ['stopPropagation', 'stopImmediatePropagation', 'preventDefault']
 
     newEvent = up.event.build('up:click', u.pick(originalEvent, copiedKeys))
+    newEvent.originalEvent = originalEvent # allow users to access other props through event.originalEvent.prop
 
     forwardedKeys.forEach (key) ->
       originalMethod = newEvent[key]

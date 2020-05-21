@@ -5,43 +5,43 @@ $ = jQuery
 @Trigger = (->
 
   mouseover = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('mouseover', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('mouseover', u.merge({ element }, options))
+    dispatch(element, event)
 
   mouseenter = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('mouseenter', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('mouseenter', u.merge({ element }, options))
+    dispatch(element, event)
 
   mousedown = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('mousedown', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('mousedown', u.merge({ element }, options))
+    dispatch(element, event)
 
   mouseout = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('mouseout', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('mouseout', u.merge({ element }, options))
+    dispatch(element, event)
 
   mouseleave = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('mouseleave', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('mouseleave', u.merge({ element }, options))
+    dispatch(element, event)
 
   mouseup = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('mouseup', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('mouseup', u.merge({ element }, options))
+    dispatch(element, event)
 
   click = (element, options) ->
-    $element = $(element)
-    event = createMouseEvent('click', options)
-    dispatch($element, event)
+    element = e.get(element)
+    event = createMouseEvent('click', u.merge({ element }, options))
+    dispatch(element, event)
 
   focus = (element, options) ->
-    $element = $(element)
-    $element.focus()
+    element = e.get(element)
+    element.focus()
 
   submit = (form, options) ->
     form = e.get(form)
@@ -80,22 +80,22 @@ $ = jQuery
       element.dispatchEvent(event)
 
   clickSequence = (element, options) ->
-    $element = $(element)
-    mouseover($element, options)
-    mousedown($element, options)
-    focus($element, options)
-    mouseup($element, options)
-    click($element, options)
+    element = e.get(element)
+    mouseover(element, options)
+    mousedown(element, options)
+    focus(element, options)
+    mouseup(element, options)
+    click(element, options)
 
   hoverSequence = (element, options) ->
-    $element = $(element)
-    mouseover($element, options)
-    mouseenter($element, options)
+    element = e.get(element)
+    mouseover(element, options)
+    mouseenter(element, options)
 
   unhoverSequence = (element, options) ->
-    $element = $(element)
-    mouseout($element, options)
-    mouseleave($element, options)
+    element = e.get(element)
+    mouseout(element, options)
+    mouseleave(element, options)
 
   # Can't use the new Event constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
@@ -110,8 +110,8 @@ $ = jQuery
 
   # Can't use the new MouseEvent constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
-  createMouseEvent = (type, options) ->
-    options = u.options(options,
+  createMouseEvent = (type, options = {}) ->
+    defaults =
       view: window,
       cancelable: true,
       bubbles: true,
@@ -126,7 +126,21 @@ $ = jQuery
       metaKey: false,
       button: 0,
       relatedTarget: null
-    )
+
+    # If we get an { element } options we can derive the { clientX } and { screenY } properties
+    # from the element's center coordinates.
+    if element = options.element
+      console.debug("--- getting coordinates from", element)
+      elementRect = element.getBoundingClientRect()
+      defaults.clientX = elementRect.left + (0.5 * elementRect.width)
+      defaults.clientY = elementRect.top + (0.5 * elementRect.height)
+
+    options = u.options(options, defaults)
+
+    # If { screenX, screenY } are not given we can derive it from { clientX, clientY }.
+    options.screenX ?= options.clientX + window.screenX
+    options.screenY ?= options.clientY + window.screenY
+
     event = document.createEvent('MouseEvent')
     event.initMouseEvent(type,
       options.bubbles,

@@ -945,8 +945,9 @@ describe 'up.link', ->
           next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing on click', asyncSpec (next)->
+          Trigger.mousedown(@$link)
           Trigger.click(@$link)
-          next => expect(@followSpy).not.toHaveBeenCalled()
+          next => expect(@followSpy.calls.count()).toBe(1)
 
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()
@@ -1264,9 +1265,33 @@ describe 'up.link', ->
 
     describe 'on a link that is not [up-instant]', ->
 
-      it 'emits an up:click event on click'
+      it 'emits an up:click event on click', ->
+        link = fixture('a[href="#"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link)
+        expect(listener).toHaveBeenCalled()
 
-      it 'prevents the click event when the up:click event is prevented'
+      it 'prevents the click event when the up:click event is prevented', ->
+        clickEvent = null
+        link = fixture('a[href="#"]')
+        link.addEventListener('click', (event) -> clickEvent = event)
+        link.addEventListener('up:click', (event) -> event.preventDefault())
+        Trigger.click(link)
+        expect(clickEvent.defaultPrevented).toBe(true)
 
-      it 'does not emit an up:click event if an element has covered the click coordinates on mousedown, which would cause browsers to create a click event on body'
+      it 'does not emit an up:click event if an element has covered the click coordinates on mousedown, which would cause browsers to create a click event on body', asyncSpec (next) ->
+        link = fixture('a[href="#"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        link.addEventListener('mousedown', ->
+          up.layer.open(mode: 'cover', content: 'cover text')
+        )
+        Trigger.mousedown(link)
 
+        next ->
+          expect(up.layer.mode).toBe('cover')
+          Trigger.click(link)
+
+        next ->
+          expect(listener).not.toHaveBeenCalled()
