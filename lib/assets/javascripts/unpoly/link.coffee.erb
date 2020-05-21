@@ -159,8 +159,8 @@ up.link = do ->
   @stable
   ###
   follow = (link, options) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    link = up.fragment.first(link)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    link = up.fragment.get(link)
     options = u.options(options)
 
     # TODO: Document new follow options like onOpened, [up-on-opened], ...
@@ -269,8 +269,8 @@ up.link = do ->
   @experimental
   ###
   preload = (link, options) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    link = up.fragment.first(link)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    link = up.fragment.get(link)
 
     if isSafe(link)
       guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
@@ -316,8 +316,8 @@ up.link = do ->
   @experimental
   ###
   isFollowable = (linkOrSelector) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    link = up.fragment.first(linkOrSelector)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    link = up.fragment.get(linkOrSelector)
     e.matches(link, fullFollowSelector())
 
   ###**
@@ -686,7 +686,7 @@ up.link = do ->
   up.macro '[up-expand]', (area) ->
     selector = area.getAttribute('up-expand') || 'a, [up-href]'
 
-    if childLink = e.first(area, selector)
+    if childLink = e.get(area, selector)
       areaAttrs = e.upAttrs(childLink)
       areaAttrs['up-href'] ||= childLink.getAttribute('href')
       areaAttrs['tabindex'] = childLink.tabIndex || 0

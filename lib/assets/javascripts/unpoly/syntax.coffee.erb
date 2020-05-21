@@ -448,8 +448,8 @@ up.syntax = do ->
   @stable
   ###
   readData = (elementOrSelector) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    element = up.fragment.first(elementOrSelector)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    element = up.fragment.get(elementOrSelector)
     e.jsonAttr(element, 'up-data') || {}
 
   ###**

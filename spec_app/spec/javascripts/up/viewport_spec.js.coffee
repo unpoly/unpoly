@@ -461,19 +461,19 @@ describe 'up.viewport', ->
 
         expect(actual).toMatchList(expected)
 
-    describe 'up.viewport.closest', ->
+    describe 'up.viewport.get', ->
 
       it 'seeks upwards from the given element', ->
         up.viewport.config.viewports = ['.viewport1', '.viewport2']
         $viewport1 = $fixture('.viewport1')
         $viewport2 = $fixture('.viewport2')
         $element = $fixture('div').appendTo($viewport2)
-        expect(up.viewport.closest($element)).toEqual($viewport2[0])
+        expect(up.viewport.get($element)).toEqual($viewport2[0])
 
       it 'returns the given element if it is a configured viewport itself', ->
         up.viewport.config.viewports = ['.viewport']
         $viewport = $fixture('.viewport')
-        expect(up.viewport.closest($viewport)).toEqual($viewport[0])
+        expect(up.viewport.get($viewport)).toEqual($viewport[0])
 
       describe 'when no configured viewport matches', ->
 
@@ -483,21 +483,21 @@ describe 'up.viewport', ->
 
         it 'falls back to the scrolling element', ->
           $element = $fixture('.element').css(height: '3000px')
-          $result = up.viewport.closest($element)
+          $result = up.viewport.get($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
           $element = $fixture('.element').css(height: '3000px')
           @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'hidden')
           @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'scroll')
-          $result = up.viewport.closest($element)
+          $result = up.viewport.get($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
           $element = $fixture('.element').css(height: '3000px')
           @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'scroll')
           @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'hidden')
-          $result = up.viewport.closest($element)
+          $result = up.viewport.get($element)
           expect($result).toMatchSelector(up.viewport.rootSelector())
 
     describe 'up.viewport.restoreScroll', ->

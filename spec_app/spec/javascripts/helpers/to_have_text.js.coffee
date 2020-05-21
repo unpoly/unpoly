@@ -8,7 +8,7 @@ beforeEach ->
         if container instanceof up.Layer
           element = container.getContentElement()
         else
-          element = up.fragment.first(container)
+          element = up.fragment.get(container)
 
         actualText = element?.textContent?.trim()
 

@@ -601,7 +601,7 @@ describe 'up.form', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toEqual(e.first('#foo-form .form-child'))
+                expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
 
           describe 'with { failReveal } option', ->
 
@@ -650,7 +650,7 @@ describe 'up.form', ->
 
               next =>
                 expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toEqual(e.first('#foo-form .form-child'))
+                expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
 
         describe 'in a form with file inputs', ->
 

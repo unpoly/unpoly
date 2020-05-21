@@ -76,7 +76,7 @@ describe 'up.fragment', ->
 
         it 'returns the first argument if that is already an element, even if { layer } is given', ->
           match = fixture('.match')
-          result = up.fragment.first(match, layer: 'root')
+          result = up.fragment.get(match, layer: 'root')
           expect(result).toBe(match)
 
     describe 'up.change()', ->

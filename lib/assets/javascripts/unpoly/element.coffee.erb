@@ -65,7 +65,7 @@ up.element = do ->
   It is similar to [`element.querySelector()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector),
   but also supports the [`:has()`](/has) selector.
 
-  @function up.element.first
+  @function first
   @param {Element} [parent=document]
     The parent element whose descendants to search.
 
@@ -76,7 +76,7 @@ up.element = do ->
     The first element matching the selector.
 
     Returns `null` or `undefined` if no element macthes.
-  @experimental
+  @internal
   ###
   first = (args...) ->
     selector = args.pop()
@@ -165,31 +165,34 @@ up.element = do ->
     parseSelector(selector).ancestor(element)
 
   ###**
-  Casts the given value to a native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element).
-
-  This is useful when working with jQuery values, or to allow callers to pass CSS selectors
-  instead of elements.
+  Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
   \#\#\# Casting rules
 
   - If given an element, returns that element.
-  - If given a CSS selector string, returns the [first element matching](/up.element.first) that selector.
+  - If given a CSS selector string, returns the first element matching that selector.
   - If given a jQuery collection , returns the first element in the collection.
     Throws an error if the collection contains more than one element.
   - If given any other argument (`undefined`, `null`, `document`, `window`…), returns the argument unchanged.
 
   @function up.element.get
+  @param {Element} [parent=document]
+    The parent element whose descendants to search if `value` is a CSS selector string.
+
+    If omitted, all elements in the `document` will be searched.
   @param {Element|jQuery|string} value
-    The value to cast.
+    The value to look up.
   @return {Element}
     The obtained `Element`.
   @experimental
   ###
-  getOne = (value) ->
+  getOne = (args...) ->
+    value = args.pop()
+
     if u.isElement(value) # Return an element before we run any other expensive checks
       value
     else if u.isString(value)
-      first(value)
+      first(args..., value)
     else if u.isList(value)
       if value.length > 1
         up.fail('up.element.get(): Cannot cast multiple elements (%o) to a single element', value)
@@ -1164,7 +1167,9 @@ up.element = do ->
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     # also document :has()!
-    first: first # same as document.querySelector
+    first: (args...) ->
+      up.legacy.deprecated('up.element.first()', 'up.element.get()')
+      getOne(args...)
     all: all # same as document.querySelectorAll
     subtree: subtree # practical
     isInSubtree: isInSubtree

@@ -97,7 +97,7 @@ up.form = do ->
       return focusedElement
     else
       # If no button is focused, we assume the first button in the form.
-      return e.first(form, selector)
+      return e.get(form, selector)
 
   ###**
   @function up.form.submitButtonSelector
@@ -200,8 +200,8 @@ up.form = do ->
   submit = (formOrSelector, options) ->
     options = u.options(options)
 
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    form = up.fragment.first(formOrSelector)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    form = up.fragment.get(formOrSelector)
     form = e.closest(form, 'form')
 
     parser = new up.OptionParser(options, form, fail: true)
@@ -375,8 +375,8 @@ up.form = do ->
   @stable
   ###
   validate = (fieldOrSelector, options) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    field = up.fragment.first(fieldOrSelector)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    field = up.fragment.get(fieldOrSelector)
 
     options = u.options(options)
     options.origin = field

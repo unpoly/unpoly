@@ -92,7 +92,7 @@ class up.Layer.Overlay extends up.Layer
 
   createViewportElement: (parentElement) ->
     # Give the viewport element an [up-viewport] attribute so it will be found
-    # by up.viewport.closest().
+    # by up.viewport.get().
     @viewportElement = @affix(parentElement, 'viewport', 'up-viewport': '')
 
   createBoxElement: (parentElement) ->

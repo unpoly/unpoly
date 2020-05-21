@@ -237,8 +237,8 @@ up.feedback = do ->
 
     if element
       # In case we get passed a selector or jQuery collection as { origin }
-      # or { feedback }, unwrap it with up.fragment.first().
-      element = up.fragment.first(element)
+      # or { feedback }, unwrap it with up.fragment.get().
+      element = up.fragment.get(element)
 
       return around(element, fn)
     else

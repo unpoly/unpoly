@@ -34,12 +34,12 @@ class up.Focus extends up.Record
       @focusElement(value, options)
     else if u.isString(value)
       # TODO: Document [up-focus] attribute
-      if element = up.fragment.first(value, options)
+      if element = up.fragment.get(value, options)
         @focusElement(element, options)
 
   @focusElement: (element, options = {}) ->
     if options.preventScroll # polyfill for IE11
-      viewport = up.viewport.closest(element)
+      viewport = up.viewport.get(element)
       oldScrollTop = viewport.scrollTop
       element.focus()
       viewport.scrollTop = oldScrollTop

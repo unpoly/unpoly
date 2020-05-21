@@ -5,7 +5,7 @@ class up.RevealMotion
 
   constructor: (@element, options = {}) ->
     viewportConfig = up.viewport.config
-    @viewport = options.viewport || up.viewport.closest(@element)
+    @viewport = options.viewport || up.viewport.get(@element)
     @obstructionsLayer = up.layer.get(@viewport)
 
     up.legacy.fixKey(viewportConfig, 'snap', 'revealSnap')

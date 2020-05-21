@@ -162,7 +162,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       u.isString(partnerSelector) or partnerSelector = '&'
       partnerSelector = e.resolveSelector(partnerSelector, keepable)
       if options.descendantsOnly
-        partner = e.first(options.newElement, partnerSelector)
+        partner = e.get(options.newElement, partnerSelector)
       else
         partner = e.subtree(options.newElement, partnerSelector)[0]
       if partner && e.matches(partner, '[up-keep]')
@@ -231,7 +231,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     for step in @steps
       # Try to find fragments matching step.selector within step.layer.
       # Note that step.oldElement might already have been set by @parseSteps().
-      step.oldElement ||= up.fragment.first(step.selector, step) or
+      step.oldElement ||= up.fragment.get(step.selector, step) or
         throw @notApplicable("Could not find element \"#{@target}\" in current page")
     @resolveOldNesting()
     @foundOld = true

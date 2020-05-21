@@ -38,7 +38,7 @@ up.fragment = do ->
   ###
   source = (args...) ->
     options = parseTargetAndOptions(args)
-    element = first(options.target, options)
+    element = getOne(options.target, options)
 
     if url = element.upSource
       url
@@ -410,8 +410,8 @@ up.fragment = do ->
   @stable
   ###
   hello = (element, options = {}) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    element = first(element)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    element = getOne(element)
 
     # Callers may pass descriptions of child elements that were [kept](/up-keep)
     # as { options.keepPlans }. For these elements up.hello() emits an event
@@ -487,24 +487,24 @@ up.fragment = do ->
 
   To select the first element with the selector `.foo`:
 
-      var fooInModal = up.fragment.first('.foo')
+      var fooInModal = up.fragment.get('.foo')
 
   You may also pass a `{ layer }` option to only match elements witin a layer:
 
-      var fooInModal = up.fragment.first('.foo', { layer: 'modal' })
+      var fooInModal = up.fragment.get('.foo', { layer: 'modal' })
 
   You may also pass a root element as a first argument:
 
-      var container = up.fragment.first('.container')
-      var fooInContainer = up.fragment.first(container, '.foo')
+      var container = up.fragment.get('.container')
+      var fooInContainer = up.fragment.get(container, '.foo')
 
   \#\#\# Similar features
 
   - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
-  - The [`up.element.first()`](/up.element.first) function simply returns the first element matching a selector
+  - The [`up.element.get()`](/up.element.get) function simply returns the first element matching a selector
     without further filtering.
 
-  @function up.fragment.first
+  @function up.fragment.get
   @param {Element|jQuery} [root=document]
     The root element for the search. Only the root's children will be matched.
 
@@ -519,18 +519,18 @@ up.fragment = do ->
     An second element or selector that can be referenced as `&` in the first selector:
 
         var input = document.querySelector('input.email')
-        up.fragment.first('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
+        up.fragment.get('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
   @return {Element|undefined}
     The first element that is neither a ghost or being destroyed,
     or `undefined` if no such element was found.
   @experimental
   ###
-  first = (args...) ->
+  getOne = (args...) ->
     # TODO: Change docs
-    all(args...)[0]
+    getAll(args...)[0]
 
   # TODO: Docs for up.fragment.all
-  all = (args...) ->
+  getAll = (args...) ->
     options = u.extractOptions(args)
     lastArg = u.last(args)
 
@@ -587,7 +587,7 @@ up.fragment = do ->
   destroy = (args...) ->
     options = parseTargetAndOptions(args)
 
-    if options.element = first(options.target, options)
+    if options.element = getOne(options.target, options)
       return new up.Change.DestroyFragment(options).executeAsync()
     else
       return Promise.resolve()
@@ -603,7 +603,7 @@ up.fragment = do ->
   If the removal is animated, the class is assigned before the animation starts.
 
   To select an element while ignoring elements that are being destroyed,
-  see the [`up.fragment.first()`](/up.fragment.first) function.
+  see the [`up.fragment.get()`](/up.fragment.get) function.
 
   @selector .up-destroying
   @stable
@@ -703,8 +703,11 @@ up.fragment = do ->
     destroy: destroy
     change: makeChange
     extract: extract
-    first: first
-    all: all
+    first: (args...) ->
+      up.legacy.deprecated('up.fragment.get()', 'up.fragment.get()')
+      getOne(args...)
+    get: getOne
+    all: getAll
     source: source
     setSource: setSource
     hello: hello
@@ -728,8 +731,8 @@ up.hello = up.fragment.hello
 up.visit = up.fragment.visit
 
 up.first = (args...) ->
-  up.legacy.deprecated('up.first()', 'up.fragment.first()')
-  up.fragment.first(args...)
+  up.legacy.deprecated('up.first()', 'up.fragment.get()')
+  up.fragment.get(args...)
 
 up.legacy.renamedModule 'flow', 'fragment'
 up.legacy.renamedModule 'dom', 'fragment'

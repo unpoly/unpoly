@@ -20,10 +20,6 @@ describe 'up.element', ->
       get = -> up.element.get($list)
       expect(get).toThrowError(/cannot cast/i)
 
-    it 'returns the first element matching the given CSS selector string', ->
-      match = fixture('.match')
-      expect(up.element.get('.match')).toBe(match)
-
     it 'returns the given document object', ->
       expect(up.element.get(document)).toBe(document)
 
@@ -36,72 +32,72 @@ describe 'up.element', ->
     it 'returns null for null', ->
       expect(up.element.get(null)).toBeNull()
 
-  describe 'up.element.first()', ->
+    describe 'for a CSS selector string', ->
 
-    it 'returns the first element matching the given selector', ->
-      match = fixture('.match')
-      otherMatch = fixture('.match')
-      noMatch = fixture('.no-match')
-      result = up.element.first('.match')
-      expect(result).toBe(match)
-
-    it 'supports the custom :has() selector', ->
-      match = fixture('.match')
-      otherMatch = fixture('.match')
-      otherMatchChild = up.element.affix(otherMatch, '.child')
-
-      result = up.element.first('.match:has(.child)')
-      expect(result).toBe(otherMatch)
-
-    describe 'when given a root element for the search', ->
-
-      it 'returns the first descendant of the given root that matches the given selector', ->
-        $element = $fixture('.element')
-        $matchingChild = $element.affix('.child.match')
-        $matchingGrandChild = $matchingChild.affix('.grand-child.match')
-        $otherChild = $element.affix('.child')
-        $otherGrandChild = $otherChild.affix('.grand-child')
-        result = up.element.first($element[0], '.match')
-        expect(result).toEqual $matchingChild[0]
-
-      it 'returns missing if no descendant matches', ->
-        $element = $fixture('.element')
-        $child = $element.affix('.child')
-        $grandChild = $child.affix('.grand-child')
-        result = up.element.first($element[0], '.match')
-        expect(result).toBeMissing()
-
-      it 'does not return the root itself, even if it matches', ->
-        $element = $fixture('.element.match')
-        result = up.element.first($element[0], '.match')
-        expect(result).toBeMissing()
-
-      it 'does not return an ancestor of the root, even if it matches', ->
-        $parent = $fixture('.parent.match')
-        $element = $parent.affix('.element')
-        result = up.element.first($element[0], '.match')
-        expect(result).toBeMissing()
+      it 'returns the first element matching the given selector', ->
+        match = fixture('.match')
+        otherMatch = fixture('.match')
+        noMatch = fixture('.no-match')
+        result = up.element.get('.match')
+        expect(result).toBe(match)
 
       it 'supports the custom :has() selector', ->
-        $element = $fixture('.element')
-        $childWithSelectorWithChild = $element.affix('.selector')
-        $childWithSelectorWithChild.affix('.match')
-        $childWithSelectorWithoutChild = $element.affix('.selector')
-        $childWithoutSelectorWithChild = $element.affix('.other-selector')
-        $childWithoutSelectorWithChild.affix('.match')
-        $childWithoutSelectorWithoutChild = $fixture('.other-selector')
+        match = fixture('.match')
+        otherMatch = fixture('.match')
+        otherMatchChild = up.element.affix(otherMatch, '.child')
 
-        result = up.element.first($element[0], '.selector:has(.match)')
-        expect(result).toBe $childWithSelectorWithChild[0]
+        result = up.element.get('.match:has(.child)')
+        expect(result).toBe(otherMatch)
 
-      it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
-        $element = $fixture('.element')
-        $childWithSelectorWithoutChild = $element.affix('.selector')
-        $childWithSelectorWithChild = $element.affix('.selector')
-        $childWithSelectorWithChild.affix('.match')
+      describe 'when given a root element for the search', ->
 
-        result = up.element.first($element[0], '.selector:has(.match)')
-        expect(result).toBe $childWithSelectorWithChild[0]
+        it 'returns the first descendant of the given root that matches the given selector', ->
+          $element = $fixture('.element')
+          $matchingChild = $element.affix('.child.match')
+          $matchingGrandChild = $matchingChild.affix('.grand-child.match')
+          $otherChild = $element.affix('.child')
+          $otherGrandChild = $otherChild.affix('.grand-child')
+          result = up.element.get($element[0], '.match')
+          expect(result).toEqual $matchingChild[0]
+
+        it 'returns missing if no descendant matches', ->
+          $element = $fixture('.element')
+          $child = $element.affix('.child')
+          $grandChild = $child.affix('.grand-child')
+          result = up.element.get($element[0], '.match')
+          expect(result).toBeMissing()
+
+        it 'does not return the root itself, even if it matches', ->
+          $element = $fixture('.element.match')
+          result = up.element.get($element[0], '.match')
+          expect(result).toBeMissing()
+
+        it 'does not return an ancestor of the root, even if it matches', ->
+          $parent = $fixture('.parent.match')
+          $element = $parent.affix('.element')
+          result = up.element.get($element[0], '.match')
+          expect(result).toBeMissing()
+
+        it 'supports the custom :has() selector', ->
+          $element = $fixture('.element')
+          $childWithSelectorWithChild = $element.affix('.selector')
+          $childWithSelectorWithChild.affix('.match')
+          $childWithSelectorWithoutChild = $element.affix('.selector')
+          $childWithoutSelectorWithChild = $element.affix('.other-selector')
+          $childWithoutSelectorWithChild.affix('.match')
+          $childWithoutSelectorWithoutChild = $fixture('.other-selector')
+
+          result = up.element.get($element[0], '.selector:has(.match)')
+          expect(result).toBe $childWithSelectorWithChild[0]
+
+        it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
+          $element = $fixture('.element')
+          $childWithSelectorWithoutChild = $element.affix('.selector')
+          $childWithSelectorWithChild = $element.affix('.selector')
+          $childWithSelectorWithChild.affix('.match')
+
+          result = up.element.get($element[0], '.selector:has(.match)')
+          expect(result).toBe $childWithSelectorWithChild[0]
 
   describe 'up.element.all()', ->
 

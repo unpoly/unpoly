@@ -243,9 +243,9 @@ describe 'up.feedback', ->
               """
 
             next =>
-              @layerLinkToBackgroundURL = e.first('.layer-content a[href="/background-url"]')
-              @layerLinkToLayerURL = e.first('.layer-content a[href="/layer-url"]')
-              @layerLinkToOtherURL = e.first('.layer-content a[href="/other-url"]')
+              @layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
+              @layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
+              @layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
 
               expect(@backgroundLinkToBackgroundURL).toHaveClass('up-current')
               expect(@backgroundLinkToLayerURL).not.toHaveClass('up-current')
@@ -281,9 +281,9 @@ describe 'up.feedback', ->
               expect(up.layer.location).toMatchURL('/layer-url')
               expect(location.href).toMatchURL('/background-url')
 
-              @layerLinkToBackgroundURL = e.first('.layer-content a[href="/background-url"]')
-              @layerLinkToLayerURL = e.first('.layer-content a[href="/layer-url"]')
-              @layerLinkToOtherURL = e.first('.layer-content a[href="/other-url"]')
+              @layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
+              @layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
+              @layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
 
               expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
               expect(@layerLinkToLayerURL).toHaveClass('up-current')

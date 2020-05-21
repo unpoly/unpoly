@@ -123,7 +123,7 @@ up.viewport = do ->
   @experimental
   ###
   scroll = (viewport, scrollTop, options = {}) ->
-    viewport = f.first(viewport, options)
+    viewport = f.get(viewport, options)
     motion = new up.ScrollMotion(viewport, scrollTop, options)
     scrollingController.startMotion(viewport, motion, options)
 
@@ -220,7 +220,7 @@ up.viewport = do ->
   reveal = (elementOrSelector, options) ->
     # copy options, since we will mutate it below
     options = u.options(options, peel: true, snap: true)
-    element = f.first(elementOrSelector, options)
+    element = f.get(elementOrSelector, options)
 
     # Now that we have looked up the element with an option like { layer: 'any' },
     # the only layer relevant from here on is the element's layer.
@@ -275,7 +275,7 @@ up.viewport = do ->
       # We allow to pass a selector as { reveal } option
       else if u.isString(revealOpt)
         selector = e.resolveSelector(revealOpt, options.origin)
-        element = f.first(selector, options)
+        element = f.get(selector, options)
 
       else
         # We reveal the given element
@@ -344,7 +344,7 @@ up.viewport = do ->
   @experimental
   ###
   closest = (target, options = {}) ->
-    element = f.first(target, options)
+    element = f.get(target, options)
     # It is OK to find a viewport in a parent layer. Layers without its own viewport (like popups)
     # are scrolled by the parent layer's viewport.
     e.closest(element, allSelector())
@@ -359,11 +359,11 @@ up.viewport = do ->
   @internal
   ###
   getSubtree = (target, options = {}) ->
-    element = f.first(target, options)
+    element = f.get(target, options)
     e.subtree(element, allSelector())
 
   getAround = (target, options = {}) ->
-    element = f.first(target, options)
+    element = f.get(target, options)
     e.list(closest(element, options), getSubtree(element, options))
 
   ###**
@@ -558,7 +558,7 @@ up.viewport = do ->
   @internal
   ###
   absolutize = (element, options = {}) ->
-    viewport = up.viewport.closest(element)
+    viewport = closest(element)
 
     viewportRect = viewport.getBoundingClientRect()
     originalRect = element.getBoundingClientRect()
@@ -757,7 +757,7 @@ up.viewport = do ->
         # Match an <a name="hash">
         'a' + e.attributeSelector('name', hash)
       ].join(',')
-      f.first(selector, options)
+      f.get(selector, options)
 
   ###**
   Returns `'foo'` if the hash is `'#foo'`.
@@ -783,7 +783,10 @@ up.viewport = do ->
     firstHashTarget: firstHashTarget
     scroll: scroll
     config: config
-    closest: closest
+    closest: (args...) ->
+      up.legacy.deprecated('up.viewport.closest()', 'up.viewport.get()')
+      return closest(args...)
+    get: closest
     subtree: getSubtree
     around: getAround
     all: getAll

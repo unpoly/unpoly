@@ -14,7 +14,7 @@ class up.Tether
 
     @alignAxis = if @position == 'top' || @position == 'bottom' then 'horizontal' else 'vertical'
 
-    @viewport = up.viewport.closest(@anchor)
+    @viewport = up.viewport.get(@anchor)
     # The document viewport is <html> on some browsers, and we cannot attach children to that.
     @parent = if @viewport == e.root then document.body else @viewport
 

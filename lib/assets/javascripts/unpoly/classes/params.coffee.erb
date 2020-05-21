@@ -438,8 +438,8 @@ class up.Params
   @experimental
   ###
   @fromForm: (form) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    if form = up.fragment.first(form)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    if form = up.fragment.get(form)
       fields = up.form.submissionFields(form)
       @fromFields(fields)
 

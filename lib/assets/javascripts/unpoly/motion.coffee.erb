@@ -159,8 +159,8 @@ up.motion = do ->
   @stable
   ###
   animate = (elementOrSelector, animation, options) ->
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    element = up.fragment.first(elementOrSelector)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    element = up.fragment.get(elementOrSelector)
     options = u.options(options)
     applyConfig(options)
 
@@ -328,9 +328,9 @@ up.motion = do ->
     options = u.options(options)
     applyConfig(options)
 
-    # If passed a selector, up.fragment.first() will prefer a match on the current layer.
-    oldElement = up.fragment.first(oldElement)
-    newElement = up.fragment.first(newElement)
+    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    oldElement = up.fragment.get(oldElement)
+    newElement = up.fragment.get(newElement)
 
     transitionFn = findTransitionFn(transitionObject)
     willMorph = willAnimate(oldElement, transitionFn, options)
@@ -356,7 +356,7 @@ up.motion = do ->
 
       up.puts('up.morph()', 'Morphing %o to %o with transition %O', oldElement, newElement, transitionObject)
 
-      viewport = up.viewport.closest(oldElement)
+      viewport = up.viewport.get(oldElement)
       scrollTopBeforeReveal = viewport.scrollTop
 
       oldRemote = up.viewport.absolutize oldElement,
