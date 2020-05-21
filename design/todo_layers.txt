@@ -13,12 +13,8 @@
   - isUnmodifiedMouseEvent
   - others?
 - close-variant events should actually say "dismissing" instead of "closing"
-- [up-instant] elements need to trigger up:click on enter
-  - what exactly prevents the regular enter pressing? entering triggering click?
-- test that up-expand gets a tabindex
 - destroying elements should get [inert][aria-hidden=true]
   - remove those attrs and .up-destroying after transition to pretty-up log
-- up.fragment.first vs. up.element.get vs. up.viewport.closest
 - What's the default for { focus } in up.change({ focus })?
 - validating should submit with another guard event (up:form:validate)
 - the escape handling introduced in a54aeaaf0a984a58d4780e4c637f9fb8a28d70f8 is not good for A11Y (#118). instead we should, in layers, blur the field if we're in an input in an overlay.
@@ -29,7 +25,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
-  - Implement up:click tests
+  - test that up-expand gets a tabindex
   - Test { layer: 'swap' }
   - Test that the original [href] or [up-href] of a link are not interpreted as patterns (if they include colons), just [up-alias]
   - Test that overlays may have sizes
