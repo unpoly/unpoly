@@ -1059,17 +1059,6 @@ up.util = do ->
     array[array.length - 1]
 
   ###**
-  Returns whether the given keyboard event involved the ESC key.
-
-  @function up.util.escapePressed
-  @internal
-  ###
-  escapePressed = (event) ->
-    key = event.key
-    # IE/Edge use 'Esc', other browsers use 'Escape'
-    key == 'Escape' || key == 'Esc'
-
-  ###**
   Returns whether the given value contains another value.
 
   If `value` is a string, this returns whether `subValue` is a sub-string of `value`.
@@ -1160,21 +1149,6 @@ up.util = do ->
   ###
   omit = (object, keys) ->
     pickBy(object, (value, key) -> !contains(keys, key))
-
-  ###**
-  @function up.util.isUnmodifiedKeyEvent
-  @internal
-  ###
-  isUnmodifiedKeyEvent = (event) ->
-    not (event.metaKey or event.shiftKey or event.ctrlKey)
-
-  ###**
-  @function up.util.isUnmodifiedMouseEvent
-  @internal
-  ###
-  isUnmodifiedMouseEvent = (event) ->
-    isLeftButton = isUndefined(event.button) || event.button == 0
-    isLeftButton && isUnmodifiedKeyEvent(event)
 
   ###**
   Returns a promise that will never be resolved.
@@ -1827,13 +1801,10 @@ up.util = do ->
   isArguments: isArguments
   isList: isList
   isRegExp: isList
-  isUnmodifiedKeyEvent: isUnmodifiedKeyEvent
-  isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
   timer: scheduleTimer
   setTimer: (args...) ->
     up.legacy.warn('up.util.setTimer() has been renamed to up.util.timer()')
     scheduleTimer(args...)
-  escapePressed: escapePressed
   contains: contains
   objectContains: objectContains
   toArray: toArray

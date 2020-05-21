@@ -347,12 +347,23 @@ up.event = do ->
   ###
   onEscape = (listener) ->
     bind('keydown', 'body', (event) ->
-      if u.escapePressed(event)
+      if escapePressed(event)
         focusedElement = document.activeElement
         # Input fields often have their own handling for Escape, to blur, reset, etc.
         if !focusedElement || !e.closest(focusedElement, up.form.fieldSelector())
           listener(event)
     )
+
+  ###**
+  Returns whether the given keyboard event involved the ESC key.
+
+  @function up.util.escapePressed
+  @internal
+  ###
+  escapePressed = (event) ->
+    key = event.key
+    # IE/Edge use 'Esc', other browsers use 'Escape'
+    key == 'Escape' || key == 'Esc'
 
   ###**
   Prevents the event from bubbling up the DOM.
@@ -380,6 +391,21 @@ up.event = do ->
       callback()
     else
       document.addEventListener('DOMContentLoaded', callback)
+
+  ###**
+  @function isUnmodifiedKeyEvent
+  @internal
+  ###
+  isUnmodifiedKeyEvent = (event) ->
+    not (event.metaKey or event.shiftKey or event.ctrlKey)
+
+  ###**
+  @function up.event.isUnmodifiedMouseEvent
+  @internal
+  ###
+  isUnmodifiedMouseEvent = (event) ->
+    isLeftButton = u.isUndefined(event.button) || event.button == 0
+    isLeftButton && isUnmodifiedKeyEvent(event)
 
 #  bind '[up-emit]', 'click up:action:consume', (consumeEvent, element) ->
 #
@@ -409,6 +435,7 @@ up.event = do ->
   onEscape: onEscape
   halt: halt
   onReady: onReady
+  isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
 
 up.on = up.event.on
 up.$on = up.event.$on

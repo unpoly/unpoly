@@ -338,7 +338,7 @@ up.link = do ->
 
   shouldFollowEvent = (event, link) ->
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
-    return false unless u.isUnmodifiedMouseEvent(event)
+    return false unless up.event.isUnmodifiedMouseEvent(event)
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
