@@ -680,10 +680,8 @@ describe 'up.form', ->
       it 'emits an up:form:validate event instead of an up:form:submit event', asyncSpec (next) ->
         form = fixture('form[action=/path]')
         input = e.affix(form, 'input[name=foo]')
-
         submitListener = jasmine.createSpy('up:form:submit listener')
         validateListener = jasmine.createSpy('up:form:validate listener')
-
         up.on('up:form:submit', submitListener)
         up.on('up:form:validate', validateListener)
 
@@ -693,7 +691,15 @@ describe 'up.form', ->
           expect(submitListener).not.toHaveBeenCalled()
           expect(validateListener).toHaveBeenCalled()
 
-      it 'may be called with an entire form (bugfix)'
+      it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
+        form = fixture('form[action=/path] input[name=foo]')
+        validateListener = jasmine.createSpy('up:form:validate listener')
+        up.on('up:form:validate', validateListener)
+
+        up.validate(form)
+
+        next ->
+          expect(validateListener).toHaveBeenCalled()
 
   describe 'unobtrusive behavior', ->
 

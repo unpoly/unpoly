@@ -330,25 +330,25 @@ up.form = do ->
   autosubmit = (target, options) ->
     observe(target, options, -> submit(target))
 
-  findValidateTarget = (field, options) ->
-    option = options.target ? field.getAttribute('up-validate')
+  findValidateTarget = (element, options) ->
+    if givenTarget = options.target ? element.getAttribute('up-validate')
+      # resolveSelector() also creates a selector string if given an element
+      return e.resolveSelector(givenTarget, options.origin)
+    else if e.matches(element, 'form')
+      # If element is the form, we cannot find a better validate target than this.
+      return e.toSelector(element)
+    else
+      return findValidateTargetFromConfig(element, options) || up.fail('Could not find validation target for %o (tried defaults %o)', element, config.validateTargets)
 
-    unless option
-      # If no [up-validate] value is given, we look through config.validateTargets
-      # for the first selector that has a match in the field's layer.
-      fieldLayer = up.layer.get(field)
-      option = u.findResult config.validateTargets, (defaultTarget) ->
-        resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
-        if fieldLayer.firstElement(resolvedDefault)
-          # We want to return the selector, *not* the element. If we returned the element
-          # and derive a selector from that, any :has() expression would be lost.
-          return resolvedDefault
-
-    unless option
-      up.fail('Could not find validation target for %o (tried defaults %o)', field, config.validateTargets)
-
-    # resolveSelector() also creates a selector string if given an element
-    return e.resolveSelector(option, options.origin)
+  findValidateTargetFromConfig = (element, options) ->
+    # for the first selector that has a match in the field's layer.
+    fieldLayer = up.layer.get(element)
+    return u.findResult config.validateTargets, (defaultTarget) ->
+      resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
+      if fieldLayer.firstElement(resolvedDefault)
+        # We want to return the selector, *not* the element. If we returned the element
+        # and derive a selector from that, any :has() expression would be lost.
+        return resolvedDefault
 
   ###**
   Performs a server-side validation of a form field.
