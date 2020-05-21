@@ -2797,6 +2797,19 @@ describe 'up.fragment', ->
           expect(destructor).toHaveBeenCalledWith('old text', true)
           done()
 
+      it 'marks the old element as [aria-hidden=true] before destructors', (done) ->
+        destructor = jasmine.createSpy('destructor')
+        up.$compiler '.container', ($element) ->
+          -> destructor($element.text(), $element.is('[aria-hidden=true]'))
+        $container = $fixture('.container').text('old text')
+        up.hello($container)
+
+        destroyDone = up.destroy('.container')
+
+        destroyDone.then ->
+          expect(destructor).toHaveBeenCalledWith('old text', true)
+          done()
+
       it 'marks the old element as .up-destroying before destructors after an { animation }', (done) ->
         destructor = jasmine.createSpy('destructor')
         up.$compiler '.container', ($element) ->
