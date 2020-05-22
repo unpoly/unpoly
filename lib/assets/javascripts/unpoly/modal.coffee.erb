@@ -250,6 +250,7 @@ up.modal = do ->
   createHiddenFrame = (target, options) ->
     html = templateHtml()
     state.modalElement = modalElement = e.createFromHtml(html)
+    modalElement.setAttribute('aria-modal', 'true') # tell modern screen readers to make all other elements inert
     modalElement.setAttribute('up-flavor', state.flavor)
     modalElement.setAttribute('up-position', state.position) if u.isPresent(state.position)
 
