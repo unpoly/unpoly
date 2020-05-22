@@ -6,10 +6,28 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+0.62.0
+------
+
+This release backports a number of accessibility improvements from [the next major version of Unpoly](https://groups.google.com/forum/#!topic/unpoly/FDdVjxbjNLg).
+We encourage everyone to upgrade to this release in order to better support users with visual impairments.
+
+The following changes are included:
+
+- Links with an [`[up-instant]`](/a-up-instant) attribute can now be followed with the keyboard.
+- Fragments that are being [destroyed](/up.destroy) now get an [`[aria-hidden=true]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-hidden_attribute)
+  attribute while its disappearance is being animated. When a fragment is being swapped with a new version, the old fragment version is also
+  given `[aria-hidden=true]` while it's disappearing.
+- [Modal dialogs](/up.modal) now get an [`[aria-modal=true]`](https://a11ysupport.io/tech/aria/aria-modal_attribute) attribute.
+
+The next major version of Unpoly will include additional accessibility improvements. In particular the
+new modal ("layer") implementation will implement all best practices for accessible dialogs.
+
+
 0.61.1
 ------
 
-This is a maintenance release while we're getting ready for the next major version of Unpoly.
+This is a maintenance release while we're getting ready for [the next major version of Unpoly](https://groups.google.com/forum/#!topic/unpoly/FDdVjxbjNLg).
 
 - Fix a bug where [`up.destroy()`](/up.destroy) wouldn't clean up the global jQuery cache. This is only relevant when using Unpoly together with jQuery.
 - Fields outside a <form> are now recognized when they have a matching [form] attribute (fixes #85)
