@@ -237,8 +237,9 @@ describe 'up.popup (deprecated)', ->
           next => expect(@attachSpy).not.toHaveBeenCalled()
 
         it 'does nothing on click', asyncSpec (next) ->
+          Trigger.mousedown(@$link)
           Trigger.click(@$link)
-          next => expect(@attachSpy).not.toHaveBeenCalled()
+          next => expect(@attachSpy.calls.count()).toBe(1)
 
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()

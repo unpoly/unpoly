@@ -14,11 +14,9 @@ gem 'bower-rails'
 gem 'bootstrap-sass', '~> 3.3'
 gem 'rake', '< 11'
 
-# Jasmine spec runner won't boot with a more modern version of sprockets.
-# It crashes with an "asset not precompiled" error.
 gem 'tilt', '=1.4.1'
-gem 'sprockets-rails', '=2.2.4'
-gem 'sprockets', '=2.12.3'
+gem 'sprockets-rails', '~> 3.2.1'
+gem 'sprockets', '~> 3.7.2'
 
 group :development, :test do
   gem 'byebug'

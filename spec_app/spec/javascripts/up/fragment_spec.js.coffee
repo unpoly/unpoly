@@ -2891,6 +2891,15 @@ describe 'up.fragment', ->
           )
           expect($element).toBeDetached()
 
+      it 'removes element-related data from the global jQuery cache (bugfix)', asyncSpec (next) ->
+        $element = $fixture('.element')
+        $element.data('foo', { foo: '1' })
+        expect($element.data('foo')).toEqual({ foo: '1'})
+        up.destroy($element)
+
+        next ->
+          expect($element.data('foo')).toBeMissing()
+
     describe 'up.reload', ->
 
       it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->

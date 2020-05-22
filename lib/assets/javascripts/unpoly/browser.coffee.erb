@@ -171,6 +171,10 @@ up.browser = do ->
   canControlScrollRestoration = u.memoize ->
     'scrollRestoration' of history
 
+  # Don't memoize so a build may publish window.jQuery after Unpoly was loaded
+  canJQuery = ->
+    !!window.jQuery
+
   popCookie = (name) ->
     if value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1]
       document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
@@ -214,7 +218,7 @@ up.browser = do ->
       canAnimationFrame()
 
   callJQuery = (args...) ->
-    jQuery = window.jQuery or up.fail("jQuery must be published as window.jQuery")
+    canJQuery() or up.fail("jQuery must be published as window.jQuery")
     return jQuery(args...)
 
   hasSlowConnection = ->
@@ -233,6 +237,7 @@ up.browser = do ->
     canCustomElements: canCustomElements
     canControlScrollRestoration: canControlScrollRestoration
     canFormatLog: canFormatLog
+    canJQuery: canJQuery
     whenConfirmed: whenConfirmed
     isSupported: isSupported
     popCookie: popCookie

@@ -131,7 +131,7 @@ up.element = do ->
   @function up.element.closest
   @param {Element} element
     The element on which to start the search.
-  @param {string}
+  @param {string} selector
     The CSS selector to match.
   @return {Element|null|undefined} element
     The matching element.
@@ -554,9 +554,9 @@ up.element = do ->
       element.className // returns 'klass'
 
   @function up.element.affix
-  @params {Element} parent
+  @param {Element} parent
     The parent to which to attach the created element.
-  @params {String} [position='beforeend']
+  @param {String} [position='beforeend']
     The position of the new element in relation to `parent`.
     Can be one of the following values:
 
@@ -564,9 +564,9 @@ up.element = do ->
     - `'afterbegin'`: Just inside `parent`, before its first child.
     - `'beforeend'`: Just inside `parent`, after its last child.
     - `'afterend'`: After `parent`, as a new sibling.
-  @params {string} selector
+  @param {string} selector
     The CSS selector from which to create an element.
-  @params {Object} attrs
+  @param {Object} attrs
     An object of attributes to set on the created element.
   @param {Object} attrs.text
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.

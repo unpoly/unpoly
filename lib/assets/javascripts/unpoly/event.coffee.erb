@@ -99,7 +99,7 @@ up.event = do ->
   for [event delegation](https://davidwalsh.name/event-delegate):
 
       var form = document.querySelector('form')
-      document.addEventListener(form, 'click', 'a', function(event, link) {
+      up.on(form, 'click', 'a', function(event, link) {
         console.log("Click on a link %o within %o", link, form)
       })
 

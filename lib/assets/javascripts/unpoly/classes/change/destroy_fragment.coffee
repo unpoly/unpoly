@@ -25,5 +25,10 @@ class up.Change.DestroyFragment extends up.Change.Removal
       # after removing @element.
       parent = @element.parentNode
       up.syntax.clean(@element)
-      e.remove(@element)
+
+      if up.browser.canJQuery()
+        jQuery(@element).remove()
+      else
+        e.remove(@element)
+
       up.fragment.emitDestroyed(@element, { parent, @log })
