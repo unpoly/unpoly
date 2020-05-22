@@ -852,6 +852,7 @@ up.fragment = do ->
   ###
   markElementAsDestroying = (element) ->
     element.classList.add('up-destroying')
+    element.setAttribute('aria-hidden', 'true')
 
   ###**
   This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
