@@ -152,6 +152,9 @@ class up.Layer.Overlay extends up.Layer
           if event.target == @viewportElement
             @onOutsideClicked(event, true)
 
+    if @escapeDismissable
+      @unbindEscapePressed = up.event.onEscape((event) => @onEscapePressed(event))
+
     # <a up-accept="value">OK</a>
     @registerClickCloser 'up-accept', (value, closeOptions) =>
       @accept(value, closeOptions)
@@ -177,6 +180,20 @@ class up.Layer.Overlay extends up.Layer
     if halt
       up.event.halt(event)
     u.muteRejection @dismiss()
+
+  onEscapePressed: (event) ->
+    # All overlays listen to the Escape key being pressed, but only the front layer
+    # should react. Note that we're using the *front* layer, not the *current* layer.
+    # The current layer might be in the visual background, e.g. if a fragment is being
+    # compiled in a background layer.
+    if @isFront()
+      if field = up.form.focusedField()
+        # Allow screen reader users to get back to a state where they can dismiss the
+        # modal with escape.
+        field.blur()
+      else if @escapeDismissable
+        up.event.halt(event)
+        u.muteRejection @dismiss()
 
   registerClickCloser: (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
@@ -211,7 +228,8 @@ class up.Layer.Overlay extends up.Layer
 
   teardownHandlers: ->
     super()
-    @unbindParentClicked()
+    @unbindParentClicked?()
+    @unbindEscapePressed?()
     @overlayFocus.teardown()
 
   destroyElement: (options) ->

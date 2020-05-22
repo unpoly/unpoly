@@ -493,6 +493,10 @@ up.form = do ->
   closestContainer = (element) ->
     e.closest(element, 'form, body')
 
+  focusedField = ->
+    if (element = document.activeElement) && e.matches(element, fieldSelector())
+      return element
+
   ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
   instead of triggering a full page reload.
@@ -1025,6 +1029,7 @@ up.form = do ->
   autosubmit: autosubmit
   fieldSelector: fieldSelector
   fields: findFields
+  focusedField: focusedField
   submissionFields: findSubmissionFields
 
 up.submit = up.form.submit

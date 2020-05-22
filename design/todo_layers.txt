@@ -12,7 +12,6 @@
 - What's the default for { focus } in up.change({ focus })?
 - validating should submit with another guard event (up:form:validate)
 - the escape handling introduced in a54aeaaf0a984a58d4780e4c637f9fb8a28d70f8 is not good for A11Y (#118). instead we should, in layers, blur the field if we're in an input in an overlay.
-- Don't log up:click
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).

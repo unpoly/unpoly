@@ -193,12 +193,6 @@ up.layer = do ->
   anySelector = ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
-  up.event.onEscape (event) ->
-    layer = stack.current
-    if layer.escapeDismissable
-      u.muteRejection layer.dismiss()
-      up.event.halt(event)
-
   up.on 'up:fragment:destroyed', (event) ->
     for layer in stack.all
       layer.repair()
