@@ -928,9 +928,14 @@ describe 'up.link', ->
           Trigger.mouseup(@$link)
           next => expect(@followSpy).not.toHaveBeenCalled()
 
-        it 'does nothing on click', asyncSpec (next)->
+        it 'does nothing on click if there was an earlier mousedown event', asyncSpec (next)->
+          Trigger.mousedown(@$link)
           Trigger.click(@$link)
-          next => expect(@followSpy).not.toHaveBeenCalled()
+          next => expect(@followSpy.calls.count()).toBe(1)
+
+        it 'does follow a link on click if there was never a mousedown event (e.g. if the user pressed enter)', asyncSpec (next) ->
+          Trigger.click(@$link)
+          next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()

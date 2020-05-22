@@ -532,8 +532,9 @@ describe 'up.modal', ->
           next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing on click', asyncSpec (next) ->
+          Trigger.mousedown(@$link)
           Trigger.click(@$link)
-          next => expect(@followSpy).not.toHaveBeenCalled()
+          next => expect(@followSpy.calls.count()).toBe(1)
 
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()

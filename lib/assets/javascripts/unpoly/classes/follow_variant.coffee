@@ -11,10 +11,14 @@ class up.FollowVariant
 
   onClick: (event, link) =>
     if up.link.shouldProcessEvent(event, link)
-      if e.matches(link, '[up-instant]')
-        # If the link was already processed on mousedown, we still need
-        # to prevent this later click event's chain.
+      # Instant links should not have a `click` event.
+      # This would trigger the browsers default follow-behavior and possibly activate JS libs.
+      # A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
+      # Keyboard navigation will not necessarily trigger a mousedown event.
+      if e.matches(link, '[up-instant]') && link.upInstantSupported
         up.event.halt(event)
+        link.upInstantSupported = false
+        return # return undefined since u.muteRejection() will try to call catch() on a given value
       else
         up.event.consumeAction(event)
         @followLink(link)
@@ -24,6 +28,10 @@ class up.FollowVariant
 
   onMousedown: (event, link) =>
     if up.link.shouldProcessEvent(event, link)
+      # A11Y: Keyboard navigation will not necessarily trigger a mousedown event.
+      # We also don't want to listen to the enter key, since some screen readers
+      # use the enter key for something else.
+      link.upInstantSupported = true
       up.event.consumeAction(event)
       @followLink(link)
 
