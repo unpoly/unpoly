@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.61.1"
+    version: "0.62.0"
   };
 
 }).call(this);
@@ -2771,11 +2771,11 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
         element.className // returns 'klass'
     
     @function up.element.affix
-    @params {Element} parent
+    @param {Element} parent
       The parent to which to attach the created element.
-    @params {string} selector
+    @param {string} selector
       The CSS selector from which to create an element.
-    @params {Object} attrs
+    @param {Object} attrs
       An object of attributes to set on the created element.
     @param {Object} attrs.text
       The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
@@ -4692,8 +4692,9 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
     FollowVariant.prototype.onClick = function(event, link) {
       if (up.link.shouldProcessEvent(event, link)) {
-        if (e.matches(link, '[up-instant]')) {
-          return up.event.halt(event);
+        if (e.matches(link, '[up-instant]') && link.upInstantSupported) {
+          up.event.halt(event);
+          link.upInstantSupported = false;
         } else {
           up.event.consumeAction(event);
           return this.followLink(link);
@@ -4705,6 +4706,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
     FollowVariant.prototype.onMousedown = function(event, link) {
       if (up.link.shouldProcessEvent(event, link)) {
+        link.upInstantSupported = true;
         up.event.consumeAction(event);
         return this.followLink(link);
       }
@@ -6960,7 +6962,7 @@ There are some advantages to using `up.on()`:
     for [event delegation](https://davidwalsh.name/event-delegate):
     
         var form = document.querySelector('form')
-        document.addEventListener(form, 'click', 'a', function(event, link) {
+        up.on(form, 'click', 'a', function(event, link) {
           console.log("Click on a link %o within %o", link, form)
         })
     
@@ -10638,7 +10640,8 @@ is built from `up.fragment` functions. You may use them to extend Unpoly from yo
     @stable
      */
     markElementAsDestroying = function(element) {
-      return element.classList.add('up-destroying');
+      element.classList.add('up-destroying');
+      return element.setAttribute('aria-hidden', 'true');
     };
 
     /***
@@ -14807,6 +14810,7 @@ or function.
       var closeElement, contentElement, dialogStyles, html, modalElement;
       html = templateHtml();
       state.modalElement = modalElement = e.createFromHtml(html);
+      modalElement.setAttribute('aria-modal', 'true');
       modalElement.setAttribute('up-flavor', state.flavor);
       if (u.isPresent(state.position)) {
         modalElement.setAttribute('up-position', state.position);
