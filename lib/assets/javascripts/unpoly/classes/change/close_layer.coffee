@@ -8,20 +8,7 @@ class up.Change.CloseLayer extends up.Change.Removal
   constructor: (options) ->
     super(options)
 
-    verb = options.verb
-    verbGerund = "#{verb}ing"
-    verbPast = "#{verb}ed"
-    @valueAttr = "up-#{verb}"
-
-    @closeEventType = "up:layer:#{verb}"
-    @closeCallbackName = "on#{u.upperCaseFirst(verb)}"
-
-    @closingEventType = "up:layer:#{verbGerund}"
-    @closingCallbackName = "on#{u.upperCaseFirst(verbGerund)}"
-
-    @closedEventType = "up:layer:#{verbPast}"
-    @closedCallbackName = "on#{u.upperCaseFirst(verbPast)}"
-
+    @verb = options.verb
     @layer = up.layer.get(options)
     @origin = options.origin
     @value = options.value
@@ -29,7 +16,7 @@ class up.Change.CloseLayer extends up.Change.Removal
 
   execute: ->
     if @origin && u.isUndefined(value)
-      value = e.jsonAttr(@origin, @valueAttr)
+      value = e.jsonAttr(@origin, "up-#{@verb}")
 
     unless @layer.isOpen()
       return Promise.resolve()
@@ -74,19 +61,25 @@ class up.Change.CloseLayer extends up.Change.Removal
 
   emitCloseEvent: ->
     return @layer.emit(
-      @buildEvent(@closeEventType),
-      callback: @layer.callback(@closeCallbackName),
-      log: "Will close #{@layer}"
+      @buildEvent("up:layer:#{@verb}"),
+      callback: @layer.callback("on#{u.upperCaseFirst(@verb)}"),
+      log: "Will #{@verb} #{@layer}"
     )
 
   emitClosingEvent: ->
+    verbGerund = "#{@verb}ing"
+    verbGerundUpperCaseFirst = u.upperCaseFirst(verbGerund)
+
     return @layer.emit(
-      @buildEvent(@closingEventType),
-      callback: @layer.callback(@closingCallbackName),
-      log: "Closing #{@layer}"
+      @buildEvent("up:layer:#{verbGerund}"),
+      callback: @layer.callback("on#{verbGerundUpperCaseFirst}"),
+      log: "#{verbGerundUpperCaseFirst} #{@layer}"
     )
 
   emitClosedEvent: (formerParent) ->
+    verbPast = "#{@verb}ed"
+    verbPastUpperCaseFirst = u.upperCaseFirst(verbPast)
+
     # layer.emit({ ensureBubbles: true }) will automatically emit a second event on document
     # because the layer is detached. We do not want to emit it on the parent layer where users
     # might confuse it with an event for the parent layer itself. Since @layer.element
@@ -94,13 +87,13 @@ class up.Change.CloseLayer extends up.Change.Removal
     # event listeners can receive it. So we explicitely emit the event a second time
     # on the document.
     return @layer.emit(
-      @buildEvent(@closedEventType),
+      @buildEvent("up:layer:#{verbPast}"),
       # Set up.layer.current to the parent of the closed layer, which is now likely
       # to be the front layer.
       currentLayer: formerParent,
-      callback: @layer.callback(@closedCallbackName),
+      callback: @layer.callback("on#{verbPastUpperCaseFirst}"),
       ensureBubbles: true,
-      log: "Closed #{@layer}"
+      log: "#{verbPastUpperCaseFirst} #{@layer}"
     )
 
   buildEvent: (name) ->
