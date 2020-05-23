@@ -30,6 +30,8 @@ Unreleased
 - [up-content], [up-content=overlay], [up-content=modal]
 - parseSelector can parse attribute selectors with prefix, infix, suffix, space-separated, dash-separated
 - up.validate() may now be called with a form element
+- validating emits up:form:validate instead of up:form:submit
+
 
 
 0.62.0
