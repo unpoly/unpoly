@@ -3,12 +3,6 @@
 - Try changes on DAH
 - Write remaining tests
 - Consider promoting some experimental functions to stable
-- When we go back from a non-Unpoly page to an Unpoly page, scroll positions are not restored
-  - Test case: https://glitch.com/edit/#!/gaudy-nettle-ash?path=index.html%3A32%3A46
-  - Why did we disable scroll restauration in https://github.com/unpoly/unpoly/commit/8b22fef9f72ea316f1a855b36abb6d01263d6059 ?
-  - Does the browser have any default scroll restauration on popstate handled by a JS app?
-  - If we keep the manual scroll restauration we need to keep our lastScrollTops in a way that it survives full page loads (it's currently a variable in memory)
-- close-variant events should actually say "dismissing" instead of "closing"
 - What's the default for { focus } in up.change({ focus })?
 - the escape handling introduced in a54aeaaf0a984a58d4780e4c637f9fb8a28d70f8 is not good for A11Y (#118). instead we should, in layers, blur the field if we're in an input in an overlay.
 
@@ -209,6 +203,11 @@ Accessibility
 Later?
 ------
 
+- When we go back from a non-Unpoly page to an Unpoly page, scroll positions are not restored
+  - Test case: https://glitch.com/edit/#!/gaudy-nettle-ash?path=index.html%3A32%3A46
+  - Why did we disable scroll restauration in https://github.com/unpoly/unpoly/commit/8b22fef9f72ea316f1a855b36abb6d01263d6059 ?
+  - Does the browser have any default scroll restauration on popstate handled by a JS app?
+  - If we keep the manual scroll restauration we need to keep our lastScrollTops in a way that it survives full page loads (it's currently a variable in memory)
 - Some API would be nicer if up.viewport would return up.Viewport instances that would then have methods like #reveal()
 - Should revealSnap also snap to the bottom? This is hard because we don't know the buffer height minus obstructions
 - Support up.form.validate(form)
