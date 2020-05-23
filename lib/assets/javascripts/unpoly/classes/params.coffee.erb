@@ -247,6 +247,7 @@ class up.Params
       @addAllFromObject(raw)
     else
       up.fail("Unsupport params type: %o", raw)
+    return this
 
   addAllFromObject: (object) ->
     for key, value of object
