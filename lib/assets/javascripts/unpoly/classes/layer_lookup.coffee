@@ -5,14 +5,23 @@ class up.LayerLookup
 
   constructor: (@stack, args...) ->
     options = u.parseArgIntoOptions(args, 'layer')
+
+    # Options normalization might change `options` relevant to the lookup.
+    # In particular it will default { layer } to 'origin' if an { origin } element is given.
+    # It will also lookup options.currentLayer.
     if options.normalizeLayerOptions != false
       up.layer.normalizeOptions(options)
 
     @value = options.layer
     @origin = options.origin
-    @currentLayer = options.currentLayer || @originLayer() || @stack.current
+    @currentLayer = options.currentLayer || @stack.current
+
     if u.isString(@currentLayer)
-      @currentLayer = new @constructor(@stack, @currentLayer, u.merge(options, currentLayer: @stack.current)).first()
+      # The { currentLayer } option may itself be a string like "parent".
+      # In this case we look it up using a new up.LayerLookup instance, using
+      # up.layer.current as the { currentLayer } for that second lookup.
+      recursiveOptions = u.merge(options, currentLayer: @stack.current, normalizeLayerOptions: false)
+      @currentLayer = new @constructor(@stack, @currentLayer, recursiveOptions).first()
 
   originLayer: ->
     if @origin

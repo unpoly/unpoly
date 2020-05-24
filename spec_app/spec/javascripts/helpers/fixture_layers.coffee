@@ -1,6 +1,16 @@
 u = up.util
 
 window.fixtureLayers = (stackPlans) ->
+
+  if u.isNumber(stackPlans)
+    count = stackPlans
+    stackPlans = u.map [1..count], -> {}
+
+  stackPlans.forEach (stackPlan, i) ->
+    stackPlan.target ||= '.element'
+    if !stackPlan.content && !stackPlan.html && !stackPlan.url
+      stackPlan.content = "text #{i}"
+
   [rootPlan, overlayPlans...] = stackPlans
 
   fixture(rootPlan.target, u.omit(rootPlan, ['target']))

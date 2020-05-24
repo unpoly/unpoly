@@ -1017,22 +1017,6 @@ describe 'up.fragment', ->
 
         it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
 
-        it 'updates the layer of the given { origin }'
-
-        it 'updates the current layer with { layer: "current" }'
-
-        it 'updates the parent layer with { layer: "parent" }'
-
-        it 'seeks the target in any layer with { layer: "any" }'
-
-        it 'updates the root layer with { layer: "root" }'
-
-        it 'updates the root layer with { layer: "page" } (deprecated)'
-
-        it 'updates an ancestor layer with { layer: "ancestor" }'
-
-        it 'updates the closest layer with { layer: "closest" }'
-
         it 'opens a new layer when given { layer: "new" }'
 
         it 'opens a new layer with the given { mode }'
