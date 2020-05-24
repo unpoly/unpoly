@@ -98,6 +98,14 @@ describe 'up.proxy', ->
             expect(response.url).toMatchURL('/url')
             done()
 
+      it 'does not send a X-Requested-With header that a server-side framework might use to detect AJAX requests and be "smart" about its response', (done) ->
+        up.request('/url')
+
+        u.task =>
+          headers = @lastRequest().requestHeaders
+          expect(headers['X-Requested-With']).toBeMissing()
+          done()
+
       describe 'error handling', ->
 
         it 'rejects with up.Failed when there was a network error', (done) ->
