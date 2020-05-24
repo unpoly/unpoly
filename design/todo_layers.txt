@@ -3,8 +3,6 @@
 - Try changes on DAH
 - Write remaining tests
 - Consider promoting some experimental functions to stable
-- What's the default for { focus } in up.change({ focus })?
-- the escape handling introduced in a54aeaaf0a984a58d4780e4c637f9fb8a28d70f8 is not good for A11Y (#118). instead we should, in layers, blur the field if we're in an input in an overlay.
 
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
@@ -51,10 +49,16 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test for up.element.isDetached()
   - Test that up-hungry will not activate in a background layer
   - Test that when a request was aborted, re-queuing the request will trigger a new network request (rather than returning the aborted version from cache)
-  - Test layer focus behavior:
-    - New layers should be focused
-    - autofocus in new layers will be respected
-    - when closing a layer, the element that originally opened the layer re-gains focus
+  - Test focus behavior in layers:
+    - A11Y: opening a layer should focus the layer, optionally to [autofocus]
+    - User may also set a { focus } option
+    - A11Y: closing a layer should focus the element that opened the layer
+    - Closing a layer when the opener is unknown: The parent layer is focused
+    - Closing a layer when the opener is no longer attached: The parent layer is focused
+    - Pressing escape will blur a focused field. Pressing escape a second time will close the layer.
+  - Test focus behavior when swapping fragments:
+    - Focus should be preserved (step.focus ?= up.Focus.preserveWithin(step.oldElement)
+    - User may also set a { focus } option
   - Test that we can actually hit another layer if the initial plan failed
     - We had this for a while:
     - @successOptions.layer = successPreview.preflightLayer()
@@ -62,7 +66,6 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - check if up:fragment:inserted sets up.layer.current
     - check if keep events sets up.layer.current
     - check if follow event sets up.layer.current
-  - Test that validations keep focus
   - Test that layers without history updates still return their current #location
   - Change with { reveal: 'selector' } should not find elements in another layer
   - Test that this doesn't crash when we don't have parent
@@ -116,8 +119,6 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Check that up.layer forwards getters for all layer properties to stack.current
   - Test that compilers always see their up.layer.current, even if it is a background update and there is another layer above it
   - A11Y: current layer should get [role=dialog] and [aria-modal=true], all parent layers should get [inert] and [aria-hidden: true]. Since the root layer has no containers, we should apply this to direct children
-  - A11Y: opening a layer should focus the layer, optionally to [autofocus]
-  - A11Y: closing a layer should focus the element that opened the layer, or if the opener is unknown, the parent layer
   - Test Rails integration
   - UpdateLayer should re-create default targets
     - E.g. I have up.layer.config.modal.targets = ['.content', '.menu']
@@ -129,6 +130,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  - { layer: 'swap' }
   - up:form:validate
   - Document request queue changes
     - Preload limits
