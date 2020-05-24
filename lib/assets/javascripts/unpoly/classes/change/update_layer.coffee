@@ -224,6 +224,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
         unless @layer.isRoot() && up.fragment.targetsBody(selector)
           oldElement = @layer.element.children[0]
 
+      # Each step inherits all options of this change.
       return u.merge(@options, { selector, placement, reveal, oldElement })
 
   findOld: ->
@@ -258,7 +259,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     if @focus == 'keep'
       for step in @steps
         if step.placement == 'swap'
-          step.focus = up.Focus.preserveWithin(step.oldElement)
+          step.focus ?= up.Focus.preserveWithin(step.oldElement)
 
   containedByRivalStep: (steps, candidateStep) ->
     return u.some steps, (rivalStep) ->
