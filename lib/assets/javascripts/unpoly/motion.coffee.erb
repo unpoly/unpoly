@@ -341,14 +341,10 @@ up.motion = do ->
     afterInsert = u.pluckKey(options, 'afterInsert') || u.noop
     beforeDetach = u.pluckKey(options, 'beforeDetach') || u.noop
     afterDetach = u.pluckKey(options, 'afterDetach') || u.noop
+    # Callback to scroll newElement into position before we start the enter animation.
+    scrollNew = u.pluckKey(options, 'scrollNew') || u.asyncNoop
 
     beforeStart()
-
-    scrollNew = ->
-      # Don't animate the scrolling.
-      scrollOptions = u.merge(options, scrollBehavior: 'auto')
-      # Scroll newElement into position before we start the enter animation.
-      up.viewport.scrollAfterInsertFragment(newElement, scrollOptions)
 
     if willMorph
       if motionController.isActive(oldElement) && options.trackMotion is false

@@ -350,7 +350,7 @@ describe 'up.link', ->
             $link = $fixture('a[href="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
-            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
             up.follow($link)
 
@@ -366,7 +366,7 @@ describe 'up.link', ->
             $target = $fixture('.target')
             $failTarget = $fixture('.fail-target')
 
-            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
             up.follow($link)
 
@@ -391,7 +391,7 @@ describe 'up.link', ->
               $target = $fixture('.target')
               $other = $fixture('.other')
 
-              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
               up.follow($link, reveal: '.other')
 
@@ -415,7 +415,7 @@ describe 'up.link', ->
               $failTarget = $fixture('.fail-target')
               $other = $fixture('.other')
 
-              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
               up.follow($link, reveal: '.other', failTarget: '.fail-target')
 
@@ -441,7 +441,7 @@ describe 'up.link', ->
               $other = $fixture('.other')
               $failOther = $fixture('.fail-other')
 
-              revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
               up.follow($link, reveal: '.other', failReveal: '.fail-other')
 

@@ -233,71 +233,22 @@ up.viewport = do ->
     promise = promise.then(-> scrollingController.startMotion(element, motion, options))
     return promise
 
-  ###**
-  @function up.viewport.scrollAfterInsertFragment
-  @param {boolean} [options.resetScroll]
-  @param {boolean|object} [options.restoreScroll]
-  @param {boolean|string|jQuery|Element} [options.reveal]
-  @param {boolean|string} [options.reveal]
-  @return {Promise}
-    A promise that is fulfilled when the scrolling has finished.
-  @internal
-  ###
-  scrollAfterInsertFragment = (element, options = {}) ->
-    hashOpt = options.hash
-    revealOpt = options.reveal
-    resetScrollOpt = options.resetScroll
-    restoreScrollOpt = options.restoreScroll
-    focusOpt = options.focus
-
-    if focusOpt
-      # Don't return since up.Focus.set() is a sync function.
-      doFocus(focusOpt)
-
-    else if resetScrollOpt
-      return resetScroll(u.merge(options, around: element))
-
-    else if restoreScrollOpt
-      # If options.restoreScroll is an object, its keys map viewport selectors
-      # to scroll positions. If it is just true, we leave the scrollTops option
-      # undefined and let restoreScroll() retrieve previous scrollTops from cache.
-      givenTops = u.presence(restoreScrollOpt, u.isObject)
-      return restoreScroll(u.merge(options, around: element, scrollTops: givenTops))
-
-    else if hashOpt && revealOpt == true # hash revealing can be disabled with { reveal: false }
-      return revealHash(hashOpt, options)
-
-    else if revealOpt
-      # We allow to pass another element as { reveal } option
-      if u.isElementish(revealOpt)
-        element = e.get(revealOpt) # unwrap jQuery
-
-      # We allow to pass a selector as { reveal } option
-      else if u.isString(revealOpt)
-        selector = e.resolveSelector(revealOpt, options.origin)
-        element = f.get(selector, options)
-
-      else
-        # We reveal the given element
-
-      # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
-      # with an empty jQuery collection. This might happen if a failed form submission
-      # reveals the first validation error message, but the error is shown in an
-      # unexpected element.
-      if element
-        value = reveal(element, options)
-        return value
-
-    # If we didn't need to scroll above, just return a resolved promise
-    # to fulfill this function's signature.
-    return Promise.resolve()
-
-  doFocus = (value, options) ->
-    up.Focus.set(value, options)
+  doFocus = (element, options = {}) ->
+    if options.preventScroll # polyfill for IE11
+      viewport = closest(element)
+      oldScrollTop = viewport.scrollTop
+      element.focus()
+      viewport.scrollTop = oldScrollTop
+    else
+      element.focus()
 
   tryFocus = (element, options) ->
-    up.Focus.focusElement(element, options)
+    doFocus(element, options)
     return element == document.activeElement
+
+  autofocus = (element, options) ->
+    if autofocusElement = e.subtree(element, '[autofocus]')[0]
+      doDocus(autofocusElement, options)
 
   ###**
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
@@ -324,7 +275,7 @@ up.viewport = do ->
   ###
   revealHash = (hash, options) ->
     if (hash) && (match = firstHashTarget(hash, options))
-      reveal(match, top: true)
+      up.reveal(match, top: true)
     else
       Promise.resolve()
 
@@ -825,13 +776,14 @@ up.viewport = do ->
     scrollTops: scrollTops
     saveScroll: saveScroll
     restoreScroll: restoreScroll
-    scrollAfterInsertFragment: scrollAfterInsertFragment
     anchoredRight: anchoredRight
     fixedElements: fixedElements
     absolutize: absolutize
     focus: doFocus
     tryFocus: tryFocus
+    autofocus: autofocus
 
+up.focus = up.viewport.focus
 up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal
 up.revealHash = up.viewport.revealHash

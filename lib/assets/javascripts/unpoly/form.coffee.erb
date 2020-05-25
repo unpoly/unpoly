@@ -399,7 +399,6 @@ up.form = do ->
     options.headers ||= {}
     options.headers[up.protocol.config.validateHeader] = options.validate
     options.reveal ?= false
-    options.focus ?= 'keep'
 
     # The guardEvent will also be assigned an { options } attribute in up.change()
     options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')
@@ -1048,8 +1047,6 @@ up.form = do ->
   @stable
   ###
   up.compiler '[up-autosubmit]', (formOrField) -> autosubmit(formOrField)
-
-  up.compiler '[autofocus]', { batch: true }, (inputs) -> u.last(inputs).focus()
 
   up.on 'up:framework:reset', reset
 

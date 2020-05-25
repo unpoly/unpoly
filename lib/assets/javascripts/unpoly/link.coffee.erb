@@ -216,7 +216,7 @@ up.link = do ->
 
     # Viewport options
     parser.booleanOrString('reveal')
-    parser.booleanOrString('focus')
+    parser.booleanOrString('focus', default: 'keep')
     parser.boolean('resetScroll')
     parser.boolean('restoreScroll')
 

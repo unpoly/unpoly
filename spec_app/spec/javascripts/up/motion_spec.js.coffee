@@ -509,39 +509,6 @@ describe 'up.motion', ->
             expect(up.motion.finishCount()).toEqual(1)
 
 
-      describe 'with { reveal: true } option', ->
-
-        it 'reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', asyncSpec (next) ->
-          $container = $fixture('.container[up-viewport]').css
-            'width': '200px'
-            'height': '200px'
-            'overflow-y': 'scroll'
-            'position': 'fixed'
-            'left': 0,
-            'top': 0
-          $old = $fixture('.old').appendTo($container).css(height: '600px')
-          $container.scrollTop(300)
-
-          expect($container.scrollTop()).toEqual(300)
-
-          $new = $fixture('.new').css(height: '600px').detach()
-
-          up.morph($old, $new, 'cross-fade', duration: 50, reveal: true)
-
-          next =>
-            # Container is scrolled up due to { reveal: true } option.
-            # Since $old and $new are sitting in the same viewport with a
-            # single shared scrollbar, this will make the ghost for $old jump.
-            expect($container.scrollTop()).toEqual(0)
-
-            # See that the ghost for $new is aligned with the top edge
-            # of the viewport.
-            expect($new.offset().top).toEqual(0)
-
-            # The absolitized $old is shifted upwards to make it looks like it
-            # was at the scroll position before we revealed $new.
-            expect($old.offset().top).toEqual(-300)
-
       describe 'with animations disabled globally', ->
 
         beforeEach ->

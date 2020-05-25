@@ -60,7 +60,7 @@ class up.OverlayFocus
   focusStart: (focusOptions) ->
     # Focusing the overlay element with its [role=dialog] will read out
     # "dialog field" in many screen readers.
-    up.viewport.focus(@layer.element, focusOptions)
+    up.focus(@layer.element, focusOptions)
 
   focusEnd: ->
     # The end will usually be the dismiss button, if there is one.

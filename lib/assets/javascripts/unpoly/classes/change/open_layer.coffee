@@ -10,6 +10,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @target = options.target
     @source = options.source
     @origin = options.origin
+    @focus = options.focus
     @currentLayer = options.currentLayer
 
   requestAttributes: ->
@@ -53,9 +54,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       promise = @layer.openNow({ @content, @onContentAttached })
 
       promise = promise.then =>
-        @currentLayer.overlayFocus?.moveToBack()
-        @layer.overlayFocus.moveToFront()
-        @layer.overlayFocus.focusStart(preventScroll: true)
+        @handleFocus()
 
         @emitOpenedEvent()
 
@@ -83,6 +82,16 @@ class up.Change.OpenLayer extends up.Change.Addition
       historyOptions.history = false
 
     @layer.updateHistory(historyOptions)
+
+  handleFocus: ->
+    preventScrollOptions = { preventScroll: true }
+    @currentLayer.overlayFocus?.moveToBack()
+    @layer.overlayFocus.moveToFront()
+
+    if u.isString(@focus) && (element = up.fragment.first(@focus, { @layer, @origin }))
+      up.focus(element, preventScrollOptions)
+    else
+      @layer.overlayFocus.focusStart(preventScrollOptions)
 
   buildEvent: (name) =>
     return up.event.build(name,

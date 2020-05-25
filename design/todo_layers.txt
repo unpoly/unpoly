@@ -2,13 +2,15 @@
 - Try changes on makandracards.com
 - Try changes on DAH
 - Write remaining tests
-- Consider promoting some experimental functions to stable
-
+- Release as 1.0.0 or 2.0.0
+  - Consider promoting some experimental functions to stable
+  - Consider removing some stable functions
 
 There is also a typo in https://unpoly.com/tutorial that you might want to fix yourself (tutorial page does not seem to be part of the repo).
 
 
 - Tests
+  - Test that up.fragment.all / up.fragment.get takes a { origin } option that defines a layer and allows "&" lookup
   - Test that up:fragment:loaded can interrupt fragment update
   - Test that up:fragment:loaded is not emitted when preloading
   - test that up-expand gets a tabindex
@@ -24,7 +26,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - test thtat up.reveal should only see obstructions on its laayer
   - test that up.reveal should peel by default
   - Test that fragment updates peel the targeted layer by default
-  - Test that { peel: false } will not peel the targeted layer (especially now that up.viewport.scrollAfterInsertFragment/reveal also peels)
+  - Test that { peel: false } will not peel the targeted layer (especially now that up.viewport.scrollAfterFragmentSwap/reveal also peels)
   - Test that up.viewport.get() will match the closest OverlayWithViewport
   - Test that up.viewport.get() will find a viewport in a parent layer if the element's layer is not an OverlayWithViewport
   - Test special overlay fallback:
@@ -57,7 +59,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - Closing a layer when the opener is no longer attached: The parent layer is focused
     - Pressing escape will blur a focused field. Pressing escape a second time will close the layer.
   - Test focus behavior when swapping fragments:
-    - Focus should be preserved (step.focus ?= up.Focus.preserveWithin(step.oldElement)
+    - Focus should be preserved (step.focus ?= up.FocusCapsule.preserveWithin(step.oldElement)
     - User may also set a { focus } option
   - Test that we can actually hit another layer if the initial plan failed
     - We had this for a while:
@@ -130,6 +132,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  - No longer autofocuses on load (already done by browser)
+  - up.hello() no longer autofocuses
   - { layer: 'swap' }
   - up:form:validate
   - Document request queue changes

@@ -97,7 +97,7 @@ up.history = do ->
     if manipulate('replaceState', url)
       emit('up:history:replaced', url: url, log: doLog && "Replaced state for #{u.urlWithoutHost url}")
     else
-      emit('up:history:muted', url: url, log: doLog && "Did not replace state with #{u.urlWithoutHost url} (history is unavailable)")
+      emit('up:history:muted', url: url, log: doLog && "Did not replace state with #{u.urlWithoutHost url} (history is disabled)")
 
   ###**
   Adds a new history entry and updates the browser's
@@ -124,7 +124,7 @@ up.history = do ->
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, log: "Advanced to location #{u.urlWithoutHost url}")
       else
-        up.emit('up:history:muted', url: url, log: "Did not advance to #{u.urlWithoutHost url} (history is unavailable)")
+        up.emit('up:history:muted', url: url, log: "Did not advance to #{u.urlWithoutHost url} (history is disabled)")
 
 
   ###**

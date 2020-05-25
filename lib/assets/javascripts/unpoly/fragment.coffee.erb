@@ -532,28 +532,26 @@ up.fragment = do ->
   # TODO: Docs for up.fragment.all
   getAll = (args...) ->
     options = u.extractOptions(args)
-    lastArg = u.last(args)
+    selectorOrElement = args.pop()
 
-    if u.isElementish(lastArg)
+    if u.isElementish(selectorOrElement)
       # up.fragment.all([root], element, [options]) should just return [element].
       # The given root and options are ignored. We also don't check if it's a real element.
       # We do use e.get() to unwrap a jQuery collection.
-      return [e.get(lastArg)]
-
-    if args.length == 1
-      # up.fragment.all(selector, [options]) should lookup the selector
-      # in all layers (prefering the current layer), or in options.layer if given.
-      if u.isUndefined(args[0])
-        console.log("calling up.layer.allElements(%o, %o)", args[0], options)
-        console.trace()
-
-      candidates = up.layer.allElements(args[0], options)
+      return [e.get(selectorOrElement)]
     else
-      # up.fragment.all(rootElement, selector) should find selector within
-      # the descendants of rootElement regardless of rootElement's layer.
-      candidates = e.all(args...)
+      selector = e.resolveSelector(selectorOrElement, options.origin)
 
-    return u.filter(candidates, isDestroying)
+      if rootElement = args[0]
+        # up.fragment.all(rootElement, selector) should find selector within
+        # the descendants of rootElement regardless of rootElement's layer.
+        candidates = e.all(rootElement, selector)
+      else
+        # up.fragment.all(selector, [options]) should lookup the selector
+        # in all layers (prefering the current layer), or in options.layer if given.
+        candidates = up.layer.allElements(selector, options)
+
+      return u.filter(candidates, isDestroying)
 
   ###**
   Destroys the given element or selector.

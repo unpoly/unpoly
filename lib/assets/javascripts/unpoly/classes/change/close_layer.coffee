@@ -44,12 +44,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       # prevented and the closing animation is about to start.
       @emitClosingEvent()
 
-      # A11Y: Stop trapping focus in the layer that's about to close
-      @layer.overlayFocus.teardown()
-      # A11Y: Start trapping focus in the parent layer that is being promoted to front.
-      parent.overlayFocus?.moveToFront()
-      # A11Y: Focus the element that originally opened this layer.
-      (@layer.origin || parent.element).focus()
+      @handleFocus(parent)
 
       promise =  @layer.closeNow(@options)
       promise = promise.then =>
@@ -102,3 +97,11 @@ class up.Change.CloseLayer extends up.Change.Removal
       value: @value
       origin: @origin
     )
+
+  handleFocus: (formerParent) ->
+    # A11Y: Stop trapping focus in the layer that's about to close
+    @layer.overlayFocus.teardown()
+    # A11Y: Start trapping focus in the parent layer that is being promoted to front.
+    formerParent.overlayFocus?.moveToFront()
+    # A11Y: Focus the element that originally opened this layer.
+    (@layer.origin || formerParent.element).focus(preventScroll: true)

@@ -554,7 +554,7 @@ describe 'up.fragment', ->
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
           it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
@@ -582,7 +582,7 @@ describe 'up.fragment', ->
               expect(revealStub).toHaveBeenCalled()
 
           it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-            revealStub = up.viewport.knife.mock('reveal').and.returnValue(Promise.resolve())
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
@@ -1519,6 +1519,40 @@ describe 'up.fragment', ->
           next =>
             expect(spy).toHaveBeenCalledWith('new text', $parent)
 
+        it 'reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', asyncSpec (next) ->
+          $container = $fixture('.container[up-viewport]').css
+            'width': '200px'
+            'height': '200px'
+            'overflow-y': 'scroll'
+            'position': 'fixed'
+            'left': 0,
+            'top': 0
+          $element = $fixture('.element').appendTo($container).css(height: '600px')
+
+          $container.scrollTop(300)
+          expect($container.scrollTop()).toEqual(300)
+
+          up.change($element, transition: 'cross-fade', duration: 60000, reveal: true, html: """
+            <div class="element" style="height: 600px"></div>
+            """
+          )
+
+          next =>
+            $old = $('.element.up-destroying')
+            $new = $('.element:not(.up-destroying)')
+
+            # Container is scrolled up due to { reveal: true } option.
+            # Since $old and $new are sitting in the same viewport with a
+            # single shared scrollbar, this will make the ghost for $old jump.
+            expect($container.scrollTop()).toBeAround(0, 5)
+
+            # See that the ghost for $new is aligned with the top edge
+            # of the viewport.
+            expect($new.offset().top).toBeAround(0, 5)
+
+            # The absolitized $old is shifted upwards to make it looks like it
+            # was at the scroll position before we revealed $new.
+            expect($old.offset().top).toBeAround(-300, 5)
 
         describe 'when up.morph() is called from a transition function', ->
 
@@ -1623,7 +1657,7 @@ describe 'up.fragment', ->
           @revealedText = []
           @revealOptions = {}
 
-          @revealMock = up.viewport.knife.mock('reveal').and.callFake (element, options) =>
+          @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
             @revealedHTML.push element.outerHTML
             @revealedText.push element.textContent.trim()
             @revealOptions = options
@@ -2175,7 +2209,7 @@ describe 'up.fragment', ->
             </form>
           """
 
-          next =>
+          next.after 50, =>
             input = $('.autofocused-input').get(0)
             expect(input).toBeGiven()
             expect(document.activeElement).toBe(input)
