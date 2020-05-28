@@ -13,7 +13,6 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that up.fragment.all / up.fragment.get takes a { origin } option that defines a layer and allows "&" lookup
   - Test that up:fragment:loaded can interrupt fragment update
   - Test that up:fragment:loaded is not emitted when preloading
-  - test that up-expand gets a tabindex
   - Test { layer: 'swap' }
   - Test that the original [href] or [up-href] of a link are not interpreted as patterns (if they include colons), just [up-alias]
   - Test that overlays may have sizes

@@ -10,17 +10,19 @@ class up.OverlayFocus
 
     @untrapFocus = up.on('focusin', (event) => @onFocus(event))
     @unsetAttrs = e.setTemporaryAttrs(@layer.element,
-      'tabindex': '0'      # make element focusable
-      'role': 'dialog'     # make screen readers speak "dialog field" as we focus the element
-      'aria-modal': 'true' # tell modern screen readers to make all other elements inert
-      # 'aria-label': 'dialog'
+      # Make layer.element focusable.
+      # It would be slightly nicer to give it [tabindex=-1] to make it focusable through JS,
+      # but remove it from the keyboard tab sequence. However, then we would need additional
+      # code to prevent an infinite loop between focus traps in an overlay that has no
+      # focusable elements.
+      'tabindex': '0'
+      # Make screen readers speak "dialog field" as we focus layer.element.
+      'role': 'dialog'
+      # Tell modern screen readers to make all elements outside layer.element's subtree inert.
+      'aria-modal': 'true'
     )
     @focusTrapBefore = e.affix(@layer.element, 'beforebegin', 'up-focus-trap[tabindex=0]',)
     @focusTrapAfter = e.affix(@layer.element, 'afterend', 'up-focus-trap[tabindex=0]')
-
-    # page = document.querySelector('.page')
-    # page.setAttribute('inert', '')
-    # page.setAttribute('aria-hidden', 'true')
 
   moveToBack: ->
     @teardown()
