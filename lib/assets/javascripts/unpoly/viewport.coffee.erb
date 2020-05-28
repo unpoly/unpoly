@@ -249,6 +249,10 @@ up.viewport = do ->
   autofocus = (element, options) ->
     if autofocusElement = e.subtree(element, '[autofocus]')[0]
       doDocus(autofocusElement, options)
+      return true
+
+  makeFocusable = (element) ->
+    e.setMissingAttrs(element, 'autofocus': '-1')
 
   ###**
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
@@ -782,6 +786,7 @@ up.viewport = do ->
     focus: doFocus
     tryFocus: tryFocus
     autofocus: autofocus
+    makeFocusable: makeFocusable
 
 up.focus = up.viewport.focus
 up.scroll = up.viewport.scroll

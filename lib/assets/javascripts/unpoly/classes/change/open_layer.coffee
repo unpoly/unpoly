@@ -88,10 +88,14 @@ class up.Change.OpenLayer extends up.Change.Addition
     @currentLayer.overlayFocus?.moveToBack()
     @layer.overlayFocus.moveToFront()
 
-    if u.isString(@focus) && (element = up.fragment.first(@focus, { @layer, @origin }))
-      up.focus(element, preventScrollOptions)
-    else
-      @layer.overlayFocus.focusStart(preventScrollOptions)
+    # The user may pass a CSS selector to focus.
+    if u.isString(@focus) && (focusElement = up.fragment.first(@focus, { @layer }))
+      up.viewport.makeFocusable(focusElement)
+      up.focus(focusElement, preventScrollOptions)
+    else if @focus != false
+      # If the new layer contains an [autofocus] element, we focus that.
+      # Otherwise we focus the layer element itself.
+      up.viewport.autofocus(@layer.element, preventScrollOptions) || @layer.overlayFocus.focusStart(preventScrollOptions)
 
   buildEvent: (name) =>
     return up.event.build(name,

@@ -296,10 +296,14 @@ class up.Change.UpdateLayer extends up.Change.Addition
       focusOpt.restore(element, step)
     # If the user has passed a CSS selector, try to find and focus a matching
     # element in the layer that we're updating.
-    else if u.isString(focusOpt) && (element = up.fragment.get(focusOpt, step))
-      up.focus(element, step)
+    else if u.isString(focusOpt) && (focusElement = e.subtree(element, focusOpt)[0] || up.fragment.get(focusOpt, step))
+      up.viewport.makeFocusable(focusElement)
+      up.focus(focusElement, step)
     # If the user hasn't passed a focus option and hasn't disabled focusing with
     # { focus: false }, we look for [autofocus] fields in element's subtree and focus that.
+    else if focusOpt == true
+      up.viewport.makeFocusable(element)
+      up.focus(element, step)
     else if focusOpt != false
       up.viewport.autofocus(element, step)
 

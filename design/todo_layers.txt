@@ -2,6 +2,7 @@
 - Try changes on makandracards.com
 - Try changes on DAH
 - Write remaining tests
+- When finding element for focus, try to find in element's subtree first
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
   - Consider removing some stable functions
@@ -10,6 +11,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that up.viewport.autofocus() returns true if it focused an element, otherwise false
   - Test that up.fragment.all / up.fragment.get takes a { origin } option that defines a layer and allows "&" lookup
   - Test that up:fragment:loaded can interrupt fragment update
   - Test that up:fragment:loaded is not emitted when preloading
