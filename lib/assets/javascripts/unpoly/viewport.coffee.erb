@@ -252,7 +252,7 @@ up.viewport = do ->
       return true
 
   makeFocusable = (element) ->
-    e.setMissingAttrs(element, 'autofocus': '-1')
+    e.setMissingAttrs(element, 'tabindex': '-1')
 
   ###**
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.

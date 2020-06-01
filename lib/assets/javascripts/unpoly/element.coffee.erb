@@ -533,7 +533,8 @@ up.element = do ->
       if styleValue = u.pluckKey(attrs, 'style')
         setInlineStyle(rootElement, styleValue)
       if textValue = u.pluckKey(attrs, 'text')
-        rootElement.innerText = textValue
+        # Use .textContent instead of .innerText, since .textContent preserves line breaks.
+        rootElement.textContent = textValue
       if contentValue = u.pluckKey(attrs, 'content')
         rootElement.innerHTML = contentValue
 

@@ -106,7 +106,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
               e.remove(step.oldElement) # clean up jQuery data
               up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
             scrollNew: =>
-              @handleScrollAndFocus(step.newElement, step)
+              @handleFocus(step.newElement, step)
+              @handleScroll(step.newElement, step)
 
           return up.morph(step.oldElement, step.newElement, step.transition, morphOptions)
 
@@ -131,10 +132,12 @@ class up.Change.UpdateLayer extends up.Change.Addition
           # Compile the new content and emit up:fragment:inserted.
           @responseDoc.activateElement(child, step)
 
+        @handleFocus(wrapper, step)
+
         # Reveal element that was being prepended/appended.
         # Since we will animate (not morph) it's OK to allow animation of scrolling
         # if options.scrollBehavior is given.
-        promise = @handleScrollAndFocus(wrapper, step)
+        promise = @handleScroll(wrapper, step)
 
         # Since we're adding content instead of replacing, we'll only
         # animate newElement instead of morphing between oldElement and newElement
@@ -274,40 +277,28 @@ class up.Change.UpdateLayer extends up.Change.Addition
           resetScroll: false
           restoreScroll: false
 
-      # If { focus: 'keep' } is given (the default) we need to store the focused element's selector
-      # as well as scroll position and selection range in an up.FocusCapsule for later restauration.
+      # Store the focused element's selector, scroll position and selection range in an up.FocusCapsule
+      # for later restoration.
+      #
       # Note that unlike the other scroll-related options, we might need to keep in a fragment that
       # is not the first step. However, only a single step can include the focused element, or none.
-      if @focus == 'keep' && step.placement == 'swap'
-        step.focus = up.FocusCapsule.preserveWithin(step.oldElement)
+      if step.placement == 'swap'
+        @focusCapsule ?= up.FocusCapsule.preserveWithin(step.oldElement)
 
-  handleScrollAndFocus: (element, step) ->
+  handleFocus: (element, step) ->
+    fragmentFocus = new up.FragmentFocus(
+      target: element,
+      layer: @layer,
+      focusCapsule: @focusCapsule,
+      autoMeans: ['keep', 'autofocus'],
+    )
+    fragmentFocus.process(step.focus)
+
+  handleScroll: (element, step) ->
     # Copy options since we will modify the object below.
     step = u.options(step)
 
-    # First we set the focus. We do not scroll when focusing, since we offer
-    # separate options to control focus, in particular { reveal }.
-    focusOpt = step.focus
-    step.preventScroll ?= true # if we're focusing, don't scroll
-
-    # If we have earlier processed { focus: 'keep' } to { focus: up.FocusCapsule },
-    # restore the capsule now.
-    if focusOpt instanceof up.FocusCapsule
-      focusOpt.restore(element, step)
-    # If the user has passed a CSS selector, try to find and focus a matching
-    # element in the layer that we're updating.
-    else if u.isString(focusOpt) && (focusElement = e.subtree(element, focusOpt)[0] || up.fragment.get(focusOpt, step))
-      up.viewport.makeFocusable(focusElement)
-      up.focus(focusElement, step)
-    # If the user hasn't passed a focus option and hasn't disabled focusing with
-    # { focus: false }, we look for [autofocus] fields in element's subtree and focus that.
-    else if focusOpt == true
-      up.viewport.makeFocusable(element)
-      up.focus(element, step)
-    else if focusOpt != false
-      up.viewport.autofocus(element, step)
-
-    # Second we process one of multiple scroll-changing options.
+    # We process one of multiple scroll-changing options.
     hashOpt = step.hash
     revealOpt = step.reveal
     resetScrollOpt = step.resetScroll

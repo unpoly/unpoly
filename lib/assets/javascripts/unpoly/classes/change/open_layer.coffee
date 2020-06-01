@@ -84,18 +84,15 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer.updateHistory(historyOptions)
 
   handleFocus: ->
-    preventScrollOptions = { preventScroll: true }
     @currentLayer.overlayFocus?.moveToBack()
     @layer.overlayFocus.moveToFront()
 
-    # The user may pass a CSS selector to focus.
-    if u.isString(@focus) && (focusElement = up.fragment.first(@focus, { @layer }))
-      up.viewport.makeFocusable(focusElement)
-      up.focus(focusElement, preventScrollOptions)
-    else if @focus != false
-      # If the new layer contains an [autofocus] element, we focus that.
-      # Otherwise we focus the layer element itself.
-      up.viewport.autofocus(@layer.element, preventScrollOptions) || @layer.overlayFocus.focusStart(preventScrollOptions)
+    fragmentFocus = new up.FragmentFocus(
+      target: @content,
+      layer: @layer,
+      autoMeans: ['autofocus', 'layer']
+    )
+    fragmentFocus.process(@focus)
 
   buildEvent: (name) =>
     return up.event.build(name,

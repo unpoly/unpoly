@@ -4,6 +4,7 @@ e = up.element
 PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
 transferProps = (from, to) ->
+  console.debug("Transfering %o to %o", u.pick(from, PRESERVE_KEYS), to)
   u.assign(to, u.pick(from, PRESERVE_KEYS))
 
 class up.FocusCapsule extends up.Record
@@ -15,6 +16,8 @@ class up.FocusCapsule extends up.Record
     if rediscoveredElement = e.get(scope, @selector)
       up.focus(rediscoveredElement, options)
       transferProps(this, rediscoveredElement)
+      # Signals callers that we could restore
+      return true
 
   @preserveWithin: (oldElement) ->
     focusedElement = document.activeElement

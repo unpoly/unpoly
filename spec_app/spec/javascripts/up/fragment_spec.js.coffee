@@ -2201,18 +2201,166 @@ describe 'up.fragment', ->
 
       describe 'focus', ->
 
-        it 'focuses an [autofocus] element in the new fragment', asyncSpec (next) ->
-          $fixture('.foo-bar')
-          up.change '.foo-bar', html: """
-            <form class='foo-bar'>
-              <input class="autofocused-input" autofocus>
-            </form>
-          """
+        describe 'with { focus: "autofocus" }', ->
 
-          next.after 50, =>
-            input = $('.autofocused-input').get(0)
-            expect(input).toBeGiven()
-            expect(document.activeElement).toBe(input)
+          it 'focuses an [autofocus] element in the new fragment', asyncSpec (next) ->
+            fixture('.foo-bar')
+            up.change '.foo-bar', focus: 'autofocus', html: """
+              <form class='foo-bar'>
+                <input class="autofocused-input" autofocus>
+              </form>
+            """
+
+            next =>
+              expect('.autofocused-input').toBeFocused()
+
+        describe 'with { focus: "target" }', ->
+
+          it 'focuses the new fragment', asyncSpec (next) ->
+            fixture('.foo-bar')
+            up.change '.foo-bar', focus: 'target', html: """
+              <form class='foo-bar'>
+                <input>
+              </form>
+            """
+
+            next =>
+              expect('.foo-bar').toBeFocused()
+
+          it 'focuses the fragment even if its element type is not focusable by default', asyncSpec (next) ->
+            fixture('.foo-bar')
+            up.change '.foo-bar', focus: 'target', html: """
+              <span class='foo-bar'></span>
+            """
+
+            next =>
+              expect('.foo-bar').toBeFocused()
+
+        describe 'with a CSS selector as { focus } option', ->
+
+          it 'focuses a matching element within the new fragment', asyncSpec (next) ->
+            fixture('.foo-bar')
+            up.change '.foo-bar', focus: '.input', html: """
+              <form class='foo-bar'>
+                <input class='input'>
+              </form>
+            """
+
+            next =>
+              expect('.input').toBeFocused()
+
+          it 'focuses a matching element in the same layer', asyncSpec (next) ->
+            fixture('.foo-bar')
+
+            fixture('.element')
+
+            up.change '.foo-bar', focus: '.element', html: """
+              <form class='foo-bar'>
+              </form>
+            """
+
+            next =>
+              expect('.element').toBeFocused()
+
+          it 'does not focus a matching element in another layer', asyncSpec (next) ->
+            fixtureLayers [
+              { target: '.root-element' }
+              { target: '.overlay-element' }
+            ]
+
+            next ->
+              up.change('.overlay-element', focus: '.root-element', content: 'new content')
+
+            next ->
+              expect('.rootElement').not.toBeFocused()
+
+        describe 'with { focus: "keep" }', ->
+
+          it 'preserves focus of an element within the changed fragment', asyncSpec (next) ->
+            container = fixture('.container')
+            oldFocused = e.affix(container, '.focused[tabindex=0]', text: 'old focused')
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.change('.container', focus: 'keep', content: '<div class="focused" tabindex="0">new focused</div>')
+
+            next ->
+              expect('.focused').toBeFocused()
+
+          it 'preserves scroll position and selection range of an element within the changed fragment', asyncSpec (next) ->
+            container = fixture('.container')
+            longText = """
+              foooooooooooo
+              baaaaaaaaaaar
+              baaaaaaaaaaaz
+              baaaaaaaaaaam
+              quuuuuuuuuuux
+            """
+            oldFocused = e.affix(container, 'textarea[wrap=off][rows=3][cols=6]', text: longText)
+
+            oldFocused.selectionStart = 10
+            oldFocused.selectionEnd = 11
+            oldFocused.scrollTop = 12
+            oldFocused.scrollLeft = 13
+            oldFocused.focus()
+
+            expect(oldFocused).toBeFocused()
+            expect(oldFocused.selectionStart).toBe(10)
+            expect(oldFocused.selectionEnd).toBe(11)
+            expect(oldFocused.scrollTop).toBe(12)
+            expect(oldFocused.scrollLeft).toBe(13)
+
+            up.change('.container', focus: 'keep', content: "<textarea wrap='off' rows='2' cols='2'>#{longText}</textarea>")
+
+            next ->
+              textarea = document.querySelector('.container textarea')
+              expect(textarea.selectionStart).toBe(10)
+              expect(textarea.selectionEnd).toBe(11)
+              expect(textarea.scrollTop).toBe(12)
+              expect(textarea.scrollLeft).toBe(13)
+              expect(textarea).toBeFocused()
+
+          it 'does not lose focus of an element outside the changed fragment', asyncSpec (next) ->
+            oldFocused = fixture('textarea')
+            oldFocused.focus()
+
+            container = fixture('.container')
+            e.affix(container, 'textarea')
+
+            up.change('.container', focus: 'keep', content: "<textarea></textarea>")
+
+            next ->
+              expect(oldFocused).toBeFocused()
+
+          it 'does not rediscover an element with the same selector outside the changed fragment (bugfix)', asyncSpec (next) ->
+            outside = fixture('textarea')
+
+            container = fixture('.container')
+            e.affix(container, 'textarea')
+
+            up.change('.container', focus: 'keep', content: "<textarea></textarea>")
+
+            next ->
+              expect(outside).not.toBeFocused()
+
+        describe 'with { focus: "layer" }', ->
+
+          it "focuses the fragment's layer", asyncSpec (next) ->
+            # Focus another element since the front layer will automatically
+            # get focus after opening.
+            textarea = fixture('textarea')
+            textarea.focus()
+
+            fixtureLayers [
+              { target: '.root' }
+              { target: '.overlay' }
+            ]
+
+            next ->
+              up.change('.overlay', focus: 'layer', content: 'new overlay text')
+
+            next ->
+              expect(up.layer.front.element).toBeFocused()
 
       describe 'abortion of existing requests', ->
 

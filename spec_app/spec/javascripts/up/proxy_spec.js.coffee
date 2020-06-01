@@ -862,7 +862,7 @@ describe 'up.proxy', ->
           next =>
             @request = up.request(url: '/foo')
 
-          next.after 50, =>
+          next.after 100, =>
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:slow'

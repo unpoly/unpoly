@@ -59,6 +59,7 @@ up.fragment = do ->
     options.hungry ?= true # preflight option has no failVariant
     options.keep ?= true
     options.failKeep ?= true
+    options.focus ?= 'auto'
 
     # When preloading, disable all preflight side effects.
     if options.preload
@@ -68,7 +69,7 @@ up.fragment = do ->
 
     # By default we consider every change to be a user-initiated navigation
     # that involves changing scroll positions, browser location, etc.
-    # Developers can pass { navigate: true } to only update a fragment without
+    # Developers can pass { navigate: false } to only update a fragment without
     # any other effects.
     navigate = options.navigate ? true # preflight option has no fail variant
 
@@ -81,10 +82,13 @@ up.fragment = do ->
     options.saveScroll ?= navigate
     options.failSaveScroll ?= navigate
 
-    if navigate == false
-      # Only change this for non-default { navigate } option
-      options.history = false
-      options.failHistory = false
+    if navigate
+      options.focus ?= 'auto'
+    else
+      # Only change this for non-default { navigate: false } option.
+      # For the default option history should depend on the layer mode setting.
+      options.history ?= false
+      options.failHistory ?= false
 
     promise = up.browser.whenConfirmed(options)
 
