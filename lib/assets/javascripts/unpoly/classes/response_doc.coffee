@@ -25,9 +25,7 @@ class up.ResponseDoc
     @scriptWrapper = new up.HTMLWrapper('script', guard: @isInlineScript)
 
     @parsedRoot =
-      @parseOuterContent(options) ||
-      @parseInnerContent(options) ||
-      throw "must pass either { html } or { content }"
+      @parseOuterContent(options) || @parseInnerContent(options)
 
   parseOuterContent: (options) ->
     if html = options.html
@@ -37,19 +35,19 @@ class up.ResponseDoc
       return html
 
   parseInnerContent: (options) ->
-    if content = options.content
-      target = options.target or throw "must pass a { target } when passing { content }"
-      if u.contains(target, ',')
-        throw 'when passing { content } you must { target } a single element'
-      matchingElement = e.createFromSelector(target)
+    content = options.content || ''
+    target = options.target or throw "must pass a { target } when passing { content }"
+    if u.contains(target, ',')
+      throw 'when passing { content } you must { target } a single element'
+    matchingElement = e.createFromSelector(target)
 
-      if u.isString(content)
-        content = @wrapHTML(content)
-        matchingElement.innerHTML = content
-      else
-        matchingElement.appendChild(content)
+    if u.isString(content)
+      content = @wrapHTML(content)
+      matchingElement.innerHTML = content
+    else
+      matchingElement.appendChild(content)
 
-      return matchingElement
+    return matchingElement
 
   wrapHTML: (html) ->
     html = @noscriptWrapper.wrap(html)

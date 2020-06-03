@@ -2,11 +2,48 @@ describe 'up.layer', ->
 
   describe 'JavaScript functions', ->
 
+    beforeEach ->
+      # Provoke concurrency issues by enabling animations, but don't slow down tests too much
+      up.motion.config.duration = 10
+
     describe 'up.layer.open()', ->
+
+      it 'resolves to an up.Layer instance', (done) ->
+        up.layer.open().then (value) ->
+          expect(value).toEqual(jasmine.any(up.Layer))
+          done()
+
+      it 'closes existing overlays over the { currentLayer }', (done) ->
+        fixtureLayers(2).then ->
+          [root, oldOverlay] = up.layer.all
+
+          up.layer.open(currentLayer: 'root').then ->
+            [root, newOverlay] = up.layer.all
+
+            expect(newOverlay).not.toBe(oldOverlay)
+            expect(oldOverlay.isOpen()).toBe(false)
+
+            done()
 
       describe 'from a remote URL', ->
 
-        it 'opens a new overlay loaded from a remote { url }'
+        it 'opens a new overlay loaded from a remote { url }', asyncSpec (next) ->
+          up.layer.open(
+            target: '.element',
+            url: '/path'
+          )
+
+          next =>
+            expect(up.layer.all.length).toBe(1)
+            expect(@lastRequest().url).toMatchURL('/path')
+
+            @respondWith('<div class="element other-class">element text</div>')
+
+          next =>
+            element = document.querySelector('up-modal .element')
+            expect(element).toBeGiven()
+            expect(element).toHaveClass('other-class')
+            expect(element).toHaveText('element text')
 
         it 'aborts an previous pending request that would result in opening a new overlay, even if { solo: false } is also passed'
 
@@ -16,25 +53,202 @@ describe 'up.layer', ->
 
       describe 'from a string of HTML', ->
 
-        it 'opens a new overlay from outer HTML given as { html }'
+        it 'opens a new overlay from outer HTML given as { html }', (done) ->
+          layerPromise = up.layer.open(
+            target: '.element',
+            html: '<div class="element other-class">element text</div>'
+          )
 
-        it 'opens a new overlay from inner HTML given as { content }'
+          layerPromise.then ->
+            expect(up.layer.all.length).toBe(2)
+
+            element = document.querySelector('up-modal .element')
+            expect(element).toBeGiven()
+            expect(element).toHaveClass('other-class')
+            expect(element).toHaveText('element text')
+
+            done()
+
+        it 'opens a new overlay from inner HTML given as { content }, constructing a container matching the { target }', (done) ->
+          layerPromise = up.layer.open(
+            target: '.element',
+            content: 'element text'
+          )
+
+          layerPromise.then ->
+            expect(up.layer.all.length).toBe(2)
+
+            element = document.querySelector('up-modal .element')
+            expect(element).toBeGiven()
+            expect(element).toHaveText('element text')
+
+            done()
+
+        it 'opens an empty overlay if neither { html } nor { content } is given', (done) ->
+          layerPromise = up.layer.open(
+            target: '.element'
+          )
+
+          layerPromise.then ->
+            expect(up.layer.all.length).toBe(2)
+
+            element = document.querySelector('up-modal .element')
+            expect(element).toBeGiven()
+            expect(element.innerText).toBeBlank()
+
+            done()
+
+
+      describe 'animation', ->
+
+        it 'should have examples'
 
       describe 'focus', ->
 
-        it "focuses the new overlay's element"
+        it "focuses the new overlay's element", (done) ->
+          layerPromise = up.layer.open(
+            target: '.element',
+          )
 
-        it 'focuses a CSS selector passed as { focus } option'
+          layerPromise.then ->
+            expect(up.layer.element).toBeFocused()
+
+            done()
+
+        it 'focuses a CSS selector passed as { focus } option', (done) ->
+          layerPromise = up.layer.open(
+            target: '.element',
+            content: '<div class="child">child text</div>',
+            focus: '.child'
+          )
+
+          layerPromise.then ->
+            child = document.querySelector('up-modal .element .child')
+            expect(child).toBeGiven()
+            expect(child).toBeFocused()
+
+            done()
+
+      describe 'history', ->
+
+        beforeEach ->
+          up.history.config.enabled = true
+
+        it 'updates the browser location when the overlay opens', asyncSpec (next) ->
+          up.layer.open(
+            target: '.element',
+            location: '/modal-location'
+            html: '<div class="element">element text</div>'
+          )
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).toMatchURL('/modal-location')
+
+        it "restores the parent layer's location when the overlay closes", asyncSpec (next) ->
+          originalLocation = location.href
+
+          up.layer.open(
+            target: '.element',
+            location: '/path/to/modal'
+            html: '<div class="element">element text</div>'
+          )
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).not.toMatchURL(originalLocation)
+
+            up.layer.dismiss()
+
+          next ->
+            expect(up.layer.isRoot()).toBe(true)
+            expect(location.href).toMatchURL(originalLocation)
+
+        it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
+          fixtureLayers [
+            { target: '.root-element' },
+            { target: '.overlay-element', location: '/modal-location' }
+          ]
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).toMatchURL('/modal-location')
+
+            up.change(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false)
+
+          next ->
+            expect(location.href).toMatchURL('/modal-location')
+
+            up.layer.dismiss()
+
+          next ->
+            expect(up.layer.isRoot()).toBe(true)
+            expect(location.href).toMatchURL('/new-root-location')
+
+        it 'does not update the browser location when the overlay is opened with { history: false }', asyncSpec (next) ->
+          originalLocation = location.href
+
+          up.layer.open(
+            target: '.element',
+            history: false,
+            location: '/modal-url'
+          )
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).toMatchURL(originalLocation)
+
+            # We can still ask the layer what location it displays
+            expect(up.layer.location).toMatchURL('/modal-url')
+
+        it 'does not let child layers update the browser location if an ancestor has { history: false }', asyncSpec (next) ->
+          originalLocation = location.href
+
+          up.layer.open(
+            target: '.element',
+            history: false,
+            location: '/overlay1',
+          )
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).toMatchURL(originalLocation)
+
+            up.layer.open(
+              target: '.element',
+              history: true,
+              location: '/overlay2',
+            )
+
+          next ->
+            expect(location.href).toMatchURL(originalLocation)
 
       describe 'mode', ->
 
-        it 'opens a new layer with the default mode from up.layer.config.mode'
+        it 'opens a new layer with the default mode from up.layer.config.mode', asyncSpec (next) ->
+          up.layer.config.mode = 'cover'
+          up.layer.open()
 
-        it 'opens a new layer with the given { mode }'
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.layer.mode).toEqual('cover')
+
+        it 'opens a new layer with the given { mode }', asyncSpec (next) ->
+          up.layer.open(mode: 'cover')
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.layer.mode).toEqual('cover')
 
       describe 'styling', ->
 
-        it 'sets a { position } option as a [position] attribute'
+        # maybe move this to the flavor specs
+
+        it 'sets a { position } option as a [position] attribute', asyncSpec (next) ->
+          up.layer.open(position: 'right')
+
+          next ->
+            expect(up.layer.element).toHaveAttribute('position', 'right')
 
         it 'sets a { size } option as a [size] attribute'
 
@@ -44,39 +258,103 @@ describe 'up.layer', ->
 
       describe 'choice of target', ->
 
-        it 'uses a selector given as { target } option'
+        beforeEach ->
+          up.layer.config.all.targets = []
+          up.layer.config.overlay.targets = []
+          up.layer.config.modal.targets = []
 
-        it 'uses a target from up.layer.config.all.targets'
+        it 'uses a selector given as { target } option', asyncSpec (next) ->
+          up.layer.open(content: 'overlay text', target: '.target-from-option')
 
-        it 'uses a target from up.layer.config.overlay.targets'
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(document).toHaveSelector('up-modal .target-from-option')
 
-        it "uses a target from up.layer.config.$mode.targets, where $mode is the new overlay's mode"
+        it 'uses a target from up.layer.config.all.targets', asyncSpec (next) ->
+          up.layer.config.all.targets.push('.target-from-config-dot-all')
 
-        it 'allows to configure an object with change options in up.layer.config.$any.target'
+          up.layer.open(content: 'overlay text')
 
-      describe 'events'
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(document).toHaveSelector('up-modal .target-from-config-dot-all')
+
+        it 'uses a target from up.layer.config.overlay.targets', asyncSpec (next) ->
+          up.layer.config.overlay.targets.push('.target-from-config-dot-overlay')
+          up.layer.config.all.targets.push('.target-from-config-dot-all')
+
+          up.layer.open(content: 'overlay text')
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(document).toHaveSelector('up-modal .target-from-config-dot-overlay')
+
+        it "uses a target from up.layer.config.$mode.targets, where $mode is the new overlay's mode", asyncSpec (next) ->
+          up.layer.config.modal.targets.push('.target-from-config-dot-modal')
+          up.layer.config.overlay.targets.push('.target-from-config-dot-overlay')
+          up.layer.config.all.targets.push('.target-from-config-dot-all')
+
+          up.layer.open(content: 'overlay text')
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
+
+        it 'allows to configure an entire object with change options in up.layer.config.$something.target', asyncSpec (next) ->
+          up.layer.config.all.targets.push({ target: '.target-from-config', size: 'small' })
+
+          up.layer.open(content: 'overlay text')
+
+          next ->
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(document).toHaveSelector('up-modal .target-from-config')
+            expect(up.layer.size).toEqual('small')
+
+      describe 'events', ->
+
+        it 'should have tests'
 
       describe 'close conditions', ->
 
-        describe '{ dismissable }'
+        describe '{ dismissable }', ->
 
-        describe '{ buttonDismissable }'
+          it 'should have examples'
 
-        describe '{ escapeDismissable }'
+        describe '{ buttonDismissable }', ->
 
-        describe '{ outsideDismissable }'
+          it 'should have examples'
 
-        describe '{ onDismissed }'
+        describe '{ escapeDismissable }', ->
 
-        describe '{ onAccepted }'
+          it 'should have examples'
 
-        describe '{ acceptEvent }'
+        describe '{ outsideDismissable }', ->
 
-        describe '{ dismissEvent }'
+          it 'should have examples'
 
-        describe '{ acceptLocation }'
+        describe '{ onDismissed }', ->
 
-        describe '{ dismissLocation }'
+          it 'should have examples'
+
+        describe '{ onAccepted }', ->
+
+          it 'should have examples'
+
+        describe '{ acceptEvent }', ->
+
+          it 'should have examples'
+
+        describe '{ dismissEvent }', ->
+
+          it 'should have examples'
+
+        describe '{ acceptLocation }', ->
+
+          it 'should have examples'
+
+        describe '{ dismissLocation }', ->
+
+          it 'should have examples'
 
     describe 'up.layer.dismiss()', ->
 

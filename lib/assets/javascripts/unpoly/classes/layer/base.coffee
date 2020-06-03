@@ -25,11 +25,6 @@ class up.Layer extends up.Record
     unless @mode
       throw "missing { mode } option"
 
-    # If an ancestor layer was opened with the wish to not affect history,
-    # this child layer should not affect it either.
-    if parent = @parent
-      @history &&= parent.history
-
   setupHandlers: ->
     up.link.convertClicks(this)
 
@@ -139,7 +134,7 @@ class up.Layer extends up.Record
     e.isDetached(@element)
 
   saveHistory: ->
-    return unless @history
+    return unless @hasHistory()
 
     @savedTitle = document.title
     @savedLocation = up.history.location
@@ -204,8 +199,18 @@ class up.Layer extends up.Record
         if @hasLiveHistory()
           up.history.push(location)
 
+  hasHistory: ->
+    history = @history
+
+    # If an ancestor layer was opened with the wish to not affect history,
+    # this child layer must not affect it either.
+    if parent = @parent
+      history &= parent.hasHistory()
+
+    history
+
   hasLiveHistory: ->
-    @history && @isFront()
+    @hasHistory() && @isFront()
 
   selector: (part) ->
     @constructor.selector(part)

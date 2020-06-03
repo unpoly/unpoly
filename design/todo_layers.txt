@@ -2,7 +2,8 @@
 - Try changes on makandracards.com
 - Try changes on DAH
 - Write remaining tests
-- When finding element for focus, try to find in element's subtree first
+- up.layer.config.all should be up.layer.config.any
+- Closing the root layer should return a rejected promise, not a fulfilled promiose
 - Test and document that up.observe() callback may return a promise that will prevent callback calls whuile running
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
@@ -12,6 +13,9 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - History handling per layer
+  - Test what happens if we call layer.open() many times after another
+  - Test what happens if we call layer.dismiss() many times after another
   - Test that up.viewport.autofocus() returns true if it focused an element, otherwise false
   - Test that up.fragment.all / up.fragment.get takes a { origin } option that defines a layer and allows "&" lookup
   - Test that up:fragment:loaded can interrupt fragment update

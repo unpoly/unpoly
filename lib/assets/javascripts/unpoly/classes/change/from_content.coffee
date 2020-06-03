@@ -85,7 +85,7 @@ class up.Change.FromContent extends up.Change
     docOptions = u.copy(@options)
     # ResponseDoc allows to pass innerHTML as { content }, but then it also
     # requires a { target }. If no { target } is given we use the first plan's target.
-    if docOptions.content && !docOptions.target
+    if !docOptions.html && !docOptions.target
       docOptions.target = @firstDefaultTarget()
     @options.responseDoc = new up.ResponseDoc(docOptions)
 

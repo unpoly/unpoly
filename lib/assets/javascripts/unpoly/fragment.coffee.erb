@@ -22,7 +22,7 @@ up.fragment = do ->
   config = u.literal
     # Users who are not using layers will prefer settings default targets
     # as up.fragment.config.targets.
-    get_targets: -> up.layer.config.all
+    get_targets: -> up.layer.config.all.targets
 
   setSource = (element, sourceURL) ->
     element.upSource = sourceURL
@@ -103,12 +103,10 @@ up.fragment = do ->
     return promise
 
   makeChangeNow = (options) ->
-    if options.content || options.html
-      return new up.Change.FromContent(options).executeAsync()
-    else if options.url
+    if options.url
       return new up.Change.FromURL(options).executeAsync()
     else
-      up.fail('up.change() requires either { content }, { html } or { url } option, but options were %o', options)
+      return new up.Change.FromContent(options).executeAsync()
 
   ###**
   Replaces elements on the current page with corresponding elements

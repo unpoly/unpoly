@@ -12,33 +12,27 @@ describe 'up.Layer.Overlay', ->
 
     it 'accepts a dismissal value that is passed to onDismissed handlers'
 
-    it 'returns a resolved promise for the root layer'
+    it 'returns a resolved promise for the root layer (should it return a rejected promise?)'
 
     it 'focuses the link that originally opened the overlay'
 
     it 'pops this layer from the stack synchronously to prevent race conditions'
 
-    describe 'events'
+    describe 'events', ->
+
+      it 'should have examples'
 
   describe '#accept()', ->
 
     it 'closes this layer'
 
-    it 'closes descendants before closing this layer'
-
-    it 'aborts pending requests for this layer'
-
-    it 'does not abort a pending request for another layer'
-
     it 'accepts an acceptance value that is passed to onAccepted handlers'
 
-    it 'returns a resolved promise for the root layer'
+    it 'returns a resolved promise for the root layer (should it return a rejected promise?)'
 
-    it 'focuses the link that originally opened the overlay'
+    describe 'events', ->
 
-    it 'pops this layer from the stack synchronously to prevent race conditions'
-
-    describe 'events'
+      it 'should have examples'
 
   describe '#on()', ->
 

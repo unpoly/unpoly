@@ -28,6 +28,9 @@ class up.FragmentFocus
   focusSelector: (selector) ->
     if (match = e.subtree(@target, selector)[0] || up.fragment.get(selector, { @layer }))
       return @focusElement(match)
+    else
+      up.warn('up.change()', 'Tried to focus selector "%s", but no matching element found', selector)
+      return
 
   restoreFocus: (capsule) ->
     return capsule?.restore(@target, PREVENT_SCROLL_OPTIONS)
