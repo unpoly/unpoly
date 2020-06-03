@@ -1,10 +1,12 @@
+u = up.util
+
 describe 'up.layer', ->
 
   describe 'JavaScript functions', ->
 
     beforeEach ->
       # Provoke concurrency issues by enabling animations, but don't slow down tests too much
-      up.motion.config.duration = 10
+      up.motion.config.duration = 5
 
     describe 'up.layer.open()', ->
 
@@ -28,10 +30,7 @@ describe 'up.layer', ->
       describe 'from a remote URL', ->
 
         it 'opens a new overlay loaded from a remote { url }', asyncSpec (next) ->
-          up.layer.open(
-            target: '.element',
-            url: '/path'
-          )
+          up.layer.open(target: '.element', url: '/path')
 
           next =>
             expect(up.layer.all.length).toBe(1)
@@ -49,7 +48,27 @@ describe 'up.layer', ->
 
         it 'does not abort a previous request that would not result in opening a new overlay'
 
-        it 'dismisses an overlay that has been opened while the request was in flight'
+        it 'dismisses an overlay that has been opened while the request was in flight', asyncSpec (next) ->
+          up.layer.open(mode: 'modal', target: '.element', url: '/path')
+
+          next ->
+            # The layer has not yet opened since the request is still in flight
+            expect(up.layer.all.length).toBe(1)
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+            # We open another layer while the request is still in flight
+            up.layer.open(mode: 'cover')
+
+          next =>
+            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.mode).toEqual('cover')
+
+            # Now we respond to the request
+            @respondWith('<div class="element"></div>')
+
+          next ->
+            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.mode).toEqual('modal')
 
       describe 'from a string of HTML', ->
 
@@ -250,11 +269,24 @@ describe 'up.layer', ->
           next ->
             expect(up.layer.element).toHaveAttribute('position', 'right')
 
-        it 'sets a { size } option as a [size] attribute'
+        it 'sets a { size } option as a [size] attribute', asyncSpec (next) ->
+          up.layer.open(size: 'small')
 
-        it 'sets an { align } option as an [align] attribute'
+          next ->
+            expect(up.layer.element).toHaveAttribute('size', 'small')
 
-        it 'sets a { class } option as a [class] of the overlay element'
+        it 'sets an { align } option as an [align] attribute', asyncSpec (next) ->
+          up.layer.open(align: 'right')
+
+          next ->
+            expect(up.layer.element).toHaveAttribute('align', 'right')
+
+        it 'sets a { class } option as a [class] of the overlay element', asyncSpec (next) ->
+          up.layer.open(class: 'foo')
+
+          next ->
+            expect(up.layer.element).toHaveClass('foo')
+
 
       describe 'choice of target', ->
 
@@ -556,15 +588,69 @@ describe 'up.layer', ->
 
     describe 'up.layer.ask()', ->
 
-      it 'opens a new overlay and returns a promise that fulfills when that overlay is accepted'
+      it 'opens a new overlay and returns a promise that fulfills when that overlay is accepted', (done) ->
+        up.motion.config.enabled = false
 
-      it 'opens a new overlay and returns a promise that rejects when that overlay is dismissed'
+        promise = up.layer.ask(content: 'Would you like to accept?')
+
+        u.task ->
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText ('Would you like to accept?')
+
+          promiseState(promise).then (result) ->
+            expect(result.state).toEqual('pending')
+
+            up.layer.accept('acceptance value')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('fulfilled')
+                expect(result.value).toEqual('acceptance value')
+
+                done()
+
+      it 'opens a new overlay and returns a promise that rejects when that overlay is dismissed', (done) ->
+        up.motion.config.enabled = false
+
+        promise = up.layer.ask(content: 'Would you like to accept?')
+
+        u.task ->
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText ('Would you like to accept?')
+
+          promiseState(promise).then (result) ->
+            expect(result.state).toEqual('pending')
+
+            up.layer.dismiss('dismissal value')
+
+            u.task ->
+
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('rejected')
+                expect(result.value).toEqual('dismissal value')
+
+                done()
 
     describe 'up.layer.current', ->
 
-      it 'returns the front layer'
+      it 'returns the front layer', (done) ->
+        expect(up.layer.current).toBe(up.layer.root)
 
-      it 'can be manipulated for the duration of a callback using up.Layer.asCurrent(fn)'
+        up.layer.open().then ->
+          expect(up.layer.all.length).toBe(2)
+          expect(up.layer.current).toBe(up.layer.all[1])
+          done()
+
+      it 'may be temporarily changed for the duration of a callback using up.Layer.asCurrent(fn)', (done) ->
+        fixtureLayers(2).then ->
+          expect(up.layer.current).toBe(up.layer.all[1])
+
+          up.layer.root.asCurrent ->
+            expect(up.layer.current).toBe(up.layer.all[0])
+
+          expect(up.layer.current).toBe(up.layer.all[1])
+
+          done()
 
   describe 'unobtrusive behavior', ->
 
