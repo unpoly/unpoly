@@ -44,9 +44,35 @@ describe 'up.layer', ->
             expect(element).toHaveClass('other-class')
             expect(element).toHaveText('element text')
 
-        it 'aborts an previous pending request that would result in opening a new overlay, even if { solo: false } is also passed'
+        it 'aborts a previous pending request for the current layer', asyncSpec (next) ->
+          fixture('.root-element')
 
-        it 'does not abort a previous request that would not result in opening a new overlay'
+          up.change('.root-element', url: '/path1')
+          abortedURLs = []
+          up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+
+          next ->
+            expect(abortedURLs).toBeBlank()
+
+            up.layer.open(url: '/path2')
+
+          next ->
+            expect(abortedURLs.length).toBe(1)
+            expect(abortedURLs[0]).toMatchURL('/path1')
+
+        it 'aborts a previous pending request that would result in opening a new overlay', asyncSpec (next) ->
+          up.layer.open(url: '/path1')
+          abortedURLs = []
+          up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+
+          next ->
+            expect(abortedURLs).toBeBlank()
+
+            up.layer.open(url: '/path2')
+
+          next ->
+            expect(abortedURLs.length).toBe(1)
+            expect(abortedURLs[0]).toMatchURL('/path1')
 
         it 'dismisses an overlay that has been opened while the request was in flight', asyncSpec (next) ->
           up.layer.open(mode: 'modal', target: '.element', url: '/path')
