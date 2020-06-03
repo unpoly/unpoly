@@ -35,6 +35,10 @@ class up.Layer.Root extends up.Layer
     #    on Chrome, Firefox, IE11, Safari.
     return e.root
 
+  @getter 'contentElement', ->
+    # This is used in Layer#affix()
+    document.body
+
   @selector: ->
     'html'
 

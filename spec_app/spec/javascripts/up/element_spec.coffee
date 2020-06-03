@@ -521,13 +521,21 @@ describe 'up.element', ->
       element = up.element.createFromSelector('.foo', text: '<script>alert("foo")</script>')
       expect(element).toHaveText('<script>alert("foo")</script>')
 
-  describe 'up.element.affix', ->
+  describe 'up.element.affix()', ->
 
     it 'creates an element from the given selector and attaches it to the given container', ->
       container = fixture('.container')
       element = up.element.affix(container, 'span')
       expect(element.tagName).toEqual('SPAN')
       expect(element.parentElement).toBe(container)
+
+    it 'can attach an element to the body', ->
+      element = up.element.affix(document.body, 'div')
+      expect(element.tagName).toEqual('DIV')
+      expect(element.parentElement).toBe(document.body)
+
+      # Since this is not a fixture that would auto-remove itself after the test, remove it manually.
+      up.element.remove(element)
 
   describe 'up.element.toSelector', ->
 

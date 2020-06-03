@@ -85,21 +85,21 @@ class up.Layer.Overlay extends up.Layer
   createElement: (parentElement) ->
     @nesting ||= @suggestVisualNesting()
     elementAttrs = u.compactObject({ @align, @position, @size, @class, @nesting })
-    @element = @affix(parentElement, null, elementAttrs)
+    @element = @affixPart(parentElement, null, elementAttrs)
 
   createBackdropElement: (parentElement) ->
-    @backdropElement = @affix(parentElement, 'backdrop')
+    @backdropElement = @affixPart(parentElement, 'backdrop')
 
   createViewportElement: (parentElement) ->
     # Give the viewport element an [up-viewport] attribute so it will be found
     # by up.viewport.get().
-    @viewportElement = @affix(parentElement, 'viewport', 'up-viewport': '')
+    @viewportElement = @affixPart(parentElement, 'viewport', 'up-viewport': '')
 
   createBoxElement: (parentElement) ->
-    @boxElement = @affix(parentElement, 'box')
+    @boxElement = @affixPart(parentElement, 'box')
 
   createContentElement: (parentElement) ->
-    @contentElement = @affix(parentElement, 'content')
+    @contentElement = @affixPart(parentElement, 'content')
 
   setInnerContent: (parentElement, options) ->
     content = options.content
@@ -107,7 +107,7 @@ class up.Layer.Overlay extends up.Layer
     options.onContentAttached?({ layer: this, content })
 
   createDismissElement: (parentElement) ->
-    @dismissElement = @affix(parentElement, 'dismiss',
+    @dismissElement = @affixPart(parentElement, 'dismiss',
       'up-dismiss': ''
       'aria-label': @dismissAriaLabel
       'tabindex': '0'
@@ -116,7 +116,7 @@ class up.Layer.Overlay extends up.Layer
     # we hide the "X" label from screen readers.
     e.affix(@dismissElement, 'span[aria-hidden="true"]', text: @dismissLabel)
 
-  affix: (parentElement, part, options = {}) ->
+  affixPart: (parentElement, part, options = {}) ->
     return e.affix(parentElement, @selector(part), options)
 
   @selector: (part) ->

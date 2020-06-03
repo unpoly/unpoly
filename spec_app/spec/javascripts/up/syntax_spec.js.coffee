@@ -288,10 +288,6 @@ describe 'up.syntax', ->
         expect(args[1]).toBeJQuery()
         expect(args[1]).toEqual($element)
 
-    describe 'up.hello', ->
-
-      it 'should have tests'
-      
     describe 'up.syntax.data', ->
 
       it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
@@ -303,4 +299,3 @@ describe 'up.syntax', ->
         $element = $fixture('.element')
         data = up.syntax.data($element)
         expect(data).toEqual({})
-

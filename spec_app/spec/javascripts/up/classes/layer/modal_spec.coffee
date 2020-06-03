@@ -1,0 +1,1 @@
+describe 'up.Layer.Modal', ->

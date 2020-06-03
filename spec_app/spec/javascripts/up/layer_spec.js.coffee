@@ -4,45 +4,107 @@ describe 'up.layer', ->
 
     describe 'up.layer.open()', ->
 
-      it 'makes a change on a new layer', ->
-        changeSpy = spyOn(up, 'change')
-        up.layer.open(option: 'value')
-        expect(changeSpy).toHaveBeenCalledWith(layer: 'new', option: 'value')
+      describe 'from a remote URL', ->
 
-      it 'resolves to an up.Layer instance', (done) ->
-        up.layer.open(target: '.foo', content: 'foo').then (value) ->
-          expect(value).toEqual(jasmine.any(up.Layer))
-          done()
+        it 'opens a new overlay loaded from a remote { url }'
 
-      it 'aborts an previous pending request that would result in opening a new layer, even if { solo: false } is also passed'
+        it 'aborts an previous pending request that would result in opening a new overlay, even if { solo: false } is also passed'
+
+        it 'does not abort a previous request that would not result in opening a new overlay'
+
+        it 'dismisses an overlay that has been opened while the request was in flight'
+
+      describe 'from a string of HTML', ->
+
+        it 'opens a new overlay from outer HTML given as { html }'
+
+        it 'opens a new overlay from inner HTML given as { content }'
+
+      describe 'focus', ->
+
+        it "focuses the new overlay's element"
+
+        it 'focuses a CSS selector passed as { focus } option'
+
+      describe 'mode', ->
+
+        it 'opens a new layer with the default mode from up.layer.config.mode'
+
+        it 'opens a new layer with the given { mode }'
+
+      describe 'styling', ->
+
+        it 'sets a { position } option as a [position] attribute'
+
+        it 'sets a { size } option as a [size] attribute'
+
+        it 'sets an { align } option as an [align] attribute'
+
+        it 'sets a { class } option as a [class] of the overlay element'
+
+      describe 'choice of target', ->
+
+        it 'uses a selector given as { target } option'
+
+        it 'uses a target from up.layer.config.all.targets'
+
+        it 'uses a target from up.layer.config.overlay.targets'
+
+        it "uses a target from up.layer.config.$mode.targets, where $mode is the new overlay's mode"
+
+        it 'allows to configure an object with change options in up.layer.config.$any.target'
+
+      describe 'events'
+
+      describe 'close conditions', ->
+
+        describe '{ dismissable }'
+
+        describe '{ buttonDismissable }'
+
+        describe '{ escapeDismissable }'
+
+        describe '{ outsideDismissable }'
+
+        describe '{ onDismissed }'
+
+        describe '{ onAccepted }'
+
+        describe '{ acceptEvent }'
+
+        describe '{ dismissEvent }'
+
+        describe '{ acceptLocation }'
+
+        describe '{ dismissLocation }'
 
     describe 'up.layer.dismiss()', ->
 
-      it 'closes the current layer'
-
-      it 'closes the given layer'
-
-      it 'closes all descendants of the given layer'
-
-      it 'aborts all pending requests for the given layer'
-
-      it 'does not abort a pending request for another layer'
-
-      it 'accepts a dismissal value that is passed to onDismissed handlers'
+      it 'closes the current layer', ->
+        dismissSpy = spyOn(up.layer.current, 'dismiss')
+        up.layer.dismiss(option: 'value')
+        expect(dismissSpy).toHaveBeenCalledWith(option: 'value')
 
     describe 'up.layer.accept()', ->
 
-      it 'closes the current layer'
+      it 'closes the current layer', ->
+        acceptSpy = spyOn(up.layer.current, 'accept')
+        up.layer.accept(option: 'value')
+        expect(acceptSpy).toHaveBeenCalledWith(option: 'value')
 
-      it 'closes the given layer'
+    describe 'up.layer.get()', ->
 
-      it 'closes all descendants of the given layer'
+      describe 'for an element', ->
 
-      it 'aborts all pending requests for the given layer'
+        it "returns the element's layer"
 
-      it 'does not abort a pending request for another layer'
+      describe 'for an up.Layer', ->
 
-      it 'accepts an acceptance value that is passed to onDismissed handlers'
+        it 'returns the given layer'
+
+      describe 'for a layer name like "parent"', ->
+
+        it 'returns the layer matching that name'
 
     describe 'up.layer.list()', ->
 
@@ -213,3 +275,19 @@ describe 'up.layer', ->
           fixtureLayers(3).then ->
             expect(up.layer.list('parent', currentLayer: 'front')).toEqual [up.layer.all[1]]
             done()
+
+    describe 'up.layer.ask()', ->
+
+      it 'opens a new overlay and returns a promise that fulfills when that overlay is accepted'
+
+      it 'opens a new overlay and returns a promise that rejects when that overlay is dismissed'
+
+    describe 'up.layer.current', ->
+
+      it 'returns the front layer'
+
+      it 'can be manipulated for the duration of a callback using up.Layer.asCurrent(fn)'
+
+  describe 'unobtrusive behavior', ->
+
+    it 'does not lose an overlay if the <body> is replaced'

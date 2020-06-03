@@ -218,3 +218,10 @@ class up.Layer extends up.Record
 
   toString: ->
     "#{@mode} layer"
+
+  affix: (args...) ->
+    content = @getContentElement()
+    if !content.insertAdjacentElement
+      debugger
+
+    e.affix(@getContentElement(), args...)

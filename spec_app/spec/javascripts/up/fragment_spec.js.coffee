@@ -1019,11 +1019,7 @@ describe 'up.fragment', ->
 
         it 'opens a new layer when given { layer: "new" }'
 
-        it 'opens a new layer with the given { mode }'
-
         it 'allows to pass the mode for the new layer as { layer } (as a shortcut)'
-
-        it 'opens a new layer with the default mode from up.layer.config.mode'
 
         it 'opens a new layer if given a { mode } but no { layer }'
 
@@ -3116,3 +3112,41 @@ describe 'up.fragment', ->
       it 'returns undefined if the given key is not prefixed with "fail"', ->
         result = up.fragment.successKey('foo')
         expect(result).toBeUndefined()
+
+    describe 'up.hello()', ->
+
+      it 'calls compilers with the given element', ->
+        compiler = jasmine.createSpy('compiler')
+        up.compiler('.element', compiler)
+        element = fixture('.element')
+
+        up.hello(element)
+        expect(compiler).toHaveBeenCalledWith(element, jasmine.anything())
+
+      it 'emits an up:fragment:inserted event', ->
+        compiler = jasmine.createSpy('compiler')
+        target = fixture('.element')
+        origin = fixture('.origin')
+        listener = jasmine.createSpy('up:fragment:inserted listener')
+        target.addEventListener('up:fragment:inserted', listener)
+
+        up.hello(target, { origin })
+
+        expectedEvent = jasmine.objectContaining({ origin, target })
+        expect(listener).toHaveBeenCalledWith(expectedEvent)
+
+      it "sets up.layer.current to the given element's layer while compilers are running", asyncSpec (next) ->
+        layerSpy = jasmine.createSpy('layer spy')
+        up.compiler('.foo', -> layerSpy(up.layer.current))
+        fixtureLayers(2)
+
+        next ->
+          rootElement = up.layer.all[0].affix('.foo.in-root')
+          overlayElement = up.layer.all[1].affix('.foo.in-overlay')
+
+          up.hello(rootElement)
+          up.hello(overlayElement)
+
+          expect(layerSpy.calls.count()).toBe(2)
+          expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.all[0]]
+          expect(layerSpy.calls.argsFor(1)).toEqual [up.layer.all[1]]

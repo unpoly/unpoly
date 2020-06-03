@@ -3,6 +3,7 @@
 - Try changes on DAH
 - Write remaining tests
 - When finding element for focus, try to find in element's subtree first
+- Test and document that up.observe() callback may return a promise that will prevent callback calls whuile running
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
   - Consider removing some stable functions
@@ -71,7 +72,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - check if follow event sets up.layer.current
   - Test that layers without history updates still return their current #location
   - Change with { reveal: 'selector' } should not find elements in another layer
-  - Test that this doesn't crash when we don't have parent
+  - Test that this doesn't crash when we don't have parent (it should default to this layer)
     - <form up-layer="parent" up-target=".list">
   - Test that accepting/dismissing the root layer will just follow the link
   - Test that proxy-events are emitted on their layer, not the document
@@ -88,11 +89,11 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
   - Test that back button closes all layers
   - Test that up.change() can be called with { target: Element }
-  - Test that up.change() can be called with { target: Element } and will find in any layer
+  - Test that up.change() can be called with { target: Element } and will find in any layer (what?)
   - Test that up.change() without { layer } option will only find in current layer
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
-  - Test that [up-dismiss][up-follow] inside a layer will dismiss, not follow
-  - Test that [up-dismiss][up-follow] outside a layer will follow
+  - Test that [up-dismiss][up-follow] inside an overlay will dismiss, not follow
+  - Test that [up-dismiss][up-follow] outside an overlay will follow
   - Test that peeling is not preventable by preventing up:layer:dismiss
   - Test that opening/updating an layer can reset the world if selector is unavailable
   - Test against https://github.com/unpoly/unpoly/issues/79
@@ -114,7 +115,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that we can submit a form into a new layer (success / fail)
   - Test up.proxy.abort()
   - Test that opening a new layer cancels requests that also open a new layer
-  - Test { abort: 'conflict' }
+  - Test { abort: 'conflict' } (is this now { solo: true }?)
   - Test that closing a layer cancels all requests for that layer
   - Test that up.change(html: Element) works
   - Test that forms can submit as arbitrary layer changes (success and failure)
@@ -122,8 +123,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Check that up.layer forwards getters for all layer properties to stack.current
   - Test that compilers always see their up.layer.current, even if it is a background update and there is another layer above it
   - A11Y: current layer should get [role=dialog] and [aria-modal=true], all parent layers should get [inert] and [aria-hidden: true]. Since the root layer has no containers, we should apply this to direct children
-  - Test Rails integration
-  - UpdateLayer should re-create default targets
+  - UpdateLayer should re-create default targets, not only when opening but also when updating!
     - E.g. I have up.layer.config.modal.targets = ['.content', '.menu']
     - Now that layer was opened with .menu
     - The next request only has .content
@@ -133,6 +133,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  - up.syntax.data() is now up.data()
+  - [up-content], [up-content=overlay], [up-content=(mode)]
   - No longer autofocuses on load (already done by browser)
   - up.hello() no longer autofocuses
   - { layer: 'swap' }
