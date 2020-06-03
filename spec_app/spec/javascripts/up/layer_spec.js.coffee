@@ -317,7 +317,7 @@ describe 'up.layer', ->
       describe 'choice of target', ->
 
         beforeEach ->
-          up.layer.config.all.targets = []
+          up.layer.config.any.targets = []
           up.layer.config.overlay.targets = []
           up.layer.config.modal.targets = []
 
@@ -328,8 +328,8 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(document).toHaveSelector('up-modal .target-from-option')
 
-        it 'uses a target from up.layer.config.all.targets', asyncSpec (next) ->
-          up.layer.config.all.targets.push('.target-from-config-dot-all')
+        it 'uses a target from up.layer.config.any.targets', asyncSpec (next) ->
+          up.layer.config.any.targets.push('.target-from-config-dot-all')
 
           up.layer.open(content: 'overlay text')
 
@@ -339,7 +339,7 @@ describe 'up.layer', ->
 
         it 'uses a target from up.layer.config.overlay.targets', asyncSpec (next) ->
           up.layer.config.overlay.targets.push('.target-from-config-dot-overlay')
-          up.layer.config.all.targets.push('.target-from-config-dot-all')
+          up.layer.config.any.targets.push('.target-from-config-dot-all')
 
           up.layer.open(content: 'overlay text')
 
@@ -350,7 +350,7 @@ describe 'up.layer', ->
         it "uses a target from up.layer.config.$mode.targets, where $mode is the new overlay's mode", asyncSpec (next) ->
           up.layer.config.modal.targets.push('.target-from-config-dot-modal')
           up.layer.config.overlay.targets.push('.target-from-config-dot-overlay')
-          up.layer.config.all.targets.push('.target-from-config-dot-all')
+          up.layer.config.any.targets.push('.target-from-config-dot-all')
 
           up.layer.open(content: 'overlay text')
 
@@ -359,7 +359,7 @@ describe 'up.layer', ->
             expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
 
         it 'allows to configure an entire object with change options in up.layer.config.$something.target', asyncSpec (next) ->
-          up.layer.config.all.targets.push({ target: '.target-from-config', size: 'small' })
+          up.layer.config.any.targets.push({ target: '.target-from-config', size: 'small' })
 
           up.layer.open(content: 'overlay text')
 

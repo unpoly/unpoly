@@ -120,7 +120,7 @@ appendDefaultFallback = (parent) ->
   e.affix(parent, 'default-fallback')
 
 beforeEach ->
-  up.layer.config.all.targets = ['default-fallback']
+  up.layer.config.any.targets = ['default-fallback']
   up.history.config.restoreTargets = ['default-fallback']
   appendDefaultFallback(document.body)
 

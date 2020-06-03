@@ -22,7 +22,7 @@ up.fragment = do ->
   config = u.literal
     # Users who are not using layers will prefer settings default targets
     # as up.fragment.config.targets.
-    get_targets: -> up.layer.config.all.targets
+    get_targets: -> up.layer.config.any.targets
 
   setSource = (element, sourceURL) ->
     element.upSource = sourceURL

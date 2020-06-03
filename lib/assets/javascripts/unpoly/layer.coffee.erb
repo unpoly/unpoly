@@ -24,7 +24,7 @@ up.layer = do ->
   config = new up.Config ->
     newConfig =
       mode: 'modal'
-      all:
+      any:
         targets: [
           '[up-content=""]',
           # Define a default target that will close all overlays
@@ -89,9 +89,9 @@ up.layer = do ->
   ###
   modeConfigs = (mode) ->
     if mode == 'root'
-      return [config.root, config.all]
+      return [config.root, config.any]
     else
-      return [config[mode], config.overlay, config.all]
+      return [config[mode], config.overlay, config.any]
       
   normalizeOptions = (options) ->
     up.legacy.fixKey(options, 'closable', 'dismissable')
