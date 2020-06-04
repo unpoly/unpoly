@@ -12,6 +12,14 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Context
+    - Test that { context } is per-layer
+    - Test that { context } is transmitted to server
+    - That that up.layer.context may be manipulated after the layer was opened
+  - Test new queue behavior
+    - Size vs. preloadSize
+    - Aborting of preload requests
+  - Test up.proxy.config.requestMetaKeys
   - { onLoaded }, up:fragment:loaded
     - Should be preventable, preventing history changes and fragment updates
     - Allows listener to manipulate change options
