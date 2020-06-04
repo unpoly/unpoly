@@ -12,6 +12,9 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - { onLoaded }, up:fragment:loaded
+    - Should be preventable, preventing history changes and fragment updates
+    - Allows listener to manipulate change options
   - History handling per layer
   - Test what happens if we call layer.open() many times after another
   - Test what happens if we call layer.dismiss() many times after another

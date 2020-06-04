@@ -120,7 +120,10 @@ class up.Change.FromURL extends up.Change
   processResponse: (response, options) ->
     @augmentOptionsFromResponse(response, options)
 
-    # Allow listeners to
+    # Allow listeners to inspect the response and either prevent the fragment change
+    # or manipulate change options. An example for when this is useful is a maintenance
+    # page with its own layout, that cannot be loaded as a fragment and must be loaded
+    # with a full page load.
     loadedEvent = up.event.build('up:fragment:loaded', { change: options, response: response })
     promise = response.request.whenEmitted(loadedEvent, callback: options.onLoaded)
     promise = promise.then -> new up.Change.FromContent(options).execute()
