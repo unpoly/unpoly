@@ -162,6 +162,8 @@ module Unpoly
       #
       # This is useful when you skip rendering the `<head>` in an Unpoly request.
       def title=(new_title)
+        # We don't make this a response_field since it belongs to *this* response
+        # and should not survive a redirect.
         response.headers['X-Up-Title'] = new_title
       end
 
