@@ -430,7 +430,7 @@ describe 'up.form', ->
                 """
 
           next =>
-            expect(up.history.location).toEqual(@hrefBeforeExample)
+            expect(up.history.location).toEqual(@locationBeforeExample)
             expect('.response').toHaveText('old-text')
             expect('form').toHaveText('error-messages')
             # See that containers outside the form have not changed
@@ -510,12 +510,12 @@ describe 'up.form', ->
           it 'keeps the current browser location if the request failed', asyncSpec (next) ->
             up.submit(@$form, history: '/given-path', failTarget: '.response')
             next => @respondWith('<div class="response">new-text</div>', status: 500)
-            next => expect(up.history.location).toEqual(@hrefBeforeExample)
+            next => expect(up.history.location).toEqual(@locationBeforeExample)
 
           it 'keeps the current browser location if the option is set to false', asyncSpec (next) ->
             up.submit(@$form, history: false)
             next => @respondWith('<div class="response">new-text</div>')
-            next =>expect(up.history.location).toEqual(@hrefBeforeExample)
+            next =>expect(up.history.location).toEqual(@locationBeforeExample)
 
         describe 'revealing', ->
 

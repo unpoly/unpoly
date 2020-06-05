@@ -16,5 +16,5 @@ beforeEach ->
   up.history.config.enabled = false
 
   # Store original URL and title so specs may use it
-  @hrefBeforeExample = location.href
+  @locationBeforeExample = location.href
   @titleBeforeExample = document.title

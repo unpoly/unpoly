@@ -109,6 +109,41 @@ up.fragment = do ->
       return new up.Change.FromContent(options).executeAsync()
 
   ###**
+  This event is [emitted](/up.emit) when the server responds with the HTML, before
+  the HTML is used to [change a fragment](/up.change).
+
+  Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
+  to prevent any changes to the DOM and browser history. This is useful to detect
+  an entirely different page layout (like a maintenance page or fatal server error)
+  which should be open with a full page load:
+
+      up.on('up:fragment:loaded', (event) => {
+        let isMaintenancePage = event.response.getHeader('X-Maintenance')
+
+        if (isMaintenancePage) {
+          // Prevent the fragment update and don't update browser history
+          event.preventDefault()
+
+          // Make a full page load for the same request.
+          event.request.navigate()
+        }
+      })
+
+  Instead of preventing the update, listeners may also access the `event.change` object
+  to mutate options to the `up.change()` call that will process the server response.
+
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the fragment change.
+  @param {up.Request} event.request
+    The original request to the server.
+  @param {up.Response} event.response
+    The server response.
+  @param {object} event.change
+    Options for the `up.change()` call that will process the server response.
+  @event up:fragment:loaded
+  ###
+
+  ###**
   Replaces elements on the current page with corresponding elements
   from a new page fetched from the server.
 

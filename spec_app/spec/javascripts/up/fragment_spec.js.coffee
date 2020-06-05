@@ -236,6 +236,61 @@ describe 'up.fragment', ->
                     expect(result.state).toEqual('rejected')
                     done()
 
+        describe 'interrupting the change', ->
+
+          it 'emits an up:fragment:loaded event that contains information about the request, response and change options', asyncSpec (next) ->
+            event = undefined
+            up.on 'up:fragment:loaded', (e) -> event = e
+            up.change(target: '.target', url: '/url', location: '/location-from-option', peel: false)
+
+            next =>
+              @respondWith('text from server')
+
+            next ->
+              expect(event).toBeGiven()
+              expect(event.request.url).toMatchURL('/url')
+              expect(event.response.text).toContain('text from server')
+              expect(event.change.peel).toBe(false)
+              expect(event.change.location).toMatchURL('/location-from-option')
+
+          it 'allows listeners to prevent an up:fragment:loaded event to prevent changes to the DOM and browser history', (done) ->
+            up.history.config.enabled = true
+            up.on('up:fragment:loaded', (e) -> e.preventDefault())
+            fixture('.target', text: 'old text')
+
+            changePromise = up.change(target: '.target', url: '/url')
+
+            u.task =>
+              @respondWith('new text')
+
+              u.task =>
+                expect('.target').toHaveText('old text')
+                expect(location.href).toMatchURL(@locationBeforeExample)
+
+                promiseState(changePromise).then (result) ->
+                  expect(result.state).toEqual('rejected')
+                  expect(up.error.aborted.is(result.value)).toBe(true)
+
+                  done()
+
+          it 'allows listeners to mutate up.change() options before the fragment is updated', asyncSpec (next) ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+
+            up.on('up:fragment:loaded', (e) -> e.change.target = '.two')
+
+            changePromise = up.change(target: '.one', url: '/url')
+
+            next =>
+              @respondWith """
+                <div class="one">new one</div>
+                <div class="two">new two</div>
+                """
+
+            next ->
+              expect('.one').toHaveText('old one')
+              expect('.two').toHaveText('new two')
+
       describe 'with { content } option', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->
@@ -1071,7 +1126,7 @@ describe 'up.fragment', ->
           fixture('.target')
           up.change('.target', url: '/path', method: 'post')
           next => @respondWithSelector('.target')
-          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+          next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
           fixture('.target')
@@ -1095,19 +1150,19 @@ describe 'up.fragment', ->
           fixture('.target')
           up.change('.target', url: '/path', method: 'post', failTarget: '.target')
           next => @respondWithSelector('.target', status: 500)
-          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+          next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
           fixture('.target')
           up.change('.target', url: '/path', history: false)
           next => @respondWithSelector('.target', status: 500)
-          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+          next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it 'does not add a history entry with { location: false } option', asyncSpec (next) ->
           fixture('.target')
           up.change('.target', url: '/path', location: false)
           next => @respondWithSelector('.target')
-          next => expect(location.href).toMatchURL(@hrefBeforeExample)
+          next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
           fixture('.target')
