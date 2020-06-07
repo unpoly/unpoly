@@ -1,6 +1,6 @@
 u = up.util
 
-window.fixtureLayers = (stackPlans) ->
+window.makeLayers = (stackPlans) ->
 
   if u.isNumber(stackPlans)
     count = stackPlans
@@ -8,18 +8,22 @@ window.fixtureLayers = (stackPlans) ->
 
   stackPlans.forEach (stackPlan, i) ->
     stackPlan.target ||= '.element'
+
     if !stackPlan.content && !stackPlan.html && !stackPlan.url
       stackPlan.content = "text #{i}"
 
-  [rootPlan, overlayPlans...] = stackPlans
+    if i == 0
+      stackPlan.layer = 'root'
+    else
+      stackPlan.layer = 'new'
+      stackPlan.openAnimation = false
+      stackPlan.closeAnimation = false
 
-  fixture(rootPlan.target, u.omit(rootPlan, ['target']))
+  # Make sure the root layer has an element to change
+  fixture(stackPlans[0].target)
 
   promise = Promise.resolve()
-
-  overlayPlans.forEach (overlayPlan) ->
-    promise = promise.then ->
-      openOpts = u.merge(overlayPlan, openAnimation: false, closeAnimation: false)
-      up.layer.open(openOpts)
+  stackPlans.forEach (stackPlan) ->
+    promise = promise.then -> up.change(stackPlan)
 
   return promise

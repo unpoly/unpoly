@@ -47,7 +47,12 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @emitOpenEvent().defaultPrevented
       # Make sure that the currentLayer layer doesn't already have a child layer.
       # Note that this cannot be prevented with { peel: false }!
+      # We don't wait for the peeling to finish.
       @currentLayer.peel()
+
+      # If the server has provided an updated { context } object,
+      # we set the layer's context to that object.
+      @layer.updateContext(@options)
 
       # Change the stack sync. Don't wait for peeling to finish.
       up.layer.push(@layer)

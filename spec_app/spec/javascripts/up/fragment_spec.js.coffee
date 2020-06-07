@@ -1058,7 +1058,7 @@ describe 'up.fragment', ->
       describe 'choice of layer', ->
 
         it 'updates the layer given as { layer } option', asyncSpec (next) ->
-          fixtureLayers [
+          makeLayers [
             { target: '.element', content: 'old text in root' }
             { target: '.element', content: 'old text in modal' }
           ]
@@ -1081,7 +1081,7 @@ describe 'up.fragment', ->
         describe 'if nothing else is specified', ->
 
           it 'prefers updating the current layer', asyncSpec (next) ->
-            fixtureLayers [
+            makeLayers [
               { target: '.element', content: 'old text in root' }
               { target: '.element', content: 'old text in modal' }
             ]
@@ -1094,7 +1094,7 @@ describe 'up.fragment', ->
               expect(up.layer.all[1]).toHaveText(/new text/)
 
           it 'updates the background layer closest to the front if the current layer does not match', asyncSpec (next) ->
-            fixtureLayers [
+            makeLayers [
               { target: '.element', content: 'old text in root' }
               { target: '.other', content: 'old text in modal1' }
               { target: '.element', content: 'old text in modal2' }
@@ -1406,6 +1406,61 @@ describe 'up.fragment', ->
               @respondWithSelector('target', status: 500)
             next =>
               expect(up.fragment.source('.target')).toMatchURL('/previous-source')
+
+      describe 'context', ->
+
+        it "sends the layer's context along with requests pertaining to this layer as an X-Up-Context request header", asyncSpec (next) ->
+          makeLayers [
+            { target: '.target', context: { rootKey: 'rootValue' }},
+            { target: '.target', context: { overlayKey: 'overlayValue' }}
+          ]
+
+          next ->
+            expect(up.layer.all[0].context).toEqual({ rootKey: 'rootValue' })
+            expect(up.layer.all[1].context).toEqual({ overlayKey: 'overlayValue' })
+
+          next ->
+            up.change('.target', layer: up.layer.all[0], url: '/path1')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
+
+            up.change('.target', layer: up.layer.all[1], url: '/path2')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
+
+        it 'lets the server change the context by responding with an X-Up-Context response header', asyncSpec (next) ->
+          makeLayers [
+            { target: '.target', context: { rootKey: 'rootValue' }},
+            { target: '.target', context: { overlayKey: 'overlayValue' }}
+          ]
+
+          next ->
+            up.change('.target', layer: up.layer.all[1], url: '/path1')
+
+          next =>
+            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+
+          next ->
+            expect(up.layer.all[0].context).toEqual({ rootKey: 'rootValue' })
+            expect(up.layer.all[1].context).toEqual({ newKey: 'newValue' })
+
+        it "sends the fail layer's context as an X-Up-Fail-Context request header", asyncSpec (next) ->
+          makeLayers [
+            { target: '.target', context: { rootKey: 'rootValue' }},
+            { target: '.target', context: { overlayKey: 'overlayValue' }}
+          ]
+
+          next ->
+            up.change('.target', layer: up.layer.all[0], failLayer: up.layer.all[1], url: '/path1')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
+            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
 
       describe 'with { transition } option', ->
 
@@ -2314,7 +2369,7 @@ describe 'up.fragment', ->
               expect('.element').toBeFocused()
 
           it 'does not focus a matching element in another layer', asyncSpec (next) ->
-            fixtureLayers [
+            makeLayers [
               { target: '.root-element' }
               { target: '.overlay-element' }
             ]
@@ -2402,7 +2457,7 @@ describe 'up.fragment', ->
             textarea = fixture('textarea')
             textarea.focus()
 
-            fixtureLayers [
+            makeLayers [
               { target: '.root' }
               { target: '.overlay' }
             ]
@@ -3193,7 +3248,7 @@ describe 'up.fragment', ->
       it "sets up.layer.current to the given element's layer while compilers are running", asyncSpec (next) ->
         layerSpy = jasmine.createSpy('layer spy')
         up.compiler('.foo', -> layerSpy(up.layer.current))
-        fixtureLayers(2)
+        makeLayers(2)
 
         next ->
           rootElement = up.layer.all[0].affix('.foo.in-root')

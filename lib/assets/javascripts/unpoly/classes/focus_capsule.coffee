@@ -4,7 +4,6 @@ e = up.element
 PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
 transferProps = (from, to) ->
-  console.debug("Transfering %o to %o", u.pick(from, PRESERVE_KEYS), to)
   u.assign(to, u.pick(from, PRESERVE_KEYS))
 
 class up.FocusCapsule extends up.Record

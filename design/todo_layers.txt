@@ -5,8 +5,8 @@
 - Closing the root layer should return a rejected promise, not a fulfilled promiose
 - Test and document that up.observe() callback may return a promise that will prevent callback calls whuile running
 - Rails Integration
-  - Server should be able to change up.layer.context. The server will send X-Up-Context: { changed_context } IFF it changed
-    - This is currently hard to implement
+  - Accept X-Up-Context from the server!
+  - Allow server's X-Up-Context when opening a NEW layer!
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
   - Consider removing some stable functions

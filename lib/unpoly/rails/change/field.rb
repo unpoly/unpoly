@@ -1,7 +1,9 @@
 module Unpoly
   module Rails
     class Change
+
       class Field
+        PARAM_PREFIX = '_up_'
 
         def initialize(name)
           @name = name
@@ -17,11 +19,8 @@ module Unpoly
           result
         end
 
-        def param_name(full: false)
-          result = name.to_s
-          result = result.dasherize
-          result = "_up[#{result}]" if full
-          result
+        def param_name
+          "#{PARAM_PREFIX}#{name}"
         end
 
         def parse(raw)
@@ -32,8 +31,6 @@ module Unpoly
           raise NotImplementedError
         end
 
-        private
-
         class String < Field
 
           def parse(raw)
@@ -42,6 +39,18 @@ module Unpoly
 
           def stringify(value)
             value
+          end
+
+        end
+
+        class Boolean < Field
+
+          def parse(raw)
+            raw == 'true'
+          end
+
+          def stringify(value)
+            value.to_json
           end
 
         end
@@ -87,7 +96,6 @@ module Unpoly
         end
 
       end
-
     end
   end
 end

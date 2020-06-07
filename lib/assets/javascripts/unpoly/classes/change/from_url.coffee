@@ -157,6 +157,11 @@ class up.Change.FromURL extends up.Change
     options.dismissLayer = response.dismissLayer
     options.eventPlans = response.eventPlans
 
+    # Only if the response contains a new context object (set by the server)
+    # we will override the context from options.
+    if context = response.context
+      options.context = context
+
   # Values we want to keep:
   # - false (no update)
   # - string (forced update)

@@ -18,6 +18,25 @@ describe 'up.Layer.Overlay', ->
 
     it 'pops this layer from the stack synchronously to prevent race conditions'
 
+    it "restores the parent layer's location", asyncSpec (next) ->
+      up.history.config.enabled = true
+
+      up.layer.open(
+        target: '.element',
+        location: '/path/to/modal'
+        content: 'element text'
+      )
+
+      next =>
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(location.href).toMatchURL('/path/to/modal')
+
+        up.layer.dismiss()
+
+      next =>
+        expect(up.layer.isRoot()).toBe(true)
+        expect(location.href).toMatchURL(@locationBeforeExample)
+
     describe 'events', ->
 
       it 'should have examples'
@@ -49,3 +68,4 @@ describe 'up.Layer.Overlay', ->
     it "emits an event on this layer's element"
 
     it 'sets up.layer.current to this layer while listeners are running'
+

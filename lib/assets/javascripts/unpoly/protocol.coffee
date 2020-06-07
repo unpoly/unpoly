@@ -222,6 +222,9 @@ up.protocol = do ->
   eventPlansFromXHR = (xhr) ->
     extractHeader(xhr, config.eventsHeader, JSON.parse)
 
+  contextFromXHR = (xhr) ->
+    extractHeader(xhr, config.contextHeader, JSON.parse)
+
   extractHeader = (xhr, header, parseFn = u.identity) ->
     if value = xhr.getResponseHeader(header)
       return parseFn(value)
@@ -305,6 +308,7 @@ up.protocol = do ->
     acceptLayerHeader: 'X-Up-Accept-Layer'
     dismissLayerHeader: 'X-Up-Dismiss-Layer'
     eventsHeader: 'X-Up-Events'
+    contextHeader: 'X-Up-Context'
     versionHeader: 'X-Up-Version'
 
   headerize = (camel) ->
@@ -331,6 +335,7 @@ up.protocol = do ->
   titleFromXHR: titleFromXHR
   methodFromXHR: methodFromXHR
   acceptLayerFromXHR: acceptLayerFromXHR
+  contextFromXHR: contextFromXHR
   dismissLayerFromXHR: dismissLayerFromXHR
   eventPlansFromXHR: eventPlansFromXHR
   csrfHeader: csrfHeader

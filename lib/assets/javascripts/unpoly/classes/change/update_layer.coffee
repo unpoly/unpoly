@@ -59,7 +59,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # Layer#peel() will manipulate the stack sync.
       # We don't wait for the peeling animation to finish.
 
-    @layer.updateHistory(@options)
+    @updateLayerProps()
+
     swapPromises = @steps.map(@executeStep)
 
     promise = Promise.all(swapPromises)
@@ -345,3 +346,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # If we didn't need to scroll above, just return a resolved promise
     # to fulfill this function's signature.
     return Promise.resolve()
+
+  updateLayerProps: ->
+    @layer.updateHistory(@options)
+
+    # If either the server or the up.change() caller has provided a new
+    # { context } object, we set the layer's context to that object.
+    @layer.updateContext(@options)

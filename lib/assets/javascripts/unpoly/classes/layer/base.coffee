@@ -164,6 +164,10 @@ class up.Layer extends up.Record
     if location = options.location
       @location = location
 
+  updateContext: (options) ->
+    if context = options.context
+      @context = context
+
   @accessor 'title',
     get: ->
       if @hasLiveHistory()

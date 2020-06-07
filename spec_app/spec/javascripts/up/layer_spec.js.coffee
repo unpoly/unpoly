@@ -16,7 +16,7 @@ describe 'up.layer', ->
           done()
 
       it 'closes existing overlays over the { currentLayer }', (done) ->
-        fixtureLayers(2).then ->
+        makeLayers(2).then ->
           [root, oldOverlay] = up.layer.all
 
           up.layer.open(currentLayer: 'root').then ->
@@ -190,27 +190,8 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(location.href).toMatchURL('/modal-location')
 
-        it "restores the parent layer's location when the overlay closes", asyncSpec (next) ->
-          originalLocation = location.href
-
-          up.layer.open(
-            target: '.element',
-            location: '/path/to/modal'
-            html: '<div class="element">element text</div>'
-          )
-
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(location.href).not.toMatchURL(originalLocation)
-
-            up.layer.dismiss()
-
-          next ->
-            expect(up.layer.isRoot()).toBe(true)
-            expect(location.href).toMatchURL(originalLocation)
-
         it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
-          fixtureLayers [
+          makeLayers [
             { target: '.root-element' },
             { target: '.overlay-element', location: '/modal-location' }
           ]
@@ -268,6 +249,35 @@ describe 'up.layer', ->
           next ->
             expect(location.href).toMatchURL(originalLocation)
 
+      describe 'context', ->
+
+        it "sets the layer's initial context object from the { context } option", (done) ->
+          up.layer.open(context: { key: 'value' }).then (overlay) ->
+            expect(overlay.context).toEqual({ key: 'value' })
+            done()
+
+        it 'sets an empty object by default', (done) ->
+          expect(up.layer.root.context).toEqual({})
+
+          up.layer.open().then (overlay) ->
+            expect(overlay.context).toEqual({})
+            done()
+
+        it 'sends the context object as an X-Up-Context header along with the request providing the initial overlay content', asyncSpec (next) ->
+          up.layer.open(url: '/modal', context: { key: 'value' })
+
+          next =>
+            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ key: 'value'}))
+
+        it 'allows the server to change the initial context object', asyncSpec (next) ->
+          up.layer.open(url: '/modal', target: '.target', context: { key: 'value' })
+
+          next =>
+            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+
+          next ->
+            expect(up.layer.all[1].context).toEqual({ newKey: 'newValue' })
+
       describe 'mode', ->
 
         it 'opens a new layer with the default mode from up.layer.config.mode', asyncSpec (next) ->
@@ -284,6 +294,8 @@ describe 'up.layer', ->
           next ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(up.layer.mode).toEqual('cover')
+
+        it "sends the layer's mode as an X-Up-Mode request header"
 
       describe 'styling', ->
 
@@ -447,12 +459,12 @@ describe 'up.layer', ->
       describe 'for "any"', ->
 
         it 'returns a reversed list of all layers', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('any')).toEqual [up.layer.all[2], up.layer.all[1], up.layer.all[0]]
             done()
 
         it 'returns the current layer first so that is preferred for element lookups', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             up.layer.all[1].asCurrent ->
               expect(up.layer.list('any')).toEqual [up.layer.all[1], up.layer.all[2], up.layer.all[0]]
               done()
@@ -460,14 +472,14 @@ describe 'up.layer', ->
       describe 'for an element', ->
 
         it "returns an array of the given element's layer", (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list(up.layer.all[1].element)).toEqual [up.layer.all[1]]
             done()
 
       describe 'for an up.Layer', ->
 
         it 'returns an array of the given up.Layer', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list(up.layer.all[1])).toEqual [up.layer.all[1]]
             done()
 
@@ -479,12 +491,12 @@ describe 'up.layer', ->
       describe 'for "closest"', ->
 
         it 'returns the current layer and its ancestors', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('closest')).toEqual [up.layer.all[2], up.layer.all[1], up.layer.all[0]]
             done()
 
         it 'honors a temporary current layer', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             up.layer.all[1].asCurrent ->
               expect(up.layer.list('closest')).toEqual [up.layer.all[1], up.layer.all[0]]
               done()
@@ -492,7 +504,7 @@ describe 'up.layer', ->
       describe 'for "parent"', ->
 
         it "returns an array of the current layer's parent layer", (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('parent')).toEqual [up.layer.all[1]]
             done()
 
@@ -500,7 +512,7 @@ describe 'up.layer', ->
           expect(up.layer.list('parent')).toEqual []
 
         it 'honors a temporary current layer', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             up.layer.all[1].asCurrent ->
               expect(up.layer.list('parent')).toEqual [up.layer.all[0]]
               done()
@@ -508,7 +520,7 @@ describe 'up.layer', ->
       describe 'for "child"', ->
 
         it "returns an array of the current layer's child layer", (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             up.layer.root.asCurrent ->
               expect(up.layer.list('child')).toEqual [up.layer.all[1]]
               done()
@@ -519,7 +531,7 @@ describe 'up.layer', ->
       describe 'for "descendant"', ->
 
         it "returns the current layer's descendant layers", (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             up.layer.root.asCurrent ->
               expect(up.layer.list('descendant')).toEqual [up.layer.all[1], up.layer.all[2]]
               done()
@@ -527,12 +539,12 @@ describe 'up.layer', ->
       describe 'for "ancestor"', ->
 
         it "returns the current layer's ancestor layers", (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('ancestor')).toEqual [up.layer.all[1], up.layer.all[0]]
             done()
 
         it 'honors a temporary current layer', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             up.layer.all[1].asCurrent ->
               expect(up.layer.list('ancestor')).toEqual [up.layer.all[0]]
               done()
@@ -540,26 +552,26 @@ describe 'up.layer', ->
       describe 'for "root"', ->
 
         it "returns an array of the root layer", (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             expect(up.layer.list('root')).toEqual [up.layer.root]
             done()
 
       describe 'for "page"', ->
 
         it "returns an array of the root layer, which used to be called 'page' in older Unpoly versions", (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             expect(up.layer.list('page')).toEqual [up.layer.root]
             done()
 
       describe 'for "front"', ->
 
         it "returns an array of the front layer", (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             expect(up.layer.list('front')).toEqual [up.layer.all[1]]
             done()
 
         it "is not affected by a temporary current layer", (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             up.layer.root.asCurrent ->
               expect(up.layer.list('front')).toEqual [up.layer.all[1]]
               done()
@@ -567,7 +579,7 @@ describe 'up.layer', ->
       describe 'for "origin"', ->
 
         it "returns an array of the layer of the { origin } element", (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('origin', origin: up.layer.all[1].element)).toEqual [up.layer.all[1]]
             done()
 
@@ -578,17 +590,17 @@ describe 'up.layer', ->
       describe 'for "current"', ->
 
         it "returns an array of the front layer", (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             expect(up.layer.list('current')).toEqual [up.layer.all[1]]
             done()
 
         it "returns an array of a { currentLayer } option", (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             expect(up.layer.list('current', currentLayer: up.layer.root)).toEqual [up.layer.root]
             done()
 
         it 'honors a temporary current layer', (done) ->
-          fixtureLayers(2).then ->
+          makeLayers(2).then ->
             up.layer.root.asCurrent ->
               expect(up.layer.list('current')).toEqual [up.layer.root]
               done()
@@ -596,19 +608,19 @@ describe 'up.layer', ->
       describe 'for an options object', ->
 
         it 'allows to pass the layer value as a { layer } option instead of a first argument', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list(layer: up.layer.all[1])).toEqual [up.layer.all[1]]
             done()
 
       describe '{ currentLayer } option', ->
 
         it 'allows to change the current layer for the purpose of the lookup', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('parent', currentLayer: up.layer.all[1])).toEqual [up.layer.all[0]]
             done()
 
         it 'looks up the { currentLayer } option if it is a string, using the actual current layer as the base for that second lookup', (done) ->
-          fixtureLayers(3).then ->
+          makeLayers(3).then ->
             expect(up.layer.list('parent', currentLayer: 'front')).toEqual [up.layer.all[1]]
             done()
 
@@ -668,7 +680,7 @@ describe 'up.layer', ->
           done()
 
       it 'may be temporarily changed for the duration of a callback using up.Layer.asCurrent(fn)', (done) ->
-        fixtureLayers(2).then ->
+        makeLayers(2).then ->
           expect(up.layer.current).toBe(up.layer.all[1])
 
           up.layer.root.asCurrent ->
