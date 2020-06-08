@@ -63,7 +63,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
         @emitOpenedEvent()
 
-        # don't delay `promise` until layer change requests have finished closing
+        # Don't delay `promise` until layer change requests have finished closing.
         @handleLayerChangeRequests()
 
         # Resolve the promise with the layer instance, so callers can do:

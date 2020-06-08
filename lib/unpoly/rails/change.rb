@@ -154,7 +154,7 @@ module Unpoly
         # In case context was persisted through a redirect (using params) we also
         # need to check _up_context_changed since we don't know whether _up_context
         # has been changed by a previous request.
-        (@context != context_from_request) || context_changed_from_params
+        (context != context_from_request) || context_changed_from_params
       end
 
       alias :context_changed? :context_changed

@@ -7,12 +7,17 @@ describe Unpoly::Rails::Controller, type: :request do
     def eval
       expression = self.class.next_eval_proc or raise "No eval expression given"
       self.eval_result = nil
+      self.eval_error = nil
       self.class.next_eval_proc = nil
-      self.eval_result = instance_exec(&expression)
+      begin
+        self.eval_result = instance_exec(&expression)
+      rescue RuntimeError => e
+        self.eval_error = e
+      end
       render nothing: true
     end
 
-    attr_accessor :eval_result
+    attr_accessor :eval_result, :eval_error
 
     def text
       render plain: 'text from controller'
@@ -42,7 +47,11 @@ describe Unpoly::Rails::Controller, type: :request do
   def controller_eval(headers: {}, &expression)
     BindingTestController.next_eval_proc = expression
     get '/binding_test/eval', {}, headers
-    controller.eval_result
+    if (error = controller.eval_error)
+      raise error
+    else
+      controller.eval_result
+    end
   end
 
   matcher :equal_json do |expected|
@@ -363,6 +372,28 @@ describe Unpoly::Rails::Controller, type: :request do
         reader: -> { up.context }
       
     end
+
+    describe 'up.context[]=' do
+
+      it 'sends a changed context hash as an X-Up-Context response header' do
+        controller_eval(headers: { 'X-Up-Context': { 'foo': 'fooValue' }.to_json }) do
+          up.context[:bar] = 'barValue'
+        end
+
+        expect(response.headers['X-Up-Context']).to equal_json(
+          foo: 'fooValue',
+          bar: 'barValue'
+        )
+      end
+
+      it 'does not send an X-Up-Context response header if the context did not change' do
+        controller_eval(headers: { 'X-Up-Context': { 'foo': 'fooValue' }.to_json }) do
+        end
+
+        expect(response.headers['X-Up-Context']).to be_nil
+      end
+
+    end
     
     describe 'up.fail_context' do
       
@@ -371,7 +402,19 @@ describe Unpoly::Rails::Controller, type: :request do
       it_behaves_like 'hash field',
         header: 'X-Up-Fail-Context',
         reader: -> { up.fail_context }
-      
+
+    end
+
+    describe 'up.fail_context[]=' do
+
+      it "raises an error since we don't have a protocol for updating the failure layer" do
+        expect {
+          controller_eval do
+            up.fail_context[:foo] = 'fooValue'
+          end
+        }.to raise_error(/can't modify/i)
+      end
+
     end
 
     describe 'up.emit' do
