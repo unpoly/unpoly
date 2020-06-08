@@ -386,45 +386,212 @@ describe 'up.layer', ->
 
       describe 'close conditions', ->
 
+        beforeEach ->
+          up.motion.config.enabled = false
+
         describe '{ dismissable }', ->
 
-          it 'should have examples'
+          describe 'with { dismissable: true }', ->
+
+            it 'sets all other dismissable options to true', (done) ->
+              up.layer.open(dismissable: true).then (layer) ->
+                expect(layer.buttonDismissable).toBe(true)
+                expect(layer.escapeDismissable).toBe(true)
+                expect(layer.outsideDismissable).toBe(true)
+                done()
+
+           describe 'with { dismissable: false }', ->
+
+            it 'sets all other dismissable options to false if passed { dismissable: false }', (done) ->
+              up.layer.open(dismissable: false).then (layer) ->
+                expect(layer.buttonDismissable).toBe(false)
+                expect(layer.escapeDismissable).toBe(false)
+                expect(layer.outsideDismissable).toBe(false)
+                done()
 
         describe '{ buttonDismissable }', ->
 
-          it 'should have examples'
+          describe 'with { buttonDismissable: true }', ->
+
+            it 'adds a button that dimisses the layer', (done) ->
+              up.layer.open(buttonDismissable: true).then (layer) ->
+                expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
+                done()
+
+          describe 'with { buttonDismissable: false }', ->
+
+            it 'does not asdd button that dimisses the layer', (done) ->
+              up.layer.open(buttonDismissable: false).then (layer) ->
+                expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
+                done()
 
         describe '{ escapeDismissable }', ->
 
-          it 'should have examples'
+          describe 'with { escapeDismissable: true }', ->
+
+            it 'lets the user close the layer by pressing escape', asyncSpec (next) ->
+              up.layer.open(escapeDismissable: true)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
+
+                Trigger.escapeSequence(document.body)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(false)
+
+          describe 'with { escapeDismissable: false }', ->
+
+            it 'does not let the user close the layer by pressing escape', asyncSpec (next) ->
+              up.layer.open(escapeDismissable: false)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
+
+                Trigger.escapeSequence(document.body)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
 
         describe '{ outsideDismissable }', ->
 
-          it 'should have examples'
+          it 'lets the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
+            up.layer.open(outsideDismissable: true, mode: 'modal')
+
+            next ->
+              expect(up.layer.isOverlay()).toBe(true)
+
+              Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
+
+            next ->
+              expect(up.layer.isOverlay()).toBe(false)
+
+          it 'lets the user close a layer with tether by clicking on its opener', asyncSpec (next) ->
+            opener = fixture('a', text: 'label')
+            up.layer.open(outsideDismissable: true, mode: 'popup', origin: opener)
+
+            next ->
+              expect(up.layer.isOverlay()).toBe(true)
+
+              Trigger.clickSequence(opener)
+
+            next ->
+              expect(up.layer.isOverlay()).toBe(false)
+
+        describe 'with { escapeDismissable: false }', ->
+
+          it 'does not let the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
+            up.layer.open(outsideDismissable: false, mode: 'modal')
+
+            next ->
+              expect(up.layer.isOverlay()).toBe(true)
+
+              Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
+
+            next ->
+              expect(up.layer.isOverlay()).toBe(true)
 
         describe '{ onDismissed }', ->
 
-          it 'should have examples'
+          it 'runs the given callback when they layer is dimissed', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+
+            up.layer.open({ onDismissed: callback })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.dismiss('dismissal value')
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+              expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:dismissed', value: 'dismissal value')
+
+          it 'does not run the given callbcak when the layer is accepted', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+
+            up.layer.open({ onDismissed: callback })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.accept('acceptance value')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
         describe '{ onAccepted }', ->
 
-          it 'should have examples'
+          it 'runs the given callback when they layer is accepted', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+
+            up.layer.open({ onAccepted: callback })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.accept('acceptance value')
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+              expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:accepted', value: 'acceptance value')
+
+          it 'does not run the given callbcak when the layer is dismissed', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+
+            up.layer.open({ onAccepted: callback })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.dismiss('dismissal value')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
         describe '{ acceptEvent }', ->
 
-          it 'should have examples'
+          it 'accepts the layer when an event of the given type was emitted on the layer'
+
+          it 'uses the event object as the acceptance value'
+
+          it 'does not accept the layer when the given event was emitted on another layer'
+
+          it 'accepts the layer when one of multiple space-separated event types was emitted on the layer'
 
         describe '{ dismissEvent }', ->
 
-          it 'should have examples'
+          it 'dismisses the layer when an event of the given type was emitted on the layer'
+
+          it 'uses the event object as the dismissal value'
+
+          it 'does not dismiss the layer when the given event was emitted on another layer'
+
+          it 'dismisses the layer when one of multiple space-separated event types was emitted on the layer'
 
         describe '{ acceptLocation }', ->
 
-          it 'should have examples'
+          it 'accepts the layer when the layer has reached the given location'
+
+          it 'accepts the layer when the layer has reached the given location pattern'
+          
+          it 'parses a location pattern of named placeholders to produce an acceptance value'
+
+          it 'accepts the layer when the layer has reached the given location but has no history'
+
+          it 'does not accept the layer when another layer has reached the given location'
 
         describe '{ dismissLocation }', ->
 
-          it 'should have examples'
+          it 'dismisses the layer when the layer has reached the given location'
+
+          it 'dismisses the layer when the layer has reached the given location pattern'
+          
+          it 'parses a location pattern of named placeholders to produce a dismissable value'
+
+          it 'dismisses the layer when the layer has reached the given location but has no history'
+
+          it 'does not dismiss the layer when another layer has reached the given location'
 
     describe 'up.layer.dismiss()', ->
 
@@ -693,3 +860,8 @@ describe 'up.layer', ->
   describe 'unobtrusive behavior', ->
 
     it 'does not lose an overlay if the <body> is replaced'
+
+    describe '[up-dismiss]', ->
+
+    describe '[up-accept]', ->
+

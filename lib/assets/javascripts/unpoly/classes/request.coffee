@@ -7,8 +7,6 @@ e = up.element
 Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
 such as the requested URL, form parameters and HTTP method.
 
-TODO: Docs: up.Request is also a promise for its response. Show example.
-
 @class up.Request
 ###
 class up.Request extends up.Record
