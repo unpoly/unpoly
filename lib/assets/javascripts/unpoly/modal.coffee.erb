@@ -437,6 +437,7 @@ up.modal = do ->
     options.layer = 'modal'
     options.failTarget ?= link.getAttribute('up-fail-target')
     options.failLayer ?= link.getAttribute('up-fail-layer') ? 'auto'
+    options.cache ?= e.booleanAttr(link, 'up-cache')
 
     animateOptions = up.motion.animateOptions(options, link, duration: flavorDefault('openDuration', options.flavor), easing: flavorDefault('openEasing', options.flavor))
 
