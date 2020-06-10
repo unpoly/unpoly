@@ -51,6 +51,8 @@ class up.Layer extends up.Record
 
   allElements: (selector) ->
     elements = @element.querySelectorAll(selector)
+    # Since our @element might contain the others layers we need
+    # to filter matches to exclude elements that belong to another layer.
     u.select(elements, @contains)
 
   firstElement: (selector) ->
@@ -230,7 +232,4 @@ class up.Layer extends up.Record
 
   affix: (args...) ->
     content = @getContentElement()
-    if !content.insertAdjacentElement
-      debugger
-
     e.affix(@getContentElement(), args...)

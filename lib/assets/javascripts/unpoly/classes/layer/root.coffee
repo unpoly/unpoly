@@ -42,13 +42,6 @@ class up.Layer.Root extends up.Layer
   @selector: ->
     'html'
 
-  allElements: (selector) ->
-    matches = e.all(selector)
-    # Since our @element also contains all the other layers we need
-    # to filter matches to exclude elements that belong to another layer.
-    matches = u.filter(matches, @contains)
-    return matches
-
   repair: ->
     # In case a fragment update has swapped the <html> element we need to re-apply
     # event handlers to the new <html> element.

@@ -6,6 +6,10 @@
 - Test and document that up.observe() callback may return a promise that will prevent callback calls whuile running
 - up.fragment.get(element, selector) finds elements in another layer!
 - up.fragment.closest(element, selector) that is layer aware
+- up#Layer.fragments(selector) ?
+- up#Layer.fragment ?
+
+
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
   - Consider removing some stable functions
