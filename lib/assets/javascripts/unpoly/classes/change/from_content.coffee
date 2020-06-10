@@ -41,7 +41,7 @@ class up.Change.FromContent extends up.Change
     for targetObj in @toTargetObjList(targetOrTargets, props)
       # One target may expand to more than one plan if it has a { layer } option that
       # needs to try multiple layers, like { layer: 'closest' }.
-      for layer in up.layer.all(targetObj)
+      for layer in up.layer.getAll(targetObj)
         changeProps = u.merge(targetObj, { layer })
         @addPlan(layer, changeProps)
         # Only for existing overlays we open will also attempt to place a new element as the
@@ -59,7 +59,7 @@ class up.Change.FromContent extends up.Change
     if @options.layer == 'new'
       return @toTargetObjList(up.layer.defaultTargets(@options.mode))
     else
-      return u.flatMap up.layer.all(@options), (layer) =>
+      return u.flatMap up.layer.getAll(@options), (layer) =>
         return @toTargetObjList(layer.defaultTargets(), { layer })
 
   firstDefaultTarget: ->

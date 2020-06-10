@@ -7,7 +7,11 @@
 - up.fragment.get(element, selector) finds elements in another layer!
 - up.fragment.closest(element, selector) that is layer aware
 - do we want to keep the property up.layer.overlays if we have up.layer.all() ? up.layer.all('overlay')?
-
+- das mit up.layer.all() ist zwar konsistent  zu up.fragment.all() etc., aber ich brauche als user das argument nie
+  - warum würde ich up.layer.all('closest') machen??
+  - die reihenfolge der rückgabe ist NUR für fragment-lookup relevant
+  - für den user wäre die reihenfolge z.b. von 'any' sehr seltsam
+  - auch "overlay" als suche wäre reversed
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable

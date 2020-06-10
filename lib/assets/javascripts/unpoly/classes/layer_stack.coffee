@@ -9,22 +9,22 @@ class up.LayerStack extends up.Class
   initialize: ->
     @currentOverrides = []
 
-    # We must initialize @layers before building the root layer, since building a layer
-    # will attempt to push it into @layers, which would be undefined.
-    @layers = []
-    @layers.push(@buildRoot())
+    # We must initialize @all before building the root layer, since building a layer
+    # will attempt to push it into @all, which would be undefined.
+    @all = []
+    @all.push(@buildRoot())
 
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
 
   at: (i) ->
-    @layers[i]
+    @all[i]
 
   remove: (layer) ->
-    u.remove(@layers, layer)
+    u.remove(@all, layer)
 
   push: (layer) ->
-    @layers.push(layer)
+    @all.push(layer)
 
   peel: (layer, options) ->
     # We will dismiss descendants closer to the front first to prevent
@@ -47,36 +47,36 @@ class up.LayerStack extends up.Class
     @initialize()
 
   indexOf: (layer) ->
-    @layers.indexOf(layer)
+    @all.indexOf(layer)
 
   atIndex: (index) ->
-    @layers[index]
+    @all[index]
 
   isOpen: (layer) ->
     layer.index >= 0
 
   parentOf: (layer) ->
-    @layers[layer.index - 1]
+    @all[layer.index - 1]
 
   childOf: (layer) ->
-    @layers[layer.index + 1]
+    @all[layer.index + 1]
 
   ancestorsOf: (layer) ->
     # Return closest ancestors first
-    u.reverse(@layers.slice(0, layer.index))
+    u.reverse(@all.slice(0, layer.index))
 
   selfAndAncestorsOf: (layer) ->
     # Order for layer.closest()
     [layer, layer.ancestors...]
 
   descendantsOf: (layer) ->
-    @layers.slice(layer.index + 1)
+    @all.slice(layer.index + 1)
 
   @getter 'root', ->
-    @layers[0]
+    @all[0]
 
   isRoot: (layer) ->
-    @layers[0] == layer
+    @all[0] == layer
 
   @getter 'overlays', ->
     @root.descendants
@@ -93,22 +93,19 @@ class up.LayerStack extends up.Class
     @current == layer
 
   @getter 'front', ->
-    u.last(@layers)
+    u.last(@all)
 
   isFront: (layer) ->
     @front == layer
 
-  @getter 'reversedLayers', ->
-    u.reverse(@layers)
+  @getter 'allReversed', ->
+    u.reverse(@all)
 
   get: (args...) ->
-    new up.LayerLookup(this, args...).first()
+    @getAll(args...)[0]
 
-  all: (args...) ->
-    if args.length == 0
-      @layers
-    else
-      new up.LayerLookup(this, args...).all()
+  getAll: (args...) ->
+    new up.LayerLookup(this, args...).all()
 
   asCurrent: (layer, fn) ->
     try

@@ -29,7 +29,10 @@ class up.LayerLookup
 
   ofElement: (element) ->
     element = e.get(element) # unwrap jQuery
-    u.find @stack.reversedLayers, (layer) -> layer.contains(element)
+    u.find @stack.allReversed, (layer) -> layer.contains(element)
+
+  first: ->
+    @all()[0]
 
   all: ->
     if @value instanceof up.Layer
@@ -46,7 +49,7 @@ class up.LayerLookup
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
-        u.uniq [@currentLayer, @stack.reversedLayers...]
+        u.uniq [@currentLayer, @stack.allReversed...]
       when 'current'
         [@currentLayer]
       when 'closest'
@@ -63,14 +66,11 @@ class up.LayerLookup
         ['new'] # pass-through
       when 'root'
         [@stack.root]
+      when 'overlay', 'overlays'
+        u.reverse(@stack.overlays)
       when 'front'
         [@stack.front]
       when 'origin'
         [@originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
-      when 'reversed'
-        @stack.reversedLayers
       else
         up.fail("Unknown { layer } option: %o", @value)
-
-  first: ->
-    @all()[0]
