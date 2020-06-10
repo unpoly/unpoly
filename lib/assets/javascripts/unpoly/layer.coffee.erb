@@ -97,7 +97,7 @@ up.layer = do ->
     up.legacy.fixKey(options, 'closable', 'dismissable')
     up.legacy.fixKey(options, 'flavor', 'mode')
 
-    if options.layer
+    if u.isGiven(options.layer) # might be the number 0, which is falsey
       if options.layer == 'swap'
         if up.layer.isRoot()
           options.layer = 'root'
@@ -186,7 +186,7 @@ up.layer = do ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
   up.on 'up:fragment:destroyed', (event) ->
-    for layer in stack.all
+    for layer in stack.layers
       layer.repair()
 
   up.on 'up:framework:boot', ->
@@ -209,12 +209,10 @@ up.layer = do ->
 
   u.delegate(api, [
     'get'
-    'list'
+    'all'
     'push'
     'root'
-    'all'
     'overlays'
-    'allReversed'
     'current'
     'front'
   ], -> stack)

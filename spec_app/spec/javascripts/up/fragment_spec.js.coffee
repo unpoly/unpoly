@@ -1133,8 +1133,8 @@ describe 'up.fragment', ->
             up.change('.element', content: 'new text', layer: 'root', peel: false)
 
           next ->
-            expect(up.layer.all[0]).toHaveText(/new text/)
-            expect(up.layer.all[1]).toHaveText(/old text in modal/)
+            expect(up.layer.get(0)).toHaveText(/new text/)
+            expect(up.layer.get(1)).toHaveText(/old text in modal/)
 
         it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
 
@@ -1156,8 +1156,8 @@ describe 'up.fragment', ->
               up.change('.element', content: 'new text', peel: false)
 
             next ->
-              expect(up.layer.all[0]).toHaveText(/old text in root/)
-              expect(up.layer.all[1]).toHaveText(/new text/)
+              expect(up.layer.get(0)).toHaveText(/old text in root/)
+              expect(up.layer.get(1)).toHaveText(/new text/)
 
           it 'updates the background layer closest to the front if the current layer does not match', asyncSpec (next) ->
             makeLayers [
@@ -1170,9 +1170,9 @@ describe 'up.fragment', ->
               up.change('.element', content: 'new text', peel: false)
 
             next ->
-              expect(up.layer.all[0]).toHaveText(/old text in root/)
-              expect(up.layer.all[1]).toHaveText(/new text/)
-              expect(up.layer.all[2]).toHaveText(/old text in modal2/)
+              expect(up.layer.get(0)).toHaveText(/old text in root/)
+              expect(up.layer.get(1)).toHaveText(/new text/)
+              expect(up.layer.get(2)).toHaveText(/old text in modal2/)
 
       describe 'browser location URL', ->
 
@@ -1482,17 +1482,17 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            expect(up.layer.all[0].context).toEqual({ rootKey: 'rootValue' })
-            expect(up.layer.all[1].context).toEqual({ overlayKey: 'overlayValue' })
+            expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+            expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue' })
 
           next ->
-            up.change('.target', layer: up.layer.all[0], url: '/path1')
+            up.change('.target', layer: up.layer.get(0), url: '/path1')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
 
-            up.change('.target', layer: up.layer.all[1], url: '/path2')
+            up.change('.target', layer: up.layer.get(1), url: '/path2')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
@@ -1505,14 +1505,14 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            up.change('.target', layer: up.layer.all[1], url: '/path1')
+            up.change('.target', layer: up.layer.get(1), url: '/path1')
 
           next =>
             @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
 
           next ->
-            expect(up.layer.all[0].context).toEqual({ rootKey: 'rootValue' })
-            expect(up.layer.all[1].context).toEqual({ newKey: 'newValue' })
+            expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+            expect(up.layer.get(1).context).toEqual({ newKey: 'newValue' })
 
         it "sends the fail layer's context as an X-Up-Fail-Context request header", asyncSpec (next) ->
           makeLayers [
@@ -1521,7 +1521,7 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            up.change('.target', layer: up.layer.all[0], failLayer: up.layer.all[1], url: '/path1')
+            up.change('.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -3317,12 +3317,12 @@ describe 'up.fragment', ->
         makeLayers(2)
 
         next ->
-          rootElement = up.layer.all[0].affix('.foo.in-root')
-          overlayElement = up.layer.all[1].affix('.foo.in-overlay')
+          rootElement = up.layer.get(0).affix('.foo.in-root')
+          overlayElement = up.layer.get(1).affix('.foo.in-overlay')
 
           up.hello(rootElement)
           up.hello(overlayElement)
 
           expect(layerSpy.calls.count()).toBe(2)
-          expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.all[0]]
-          expect(layerSpy.calls.argsFor(1)).toEqual [up.layer.all[1]]
+          expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.get(0)]
+          expect(layerSpy.calls.argsFor(1)).toEqual [up.layer.get(1)]

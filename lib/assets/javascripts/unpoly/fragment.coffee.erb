@@ -597,7 +597,7 @@ up.fragment = do ->
         # in all layers (prefering the current layer), or in options.layer.
         # Note that options.layer might resolve to more than one layer, e.g.
         # with { layer: 'ancestor' } or { layer: 'any' }.
-        layers = up.layer.list(options)
+        layers = up.layer.all(options)
         candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
 
       return u.filter(candidates, isDestroying)

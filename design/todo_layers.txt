@@ -6,12 +6,7 @@
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - up.fragment.get(element, selector) finds elements in another layer!
 - up.fragment.closest(element, selector) that is layer aware
-- up.layer.all (getter) vs. up.layer.list(options) vs. up.fragment.all(selector).
-  - besser up.layer.all(options)?
-  - oder up.fragment.list(options)?
-  - wir haben auch up.element.all() und up.element.list()
-  - => up.layer.all() [
-  - => up.layer.overlays löschen
+- do we want to keep the property up.layer.overlays if we have up.layer.all() ? up.layer.all('overlay')?
 
 
 - Release as 1.0.0 or 2.0.0
@@ -108,7 +103,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)
-  - Test that up.layer.get and up.layer.list take both a layer name like "root" or an options hash or an element or a jquery collection
+  - Test that up.layer.get and up.layer.all take both a layer name like "root" or an options hash or an element or a jquery collection
   - Test layer { context } transmission
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
   - Test that back button closes all layers
