@@ -3,15 +3,15 @@
 - Try changes on DAH
 - Write remaining tests
 - Closing the root layer should return a rejected promise, not a fulfilled promiose
-- Test and document that up.observe() callback may return a promise that will prevent callback calls whuile running
+- Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - up.fragment.get(element, selector) finds elements in another layer!
 - up.fragment.closest(element, selector) that is layer aware
-- up#Layer.fragments(selector) ?
-- up#Layer.fragment ?
 - up.layer.all (getter) vs. up.layer.list(options) vs. up.fragment.all(selector).
   - besser up.layer.all(options)?
   - oder up.fragment.list(options)?
   - wir haben auch up.element.all() und up.element.list()
+  - => up.layer.all() [
+  - => up.layer.overlays löschen
 
 
 - Release as 1.0.0 or 2.0.0
