@@ -41,6 +41,17 @@ describe 'up.fragment', ->
           expect(up.fragment.all(parent1, '.match')).toEqual [parent1Match]
           expect(up.fragment.all(parent2, '.match')).toEqual [parent2Match]
 
+        it "only matches descendants in root's layer", asyncSpec (next) ->
+          makeLayers [
+            { '.element', content: 'element in root layer' }
+            { '.element', content: 'element in modal layer' }
+          ]
+
+          next ->
+            results = up.fragment.all(document.body, '.element')
+            expect(results.length).toBe(1)
+            expect(up.layer.get(results[0])).toBe(up.layer.root)
+
         it 'returns an array of the second argument if the second argument is already an element', ->
           root = fixture('.root')
           match = fixture('.match')

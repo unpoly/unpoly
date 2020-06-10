@@ -583,6 +583,8 @@ up.fragment = do ->
         # up.fragment.all(rootElement, selector) should find selector within
         # the descendants of rootElement regardless of rootElement's layer.
         candidates = e.all(rootElement, selector)
+        if e.get(rootElement, up.layer.anySelector())
+
       else
         # up.fragment.all(selector, [options]) should lookup the selector
         # in all layers (prefering the current layer), or in options.layer if given.

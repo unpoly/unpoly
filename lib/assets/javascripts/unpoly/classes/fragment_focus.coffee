@@ -26,7 +26,8 @@ class up.FragmentFocus
       @focusSelector(focusOpt)
 
   focusSelector: (selector) ->
-    if (match = e.subtree(@target, selector)[0] || up.fragment.get(selector, { @layer }))
+    lookupOpts = { @layer }
+    if (match = up.fragment.get(@target, selector, lookupOpts) || up.fragment.get(selector, lookupOpts))
       return @focusElement(match)
     else
       up.warn('up.change()', 'Tried to focus selector "%s", but no matching element found', selector)

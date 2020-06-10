@@ -319,7 +319,7 @@ up.viewport = do ->
 
   getAround = (target, options = {}) ->
     element = f.get(target, options)
-    e.list(closest(element, options), getSubtree(element, options))
+    e.around(element, allSelector())
 
   ###**
   Returns a list of all the viewports on the screen.
