@@ -427,7 +427,7 @@ describe 'up.viewport', ->
 
     describe 'up.viewport.all', ->
 
-      it 'returns a list of all viewports on the screen', ->
+      it 'returns an array of all viewports on the screen', ->
         viewportElement = $fixture('[up-viewport]')[0]
         results = up.viewport.all()
         expect(results).toMatchList([viewportElement, up.viewport.root])

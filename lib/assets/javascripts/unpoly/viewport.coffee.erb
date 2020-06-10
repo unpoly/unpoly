@@ -148,7 +148,7 @@ up.viewport = do ->
   ###
   anchoredRight = ->
     selector = config.anchoredRight.join(',')
-    up.layer.root.allElements(selector)
+    f.all(selector, { layer: 'root' })
 
   ###**
   Scroll's the given element's viewport so the first rows of the

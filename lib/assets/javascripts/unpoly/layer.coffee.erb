@@ -182,14 +182,6 @@ up.layer = do ->
         onDismissed: (event) -> reject(event.value)
       open(options)
 
-  allElements = (selector, options) ->
-    layers = stack.list(options)
-    u.flatMap layers, (layer) -> layer.allElements(selector)
-
-  firstElement = (selector, options) ->
-    layers = stack.list(options)
-    u.findResult layers, -> layer.firstElement(selector)
-
   anySelector = ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
@@ -204,8 +196,6 @@ up.layer = do ->
   up.on 'up:framework:reset', reset
 
   api = {
-    allElements
-    firstElement
     config
     defaultTargets
     open

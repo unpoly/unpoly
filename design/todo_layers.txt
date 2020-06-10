@@ -8,6 +8,10 @@
 - up.fragment.closest(element, selector) that is layer aware
 - up#Layer.fragments(selector) ?
 - up#Layer.fragment ?
+- up.layer.all (getter) vs. up.layer.list(options) vs. up.fragment.all(selector).
+  - besser up.layer.all(options)?
+  - oder up.fragment.list(options)?
+  - wir haben auch up.element.all() und up.element.list()
 
 
 - Release as 1.0.0 or 2.0.0

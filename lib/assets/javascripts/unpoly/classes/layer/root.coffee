@@ -33,6 +33,8 @@ class up.Layer.Root extends up.Layer
     #    and compilers will have registered.
     # 3. That leaves the <html> element, which is available before the DOM is ready
     #    on Chrome, Firefox, IE11, Safari.
+    # 4. A nice benefit of using <html> is that up.fragment.get('html', layer: 'root')
+    #    will yield a result.
     return e.root
 
   @getter 'contentElement', ->

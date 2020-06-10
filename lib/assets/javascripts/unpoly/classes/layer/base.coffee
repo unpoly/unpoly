@@ -49,15 +49,6 @@ class up.Layer extends up.Record
   evalOption: (option) ->
     u.evalOption(option, this)
 
-  allElements: (selector) ->
-    elements = @element.querySelectorAll(selector)
-    # Since our @element might contain the others layers we need
-    # to filter matches to exclude elements that belong to another layer.
-    u.select(elements, @contains)
-
-  firstElement: (selector) ->
-    @allElements(selector)[0]
-
   isCurrent: ->
     @stack.isCurrent(this)
 

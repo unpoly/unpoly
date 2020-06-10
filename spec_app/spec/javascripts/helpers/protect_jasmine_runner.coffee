@@ -126,8 +126,7 @@ beforeEach ->
 
   up.on 'up:layer:opening', (event) ->
     layer = event.layer
-    contentSelector = layer.selector('content')
-    parent = layer.firstElement(contentSelector) || layer.element
+    parent = layer.getContentElement()
     appendDefaultFallback(parent)
 
 afterEach ->

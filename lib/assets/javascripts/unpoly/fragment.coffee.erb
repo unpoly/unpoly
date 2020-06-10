@@ -582,14 +582,22 @@ up.fragment = do ->
       if rootElement = args[0]
         # up.fragment.all(rootElement, selector) should find selector within
         # the descendants of rootElement regardless of rootElement's layer.
-        candidates = e.all(rootElement, selector)
+        selectFn = if options.subtree then e.subtree else e.all
+        candidates = selectFn(rootElement, selector)
+
+        # Check if the root element has a child layer whose elements we might need
+        # to exclude fromt the matches.
         if childLayerElement = e.get(rootElement, up.layer.anySelector())
+          # Since we have already We're using the native Element#contains instead of the slower
           candidates = u.reject(candidates, (candidate) -> childLayerElement.contains(candidate))
 
       else
         # up.fragment.all(selector, [options]) should lookup the selector
         # in all layers (prefering the current layer), or in options.layer if given.
-        candidates = up.layer.allElements(selector, options)
+        # Note that options.layer might contain a name that resolves to more than
+        # one layer, e.g. 'closest' or 'any'.
+        layers = up.layer.list(options)
+        candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
 
       return u.filter(candidates, isDestroying)
 

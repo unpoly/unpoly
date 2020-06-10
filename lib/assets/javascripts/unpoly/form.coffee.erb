@@ -348,10 +348,10 @@ up.form = do ->
 
   findValidateTargetFromConfig = (element, options) ->
     # for the first selector that has a match in the field's layer.
-    fieldLayer = up.layer.get(element)
+    layer = up.layer.get(element)
     return u.findResult config.validateTargets, (defaultTarget) ->
       resolvedDefault = e.resolveSelector(defaultTarget, options.origin)
-      if fieldLayer.firstElement(resolvedDefault)
+      if up.fragment.get(resolvedDefault, { layer })
         # We want to return the selector, *not* the element. If we returned the element
         # and derive a selector from that, any :has() expression would be lost.
         return resolvedDefault

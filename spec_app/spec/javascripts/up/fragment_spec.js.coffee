@@ -29,6 +29,14 @@ describe 'up.fragment', ->
         results = up.fragment.all('.match')
         expect(results).toEqual []
 
+      it 'finds the <body> element (bugfix)', ->
+        results = up.fragment.all('body')
+        expect(results).toEqual [document.body]
+
+      it 'finds the <html> element (bugfix)', ->
+        results = up.fragment.all('html')
+        expect(results).toEqual [document.documentElement]
+
       describe 'when given a root element for the search', ->
 
         it 'only matches descendants of that root', ->
@@ -40,6 +48,13 @@ describe 'up.fragment', ->
 
           expect(up.fragment.all(parent1, '.match')).toEqual [parent1Match]
           expect(up.fragment.all(parent2, '.match')).toEqual [parent2Match]
+
+        it 'does not match the root element itself', ->
+          parent = fixture('.element')
+          child = e.affix(parent, '.element')
+
+          expect(up.fragment.all(parent, '.element')).toEqual [child]
+
 
         it "only matches descendants in root's layer", asyncSpec (next) ->
           makeLayers [
