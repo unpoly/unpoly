@@ -300,8 +300,9 @@ up.viewport = do ->
   ###
   closest = (target, options = {}) ->
     element = f.get(target, options)
-    # It is OK to find a viewport in a parent layer. Layers without its own viewport (like popups)
-    # are scrolled by the parent layer's viewport.
+    # Use up.element.closest() which searches across layer boundaries.
+    # It is OK to find a viewport in a parent layer. Layers without its
+    # own viewport (like popups) are scrolled by the parent layer's viewport.
     e.closest(element, allSelector())
 
   ###**

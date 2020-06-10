@@ -573,7 +573,7 @@ up.fragment = do ->
 
     if u.isElementish(selectorOrElement)
       # up.fragment.all([root], element, [options]) should just return [element].
-      # The given root and options are ignored. We also don't check if it's a real element.
+      # The given root and options are ignored. We also don't check if it's destroying.
       # We do use e.get() to unwrap a jQuery collection.
       return [e.get(selectorOrElement)]
     else
