@@ -581,25 +581,49 @@ up.fragment = do ->
 
       if rootElement = args[0]
         # up.fragment.all(rootElement, selector) should find selector within
-        # the descendants of rootElement regardless of rootElement's layer.
+        # the descendants of rootElement.
         selectFn = if options.subtree then e.subtree else e.all
         candidates = selectFn(rootElement, selector)
 
-        # Check if the root element has a child layer whose elements we might need
+        # Check if the root element has a child layer whose elements we need
         # to exclude fromt the matches.
         if childLayerElement = e.get(rootElement, up.layer.anySelector())
-          # Since we have already We're using the native Element#contains instead of the slower
+          # Since we have already have the child layer's element, we're using the native
+          # Element#contains() instead of the slower up.Element#contains().
           candidates = u.reject(candidates, (candidate) -> childLayerElement.contains(candidate))
 
       else
         # up.fragment.all(selector, [options]) should lookup the selector
-        # in all layers (prefering the current layer), or in options.layer if given.
-        # Note that options.layer might contain a name that resolves to more than
-        # one layer, e.g. 'closest' or 'any'.
+        # in all layers (prefering the current layer), or in options.layer.
+        # Note that options.layer might resolve to more than one layer, e.g.
+        # with { layer: 'ancestor' } or { layer: 'any' }.
         layers = up.layer.list(options)
         candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
 
       return u.filter(candidates, isDestroying)
+
+#  ###**
+#  Returns the first element that matches the selector by testing the element itself
+#  and traversing up through ancestors in element's layers.
+#
+#  `up.fragment.closest()` will only match elements in the same [layer](/up.layer) as element.
+#  To match ancestors regardless of layers, use `up.element.closest()`.
+#
+#  @function up.fragment.closest
+#  @param {Element} element
+#    The element on which to start the search.
+#  @param {string} selector
+#    The CSS selector to match.
+#  @return {Element|null|undefined} element
+#    The matching element.
+#
+#    Returns `null` or `undefined` if no element matches in the same layer.
+#  @experimental
+#  ###
+#  closest = (element, selector) ->
+#    match = e.closest(element, selector)
+#    if match && up.layer.get(match) == up.layer.get(element)
+#      return match
 
   ###**
   Destroys the given element or selector.
@@ -755,6 +779,7 @@ up.fragment = do ->
       getOne(args...)
     get: getOne
     all: getAll
+    # closest: closest
     source: source
     setSource: setSource
     hello: hello

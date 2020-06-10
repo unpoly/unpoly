@@ -105,6 +105,46 @@ describe 'up.fragment', ->
           result = up.fragment.get(match, layer: 'root')
           expect(result).toBe(match)
 
+#    describe 'up.fragment.closest()', ->
+#
+#      it 'returns the closest ancestor of the given root that matches the given selector', ->
+#        $grandGrandMother = $fixture('.match')
+#        $grandMother = $fixture('.match')
+#        $mother = $grandMother.affix('.no-match')
+#        $element = $mother.affix('.element')
+#
+#        result = up.fragment.closest($element[0], '.match')
+#        expect(result).toBe($grandMother[0])
+#
+#      it 'returns the given root if it matches', ->
+#        $mother = $fixture('.match')
+#        $element = $mother.affix('.match')
+#
+#        result = up.fragment.closest($element[0], '.match')
+#        expect(result).toBe($element[0])
+#
+#      it 'does not return descendants of the root, even if they match', ->
+#        $element = $fixture('.element')
+#        $child = $element.affix('.match')
+#
+#        result = up.fragment.closest($element[0], '.match')
+#        expect(result).toBeMissing()
+#
+#      it 'returns missing if neither root nor ancestor matches', ->
+#        $mother = $fixture('.no-match')
+#        $element = $mother.affix('.no-match')
+#
+#        result = up.fragment.closest($element[0], '.match')
+#        expect(result).toBeMissing()
+#
+#      it 'returns missing if an ancestor matches, but is in another layer', asyncSpec (next) ->
+#        makeLayers(2)
+#
+#        next ->
+#          start = up.layer.element
+#          result = up.fragment.closest(start, 'body')
+#          expect(result).toBeMissing()
+
     describe 'up.change()', ->
 
       beforeEach ->
