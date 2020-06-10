@@ -23,7 +23,7 @@ class up.MotionController
   The animation is tracked so it can be
   [`finished`](/up.MotionController.finish) later.
 
-  @method startFunction
+  @function startFunction
   @param {Element|List<Element>} cluster
     A list of elements that will be affected by the motion.
   @param {Function(): Promise} startMotion
@@ -66,7 +66,7 @@ class up.MotionController
   Also listens to `this.finishEvent` on the given elements.
   When this event is observed, calls `motion.finish()`.
 
-  @method startMotion
+  @function startMotion
   @param {Element|List<Element>} cluster
   @param {up.Motion} motion
   @param {Object} [memory.trackMotion=true]
@@ -80,7 +80,7 @@ class up.MotionController
     promise
 
   ###**
-  @method finish
+  @function finish
   @param {List<Element>} [elements]
     If no element is given, finishes all animations in the documnet.
     If an element is given, only finishes animations in its subtree and ancestors.

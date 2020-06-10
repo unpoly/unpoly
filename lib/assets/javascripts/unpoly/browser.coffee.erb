@@ -20,7 +20,7 @@ up.browser = do ->
   u = up.util
 
   ###**
-  @method up.browser.loadPage
+  @function up.browser.loadPage
   @param {string} url
   @param {string} [options.method='get']
   @param {Object|Array|FormData|string} [options.params]
@@ -33,7 +33,7 @@ up.browser = do ->
   ###**
   For mocking in specs.
 
-  @method submitForm
+  @function up.browser.submitForm
   ###
   submitForm = (form) ->
     form.submit()

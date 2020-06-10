@@ -30,7 +30,7 @@ up.fragment = do ->
   ###**
   Returns the URL the given element was retrieved from.
 
-  @method up.fragment.source
+  @function up.fragment.source
   @param {string|Element|jQuery} target
   @param {Object} options
   @return {string|undefined}
@@ -767,7 +767,6 @@ up.fragment = do ->
     targetsBody: targetsBody
     successKey: successKey,
     failKey: failKey
-
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

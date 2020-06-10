@@ -143,7 +143,7 @@ up.feedback = do ->
         })
       })
 
-  @method up.feedback.start
+  @function up.feedback.start
   @param {Element} element
     The element to mark as active
   @internal
