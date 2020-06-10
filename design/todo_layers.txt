@@ -354,6 +354,8 @@ Decisions
 - Do I really want up.Change.ResetWorld instead of <body> as root's default target?
   - Yes, if we cannot match an overlay target we want to reset the world
   - One could argue that we only need ResetWorld when we're creating a layer or updating an overlay
+- Should we allow opening <body> in a layer through an element <up-layer>?
+  => No, this would open fixed nav bars in a layer
 - Should up.emit without an element emit on the document or on the current layer? => Keep it on document, as it is now!
 - Should we keep up.history.popTargets?
   - up.config.root.targets might not be appropriate
