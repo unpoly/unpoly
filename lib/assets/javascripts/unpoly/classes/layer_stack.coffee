@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.LayerStack extends up.Class
+class up.LayerStack extends Array
 
   constructor: ->
     @initialize()
@@ -9,24 +9,25 @@ class up.LayerStack extends up.Class
   initialize: ->
     @currentOverrides = []
 
-    # We must initialize @all before building the root layer, since building a layer
-    # will attempt to push it into @all, which would be undefined.
-    @all = []
-    @all.push(@buildRoot())
+    # We must initialize @ before building the root layer, since building a layer
+    # will attempt to push it into @, which would be undefined.
+    @clear()
+    @push(@buildRoot())
+
+  clear: ->
+    console.debug("splice(0, %o)", @length)
+    @splice(0, @length)
+    console.debug("stack length after splice: %o", @length)
 
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
 
-  at: (i) ->
-    @all[i]
-
   remove: (layer) ->
-    u.remove(@all, layer)
-
-  push: (layer) ->
-    @all.push(layer)
+    u.remove(this, layer)
 
   peel: (layer, options) ->
+    console.debug("peel(%o)", layer)
+
     # We will dismiss descendants closer to the front first to prevent
     # recursive calls of peel().
     descendants = u.reverse(layer.descendants)
@@ -35,7 +36,7 @@ class up.LayerStack extends up.Class
     # Because of this we will dismiss alle descendants sync rather than waiting
     # for each descendant to finish its closing animation.
     dismissOptions = u.merge(options, preventable: false)
-    dismissDescendant = (descendant) -> descendant.dismiss(null, dismissOptions)
+    dismissDescendant = (descendant) -> console.debug("dismissing descendant %o", descendant); descendant.dismiss(null, dismissOptions)
     promises = u.map(descendants, dismissDescendant)
 
     # In case a caller wants to know when all (concurrent) closing animations
@@ -43,63 +44,42 @@ class up.LayerStack extends up.Class
     Promise.all(promises)
 
   reset: ->
+    console.debug("=== resetting stack")
     @peel(@root, animation: false)
     @initialize()
-
-  indexOf: (layer) ->
-    @all.indexOf(layer)
-
-  atIndex: (index) ->
-    @all[index]
+    console.debug("=== stack length after reset: %o ... %o", @length, this)
 
   isOpen: (layer) ->
     layer.index >= 0
 
   parentOf: (layer) ->
-    @all[layer.index - 1]
+    @[layer.index - 1]
 
   childOf: (layer) ->
-    @all[layer.index + 1]
+    @[layer.index + 1]
 
   ancestorsOf: (layer) ->
     # Return closest ancestors first
-    u.reverse(@all.slice(0, layer.index))
+    u.reverse(@slice(0, layer.index))
 
   selfAndAncestorsOf: (layer) ->
     # Order for layer.closest()
     [layer, layer.ancestors...]
 
   descendantsOf: (layer) ->
-    @all.slice(layer.index + 1)
-
-  @getter 'root', ->
-    @all[0]
+    @.slice(layer.index + 1)
 
   isRoot: (layer) ->
-    @all[0] == layer
-
-  @getter 'overlays', ->
-    @root.descendants
+    @[0] == layer
 
   isOverlay: (layer) ->
     !@isRoot(layer)
 
-  @getter 'current', ->
-    # Event listeners and compilers will push into @currentOverrides
-    # to temporarily set up.layer.current to the layer they operate in.
-    u.last(@currentOverrides) || @front
-
   isCurrent: (layer) ->
     @current == layer
 
-  @getter 'front', ->
-    u.last(@all)
-
   isFront: (layer) ->
     @front == layer
-
-  @getter 'allReversed', ->
-    u.reverse(@all)
 
   get: (args...) ->
     @getAll(args...)[0]
@@ -113,3 +93,21 @@ class up.LayerStack extends up.Class
       return fn()
     finally
       @currentOverrides.pop()
+
+  reversed: ->
+    u.reverse(@)
+
+  u.getter @prototype, 'root', ->
+    @[0]
+
+  u.getter @prototype, 'overlays', ->
+    @root.descendants
+
+  u.getter @prototype, 'current', ->
+    # Event listeners and compilers will push into @currentOverrides
+    # to temporarily set up.layer.current to the layer they operate in.
+    u.last(@currentOverrides) || @front
+
+  u.getter @prototype, 'front', ->
+    u.last(@)
+
