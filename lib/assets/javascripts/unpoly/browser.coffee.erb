@@ -27,8 +27,7 @@ up.browser = do ->
   @internal
   ###
   loadPage = (args...) ->
-    request = new up.Request(args...)
-    request.loadPage()
+    new up.Request(args...).loadPage()
 
   ###**
   For mocking in specs.

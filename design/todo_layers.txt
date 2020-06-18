@@ -12,6 +12,8 @@
   - die reihenfolge der rückgabe ist NUR für fragment-lookup relevant
   - für den user wäre die reihenfolge z.b. von 'any' sehr seltsam
   - auch "overlay" als suche wäre reversed
+- prevent overscroll ofter layer viewport with touch events
+- up.form.config.submit = [...selectors]
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable

@@ -564,15 +564,3 @@ describe 'up.event', ->
 
         next ->
           expect(callback).not.toHaveBeenCalled()
-
-      it 'does not run the given callback when an input field is focused (which often use Escape to blur, reset, etc.)', asyncSpec (next) ->
-        callback = jasmine.createSpy()
-        up.event.onEscape(callback)
-        select = fixture('select')
-        select.focus()
-
-        next ->
-          Trigger.keySequence(select, 'Escape')
-
-        next ->
-          expect(callback).not.toHaveBeenCalled()

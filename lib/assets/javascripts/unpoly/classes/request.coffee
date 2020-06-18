@@ -279,6 +279,9 @@ class up.Request extends up.Record
 
   # TODO: Document API
   loadPage: ->
+    # Abort all pending requests so their callbacks won't run
+    # while we're already navigating away.
+    up.proxy.abort()
     new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
