@@ -742,7 +742,7 @@ describe 'up.proxy', ->
               'up:proxy:load'
             ])
 
-          next.after 300, =>
+          next.after 500, =>
             expect(@events).toEqual([
               'up:proxy:load',
               'up:proxy:slow'
