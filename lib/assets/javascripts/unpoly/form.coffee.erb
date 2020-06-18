@@ -21,7 +21,9 @@ up.form = do ->
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
-  @param {Array} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
+  @param {Array<string>} [config.submit=['form[up-target]', 'form[up-follow]']]
+    An array of CSS selectors matching forms that will be [submitted by Unpoly](/up.submit).
+  @param {Array<string>} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
     An array of CSS selectors that are searched around a form field
     that wants to [validate](/up.validate). The first matching selector
     will be updated with the validation messages from the server.
@@ -37,8 +39,12 @@ up.form = do ->
   config = new up.Config ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
+    submit: ['form[up-target]', 'form[up-follow]']
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
+
+  fullSubmitSelector = ->
+    config.submit.join(',')
 
   reset = ->
     config.reset()
@@ -635,7 +641,7 @@ up.form = do ->
     By default only responses to `GET` requests are cached for a few minutes.
   @stable
   ###
-  up.on 'submit', 'form[up-target], form[up-follow]', (event, form) ->
+  up.on 'submit', fullSubmitSelector, (event, form) ->
     up.event.halt(event)
     u.muteRejection submit(form)
 
