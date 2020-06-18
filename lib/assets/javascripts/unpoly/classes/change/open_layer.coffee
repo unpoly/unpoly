@@ -55,8 +55,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       @layer.updateContext(@options)
 
       # Change the stack sync. Don't wait for peeling to finish.
-      console.debug("pushing to stack")
-      up.layer.stack.push(@layer)
+      up.layer.push(@layer)
       promise = @layer.openNow({ @content, @onContentAttached })
 
       promise = promise.then =>

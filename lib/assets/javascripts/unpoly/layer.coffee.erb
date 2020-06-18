@@ -186,17 +186,16 @@ up.layer = do ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
   up.on 'up:fragment:destroyed', (event) ->
-    for layer in stack
+    for layer in stack.all
       layer.repair()
 
   up.on 'up:framework:boot', ->
-    console.debug("=== new stack")
     stack = new up.LayerStack()
 
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  api = u.literal({
+  api = {
     config
     defaultTargets
     open
@@ -206,12 +205,14 @@ up.layer = do ->
     openCallbackAttr
     closeCallbackAttr
     anySelector
-    get_stack: -> stack
-  })
+  }
 
   u.delegate(api, [
     'get'
     'getAll'
+    'all'
+    'allReversed'
+    'push'
     'root'
     'overlays'
     'current'
@@ -245,8 +246,5 @@ up.layer = do ->
   ], -> stack.current)
 
   return api
-
-console.debug("=== api defined")
-console.debug("=== up.layer.build is %o", up.layer.build)
 
 u.getter up, 'context', -> up.layer.context

@@ -56,7 +56,7 @@ describe 'up.fragment', ->
           expect(up.fragment.all(parent, '.element')).toEqual [child]
 
 
-        it "only matches descendants in that root's layer", asyncSpec (next) ->
+        it "only matches descendants in root's layer", asyncSpec (next) ->
           makeLayers [
             { '.element', content: 'element in root layer' }
             { '.element', content: 'element in modal layer' }

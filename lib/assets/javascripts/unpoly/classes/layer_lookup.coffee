@@ -29,7 +29,7 @@ class up.LayerLookup
 
   ofElement: (element) ->
     element = e.get(element) # unwrap jQuery
-    u.find @stack.reversed(), (layer) -> layer.contains(element)
+    u.find @stack.allReversed, (layer) -> layer.contains(element)
 
   first: ->
     @all()[0]
@@ -39,7 +39,8 @@ class up.LayerLookup
       return [@value]
 
     if u.isNumber(@value)
-      return u.compact [@stack.indexOf(@value)]
+      console.debug("isNumber: %o", @value)
+      return u.compact [@stack.atIndex(@value)]
 
     if u.isElementish(@value)
       return [@ofElement(@value)]
@@ -48,7 +49,7 @@ class up.LayerLookup
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
-        u.uniq [@currentLayer, @stack.reversed()...]
+        u.uniq [@currentLayer, @stack.allReversed...]
       when 'current'
         [@currentLayer]
       when 'closest'
