@@ -16,13 +16,20 @@ beforeEach ->
     else
       options = firstArg
       responseText = options.responseText || 'response-text'
-    request = options.request || @lastRequest()
-    request.respondWith
+
+    contentType = options.contentType || 'text/html'
+    headers = options.responseHeaders || {}
+    headers['Content-Type'] ||= contentType
+
+    requestAttrs =
       status: options.status || 200
-      contentType: options.contentType || 'text/html'
-      responseHeaders: options.responseHeaders
+      contentType: contentType
+      responseHeaders: headers
       responseText: responseText
       responseURL: options.responseURL
+
+    request = options.request || @lastRequest()
+    request.respondWith(requestAttrs)
 
   @respondWithSelector = (selector, options = {}) ->
     respondWithKeys = ['contentType', 'status', 'responseURL', 'responseHeaders']

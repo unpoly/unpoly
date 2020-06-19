@@ -77,7 +77,7 @@ describe 'up.link', ->
           up.history.config.restoreTargets = ['.container']
 
           respondWith = (html, title) =>
-            @lastRequest().respondWith
+            @respondWith
               status: 200
               contentType: 'text/html'
               responseText: "<div class='container'><div class='target'>#{html}</div></div>"

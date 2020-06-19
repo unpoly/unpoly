@@ -93,30 +93,17 @@ class up.Response extends up.Record
       'text',
       'status',
       'request',
-      'xhr',
+      'xhr', # optional
       'title',
       'acceptLayer'
       'dismissLayer'
       'events'
       'context'
+      'headers' # custom headers to for synthetic reponses without { xhr } property
     ]
 
-  ###**
-  @constructor up.Response
-  @internal
-  ###
-  constructor: (options) ->
-    super(options)
-#    @removeUpParamsFromURL()
-#
-#  removeUpParamsFromURL: ->
-#    [base, query] = @url.split('?')
-#    if query
-#      params = new up.Params(query)
-#      params.delete('up[target]')
-#      params.delete('up[fail-target]')
-#      params.delete('up[context]')
-#      @url = params.toURL(base)
+  defaults: ->
+    headers: {}
 
   ###**
   Returns whether the server responded with a 2xx HTTP status.
@@ -166,4 +153,8 @@ class up.Response extends up.Record
   @experimental
   ###
   getHeader: (name) ->
-    @xhr.getResponseHeader(name)
+    @headers[name] || @xhr?.getResponseHeader(name)
+
+  @getter 'contentType', ->
+    @getHeader('Content-Type')
+

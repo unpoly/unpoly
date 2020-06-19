@@ -86,7 +86,7 @@ class up.Change.FromURL extends up.Change
 
     promise = up.request(@request)
     unless @successOptions.preload
-      promise = promise.then(@onRequestSuccess, @onRequestFailure)
+      promise = u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
     return promise
 
   buildRequest: ->
@@ -101,23 +101,24 @@ class up.Change.FromURL extends up.Change
 
     @request = new up.Request(requestAttrs)
 
-  onRequestSuccess: (response) =>
-    up.puts('up.change()', 'Upating page with successful response')
-    @processResponse(response, @successOptions)
+  onRequestSettled: (responseOrError) ->
+    rejectWithFailedResponse = -> Promise.reject(responseOrError)
 
-  onRequestFailure: (response) =>
-    rejectWithFailedResponse = -> Promise.reject(response)
-    if @failedResponseHasContent(response)
-      up.puts('up.change()', 'Updating page with failed response (HTTP %d)', response.status)
-      promise = @processResponse(response, @failOptions)
-      # Although processResponse() will fulfill with a successful replacement of options.failTarget,
-      # we still want to reject the promise that's returned to our API client.
-      return u.always(promise, rejectWithFailedResponse)
+    if @isResponseWithHTMLContent(responseOrError)
+      if responseOrError.isSuccess()
+        up.puts('up.change()', 'Upating page with successful response')
+        return @updateContentFromResponse(responseOrError, @successOptions)
+      else
+        up.puts('up.change()', 'Updating page with failed response (HTTP %d)', responseOrError.status)
+        promise = @updateContentFromResponse(responseOrError, @failOptions)
+        # Although processResponse() will fulfill with a successful replacement of options.failTarget,
+        # we still want to reject the promise that's returned to our API client.
+        return u.always(promise, rejectWithFailedResponse)
     else
-      up.puts('up.change()', 'Response failed without content')
+      up.puts('up.change()', 'Response without HTML content (HTTP %d, Content-Type %s)', responseOrError.status, responseOrError.contentType)
       return rejectWithFailedResponse()
 
-  processResponse: (response, options) ->
+  updateContentFromResponse: (response, options) ->
     @augmentOptionsFromResponse(response, options)
 
     # Allow listeners to inspect the response and either prevent the fragment change
@@ -174,10 +175,12 @@ class up.Change.FromURL extends up.Change
     else
       newValue
 
-  failedResponseHasContent: (responseOrError) ->
+  isResponseWithHTMLContent: (responseOrError) ->
     # Check if the failed response wasn't cause by a fatal error
     # like a timeout or disconnect.
-    (responseOrError instanceof up.Response) && responseOrError.text
+    return (responseOrError instanceof up.Response) &&
+      responseOrError.text && # check if the body contains a non-empty string
+      /\bx?html\b/.test(responseOrError.contentType) # HTML4+ is text/html, XHTML is application/xhtml+xml
 
   fullLoad: =>
     up.browser.loadPage(@successOptions.url, u.pick(@successOptions, ['method', 'params']))

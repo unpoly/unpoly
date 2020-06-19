@@ -749,10 +749,7 @@ describe 'up.proxy', ->
             ])
 
           next =>
-            jasmine.Ajax.requests.at(0).respondWith
-              status: 200
-              contentType: 'text/html'
-              responseText: 'foo'
+            @respondWith('foo')
 
           next =>
             expect(@events).toEqual([

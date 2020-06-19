@@ -217,7 +217,7 @@ describe 'up.fragment', ->
             next =>
               expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
 
-        describe 'when the server responds with an error', ->
+        describe 'when the server responds with an error or unexpected content', ->
 
           it "replaces the layer's default target instead of the given selector", asyncSpec (next) ->
             up.layer.config.root.targets = ['.default']
@@ -249,6 +249,54 @@ describe 'up.fragment', ->
             next =>
               expect('.success-target').toHaveText('old success text')
               expect('.failure-target').toHaveText('new failure text')
+
+          it 'does not update a fragment if the response contains no text', asyncSpec (next) ->
+            insertedListener = jasmine.createSpy('up:fragment:inserted listener')
+            up.on('up:fragment:inserted', insertedListener)
+
+            fixture('.success-target', text: 'old success text')
+            fixture('.failure-target', text: 'old failure text')
+
+            up.change('.success-target', url: '/path', failTarget: '.failure-target')
+
+            next =>
+              @respondWith(responseText: '')
+
+            next =>
+              expect(insertedListener).not.toHaveBeenCalled()
+
+          it 'does not update a fragment if the response has no HTML content-type', asyncSpec (next) ->
+            insertedListener = jasmine.createSpy('up:fragment:inserted listener')
+            up.on('up:fragment:inserted', insertedListener)
+
+            fixture('.success-target', text: 'old success text')
+            fixture('.failure-target', text: 'old failure text')
+
+            up.change('.success-target', url: '/path', failTarget: '.failure-target')
+
+            next =>
+              @respondWith
+                contentType: 'text/plain'
+                responseText: """
+                  <div class="failure-target">new failure text</div>
+                  <div class="success-target">new success text</div>
+                """
+
+            next =>
+              expect(insertedListener).not.toHaveBeenCalled()
+
+          it 'does update a fragment if the server has an XHTML content-type', asyncSpec (next) ->
+            fixture('.target', text: 'old text')
+
+            up.change('.target', url: '/path', failTarget: '.failure')
+
+            next =>
+              @respondWith
+                contentType: 'application/xhtml+xml'
+                responseText: '<div class="target">new text</div>'
+
+            next =>
+              expect('.target').toHaveText('new text')
 
           it 'rejects the returned promise', (done) ->
             fixture('.success-target')
@@ -2103,7 +2151,7 @@ describe 'up.fragment', ->
             'overflow-y': 'scroll'
 
           respond = =>
-            @lastRequest().respondWith
+            @respondWith
               status: 200
               contentType: 'text/html'
               responseText: '<div class="element" style="height: 300px"></div>'
