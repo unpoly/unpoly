@@ -66,10 +66,10 @@ describe 'up.link', ->
           next => @respondWith '<div id="second">second-div</div>'
           next => expect($container.text()).toBe('first-linksecond-div')
 
-        it 'adds history entries and allows the user to use the back- and forward-buttons', asyncSpec (next) ->
+        it 'adds history entries and allows the user to use the back and forward buttons', asyncSpec (next) ->
           up.history.config.enabled = true
 
-          waitForBrowser = 150
+          waitForBrowser = 300
 
           # By default, up.history will replace the <body> tag when
           # the user presses the back-button. We reconfigure this
@@ -124,7 +124,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/three')
             expect(document.title).toEqual('title from three')
 
-            safeHistory.back()
+            history.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two', 'restored title from two')
@@ -134,7 +134,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(document.title).toEqual('restored title from two')
 
-            safeHistory.back()
+            history.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from one', 'restored title from one')
@@ -144,7 +144,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/one')
             expect(document.title).toEqual('restored title from one')
 
-            safeHistory.forward()
+            history.forward()
 
           next.after waitForBrowser, =>
             # Since the response is cached, we don't have to respond
@@ -203,7 +203,7 @@ describe 'up.link', ->
             expect($('.target')).toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
 
-            safeHistory.back()
+            history.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from one')
@@ -212,7 +212,7 @@ describe 'up.link', ->
             expect($('.target')).toHaveText('restored text from one')
             expect(location.pathname).toEqual('/one')
 
-            safeHistory.forward()
+            history.forward()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two')
@@ -276,7 +276,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('#hash')
 
-            safeHistory.back()
+            history.back()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two')
@@ -286,7 +286,7 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('')
 
-            safeHistory.forward()
+            history.forward()
 
           next.after waitForBrowser, =>
             respondWith('restored text from two with hash')

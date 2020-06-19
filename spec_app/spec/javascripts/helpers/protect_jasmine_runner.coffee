@@ -22,15 +22,29 @@ afterEach ->
   if links = u.presence(window.defaultSubmittedForms)
     up.fail('Unhandled default submit behavior for forms %o', links)
 
+
+oldPushState = history.pushState
+oldReplaceState = history.replaceState
+oldBack = history.back
+oldForward = history.forward
+
+history.pushState = (args...) -> safeHistory.pushState(args...)
+history.replaceState = (args...) -> safeHistory.replaceState(args...)
+history.back = (args...) -> safeHistory.back(args...)
+history.forward = (args...) -> safeHistory.forward(args...)
+
 window.safeHistory = new class
   constructor: ->
-    @reset()
+    @logEnabled = true
+    @cursor = -1 # we don't know the initial state
+    @stateIndexes = []
+    @nextIndex = 1000
 
   back: ->
     @log("safeHistory: back(), cursor before is %o, path before is %o", @cursor, location.pathname)
     if @cursor > 0
       # This will trigger popstate, which we will handle and update @cursor
-      window.history.back()
+      oldBack.call(history)
     else
       up.fail('safeHistory: Tried to go too far back in history (prevented)')
 
@@ -38,56 +52,71 @@ window.safeHistory = new class
     @log("safeHistory: forward()")
     if @cursor < @stateIndexes.length - 1
       # This will trigger popstate, which we will handle and update @cursor
-      window.history.forward()
+      oldForward.call(history)
     else
       up.fail('safeHistory: Tried to go too far forward in history (prevented)')
 
-  pushed: (state) ->
-    @log("safeHistory: pushed(%o)", state.up.index)
-    if state.up
-      @stateIndexes.splice(@cursor + 1, @stateIndexes.length, state.up.index)
-      @cursor++
-      @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
-    else
-      up.fail('safeHistory: Pushed a non-Unpoly state: %o', state)
+  pushState: (state, title, url) ->
+    state ||= { state }
+    state._index = @nextIndex++
 
-  replaced: (state) ->
-    @log("safeHistory: replaced(%o)", state.up.index)
-    if state.up
-      @stateIndexes[@cursor] = state.up.index
-      @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
-    else
-      up.fail('safeHistory: Replaced a non-Unpoly state: %o', state)
+    @log("safeHistory: pushState(%o, %o, %o)", state, title, url)
+    oldPushState.call(history, state, title, url)
 
-  restored: (state) ->
-    @log("safeHistory: restored(%o)", state.up.index)
-    if state.up
-      @cursor = @stateIndexes.indexOf(state.up.index)
-      @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
-    else
-      up.fail('safeHistory: Restored a non-Unpoly state: %o', state)
+    if url && u.normalizeURL(url) != u.normalizeURL(location.href)
+      up.fail('safeHistory: Browser did now allow history.pushState() to URL %s (Chrome throttling history changes?)', url)
+
+    @stateIndexes.splice(@cursor + 1, @stateIndexes.length, state._index)
+    @cursor++
+    @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
+
+  replaceState: (state, title, url) ->
+    state ||= { state }
+    state._index = @nextIndex++
+
+    @log("safeHistory: replaceState(%o, %o, %o)", state, title, url)
+    oldReplaceState.call(history, state, title, url)
+
+    if url && u.normalizeURL(url) != u.normalizeURL(location.href)
+      up.fail('safeHistory: Browser did now allow history.replaceState() to URL %s (Chrome throttling history changes?)', url)
+
+    # In case an example uses replaceState to set a known initial URL
+    # we can use this to know our initial state.
+    @cursor = 0 if @cursor == -1
+    @stateIndexes[@cursor] = state._index
+    @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
+
+  onPopState: (event) ->
+    state = event.state
+    @log("safeHistory: Got event %o with state %o", event, state)
+
+    return unless state
+
+    @log("safeHistory: restored(%o)", state._index)
+    @cursor = @stateIndexes.indexOf(state._index)
+
+    if @cursor == -1
+      up.fail('safeHistory: Could not find position of state %o', state)
+
+    @log("safeHistory: @stateIndexes are now %o, cursor is %o, path is %o", u.copy(@stateIndexes), @cursor, location.pathname)
 
   log: (args...) ->
     if @logEnabled
-      console.log(args...)
+      console.debug(args...)
+
+  afterEach: ->
+    @cursor = 0
+    @stateIndexes = [@stateIndexes[@cursor]]
 
   reset: ->
-    @logEnabled = false
     @log("safeHistory: reset()")
-    @cursor = -1
-    @stateIndexes = []
+    @cursor = 0
+    @stateIndexes = [0]
 
-beforeEach ->
-  safeHistory.reset()
+window.addEventListener('popstate', (event) -> safeHistory.onPopState(event))
 
-  up.on 'up:history:pushed', (event) ->
-    safeHistory.pushed(window.history.state)
-
-  up.on 'up:history:replaced', (event) ->
-    safeHistory.replaced(window.history.state)
-
-  up.on 'up:history:restored', (event) ->
-    safeHistory.restored(window.history.state)
+afterEach ->
+  safeHistory.afterEach()
 
 # Make specs fail if a link was followed without Unpoly.
 # This would otherwise navigate away from the spec runner.

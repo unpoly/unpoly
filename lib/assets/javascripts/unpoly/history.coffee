@@ -145,11 +145,8 @@ up.history = do ->
     else
       false
 
-  stateIndex = 0
-
   buildState = ->
-    up:
-      index: stateIndex++
+    up: {}
 
   restoreStateOnPop = (state) ->
     if state?.up
