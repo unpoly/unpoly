@@ -12,7 +12,7 @@ GIT
 PATH
   remote: ..
   specs:
-    unpoly-rails (0.61.0)
+    unpoly-rails (0.62.0)
       rails (>= 3)
 
 GEM

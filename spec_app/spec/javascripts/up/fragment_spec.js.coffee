@@ -2432,12 +2432,25 @@ describe 'up.fragment', ->
           expect($element).toBeDetached()
 
       it 'calls destructors for custom elements', (done) ->
-        up.$compiler('.element', ($element) -> destructor)
         destructor = jasmine.createSpy('destructor')
+        up.$compiler('.element', ($element) -> destructor)
         up.hello(fixture('.element'))
         up.destroy('.element').then ->
           expect(destructor).toHaveBeenCalled()
           done()
+
+      it 'does not call destructors twice if up.destroy() is called twice on the same fragment', asyncSpec (next) ->
+        destructor = jasmine.createSpy('destructor')
+        up.compiler('.element', (element) -> destructor)
+
+        element = fixture('.element')
+        up.hello(element)
+
+        up.destroy(element, animation: 'fade-out', duration: 10)
+        up.destroy(element, animation: 'fade-out', duration: 10)
+
+        next.after 60, ->
+          expect(destructor.calls.count()).toBe(1)
 
       it 'marks the old element as .up-destroying before destructors', (done) ->
         destructor = jasmine.createSpy('destructor')
