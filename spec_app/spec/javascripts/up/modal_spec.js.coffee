@@ -563,6 +563,27 @@ describe 'up.modal', ->
           next =>
             expect(@lastRequest().method).toEqual 'POST'
 
+      describe 'with [up-cache] modifier', ->
+        it 'honours the given setting', asyncSpec (next) ->
+          $link = $fixture('a[href="/path"][up-modal=".target"][up-cache="false"]')
+          Trigger.clickSequence($link)
+
+          next =>
+            @respondWith('<div class="target">modal content 1</div>')
+
+          next =>
+            expect('.up-modal .target').toHaveText('modal content 1')
+            history.back()
+
+          next =>
+            Trigger.clickSequence($link)
+
+          next =>
+            @respondWith('<div class="target">modal content 2</div>')
+
+          next =>
+            expect('.up-modal .target').toHaveText('modal content 2')
+
       it 'adds a history entry and allows the user to use the back button', asyncSpec (next) ->
         up.motion.config.enabled = false
         up.history.config.enabled = true
