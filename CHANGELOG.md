@@ -11,6 +11,7 @@ Unreleased
 
 - Prevent destructor function from being called twice if [`up.destroy()`](/up.destroy) is called twice with the same element (reported by @kratob)
 - [`up.submit()`](/up.submit) has a new options `{ params }`. It may be used to pass extra form [parameters](/up.Params) that will be submitted in addition to the parameters from the form. (fix by @robinvdvleuten)
+- [`a[up-modal]`](/a-up-modal) will now honor an [`[up-cache]`](/a-up-target#up-cache) attribute on the same link. (fix by @adam12)
 
 
 0.62.0
