@@ -13,23 +13,32 @@ class up.BodyShifter
     @unshiftFns = []
 
   shift: ->
-    return unless up.viewport.rootHasVerticalScrollbar()
+    # Remember whether the root viewport has a visible scrollbar at rest.
+    # It will disappear when we set overflow-y: hidden below.
+    rootHadVerticalScrollbar = up.viewport.rootHasVerticalScrollbar()
 
-    body = document.body
+    # Even if root viewport has no scroll bar, we still want to give overflow-y: hidden
+    # to the <body> element. Otherwise the user could scroll the underlying page by
+    # scrolling over the dimmed backdrop (observable with touch emulation in Chrome DevTools).
+    # Note that some devices don't show a vertical scrollbar at rest for a viewport, even
+    # when it can be scrolled.
     overflowElement = up.viewport.rootOverflowElement()
-
-    scrollbarWidth = up.viewport.scrollbarWidth()
-
-    bodyRightPadding = e.styleNumber(body, 'paddingRight')
-    bodyRightShift = scrollbarWidth + bodyRightPadding
-
-    @unshiftFns.push e.setTemporaryStyle(body, paddingRight: bodyRightShift)
     @unshiftFns.push e.setTemporaryStyle(overflowElement, overflowY: 'hidden')
 
-    for anchor in up.viewport.anchoredRight()
-      elementRight = e.styleNumber(anchor, 'right')
-      elementRightShift = scrollbarWidth + elementRight
-      @unshiftFns.push e.setTemporaryStyle(anchor, right: elementRightShift)
+    if rootHadVerticalScrollbar
+      body = document.body
+
+      scrollbarWidth = up.viewport.scrollbarWidth()
+
+      bodyRightPadding = e.styleNumber(body, 'paddingRight')
+      bodyRightShift = scrollbarWidth + bodyRightPadding
+
+      @unshiftFns.push e.setTemporaryStyle(body, paddingRight: bodyRightShift)
+
+      for anchor in up.viewport.anchoredRight()
+        elementRight = e.styleNumber(anchor, 'right')
+        elementRightShift = scrollbarWidth + elementRight
+        @unshiftFns.push e.setTemporaryStyle(anchor, right: elementRightShift)
 
   unshift: ->
     while unshiftFn = @unshiftFns.pop()
