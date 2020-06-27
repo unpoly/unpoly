@@ -19,11 +19,28 @@ class up.BodyShifter
 
   shift: ->
     @shiftCount++
-    unless @shiftCount == 1 && up.viewport.rootHasVerticalScrollbar()
+
+    if @shiftCount > 1
+      return
+
+    # Remember whether the root viewport has a visible scrollbar at rest.
+    # It will disappear when we set overflow-y: hidden below.
+    scrollbarTookSpace = up.viewport.rootHasReducedWidthFromScrollbar()
+
+    # Even if root viewport has no scroll bar, we still want to give overflow-y: hidden
+    # to the <body> element. Otherwise the user could scroll the underlying page by
+    # scrolling over the dimmed backdrop (observable with touch emulation in Chrome DevTools).
+    # Note that some devices don't show a vertical scrollbar at rest for a viewport, even
+    # when it can be scrolled.
+    overflowElement = up.viewport.rootOverflowElement()
+    @changeStyle(overflowElement, overflowY: 'hidden')
+
+    # If the scrollbar never took space away from the main viewport's client width,
+    # we do not need to run the code below that would pad it on the right.
+    if !scrollbarTookSpace
       return
 
     body = document.body
-    overflowElement = up.viewport.rootOverflowElement()
 
     scrollbarWidth = up.viewport.scrollbarWidth()
 
@@ -31,7 +48,6 @@ class up.BodyShifter
     bodyRightShift = scrollbarWidth + bodyRightPadding
 
     @changeStyle(body, paddingRight: bodyRightShift)
-    @changeStyle(overflowElement, overflowY: 'hidden')
 
     for anchor in up.viewport.anchoredRight()
       elementRight = e.styleNumber(anchor, 'right')

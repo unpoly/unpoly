@@ -99,7 +99,7 @@ namespace :publish do
 
   desc 'Release new version to all package managers'
   task :release do
-    Rake::Task['release'].invoke
+    Rake::Task['rubygems:publish'].invoke
     Rake::Task['npm:publish'].invoke
   end
 
@@ -113,6 +113,15 @@ namespace :publish do
 
   desc 'Build artifacts, push to git and release to package managers'
   task :all => [:confirm, :build, :commit, :release, :remind_to_update_site] do
+  end
+
+end
+
+namespace :rubygems do
+
+  task :publish do
+    puts 'Publishing to rubygems.org. If this seems to hang, enter your 2FA token.'
+    Rake::Task['release'].invoke
   end
 
 end

@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.62.0"
+    version: "0.62.1"
   };
 
 }).call(this);
@@ -3428,32 +3428,32 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     }
 
     BodyShifter.prototype.shift = function() {
-      var anchor, body, bodyRightPadding, bodyRightShift, elementRight, elementRightShift, i, len, overflowElement, ref, results, scrollbarWidth;
-      if (!up.viewport.rootHasVerticalScrollbar()) {
-        return;
-      }
-      body = document.body;
+      var anchor, body, bodyRightPadding, bodyRightShift, elementRight, elementRightShift, i, len, overflowElement, ref, results, rootHadVerticalScrollbar, scrollbarWidth;
+      rootHadVerticalScrollbar = up.viewport.rootHasVerticalScrollbar();
       overflowElement = up.viewport.rootOverflowElement();
-      scrollbarWidth = up.viewport.scrollbarWidth();
-      bodyRightPadding = e.styleNumber(body, 'paddingRight');
-      bodyRightShift = scrollbarWidth + bodyRightPadding;
-      this.unshiftFns.push(e.setTemporaryStyle(body, {
-        paddingRight: bodyRightShift
-      }));
       this.unshiftFns.push(e.setTemporaryStyle(overflowElement, {
         overflowY: 'hidden'
       }));
-      ref = up.viewport.anchoredRight();
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        anchor = ref[i];
-        elementRight = e.styleNumber(anchor, 'right');
-        elementRightShift = scrollbarWidth + elementRight;
-        results.push(this.unshiftFns.push(e.setTemporaryStyle(anchor, {
-          right: elementRightShift
-        })));
+      if (rootHadVerticalScrollbar) {
+        body = document.body;
+        scrollbarWidth = up.viewport.scrollbarWidth();
+        bodyRightPadding = e.styleNumber(body, 'paddingRight');
+        bodyRightShift = scrollbarWidth + bodyRightPadding;
+        this.unshiftFns.push(e.setTemporaryStyle(body, {
+          paddingRight: bodyRightShift
+        }));
+        ref = up.viewport.anchoredRight();
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          anchor = ref[i];
+          elementRight = e.styleNumber(anchor, 'right');
+          elementRightShift = scrollbarWidth + elementRight;
+          results.push(this.unshiftFns.push(e.setTemporaryStyle(anchor, {
+            right: elementRightShift
+          })));
+        }
+        return results;
       }
-      return results;
     };
 
     BodyShifter.prototype.unshift = function() {
@@ -5358,18 +5358,19 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
       if (u.isMissing(raw)) {
 
       } else if (raw instanceof this.constructor) {
-        return (ref = this.entries).push.apply(ref, raw.entries);
+        (ref = this.entries).push.apply(ref, raw.entries);
       } else if (u.isArray(raw)) {
-        return (ref1 = this.entries).push.apply(ref1, raw);
+        (ref1 = this.entries).push.apply(ref1, raw);
       } else if (u.isString(raw)) {
-        return this.addAllFromQuery(raw);
+        this.addAllFromQuery(raw);
       } else if (u.isFormData(raw)) {
-        return this.addAllFromFormData(raw);
+        this.addAllFromFormData(raw);
       } else if (u.isObject(raw)) {
-        return this.addAllFromObject(raw);
+        this.addAllFromObject(raw);
       } else {
-        return up.fail("Unsupport params type: %o", raw);
+        up.fail("Unsupport params type: %o", raw);
       }
+      return this;
     };
 
     Params.prototype.addAllFromObject = function(object) {
@@ -8432,15 +8433,14 @@ or when a matching fragment is [inserted via AJAX](/up.link) later.
       var cleanables;
       cleanables = e.subtree(fragment, '.up-can-clean');
       return u.each(cleanables, function(cleanable) {
-        var destructor, destructors, i, len, results;
-        if (destructors = cleanable.upDestructors) {
-          results = [];
+        var destructor, destructors, i, len;
+        if (destructors = u.pluckKey(cleanable, 'upDestructors')) {
           for (i = 0, len = destructors.length; i < len; i++) {
             destructor = destructors[i];
-            results.push(destructor());
+            destructor();
           }
-          return results;
         }
+        return cleanable.classList.remove('up-can-clean');
       });
     };
 
@@ -10837,7 +10837,7 @@ You can define custom animations using [`up.transition()`](/up.transition) and
     
     You can pass additional options:
     
-        up.animate('warning', '.fade-in', {
+        up.animate('.warning', 'fade-in', {
           delay: 1000,
           duration: 250,
           easing: 'linear'
@@ -13054,6 +13054,9 @@ open dialogs with sub-forms, etc. all without losing form state.
       If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
     @param {string} [options.failLayer='auto']
       The name of the layer that ought to be updated if the server sends a non-200 status code.
+    @param {Object|FormData|string|Array|up.Params} [options.params]
+      Extra form [parameters](/up.Params) that will be submitted in addition to
+      the parameters from the form.
     @return {Promise}
       A promise for the successful form submission.
     @stable
@@ -13103,7 +13106,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       if (options.failLayer == null) {
         options.failLayer = form.getAttribute('up-fail-layer');
       }
-      options.params = up.Params.fromForm(form);
+      options.params = up.Params.fromForm(form).addAll(options.params);
       options = u.merge(options, up.motion.animateOptions(options, form));
       if (options.validate) {
         options.headers || (options.headers = {});
@@ -15031,6 +15034,9 @@ or function.
       }
       if (options.failLayer == null) {
         options.failLayer = (ref12 = link.getAttribute('up-fail-layer')) != null ? ref12 : 'auto';
+      }
+      if (options.cache == null) {
+        options.cache = e.booleanAttr(link, 'up-cache');
       }
       animateOptions = up.motion.animateOptions(options, link, {
         duration: flavorDefault('openDuration', options.flavor),

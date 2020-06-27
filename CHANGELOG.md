@@ -33,6 +33,18 @@ Unreleased
 - validating emits up:form:validate instead of up:form:submit
 
 
+0.62.1
+------
+
+This is another maintenance release while we're finishing [the next major version of Unpoly](https://groups.google.com/forum/#!topic/unpoly/FDdVjxbjNLg).
+
+Community members were involved in every change of this release:
+
+- [`up.submit()`](/up.submit) has a new options `{ params }`. It may be used to pass extra form [parameters](/up.Params) that will be submitted in addition to the parameters from the form. (fix by @robinvdvleuten)
+- [`a[up-modal]`](/a-up-modal) will now honor an [`[up-cache]`](/a-up-target#up-cache) attribute on the same link. (fix by @adam12)
+- Prevent destructor function from being called twice if [`up.destroy()`](/up.destroy) is called twice with the same element (reported by @kratob)
+- On devices that don't show a vertical scrollbar, users can no longer scroll the underlying page while a [modal overlay](/up.modal) is open. (reported by @msurdi)
+
 
 0.62.0
 ------
@@ -60,7 +72,6 @@ This is a maintenance release while we're getting ready for [the next major vers
 - Fix a bug where [`up.destroy()`](/up.destroy) wouldn't clean up the global jQuery cache. This is only relevant when using Unpoly together with jQuery.
 - Fields outside a <form> are now recognized when they have a matching [form] attribute (fixes #85)
 - [`up.form.fields()`](/up.form.fields) now accepts a jQuery collection as a first argument, as was already documented.
->>>>>>> master
 
 
 0.61.0
@@ -131,7 +142,6 @@ In the example below, changing the `email` input would only validate the first f
 
 - When user does not confirm an [`[up-confirm]`](/a-up-target#up-confirm) link,
   the link's [`.up-active`](/a.up-active) class is now removed (fixes #89)
->>>>>>> master
 
 
 0.60.0

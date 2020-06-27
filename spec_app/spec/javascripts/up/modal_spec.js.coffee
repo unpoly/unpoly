@@ -116,7 +116,7 @@ describe 'up.modal (deprecated)', ->
           $fixture('.spacer').css(height: '9000px')
           # Safari 11 has no vertical scrollbar that takes away space from the document,
           # so the entire shifting logic is skipped.
-          if up.viewport.rootHasVerticalScrollbar()
+          if up.viewport.rootHasReducedWidthFromScrollbar()
 
             $rootOverflowElement = $(up.viewport.rootOverflowElement())
 
@@ -198,7 +198,7 @@ describe 'up.modal (deprecated)', ->
           $fixture('.spacer').css(height: '9000px')
           # Safari 11 has no vertical scrollbar that takes away space from the document,
           # so the entire shifting logic is skipped.
-          if up.viewport.rootHasVerticalScrollbar()
+          if up.viewport.rootHasReducedWidthFromScrollbar()
             scrollbarWidth = up.viewport.scrollbarWidth()
             $anchoredElement = $fixture('div[up-anchored=right]').css
               position: 'absolute'
@@ -568,6 +568,27 @@ describe 'up.modal (deprecated)', ->
 
           next =>
             expect(@lastRequest().method).toEqual 'POST'
+
+      describe 'with [up-cache] modifier', ->
+        it 'honours the given setting', asyncSpec (next) ->
+          $link = $fixture('a[href="/path"][up-modal=".target"][up-cache="false"]')
+          Trigger.clickSequence($link)
+
+          next =>
+            @respondWith('<div class="target">modal content 1</div>')
+
+          next =>
+            expect('.up-modal .target').toHaveText('modal content 1')
+            history.back()
+
+          next =>
+            Trigger.clickSequence($link)
+
+          next =>
+            @respondWith('<div class="target">modal content 2</div>')
+
+          next =>
+            expect('.up-modal .target').toHaveText('modal content 2')
 
       it 'adds a history entry and allows the user to use the back button', asyncSpec (next) ->
         up.motion.config.enabled = false

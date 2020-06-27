@@ -365,12 +365,16 @@ up.viewport = do ->
     e.matches(element, rootSelector())
 
   ###**
-  Returns whether the given element is currently showing a vertical scrollbar.
+  Returns whether the root viewport is currently showing a vertical scrollbar.
 
-  @function up.viewport.rootHasVerticalScrollbar
+  Note that this returns `false` if the root viewport scrolls vertically but the browser
+  shows no visible scroll bar at rest, e.g. on mobile devices that only overlay a scroll
+  indicator while scrolling.
+
+  @function up.viewport.rootHasReducedWidthFromScrollbar
   @internal
   ###
-  rootHasVerticalScrollbar = ->
+  rootHasReducedWidthFromScrollbar = ->
     # We could also check if scrollHeight > offsetHeight for the document viewport.
     # However, we would also need to check overflow-y for that element.
     # Also we have no control whether developers set the property on <body> or <html>.
@@ -774,7 +778,7 @@ up.viewport = do ->
     get_root: getRoot
     rootWidth: rootWidth
     rootHeight: rootHeight
-    rootHasVerticalScrollbar: rootHasVerticalScrollbar
+    rootHasReducedWidthFromScrollbar: rootHasReducedWidthFromScrollbar
     rootOverflowElement: rootOverflowElement
     isRoot: isRoot
     scrollbarWidth: scrollbarWidth

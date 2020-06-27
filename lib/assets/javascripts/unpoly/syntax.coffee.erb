@@ -377,10 +377,9 @@ up.syntax = do ->
   clean = (fragment) ->
     cleanables = e.subtree(fragment, '.up-can-clean')
     u.each cleanables, (cleanable) ->
-      if destructors = cleanable.upDestructors
+      if destructors = u.pluckKey(cleanable, 'upDestructors')
         destructor() for destructor in destructors
-      # We do not actually remove the #upDestructors property or .up-can-* classes for performance reasons.
-      # The element we just cleaned is about to be removed from the DOM.
+      cleanable.classList.remove('up-can-clean')
 
   ###**
   Checks if the given element has an [`up-data`](/up-data) attribute.
