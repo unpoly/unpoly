@@ -131,7 +131,6 @@ describe 'up.history', ->
 
           up.history.replace('/scroll-restauration-spec')
 
-          console.debug("SPEC: navigating to /test-one")
           up.replace('.content', '/test-one')
 
           next =>
@@ -140,7 +139,6 @@ describe 'up.history', ->
           next =>
             expect(location.href).toMatchURL('/test-one')
             $viewport.scrollTop(50)
-            console.debug("SPEC: navigating to /test-two")
             up.replace('.content', '/test-two')
 
           next.after waitForBrowser, =>
@@ -149,7 +147,6 @@ describe 'up.history', ->
           next =>
             expect(location.href).toMatchURL('/test-two')
             $('.viewport').scrollTop(150)
-            console.debug("SPEC: navigating to /test-three")
             up.replace('.content', '/test-three')
 
           next.after waitForBrowser, =>
@@ -158,7 +155,6 @@ describe 'up.history', ->
           next =>
             expect(location.href).toMatchURL('/test-three')
             $('.viewport').scrollTop(250)
-            console.debug("SPEC: going back to /test-two")
             history.back()
 
           next.after waitForBrowser, =>
@@ -167,7 +163,6 @@ describe 'up.history', ->
           next =>
             expect(location.href).toMatchURL('/test-two')
             expect($('.viewport').scrollTop()).toBe(150)
-            console.debug("SPEC: going back to /test-one")
             history.back()
 
           next.after waitForBrowser, =>
@@ -176,7 +171,6 @@ describe 'up.history', ->
 
           next =>
             expect($('.viewport').scrollTop()).toBe(50)
-            console.debug("SPEC: going forward to /test-two")
             history.forward()
 
           next.after waitForBrowser, =>
@@ -184,7 +178,6 @@ describe 'up.history', ->
             # No need to respond since we requested /test-two with the popTarget
             # when we went backwards
             expect($('.viewport').scrollTop()).toBe(150)
-            console.debug("SPEC: going forward to /test-three")
             history.forward()
 
           next.after waitForBrowser, =>

@@ -11,35 +11,26 @@ class up.LayerStack extends Array
     @currentOverrides = []
     @clear()
     @push(@buildRoot())
-    console.debug("stack after initialize: ", u.map(this, 'mode'))
 
   clear: ->
-    console.debug("stack before splice", u.map(this, 'mode'))
     @splice(0, @length)
-    console.debug("stack after splice", u.map(this, 'mode'))
 
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
 
   remove: (layer) ->
-    console.debug("stack before remove", u.map(this, 'mode'))
     u.remove(this, layer)
-    console.debug("stack after remove", u.map(this, 'mode'))
 
   peel: (layer, options) ->
-    console.debug("peel(%o)", layer)
-
     # We will dismiss descendants closer to the front first to prevent
     # recursive calls of peel().
     descendants = u.reverse(layer.descendants)
-
-    console.debug("during peel: descendants are %o", descendants)
 
     # Callers expect the effects of peel() to manipulate the layer stack sync.
     # Because of this we will dismiss alle descendants sync rather than waiting
     # for each descendant to finish its closing animation.
     dismissOptions = u.merge(options, preventable: false)
-    dismissDescendant = (descendant) -> console.debug("dismissing descendant %o", descendant); descendant.dismiss(null, dismissOptions)
+    dismissDescendant = (descendant) -> descendant.dismiss(null, dismissOptions)
     promises = u.map(descendants, dismissDescendant)
 
     # In case a caller wants to know when all (concurrent) closing animations
@@ -47,11 +38,8 @@ class up.LayerStack extends Array
     Promise.all(promises)
 
   reset: ->
-    console.debug("=== resetting stack: %o", u.map(this, 'mode'))
-    console.debug("during reset: will reset root %o", @root)
     @peel(@root, animation: false)
     @initialize()
-    console.debug("=== stack length after reset: %o ... %o", @length, u.map(this, 'mode'))
 
   isOpen: (layer) ->
     layer.index >= 0

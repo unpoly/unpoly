@@ -130,7 +130,6 @@ $ = jQuery
     # If we get an { element } options we can derive the { clientX } and { screenY } properties
     # from the element's center coordinates.
     if element = options.element
-      console.debug("--- getting coordinates from", element)
       elementRect = element.getBoundingClientRect()
       defaults.clientX = elementRect.left + (0.5 * elementRect.width)
       defaults.clientY = elementRect.top + (0.5 * elementRect.height)

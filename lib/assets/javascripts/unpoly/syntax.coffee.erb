@@ -378,11 +378,9 @@ up.syntax = do ->
   ###
   clean = (fragment, options = {}) ->
     cleanables = up.fragment.subtree(fragment, '.up-can-clean', u.merge(options, destroying: true))
-    console.debug("Cleaning %o with opts %o, candidates are %o", fragment, options, cleanables)
     u.each cleanables, (cleanable) ->
       if destructors = u.pluckKey(cleanable, 'upDestructors')
         for destructor in destructors
-          console.debug("Calling destructor %o for element %o", destructor, cleanable)
           destructor()
       cleanable.classList.remove('up-can-clean')
 
