@@ -18,6 +18,8 @@
 - Nach dem Austauschen des <body> sollen Overlays wieder attached werden
 - Das Abstürzen eines Destruktors soll andere Destruktoren nicht verhindern
 - Das Abstürzen eines Compilers soll andere Compiler nicht verhindern
+- Finish and merge Refactoring LayerStack to array
+- Publish Layer#sync()
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable

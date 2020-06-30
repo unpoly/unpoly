@@ -40,6 +40,9 @@ class up.Tether
     clearTimeout(@syncTimer)
     @syncTimer = u.task(@sync)
 
+  isDetached: ->
+    e.isDetached(@parent) || e.isDetached(@anchor)
+
   sync: =>
     elementBox = @element.getBoundingClientRect()
     anchorBox = @anchor.getBoundingClientRect()

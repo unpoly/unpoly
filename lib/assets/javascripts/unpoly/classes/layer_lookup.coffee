@@ -39,7 +39,6 @@ class up.LayerLookup
       return [@value]
 
     if u.isNumber(@value)
-      console.debug("isNumber: %o", @value)
       return u.compact [@stack.atIndex(@value)]
 
     if u.isElementish(@value)

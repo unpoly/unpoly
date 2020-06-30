@@ -215,12 +215,8 @@ class up.Layer extends up.Record
   @selector: (part) ->
     throw up.error.notImplemented()
 
-  repair: ->
-    # optional callback
-
   toString: ->
     "#{@mode} layer"
 
   affix: (args...) ->
-    content = @getContentElement()
     e.affix(@getContentElement(), args...)

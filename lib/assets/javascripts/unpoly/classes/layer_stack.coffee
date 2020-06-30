@@ -107,6 +107,10 @@ class up.LayerStack extends up.Class
   getAll: (args...) ->
     new up.LayerLookup(this, args...).all()
 
+  sync: ->
+    for layer in @all
+      layer.sync()
+
   asCurrent: (layer, fn) ->
     try
       @currentOverrides.push(layer)

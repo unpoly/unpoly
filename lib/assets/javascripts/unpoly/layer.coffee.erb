@@ -186,8 +186,7 @@ up.layer = do ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
   up.on 'up:fragment:destroyed', (event) ->
-    for layer in stack.all
-      layer.repair()
+    stack.sync()
 
   up.on 'up:framework:boot', ->
     stack = new up.LayerStack()
@@ -217,12 +216,12 @@ up.layer = do ->
     'overlays'
     'current'
     'front'
+    'sync'
   ], -> stack)
 
   u.delegate(api, [
     'accept'
     'dismiss'
-    'sync'
     'isRoot'
     'isOverlay'
     'on'

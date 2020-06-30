@@ -24,7 +24,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
       # Save the parent so we can emit up:fragment:destroyed on it
       # after removing @element.
       parent = @element.parentNode
-      up.syntax.clean(@element)
+      up.syntax.clean(@element, { @layer })
 
       if up.browser.canJQuery()
         jQuery(@element).remove()

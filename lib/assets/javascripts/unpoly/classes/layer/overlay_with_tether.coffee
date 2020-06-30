@@ -6,6 +6,9 @@ e = up.element
 class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
   openNow: (options) ->
+    unless @origin
+      up.fail('Missing { origin } option')
+
     # We first construct an un-started Tether object so we can
     # ask for its parent element.
     @tether = new up.Tether(
@@ -27,27 +30,34 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     @destroyElement({ animation }).then =>
       @tether.stop()
 
-  # Update the element's position relative to the anchor.
   sync: ->
-    @tether.sync()
-
-  repair: ->
     # Check if a fragment update might have removed us from the DOM tree.
-    if @isDetached()
-      if e.isDetached(@tether.parent) || u.isDetached(@tether.anchor)
+    if @isDetached() || e.isDetached(@tether.parent) || e.isDetached(@tether.anchor)
+      # If our tether parent and anchor is gone, the best thing we can
+      # do now is to dismiss ourselves and have a consistent layer stack.
+      @dismiss(null,
+        animation: false   # no need to animate since we're already hidden
+        preventable: false # since we're cleaning up a broken stack, don't allow user intervention
+      )
+    else
+      # The fragment update might have moved elements around.
+      # This is a good moment to sync our position relative to the anchor.
+      @tether.sync()
+
+  sync: ->
+    # In case some async code calls #sync() on a layer that was already closed,
+    # don't run the code below that might re-attach the overlay.
+    if @isOpen()
+
+      if @isDetached() || @tether.isDetached()
         # If our tether parent and anchor is gone, the best thing we can
         # do now is to dismiss ourselves and have a consistent layer stack.
-        @dismiss(null,
+        @dismiss(
+          null,              # no dismiss value
           animation: false   # no need to animate since we're already hidden
           preventable: false # since we're cleaning up a broken stack, don't allow user intervention
         )
       else
-        # We we're detached but our tether parent and anchor are still in the DOM,
-        # we can re-attach our element and keep the layer stack unchanged.
-        @tether.parent.appendChild(@element)
-
-    # The fragment update might have moved elements around.
-    # In case we could repair ourselves, it's a good moment to sync our position
-    # relative to the anchor.
-    unless @isDetached()
-      @sync()
+        # The fragment update might have moved elements around.
+        # This is a good moment to sync our position relative to the anchor.
+        @tether.sync()

@@ -367,18 +367,23 @@ up.syntax = do ->
       destructors.push(destructor)
 
   ###**
-  Runs any destructor on the given fragment and its descendants.
+  Runs any destructor on the given fragment and its descendants in the same layer.
   Unlike [`up.destroy()`](/up.destroy), this does not emit any events
   and does not remove the element from the DOM.
 
   @function up.syntax.clean
+  @param {Element} fragment
+  @param {up.Layer} options.layer
   @internal
   ###
-  clean = (fragment) ->
-    cleanables = e.subtree(fragment, '.up-can-clean')
+  clean = (fragment, options = {}) ->
+    cleanables = up.fragment.subtree(fragment, '.up-can-clean', u.merge(options, destroying: true))
+    console.debug("Cleaning %o with opts %o, candidates are %o", fragment, options, cleanables)
     u.each cleanables, (cleanable) ->
       if destructors = u.pluckKey(cleanable, 'upDestructors')
-        destructor() for destructor in destructors
+        for destructor in destructors
+          console.debug("Calling destructor %o for element %o", destructor, cleanable)
+          destructor()
       cleanable.classList.remove('up-can-clean')
 
   ###**

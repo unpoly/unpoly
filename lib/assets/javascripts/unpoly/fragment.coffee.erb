@@ -600,7 +600,13 @@ up.fragment = do ->
         layers = up.layer.getAll(options)
         candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
 
-      return u.filter(candidates, isDestroying)
+      unless options.destroying
+        candidates = u.filter(candidates, isDestroying)
+
+      return candidates
+
+  getSubtree = (element, selector, options = {}) ->
+    getAll(element, selector, u.merge(options, subtree: true))
 
 #  ###**
 #  Returns the first element that matches the selector by testing the element itself
@@ -779,6 +785,7 @@ up.fragment = do ->
       getOne(args...)
     get: getOne
     all: getAll
+    subtree: getSubtree
     # closest: closest
     source: source
     setSource: setSource

@@ -101,8 +101,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
               up.fragment.markAsDestroying(step.oldElement)
             afterInsert: =>
               @responseDoc.activateElement(step.newElement, step)
-            beforeDetach: ->
-              up.syntax.clean(step.oldElement)
+            beforeDetach: =>
+              up.syntax.clean(step.oldElement, { @layer })
             afterDetach: =>
               e.remove(step.oldElement) # clean up jQuery data
               up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)

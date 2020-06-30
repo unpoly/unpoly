@@ -35,7 +35,7 @@ history.forward = (args...) -> safeHistory.forward(args...)
 
 window.safeHistory = new class
   constructor: ->
-    @logEnabled = true
+    @logEnabled = false
     @cursor = -1 # we don't know the initial state
     @stateIndexes = []
     @nextIndex = 1000

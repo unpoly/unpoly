@@ -44,7 +44,7 @@ class up.Layer.Root extends up.Layer
   @selector: ->
     'html'
 
-  repair: ->
+  sync: ->
     # In case a fragment update has swapped the <html> element we need to re-apply
     # event handlers to the new <html> element.
     @setupHandlers()

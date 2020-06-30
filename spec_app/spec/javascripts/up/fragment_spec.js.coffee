@@ -3239,7 +3239,6 @@ describe 'up.fragment', ->
         next ->
           expect(destructor).toHaveBeenCalledWith('old text',)
 
-
       it 'allows to pass a new history entry as { history } option', (done) ->
         up.history.config.enabled = true
         $fixture('.element')
@@ -3298,6 +3297,21 @@ describe 'up.fragment', ->
 
         next ->
           expect($element.data('foo')).toBeMissing()
+
+      it 'calls #sync() on all layers in the stack', asyncSpec (next) ->
+        makeLayers(2)
+
+        next ->
+          spyOn(up.layer.all[0], 'sync')
+          spyOn(up.layer.all[1], 'sync')
+
+          element = up.layer.all[1].affix('.element')
+
+          up.destroy(element)
+
+        next ->
+          expect(up.layer.all[0].sync).toHaveBeenCalled()
+          expect(up.layer.all[1].sync).toHaveBeenCalled()
 
     describe 'up.reload', ->
 
