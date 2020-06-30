@@ -12,15 +12,15 @@ describe 'up.OverlayWithViewport', ->
       next.await up.layer.open(content: 'foo', animation: false)
 
       next ->
-        expect(up.layer.all.length).toBe(2)
+        expect(up.layer.stack.length).toBe(2)
 
         # Need to pass { peel: false } since peeling would close the layer
         up.change('.container', content: 'new container text', peel: false)
 
       next ->
-        expect(up.layer.all.length).toBe(2)
-        expect(up.layer.all[1].element).toBeAttached()
-        expect(up.layer.all[1].element.parentElement).toMatchSelector('.container')
+        expect(up.layer.stack.length).toBe(2)
+        expect(up.layer.stack[1].element).toBeAttached()
+        expect(up.layer.stack[1].element.parentElement).toMatchSelector('.container')
 
     it 'does not call destructors', asyncSpec (next) ->
       destructor = jasmine.createSpy('destructor for <overlay-child>')
@@ -29,17 +29,17 @@ describe 'up.OverlayWithViewport', ->
       next.await up.layer.open(content: '<overlay-child></overlay-child>', animation: false)
 
       next ->
-        expect(up.layer.all.length).toBe(2)
+        expect(up.layer.stack.length).toBe(2)
 
         # Need to pass { peel: false } since peeling would close the layer
         up.change('.container', content: 'new container text', peel: false)
 
       next ->
-        expect(up.layer.all.length).toBe(2)
+        expect(up.layer.stack.length).toBe(2)
         expect(destructor).not.toHaveBeenCalled()
 
         next.await up.layer.dismiss(animation: false)
 
       next ->
-        expect(up.layer.all.length).toBe(1)
+        expect(up.layer.stack.length).toBe(1)
         expect(destructor).toHaveBeenCalled()

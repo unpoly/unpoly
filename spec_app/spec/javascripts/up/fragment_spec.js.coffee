@@ -56,7 +56,7 @@ describe 'up.fragment', ->
           expect(up.fragment.all(parent, '.element')).toEqual [child]
 
 
-        it "only matches descendants in root's layer", asyncSpec (next) ->
+        it "only matches descendants in that root's layer", asyncSpec (next) ->
           makeLayers [
             { '.element', content: 'element in root layer' }
             { '.element', content: 'element in modal layer' }
@@ -3302,16 +3302,16 @@ describe 'up.fragment', ->
         makeLayers(2)
 
         next ->
-          spyOn(up.layer.all[0], 'sync')
-          spyOn(up.layer.all[1], 'sync')
+          spyOn(up.layer.stack[0], 'sync')
+          spyOn(up.layer.stack[1], 'sync')
 
-          element = up.layer.all[1].affix('.element')
+          element = up.layer.stack[1].affix('.element')
 
           up.destroy(element)
 
         next ->
-          expect(up.layer.all[0].sync).toHaveBeenCalled()
-          expect(up.layer.all[1].sync).toHaveBeenCalled()
+          expect(up.layer.stack[0].sync).toHaveBeenCalled()
+          expect(up.layer.stack[1].sync).toHaveBeenCalled()
 
     describe 'up.reload', ->
 

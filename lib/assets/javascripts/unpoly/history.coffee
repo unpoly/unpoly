@@ -174,7 +174,7 @@ up.history = do ->
     restoreStateOnPop(state)
 
   emit = (args...) ->
-    historyLayer = u.find(up.layer.allReversed, 'history')
+    historyLayer = u.find(up.layer.stack.reversed(), 'history')
     historyLayer.emit(args...)
 
   ###**

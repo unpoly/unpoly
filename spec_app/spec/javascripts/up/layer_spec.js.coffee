@@ -17,10 +17,10 @@ describe 'up.layer', ->
 
       it 'closes existing overlays over the { currentLayer }', (done) ->
         makeLayers(2).then ->
-          [root, oldOverlay] = up.layer.all
+          [root, oldOverlay] = up.layer.stack
 
           up.layer.open(currentLayer: 'root').then ->
-            [root, newOverlay] = up.layer.all
+            [root, newOverlay] = up.layer.stack
 
             expect(newOverlay).not.toBe(oldOverlay)
             expect(oldOverlay.isOpen()).toBe(false)
@@ -33,7 +33,7 @@ describe 'up.layer', ->
           up.layer.open(target: '.element', url: '/path')
 
           next =>
-            expect(up.layer.all.length).toBe(1)
+            expect(up.layer.stack.length).toBe(1)
             expect(@lastRequest().url).toMatchURL('/path')
 
             @respondWith('<div class="element other-class">element text</div>')
@@ -79,21 +79,21 @@ describe 'up.layer', ->
 
           next ->
             # The layer has not yet opened since the request is still in flight
-            expect(up.layer.all.length).toBe(1)
+            expect(up.layer.stack.length).toBe(1)
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
             # We open another layer while the request is still in flight
             up.layer.open(mode: 'cover')
 
           next =>
-            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.stack.length).toBe(2)
             expect(up.layer.mode).toEqual('cover')
 
             # Now we respond to the request
             @respondWith('<div class="element"></div>')
 
           next ->
-            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.stack.length).toBe(2)
             expect(up.layer.mode).toEqual('modal')
 
       describe 'from a string of HTML', ->
@@ -105,7 +105,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.stack.length).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -121,7 +121,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.stack.length).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -135,7 +135,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.all.length).toBe(2)
+            expect(up.layer.stack.length).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -627,7 +627,7 @@ describe 'up.layer', ->
           makeLayers(2)
 
           next ->
-            [root, overlay] = up.layer.all
+            [root, overlay] = up.layer.stack
 
             expect(up.layer.get(0)).toBe(root)
             expect(up.layer.get(1)).toBe(overlay)
@@ -638,11 +638,13 @@ describe 'up.layer', ->
           next ->
             expect(up.layer.get(2)).toBeMissing()
 
-    describe 'up.layer.all', ->
+    describe 'up.layer.stack', ->
 
-      it 'returns an array of all layers, starting with the root layer, for easy access to the entire stack', (done) ->
+      it 'returns an array-like object of all layers, starting with the root layer, for easy access to the entire stack', (done) ->
         makeLayers(2).then ->
-          expect(up.layer.all).toEqual [up.layer.root, up.layer.front]
+          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.stack[0]).toBe(up.layer.root)
+          expect(up.layer.stack[1]).toBe(up.layer.front)
           done()
 
     describe 'up.layer.getAll()', ->
@@ -879,7 +881,7 @@ describe 'up.layer', ->
         expect(up.layer.current).toBe(up.layer.root)
 
         up.layer.open().then ->
-          expect(up.layer.all.length).toBe(2)
+          expect(up.layer.stack.length).toBe(2)
           expect(up.layer.current).toBe(up.layer.get(1))
           done()
 

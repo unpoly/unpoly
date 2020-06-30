@@ -18,13 +18,13 @@ describe 'up.Layer.OverlayWithTether', ->
       up.on('up:layer:dismissed', onDismissed)
 
       next ->
-        expect(up.layer.all.length).toBe(2)
+        expect(up.layer.stack.length).toBe(2)
 
       next ->
         up.destroy(viewport)
 
       next ->
-        expect(up.layer.all.length).toBe(1)
+        expect(up.layer.stack.length).toBe(1)
         expect(onDismissed).toHaveBeenCalled()
 
     it 'dismisses the overlay when its anchor has been removed', asyncSpec (next) ->
@@ -35,13 +35,13 @@ describe 'up.Layer.OverlayWithTether', ->
       up.on('up:layer:dismissed', onDismissed)
 
       next ->
-        expect(up.layer.all.length).toBe(2)
+        expect(up.layer.stack.length).toBe(2)
 
       next ->
         up.destroy(opener)
 
       next ->
-        expect(up.layer.all.length).toBe(1)
+        expect(up.layer.stack.length).toBe(1)
         expect(onDismissed).toHaveBeenCalled()
 
 #    it 're-attaches the overlay when it has been manually removed from the DOM', asyncSpec (next) ->
@@ -49,14 +49,14 @@ describe 'up.Layer.OverlayWithTether', ->
 #      up.layer.open(origin: opener, mode: 'popup', animation: false)
 #
 #      next ->
-#        expect(up.layer.all.length).toBe(2)
+#        expect(up.layer.stack.length).toBe(2)
 #
 #      next ->
-#        e.remove(up.layer.all[1].element)
+#        e.remove(up.layer.stack[1].element)
 #
 #        # sync() is automatically called after an element was removed from the DOM.
-#        up.layer.all[1].sync()
+#        up.layer.stack[1].sync()
 #
 #      next ->
-#        expect(up.layer.all.length).toBe(1)
-#        expect(up.layer.all[1].isDetached()).toBe(false)
+#        expect(up.layer.stack.length).toBe(1)
+#        expect(up.layer.stack[1].isDetached()).toBe(false)

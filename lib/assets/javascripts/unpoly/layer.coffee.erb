@@ -194,7 +194,7 @@ up.layer = do ->
   # The framework is reset between tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
-  api = {
+  api = u.literal({
     config
     defaultTargets
     open
@@ -204,14 +204,12 @@ up.layer = do ->
     openCallbackAttr
     closeCallbackAttr
     anySelector
-  }
+    get_stack: -> stack
+  })
 
   u.delegate(api, [
     'get'
     'getAll'
-    'all'
-    'allReversed'
-    'push'
     'root'
     'overlays'
     'current'
