@@ -420,7 +420,7 @@ describe 'up.layer', ->
 
           describe 'with { buttonDismissable: false }', ->
 
-            it 'does not asdd button that dimisses the layer', (done) ->
+            it 'does not add a button that dimisses the layer', (done) ->
               up.layer.open(buttonDismissable: false).then (layer) ->
                 expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
                 done()
@@ -551,23 +551,109 @@ describe 'up.layer', ->
 
         describe '{ acceptEvent }', ->
 
-          it 'accepts the layer when an event of the given type was emitted on the layer'
+          it 'accepts the layer when an event of the given type was emitted on the layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, acceptEvent: 'foo' })
 
-          it 'uses the event object as the acceptance value'
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
-          it 'does not accept the layer when the given event was emitted on another layer'
+              up.layer.emit('foo')
 
-          it 'accepts the layer when one of multiple space-separated event types was emitted on the layer'
+            next ->
+              expect(callback).toHaveBeenCalled()
+
+          it 'uses the event object as the acceptance value', asyncSpec (next) ->
+            fooEvent = up.event.build('foo')
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, acceptEvent: 'foo' })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.emit(fooEvent)
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+              expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:accepted')
+              expect(callback.calls.mostRecent().args[0].value).toBe(fooEvent)
+
+          it 'does not accept the layer when the given event was emitted on another layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, acceptEvent: 'foo' })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.root.emit('foo')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+          it 'accepts the layer when one of multiple space-separated event types was emitted on the layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, acceptEvent: 'foo bar baz' })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.emit('bar')
+
+            next ->
+              expect(callback).toHaveBeenCalled()
 
         describe '{ dismissEvent }', ->
 
-          it 'dismisses the layer when an event of the given type was emitted on the layer'
+          it 'dismisses the layer when an event of the given type was emitted on the layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({ onDismissed: callback, dismissEvent: 'foo' })
 
-          it 'uses the event object as the dismissal value'
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
-          it 'does not dismiss the layer when the given event was emitted on another layer'
+              up.layer.emit('foo')
 
-          it 'dismisses the layer when one of multiple space-separated event types was emitted on the layer'
+            next ->
+              expect(callback).toHaveBeenCalled()
+
+          it 'uses the event object as the dismissal value', asyncSpec (next) ->
+            fooEvent = up.event.build('foo')
+            callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({ onDismissed: callback, dismissEvent: 'foo' })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.emit(fooEvent)
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+              expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:dismissed')
+              expect(callback.calls.mostRecent().args[0].value).toBe(fooEvent)
+
+          it 'does not dismiss the layer when the given event was emitted on another layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({ onDismissed: callback, dismissEvent: 'foo' })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.root.emit('foo')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+          it 'dismisses the layer when one of multiple space-separated event types was emitted on the layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({ onDismissed: callback, dismissEvent: 'foo bar baz' })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.emit('bar')
+
+            next ->
+              expect(callback).toHaveBeenCalled()
 
         describe '{ acceptLocation }', ->
 

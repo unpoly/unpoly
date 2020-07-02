@@ -191,7 +191,7 @@ up.layer = do ->
   up.on 'up:framework:boot', ->
     stack = new up.LayerStack()
 
-  # The framework is reset between tests, so also close a currently open tooltip.
+  # The framework is reset betweNen tests, so also close a currently open tooltip.
   up.on 'up:framework:reset', reset
 
   api = u.literal({
