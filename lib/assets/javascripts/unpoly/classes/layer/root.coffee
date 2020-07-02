@@ -48,3 +48,13 @@ class up.Layer.Root extends up.Layer
     # In case a fragment update has swapped the <html> element we need to re-apply
     # event handlers to the new <html> element.
     @setupHandlers()
+
+  accept: ->
+    return @cannotClosePromise()
+
+  dismiss: ->
+    return @cannotClosePromise()
+
+  cannotClosePromise: ->
+    return up.error.failed.async('Cannot close the root layer')
+

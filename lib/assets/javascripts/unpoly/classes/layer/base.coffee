@@ -37,11 +37,11 @@ class up.Layer extends up.Record
   # no-op so users can blindly sync without knowing the current mode
   sync: ->
 
-  # no-op so users can blindly accept even though they might be on the root layer
-  accept: u.asyncNoop
+  accept: ->
+    throw up.error.notImplemented()
 
-  # no-op so users can blindly dismiss even though they might be on the root layer
-  dismiss: u.asyncNoop
+  dismiss: ->
+    throw up.error.notImplemented()
 
   peel: (options) ->
     @stack.peel(this, options)
