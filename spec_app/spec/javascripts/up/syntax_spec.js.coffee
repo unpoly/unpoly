@@ -21,88 +21,132 @@ describe 'up.syntax', ->
         expect(observeElement).not.toHaveBeenCalledWith($otherChild[0])
         expect(observeElement).toHaveBeenCalledWith($child[0])
 
+    describe 'up.$compiler', ->
+
+      it 'registers a compiler that receives the element as a jQuery collection', ->
+        observeElement = jasmine.createSpy()
+        up.$compiler '.element', ($element) -> observeElement($element)
+
+        $element = $fixture('.element')
+        up.hello($element)
+
+        expect(observeElement).toHaveBeenCalled()
+        arg = observeElement.calls.argsFor(0)[0]
+        expect(arg).toBeJQuery()
+        expect(arg).toEqual($element)
+
+    describe 'up.macro', ->
+
+      it 'registers compilers that are run before other compilers', ->
+        traces = []
+        up.compiler '.element', { priority: 10 }, -> traces.push('foo')
+        up.compiler '.element', { priority: -1000 }, -> traces.push('bar')
+        up.macro '.element', -> traces.push('baz')
+        up.hello(fixture('.element'))
+        expect(traces).toEqual ['baz', 'foo' , 'bar']
+
+      it 'allows to macros to have priorities of their own (higher priority is run first)', ->
+        traces = []
+        up.macro '.element', { priority: 1 }, -> traces.push('foo')
+        up.macro '.element', { priority: 2 }, -> traces.push('bar')
+        up.macro '.element', { priority: 0 }, -> traces.push('baz')
+        up.macro '.element', { priority: 3 }, -> traces.push('bam')
+        up.macro '.element', { priority: -1 }, -> traces.push('qux')
+        up.compiler '.element', { priority: 999 }, -> traces.push('ccc')
+        up.hello(fixture('.element'))
+        expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux', 'ccc']
+
+      it 'runs two macros with the same priority in the order in which they were registered', ->
+        traces = []
+        up.macro '.element', { priority: 1 }, -> traces.push('foo')
+        up.macro '.element', { priority: 1 }, -> traces.push('bar')
+        up.hello(fixture('.element'))
+        expect(traces).toEqual ['foo', 'bar']
+
+      it 'allows users to use the built-in [up-expand] from their own macros', ->
+        up.macro '.element', (element) ->
+          element.setAttribute('up-expand', '')
+        $element = $fixture('.element a[href="/foo"][up-target=".target"]')
+        up.hello($element)
+        expect($element.attr('up-target')).toEqual('.target')
+        expect($element.attr('up-href')).toEqual('/foo')
+
+      it 'allows users to use the built-in [up-dash] from their own macros', ->
+        up.macro '.element', (element) ->
+          element.setAttribute('up-dash', '.target')
+        $element = $fixture('a.element[href="/foo"]')
+        up.hello($element)
+        expect($element.attr('up-target')).toEqual('.target')
+        expect($element.attr('up-preload')).toEqual('')
+        expect($element.attr('up-instant')).toEqual('')
+
+    describe 'up.$macro', ->
+
+      it 'registers a macro that receives the element as a jQuery collection', ->
+        observeElement = jasmine.createSpy()
+        up.$macro '.element', ($element) -> observeElement('macro', $element)
+        up.$compiler '.element', ($element) -> observeElement('compiler', $element)
+
+        $element = $fixture('.element')
+        up.hello($element)
+
+        expect(observeElement).toHaveBeenCalled()
+        args = observeElement.calls.argsFor(0)
+        expect(args[0]).toEqual('macro')
+        expect(args[1]).toBeJQuery()
+        expect(args[1]).toEqual($element)
+
+    describe 'up.syntax.data', ->
+
+      it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
+        $element = $fixture('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
+        data = up.syntax.data($element)
+        expect(data).toEqual(foo: 1, bar: 2)
+
+      it 'returns en empty object if the given element has no [up-data] attribute', ->
+        $element = $fixture('.element')
+        data = up.syntax.data($element)
+        expect(data).toEqual({})
+
+    describe 'up.syntax.compile', ->
+      
       it "sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer"
 
-      describe 'destructors', ->
+      describe 'when a compiler throws an error', ->
+        allowGlobalErrors()
 
-        it 'allows compilers to return a function to call when the compiled element is destroyed', asyncSpec (next) ->
-          destructor = jasmine.createSpy('destructor')
-          up.compiler '.child', (element) ->
-            destructor
+        it 'does not prevent other compilers from running', ->
+          compilerBefore = jasmine.createSpy('compiler before')
+          crashingCompiler = -> throw new Error("error from crashing compiler")
+          compilerAfter = jasmine.createSpy('compiler after')
 
-          up.hello(fixture('.container .child'))
+          up.compiler '.element', compilerBefore
+          up.compiler '.element', crashingCompiler
+          up.compiler '.element', compilerAfter
 
-          next =>
-            expect(destructor).not.toHaveBeenCalled()
-            up.destroy('.container')
+          element = fixture('.element')
 
-          next =>
-            expect(destructor).toHaveBeenCalled()
+          hello = -> up.hello(element)
+          expect(hello).toThrowError(/errors while compiling/i)
 
-        it 'allows compilers to return an array of functions to call when the compiled element is destroyed', asyncSpec (next) ->
-          destructor1 = jasmine.createSpy('destructor1')
-          destructor2 = jasmine.createSpy('destructor2')
-          up.compiler '.child', (element) ->
-            [ destructor1, destructor2 ]
+          expect(compilerBefore).toHaveBeenCalled()
+          expect(compilerAfter).toHaveBeenCalled()
 
-          up.hello(fixture('.container .child'))
 
-          next =>
-            expect(destructor1).not.toHaveBeenCalled()
-            expect(destructor2).not.toHaveBeenCalled()
+        it 'reports caught exceptions to window.onerror to support exception notification tools', ->
+          crashingCompiler = -> throw new Error("error from crashing compiler")
+          up.compiler '.element', crashingCompiler
 
-            up.destroy('.container')
+          element = fixture('.element')
 
-          next =>
-            expect(destructor1).toHaveBeenCalled()
-            expect(destructor2).toHaveBeenCalled()
+          hello = -> up.hello(element)
+          expect(hello).toThrowError(/errors while compiling/i)
 
-        it "does not consider a returned array to be a destructor unless it's comprised entirely of functions", asyncSpec (next) ->
-          value1 = jasmine.createSpy('non-destructor')
-          value2 = 'two'
-          up.compiler '.child', (element) ->
-            [ value1, value2 ]
+          expect(@globalErrorHandler).toHaveBeenCalled()
+          event = @globalErrorHandler.calls.mostRecent().args[0]
+          expect(event).toBeEvent('error')
+          expect(event.error).toBeError('error from crashing compiler')
 
-          up.hello(fixture('.container .child'))
-
-          next =>
-            expect(value1).not.toHaveBeenCalled()
-
-            up.destroy('.container')
-
-          next =>
-            expect(value1).not.toHaveBeenCalled()
-
-        it 'runs all destructors if multiple compilers are applied to the same element', asyncSpec (next) ->
-          destructor1 = jasmine.createSpy('destructor1')
-          up.compiler '.one', (element) -> destructor1
-          destructor2 = jasmine.createSpy('destructor2')
-          up.compiler '.two', (element) -> destructor2
-
-          $element = $fixture('.one.two')
-          up.hello($element)
-
-          next =>
-            expect(destructor1).not.toHaveBeenCalled()
-            expect(destructor2).not.toHaveBeenCalled()
-
-            up.destroy($element[0])
-
-          next =>
-            expect(destructor1).toHaveBeenCalled()
-            expect(destructor2).toHaveBeenCalled()
-
-        it 'does not throw an error if both container and child have a destructor, and the container gets destroyed', asyncSpec (next) ->
-          up.compiler '.container', (element) ->
-            return (->)
-
-          up.compiler '.child', (element) ->
-            return (->)
-
-          promise = up.destroy('.container')
-
-          promiseState(promise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
 
       describe 'passing of [up-data]', ->
 
@@ -212,90 +256,107 @@ describe 'up.syntax', ->
           up.compiler '.element', { priority: 1 }, -> traces.push('bar')
           up.hello(fixture('.element'))
           expect(traces).toEqual ['foo', 'bar']
+        
+    describe 'up.syntax.clean', ->
 
-    describe 'up.$compiler', ->
+      it 'allows compilers to return a function to call when the compiled element is cleaned', ->
+        destructor = jasmine.createSpy('destructor')
+        up.compiler '.child', (element) ->
+          destructor
 
-      it 'registers a compiler that receives the element as a jQuery collection', ->
-        observeElement = jasmine.createSpy()
-        up.$compiler '.element', ($element) -> observeElement($element)
+        container = fixture('.container .child')
+        up.hello(container)
+        expect(destructor).not.toHaveBeenCalled()
 
-        $element = $fixture('.element')
-        up.hello($element)
+        up.syntax.clean(container)
+        expect(destructor).toHaveBeenCalled()
 
-        expect(observeElement).toHaveBeenCalled()
-        arg = observeElement.calls.argsFor(0)[0]
-        expect(arg).toBeJQuery()
-        expect(arg).toEqual($element)
+      it 'allows compilers to return an array of functions to call when the compiled element is cleaned', ->
+        destructor1 = jasmine.createSpy('destructor1')
+        destructor2 = jasmine.createSpy('destructor2')
+        up.compiler '.child', (element) ->
+          [ destructor1, destructor2 ]
 
-    describe 'up.macro', ->
+        container = fixture('.container .child')
+        up.hello(container)
 
-      it 'registers compilers that are run before other compilers', ->
-        traces = []
-        up.compiler '.element', { priority: 10 }, -> traces.push('foo')
-        up.compiler '.element', { priority: -1000 }, -> traces.push('bar')
-        up.macro '.element', -> traces.push('baz')
-        up.hello(fixture('.element'))
-        expect(traces).toEqual ['baz', 'foo' , 'bar']
+        up.syntax.clean(container)
 
-      it 'allows to macros to have priorities of their own (higher priority is run first)', ->
-        traces = []
-        up.macro '.element', { priority: 1 }, -> traces.push('foo')
-        up.macro '.element', { priority: 2 }, -> traces.push('bar')
-        up.macro '.element', { priority: 0 }, -> traces.push('baz')
-        up.macro '.element', { priority: 3 }, -> traces.push('bam')
-        up.macro '.element', { priority: -1 }, -> traces.push('qux')
-        up.compiler '.element', { priority: 999 }, -> traces.push('ccc')
-        up.hello(fixture('.element'))
-        expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux', 'ccc']
+        expect(destructor1).toHaveBeenCalled()
+        expect(destructor2).toHaveBeenCalled()
 
-      it 'runs two macros with the same priority in the order in which they were registered', ->
-        traces = []
-        up.macro '.element', { priority: 1 }, -> traces.push('foo')
-        up.macro '.element', { priority: 1 }, -> traces.push('bar')
-        up.hello(fixture('.element'))
-        expect(traces).toEqual ['foo', 'bar']
+      it "does not consider a returned array to be a destructor unless it's comprised entirely of functions", ->
+        value1 = jasmine.createSpy('non-destructor')
+        value2 = 'two'
+        up.compiler '.child', (element) ->
+          [ value1, value2 ]
 
-      it 'allows users to use the built-in [up-expand] from their own macros', ->
-        up.macro '.element', (element) ->
-          element.setAttribute('up-expand', '')
-        $element = $fixture('.element a[href="/foo"][up-target=".target"]')
-        up.hello($element)
-        expect($element.attr('up-target')).toEqual('.target')
-        expect($element.attr('up-href')).toEqual('/foo')
+        container = fixture('.container .child')
+        up.hello(container)
 
-      it 'allows users to use the built-in [up-dash] from their own macros', ->
-        up.macro '.element', (element) ->
-          element.setAttribute('up-dash', '.target')
-        $element = $fixture('a.element[href="/foo"]')
-        up.hello($element)
-        expect($element.attr('up-target')).toEqual('.target')
-        expect($element.attr('up-preload')).toEqual('')
-        expect($element.attr('up-instant')).toEqual('')
+        up.syntax.clean(container)
 
-    describe 'up.$macro', ->
+        expect(value1).not.toHaveBeenCalled()
 
-      it 'registers a macro that receives the element as a jQuery collection', ->
-        observeElement = jasmine.createSpy()
-        up.$macro '.element', ($element) -> observeElement('macro', $element)
-        up.$compiler '.element', ($element) -> observeElement('compiler', $element)
+      it 'runs all destructors if multiple compilers are applied to the same element', ->
+        destructor1 = jasmine.createSpy('destructor1')
+        up.compiler '.one', (element) -> destructor1
+        destructor2 = jasmine.createSpy('destructor2')
+        up.compiler '.two', (element) -> destructor2
 
-        $element = $fixture('.element')
-        up.hello($element)
+        element = fixture('.one.two')
+        up.hello(element)
 
-        expect(observeElement).toHaveBeenCalled()
-        args = observeElement.calls.argsFor(0)
-        expect(args[0]).toEqual('macro')
-        expect(args[1]).toBeJQuery()
-        expect(args[1]).toEqual($element)
+        up.syntax.clean(element)
 
-    describe 'up.syntax.data', ->
+        expect(destructor1).toHaveBeenCalled()
+        expect(destructor2).toHaveBeenCalled()
 
-      it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
-        $element = $fixture('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
-        data = up.syntax.data($element)
-        expect(data).toEqual(foo: 1, bar: 2)
+      it 'does not throw an error if both container and child have a destructor, and the container gets destroyed', ->
+        up.compiler '.container', (element) ->
+          return (->)
 
-      it 'returns en empty object if the given element has no [up-data] attribute', ->
-        $element = $fixture('.element')
-        data = up.syntax.data($element)
-        expect(data).toEqual({})
+        up.compiler '.child', (element) ->
+          return (->)
+
+        container = fixture('.container .child')
+
+        clean = -> up.syntax.clean(container)
+        expect(clean).not.toThrowError()
+
+      describe 'when a destructor throws an error', ->
+        allowGlobalErrors()
+
+        it 'does not prevent other destructors from running', ->
+          destructorBefore = jasmine.createSpy('destructor before')
+          crashingDestructor = -> throw new Error("error from crashing destructor")
+          destructorAfter = jasmine.createSpy('destructor after')
+
+          up.compiler '.element', -> return destructorBefore
+          up.compiler '.element', -> return crashingDestructor
+          up.compiler '.element', -> return destructorAfter
+
+          element = fixture('.element')
+          up.hello(element)
+
+          clean = -> up.syntax.clean(element)
+
+          expect(clean).toThrowError(/errors while destroying/i)
+
+          expect(destructorBefore).toHaveBeenCalled()
+          expect(destructorAfter).toHaveBeenCalled()
+
+        it 'reports caught exceptions to window.onerror to support exception notification tools', ->
+          crashingDestructor = -> throw new Error("error from crashing destructor")
+          up.compiler '.element', -> return crashingDestructor
+
+          element = fixture('.element')
+          up.hello(element)
+
+          clean = -> up.syntax.clean(element)
+          expect(clean).toThrowError(/errors while destroying/i)
+
+          expect(@globalErrorHandler).toHaveBeenCalled()
+          event = @globalErrorHandler.calls.mostRecent().args[0]
+          expect(event).toBeEvent('error')
+          expect(event.error).toBeError('error from crashing destructor')

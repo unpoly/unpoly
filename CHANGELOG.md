@@ -31,6 +31,8 @@ Unreleased
 - parseSelector can parse attribute selectors with prefix, infix, suffix, space-separated, dash-separated
 - up.validate() may now be called with a form element
 - validating emits up:form:validate instead of up:form:submit
+- When a compiler throws an error, other compilers will now run anyway
+- When a destructor throws an error, other destructors will now run anyway
 
 
 0.62.1

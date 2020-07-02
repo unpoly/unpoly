@@ -43,10 +43,16 @@ up.error = do ->
     build("Cannot parse selector: #{selector}")
   )
 
+  emitGlobal = (error) ->
+    # Emit an ErrorEvent on window.onerror for exception tracking tools
+    message = error.message
+    up.emit(window, 'error', { message, error, log: false })
+
   {
     failed,
     aborted,
     invalidSelector,
     notApplicable,
     notImplemented,
+    emitGlobal
   }

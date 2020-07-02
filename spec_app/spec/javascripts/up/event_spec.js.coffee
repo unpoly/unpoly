@@ -210,16 +210,7 @@ describe 'up.event', ->
         expect(register).not.toThrowError()
 
       describe 'when a listener throws an error', ->
-        beforeEach ->
-          # Even though a crashing listener will not actually crash the event dispatching process,
-          # it will still dispatch an ErrorEvent to window.onerror (which is good behavior).
-          # However, Jasmine also observes window.onerror and fails the spec, so we need to disable
-          # this behavior for this purpose.
-          @oldGlobalErrorHandler = window.onerror
-          window.onerror = u.noop
-
-        afterEach ->
-          window.onerror = @oldGlobalErrorHandler
+        allowGlobalErrors()
 
         it 'does not prevent other event listeners from being called', ->
           nativeCallbackBefore = jasmine.createSpy('native callback before')

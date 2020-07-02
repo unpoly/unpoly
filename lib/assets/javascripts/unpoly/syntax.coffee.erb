@@ -340,8 +340,8 @@ up.syntax = do ->
   ###
   compile = (fragment, options) ->
     orderedCompilers = macros.concat(compilers)
-    compileRun = new up.CompilePass(fragment, orderedCompilers, options)
-    compileRun.compile()
+    pass = new up.CompilerPass(fragment, orderedCompilers, options)
+    pass.run()
 
   ###**
   Registers a function to be called when the given element
@@ -377,12 +377,8 @@ up.syntax = do ->
   @internal
   ###
   clean = (fragment, options = {}) ->
-    cleanables = up.fragment.subtree(fragment, '.up-can-clean', u.merge(options, destroying: true))
-    u.each cleanables, (cleanable) ->
-      if destructors = u.pluckKey(cleanable, 'upDestructors')
-        for destructor in destructors
-          destructor()
-      cleanable.classList.remove('up-can-clean')
+    pass = new up.DestructorPass(fragment, options)
+    pass.run()
 
   ###**
   Checks if the given element has an [`up-data`](/up-data) attribute.

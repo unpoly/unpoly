@@ -1,9 +1,7 @@
-#= require ./record
-
 u = up.util
 e = up.element
 
-class up.CompilePass
+class up.CompilerPass
 
   constructor: (@root, @compilers, options = {}) ->
     # Exclude all elements that are descendants of the subtrees we want to keep.
@@ -17,13 +15,18 @@ class up.CompilePass
     # If a caller has already looked up the layer we don't want to look it up again.
     @layer = options.layer || up.layer.get(@root)
 
-  compile: ->
+    @errors = []
+
+  run: ->
     up.puts 'up.hello()', "Compiling fragment %o", @root
     # If we're compiling a fragment in a background layer, we want
     # up.layer.current to resolve to that background layer, not the front layer.
     @layer.asCurrent =>
       for compiler in @compilers
         @runCompiler(compiler)
+
+    if @errors.length
+      throw up.error.failed('Errors while compiling', { @errors })
 
   runCompiler: (compiler) ->
     matches = @select(compiler.selector)
@@ -55,7 +58,7 @@ class up.CompilePass
       data = up.syntax.data(element)
       compileArgs.push(data)
 
-    result = compiler.apply(element, compileArgs)
+    result = @applyCompilerFunction(compiler, element, compileArgs)
 
     if destructorOrDestructors = @destructorPresence(result)
       up.destructor(element, destructorOrDestructors)
@@ -70,10 +73,18 @@ class up.CompilePass
       dataList = u.map(elements, up.syntax.data)
       compileArgs.push(dataList)
 
-    result = compiler.apply(elements, compileArgs)
+    result = @applyCompilerFunction(compiler, elements, compileArgs)
 
     if @destructorPresence(result)
       up.fail('Compilers with { batch: true } cannot return destructors')
+
+  applyCompilerFunction: (compiler, elementOrElements, compileArgs) ->
+    try
+      compiler.apply(elementOrElements, compileArgs)
+    catch error
+      @errors.push(error)
+      up.log.error('up.hello()', 'While compiling %o: %o', elementOrElements, error)
+      up.error.emitGlobal(error)
 
   destructorPresence: (result) ->
     # Check if the result value looks like a destructor to filter out
