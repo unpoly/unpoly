@@ -18,8 +18,8 @@
 - Nach dem Austauschen des <body> sollen Overlays wieder attached werden
 - Das Abstürzen eines Destruktors soll andere Destruktoren nicht verhindern
 - Das Abstürzen eines Compilers soll andere Compiler nicht verhindern
-- Finish and merge Refactoring LayerStack to array
 - Publish Layer#sync()
+- Clicking on an empty area on the spec app show error: integration_test-537f786978a334bcb7b55fa666feef2502ab99b4f4f3121c40f5a0d9248b443e.js:19228 Uncaught TypeError: Failed to execute 'elementFromPoint' on 'Document': The provided double value is non-finite.
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
