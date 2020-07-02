@@ -209,6 +209,44 @@ describe 'up.event', ->
         unregister()
         expect(register).not.toThrowError()
 
+      describe 'when a listener throws an error', ->
+        beforeEach ->
+          # Even though a crashing listener will not actually crash the event dispatching process,
+          # it will still dispatch an ErrorEvent to window.onerror (which is good behavior).
+          # However, Jasmine also observes window.onerror and fails the spec, so we need to disable
+          # this behavior for this purpose.
+          @oldGlobalErrorHandler = window.onerror
+          window.onerror = u.noop
+
+        afterEach ->
+          window.onerror = @oldGlobalErrorHandler
+
+        it 'does not prevent other event listeners from being called', ->
+          nativeCallbackBefore = jasmine.createSpy('native callback before')
+          upCallbackBefore = jasmine.createSpy('Unpoly callback before')
+          crashingUpCallback = -> throw new Error('error from crashing Unpoly callback')
+          upCallbackAfter = jasmine.createSpy('Unpoly callback after')
+          nativeCallbackAfter = jasmine.createSpy('native callback after')
+
+          document.addEventListener('foo', nativeCallbackBefore)
+          up.on('foo', upCallbackBefore)
+          up.on('foo', crashingUpCallback)
+          up.on('foo', upCallbackAfter)
+          document.addEventListener('foo', nativeCallbackAfter)
+
+          emit = -> up.emit('foo')
+
+          expect(emit).not.toThrowError()
+
+          expect(nativeCallbackBefore).toHaveBeenCalled()
+          expect(upCallbackBefore).toHaveBeenCalled()
+          expect(upCallbackAfter).toHaveBeenCalled()
+          expect(nativeCallbackAfter).toHaveBeenCalled()
+
+          # Since we're not using up.on we need to clean up manually
+          document.removeEventListener('foo', nativeCallbackBefore)
+          document.removeEventListener('foo', nativeCallbackAfter)
+
       describe 'passing of [up-data]', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->
