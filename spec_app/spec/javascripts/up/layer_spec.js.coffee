@@ -697,15 +697,26 @@ describe 'up.layer', ->
 
       describe 'for an element', ->
 
-        it "returns the element's layer"
+        it "returns the element's layer", (done) ->
+          makeLayers(3).then ->
+            expect(up.layer.get(up.layer.get(1).element)).toBe up.layer.get(1)
+            done()
 
       describe 'for an up.Layer', ->
 
-        it 'returns the given layer'
+        it 'returns the given layer', (done) ->
+          makeLayers(3).then ->
+            layer = up.layer.get(1)
+            expect(layer).toEqual jasmine.any(up.Layer)
+            expect(up.layer.get(layer)).toBe(layer)
+            done()
 
       describe 'for a layer name like "parent"', ->
 
-        it 'returns the layer matching that name'
+        it 'returns the layer matching that name', (done) ->
+          makeLayers(2).then ->
+            expect(up.layer.get('parent')).toBe(up.layer.root)
+            done()
 
       describe 'for a number', ->
 
@@ -759,7 +770,9 @@ describe 'up.layer', ->
 
         it 'returns an array of the given up.Layer', (done) ->
           makeLayers(3).then ->
-            expect(up.layer.getAll(up.layer.get(1))).toEqual [up.layer.get(1)]
+            layer = up.layer.get(1)
+            expect(layer).toEqual jasmine.any(up.Layer)
+            expect(up.layer.getAll(layer)).toEqual [layer]
             done()
 
       describe 'for "new"', ->
