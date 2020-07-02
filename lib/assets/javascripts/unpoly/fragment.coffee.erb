@@ -626,10 +626,10 @@ up.fragment = do ->
 #    Returns `null` or `undefined` if no element matches in the same layer.
 #  @experimental
 #  ###
-#  closest = (element, selector) ->
-#    match = e.closest(element, selector)
-#    if match && up.layer.get(match) == up.layer.get(element)
-#      return match
+  closest = (element, selector) ->
+    match = e.closest(element, selector)
+    if match && up.layer.get(match) == up.layer.get(element)
+      return match
 
   ###**
   Destroys the given element or selector.
@@ -786,7 +786,7 @@ up.fragment = do ->
     get: getOne
     all: getAll
     subtree: getSubtree
-    # closest: closest
+    closest: closest
     source: source
     setSource: setSource
     hello: hello
