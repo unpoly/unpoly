@@ -93,7 +93,7 @@ class up.LayerStack extends Array
   reversed: ->
     # u.reverse() will use u.copy() to reverse a copy,
     # but u.copy() cannot copy instances of this class.
-    copy = Array.prototype.slice.call(this)
+    copy = u.copyArrayLike(this)
     return copy.reverse()
 
   u.getter @prototype, 'root', ->

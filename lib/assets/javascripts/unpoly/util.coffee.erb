@@ -576,7 +576,7 @@ up.util = do ->
     if isArray(value)
       value
     else
-      Array.prototype.slice.call(value)
+      copyArrayLike(value)
 
   ###***
   Returns whether the given argument is an array-like value.
@@ -668,7 +668,7 @@ up.util = do ->
     if isObject(value) && value[copy.key]
       value = value[copy.key]()
     else if isList(value)
-      value = Array.prototype.slice.call(value)
+      value = copyArrayLike(value)
       # copied = true
     else if isOptions(value)
       value = assign({}, value)
@@ -677,6 +677,9 @@ up.util = do ->
 #      for k, v of value
 #        value[k] = copy(v, true)
     value
+
+  copyArrayLike = (arrayLike) ->
+    Array.prototype.slice.call(arrayLike)
 
   ###**
   This property contains the name of a method that user-defined classes
@@ -1740,6 +1743,7 @@ up.util = do ->
   assign: assign
   assignPolyfill: assignPolyfill
   copy: copy
+  copyArrayLike: copyArrayLike
 #  deepCopy: deepCopy
   merge: merge
   mergeDefined: mergeDefined
