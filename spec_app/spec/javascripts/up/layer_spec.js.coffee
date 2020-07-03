@@ -662,6 +662,7 @@ describe 'up.layer', ->
           it 'accepts the layer when the layer has reached the given location pattern'
           
           it 'parses a location pattern of named placeholders to produce an acceptance value'
+          # possible include a key { location }?
 
           it 'accepts the layer when the layer has reached the given location but has no history'
 

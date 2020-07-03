@@ -1,3 +1,5 @@
+u = up.util
+
 describe 'up.URLPattern', ->
 
   describe '#matches', ->
@@ -33,18 +35,40 @@ describe 'up.URLPattern', ->
 
   describe '#recognize', ->
 
+    it 'returns an { url } property with the matching URL in a space-separated list of URLs', ->
+      pattern = new up.URLPattern('/foo /bar /baz')
+      url = '/bar'
+      expect(pattern.recognize(url)).toEqual {
+        url: u.normalizeURL(url)
+      }
+
     it 'returns an object mapping named segments to their value', ->
       pattern = new up.URLPattern('/foo/:one/:two/baz')
-      expect(pattern.recognize('/foo/bar/bam/baz')).toEqual { one: 'bar', two: 'bam' }
+      url = '/foo/bar/bam/baz'
+      expect(pattern.recognize(url)).toEqual {
+        url: u.normalizeURL(url)
+        one: 'bar',
+        two: 'bam'
+      }
 
     it 'returns an object if two space-separated URLs have the same named segment', ->
       pattern = new up.URLPattern('/foo/:one /bar/:one')
-      expect(pattern.recognize('/foo/bar')).toEqual { one: 'bar' }
+      url = '/foo/bar'
+      expect(pattern.recognize(url)).toEqual {
+        url: u.normalizeURL(url),
+        one: 'bar'
+      }
 
     it 'returns a missing value if the given URL does not match the pattern', ->
       pattern = new up.URLPattern('/foo')
-      expect(pattern.recognize('/bar')).toBeMissing()
+      url = '/bar'
+      expect(pattern.recognize(url)).toBeMissing()
 
     it 'matches query params', ->
       pattern = new up.URLPattern('/search?query=:query&page=:page')
-      expect(pattern.recognize('/search?query=hello&page=3')).toEqual { query: 'hello', page: '3' }
+      url = '/search?query=hello&page=3'
+      expect(pattern.recognize(url)).toEqual {
+        url: u.normalizeURL(url),
+        query: 'hello',
+        page: '3'
+      }
