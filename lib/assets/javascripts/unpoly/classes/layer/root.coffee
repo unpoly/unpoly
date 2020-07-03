@@ -58,3 +58,5 @@ class up.Layer.Root extends up.Layer
   cannotClosePromise: ->
     return up.error.failed.async('Cannot close the root layer')
 
+  reset: ->
+    u.assign(this, @defaults())

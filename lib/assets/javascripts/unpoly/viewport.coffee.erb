@@ -224,17 +224,15 @@ up.viewport = do ->
 
     # Now that we have looked up the element with an option like { layer: 'any' },
     # the only layer relevant from here on is the element's layer.
-    options.layer = up.layer.get(element)
+    unless options.layer = up.layer.get(element)
+      return up.failed.async('Cannot reveal a detached element')
 
     motion = new up.RevealMotion(element, options)
 
     promise = Promise.resolve()
 
     if options.peel
-      promise = promise.then ->
-        if !options.layer
-          debugger
-        options.layer.peel()
+      promise = promise.then -> options.layer.peel()
     promise = promise.then ->
       scrollingController.startMotion(element, motion, options)
     return promise
@@ -508,7 +506,7 @@ up.viewport = do ->
   ###
   saveScroll = (options = {}) ->
     layer = up.layer.get(options)
-    if url = options.url || layer.location
+    if url = (options.url || layer.location)
       tops = options.tops ? scrollTops(options)
       layer.lastScrollTops.set(url, tops)
 
@@ -529,7 +527,10 @@ up.viewport = do ->
   ###
   restoreScroll = (options = {}) ->
     layer = up.layer.get(options)
-    url = layer.location
+
+    unless url = layer.location
+      return Promise.resolve()
+
     viewports = if options.around then getAround(options.around, options) else getAll(options)
     scrollTopsForURL = options.scrollTops || layer.lastScrollTops.get(url) || {}
 

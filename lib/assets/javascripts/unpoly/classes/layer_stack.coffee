@@ -5,15 +5,8 @@ class up.LayerStack extends Array
 
   constructor: ->
     super()
-    @initialize()
-
-  initialize: ->
     @currentOverrides = []
-    @clear()
     @push(@buildRoot())
-
-  clear: ->
-    @splice(0, @length)
 
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
@@ -39,7 +32,8 @@ class up.LayerStack extends Array
 
   reset: ->
     @peel(@root, animation: false)
-    @initialize()
+    @currentOverrides = []
+    @root.reset()
 
   isOpen: (layer) ->
     layer.index >= 0
@@ -112,4 +106,3 @@ class up.LayerStack extends Array
 
   u.getter @prototype, 'front', ->
     u.last(@)
-

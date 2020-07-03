@@ -105,6 +105,9 @@ up.feedback = do ->
     return unless links.length
 
     layer = options.layer || up.layer.get(links[0])
+
+    # A layer might not have a { location } property, e.g. if it was created
+    # from local { content }. In this case we do not set .up-current.
     if layerLocation = layer.feedbackLocation
       u.each links, (link) ->
         isCurrent = linkURLs(link).isCurrent(layerLocation)

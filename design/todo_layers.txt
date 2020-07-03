@@ -8,6 +8,11 @@
 - UpdateLayer/OpenLayer must now blow up if the user layer is dismissed in between
 - UpdateLayer: handleLayerChangeRequests does up.layer.dismiss(), but doesn't set up.layer.current
 - saveScroll: options.url should be renamed to options.location
+- ganz viel zeug bricht wenn layer.location nicht gesetzt ist, e.g. bei layern die über { content } geöffnet werden
+  - test that restoreScroll() doesn't break
+  - test that saveScroll() doesn't break
+  - test that feedback highlighting doesn't break
+
 
 
 - Release as 1.0.0 or 2.0.0

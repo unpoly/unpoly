@@ -678,7 +678,7 @@ describe 'up.link', ->
           up.history.config.enabled = true
 
           $fixture('.target')
-          $link = $fixture('a[href="/path"][up-target=".target"]')
+          $link = $fixture('a[href="/new-path"][up-target=".target"]')
           Trigger.clickSequence($link)
 
           next =>
@@ -686,7 +686,7 @@ describe 'up.link', ->
 
           next.after 1000, =>
             expect($('.target')).toHaveText('new text')
-            expect(location.pathname).toEqual('/path')
+            expect(location.pathname).toEqual('/new-path')
 
         it 'respects a X-Up-Location header that the server sends in case of a redirect', asyncSpec (next) ->
           up.history.config.enabled = true

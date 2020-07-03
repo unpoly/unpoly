@@ -210,7 +210,7 @@ class up.Layer extends up.Record
     history
 
   hasLiveHistory: ->
-    up.history.config.enabled && @hasHistory() && @isFront()
+    @hasHistory() && @isFront() && (up.history.config.enabled || @isRoot())
 
   selector: (part) ->
     @constructor.selector(part)
