@@ -536,7 +536,7 @@ describe 'up.layer', ->
               expect(callback).toHaveBeenCalled()
               expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:accepted', value: 'acceptance value')
 
-          it 'does not run the given callbcak when the layer is dismissed', asyncSpec (next) ->
+          it 'does not run the given callback when the layer is dismissed', asyncSpec (next) ->
             callback = jasmine.createSpy('onAccepted callback')
 
             up.layer.open({ onAccepted: callback })
@@ -657,7 +657,29 @@ describe 'up.layer', ->
 
         describe '{ acceptLocation }', ->
 
-          it 'accepts the layer when the layer has reached the given location'
+          it 'accepts the layer when the layer has reached the given location', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content'
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: '/acceptable-location'
+            })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.change('.overlay-content', content: 'other content', location: '/other-location')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.change('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+
+            next ->
+              value = { location: u.normalizeURL('/acceptable-location') }
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
           it 'accepts the layer when the layer has reached the given location pattern'
           
@@ -666,6 +688,8 @@ describe 'up.layer', ->
           it 'accepts the layer when the layer has reached the given location but has no history'
 
           it 'does not accept the layer when another layer has reached the given location'
+
+          it 'immediately accepts a layer that was opened at the given location'
 
         describe '{ dismissLocation }', ->
 
@@ -679,6 +703,8 @@ describe 'up.layer', ->
 
           it 'does not dismiss the layer when another layer has reached the given location'
 
+          it 'immediately dismisses a layer that was opened at the given location'
+
     describe 'up.layer.dismiss()', ->
 
       it 'closes the current layer', ->
@@ -686,12 +712,16 @@ describe 'up.layer', ->
         up.layer.dismiss(option: 'value')
         expect(dismissSpy).toHaveBeenCalledWith(option: 'value')
 
+      it 'manipulates the layer stack synchronously'
+
     describe 'up.layer.accept()', ->
 
       it 'closes the current layer', ->
         acceptSpy = spyOn(up.layer.current, 'accept')
         up.layer.accept(option: 'value')
         expect(acceptSpy).toHaveBeenCalledWith(option: 'value')
+
+      it 'manipulates the layer stack synchronously'
 
     describe 'up.layer.get()', ->
 

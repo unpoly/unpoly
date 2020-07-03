@@ -4,6 +4,11 @@
 - Write remaining tests
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - Publish Layer#sync()
+- Currently onAccepted and onDismissed get an accepted/dismissed event. I often expected this to be the resolution value instead.
+- UpdateLayer/OpenLayer must now blow up if the user layer is dismissed in between
+- UpdateLayer: handleLayerChangeRequests does up.layer.dismiss(), but doesn't set up.layer.current
+- saveScroll: options.url should be renamed to options.location
+
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
@@ -13,6 +18,31 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Edge Cases for concurrent Layer Changes:
+    - up.change()
+      - das neue fragment sieht einen server-sent event
+      - ein server-sent event schließt das overlay
+        ODER der server schließt das overlay
+        ODER die neue location is eine acceptLocation
+        => keine exception
+        => change promise rejected
+        => das overlay ist zu
+    - up.layer.open()
+      - das neue fragment sieht einen server-sent event
+      - ich mache es direkt auf einer acceptLocation auf
+        ODER der server-sent event schließt das overlay
+        ODER der server schließt das overlay
+        => keine exception
+        => open promise rejected
+        => der layer geht direkt wieder zu
+     - up.layer.dismiss() / .accept()
+       - ein layer wird geschlossen während er sich öffnet
+         => der layer geht ohne animation wieder zu
+         => die open promise rejected
+      - ein geschlossener layer wird nochmal geschlossen
+        => der zweite close aborted
+        => der erste close geht zu ende
+  - Test that when we update a non-front layer, and the server sends `X-Up-Events: [{ layer: 'current', type: 'foo'}]`, the events are emitted on the updating layer
   - Context
     - Test that { context } is per-layer
     - Test that { context } is transmitted to server

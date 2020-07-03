@@ -37,41 +37,75 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @content
       throw @notApplicable("Could not find element \"#{@target}\" in server response")
 
-    unless @currentLayer.isOpen()
+    if @currentLayer.isClosed()
       throw @notApplicable('Parent layer was closed')
 
     up.puts('up.change()', "Will open element \"#{@target}\" in new layer")
 
     @layer = up.layer.build(@options)
 
-    unless @emitOpenEvent().defaultPrevented
-      # Make sure that the currentLayer layer doesn't already have a child layer.
-      # Note that this cannot be prevented with { peel: false }!
-      # We don't wait for the peeling to finish.
-      @currentLayer.peel()
+    if @emitOpenEvent().defaultPrevented
+      throw up.error.aborted('Open event was prevented')
 
-      # If the server has provided an updated { context } object,
-      # we set the layer's context to that object.
-      @layer.updateContext(@options)
+    # Make sure that the currentLayer layer doesn't already have a child layer.
+    # Note that this cannot be prevented with { peel: false }!
+    # We don't wait for the peeling to finish.
+    @currentLayer.peel()
 
-      # Change the stack sync. Don't wait for peeling to finish.
-      up.layer.stack.push(@layer)
+    # If the server has provided an updated { context } object,
+    # we set the layer's context to that object.
+    @layer.updateContext(@options)
 
-      promise = @layer.openNow({ @content, @onContentAttached })
+    # Change the stack sync. Don't wait for peeling to finish.
+    up.layer.stack.push(@layer)
 
-      promise = promise.then =>
-        @handleFocus()
+    @layer.createElements(@content)
+    @layer.setupHandlers()
 
-        @emitOpenedEvent()
+    # Change history before compilation, so new fragments see the new location.
+    @handleHistory() # location event soll hier nicht mehr automatuisch fliegen
 
-        # Don't delay `promise` until layer change requests have finished closing.
-        @handleLayerChangeRequests()
+    # Remember where the content was loaded from, to support up.fragment.reload().
+    up.fragment.setSource(@content, @source)
 
-        # Resolve the promise with the layer instance, so callers can do:
-        # layer = await up.layer.open(...)
-        return @layer
-    else
-      return up.error.aborted.async()
+    # Compile the new content and emit up:fragment:inserted.
+    @responseDoc.activateElement(@content, { @layer, @origin })
+
+    # Emit up:layer:opening to indicate that the open event was not prevented
+    # and the the opening animation is about to start. This is a good time for
+    # listeners to manipulate the overlay optics.
+    # In case a listener dimisses the opening layer, abort the process.
+    @emitOpeningEvent()
+    @abortWhenLayerClosed()
+
+    # The server may trigger multiple signals that may cause the layer to close:
+    #
+    # - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
+    # - Emit an event with X-Up-Events, to which a listener may close the layer
+    # - Update the location to a URL for which { acceptLocation } or { dismissLocation }
+    #   will close the layer.
+    #
+    # Note that @handleLayerChangeRequests() also calls @abortWhenLayerClosed()
+    # if any of these options cause the layer to close.
+    @handleLayerChangeRequests()
+
+    return @layer.startOpenAnimation().then =>
+      # In case an async operation closed the layer while the opening animation
+      # was running, abort the process.
+      @abortWhenLayerClosed()
+
+      # A11Y: Place the focus on the overlay element and setup a focus circle.
+      @handleFocus()
+
+      # Emit up:layer:opened to indicate that the layer was opened successfully.
+      # In case a listener dimisses the opening layer, reject the promise
+      # returned by up.layer.open().
+      @emitOpenedEvent()
+      @abortWhenLayerClosed()
+
+      # Resolve the promise with the layer instance, so callers can do:
+      # layer = await up.layer.open(...)
+      return @layer
 
   handleHistory: ->
     @layer.parent.saveHistory()
@@ -106,15 +140,6 @@ class up.Change.OpenLayer extends up.Change.Addition
       origin: @origin
       log: true
     )
-
-  onContentAttached: =>
-    @handleHistory()
-    up.fragment.setSource(@content, @source)
-
-    # Compile the new content and emit up:fragment:inserted.
-    @responseDoc.activateElement(@content, { @layer, @origin })
-
-    @emitOpeningEvent()
 
   emitOpenEvent: ->
     # The initial up:layer:open event is emitted on the document, since the layer

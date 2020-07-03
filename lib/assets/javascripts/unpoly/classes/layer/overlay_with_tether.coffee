@@ -5,7 +5,7 @@ e = up.element
 
 class up.Layer.OverlayWithTether extends up.Layer.Overlay
 
-  openNow: (options) ->
+  createElements: (content) ->
     unless @origin
       up.fail('Missing { origin } option')
 
@@ -17,18 +17,11 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
       position: @position
     )
     @createElement(@tether.parent)
-    # @createBoxElement(@element)
-    @createContentElement(@element)
-    @setInnerContent(@contentElement, options)
-    @setupHandlers()
+    @createContentElement(@element, content)
     @tether.start(@element)
-    return @startOpenAnimation(options)
 
-  closeNow: (options) ->
-    @teardownHandlers()
-    animation = => @startCloseAnimation(options)
-    @destroyElement({ animation }).then =>
-      @tether.stop()
+  onElementsDestroyed: ->
+    @tether.stop()
 
   sync: ->
     # Check if a fragment update might have removed us from the DOM tree.

@@ -52,6 +52,15 @@ class up.Layer.Overlay extends up.Layer
       escapeDismissable: options.dismissable
       outsideDismissable: options.dismissable
 
+  constructor: (options) ->
+    super(options)
+
+    if @acceptLocation
+      @acceptLocation = new up.URLPattern(@acceptLocation)
+
+    if @dismissLocation
+      @dismissLocation = new up.URLPattern(@dismissLocation)
+
   callback: (name) ->
     if fn = this[name]
       return fn.bind(this)
@@ -98,13 +107,9 @@ class up.Layer.Overlay extends up.Layer
   createBoxElement: (parentElement) ->
     @boxElement = @affixPart(parentElement, 'box')
 
-  createContentElement: (parentElement) ->
+  createContentElement: (parentElement, content) ->
     @contentElement = @affixPart(parentElement, 'content')
-
-  setInnerContent: (parentElement, options) ->
-    content = options.content
-    parentElement.appendChild(content)
-    options.onContentAttached?({ layer: this, content })
+    @contentElement.appendChild(content)
 
   createDismissElement: (parentElement) ->
     @dismissElement = @affixPart(parentElement, 'dismiss',
@@ -168,10 +173,6 @@ class up.Layer.Overlay extends up.Layer
       up.legacy.deprecated('[up-close]', '[up-dismiss]')
       @dismiss(value, closeOptions)
 
-    # let { userId } = await up.layer.open({ acceptLocation: '/users/:userId' })
-    @registerLocationCloser(@acceptLocation, @accept)
-    @registerLocationCloser(@denyLocation, @accept)
-
     # let { userId } = await up.layer.open({ acceptEvent: 'user:show' })
     @registerEventCloser(@acceptEvent, @accept)
     @registerEventCloser(@dismissEvent, @dismiss)
@@ -215,16 +216,47 @@ class up.Layer.Overlay extends up.Layer
       event.preventDefault()
       closeFn.call(this, event)
 
-  registerLocationCloser: (urlPattern, closeFn) ->
-    return unless urlPattern
-    urlPattern = new up.URLPattern(urlPattern)
-    @on 'up:layer:location:changed', selector, (event) =>
-      location = event.location
-      if resolution = urlPattern.recognize(location)
-        # resolution now contains named capture groups, e.g. when
-        # '/decks/:deckId/cards/:cardId' is matched against
-        # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
-        closeFn.call(this, u.merge(resolution, { location }))
+#  registerLocationCloser: (urlPattern, closeFn) ->
+#    return unless urlPattern
+#    urlPattern = new up.URLPattern(urlPattern)
+#    @on 'up:layer:location:changed', (event) =>
+#      console.debug("--- Received location:changed")
+#      location = event.location
+#      if resolution = urlPattern.recognize(location)
+#        # resolution now contains named capture groups, e.g. when
+#        # '/decks/:deckId/cards/:cardId' is matched against
+#        # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
+#        closeFn.call(this, u.merge(resolution, { location }))
+#
+#  acceptValueFromLocation: ->
+#    @closeValueFromLocation(@acceptLocation)
+#
+#  dismissValueFromLocation: ->
+#    @closeValueFromLocation(@dismissLocation)
+#
+#  closeValueFromLocation: (urlPattern) ->
+#    return unless urlPattern
+#
+#    location = @location
+#    if resolution = urlPattern.recognize(location)
+#      # resolution now contains named capture groups, e.g. when
+#      # '/decks/:deckId/cards/:cardId' is matched against
+#      # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
+#      return u.merge(resolution, { location })
+
+  tryAcceptForLocation: ->
+    @tryCloseForLocation(@acceptLocation, @accept)
+
+  tryDismissForLocation: ->
+    @tryCloseForLocation(@dismissLocation, @dismiss)
+
+  tryCloseForLocation: (urlPattern, closeFn) ->
+    if urlPattern && (location = @location) && (resolution = urlPattern.recognize(location))
+      # resolution now contains named capture groups, e.g. when
+      # '/decks/:deckId/cards/:cardId' is matched against
+      # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
+      closeValue = u.merge(resolution, { location })
+      closeFn.call(this, closeValue)
 
   teardownHandlers: ->
     super()
@@ -232,16 +264,28 @@ class up.Layer.Overlay extends up.Layer
     @unbindEscapePressed?()
     @overlayFocus.teardown()
 
-  destroyElement: (options) ->
-    up.destroy(@element, u.merge(options, log: false))
+  destroyElements: (options) ->
+    # Do not re-use options, or we would call startCloseAnimation(anination: startCloseAnimation)!
+    destroyOptions = u.merge(options,
+      animation: => @startCloseAnimation(options)
+      log: false
+    )
+
+    up.destroy(@element, destroyOptions).then =>
+      @onElementsDestroyed()
+
+  onElementsDestroyed: ->
+    # optional callback
 
   startAnimation: (options = {}) ->
-    whenBoxClosed = up.animate(@getBoxElement(), options.boxAnimation, options)
-    if @backdrop && !up.motion.isNone(options.frameAnimation)
-      whenBackdropClosed = up.animate(@backdropElement, options.backdropAnimation, options)
+    boxDone = up.animate(@getBoxElement(), options.boxAnimation, options)
+
+    # If we don't animate the box, we don't animate the backdrop
+    if @backdrop && !up.motion.isNone(options.boxAnimation)
+      backdropDone = up.animate(@backdropElement, options.backdropAnimation, options)
 
     # Promise.all() ignores non-Thenables in the given array
-    return Promise.all([whenBoxClosed, whenBackdropClosed])
+    return Promise.all([boxDone, backdropDone])
 
   startOpenAnimation: (options = {}) ->
     @startAnimation(
@@ -249,11 +293,14 @@ class up.Layer.Overlay extends up.Layer
       backdropAnimation: 'fade-in',
       easing: options.easing || @openEasing,
       duration: options.duration || @openDuration,
-    )
+    ).then =>
+      @wasEverVisible = true
 
   startCloseAnimation: (options = {}) ->
+    boxAnimation = @wasEverVisible && (options.animation ? @evalOption(@closeAnimation))
+
     @startAnimation(
-      boxAnimation: options.animation ? @evalOption(@closeAnimation),
+      boxAnimation: boxAnimation,
       backdropAnimation: 'fade-out',
       easing: options.easing || @closeEasing,
       duration: options.duration || @closeDuration,

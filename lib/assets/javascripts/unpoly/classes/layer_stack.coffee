@@ -44,6 +44,9 @@ class up.LayerStack extends Array
   isOpen: (layer) ->
     layer.index >= 0
 
+  isClosed: (layer) ->
+    !@isOpen(layer)
+
   parentOf: (layer) ->
     @[layer.index - 1]
 

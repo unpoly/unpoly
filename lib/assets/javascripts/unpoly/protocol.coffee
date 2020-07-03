@@ -215,7 +215,7 @@ up.protocol = do ->
     extractHeader(xhr, config.acceptLayerHeader, JSON.parse)
 
   dismissLayerFromXHR = (xhr) ->
-    # Even if acceptance has no value, the server will send
+    # Even if dismissal has no value, the server will send
     # X-Up-Dismiss-Layer: null
     extractHeader(xhr, config.dismissLayerHeader, JSON.parse)
 

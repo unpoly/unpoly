@@ -24,35 +24,34 @@ class up.Change.CloseLayer extends up.Change.Removal
     # Abort all pending requests targeting the layer we're now closing.
     up.proxy.abort (request) => request.layer == @layer
 
-    if !@emitCloseEvent().defaultPrevented || !@preventable
-      # Remember the parent, which will no longer be accessible once we
-      # remove @layer from the @stack.
-      parent = @layer.parent
+    if @emitCloseEvent().defaultPrevented && @preventable
+      throw up.error.aborted('Close event was prevented')
 
-      # Close any child-layers we might have.
-      # We don't wait for peeling to finish, since changes that affect the
-      # layer stack should happen sync:
-      @layer.peel()
+    # Remember the parent, which will no longer be accessible once we
+    # remove @layer from the @stack.
+    parent = @layer.parent
 
-      # Remove ourselves from the layer stack.
-      @layer.stack.remove(@layer)
+    # Close any child-layers we might have.
+    # We don't wait for peeling to finish, since changes that affect the
+    # layer stack should happen sync:
+    @layer.peel()
 
-      # Restore the history of the parent layer we just uncovered.
-      parent.restoreHistory()
+    # Remove ourselves from the layer stack.
+    @layer.stack.remove(@layer)
 
-      # Emit the "closing" event to indicate that the "close" event was not
-      # prevented and the closing animation is about to start.
-      @emitClosingEvent()
+    # Restore the history of the parent layer we just uncovered.
+    parent.restoreHistory()
 
-      @handleFocus(parent)
+    # Emit the "closing" event to indicate that the "close" event was not
+    # prevented and the closing animation is about to start.
+    @emitClosingEvent()
 
-      promise =  @layer.closeNow(@options)
-      promise = promise.then =>
-        @emitClosedEvent(parent)
+    @handleFocus(parent)
 
-      return promise
-    else
-      return up.error.aborted.async()
+    @layer.teardownHandlers()
+
+    return @layer.destroyElements(@options).then =>
+      @emitClosedEvent(parent)
 
   emitCloseEvent: ->
     return @layer.emit(

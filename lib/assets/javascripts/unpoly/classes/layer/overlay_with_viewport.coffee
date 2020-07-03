@@ -20,23 +20,16 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
   @param {Element} options.content
   @param {Function} options.onContentAttached
   ###
-  openNow: (options) ->
+  createElements: (content) ->
+    @shiftBody()
     @createElement(@constructor.getParentElement())
     @createBackdropElement(@element) if @backdrop
     @createViewportElement(@element)
     @createBoxElement(@viewportElement)
-    @createContentElement(@boxElement)
-    @setInnerContent(@contentElement, options)
-    @setupHandlers()
+    @createContentElement(@boxElement, content)
 
-    @shiftBody()
-    return @startOpenAnimation(options)
-
-  closeNow: (options) ->
-    @teardownHandlers()
-    animation = => @startCloseAnimation(options)
-    @destroyElement({ animation }).then =>
-      @unshiftBody()
+  onElementsDestroyed: ->
+    @unshiftBody()
 
   shiftBody: ->
     @constructor.bodyShifter.shift()

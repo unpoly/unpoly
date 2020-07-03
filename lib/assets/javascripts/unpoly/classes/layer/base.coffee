@@ -64,6 +64,9 @@ class up.Layer extends up.Record
   isOpen: ->
     @stack.isOpen(this)
 
+  isClosed: ->
+    @stack.isClosed(this)
+
   @getter 'parent', ->
     @stack.parentOf(this)
 
@@ -207,7 +210,7 @@ class up.Layer extends up.Record
     history
 
   hasLiveHistory: ->
-    @hasHistory() && @isFront()
+    up.history.config.enabled && @hasHistory() && @isFront()
 
   selector: (part) ->
     @constructor.selector(part)

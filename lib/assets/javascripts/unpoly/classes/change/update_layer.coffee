@@ -51,26 +51,29 @@ class up.Change.UpdateLayer extends up.Change.Addition
       up.browser.loadPage(@options)
       return u.unresolvablePromise()
 
-    unless @layer.isOpen()
-      throw @notApplicable('Layer was closed')
-
     if @peel
       @layer.peel()
       # Layer#peel() will manipulate the stack sync.
       # We don't wait for the peeling animation to finish.
 
-    @updateLayerProps()
+    # If either the server or the up.change() caller has provided a new
+    # { context } object, we set the layer's context to that object.
+    @layer.updateContext(@options)
+
+    # Change history before compilation, so new fragments see the new location.
+    @layer.updateHistory(@options) # layer location changed event soll hier nicht mehr fliegen
+
+    # The server may trigger multiple signals that may cause the layer to close:
+    # - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
+    # - Event an event with X-Up-Events, to which a listener may close the layer
+    # - Update the location to a URL for which { acceptLocation } or { dismissLocation }
+    #   will close the layer.
+    @handleLayerChangeRequests()
 
     swapPromises = @steps.map(@executeStep)
 
-    promise = Promise.all(swapPromises)
-
-    promise = promise.then =>
-      @handleLayerChangeRequests()
-      # don't delay `promise` until layer change requests have finished closing
-      return undefined
-
-    return promise
+    return Promise.all(swapPromises).then =>
+      @abortWhenLayerClosed()
 
   executeStep: (step) =>
     # When the server responds with an error, or when the request method is not
@@ -346,10 +349,3 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # If we didn't need to scroll above, just return a resolved promise
     # to fulfill this function's signature.
     return Promise.resolve()
-
-  updateLayerProps: ->
-    @layer.updateHistory(@options)
-
-    # If either the server or the up.change() caller has provided a new
-    # { context } object, we set the layer's context to that object.
-    @layer.updateContext(@options)

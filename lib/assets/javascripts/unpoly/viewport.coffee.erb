@@ -229,8 +229,14 @@ up.viewport = do ->
     motion = new up.RevealMotion(element, options)
 
     promise = Promise.resolve()
-    promise = promise.then(-> options.layer.peel()) if options.peel
-    promise = promise.then(-> scrollingController.startMotion(element, motion, options))
+
+    if options.peel
+      promise = promise.then ->
+        if !options.layer
+          debugger
+        options.layer.peel()
+    promise = promise.then ->
+      scrollingController.startMotion(element, motion, options)
     return promise
 
   doFocus = (element, options = {}) ->
@@ -502,9 +508,9 @@ up.viewport = do ->
   ###
   saveScroll = (options = {}) ->
     layer = up.layer.get(options)
-    url = options.url || layer.location
-    tops = options.tops ? scrollTops(options)
-    layer.lastScrollTops.set(url, tops)
+    if url = options.url || layer.location
+      tops = options.tops ? scrollTops(options)
+      layer.lastScrollTops.set(url, tops)
 
   ###**
   Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
