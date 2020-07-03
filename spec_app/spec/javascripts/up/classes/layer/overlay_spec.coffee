@@ -1,8 +1,25 @@
+u = up.util
+
 describe 'up.Layer.Overlay', ->
 
-  describe '#dismiss()', ->
+  beforeEach ->
+    # Provoke concurrency issues by enabling animations, but don't slow down tests too much
+    up.motion.config.duration = 5
 
-    it 'closes this layer'
+  describe '#accept()', ->
+
+    it 'closes this layer', asyncSpec (next) ->
+      modes = -> u.map(up.layer.stack, 'mode')
+
+      makeLayers(2)
+
+      next ->
+        expect(modes()).toEqual ['root', 'modal']
+
+        up.layer.accept(null, animation: false)
+
+      next ->
+        expect(modes()).toEqual ['root']
 
     it 'closes descendants before closing this layer'
 
@@ -10,9 +27,21 @@ describe 'up.Layer.Overlay', ->
 
     it 'does not abort a pending request for another layer'
 
-    it 'accepts a dismissal value that is passed to onDismissed handlers'
+    it 'takes an acceptance value that is passed to onAccepted handlers', asyncSpec (next) ->
+      callback = jasmine.createSpy('onAccepted handler')
 
-    it 'returns a resolved promise for the root layer (should it return a rejected promise?)'
+      makeLayers [
+        { }
+        { onAccepted: callback }
+      ]
+
+      next ->
+        expect(callback).not.toHaveBeenCalled()
+
+        up.layer.current.accept('acceptance value')
+
+      next ->
+        expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
 
     it 'focuses the link that originally opened the overlay'
 
@@ -31,7 +60,7 @@ describe 'up.Layer.Overlay', ->
         expect(up.layer.isOverlay()).toBe(true)
         expect(location.href).toMatchURL('/path/to/modal')
 
-        up.layer.dismiss()
+        up.layer.current.accept()
 
       next =>
         expect(up.layer.isRoot()).toBe(true)
@@ -41,13 +70,36 @@ describe 'up.Layer.Overlay', ->
 
       it 'should have examples'
 
-  describe '#accept()', ->
+  describe '#dismiss()', ->
 
-    it 'closes this layer'
+    it 'closes this layer', asyncSpec (next) ->
+      modes = -> u.map(up.layer.stack, 'mode')
 
-    it 'accepts an acceptance value that is passed to onAccepted handlers'
+      makeLayers(2)
 
-    it 'returns a resolved promise for the root layer (should it return a rejected promise?)'
+      next ->
+        expect(modes()).toEqual ['root', 'modal']
+
+        up.layer.current.dismiss(null, animation: false)
+
+      next ->
+        expect(modes()).toEqual ['root']
+
+    it 'takes a dismissal value that is passed to onDismissed handlers', asyncSpec (next) ->
+      callback = jasmine.createSpy('onDismissed handler')
+
+      makeLayers [
+        { }
+        { onDismissed: callback }
+      ]
+
+      next ->
+        expect(callback).not.toHaveBeenCalled()
+
+        up.layer.current.dismiss('dismissal value')
+
+      next ->
+        expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'dismissal value'))
 
     describe 'events', ->
 

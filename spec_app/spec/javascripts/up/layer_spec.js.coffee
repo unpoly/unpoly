@@ -491,35 +491,6 @@ describe 'up.layer', ->
             next ->
               expect(up.layer.isOverlay()).toBe(true)
 
-        describe '{ onDismissed }', ->
-
-          it 'runs the given callback when they layer is dimissed', asyncSpec (next) ->
-            callback = jasmine.createSpy('onDismissed callback')
-
-            up.layer.open({ onDismissed: callback })
-
-            next ->
-              expect(callback).not.toHaveBeenCalled()
-
-              up.layer.dismiss('dismissal value')
-
-            next ->
-              expect(callback).toHaveBeenCalled()
-              expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:dismissed', value: 'dismissal value')
-
-          it 'does not run the given callbcak when the layer is accepted', asyncSpec (next) ->
-            callback = jasmine.createSpy('onDismissed callback')
-
-            up.layer.open({ onDismissed: callback })
-
-            next ->
-              expect(callback).not.toHaveBeenCalled()
-
-              up.layer.accept('acceptance value')
-
-            next ->
-              expect(callback).not.toHaveBeenCalled()
-
         describe '{ onAccepted }', ->
 
           it 'runs the given callback when they layer is accepted', asyncSpec (next) ->
@@ -545,6 +516,35 @@ describe 'up.layer', ->
               expect(callback).not.toHaveBeenCalled()
 
               up.layer.dismiss('dismissal value')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+        describe '{ onDismissed }', ->
+
+          it 'runs the given callback when they layer is dimissed', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+
+            up.layer.open({ onDismissed: callback })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.dismiss('dismissal value')
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+              expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:dismissed', value: 'dismissal value')
+
+          it 'does not run the given callback when the layer is accepted', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+
+            up.layer.open({ onDismissed: callback })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.layer.accept('acceptance value')
 
             next ->
               expect(callback).not.toHaveBeenCalled()
@@ -681,29 +681,110 @@ describe 'up.layer', ->
               value = { location: u.normalizeURL('/acceptable-location') }
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
-          it 'accepts the layer when the layer has reached the given location pattern'
-          
-          it 'parses a location pattern of named placeholders to produce an acceptance value'
+          it 'accepts the layer when the layer has reached the given location pattern', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content'
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: '/users /records/* /articles'
+            })
 
-          it 'accepts the layer when the layer has reached the given location but has no history'
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
-          it 'does not accept the layer when another layer has reached the given location'
+              up.change('.overlay-content', content: 'acceptable content', location: '/records/new')
+
+            next ->
+              value = { location: u.normalizeURL('/records/new') }
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+
+          it 'parses a location pattern of named placeholders to produce an acceptance value', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content'
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: '/records/:action/:id'
+            })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.change('.overlay-content', content: 'acceptable content', location: '/records/edit/123')
+
+            next ->
+              value = {
+                location: u.normalizeURL('/records/edit/123')
+                action: 'edit'
+                id: '123'
+              }
+
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+
+          it 'accepts the layer when the layer has reached the given location but renders no history', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content'
+              history: false,
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: '/acceptable-location'
+            })
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              up.change('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+
+            next ->
+              value = { location: u.normalizeURL('/acceptable-location') }
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+
+          it 'does not accept the layer when another layer has reached the given location', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+
+            makeLayers [
+              { target: '.root-content' },
+              { target: '.overlay-content', onAccepted: callback, acceptLocation: '/acceptable-location' }
+            ]
+
+            next ->
+              up.change('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
           it 'immediately accepts a layer that was opened at the given location'
 
         describe '{ dismissLocation }', ->
 
-          it 'dismisses the layer when the layer has reached the given location'
+          it 'dismisses the layer when the layer has reached the given location', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content'
+              location: '/start-location',
+              onDismissed: callback,
+              dismissLocation: '/dismissable-location'
+            })
 
-          it 'dismisses the layer when the layer has reached the given location pattern'
-          
-          it 'parses a location pattern of named placeholders to produce a dismissable value'
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
-          it 'dismisses the layer when the layer has reached the given location but has no history'
+              up.change('.overlay-content', content: 'other content', location: '/other-location')
 
-          it 'does not dismiss the layer when another layer has reached the given location'
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
-          it 'immediately dismisses a layer that was opened at the given location'
+              up.change('.overlay-content', content: 'dismissable content', location: '/dismissable-location')
+
+            next ->
+              value = { location: u.normalizeURL('/dismissable-location') }
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
     describe 'up.layer.dismiss()', ->
 
