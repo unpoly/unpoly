@@ -3,18 +3,17 @@ u = up.util
 class up.URLPattern
 
   constructor: (pattern, @normalizeURL = u.normalizeURL) ->
+    @groupNames = []
 
     if u.isArray(pattern)
       pattern = pattern.join(' ')
-
-    @groupNames = ['url'] # There is a fixed group "url" which covers the entire match
 
     pattern = u.splitValues(pattern).map(@normalizeURL).map(u.escapeRegExp).join('|')
     pattern = pattern.replace /\\\*/g, '.*?'
     pattern = pattern.replace /\:([a-z][\w-]*)/ig, (match, name) =>
       @groupNames.push(name)
       return '([^/?#]+)'
-    @regexp = new RegExp('^(' + pattern + ')$')
+    @regexp = new RegExp('^' + pattern + '$')
 
   matches: (url, doNormalize = true) ->
     url = @normalizeURL(url) if doNormalize
