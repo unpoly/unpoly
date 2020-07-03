@@ -38,5 +38,6 @@ beforeEach ->
 
     element = e.createFromSelector(selector, affixOptions)
     responseText = element.outerHTML
+
     @respondWith(responseText, respondWithOptions)
 

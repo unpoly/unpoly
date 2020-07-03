@@ -36,9 +36,36 @@ describe 'up.Layer.Overlay', ->
         expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', layer: @layers[2])
         expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', layer: @layers[1])
 
-    it 'aborts pending requests for this layer'
+    it 'aborts pending requests for this layer', asyncSpec (next) ->
+      abortedURLs = []
+      up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
 
-    it 'does not abort a pending request for another layer'
+      makeLayers(2)
+
+      next ->
+        up.change('.element', url: '/layer-url', layer: 'current')
+
+      next ->
+        up.layer.accept()
+
+      next ->
+        expect(abortedURLs.length).toBe(1)
+        expect(abortedURLs[0]).toMatchURL('/layer-url')
+
+    it 'does not abort a pending request for another layer', asyncSpec (next) ->
+      abortedURLs = []
+      up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+
+      makeLayers(2)
+
+      next ->
+        up.change('.element', url: '/root-url', layer: 'root', peel: false)
+
+      next ->
+        up.layer.current.accept()
+
+      next ->
+        expect(abortedURLs).toBeBlank()
 
     it 'takes an acceptance value that is passed to onAccepted handlers', asyncSpec (next) ->
       callback = jasmine.createSpy('onAccepted handler')
@@ -56,9 +83,30 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
 
-    it 'focuses the link that originally opened the overlay'
+    it 'focuses the link that originally opened the overlay', asyncSpec (next) ->
+      opener = fixture('a[up-target=".element"][up-layer="new"][href="/overlay-path"]')
 
-    it 'pops this layer from the stack synchronously to prevent race conditions'
+      Trigger.clickSequence(opener)
+
+      next =>
+        @respondWithSelector('.element', text: 'text')
+
+      next ->
+        expect(up.layer.stack.length).toBe(2)
+        expect(opener).not.toBeFocused()
+
+        up.layer.current.accept()
+
+      next ->
+        expect(opener).toBeFocused()
+
+    it 'pops this layer from the stack synchronously to prevent race conditions', asyncSpec (next) ->
+      makeLayers(2)
+
+      next ->
+        expect(up.layer.stack.length).toBe(2)
+        up.layer.current.accept()
+        expect(up.layer.stack.length).toBe(1)
 
     it "restores the parent layer's location", asyncSpec (next) ->
       up.history.config.enabled = true
@@ -117,20 +165,3 @@ describe 'up.Layer.Overlay', ->
     describe 'events', ->
 
       it 'should have examples'
-
-  describe '#on()', ->
-
-    it 'registers a listener for events on this layer'
-
-    it 'allows to pass a selector for event delegation as second argument'
-
-    it "does not call the listener for events on another layer"
-
-    it "does not call the listener for events on another layer, even if the event target is a DOM child of the layer element"
-
-  describe '#emit()', ->
-
-    it "emits an event on this layer's element"
-
-    it 'sets up.layer.current to this layer while listeners are running'
-
