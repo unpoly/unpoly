@@ -14,3 +14,7 @@ describe 'up.Layer', ->
         # Show that the root layer's context wasn't changed.
         expect(up.layer.root.context).toEqual(rootKey: 'rootValue')
         done()
+
+    it 'may be mutated by the user', ->
+      up.layer.context.key = 'value'
+      expect(up.layer.context.key).toEqual('value')

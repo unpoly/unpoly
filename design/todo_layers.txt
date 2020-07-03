@@ -48,10 +48,6 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
         => der zweite close aborted
         => der erste close geht zu ende
   - Test that when we update a non-front layer, and the server sends `X-Up-Events: [{ layer: 'current', type: 'foo'}]`, the events are emitted on the updating layer
-  - Context
-    - Test that { context } is per-layer
-    - Test that { context } is transmitted to server
-    - That that up.layer.context may be manipulated after the layer was opened
   - Test new queue behavior
     - Size vs. preloadSize
     - Aborting of preload requests
@@ -60,8 +56,6 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - Should be preventable, preventing history changes and fragment updates
     - Allows listener to manipulate change options
   - History handling per layer
-  - Test what happens if we call layer.open() many times after another
-  - Test what happens if we call layer.dismiss() many times after another
   - Test that up.viewport.autofocus() returns true if it focused an element, otherwise false
   - Test that up.fragment.all / up.fragment.get takes a { origin } option that defines a layer and allows "&" lookup
   - Test that up:fragment:loaded can interrupt fragment update
@@ -86,7 +80,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     # new first child of the layer's root element. This mirrors the behavior that we get when
     # opening a layer: The new element does not need to match anything in the current document.
   - Test: up:proxy:fatal is not emitted when a request was aborted
-  - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
+  - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``
+  - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
   - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.
   - Test: History events are emitted on the history-enabled layer closest to the front
   - Test: Re-clicking the popup opener while the popup is open should close the popup instead of re-opening
@@ -129,13 +124,10 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that proxy-events are emitted a second time on the document if the layer has been detached
   - Test that proxy-events don't crash when a request has { layer: 'new' }
   - Test that proxy-events don't crash when a request has no { layer }
-  - Test that updating <body> or <html> we keep layer.onEach handlers
-  - Test that updating <body> will re-attach up-overlay elements
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)
   - Test that up.layer.get and up.layer.all take both a layer name like "root" or an options hash or an element or a jquery collection
-  - Test layer { context } transmission
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
   - Test that back button closes all layers
   - Test that up.change() can be called with { target: Element }
