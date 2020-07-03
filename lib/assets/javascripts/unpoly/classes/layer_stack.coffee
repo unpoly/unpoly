@@ -88,10 +88,11 @@ class up.LayerStack extends Array
       @currentOverrides.pop()
 
   reversed: ->
-    # u.reverse() will use u.copy() to reverse a copy,
-    # but u.copy() cannot copy instances of this class.
-    copy = u.copyArrayLike(this)
-    return copy.reverse()
+    u.reverse(this)
+
+  # Used by up.util.reverse() and specs
+  "#{u.copy.key}": ->
+    return u.copyArrayLike(this)
 
   u.getter @prototype, 'root', ->
     @[0]

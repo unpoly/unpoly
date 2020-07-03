@@ -3,8 +3,7 @@ u = up.util
 describe 'up.Layer.Overlay', ->
 
   beforeEach ->
-    # Provoke concurrency issues by enabling animations, but don't slow down tests too much
-    up.motion.config.duration = 5
+    up.motion.config.enabled = false
 
   describe '#accept()', ->
 
@@ -21,7 +20,21 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(modes()).toEqual ['root']
 
-    it 'closes descendants before closing this layer'
+    it 'dismiss descendants before closing this layer', asyncSpec (next) ->
+      listener = jasmine.createSpy('layer close listener')
+      up.on 'up:layer:accepted up:layer:dismissed', listener
+
+      makeLayers(4)
+
+      next =>
+        @layers = u.copy(up.layer.stack)
+        up.layer.get(1).accept()
+
+      next =>
+        expect(listener.calls.count()).toBe(3)
+        expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:dismissed', layer: @layers[3])
+        expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', layer: @layers[2])
+        expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', layer: @layers[1])
 
     it 'aborts pending requests for this layer'
 
@@ -80,7 +93,7 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(modes()).toEqual ['root', 'modal']
 
-        up.layer.current.dismiss(null, animation: false)
+        up.layer.current.dismiss()
 
       next ->
         expect(modes()).toEqual ['root']
