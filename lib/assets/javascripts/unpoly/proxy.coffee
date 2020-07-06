@@ -104,7 +104,7 @@ up.proxy = do ->
     preloadQueueSize: 5
     preloadEnabled: 'auto'
     preloadTimeout: 10
-    preloadMaxResponseTime: 500
+    preloadMaxResponseTime: 750
     preloadSampleSize: 3      # set to 0 to prevent sampling
 
     requestMetaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
