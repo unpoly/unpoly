@@ -96,7 +96,7 @@ class up.Request extends up.Record
 
   @property up.Request#failMode
   @stable
-2  ###
+  ###
 
   keys: ->
     [
@@ -121,6 +121,8 @@ class up.Request extends up.Record
       'failContext',
       'origin',
       'solo',
+      'queueTime',
+      'startTime'
     ]
 
   ###**
@@ -225,6 +227,8 @@ class up.Request extends up.Record
     # normalize again.
     @normalize()
 
+    @startTime = new Date()
+
     # Convert from XHR's callback-based API to up.Request's promise-based API
     @xhr = new up.Request.XHRRenderer(this).buildAndSend(
       onload: (_event) => @onXHRLoad(_event)
@@ -311,6 +315,7 @@ class up.Request extends up.Record
       dismissLayer: up.protocol.dismissLayerFromXHR(@xhr)
       eventPlans: up.protocol.eventPlansFromXHR(@xhr)
       context: up.protocol.contextFromXHR(@xhr)
+      endTime: new Date()
 
     if urlFromServer = up.protocol.locationFromXHR(@xhr)
       responseAttrs.url = urlFromServer

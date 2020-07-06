@@ -1730,6 +1730,8 @@ up.util = do ->
 #    before()
 #    return fn().finally(after)
 
+  average = (array) -> array.reduce((a, b) -> a + b) / array.length
+
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseURL: parseURL
   parseUrl: (args...) ->
@@ -1882,4 +1884,5 @@ up.util = do ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   renameKeys: renameKeys
+  average: average
 

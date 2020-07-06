@@ -3,6 +3,10 @@ $ = jQuery
 
 describe 'up.proxy', ->
 
+  beforeEach ->
+    # Disable response time measuring for these tests
+    up.proxy.config.preloadEnabled = true
+
   describe 'JavaScript functions', ->
 
     describe 'up.request', ->

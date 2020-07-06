@@ -102,8 +102,11 @@ up.proxy = do ->
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
     preloadQueueSize: 5
-    preloadEnabled: !up.browser.hasSlowConnection()
+    preloadEnabled: 'auto'
     preloadTimeout: 10
+    preloadMaxResponseTime: 500
+    preloadSampleSize: 3      # set to 0 to prevent sampling
+
     requestMetaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
@@ -120,6 +123,10 @@ up.proxy = do ->
   queue = new up.Request.Queue()
 
   cache = new up.ProxyCache()
+
+  connectionSpeed = new up.ConnectionSpeed
+    sampleSize: -> config.preloadSampleSize
+    maxResponseTime: -> config.preloadMaxResponseTime
 
   ###**
   Returns a cached response for the given request.
@@ -250,12 +257,6 @@ up.proxy = do ->
     if request.preload
       request.timeout ?= config.preloadTimeout
 
-      # If the user has disabled preloading (default for slow connections)
-      # we immediately abort and return the request, without queuing it.
-      unless config.preloadEnabled
-        request.abort()
-        return request
-
     # We clear the entire cache before an unsafe request, since we
     # assume the user is writing a change.
     cache.clear() unless request.isSafe()
@@ -374,6 +375,13 @@ up.proxy = do ->
   ###
   isBusy = ->
     queue.isBusy()
+
+  shouldPreload = (request) ->
+    setting = u.evalOption(config.preloadEnabled, request)
+    if setting == 'auto'
+      return !connectionSpeed.isSlow()
+    else
+      setting
 
   abortRequests = (args...) ->
     queue.abort(args...)
@@ -529,6 +537,7 @@ up.proxy = do ->
   abort: abortRequests
   registerAliasForRedirect: registerAliasForRedirect
   queue: queue # for testing
+  shouldPreload: shouldPreload
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request

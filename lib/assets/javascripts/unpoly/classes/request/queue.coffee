@@ -20,7 +20,7 @@ class up.Request.Queue extends up.Class
     return @currentRequests.concat(@queuedRequests)
 
   asap: (request) ->
-    request.queuedAt = new Date()
+    request.queueTime = new Date()
     if @hasConcurrencyLeft()
       @sendRequestNow(request)
     else
@@ -92,14 +92,14 @@ class up.Request.Queue extends up.Class
 
   sendRequestNow: (request) ->
     log = ['Loading %s %s', request.method, request.url]
-    event = request.emit('up:proxy:load', { log })
+    preloadDisabled = request.preload && !up.proxy.shouldPreload(request)
 
-    if !event.defaultPrevented
+    if preloadDisabled || request.emit('up:proxy:load', { log }).defaultPrevented
+      request.abort()
+    else
       @currentRequests.push(request)
       request.send()
       u.always request, (responseOrError) => @onRequestSettled(request, responseOrError)
-    else
-      request.abort()
 
   onRequestSettled: (request, responseOrError) ->
     u.remove(@currentRequests, request)
@@ -141,4 +141,4 @@ class up.Request.Queue extends up.Class
     allForegroundRequests = u.reject(@allRequests, 'preload')
 
     return u.some allForegroundRequests, (request) ->
-      (now - request.queuedAt) > delay
+      (now - request.queueTime) > delay

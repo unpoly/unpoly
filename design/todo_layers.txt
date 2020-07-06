@@ -12,6 +12,17 @@
   - test that restoreScroll() doesn't break
   - test that saveScroll() doesn't break
   - test that feedback highlighting doesn't break
+- Reach out to server-integration libs (make issues?) with the new changes
+- Disable preloading when last X requests > Y ms?
+
+- "slow"
+  - wir haben up.proxy.config.slowDelay
+    - das ist eigentlich "ab wann zeige ich spinner"
+    - das bedeutet wie lange der benutzer auf einen nicht-preload request warten muss
+    - das hat nichts damit zu tun, ob die verbindung gesund ist
+  - up.request.isSlow()
+  - up.connection.isSlow()
+
 
 
 

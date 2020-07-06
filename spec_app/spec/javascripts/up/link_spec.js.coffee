@@ -1116,6 +1116,10 @@ describe 'up.link', ->
 
     describe '[up-preload]', ->
 
+      beforeEach ->
+        # Disable response time measuring for these tests
+        up.proxy.config.preloadEnabled = true
+
       it 'preloads the link destination when hovering, after a delay', asyncSpec (next) ->
         up.link.config.preloadDelay = 100
 

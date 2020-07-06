@@ -100,6 +100,7 @@ class up.Response extends up.Record
       'events'
       'context'
       'headers' # custom headers to for synthetic reponses without { xhr } property
+      'endTime'
     ]
 
   defaults: ->

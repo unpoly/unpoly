@@ -33,6 +33,7 @@ Unreleased
 - validating emits up:form:validate instead of up:form:submit
 - When a compiler throws an error, other compilers will now run anyway
 - When a destructor throws an error, other destructors will now run anyway
+- New event up:layer:opening
 
 
 0.62.1
