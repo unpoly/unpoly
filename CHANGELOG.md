@@ -34,6 +34,14 @@ Unreleased
 - When a compiler throws an error, other compilers will now run anyway
 - When a destructor throws an error, other destructors will now run anyway
 - New event up:layer:opening
+- Bootstrap integration
+  - Minimal: active, nav, navbar
+  - Bootstrap modal styles are no longer used for Unpoly modals
+  - Now supports three major Bootstrap versions:
+    - unpoly-bootstrap3.js
+    - unpoly-bootstrap4.js
+    - unpoly-bootstrap5.js
+
 
 
 0.62.1
