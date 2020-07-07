@@ -272,11 +272,14 @@ up.link = do ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
 
-    if isSafe(link)
-      guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
-      follow(link, u.merge(options, preload: true, { guardEvent }))
-    else
+    unless isSafe(link)
       return up.error.failed.async("Won't preload unsafe link")
+
+    if u.isCrossDomain(link.href)
+      return up.error.failed.async("Won't preload cross-domain link")
+
+    guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
+    follow(link, u.merge(options, preload: true, { guardEvent }))
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
