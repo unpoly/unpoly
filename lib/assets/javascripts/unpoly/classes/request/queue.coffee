@@ -20,7 +20,14 @@ class up.Request.Queue extends up.Class
     return @currentRequests.concat(@queuedRequests)
 
   asap: (request) ->
+    u.always request, (responseOrError) => @onRequestSettled(request, responseOrError)
+
+    # When considering whether a request is "slow", we're measing the duration between { queueTime }
+    # and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
+    # make its own check whether a request in the queue is considered slow.
     request.queueTime = new Date()
+    @setSlowTimer()
+
     if @hasConcurrencyLeft()
       @sendRequestNow(request)
     else
@@ -40,25 +47,19 @@ class up.Request.Queue extends up.Class
         else
           @queueRequest(request)
 
-    @setSlowTimer(request)
-
     return request
 
-  # Changes a preload request in the queue to a non-preload request.
+  # Changes a preload request to a non-preload request.
   # Does not change the request's position in the queue.
   # Does nothing if the given request is not a preload request.
   promoteToForeground: (request) ->
-    if request.preload && @contains(request)
+    if request.preload
       request.preload = false
-      @setSlowTimer(request)
+      @setSlowTimer()
 
-  contains: (request) ->
-    u.contains(@allRequests, request)
-
-  setSlowTimer: (request) ->
-    unless request.preload || request.aborted
-      slowDelay = u.evalOption(@slowDelay)
-      @checkSlowTimout = setTimeout(@checkSlow, slowDelay)
+  setSlowTimer: ->
+    slowDelay = u.evalOption(@slowDelay)
+    @checkSlowTimout = setTimeout(@checkSlow, slowDelay)
 
   hasConcurrencyLeft: ->
     maxConcurrency = u.evalOption(@concurrency)
@@ -91,21 +92,22 @@ class up.Request.Queue extends up.Class
     return u.remove(@queuedRequests, request)
 
   sendRequestNow: (request) ->
-    log = ['Loading %s %s', request.method, request.url]
-    preloadDisabled = request.preload && !up.proxy.shouldPreload(request)
-
-    if preloadDisabled || request.emit('up:proxy:load', { log }).defaultPrevented
-      request.abort()
+    if request.preload && !up.proxy.shouldPreload(request)
+      request.abort('Preloading is disabled')
+    else if request.emit('up:proxy:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
+      request.abort('Prevented by event listener')
     else
       @currentRequests.push(request)
       request.send()
-      u.always request, (responseOrError) => @onRequestSettled(request, responseOrError)
 
   onRequestSettled: (request, responseOrError) ->
     u.remove(@currentRequests, request)
     if (responseOrError instanceof up.Response) && responseOrError.ok
       up.proxy.registerAliasForRedirect(request, responseOrError)
+
+    # Check if we can emit up:proxy:recover after a previous up:proxy:slow event.
     @checkSlow()
+
     u.microtask(=> @poke())
 
   poke: ->
@@ -114,10 +116,11 @@ class up.Request.Queue extends up.Class
 
   # Aborting a request will cause its promise to reject, which will also uncache it
   abort: (conditions = true) ->
+    reason = u.pluckKey(conditions, 'reason')
     for list in [@currentRequests, @queuedRequests]
       matches = u.filter list, (request) => @requestMatches(request, conditions)
       matches.forEach (match) ->
-        match.abort()
+        match.abort(reason)
         u.remove(list, match)
       return
 
@@ -140,5 +143,11 @@ class up.Request.Queue extends up.Class
     delay = u.evalOption(@slowDelay)
     allForegroundRequests = u.reject(@allRequests, 'preload')
 
+    # If slowDelay is 200, we're scheduling the checkSlow() timer after 200 ms.
+    # The request must be slow when checkSlow() is called, or we will never look
+    # at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
+    # to "be slow" a few ms earlier than actually configured.
+    timerTolerance = 1
+
     return u.some allForegroundRequests, (request) ->
-      (now - request.queueTime) > delay
+      (now - request.queueTime) >= (delay - timerTolerance)

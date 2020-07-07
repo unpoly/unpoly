@@ -22,6 +22,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Aborting a slow request emits :up:proxy:recover event
+  - Test that unsafe links are not preloaded (does that exist?)
   - Edge Cases for concurrent Layer Changes:
     - up.change()
       - das neue fragment sieht einen server-sent event

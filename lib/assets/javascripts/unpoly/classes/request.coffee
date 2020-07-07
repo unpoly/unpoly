@@ -256,17 +256,17 @@ class up.Request extends up.Record
     # Use the default message that callers of request.abort() would also get.
     @setAbortedState()
 
-  abort: (message) ->
+  abort: (reason) ->
     # setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     # will call setAbortedState() a second time, without a message.
-    @setAbortedState(message)
+    @setAbortedState(reason)
     @xhr?.abort()
 
-  setAbortedState: (message = 'Request was aborted') ->
+  setAbortedState: (reason = 'Request was aborted') ->
     unless @aborted
-      @emit('up:proxy:aborted', log: message)
+      @emit('up:proxy:aborted', log: reason)
       @aborted = true
-      @deferred.reject(up.error.aborted(message))
+      @deferred.reject(up.error.aborted(reason))
 
   respondWith: (response) ->
     log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, @method, @url, response.text.length]
