@@ -108,6 +108,7 @@ class up.Request extends up.Record
       'headers',
       'timeout',
       'preload' # since up.proxy.request() options are sometimes wrapped in this class
+      'tentative',
       'cache',  # since up.proxy.request() options are sometimes wrapped in this class
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
@@ -153,10 +154,10 @@ class up.Request extends up.Record
 
     @normalize()
 
-    @headers ||= {}
     @aborted = false
-    @preload = !!@preload
     @headers ||= {}
+    @preload = !!@preload
+    @tentative ?= @preload
 
     if @origin
       @layer ||= up.layer.get(@origin)

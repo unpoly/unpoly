@@ -22,6 +22,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Preload requests are tentative by default, but tentative can be set to false and the request will then not be aborted by a foreground request
+  - When a tentative request is promoted to the foreground, it is no longer tentative
   - Aborting a slow request emits :up:proxy:recover event
   - Test that unsafe links are not preloaded (does that exist?)
   - Edge Cases for concurrent Layer Changes:

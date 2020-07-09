@@ -32,17 +32,21 @@ class up.Request.Queue extends up.Class
       @sendRequestNow(request)
     else
       if request.preload
+        # The preload queue is limited in size
         if @hasPreloadQueueSpaceLeft()
           @queueRequest(request)
-        else if oldestQueuedPreloadRequest = @oldestPreloadRequest(@queuedRequests)
-          @abort(oldestQueuedPreloadRequest)
+        else if oldestQueuedTentativeRequest = @oldestTentativePreloadRequest(@queuedRequests)
+          @abort(oldestQueuedTentativeRequest)
           @queueRequest(request)
-        else
-          # This can only happen if preloadQueueSize is zero.
+        else if request.tentative
           @abort(request)
+        else
+          # If neither existing nor new requests are tentative,
+          # we must exceed the size of the preload queue.
+          @queueRequest(request)
       else
-        if oldestCurrentPreloadRequest = @oldestPreloadRequest(@currentRequests)
-          @abort(oldestCurrentPreloadRequest)
+        if oldestCurrentTentativeRequest = @oldestTentativePreloadRequest(@currentRequests)
+          @abort(oldestCurrentTentativeRequest)
           @sendRequestNow(request)
         else
           @queueRequest(request)
@@ -75,8 +79,8 @@ class up.Request.Queue extends up.Class
   queueRequest: (request) ->
     @queuedRequests.push(request)
 
-  oldestPreloadRequest: (list) ->
-    u.find(list, 'preload')
+  oldestTentativePreloadRequest: (list) ->
+    u.find list, (request) -> request.preload && request.tentative
 
   pluckNextRequest: ->
     # We process the most recently queued request first.
