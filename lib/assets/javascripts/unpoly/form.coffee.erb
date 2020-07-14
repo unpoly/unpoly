@@ -39,7 +39,7 @@ up.form = do ->
   config = new up.Config ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
-    submit: ['form[up-target]', 'form[up-follow]']
+    submit: up.link.combineFollowableSelectors(['form'])
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
 

@@ -78,17 +78,21 @@ up.link = do ->
 
   preloadDelayTimer = undefined
   waitingLink = undefined
-
   preloadDelay = new up.LinkPreloadDelay()
 
-  linkishSelectors = (suffixes) ->
-    u.flatMap suffixes, (suffix) -> ['a[href]' + suffix, '[up-href]' + suffix]
+  LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
+  LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-content]', 'a[up-fragment]', 'a[up-document]']
+  LINKS_WITH_ANY_HTML = LINKS_WITH_REMOTE_HTML.concat(LINKS_WITH_LOCAL_HTML)
+  ATTRIBUTES_SUGGESTING_FOLLOW = [e.trueAttributeSelector('up-follow'), '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
+
+  combineFollowableSelectors = (elementSelectors, attributeSelectors = ATTRIBUTES_SUGGESTING_FOLLOW) ->
+    return u.flatMap(elementSelectors, (l) -> attributeSelectors.map((r) -> l + r))
 
   config = new up.Config ->
     preloadDelay: 75
-    follow: linkishSelectors(['[up-target]', '[up-follow]', '[up-layer]', '[up-mode]'])
-    preload: linkishSelectors(['[up-preload]'])
-    instant: linkishSelectors(['[up-instant]'])
+    follow: combineFollowableSelectors(LINKS_WITH_ANY_HTML)
+    instant: combineFollowableSelectors(LINKS_WITH_ANY_HTML, [e.trueAttributeSelector('up-instant')])
+    preload: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
 
   fullFollowSelector = ->
     config.follow.join(',')
@@ -186,6 +190,9 @@ up.link = do ->
     parser.string('target')
     parser.booleanOrString('fallback')
     parser.parse(((link, attrName) -> e.callbackAttr(link, attrName, ['request', 'response', 'change'])), 'onLoaded')
+    parser.string('content')
+    parser.string('fragment')
+    parser.string('document')
 
     # Layer options
     parser.string('layer')
@@ -273,11 +280,14 @@ up.link = do ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
 
-    if isSafe(link)
-      guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
-      follow(link, u.merge(options, preload: true, { guardEvent }))
-    else
+    unless isSafe(link)
       return up.error.failed.async("Won't preload unsafe link")
+
+    unless e.matches(link, '[href], [up-href]')
+      return up.error.failed.async("Won't preload link without a URL")
+
+    guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
+    follow(link, u.merge(options, preload: true, { guardEvent }))
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
@@ -724,5 +734,6 @@ up.link = do ->
   targetMacro: targetMacro
   convertClicks: convertClicks
   config: config
+  combineFollowableSelectors: combineFollowableSelectors
 
 up.follow = up.link.follow

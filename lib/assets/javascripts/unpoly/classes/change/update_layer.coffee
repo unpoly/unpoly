@@ -298,35 +298,35 @@ class up.Change.UpdateLayer extends up.Change.Addition
     )
     fragmentFocus.process(step.focus)
 
-  handleScroll: (element, step) ->
+  handleScroll: (element, options) ->
     # Copy options since we will modify the object below.
-    step = u.options(step)
+    options = u.options(options)
 
     # We process one of multiple scroll-changing options.
-    hashOpt = step.hash
-    revealOpt = step.reveal
-    resetScrollOpt = step.resetScroll
-    restoreScrollOpt = step.restoreScroll
+    hashOpt = options.hash
+    revealOpt = options.reveal
+    resetScrollOpt = options.resetScroll
+    restoreScrollOpt = options.restoreScroll
 
-    if step.placement == 'swap'
+    if options.placement == 'swap'
       # If we're scrolling a swapped fragment, don't animate.
       # If we're scrolling a prepended/appended fragment we allow the user to
       # pass { scrollBehavior: 'smooth' }.
-      step.scrollBehavior = 'auto'
+      options.scrollBehavior = 'auto'
 
-    # If the user has passed { resetScroll: false } we scroll to the top all
-    # viewports that are either containing or are contained by element.
     if resetScrollOpt
-      return up.viewport.resetScroll(u.merge(step, around: element))
-    # If the user has passed { restoreScroll } we restore the last known scroll
-    # positions for the new URL, for all viewports that are either containing or
-    # are contained by element.
+      # If the user has passed { resetScroll: false } we scroll to the top all
+      # viewports that are either containing or are contained by element.
+      return up.viewport.resetScroll(u.merge(options, around: element))
     else if restoreScrollOpt
-      return up.viewport.restoreScroll(u.merge(step, around: element))
-    # If a { hash } is given, we will reveal the element it refers to.
-    # This can be disabled with { reveal: false }.
+      # If the user has passed { restoreScroll } we restore the last known scroll
+      # positions for the new URL, for all viewports that are either containing or
+      # are contained by element.
+      return up.viewport.restoreScroll(u.merge(options, around: element))
     else if hashOpt && revealOpt == true
-      return up.viewport.revealHash(hashOpt, step)
+      # If a { hash } is given, we will reveal the element it refers to.
+      # This can be disabled with { reveal: false }.
+      return up.viewport.revealHash(hashOpt, options)
 
     else if revealOpt
       # We allow to pass another element as { reveal } option
@@ -335,7 +335,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # If the user has passed a CSS selector as { reveal } option, we try to find
       # and reveal a matching element in the layer that we're updating.
       else if u.isString(revealOpt)
-        element = up.fragment.get(revealOpt, step)
+        if revealOpt == 'top'
+          options.top = true
+        else
+          element = up.fragment.get(revealOpt, options)
       else
         # We reveal the given `element` argument.
 
@@ -344,7 +347,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # reveals the first validation error message, but the error is shown in an
       # unexpected element.
       if element
-        return up.reveal(element, step)
+        return up.reveal(element, options)
 
     # If we didn't need to scroll above, just return a resolved promise
     # to fulfill this function's signature.

@@ -10,7 +10,7 @@ up.modal = u.literal
     up.follow(link, u.merge(options, { layer: 'modal' }))
 
   extract: (target, html, options = {}) ->
-    up.legacy.deprecated('up.modal.extract(target, html)', 'up.change(target, { html, layer: "modal" })')
+    up.legacy.deprecated('up.modal.extract(target, document)', 'up.change({ document, layer: "modal" })')
     up.change(u.merge(options, { target, html, layer: 'modal' }))
 
   close: (options = {}) ->

@@ -57,9 +57,15 @@ up.viewport = do ->
   @param {number} [config.revealSnap=50]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.revealSnap`.
+
+    Set to `0` to disable snapping.
   @param {number} [config.revealPadding=0]
     The desired padding between a [revealed](/up.reveal) element and the
     closest [viewport](/up.viewport) edge (in pixels).
+  @param {number} [config.revealTop=false]
+    Whether to always scroll a [revealing](/up.reveal) element to the top.
+
+    By default Unpoly will scroll as little as possible to make the element visible.
   @param {number} [config.scrollSpeed=1]
     The speed of the scrolling motion when [scrolling](/up.scroll) with `{ behavior: 'smooth' }`.
 
@@ -75,6 +81,7 @@ up.viewport = do ->
     anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
     revealSnap: 75
     revealPadding: 0,
+    revealTop: false,
     scrollSpeed: 1
 
   scrollingController = new up.MotionController('scrolling')
@@ -219,7 +226,7 @@ up.viewport = do ->
   ###
   reveal = (elementOrSelector, options) ->
     # copy options, since we will mutate it below
-    options = u.options(options, peel: true, snap: true)
+    options = u.options(options, peel: true, snap: true, top: config.revealTop)
     element = f.get(elementOrSelector, options)
 
     # Now that we have looked up the element with an option like { layer: 'any' },

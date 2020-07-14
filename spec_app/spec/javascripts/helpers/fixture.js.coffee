@@ -24,7 +24,8 @@ window.$fixture = $appendFixture
 # A lot of legacy tests require this jQuery function
 $.fn.affix = (args...) -> $(e.affix(this[0], args...))
 
+# TODO: Replace me with makeLayers()
 window.fixtureInOverlay = (target, args...) ->
-  element = e.createFromSelector(target, args...)
-  up.layer.open({ target, html: element }).then ->
-    return element
+  fragment = e.createFromSelector(target, args...)
+  up.layer.open({ fragment }).then ->
+    return fragment

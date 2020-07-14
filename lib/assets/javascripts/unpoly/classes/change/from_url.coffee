@@ -131,7 +131,7 @@ class up.Change.FromURL extends up.Change
     promise
 
   augmentOptionsFromResponse: (response, options) ->
-    options.html = response.text
+    options.document = response.text
 
     responseURL = response.url
     locationFromExchange = responseURL

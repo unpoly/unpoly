@@ -647,6 +647,146 @@ describe 'up.link', ->
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(false)
 
+
+    describe 'up.link.preload', ->
+
+      describeCapability 'canPushState', ->
+
+        beforeEach ->
+          @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
+
+        it "loads and caches the given link's destination", asyncSpec (next) ->
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
+
+          up.proxy.preload($link)
+
+          next =>
+            cachedPromise = up.proxy.get
+              url: '/path'
+              target: '.target'
+              failTarget: 'default-fallback'
+            expect(u.isPromise(cachedPromise)).toBe(true)
+
+        it "does not load a link whose method has side-effects", (done) ->
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"][data-method="post"]')
+          preloadPromise = up.proxy.preload($link)
+
+          promiseState(preloadPromise).then (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(up.proxy.get(url: '/path', target: '.target')).toBeUndefined()
+            done()
+
+        it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
+          $fixture('.target')
+          $link = $fixture('a[href="/path"][up-target=".target"]')
+          up.proxy.preload($link, url: '/options-path')
+
+          next =>
+            cachedPromise = up.proxy.get
+              url: '/options-path'
+              target: '.target'
+              failTarget: 'default-fallback'
+            expect(u.isPromise(cachedPromise)).toBe(true)
+
+        describe 'for an [up-target] link', ->
+
+          it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->
+            $fixture('.target')
+            $link = $fixture('a[href="/path"][up-target=".target"]')
+            up.proxy.preload($link)
+            next => expect(@requestTarget()).toEqual('.target')
+
+          it 'replaces the [up-target] selector as with a fallback and uses that as an X-Up-Target header if the targeted element is not currently on the page', asyncSpec (next) ->
+            $link = $fixture('a[href="/path"][up-target=".target"]')
+            up.proxy.preload($link)
+            # The default fallback would usually be `body`, but in Jasmine specs we change
+            # it to protect the test runner during failures.
+            next => expect(@requestTarget()).toEqual('default-fallback')
+
+          it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
+            requestSpy = spyOn(up, 'request')
+
+            $link = $fixture('a[href="/path"][up-target=".target"]')
+            up.proxy.preload($link)
+
+            next =>
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
+
+        describe 'for a link opening a new layer', ->
+
+          beforeEach ->
+            up.motion.config.enabled = false
+
+          it 'includes the selector as an X-Up-Target header and does not replace it with a fallback, since the layer frame always exists', asyncSpec (next) ->
+            $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new"]')
+            up.hello($link)
+            up.link.preload($link)
+            next => expect(@requestTarget()).toEqual('.target')
+
+          it 'does not create layer elements', asyncSpec (next) ->
+            $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+            up.hello($link)
+            up.link.preload($link)
+            next =>
+              expect('up-modal').not.toBeAttached()
+
+          it 'does not emit an up:layer:open event', asyncSpec (next) ->
+            $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new"]')
+            up.hello($link)
+            openListener = jasmine.createSpy('listener')
+            up.on('up:layer:open', openListener)
+            up.link.preload($link)
+            next =>
+              expect(openListener).not.toHaveBeenCalled()
+
+          it 'does not close a currently open overlay', asyncSpec (next) ->
+            $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+            up.hello($link)
+            closeListener = jasmine.createSpy('listener')
+            up.on('up:layer:dismiss', closeListener)
+
+            up.layer.open(mode: 'modal', fragment: '<div class="content">Modal content</div>')
+
+            next =>
+              expect('up-modal .content').toBeAttached()
+
+            next =>
+              up.link.preload($link)
+
+            next =>
+              expect('up-modal .content').toBeAttached()
+              expect(closeListener).not.toHaveBeenCalled()
+
+            next =>
+              up.layer.dismiss()
+
+            next =>
+              expect('up-modal .content').not.toBeAttached()
+              expect(closeListener).toHaveBeenCalled()
+
+          it 'does not prevent the opening of other overlays while the request is still pending', asyncSpec (next) ->
+            $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+            up.hello($link)
+            up.link.preload($link)
+
+            next =>
+              up.layer.open(mode: 'modal', fragment: '<div class="content">Modal content</div>')
+
+            next =>
+              expect('up-modal .content').toBeAttached()
+
+          it 'calls up.request() with a { preload: true } option', asyncSpec (next) ->
+            requestSpy = spyOn(up, 'request')
+
+            $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+            up.hello($link)
+            up.link.preload($link)
+
+            next =>
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-target]', ->

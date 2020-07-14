@@ -27,7 +27,7 @@ Unreleased
 - up:link:follow is no longer sent when preloading, up:link:preload still is
 - Preserve focus when validating forms; Add { focus } option for fragment update
 - up.Request.prototype.isFatalError() has been removed without replacement. Network errors now reject with an error, and not a response.
-- [up-content], [up-content=overlay], [up-content=modal]
+- [up-main], [up-main=overlay], [up-main=modal]
 - parseSelector can parse attribute selectors with prefix, infix, suffix, space-separated, dash-separated
 - up.validate() may now be called with a form element
 - validating emits up:form:validate instead of up:form:submit

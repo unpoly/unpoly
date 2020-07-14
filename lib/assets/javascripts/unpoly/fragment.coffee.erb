@@ -329,9 +329,9 @@ up.fragment = do ->
     and all animation has finished.
   @stable
   ###
-  extract = (target, html, options) ->
-    up.legacy.deprecated('up.extract(target, html)', 'up.change(target, { html })')
-    return makeChange(target, u.merge(options, { html }))
+  extract = (target, document, options) ->
+    up.legacy.deprecated('up.extract(target, document)', 'up.change(target, { document })')
+    return makeChange(target, u.merge(options, { document }))
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -767,6 +767,10 @@ up.fragment = do ->
     unless key.match(/^fail[A-Z]/)
       return u.prefixCamelCase(key, 'fail')
 
+  changeSelectors = (options) ->
+    infixes = ['[up-target]', '[up-follow]', '[up-layer]', '[up-mode]', '[up-content]', '[up-html]']
+    infixes.map (infix) -> (options.prefix || '') + infix + (options.suffix || '')
+
   up.on 'up:app:boot', ->
     body = document.body
     setSource(body, up.history.location)
@@ -799,6 +803,7 @@ up.fragment = do ->
     targetsBody: targetsBody
     successKey: successKey,
     failKey: failKey
+    changeSelectors: changeSelectors
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

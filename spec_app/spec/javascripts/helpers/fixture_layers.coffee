@@ -7,9 +7,10 @@ window.makeLayers = (stackPlans) ->
     stackPlans = u.map [1..count], -> {}
 
   stackPlans.forEach (stackPlan, i) ->
-    stackPlan.target ||= '.element'
+    unless stackPlan.target || stackPlan.fragment
+      stackPlan.target = '.element'
 
-    if !stackPlan.content && !stackPlan.html && !stackPlan.url
+    unless stackPlan.content && stackPlan.fragment || stackPlan.document || stackPlan.url
       stackPlan.content = "text #{i}"
 
     if i == 0

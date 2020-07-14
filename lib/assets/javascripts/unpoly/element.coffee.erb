@@ -708,17 +708,22 @@ up.element = do ->
     value = value.replace(/"/g, '\\"')
     "[#{attribute}=\"#{value}\"]"
 
+  trueAttributeSelector = (attribute) ->
+    "[#{attribute}]:not([#{attribute}=false])"
+
   nonUpClasses = (element) ->
     classString = element.className
     classes = u.splitValues(classString)
     u.reject classes, (klass) -> klass.match(/^up-/)
 
   ###**
+  Always creates a full document with a <html> root, even if the given `html`
+  is only a fragment.
+
   @function up.element.createDocumentFromHTML
   @internal
   ###
   createDocumentFromHTML = (html) ->
-    # IE9 cannot set innerHTML on a <html> or <head> element.
     parser = new DOMParser()
     return parser.parseFromString(html, 'text/html')
 
@@ -1202,6 +1207,7 @@ up.element = do ->
     toSelector: toSelector # practical
     isSingleton: isSingleton # internal
     attributeSelector: attributeSelector # internal
+    trueAttributeSelector: trueAttributeSelector
     createDocumentFromHTML: createDocumentFromHTML # internal
     createFromHTML: createFromHTML # practical for element creation
     createFromHtml: (args...) ->
@@ -1232,3 +1238,4 @@ up.element = do ->
     upAttrs: upAttrs
     toggleAttr: toggleAttr
     isDetached: isDetached
+

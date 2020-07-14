@@ -4,15 +4,35 @@
 - Write remaining tests
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - Publish Layer#sync()
-- Currently onAccepted and onDismissed get an accepted/dismissed event. I often expected this to be the resolution value instead.
-- UpdateLayer/OpenLayer must now blow up if the user layer is dismissed in between
-- UpdateLayer: handleLayerChangeRequests does up.layer.dismiss(), but doesn't set up.layer.current
 - saveScroll: options.url should be renamed to options.location
-- ganz viel zeug bricht wenn layer.location nicht gesetzt ist, e.g. bei layern die über { content } geöffnet werden
-  - test that restoreScroll() doesn't break
-  - test that saveScroll() doesn't break
-  - test that feedback highlighting doesn't break
+- createFromSelector(options.content) needs to be (options.inner)
 - Reach out to server-integration libs (make issues?) with the new changes
+
+- up.element.config.nonSemanticClasses = [/^mb-\d$]
+  - Implement for Bootstrap
+
+- up.fail()
+  - move to up.error
+  - expose up.error.config.toast()
+
+- Consolidate scroll options?
+  - up.change({ scroll: Function })
+  - up.change({ focus: Function })
+  - { restoreScroll: true } => { scroll: 'restore' }
+  - { reveal: false } => { scroll: false }
+  - { resetScroll: true } => { scroll: 'reset' }
+  - => saveScroll passt da nicht rein
+
+- Still unhappy with { content } / { html }
+  - Should this be { inner }, { outer } ?
+  - { content } / { fragment } ?
+  - { content } / { document } ?
+  - { content } is OK, but the other option is either a fragment or document.
+  - variante 1: { document }, { outer }, { inner }
+  - variante 2: { document }, { outer }, { content }
+  - variante 3: { document }, { fragment }, { content } => YEAH!!!!
+
+- up.viewport.config.revealTop = false
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
@@ -22,8 +42,26 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that [up-main] is a default target
+  - Test <a ... up-reveal=top>
+  - Test up.link.config.preload.push('a')
+    - Test that can be disabled at a link with [up-preload=false]
+  - Test up.link.config.instant.push('a')
+    - Test that can be disabled at a link with [up-instant=false]
+  - Test up.link.config.follow.push('a')
+    - Test that can be disabled at a link with [up-follow=false]
+  - Test up.form.config.submit.push('a')
+    - Test that can be disabled at a form with [up-follow=false]
   - Preload requests are tentative by default, but tentative can be set to false and the request will then not be aborted by a foreground request
   - When a tentative request is promoted to the foreground, it is no longer tentative
+  - Test that we can have serverless popups with inline [up-content]: <a up-layer="popup" up-content="Locking a user will prevent them from using the application">
+  - Test that serverless links with inline [up-content] will not explode when they also have a [up-preload] attribute set by accident
+  - Test that we can open layers via { content } that do not even know their { location }
+    - test that opening such a layer with { history: true } does not break for the initial opening and a fragment update (it might want to render its history to the address bar but has an empty { location })
+    - test that closing a child layer of an location-less layer will not break in parentLayer.restoreHistory()
+    - test that restoreScroll() doesn't break
+    - test that saveScroll() doesn't break
+    - test that feedback highlighting doesn't break
   - Aborting a slow request emits :up:proxy:recover event
   - Test that unsafe links are not preloaded (does that exist?)
   - Edge Cases for concurrent Layer Changes:
@@ -182,7 +220,6 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.syntax.data() is now up.data()
   - [up-content], [up-content=overlay], [up-content=(mode)]
   - No longer autofocuses on load (already done by browser)
-  - up.hello() no longer autofocuses
   - { layer: 'swap' }
   - up:form:validate
   - Document request queue changes
@@ -222,11 +259,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Document up.proxy.abort().
   - Document up.proxy.abort(request)
   - Document up.proxy.abort(conditionsObj)
-  - Document [up-dismiss-on="click .button"]
   - Document up:proxy:aborted
-  - Document new Rails integration
-    - Document up.redirect_to
-  - Document Protocol changes for other integrators
   - More Documentation from Diff
   - CHANGELOG from diff
 
@@ -408,5 +441,7 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
   - DECISION: We do it like this:
     - up.emit([target], [eventType], [eventProps]) ?
 - Are there still cases for up.toast()?
-- Can we prevent the fragment from being updated when the update trigers a layer close? To prevent content flashing
-  => This would be really heard to do. Remember that the server might emits that MIGHT cause a layer close
+- Should up.change() be named up.replace()?
+  - up.replace(selectorOrElement, url, [options])
+  - up.replace(selectorOrElement, url, [options])
+  => No, We named it change() because it sometimes opens a new layer

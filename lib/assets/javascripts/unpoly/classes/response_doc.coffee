@@ -24,30 +24,41 @@ class up.ResponseDoc
     # HTMLParser will not execute their content once appended to the DOM.
     @scriptWrapper = new up.HTMLWrapper('script', guard: @isInlineScript)
 
-    @parsedRoot =
-      @parseOuterContent(options) || @parseInnerContent(options)
+    @root =
+      @parseDocument(options) || @parseFragment(options) || @parseContentOrBuildEmpty(options)
 
-  parseOuterContent: (options) ->
-    if html = options.html
-      if u.isString(html)
-        html = @wrapHTML(html)
-        html = e.createDocumentFromHTML(html)
-      return html
+  parseDocument: (options) ->
+    return @parse(options.document, e.createDocumentFromHTML)
 
-  parseInnerContent: (options) ->
+  parseContentOrBuildEmpty: (options) ->
+    # Parsing { inner } is the last option we try. It should always succeed in case someone
+    # tries `up.layer.open()` without any args. Hence we set the innerHTML to an empty string.
     content = options.content || ''
-    target = options.target or throw "must pass a { target } when passing { content }"
-    if u.contains(target, ',')
-      throw 'when passing { content } you must { target } a single element'
+    target = options.target || options.defaultTarget || up.fail("must pass a { target } when passing { content }")
+
+    # Conjure an element that will later match options.target in @select()
     matchingElement = e.createFromSelector(target)
 
     if u.isString(content)
       content = @wrapHTML(content)
+      # Don't use e.createFromHTML() here, since content may be a text node.
       matchingElement.innerHTML = content
     else
       matchingElement.appendChild(content)
 
     return matchingElement
+
+  parseFragment: (options) ->
+    return @parse(options.fragment)
+
+  parse: (value, parseFn = e.createFromHTML) ->
+    if u.isString(value)
+      value = @wrapHTML(value)
+      value = parseFn(value)
+    value
+
+  rootSelector: ->
+    e.toSelector(@root)
 
   wrapHTML: (html) ->
     html = @noscriptWrapper.wrap(html)
@@ -55,10 +66,10 @@ class up.ResponseDoc
     html
 
   title: ->
-    @parsedRoot.querySelector("head title")?.textContent
+    @root.querySelector("head title")?.textContent
 
   select: (selector) ->
-    e.subtree(@parsedRoot, selector)[0]
+    e.subtree(@root, selector)[0]
 
   isInlineScript: (element) ->
     element.hasAttribute('src')

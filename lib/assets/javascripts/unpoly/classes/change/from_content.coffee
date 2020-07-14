@@ -82,12 +82,23 @@ class up.Change.FromContent extends up.Change
       noneApplicable: => @postflightTargetNotApplicable()
 
   buildResponseDoc: ->
-    docOptions = u.copy(@options)
-    # ResponseDoc allows to pass innerHTML as { content }, but then it also
-    # requires a { target }. If no { target } is given we use the first plan's target.
-    if !docOptions.html && !docOptions.target
-      docOptions.target = @firstDefaultTarget()
+    docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
+    up.legacy.fixKey(docOptions, 'html', 'document')
+
+    if !docOptions.document
+      # ResponseDoc allows to pass innerHTML as { content }, but then it also
+      # requires a { target }. If no { target } is given we use the first plan's target.
+      docOptions.defaultTarget = @firstDefaultTarget()
+
     @options.responseDoc = new up.ResponseDoc(docOptions)
+
+    if docOptions.fragment
+      # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
+      # requires a { target }. We use a target that matches the parsed { fragment }.
+
+      console.debug("=== rootSelector for %o is %o", @options.responseDoc.root, @options.responseDoc.rootSelector())
+
+      @options.target ||= @options.responseDoc.rootSelector()
 
   # Returns information about the change that is most likely before the request was dispatched.
   # This might change postflight if the response does not contain the desired target.
@@ -110,7 +121,7 @@ class up.Change.FromContent extends up.Change
     if @plans.length
       up.fail(["Could not find matching targets in current page and server response (tried selectors %o)", @planTargets()], toastOpts)
     else
-      up.fail('No target given for change', toastOpts)
+      up.fail(['No target given for change'], toastOpts)
 
   planTargets: ->
     return u.uniq(u.map(@plans, 'target'))

@@ -98,10 +98,10 @@ describe 'up.layer', ->
 
       describe 'from a string of HTML', ->
 
-        it 'opens a new overlay from outer HTML given as { html }', (done) ->
+        it 'opens a new overlay with matching HTML extracted from the given as { document }', (done) ->
           layerPromise = up.layer.open(
             target: '.element',
-            html: '<div class="element other-class">element text</div>'
+            document: '<div class="element other-class">element text</div>'
           )
 
           layerPromise.then ->
@@ -110,6 +110,20 @@ describe 'up.layer', ->
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
             expect(element).toHaveClass('other-class')
+            expect(element).toHaveText('element text')
+
+            done()
+
+        it 'derives a new overlay with a selector and outer HTML derived from the given { fragment } option', (done) ->
+          layerPromise = up.layer.open(
+            fragment: '<div class="element">element text</div>'
+          )
+
+          layerPromise.then ->
+            expect(up.layer.stack.length).toBe(2)
+
+            element = document.querySelector('up-modal .element')
+            expect(element).toBeGiven()
             expect(element).toHaveText('element text')
 
             done()
@@ -129,7 +143,7 @@ describe 'up.layer', ->
 
             done()
 
-        it 'opens an empty overlay if neither { html } nor { content } is given', (done) ->
+        it 'opens an empty overlay if neither { document } nor { fragment } nor { content } is given', (done) ->
           layerPromise = up.layer.open(
             target: '.element'
           )
@@ -181,9 +195,8 @@ describe 'up.layer', ->
 
         it 'updates the browser location when the overlay opens', asyncSpec (next) ->
           up.layer.open(
-            target: '.element',
             location: '/modal-location'
-            html: '<div class="element">element text</div>'
+            fragment: '<div class="element">element text</div>'
           )
 
           next ->

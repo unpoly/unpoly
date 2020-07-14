@@ -394,7 +394,7 @@ up.event = do ->
   @internal
   ###
   isUnmodifiedKeyEvent = (event) ->
-    not (event.metaKey or event.shiftKey or event.ctrlKey)
+    not (event.metaKey or event.shiftKey or event.ctrlKey or event.altKey)
 
   ###**
   @function up.event.isUnmodifiedMouseEvent
