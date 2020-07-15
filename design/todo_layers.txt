@@ -8,29 +8,9 @@
 - createFromSelector(options.content) needs to be (options.inner)
 - Reach out to server-integration libs (make issues?) with the new changes
 
-- up.element.config.nonSemanticClasses = [/^mb-\d$]
-  - Implement for Bootstrap
-
 - up.fail()
   - move to up.error
   - expose up.error.config.toast()
-
-- Consolidate scroll options?
-  - up.change({ scroll: Function })
-  - up.change({ focus: Function })
-  - { restoreScroll: true } => { scroll: 'restore' }
-  - { reveal: false } => { scroll: false }
-  - { resetScroll: true } => { scroll: 'reset' }
-  - => saveScroll passt da nicht rein
-
-- Still unhappy with { content } / { html }
-  - Should this be { inner }, { outer } ?
-  - { content } / { fragment } ?
-  - { content } / { document } ?
-  - { content } is OK, but the other option is either a fragment or document.
-  - variante 1: { document }, { outer }, { inner }
-  - variante 2: { document }, { outer }, { content }
-  - variante 3: { document }, { fragment }, { content } => YEAH!!!!
 
 - up.viewport.config.revealTop = false
 
@@ -291,6 +271,9 @@ Accessibility
 Later?
 ------
 
+- up.element.config.nonSemanticClasses = [/^mb-\d$]
+  - will be ignored in up.element.toSelector()
+  - Implement for Bootstrap
 - When we go back from a non-Unpoly page to an Unpoly page, scroll positions are not restored
   - Test case: https://glitch.com/edit/#!/gaudy-nettle-ash?path=index.html%3A32%3A46
   - Why did we disable scroll restauration in https://github.com/unpoly/unpoly/commit/8b22fef9f72ea316f1a855b36abb6d01263d6059 ?
