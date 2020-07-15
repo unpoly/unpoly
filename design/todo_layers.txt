@@ -5,14 +5,7 @@
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - Publish Layer#sync()
 - saveScroll: options.url should be renamed to options.location
-- createFromSelector(options.content) needs to be (options.inner)
 - Reach out to server-integration libs (make issues?) with the new changes
-
-- up.fail()
-  - move to up.error
-  - expose up.error.config.toast()
-
-- up.viewport.config.revealTop = false
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable

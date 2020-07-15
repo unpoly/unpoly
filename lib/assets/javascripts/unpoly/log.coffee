@@ -28,6 +28,8 @@ up.log = do ->
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
+  @param {boolean} [options.toast=true]
+    Whether fatal errors display a notification bar at the bottom of the screen.
   @stable
   ###
   config = new up.Config ->
