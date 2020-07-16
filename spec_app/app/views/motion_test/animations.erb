@@ -1,6 +1,6 @@
 <div class="fixed-top-bar">
   <% for animation in %w(fade-in fade-out move-to-top move-from-top move-to-bottom move-from-bottom move-to-left move-from-left move-to-right move-from-right roll-down) do %>
-    <span class="button" onclick="up.animate('.animated-object', '<%= animation %>', { duration: 500 })">
+    <span class="btn btn-primary" onclick="up.animate('.animated-object', '<%= animation %>', { duration: 500 })">
       <%= animation %>
     </span>
   <% end %>

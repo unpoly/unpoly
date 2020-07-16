@@ -1,60 +1,55 @@
-<div class="example">
+<div class="row">
+  <div class="col">
 
-  <h2>Basic form</h2>
+    <h2>Basic form</h2>
 
-  <%= form_tag "/form_test/basic", method: :post, 'up-target' => '.result' do %>
+    <%= form_tag "/form_test/basic", method: :post, 'up-target' => '.result' do %>
 
-    <p>
-      <label>
-        input[type=text]
-        <input type="text" name="text-param" value="text-value" />
-      </label>
-    </p>
+      <div class="form-group">
+        <label for="text-param">input[type=text]</label>
+        <input type="text" name="text-param" value="text-value" class="form-control" id="text-param">
+      </div>
 
-    <p>
-      <label>
-        input[type=password]
-        <input type="password" name="password-param" value="password-value" />
-      </label>
-    </p>
+      <div class="form-group">
+        <label for="password-param">input[type=password]</label>
+        <input type="password" name="password-param" value="password-value" class="form-control" id="password-param">
+      </div>
 
-    <p>
-      <label>
-        input[type=checkbox]
-        <input type="checkbox" name="checkbox-param" value="checkbox-value">
-      </label>
-    </p>
+      <div class="form-group form-check">
+        <input type="checkbox" name="checkbox-param" value="checkbox-value" class="form-check-input" id="checkbox-param">
+        <label for="checkbox-param" class="form-check-label"">input[type=checkbox]</label>
+      </div>
 
-    <p>
-      <label>
-        select
-        <select name="select-param">
+      <div class="form-group">
+        <label for="select-param">select</label>
+        <select name="select-param" class="form-control" id="select-param">
           <option value="select-value">select-label</option>
         </select>
-      </label>
-    </p>
+      </div>
 
-    <p>
-      <label>
-        select[multiple]
-        <select name="multiple-select-param[]" multiple>
+      <div class="form-group">
+        <label for="multiple-select-param">select[multiple]</label>
+        <select name="multiple-select-param[]" multiple class="form-control" id="multiple-select-param">
           <option value="multiple-select-value-1">multiple-select-label-1</option>
           <option value="multiple-select-value-2">multiple-select-label-2</option>
           <option value="multiple-select-value-3">multiple-select-label-3</option>
         </select>
-      </label>
-    </p>
+      </div>
 
-    <p>
-      <button type="submit">Submit</button>
-    </p>
 
-  <% end %>
+      <button type="submit" class="btn btn-primary">Submit</button>
 
-  <h3>Submission result</h3>
 
-  <div class="result">
-    Results of the form submission will be shown here.
+    <% end %>
+
+  </div>
+
+  <div class="col">
+    <h2>Submission result</h2>
+
+    <div class="result">
+      Results of the form submission will be shown here.
+    </div>
   </div>
 
 </div>

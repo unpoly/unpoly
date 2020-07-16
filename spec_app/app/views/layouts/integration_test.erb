@@ -4,21 +4,13 @@
     <title>Integration test - Unpoly</title>
     <%= stylesheet_link_tag 'integration_test', media: 'all' %>
     <%= javascript_include_tag 'integration_test' %>
-    <% if params[:bootstrap] == '1' %>
-      <%= stylesheet_link_tag 'bootstrap_manifest', media: 'all' %>
-      <%= javascript_include_tag 'bootstrap_manifest' %>
-      <%= stylesheet_link_tag 'unpoly-bootstrap3', media: 'all' %>
-      <%= javascript_include_tag 'unpoly-bootstrap3' %>
-    <% end %>
     <%= csrf_meta_tags %>
     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1'>
     <%= favicon_link_tag("favicon.png") %>
   </head>
   <body>
-    <div class="page">
-      <div up-main>
-        <%= yield %>
-      </div>
+    <div up-main class="container">
+      <%= yield %>
     </div>
   </body>
 </html>

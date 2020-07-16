@@ -24,23 +24,23 @@
 
 
 <div class="fixed-top-bar" up-fixed="top">
-  <a class="button" href="/css_test/popup_contents?1" up-layer="popup" up-position="top" up-align="left">top/left popup</a>
-  <a class="button" href="/css_test/popup_contents?2" up-layer="popup" up-position="top" up-align="right">top/right popup</a>
-  <a class="button" href="/css_test/popup_contents?3" up-layer="popup" up-position="bottom" up-align="right">bottom/right popup</a>
-  <a class="button" href="/css_test/popup_contents?4" up-layer="popup" up-position="bottom" up-align="left">bottom/left popup</a>
+  <a class="btn btn-primary" href="/css_test/popup_contents?1" up-layer="popup" up-position="top" up-align="left">top/left popup</a>
+  <a class="btn btn-primary" href="/css_test/popup_contents?2" up-layer="popup" up-position="top" up-align="right">top/right popup</a>
+  <a class="btn btn-primary" href="/css_test/popup_contents?3" up-layer="popup" up-position="bottom" up-align="right">bottom/right popup</a>
+  <a class="btn btn-primary" href="/css_test/popup_contents?4" up-layer="popup" up-position="bottom" up-align="left">bottom/left popup</a>
 </div>
 
 <div class="spacer">
 </div>
 
-<div up-content="overlay">
+<div up-main="overlay">
 
   <div class="example">
     Text
     <a href="#">Link</a>
-    <input type="text" name="text-input" placeholder="Text input">
-    <input type="text" name="search-input" placeholder="Search input">
-    <select name="select">
+    <input class="form-control" type="text" name="text-input" placeholder="Text input">
+    <input class="form-control" type="text" name="search-input" placeholder="Search input">
+    <select class="form-control" name="select">
       <option value="">&lt;Select&gt;</option>
       <option>Option</option>
     </select>
@@ -48,73 +48,73 @@
   </div>
 
   <div class="example">
-    <a class="button" href="/css_test/layer" up-layer="modal">Modal</a>
-    <a class="button" href="/css_test/layer" up-layer="modal" up-instant>Modal (instant)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="modal">Modal</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="modal" up-instant>Modal (instant)</a>
     <a class="button clamped-open" href="/css_test/layer">Modal (clamped)</a>
   </div>
 
   <div class="example">
-    <a class="button" href="/css_test/layer" up-layer="modal" up-size="small">Modal (small)</a>
-    <a class="button" href="/css_test/layer" up-layer="modal" up-size="medium">Modal (medium)</a>
-    <a class="button" href="/css_test/layer" up-layer="modal" up-size="large">Modal (large)</a>
-    <a class="button" href="/css_test/layer" up-layer="modal" up-size="auto">Modal (auto)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="modal" up-size="small">Modal (small)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="modal" up-size="medium">Modal (medium)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="modal" up-size="large">Modal (large)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="modal" up-size="auto">Modal (auto)</a>
   </div>
 
   <div class="example">
-    <a class="button" href="/css_test/modal_contents_wide" up-layer="modal">Modal (wide contents)</a>
+    <a class="btn btn-primary" href="/css_test/modal_contents_wide" up-layer="modal">Modal (wide contents)</a>
   </div>
 
   <div class="example">
-    <a class="button" href="/css_test/layer" up-layer="cover" up-target=".contents">Cover</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="cover" up-target=".contents">Cover</a>
   </div>
 
   <div class="example">
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-position="left">Drawer (left)</a>
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-position="right">Drawer (right)</a>
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-position="right" up-instant>Drawer (instant)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-position="left">Drawer (left)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-position="right">Drawer (right)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-position="right" up-instant>Drawer (instant)</a>
   </div>
   
   <div class="example">
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-size="small">Drawer (small)</a>
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-size="medium">Drawer (medium)</a>
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-size="large">Drawer (large)</a>
-    <a class="button" href="/css_test/layer" up-layer="drawer" up-size="auto">Drawer (auto)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-size="small">Drawer (small)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-size="medium">Drawer (medium)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-size="large">Drawer (large)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="drawer" up-size="auto">Drawer (auto)</a>
   </div>
   
   <div class="example">
-    <a class="button" href="/css_test/popup_contents" up-layer="popup">popup</a>
-    <a class="button" href="/css_test/popup_contents" up-layer="popup" up-instant>popup (instant)</a>
-    <a class="button" href="/css_test/layer" up-layer="popup" up-instant up-size="large">popup (nested)</a>
-    <span class="button" up-layer="popup" up-content="Inline popup content">popup (inline)</span>
+    <a class="btn btn-primary" href="/css_test/popup_contents" up-layer="popup">popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents" up-layer="popup" up-instant>popup (instant)</a>
+    <a class="btn btn-primary" href="/css_test/layer" up-layer="popup" up-instant up-size="large">popup (nested)</a>
+    <span class="btn btn-primary" up-layer="popup" up-content="Inline popup content">popup (inline)</span>
   </div>
   
 
   <div class="example">
-    <a class="button" href="/css_test/popup_contents" up-layer="popup" up-size="small">Popup (small)</a>
-    <a class="button" href="/css_test/popup_contents" up-layer="popup" up-size="medium">Popup (medium)</a>
-    <a class="button" href="/css_test/popup_contents" up-layer="popup" up-size="large">Popup (large)</a>
-    <a class="button" href="/css_test/popup_contents" up-layer="popup" up-size="auto">Popup (auto)</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents" up-layer="popup" up-size="small">Popup (small)</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents" up-layer="popup" up-size="medium">Popup (medium)</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents" up-layer="popup" up-size="large">Popup (large)</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents" up-layer="popup" up-size="auto">Popup (auto)</a>
   </div>
 
   <div class="example">
-    <a class="button" href="/css_test/popup_contents?5" up-layer="popup" up-position="top" up-align="left">top/left popup</a>
-    <a class="button" href="/css_test/popup_contents?6" up-layer="popup" up-position="top" up-align="center">top/center popup</a>
-    <a class="button" href="/css_test/popup_contents?7" up-layer="popup" up-position="top" up-align="right">top/right popup</a>
-    <a class="button" href="/css_test/popup_contents?8" up-layer="popup" up-position="right" up-align="top">right/top popup</a>
-    <a class="button" href="/css_test/popup_contents?9" up-layer="popup" up-position="right" up-align="center">right/center popup</a>
-    <a class="button" href="/css_test/popup_contents?a" up-layer="popup" up-position="right" up-align="bottom">right/bottom popup</a>
-    <a class="button" href="/css_test/popup_contents?b" up-layer="popup" up-position="bottom" up-align="right">  bottom/right popup</a>
-    <a class="button" href="/css_test/popup_contents?c" up-layer="popup" up-position="bottom" up-align="center">bottom/center popup</a>
-    <a class="button" href="/css_test/popup_contents?d" up-layer="popup" up-position="bottom" up-align="left"> bottom/left popup</a>
-    <a class="button" href="/css_test/popup_contents?e" up-layer="popup" up-position="left" up-align="bottom">left/bottom popup</a>
-    <a class="button" href="/css_test/popup_contents?f" up-layer="popup" up-position="left" up-align="top">left/top popup</a>
-    <a class="button" href="/css_test/popup_contents?g" up-layer="popup" up-position="left" up-align="center">left/center popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?5" up-layer="popup" up-position="top" up-align="left">top/left popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?6" up-layer="popup" up-position="top" up-align="center">top/center popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?7" up-layer="popup" up-position="top" up-align="right">top/right popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?8" up-layer="popup" up-position="right" up-align="top">right/top popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?9" up-layer="popup" up-position="right" up-align="center">right/center popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?a" up-layer="popup" up-position="right" up-align="bottom">right/bottom popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?b" up-layer="popup" up-position="bottom" up-align="right">  bottom/right popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?c" up-layer="popup" up-position="bottom" up-align="center">bottom/center popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?d" up-layer="popup" up-position="bottom" up-align="left"> bottom/left popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?e" up-layer="popup" up-position="left" up-align="bottom">left/bottom popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?f" up-layer="popup" up-position="left" up-align="top">left/top popup</a>
+    <a class="btn btn-primary" href="/css_test/popup_contents?g" up-layer="popup" up-position="left" up-align="center">left/center popup</a>
   </div>
 
   <div class="example">
     <div up-viewport style="height: 125px; width: 500px; overflow-y: scroll; background-color: rgba(0,0,0,0.2)">
       <div class="spacer"></div>
-      <a class="button" href="/css_test/popup_contents?8" up-layer="popup" up-position="bottom">Popup within a viewport that has no position</a>
+      <a class="btn btn-primary" href="/css_test/popup_contents?8" up-layer="popup" up-position="bottom">Popup within a viewport that has no position</a>
       <div class="spacer"></div>
     </div>
   </div>
@@ -122,7 +122,7 @@
   <div class="example">
     <div up-viewport style="height: 125px; width: 500px; overflow-y: scroll; background-color: rgba(0,0,0,0.2); position: relative">
       <div class="spacer"></div>
-      <a class="button" href="/css_test/popup_contents?8" up-layer="popup" up-position="bottom">Popup within a viewport that has position</a>
+      <a class="btn btn-primary" href="/css_test/popup_contents?8" up-layer="popup" up-position="bottom">Popup within a viewport that has position</a>
       <div class="spacer"></div>
     </div>
   </div>

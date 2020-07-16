@@ -10,10 +10,6 @@ Rails.application.config.assets.paths += Dir["#{Rails.root}/vendor/asset-libs/*"
 Rails.application.config.assets.precompile += %w( application.js application.css )
 Rails.application.config.assets.precompile += %w( jasmine_specs.js jasmine_specs.css )
 Rails.application.config.assets.precompile += %w( integration_test.js integration_test.css )
-Rails.application.config.assets.precompile += %w( bootstrap_manifest.js bootstrap_manifest.css )
 
 # Precompile jQuery versions from jquery-rails individually, so we can include them as individual <script> tags
 Rails.application.config.assets.precompile += %w( jquery.js jquery2.js jquery3.js )
-
-# Precompile Bootstrap bindings individually, so we can include them as individual <script> tags
-Rails.application.config.assets.precompile += %w( unpoly-bootstrap3.js unpoly-bootstrap3.css )

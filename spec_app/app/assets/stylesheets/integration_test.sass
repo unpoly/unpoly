@@ -1,31 +1,17 @@
 //= require unpoly
 
+@import bootstrap
 @import helpers
 
-$block-spacing: 25px
-
 =block-spacing
-  margin-top: $block-spacing
-  margin-bottom: $block-spacing
+  margin-top: $spacer * 3
+  margin-bottom: $spacer * 2
 
 body
   margin: 25px
 
-  font-family: arial, sans-serif
-
-h1, h2, h3, h4, p
-  +block-spacing
-
-a
-  color: #169
-  &:hover
-    color: #e81
-
 *:focus
-  outline: 3px solid orange
-
-.page
-  min-height: 3000px
+  outline: 2px solid orange // Make focus very visible to help test A11Y
 
 .spacer
   // background-color: transparentize(green, 0.7)
@@ -57,34 +43,9 @@ a
   //padding: 25px
   //background: image-url('grid.png') repeat
 
-.area
-  +block-spacing
-  padding: 25px
-  border: 1px dashed #666
-
-.button
-  display: inline-block
-  cursor: pointer
-  height: 30px
-  line-height: 30px
-  padding-left: 10px
-  padding-right: 10px
-  background-color: #37b
-  color: white
-  text-decoration: none
-  box-sizing: border-box
-
-  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), inset 0 -2px 5px rgba(0, 0, 0, 0.2)
-
-  &.up-current
-    background-color: #e21
-  &:hover
-    background-color: #fa1
-    color: white
+.btn
   &.up-active
-    background-color: #ff0
-  &.-green
-    background-color: green
+    outline: 2px solid green
 
 
 dt
