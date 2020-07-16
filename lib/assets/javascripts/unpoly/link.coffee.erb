@@ -81,7 +81,7 @@ up.link = do ->
   preloadDelay = new up.LinkPreloadDelay()
 
   LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-content]', 'a[up-fragment]', 'a[up-document]']
+  LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]']
   LINKS_WITH_ANY_HTML = LINKS_WITH_REMOTE_HTML.concat(LINKS_WITH_LOCAL_HTML)
   ATTRIBUTES_SUGGESTING_FOLLOW = [e.trueAttributeSelector('up-follow'), '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
 

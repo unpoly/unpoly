@@ -15,6 +15,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test [up-reveal=top]
   - Test that [up-main] is a default target
   - Test <a ... up-reveal=top>
   - Test up.link.config.preload.push('a')
