@@ -1,4 +1,4 @@
-module NestedFormTest
+module LayerTest
   class BudgetsController < ApplicationController
 
     def new
@@ -37,7 +37,7 @@ module NestedFormTest
     end
 
     def load_budget
-      @budget ||= budget_scope.find(params[:id])
+      @budget ||= budget_scope.includes(:project).find(params[:id])
     end
     
     def save_budget(form:)
@@ -45,7 +45,7 @@ module NestedFormTest
         @budget.valid? # run validations
         render form
       elsif @budget.save
-        redirect_to [:nested_form_test, @budget]
+        redirect_to [:layer_test, @budget]
       else
         render form, status: :bad_request
       end

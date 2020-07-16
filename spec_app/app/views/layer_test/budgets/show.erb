@@ -1,0 +1,10 @@
+<h2>Budget #<%= @budget.id %></h2>
+
+<dl>
+  <dt>Name</dt>
+  <dd><%= @budget.name %></dd>
+  <dt>Amount</dt>
+  <dd><%= @budget.amount %> €</dd>
+  <dt>Project</dt>
+  <dd><%= link_to @budget.project.name, [:layer_test, @budget.project] %></dd>
+</dl>

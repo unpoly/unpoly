@@ -14,13 +14,23 @@
 ActiveRecord::Schema.define(version: 20200716071558) do
 
   create_table "budgets", force: :cascade do |t|
-    t.string  "name"
-    t.integer "amount"
-    t.integer "project_id"
+    t.string   "name"
+    t.integer  "amount"
+    t.integer  "project_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "companies", force: :cascade do |t|
+    t.string   "name"
+    t.text     "address"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "projects", force: :cascade do |t|
     t.string   "name"
+    t.integer  "company_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

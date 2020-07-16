@@ -27,9 +27,10 @@ Rails.application.routes.draw do
     end
   end
 
-  namespace :nested_form_test do
+  namespace :layer_test do
     resources :projects
     resources :budgets
+    resources :companies
   end
 
 end

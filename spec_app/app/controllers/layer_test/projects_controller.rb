@@ -1,4 +1,4 @@
-module NestedFormTest
+module LayerTest
   class ProjectsController < ApplicationController
 
     def new
@@ -45,7 +45,7 @@ module NestedFormTest
         @project.valid? # run validations
         render form
       elsif @project.save
-        redirect_to [:nested_form_test, @project]
+        redirect_to [:layer_test, @project]
       else
         render form, status: :bad_request
       end

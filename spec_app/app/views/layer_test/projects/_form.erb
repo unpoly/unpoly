@@ -1,4 +1,4 @@
-<%= form_for [:nested_form_test, @project] do |form| %>
+<%= form_for [:layer_test, @project] do |form| %>
 
   <%= form.label :name %>
   <%= form.text_field :name %>
@@ -9,9 +9,9 @@
     <% byebug %>
     <%= budget_form.object.name %> (<%= budget_form.object.amount %>)
 
-    <%= link_to 'Edit', edit_nested_form_test_budget_path(budget_form.object),
+    <%= link_to 'Edit', edit_layer_test_budget_path(budget_form.object),
       'up-layer': 'modal',
-      'up-accept-location': nested_form_test_budgets_path + ' ' + nested_form_test_budget_path(:id),
+      'up-accept-location': layer_test_budgets_path + ' ' + layer_test_budget_path(:id),
       'up-on-accepted': 'up.validate("form")'
     %>
 
@@ -19,9 +19,9 @@
   <% end %>
 
   <div class="budgets--new">
-    <%= link_to 'New', new_nested_form_test_budget_path,
+    <%= link_to 'New', new_layer_test_budget_path,
       'up-layer': 'modal',
-      'up-accept-location': nested_form_test_budget_path('$id'),
+      'up-accept-location': layer_test_budget_path('$id'),
       'up-on-accepted': 'up.validate("form", { params: { "project[budgets_attributes][0][id]": value.id } })'
     %>
   </div>

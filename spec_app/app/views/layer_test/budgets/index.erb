@@ -1,0 +1,25 @@
+<h2>All budgets</h2>
+
+<div class="my-4">
+  <%= link_to 'New budget', new_layer_test_budget_path, class: 'btn btn-primary' %>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Amount</th>
+      <th>Project</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @budgets.each do |budget| %>
+      <tr>
+        <td><%= link_to budget.name, [:layer_test, budget] %></td>
+        <td><%= budget.amount %></td>
+        <td><%= budget.project.name %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

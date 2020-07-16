@@ -1,0 +1,11 @@
+<h2>All projects</h2>
+
+<%= link_to 'New project', new_layer_test_project_path %>
+
+<ul>
+  <% @projects.each do |project| %>
+    <li>
+      <%= link_to project.name, [:layer_test, project] %>
+    </li>
+  <% end %>
+</ul>
