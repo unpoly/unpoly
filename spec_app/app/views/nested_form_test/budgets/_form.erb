@@ -1,0 +1,13 @@
+<%= form_for [:nested_form_test, @budget], html: { 'up-follow': '' } do |form| %>
+
+  <%= form.label :name %>
+  <%= form.text_field :name %>
+
+  <hr>
+
+  <%= form.label :amount %>
+  <%= form.text_field :amount %>
+
+<%= form.submit "Save" %>
+
+<% end %>

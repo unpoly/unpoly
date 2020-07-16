@@ -1,0 +1,21 @@
+<h2>Project #<%= @project.id %></h2>
+
+<dl>
+  <dt>Name</dt>
+  <dd><%= @project.name %></dd>
+</dl>
+
+<table>
+  <thead>
+    <th>Budget</th>
+    <th>Amount</th>
+  </thead>
+  <tbody>
+    <% @project.budgets.each do |budget| %>
+      <tr>
+        <td><%= budget.name %></td>
+        <td><%= budget.amount %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

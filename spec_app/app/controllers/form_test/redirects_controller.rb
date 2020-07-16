@@ -1,8 +1,6 @@
 module FormTest
   class RedirectsController < ApplicationController
 
-    layout 'integration_test'
-
     def new
     end
 

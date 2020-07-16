@@ -6,6 +6,8 @@
 - Publish Layer#sync()
 - saveScroll: options.url should be renamed to options.location
 - Reach out to server-integration libs (make issues?) with the new changes
+- Allow up.validate(any_element) and this will find the nearest field or form
+- Consider removing history from modals
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
@@ -15,6 +17,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that { acceptLocation } also takes an array of alternatives instead of a space-separated string
   - Test [up-reveal=top]
   - Test that [up-main] is a default target
   - Test <a ... up-reveal=top>

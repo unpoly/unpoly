@@ -645,6 +645,7 @@ up.form = do ->
   @stable
   ###
   up.on 'submit', fullSubmitSelector, (event, form) ->
+    console.debug("caught submit event for selector %o", fullSubmitSelector())
     up.event.halt(event)
     u.muteRejection submit(form)
 

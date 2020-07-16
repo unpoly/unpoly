@@ -1,0 +1,11 @@
+<h2>All budgets</h2>
+
+<%= link_to 'New budget', new_nested_form_test_budget_path %>
+
+<ul>
+  <% @budgets.each do |budget| %>
+    <li>
+      <%= link_to budget.name, [:nested_form_test, budget] %>
+    </li>
+  <% end %>
+</ul>

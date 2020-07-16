@@ -18,9 +18,17 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/*/baz')
       expect(pattern.matches('/foo/bar/baz')).toBe(true)
 
-    it 'returns true if the given URL matches a pattern with a named segment', ->
+    it 'returns true if the given URL matches a pattern with a named string segment', ->
       pattern = new up.URLPattern('/foo/:middle/baz')
       expect(pattern.matches('/foo/bar/baz')).toBe(true)
+
+    it 'returns true if the given URL matches a pattern with a named number segment', ->
+      pattern = new up.URLPattern('/foo/$middle/baz')
+      expect(pattern.matches('/foo/123/baz')).toBe(true)
+
+    it 'returns false if named number segment would match a string', ->
+      pattern = new up.URLPattern('/users/$id')
+      expect(pattern.matches('/users/new')).toBe(false)
 
     it 'returns true if the given URL matches either of two space-separated URLs', ->
       pattern = new up.URLPattern('/foo /bar')
@@ -33,11 +41,15 @@ describe 'up.URLPattern', ->
 
   describe '#recognize', ->
 
-    it 'returns an object mapping named segments to their value', ->
+    it 'returns an object mapping named string segments to their value', ->
       pattern = new up.URLPattern('/foo/:one/:two/baz')
       expect(pattern.recognize('/foo/bar/bam/baz')).toEqual { one: 'bar', two: 'bam' }
 
-    it 'returns an object if two space-separated URLs have the same named segment', ->
+    it 'returns an object mapping named number segments to their value', ->
+      pattern = new up.URLPattern('/foo/:one/$two/baz')
+      expect(pattern.recognize('/foo/bar/123/baz')).toEqual { one: 'bar', two: 123 }
+
+    it 'returns an object if two space-separated URLs have the same named string segment', ->
       pattern = new up.URLPattern('/foo/:one /bar/:one')
       expect(pattern.recognize('/foo/bar')).toEqual { one: 'bar' }
 
@@ -46,5 +58,5 @@ describe 'up.URLPattern', ->
       expect(pattern.recognize('/bar')).toBeMissing()
 
     it 'matches query params', ->
-      pattern = new up.URLPattern('/search?query=:query&page=:page')
-      expect(pattern.recognize('/search?query=hello&page=3')).toEqual { query: 'hello', page: '3' }
+      pattern = new up.URLPattern('/search?query=:query&page=$page')
+      expect(pattern.recognize('/search?query=hello&page=3')).toEqual { query: 'hello', page: 3 }

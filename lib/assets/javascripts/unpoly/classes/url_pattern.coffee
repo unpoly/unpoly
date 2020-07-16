@@ -3,16 +3,23 @@ u = up.util
 class up.URLPattern
 
   constructor: (pattern, @normalizeURL = u.normalizeURL) ->
-    @groupNames = []
+    @groups = []
 
     if u.isArray(pattern)
       pattern = pattern.join(' ')
 
     pattern = u.splitValues(pattern).map(@normalizeURL).map(u.escapeRegExp).join('|')
+
     pattern = pattern.replace /\\\*/g, '.*?'
-    pattern = pattern.replace /\:([a-z][\w-]*)/ig, (match, name) =>
-      @groupNames.push(name)
-      return '([^/?#]+)'
+
+    pattern = pattern.replace /(\:|\\\$)([a-z][\w-]*)/ig, (match, type, name) =>
+      # It's \\$ instead of $ because we do u.escapeRegExp above
+      if type == '\\$'
+        @groups.push({ name, cast: Number })
+        return '(\\d+)'
+      else
+        @groups.push({ name, cast: String })
+        return '([^/?#]+)'
     @regexp = new RegExp('^' + pattern + '$')
 
   matches: (url, doNormalize = true) ->
@@ -23,7 +30,7 @@ class up.URLPattern
     url = @normalizeURL(url) if doNormalize
     if match = @regexp.exec(url)
       resolution = {}
-      @groupNames.forEach (groupName, groupIndex) =>
+      @groups.forEach (group, groupIndex) =>
         if value = match[groupIndex + 1]
-          resolution[groupName] = value
+          resolution[group.name] = group.cast(value)
       return resolution

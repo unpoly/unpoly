@@ -120,6 +120,7 @@ class up.EventEmitter extends up.Record
       # In this branch we receive an Event object that was already built:
       # up.emit([target], event, [emitOptions])
       options.event = args[0]
+      options.log ?= args[0].log
     else if u.isString(args[0])
       # In this branch we receive an Event type and props object.
       # The props object may also include options for the emission, such as

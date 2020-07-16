@@ -62,6 +62,10 @@ class up.Layer.Overlay extends up.Layer
       @dismissLocation = new up.URLPattern(@dismissLocation)
 
   callback: (name) ->
+    # Only binds the callback to the layer instance.
+    # Note if the callback was created by an UJS attribute like [up-on-accepted], the
+    # callback is already bound to the origin element to mimic the behavior of built-in
+    # handler attributes like [onclick].
     if fn = this[name]
       return fn.bind(this)
 
@@ -256,6 +260,7 @@ class up.Layer.Overlay extends up.Layer
       # '/decks/:deckId/cards/:cardId' is matched against
       # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
       closeValue = u.merge(resolution, { location })
+      console.log("Calling closeFn %o with value %o", closeFn, closeValue)
       closeFn.call(this, closeValue)
 
   teardownHandlers: ->

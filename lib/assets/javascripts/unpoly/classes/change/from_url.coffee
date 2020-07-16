@@ -78,13 +78,14 @@ class up.Change.FromURL extends up.Change
     return opts
 
   execute: ->
-    if !up.browser.canPushState() && @successOptions.history != false
+    unless up.browser.canPushState()
       @fullLoad() unless @successOptions.preload
       return u.unresolvablePromise()
 
     @buildRequest()
 
     promise = up.request(@request)
+
     unless @successOptions.preload
       promise = u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
     return promise

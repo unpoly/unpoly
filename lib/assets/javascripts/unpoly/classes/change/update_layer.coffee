@@ -46,11 +46,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Make sure only the first step will have scroll-related options.
     @setScrollAndFocusOptions()
 
-    # If we cannot push state on the root layer, a full page load will fix this.
-    if @location && !up.browser.canPushState() && @layer.isRoot()
-      up.browser.loadPage(@options)
-      return u.unresolvablePromise()
-
     if @peel
       @layer.peel()
       # Layer#peel() will manipulate the stack sync.
