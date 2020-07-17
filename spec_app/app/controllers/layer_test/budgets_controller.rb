@@ -1,5 +1,5 @@
 module LayerTest
-  class BudgetsController < ApplicationController
+  class BudgetsController < BaseController
 
     def new
       build_budget
@@ -27,6 +27,15 @@ module LayerTest
 
     def index
       load_budgets
+    end
+    
+    def destroy
+      load_budget
+      if @budget.destroy
+        redirect_to layer_test_companies_path
+      else
+        redirect_to [:layer_test, @budget], alert: 'Could not delete budget'
+      end
     end
 
     private
@@ -61,7 +70,7 @@ module LayerTest
 
     def budget_attributes
       if (attrs = params[:budget])
-        attrs.permit(:name, :amount)
+        attrs.permit(:name, :amount, :project_id)
       else
         {}
       end

@@ -1,10 +1,26 @@
-<h2>Budget #<%= @budget.id %></h2>
+<div class="row mb-4">
+  <div class="col">
+    <h2>Budget #<%= @budget.id %></h2>
+  </div>
+
+  <div class="col-sm-auto">
+    <%= link_to 'Edit', [:edit, :layer_test, @budget], class: 'btn btn-primary', 'up-follow': '' %>
+    <%= link_to 'Delete', [:layer_test, @budget], method: :delete, 'up-follow': '', 'up-confirm' => 'Really delete?', class: 'btn btn-danger mr-3'  %>
+  </div>
+</div>
 
 <dl>
   <dt>Name</dt>
   <dd><%= @budget.name %></dd>
   <dt>Amount</dt>
   <dd><%= @budget.amount %> €</dd>
+
   <dt>Project</dt>
-  <dd><%= link_to @budget.project.name, [:layer_test, @budget.project] %></dd>
+  <dd>
+    <% if @budget.project %>
+      <%= link_to @budget.project.name, [:layer_test, @budget.project] %>
+    <% else %>
+      &mdash;
+    <% end %>
+  </dd>
 </dl>

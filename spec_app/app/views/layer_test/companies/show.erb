@@ -1,0 +1,29 @@
+<div class="row mb-4">
+  <div class="col">
+    <h2>Company #<%= @company.id %></h2>
+  </div>
+
+  <div class="col-sm-auto">
+    <%= link_to 'Edit', [:edit, :layer_test, @company], class: 'btn btn-primary', 'up-follow': '' %>
+    <%= link_to 'Delete', [:layer_test, @company], method: :delete, 'up-follow': '', 'up-confirm' => 'Really delete?', class: 'btn btn-danger mr-3'  %>
+  </div>
+</div>
+
+<dl>
+  <dt>Name</dt>
+  <dd><%= @company.name %></dd>
+  <dt>Address</dt>
+  <dd><%= safe_join(@company.address.lines, '<br>'.html_safe) %></dd>
+</dl>
+
+<% if @company.projects.present? %>
+
+  <h3>Projects</h3>
+
+  <ul>
+    <% @company.projects.each do |project| %>
+      <li><%= link_to project.name, [:layer_test, project] %></li>
+    <% end %>
+  </ul>
+
+<% end %>

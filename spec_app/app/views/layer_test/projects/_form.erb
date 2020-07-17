@@ -1,31 +1,26 @@
-<%= form_for [:layer_test, @project] do |form| %>
+<%= form_for [:layer_test, @project], html: { 'up-follow': '' } do |form| %>
 
-  <%= form.label :name %>
-  <%= form.text_field :name %>
-
-  <h3>Budgets</h3>
-
-  <%= form.fields_for :budgets do |budget_form| %>
-    <% byebug %>
-    <%= budget_form.object.name %> (<%= budget_form.object.amount %>)
-
-    <%= link_to 'Edit', edit_layer_test_budget_path(budget_form.object),
-      'up-layer': 'modal',
-      'up-accept-location': layer_test_budgets_path + ' ' + layer_test_budget_path(:id),
-      'up-on-accepted': 'up.validate("form")'
-    %>
-
-    <hr>
-  <% end %>
-
-  <div class="budgets--new">
-    <%= link_to 'New', new_layer_test_budget_path,
-      'up-layer': 'modal',
-      'up-accept-location': layer_test_budget_path('$id'),
-      'up-on-accepted': 'up.validate("form", { params: { "project[budgets_attributes][0][id]": value.id } })'
-    %>
+  <div class="form-group">
+    <%= form.label :name %>
+    <%= form.text_field :name, class: 'form-control' %>
   </div>
 
-  <%= form.submit "Save" %>
+  <div class="form-group">
+    <%= form.label :company_id %>
+    <div class="input-group">
+      <%= form.collection_select :company_id, Company.order(:name), :id, :name, { include_blank: '<Select a company>' }, class: 'custom-select' %>
+      <div class="input-group-append">
+        <span class="input-group-text">
+          <%= link_to 'New company', new_layer_test_company_path,
+            'up-layer': 'new',
+            'up-accept-location': layer_test_company_path('$id'),
+            'up-on-accepted': "up.validate('form', { params: { 'project[company_id]': value.id } })"
+          %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <%= form.submit "Save", class: 'btn btn-primary mt-2' %>
 
 <% end %>

@@ -1,11 +1,28 @@
-<h2>All projects</h2>
+<div class="row mb-4">
+  <div class="col">
+    <h2>All projects</h2>
+  </div>
 
-<%= link_to 'New project', new_layer_test_project_path %>
+  <div class="col-sm-auto">
+    <%= link_to 'New project', new_layer_test_project_path, class: 'btn btn-primary', 'up-layer': 'new', 'up-accept-location': layer_test_project_path('$id'), 'up-on-accepted': "up.reload('.table')" %>
+  </div>
+</div>
 
-<ul>
-  <% @projects.each do |project| %>
-    <li>
-      <%= link_to project.name, [:layer_test, project] %>
-    </li>
-  <% end %>
-</ul>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Company</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @projects.each do |project| %>
+      <tr>
+        <td><%= link_to project.name, [:layer_test, project], 'up-layer': 'new', 'up-dismiss-location': layer_test_companies_path %></td>
+        <td><%= project.company.name %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

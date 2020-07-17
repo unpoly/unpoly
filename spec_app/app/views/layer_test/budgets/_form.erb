@@ -1,13 +1,25 @@
 <%= form_for [:layer_test, @budget], html: { 'up-follow': '' } do |form| %>
 
-  <%= form.label :name %>
-  <%= form.text_field :name %>
+  <div class="form-group">
+    <%= form.label :name %>
+    <%= form.text_field :name, class: 'form-control' %>
+  </div>
 
-  <hr>
+  <div class="form-group">
+    <%= form.label :amount %>
+    <div class="input-group">
+      <%= form.text_field :amount, class: 'form-control' %>
+      <span class="input-group-append">
+        <span class="input-group-text">€</span>
+      </span>
+    </div>
+  </div>
 
-  <%= form.label :amount %>
-  <%= form.text_field :amount %>
+  <div class="form-group <%= 'd-none' if up.context[:from_project_form] %>">
+    <%= form.label :project_id %>
+    <%= form.collection_select :project_id, Project.order(:name), :id, :name, { include_blank: '<Select a project>' }, class: 'custom-select' %>
+  </div>
 
-<%= form.submit "Save" %>
+  <%= form.submit "Save", class: 'btn btn-primary mt-2' %>
 
 <% end %>

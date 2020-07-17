@@ -8,6 +8,27 @@
 - Reach out to server-integration libs (make issues?) with the new changes
 - Allow up.validate(any_element) and this will find the nearest field or form
 - Consider removing history from modals
+- When the <body> is replaced with a Rails error, there are <div class="up-wrapped-script"> elements in the DOM
+
+- What should this do if there is no parent layer?
+    <div class="row mb-4">
+      <div class="col">
+        <h2>Company #<%= @company.id %></h2>
+      </div>
+
+      <div class="col-sm-auto">
+        <%= link_to 'Edit', [:edit, :layer_test, @company], class: 'btn btn-primary', 'up-follow': '' %>
+        <%= link_to 'Delete', [:layer_test, @company], method: :delete, 'up-confirm' => 'Really delete?', class: 'btn btn-danger', 'up-layer': 'parent'  %>
+      </div>
+    </div>
+
+  => [up-dismiss] would close immediately upon clicking
+  => we don't have [up-dismiss-after] or similar
+  => the server could accept/dismiss, but I don't like that
+  => the opener could close on destroy
+  => IN ANY CASE we should define the behavior of up-layer="parent" on the root layer
+    - It currently fails with "up.fail() No target given for change"
+  => WE SHOULD SUPPORT: up-layer: 'parent root'
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable

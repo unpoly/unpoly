@@ -1,0 +1,8 @@
+<nav class="navbar navbar-expand navbar-light bg-light fixed-top">
+  <a class="navbar-brand" href="#">ERP Demo</a>
+  <div class="navbar-nav">
+    <%= link_to 'Projects', layer_test_projects_path, class: 'nav-item nav-link', 'up-follow': '', 'up-alias' => layer_test_project_path('*') %>
+    <%= link_to 'Budgets', layer_test_budgets_path, class: 'nav-item nav-link', 'up-follow': '', 'up-alias' => layer_test_budget_path('*') %>
+    <%= link_to 'Companies', layer_test_companies_path, class: 'nav-item nav-link', 'up-follow': '', 'up-alias' => layer_test_company_path('*') %>
+  </div>
+</nav>

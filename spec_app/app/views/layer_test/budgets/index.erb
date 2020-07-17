@@ -1,7 +1,11 @@
-<h2>All budgets</h2>
+<div class="row mb-4">
+  <div class="col">
+    <h2>All budgets</h2>
+  </div>
 
-<div class="my-4">
-  <%= link_to 'New budget', new_layer_test_budget_path, class: 'btn btn-primary' %>
+  <div class="col-sm-auto">
+    <%= link_to 'New budget', new_layer_test_budget_path, class: 'btn btn-primary', 'up-layer': 'new', 'up-accept-location': layer_test_budget_path('$id'), 'up-size': 'small', 'up-on-accepted': "up.reload('.table')" %>
+  </div>
 </div>
 
 <table class="table">
@@ -16,9 +20,9 @@
   <tbody>
     <% @budgets.each do |budget| %>
       <tr>
-        <td><%= link_to budget.name, [:layer_test, budget] %></td>
+        <td><%= link_to budget.name, [:layer_test, budget], 'up-layer': 'new', 'up-size': 'small', 'up-dismiss-location': layer_test_budgets_path %></td>
         <td><%= budget.amount %></td>
-        <td><%= budget.project.name %></td>
+        <td><%= budget.project&.name %></td>
       </tr>
     <% end %>
   </tbody>

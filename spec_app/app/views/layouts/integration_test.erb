@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Integration test - Unpoly</title>
-    <%= stylesheet_link_tag 'integration_test', media: 'all' %>
-    <%= javascript_include_tag 'integration_test' %>
-    <%= csrf_meta_tags %>
-    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1'>
-    <%= favicon_link_tag("favicon.png") %>
+    <%= render 'layouts/integration_test_head' %>
   </head>
-  <body>
+  <body class="<%= 'has-nav' if @nav %>">
+    <%= render @nav if @nav %>
+
     <div up-main class="container">
+      <%= render_flashes %>
       <%= yield %>
     </div>
   </body>

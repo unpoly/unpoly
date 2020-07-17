@@ -20,7 +20,7 @@ $overlay-with-viewport-z-index: 2000
 // Currently all overlay modes with a viewport have the same backdrop.
 // When we do a lightbox mode, we will need a darker backdrop for that one mode.
 // Hence we cannot share it across all modes using a CSS variable.
-$overlay-backdrop: rgba(90, 90, 90, 0.4)
+$overlay-backdrop: rgba(0, 0, 0, 0.4)
 
 // If multiple modals are nested inside each other, the padding is
 // multiplied by the nesting depth.
@@ -109,10 +109,12 @@ up-focus-trap
   z-index: $overlay-with-tether-z-index
 
 %overlay-dismiss
-  color: #666
+  color: #888
   position: absolute
-  top: 5px
-  right: 5px
+  top: 10px
+  right: 10px
+  font-size: 1.7rem
+  line-height: 1rem
 
 // Links that close a layer
 [up-dismiss], [up-accept]

@@ -1,5 +1,5 @@
 module LayerTest
-  class ProjectsController < ApplicationController
+  class ProjectsController < BaseController
 
     def new
       build_project
@@ -29,6 +29,15 @@ module LayerTest
       load_projects
     end
 
+    def destroy
+      load_project
+      if @project.destroy
+        redirect_to layer_test_companies_path
+      else
+        redirect_to [:layer_test, @project], alert: 'Could not delete project'
+      end
+    end
+    
     private
 
     def build_project
@@ -52,7 +61,7 @@ module LayerTest
     end
 
     def load_projects
-      @projects = project_scope.order(:name).to_a
+      @projects = project_scope.includes(:company).order(:name).to_a
     end
 
     def project_scope
@@ -61,7 +70,7 @@ module LayerTest
 
     def project_attributes
       if (attrs = params[:project])
-        attrs.permit(:name, :budgets_attributes => [ :id ])
+        attrs.permit(:name, :company_id)
       else
         {}
       end
