@@ -65,9 +65,11 @@ class up.Layer.Overlay extends up.Layer
     # Only binds the callback to the layer instance.
     # Note if the callback was created by an UJS attribute like [up-on-accepted], the
     # callback is already bound to the origin element to mimic the behavior of built-in
-    # handler attributes like [onclick].
+    # handler attributes like [onclick]. In that case our additional bind() will have
+    # no effect.
     if fn = this[name]
-      return fn.bind(this)
+      return @asCurrent =>
+        return fn.call(this)
 
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
