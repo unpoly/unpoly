@@ -17,7 +17,7 @@ class up.RevealMotion
       # snap is now a given pixel value
 
     @padding = options.padding ? options.revealPadding ? viewportConfig.revealPadding
-    @top = options.top
+    @top = options.revealTop ? options.top
     @topObstructions = viewportConfig.fixedTop
     @bottomObstructions = viewportConfig.fixedBottom
 

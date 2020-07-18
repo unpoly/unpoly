@@ -330,10 +330,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # If the user has passed a CSS selector as { reveal } option, we try to find
       # and reveal a matching element in the layer that we're updating.
       else if u.isString(revealOpt)
-        if revealOpt == 'top'
-          options.top = true
-        else
-          element = up.fragment.get(revealOpt, options)
+        element = up.fragment.get(revealOpt, options)
       else
         # We reveal the given `element` argument.
 

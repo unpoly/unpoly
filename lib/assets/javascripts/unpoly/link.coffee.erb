@@ -227,6 +227,8 @@ up.link = do ->
     parser.booleanOrString('focus')
     parser.boolean('resetScroll')
     parser.boolean('restoreScroll')
+    parser.boolean('revealTop')
+    parser.string('scrollBehavior')
 
     # History options
     # { history } is actually a boolean, but we keep the deprecated string
