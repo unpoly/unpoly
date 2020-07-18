@@ -12,7 +12,7 @@ class up.LayerLookup
     if options.normalizeLayerOptions != false
       up.layer.normalizeOptions(options)
 
-    @value = options.layer
+    @values = @parseValues(options.layer)
     @origin = options.origin
     @currentLayer = options.currentLayer || @stack.current
 
@@ -22,6 +22,12 @@ class up.LayerLookup
       # up.layer.current as the { currentLayer } for that second lookup.
       recursiveOptions = u.merge(options, currentLayer: @stack.current, normalizeLayerOptions: false)
       @currentLayer = new @constructor(@stack, @currentLayer, recursiveOptions).first()
+
+  parseValues: (givenValues) ->
+    if u.isString(givenValues)
+      return u.splitValues(givenValues)
+    else
+      return u.wrapList(givenValues)
 
   originLayer: ->
     if @origin
@@ -35,16 +41,27 @@ class up.LayerLookup
     @all()[0]
 
   all: ->
-    if @value instanceof up.Layer
-      return [@value]
+    results = u.flatMap(@values, @resolveValue.bind(this))
+    results = u.uniq(results) if @values.length > 1
+    results
 
-    if u.isNumber(@value)
-      return u.compact [@stack[@value]]
+  forIndex: (value) ->
+    return u.compact [@stack[value]]
 
-    if u.isElementish(@value)
-      return [@ofElement(@value)]
+  resolveValue: (value) ->
+    if value instanceof up.Layer
+      return [value]
 
-    return switch (@value || 'any')
+    if u.isNumber(value)
+      return @forIndex(value)
+
+    if value =~ /^\d+$/
+      return @forIndex(Number(value))
+
+    if u.isElementish(value)
+      return [@ofElement(value)]
+
+    return switch (value || 'any')
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
@@ -72,4 +89,4 @@ class up.LayerLookup
       when 'origin'
         [@originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
       else
-        up.fail("Unknown { layer } option: %o", @value)
+        up.fail("Unknown { layer } option: %o", value)

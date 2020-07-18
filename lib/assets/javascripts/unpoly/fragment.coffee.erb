@@ -767,10 +767,6 @@ up.fragment = do ->
     unless key.match(/^fail[A-Z]/)
       return u.prefixCamelCase(key, 'fail')
 
-  changeSelectors = (options) ->
-    infixes = ['[up-target]', '[up-follow]', '[up-layer]', '[up-mode]', '[up-content]', '[up-html]']
-    infixes.map (infix) -> (options.prefix || '') + infix + (options.suffix || '')
-
   up.on 'up:app:boot', ->
     body = document.body
     setSource(body, up.history.location)
@@ -803,7 +799,6 @@ up.fragment = do ->
     targetsBody: targetsBody
     successKey: successKey,
     failKey: failKey
-    changeSelectors: changeSelectors
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

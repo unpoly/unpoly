@@ -11,6 +11,9 @@
 - When the <body> is replaced with a Rails error, there are <div class="up-wrapped-script"> elements in the DOM
 - Change X-Up-Accept to X-Up-Accept-Value
 - Change X-Up-Dismiss to X-Up-Dismiss-Value
+- Consider renaming up.change() to up.next()
+  - up.replace() was actually a great name
+  - the only reason we went away from change was that new layers or before/after insertions do not replace anything
 
 - What should this do if there is no parent layer?
     <div class="row mb-4">

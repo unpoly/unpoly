@@ -1028,6 +1028,17 @@ describe 'up.layer', ->
             expect(up.layer.getAll(layer: up.layer.get(1))).toEqual [up.layer.get(1)]
             done()
 
+      describe 'for multiple space-separated layer named', ->
+
+        it "returns an array of the matching layers", (done) ->
+          makeLayers(3).then ->
+            expect(up.layer.getAll('parent root')).toEqual [up.layer.get(1), up.layer.root]
+            done()
+
+        it 'omits layers that do not exist', ->
+            expect(up.layer.getAll('parent root')).toEqual [up.layer.root]
+            done()
+
       describe 'for an options object without { layer } property', ->
 
         it 'behaves like "any" and returns a reversed list of all layers', (done) ->

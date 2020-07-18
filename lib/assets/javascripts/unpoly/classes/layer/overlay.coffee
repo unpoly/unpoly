@@ -68,8 +68,7 @@ class up.Layer.Overlay extends up.Layer
     # handler attributes like [onclick]. In that case our additional bind() will have
     # no effect.
     if fn = this[name]
-      return @asCurrent =>
-        return fn.call(this)
+      return @asCurrent(fn.bind(this))
 
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**
@@ -213,8 +212,8 @@ class up.Layer.Overlay extends up.Layer
       parser.string('easing')
       parser.number('duration')
       up.event.halt(event)
-      # u.muteRejection
-      closeFn(value, closeOptions)
+      u.muteRejection ->
+        closeFn(value, closeOptions)
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes
