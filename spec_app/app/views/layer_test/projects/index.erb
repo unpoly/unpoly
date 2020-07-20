@@ -20,7 +20,7 @@
   <tbody>
     <% @projects.each do |project| %>
       <tr>
-        <td><%= link_to project.name, [:layer_test, project], 'up-layer': 'new', 'up-dismiss-location': layer_test_companies_path %></td>
+        <td><%= link_to project.name, [:layer_test, project], 'up-layer': 'new', 'up-dismiss-location': layer_test_companies_path, 'up-on-dismissed': 'up.reload(".table")' %></td>
         <td><%= project.company.name %></td>
       </tr>
     <% end %>

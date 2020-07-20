@@ -18,7 +18,7 @@ module LayerTest
     def update
       load_project
       build_project
-      save_project(form: 'update')
+      save_project(form: 'edit')
     end
 
     def show
