@@ -214,8 +214,7 @@ class up.Layer.Overlay extends up.Layer
       parser.string('easing')
       parser.number('duration')
       up.event.halt(event)
-      u.muteRejection ->
-        closeFn(value, closeOptions)
+      u.muteRejection closeFn(value, closeOptions)
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes
