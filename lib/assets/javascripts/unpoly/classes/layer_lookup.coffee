@@ -12,7 +12,7 @@ class up.LayerLookup
     if options.normalizeLayerOptions != false
       up.layer.normalizeOptions(options)
 
-    @values = @parseValues(options.layer)
+    @values = u.splitValues(options.layer)
 
     @origin = options.origin
     @currentLayer = options.currentLayer || @stack.current
@@ -24,34 +24,29 @@ class up.LayerLookup
       recursiveOptions = u.merge(options, currentLayer: @stack.current, normalizeLayerOptions: false)
       @currentLayer = new @constructor(@stack, @currentLayer, recursiveOptions).first()
 
-  parseValues: (givenValues) ->
-    if u.isString(givenValues)
-      return u.splitValues(givenValues)
-    else
-      return u.wrapList(givenValues)
-
   originLayer: ->
     if @origin
-      return @ofElement(@origin)
-
-  ofElement: (element) ->
-    element = e.get(element) # unwrap jQuery
-    u.find @stack.reversed(), (layer) -> layer.contains(element)
+      return @forElement(@origin)
 
   first: ->
     @all()[0]
 
   all: ->
     results = u.flatMap @values, (value) => @resolveValue(value)
+    results = u.compact(results)
     results = u.uniq(results) if @values.length > 1
     results
 
+  forElement: (element) ->
+    element = e.get(element) # unwrap jQuery
+    u.find @stack.reversed(), (layer) -> layer.contains(element)
+
   forIndex: (value) ->
-    return u.compact [@stack[value]]
+    return @stack[value]
 
   resolveValue: (value) ->
     if value instanceof up.Layer
-      return [value]
+      return value
 
     if u.isNumber(value)
       return @forIndex(value)
@@ -60,7 +55,7 @@ class up.LayerLookup
       return @forIndex(Number(value))
 
     if u.isElementish(value)
-      return [@ofElement(value)]
+      return @forElement(value)
 
     return switch (value || 'any')
       when 'any'
@@ -68,26 +63,26 @@ class up.LayerLookup
         # layer, or closer to the front.
         u.uniq [@currentLayer, @stack.reversed()...]
       when 'current'
-        [@currentLayer]
+        @currentLayer
       when 'closest'
         @stack.selfAndAncestorsOf(@currentLayer)
       when 'parent'
-        u.compact [@currentLayer.parent]
+        @currentLayer.parent
       when 'ancestor', 'ancestors'
         @currentLayer.ancestors
       when 'child'
-        u.compact [@currentLayer.child]
+        @currentLayer.child
       when 'descendant', 'descendants'
         @currentLayer.descendants
       when 'new'
-        ['new'] # pass-through
+        'new' # pass-through
       when 'root'
-        [@stack.root]
+        @stack.root
       when 'overlay', 'overlays'
         u.reverse(@stack.overlays)
       when 'front'
-        [@stack.front]
+        @stack.front
       when 'origin'
-        [@originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")]
+        @originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")
       else
         up.fail("Unknown { layer } option: %o", value)

@@ -1544,10 +1544,13 @@ up.util = do ->
     a.length == b.length && every(a, (elem, index) -> isEqual(elem, b[index]))
 
   splitValues = (value, separator = ' ') ->
-    values = value.split(separator)
-    values = map values, (v) -> v.trim()
-    values = filterList(values, isPresent)
-    values
+    if isString(value)
+      value = value.split(separator)
+      value = map value, (v) -> v.trim()
+      value = filterList(value, isPresent)
+      value
+    else
+      wrapList(value)
 
   endsWith = (string, search) ->
     if search.length > string.length

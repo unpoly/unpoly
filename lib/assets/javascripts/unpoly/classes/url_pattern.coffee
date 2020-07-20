@@ -5,9 +5,6 @@ class up.URLPattern
   constructor: (pattern, @normalizeURL = u.normalizeURL) ->
     @groups = []
 
-    if u.isArray(pattern)
-      pattern = pattern.join(' ')
-
     pattern = u.splitValues(pattern).map(@normalizeURL).map(u.escapeRegExp).join('|')
 
     pattern = pattern.replace /\\\*/g, '.*?'

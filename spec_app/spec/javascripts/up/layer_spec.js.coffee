@@ -1036,8 +1036,7 @@ describe 'up.layer', ->
             done()
 
         it 'omits layers that do not exist', ->
-            expect(up.layer.getAll('parent root')).toEqual [up.layer.root]
-            done()
+          expect(up.layer.getAll('parent root')).toEqual [up.layer.root]
 
       describe 'for an options object without { layer } property', ->
 
