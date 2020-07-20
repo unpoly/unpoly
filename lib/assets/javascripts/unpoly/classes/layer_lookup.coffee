@@ -13,6 +13,7 @@ class up.LayerLookup
       up.layer.normalizeOptions(options)
 
     @values = @parseValues(options.layer)
+
     @origin = options.origin
     @currentLayer = options.currentLayer || @stack.current
 
@@ -41,7 +42,7 @@ class up.LayerLookup
     @all()[0]
 
   all: ->
-    results = u.flatMap(@values, @resolveValue.bind(this))
+    results = u.flatMap @values, (value) => @resolveValue(value)
     results = u.uniq(results) if @values.length > 1
     results
 
@@ -55,7 +56,7 @@ class up.LayerLookup
     if u.isNumber(value)
       return @forIndex(value)
 
-    if value =~ /^\d+$/
+    if /^\d+$/.test(value)
       return @forIndex(Number(value))
 
     if u.isElementish(value)

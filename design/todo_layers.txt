@@ -14,6 +14,10 @@
 - Consider renaming up.change() to up.next()
   - up.replace() was actually a great name
   - the only reason we went away from change was that new layers or before/after insertions do not replace anything
+- If u.splitValues() returns a given array we might save code everywhere else
+- LayerLookup:
+  - compact zentral nach flatMap machen
+  - mit flatMap muss ich nicht mehr arrays zurückgeben
 
 - What should this do if there is no parent layer?
     <div class="row mb-4">
