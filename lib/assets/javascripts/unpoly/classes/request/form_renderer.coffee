@@ -17,13 +17,7 @@ class up.Request.FormRenderer
     paramsFromQuery = up.Params.fromURL(action)
     params.addAll(paramsFromQuery)
     action = u.normalizeURL(action, search: false)
-
-    if @request.method != 'GET'
-      # Browser forms can only have GET or POST methods.
-      # When we want to make a request with another method, most backend
-      # frameworks allow to pass the method as a param.
-      params.add(up.protocol.config.methodParam, @request.method)
-      method = 'POST'
+    method = up.proxy.wrapMethod(@request.method, params)
 
     @form = e.affix(document.body, 'form.up-page-loader', { method, action })
 
