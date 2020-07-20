@@ -171,9 +171,9 @@ up.layer = do ->
   open = (options) ->
     options = u.options(options, layer: 'new')
 
-    # Even if we are given { content } we need to pipe this through up.change()
+    # Even if we are given { content } we need to pipe this through up.render()
     # since a lot of options processing is happening there.
-    return up.change(options)
+    return up.render(options)
 
   # TODO: Docs for up.layer.ask()
   ask = (options) ->

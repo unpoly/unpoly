@@ -245,10 +245,10 @@ up.link = do ->
 
     # This is the event that may be prevented to stop the follow.
     # up.form.submit() changes this to be up:form:submit instead.
-    # The guardEvent will also be assigned an { options } attribute in up.change()
+    # The guardEvent will also be assigned an { options } attribute in up.render()
     options.guardEvent ||= up.event.build('up:link:follow', log: 'Following link')
 
-    return up.change(options)
+    return up.render(options)
 
   ###**
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.

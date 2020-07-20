@@ -11,7 +11,7 @@
 - When the <body> is replaced with a Rails error, there are <div class="up-wrapped-script"> elements in the DOM
 - Change X-Up-Accept to X-Up-Accept-Value
 - Change X-Up-Dismiss to X-Up-Dismiss-Value
-- Rename up.change() to up.render()
+- Rename up.render() to up.render()
 
 - What should this do if there is no parent layer?
     <div class="row mb-4">
@@ -64,7 +64,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Aborting a slow request emits :up:proxy:recover event
   - Test that unsafe links are not preloaded (does that exist?)
   - Edge Cases for concurrent Layer Changes:
-    - up.change()
+    - up.render()
       - das neue fragment sieht einen server-sent event
       - ein server-sent event schließt das overlay
         ODER der server schließt das overlay
@@ -170,9 +170,9 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that up.layer.get and up.layer.all take both a layer name like "root" or an options hash or an element or a jquery collection
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
   - Test that back button closes all layers
-  - Test that up.change() can be called with { target: Element }
-  - Test that up.change() can be called with { target: Element } and will find in any layer (what?)
-  - Test that up.change() without { layer } option will only find in current layer
+  - Test that up.render() can be called with { target: Element }
+  - Test that up.render() can be called with { target: Element } and will find in any layer (what?)
+  - Test that up.render() without { layer } option will only find in current layer
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
   - Test that [up-dismiss][up-follow] inside an overlay will dismiss, not follow
   - Test that [up-dismiss][up-follow] outside an overlay will follow
@@ -193,13 +193,13 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
     - It's OK for animations to run async after that
   - Test that ResetWorld is actually happening
-  - Test that up.change({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
+  - Test that up.render({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
   - Test that we can submit a form into a new layer (success / fail)
   - Test up.proxy.abort()
   - Test that opening a new layer cancels requests that also open a new layer
   - Test { abort: 'conflict' } (is this now { solo: true }?)
   - Test that closing a layer cancels all requests for that layer
-  - Test that up.change(html: Element) works
+  - Test that up.render(html: Element) works
   - Test that forms can submit as arbitrary layer changes (success and failure)
   - Test that [up-on-accepted] and [up-on-dismissed] get the link's layer as up.layer.current
   - Check that up.layer forwards getters for all layer properties to stack.current
@@ -350,9 +350,9 @@ Later?
 - Do we want an ExtractPlan.BackButton? Turbolinks keep [up-keep] for back.
 - Support [up-target][up-class] and [up-target][up-fail-class] to set a class on the new fragment
   - But think how that would go together with [up-layer="new"][up-class="warning"]
-- Support :destroy pseudo-class up up.change() target
+- Support :destroy pseudo-class up up.render() target
 - Do we need an API to change context from JS? from server via header?
-- Should up.reload / up.change etc. resolve to the updated elements?
+- Should up.reload / up.render etc. resolve to the updated elements?
 - There should be a preload() function in up.proxy, but that should also take a request
   - For this we also need to decide whether up.proxy.preload() would reject unsafe requests
 - form[up-target] without a target now looks funny
@@ -443,7 +443,7 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
   - DECISION: We do it like this:
     - up.emit([target], [eventType], [eventProps]) ?
 - Are there still cases for up.toast()?
-- Should up.change() be named up.replace()?
+- Should up.render() be named up.replace()?
   - up.replace(selectorOrElement, url, [options])
   - up.replace(selectorOrElement, url, [options])
   => No, We named it change() because it sometimes opens a new layer

@@ -37,7 +37,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @findOld()
     @findNew()
 
-    up.puts('up.change()', "Updating \"#{@target}\" in #{@layer}")
+    up.puts('up.render()', "Updating \"#{@target}\" in #{@layer}")
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
@@ -51,7 +51,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # Layer#peel() will manipulate the stack sync.
       # We don't wait for the peeling animation to finish.
 
-    # If either the server or the up.change() caller has provided a new
+    # If either the server or the up.render() caller has provided a new
     # { context } object, we set the layer's context to that object.
     @layer.updateContext(@options)
 

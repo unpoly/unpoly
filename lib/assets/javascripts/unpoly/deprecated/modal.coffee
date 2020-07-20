@@ -2,16 +2,16 @@ u = up.util
 
 up.modal = u.literal
   visit: (url, options = {}) ->
-    up.legacy.deprecated('up.modal.visit(url)', 'up.change({ url, layer: "modal" })')
-    up.change(u.merge(options, { url, layer: 'modal' }))
+    up.legacy.deprecated('up.modal.visit(url)', 'up.render({ url, layer: "modal" })')
+    up.render(u.merge(options, { url, layer: 'modal' }))
 
   follow: (link, options = {}) ->
     up.legacy.deprecated('up.modal.follow(link)', 'up.follow(link, { layer: "modal" })')
     up.follow(link, u.merge(options, { layer: 'modal' }))
 
   extract: (target, html, options = {}) ->
-    up.legacy.deprecated('up.modal.extract(target, document)', 'up.change({ document, layer: "modal" })')
-    up.change(u.merge(options, { target, html, layer: 'modal' }))
+    up.legacy.deprecated('up.modal.extract(target, document)', 'up.render({ document, layer: "modal" })')
+    up.render(u.merge(options, { target, html, layer: 'modal' }))
 
   close: (options = {}) ->
     up.legacy.deprecated('up.modal.close()', 'up.layer.dismiss()')

@@ -145,7 +145,7 @@ describe 'up.fragment', ->
           result = up.fragment.closest(start, 'body')
           expect(result).toBeMissing()
 
-    describe 'up.change()', ->
+    describe 'up.render()', ->
 
       beforeEach ->
         up.motion.config.enabled = false
@@ -157,7 +157,7 @@ describe 'up.fragment', ->
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
 
-          up.change('.middle', url: '/path')
+          up.render('.middle', url: '/path')
 
           next =>
             @respondWith """
@@ -175,7 +175,7 @@ describe 'up.fragment', ->
           fixture('.target')
 
           resolution = jasmine.createSpy()
-          promise = up.change('.target', url: '/path')
+          promise = up.render('.target', url: '/path')
           promise.then(resolution)
 
           next =>
@@ -188,7 +188,7 @@ describe 'up.fragment', ->
 
         it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', method: 'put')
+          up.render('.target', url: '/path', method: 'put')
           next => expect(@lastRequest()).toHaveRequestMethod('PUT')
 
         describe 'with { params } option', ->
@@ -196,7 +196,7 @@ describe 'up.fragment', ->
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
             fixture('.target')
-            up.change('.target', url: '/path', method: 'put', params: givenParams)
+            up.render('.target', url: '/path', method: 'put', params: givenParams)
 
             next =>
               expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
@@ -205,14 +205,14 @@ describe 'up.fragment', ->
           it "encodes the given params into the URL of a GET request", asyncSpec (next) ->
             fixture('.target')
             givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-            up.change('.target', url: '/path', method: 'get', params: givenParams)
+            up.render('.target', url: '/path', method: 'get', params: givenParams)
             next => expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
 
         describeFallback 'canPushState', ->
 
           it 'makes a full page load', asyncSpec (next) ->
             spyOn(up.browser, 'loadPage')
-            up.change('.selector', url: '/path')
+            up.render('.selector', url: '/path')
 
             next =>
               expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
@@ -225,7 +225,7 @@ describe 'up.fragment', ->
             fixture('.default', text: 'old fallback text')
 
             next =>
-              up.change('.target', url: '/path')
+              up.render('.target', url: '/path')
             next =>
               @respondWithSelector('.default', text: 'new fallback text', status: 500)
             next =>
@@ -236,7 +236,7 @@ describe 'up.fragment', ->
             fixture('.success-target', text: 'old success text')
             fixture('.failure-target', text: 'old failure text')
 
-            up.change('.success-target', url: '/path', failTarget: '.failure-target')
+            up.render('.success-target', url: '/path', failTarget: '.failure-target')
 
             next =>
               @respondWith
@@ -257,7 +257,7 @@ describe 'up.fragment', ->
             fixture('.success-target', text: 'old success text')
             fixture('.failure-target', text: 'old failure text')
 
-            up.change('.success-target', url: '/path', failTarget: '.failure-target')
+            up.render('.success-target', url: '/path', failTarget: '.failure-target')
 
             next =>
               @respondWith(responseText: '')
@@ -272,7 +272,7 @@ describe 'up.fragment', ->
             fixture('.success-target', text: 'old success text')
             fixture('.failure-target', text: 'old failure text')
 
-            up.change('.success-target', url: '/path', failTarget: '.failure-target')
+            up.render('.success-target', url: '/path', failTarget: '.failure-target')
 
             next =>
               @respondWith
@@ -288,7 +288,7 @@ describe 'up.fragment', ->
           it 'does update a fragment if the server has an XHTML content-type', asyncSpec (next) ->
             fixture('.target', text: 'old text')
 
-            up.change('.target', url: '/path', failTarget: '.failure')
+            up.render('.target', url: '/path', failTarget: '.failure')
 
             next =>
               @respondWith
@@ -301,7 +301,7 @@ describe 'up.fragment', ->
           it 'rejects the returned promise', (done) ->
             fixture('.success-target')
             fixture('.failure-target')
-            promise = up.change('.success-target', url: '/path', failTarget: '.failure-target')
+            promise = up.render('.success-target', url: '/path', failTarget: '.failure-target')
 
             u.task =>
               promiseState(promise).then (result) =>
@@ -319,7 +319,7 @@ describe 'up.fragment', ->
           it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
             jasmine.clock().install() # required by responseTimeout()
             fixture('.target')
-            promise = up.change('.target', url: '/path', timeout: 50)
+            promise = up.render('.target', url: '/path', timeout: 50)
 
             next =>
               # See that the correct timeout value has been set on the XHR instance
@@ -339,7 +339,7 @@ describe 'up.fragment', ->
 
           it "doesn't crash and rejects the returned promise", (done) ->
             fixture('.target')
-            promise = up.change('.target', url: '/path')
+            promise = up.render('.target', url: '/path')
 
             u.task =>
               promiseState(promise).then (result) =>
@@ -355,7 +355,7 @@ describe 'up.fragment', ->
           it 'emits an up:fragment:loaded event that contains information about the request, response and change options', asyncSpec (next) ->
             event = undefined
             up.on 'up:fragment:loaded', (e) -> event = e
-            up.change(target: '.target', url: '/url', location: '/location-from-option', peel: false)
+            up.render(target: '.target', url: '/url', location: '/location-from-option', peel: false)
 
             next =>
               @respondWith('text from server')
@@ -372,7 +372,7 @@ describe 'up.fragment', ->
             up.on('up:fragment:loaded', (e) -> e.preventDefault())
             fixture('.target', text: 'old text')
 
-            changePromise = up.change(target: '.target', url: '/url')
+            changePromise = up.render(target: '.target', url: '/url')
 
             u.task =>
               @respondWith('new text')
@@ -387,13 +387,13 @@ describe 'up.fragment', ->
 
                   done()
 
-          it 'allows listeners to mutate up.change() options before the fragment is updated', asyncSpec (next) ->
+          it 'allows listeners to mutate up.render() options before the fragment is updated', asyncSpec (next) ->
             fixture('.one', text: 'old one')
             fixture('.two', text: 'old two')
 
             up.on('up:fragment:loaded', (e) -> e.change.target = '.two')
 
-            changePromise = up.change(target: '.one', url: '/url')
+            changePromise = up.render(target: '.one', url: '/url')
 
             next =>
               @respondWith """
@@ -409,7 +409,7 @@ describe 'up.fragment', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->
           fixture('.target', text: 'old text')
-          up.change('.target', content: 'new text')
+          up.render('.target', content: 'new text')
 
           next =>
             expect('.target').toHaveText('new text')
@@ -417,7 +417,7 @@ describe 'up.fragment', ->
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
           content = e.createFromSelector('div', text: 'new text')
-          up.change('.target', { content })
+          up.render('.target', { content })
 
           next =>
             expect('.target').toHaveText('new text')
@@ -436,7 +436,7 @@ describe 'up.fragment', ->
             <div class="after">new-after</div>
             """
 
-          up.change('.middle', { document })
+          up.render('.middle', { document })
 
           next ->
             expect($('.before')).toHaveText('old-before')
@@ -446,7 +446,7 @@ describe 'up.fragment', ->
         it 'derives a selector from an element given as { target } option', asyncSpec (next) ->
           target = fixture('.target', text: 'old-text')
           document = '<div class="target">new-text</div>'
-          up.change({ target, document })
+          up.render({ target, document })
 
           next =>
             expect('.target').toHaveText('new-text')
@@ -454,14 +454,14 @@ describe 'up.fragment', ->
         it 'replaces the given selector with a matching element that has the outer HTML from the given { document } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
           element = e.createFromHTML('<div class="target">new text</div>')
-          up.change('.target', { document: element })
+          up.render('.target', { document: element })
 
           next =>
             expect('.target').toHaveText('new text')
 
         it "rejects if the selector can't be found in the given { document } string", (done) ->
           $fixture('.foo-bar')
-          promise = up.change('.foo-bar', document: 'html without match')
+          promise = up.render('.foo-bar', document: 'html without match')
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -478,7 +478,7 @@ describe 'up.fragment', ->
 
           fragment = '<div class="middle">new-middle</div>'
 
-          up.change({ fragment })
+          up.render({ fragment })
 
           next ->
             expect($('.before')).toHaveText('old-before')
@@ -488,7 +488,7 @@ describe 'up.fragment', ->
         it 'derives target and outer HTML from the given { fragment } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
           fragment = e.createFromHTML('<div class="target">new text</div>')
-          up.change('.target', { fragment: fragment })
+          up.render('.target', { fragment: fragment })
 
           next =>
             expect('.target').toHaveText('new text')
@@ -496,7 +496,7 @@ describe 'up.fragment', ->
         it "rejects if the given { fragment } does not match an element on the current page", (done) ->
           $fixture('.foo-bar')
           fragment = e.createFromHTML('<div class="target">new text</div>')
-          promise = up.change({ fragment })
+          promise = up.render({ fragment })
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -517,7 +517,7 @@ describe 'up.fragment', ->
         it "ignores an element that matches the selector but also matches .up-destroying", (done) ->
           document = '<div class="foo-bar">text</div>'
           $fixture('.foo-bar.up-destroying')
-          promise = up.change('.foo-bar', { document })
+          promise = up.render('.foo-bar', { document })
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -529,7 +529,7 @@ describe 'up.fragment', ->
           document = '<div class="foo-bar">text</div>'
           $parent = $fixture('.up-destroying')
           $child = $fixture('.foo-bar').appendTo($parent)
-          promise = up.change('.foo-bar', { document })
+          promise = up.render('.foo-bar', { document })
 
           u.task ->
             promiseState(promise).then (result) =>
@@ -541,7 +541,7 @@ describe 'up.fragment', ->
           document = '<div class="foo-bar">text</div>'
           $fixture('.foo-bar')
           $fixture('.foo-bar')
-          up.change('.foo-bar', { document })
+          up.render('.foo-bar', { document })
 
           next =>
             $elements = $('.foo-bar')
@@ -553,7 +553,7 @@ describe 'up.fragment', ->
         it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
           target = fixture('.target')
           e.affix(target, '.child', text: 'old')
-          up.change('.target:before', html: """
+          up.render('.target:before', html: """
             <div class='target'>
               <div class='child'>new</div>
             </div>"
@@ -569,7 +569,7 @@ describe 'up.fragment', ->
         it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
           target = fixture('.target')
           e.affix(target, '.child', text: 'old')
-          up.change('.target:after', document: """
+          up.render('.target:after', document: """
             <div class='target'>
               <div class='child'>new</div>
             </div>
@@ -586,7 +586,7 @@ describe 'up.fragment', ->
           fixture('.before', text: 'old-before')
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
-          up.change '.before:before, .middle, .after:after', document: """
+          up.render '.before:before, .middle, .after:after', document: """
             <div class="before">new-before</div>
             <div class="middle">new-middle</div>
             <div class="after">new-after</div>
@@ -621,7 +621,7 @@ describe 'up.fragment', ->
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
 
-          up.change '.middle, .after', document: """
+          up.render '.middle, .after', document: """
             <div class="before">new-before</div>
             <div class="middle">new-middle</div>
             <div class="after">new-after</div>
@@ -638,7 +638,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            replacePromise = up.change('.outer, .inner', url: '/path')
+            replacePromise = up.render('.outer, .inner', url: '/path')
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -666,7 +666,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            replacePromise = up.change('.outer:before, .inner', url: '/path')
+            replacePromise = up.render('.outer:before, .inner', url: '/path')
 
             next =>
               # Placement pseudo-selectors are removed from X-Up-Target
@@ -696,7 +696,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            replacePromise = up.change('.outer:after, .inner', url: '/path')
+            replacePromise = up.render('.outer:after, .inner', url: '/path')
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
@@ -725,7 +725,7 @@ describe 'up.fragment', ->
 #            $outer = $fixture('.outer').text('old outer text')
 #            $inner = $outer.affix('.inner').text('old inner text')
 #
-#            replacePromise = up.change('.outer:after, .inner', url: '/path')
+#            replacePromise = up.render('.outer:after, .inner', url: '/path')
 #
 #            next =>
 #              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
@@ -734,7 +734,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            replacePromise = up.change('.outer, .inner', url: '/path')
+            replacePromise = up.render('.outer, .inner', url: '/path')
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -764,7 +764,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            up.change('.inner, .outer', url: '/path', reveal: true)
+            up.render('.inner, .outer', url: '/path', reveal: true)
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -792,7 +792,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            up.change('.inner, .outer', url: '/path', reveal: '.revealee')
+            up.render('.inner, .outer', url: '/path', reveal: '.revealee')
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -823,7 +823,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            replacePromise = up.change('.outer, .inner', url: '/path')
+            replacePromise = up.render('.outer, .inner', url: '/path')
 
             next =>
               @respondWith """
@@ -848,7 +848,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.one').text('old one text')
             $inner = $fixture('.two').text('old two text')
 
-            replacePromise = up.change('.one, .two', url: '/path')
+            replacePromise = up.render('.one, .two', url: '/path')
 
             next =>
               @respondWith """
@@ -874,7 +874,7 @@ describe 'up.fragment', ->
             $outer = $fixture('.one').text('old one text')
             $inner = $fixture('.two').text('old two text')
 
-            replacePromise = up.change('.one, .two', url: '/path')
+            replacePromise = up.render('.one, .two', url: '/path')
 
             next =>
               @respondWith """
@@ -899,7 +899,7 @@ describe 'up.fragment', ->
           it 'updates the first selector if the same element is targeted twice in a single replacement', asyncSpec (next) ->
             $one = $fixture('.one.alias').text('old one text')
 
-            replacePromise = up.change('.one, .alias', url: '/path')
+            replacePromise = up.render('.one, .alias', url: '/path')
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.one')
@@ -921,7 +921,7 @@ describe 'up.fragment', ->
           it 'updates the first selector if the same element is prepended or appended twice in a single replacement', asyncSpec (next) ->
             $one = $fixture('.one').text('old one text')
 
-            replacePromise = up.change('.one:before, .one:after', url: '/path')
+            replacePromise = up.render('.one:before, .one:after', url: '/path')
 
             next =>
               # Placement pseudo-selectors are removed from X-Up-Target
@@ -944,7 +944,7 @@ describe 'up.fragment', ->
           it "updates the first selector if the same element is prepended, replaced and appended in a single replacement", asyncSpec (next) ->
             $elem = $fixture('.elem.alias1.alias2').text("old text")
 
-            replacePromise = up.change('.elem:before, .alias1, .alias2:after', url: '/path')
+            replacePromise = up.render('.elem:before, .alias1, .alias2:after', url: '/path')
 
             next =>
               # Placement pseudo-selectors are removed from X-Up-Target
@@ -973,13 +973,13 @@ describe 'up.fragment', ->
 
           it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
             $fixture('.box').text('old box')
-            up.change('.unknown', url: '/path', fallback: '.box')
+            up.render('.unknown', url: '/path', fallback: '.box')
 
             next => @respondWith '<div class="box">new box</div>'
             next => expect('.box').toHaveText('new box')
 
           it 'rejects the promise if all alternatives are exhausted', (done) ->
-            promise = up.change('.unknown', url: '/path', fallback: '.more-unknown')
+            promise = up.render('.unknown', url: '/path', fallback: '.more-unknown')
 
             u.task ->
               promiseState(promise).then (result) ->
@@ -990,7 +990,7 @@ describe 'up.fragment', ->
           it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
             $fixture('.target').text('old target')
             $fixture('.fallback').text('old fallback')
-            up.change('.target, .unknown', url: '/path', fallback: '.fallback')
+            up.render('.target, .unknown', url: '/path', fallback: '.fallback')
 
             next =>
               @respondWith """
@@ -1005,14 +1005,14 @@ describe 'up.fragment', ->
           it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
             up.layer.config.any.targets = ['.existing']
             $fixture('.existing').text('old existing')
-            up.change('.unknown', url: '/path')
+            up.render('.unknown', url: '/path')
             next => @respondWith '<div class="existing">new existing</div>'
             next => expect('.existing').toHaveText('new existing')
 
           it "does not try the layer's default targets and rejects the promise wieht { fallback: false }", (done) ->
             up.layer.config.any.targets = ['.existing']
             $fixture('.existing').text('old existing')
-            up.change('.unknown', url: '/path', fallback: false).catch (e) ->
+            up.render('.unknown', url: '/path', fallback: false).catch (e) ->
               expect(e).toBeError(/Could not find target in current page/i)
               done()
 
@@ -1024,7 +1024,7 @@ describe 'up.fragment', ->
           it 'tries the selector in options.fallback before swapping elements', asyncSpec (next) ->
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            up.change('.target', url: '/path', fallback: '.fallback')
+            up.render('.target', url: '/path', fallback: '.fallback')
             $target.remove()
 
             next =>
@@ -1039,7 +1039,7 @@ describe 'up.fragment', ->
           it 'rejects the promise if all alternatives are exhausted', (done) ->
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            promise = up.change('.target', url: '/path', fallback: '.fallback')
+            promise = up.render('.target', url: '/path', fallback: '.fallback')
 
             u.task =>
               $target.remove()
@@ -1060,7 +1060,7 @@ describe 'up.fragment', ->
             $target = $fixture('.target').text('old target')
             $target2 = $fixture('.target2').text('old target2')
             $fallback = $fixture('.fallback').text('old fallback')
-            up.change('.target, .target2', url: '/path', fallback: '.fallback')
+            up.render('.target, .target2', url: '/path', fallback: '.fallback')
             $target2.remove()
 
             next =>
@@ -1077,7 +1077,7 @@ describe 'up.fragment', ->
             up.layer.config.any.targets = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
             $target.remove()
 
             next =>
@@ -1093,7 +1093,7 @@ describe 'up.fragment', ->
             up.layer.config.any.fallbacks = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            promise = up.change('.target', url: '/path', fallback: false)
+            promise = up.render('.target', url: '/path', fallback: false)
 
             u.task =>
               $target.remove()
@@ -1115,7 +1115,7 @@ describe 'up.fragment', ->
           it "tries the selector in options.fallback before swapping elements", asyncSpec (next) ->
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            up.change('.target', url: '/path', fallback: '.fallback')
+            up.render('.target', url: '/path', fallback: '.fallback')
 
             next =>
               @respondWith """
@@ -1131,7 +1131,7 @@ describe 'up.fragment', ->
             it 'rejects the promise', (done) ->
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
-              promise = up.change('.target', url: '/path', fallback: '.fallback')
+              promise = up.render('.target', url: '/path', fallback: '.fallback')
 
               u.task =>
                 @respondWith '<div class="unexpected">new unexpected</div>'
@@ -1143,7 +1143,7 @@ describe 'up.fragment', ->
             it 'shows a link to open the unexpected response', (done) ->
               $target = $fixture('.target').text('old target')
               $fallback = $fixture('.fallback').text('old fallback')
-              promise = up.change('.target', url: '/path', fallback: '.fallback')
+              promise = up.render('.target', url: '/path', fallback: '.fallback')
               loadPage = spyOn(up.browser, 'loadPage')
 
               u.task =>
@@ -1166,7 +1166,7 @@ describe 'up.fragment', ->
             $target = $fixture('.target').text('old target')
             $target2 = $fixture('.target2').text('old target2')
             $fallback = $fixture('.fallback').text('old fallback')
-            up.change('.target, .target2', url: '/path', fallback: '.fallback')
+            up.render('.target, .target2', url: '/path', fallback: '.fallback')
 
             next =>
               @respondWith """
@@ -1183,7 +1183,7 @@ describe 'up.fragment', ->
             up.layer.config.any.targets = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith '<div class="fallback">new fallback</div>'
@@ -1196,7 +1196,7 @@ describe 'up.fragment', ->
             up.layer.config.any.targets = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
-            promise = up.change('.target', url: '/path', fallback: false)
+            promise = up.render('.target', url: '/path', fallback: false)
 
             u.task =>
               @respondWith '<div class="fallback">new fallback</div>'
@@ -1214,7 +1214,7 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            up.change('.element', content: 'new text', layer: 'root', peel: false)
+            up.render('.element', content: 'new text', layer: 'root', peel: false)
 
           next ->
             expect(up.layer.get(0)).toHaveText(/new text/)
@@ -1237,7 +1237,7 @@ describe 'up.fragment', ->
             ]
 
             next ->
-              up.change('.element', content: 'new text', peel: false)
+              up.render('.element', content: 'new text', peel: false)
 
             next ->
               expect(up.layer.get(0)).toHaveText(/old text in root/)
@@ -1251,7 +1251,7 @@ describe 'up.fragment', ->
             ]
 
             next ->
-              up.change('.element', content: 'new text', peel: false)
+              up.render('.element', content: 'new text', peel: false)
 
             next ->
               expect(up.layer.get(0)).toHaveText(/old text in root/)
@@ -1265,7 +1265,7 @@ describe 'up.fragment', ->
 
         it 'sets the browser location to the requested URL', asyncSpec (next) ->
           fixture('.target')
-          promise = up.change('.target', url: '/path')
+          promise = up.render('.target', url: '/path')
           next =>
             @respondWithSelector('.target')
             next.await(promise)
@@ -1274,19 +1274,19 @@ describe 'up.fragment', ->
 
         it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', method: 'post')
+          up.render('.target', url: '/path', method: 'post')
           next => @respondWithSelector('.target')
           next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path')
+          up.render('.target', url: '/path')
           next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
           next => expect(location.href).toMatchURL('/other-path')
 
         it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/requested-path', method: 'post')
+          up.render('.target', url: '/requested-path', method: 'post')
           next =>
             @respondWithSelector('.target', {
               responseHeaders: {
@@ -1298,25 +1298,25 @@ describe 'up.fragment', ->
 
         it 'does not add a history entry after a failed GET-request', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', method: 'post', failTarget: '.target')
+          up.render('.target', url: '/path', method: 'post', failTarget: '.target')
           next => @respondWithSelector('.target', status: 500)
           next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', history: false)
+          up.render('.target', url: '/path', history: false)
           next => @respondWithSelector('.target', status: 500)
           next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it 'does not add a history entry with { location: false } option', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', location: false)
+          up.render('.target', url: '/path', location: false)
           next => @respondWithSelector('.target')
           next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
+          up.render('.target', url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
           next => @respondWithSelector('.target')
           next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
 
@@ -1324,28 +1324,28 @@ describe 'up.fragment', ->
 
           it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path', location: '/path2')
+            up.render('.target', url: '/path', location: '/path2')
             next => @respondWithSelector('.target')
             next =>
               expect(location.href).toMatchURL('/path2')
 
           it 'adds a history entry after a non-GET request', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path', method: 'post', location: '/path3')
+            up.render('.target', url: '/path', method: 'post', location: '/path3')
             next => @respondWithSelector('.target')
             next => expect(location.href).toMatchURL('/path3')
 
           it 'does not override the response URL after a failed request', asyncSpec (next) ->
             fixture('.success-target')
             fixture('.failure-target')
-            up.change('.success-target', url: '/path', location: '/path4', failTarget: '.failure-target')
+            up.render('.success-target', url: '/path', location: '/path4', failTarget: '.failure-target')
             next => @respondWithSelector('.failure-target', status: 500)
             next => expect(location.href).toMatchURL('/path')
 
           it 'overrides the response URL after a failed request when passed as { failLocation }', asyncSpec (next) ->
             fixture('.success-target')
             fixture('.failure-target')
-            up.change('.success-target', url: '/path', location: '/path5', failLocation: '/path6', failTarget: '.failure-target')
+            up.render('.success-target', url: '/path', location: '/path5', failLocation: '/path6', failTarget: '.failure-target')
             next => @respondWithSelector('.failure-target', status: 500)
             next => expect(location.href).toMatchURL('/path6')
 
@@ -1356,7 +1356,7 @@ describe 'up.fragment', ->
 
         it "sets the document title to the response <title>", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.change('.container', url: '/path')
+          up.render('.container', url: '/path')
 
           next =>
             @respondWith """
@@ -1378,7 +1378,7 @@ describe 'up.fragment', ->
 
         it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.change('.container', url: '/path')
+          up.render('.container', url: '/path')
 
           next =>
             @respondWith
@@ -1396,7 +1396,7 @@ describe 'up.fragment', ->
 
         it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.change('.container', url: '/path')
+          up.render('.container', url: '/path')
 
           next =>
             @respondWith
@@ -1421,7 +1421,7 @@ describe 'up.fragment', ->
 
         it "sets the document title to the response <title> with { location: false, title: true } options (bugfix)", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.change('.container', url: '/path', location: false, title: true)
+          up.render('.container', url: '/path', location: false, title: true)
 
           next =>
             @respondWith """
@@ -1444,7 +1444,7 @@ describe 'up.fragment', ->
         it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
           $fixture('.container').text('old container text')
           oldTitle = document.title
-          up.change('.container', url: '/path', history: false, title: true)
+          up.render('.container', url: '/path', history: false, title: true)
 
           next =>
             @respondWith """
@@ -1467,7 +1467,7 @@ describe 'up.fragment', ->
         it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
           $fixture('.container').text('old container text')
           oldTitle = document.title
-          up.change('.container', url: '/path', history: false)
+          up.render('.container', url: '/path', history: false)
 
           next =>
             @respondWith
@@ -1491,7 +1491,7 @@ describe 'up.fragment', ->
 
         it 'allows to pass an explicit title as { title } option', asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.change('.container', url: '/path', title: 'Title from options')
+          up.render('.container', url: '/path', title: 'Title from options')
 
           next =>
             @respondWith """
@@ -1515,7 +1515,7 @@ describe 'up.fragment', ->
 
         it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path')
+          up.render('.target', url: '/path')
           next =>
             @respondWithSelector('.target')
           next =>
@@ -1524,7 +1524,7 @@ describe 'up.fragment', ->
         it 'keeps the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
           target = fixture('.target')
           up.fragment.setSource(target, '/previous-source')
-          up.change('.target', url: '/path', method: 'post')
+          up.render('.target', url: '/path', method: 'post')
           next =>
             @respondWithSelector('.target')
           next =>
@@ -1534,7 +1534,7 @@ describe 'up.fragment', ->
 
           it 'uses that URL as the source for a GET request', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path', source: '/given-path')
+            up.render('.target', url: '/path', source: '/given-path')
             next =>
               @respondWithSelector('.target')
             next =>
@@ -1542,7 +1542,7 @@ describe 'up.fragment', ->
 
           it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path', method: 'post', source: '/given-path')
+            up.render('.target', url: '/path', method: 'post', source: '/given-path')
             next =>
               @respondWithSelector('.target')
             next =>
@@ -1570,13 +1570,13 @@ describe 'up.fragment', ->
             expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue' })
 
           next ->
-            up.change('.target', layer: up.layer.get(0), url: '/path1')
+            up.render('.target', layer: up.layer.get(0), url: '/path1')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
 
-            up.change('.target', layer: up.layer.get(1), url: '/path2')
+            up.render('.target', layer: up.layer.get(1), url: '/path2')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
@@ -1589,7 +1589,7 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            up.change('.target', layer: up.layer.get(1), url: '/path1')
+            up.render('.target', layer: up.layer.get(1), url: '/path1')
 
           next =>
             @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
@@ -1605,7 +1605,7 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            up.change('.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
+            up.render('.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -1619,7 +1619,7 @@ describe 'up.fragment', ->
 
         it 'morphs between the old and new element', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')
-          up.change('.element',
+          up.render('.element',
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
             duration: 200,
@@ -1655,7 +1655,7 @@ describe 'up.fragment', ->
           $fixture('.container').text('old text')
 
           extractDone = jasmine.createSpy()
-          promise = up.change(
+          promise = up.render(
             fragment: '<div class="container">new text</div>',
             transition: 'cross-fade',
             duration: 200
@@ -1670,7 +1670,7 @@ describe 'up.fragment', ->
 
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
           $fixture('.element').text('version 1')
-          up.change(
+          up.render(
             fragment: '<div class="element">version 2</div>',
             transition: 'cross-fade',
             duration: 200
@@ -1695,7 +1695,7 @@ describe 'up.fragment', ->
           $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
             spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
-          extractDone = up.change('.element',
+          extractDone = up.render('.element',
             document: '<div class="element v2">v2</div>',
             transition: 'cross-fade',
             duration: 50
@@ -1709,7 +1709,7 @@ describe 'up.fragment', ->
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')
 
-          up.change('.element',
+          up.render('.element',
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
             duration: 200
@@ -1725,7 +1725,7 @@ describe 'up.fragment', ->
             expect($ghost2.css('opacity')).toBeAround(0.0, 0.1)
 
           next =>
-            up.change('.element',
+            up.render('.element',
               document: '<div class="element v3">version 3</div>',
               transition: 'cross-fade',
               duration: 200
@@ -1747,7 +1747,7 @@ describe 'up.fragment', ->
         it 'delays the resolution of the returned promise until the transition is over', (done) ->
           $fixture('.element').text('version 1')
           resolution = jasmine.createSpy()
-          promise = up.change(
+          promise = up.render(
             fragment: '<div class="element">version 2</div>',
             transition: 'cross-fade',
             duration: 60
@@ -1767,7 +1767,7 @@ describe 'up.fragment', ->
           $element = $parent.affix('.element').text('old text')
           spy = jasmine.createSpy('parent spy')
           up.$compiler '.element', ($element) -> spy($element.text(), $element.parent())
-          up.change
+          up.render
             fragment: '<div class="element">new text</div>',
             transition: 'cross-fade',
             duration: 50
@@ -1788,7 +1788,7 @@ describe 'up.fragment', ->
           $container.scrollTop(300)
           expect($container.scrollTop()).toEqual(300)
 
-          up.change($element, transition: 'cross-fade', duration: 60000, reveal: true, document: """
+          up.render($element, transition: 'cross-fade', duration: 60000, reveal: true, document: """
             <div class="element" style="height: 600px"></div>
             """
           )
@@ -1823,7 +1823,7 @@ describe 'up.fragment', ->
             insertedListener = jasmine.createSpy('listener to up:fragment:inserted')
             up.on 'up:fragment:inserted', insertedListener
 
-            extractDone = up.change(
+            extractDone = up.render(
               fragment: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
@@ -1844,7 +1844,7 @@ describe 'up.fragment', ->
             compiler = jasmine.createSpy('compiler')
             up.$compiler '.element', compiler
 
-            extractDone = up.change(
+            extractDone = up.render(
               fragment: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
@@ -1867,7 +1867,7 @@ describe 'up.fragment', ->
 
             up.hello($element)
 
-            extractDone = up.change(
+            extractDone = up.render(
               fragment: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
@@ -1886,7 +1886,7 @@ describe 'up.fragment', ->
 
           it 'immediately swaps the old and new elements without creating unnecessary ghosts', asyncSpec (next) ->
             $fixture('.element').text('version 1')
-            up.change(
+            up.render(
               fragment: '<div class="element">version 2</div>',
               transition: 'cross-fade',
               duration: 200
@@ -1898,7 +1898,7 @@ describe 'up.fragment', ->
           it "replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec (next) ->
             swapDirectlySpy = up.motion.knife.mock('swapElementsDirectly')
             $fixture('.element').text('version 1')
-            up.change(
+            up.render(
               fragment: '<div class="element">version 2</div>',
               transition: false
             )
@@ -1921,7 +1921,7 @@ describe 'up.fragment', ->
 
         it 'scrolls to the new element that is inserted into the DOM', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target', url: '/path', reveal: true)
+          up.render('.target', url: '/path', reveal: true)
 
           next =>
             @respondWithSelector('.target', text: 'new text')
@@ -1933,7 +1933,7 @@ describe 'up.fragment', ->
           fixture('.target', text: 'target text')
           fixture('.other', text: 'other text')
 
-          up.change('.target', url: '/path', reveal: '.other')
+          up.render('.target', url: '/path', reveal: '.other')
 
           next =>
             @respondWithSelector('.target')
@@ -1945,7 +1945,7 @@ describe 'up.fragment', ->
           target = fixture('.target', text: 'target text')
           origin = fixture('.origin', text: 'origin text')
 
-          up.change('.target', url: '/path', reveal: '&', origin: origin)
+          up.render('.target', url: '/path', reveal: '&', origin: origin)
 
           next =>
             @respondWithSelector('.target')
@@ -1959,7 +1959,7 @@ describe 'up.fragment', ->
             fixture('.target', text: 'target text')
             fixture('.other', text: 'other text')
             fixture('.fail-target', text: 'fail-target text')
-            up.change('.target', url: '/path', failTarget: '.fail-target', reveal: '.other')
+            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: '.other')
 
             next =>
               @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
@@ -1971,7 +1971,7 @@ describe 'up.fragment', ->
             fixture('.target', text: 'old target text')
             fixture('.other', text: 'other text')
             fixture('.fail-target', text: 'old fail-target text')
-            up.change('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '.other')
+            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '.other')
 
             next =>
               @respondWith
@@ -1989,7 +1989,7 @@ describe 'up.fragment', ->
             $origin = $fixture('.origin').text('origin text')
             $fixture('.target').text('old target text')
             $fixture('.fail-target').text('old fail-target text')
-            up.change('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
+            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
 
             next =>
               @respondWith
@@ -2008,7 +2008,7 @@ describe 'up.fragment', ->
           it 'only reveals the first fragment', asyncSpec (next) ->
             fixture('.one', text: 'old one text')
             fixture('.two', text: 'old two text')
-            up.change('.one, .two', url: '/path', reveal: true)
+            up.render('.one, .two', url: '/path', reveal: true)
 
             next =>
               @respondWith """
@@ -2021,7 +2021,7 @@ describe 'up.fragment', ->
 
         it 'reveals a new element that is being appended', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target:after', url: '/path', reveal: true)
+          up.render('.target:after', url: '/path', reveal: true)
 
           next =>
             @respondWithSelector('.target', text: 'new target text')
@@ -2036,7 +2036,7 @@ describe 'up.fragment', ->
 
         it 'reveals a new element that is being prepended', asyncSpec (next) ->
           fixture('.target')
-          up.change('.target:before', url: '/path', reveal: true)
+          up.render('.target:before', url: '/path', reveal: true)
 
           next =>
             @respondWithSelector('.target', text: 'new target text')
@@ -2053,7 +2053,7 @@ describe 'up.fragment', ->
 
           it 'scrolls to the top of an element with the ID of that #hash', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path#hash', reveal: true)
+            up.render('.target', url: '/path#hash', reveal: true)
 
             next =>
               @respondWith """
@@ -2068,7 +2068,7 @@ describe 'up.fragment', ->
 
           it "scrolls to the top of an <a> element with the name of that hash", asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path#three', reveal: true)
+            up.render('.target', url: '/path#three', reveal: true)
 
             next =>
               @respondWith """
@@ -2083,7 +2083,7 @@ describe 'up.fragment', ->
 
           it "scrolls to a hash that includes a dot character ('.') (bugfix)", asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path#foo.bar', reveal: true)
+            up.render('.target', url: '/path#foo.bar', reveal: true)
 
             next =>
               @respondWith """
@@ -2098,7 +2098,7 @@ describe 'up.fragment', ->
 
           it 'does not scroll if { reveal: false } is also set', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path#hash', reveal: false)
+            up.render('.target', url: '/path#hash', reveal: false)
 
             next =>
               @respondWith """
@@ -2112,7 +2112,7 @@ describe 'up.fragment', ->
 
           it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path#two', reveal: true)
+            up.render('.target', url: '/path#two', reveal: true)
 
             next =>
               @respondWith """
@@ -2126,7 +2126,7 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['two']
 
-              up.change('.target', url: '/path#three', reveal: true)
+              up.render('.target', url: '/path#three', reveal: true)
               # response is already cached
 
             next =>
@@ -2134,7 +2134,7 @@ describe 'up.fragment', ->
 
           it "does not scroll if there is no element with the ID of that #hash", asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path#hash', reveal: true)
+            up.render('.target', url: '/path#hash', reveal: true)
 
             next =>
               @respondWithSelector('.target')
@@ -2146,7 +2146,7 @@ describe 'up.fragment', ->
 
           it 'animates the revealing when prepending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
-            up.change('.element:before',
+            up.render('.element:before',
               html: '<div class="element">version 2</div>',
               reveal: true,
               scrollBehavior: 'smooth'
@@ -2156,7 +2156,7 @@ describe 'up.fragment', ->
 
           it 'animates the revealing when appending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
-            up.change('.element:after',
+            up.render('.element:after',
               html: '<div class="element">version 2</div>',
               reveal: true,
               scrollBehavior: 'smooth'
@@ -2166,7 +2166,7 @@ describe 'up.fragment', ->
 
           it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
-            up.change('.element',
+            up.render('.element',
               html: '<div class="element">version 2</div>',
               reveal: true,
               scrollBehavior: 'smooth'
@@ -2192,7 +2192,7 @@ describe 'up.fragment', ->
               contentType: 'text/html'
               responseText: '<div class="element" style="height: 300px"></div>'
 
-          up.change('.element', url: '/foo')
+          up.render('.element', url: '/foo')
 
           next => respond()
           next => $viewport.scrollTop(65)
@@ -2212,7 +2212,7 @@ describe 'up.fragment', ->
 
           it 'does not execute inline script tags', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith """
@@ -2228,7 +2228,7 @@ describe 'up.fragment', ->
 
           it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith """
@@ -2252,7 +2252,7 @@ describe 'up.fragment', ->
 
           it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith """
@@ -2268,7 +2268,7 @@ describe 'up.fragment', ->
 
           it 'parses <noscript> contents as text, not DOM nodes (since it will be placed in a scripting-capable browser)', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith """
@@ -2286,7 +2286,7 @@ describe 'up.fragment', ->
 
           it 'parses <noscript> contents with multiple lines as text, not DOM nodes', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith """
@@ -2305,7 +2305,7 @@ describe 'up.fragment', ->
 
           it 'parses multiple <noscript> tags in the same fragment as text, not DOM nodes', asyncSpec (next) ->
             fixture('.target')
-            up.change('.target', url: '/path')
+            up.render('.target', url: '/path')
 
             next =>
               @respondWith """
@@ -2338,7 +2338,7 @@ describe 'up.fragment', ->
           $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
             spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
-          extractDone = up.change('.element', document: '<div class="element v2">v2</div>')
+          extractDone = up.render('.element', document: '<div class="element v2">v2</div>')
 
           extractDone.then ->
             expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
@@ -2350,7 +2350,7 @@ describe 'up.fragment', ->
             -> destructor($element.text())
           $container = $fixture('.container').text('old text')
           up.hello($container)
-          up.change('.container', document: '<div class="container">new text</div>')
+          up.render('.container', document: '<div class="container">new text</div>')
 
           next =>
             expect('.container').toHaveText('new text')
@@ -2365,7 +2365,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
-          up.change(fragment: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
+          up.render(fragment: '<div class="container">new text</div>', transition: 'cross-fade', duration: 100)
 
           u.timer 50, =>
             expect(destructor).not.toHaveBeenCalled()
@@ -2385,7 +2385,7 @@ describe 'up.fragment', ->
 
           # Need to pass a { target } and not use { fragment }, since e.toSelector() ignores
           # classes and only returns the tag name for singleton elements.
-          up.change('.container', document: '<div class="container">new text</div>')
+          up.render('.container', document: '<div class="container">new text</div>')
 
           next =>
             expect('.container').toHaveText('new text')
@@ -2398,7 +2398,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
-          extractDone = up.change(fragment: '<div class="container">new text</div>')
+          extractDone = up.render(fragment: '<div class="container">new text</div>')
 
           extractDone.then ->
             expect('.container').toHaveText('new text')
@@ -2412,7 +2412,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
-          extractDone = up.change(
+          extractDone = up.render(
             fragment: '<div class="container">new text</div>',
             transition: 'cross-fade',
             duration: 100
@@ -2432,7 +2432,7 @@ describe 'up.fragment', ->
           $element = $parent.affix('.element').text('old text')
           up.hello($element)
 
-          up.change(fragment: '<div class="element">new text</div>')
+          up.render(fragment: '<div class="element">new text</div>')
 
           next =>
             expect(spy).toHaveBeenCalledWith('old text', $parent)
@@ -2448,7 +2448,7 @@ describe 'up.fragment', ->
           $element = $parent.affix('.element').text('old text')
           up.hello($element)
 
-          extractDone = up.change(
+          extractDone = up.render(
             fragment: '<div class="element">new text</div>',
             transition: 'cross-fade',
             duration: 30
@@ -2464,7 +2464,7 @@ describe 'up.fragment', ->
 
           it 'focuses an [autofocus] element in the new fragment', asyncSpec (next) ->
             fixture('.foo-bar')
-            up.change focus: 'autofocus', fragment: """
+            up.render focus: 'autofocus', fragment: """
               <form class='foo-bar'>
                 <input class="autofocused-input" autofocus>
               </form>
@@ -2477,7 +2477,7 @@ describe 'up.fragment', ->
 
           it 'focuses the new fragment', asyncSpec (next) ->
             fixture('.foo-bar')
-            up.change focus: 'target', fragment: """
+            up.render focus: 'target', fragment: """
               <form class='foo-bar'>
                 <input>
               </form>
@@ -2488,7 +2488,7 @@ describe 'up.fragment', ->
 
           it 'focuses the fragment even if its element type is not focusable by default', asyncSpec (next) ->
             fixture('.foo-bar')
-            up.change focus: 'target', fragment: """
+            up.render focus: 'target', fragment: """
               <span class='foo-bar'></span>
             """
 
@@ -2499,7 +2499,7 @@ describe 'up.fragment', ->
 
           it 'focuses a matching element within the new fragment', asyncSpec (next) ->
             fixture('.foo-bar')
-            up.change focus: '.input', fragment: """
+            up.render focus: '.input', fragment: """
               <form class='foo-bar'>
                 <input class='input'>
               </form>
@@ -2513,7 +2513,7 @@ describe 'up.fragment', ->
 
             fixture('.element')
 
-            up.change focus: '.element', fragment: """
+            up.render focus: '.element', fragment: """
               <form class='foo-bar'>
               </form>
             """
@@ -2528,7 +2528,7 @@ describe 'up.fragment', ->
             ]
 
             next ->
-              up.change('.overlay-element', focus: '.root-element', content: 'new content')
+              up.render('.overlay-element', focus: '.root-element', content: 'new content')
 
             next ->
               expect('.rootElement').not.toBeFocused()
@@ -2541,7 +2541,7 @@ describe 'up.fragment', ->
             oldFocused.focus()
             expect(oldFocused).toBeFocused()
 
-            up.change('.container', focus: 'keep', content: '<div class="focused" tabindex="0">new focused</div>')
+            up.render('.container', focus: 'keep', content: '<div class="focused" tabindex="0">new focused</div>')
 
             next ->
               expect('.focused').toBeFocused()
@@ -2569,7 +2569,7 @@ describe 'up.fragment', ->
             expect(oldFocused.scrollTop).toBe(12)
             expect(oldFocused.scrollLeft).toBe(13)
 
-            up.change('.container', focus: 'keep', content: "<textarea wrap='off' rows='2' cols='2'>#{longText}</textarea>")
+            up.render('.container', focus: 'keep', content: "<textarea wrap='off' rows='2' cols='2'>#{longText}</textarea>")
 
             next ->
               textarea = document.querySelector('.container textarea')
@@ -2586,7 +2586,7 @@ describe 'up.fragment', ->
             container = fixture('.container')
             e.affix(container, 'textarea')
 
-            up.change('.container', focus: 'keep', content: "<textarea></textarea>")
+            up.render('.container', focus: 'keep', content: "<textarea></textarea>")
 
             next ->
               expect(oldFocused).toBeFocused()
@@ -2597,7 +2597,7 @@ describe 'up.fragment', ->
             container = fixture('.container')
             e.affix(container, 'textarea')
 
-            up.change('.container', focus: 'keep', content: "<textarea></textarea>")
+            up.render('.container', focus: 'keep', content: "<textarea></textarea>")
 
             next ->
               expect(outside).not.toBeFocused()
@@ -2616,7 +2616,7 @@ describe 'up.fragment', ->
             ]
 
             next ->
-              up.change('.overlay', focus: 'layer', content: 'new overlay text')
+              up.render('.overlay', focus: 'layer', content: 'new overlay text')
 
             next ->
               expect(up.layer.front.element).toBeFocused()
@@ -2630,13 +2630,13 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.change('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.change('.element', url: '/path2')
+            change2Promise = up.render('.element', url: '/path2')
 
           next =>
             expect(change1Error).toBeError(/aborted/)
@@ -2649,32 +2649,32 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.change('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.change('.element', url: '/path2', preload: true)
+            change2Promise = up.render('.element', url: '/path2', preload: true)
 
           next =>
             expect(change1Error).toBeUndefined()
             expect(up.proxy.queue.allRequests.length).toEqual(2)
 
-        it "does not abort an existing change's request when up.change() was called with { solo: false }", asyncSpec (next) ->
+        it "does not abort an existing change's request when up.render() was called with { solo: false }", asyncSpec (next) ->
           fixture('.element')
 
           change1Error  = undefined
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.change('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.change('.element', url: '/path2', solo: false)
+            change2Promise = up.render('.element', url: '/path2', solo: false)
 
           next =>
             expect(change1Error).toBeUndefined()
@@ -2687,13 +2687,13 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.change('.element', url: '/path1', solo: false).catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: false).catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.change('.element', url: '/path2')
+            change2Promise = up.render('.element', url: '/path2')
 
           next =>
             expect(change1Error).toBeUndefined()
@@ -2718,7 +2718,7 @@ describe 'up.fragment', ->
           $container.affix('.middle[up-keep]').text('old-middle')
           $container.affix('.after').text('old-after')
 
-          up.change '.container', document: """
+          up.render '.container', document: """
             <div class='container'>
               <div class='before'>new-before</div>
               <div class='middle' up-keep>new-middle</div>
@@ -2739,7 +2739,7 @@ describe 'up.fragment', ->
             old-after
             """
 
-          up.change '.container', html: """
+          up.render '.container', html: """
             <div class='container'>
               new-before
               <div class='element' up-keep>new-inside</div>
@@ -2758,7 +2758,7 @@ describe 'up.fragment', ->
             old-after
             """
 
-          up.change '.container',
+          up.render '.container',
             keep: false
             document: """
               <div class='container'>
@@ -2775,7 +2775,7 @@ describe 'up.fragment', ->
 
           it "keeps that element", asyncSpec (next) ->
             $fixture('.keeper[up-keep]').text('old-inside')
-            up.change fragment: "<div class='keeper' up-keep>new-inside</div>"
+            up.render fragment: "<div class='keeper' up-keep>new-inside</div>"
 
             next =>
               expect($('.keeper')).toHaveText('old-inside')
@@ -2786,7 +2786,7 @@ describe 'up.fragment', ->
             up.on('up:fragment:kept', keptListener)
             up.on('up:fragment:inserted', insertedListener)
             $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-            up.change '.keeper', document: "<div class='keeper new' up-keep>new-inside</div>"
+            up.render '.keeper', document: "<div class='keeper new' up-keep>new-inside</div>"
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
@@ -2814,7 +2814,7 @@ describe 'up.fragment', ->
           expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
           expect(barDestructor.calls.allArgs()).toEqual []
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class='foo'>new-ffrooo</div>
             </div>
@@ -2845,7 +2845,7 @@ describe 'up.fragment', ->
           expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
           expect(barDestructor.calls.allArgs()).toEqual []
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar'>new-bar</div>
@@ -2868,7 +2868,7 @@ describe 'up.fragment', ->
             <div class="parent2">
             </div>
             """
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class="parent1">
               </div>
@@ -2887,7 +2887,7 @@ describe 'up.fragment', ->
           $container.html """
             <div class="keeper" up-keep=".stayer"></div>
             """
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div up-keep class="stayer"></div>
             </div>
@@ -2907,7 +2907,7 @@ describe 'up.fragment', ->
           up.hello($container)
           expect(compiler.calls.count()).toEqual(1)
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
@@ -2928,7 +2928,7 @@ describe 'up.fragment', ->
             """
           up.hello($container)
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
@@ -2954,7 +2954,7 @@ describe 'up.fragment', ->
             """
           up.hello($container)
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class="keeper" up-keep>new-text</div>
             </div>
@@ -2977,7 +2977,7 @@ describe 'up.fragment', ->
             """
           up.hello($container)
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class="keeper">new-text</div>
             </div>
@@ -2992,7 +2992,7 @@ describe 'up.fragment', ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           listener = jasmine.createSpy('event listener')
           $keeper[0].addEventListener('up:fragment:keep', listener)
-          up.change '.keeper', document: "<div class='keeper new' up-keep up-data='{ \"key\": \"new-value\" }'>new-inside</div>"
+          up.render '.keeper', document: "<div class='keeper new' up-keep up-data='{ \"key\": \"new-value\" }'>new-inside</div>"
           next =>
             expect(listener).toHaveBeenCalledWith(
               jasmine.objectContaining(
@@ -3005,7 +3005,7 @@ describe 'up.fragment', ->
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
-          up.change fragment: "<div class='keeper' up-keep>new-inside</div>"
+          up.render fragment: "<div class='keeper' up-keep>new-inside</div>"
           next => expect($('.keeper')).toHaveText('new-inside')
 
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
@@ -3013,9 +3013,9 @@ describe 'up.fragment', ->
           $keeper[0].addEventListener 'up:fragment:keep', (event) ->
             event.preventDefault() if event.newFragment.textContent.trim() == 'version 3'
 
-          next => up.change fragment: "<div class='keeper' up-keep>version 2</div>"
+          next => up.render fragment: "<div class='keeper' up-keep>version 2</div>"
           next => expect($('.keeper')).toHaveText('version 1')
-          next => up.change fragment: "<div class='keeper' up-keep>version 3</div>"
+          next => up.render fragment: "<div class='keeper' up-keep>version 3</div>"
           next => expect($('.keeper')).toHaveText('version 3')
 
         it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on the targeted parent parent', asyncSpec (next) ->
@@ -3029,7 +3029,7 @@ describe 'up.fragment', ->
             <div class="keeper" up-keep></div>
             """
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class="keeper" up-keep></div>
             </div>
@@ -3045,7 +3045,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
-          up.change fragment: """
+          up.render fragment: """
             <div class='container'>
               <div class='keeper' up-keep up-data='{ "foo": "bar" }'>new-inside</div>
             </div>
@@ -3060,7 +3060,7 @@ describe 'up.fragment', ->
           up.on('up:fragment:kept', keptListener)
           $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
-          up.change '.keeper', document: """
+          up.render '.keeper', document: """
             <div class='container'>
               <div class='keeper' up-keep>new-inside</div>
             </div>
@@ -3077,14 +3077,14 @@ describe 'up.fragment', ->
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
           next =>
-            up.change '.keeper', document: """
+            up.render '.keeper', document: """
               <div class='container'>
                 <div class='keeper' up-keep up-data='{ \"key\": \"value1\" }'>new-inside</div>
               </div>
             """
 
           next =>
-            up.change '.keeper', document: """
+            up.render '.keeper', document: """
               <div class='container'>
                 <div class='keeper' up-keep up-data='{ \"key\": \"value2\" }'>new-inside</div>
             """
@@ -3115,7 +3115,7 @@ describe 'up.fragment', ->
               <div class='bar' up-keep>new-bar</div>
             </div>
             """
-          promise = up.change('.container',
+          promise = up.render('.container',
             fragment: newHTML,
             transition: transition
           )
@@ -3142,7 +3142,7 @@ describe 'up.fragment', ->
           it 'activates custom elements in inserted fragments', asyncSpec (next) ->
             fixture('.target')
 
-            up.change '.target', content: """
+            up.render '.target', content: """
               <test-component-activation></test-component-activation>
               """
 
@@ -3154,7 +3154,7 @@ describe 'up.fragment', ->
             constructorSpy = jasmine.createSpy('constructor called')
             up.on('test-component:new', constructorSpy)
 
-            up.change '.target', document: """
+            up.render '.target', document: """
               <div class="target">
                 <test-component-activation></test-component-activation>
               </div>
@@ -3168,17 +3168,17 @@ describe 'up.fragment', ->
 
     describe 'up.replace()', ->
 
-      it 'delegates to up.change(target, { url })', ->
-        changeSpy = up.fragment.knife.mock('makeChange')
+      it 'delegates to up.render(target, { url })', ->
+        renderSpy = up.fragment.knife.mock('render')
         up.replace('target', 'url')
-        expect(changeSpy).toHaveBeenCalledWith('target', { url: 'url' })
+        expect(renderSpy).toHaveBeenCalledWith('target', { url: 'url' })
 
     describe 'up.extract()', ->
 
-      it 'delegates to up.change(target, { document })', ->
-        changeSpy = up.fragment.knife.mock('makeChange')
+      it 'delegates to up.render(target, { document })', ->
+        renderSpy = up.fragment.knife.mock('render')
         up.extract('target', 'document')
-        expect(changeSpy).toHaveBeenCalledWith('target', { document: 'document' })
+        expect(renderSpy).toHaveBeenCalledWith('target', { document: 'document' })
 
     describe 'up.destroy()', ->
 

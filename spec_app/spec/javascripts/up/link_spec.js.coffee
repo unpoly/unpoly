@@ -486,24 +486,24 @@ describe 'up.link', ->
               expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
 
           it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
-            spyOn(up, 'change')
+            spyOn(up, 'render')
             spyOn(window, 'confirm')
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: '')
 
             next =>
               expect(window.confirm).not.toHaveBeenCalled()
-              expect(up.change).toHaveBeenCalled()
+              expect(up.render).toHaveBeenCalled()
 
           it 'does not show a confirmation dialog when preloading', asyncSpec (next) ->
-            spyOn(up, 'change')
+            spyOn(up, 'render')
             spyOn(window, 'confirm')
             $link = $fixture('a[href="/danger"][up-target=".middle"]')
             up.follow($link, confirm: 'Are you sure?', preload: true)
 
             next =>
               expect(window.confirm).not.toHaveBeenCalled()
-              expect(up.change).toHaveBeenCalled()
+              expect(up.render).toHaveBeenCalled()
 
       describeFallback 'canPushState', ->
 
@@ -1187,10 +1187,10 @@ describe 'up.link', ->
       it 'can be used to enlarge the click area of a link', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"]')
         up.hello($area)
-        spyOn(up, 'change')
+        spyOn(up, 'render')
         Trigger.clickSequence($area)
         next =>
-          expect(up.change).toHaveBeenCalled()
+          expect(up.render).toHaveBeenCalled()
 
       it 'does nothing when the user clicks another link in the expanded area', asyncSpec (next) ->
         $area = $fixture('div[up-expand]')
@@ -1216,10 +1216,10 @@ describe 'up.link', ->
       it 'does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
-        spyOn(up, 'change')
+        spyOn(up, 'render')
         Trigger.clickSequence($area)
         next =>
-          expect(up.change.calls.count()).toEqual(1)
+          expect(up.render.calls.count()).toEqual(1)
 
       it 'makes the expanded area followable if the expanded link is [up-dash] with a selector (bugfix)', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')

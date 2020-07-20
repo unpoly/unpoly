@@ -18,11 +18,11 @@ up.history = do ->
 
   @property up.history.config
   @param {Array} [config.popTargets=[]]
-    A list of possible CSS selectors to [replace](/up.change) when the user goes back in history.
+    A list of possible CSS selectors to [replace](/up.render) when the user goes back in history.
 
     If this array is empty, the [root layer's default targets](/up.layer.config.root) will be replaced.
   @param {boolean} [config.enabled=true]
-    Defines whether [fragment updates](/up.change) will update the browser's current URL.
+    Defines whether [fragment updates](/up.render) will update the browser's current URL.
 
     If set to `false` Unpoly will never change the browser URL.
   @param {boolean} [config.restoreScroll=true]
@@ -152,7 +152,7 @@ up.history = do ->
     if state?.up
       url = currentLocation()
 
-      replaced = up.change
+      replaced = up.render
         layer: 'root'        # Don't replace elements in a modal that might still be open
         peel: true           # Close all overlays
         keep: false

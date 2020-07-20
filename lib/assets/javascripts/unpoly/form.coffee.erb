@@ -234,7 +234,7 @@ up.form = do ->
     # Take params from form, but allow to pass additional params as { params }
     options.params = up.Params.fromForm(form).addAll(options.params)
 
-    # The guardEvent will also be assigned an { options } attribute in up.change()
+    # The guardEvent will also be assigned an { options } attribute in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', log: 'Submitting form')
 
     # Now that we have extracted everything form-specific into options, we can call
@@ -383,7 +383,7 @@ up.form = do ->
   @function up.validate
   @param {string|Element|jQuery} fieldOrSelector
   @param {string|Element|jQuery} [options.target]
-    The element that will be [updated](/up.change) with the validation results.
+    The element that will be [updated](/up.render) with the validation results.
   @return {Promise}
     A promise that is fulfilled when the server-side
     validation is received and the form was updated.
@@ -409,7 +409,7 @@ up.form = do ->
     options.headers[up.protocol.config.validateHeader] = options.validate
     options.reveal ?= false
 
-    # The guardEvent will also be assigned an { options } attribute in up.change()
+    # The guardEvent will also be assigned an { options } attribute in up.render()
     options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')
 
     return submit(field, options)

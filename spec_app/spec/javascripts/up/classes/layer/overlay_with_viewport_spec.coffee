@@ -15,7 +15,7 @@ describe 'up.OverlayWithViewport', ->
         expect(up.layer.stack.length).toBe(2)
 
         # Need to pass { peel: false } since peeling would close the layer
-        up.change('.container', content: 'new container text', peel: false)
+        up.render('.container', content: 'new container text', peel: false)
 
       next ->
         expect(up.layer.stack.length).toBe(2)
@@ -32,7 +32,7 @@ describe 'up.OverlayWithViewport', ->
         expect(up.layer.stack.length).toBe(2)
 
         # Need to pass { peel: false } since peeling would close the layer
-        up.change('.container', content: 'new container text', peel: false)
+        up.render('.container', content: 'new container text', peel: false)
 
       next ->
         expect(up.layer.stack.length).toBe(2)

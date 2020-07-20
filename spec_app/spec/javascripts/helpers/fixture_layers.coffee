@@ -25,6 +25,6 @@ window.makeLayers = (stackPlans) ->
 
   promise = Promise.resolve()
   stackPlans.forEach (stackPlan) ->
-    promise = promise.then -> up.change(stackPlan)
+    promise = promise.then -> up.render(stackPlan)
 
   return promise

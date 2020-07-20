@@ -30,7 +30,7 @@ class up.FragmentFocus
     if (match = up.fragment.get(@target, selector, lookupOpts) || up.fragment.get(selector, lookupOpts))
       return @focusElement(match)
     else
-      up.warn('up.change()', 'Tried to focus selector "%s", but no matching element found', selector)
+      up.warn('up.render()', 'Tried to focus selector "%s", but no matching element found', selector)
       return
 
   restoreFocus: (capsule) ->

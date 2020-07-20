@@ -46,14 +46,14 @@ up.fragment = do ->
       source(parent)
 
   ###*
-  @function up.change
+  @function up.render
   @param {string|Element|jQuery} [target]
   @param {Object} options
     TODO: Copy from replace()
     TODO: New options like { html } or { content } or { url } or { target }
   @stable
   ###
-  makeChange = (args...) ->
+  render = (args...) ->
     options = parseTargetAndOptions(args)
 
     options.hungry ?= true # preflight option has no failVariant
@@ -110,7 +110,7 @@ up.fragment = do ->
 
   ###**
   This event is [emitted](/up.emit) when the server responds with the HTML, before
-  the HTML is used to [change a fragment](/up.change).
+  the HTML is used to [change a fragment](/up.render).
 
   Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
   to prevent any changes to the DOM and browser history. This is useful to detect
@@ -130,7 +130,7 @@ up.fragment = do ->
       })
 
   Instead of preventing the update, listeners may also access the `event.change` object
-  to mutate options to the `up.change()` call that will process the server response.
+  to mutate options to the `up.render()` call that will process the server response.
 
   @param event.preventDefault()
     Event listeners may call this method to prevent the fragment change.
@@ -139,7 +139,7 @@ up.fragment = do ->
   @param {up.Response} event.response
     The server response.
   @param {object} event.change
-    Options for the `up.change()` call that will process the server response.
+    Options for the `up.render()` call that will process the server response.
   @event up:fragment:loaded
   ###
 
@@ -288,8 +288,8 @@ up.fragment = do ->
   @stable
   ###
   replace = (target, url, options) ->
-    up.legacy.deprecated('up.replace(target, url)', 'up.change(target, { url })')
-    return makeChange(target, u.merge(options, { url }))
+    up.legacy.deprecated('up.replace(target, url)', 'up.render(target, { url })')
+    return render(target, u.merge(options, { url }))
 
   ###**
   Updates a selector on the current page with the
@@ -330,8 +330,8 @@ up.fragment = do ->
   @stable
   ###
   extract = (target, document, options) ->
-    up.legacy.deprecated('up.extract(target, document)', 'up.change(target, { document })')
-    return makeChange(target, u.merge(options, { document }))
+    up.legacy.deprecated('up.extract(target, document)', 'up.render(target, { document })')
+    return render(target, u.merge(options, { document }))
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -732,7 +732,7 @@ up.fragment = do ->
     options = parseTargetAndOptions(args)
     options.cache ?= false
     options.url ?= source(options.target)
-    return makeChange(options)
+    return render(options)
 
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
@@ -754,8 +754,8 @@ up.fragment = do ->
   @stable
   ###
   visit = (url, options = {}) ->
-    up.legacy.warn("up.visit(url) has been deprecated. Use up.change({ url }) instead.")
-    up.change(u.merge(options, { url }))
+    up.legacy.warn("up.visit(url) has been deprecated. Use up.render({ url }) instead.")
+    up.render(u.merge(options, { url }))
 
   targetsBody = (selector) ->
     /(^|,)\s*(body|html)\s*(\,|$)/i.test(selector)
@@ -778,7 +778,7 @@ up.fragment = do ->
     replace: replace
     reload: reload
     destroy: destroy
-    change: makeChange
+    render: render
     extract: extract
     first: (args...) ->
       up.legacy.deprecated('up.fragment.get()', 'up.fragment.get()')
@@ -804,7 +804,7 @@ up.replace = up.fragment.replace
 up.extract = up.fragment.extract
 up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
-up.change = up.fragment.change
+up.render = up.fragment.render
 up.hello = up.fragment.hello
 up.visit = up.fragment.visit
 

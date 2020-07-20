@@ -143,6 +143,6 @@ class up.Change.FromContent extends up.Change
           throw error
 
     # If we're about to explode with a fatal error we print everything that we tried.
-    unprintedMessages.forEach (message) -> up.puts('up.change()', message)
+    unprintedMessages.forEach (message) -> up.puts('up.render()', message)
 
     return opts.noneApplicable?()

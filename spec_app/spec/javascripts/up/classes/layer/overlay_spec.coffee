@@ -43,7 +43,7 @@ describe 'up.Layer.Overlay', ->
       makeLayers(2)
 
       next ->
-        up.change('.element', url: '/layer-url', layer: 'current')
+        up.render('.element', url: '/layer-url', layer: 'current')
 
       next ->
         up.layer.accept()
@@ -59,7 +59,7 @@ describe 'up.Layer.Overlay', ->
       makeLayers(2)
 
       next ->
-        up.change('.element', url: '/root-url', layer: 'root', peel: false)
+        up.render('.element', url: '/root-url', layer: 'root', peel: false)
 
       next ->
         up.layer.current.accept()

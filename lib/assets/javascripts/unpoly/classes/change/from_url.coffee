@@ -107,16 +107,16 @@ class up.Change.FromURL extends up.Change
 
     if @isResponseWithHTMLContent(responseOrError)
       if responseOrError.isSuccess()
-        up.puts('up.change()', 'Upating page with successful response')
+        up.puts('up.render()', 'Upating page with successful response')
         return @updateContentFromResponse(responseOrError, @successOptions)
       else
-        up.puts('up.change()', 'Updating page with failed response (HTTP %d)', responseOrError.status)
+        up.puts('up.render()', 'Updating page with failed response (HTTP %d)', responseOrError.status)
         promise = @updateContentFromResponse(responseOrError, @failOptions)
         # Although processResponse() will fulfill with a successful replacement of options.failTarget,
         # we still want to reject the promise that's returned to our API client.
         return u.always(promise, rejectWithFailedResponse)
     else
-      up.puts('up.change()', 'Response without HTML content (HTTP %d, Content-Type %s)', responseOrError.status, responseOrError.contentType)
+      up.puts('up.render()', 'Response without HTML content (HTTP %d, Content-Type %s)', responseOrError.status, responseOrError.contentType)
       return rejectWithFailedResponse()
 
   updateContentFromResponse: (response, options) ->
