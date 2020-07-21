@@ -399,34 +399,51 @@ up.event = do ->
     (u.isUndefined(event.button) || event.button == 0) && !u.some(keyModifiers, (modifier) -> event[modifier])
 
   fork = (originalEvent, newType, copyKeys = []) ->
-    forwardKeys = ['stopPropagation', 'stopImmediatePropagation', 'preventDefault']
-
     newEvent = up.event.build(newType, u.pick(originalEvent, copyKeys))
     newEvent.originalEvent = originalEvent # allow users to access other props through event.originalEvent.prop
 
-    forwardKeys.forEach (key) ->
+    ['stopPropagation', 'stopImmediatePropagation', 'preventDefault'].forEach (key) ->
       originalMethod = newEvent[key]
 
       newEvent[key] = ->
         originalEvent[key]()
         return originalMethod.call(newEvent)
 
-    newEvent
+    return newEvent
 
-#  bind '[up-emit]', 'click up:action:consume', (consumeEvent, element) ->
-#
-#    # TODO: Support this: up.emit="{ type: foo:bar, prop1: foo, prop2: prop2 }"
-#    # TODO: build. emit, etc. need to support this form2
-#    # TODO: This should then also be the protocol for the server ptotocol
-#    # <a href="foo" up-emit="my:custom:event" up-emit-props="{ foo: 'bar' }">
-#    # <a href="foo" up-emit="{ type: 'my:custom:event', foo: 'bar' }">
-#
-#
-#    eventType = e.attr(element, 'up-emit')
-#    eventProps = e.jsonAttr(element, 'up-emit-props')
-#    emittedEvent = up.emit(element, eventType, eventProps)
-#    if emittedEvent.defaultPrevented
-#      halt(consumeEvent)
+  ###*
+  Emits the given event when this link is clicked.
+
+  When the emitted event's default' is prevented, the original `click` event's default is also prevented.
+
+  You may use this attribute to emit events when clicking on areas that are no hyperlinks,
+  by setting it on an `<a>` element without a `[href]` attribute.
+
+  \#\#\# Example
+
+      <a href='/users/5" up-emit='user:select' up-emit-props='{ "id": 5, "firstName": "Alice" }'>Alice</a>
+
+      <script>
+        up.on('a', 'user:select', function(event) {
+          console.log(event.firstName) // logs "Alice"
+          event.preventDefault()       // will prevent the link from being followed
+        })
+      </script>
+
+  @selector a[up-emit]
+  @param {string} up-emit
+    The type of the event to be emitted.
+  @param {string} up-emit-props
+    The event properties, serialized as JSON.
+  ###
+  executeEmitAttr = (event, element) ->
+    eventType = e.attr(element, 'up-emit')
+    eventProps = e.jsonAttr(element, 'up-emit-props') || {}
+    forkedEvent = fork(event, eventType)
+    u.assign(forkedEvent, eventProps)
+    up.emit(element, forkedEvent)
+
+  bind 'up:click', 'a[up-emit]', executeEmitAttr
 
   bind 'up:framework:reset', reset
 

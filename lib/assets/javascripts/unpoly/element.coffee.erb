@@ -330,9 +330,9 @@ up.element = do ->
   @function up.element.toggleClass
   @param {Element} element
     The element for which to add or remove the class.
-  @param {String} className
+  @param {string} className
     A boolean value to determine whether the class should be added or removed.
-  @param {String} state
+  @param {string} state
     If omitted, the class will be added if missing and removed if present.
   @experimental
   ###
@@ -491,7 +491,7 @@ up.element = do ->
     # Attribute values might contain spaces, and then we would incorrectly
     # split depths at that space.
     attrValues = []
-    selectorWithoutAttrValues = selector.replace /\[([\w-]+)(?:[\~\|\^\$\*]?=(["'])?([^"'\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
+    selectorWithoutAttrValues = selector.replace /\[([\w-]+)(?:[\~\|\^\$\*]?=(["'])?([^\2\]]*?)\2)?\]/g, (_match, attrName, _quote, attrValue) ->
       attrValues.push(attrValue || '')
       "[#{attrName}]"
 
@@ -562,7 +562,7 @@ up.element = do ->
   @function up.element.affix
   @param {Element} parent
     The parent to which to attach the created element.
-  @param {String} [position='beforeend']
+  @param {string} [position='beforeend']
     The position of the new element in relation to `parent`.
     Can be one of the following values:
 
@@ -844,7 +844,7 @@ up.element = do ->
 #  @function up.element.presentAttr
 #  @param {Element} element
 #    The element from which to retrieve the attribute value.
-#  @param {String} attribute
+#  @param {string} attribute
 #    The attribute name.
 #  @return {string|undefined}
 #    The attribute value, if present.
@@ -892,7 +892,7 @@ up.element = do ->
   @function up.element.booleanAttr
   @param {Element} element
     The element from which to retrieve the attribute value.
-  @param {String} attribute
+  @param {string} attribute
     The attribute name.
   @return {boolean|undefined}
     The cast attribute value.
@@ -926,7 +926,7 @@ up.element = do ->
   @function up.element.numberAttr
   @param {Element} element
     The element from which to retrieve the attribute value.
-  @param {String} attribute
+  @param {string} attribute
     The attribute name.
   @return {number|undefined}
     The cast attribute value.
@@ -947,7 +947,7 @@ up.element = do ->
   @function up.element.jsonAttr
   @param {Element} element
     The element from which to retrieve the attribute value.
-  @param {String} attribute
+  @param {string} attribute
     The attribute name.
   @return {Object|undefined}
     The cast attribute value.
@@ -1044,7 +1044,7 @@ up.element = do ->
 
   @function up.element.styleNumber
   @param {Element} element
-  @param {String} prop
+  @param {string} prop
     A single property name in kebab-case or camelCase.
   @return {number|undefined}
   @experimental

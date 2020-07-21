@@ -250,22 +250,22 @@ up.protocol = do ->
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config
-  @param {String} [config.targetHeader='X-Up-Target']
-  @param {String} [config.failTargetHeader='X-Up-Fail-Target']
-  @param {String} [config.locationHeader='X-Up-Location']
-  @param {String} [config.titleHeader='X-Up-Title']
-  @param {String} [config.acceptLayerHeader='X-Up-Accept-Layer']
-  @param {String} [config.dismissLayerHeader='X-Up-Dismiss-Layer']
-  @param {String} [config.eventsHeader='X-Up-Events']
-  @param {String} [config.validateHeader='X-Up-Validate']
-  @param {String} [config.methodHeader='X-Up-Method']
-  @param {String} [config.methodCookie='_up_method']
+  @param {string} [config.targetHeader='X-Up-Target']
+  @param {string} [config.failTargetHeader='X-Up-Fail-Target']
+  @param {string} [config.locationHeader='X-Up-Location']
+  @param {string} [config.titleHeader='X-Up-Title']
+  @param {string} [config.acceptLayerHeader='X-Up-Accept-Layer']
+  @param {string} [config.dismissLayerHeader='X-Up-Dismiss-Layer']
+  @param {string} [config.eventsHeader='X-Up-Events']
+  @param {string} [config.validateHeader='X-Up-Validate']
+  @param {string} [config.methodHeader='X-Up-Method']
+  @param {string} [config.methodCookie='_up_method']
     The name of the optional cookie the server can send to
     [signal the initial request method](/up.protocol#signaling-the-initial-request-method).
-  @param {String} [config.methodParam='_method']
+  @param {string} [config.methodParam='_method']
     The name of the POST parameter when [wrapping HTTP methods](/up.proxy.config#config.wrapMethods)
     in a `POST` request.
-  @param {String} [config.csrfHeader='X-CSRF-Token']
+  @param {string} [config.csrfHeader='X-CSRF-Token']
     The name of the HTTP header that will include the
     [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
     for AJAX requests.

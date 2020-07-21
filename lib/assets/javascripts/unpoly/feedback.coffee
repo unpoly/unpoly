@@ -336,7 +336,7 @@ up.feedback = do ->
       </nav>
 
   @selector a[up-alias]
-  @param {String} up-alias
+  @param {string} up-alias
     A space-separated list of alternative URLs or URL patterns.
   @stable
   ###

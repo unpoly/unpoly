@@ -524,13 +524,13 @@ describe 'up.event', ->
           expect(result.state).toEqual('rejected')
           done()
 
-      describe '(onEmitted callback)', ->
-
-        it 'allows to pass a function that is called sync after the event was emitted'
-
-        it 'allows the function to return a promise that will delay the promise returned by whenEmitted'
-
-        it 'does not call the function if the event was prevented'
+#      describe '(onEmitted callback)', ->
+#
+#        it 'allows to pass a function that is called sync after the event was emitted'
+#
+#        it 'allows the function to return a promise that will delay the promise returned by whenEmitted'
+#
+#        it 'does not call the function if the event was prevented'
 
     describe 'up.event.halt', ->
 
@@ -593,3 +593,49 @@ describe 'up.event', ->
 
         next ->
           expect(callback).not.toHaveBeenCalled()
+
+  describe 'unobtrusive behavior', ->
+
+    describe 'a[up-emit]', ->
+
+      it 'emits an event of the given type when the link is clicked', ->
+        link = fixture("a[up-emit='foo']")
+        fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
+
+        Trigger.clickSequence(link)
+
+        expect(fooListener).toHaveBeenCalled()
+
+      it 'allows to pass event props as [up-emit-props]', ->
+        link = fixture("a[up-emit='foo'][up-emit-props='#{JSON.stringify(key: 'value')}']")
+        fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
+
+        Trigger.clickSequence(link)
+
+        expect(fooListener).toHaveBeenCalled()
+        expect(fooListener.calls.mostRecent().args[0]).toBeEvent('foo', key: 'value')
+
+      describe 'when the emitted event is prevented', ->
+
+        it 'prevents the click event', ->
+          link = fixture("a[up-emit='foo']")
+          clickEvent = null
+          link.addEventListener('click', (event) -> clickEvent = event)
+          link.addEventListener('foo', (event) -> event.preventDefault())
+
+          Trigger.clickSequence(link)
+
+          expect(clickEvent.defaultPrevented).toBe(true)
+
+        it 'prevents an Unpoly link from being followed', ->
+          link = fixture("a[up-emit='foo'][href='/path'][up-follow]")
+          followListener = jasmine.createSpy('follow listener')
+          link.addEventListener('up:link:follow', followListener)
+          link.addEventListener('foo', (event) -> event.preventDefault())
+
+          Trigger.clickSequence(link)
+
+          expect(followListener).not.toHaveBeenCalled()
+

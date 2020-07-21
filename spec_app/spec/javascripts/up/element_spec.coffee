@@ -439,6 +439,30 @@ describe 'up.element', ->
       expect(element.tagName).toEqual('UL')
       expect(element.getAttribute('foo')).toEqual('bar')
 
+    it 'allows to quote attribute values in single quotes', ->
+      element = up.element.createFromSelector("ul[foo='bar']")
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'allows to quote attribute values in double quotes', ->
+      element = up.element.createFromSelector('ul[foo="bar"]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar')
+
+    it 'allows single-quotes in a double-quoted attribute value', ->
+      element = up.element.createFromSelector('ul[foo="bar\'baz"]')
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual("bar'baz")
+
+    it 'allows double-quotes in a single-quoted attribute value', ->
+      element = up.element.createFromSelector("ul[foo='bar\"baz']")
+      expect(element).toBeElement()
+      expect(element.tagName).toEqual('UL')
+      expect(element.getAttribute('foo')).toEqual('bar"baz')
+
     it 'creates an element with an attribute set to a space-separated value', ->
       element = up.element.createFromSelector('ul[foo~=bar]')
       expect(element).toBeElement()
