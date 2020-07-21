@@ -389,20 +389,29 @@ up.event = do ->
     else
       document.addEventListener('DOMContentLoaded', callback)
 
-  ###**
-  @function isUnmodifiedKeyEvent
-  @internal
-  ###
-  isUnmodifiedKeyEvent = (event) ->
-    not (event.metaKey or event.shiftKey or event.ctrlKey or event.altKey)
+  keyModifiers = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
   ###**
-  @function up.event.isUnmodifiedMouseEvent
+  @function up.event.isUnmodified
   @internal
   ###
-  isUnmodifiedMouseEvent = (event) ->
-    isLeftButton = u.isUndefined(event.button) || event.button == 0
-    isLeftButton && isUnmodifiedKeyEvent(event)
+  isUnmodified = (event) ->
+    (u.isUndefined(event.button) || event.button == 0) && !u.some(keyModifiers, (modifier) -> event[modifier])
+
+  fork = (originalEvent, newType, copyKeys = []) ->
+    forwardKeys = ['stopPropagation', 'stopImmediatePropagation', 'preventDefault']
+
+    newEvent = up.event.build(newType, u.pick(originalEvent, copyKeys))
+    newEvent.originalEvent = originalEvent # allow users to access other props through event.originalEvent.prop
+
+    forwardKeys.forEach (key) ->
+      originalMethod = newEvent[key]
+
+      newEvent[key] = ->
+        originalEvent[key]()
+        return originalMethod.call(newEvent)
+
+    newEvent
 
 #  bind '[up-emit]', 'click up:action:consume', (consumeEvent, element) ->
 #
@@ -432,7 +441,9 @@ up.event = do ->
   onEscape: onEscape
   halt: halt
   onReady: onReady
-  isUnmodifiedMouseEvent: isUnmodifiedMouseEvent
+  isUnmodified: isUnmodified
+  fork: fork
+  keyModifiers: keyModifiers
 
 up.on = up.event.on
 up.$on = up.event.$on

@@ -6,7 +6,11 @@
 - Publish Layer#sync()
 - saveScroll: options.url should be renamed to options.location
 - Reach out to server-integration libs (make issues?) with the new changes
+
 - Consider removing history from modals
+
+- Should the default layer for up.fragment be 'current' instead of 'any'? Consider up-on-accepted="up.reload('.table')"
+
 - New attribute [up-emit]
   - For Unpoly links and forms this is another guardEvent (userGuardEvent)
   - For input elements this reacts on input / change

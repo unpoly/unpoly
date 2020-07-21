@@ -350,8 +350,8 @@ up.link = do ->
       link.setAttribute('up-follow', '')
 
   shouldFollowEvent = (event, link) ->
-    # We never handle events for the right mouse button, or when Shift/CTRL/Meta is pressed
-    return false unless up.event.isUnmodifiedMouseEvent(event)
+    # We never handle events for the right mouse button, or when Shift/CTRL/Meta/ALT is pressed
+    return false unless up.event.isUnmodified(event)
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
@@ -399,19 +399,7 @@ up.link = do ->
         convertClick(event)
 
   convertClick = (originalEvent) ->
-    copiedKeys = ['clientX', 'clientY', 'button', 'metaKey', 'shiftKey', 'ctrlKey']
-    forwardedKeys = ['stopPropagation', 'stopImmediatePropagation', 'preventDefault']
-
-    newEvent = up.event.build('up:click', u.pick(originalEvent, copiedKeys))
-    newEvent.originalEvent = originalEvent # allow users to access other props through event.originalEvent.prop
-
-    forwardedKeys.forEach (key) ->
-      originalMethod = newEvent[key]
-
-      newEvent[key] = ->
-        originalEvent[key]()
-        return originalMethod.call(newEvent)
-
+    newEvent = up.event.fork(originalEvent, 'up:click', ['clientX', 'clientY', 'button', up.event.keyModifiers...])
     up.emit(originalEvent.target, newEvent, log: false)
 
   ###**
