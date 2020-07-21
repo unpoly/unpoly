@@ -6,26 +6,12 @@
 - Publish Layer#sync()
 - saveScroll: options.url should be renamed to options.location
 - Reach out to server-integration libs (make issues?) with the new changes
-- Allow up.validate(any_element) and this will find the nearest field or form
 - Consider removing history from modals
-- When the <body> is replaced with a Rails error, there are <div class="up-wrapped-script"> elements in the DOM
-- When sending a request twice, the methods is wrapped twice into the params
-
-- What should this do if there is no parent layer?
-    <div class="row mb-4">
-      <div class="col">
-        <h2>Company #<%= @company.id %></h2>
-      </div>
-
-      <div class="col-sm-auto">
-        <%= link_to 'Edit', [:edit, :layer_test, @company], class: 'btn btn-primary', 'up-follow': '' %>
-        <%= link_to 'Delete', [:layer_test, @company], method: :delete, 'up-confirm' => 'Really delete?', class: 'btn btn-danger', 'up-layer': 'parent'  %>
-      </div>
-    </div>
-
-  => [up-dismiss] would close immediately upon clicking
-  => IN ANY CASE we should define the behavior of up-layer="parent" on the root layer
-    - It currently fails with "up.fail() No target given for change"
+- New attribute [up-emit]
+  - For Unpoly links and forms this is another guardEvent (userGuardEvent)
+  - For input elements this reacts on input / change
+  - For other elements this reacts on click
+  - do we have { props }, [up-props] with that?
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
@@ -289,6 +275,7 @@ Accessibility
 Later?
 ------
 
+- We could allow up.fragment.config.runInlineScripts again. I don't know why we removed it, now that we have HTMLWrapper.
 - up.element.config.nonSemanticClasses = [/^mb-\d$]
   - will be ignored in up.element.toSelector()
   - Implement for Bootstrap
@@ -299,16 +286,13 @@ Later?
   - If we keep the manual scroll restauration we need to keep our lastScrollTops in a way that it survives full page loads (it's currently a variable in memory)
 - Some API would be nicer if up.viewport would return up.Viewport instances that would then have methods like #reveal()
 - Should revealSnap also snap to the bottom? This is hard because we don't know the buffer height minus obstructions
-- Support up.form.validate(form)
+- Support up.validate(form)
   - This should replace the entire form
-- Support up.form.validate(containerInForm)
+- Support up.validate(containerInForm)
   - This should derive a selector from the container
+- Support up.validate(element)
+  - Allow up.validate(any_element) and this will find the nearest field or form
 - Stagger initial compilation with a time budget
-- New attribute [up-emit]
-  - For Unpoly links and forms this is another guardEvent (userGuardEvent)
-  - For input elements this reacts on input / change
-  - For other elements this reacts on click
-  - do we have { props }, [up-props] with that?
 - Validate Requests prevents Submit when clicking out of a focused field into submit button
   - https://makandra.slack.com/archives/C02KGPZDE/p1588250760006500
   - https://jsbin.com/fofefokafu/edit?html,js,output

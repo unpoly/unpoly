@@ -2259,13 +2259,16 @@ describe 'up.fragment', ->
               @respondWith """
                 <div class="target">
                   <script type="text/javascript">
+                    alert("foo")
                     window.scriptTagExecuted()
                   </script>
                 </div>
               """
 
-            next =>
+            next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script')
 
           it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
             fixture('.target')
@@ -2284,6 +2287,8 @@ describe 'up.fragment', ->
 
             next =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script')
 
         describe 'linked scripts', ->
 
@@ -2304,6 +2309,8 @@ describe 'up.fragment', ->
 
             next =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script')
 
         describe '<noscript> tags', ->
 

@@ -8,25 +8,21 @@ class up.HTMLWrapper
     closeTag = "<\/#{@tagName}>"
     innerHTML = "(.|\\s)*?"
     @pattern = new RegExp(openTag + innerHTML + closeTag, 'ig')
-    @className = "up-wrapped-#{@tagName}"
-    @guard = options.guard || @noGuard
+    @attrName = "up-wrapped-#{@tagName}"
+
+  strip: (html) ->
+    return html.replace(@pattern, '')
 
   wrap: (html) ->
     return html.replace(@pattern, @wrapMatch)
 
   wrapMatch: (match) =>
     @didWrap = true
-    "<div class='#{@className}' data-html='#{u.escapeHTML(match)}'></div>"
+    "<div #{@attrName}='#{u.escapeHTML(match)}'></div>"
 
   unwrap: (element) ->
     return unless @didWrap
-    for wrappedChild in element.querySelectorAll(".#{@className}")
-      originalHTML = wrappedChild.getAttribute('data-html')
+    for wrappedChild in element.querySelectorAll("[#{@attrName}]")
+      originalHTML = wrappedChild.getAttribute(@attrName)
       restoredElement = e.createFromHTML(originalHTML)
-      if @guard(restoredElement)
-        e.replace(wrappedChild, restoredElement)
-      else
-        e.remove(restoredElement)
-
-  noGuard: (element) ->
-    true
+      e.replace(wrappedChild, restoredElement)

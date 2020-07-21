@@ -20,9 +20,10 @@ class up.ResponseDoc
     # #first(), and only in the requested fragment.
     @noscriptWrapper = new up.HTMLWrapper('noscript')
 
-    # We wrap <script> tags into a <div> because <script> tags parsed by
-    # HTMLParser will not execute their content once appended to the DOM.
-    @scriptWrapper = new up.HTMLWrapper('script', guard: @isInlineScript)
+    # We strip <script> tags from the HTML.
+    # If you need a fragment update to call JavaScript code, call it from a compiler
+    # ([Google Analytics example](https://makandracards.com/makandra/41488-using-google-analytics-with-unpoly)).
+    @scriptStripper = new up.HTMLWrapper('script')
 
     @root =
       @parseDocument(options) || @parseFragment(options) || @parseContentOrBuildEmpty(options)
@@ -62,7 +63,7 @@ class up.ResponseDoc
 
   wrapHTML: (html) ->
     html = @noscriptWrapper.wrap(html)
-    html = @scriptWrapper.wrap(html)
+    html = @scriptStripper.strip(html)
     html
 
   title: ->
@@ -71,15 +72,9 @@ class up.ResponseDoc
   select: (selector) ->
     e.subtree(@root, selector)[0]
 
-  isInlineScript: (element) ->
-    element.hasAttribute('src')
-
   activateElement: (element, options) ->
     # Restore <noscript> tags so they become available to compilers
     @noscriptWrapper.unwrap(element)
 
     # Compile the new fragment
     up.hello(element, options)
-
-    # Run any <script> tags that were within the element
-    @scriptWrapper.unwrap(element)
