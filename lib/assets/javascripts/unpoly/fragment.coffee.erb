@@ -19,10 +19,12 @@ up.fragment = do ->
   u = up.util
   e = up.element
 
-  config = u.literal
-    # Users who are not using layers will prefer settings default targets
-    # as up.fragment.config.targets.
-    get_targets: -> up.layer.config.any.targets
+  config = new up.Config ->
+    u.literal
+      # Users who are not using layers will prefer settings default targets
+      # as up.fragment.config.targets.
+      get_targets: -> up.layer.config.any.targets
+      resetTargets: ['body']
 
   setSource = (element, sourceURL) ->
     element.upSource = sourceURL

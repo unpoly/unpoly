@@ -1218,6 +1218,14 @@ describe 'up.util', ->
         reverseResult = up.util.merge(null, obj)
         expect(reverseResult).toEqual { a: 1, b: 2 }
 
+#      it 'copies inherited values', ->
+#        parent = { a: 1 }
+#        child = Object.create(parent)
+#        child.b = 2
+#
+#        result = up.util.merge(child, { c: 3 })
+#        expect(result).toEqual { a: 1, b: 2, c: 3 }
+
     describe 'up.util.mergeDefined', ->
 
       it 'merges the given objects', ->

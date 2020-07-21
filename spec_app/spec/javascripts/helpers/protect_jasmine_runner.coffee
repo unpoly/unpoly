@@ -149,6 +149,7 @@ appendDefaultFallback = (parent) ->
   e.affix(parent, 'default-fallback')
 
 beforeEach ->
+  up.fragment.config.resetTargets = []
   up.layer.config.any.targets = ['default-fallback']
   up.history.config.restoreTargets = ['default-fallback']
   appendDefaultFallback(document.body)

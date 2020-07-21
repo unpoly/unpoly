@@ -222,34 +222,6 @@ class up.Layer.Overlay extends up.Layer
       event.preventDefault()
       closeFn.call(this, event)
 
-#  registerLocationCloser: (urlPattern, closeFn) ->
-#    return unless urlPattern
-#    urlPattern = new up.URLPattern(urlPattern)
-#    @on 'up:layer:location:changed', (event) =>
-#      console.debug("--- Received location:changed")
-#      location = event.location
-#      if resolution = urlPattern.recognize(location)
-#        # resolution now contains named capture groups, e.g. when
-#        # '/decks/:deckId/cards/:cardId' is matched against
-#        # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
-#        closeFn.call(this, u.merge(resolution, { location }))
-#
-#  acceptValueFromLocation: ->
-#    @closeValueFromLocation(@acceptLocation)
-#
-#  dismissValueFromLocation: ->
-#    @closeValueFromLocation(@dismissLocation)
-#
-#  closeValueFromLocation: (urlPattern) ->
-#    return unless urlPattern
-#
-#    location = @location
-#    if resolution = urlPattern.recognize(location)
-#      # resolution now contains named capture groups, e.g. when
-#      # '/decks/:deckId/cards/:cardId' is matched against
-#      # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
-#      return u.merge(resolution, { location })
-
   tryAcceptForLocation: ->
     @tryCloseForLocation(@acceptLocation, @accept)
 

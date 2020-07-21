@@ -7,63 +7,76 @@ class up.Change.FromContent extends up.Change
 
   constructor: (options) ->
     up.layer.normalizeOptions(options)
+    @layers = up.layer.getAll(options)
     super(options)
 
   ensurePlansBuilt: ->
-    @plans or @buildPlans()
-    unless @plans.length
-      @notApplicable(['No target for change %o', @options])
-
-  toTargetObjList: (targetOrTargets, props) ->
-    list = u.wrapList(targetOrTargets)
-    list = u.compact(list)
-    list = u.map list, (target) => @toTargetObj(target, props)
-    return list
-
-  toTargetObj: (target, props) =>
-    base = u.merge(@options, props)
-
-    if u.isElementish(target)
-      target = { target: e.toSelector(target) }
-    else if u.isString(target)
-      target = { target: e.resolveSelector(target, base.origin) }
-
-    return u.merge(base, target)
+    # The actual error message will be produced in preflightTargetNotApplicable()
+    # or postFlightTargetNotApplicable(). Here it is only important to signal
+    # notApplicable().
+    @plans or @buildPlans() or @notApplicable()
 
   buildPlans: ->
     @plans = []
-    @addPlansForTarget(@options.target)
-    if @options.fallback != false
-      @addPlansForTarget(@options.fallback, isFallback: true)
-      @addPlansForTarget(@defaultTargetObjs(), isFallback: true)
 
-  addPlansForTarget: (targetOrTargets, props = {}) ->
-    for targetObj in @toTargetObjList(targetOrTargets, props)
-      # One target may expand to more than one plan if it has a { layer } option that
-      # needs to try multiple layers, like { layer: 'closest' }.
-      for layer in up.layer.getAll(targetObj)
-        changeProps = u.merge(targetObj, { layer })
-        @addPlan(layer, changeProps)
+    fallback = @options.fallback
+
+    # First we seek @options.target in all layers
+    for layer in @layers
+      @addPlansForTarget(@options.target, { layer })
+
+    if fallback != false
+
+      # Second we seek @options.fallback in all layers
+      for layer in @layers
+        @addPlansForTarget(fallback, { layer, resetOverlay: true })
+
+      # Third we seek the default target of all layers
+      for layer in @layers
+        for defaultTarget in @defaultTargets(layer)
+          @addPlansForTarget(defaultTarget, { layer, resetOverlay: true })
+
+    if resetTargets = up.fragment.config.resetTargets
+      @addPlansForTarget(resetTargets, { layer: up.layer.root, peel: true })
+
+    @plans
+
+  defaultTargets: (layer) ->
+    if layer == 'new'
+      return up.layer.defaultTargets(@options.mode)
+    else
+      return layer.defaultTargets()
+
+  addPlansForTarget: (target, variantProps) ->
+    for target in u.wrapList(target)
+      props = u.merge(@options, variantProps)
+
+      if u.isElementish(target)
+        props.target = e.toSelector(target)
+      else if u.isString(target)
+        props.target = e.resolveSelector(target, props.origin)
+      else
+        # @buildPlans() might call us with { target: false } or { target: nil }
+        # In that case we don't add a plan.
+        continue
+
+      if props.layer == 'new'
+        change = new up.Change.OpenLayer(props)
+        @plans.push(change)
+      else
+        change = new up.Change.UpdateLayer(props)
+        @plans.push(change)
+
         # Only for existing overlays we open will also attempt to place a new element as the
         # new first child of the layer's root element. This mirrors the behavior that we get when
         # opening a layer: The new element does not need to match anything in the current document.
-        if props.isFallback && layer.isOverlay?()
-          @addPlan(layer, u.merge(changeProps, placement: 'root'))
-
-  addPlan: (layer, props) ->
-    ChangeClass = if layer == 'new' then up.Change.OpenLayer else up.Change.UpdateLayer
-    change = new ChangeClass(props)
-    @plans.push(change)
-
-  defaultTargetObjs: ->
-    if @options.layer == 'new'
-      return @toTargetObjList(up.layer.defaultTargets(@options.mode))
-    else
-      return u.flatMap up.layer.getAll(@options), (layer) =>
-        return @toTargetObjList(layer.defaultTargets(), { layer })
+        if props.resetOverlay && props.layer.isOverlay?()
+          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
+          @plans.push(change)
 
   firstDefaultTarget: ->
-    @defaultTargetObjs()[0]?.target
+    if firstLayer = @layers[0]
+      @defaultTargets(firstLayer)[0]
 
   execute: ->
     @buildResponseDoc()
@@ -85,6 +98,7 @@ class up.Change.FromContent extends up.Change
     docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
     up.legacy.fixKey(docOptions, 'html', 'document')
 
+    # We require this branch for { content: string } or { content: undefined }
     if !docOptions.document
       # ResponseDoc allows to pass innerHTML as { content }, but then it also
       # requires a { target }. If no { target } is given we use the first plan's target.
@@ -95,9 +109,6 @@ class up.Change.FromContent extends up.Change
     if docOptions.fragment
       # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
       # requires a { target }. We use a target that matches the parsed { fragment }.
-
-      console.debug("=== rootSelector for %o is %o", @options.responseDoc.root, @options.responseDoc.rootSelector())
-
       @options.target ||= @options.responseDoc.rootSelector()
 
   # Returns information about the change that is most likely before the request was dispatched.
@@ -112,7 +123,7 @@ class up.Change.FromContent extends up.Change
     if @plans.length
       up.fail("Could not find target in current page (tried selectors %o)", @planTargets())
     else
-      up.fail('No target given for change')
+      @emptyPlans()
 
   postflightTargetNotApplicable: ->
     if @options.inspectResponse
@@ -121,7 +132,15 @@ class up.Change.FromContent extends up.Change
     if @plans.length
       up.fail(["Could not find matching targets in current page and server response (tried selectors %o)", @planTargets()], toastOpts)
     else
-      up.fail(['No target given for change'], toastOpts)
+      @emptyPlans(toastOpts)
+
+  emptyPlans: (toastOpts) ->
+    if @layers.length
+      up.fail(['No target for change %o', @options], toastOpts)
+    else
+      # This can happen e.g. if the user tries to replace { layer: 'parent' },
+      # but there is no parent layer.
+      up.fail(["Layer %o does not exist", @options.layer], toastOpts)
 
   planTargets: ->
     return u.uniq(u.map(@plans, 'target'))

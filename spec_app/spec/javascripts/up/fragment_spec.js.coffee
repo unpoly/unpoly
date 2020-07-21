@@ -1258,6 +1258,47 @@ describe 'up.fragment', ->
               expect(up.layer.get(1)).toHaveText(/new text/)
               expect(up.layer.get(2)).toHaveText(/old text in modal2/)
 
+        describe 'if the given layer does not exist', ->
+
+          it 'rejects the change', (done) ->
+            fixture('.element', text: 'old text')
+            promise = up.render('.element', layer: 'parent', content: 'new text')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('rejected')
+                expect(result.value).toMatch(/layer parent does not exist/i)
+                expect('.element').toHaveText(/old text/)
+                done()
+
+          it 'updates the next layer in a space-separated list of alternative layer names', (done) ->
+            fixture('.element', text: 'old text')
+            promise = up.render('.element', layer: 'parent root', content: 'new text')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('fulfilled')
+                expect('.element').toHaveText(/new text/)
+                done()
+
+          it 'closes all overlays and replaces a target from up.fragment.config.resetTargets', (done) ->
+            up.fragment.config.resetTargets = ['.reset-target']
+            fixture('.reset-target', text: 'old reset target text')
+            fixture('.target', text: 'old target text')
+
+            fixture('.element', text: 'old text')
+            promise = up.render '.target', layer: 'parent', document: """
+              <div class="reset-target">new reset target text</div>div>
+              <div class="target">new target text</div>div>
+            """
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('fulfilled')
+                expect('.target').toHaveText(/old target text/)
+                expect('.reset-target').toHaveText(/new reset target text/)
+                done()
+
       describe 'browser location URL', ->
 
         beforeEach ->

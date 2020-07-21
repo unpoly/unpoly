@@ -383,16 +383,6 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
 
-        it 'allows to configure an entire object with change options in up.layer.config.$something.target', asyncSpec (next) ->
-          up.layer.config.any.targets.push({ target: '.target-from-config', size: 'small' })
-
-          up.layer.open(content: 'overlay text')
-
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(document).toHaveSelector('up-modal .target-from-config')
-            expect(up.layer.size).toEqual('small')
-
       describe 'events', ->
 
         it 'should have tests'

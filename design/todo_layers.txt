@@ -9,9 +9,7 @@
 - Allow up.validate(any_element) and this will find the nearest field or form
 - Consider removing history from modals
 - When the <body> is replaced with a Rails error, there are <div class="up-wrapped-script"> elements in the DOM
-- Change X-Up-Accept to X-Up-Accept-Value
-- Change X-Up-Dismiss to X-Up-Dismiss-Value
-- Rename up.render() to up.render()
+- When sending a request twice, the methods is wrapped twice into the params
 
 - What should this do if there is no parent layer?
     <div class="row mb-4">
@@ -37,6 +35,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
   - Test that layer callbacks via option always set the layer as current AND the layer as this
   - Test that layer callbacks via UJS attribute set the layer as current AND the origin as this
   - Test that { acceptLocation } (JS API) also takes an array of alternatives instead of a space-separated string
