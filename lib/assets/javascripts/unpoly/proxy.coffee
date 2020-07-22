@@ -103,7 +103,7 @@ up.proxy = do ->
     concurrency: 4
     preloadQueueSize: 5
     preloadEnabled: 'auto'
-    preloadTimeout: 10
+    preloadTimeout: 10 * 1000
     preloadMaxResponseTime: 750
     preloadSampleSize: 3      # set to 0 to prevent sampling
 
