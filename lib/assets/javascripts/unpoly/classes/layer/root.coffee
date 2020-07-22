@@ -10,13 +10,7 @@ class up.Layer.Root extends up.Layer
   constructor: (options) ->
     super(options)
     @history = true
-
-    # When we reset the framework during tests, we might re-initialize this
-    # layer with the same <html> element. In this case we do not want to
-    # setup handlers more than once.
-    unless @element.upHandlersApplied
-      @element.upHandlersApplied = true
-      @setupHandlers()
+    @setupHandlers()
 
   # Always return the current <body> instead of caching it,
   # since the developer might replace it with a new version.
@@ -43,6 +37,14 @@ class up.Layer.Root extends up.Layer
 
   @selector: ->
     'html'
+
+  setupHandlers: ->
+    # When we reset the framework during tests, we might re-initialize this
+    # layer with the same <html> element. In this case we do not want to
+    # setup handlers more than once.
+    unless @element.upHandlersApplied
+      @element.upHandlersApplied = true
+      super()
 
   sync: ->
     # In case a fragment update has swapped the <html> element we need to re-apply
