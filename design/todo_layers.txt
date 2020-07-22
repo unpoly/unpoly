@@ -8,6 +8,32 @@
 - Reach out to server-integration libs (make issues?) with the new changes
 - Consider removing history from modals
 - Should the default layer for up.fragment be 'current' instead of 'any'? Consider up-on-accepted="up.reload('.table')"
+- [up-on-accepting] throws `Need { origin } option for { layer: 'origin' }`
+  - I have this in the "new company" popup, but not the "Suggest name" popup
+- Get rid of up:layer:accepting/dismissing/opening
+  - Let all promises resolve as the animation starts
+    - This makes the app snappier in general
+    - This affects: up.layer.open(), up.layer.dismiss(), up.layer.accept(), up.render(), ...
+    - Offer up.render({ onAnimated }) for old-school callback
+    - Check that up:fragment:inserted also happens before animation
+
+- What should be up.current in
+  - [up-on-opening] => remove event
+  - [up-on-opened] => could be used for decorating. set the overlay.
+  - [up-on-accept] => could be used to stop something. set the overlay.
+  - [up-on-accpting] => remove event
+  - [up-on-accepted] => the links' layer
+- Should we allow updates and layer lookups in closed layers?
+
+
+begin
+  prefixes = ActionView::Helpers::TagHelper.const_get(:TAG_PREFIXES)
+  prefixes << 'up'
+  prefixes << :up
+rescue NameError
+  # Rails 3.2 does not define that constant
+end
+
 
 - Release as 1.0.0 or 2.0.0
   - Consider promoting some experimental functions to stable
@@ -17,6 +43,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that a[up-emit] does not emit on modified events
   - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
   - Test that layer callbacks via option always set the layer as current AND the layer as this
   - Test that layer callbacks via UJS attribute set the layer as current AND the origin as this
