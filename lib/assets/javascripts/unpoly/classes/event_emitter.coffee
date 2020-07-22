@@ -17,6 +17,7 @@ class up.EventEmitter extends up.Record
   emit: ->
     @logEmission()
     # destroyBoundary = @createBoundary()
+
     if @currentLayer
       @currentLayer.asCurrent(=> @dispatchEvent())
     else

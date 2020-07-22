@@ -235,7 +235,6 @@ class up.Layer.Overlay extends up.Layer
       # '/decks/:deckId/cards/:cardId' is matched against
       # '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
       closeValue = u.merge(resolution, { location })
-      console.log("Calling closeFn %o with value %o", closeFn, closeValue)
       closeFn.call(this, closeValue)
 
   teardownHandlers: ->

@@ -437,8 +437,9 @@ up.event = do ->
     The event properties, serialized as JSON.
   ###
   executeEmitAttr = (event, element) ->
+    return unless isUnmodified(event)
     eventType = e.attr(element, 'up-emit')
-    eventProps = e.jsonAttr(element, 'up-emit-props') || {}
+    eventProps = e.jsonAttr(element, 'up-emit-props')
     forkedEvent = fork(event, eventType)
     u.assign(forkedEvent, eventProps)
     up.emit(element, forkedEvent)

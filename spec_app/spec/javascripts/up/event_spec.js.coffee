@@ -599,7 +599,7 @@ describe 'up.event', ->
     describe 'a[up-emit]', ->
 
       it 'emits an event of the given type when the link is clicked', ->
-        link = fixture("a[up-emit='foo']")
+        link = fixture("a[up-emit='foo']", text: 'label')
         fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
@@ -608,7 +608,7 @@ describe 'up.event', ->
         expect(fooListener).toHaveBeenCalled()
 
       it 'allows to pass event props as [up-emit-props]', ->
-        link = fixture("a[up-emit='foo'][up-emit-props='#{JSON.stringify(key: 'value')}']")
+        link = fixture("a[up-emit='foo'][up-emit-props='#{JSON.stringify(key: 'value')}']", text: 'label')
         fooListener = jasmine.createSpy('fooListener')
         link.addEventListener('foo', fooListener)
 
@@ -617,25 +617,65 @@ describe 'up.event', ->
         expect(fooListener).toHaveBeenCalled()
         expect(fooListener.calls.mostRecent().args[0]).toBeEvent('foo', key: 'value')
 
+      # IE does not call JavaScript and always performs the default action on right clicks
+      unless AgentDetector.isIE() || AgentDetector.isEdge()
+        it 'does not emit the event if the right mouse button is used', asyncSpec (next) ->
+          link = fixture("a[up-emit='foo']", text: 'label')
+          fooListener = jasmine.createSpy('fooListener')
+          link.addEventListener('foo', fooListener)
+
+          Trigger.clickSequence(link, button: 2)
+
+          next ->
+            expect(fooListener).not.toHaveBeenCalled()
+
+      it 'does not emit the event if ctrl is pressed during the click', asyncSpec (next) ->
+        link = fixture("a[up-emit='foo']", text: 'label')
+        fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
+
+        Trigger.clickSequence(link, ctrlKey: true)
+
+        next ->
+          expect(fooListener).not.toHaveBeenCalled()
+
+      it 'emits the event on mousedown when the link is [up-instant]', asyncSpec (next) ->
+        link = fixture("a[up-emit='foo'][up-instant]", text: 'label')
+        fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
+
+        Trigger.mousedown(link)
+
+        next ->
+          expect(fooListener.calls.count()).toBe(1)
+
+          # Trigger.click(link)
+
+        next ->
+          expect(fooListener.calls.count()).toBe(1)
+
       describe 'when the emitted event is prevented', ->
 
-        it 'prevents the click event', ->
-          link = fixture("a[up-emit='foo']")
+        it "prevents the click event's default", asyncSpec (next) ->
+          link = fixture("a[up-emit='foo']", text: 'label')
           clickEvent = null
           link.addEventListener('click', (event) -> clickEvent = event)
           link.addEventListener('foo', (event) -> event.preventDefault())
 
           Trigger.clickSequence(link)
 
-          expect(clickEvent.defaultPrevented).toBe(true)
+          next ->
+            expect(clickEvent.defaultPrevented).toBe(true)
 
-        it 'prevents an Unpoly link from being followed', ->
-          link = fixture("a[up-emit='foo'][href='/path'][up-follow]")
+      describe 'when the emitted event is stopped from propagation', ->
+
+        it 'prevents an Unpoly link from being followed', asyncSpec (next) ->
+          link = fixture("a[up-emit='foo'][href='/path'][up-follow]", text: 'label')
           followListener = jasmine.createSpy('follow listener')
           link.addEventListener('up:link:follow', followListener)
-          link.addEventListener('foo', (event) -> event.preventDefault())
+          link.addEventListener('foo', (event) -> up.event.halt(event))
 
           Trigger.clickSequence(link)
 
-          expect(followListener).not.toHaveBeenCalled()
-
+          next ->
+            expect(followListener).not.toHaveBeenCalled()

@@ -26,7 +26,7 @@ class up.LayerLookup
 
   originLayer: ->
     if @origin
-      return @forElement(@origin)
+      @forElement(@origin)
 
   first: ->
     @all()[0]

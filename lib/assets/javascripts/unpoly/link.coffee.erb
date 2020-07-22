@@ -91,7 +91,7 @@ up.link = do ->
   config = new up.Config ->
     preloadDelay: 75
     follow: combineFollowableSelectors(LINKS_WITH_ANY_HTML)
-    instant: combineFollowableSelectors(LINKS_WITH_ANY_HTML, [e.trueAttributeSelector('up-instant')])
+    instant: [e.trueAttributeSelector('up-instant')]
     preload: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
 
   fullFollowSelector = ->
@@ -184,7 +184,7 @@ up.link = do ->
 
     # Fragment options
     parser.string('failOptions')
-    parser.options.origin ?= parser.element
+    parser.options.origin ?= link
     parser.boolean('navigate')
     parser.string('confirm')
     parser.string('target')

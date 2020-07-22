@@ -44,10 +44,10 @@ class up.Change.FromURL extends up.Change
 
     switch mode
       when 'explicit'
-        # In explicit mode the developer needs to pass all failVariant
+        # In explicit mode (the default) the developer needs to pass all failVariant
         # keys that should be used for failed responses. From the succcess options
         # we only inherit keys that need to be known before the request goes out,
-        # like { method }, { url } or { params }.
+        # like { method }, { url } or { params } ("preflight keys").
         preflightOptions = u.pick(@successOptions, @constructor.PREFLIGHT_KEYS)
         @failOptions = u.merge(preflightOptions, @explicitFailOptions())
       when 'inherit'
