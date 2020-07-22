@@ -67,10 +67,11 @@ class up.Layer.Overlay extends up.Layer
     # callback is already bound to the origin element to mimic the behavior of built-in
     # handler attributes like [onclick]. In that case our additional bind() will have
     # no effect.
+    #
+    # The up.layer.current value within a callback is controlled by the event
+    # emission in up.Change.OpenLayer and up.Change.CloseLayer
     if fn = this[name]
-      return (args...) =>
-        @asCurrent =>
-          fn.apply(this, args)
+      return fn.bind(this)
 
   # TODO: Rename openNow to something that doesn't have the sync/async connotation
   ###**

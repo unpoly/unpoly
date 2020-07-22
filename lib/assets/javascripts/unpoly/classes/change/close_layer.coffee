@@ -44,7 +44,7 @@ class up.Change.CloseLayer extends up.Change.Removal
 
     # Emit the "closing" event to indicate that the "close" event was not
     # prevented and the closing animation is about to start.
-    @emitClosingEvent()
+    @emitClosingEvent(parent)
 
     @handleFocus(parent)
 
@@ -60,12 +60,13 @@ class up.Change.CloseLayer extends up.Change.Removal
       log: "Will #{@verb} #{@layer}"
     )
 
-  emitClosingEvent: ->
+  emitClosingEvent: (formerParent) ->
     verbGerund = "#{@verb}ing"
     verbGerundUpperCaseFirst = u.upperCaseFirst(verbGerund)
 
     return @layer.emit(
       @buildEvent("up:layer:#{verbGerund}"),
+      currentLayer: formerParent,
       callback: @layer.callback("on#{verbGerundUpperCaseFirst}"),
       log: "#{verbGerundUpperCaseFirst} #{@layer}"
     )
