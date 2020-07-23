@@ -2708,6 +2708,25 @@ describe 'up.fragment', ->
             expect(change1Error).toBeError(/aborted/)
             expect(up.proxy.queue.allRequests.length).toEqual(1)
 
+        it 'aborts the request of an existing change if the new change is made from local content', asyncSpec (next) ->
+          fixture('.element')
+
+          change1Error  = undefined
+          change1Promise = undefined
+          change2Promise = undefined
+
+          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+
+          next =>
+            expect(up.proxy.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+
+            change2Promise = up.render('.element', { content: 'local content' })
+
+          next =>
+            expect(change1Error).toBeError(/aborted/)
+            expect(up.proxy.queue.allRequests.length).toEqual(0)
+
         it "does not abort an existing change's request when preloading", asyncSpec (next) ->
           fixture('.element')
 

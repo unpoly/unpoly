@@ -234,6 +234,8 @@ up.fragment = do ->
       promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
 
     promise = promise.then ->
+      if options.solo && !options.preload
+        up.proxy.abort((request) -> request.solo)
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise

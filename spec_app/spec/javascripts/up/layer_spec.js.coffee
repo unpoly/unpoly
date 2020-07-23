@@ -74,28 +74,6 @@ describe 'up.layer', ->
             expect(abortedURLs.length).toBe(1)
             expect(abortedURLs[0]).toMatchURL('/path1')
 
-        it 'dismisses an overlay that has been opened while the request was in flight', asyncSpec (next) ->
-          up.layer.open(mode: 'modal', target: '.element', url: '/path')
-
-          next ->
-            # The layer has not yet opened since the request is still in flight
-            expect(up.layer.stack.length).toBe(1)
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-            # We open another layer while the request is still in flight
-            up.layer.open(mode: 'cover')
-
-          next =>
-            expect(up.layer.stack.length).toBe(2)
-            expect(up.layer.mode).toEqual('cover')
-
-            # Now we respond to the request
-            @respondWith('<div class="element"></div>')
-
-          next ->
-            expect(up.layer.stack.length).toBe(2)
-            expect(up.layer.mode).toEqual('modal')
-
       describe 'from a string of HTML', ->
 
         it 'opens a new overlay with matching HTML extracted from the given as { document }', (done) ->
