@@ -20,7 +20,7 @@ class up.Layer.OverlayWithTether extends up.Layer.Overlay
     @createContentElement(@element, content)
     @tether.start(@element)
 
-  onElementsDestroyed: ->
+  onElementsRemoved: ->
     @tether.stop()
 
   sync: ->

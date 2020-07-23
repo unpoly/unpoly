@@ -28,7 +28,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     @createBoxElement(@viewportElement)
     @createContentElement(@boxElement, content)
 
-  onElementsDestroyed: ->
+  onElementsRemoved: ->
     @unshiftBody()
 
   shiftBody: ->

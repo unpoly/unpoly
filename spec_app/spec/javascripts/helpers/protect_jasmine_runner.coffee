@@ -154,7 +154,7 @@ beforeEach ->
   up.history.config.restoreTargets = ['default-fallback']
   appendDefaultFallback(document.body)
 
-  up.on 'up:layer:opening', (event) ->
+  up.on 'up:layer:opened', (event) ->
     layer = event.layer
     parent = layer.getContentElement()
     appendDefaultFallback(parent)

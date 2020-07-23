@@ -31,13 +31,10 @@ class up.Layer.Overlay extends up.Layer
       'outsideDismissable',
       'dismissLabel',
       'dismissAriaLabel',
-      'onOpening',
       'onOpened',
       'onAccept',
-      'onAccepting',
       'onAccepted',
       'onDismiss',
-      'onDismissing',
       'onDismissed',
       'onContentAttached',
       'acceptEvent',
@@ -243,17 +240,33 @@ class up.Layer.Overlay extends up.Layer
     @unbindEscapePressed?()
     @overlayFocus.teardown()
 
+  ###**
+  Destroys the elements that make up this overlay.
+
+  @function up.Layer.prototype.destroyElements
+  @param {string|Function<Element>} [options.animation=this.closeAnimation]
+  @param {number} [options.duration=this.closeDuration]
+  @param {string} [options.easing=this.closeEasing]
+  @param {Function} [options.onRemoved]
+    A callback that will run when the elements have been removed from the DOM.
+    If the destruction is animated, the callback will run after the animation has finished.
+  @return {Promise}
+    A resolved promise.
+  @private
+  ###
   destroyElements: (options) ->
-    # Do not re-use options, or we would call startCloseAnimation(anination: startCloseAnimation)!
-    destroyOptions = u.merge(options,
-      animation: => @startCloseAnimation(options)
-      log: false
-    )
+    animation = =>
+      @startCloseAnimation(options)
 
-    up.destroy(@element, destroyOptions).then =>
-      @onElementsDestroyed()
+    onRemoved = =>
+      @onElementsRemoved() # callback for layer implementations that need to clean up
+      options.onRemoved?() # callback for callers of up.layer.dismiss/accept()
 
-  onElementsDestroyed: ->
+    # Do not re-use `options`, or we would call startCloseAnimation(animation: startCloseAnimation)!
+    destroyOptions = u.merge(options, { animation, onRemoved, log: false })
+    up.destroy(@element, destroyOptions)
+
+  onElementsRemoved: ->
     # optional callback
 
   startAnimation: (options = {}) ->

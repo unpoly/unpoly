@@ -1727,25 +1727,22 @@ describe 'up.fragment', ->
             expect($version2).not.toHaveClass('up-destroying')
 
         # extract with { transition } option
-        it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
+        it 'runs an { onRemoved } callback after the element has been removed from the DOM', (done) ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element.v1').text('v1')
-          expect($element).toBeAttached()
 
-          spy = jasmine.createSpy('event listener')
-          $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
-            spy(event.target, event.fragment, up.specUtil.isDetached($element))
-
-          extractDone = up.render('.element',
-            document: '<div class="element v2">v2</div>',
-            transition: 'cross-fade',
-            duration: 50
-          )
-
-          extractDone.then ->
-            expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
+          testElementAttachment = ->
+            expect($element).toBeDetached()
             done()
 
+          up.render('.element',
+            document: '<div class="element v2">v2</div>',
+            transition: 'cross-fade',
+            duration: 50,
+            onRemoved: testElementAttachment
+          )
+
+          expect($element).toBeAttached()
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')
@@ -1784,24 +1781,45 @@ describe 'up.fragment', ->
             expect($ghost3).toHaveLength(1)
             expect($ghost3.css('opacity')).toBeAround(0.0, 0.1)
 
+        it 'resolves the returned promise as soon as both elements are in the DOM and the transition has started', (done) ->
+          fixture('.swapping-element', text: 'version 1')
 
-        it 'delays the resolution of the returned promise until the transition is over', (done) ->
-          $fixture('.element').text('version 1')
-          resolution = jasmine.createSpy()
-          promise = up.render(
-            fragment: '<div class="element">version 2</div>',
-            transition: 'cross-fade',
+          renderDone = up.render(
+            fragment: '<div class="swapping-element">version 2</div>'
+            transition: 'cross-fade'
             duration: 60
           )
-          promise.then(resolution)
-          expect(resolution).not.toHaveBeenCalled()
 
-          u.timer 20, ->
-            expect(resolution).not.toHaveBeenCalled()
+          renderDone.then ->
+            elements = document.querySelectorAll('.swapping-element')
+            expect(elements.length).toBe(2)
 
-          u.timer 200, ->
-            expect(resolution).toHaveBeenCalled()
+            expect(elements[0]).toHaveText('version 2')
+            expect(elements[0]).not.toMatchSelector('.up-destroying')
+
+            expect(elements[1]).toHaveText('version 1')
+            expect(elements[1]).toMatchSelector('.up-destroying')
+
             done()
+
+        it 'runs an { onAppeared } callback when the transition has finished', asyncSpec (next) ->
+          fixture('.element', text: 'version 1')
+          onAppeared = jasmine.createSpy('onAppeared callback')
+
+          up.render(
+            fragment: '<div class="element">version 2</div>'
+            transition: 'cross-fade'
+            duration: 60
+            onAppeared: onAppeared
+          )
+
+          expect(onAppeared).not.toHaveBeenCalled()
+
+          next.after 20, ->
+            expect(onAppeared).not.toHaveBeenCalled()
+
+          next.after 100, ->
+            expect(onAppeared).toHaveBeenCalled()
 
         it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next)->
           $parent = $fixture('.parent')
@@ -1864,17 +1882,18 @@ describe 'up.fragment', ->
             insertedListener = jasmine.createSpy('listener to up:fragment:inserted')
             up.on 'up:fragment:inserted', insertedListener
 
-            extractDone = up.render(
+            testListenerCalls = ->
+              expect(destroyedListener.calls.count()).toBe(1)
+              expect(insertedListener.calls.count()).toBe(1)
+              done()
+
+            up.render(
               fragment: '<div class="element">new content</div>',
               transition: transition,
               duration: 50,
               easing: 'linear'
+              onAppeared: testListenerCalls
             )
-
-            extractDone.then ->
-              expect(destroyedListener.calls.count()).toBe(1)
-              expect(insertedListener.calls.count()).toBe(1)
-              done()
 
           it "does not compile the element multiple times (bugfix)", (done) ->
             $element = $fixture('.element').text('old content')
@@ -1908,17 +1927,17 @@ describe 'up.fragment', ->
 
             up.hello($element)
 
-            extractDone = up.render(
-              fragment: '<div class="element">new content</div>',
-              transition: transition,
-              duration: 50,
-              easing: 'linear'
-            )
-
-            extractDone.then ->
+            testDestructorCalls = ->
               expect(destructor.calls.count()).toBe(1)
               done()
 
+            up.render(
+              fragment: '<div class="element">new content</div>',
+              transition: transition,
+              duration: 50,
+              easing: 'linear',
+              onAppeared: testDestructorCalls
+            )
 
         describe 'when animation is disabled', ->
 
@@ -2440,18 +2459,17 @@ describe 'up.fragment', ->
             expect(destructor).toHaveBeenCalled()
 
         it 'marks the old element as .up-destroying before destructors', (done) ->
-          destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text(), $element.is('.up-destroying'))
-          $container = $fixture('.container').text('old text')
-          up.hello($container)
-
-          extractDone = up.render(fragment: '<div class="container">new text</div>')
-
-          extractDone.then ->
-            expect('.container').toHaveText('new text')
-            expect(destructor).toHaveBeenCalledWith('old text', true)
+          testElementState = (element) ->
+            expect(element).toHaveText('old text')
+            expect(element).toMatchSelector('.up-destroying')
             done()
+
+          up.compiler '.container', (element) ->
+            return -> testElementState(element)
+
+          up.hello fixture('.container', text: 'old text')
+
+          up.render(fragment: '<div class="container">new text</div>')
 
         it 'marks the old element as .up-destroying before destructors after a { transition }', (done) ->
           destructor = jasmine.createSpy('destructor')
@@ -3152,25 +3170,30 @@ describe 'up.fragment', ->
             oldTextDuringTransition = squish(oldElement.innerText)
             newTextDuringTransition = squish(newElement.innerText)
             Promise.resolve()
+
           $container = $fixture('.container')
           $container.html """
             <div class='foo'>old-foo</div>
             <div class='bar' up-keep>old-bar</div>
             """
+
           newHTML = """
             <div class='container'>
               <div class='foo'>new-foo</div>
               <div class='bar' up-keep>new-bar</div>
             </div>
             """
-          promise = up.render('.container',
-            fragment: newHTML,
-            transition: transition
-          )
-          promise.then ->
+
+          assertElements = ->
             expect(oldTextDuringTransition).toEqual('old-foo old-bar')
             expect(newTextDuringTransition).toEqual('new-foo old-bar')
             done()
+
+          up.render('.container',
+            fragment: newHTML,
+            transition: transition,
+            onAppeared: assertElements
+          )
 
       describeCapability 'canCustomElements', ->
 
@@ -3270,44 +3293,25 @@ describe 'up.fragment', ->
         next.after 60, ->
           expect(destructor.calls.count()).toBe(1)
 
-      it 'marks the old element as .up-destroying before destructors', (done) ->
-        destructor = jasmine.createSpy('destructor')
-        up.$compiler '.container', ($element) ->
-          -> destructor($element.text(), $element.is('.up-destroying'))
-        $container = $fixture('.container').text('old text')
-        up.hello($container)
-
-        destroyDone = up.destroy('.container')
-
-        destroyDone.then ->
-          expect(destructor).toHaveBeenCalledWith('old text', true)
-          done()
-
       it 'marks the old element as [aria-hidden=true] before destructors', (done) ->
-        destructor = jasmine.createSpy('destructor')
-        up.$compiler '.container', ($element) ->
-          -> destructor($element.text(), $element.is('[aria-hidden=true]'))
-        $container = $fixture('.container').text('old text')
-        up.hello($container)
-
-        destroyDone = up.destroy('.container')
-
-        destroyDone.then ->
-          expect(destructor).toHaveBeenCalledWith('old text', true)
+        testElement = (element) ->
+          expect(element).toHaveText('old text')
+          expect(element).toMatchSelector('[aria-hidden=true]')
           done()
 
-      it 'marks the old element as .up-destroying before destructors after an { animation }', (done) ->
-        destructor = jasmine.createSpy('destructor')
-        up.$compiler '.container', ($element) ->
-          -> destructor($element.text(), $element.is('.up-destroying'))
-        $container = $fixture('.container').text('old text')
-        up.hello($container)
+        up.compiler '.container', (element) ->
+          return -> testElement(element)
 
-        destroyDone = up.destroy('.container', animation: 'fade-out', duration: 100)
+        up.hello fixture('.container', text: 'old text')
 
-        destroyDone.then ->
-          expect(destructor).toHaveBeenCalledWith('old text', true)
-          done()
+        up.destroy('.container')
+
+      it 'immediately marks the old element as .up-destroying', ->
+        container = fixture('.container')
+
+        up.destroy('.container', animation: 'fade-out', duration: 100)
+
+        expect(container).toMatchSelector('.up-destroying')
 
       it 'waits until an { animation } is done before calling destructors', asyncSpec (next) ->
         destructor = jasmine.createSpy('destructor')
@@ -3316,15 +3320,13 @@ describe 'up.fragment', ->
         $container = $fixture('.container').text('old text')
         up.hello($container)
 
-        destroyDone = up.destroy('.container', animation: 'fade-out', duration: 200)
+        up.destroy('.container', animation: 'fade-out', duration: 100)
 
-        next.after 100, ->
+        next.after 50, ->
           expect(destructor).not.toHaveBeenCalled()
 
-          next.await(destroyDone)
-
-        next ->
-          expect(destructor).toHaveBeenCalledWith('old text',)
+        next.after 100, ->
+          expect(destructor).toHaveBeenCalledWith('old text')
 
       it 'allows to pass a new history entry as { history } option', (done) ->
         up.history.config.enabled = true
@@ -3349,7 +3351,25 @@ describe 'up.fragment', ->
           expect($element).toHaveClass('up-destroying')
 
       # up.destroy
-      it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', asyncSpec (next) ->
+      it 'runs an { onRemoved } callback after the element has been removed from the DOM', asyncSpec (next) ->
+        $parent = $fixture('.parent')
+        $element = $parent.affix('.element')
+        expect($element).toBeAttached()
+
+        onRemoved = jasmine.createSpy('onRemoved callback')
+
+        up.destroy($element, { animation: 'fade-out', duration: 30, onRemoved })
+
+        next ->
+          expect($element).toBeAttached()
+          expect(onRemoved).not.toHaveBeenCalled()
+
+        next.after 60, ->
+          expect($element).toBeDetached()
+          expect(onRemoved).toHaveBeenCalled()
+
+      # up.destroy
+      it 'emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', asyncSpec (next) ->
         $parent = $fixture('.parent')
         $element = $parent.affix('.element')
         expect($element).toBeAttached()
@@ -3358,23 +3378,12 @@ describe 'up.fragment', ->
 
         $parent[0].addEventListener('up:fragment:destroyed', listener)
 
-        destroyDone = up.destroy($element, animation: 'fade-out', duration: 30)
+        up.destroy($element, animation: 'fade-out', duration: 30)
 
         next ->
-          expect(listener).not.toHaveBeenCalled()
+          expect(listener).toHaveBeenCalled()
+          expect($element).toMatchSelector('.up-destroying')
           expect($element).toBeAttached()
-
-          next.await(destroyDone)
-
-        next ->
-          expect(listener).toHaveBeenCalledWith(
-            jasmine.objectContaining(
-              target: $parent[0],
-              parent: $parent[0]
-              fragment: $element[0]
-            )
-          )
-          expect($element).toBeDetached()
 
       it 'removes element-related data from the global jQuery cache (bugfix)', asyncSpec (next) ->
         $element = $fixture('.element')

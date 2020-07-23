@@ -13,9 +13,10 @@
 - Get rid of up:layer:accepting/dismissing/opening
   - Let all promises resolve as the animation starts
     - This makes the app snappier in general
-    - This affects: up.layer.open(), up.layer.dismiss(), up.layer.accept(), up.render(), ...
-    - Offer up.render({ onAnimated }) for old-school callback
+    - This affects: up.layer.open(), up.layer.dismiss(), up.layer.accept(), up.render(), up.destroy() ...
+    - Offer up.render({ onMotionEnd }) for old-school callback
     - Check that up:fragment:inserted also happens before animation
+- Support [up-on-keep] in `<select up-keep up-on-keep="this.values = newElement.values">`
 
 - What should be up.current in
   - [up-on-opening] => remove event
@@ -24,6 +25,23 @@
   - [up-on-accpting] => remove event
   - [up-on-accepted] => the links' layer
 - Should we allow updates and layer lookups in closed layers?
+
+- One last time consider whether up:layer:open and up:layer:dismissed/accepted should be emitted on the parent layer
+
+- Functions that COULD now be sync:
+  - up.destroy()
+  - up.layer.dismiss()
+  - up.layer.accept()
+  - up.render() with local content
+
+- Alternatives to onMotionEnd:
+  - up.destroy: onRemoved
+  - up.render: onAppeared
+  - up.layer.open: onAppeared
+  - up.layer.accept/dimissed: onRemoved
+  -
+
+
 
 
 begin

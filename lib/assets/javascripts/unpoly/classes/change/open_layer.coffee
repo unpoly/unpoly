@@ -45,6 +45,8 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer = up.layer.build(@options)
 
     if @emitOpenEvent().defaultPrevented
+      # We cannot use @abortWhenLayerClosed() here,
+      # because the layer is not even in the stack yet.
       throw up.error.aborted('Open event was prevented')
 
     # Make sure that the currentLayer layer doesn't already have a child layer.
@@ -71,13 +73,6 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Compile the new content and emit up:fragment:inserted.
     @responseDoc.activateElement(@content, { @layer, @origin })
 
-    # Emit up:layer:opening to indicate that the open event was not prevented
-    # and the the opening animation is about to start. This is a good time for
-    # listeners to manipulate the overlay optics.
-    # In case a listener dimisses the opening layer, abort the process.
-    @emitOpeningEvent()
-    @abortWhenLayerClosed()
-
     # The server may trigger multiple signals that may cause the layer to close:
     #
     # - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -89,23 +84,23 @@ class up.Change.OpenLayer extends up.Change.Addition
     # if any of these options cause the layer to close.
     @handleLayerChangeRequests()
 
-    return @layer.startOpenAnimation().then =>
-      # In case an async operation closed the layer while the opening animation
-      # was running, abort the process.
-      @abortWhenLayerClosed()
-
+    @layer.startOpenAnimation().then =>
       # A11Y: Place the focus on the overlay element and setup a focus circle.
-      @handleFocus()
+      # However, don't change focus if the layer has been closed while the animation was running.
+      @handleFocus() if @layer.isOpen()
+      @onAppeared()
 
-      # Emit up:layer:opened to indicate that the layer was opened successfully.
-      # In case a listener dimisses the opening layer, reject the promise
-      # returned by up.layer.open().
-      @emitOpenedEvent()
-      @abortWhenLayerClosed()
+    # Emit up:layer:opened to indicate that the layer was opened successfully.
+    # This is a good time for listeners to manipulate the overlay optics.
+    @emitOpenedEvent()
 
-      # Resolve the promise with the layer instance, so callers can do:
-      # layer = await up.layer.open(...)
-      return @layer
+    # In case a listener immediately dimisses the new layer, reject the promise
+    # returned by up.layer.open().
+    @abortWhenLayerClosed()
+
+    # Resolve the promise with the layer instance, so callers can do:
+    # layer = await up.layer.open(...)
+    return Promise.resolve(@layer)
 
   handleHistory: ->
     @layer.parent.saveHistory()
@@ -152,13 +147,6 @@ class up.Change.OpenLayer extends up.Change.Addition
       @buildEvent('up:layer:open'),
       currentLayer: @layer.parent, # sets up.layer.current
       log: "Will open new #{@layer}"
-    )
-
-  emitOpeningEvent: ->
-    return @layer.emit(
-      @buildEvent('up:layer:opening'),
-      callback: @layer.callback('onOpening')
-      log: "Opening new #{@layer}"
     )
 
   emitOpenedEvent: ->

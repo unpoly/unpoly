@@ -47,12 +47,146 @@ up.fragment = do ->
     else if parent = element.parentElement
       source(parent)
 
-  ###*
+
+  ###**
+  Replaces elements on the current page with corresponding elements
+  from a new page fetched from the server.
+
+  The current and new elements must both match the given CSS selector.
+
+  The unobtrusive variant of this is the [`a[up-target]`](/a-up-target) selector.
+
+  \#\#\# Example
+
+  Let's say your current HTML looks like this:
+
+      <div class="one">old one</div>
+      <div class="two">old two</div>
+
+  We now replace the second `<div>`:
+
+      up.replace('.two', '/new')
+
+  The server renders a response for `/new`:
+
+      <div class="one">new one</div>
+      <div class="two">new two</div>
+
+  Unpoly looks for the selector `.two` in the response and [implants](/up.extract) it into
+  the current page. The current page now looks like this:
+
+      <div class="one">old one</div>
+      <div class="two">new two</div>
+
+  Note how only `.two` has changed. The update for `.one` was
+  discarded, since it didn't match the selector.
+
+  \#\#\# Appending or prepending instead of replacing
+
+  By default Unpoly will replace the given selector with the same
+  selector from a freshly fetched page. Instead of replacing you
+  can *append* the loaded content to the existing content by using the
+  `:after` pseudo selector. In the same fashion, you can use `:before`
+  to indicate that you would like the *prepend* the loaded content.
+
+  A practical example would be a paginated list of items:
+
+      <ul class="tasks">
+        <li>Wash car</li>
+        <li>Purchase supplies</li>
+        <li>Fix tent</li>
+      </ul>
+
+  In order to append more items from a URL, replace into
+  the `.tasks:after` selector:
+
+      up.replace('.tasks:after', '/page/2')
+
+  \#\#\# Setting the window title from the server
+
+  If the `replace` call changes history, the document title will be set
+  to the contents of a `<title>` tag in the response.
+
+  The server can also change the document title by setting
+  an `X-Up-Title` header in the response.
+
+  \#\#\# Optimizing response rendering
+
+  The server is free to optimize Unpoly requests by only rendering the HTML fragment
+  that is being updated. The request's `X-Up-Target` header will contain
+  the CSS selector for the updating fragment.
+
+  If you are using the `unpoly-rails` gem you can also access the selector via
+  `up.target` in all controllers, views and helpers.
+
+  \#\#\# Events
+
+  Unpoly will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
+  that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
+  element that replaces it.
+
   @function up.render
-  @param {string|Element|jQuery} [target]
-  @param {Object} options
-    TODO: Copy from replace()
-    TODO: New options like { html } or { content } or { url } or { target }
+  @param {string|Element|jQuery} [options.target]
+    The CSS selector to update. You can also pass a DOM element or jQuery element
+    here, in which case a selector will be inferred from the element's class and ID.
+  @param {string} [options.url]
+    The URL to fetch from the server.
+  @param {string} [options.fragment]
+    TODO: Docs
+  @param {string} [options.document]
+    TODO: Docs
+  @param {string} [options.failOptions]
+    TODO: Document failOptions and the general behavior of fail options
+  @param {string} [options.fallback]
+    The selector to update when the original target was not found in the page.
+  @param {string} [options.title]
+    The document title after the replacement.
+
+    If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
+    You can also pass `false` to explicitly prevent the title from being updated.
+  @param {string} [options.method='get']
+    The HTTP method to use for the request.
+  @param {Object|FormData|string|Array} [options.params]
+    [Parameters](/up.Params) that should be sent as the request's payload.
+  @param {string} [options.transition='none']
+  @param {string|boolean} [options.history=true]
+    If a string is given, it is used as the URL the browser's location bar and history.
+    If omitted or true, the `url` argument will be used.
+    If set to `false`, the history will remain unchanged.
+  @param {boolean|string} [options.reveal=false]
+    Whether to [reveal](/up.reveal) the new fragment.
+
+    You can also pass a CSS selector for the element to reveal.
+  @param {number} [options.revealPadding]
+
+  @param {boolean} [options.restoreScroll=false]
+    If set to true, Unpoly will try to restore the scroll position
+    of all the viewports around or below the updated element. The position
+    will be reset to the last known top position before a previous
+    history change for the current URL.
+  @param {boolean} [options.cache]
+    Whether to use a [cached response](/up.proxy) if available.
+  @param {Object} [options.headers={}]
+    An object of additional header key/value pairs to send along
+    with the request.
+  @param {Element|jQuery} [options.origin]
+    The element that triggered the replacement.
+
+    The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+  @param {string} [options.layer='auto']
+    TODO: Docs for all layer-related options. However, opts for new layers we will document on up.layer.open().
+  @param {boolean} [options.keep=true]
+    Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
+  @param {boolean} [options.hungry=true]
+    Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
+
+  @return {Promise}
+    A promise that is fulfilled when the page has been updated.
+
+    If the update is animated, the promise will be resolved *before* the existing element was
+    removed from the DOM tree. The old element will be marked with the `.up-destroying` class
+    and removed once the animation finishes. To run code after the old element was removed,
+    pass an `{ onRemoved }` callback.
   @stable
   ###
   render = (args...) ->
@@ -149,144 +283,18 @@ up.fragment = do ->
   Replaces elements on the current page with corresponding elements
   from a new page fetched from the server.
 
-  The current and new elements must both match the given CSS selector.
-
-  The unobtrusive variant of this is the [`a[up-target]`](/a-up-target) selector.
-
-  \#\#\# Example
-
-  Let's say your current HTML looks like this:
-
-      <div class="one">old one</div>
-      <div class="two">old two</div>
-
-  We now replace the second `<div>`:
-
-      up.replace('.two', '/new')
-
-  The server renders a response for `/new`:
-
-      <div class="one">new one</div>
-      <div class="two">new two</div>
-
-  Unpoly looks for the selector `.two` in the response and [implants](/up.extract) it into
-  the current page. The current page now looks like this:
-
-      <div class="one">old one</div>
-      <div class="two">new two</div>
-
-  Note how only `.two` has changed. The update for `.one` was
-  discarded, since it didn't match the selector.
-
-  \#\#\# Appending or prepending instead of replacing
-
-  By default Unpoly will replace the given selector with the same
-  selector from a freshly fetched page. Instead of replacing you
-  can *append* the loaded content to the existing content by using the
-  `:after` pseudo selector. In the same fashion, you can use `:before`
-  to indicate that you would like the *prepend* the loaded content.
-
-  A practical example would be a paginated list of items:
-
-      <ul class="tasks">
-        <li>Wash car</li>
-        <li>Purchase supplies</li>
-        <li>Fix tent</li>
-      </ul>
-
-  In order to append more items from a URL, replace into
-  the `.tasks:after` selector:
-
-      up.replace('.tasks:after', '/page/2')
-
-  \#\#\# Setting the window title from the server
-
-  If the `replace` call changes history, the document title will be set
-  to the contents of a `<title>` tag in the response.
-
-  The server can also change the document title by setting
-  an `X-Up-Title` header in the response.
-
-  \#\#\# Optimizing response rendering
-
-  The server is free to optimize Unpoly requests by only rendering the HTML fragment
-  that is being updated. The request's `X-Up-Target` header will contain
-  the CSS selector for the updating fragment.
-
-  If you are using the `unpoly-rails` gem you can also access the selector via
-  `up.target` in all controllers, views and helpers.
-
-  \#\#\# Events
-
-  Unpoly will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
-  that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
-  element that replaces it.
-
   @function up.replace
   @param {string|Element|jQuery} target
     The CSS selector to update. You can also pass a DOM element or jQuery element
     here, in which case a selector will be inferred from the element's class and ID.
   @param {string} url
     The URL to fetch from the server.
-  @param {string} [options.failTarget]
-    The CSS selector to update if the server sends a non-200 status code.
-  @param {string} [options.fallback]
-    The selector to update when the original target was not found in the page.
-  @param {string} [options.title]
-    The document title after the replacement.
-
-    If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
-    You can also pass `false` to explicitly prevent the title from being updated.
-  @param {string} [options.method='get']
-    The HTTP method to use for the request.
-  @param {Object|FormData|string|Array} [options.params]
-    [Parameters](/up.Params) that should be sent as the request's payload.
-  @param {string} [options.transition='none']
-  @param {string|boolean} [options.history=true]
-    If a string is given, it is used as the URL the browser's location bar and history.
-    If omitted or true, the `url` argument will be used.
-    If set to `false`, the history will remain unchanged.
-  @param {boolean|string} [options.reveal=false]
-    Whether to [reveal](/up.reveal) the new fragment.
-
-    You can also pass a CSS selector for the element to reveal.
-  @param {boolean|string} [options.failReveal=false]
-    Whether to [reveal](/up.reveal) the new fragment when the server responds with an error.
-
-    You can also pass a CSS selector for the element to reveal.
-  @param {number} [options.revealPadding]
-
-  @param {boolean} [options.restoreScroll=false]
-    If set to true, Unpoly will try to restore the scroll position
-    of all the viewports around or below the updated element. The position
-    will be reset to the last known top position before a previous
-    history change for the current URL.
-  @param {boolean} [options.cache]
-    Whether to use a [cached response](/up.proxy) if available.
-  @param {Object} [options.headers={}]
-    An object of additional header key/value pairs to send along
-    with the request.
-  @param {Element|jQuery} [options.origin]
-    The element that triggered the replacement.
-
-    The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [options.layer='auto']
-    The name of the layer that ought to be updated. Valid values are
-    `'auto'`, `'page'`, `'modal'` and `'popup'`.
-
-    If set to `'auto'` (default), Unpoly will try to find a match in the
-    same layer as the element that triggered the replacement (see `options.origin`).
-    If that element is not known, or no match was found in that layer,
-    Unpoly will search in other layers, starting from the topmost layer.
-  @param {string} [options.failLayer='auto']
-    The name of the layer that ought to be updated if the server sends a non-200 status code.
-  @param {boolean} [options.keep=true]
-    Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
-  @param {boolean} [options.hungry=true]
-    Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
-
+  @param {object} [options]
+    See `options` for `up.render()
   @return {Promise}
-    A promise that will be fulfilled when the page has been updated.
+    A promise that is fulfilled when the page has been updated.
+  @deprecated
+    Use `up.render()` instead.
   @stable
   ###
   replace = (target, url, options) ->
@@ -325,10 +333,9 @@ up.fragment = do ->
   @param {string|Element|jQuery} target
   @param {string} html
   @param {Object} [options]
-    See options for [`up.replace()`](/up.replace).
+    See options for [`up.render()`](/up.render).
   @return {Promise}
-    A promise that will be fulfilled then the selector was updated
-    and all animation has finished.
+    A promise that will be fulfilled then the selector was updated.
   @stable
   ###
   extract = (target, document, options) ->
@@ -500,12 +507,11 @@ up.fragment = do ->
   emitFromKeepPlan = (keepPlan, eventType, log) ->
     keepable = keepPlan.oldElement
     eventAttrs =
-      target: keepable
       newFragment: keepPlan.newElement
       newData: keepPlan.newData
       log: [log, keepable]
 
-    up.emit(eventType, eventAttrs)
+    up.emit(keepable, eventType, eventAttrs)
 
   emitFragmentDestroyed = (fragment, options) ->
     log = options.log ? ['Destroyed fragment %o', fragment]
@@ -646,10 +652,10 @@ up.fragment = do ->
 
   @function up.destroy
   @param {string|Element|jQuery} target
-  @param {string} [options.history]
-    A URL that will be pushed as a new history entry when the element begins destruction.
+  @param {string} [options.location]
+    A URL that will be pushed as a new history entry when the element was destroyed.
   @param {string} [options.title]
-    The document title to set when the element begins destruction.
+    The document title to set after the element was destroyed.
   @param {string|Function(element, options): Promise} [options.animation='none']
     The animation to use before the element is removed from the DOM.
   @param {number} [options.duration]
@@ -658,8 +664,15 @@ up.fragment = do ->
     The delay before the animation starts. See [`up.animate()`](/up.animate).
   @param {string} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
+  @param {Function} [options.onRemoved]
+    A callback that is run when the element was removed from the DOM.
   @return {Promise}
-    A promise that will be fulfilled once the element has been removed from the DOM.
+    A promise that is fulfilled when the element has been destroyed.
+
+    If the destruction is animated, the promise will be resolved *before* the element was
+    removed from the DOM tree. The element will be marked with the `.up-destroying` class
+    and removed once the animation finishes. To run code after the element was removed,
+    pass an `{ onRemoved }` callback.
   @stable
   ###
   destroy = (args...) ->
