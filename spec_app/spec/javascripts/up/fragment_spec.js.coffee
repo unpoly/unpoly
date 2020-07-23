@@ -3087,6 +3087,19 @@ describe 'up.fragment', ->
               )
             )
 
+        it 'allows to define a listener in an [up-on-keep] attribute', asyncSpec (next) ->
+          keeper = fixture('.keeper[up-keep][up-on-keep="this.onKeepSpy(this, newFragment, newData)"]', text: 'old-inside')
+
+          keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
+
+          up.render '.keeper', document: "<div class='keeper new' up-keep up-data='{ \"key\": \"new-value\" }'>new-inside</div>"
+          next =>
+            expect(keeper.onKeepSpy).toHaveBeenCalledWith(
+              keeper,
+              jasmine.objectContaining(className: 'keeper new'),
+              { key: 'new-value' }
+            )
+
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()

@@ -391,6 +391,11 @@ up.fragment = do ->
   element will be destroyed and replaced by a fragment from the response.
 
   @selector [up-keep]
+  @param {string} up-on-keep
+    Code to run before an existing element is kept during a page update.
+
+    The code may use the variables `event` (see `up:fragment:keep`),
+    `this` (the old fragment), `newFragment` and `newData`.
   @stable
   ###
 
@@ -501,19 +506,23 @@ up.fragment = do ->
       origin: options.origin
 
   emitFragmentKeep = (keepPlan) ->
-    emitFromKeepPlan(keepPlan, 'up:fragment:keep', 'Keeping fragment %o')
+    log = ['Keeping fragment %o', keepPlan.oldElement]
+    callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', ['newFragment', 'newData'])
+    emitFromKeepPlan(keepPlan, 'up:fragment:keep', { log, callback })
 
   emitFragmentKept = (keepPlan) ->
-    emitFromKeepPlan(keepPlan, 'up:fragment:kept', 'Kept fragment %o')
+    log = ['Kept fragment %o', keepPlan.oldElement]
+    emitFromKeepPlan(keepPlan, 'up:fragment:kept', { log })
 
-  emitFromKeepPlan = (keepPlan, eventType, log) ->
+  emitFromKeepPlan = (keepPlan, eventType, emitDetails) ->
     keepable = keepPlan.oldElement
-    eventAttrs =
+
+    event = up.event.build(eventType,
       newFragment: keepPlan.newElement
       newData: keepPlan.newData
-      log: [log, keepable]
+    )
 
-    up.emit(keepable, eventType, eventAttrs)
+    up.emit(keepable, event, emitDetails)
 
   emitFragmentDestroyed = (fragment, options) ->
     log = options.log ? ['Destroyed fragment %o', fragment]
