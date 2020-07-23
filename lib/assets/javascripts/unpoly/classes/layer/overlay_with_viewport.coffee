@@ -18,7 +18,6 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     ###**
   @function up.Layer.OverlayWithViewport#openNow
   @param {Element} options.content
-  @param {Function} options.onContentAttached
   ###
   createElements: (content) ->
     @shiftBody()

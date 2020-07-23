@@ -8,16 +8,11 @@
 - Reach out to server-integration libs (make issues?) with the new changes
 - Consider removing history from modals
 - Should the default layer for up.fragment be 'current' instead of 'any'? Consider up-on-accepted="up.reload('.table')"
-- [up-on-accepting] throws `Need { origin } option for { layer: 'origin' }`
-  - I have this in the "new company" popup, but not the "Suggest name" popup
 - Support [up-on-keep] in `<select up-keep up-on-keep="this.values = newElement.values">`
 - Should we allow updates and layer lookups in closed layers?
 - One last time consider whether up:layer:open and up:layer:dismissed/accepted should be emitted on the parent layer
 - demo-layers
   - Test server-side accepting or event emission
-- if there is a pending { url } request and we updated a fragment with a cached request OR local content, the { url } request should be canceled
-=> why did requests to /projects/1 and then the project reload not cancel each other out?
-
 
 
 

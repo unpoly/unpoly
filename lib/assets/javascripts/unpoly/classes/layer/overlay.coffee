@@ -36,7 +36,6 @@ class up.Layer.Overlay extends up.Layer
       'onAccepted',
       'onDismiss',
       'onDismissed',
-      'onContentAttached',
       'acceptEvent',
       'dismissEvent',
       'acceptLocation',
