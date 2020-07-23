@@ -69,6 +69,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     Promise.all(swapPromises).then =>
       @abortWhenLayerClosed()
+      @onRemoved()
       @onAppeared()
 
     return Promise.resolve()
@@ -107,7 +108,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
             afterDetach: =>
               e.remove(step.oldElement) # clean up jQuery data
               up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
-              @onRemoved()
             scrollNew: =>
               @handleFocus(step.newElement, step)
               @handleScroll(step.newElement, step)
@@ -117,7 +117,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
             step.newElement,
             step.transition,
             morphOptions
-          ).then(=> @onAppeared())
+          )
 
       when 'before', 'after'
         # We're either appending or prepending. No keepable elements must be honored.

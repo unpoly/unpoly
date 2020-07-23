@@ -1726,7 +1726,7 @@ describe 'up.fragment', ->
             expect($version2).toHaveLength(1)
             expect($version2).not.toHaveClass('up-destroying')
 
-        # extract with { transition } option
+        # render with { transition } option
         it 'runs an { onRemoved } callback after the element has been removed from the DOM', (done) ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element.v1').text('v1')
@@ -1743,6 +1743,22 @@ describe 'up.fragment', ->
           )
 
           expect($element).toBeAttached()
+
+        it 'runs an { onRemoved } callback once when updating multiple elements', asyncSpec (next) ->
+          fixture('.foo')
+          fixture('.bar')
+
+          onRemovedSpy = jasmine.createSpy('onRemoved spy')
+
+          up.render('.foo, .bar',
+            document: '<div class="foo"></div> <div class="bar"></div>',
+            transition: 'cross-fade',
+            duration: 10,
+            onRemoved: onRemovedSpy
+          )
+
+          next.after 50, ->
+            expect(onRemovedSpy.calls.count()).toBe(1)
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')
@@ -1820,6 +1836,37 @@ describe 'up.fragment', ->
 
           next.after 100, ->
             expect(onAppeared).toHaveBeenCalled()
+
+        it 'runs an { onAppeared } callback once when updating multiple elements', asyncSpec (next) ->
+          fixture('.foo')
+          fixture('.bar')
+
+          onAppearedSpy = jasmine.createSpy('onAppeared spy')
+
+          up.render('.foo, .bar',
+            document: '<div class="foo"></div> <div class="bar"></div>',
+            transition: 'cross-fade',
+            duration: 10,
+            onAppeared: onAppearedSpy
+          )
+
+          next.after 50, ->
+            expect(onAppearedSpy.calls.count()).toBe(1)
+
+        it 'runs an { onAppeared } callback once when appending an element', asyncSpec (next) ->
+          fixture('.foo')
+
+          onAppearedSpy = jasmine.createSpy('onAppeared spy')
+
+          up.render('.foo:after',
+            document: '<div class="foo"></div>',
+            transition: 'fade-in',
+            duration: 10,
+            onAppeared: onAppearedSpy
+          )
+
+          next.after 50, ->
+            expect(onAppearedSpy.calls.count()).toBe(1)
 
         it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next)->
           $parent = $fixture('.parent')
