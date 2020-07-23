@@ -396,7 +396,7 @@ describe 'up.layer', ->
             it 'sets all other dismissable options to true', (done) ->
               up.layer.open(dismissable: true).then (layer) ->
                 expect(layer.buttonDismissable).toBe(true)
-                expect(layer.escapeDismissable).toBe(true)
+                expect(layer.keyDismissable).toBe(true)
                 expect(layer.outsideDismissable).toBe(true)
                 done()
 
@@ -405,7 +405,7 @@ describe 'up.layer', ->
             it 'sets all other dismissable options to false if passed { dismissable: false }', (done) ->
               up.layer.open(dismissable: false).then (layer) ->
                 expect(layer.buttonDismissable).toBe(false)
-                expect(layer.escapeDismissable).toBe(false)
+                expect(layer.keyDismissable).toBe(false)
                 expect(layer.outsideDismissable).toBe(false)
                 done()
 
@@ -425,12 +425,12 @@ describe 'up.layer', ->
                 expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
                 done()
 
-        describe '{ escapeDismissable }', ->
+        describe '{ keyDismissable }', ->
 
-          describe 'with { escapeDismissable: true }', ->
+          describe 'with { keyDismissable: true }', ->
 
             it 'lets the user close the layer by pressing escape', asyncSpec (next) ->
-              up.layer.open(escapeDismissable: true)
+              up.layer.open(keyDismissable: true)
 
               next ->
                 expect(up.layer.isOverlay()).toBe(true)
@@ -440,10 +440,10 @@ describe 'up.layer', ->
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
 
-          describe 'with { escapeDismissable: false }', ->
+          describe 'with { keyDismissable: false }', ->
 
             it 'does not let the user close the layer by pressing escape', asyncSpec (next) ->
-              up.layer.open(escapeDismissable: false)
+              up.layer.open(keyDismissable: false)
 
               next ->
                 expect(up.layer.isOverlay()).toBe(true)
@@ -478,7 +478,7 @@ describe 'up.layer', ->
             next ->
               expect(up.layer.isOverlay()).toBe(false)
 
-        describe 'with { escapeDismissable: false }', ->
+        describe 'with { keyDismissable: false }', ->
 
           it 'does not let the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
             up.layer.open(outsideDismissable: false, mode: 'modal')

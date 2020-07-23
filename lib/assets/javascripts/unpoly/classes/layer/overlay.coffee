@@ -27,7 +27,7 @@ class up.Layer.Overlay extends up.Layer
       'backdropOpenAnimation',
       'backdropCloseAnimation',
       'buttonDismissable',
-      'escapeDismissable',
+      'keyDismissable',
       'outsideDismissable',
       'dismissLabel',
       'dismissAriaLabel',
@@ -46,7 +46,7 @@ class up.Layer.Overlay extends up.Layer
   defaults: (options) ->
     u.merge super(options),
       buttonDismissable: options.dismissable
-      escapeDismissable: options.dismissable
+      keyDismissable: options.dismissable
       outsideDismissable: options.dismissable
 
   constructor: (options) ->
@@ -70,32 +70,6 @@ class up.Layer.Overlay extends up.Layer
     if fn = this[name]
       return fn.bind(this)
 
-  # TODO: Rename openNow to something that doesn't have the sync/async connotation
-  ###**
-  @function up.Layer.Overlay#openNow
-  @param {Element} options.parent
-  @param {Element} options.content
-  @param {string|Object|Function(element, options): Promise} [options.animation]
-  @param {string|Object|Function(element, options): Promise} [options.backdropAnimation]
-  @param {string} [options.easing]
-  @param {number} [options.duration]
-  @param {number} [options.delay]
-  ###
-  openNow: (options) ->
-    throw up.error.notImplemented()
-
-  # TODO: Rename closeNow to something that doesn't have the sync/async connotation
-  ###**
-  @function up.Layer.Overlay#closeNow
-  @param {string|Object|Function(element, options): Promise} [options.animation]
-  @param {string|Object|Function(element, options): Promise} [options.backdropAnimation]
-  @param {string} [options.easing]
-  @param {number} [options.duration]
-  @param {number} [options.delay]
-  ###
-  closeNow: (options) ->
-    throw up.error.notImplemented()
-
   createElement: (parentElement) ->
     @nesting ||= @suggestVisualNesting()
     elementAttrs = u.compactObject({ @align, @position, @size, @class, @nesting })
@@ -118,7 +92,7 @@ class up.Layer.Overlay extends up.Layer
 
   createDismissElement: (parentElement) ->
     @dismissElement = @affixPart(parentElement, 'dismiss',
-      'up-dismiss': ''
+      'up-dismiss': ':button'
       'aria-label': @dismissAriaLabel
       'tabindex': '0'
     )
@@ -162,7 +136,7 @@ class up.Layer.Overlay extends up.Layer
           if event.target == @viewportElement
             @onOutsideClicked(event, true)
 
-    if @escapeDismissable
+    if @keyDismissable
       @unbindEscapePressed = up.event.onEscape((event) => @onEscapePressed(event))
 
     # <a up-accept="value">OK</a>
@@ -185,7 +159,7 @@ class up.Layer.Overlay extends up.Layer
   onOutsideClicked: (event, halt) ->
     if halt
       up.event.halt(event)
-    u.muteRejection @dismiss()
+    u.muteRejection @dismiss(':outside')
 
   onEscapePressed: (event) ->
     # All overlays listen to the Escape key being pressed, but only the front layer
@@ -197,9 +171,9 @@ class up.Layer.Overlay extends up.Layer
         # Allow screen reader users to get back to a state where they can dismiss the
         # modal with escape.
         field.blur()
-      else if @escapeDismissable
+      else if @keyDismissable
         up.event.halt(event)
-        u.muteRejection @dismiss()
+        u.muteRejection @dismiss(':key')
 
   registerClickCloser: (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links

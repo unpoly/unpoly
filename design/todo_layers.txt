@@ -10,36 +10,14 @@
 - Should the default layer for up.fragment be 'current' instead of 'any'? Consider up-on-accepted="up.reload('.table')"
 - [up-on-accepting] throws `Need { origin } option for { layer: 'origin' }`
   - I have this in the "new company" popup, but not the "Suggest name" popup
-- Get rid of up:layer:accepting/dismissing/opening
-  - Let all promises resolve as the animation starts
-    - This makes the app snappier in general
-    - This affects: up.layer.open(), up.layer.dismiss(), up.layer.accept(), up.render(), up.destroy() ...
-    - Offer up.render({ onMotionEnd }) for old-school callback
-    - Check that up:fragment:inserted also happens before animation
 - Support [up-on-keep] in `<select up-keep up-on-keep="this.values = newElement.values">`
-
-- What should be up.current in
-  - [up-on-opening] => remove event
-  - [up-on-opened] => could be used for decorating. set the overlay.
-  - [up-on-accept] => could be used to stop something. set the overlay.
-  - [up-on-accpting] => remove event
-  - [up-on-accepted] => the links' layer
 - Should we allow updates and layer lookups in closed layers?
-
 - One last time consider whether up:layer:open and up:layer:dismissed/accepted should be emitted on the parent layer
+- demo-layers
+  - Test server-side accepting or event emission
 
-- Functions that COULD now be sync:
-  - up.destroy()
-  - up.layer.dismiss()
-  - up.layer.accept()
-  - up.render() with local content
+=> why did requests to /projects/1 and then the project reload not cancel each other out?
 
-- Alternatives to onMotionEnd:
-  - up.destroy: onRemoved
-  - up.render: onAppeared
-  - up.layer.open: onAppeared
-  - up.layer.accept/dimissed: onRemoved
-  -
 
 
 
@@ -61,6 +39,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that peeling dismissals can be detected by a dismiss value of ":peel"
   - Test that a[up-emit] does not emit on modified events
   - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
   - Test that layer callbacks via option always set the layer as current AND the layer as this

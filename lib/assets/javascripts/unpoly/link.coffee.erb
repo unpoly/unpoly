@@ -207,7 +207,7 @@ up.link = do ->
     parser.boolean('closable') # Renamed to { closable }. Legacy calls handled by up.Change.OpenLayer.
     parser.boolean('dismissable')
     parser.boolean('buttonDismissable')
-    parser.boolean('escapeDismissable')
+    parser.boolean('keyDismissable')
     parser.boolean('outsideDismissable')
     parser.parse(up.layer.openCallbackAttr, 'onOpened')
     parser.parse(up.layer.closeCallbackAttr, 'onAccept')
