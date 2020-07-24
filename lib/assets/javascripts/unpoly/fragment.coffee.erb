@@ -758,6 +758,7 @@ up.fragment = do ->
     options = parseTargetAndOptions(args)
     options.cache ?= false
     options.url ?= source(options.target)
+    options.navigate ?= false
     return render(options)
 
   ###**

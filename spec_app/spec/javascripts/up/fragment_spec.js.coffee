@@ -3529,6 +3529,23 @@ describe 'up.fragment', ->
         next =>
           expect($('.element')).toHaveText('new text')
 
+      it 'does not reveal by default', asyncSpec (next) ->
+        element = fixture('.element', text: 'old text')
+
+        up.fragment.setSource(element, '/source')
+        spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+
+        next ->
+          up.reload('.element')
+
+        next =>
+          @respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+          expect(up.reveal).not.toHaveBeenCalled()
+
+
       describeFallback 'canPushState', ->
 
         it 'makes a page load from the closest known source URL', asyncSpec (next) ->
