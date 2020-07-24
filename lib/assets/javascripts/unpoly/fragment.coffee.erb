@@ -748,7 +748,7 @@ up.fragment = do ->
     If omitted, an element matching a selector in [`up.fragment.config.targets`](/up.fragment.config#targets)
     will be reloaded.
   @param {Object} [options]
-    See options for [`up.replace()`](/up.replace)
+    See options for `up.render()`
   @param {string} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
@@ -776,7 +776,7 @@ up.fragment = do ->
   @param {string} [options.target]
     The selector to replace.
   @param {Object} [options]
-    See options for [`up.replace()`](/up.replace)
+    See options for `up.render()`
   @stable
   ###
   visit = (url, options = {}) ->

@@ -194,7 +194,7 @@ class up.Layer extends up.Record
 
       if previousLocation != location
         @savedLocation = location
-        @emit('up:layer:location:changed', { location })
+        @emit('up:layer:location:changed', { location, log: false })
 
         if @hasLiveHistory()
           up.history.push(location)

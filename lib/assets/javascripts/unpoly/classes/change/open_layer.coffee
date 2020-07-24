@@ -40,7 +40,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     if @currentLayer.isClosed()
       throw @notApplicable('Parent layer was closed')
 
-    up.puts('up.render()', "Will open element \"#{@target}\" in new layer")
+    up.puts('up.render()', "Opening element \"#{@target}\" in new layer")
 
     @layer = up.layer.build(@options)
 
@@ -146,7 +146,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     return up.emit(
       @buildEvent('up:layer:open'),
       currentLayer: @layer.parent, # sets up.layer.current
-      log: "Will open new #{@layer}"
+      log: "Opening new #{@layer}"
     )
 
   emitOpenedEvent: ->

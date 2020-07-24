@@ -54,15 +54,15 @@ up.viewport = do ->
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
     See [`[up-anchored="right"]`](/up-anchored-right) for details.
-  @param {number} [config.revealSnap=50]
+  @param {number} [config.revealSnap]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
     to the top when the revealed element is closer to the top than `config.revealSnap`.
 
     Set to `0` to disable snapping.
-  @param {number} [config.revealPadding=0]
+  @param {number} [config.revealPadding]
     The desired padding between a [revealed](/up.reveal) element and the
     closest [viewport](/up.viewport) edge (in pixels).
-  @param {number} [config.revealTop=false]
+  @param {number} [config.revealTop]
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.

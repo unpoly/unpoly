@@ -11,9 +11,14 @@
 - Support [up-on-keep] in `<select up-keep up-on-keep="this.values = newElement.values">`
 - Should we allow updates and layer lookups in closed layers?
 - One last time consider whether up:layer:open and up:layer:dismissed/accepted should be emitted on the parent layer
+- Should { solo: true } only cancel solo-requests, or all requests?
 - demo-layers
   - Test server-side accepting or event emission
 
+
+- das was a. wollte ist überhaupt nicht hilfreich bei geschachtelten layers:
+  - controller: if up.layer.overlay? then up.layer.accept("foo")
+  - man will schon den mode
 
 
 
