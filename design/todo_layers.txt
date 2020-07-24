@@ -3,12 +3,10 @@
 - Try changes on DAH
 - Write remaining tests
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
-- Publish Layer#sync()
 - saveScroll: options.url should be renamed to options.location
 - Reach out to server-integration libs (make issues?) with the new changes
 - Consider removing history from modals
 - Should the default layer for up.fragment be 'current' instead of 'any'? Consider up-on-accepted="up.reload('.table')"
-- Support [up-on-keep] in `<select up-keep up-on-keep="this.values = newElement.values">`
 - Should we allow updates and layer lookups in closed layers?
 - One last time consider whether up:layer:open and up:layer:dismissed/accepted should be emitted on the parent layer
 
@@ -56,6 +54,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - test that restoreScroll() doesn't break
     - test that saveScroll() doesn't break
     - test that feedback highlighting doesn't break
+  - test that layers with { history: false } inherit that settings to child layers, even if the child layer was opened with { history: true }
   - Aborting a slow request emits :up:proxy:recover event
   - Test that unsafe links are not preloaded (does that exist?)
   - Edge Cases for concurrent Layer Changes:
