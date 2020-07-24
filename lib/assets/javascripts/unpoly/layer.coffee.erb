@@ -134,8 +134,8 @@ up.layer = do ->
         # Links update their own layer by default.
         options.layer = 'origin'
       else
-        # If nothing is given, we allow changes of any layer (preferring the current layer)
-        options.layer = 'any'
+        # If nothing is given, we assume the current layer
+        options.layer = 'current'
 
     options.context ||= {}
 

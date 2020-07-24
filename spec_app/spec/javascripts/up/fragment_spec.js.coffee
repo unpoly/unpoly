@@ -83,9 +83,9 @@ describe 'up.fragment', ->
             @overlayElement = element
             done()
 
-        it 'matches elements in any layer, but returns elements in the current layer first', ->
+        it 'matches elements in the current layer only', ->
           results = up.fragment.all('.element')
-          expect(results).toEqual [@overlayElement, @rootElement]
+          expect(results).toEqual [@overlayElement]
 
         it "only matches elements in the layer of the given { origin }", ->
           otherRootElement = fixture('.element.other.in-root')
