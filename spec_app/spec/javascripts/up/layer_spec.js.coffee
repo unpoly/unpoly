@@ -1109,6 +1109,120 @@ describe 'up.layer', ->
 
           done()
 
+    describe 'up.layer.normalizeOptions()', ->
+
+      describe 'snapshotting the current layer', ->
+
+        it 'saves the current layer instance to { currentLayer }', ->
+          options = {}
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.current)
+
+        it 'does not override an existing { currentLayer } option', asyncSpec (next) ->
+          makeLayers(3)
+
+          next ->
+            options = { currentLayer: up.layer.get(1) }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1))
+
+        it 'resolves a given { currentLayer } string to an up.Layer object', ->
+          options = { currentLayer: 'root' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.root)
+
+      describe 'for a { layer } string', ->
+
+        it 'does not resolve the { layer } string, since that might resolve to multiple laters layer', ->
+          options = { layer: 'any' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'any')
+
+      describe 'for an mode passed as { layer } option', ->
+
+        it 'transfers the mode to the { mode } option and sets { layer: "new" }', ->
+          options = { layer: 'cover' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'cover')
+
+        it 'does not change { layer: "root" }', ->
+          options = { layer: 'root' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'root')
+
+      describe 'for an mode passed as the legacy { flavor } option', ->
+
+        it 'transfers the mode to the { mode } option', ->
+          options = { flavor: 'cover' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'cover')
+
+      describe 'for the legacy { layer: "page" } option', ->
+
+        it 'sets { layer: "root" }', ->
+          options = { layer: 'page' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'root')
+
+      describe 'for { layer: "new" }', ->
+
+        it 'sets a default mode from up.layer.config.mode', ->
+          up.layer.config.mode = 'popup'
+          options = { layer: 'new' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'popup')
+
+        it 'does not change an existing { mode } option', ->
+          up.layer.config.mode = 'popup'
+          options = { layer: 'new', mode: 'cover' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'cover')
+
+      describe 'for { layer: "swap" }', ->
+
+        it 'sets { currentLayer } to the current parent layer and set { layer: "new" }', asyncSpec (next) ->
+          makeLayers(3)
+
+          next ->
+            options = { layer: 'swap' }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1), layer: 'new')
+
+      describe 'for an element passed as { target }', ->
+
+        it "sets { layer } to that element's layer object", asyncSpec (next) ->
+          makeLayers(3)
+
+          next ->
+            options = { target: up.layer.get(1).element }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(layer: up.layer.get(1))
+
+      describe 'for an element passed as { origin }', ->
+
+        it "sets { layer: 'origin' }", asyncSpec (next) ->
+          makeLayers(3)
+
+          next ->
+            options = { origin: up.layer.get(1).element }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(origin: up.layer.get(1).element, layer: 'origin')
+
+        it 'does not change an existing { layer } option', asyncSpec (next) ->
+          makeLayers(2)
+
+          next ->
+            options = { layer: 'root', origin: up.layer.get(1).element }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(origin: up.layer.get(1).element, layer: 'root')
+
+      describe 'if no layer-related option is given', ->
+
+        it 'sets { layer: "current" }', ->
+          options = {}
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: 'current')
+
   describe 'unobtrusive behavior', ->
 
     it 'does not lose an overlay if the <body> is replaced'
