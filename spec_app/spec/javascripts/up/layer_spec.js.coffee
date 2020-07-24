@@ -1225,9 +1225,119 @@ describe 'up.layer', ->
 
   describe 'unobtrusive behavior', ->
 
-    it 'does not lose an overlay if the <body> is replaced'
+    describe '[up-accept]', ->
+
+      beforeEach ->
+        up.motion.config.enabled = false
+
+      it 'accepts an overlay', asyncSpec (next) ->
+        acceptListener = jasmine.createSpy('accept listener')
+        up.on('up:layer:accept', acceptListener)
+
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', '')
+          Trigger.clickSequence(link)
+
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener).toHaveBeenCalled()
+
+      it 'accepts an overlay with the attribute value as JSON', asyncSpec (next) ->
+        acceptListener = jasmine.createSpy('accept listener')
+        up.on('up:layer:accept', acceptListener)
+
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
+          Trigger.clickSequence(link)
+
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
+
+      it 'prevents a link from being followed on an overlay', asyncSpec (next) ->
+        followListener = jasmine.createSpy('follow listener')
+        up.on('up:link:follow', followListener)
+
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          link = up.layer.affix('a[href="/foo"][up-follow]')
+          link.setAttribute('up-accept', '')
+          Trigger.clickSequence(link)
+
+        next ->
+          expect(followListener).not.toHaveBeenCalled()
+
+      it 'follows a link on the root layer', asyncSpec (next) ->
+        followListener = jasmine.createSpy('follow listener')
+        up.on('up:link:follow', followListener)
+
+        link = up.layer.affix('a[href="/foo"][up-follow]')
+        link.setAttribute('up-accept', '')
+        Trigger.clickSequence(link)
+
+        next ->
+          expect(followListener).toHaveBeenCalled()
+
+      it 'may be used on elements that are no links', asyncSpec (next) ->
+        acceptListener = jasmine.createSpy('accept listener')
+        up.on('up:layer:accept', acceptListener)
+
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          link = up.layer.affix('span')
+          link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
+          Trigger.clickSequence(link)
+
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
+
+      it 'allows to set attributes that control the closing animation', asyncSpec (next) ->
+        makeLayers(2)
+        overlay = undefined
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          overlay = up.layer.current
+          spyOn(overlay, 'accept')
+          link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-accept', '')
+          link.setAttribute('up-animation', 'move-to-right')
+          link.setAttribute('up-duration', '654')
+          Trigger.clickSequence(link)
+
+        next ->
+          expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining(animation: 'move-to-right', duration: 654))
 
     describe '[up-dismiss]', ->
 
-    describe '[up-accept]', ->
+      beforeEach ->
+        up.motion.config.enabled = false
 
+      it 'dismisses an overlay with the attribute value as JSON', asyncSpec (next) ->
+        dismissListener = jasmine.createSpy('dismiss listener')
+        up.on('up:layer:dismiss', dismissListener)
+
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          link = up.layer.affix('a[href="#"]')
+          link.setAttribute('up-dismiss', JSON.stringify(foo: 'bar'))
+          Trigger.clickSequence(link)
+
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
+          expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', value: { foo: 'bar' })

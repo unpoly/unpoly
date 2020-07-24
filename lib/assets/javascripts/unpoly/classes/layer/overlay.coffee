@@ -91,7 +91,7 @@ class up.Layer.Overlay extends up.Layer
 
   createDismissElement: (parentElement) ->
     @dismissElement = @affixPart(parentElement, 'dismiss',
-      'up-dismiss': ':button'
+      'up-dismiss': '":button"' # value must be JSON
       'aria-label': @dismissAriaLabel
       'tabindex': '0'
     )
@@ -177,6 +177,10 @@ class up.Layer.Overlay extends up.Layer
   registerClickCloser: (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
     @on 'up:click', "[#{attribute}]", (event) ->
+      # Since we're defining this handler on up.Overlay, we will not prevent
+      # a link from being followed on the root layer.
+      up.event.halt(event)
+
       origin = event.target
       value = e.jsonAttr(origin, attribute)
       closeOptions = { origin }
@@ -184,7 +188,7 @@ class up.Layer.Overlay extends up.Layer
       parser.booleanOrString('animation')
       parser.string('easing')
       parser.number('duration')
-      up.event.halt(event)
+
       u.muteRejection closeFn(value, closeOptions)
 
   registerEventCloser: (eventTypes, closeFn) ->
