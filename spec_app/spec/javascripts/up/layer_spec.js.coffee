@@ -74,6 +74,25 @@ describe 'up.layer', ->
             expect(abortedURLs.length).toBe(1)
             expect(abortedURLs[0]).toMatchURL('/path1')
 
+        describe 'when the server sends an X-Up-Events header', ->
+
+          it 'emits these events', asyncSpec (next) ->
+            up.layer.open(target: '.element', url: '/path')
+
+            event1 = { type: 'foo', prop: 'bar '}
+            event2 = { type: 'baz', prop: 'bam '}
+
+            spyOn(up, 'emit').and.callThrough()
+
+            next =>
+              @respondWith
+                responseHeaders: { 'X-Up-Events': JSON.stringify([event1, event2]) }
+                responseText: '<div class="element"></div>'
+
+            next ->
+              expect(up.emit).toHaveBeenCalledWith(event1)
+              expect(up.emit).toHaveBeenCalledWith(event2)
+
       describe 'from a string of HTML', ->
 
         it 'opens a new overlay with matching HTML extracted from the given as { document }', (done) ->
@@ -357,10 +376,6 @@ describe 'up.layer', ->
           next ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
-
-      describe 'events', ->
-
-        it 'should have tests'
 
       describe 'close conditions', ->
 

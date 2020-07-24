@@ -59,10 +59,14 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @layer.updateHistory(@options) # layer location changed event soll hier nicht mehr fliegen
 
     # The server may trigger multiple signals that may cause the layer to close:
+    #
     # - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
     # - Event an event with X-Up-Events, to which a listener may close the layer
     # - Update the location to a URL for which { acceptLocation } or { dismissLocation }
     #   will close the layer.
+    #
+    # Note that @handleLayerChangeRequests() also calls @abortWhenLayerClosed()
+    # if any of these options cause the layer to close.
     @handleLayerChangeRequests()
 
     swapPromises = @steps.map(@executeStep)

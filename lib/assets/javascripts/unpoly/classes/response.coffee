@@ -97,7 +97,7 @@ class up.Response extends up.Record
       'title',
       'acceptLayer'
       'dismissLayer'
-      'events'
+      'eventPlans'
       'context'
       'headers' # custom headers to for synthetic reponses without { xhr } property
       'endTime'
