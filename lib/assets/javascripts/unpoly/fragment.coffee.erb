@@ -235,7 +235,7 @@ up.fragment = do ->
 
     promise = promise.then ->
       if options.solo && !options.preload
-        up.proxy.abort((request) -> request.solo)
+        up.proxy.abort()
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise
