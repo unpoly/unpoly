@@ -742,14 +742,14 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-#          it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
-#            $outer = $fixture('.outer').text('old outer text')
-#            $inner = $outer.affix('.inner').text('old inner text')
-#
-#            replacePromise = up.render('.outer:after, .inner', url: '/path')
-#
-#            next =>
-#              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
+  #          it 'does not lose selector pseudo-classes when merging selectors (bugfix)', asyncSpec (next) ->
+  #            $outer = $fixture('.outer').text('old outer text')
+  #            $inner = $outer.affix('.inner').text('old inner text')
+  #
+  #            replacePromise = up.render('.outer:after, .inner', url: '/path')
+  #
+  #            next =>
+  #              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer:after, .inner')
 
           it 'replaces a single fragment if a selector contains a previous selector in the current page', asyncSpec (next) ->
             $outer = $fixture('.outer').text('old outer text')
@@ -985,57 +985,57 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-        describe 'when selectors are missing on the page before the request was made', ->
+          describe 'when selectors are missing on the page before the request was made', ->
 
-          beforeEach ->
-            # In helpers/protect_jasmine_runner wie have configured <default-fallback>
-            # as a default target for all layers.
-            up.layer.config.any.targets = []
+            beforeEach ->
+              # In helpers/protect_jasmine_runner wie have configured <default-fallback>
+              # as a default target for all layers.
+              up.layer.config.any.targets = []
 
-          it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
-            $fixture('.box').text('old box')
-            up.render('.unknown', url: '/path', fallback: '.box')
+            it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
+              $fixture('.box').text('old box')
+              up.render('.unknown', url: '/path', fallback: '.box')
 
-            next => @respondWith '<div class="box">new box</div>'
-            next => expect('.box').toHaveText('new box')
+              next => @respondWith '<div class="box">new box</div>'
+              next => expect('.box').toHaveText('new box')
 
-          it 'rejects the promise if all alternatives are exhausted', (done) ->
-            promise = up.render('.unknown', url: '/path', fallback: '.more-unknown')
+            it 'rejects the promise if all alternatives are exhausted', (done) ->
+              promise = up.render('.unknown', url: '/path', fallback: '.more-unknown')
 
-            u.task ->
-              promiseState(promise).then (result) ->
-                expect(result.state).toEqual('rejected')
-                expect(result.value).toBeError(/Could not find target in current page/i)
+              u.task ->
+                promiseState(promise).then (result) ->
+                  expect(result.state).toEqual('rejected')
+                  expect(result.value).toBeError(/Could not find target in current page/i)
+                  done()
+
+            it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
+              $fixture('.target').text('old target')
+              $fixture('.fallback').text('old fallback')
+              up.render('.target, .unknown', url: '/path', fallback: '.fallback')
+
+              next =>
+                @respondWith """
+                  <div class="target">new target</div>
+                  <div class="fallback">new fallback</div>
+                """
+
+              next =>
+                expect('.target').toHaveText('old target')
+                expect('.fallback').toHaveText('new fallback')
+
+            it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
+              up.layer.config.any.targets = ['.existing']
+              $fixture('.existing').text('old existing')
+              up.render('.unknown', url: '/path')
+              next => @respondWith '<div class="existing">new existing</div>'
+              next => expect('.existing').toHaveText('new existing')
+
+            it "does not try the layer's default targets and rejects the promise wieht { fallback: false }", (done) ->
+              up.layer.config.any.targets = ['.existing']
+              $fixture('.existing').text('old existing')
+              up.render('.unknown', url: '/path', fallback: false).catch (e) ->
+                expect(e).toBeError(/Could not find target in current page/i)
                 done()
-
-          it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
-            $fixture('.target').text('old target')
-            $fixture('.fallback').text('old fallback')
-            up.render('.target, .unknown', url: '/path', fallback: '.fallback')
-
-            next =>
-              @respondWith """
-                <div class="target">new target</div>
-                <div class="fallback">new fallback</div>
-              """
-
-            next =>
-              expect('.target').toHaveText('old target')
-              expect('.fallback').toHaveText('new fallback')
-
-          it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
-            up.layer.config.any.targets = ['.existing']
-            $fixture('.existing').text('old existing')
-            up.render('.unknown', url: '/path')
-            next => @respondWith '<div class="existing">new existing</div>'
-            next => expect('.existing').toHaveText('new existing')
-
-          it "does not try the layer's default targets and rejects the promise wieht { fallback: false }", (done) ->
-            up.layer.config.any.targets = ['.existing']
-            $fixture('.existing').text('old existing')
-            up.render('.unknown', url: '/path', fallback: false).catch (e) ->
-              expect(e).toBeError(/Could not find target in current page/i)
-              done()
 
         describe 'when selectors are missing on the page after the request was made', ->
 
