@@ -28,14 +28,12 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 - Tests
   - Test that peeling dismissals can be detected by a dismiss value of ":peel"
-  - Test that a[up-emit] does not emit on modified events
   - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
-  - Test that layer callbacks via option always set the layer as current AND the layer as this
-  - Test that layer callbacks via UJS attribute set the layer as current AND the origin as this
+  - Test that layer callbacks via option always set the layer as current AND the layer as `this`
+  - Test that layer callbacks via UJS attribute set the layer as current AND the origin as `this`
   - Test that { acceptLocation } (JS API) also takes an array of alternatives instead of a space-separated string
-  - Test [up-reveal=top]
+  - Test a[up-reveal=top]
   - Test that [up-main] is a default target
-  - Test <a ... up-reveal=top>
   - Test up.link.config.preload.push('a')
     - Test that can be disabled at a link with [up-preload=false]
   - Test up.link.config.instant.push('a')
@@ -110,9 +108,9 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that up.viewport.get() will match the closest OverlayWithViewport
   - Test that up.viewport.get() will find a viewport in a parent layer if the element's layer is not an OverlayWithViewport
   - Test special overlay fallback:
-    # Only for existing overlays we open will also attempt to place a new element as the
-    # new first child of the layer's root element. This mirrors the behavior that we get when
-    # opening a layer: The new element does not need to match anything in the current document.
+    - Only for existing overlays we open will also attempt to place a new element as the
+      new first child of the layer's root element. This mirrors the behavior that we get when
+      opening a layer: The new element does not need to match anything in the current document.
   - Test: up:proxy:fatal is not emitted when a request was aborted
   - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``
   - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
@@ -149,10 +147,11 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
     - check if up:fragment:inserted sets up.layer.current
     - check if keep events sets up.layer.current
     - check if follow event sets up.layer.current
+    - check if compilers set up.layer.current
+    - check if compilers when opening a layer set up.layer.current
   - Test that layers without history updates still return their current #location
+  - Test that layers without history updates still set .up-current links
   - Change with { reveal: 'selector' } should not find elements in another layer
-  - Test that this doesn't crash when we don't have parent (it should default to this layer)
-    - <form up-layer="parent" up-target=".list">
   - Test that accepting/dismissing the root layer will just follow the link
   - Test that proxy-events are emitted on their layer, not the document
   - Test that proxy-events are emitted a second time on the document if the layer has been detached
@@ -161,20 +160,16 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test and document up.proxy.abort().
   - Test and document up.proxy.abort(request)
   - Test and document up.proxy.abort(conditionsObj)
-  - Test that up.layer.get and up.layer.all take both a layer name like "root" or an options hash or an element or a jquery collection
   - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
   - Test that back button closes all layers
   - Test that up.render() can be called with { target: Element }
-  - Test that up.render() can be called with { target: Element } and will find in any layer (what?)
+  - Test that up.render(), when called with { target: Element }, ignores options that would otherwise select a layer, like { origin }
   - Test that up.render() without { layer } option will only find in current layer
   - Test that clicking on the layer backdrop will cause dismiss on iOS (https://code.makandra.de/makandra/studyflix/commit/cf7d016a1d00797519b709cfcb27423c6adea9d2)
-  - Test that [up-dismiss][up-follow] inside an overlay will dismiss, not follow
-  - Test that [up-dismiss][up-follow] outside an overlay will follow
   - Test that peeling is not preventable by preventing up:layer:dismiss
   - Test that opening/updating an layer can reset the world if selector is unavailable
-  - Test against https://github.com/unpoly/unpoly/issues/79
-    - Should be fixed by up.layer.onEach()
-  - Test defaults inheritance in layer hierarchy (all => overlay => mode)
+  - Test against https://github.com/unpoly/unpoly/issues/79 (mousedown removes a layer, click goes to nowhere)
+  - Test options inheritance in layer hierarchy (any => overlay => mode)
   - Test that a layer cannot have history: true if its parent has history: false
   - Test that making a layer change in an { onAccepted } callback will not deadlock the acceptance change
   - Test that layers are assigned .up-destroyed class while closing
@@ -183,7 +178,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test non-standard failOptions:
     - failOptions: mirror
     - failOptions: inherit
-  - Test that that all layer methods manipulate the stack in sync (peel, push, remove)
+  - Test that that all layer methods manipulate the stack in sync (open with local content, dismiss, accept, peel, peeling while opening, peeling while updating)
     - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
     - It's OK for animations to run async after that
   - Test that ResetWorld is actually happening
@@ -209,6 +204,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  - Layer lookup options
+    - Also "parent root"
   - Docs: up.Request is also a promise for its response. Show example.
   - up.syntax.data() is now up.data()
   - [up-content], [up-content=overlay], [up-content=(mode)]
