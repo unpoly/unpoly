@@ -88,6 +88,9 @@ class up.Layer extends up.Record
   getBoxElement: ->
     @boxElement || @element
 
+  getFirstContentChildElement: ->
+    @getContentElement().children[0]
+
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
     e.closest(element, up.layer.anySelector()) == @element

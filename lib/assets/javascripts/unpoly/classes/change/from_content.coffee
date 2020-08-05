@@ -8,6 +8,7 @@ class up.Change.FromContent extends up.Change
   constructor: (options) ->
     up.layer.normalizeOptions(options)
     @layers = up.layer.getAll(options)
+    @target = options.target
     super(options)
 
   ensurePlansBuilt: ->
@@ -21,17 +22,29 @@ class up.Change.FromContent extends up.Change
 
     fallback = @options.fallback
 
-    # First we seek @options.target in all layers
+    if @options.origin && !@target
+      @options.originLayer = up.layer.get(@options.origin)
+
+    if !@target && fallback == false
+      throw "must have a target without falbacks"
+
+    # First we seek @options.target in all matching layers
     for layer in @layers
-      @addPlansForTarget(@options.target, { layer })
+      if @target
+        @addPlansForTarget(@target, { layer })
 
     if fallback != false
 
-      # Second we seek @options.fallback in all layers
+      # Second we seek @options.fallback in all matching layers
       for layer in @layers
         @addPlansForTarget(fallback, { layer, resetOverlay: true })
 
-      # Third we seek the default target of all layers
+      for layer in @layers
+        if layer == @options.originLayer
+          @addPlansForTarget(':zone', { layer })
+
+      # Third we seek the default target of all matching layers
+      throw "ist das hier ':main'?"
       for layer in @layers
         for defaultTarget in @defaultTargets(layer)
           @addPlansForTarget(defaultTarget, { layer, resetOverlay: true })
@@ -74,6 +87,51 @@ class up.Change.FromContent extends up.Change
           change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
           @plans.push(change)
 
+  getMains: (plan) ->
+    mainSelectors = up.layer.defaultTargets(@options.main) # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
+    # TODO: Also include the layer root
+    return up.fragment.all(mainSelectors.join(','), layer: plan.layer)
+
+  getZones: (plan) ->
+    return [] unless plan.origin
+    zoneSelectors = up.fragment.config.zones
+    return up.fragment.ancestorsWithSelf(plan.origin, zoneSelectors.join(','))
+
+  expandTargetForUpdateLayer: (plan) ->
+    mains = @getMains(options)
+    zones = @getZones(options).concat(mains)
+    rawTarget = plan.target
+
+    expandedPlans = []
+
+    mainPseudo = /\b\:main\b/
+    zonePseudo = /\b\:zone\b/
+    closestZonePseudo = /\b\:closest-zone\b/
+
+    
+
+    if u.contains(rawTarget, mainPseudo)
+      for main in mains
+        target = rawTarget.replace(mainPseudo, e.toSelector(main))  # TODO: Oben bereits Selektoren bauen?
+        # TODO: Können wir das alte Element hier nutzbar machen?
+        expandedPlans.push(u.merge(plan, { target }))
+    else if u.contains(rawTarget, zonePseudo)
+      if firstZone = zones[0]
+        target = rawTarget.replace(firstZone, e.toSelector(firstZone))  # TODO: Oben bereits Selektoren bauen?
+        expandedPlans.push(u.merge(plan, { target }))
+    else if u.contains(rawTarget, closestZonePseudo)
+      for zone in zones
+        target = rawTarget.replace(closestZonePseudo, e.toSelector(zone))  # TODO: Oben bereits Selektoren bauen?
+        # TODO: Können wir das alte Element hier nutzbar machen?
+        expandedPlans.push(u.merge(plan, { target }))
+    else
+      expandedPlans.push(plan)
+
+    return expandedPlans
+
+    # TODO: Selektoren verbessern, auch in OR clauses
+
+
   firstDefaultTarget: ->
     if firstLayer = @layers[0]
       @defaultTargets(firstLayer)[0]
@@ -109,7 +167,7 @@ class up.Change.FromContent extends up.Change
     if docOptions.fragment
       # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
       # requires a { target }. We use a target that matches the parsed { fragment }.
-      @options.target ||= @options.responseDoc.rootSelector()
+      @target ||= @options.responseDoc.rootSelector()
 
   # Returns information about the change that is most likely before the request was dispatched.
   # This might change postflight if the response does not contain the desired target.

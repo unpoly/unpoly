@@ -16,6 +16,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @location = options.location
     @hungry = options.hungry
     @transition = options.transition
+    @origin = options.origin
     @parseSteps()
 
   requestAttributes: ->
@@ -227,17 +228,113 @@ class up.Change.UpdateLayer extends up.Change.Addition
         selector = 'body'
 
       placement = expressionParts[2] || @placement || 'swap'
+
+      if selector == ':main'
+        for main in @layerMains()
+          alternatives.push(
+            oldElement: main,
+            selector: e.toSelector(main)
+          )
+      else if selector == ':zone'
+        if @originLayer() == @layer
+          if zone = @originZone()
+            alternatives.push({
+              oldElement: zone,
+              selector: e.toSelector(zone)
+            })
+
+      else if match = selector.match(/^\:zone (.+)$/)
+        if @originLayer() == @layer
+          zoneDescendantSelector = match[1]
+          if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector))
+            alternatives.push({
+              oldElement: zoneDescendantMatch,
+              # In this branch the user wants the zone to be part of the selector.
+              selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
+            })
+
+      else if selector == ':closest-zone'
+        if @originLayer() == @layer
+          for zone in @originZones()
+            alternatives.push({
+              oldElement: zone,
+              selector: e.toSelector(zone)
+            })
+
+      else if match = selector.match(/^\:closest-zone (.+)$/)
+        if @originLayer == @layer
+          for zone in @originZones()
+            if zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector)
+              alternatives.push({
+                oldElement: zoneDescendantMatch,
+                # In this branch the user wants the zone to be part of the selector.
+                selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
+              })
+      else
+        alternatives = []
+        if @originLayer() == @layer
+          if closestMatchInLayer = up.fragment.closest(@origin, selector)
+            alternatives.push({
+              oldElement: closestMatchInLayer,
+              selector: @improveSelector(selector, closestMatchInLayer) # TODO: Should we just do toSelector everywhere?
+            })
+
+          for zone in @originZones()
+            if matchInZone = up.fragment.subtree(zone, selector)
+              alternatives.push({
+                oldElement: matchInZone,
+                selector: @improveSelector(selector, matchInZone)
+              })
+        else
+          firstMatchInLayer = up.fragment.get(selector, @options)
+          alternatives.push({
+            oldElement: firstMatchInLayer,
+            selector: @improveSelector(selector, firstMatchInLayer)
+          })
+
+
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
         # the first child of the current layer's' root element.
         placement = 'swap'
-        # If someone wants to target `body:root` in the root layer,
-        # they probably wanted to target `body:swap` instead.
-        unless @layer.isRoot() && up.fragment.targetsBody(selector)
-          oldElement = @layer.element.children[0]
+
+        for alternative in alternatives
+          alternative.oldElement = @layer.getFirstContentChildElement()
 
       # Each step inherits all options of this change.
-      return u.merge(@options, { selector, placement, oldElement })
+      return u.merge(@options, { alternatives, placement })
+
+  layerMains: ->
+    if !@options.layerMains
+      mainSelector = @layer.defaultTargets.join(',') # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
+
+      if @origin
+        # If we have an origin we can try closer mains first
+        mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelector)
+      else
+        mainElements = up.fragment.all(mainSelector, @options)
+
+      # We always consider the content element's first child to be a "main".
+      mainElements.push(@layer.getFirstContentChildElement())
+
+      @options.layerMains = u.uniq(mainElements)
+    return @options.layerMains
+
+  originZone: ->
+    return @originZones[0]
+
+  originZones: ->
+    if @origin && !@options.originZones
+      zoneSelector = up.fragment.config.zones.join(',')
+      zoneElements = up.fragment.ancestorsWithSelf(@origin, zoneSelector)
+      zoneElements.push(@layerMains()...)
+      @options.originZones = u.uniq(zoneElements)
+    return @options.originZones
+
+  originLayer: ->
+    if @origin && !@options.originLayer
+      @options.originLayer = up.layer.get(@origin)
+    return @options.originLayer
 
   findOld: ->
     return if @foundOld
