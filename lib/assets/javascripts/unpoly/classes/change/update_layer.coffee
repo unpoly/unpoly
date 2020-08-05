@@ -272,26 +272,29 @@ class up.Change.UpdateLayer extends up.Change.Addition
               })
       else
         alternatives = []
+
         if @originLayer() == @layer
+          # If we have an @origin we can be smarter about finding oldElement.
+          # First, we check if @origin itself or one of its ancestors would match.
           if closestMatchInLayer = up.fragment.closest(@origin, selector)
             alternatives.push({
               oldElement: closestMatchInLayer,
-              selector: @improveSelector(selector, closestMatchInLayer) # TODO: Should we just do toSelector everywhere?
+              selector: e.toSelector(closestMatchInLayer)
             })
 
+          # Now we check if any zone around the element would match.
           for zone in @originZones()
             if matchInZone = up.fragment.subtree(zone, selector)
               alternatives.push({
                 oldElement: matchInZone,
-                selector: @improveSelector(selector, matchInZone)
+                selector: e.toSelector(matchInZone)
               })
         else
           firstMatchInLayer = up.fragment.get(selector, @options)
           alternatives.push({
             oldElement: firstMatchInLayer,
-            selector: @improveSelector(selector, firstMatchInLayer)
+            selector: e.toSelector(firstMatchInLayer)
           })
-
 
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
@@ -306,13 +309,17 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   layerMains: ->
     if !@options.layerMains
-      mainSelector = @layer.defaultTargets.join(',') # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
+      mainSelectors = @layer.defaultTargets # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
 
       if @origin
-        # If we have an origin we can try closer mains first
-        mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelector)
+        # If we have an origin we can try closer mains first.
+        mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelectors)
       else
-        mainElements = up.fragment.all(mainSelector, @options)
+        # If we don't have an origin we select all mains in the configured order.
+        # Note that if we would run a single select on mainSelectors.join(','),
+        # the main closest to the root would be matched first. We wouldn't want this
+        # if the user has configured e.g. ['.content', 'body'].
+        mainElements = u.flatMap mainSelectors, (mainSelector) => up.fragment.all(mainSelector, @options)
 
       # We always consider the content element's first child to be a "main".
       mainElements.push(@layer.getFirstContentChildElement())
