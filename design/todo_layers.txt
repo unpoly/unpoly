@@ -1,3 +1,10 @@
+TODO for [up-zone]
+-------------------
+
+- up.fragment.ancestorsWithSelf
+- re-use plans if old element is still attached
+
+
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH

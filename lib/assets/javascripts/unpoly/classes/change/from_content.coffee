@@ -26,33 +26,25 @@ class up.Change.FromContent extends up.Change
       @options.originLayer = up.layer.get(@options.origin)
 
     if !@target && fallback == false
-      throw "must have a target without falbacks"
+      up.fail "must pass a { target } with { fallback: false }"
 
     # First we seek @options.target in all matching layers
-    for layer in @layers
-      if @target
+    if @target
+      for layer in @layers
         @addPlansForTarget(@target, { layer })
 
     if fallback != false
-
       # Second we seek @options.fallback in all matching layers
       for layer in @layers
-        @addPlansForTarget(fallback, { layer, resetOverlay: true })
+        @addPlansForTarget(fallback, { layer })
 
       for layer in @layers
-        if layer == @options.originLayer
-          @addPlansForTarget(':zone', { layer })
+        @addPlansForTarget(':closest-zone', { layer })
 
-      # Third we seek the default target of all matching layers
-      throw "ist das hier ':main'?"
-      for layer in @layers
-        for defaultTarget in @defaultTargets(layer)
-          @addPlansForTarget(defaultTarget, { layer, resetOverlay: true })
+      if resetTargets = up.fragment.config.resetTargets
+        @addPlansForTarget(resetTargets, { layer: 'root', peel: true })
 
-    if resetTargets = up.fragment.config.resetTargets
-      @addPlansForTarget(resetTargets, { layer: up.layer.root, peel: true })
-
-    @plans
+    return @plans
 
   defaultTargets: (layer) ->
     if layer == 'new'
@@ -80,12 +72,12 @@ class up.Change.FromContent extends up.Change
         change = new up.Change.UpdateLayer(props)
         @plans.push(change)
 
-        # Only for existing overlays we open will also attempt to place a new element as the
-        # new first child of the layer's root element. This mirrors the behavior that we get when
-        # opening a layer: The new element does not need to match anything in the current document.
-        if props.resetOverlay && props.layer.isOverlay?()
-          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
-          @plans.push(change)
+#        # Only for existing overlays we open will also attempt to place a new element as the
+#        # new first child of the layer's root element. This mirrors the behavior that we get when
+#        # opening a layer: The new element does not need to match anything in the current document.
+#        if props.resetOverlay && props.layer.isOverlay?()
+#          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
+#          @plans.push(change)
 
   getMains: (plan) ->
     mainSelectors = up.layer.defaultTargets(@options.main) # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors

@@ -228,6 +228,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
         selector = 'body'
 
       placement = expressionParts[2] || @placement || 'swap'
+      alternatives = []
+
+      unless @updatingOriginLayer()
+        selector = selector.replace(/\b\:(closest-)?zone\b/, ':main')
 
       if selector == ':main'
         for main in @layerMains()
@@ -271,9 +275,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
                 selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
               })
       else
-        alternatives = []
-
-        if @originLayer() == @layer
+        if @updatingOriginLayer()
           # If we have an @origin we can be smarter about finding oldElement.
           # First, we check if @origin itself or one of its ancestors would match.
           if closestMatchInLayer = up.fragment.closest(@origin, selector)
@@ -306,6 +308,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       # Each step inherits all options of this change.
       return u.merge(@options, { alternatives, placement })
+
+  updatingOriginLayer: ->
+    return @layer == @originLayer()
 
   layerMains: ->
     if !@options.layerMains
