@@ -17,32 +17,39 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @hungry = options.hungry
     @transition = options.transition
     @origin = options.origin
-    @parseSteps()
 
   requestAttributes: ->
-    @findOld()
+    @matchPreflight()
+
     return {
       layer: @layer
       mode: @layer.mode
       context: @layer.context
-      target: u.map(@steps, 'selector').join(', '),
+      target: @bestPreflightSelector(),
     }
+
+  bestPreflightSelector: ->
+    @matchPreflight()
+
+    u.map(@steps, 'selector').join(', ')
 
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
 
   execute: ->
-    if @layer.isOverlay() && up.fragment.targetsBody(@target)
-      throw @notApplicable("Cannot place element \"#{@target}\" in an overlay")
-
-    @findOld()
-    @findNew()
+    # For each step, find a step.alternative that matches in both the current page
+    # and the response document.
+    @matchPostflight()
 
     up.puts('up.render()', "Updating \"#{@target}\" in #{@layer}")
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
     @addHungrySteps()
+
+    # Remove steps when their oldElement is nested inside the oldElement
+    # of another step.
+    @resolveOldNesting()
 
     # Make sure only the first step will have scroll-related options.
     @setScrollAndFocusOptions()
@@ -223,57 +230,51 @@ class up.Change.UpdateLayer extends up.Change.Addition
         throw up.error.invalidSelector(target)
 
       selector = expressionParts[1]
+      placement = expressionParts[2] || @placement || 'swap'
+
       # We cannot replace <html> with the current e.replace() implementation.
       if selector == 'html'
         selector = 'body'
 
-      placement = expressionParts[2] || @placement || 'swap'
       alternatives = []
 
-      unless @updatingOriginLayer()
-        selector = selector.replace(/\b\:(closest-)?zone\b/, ':main')
-
       if selector == ':main'
-        for main in @layerMains()
+        for main in @getLayerMains()
           alternatives.push(
             oldElement: main,
             selector: e.toSelector(main)
           )
       else if selector == ':zone'
-        if @originLayer() == @layer
-          if zone = @originZone()
-            alternatives.push({
-              oldElement: zone,
-              selector: e.toSelector(zone)
-            })
+        if zone = @getOriginZone()
+          alternatives.push({
+            oldElement: zone,
+            selector: e.toSelector(zone)
+          })
 
       else if match = selector.match(/^\:zone (.+)$/)
-        if @originLayer() == @layer
-          zoneDescendantSelector = match[1]
-          if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector))
+        zoneDescendantSelector = match[1]
+        if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector))
+          alternatives.push({
+            oldElement: zoneDescendantMatch,
+            # In this branch the user wants the zone to be part of the selector.
+            selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
+          })
+
+      else if selector == ':closest-zone'
+        for zone in @getOriginZones()
+          alternatives.push({
+            oldElement: zone,
+            selector: e.toSelector(zone)
+          })
+
+      else if match = selector.match(/^\:closest-zone (.+)$/)
+        for zone in @getOriginZones()
+          if zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector)
             alternatives.push({
               oldElement: zoneDescendantMatch,
               # In this branch the user wants the zone to be part of the selector.
               selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
             })
-
-      else if selector == ':closest-zone'
-        if @originLayer() == @layer
-          for zone in @originZones()
-            alternatives.push({
-              oldElement: zone,
-              selector: e.toSelector(zone)
-            })
-
-      else if match = selector.match(/^\:closest-zone (.+)$/)
-        if @originLayer == @layer
-          for zone in @originZones()
-            if zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector)
-              alternatives.push({
-                oldElement: zoneDescendantMatch,
-                # In this branch the user wants the zone to be part of the selector.
-                selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
-              })
       else
         if @updatingOriginLayer()
           # If we have an @origin we can be smarter about finding oldElement.
@@ -285,7 +286,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
             })
 
           # Now we check if any zone around the element would match.
-          for zone in @originZones()
+          for zone in @getOriginZones()
             if matchInZone = up.fragment.subtree(zone, selector)
               alternatives.push({
                 oldElement: matchInZone,
@@ -306,11 +307,18 @@ class up.Change.UpdateLayer extends up.Change.Addition
         for alternative in alternatives
           alternative.oldElement = @layer.getFirstContentChildElement()
 
+      if @layer.isOverlay()
+        alternatives = u.reject(alternatives, up.fragment.targetsBody)
+
+      unless alternatives.length
+        throw @notApplicable()
+
       # Each step inherits all options of this change.
       return u.merge(@options, { alternatives, placement })
 
   updatingOriginLayer: ->
-    return @layer == @originLayer()
+    # originLayer was set by up.Change.FromContent.
+    return @layer == @options.originLayer()
 
   layerMains: ->
     if !@options.layerMains
@@ -333,38 +341,59 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return @options.layerMains
 
   originZone: ->
-    return @originZones[0]
+    return @originZones()[0]
 
   originZones: ->
     if @origin && !@options.originZones
       zoneSelector = up.fragment.config.zones.join(',')
       zoneElements = up.fragment.ancestorsWithSelf(@origin, zoneSelector)
-      zoneElements.push(@layerMains()...)
+      zoneElements.push(@getLayerMains()...)
       @options.originZones = u.uniq(zoneElements)
     return @options.originZones
 
-  originLayer: ->
-    if @origin && !@options.originLayer
-      @options.originLayer = up.layer.get(@origin)
-    return @options.originLayer
+  matchPreflight: ->
+    return if @matchedPreflight
 
-  findOld: ->
-    return if @foundOld
-    for step in @steps
-      # Try to find fragments matching step.selector within step.layer.
-      # Note that step.oldElement might already have been set by @parseSteps().
-      step.oldElement ||= up.fragment.get(step.selector, step) or
-        throw @notApplicable("Could not find element \"#{@target}\" in current page")
-    @resolveOldNesting()
-    @foundOld = true
+    # Since parsing steps involves many DOM lookups, we only do it when required.
+    @parseSteps()
 
-  findNew: ->
-    return if @foundNew
     for step in @steps
-      # The responseDoc has no layers.
-      step.newElement = @responseDoc.select(step.selector) or
-        throw @notApplicable("Could not find element \"#{@target}\" in server response")
-    @foundNew = true
+      if firstAlternative = step.alternatives[0]
+        # Copy { selector, oldElement } from the first alternative to the step.
+        # We might not swap this element. Once the response is received, @matchPostflight()
+        # will go through all alternatives and see which selector matches in *both*
+        # the current page and response doc.
+        u.assign(step, firstAlternative)
+      else
+        throw @notApplicable()
+
+    @matchedPreflight = true
+
+  matchPostflight: ->
+    return if @matchedPostflight
+
+    # Since parsing steps involves many DOM lookups, we only do it when required.
+    @parseSteps()
+
+    for step in @steps
+      bestAlternative = u.find step.alternatives, (alternative) =>
+        # If an element was removed while the request was in flight, this alternative
+        # is no longer relevant.
+        if e.isDetached(alternative.oldElement)
+          return false
+
+        # The responseDoc has no layers, so we can just select on the entire tree.
+        if alternative.newElement = @responseDoc.select(alternative.selector)
+          return true
+
+      if bestAlternative
+        # Copy { selector, oldElement, newElement } from the best alternatives to the step.
+        # We will no longer look at alternatives after that.
+        u.assign(step, bestAlternative)
+      else
+        throw @notApplicable()
+
+    @matchedPostflight = true
 
   addHungrySteps: ->
     if @hungry

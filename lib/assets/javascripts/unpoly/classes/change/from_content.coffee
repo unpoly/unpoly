@@ -6,45 +6,43 @@ e = up.element
 class up.Change.FromContent extends up.Change
 
   constructor: (options) ->
+    # Don't extract too many options here, since they will be mutated by Change.FromURL
+    # once the response is received.
     up.layer.normalizeOptions(options)
     @layers = up.layer.getAll(options)
     @target = options.target
     super(options)
 
   ensurePlansBuilt: ->
-    # The actual error message will be produced in preflightTargetNotApplicable()
-    # or postFlightTargetNotApplicable(). Here it is only important to signal
-    # notApplicable().
-    @plans or @buildPlans() or @notApplicable()
+    @plans or @buildPlans()
 
   buildPlans: ->
     @plans = []
 
-    fallback = @options.fallback
-
-    if @options.origin && !@target
+    # When we're swapping elements in origin's layer, we can be choose a fallback
+    # replacement zone close to the origin instead of looking up a selector in the
+    # entire layer (where it might match unrelated elements).
+    if @options.origin
       @options.originLayer = up.layer.get(@options.origin)
 
-    if !@target && fallback == false
-      up.fail "must pass a { target } with { fallback: false }"
+    # (1) We seek @options.target in all matching layers
+    @expandIntoPlans(@layers, @target)
 
-    # First we seek @options.target in all matching layers
-    if @target
-      for layer in @layers
-        @addPlansForTarget(@target, { layer })
+    return if @options.fallback == false
 
-    if fallback != false
-      # Second we seek @options.fallback in all matching layers
-      for layer in @layers
-        @addPlansForTarget(fallback, { layer })
+    # (2) In case fallback is a selector or array of selectors, we seek the fallback
+    # in all matching layers. If fallback is true or undefined, this won't add plans.
+    @expandIntoPlans(@layers,  @options.fallback)
 
-      for layer in @layers
-        @addPlansForTarget(':closest-zone', { layer })
+    # (3) We try to update the closest zone around the origin. If no origin is
+    # given, this will update the layer's main selectors.
+    @expandIntoPlans(@layers, ':closest-zone')
 
-      if resetTargets = up.fragment.config.resetTargets
-        @addPlansForTarget(resetTargets, { layer: 'root', peel: true })
-
-    return @plans
+    # (4) In case nothing from the above matches, we close all layers and swap the
+    # body. The assumption is that the server has returned an unexpected response like
+    # an error message or a login screen (if a session expired) and we want to display
+    # this rather than fail the update.
+    @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true })
 
   defaultTargets: (layer) ->
     if layer == 'new'
@@ -52,77 +50,39 @@ class up.Change.FromContent extends up.Change
     else
       return layer.defaultTargets()
 
-  addPlansForTarget: (target, variantProps) ->
-    for target in u.wrapList(target)
-      props = u.merge(@options, variantProps)
+  expandIntoPlans: (layers, target, variantProps) ->
+    for layer in layers
+      for target in u.wrapList(target)
+        if u.isElementish(target)
+          target = e.toSelector(target)
+        else if u.isString(target)
+          target = e.resolveSelector(target, @options.origin)
 
-      if u.isElementish(target)
-        props.target = e.toSelector(target)
-      else if u.isString(target)
-        props.target = e.resolveSelector(target, props.origin)
-      else
-        # @buildPlans() might call us with { target: false } or { target: nil }
-        # In that case we don't add a plan.
-        continue
+          # We cannot reason about zones when there is no known origin from which to climb up,
+          # or when we are not updating origin's layer, or when we are opening a new layer.
+          if layer =! @options.originLayer()
+            target = target.replace(/\b\:(closest-)?zone\b/, ':main')
+        else
+          # @buildPlans() might call us with { target: false } or { target: nil }
+          # In that case we don't add a plan.
+          continue
 
-      if props.layer == 'new'
-        change = new up.Change.OpenLayer(props)
-        @plans.push(change)
-      else
-        change = new up.Change.UpdateLayer(props)
-        @plans.push(change)
+        # Any plans we add will inherit all properties from @options
+        props = u.merge(@options, { target, layer }, variantProps)
 
-#        # Only for existing overlays we open will also attempt to place a new element as the
-#        # new first child of the layer's root element. This mirrors the behavior that we get when
-#        # opening a layer: The new element does not need to match anything in the current document.
-#        if props.resetOverlay && props.layer.isOverlay?()
-#          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
-#          @plans.push(change)
+        if layer == 'new'
+          change = new up.Change.OpenLayer(props)
+          @plans.push(change)
+        else
+          change = new up.Change.UpdateLayer(props)
+          @plans.push(change)
 
-  getMains: (plan) ->
-    mainSelectors = up.layer.defaultTargets(@options.main) # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-    # TODO: Also include the layer root
-    return up.fragment.all(mainSelectors.join(','), layer: plan.layer)
-
-  getZones: (plan) ->
-    return [] unless plan.origin
-    zoneSelectors = up.fragment.config.zones
-    return up.fragment.ancestorsWithSelf(plan.origin, zoneSelectors.join(','))
-
-  expandTargetForUpdateLayer: (plan) ->
-    mains = @getMains(options)
-    zones = @getZones(options).concat(mains)
-    rawTarget = plan.target
-
-    expandedPlans = []
-
-    mainPseudo = /\b\:main\b/
-    zonePseudo = /\b\:zone\b/
-    closestZonePseudo = /\b\:closest-zone\b/
-
-    
-
-    if u.contains(rawTarget, mainPseudo)
-      for main in mains
-        target = rawTarget.replace(mainPseudo, e.toSelector(main))  # TODO: Oben bereits Selektoren bauen?
-        # TODO: Können wir das alte Element hier nutzbar machen?
-        expandedPlans.push(u.merge(plan, { target }))
-    else if u.contains(rawTarget, zonePseudo)
-      if firstZone = zones[0]
-        target = rawTarget.replace(firstZone, e.toSelector(firstZone))  # TODO: Oben bereits Selektoren bauen?
-        expandedPlans.push(u.merge(plan, { target }))
-    else if u.contains(rawTarget, closestZonePseudo)
-      for zone in zones
-        target = rawTarget.replace(closestZonePseudo, e.toSelector(zone))  # TODO: Oben bereits Selektoren bauen?
-        # TODO: Können wir das alte Element hier nutzbar machen?
-        expandedPlans.push(u.merge(plan, { target }))
-    else
-      expandedPlans.push(plan)
-
-    return expandedPlans
-
-    # TODO: Selektoren verbessern, auch in OR clauses
-
+  #        # Only for existing overlays we open will also attempt to place a new element as the
+  #        # new first child of the layer's root element. This mirrors the behavior that we get when
+  #        # opening a layer: The new element does not need to match anything in the current document.
+  #        if props.resetOverlay && props.layer.isOverlay?()
+  #          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
+  #          @plans.push(change)
 
   firstDefaultTarget: ->
     if firstLayer = @layers[0]
@@ -148,11 +108,10 @@ class up.Change.FromContent extends up.Change
     docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
     up.legacy.fixKey(docOptions, 'html', 'document')
 
-    # We require this branch for { content: string } or { content: undefined }
-    if !docOptions.document
-      # ResponseDoc allows to pass innerHTML as { content }, but then it also
-      # requires a { target }. If no { target } is given we use the first plan's target.
-      docOptions.defaultTarget = @firstDefaultTarget()
+    # ResponseDoc allows to pass innerHTML as { content: 'html }, or { content: undefined }
+    # (meaning empty), but then it also requires a { target } to create a matching wrapper.
+    # If no { target } is given we use the first plan's main target.
+    docOptions.defaultTarget = @firstDefaultTarget()
 
     @options.responseDoc = new up.ResponseDoc(docOptions)
 

@@ -785,7 +785,7 @@ up.fragment = do ->
     up.render(u.merge(options, { url }))
 
   targetsBody = (selector) ->
-    /(^|,)\s*(body|html)\s*(\,|$)/i.test(selector)
+    /\bbody\b/i.test(selector)
 
   successKey = (key) ->
     return u.unprefixCamelCase(key, 'fail')

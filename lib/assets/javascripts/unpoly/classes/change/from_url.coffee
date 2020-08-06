@@ -91,13 +91,13 @@ class up.Change.FromURL extends up.Change
     return promise
 
   buildRequest: ->
-    successPreview = new up.Change.FromContent(@successOptions)
-    failPreview = new up.Change.FromContent(@failOptions)
+    @successChange = new up.Change.FromContent(@successOptions)
+    @failChange = new up.Change.FromContent(@failOptions)
 
     requestAttrs = u.merge(
       @successOptions,
-      successPreview.requestAttributes(),
-      u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
+      @successChange.requestAttributes(),
+      u.renameKeys(@failChange.requestAttributes(optional: true), up.fragment.failKey)
     )
 
     @request = new up.Request(requestAttrs)
@@ -108,10 +108,10 @@ class up.Change.FromURL extends up.Change
     if @isResponseWithHTMLContent(responseOrError)
       if responseOrError.isSuccess()
         up.puts('up.render()', 'Upating page with successful response')
-        return @updateContentFromResponse(responseOrError, @successOptions)
+        return @updateContentFromResponse(responseOrError, @successChange)
       else
         up.puts('up.render()', 'Updating page with failed response (HTTP %d)', responseOrError.status)
-        promise = @updateContentFromResponse(responseOrError, @failOptions)
+        promise = @updateContentFromResponse(responseOrError, @failChange)
         # Although processResponse() will fulfill with a successful replacement of options.failTarget,
         # we still want to reject the promise that's returned to our API client.
         return u.always(promise, rejectWithFailedResponse)
@@ -119,16 +119,16 @@ class up.Change.FromURL extends up.Change
       up.puts('up.render()', 'Response without HTML content (HTTP %d, Content-Type %s)', responseOrError.status, responseOrError.contentType)
       return rejectWithFailedResponse()
 
-  updateContentFromResponse: (response, options) ->
-    @augmentOptionsFromResponse(response, options)
+  updateContentFromResponse: (response, change) ->
+    @augmentOptionsFromResponse(response, change.options)
 
     # Allow listeners to inspect the response and either prevent the fragment change
     # or manipulate change options. An example for when this is useful is a maintenance
     # page with its own layout, that cannot be loaded as a fragment and must be loaded
     # with a full page load.
-    loadedEvent = up.event.build('up:fragment:loaded', { change: options, request: response.request, response })
-    promise = response.request.whenEmitted(loadedEvent, callback: options.onLoaded)
-    promise = promise.then -> new up.Change.FromContent(options).execute()
+    loadedEvent = up.event.build('up:fragment:loaded', { change: change.options, request: response.request, response })
+    promise = response.request.whenEmitted(loadedEvent, callback: change.options.onLoaded)
+    promise = promise.then -> change.execute()
     promise
 
   augmentOptionsFromResponse: (response, options) ->

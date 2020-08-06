@@ -8,6 +8,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     super(options)
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
+    @mode = options.mode
     @source = options.source
     @origin = options.origin
     @focus = options.focus
@@ -18,27 +19,44 @@ class up.Change.OpenLayer extends up.Change.Addition
       # We associate this request to our current layer. This way other { solo }
       # navigations on { currentLayer } will cancel this request to open a new layer.
       layer: @currentLayer
-      mode: @options.mode,
+      mode: @mode,
       context: @options.context
       # The target will always exist in the current page, since
       # we're opening a new layer that will match the target.
-      target: @target,
+      target: @bestPreflightSelector(),
     }
+
+  bestPreflightSelector: ->
+    @getAlternatives()[0]
 
   toString: ->
     "Open \"#{@target}\" in new layer"
 
+  getAlternatives: ->
+    unless @alternatives
+      @alternatives = []
+      if @target.indexOf(':main') >= 0
+        for mainSelector in up.layer.defaultTargets(@mode)
+          @alternatives.push(@target.replace(/\b\:main\b/, mainSelector))
+      else
+        @alternatives.push(@target)
+
+      # We cannot place <body> in a new overlay
+      @alternatives = u.reject(@alternatives, up.fragment.targetsBody)
+
+    unless @alternatives.length
+      throw @notApplicable()
+
+    return @alternatives
+
   execute: ->
-    if up.fragment.targetsBody(@target)
-      throw @notApplicable("Cannot place element \"#{@target}\" in an overlay")
+    # TODO: Go through all alternatives
+    # TODO: Crash when there are no plans
 
-    @content = @responseDoc.select(@target)
+    @content = u.findResult @getAlternatives(), (alternative) => @responseDoc.select(alternative)
 
-    unless @content
-      throw @notApplicable("Could not find element \"#{@target}\" in server response")
-
-    if @currentLayer.isClosed()
-      throw @notApplicable('Parent layer was closed')
+    if !@content || @currentLayer.isClosed()
+      throw @notApplicable()
 
     up.puts('up.render()', "Opening element \"#{@target}\" in new layer")
 

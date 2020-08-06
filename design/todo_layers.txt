@@ -3,8 +3,29 @@ TODO for [up-zone]
 
 - up.fragment.ancestorsWithSelf
 - re-use plans if old element is still attached
+- Rename config.xxx.targets to config.xxx.mains, or mainSelectors
+- By default, update history only when targeting a main
+  - Does this also affect revealing?
+  - This is not true in cards?
+- Issues with render({ content })
+  - This will not work: up.render({ origin: 'foo', content: 'xxx' })
+    - It will replace the main (because docOptions.defaultTarget = @firstDefaultTarget())
+    - It will not look up a zone around origin
+  - This will not work: up.render({ target: ':main', content: 'xxx' })
+    - ResponseDoc will fail to create an element matching :main
+  - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
+    , but there was some cyclical flow
+    when I last tried that.
 
+Other TODOs
+----------
 
+- Change options in event properties are sometimes called { options } and sometimes { change }
+- We cannot use `eval()` or `new Function()` with CSP.
+  - new Function will throw an EvalError (both e instanceof EvalError and e.name == 'EvalError')
+  - at least we need to report a more helpful error
+- When swapping { content } we should *not* change the wrapping element with any attributes it may have. { placement: 'content' } ?
+- up.target? etc. should split at commas
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH
