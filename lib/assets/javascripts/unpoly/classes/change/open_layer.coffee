@@ -50,10 +50,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     return @alternatives
 
   execute: ->
-    # TODO: Go through all alternatives
-    # TODO: Crash when there are no plans
-
-    @content = u.findResult @getAlternatives(), (alternative) => @responseDoc.select(alternative)
+    @content = u.findResult(@getAlternatives(), (alternative) => @responseDoc.select(alternative))
 
     if !@content || @currentLayer.isClosed()
       throw @notApplicable()

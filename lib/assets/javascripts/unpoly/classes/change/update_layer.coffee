@@ -37,6 +37,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     "Update \"#{@target}\" in #{@layer}"
 
   execute: ->
+    debugger
+
     # For each step, find a step.alternative that matches in both the current page
     # and the response document.
     @matchPostflight()
@@ -307,6 +309,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
         for alternative in alternatives
           alternative.oldElement = @layer.getFirstContentChildElement()
 
+      console.log("calling #isOverlay() on %o", @layer)
+
       if @layer.isOverlay()
         alternatives = u.reject(alternatives, up.fragment.targetsBody)
 
@@ -318,9 +322,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   updatingOriginLayer: ->
     # originLayer was set by up.Change.FromContent.
-    return @layer == @options.originLayer()
+    return @layer == @options.originLayer
 
-  layerMains: ->
+  getLayerMains: ->
     if !@options.layerMains
       mainSelectors = @layer.defaultTargets # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
 
@@ -340,10 +344,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
       @options.layerMains = u.uniq(mainElements)
     return @options.layerMains
 
-  originZone: ->
+  getOriginZone: ->
     return @originZones()[0]
 
-  originZones: ->
+  getOriginZones: ->
     if @origin && !@options.originZones
       zoneSelector = up.fragment.config.zones.join(',')
       zoneElements = up.fragment.ancestorsWithSelf(@origin, zoneSelector)

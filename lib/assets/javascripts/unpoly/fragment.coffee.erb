@@ -25,6 +25,7 @@ up.fragment = do ->
       # as up.fragment.config.targets.
       get_targets: -> up.layer.config.any.targets
       resetTargets: ['body']
+      zones: ['[up-zone]']
 
   setSource = (element, sourceURL) ->
     element.upSource = sourceURL
@@ -647,8 +648,20 @@ up.fragment = do ->
 #  ###
   closest = (element, selector) ->
     match = e.closest(element, selector)
-    if match && up.layer.get(match) == up.layer.get(element)
+    if match && (up.layer.get(match) == up.layer.get(element)) && !isDestroying(match)
       return match
+
+  ancestorsWithSelf = (element, selector) ->
+    matches = []
+
+    unless isDestroying(element)
+      if e.matches(element, selector)
+        matches.push(element)
+
+      if !e.matches(element, up.layer.anySelector()) && (parent = element.parentElement)
+        matches.push(ancestorsWithSelf(parent, selector)...)
+
+    return matches
 
   ###**
   Destroys the given element or selector.
@@ -814,6 +827,7 @@ up.fragment = do ->
     all: getAll
     subtree: getSubtree
     closest: closest
+    ancestorsWithSelf: ancestorsWithSelf
     source: source
     setSource: setSource
     hello: hello

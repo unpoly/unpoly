@@ -60,7 +60,7 @@ class up.Change.FromContent extends up.Change
 
           # We cannot reason about zones when there is no known origin from which to climb up,
           # or when we are not updating origin's layer, or when we are opening a new layer.
-          if layer =! @options.originLayer()
+          if layer != @options.originLayer
             target = target.replace(/\b\:(closest-)?zone\b/, ':main')
         else
           # @buildPlans() might call us with { target: false } or { target: nil }
