@@ -58,6 +58,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test that pseudo-element targets are removed from target
   - Test that peeling dismissals can be detected by a dismiss value of ":peel"
   - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
   - Test that layer callbacks via option always set the layer as current AND the layer as `this`

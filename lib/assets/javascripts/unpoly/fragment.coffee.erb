@@ -531,7 +531,7 @@ up.fragment = do ->
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isDestroying = (element) ->
-    !e.closest(element, '.up-destroying')
+    !!e.closest(element, '.up-destroying')
 
   ###**
   Returns the first element matching the given selector, but
@@ -621,7 +621,7 @@ up.fragment = do ->
         candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
 
       unless options.destroying
-        candidates = u.filter(candidates, isDestroying)
+        candidates = u.reject(candidates, isDestroying)
 
       return candidates
 

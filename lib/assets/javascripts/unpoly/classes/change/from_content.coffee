@@ -6,7 +6,6 @@ e = up.element
 class up.Change.FromContent extends up.Change
 
   constructor: (options) ->
-    console.log("FromContent ctor")
     # Only extract options required for step building, since #execute() will be called with an
     # postflightOptions argument once the response is received and has provided refined
     # options.
@@ -21,7 +20,6 @@ class up.Change.FromContent extends up.Change
 
   getPlans: ->
     unless @plans
-      console.log("--- buildPlans")
       @plans = []
 
       # When we're swapping elements in origin's layer, we can be choose a fallback
@@ -59,14 +57,10 @@ class up.Change.FromContent extends up.Change
         else if u.isString(target)
           target = e.resolveSelector(target, @options.origin)
 
-          console.log("### finalizing target %o, layer is %o, originLayer is %o, same is %o", target, layer, @options.originLayer, layer == @options.originLayer)
-
           # We cannot reason about zones when there is no known origin from which to climb up,
           # or when we are not updating origin's layer, or when we are opening a new layer.
           if layer != @options.originLayer
             target = target.replace(/\:(closest-)?zone\b/, ':main')
-
-          console.log("#### target after replace is %o", target)
         else
           # @buildPlans() might call us with { target: false } or { target: nil }
           # In that case we don't add a plan.
@@ -100,16 +94,11 @@ class up.Change.FromContent extends up.Change
 #      @defaultTargets(firstLayer)[0]
 
   execute: (postflightOptions = {}) ->
-    # In up.Change.FromURL we already set an X-Up-Title header as options.title.
-    # Now that we process an HTML document
-
-    console.log("--- execute: responseDoc is %o, postflightOptions is %o", @responseDoc, u.copy(postflightOptions))
-
     u.assign(@options, postflightOptions)
     postflightOptions.responseDoc = @getResponseDoc()
+    # In up.Change.FromURL we already set an X-Up-Title header as options.title.
+    # Now that we process an HTML document
     postflightOptions.title = @improveHistoryValue(@options.title, @getResponseDoc().getTitle())
-
-    console.log('--- execute: build responseDoc')
 
 #    # If no document source is given, we assume the user wants to render empty inner content.
 #    # This enables `up.layer.open()` (with no args) to open an empty overlay.
@@ -133,10 +122,7 @@ class up.Change.FromContent extends up.Change
       if !@options.document && !@options.fragment
         docOptions.target ||= @getPlans()[0].bestPreflightSelector()
 
-      console.log("--- buildResponseDoc from opts %o", u.copy(docOptions))
-
       @responseDoc = new up.ResponseDoc(docOptions)
-      console.log("--- responseDoc root is %o", @responseDoc.root)
 
     return @responseDoc
 

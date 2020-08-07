@@ -662,8 +662,6 @@ describe 'up.fragment', ->
             replacePromise = up.render('.outer, .inner', url: '/path')
 
             next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-
               @respondWith """
                 <div class="outer">
                   new outer text
@@ -690,9 +688,6 @@ describe 'up.fragment', ->
             replacePromise = up.render('.outer:before, .inner', url: '/path')
 
             next =>
-              # Placement pseudo-selectors are removed from X-Up-Target
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer, .inner')
-
               @respondWith """
                 <div class="outer">
                   new outer text

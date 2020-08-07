@@ -32,7 +32,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     "Update \"#{@target}\" in #{@layer}"
 
   execute: (postflightOptions) ->
-    console.log("UpdateLayer#execute with opts %o", postflightOptions)
     u.assign(@options, postflightOptions)
     @responseDoc = postflightOptions.responseDoc
 
@@ -114,7 +113,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
             beforeStart: ->
               up.fragment.markAsDestroying(step.oldElement)
             afterInsert: =>
-              console.log("*** activating element with step %o", u.copy(step))
               @responseDoc.activateElement(step.newElement, step)
             beforeDetach: =>
               up.syntax.clean(step.oldElement, { @layer })
@@ -293,8 +291,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
                 oldElement: matchInZone,
                 selector: e.toSelector(matchInZone)
               })
-        else
-          firstMatchInLayer = up.fragment.get(selector, @options)
+        else if firstMatchInLayer = up.fragment.get(selector, @options)
           alternatives.push({
             oldElement: firstMatchInLayer,
             selector: e.toSelector(firstMatchInLayer)
@@ -311,8 +308,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
       if @layer.isOverlay()
         alternatives = u.reject(alternatives, up.fragment.targetsBody)
 
-      console.log("=== alternatives for %o are %o", selector, alternatives)
-
       unless alternatives.length
         throw @notApplicable()
 
@@ -325,7 +320,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   getLayerMains: ->
     if !@options.layerMains
-      mainSelectors = @layer.defaultTargets # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
+      mainSelectors = @layer.defaultTargets() # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
 
       if @origin
         # If we have an origin we can try closer mains first.
@@ -385,8 +380,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
         if e.isDetached(alternative.oldElement)
           return false
 
-        console.log("=== matchPostflight: Selector %o, oldElement %o, newElement %o", alternative.selector, alternative.oldElement, @responseDoc.select(alternative.selector))
-
         # The responseDoc has no layers, so we can just select on the entire tree.
         if alternative.newElement = @responseDoc.select(alternative.selector)
           return true
@@ -417,6 +410,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   resolveOldNesting: ->
     compressed = u.uniqBy(@steps, 'oldElement')
+    console.log("--- compressed from resolveOldNesting: %o", u.copy(@steps))
+    debugger
     compressed = u.reject compressed, (step) => @containedByRivalStep(compressed, step)
     @steps = compressed
 

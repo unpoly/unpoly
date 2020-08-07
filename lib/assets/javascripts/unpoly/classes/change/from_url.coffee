@@ -11,8 +11,6 @@ class up.Change.FromURL extends up.Change
     @successOptions.inspectResponse = @fullLoad
     @deriveFailOptions()
 
-    console.log("up.Change.FromURL constructor")
-
   # These options are used before the request is sent.
   # Hence there is no failVariant.
   @PREFLIGHT_KEYS: [
@@ -80,8 +78,6 @@ class up.Change.FromURL extends up.Change
     return opts
 
   execute: ->
-    console.log("execute()")
-
     unless up.browser.canPushState()
       @fullLoad() unless @successOptions.preload
       return u.unresolvablePromise()
@@ -98,8 +94,6 @@ class up.Change.FromURL extends up.Change
     @successChange = new up.Change.FromContent(@successOptions)
     @failChange = new up.Change.FromContent(@failOptions)
 
-    console.log("@@@ building request attrs @@@")
-
     requestAttrs = u.merge(
       @successOptions,
       @successChange.requestAttributes(),
@@ -109,7 +103,6 @@ class up.Change.FromURL extends up.Change
     @request = new up.Request(requestAttrs)
 
   onRequestSettled: (responseOrError) ->
-    console.debug("onRequestSettled()")
     rejectWithFailedResponse = -> Promise.reject(responseOrError)
 
     if @isResponseWithHTMLContent(responseOrError)
