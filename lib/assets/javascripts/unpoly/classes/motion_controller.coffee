@@ -38,7 +38,7 @@ class up.MotionController
     # will reject when the user scrolls manually during the animation. For
     # the purpose of this controller, we just want to know when the animation
     # has setteld, regardless of whether it was resolved or rejected.
-    mutedAnimator = -> u.muteRejection(startMotion())
+    mutedAnimator = -> up.log.muteRejection(startMotion())
 
     # Callers can pass an options hash `memory` in which we store a { trackMotion }
     # property. With this we can prevent tracking the same motion multiple times.

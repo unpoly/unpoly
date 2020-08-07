@@ -14,7 +14,7 @@ TODO for [up-zone]
   - This will not work: up.render({ target: ':main', content: 'xxx' })
     - ResponseDoc will fail to create an element matching :main
   - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
-    , but there was some cyclical flow
+    , but there was some cyclical flow (I think the ResponseDoc was missing from plans?)
     when I last tried that.
 
 Other TODOs
@@ -232,6 +232,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  - Log is prettier and less noisy
+  - Async errors from event handlers are now printed to the console if the log is enabled
   - Layer lookup options
     - Also "parent root"
   - Docs: up.Request is also a promise for its response. Show example.

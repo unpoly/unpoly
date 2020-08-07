@@ -6,49 +6,58 @@ e = up.element
 class up.Change.FromContent extends up.Change
 
   constructor: (options) ->
-    # Don't extract too many options here, since they will be mutated by Change.FromURL
-    # once the response is received.
-    up.layer.normalizeOptions(options)
-    @layers = up.layer.getAll(options)
-    @target = options.target
+    # Only extract options required for step building, since #execute() will be called with an
+    # postflightOptions argument once the response is received and has provided refined
+    # options.
     super(options)
+    up.layer.normalizeOptions(@options)
+    @layers = up.layer.getAll(@options)
 
-  ensurePlansBuilt: ->
-    @plans or @buildPlans()
+    # If no document source is given, we assume the user wants to render empty inner content.
+    # This enables `up.layer.open()` (with no args) to open an empty overlay.
+    if !@options.document && !@options.fragment && !@options.content
+      @options.content = ''
 
-  buildPlans: ->
-    @plans = []
+    @target = @options.target
+    if !@target
+      if @options.fragment
+        # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
+        # requires a { target }. We use a target that matches the parsed { fragment }.
+        @target = @getResponseDoc().rootSelector()
+      else if u.isDefined(@options.content)
+        @target = @getPlans()[0].bestPreflightSelector()
 
-    # When we're swapping elements in origin's layer, we can be choose a fallback
-    # replacement zone close to the origin instead of looking up a selector in the
-    # entire layer (where it might match unrelated elements).
-    if @options.origin
-      @options.originLayer = up.layer.get(@options.origin)
+  getPlans: ->
+    unless @plans
+      console.log("--- buildPlans")
+      @plans = []
 
-    # (1) We seek @options.target in all matching layers
-    @expandIntoPlans(@layers, @target)
+      # When we're swapping elements in origin's layer, we can be choose a fallback
+      # replacement zone close to the origin instead of looking up a selector in the
+      # entire layer (where it might match unrelated elements).
+      if @options.origin
+        @options.originLayer = up.layer.get(@options.origin)
 
-    return if @options.fallback == false
+      # (1) We seek @options.target in all matching layers
+      @expandIntoPlans(@layers, @target)
 
-    # (2) In case fallback is a selector or array of selectors, we seek the fallback
-    # in all matching layers. If fallback is true or undefined, this won't add plans.
-    @expandIntoPlans(@layers,  @options.fallback)
+      return if @options.fallback == false
 
-    # (3) We try to update the closest zone around the origin. If no origin is
-    # given, this will update the layer's main selectors.
-    @expandIntoPlans(@layers, ':closest-zone')
+      # (2) In case fallback is a selector or array of selectors, we seek the fallback
+      # in all matching layers. If fallback is true or undefined, this won't add plans.
+      @expandIntoPlans(@layers,  @options.fallback)
 
-    # (4) In case nothing from the above matches, we close all layers and swap the
-    # body. The assumption is that the server has returned an unexpected response like
-    # an error message or a login screen (if a session expired) and we want to display
-    # this rather than fail the update.
-    @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true })
+      # (3) We try to update the closest zone around the origin. If no origin is
+      # given, this will update the layer's main selectors.
+      @expandIntoPlans(@layers, ':closest-zone')
 
-  defaultTargets: (layer) ->
-    if layer == 'new'
-      return up.layer.defaultTargets(@options.mode)
-    else
-      return layer.defaultTargets()
+      # (4) In case nothing from the above matches, we close all layers and swap the
+      # body. The assumption is that the server has returned an unexpected response like
+      # an error message or a login screen (if a session expired) and we want to display
+      # this rather than fail the update.
+      @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true })
+
+    return @plans
 
   expandIntoPlans: (layers, target, variantProps) ->
     for layer in layers
@@ -84,41 +93,38 @@ class up.Change.FromContent extends up.Change
   #          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
   #          @plans.push(change)
 
-  firstDefaultTarget: ->
-    if firstLayer = @layers[0]
-      @defaultTargets(firstLayer)[0]
+#  defaultTargets: (layer) ->
+#    if layer == 'new'
+#      return up.layer.defaultTargets(@options.mode)
+#    else
+#      return layer.defaultTargets()
+#
+#  firstDefaultTarget: ->
+#    if firstLayer = @layers[0]
+#      @defaultTargets(firstLayer)[0]
 
-  execute: ->
-    @buildResponseDoc()
+  execute: (postFlightOptions = {}) ->
+    # In up.Change.FromURL we already set an X-Up-Title header as options.title.
+    # Now that we process an HTML document
+    postFlightOptions.title = @improveHistoryValue(postFlightOptions.title ? @options.title, @getResponseDoc().getTitle())
+    postFlightOptions.responseDoc = @getResponseDoc()
 
+    # The saveScroll option will never be updated in updatedOptions.
     if @options.saveScroll
       up.viewport.saveScroll()
 
-    # In up.Change.FromURL we already set an X-Up-Title header as options.title.
-    # Now that we process an HTML document
-    shouldExtractTitle = not (@options.title is false || u.isString(@options.title))
-    if shouldExtractTitle && (title = @options.responseDoc.title())
-      @options.title = title
-
     return @seekPlan
-      attempt: (plan) -> plan.execute()
+      attempt: (plan) -> plan.execute(postFlightOptions)
       noneApplicable: => @postflightTargetNotApplicable()
 
-  buildResponseDoc: ->
-    docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
-    up.legacy.fixKey(docOptions, 'html', 'document')
+  getResponseDoc: ->
+    unless @responseDoc
+      console.log("--- buildResponseDoc")
+      docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
+      up.legacy.fixKey(docOptions, 'html', 'document')
+      @responseDoc = new up.ResponseDoc(docOptions)
 
-    # ResponseDoc allows to pass innerHTML as { content: 'html }, or { content: undefined }
-    # (meaning empty), but then it also requires a { target } to create a matching wrapper.
-    # If no { target } is given we use the first plan's main target.
-    docOptions.defaultTarget = @firstDefaultTarget()
-
-    @options.responseDoc = new up.ResponseDoc(docOptions)
-
-    if docOptions.fragment
-      # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
-      # requires a { target }. We use a target that matches the parsed { fragment }.
-      @target ||= @options.responseDoc.rootSelector()
+    return @responseDoc
 
   # Returns information about the change that is most likely before the request was dispatched.
   # This might change postflight if the response does not contain the desired target.
@@ -129,21 +135,24 @@ class up.Change.FromContent extends up.Change
         opts.optional or @preflightTargetNotApplicable(opts)
 
   preflightTargetNotApplicable: ->
-    if @plans.length
+    if @hasPlans()
       up.fail("Could not find target in current page (tried selectors %o)", @planTargets())
     else
-      @emptyPlans()
+      @failFromEmptyPlans()
 
   postflightTargetNotApplicable: ->
     if @options.inspectResponse
       toastOpts = { action: { label: 'Open response', callback: @options.inspectResponse } }
 
-    if @plans.length
+    if @hasPlans()
       up.fail(["Could not find matching targets in current page and server response (tried selectors %o)", @planTargets()], toastOpts)
     else
-      @emptyPlans(toastOpts)
+      @failFromEmptyPlans(toastOpts)
 
-  emptyPlans: (toastOpts) ->
+  hasPlans: ->
+    return @getPlans().length
+
+  failFromEmptyPlans: (toastOpts) ->
     if @layers.length
       up.fail(['No target for change %o', @options], toastOpts)
     else
@@ -152,13 +161,13 @@ class up.Change.FromContent extends up.Change
       up.fail(["Layer %o does not exist", @options.layer], toastOpts)
 
   planTargets: ->
-    return u.uniq(u.map(@plans, 'target'))
+    return u.uniq(u.map(@getPlans(), 'target'))
 
   seekPlan: (opts) ->
-    @ensurePlansBuilt()
     unprintedMessages = []
 
-    for plan in @plans
+    for plan in @getPlans()
+      opts.before?(plan)
       try
         return opts.attempt(plan)
       catch error

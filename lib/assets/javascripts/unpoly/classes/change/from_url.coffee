@@ -125,7 +125,9 @@ class up.Change.FromURL extends up.Change
       return rejectWithFailedResponse()
 
   updateContentFromResponse: (response, change) ->
-    @augmentOptionsFromResponse(response, change.options)
+    # The response might carry some updates for our change options,
+    # like a server-set location, or server-sent events.
+    optionsFromResponse = @getOptionsFromResponse(response, change.options)
 
     # Allow listeners to inspect the response and either prevent the fragment change
     # or manipulate change options. An example for when this is useful is a maintenance
@@ -133,53 +135,45 @@ class up.Change.FromURL extends up.Change
     # with a full page load.
     loadedEvent = up.event.build('up:fragment:loaded', { change: change.options, request: response.request, response })
     promise = response.request.whenEmitted(loadedEvent, callback: change.options.onLoaded)
-    promise = promise.then -> change.execute()
+    promise = promise.then -> change.execute(optionsFromResponse)
     promise
 
-  augmentOptionsFromResponse: (response, options) ->
-    options.document = response.text
+  getOptionsFromResponse: (response, originalOptions) ->
+    responseOptions = {}
+
+    responseOptions.document = response.text
 
     responseURL = response.url
     locationFromExchange = responseURL
 
     if hash = @request.hash
-      options.hash = hash
+      responseOptions.hash = hash
       locationFromExchange += hash
 
     isReloadable = (response.method == 'GET')
 
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
-      options.source = @improveHistoryValue(options.source, responseURL)
+      responseOptions.source = @improveHistoryValue(originalOptions.source, responseURL)
     else
       # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      options.source = @improveHistoryValue(options.source, 'keep')
+      responseOptions.source = @improveHistoryValue(originalOptions.source, 'keep')
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
-      options.history = !!options.location
+      responseOptions.history = !!originalOptions.location
 
-    options.location = @improveHistoryValue(options.location, locationFromExchange)
-    options.title = @improveHistoryValue(options.title, response.title)
-    options.acceptLayer = response.acceptLayer
-    options.dismissLayer = response.dismissLayer
-    options.eventPlans = response.eventPlans
+    responseOptions.location = @improveHistoryValue(originalOptions.location, locationFromExchange)
+    responseOptions.title = @improveHistoryValue(originalOptions.title, response.title)
+    responseOptions.acceptLayer = response.acceptLayer
+    responseOptions.dismissLayer = response.dismissLayer
+    responseOptions.eventPlans = response.eventPlans
 
     # Only if the response contains a new context object (set by the server)
     # we will override the context from options.
     if context = response.context
-      options.context = context
+      responseOptions.context = context
 
-  # Values we want to keep:
-  # - false (no update)
-  # - string (forced update)
-  # Values we want to override:
-  # - true (do update with defaults)
-  # - missing (do with defaults)
-  improveHistoryValue: (value, newValue) ->
-    if value == false || u.isString(value)
-      value
-    else
-      newValue
+    responseOptions
 
   isResponseWithHTMLContent: (responseOrError) ->
     # Check if the failed response wasn't cause by a fatal error

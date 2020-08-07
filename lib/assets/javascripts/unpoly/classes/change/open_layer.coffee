@@ -6,12 +6,9 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   constructor: (options) ->
     super(options)
-    # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @mode = options.mode
-    @source = options.source
     @origin = options.origin
-    @focus = options.focus
     @currentLayer = options.currentLayer
 
   requestAttributes: ->
@@ -49,7 +46,11 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     return @alternatives
 
-  execute: ->
+  execute: (postFlightOptions) ->
+    u.assign(@options, postFlightOptions)
+    @source = @options.source
+    @focus = @options.focus
+
     @content = u.findResult(@getAlternatives(), (alternative) => @responseDoc.select(alternative))
 
     if !@content || @currentLayer.isClosed()

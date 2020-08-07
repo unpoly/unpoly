@@ -29,7 +29,7 @@ class up.LinkPreloadDelay
     unless link == @waitingLink
       @waitingLink = link
       @startTimer delay, =>
-        u.muteRejection up.link.preload(link)
+        up.log.muteRejection up.link.preload(link)
         @waitingLink = null
 
   startTimer: (delay, block) ->

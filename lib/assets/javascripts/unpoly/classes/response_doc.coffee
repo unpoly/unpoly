@@ -66,8 +66,13 @@ class up.ResponseDoc
     html = @scriptStripper.strip(html)
     html
 
-  title: ->
-    @root.querySelector("head title")?.textContent
+  getTitle: ->
+    # Cache since multiple plans will query this.
+    # Use a flag so we can cache an empty result.
+    unless @titleParsed
+      @title = @root.querySelector("head title")?.textContent
+      @titleParsed = true
+    return @title
 
   select: (selector) ->
     e.subtree(@root, selector)[0]

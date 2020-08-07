@@ -32,3 +32,15 @@ class up.Change extends up.Class
   ###
   executeAsync: ->
     u.rejectOnError => @execute()
+
+  # Values we want to keep:
+  # - false (no update)
+  # - string (forced update)
+  # Values we want to override:
+  # - true (do update with defaults)
+  # - missing (do with defaults)
+  improveHistoryValue: (existingValue, newValue) ->
+    if existingValue == false || u.isString(existingValue)
+      existingValue
+    else
+      newValue

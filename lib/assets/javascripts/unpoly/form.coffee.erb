@@ -646,7 +646,7 @@ up.form = do ->
   ###
   up.on 'submit', fullSubmitSelector, (event, form) ->
     up.event.halt(event)
-    u.muteRejection submit(form)
+    up.log.muteRejection submit(form)
 
   ###**
   When a form field with this attribute is changed, the form is validated on the server
@@ -805,7 +805,7 @@ up.form = do ->
   ###
   up.on 'change', '[up-validate]', (event) ->
     field = findFields(event.target)[0]
-    u.muteRejection validate(field)
+    up.log.muteRejection validate(field)
 
   ###**
   Show or hide elements when a `<select>` or `<input>` has a given value.

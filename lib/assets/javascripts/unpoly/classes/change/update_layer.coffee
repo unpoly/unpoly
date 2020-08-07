@@ -10,13 +10,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @layer = options.layer
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
-    @peel = options.peel
-    @focus = options.focus
-    @placement = options.placement
-    @location = options.location
-    @hungry = options.hungry
-    @transition = options.transition
     @origin = options.origin
+    @placement = options.placement
 
   requestAttributes: ->
     @matchPreflight()
@@ -36,8 +31,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
 
-  execute: ->
-    debugger
+  execute: (postFlightOptions) ->
+    u.assign(@options, postFlightOptions)
+    @responseDoc = postFlightOptions.responseDoc
 
     # For each step, find a step.alternative that matches in both the current page
     # and the response document.
@@ -47,7 +43,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
-    @addHungrySteps()
+    if @options.hungry
+      @addHungrySteps()
 
     # Remove steps when their oldElement is nested inside the oldElement
     # of another step.
@@ -56,17 +53,17 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Make sure only the first step will have scroll-related options.
     @setScrollAndFocusOptions()
 
-    if @peel
+    if @options.peel
       @layer.peel()
       # Layer#peel() will manipulate the stack sync.
       # We don't wait for the peeling animation to finish.
 
     # If either the server or the up.render() caller has provided a new
     # { context } object, we set the layer's context to that object.
-    @layer.updateContext(@options)
+    @layer.updateContext(postflightOptions)
 
     # Change history before compilation, so new fragments see the new location.
-    @layer.updateHistory(@options) # layer location changed event soll hier nicht mehr fliegen
+    @layer.updateHistory(postflightOptions) # layer location changed event soll hier nicht mehr fliegen
 
     # The server may trigger multiple signals that may cause the layer to close:
     #
@@ -255,7 +252,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       else if match = selector.match(/^\:zone (.+)$/)
         zoneDescendantSelector = match[1]
-        if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector))
+        if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.get(zone, zoneDescendantSelector))
           alternatives.push({
             oldElement: zoneDescendantMatch,
             # In this branch the user wants the zone to be part of the selector.
@@ -271,7 +268,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       else if match = selector.match(/^\:closest-zone (.+)$/)
         for zone in @getOriginZones()
-          if zoneDescendantMatch = up.fragment.all(zone, zoneDescendantSelector)
+          if zoneDescendantMatch = up.fragment.get(zone, zoneDescendantSelector)
             alternatives.push({
               oldElement: zoneDescendantMatch,
               # In this branch the user wants the zone to be part of the selector.
@@ -289,7 +286,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
           # Now we check if any zone around the element would match.
           for zone in @getOriginZones()
-            if matchInZone = up.fragment.subtree(zone, selector)
+            if matchInZone = up.fragment.subtree(zone, selector)[0]
               alternatives.push({
                 oldElement: matchInZone,
                 selector: e.toSelector(matchInZone)
@@ -383,6 +380,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       bestAlternative = u.find step.alternatives, (alternative) =>
         # If an element was removed while the request was in flight, this alternative
         # is no longer relevant.
+        console.log("Asking if detached: %o", alternative.oldElement)
         if e.isDetached(alternative.oldElement)
           return false
 
@@ -400,14 +398,13 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @matchedPostflight = true
 
   addHungrySteps: ->
-    if @hungry
-      # Find all [up-hungry] fragments within @layer
-      hungries = up.fragment.all(up.radio.hungrySelector(), @options)
-      transition = up.radio.config.hungryTransition ? @transition
-      for oldElement in hungries
-        selector = e.toSelector(oldElement)
-        if newElement = @responseDoc.select(selector)
-          @steps.push({ selector, oldElement, newElement, transition, placement: 'swap' })
+    # Find all [up-hungry] fragments within @layer
+    hungries = up.fragment.all(up.radio.hungrySelector(), { @layer })
+    transition = up.radio.config.hungryTransition ? @options.transition
+    for oldElement in hungries
+      selector = e.toSelector(oldElement)
+      if newElement = @responseDoc.select(selector)
+        @steps.push({ selector, oldElement, newElement, transition, placement: 'swap' })
 
   containedByRivalStep: (steps, candidateStep) ->
     return u.some steps, (rivalStep) ->

@@ -169,6 +169,12 @@ up.log = do ->
 
     throw up.error.failed(messageArgs)
 
+  muteRejection = (promise) ->
+    if config.enabled
+      return promise
+    else
+      return u.muteRejection(promise)
+
   puts: printToStandard
   # debug: printToDebug
   error: printToError
@@ -177,6 +183,7 @@ up.log = do ->
   enable: enable
   disable: disable
   fail: fail
+  muteRejection: muteRejection
   isEnabled: -> config.enabled
 
 up.puts = up.log.puts

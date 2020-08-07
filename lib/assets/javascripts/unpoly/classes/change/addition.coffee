@@ -4,13 +4,6 @@ u = up.util
 
 class up.Change.Addition extends up.Change
 
-  constructor: (options) ->
-    super(options)
-    @responseDoc = options.responseDoc
-    @acceptLayer = options.acceptLayer
-    @dismissLayer = options.dismissLayer
-    @eventPlans = options.eventPlans || []
-
   handleLayerChangeRequests: ->
     if @layer.isOverlay()
       # The server may send an HTTP header `X-Up-Accept-Layer: value`
@@ -40,21 +33,21 @@ class up.Change.Addition extends up.Change
     #
     # A listener to such a server-sent event might also close the layer.
     @layer.asCurrent =>
-      for eventPlan in @eventPlans
+      for eventPlan in (@options.eventPlans || [])
         up.emit(eventPlan)
         @abortWhenLayerClosed()
 
   tryAcceptLayerFromServer: ->
-    if u.isDefined(@acceptLayer)
+    if u.isDefined(@options.acceptLayer)
       # Even if acceptance has no value, the server will send
       # X-Up-Accept-Layer: null
-      @layer.accept(@acceptLayer)
+      @layer.accept(@options.acceptLayer)
 
   tryDismissLayerFromServer: ->
-    if u.isDefined(@dismissLayer)
+    if u.isDefined(@options.dismissLayer)
       # Even if acceptance has no value, the server will send
       # X-Up-Accept-Layer: null
-      @layer.accept(@dismissLayer)
+      @layer.accept(@options.dismissLayer)
 
   abortWhenLayerClosed: ->
     if @layer.isClosed()

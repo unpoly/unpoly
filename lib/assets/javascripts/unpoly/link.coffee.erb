@@ -583,7 +583,7 @@ up.link = do ->
   up.on 'up:click', fullFollowSelector, (event, link) ->
     if shouldFollowEvent(event, link)
       up.event.halt(event)
-      u.muteRejection follow(link)
+      up.log.muteRejection follow(link)
 
   ###**
   By adding an `up-instant` attribute to a link, the destination will be
