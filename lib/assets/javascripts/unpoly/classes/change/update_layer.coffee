@@ -31,9 +31,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
 
-  execute: (postFlightOptions) ->
-    u.assign(@options, postFlightOptions)
-    @responseDoc = postFlightOptions.responseDoc
+  execute: (postflightOptions) ->
+    u.assign(@options, postflightOptions)
+    @responseDoc = postflightOptions.responseDoc
 
     # For each step, find a step.alternative that matches in both the current page
     # and the response document.
@@ -306,10 +306,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
         for alternative in alternatives
           alternative.oldElement = @layer.getFirstContentChildElement()
 
-      console.log("calling #isOverlay() on %o", @layer)
-
       if @layer.isOverlay()
         alternatives = u.reject(alternatives, up.fragment.targetsBody)
+
+      console.log("=== alternatives for %o are %o", selector, alternatives)
 
       unless alternatives.length
         throw @notApplicable()
@@ -380,9 +380,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
       bestAlternative = u.find step.alternatives, (alternative) =>
         # If an element was removed while the request was in flight, this alternative
         # is no longer relevant.
-        console.log("Asking if detached: %o", alternative.oldElement)
         if e.isDetached(alternative.oldElement)
           return false
+
+        console.log("=== matchPostflight: Selector %o, oldElement %o, newElement %o", alternative.selector, alternative.oldElement, @responseDoc.select(alternative.selector))
 
         # The responseDoc has no layers, so we can just select on the entire tree.
         if alternative.newElement = @responseDoc.select(alternative.selector)

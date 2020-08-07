@@ -20,6 +20,7 @@ TODO for [up-zone]
 Other TODOs
 ----------
 
+- The log trace for up.fail() exceptions is "up.fail()" instead of the actual source
 - Change options in event properties are sometimes called { options } and sometimes { change }
 - We cannot use `eval()` or `new Function()` with CSP.
   - new Function will throw an EvalError (both e instanceof EvalError and e.name == 'EvalError')

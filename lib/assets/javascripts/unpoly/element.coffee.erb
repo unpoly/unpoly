@@ -643,10 +643,8 @@ up.element = do ->
         selector = attributeSelector('id', id)
     else if name = element.getAttribute("name")
       selector = elementTagName(element) + attributeSelector('name', name)
-    else if classes = u.presence(nonUpClasses(element))
-      selector = ''
-      for klass in classes
-        selector += ".#{klass}"
+    else if firstClass = nonUpClasses(element)[0]
+      selector = ".#{firstClass}"
     else if ariaLabel = element.getAttribute("aria-label")
       selector = attributeSelector('aria-label', ariaLabel)
     else

@@ -103,18 +103,18 @@ class up.Change.FromContent extends up.Change
 #    if firstLayer = @layers[0]
 #      @defaultTargets(firstLayer)[0]
 
-  execute: (postFlightOptions = {}) ->
+  execute: (postflightOptions = {}) ->
     # In up.Change.FromURL we already set an X-Up-Title header as options.title.
     # Now that we process an HTML document
-    postFlightOptions.title = @improveHistoryValue(postFlightOptions.title ? @options.title, @getResponseDoc().getTitle())
-    postFlightOptions.responseDoc = @getResponseDoc()
+    postflightOptions.title = @improveHistoryValue(postflightOptions.title ? @options.title, @getResponseDoc().getTitle())
+    postflightOptions.responseDoc = @getResponseDoc()
 
     # The saveScroll option will never be updated in updatedOptions.
     if @options.saveScroll
       up.viewport.saveScroll()
 
     return @seekPlan
-      attempt: (plan) -> plan.execute(postFlightOptions)
+      attempt: (plan) -> plan.execute(postflightOptions)
       noneApplicable: => @postflightTargetNotApplicable()
 
   getResponseDoc: ->
@@ -164,20 +164,21 @@ class up.Change.FromContent extends up.Change
     return u.uniq(u.map(@getPlans(), 'target'))
 
   seekPlan: (opts) ->
-    unprintedMessages = []
+#    unprintedMessages = []
 
     for plan in @getPlans()
       opts.before?(plan)
       try
         return opts.attempt(plan)
       catch error
-        if up.error.notApplicable.is(error)
-          unprintedMessages.push(error.message)
-        else
+#        if up.error.notApplicable.is(error)
+#          unprintedMessages.push(error.message)
+#        else
+        unless up.error.notApplicable.is(error)
           # Re-throw any unexpected type of error
           throw error
 
-    # If we're about to explode with a fatal error we print everything that we tried.
-    unprintedMessages.forEach (message) -> up.puts('up.render()', message)
+#    # If we're about to explode with a fatal error we print everything that we tried.
+#    unprintedMessages.forEach (message) -> up.puts('up.render()', message)
 
     return opts.noneApplicable?()

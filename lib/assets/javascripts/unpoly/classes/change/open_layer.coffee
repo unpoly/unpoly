@@ -46,8 +46,8 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     return @alternatives
 
-  execute: (postFlightOptions) ->
-    u.assign(@options, postFlightOptions)
+  execute: (postflightOptions) ->
+    u.assign(@options, postflightOptions)
     @source = @options.source
     @focus = @options.focus
 

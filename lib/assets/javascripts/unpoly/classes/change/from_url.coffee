@@ -98,6 +98,8 @@ class up.Change.FromURL extends up.Change
     @successChange = new up.Change.FromContent(@successOptions)
     @failChange = new up.Change.FromContent(@failOptions)
 
+    console.log("@@@ building request attrs @@@")
+
     requestAttrs = u.merge(
       @successOptions,
       @successChange.requestAttributes(),
