@@ -32,6 +32,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     "Update \"#{@target}\" in #{@layer}"
 
   execute: (postflightOptions) ->
+    console.log("UpdateLayer#execute with opts %o", postflightOptions)
     u.assign(@options, postflightOptions)
     @responseDoc = postflightOptions.responseDoc
 
@@ -113,6 +114,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
             beforeStart: ->
               up.fragment.markAsDestroying(step.oldElement)
             afterInsert: =>
+              console.log("*** activating element with step %o", u.copy(step))
               @responseDoc.activateElement(step.newElement, step)
             beforeDetach: =>
               up.syntax.clean(step.oldElement, { @layer })

@@ -34,7 +34,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       @alternatives = []
       if @target.indexOf(':main') >= 0
         for mainSelector in up.layer.defaultTargets(@mode)
-          @alternatives.push(@target.replace(/\b\:main\b/, mainSelector))
+          @alternatives.push(@target.replace(/\:main\b/, mainSelector))
       else
         @alternatives.push(@target)
 
@@ -51,7 +51,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @source = @options.source
     @focus = @options.focus
 
-    @content = u.findResult(@getAlternatives(), (alternative) => @responseDoc.select(alternative))
+    @content = u.findResult(@getAlternatives(), (alternative) => @options.responseDoc.select(alternative))
 
     if !@content || @currentLayer.isClosed()
       throw @notApplicable()
@@ -87,7 +87,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     up.fragment.setSource(@content, @source)
 
     # Compile the new content and emit up:fragment:inserted.
-    @responseDoc.activateElement(@content, { @layer, @origin })
+    @options.responseDoc.activateElement(@content, { @layer, @origin })
 
     # The server may trigger multiple signals that may cause the layer to close:
     #

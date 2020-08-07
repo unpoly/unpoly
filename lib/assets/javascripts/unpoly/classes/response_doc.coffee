@@ -26,12 +26,12 @@ class up.ResponseDoc
     @scriptStripper = new up.HTMLWrapper('script')
 
     @root =
-      @parseDocument(options) || @parseFragment(options) || @parseContentOrBuildEmpty(options)
+      @parseDocument(options) || @parseFragment(options) || @parseContent(options)
 
   parseDocument: (options) ->
     return @parse(options.document, e.createDocumentFromHTML)
 
-  parseContentOrBuildEmpty: (options) ->
+  parseContent: (options) ->
     # Parsing { inner } is the last option we try. It should always succeed in case someone
     # tries `up.layer.open()` without any args. Hence we set the innerHTML to an empty string.
     content = options.content || ''
