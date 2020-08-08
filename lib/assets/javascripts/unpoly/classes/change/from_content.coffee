@@ -12,6 +12,7 @@ class up.Change.FromContent extends up.Change
     super(options)
     up.layer.normalizeOptions(@options)
     @layers = up.layer.getAll(@options)
+    @layerScanners = @options.layerScanners || new Map()
 
     if @options.fragment
       # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
@@ -51,6 +52,8 @@ class up.Change.FromContent extends up.Change
 
   expandIntoPlans: (layers, target, variantProps) ->
     for layer in layers
+      layerScanner = @getLayerScanner(layer)
+
       for target in u.wrapList(target)
         if u.isElementish(target)
           target = e.toSelector(target)
@@ -67,7 +70,7 @@ class up.Change.FromContent extends up.Change
           continue
 
         # Any plans we add will inherit all properties from @options
-        props = u.merge(@options, { target, layer }, variantProps)
+        props = u.merge(@options, { target, layer, layerScanner }, variantProps)
 
         if layer == 'new'
           change = new up.Change.OpenLayer(props)
@@ -83,6 +86,19 @@ class up.Change.FromContent extends up.Change
   #          change = new up.Change.UpdateLayer(u.merge(props, placement: 'root'))
   #          @plans.push(change)
 
+  getLayerScanner: (layer) ->
+    unless scanner = @layerScanners.get(layer)
+      scanner = new up.LayerScanner({ @layer, @origin, originLayer: @getOriginLayer() })
+      @layerScanners.set(layer, scanner)
+
+    return scanner
+
+  getOriginLayer: ->
+    if @options.origin && !@originLayer
+      @originLayer = up.layer.get(@options.origin)
+
+    return @originLayer
+
 #  defaultTargets: (layer) ->
 #    if layer == 'new'
 #      return up.layer.defaultTargets(@options.mode)
@@ -93,24 +109,16 @@ class up.Change.FromContent extends up.Change
 #    if firstLayer = @layers[0]
 #      @defaultTargets(firstLayer)[0]
 
-  execute: (postflightOptions = {}) ->
-    u.assign(@options, postflightOptions)
-    postflightOptions.responseDoc = @getResponseDoc()
+  execute: ->
     # In up.Change.FromURL we already set an X-Up-Title header as options.title.
     # Now that we process an HTML document
-    postflightOptions.title = @improveHistoryValue(@options.title, @getResponseDoc().getTitle())
+    @options.title = @improveHistoryValue(@options.title, @getResponseDoc().getTitle())
 
-#    # If no document source is given, we assume the user wants to render empty inner content.
-#    # This enables `up.layer.open()` (with no args) to open an empty overlay.
-#    if !@options.document && !@options.fragment && !@options.content
-#      @options.content = ''
-
-    # The saveScroll option will never be updated in updatedOptions.
     if @options.saveScroll
       up.viewport.saveScroll()
 
     return @seekPlan
-      attempt: (plan) => plan.execute(postflightOptions)
+      attempt: (plan) => plan.execute()
       noneApplicable: => @postflightTargetNotApplicable()
 
   getResponseDoc: ->

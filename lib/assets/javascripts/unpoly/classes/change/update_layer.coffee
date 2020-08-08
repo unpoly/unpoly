@@ -31,10 +31,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
 
-  execute: (postflightOptions) ->
-    u.assign(@options, postflightOptions)
-    @responseDoc = postflightOptions.responseDoc
-
+  execute: ->
     # For each step, find a step.alternative that matches in both the current page
     # and the response document.
     @matchPostflight()
@@ -60,10 +57,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     # If either the server or the up.render() caller has provided a new
     # { context } object, we set the layer's context to that object.
-    @layer.updateContext(postflightOptions)
+    @layer.updateContext(u.pick(@options, ['context']))
 
     # Change history before compilation, so new fragments see the new location.
-    @layer.updateHistory(postflightOptions) # layer location changed event soll hier nicht mehr fliegen
+    @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
 
     # The server may trigger multiple signals that may cause the layer to close:
     #
@@ -228,74 +225,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
       expressionParts = target.match(/^(.+?)(?:\:(before|after|root))?$/) or
         throw up.error.invalidSelector(target)
 
-      selector = expressionParts[1]
+      selector = @layerScanner.fixSelector(expressionParts[1])
       placement = expressionParts[2] || @placement || 'swap'
 
-      # We cannot replace <html> with the current e.replace() implementation.
-      if selector == 'html'
-        selector = 'body'
-
-      alternatives = []
-
-      if selector == ':main'
-        for main in @getLayerMains()
-          alternatives.push(
-            oldElement: main,
-            selector: e.toSelector(main)
-          )
-      else if selector == ':zone'
-        if zone = @getOriginZone()
-          alternatives.push({
-            oldElement: zone,
-            selector: e.toSelector(zone)
-          })
-
-      else if match = selector.match(/^\:zone (.+)$/)
-        zoneDescendantSelector = match[1]
-        if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.get(zone, zoneDescendantSelector))
-          alternatives.push({
-            oldElement: zoneDescendantMatch,
-            # In this branch the user wants the zone to be part of the selector.
-            selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
-          })
-
-      else if selector == ':closest-zone'
-        for zone in @getOriginZones()
-          alternatives.push({
-            oldElement: zone,
-            selector: e.toSelector(zone)
-          })
-
-      else if match = selector.match(/^\:closest-zone (.+)$/)
-        for zone in @getOriginZones()
-          if zoneDescendantMatch = up.fragment.get(zone, zoneDescendantSelector)
-            alternatives.push({
-              oldElement: zoneDescendantMatch,
-              # In this branch the user wants the zone to be part of the selector.
-              selector: e.toSelector(zone) + ' ' + e.toSelector(zoneDescendantMatch)
-            })
-      else
-        if @updatingOriginLayer()
-          # If we have an @origin we can be smarter about finding oldElement.
-          # First, we check if @origin itself or one of its ancestors would match.
-          if closestMatchInLayer = up.fragment.closest(@origin, selector)
-            alternatives.push({
-              oldElement: closestMatchInLayer,
-              selector: e.toSelector(closestMatchInLayer)
-            })
-
-          # Now we check if any zone around the element would match.
-          for zone in @getOriginZones()
-            if matchInZone = up.fragment.subtree(zone, selector)[0]
-              alternatives.push({
-                oldElement: matchInZone,
-                selector: e.toSelector(matchInZone)
-              })
-        else if firstMatchInLayer = up.fragment.get(selector, @options)
-          alternatives.push({
-            oldElement: firstMatchInLayer,
-            selector: e.toSelector(firstMatchInLayer)
-          })
+      alternatives = @layerScanner.scan(selector)
 
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
@@ -305,49 +238,11 @@ class up.Change.UpdateLayer extends up.Change.Addition
         for alternative in alternatives
           alternative.oldElement = @layer.getFirstContentChildElement()
 
-      if @layer.isOverlay()
-        alternatives = u.reject(alternatives, up.fragment.targetsBody)
-
       unless alternatives.length
         throw @notApplicable()
 
       # Each step inherits all options of this change.
       return u.merge(@options, { alternatives, placement })
-
-  updatingOriginLayer: ->
-    # originLayer was set by up.Change.FromContent.
-    return @layer == @options.originLayer
-
-  getLayerMains: ->
-    if !@options.layerMains
-      mainSelectors = @layer.defaultTargets() # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-
-      if @origin
-        # If we have an origin we can try closer mains first.
-        mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelectors)
-      else
-        # If we don't have an origin we select all mains in the configured order.
-        # Note that if we would run a single select on mainSelectors.join(','),
-        # the main closest to the root would be matched first. We wouldn't want this
-        # if the user has configured e.g. ['.content', 'body'].
-        mainElements = u.flatMap mainSelectors, (mainSelector) => up.fragment.all(mainSelector, @options)
-
-      # We always consider the content element's first child to be a "main".
-      mainElements.push(@layer.getFirstContentChildElement())
-
-      @options.layerMains = u.uniq(mainElements)
-    return @options.layerMains
-
-  getOriginZone: ->
-    return @originZones()[0]
-
-  getOriginZones: ->
-    if @origin && !@options.originZones
-      zoneSelector = up.fragment.config.zones.join(',')
-      zoneElements = up.fragment.ancestorsWithSelf(@origin, zoneSelector)
-      zoneElements.push(@getLayerMains()...)
-      @options.originZones = u.uniq(zoneElements)
-    return @options.originZones
 
   matchPreflight: ->
     return if @matchedPreflight

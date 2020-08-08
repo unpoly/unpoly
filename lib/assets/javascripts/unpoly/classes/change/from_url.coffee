@@ -7,7 +7,8 @@ class up.Change.FromURL extends up.Change
   constructor: (options) ->
     super(options)
 
-    @successOptions = u.copy(@options)
+    @layerScanners = new Map()
+    @successOptions = u.merge(@options, { @layerScanners })
     @successOptions.inspectResponse = @fullLoad
     @deriveFailOptions()
 
@@ -15,6 +16,7 @@ class up.Change.FromURL extends up.Change
   # Hence there is no failVariant.
   @PREFLIGHT_KEYS: [
     'currentLayer',
+    'layerScanners',
     'inspectResponse',
     'url',
     'method',
@@ -91,13 +93,13 @@ class up.Change.FromURL extends up.Change
     return promise
 
   buildRequest: ->
-    @successChange = new up.Change.FromContent(@successOptions)
-    @failChange = new up.Change.FromContent(@failOptions)
+    successPreview = new up.Change.FromContent(@successOptions)
+    failPreview = new up.Change.FromContent(@failOptions)
 
     requestAttrs = u.merge(
       @successOptions,
-      @successChange.requestAttributes(),
-      u.renameKeys(@failChange.requestAttributes(optional: true), up.fragment.failKey)
+      successPreview.requestAttributes(),
+      u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
     )
 
     @request = new up.Request(requestAttrs)
@@ -108,10 +110,10 @@ class up.Change.FromURL extends up.Change
     if @isResponseWithHTMLContent(responseOrError)
       if responseOrError.isSuccess()
         up.puts('up.render()', 'Upating page with successful response')
-        return @updateContentFromResponse(responseOrError, @successChange)
+        return @updateContentFromResponse(responseOrError, @successOptions)
       else
         up.puts('up.render()', 'Updating page with failed response (HTTP %d)', responseOrError.status)
-        promise = @updateContentFromResponse(responseOrError, @failChange)
+        promise = @updateContentFromResponse(responseOrError, @failOptions)
         # Although processResponse() will fulfill with a successful replacement of options.failTarget,
         # we still want to reject the promise that's returned to our API client.
         return u.always(promise, rejectWithFailedResponse)
@@ -119,56 +121,54 @@ class up.Change.FromURL extends up.Change
       up.puts('up.render()', 'Response without HTML content (HTTP %d, Content-Type %s)', responseOrError.status, responseOrError.contentType)
       return rejectWithFailedResponse()
 
-  updateContentFromResponse: (response, change) ->
+  updateContentFromResponse: (response, options) ->
     # The response might carry some updates for our change options,
     # like a server-set location, or server-sent events.
-    optionsFromResponse = @getOptionsFromResponse(response, change.options)
+    @augmentOptionsFromResponse(response, options)
+
+    change = new up.Change.FromContent(options)
 
     # Allow listeners to inspect the response and either prevent the fragment change
     # or manipulate change options. An example for when this is useful is a maintenance
     # page with its own layout, that cannot be loaded as a fragment and must be loaded
     # with a full page load.
-    loadedEvent = up.event.build('up:fragment:loaded', { change: change.options, request: response.request, response })
-    promise = response.request.whenEmitted(loadedEvent, callback: change.options.onLoaded)
-    promise = promise.then -> change.execute(optionsFromResponse)
+    loadedEvent = up.event.build('up:fragment:loaded', { change: options, request: response.request, response })
+    promise = response.request.whenEmitted(loadedEvent, callback: options.onLoaded)
+    promise = promise.then -> change.execute()
     promise
 
-  getOptionsFromResponse: (response, originalOptions) ->
-    responseOptions = {}
-
-    responseOptions.document = response.text
+  augmentOptionsFromResponse: (response, options) ->
+    options.document = response.text
 
     responseURL = response.url
     locationFromExchange = responseURL
 
     if hash = @request.hash
-      responseOptions.hash = hash
+      options.hash = hash
       locationFromExchange += hash
 
     isReloadable = (response.method == 'GET')
 
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
-      responseOptions.source = @improveHistoryValue(originalOptions.source, responseURL)
+      options.source = @improveHistoryValue(originalOptions.source, responseURL)
     else
       # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      responseOptions.source = @improveHistoryValue(originalOptions.source, 'keep')
+      options.source = @improveHistoryValue(originalOptions.source, 'keep')
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
-      responseOptions.history = !!originalOptions.location
+      options.history = !!originalOptions.location
 
-    responseOptions.location = @improveHistoryValue(originalOptions.location, locationFromExchange)
-    responseOptions.title = @improveHistoryValue(originalOptions.title, response.title)
-    responseOptions.acceptLayer = response.acceptLayer
-    responseOptions.dismissLayer = response.dismissLayer
-    responseOptions.eventPlans = response.eventPlans
+    options.location = @improveHistoryValue(originalOptions.location, locationFromExchange)
+    options.title = @improveHistoryValue(originalOptions.title, response.title)
+    options.acceptLayer = response.acceptLayer
+    options.dismissLayer = response.dismissLayer
+    options.eventPlans = response.eventPlans
 
     # Only if the response contains a new context object (set by the server)
     # we will override the context from options.
     if context = response.context
-      responseOptions.context = context
-
-    responseOptions
+      options.context = context
 
   isResponseWithHTMLContent: (responseOrError) ->
     # Check if the failed response wasn't cause by a fatal error
