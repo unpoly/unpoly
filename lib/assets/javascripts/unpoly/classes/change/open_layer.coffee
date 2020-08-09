@@ -5,7 +5,6 @@ u = up.util
 class up.Change.OpenLayer extends up.Change.Addition
 
   constructor: (options) ->
-    console.log("OpenLayer with opts %o", options)
     super(options)
     @target = options.target
     @mode = options.mode
@@ -36,11 +35,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     unless @alternatives
       @alternatives = []
 
-      console.log("OpenLayer: target is %o", @target)
-
       if @target.indexOf(':main') >= 0
-        console.log("OpenLayer: main selectors are %o", up.layer.defaultTargets(@mode))
-
         for mainSelector in up.layer.defaultTargets(@mode)
           @alternatives.push(@target.replace(/\:main\b/, mainSelector))
       else
@@ -54,8 +49,8 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     return @alternatives
 
-  execute: ->
-    @content = u.findResult(@getAlternatives(), (alternative) => @responseDoc.select(alternative))
+  execute: (responseDoc) ->
+    @content = u.findResult(@getAlternatives(), (alternative) => responseDoc.select(alternative))
 
     if !@content || @currentLayer.isClosed()
       throw @notApplicable()
@@ -91,7 +86,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     up.fragment.setSource(@content, @source)
 
     # Compile the new content and emit up:fragment:inserted.
-    @responseDoc.activateElement(@content, { @layer, @origin })
+    responseDoc.activateElement(@content, { @layer, @origin })
 
     # The server may trigger multiple signals that may cause the layer to close:
     #

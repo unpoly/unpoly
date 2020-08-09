@@ -10,6 +10,8 @@ class up.LayerScanner
     @alternativesBySelector = {}
     
   fixSelector: (selector) ->
+    selector = e.resolveSelector(selector, @origin)
+
     # We cannot replace <html> with the current e.replace() implementation.
     if selector == 'html'
       selector = 'body'
@@ -74,7 +76,6 @@ class up.LayerScanner
 
         # Now we check if any zone around the element would match.
         for zone in @getOriginZones()
-          console.log("calling subtree(%o, %o)", zone, selector)
           if matchInZone = up.fragment.subtree(zone, selector)[0]
             alternatives.push({
               oldElement: matchInZone,
@@ -105,13 +106,15 @@ class up.LayerScanner
 
       if @origin
         # If we have an origin we can try closer mains first.
+        # Note that the origin might not be a descendant of a main, so we still need
+        # to find mains after that.
         mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelectors.join(','))
-      else
-        # If we don't have an origin we select all mains in the configured order.
-        # Note that if we would run a single select on mainSelectors.join(','),
-        # the main closest to the root would be matched first. We wouldn't want this
-        # if the user has configured e.g. ['.content', 'body'].
-        mainElements = u.flatMap mainSelectors, (mainSelector) => up.fragment.all(mainSelector, { @layer })
+
+      # Select all mains in the configured order.
+      # Note that if we would run a single select on mainSelectors.join(','),
+      # the main closest to the root would be matched first. We wouldn't want this
+      # if the user has configured e.g. ['.content', 'body'].
+      mainElements = u.flatMap mainSelectors, (mainSelector) => up.fragment.all(mainSelector, { @layer })
 
       @layerMains = u.uniq(mainElements)
 

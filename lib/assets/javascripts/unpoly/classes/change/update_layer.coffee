@@ -32,7 +32,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
 
-  execute: ->
+  execute: (@responseDoc) ->
     # For each step, find a step.alternative that matches in both the current page
     # and the response document.
     @matchPostflight()
@@ -217,12 +217,11 @@ class up.Change.UpdateLayer extends up.Change.Addition
       expressionParts = target.match(/^(.+?)(?:\:(before|after|root))?$/) or
         throw up.error.invalidSelector(target)
 
-      selector = @layerScanner.fixSelector(expressionParts[1])
+      # selector = @layerScanner.fixSelector(expressionParts[1])
+      selector = expressionParts[1]
       placement = expressionParts[2] || @placement || 'swap'
 
       alternatives = @layerScanner.selectAlternatives(selector)
-
-      console.log("alternatives for %o are %o", selector, alternatives)
 
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
@@ -241,12 +240,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
   matchPreflight: ->
     return if @matchedPreflight
 
-    console.log("matchPreflight()")
-
     # Since parsing steps involves many DOM lookups, we only do it when required.
     @parseSteps()
-
-    console.log("Steps are %o", @steps)
 
     for step in @steps
       if firstAlternative = step.alternatives[0]

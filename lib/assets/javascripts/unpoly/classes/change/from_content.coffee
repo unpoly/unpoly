@@ -22,12 +22,8 @@ class up.Change.FromContent extends up.Change
     if @origin
       @originLayer = up.layer.get(@origin)
 
-    # console.log("--- FromContent() with target %o", @options.target)
-
   getPlans: ->
     unless @plans
-      console.log("-- getPlans() with @layers %o and fallback %o", @layers, @options.fallback)
-
       if @options.fragment
         # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
         # requires a { target }. We use a target that matches the parsed { fragment }.
@@ -43,8 +39,6 @@ class up.Change.FromContent extends up.Change
         # in all matching layers. If fallback is true or undefined, this won't add plans.
         @expandIntoPlans(@layers,  @options.fallback)
 
-        console.log("Adding :closest-zone")
-
         # (3) We try to update the closest zone around the origin. If no origin is
         # given, this will update the layer's main selectors.
         @expandIntoPlans(@layers, ':closest-zone')
@@ -55,38 +49,24 @@ class up.Change.FromContent extends up.Change
         # this rather than fail the update.
         @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true })
 
-    console.log("-- getPlans() returns %o", @plans)
-
     return @plans
 
   expandIntoPlans: (layers, target, variantProps) ->
     for layer in layers
       layerScanner = @getLayerScanner(layer)
 
-      console.log("expandIntoPlans layer %o, target %o", layer, target)
-
-      throw "expandIntoPlans sets responseDoc: @getResponseDoc, but @getResponseDocs calls @getPlans() with content"
-
       for target in u.wrapList(target)
         if u.isElementish(target)
           target = e.toSelector(target)
         else if u.isString(target)
-          target = e.resolveSelector(target, @origin)
-
-          # We cannot reason about zones when there is no known origin from which to climb up,
-          # or when we are not updating origin's layer, or when we are opening a new layer.
-          if layer != @originLayer
-            # TODO: User layerScanner.fixSelector
-            target = target.replace(/\:(closest-)?zone\b/, ':main')
+          target = layerScanner.fixSelector(target)
         else
           # @buildPlans() might call us with { target: false } or { target: nil }
           # In that case we don't add a plan.
           continue
 
         # Any plans we add will inherit all properties from @options
-        props = u.merge(@options, { target, layer, layerScanner, responseDoc: @getResponseDoc() }, variantProps)
-
-        console.log("adding plan: %o / %o", layer, props)
+        props = u.merge(@options, { target, layer, layerScanner }, variantProps)
 
         if layer == 'new'
           change = new up.Change.OpenLayer(props)
@@ -128,7 +108,7 @@ class up.Change.FromContent extends up.Change
       up.viewport.saveScroll()
 
     return @seekPlan
-      attempt: (plan) => plan.execute()
+      attempt: (plan) => plan.execute(@getResponseDoc())
       noneApplicable: => @postflightTargetNotApplicable()
 
   getResponseDoc: ->
@@ -140,10 +120,10 @@ class up.Change.FromContent extends up.Change
       # In this case we also need a target, which unless given we derive
       # from the first plan.
       if !@options.document && !@options.fragment
-        #docOptions.content ?= ''
-        docOptions.target ||= @getPlans()[0]?.bestPreflightSelector()
-        debugger
-        console.log("Got { content }, auto-target is %o", docOptions.target)
+        docOptions.content ?= ''
+        docOptions.target ?= @getPlans()[0]?.bestPreflightSelector()
+        #debugger
+        #console.log("Got { content }, auto-target is %o", docOptions.target)
 
       @responseDoc = new up.ResponseDoc(docOptions)
 

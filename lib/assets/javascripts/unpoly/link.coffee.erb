@@ -167,6 +167,8 @@ up.link = do ->
     link = up.fragment.get(link)
     options = u.options(options)
 
+    console.log("--- follow(%o, %o)", link, options)
+
     # TODO: Document new follow options like onOpened, [up-on-opened], ...
     parser = new up.OptionParser(options, link, fail: true)
 

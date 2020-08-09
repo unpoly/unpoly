@@ -588,16 +588,20 @@ describe 'up.element', ->
       expect(up.element.toSelector($element)).toBe('[id="foo\\"bar"]')
 
     it "prefers using the element's tagName + [name] to using the element's classes", ->
-      $element = $fixture('input[name=name-value].class1.class2')
+      $element = $fixture('input[name=name-value].class')
       expect(up.element.toSelector($element)).toBe('input[name="name-value"]')
 
-    it "prefers using the element's classes to using the element's ARIA label", ->
-      $element = $fixture('div.class1.class2[aria-label="ARIA label value"]')
-      expect(up.element.toSelector($element)).toBe(".class1.class2")
+    it "prefers using the element's class to using the element's ARIA label", ->
+      $element = $fixture('div.class[aria-label="ARIA label value"]')
+      expect(up.element.toSelector($element)).toBe(".class")
 
     it 'does not use Unpoly classes to compose a class selector', ->
-      $element = $fixture('div.class1.up-current.class2')
-      expect(up.element.toSelector($element)).toBe(".class1.class2")
+      $element = $fixture('div.up-current.class')
+      expect(up.element.toSelector($element)).toBe(".class")
+
+    it 'uses the first of multiple classes', ->
+      $element = $fixture('div.class1.class2')
+      expect(up.element.toSelector($element)).toBe(".class1")
 
     it "prefers using the element's ARIA label to using the element's tag name", ->
       $element = $fixture('div[aria-label="ARIA label value"]')
