@@ -20,6 +20,7 @@ TODO for [up-zone]
 Other TODOs
 ----------
 
+- Why does protect_jasmine_runner create a default-fallback as a new child of overlay#contentElement? In real use #contentElement will only have a singel child!
 - Allow to refer to ":self" instead of "&"
   - We can document this
 - The log trace for up.fail() exceptions is "up.fail()" instead of the actual source

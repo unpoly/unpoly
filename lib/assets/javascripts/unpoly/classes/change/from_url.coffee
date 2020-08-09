@@ -7,8 +7,7 @@ class up.Change.FromURL extends up.Change
   constructor: (options) ->
     super(options)
 
-    @layerScanners = new Map()
-    @successOptions = u.merge(@options, { @layerScanners })
+    @successOptions = u.merge(@options, { layerScanners: new Map() })
     @successOptions.inspectResponse = @fullLoad
     @deriveFailOptions()
 
@@ -93,8 +92,8 @@ class up.Change.FromURL extends up.Change
     return promise
 
   buildRequest: ->
-    successPreview = new up.Change.FromContent(@successOptions)
-    failPreview = new up.Change.FromContent(@failOptions)
+    successPreview = new up.Change.FromContent(u.merge(@successOptions, preview: true))
+    failPreview = new up.Change.FromContent(u.merge(@failOptions, preview: true))
 
     requestAttrs = u.merge(
       @successOptions,
@@ -151,16 +150,16 @@ class up.Change.FromURL extends up.Change
 
     if isReloadable
       # Remember where we got the fragment from so we can up.reload() it later.
-      options.source = @improveHistoryValue(originalOptions.source, responseURL)
+      options.source = @improveHistoryValue(options.source, responseURL)
     else
       # Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      options.source = @improveHistoryValue(originalOptions.source, 'keep')
+      options.source = @improveHistoryValue(options.source, 'keep')
       # Since the current URL is not retrievable over the GET-only address bar,
       # we can only provide history if a location URL is passed as an option.
-      options.history = !!originalOptions.location
+      options.history = !!options.location
 
-    options.location = @improveHistoryValue(originalOptions.location, locationFromExchange)
-    options.title = @improveHistoryValue(originalOptions.title, response.title)
+    options.location = @improveHistoryValue(options.location, locationFromExchange)
+    options.title = @improveHistoryValue(options.title, response.title)
     options.acceptLayer = response.acceptLayer
     options.dismissLayer = response.dismissLayer
     options.eventPlans = response.eventPlans

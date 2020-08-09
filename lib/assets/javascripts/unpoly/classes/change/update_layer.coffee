@@ -11,6 +11,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @origin = options.origin
+    @layerScanner = options.layerScanner
     @placement = options.placement
 
   requestAttributes: ->
@@ -37,15 +38,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @matchPostflight()
 
     up.puts('up.render()', "Updating \"#{@target}\" in #{@layer}")
-
-    # Only when we have a match in the required selectors, we
-    # append the optional steps for [up-hungry] elements.
-    if @options.hungry
-      @addHungrySteps()
-
-    # Remove steps when their oldElement is nested inside the oldElement
-    # of another step.
-    @resolveOldNesting()
 
     # Make sure only the first step will have scroll-related options.
     @setScrollAndFocusOptions()
@@ -228,7 +220,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
       selector = @layerScanner.fixSelector(expressionParts[1])
       placement = expressionParts[2] || @placement || 'swap'
 
-      alternatives = @layerScanner.scan(selector)
+      alternatives = @layerScanner.selectAlternatives(selector)
+
+      console.log("alternatives for %o are %o", selector, alternatives)
 
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
@@ -236,7 +230,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
         placement = 'swap'
 
         for alternative in alternatives
-          alternative.oldElement = @layer.getFirstContentChildElement()
+          alternative.oldElement = @layer.getFirstSwappableElement()
 
       unless alternatives.length
         throw @notApplicable()
@@ -247,8 +241,12 @@ class up.Change.UpdateLayer extends up.Change.Addition
   matchPreflight: ->
     return if @matchedPreflight
 
+    console.log("matchPreflight()")
+
     # Since parsing steps involves many DOM lookups, we only do it when required.
     @parseSteps()
+
+    console.log("Steps are %o", @steps)
 
     for step in @steps
       if firstAlternative = step.alternatives[0]
@@ -259,6 +257,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
         u.assign(step, firstAlternative)
       else
         throw @notApplicable()
+
+    # Remove steps when their oldElement is nested inside the oldElement
+    # of another step.
+    @resolveOldNesting()
 
     @matchedPreflight = true
 
@@ -286,6 +288,15 @@ class up.Change.UpdateLayer extends up.Change.Addition
       else
         throw @notApplicable()
 
+    # Only when we have a match in the required selectors, we
+    # append the optional steps for [up-hungry] elements.
+    if @options.hungry
+      @addHungrySteps()
+
+    # Remove steps when their oldElement is nested inside the oldElement
+    # of another step.
+    @resolveOldNesting()
+
     @matchedPostflight = true
 
   addHungrySteps: ->
@@ -305,8 +316,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   resolveOldNesting: ->
     compressed = u.uniqBy(@steps, 'oldElement')
-    console.log("--- compressed from resolveOldNesting: %o", u.copy(@steps))
-    debugger
     compressed = u.reject compressed, (step) => @containedByRivalStep(compressed, step)
     @steps = compressed
 

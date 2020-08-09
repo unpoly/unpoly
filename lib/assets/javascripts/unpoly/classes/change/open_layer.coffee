@@ -5,6 +5,7 @@ u = up.util
 class up.Change.OpenLayer extends up.Change.Addition
 
   constructor: (options) ->
+    console.log("OpenLayer with opts %o", options)
     super(options)
     @target = options.target
     @mode = options.mode
@@ -34,7 +35,12 @@ class up.Change.OpenLayer extends up.Change.Addition
   getAlternatives: ->
     unless @alternatives
       @alternatives = []
+
+      console.log("OpenLayer: target is %o", @target)
+
       if @target.indexOf(':main') >= 0
+        console.log("OpenLayer: main selectors are %o", up.layer.defaultTargets(@mode))
+
         for mainSelector in up.layer.defaultTargets(@mode)
           @alternatives.push(@target.replace(/\:main\b/, mainSelector))
       else

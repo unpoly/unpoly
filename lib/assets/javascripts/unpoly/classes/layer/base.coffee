@@ -88,8 +88,8 @@ class up.Layer extends up.Record
   getBoxElement: ->
     @boxElement || @element
 
-  getFirstContentChildElement: ->
-    @getContentElement().children[0]
+  getFirstSwappableElement: ->
+    throw up.error.notImplemented()
 
   contains: (element) =>
     # Test that the closest parent is the element and not another layer.
@@ -225,4 +225,4 @@ class up.Layer extends up.Record
     "#{@mode} layer"
 
   affix: (args...) ->
-    e.affix(@getContentElement(), args...)
+    e.affix(@getFirstSwappableElement(), args...)

@@ -31,8 +31,11 @@ class up.Layer.Root extends up.Layer
     #    will yield a result.
     return e.root
 
-  @getter 'contentElement', ->
-    # This is used in Layer#affix()
+#  @getter 'contentElement', ->
+#    # This is used in Layer#affix()
+#    document.body
+
+  getFirstSwappableElement: ->
     document.body
 
   @selector: ->

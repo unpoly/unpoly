@@ -1,3 +1,6 @@
+u = up.util
+e = up.element
+
 class up.LayerScanner
 
   constructor: (options) ->
@@ -16,7 +19,7 @@ class up.LayerScanner
       
     return selector
 
-  scan: (selector) ->
+  selectAlternatives: (selector) ->
     if alternatives = @alternativesBySelector[selector]
       return alternatives
 
@@ -71,27 +74,30 @@ class up.LayerScanner
 
         # Now we check if any zone around the element would match.
         for zone in @getOriginZones()
+          console.log("calling subtree(%o, %o)", zone, selector)
           if matchInZone = up.fragment.subtree(zone, selector)[0]
             alternatives.push({
               oldElement: matchInZone,
               selector: e.toSelector(matchInZone)
             })
-      else if firstMatchInLayer = up.fragment.get(selector, @options)
+
+      # The topmost element is not a zone!
+      if firstMatchInLayer = up.fragment.get(selector, { @layer })
         alternatives.push({
           oldElement: firstMatchInLayer,
           selector: e.toSelector(firstMatchInLayer)
         })
 
-  if @layer.isOverlay()
-    alternatives = u.reject(alternatives, up.fragment.targetsBody)
-    
-  @alternativesBySelector[selector] = alternatives
+    if @layer.isOverlay()
+      alternatives = u.reject(alternatives, up.fragment.targetsBody)
 
-  return alternatives
+    @alternativesBySelector[selector] = alternatives
+
+    return alternatives
 
   isOriginLayerUpdate: ->
     # originLayer was set by up.Change.FromContent.
-    return @layer == @options.originLayer
+    return @layer == @originLayer
 
   getLayerMains: ->
     unless @layerMains
@@ -99,16 +105,13 @@ class up.LayerScanner
 
       if @origin
         # If we have an origin we can try closer mains first.
-        mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelectors)
+        mainElements = up.fragment.ancestorsWithSelf(@origin, mainSelectors.join(','))
       else
         # If we don't have an origin we select all mains in the configured order.
         # Note that if we would run a single select on mainSelectors.join(','),
         # the main closest to the root would be matched first. We wouldn't want this
         # if the user has configured e.g. ['.content', 'body'].
-        mainElements = u.flatMap mainSelectors, (mainSelector) => up.fragment.all(mainSelector, @options)
-
-      # We always consider the content element's first child to be a "main".
-      mainElements.push(@layer.getFirstContentChildElement())
+        mainElements = u.flatMap mainSelectors, (mainSelector) => up.fragment.all(mainSelector, { @layer })
 
       @layerMains = u.uniq(mainElements)
 

@@ -35,7 +35,7 @@ class up.ResponseDoc
     # Parsing { inner } is the last option we try. It should always succeed in case someone
     # tries `up.layer.open()` without any args. Hence we set the innerHTML to an empty string.
     content = options.content || ''
-    target = options.target || options.defaultTarget || up.fail("must pass a { target } when passing { content }")
+    target = options.target || up.fail("must pass a { target } when passing { content }")
 
     # Conjure an element that will later match options.target in @select()
     matchingElement = e.createFromSelector(target)
