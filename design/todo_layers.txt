@@ -16,10 +16,14 @@ TODO for [up-zone]
   - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
     , but there was some cyclical flow (I think the ResponseDoc was missing from plans?)
     when I last tried that.
+- up-zone=name should produce a selector
+- up.element.config.ignoreClassesForSelector
+- Either implement overlay revivification OR remove support for { placement: 'root' }
 
 Other TODOs
 ----------
 
+- rename Options like up.viewport.config.viewports to up.viewport.config.viewportSelectors etc.
 - Why does protect_jasmine_runner create a default-fallback as a new child of overlay#contentElement? In real use #contentElement will only have a singel child!
 - Allow to refer to ":self" instead of "&"
   - We can document this

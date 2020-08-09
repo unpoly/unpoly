@@ -634,15 +634,12 @@ up.element = do ->
 
     if isSingleton(element)
       selector = elementTagName(element)
-    else if upId = element.getAttribute("up-id")
-      selector = attributeSelector('up-id', upId)
-    else if id = element.getAttribute("id")
-      if id.match(/^[a-z0-9\-_]+$/i)
-        selector = "##{id}"
-      else
-        selector = attributeSelector('id', id)
+    else if upID = element.getAttribute("up-id")
+      selector = attributeSelector('up-id', upID)
+    else if id = element.id
+      selector = idSelector(id)
     else if name = element.getAttribute("name")
-      selector = elementTagName(element) + attributeSelector('name', name)
+      selector = attributeSelector('name', name)
     else if firstClass = nonUpClasses(element)[0]
       selector = ".#{firstClass}"
     else if ariaLabel = element.getAttribute("aria-label")
@@ -650,6 +647,27 @@ up.element = do ->
     else
       selector = elementTagName(element)
 
+    return selector
+
+  idSelector = (id) ->
+    if id.match(/^[a-z0-9\-_]+$/i)
+      return "##{id}"
+    else
+      return attributeSelector('id', id)
+
+  improveSelector = (selector, element) ->
+    # TODO: DRY up improveSelector() and toSelector()
+    if selector.indexOf(' ') == -1 # don't try to understand a complicated selector
+      if selector.indexOf('[up-id=') == -1 && (upID = element.getAttribute('up-id'))
+        selector += attributeSelector('up-id', upID)
+      else if selector.indexOf('#') == -1 && (id = element.id)
+        selector += idSelector(id)
+      else if selector.indexOf('.') == -1 && (firstClass = nonUpClasses(element)[0])
+        selector += ".#{firstClass}"
+      else if selector.indexOf('[name=') == -1 && (name = element.getAttribute('name'))
+        selector += attributeSelector('name', name)
+      else if selector.indexOf('[aria-label=') == -1 && (ariaLabel = element.getAttribute('aria-label'))
+        selector += attributeSelector('aria-label', ariaLabel)
     return selector
 
   ###**

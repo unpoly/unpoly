@@ -651,18 +651,6 @@ up.fragment = do ->
     if match && (up.layer.get(match) == up.layer.get(element)) && !isDestroying(match)
       return match
 
-  ancestorsWithSelf = (element, selector) ->
-    matches = []
-
-    unless isDestroying(element)
-      if e.matches(element, selector)
-        matches.push(element)
-
-      if !e.matches(element, up.layer.anySelector()) && (parent = element.parentElement)
-        matches.push(ancestorsWithSelf(parent, selector)...)
-
-    return matches
-
   ###**
   Destroys the given element or selector.
 
@@ -827,7 +815,6 @@ up.fragment = do ->
     all: getAll
     subtree: getSubtree
     closest: closest
-    ancestorsWithSelf: ancestorsWithSelf
     source: source
     setSource: setSource
     hello: hello
