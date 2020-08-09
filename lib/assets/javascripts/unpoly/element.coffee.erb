@@ -630,45 +630,36 @@ up.element = do ->
     # resolveSelector() might be called with jQuery collections
     element = getOne(element)
 
-    selector = undefined
+    unless isSingleton(element)
+      selector = improveSelector('', element)
 
-    if isSingleton(element)
-      selector = elementTagName(element)
-    else if upID = element.getAttribute("up-id")
-      selector = attributeSelector('up-id', upID)
-    else if id = element.id
-      selector = idSelector(id)
-    else if name = element.getAttribute("name")
-      selector = attributeSelector('name', name)
-    else if firstClass = nonUpClasses(element)[0]
-      selector = ".#{firstClass}"
-    else if ariaLabel = element.getAttribute("aria-label")
-      selector = attributeSelector('aria-label', ariaLabel)
-    else
-      selector = elementTagName(element)
+    return selector || elementTagName(element)
 
-    return selector
+  attributeImprover = (attr) ->
+    return {
+      presence: new RegExp('\\[' + attr + '=')
+      attempt: (element) ->
+        if value = element.getAttribute(attr)
+          return attributeSelector(attr, value)
+    }
 
-  idSelector = (id) ->
-    if id.match(/^[a-z0-9\-_]+$/i)
-      return "##{id}"
-    else
-      return attributeSelector('id', id)
+  SELECTOR_IMPROVERS = [
+    attributeImprover('up-id'),
+    attributeImprover('up-zone'),
+    { presence: /\#|\[id=/, attempt: idSelector }
+    { presence: /\./, attempt: bestClassSelector }
+    attributeImprover('name'),
+    attributeImprover('aria-label')
+  ]
 
   improveSelector = (selector, element) ->
-    # TODO: DRY up improveSelector() and toSelector()
-    if selector.indexOf(' ') == -1 # don't try to understand a complicated selector
-      if selector.indexOf('[up-id=') == -1 && (upID = element.getAttribute('up-id'))
-        selector += attributeSelector('up-id', upID)
-      else if selector.indexOf('#') == -1 && (id = element.id)
-        selector += idSelector(id)
-      else if selector.indexOf('.') == -1 && (firstClass = nonUpClasses(element)[0])
-        selector += ".#{firstClass}"
-      else if selector.indexOf('[name=') == -1 && (name = element.getAttribute('name'))
-        selector += attributeSelector('name', name)
-      else if selector.indexOf('[aria-label=') == -1 && (ariaLabel = element.getAttribute('aria-label'))
-        selector += attributeSelector('aria-label', ariaLabel)
+    if !u.contains(selector, ' ') && !isSingletonSelector(selector) && (improvement = findSelectorImprovement(selector, element))
+      selector += improvement
     return selector
+
+  findSelectorImprovement = (selector, element) ->
+    u.detect SELECTOR_IMPROVERS, (improver) ->
+      return (!selector || !improver.presence.test(selector)) && improver.attempt(element)
 
   ###**
   Sets an unique identifier for this element.
@@ -706,12 +697,19 @@ up.element = do ->
   @stable
   ###
 
+  # TODO: Do we really need to test for anything except BODY here?
+  SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
+  SINGLETON_PATTERN = new RegExp('\\b(' + SINGLETON_TAG_NAMES.join('|') + ')\\b', 'i')
+
   ###**
   @function up.element.isSingleton
   @internal
   ###
   isSingleton = (element) ->
-    matches(element, 'html, body, head, title')
+    return matches(element, SINGLETON_TAG_NAMES.join(','))
+
+  isSingletonSelector = (selector) ->
+    return SINGLETON_PATTERN.test(selector)
 
   elementTagName = (element) ->
     element.tagName.toLowerCase()
@@ -726,6 +724,16 @@ up.element = do ->
 
   trueAttributeSelector = (attribute) ->
     "[#{attribute}]:not([#{attribute}=false])"
+
+  idSelector = (id) ->
+    if id.match(/^[a-z0-9\-_]+$/i)
+      return "##{id}"
+    else
+      return attributeSelector('id', id)
+
+  bestClassSelector = (element) ->
+    if bestClass = nonUpClasses(element)[0]
+      return ".#{bestClass}"
 
   nonUpClasses = (element) ->
     classString = element.className

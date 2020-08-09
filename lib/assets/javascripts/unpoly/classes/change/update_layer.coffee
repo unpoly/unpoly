@@ -221,21 +221,21 @@ class up.Change.UpdateLayer extends up.Change.Addition
       selector = expressionParts[1]
       placement = expressionParts[2] || @placement || 'swap'
 
-      alternatives = @layerScanner.selectAlternatives(selector)
+      solutions = @layerScanner.selectSolutions(selector)
 
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
         # the first child of the current layer's' root element.
         placement = 'swap'
 
-        for alternative in alternatives
-          alternative.oldElement = @layer.getFirstSwappableElement()
+        for solution in solutions
+          solution.element = @layer.getFirstSwappableElement()
 
-      unless alternatives.length
+      unless solutions.length
         throw @notApplicable()
 
       # Each step inherits all options of this change.
-      return u.merge(@options, { alternatives, placement })
+      return u.merge(@options, { solutions, placement })
 
   matchPreflight: ->
     return if @matchedPreflight
@@ -244,12 +244,11 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @parseSteps()
 
     for step in @steps
-      if firstAlternative = step.alternatives[0]
-        # Copy { selector, oldElement } from the first alternative to the step.
+      if firstSolution = step.solutions[0]
         # We might not swap this element. Once the response is received, @matchPostflight()
         # will go through all alternatives and see which selector matches in *both*
         # the current page and response doc.
-        u.assign(step, firstAlternative)
+        @useSolution(step, firstSolution)
       else
         throw @notApplicable()
 
@@ -259,6 +258,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     @matchedPreflight = true
 
+  useSolution: (step, solution) ->
+    step.oldElement = solution.element
+    step.selector = solution.selector
+
   matchPostflight: ->
     return if @matchedPostflight
 
@@ -266,20 +269,19 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @parseSteps()
 
     for step in @steps
-      bestAlternative = u.find step.alternatives, (alternative) =>
+      bestSolution = u.find step.solutions, (solution) =>
         # If an element was removed while the request was in flight, this alternative
         # is no longer relevant.
-        if e.isDetached(alternative.oldElement)
+        if e.isDetached(solution.oldElement)
           return false
 
         # The responseDoc has no layers, so we can just select on the entire tree.
-        if alternative.newElement = @responseDoc.select(alternative.selector)
+        if step.newElement = @responseDoc.select(solution.selector)
           return true
 
-      if bestAlternative
-        # Copy { selector, oldElement, newElement } from the best alternatives to the step.
-        # We will no longer look at alternatives after that.
-        u.assign(step, bestAlternative)
+      if bestSolution
+        # We will no longer look at other solutions.
+        @useSolution(step, bestSolution)
       else
         throw @notApplicable()
 

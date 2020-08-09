@@ -1,13 +1,20 @@
 u = up.util
 e = up.element
 
+class TargetSolution extends up.Class
+  
+  constructor: (@originalSelector, @element) ->
 
-class TargetSolution
-  
-  constructor: (@selector, @element) ->
-  
-  improve: ->
-    return new @constructor(e.improveSelector(@selector), @element)
+  within: (parentSolution) ->
+    { element: @element
+      selector: parentSolution.selector + ' ' + @selector
+    }
+
+  isDetached: ->
+    e.isDetached(@element)
+
+  @getter 'selector', ->
+    return @improvedSelector ||= e.improveSelector(@originalSelector, @element)
 
 class up.LayerScanner
 
@@ -29,77 +36,60 @@ class up.LayerScanner
       
     return selector
 
-  selectAlternatives: (selector) ->
+  selectSolutions: (selector) ->
     if solutions = @solutionsBySelector[selector]
       return solutions
 
-    solutions = []
-
     if selector == ':main'
-      for main in @getLayerMains()
-        solutions.push(
-          oldElement: main.element,
-          selector: e.improveSelector(main.selector, main.element) # TODO: improveSelector
-        )
+      solutions = @getLayerMains()
+
     else if selector == ':zone'
       if zone = @getOriginZone()
-        solutions.push({
-          oldElement: zone.element,
-          selector: e.improveSelector(zone.selector, main.element)
-        })
+        solutions = [zone]
 
     else if match = selector.match(/^\:zone (.+)$/)
       zoneDescendantSelector = match[1]
-      if (zone = @originZone()) && (zoneDescendantMatch = up.fragment.get(zone.element, zoneDescendantSelector))
-        solutions.push({
-          oldElement: zoneDescendantMatch,
-          # In this branch the user wants the zone to be part of the selector.
-          selector: e.improveSelector(zone.selector, zone.element) + ' ' + e.improveSelector(zoneDescendantMatch, zoneDescendantSelector)
-        })
+      if (zoneSolution = @originZone()) && (zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector))
+        descendantSolution = new TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
+        # In this branch the user wants the zone to be part of the selector.
+        solutions = [descendantSolution.within(zoneSolution)]
 
     else if selector == ':closest-zone'
-      for zone in @getOriginZones()
-        solutions.push({
-          oldElement: zone.element,
-          selector: e.improveSelector(zone.selector, zone.element)
-        })
+      solutions = @getOriginZones()
 
     else if match = selector.match(/^\:closest-zone (.+)$/)
-      for zone in @getOriginZones()
-        if zoneDescendantMatch = up.fragment.get(zone.element, zoneDescendantSelector)
-          solutions.push({
-            oldElement: zoneDescendantMatch,
-            # In this branch the user wants the zone to be part of the selector.
-            selector: e.improveSelector(zone.selector, zone.element) + ' ' + e.improveSelector(zoneDescendantSelector, zoneDescendantMatch)
-          })
+      for zoneSolution in @getOriginZones()
+        if zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector)
+          descendantSolution = new TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
+          # In this branch the user wants the zone to be part of the selector.
+          solutions = [descendantSolution.within(zoneSolution)]
+
     else
       # Now we have a regular selector like ".foo"
+
+      solutions = []
 
       if @isOriginLayerUpdate()
         # If we have an @origin we can be smarter about finding oldElement.
         # First, we check if @origin itself or one of its ancestors would match.
         if closestMatchInLayer = up.fragment.closest(@origin, selector)
-          solutions.push({
-            oldElement: closestMatchInLayer,
-            selector: e.improveSelector(selector, closestMatchInLayer)
-          })
+          solutions.push(new TargetSolution(selector, closestMatchInLayer))
 
         # Now we check if any zone around the element would match.
         for zone in @getOriginZones()
           if matchInZone = up.fragment.subtree(zone.element, selector)[0]
-            solutions.push({
-              oldElement: matchInZone,
-              selector: e.improveSelector(selector, matchInZone)
-            })
+            solutions.push(new TargetSolution(selector, matchInZone))
 
       if firstMatchInLayer = up.fragment.get(selector, { @layer })
+        solutions.push(new TargetSolution(selector, firstMatchInLayer))
+
         solutions.push({
           oldElement: firstMatchInLayer,
           selector: e.improveSelector(selector, firstMatchInLayer)
         })
 
     if @layer.isOverlay()
-      solutions = u.reject solutions, (alternative) -> up.fragment.targetsBody(alternative.oldElement)
+      solutions = u.reject solutions, (solution) -> up.fragment.targetsBody(solution.element)
 
     @solutionsBySelector[selector] = solutions
 
@@ -119,7 +109,7 @@ class up.LayerScanner
         # the main closest to the root would be matched first. We wouldn't want this
         # if the user has configured e.g. ['.content', 'body'].
         if element = up.fragment.get(selector, { @layer })
-          @layerMains.push({ selector, element })
+          @layerMains.push(new TargetSolution(selector, element))
 
     return @layerMains
 
@@ -130,17 +120,17 @@ class up.LayerScanner
     if @origin && !@originZones
       @originZones = @getClosestOriginZones(@origin)
       @originZones.push(@getLayerMains()...)
-      @originZones = u.uniqBy(@originZones, 'element')
+      # @originZones = u.uniqBy(@originZones, 'element')
 
     return @originZones
 
   getClosestOriginZones: (element) ->
-    zones = []
+    solutions = []
 
     if selector = u.find(up.fragment.config.zones, (s) -> e.matches(element, s))
-      zones.push({ element, selector })
+      solutions.push(new TargetSolution(selector, element))
 
     if !e.matches(element, up.layer.anySelector()) && (parent = element.parentElement)
-      zones.push(@getClosestOriginZones(parent)...)
+      solutions.push(@getClosestOriginZones(parent)...)
 
-    return zones
+    return solutions

@@ -19,6 +19,7 @@ TODO for [up-zone]
 - up-zone=name should produce a selector
 - up.element.config.ignoreClassesForSelector
 - Either implement overlay revivification OR remove support for { placement: 'root' }
+- Only in overlays the first swappable element should be a main
 
 Other TODOs
 ----------
