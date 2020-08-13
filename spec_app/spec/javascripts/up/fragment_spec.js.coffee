@@ -152,7 +152,7 @@ describe 'up.fragment', ->
 
       describe 'with { url } option', ->
 
-        it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
+        it 'replaces the given selector with the same selector from a freshly fetched page xxx', asyncSpec (next) ->
           fixture('.before', text: 'old-before')
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')

@@ -894,7 +894,7 @@ up.fragment = do ->
   ]
 
   isImprovableTarget = (selector) ->
-    return !/[ >]/.test(selector) && !e.isSingletonSelector(selector)
+    return !/[ >\:]/.test(selector) && !e.isSingletonSelector(selector)
 
   improveTarget = (selector, element) ->
     if isImprovableTarget(selector)

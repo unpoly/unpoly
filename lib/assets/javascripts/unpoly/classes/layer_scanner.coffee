@@ -1,21 +1,6 @@
 u = up.util
 e = up.element
 
-class TargetSolution extends up.Class
-  
-  constructor: (@originalSelector, @element) ->
-
-  within: (parentSolution) ->
-    { element: @element
-      selector: parentSolution.selector + ' ' + @selector
-    }
-
-  isDetached: ->
-    e.isDetached(@element)
-
-  @getter 'selector', ->
-    return @improvedSelector ||= up.fragment.improveTarget(@originalSelector, @element)
-
 class up.LayerScanner
 
   constructor: (options) ->
@@ -50,7 +35,7 @@ class up.LayerScanner
     else if match = selector.match(/^\:zone (.+)$/)
       zoneDescendantSelector = match[1]
       if (zoneSolution = @originZone()) && (zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector))
-        descendantSolution = new TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
+        descendantSolution = new up.TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
         # In this branch the user wants the zone to be part of the selector.
         solutions = [descendantSolution.within(zoneSolution)]
 
@@ -60,7 +45,7 @@ class up.LayerScanner
     else if match = selector.match(/^\:closest-zone (.+)$/)
       for zoneSolution in @getOriginZones()
         if zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector)
-          descendantSolution = new TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
+          descendantSolution = new up.TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
           # In this branch the user wants the zone to be part of the selector.
           solutions = [descendantSolution.within(zoneSolution)]
 
@@ -73,15 +58,15 @@ class up.LayerScanner
         # If we have an @origin we can be smarter about finding oldElement.
         # First, we check if @origin itself or one of its ancestors would match.
         if closestMatchInLayer = up.fragment.closest(@origin, selector)
-          solutions.push(new TargetSolution(selector, closestMatchInLayer))
+          solutions.push(new up.TargetSolution(selector, closestMatchInLayer))
 
         # Now we check if any zone around the element would match.
         for zone in @getOriginZones()
           if matchInZone = up.fragment.subtree(zone.element, selector)[0]
-            solutions.push(new TargetSolution(selector, matchInZone))
+            solutions.push(new up.TargetSolution(selector, matchInZone))
 
       if firstMatchInLayer = up.fragment.get(selector, { @layer })
-        solutions.push(new TargetSolution(selector, firstMatchInLayer))
+        solutions.push(new up.TargetSolution(selector, firstMatchInLayer))
 
         solutions.push({
           oldElement: firstMatchInLayer,
@@ -110,7 +95,7 @@ class up.LayerScanner
         # the main closest to the root would be matched first. We wouldn't want this
         # if the user has configured e.g. ['.content', 'body'].
         if element = up.fragment.get(selector, { @layer })
-          @layerMains.push(new TargetSolution(selector, element))
+          @layerMains.push(new up.TargetSolution(selector, element))
 
     return @layerMains
 
@@ -129,7 +114,7 @@ class up.LayerScanner
     solutions = []
 
     if selector = u.find(up.fragment.config.zones, (s) -> e.matches(element, s))
-      solutions.push(new TargetSolution(selector, element))
+      solutions.push(new up.TargetSolution(selector, element))
 
     if !e.matches(element, up.layer.anySelector()) && (parent = element.parentElement)
       solutions.push(@getClosestOriginZones(parent)...)

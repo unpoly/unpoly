@@ -248,6 +248,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
         # We might not swap this element. Once the response is received, @matchPostflight()
         # will go through all alternatives and see which selector matches in *both*
         # the current page and response doc.
+        console.log("Calling useSolution() from matchPreflight")
         @useSolution(step, firstSolution)
       else
         throw @notApplicable()
@@ -259,6 +260,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @matchedPreflight = true
 
   useSolution: (step, solution) ->
+    console.log("useSolution(%o, %o)", u.copy(step), u.copy(solution))
     step.oldElement = solution.element
     step.selector = solution.selector
 
@@ -269,10 +271,13 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @parseSteps()
 
     for step in @steps
+
+      console.log("step.solutions is %o", u.copy(step.solutions))
+
       bestSolution = u.find step.solutions, (solution) =>
         # If an element was removed while the request was in flight, this alternative
         # is no longer relevant.
-        if e.isDetached(solution.oldElement)
+        if e.isDetached(solution.element)
           return false
 
         # The responseDoc has no layers, so we can just select on the entire tree.
@@ -281,6 +286,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
       if bestSolution
         # We will no longer look at other solutions.
+        console.log("Calling useSolution() from matchPostflight")
         @useSolution(step, bestSolution)
       else
         throw @notApplicable()
@@ -318,6 +324,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   setScrollAndFocusOptions: ->
     @steps.forEach (step, i) =>
+      console.log("setScrollAndFocusOptions for step %o", step)
+
       # Since up.motion will call @handleScrollAndFocus() after each fragment,
       # make sure that we only touch the scroll position once, for the first step.
       if i > 0
