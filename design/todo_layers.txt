@@ -20,6 +20,17 @@ TODO for [up-zone]
 - up.element.config.ignoreClassesForSelector
 - Either implement overlay revivification OR remove support for { placement: 'root' }
 - Only in overlays the first swappable element should be a main
+- Tests!
+  - Zones are preferred lookups
+  - Targets are improved
+  - Zones are mains ("default targets")
+  - Users can target :zone
+  - Users can target :closest-zone
+  - Users can target :zone .foo
+  - Users can target :closest-zone .foo
+  - Users can target :main when updating layers
+  - Users can target :main when opening layers
+
 
 Other TODOs
 ----------
