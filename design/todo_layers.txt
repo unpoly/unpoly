@@ -30,6 +30,7 @@ TODO for [up-zone]
   - Users can target :closest-zone .foo
   - Users can target :main when updating layers
   - Users can target :main when opening layers
+- Rename config.xxx.targets to config.xxx.mains, or mainSelectors
 
 
 Other TODOs
