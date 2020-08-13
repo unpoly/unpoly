@@ -17,7 +17,7 @@ up.history = do ->
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
-  @param {Array} [config.popTargets=[]]
+  @param {Array} [config.restoreTargets=[]]
     A list of possible CSS selectors to [replace](/up.render) when the user goes back in history.
 
     If this array is empty, the [root layer's default targets](/up.layer.config.root) will be replaced.

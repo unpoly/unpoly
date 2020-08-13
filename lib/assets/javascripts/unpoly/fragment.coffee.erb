@@ -899,7 +899,7 @@ up.fragment = do ->
   improveTarget = (selector, element) ->
     if isImprovableTarget(selector)
       for improver in TARGET_IMPROVERS
-        if improver.presence.test(selector)
+        if selector && improver.presence.test(selector)
           # If the best improver is already present in the selector,
           # don't improve further.
           return selector
