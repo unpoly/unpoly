@@ -243,19 +243,23 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Since parsing steps involves many DOM lookups, we only do it when required.
     @parseSteps()
 
-    for step in @steps
-      if firstSolution = step.solutions[0]
-        # We might not swap this element. Once the response is received, @matchPostflight()
-        # will go through all alternatives and see which selector matches in *both*
-        # the current page and response doc.
-        console.log("Calling useSolution() from matchPreflight")
-        @useSolution(step, firstSolution)
-      else
-        throw @notApplicable()
+    originalSteps = @steps
+    @steps = []
 
-    # Remove steps when their oldElement is nested inside the oldElement
-    # of another step.
-    @resolveOldNesting()
+    for step in originalSteps
+      unless @isSwappedByEarlierStep(step)
+        if firstSolution = step.solutions[0]
+          # We might not swap this element. Once the response is received, @matchPostflight()
+          # will go through all alternatives and see which selector matches in *both*
+          # the current page and response doc.
+          console.log("Calling useSolution() from matchPreflight")
+          @useSolution(step, firstSolution)
+        else
+          throw @notApplicable()
+
+#    # Remove steps when their oldElement is nested inside the oldElement
+#    # of another step.
+#    @resolveOldNesting()
 
     @matchedPreflight = true
 
@@ -263,6 +267,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     console.log("useSolution(%o, %o)", u.copy(step), u.copy(solution))
     step.oldElement = solution.element
     step.selector = solution.selector
+    @steps.push(step)
 
   matchPostflight: ->
     return if @matchedPostflight
@@ -270,26 +275,27 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Since parsing steps involves many DOM lookups, we only do it when required.
     @parseSteps()
 
-    for step in @steps
+    originalSteps = @steps
+    @steps = []
 
-      console.log("step.solutions is %o", u.copy(step.solutions))
+    for step in originalSteps
+      unless @isSwappedByEarlierStep(step)
+        bestSolution = u.find step.solutions, (solution) =>
+          # If an element was removed while the request was in flight, this alternative
+          # is no longer relevant.
+          if e.isDetached(solution.element)
+            return false
 
-      bestSolution = u.find step.solutions, (solution) =>
-        # If an element was removed while the request was in flight, this alternative
-        # is no longer relevant.
-        if e.isDetached(solution.element)
-          return false
+          # The responseDoc has no layers, so we can just select on the entire tree.
+          if step.newElement = @responseDoc.select(solution.selector)
+            return true
 
-        # The responseDoc has no layers, so we can just select on the entire tree.
-        if step.newElement = @responseDoc.select(solution.selector)
-          return true
-
-      if bestSolution
-        # We will no longer look at other solutions.
-        console.log("Calling useSolution() from matchPostflight")
-        @useSolution(step, bestSolution)
-      else
-        throw @notApplicable()
+        if bestSolution
+          # We will no longer look at other solutions.
+          console.log("Calling useSolution() from matchPostflight")
+          @useSolution(step, bestSolution)
+        else
+          throw @notApplicable()
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
@@ -298,13 +304,22 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     console.log("--- targets before collapse: %o", u.map(@steps, 'selector'))
 
-    # Remove steps when their oldElement is nested inside the oldElement
-    # of another step.
-    @resolveOldNesting()
+#    # Remove steps when their oldElement is nested inside the oldElement
+#    # of another step.
+#    @resolveOldNesting()
 
     console.log("--- targets after collapse: %o", u.map(@steps, 'selector'))
 
     @matchedPostflight = true
+
+  isSwappedByEarlierStep: (testedStep) ->
+    return u.all testedStep.solutions, (testedStepSolution) =>
+      return u.some @steps, (existingStep) ->
+        willRemoveOldElement = (existingStep.placement == 'swap' || existingStep.placement == 'root')
+        if willRemoveOldElement
+          return existingStep.oldElement.contains(testedStepSolution.element)
+        else
+          return existingStep.oldElement == testedStepSolution.element
 
   addHungrySteps: ->
     # Find all [up-hungry] fragments within @layer
@@ -313,18 +328,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
     for oldElement in hungries
       selector = up.fragment.toTarget(oldElement)
       if newElement = @responseDoc.select(selector)
-        @steps.push({ selector, oldElement, newElement, transition, placement: 'swap' })
-
-  containedByRivalStep: (steps, candidateStep) ->
-    return u.some steps, (rivalStep) ->
-      rivalStep != candidateStep &&
-        rivalStep.placement == 'swap' &&
-        rivalStep.oldElement.contains(candidateStep.oldElement)
-
-  resolveOldNesting: ->
-    compressed = u.uniqBy(@steps, 'oldElement')
-    compressed = u.reject compressed, (step) => @containedByRivalStep(compressed, step)
-    @steps = compressed
+        step = { selector, oldElement, newElement, transition, placement: 'swap' }
+        unless @isSwappedByEarlierStep(step)
+          @steps.push()
 
   setScrollAndFocusOptions: ->
     @steps.forEach (step, i) =>

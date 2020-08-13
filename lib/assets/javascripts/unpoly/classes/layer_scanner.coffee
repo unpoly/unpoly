@@ -106,7 +106,6 @@ class up.LayerScanner
     if @origin && !@originZones
       @originZones = @getClosestOriginZones(@origin)
       @originZones.push(@getLayerMains()...)
-      # @originZones = u.uniqBy(@originZones, 'element')
 
     return @originZones
 

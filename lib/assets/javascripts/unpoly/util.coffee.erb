@@ -925,28 +925,28 @@ up.util = do ->
     return array if array.length < 2
     setToArray(arrayToSet(array))
 
-  ###**
-  This function is like [`uniq`](/up.util.uniq), accept that
-  the given function is invoked for each element to generate the value
-  for which uniquness is computed.
-
-  @function up.util.uniqBy
-  @param {Array} array
-  @param {Function(value): any} array
-  @return {Array}
-  @experimental
-  ###
-  uniqBy = (array, mapper) ->
-    return array if array.length < 2
-    mapper = iteratee(mapper)
-    set = new Set()
-    filterList array, (elem, index) ->
-      mapped = mapper(elem, index)
-      if set.has(mapped)
-        false
-      else
-        set.add(mapped)
-        true
+#  ###**
+#  This function is like [`uniq`](/up.util.uniq), accept that
+#  the given function is invoked for each element to generate the value
+#  for which uniquness is computed.
+#
+#  @function up.util.uniqBy
+#  @param {Array} array
+#  @param {Function(value): any} array
+#  @return {Array}
+#  @experimental
+#  ###
+#  uniqBy = (array, mapper) ->
+#    return array if array.length < 2
+#    mapper = iteratee(mapper)
+#    set = new Set()
+#    filterList array, (elem, index) ->
+#      mapped = mapper(elem, index)
+#      if set.has(mapped)
+#        false
+#      else
+#        set.add(mapped)
+#        true
 
   ###**
   @function up.util.setToArray
@@ -1785,7 +1785,7 @@ up.util = do ->
   compact: compact
   compactObject: compactObject
   uniq: uniq
-  uniqBy: uniqBy
+  # uniqBy: uniqBy
   last: last
   isNull: isNull
   isDefined: isDefined
