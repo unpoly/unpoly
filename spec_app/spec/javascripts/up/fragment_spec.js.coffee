@@ -683,6 +683,34 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
+          it 'replaces a single fragment if a selector is contained by a subsequent selector in the current page', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.render('.inner, .outer', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
+
           it 'does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', asyncSpec (next) ->
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
