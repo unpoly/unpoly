@@ -296,9 +296,13 @@ class up.Change.UpdateLayer extends up.Change.Addition
     if @options.hungry
       @addHungrySteps()
 
+    console.log("--- targets before collapse: %o", u.map(@steps, 'selector'))
+
     # Remove steps when their oldElement is nested inside the oldElement
     # of another step.
     @resolveOldNesting()
+
+    console.log("--- targets after collapse: %o", u.map(@steps, 'selector'))
 
     @matchedPostflight = true
 

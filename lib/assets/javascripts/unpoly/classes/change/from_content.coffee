@@ -122,8 +122,6 @@ class up.Change.FromContent extends up.Change
       if !@options.document && !@options.fragment
         docOptions.content ?= ''
         docOptions.target ?= @getPlans()[0]?.bestPreflightSelector()
-        #debugger
-        #console.log("Got { content }, auto-target is %o", docOptions.target)
 
       @responseDoc = new up.ResponseDoc(docOptions)
 
@@ -148,7 +146,7 @@ class up.Change.FromContent extends up.Change
       toastOpts = { action: { label: 'Open response', callback: @options.inspectResponse } }
 
     if @hasPlans()
-      up.fail(["Could not find matching targets in current page and server response (tried selectors %o)", @planTargets()], toastOpts)
+      up.fail(["Could not match targets in old and new content (tried selectors %o)", @planTargets()], toastOpts)
     else
       @failFromEmptyPlans(toastOpts)
 

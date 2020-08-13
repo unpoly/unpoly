@@ -69,7 +69,7 @@ class up.LayerScanner
         solutions.push(new up.TargetSolution(selector, firstMatchInLayer))
 
         solutions.push({
-          oldElement: firstMatchInLayer,
+          element: firstMatchInLayer,
           selector: up.fragment.improveTarget(selector, firstMatchInLayer)
         })
 

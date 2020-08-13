@@ -487,7 +487,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not find matching targets/i)
+              expect(result.value).toMatch(/Could not match targets/i)
               done()
 
       describe 'with { fragment } option', ->
@@ -522,7 +522,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not find matching targets/i)
+              expect(result.value).toMatch(/Could not match targets/i)
               done()
 
       describe 'choice of target', ->
@@ -543,7 +543,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not find matching targets/i)
+              expect(result.value).toMatch(/Could not match targets/i)
               done()
 
         it "ignores an element that matches the selector but also has a parent matching .up-destroying", (done) ->
@@ -555,7 +555,7 @@ describe 'up.fragment', ->
           u.task ->
             promiseState(promise).then (result) =>
               expect(result.state).toEqual('rejected')
-              expect(result.value).toMatch(/Could not find matching targets/i)
+              expect(result.value).toMatch(/Could not match targets/i)
               done()
 
         it 'only replaces the first element matching the selector', asyncSpec (next) ->
@@ -1074,7 +1074,7 @@ describe 'up.fragment', ->
               u.task =>
                 promiseState(promise).then (result) ->
                   expect(result.state).toEqual('rejected')
-                  expect(result.value).toBeError(/Could not find matching targets/i)
+                  expect(result.value).toBeError(/Could not match targets/i)
                   done()
 
           it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
@@ -1125,7 +1125,7 @@ describe 'up.fragment', ->
               """
 
               promise.catch (e) ->
-                expect(e).toBeError(/Could not find matching targets/i)
+                expect(e).toBeError(/Could not match targets/i)
                 done()
 
         describe 'when selectors are missing in the response', ->
@@ -1158,7 +1158,7 @@ describe 'up.fragment', ->
                 @respondWith '<div class="unexpected">new unexpected</div>'
 
               promise.catch (e) ->
-                expect(e).toBeError(/Could not find matching targets/i)
+                expect(e).toBeError(/Could not match targets/i)
                 done()
 
             it 'shows a link to open the unexpected response', (done) ->
@@ -1223,7 +1223,7 @@ describe 'up.fragment', ->
               @respondWith '<div class="fallback">new fallback</div>'
 
             promise.catch (e) ->
-              expect(e).toBeError(/Could not find matching targets/i)
+              expect(e).toBeError(/Could not match targets/i)
               done()
 
       describe 'choice of layer', ->
@@ -1712,23 +1712,23 @@ describe 'up.fragment', ->
 
         it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          spyOn(up.element, 'isSingleton').and.callFake (element) -> e.matches(element, '.container')
+          spyOn(up.element, 'isSingleton').and.callFake (element) -> e.matches(element, 'fake-body')
 
-          $fixture('.container').text('old text')
+          $fixture('fake-body').text('old text')
 
-          extractDone = jasmine.createSpy()
+          renderDone = jasmine.createSpy('render() done')
           promise = up.render(
-            fragment: '<div class="container">new text</div>',
+            fragment: '<fake-body>new text</fake-bofy>',
             transition: 'cross-fade',
             duration: 200
           )
-          promise.then(extractDone)
+          promise.then(renderDone)
 
           next =>
             # See that we've already immediately swapped the element and ignored the duration of 200ms
-            expect(extractDone).toHaveBeenCalled()
-            expect($('.container').length).toEqual(1)
-            expect($('.container')).toHaveOpacity(1.0)
+            expect(renderDone).toHaveBeenCalled()
+            expect($('fake-body').length).toEqual(1)
+            expect($('fake-body')).toHaveOpacity(1.0)
 
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
           $fixture('.element').text('version 1')
