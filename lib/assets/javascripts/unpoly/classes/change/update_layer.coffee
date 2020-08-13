@@ -246,22 +246,31 @@ class up.Change.UpdateLayer extends up.Change.Addition
     originalSteps = @steps
     @steps = []
 
-    for step in originalSteps
-      unless @isSwappedByEarlierStep(step)
-        if firstSolution = step.solutions[0]
-          # We might not swap this element. Once the response is received, @matchPostflight()
-          # will go through all alternatives and see which selector matches in *both*
-          # the current page and response doc.
-          console.log("Calling useSolution() from matchPreflight")
-          @useSolution(step, firstSolution)
-        else
-          throw @notApplicable()
+    for originalStep in originalSteps
+      solutions = originalStep.solutions
 
-#    # Remove steps when their oldElement is nested inside the oldElement
-#    # of another step.
-#    @resolveOldNesting()
+      # If we don't have any solutions for this step, this change cannot be applied.
+      unless solutions.length
+        throw @notApplicable()
+
+      remainingSolutions = @rejectSolutionsSwappedByEarlierSteps(originalStep.solutions)
+      if remainingSolutions.length
+        # We might not swap this element. Once the response is received, @matchPostflight()
+        # will go through all alternatives and see which selector matches in *both*
+        # the current page and response doc.
+        console.log("Calling useSolution() from matchPreflight")
+        @useSolution(originalStep, remainingSolutions[0])
+      else
+        # This step's oldElement was already changed by a previous step.
 
     @matchedPreflight = true
+
+  rejectSolutionsSwappedByEarlierSteps: (solutions) ->
+    return u.reject solutions, (solution) => @isElementSwappedByEarlierStep(solution.element)
+
+  isElementSwappedByEarlierStep: (element) ->
+    return u.some @steps, (step) ->
+      step.oldElement.contains(element)
 
   useSolution: (step, solution) ->
     console.log("useSolution(%o, %o)", u.copy(step), u.copy(solution))
@@ -279,13 +288,18 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @steps = []
 
     for step in originalSteps
-      unless @isSwappedByEarlierStep(step)
-        bestSolution = u.find step.solutions, (solution) =>
-          # If an element was removed while the request was in flight, this alternative
-          # is no longer relevant.
-          if e.isDetached(solution.element)
-            return false
+      # If a solution's element was removed while the request was in flight,
+      # this solution is no longer relevant. Another solution for the same step still might.
+      attachedSolutions = u.reject step.solutions, (solution) -> e.isDetached(solution.element)
 
+      # If we cannot find an attached match in the current page, this change is not applicable.
+      unless attachedSolutions.length
+        throw @notApplicable()
+
+      remainingSolutions = @rejectSolutionsSwappedByEarlierSteps(attachedSolutions)
+
+      if remainingSolutions.length
+        bestSolution = u.find remainingSolutions, (solution) =>
           # The responseDoc has no layers, so we can just select on the entire tree.
           if step.newElement = @responseDoc.select(solution.selector)
             return true
@@ -296,6 +310,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
           @useSolution(step, bestSolution)
         else
           throw @notApplicable()
+
+      else
+        # This step's oldElement was already changed by a previous step
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
@@ -312,25 +329,19 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     @matchedPostflight = true
 
-  isSwappedByEarlierStep: (testedStep) ->
-    return u.all testedStep.solutions, (testedStepSolution) =>
-      return u.some @steps, (existingStep) ->
-        willRemoveOldElement = (existingStep.placement == 'swap' || existingStep.placement == 'root')
-        if willRemoveOldElement
-          return existingStep.oldElement.contains(testedStepSolution.element)
-        else
-          return existingStep.oldElement == testedStepSolution.element
-
   addHungrySteps: ->
     # Find all [up-hungry] fragments within @layer
     hungries = up.fragment.all(up.radio.hungrySelector(), { @layer })
     transition = up.radio.config.hungryTransition ? @options.transition
     for oldElement in hungries
-      selector = up.fragment.toTarget(oldElement)
-      if newElement = @responseDoc.select(selector)
-        step = { selector, oldElement, newElement, transition, placement: 'swap' }
-        unless @isSwappedByEarlierStep(step)
-          @steps.push()
+      # Don't touch an element a second time.
+      unless @isElementSwappedByEarlierStep(oldElement)
+        selector = up.fragment.toTarget(oldElement)
+        # Be opportunistic and only add a step if there is a new element
+        # in responseDoc. If there is no new element, we do nothing.
+        if newElement = @responseDoc.select(selector)
+          step = { selector, oldElement, newElement, transition, placement: 'swap' }
+          @steps.push(step)
 
   setScrollAndFocusOptions: ->
     @steps.forEach (step, i) =>
