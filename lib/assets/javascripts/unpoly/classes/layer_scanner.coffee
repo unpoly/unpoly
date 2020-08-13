@@ -26,21 +26,21 @@ class up.LayerScanner
       return solutions
 
     if selector == ':main'
-      solutions = @getLayerMains()
+      solutions = @getLayerMains() # could be one solution
 
     else if selector == ':zone'
       if zone = @getOriginZone()
-        solutions = [zone]
+        solutions = [zone] # is one solution
 
     else if match = selector.match(/^\:zone (.+)$/)
       zoneDescendantSelector = match[1]
       if (zoneSolution = @originZone()) && (zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector))
         descendantSolution = new up.TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
         # In this branch the user wants the zone to be part of the selector.
-        solutions = [descendantSolution.within(zoneSolution)]
+        solutions = [descendantSolution.within(zoneSolution)] # is one solution
 
     else if selector == ':closest-zone'
-      solutions = @getOriginZones()
+      solutions = @getOriginZones() # must be multiple solutions :(
 
     else if match = selector.match(/^\:closest-zone (.+)$/)
       for zoneSolution in @getOriginZones()
@@ -48,14 +48,15 @@ class up.LayerScanner
           descendantSolution = new up.TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
           # In this branch the user wants the zone to be part of the selector.
           solutions = [descendantSolution.within(zoneSolution)]
+          break
 
     else
       # Now we have a regular selector like ".foo"
 
       solutions = []
 
+      # If we have an @origin we can be smarter about finding oldElement.
       if @isOriginLayerUpdate()
-        # If we have an @origin we can be smarter about finding oldElement.
         # First, we check if @origin itself or one of its ancestors would match.
         if closestMatchInLayer = up.fragment.closest(@origin, selector)
           solutions.push(new up.TargetSolution(selector, closestMatchInLayer))
@@ -64,14 +65,10 @@ class up.LayerScanner
         for zone in @getOriginZones()
           if matchInZone = up.fragment.subtree(zone.element, selector)[0]
             solutions.push(new up.TargetSolution(selector, matchInZone))
+            break
 
       if firstMatchInLayer = up.fragment.get(selector, { @layer })
         solutions.push(new up.TargetSolution(selector, firstMatchInLayer))
-
-        solutions.push({
-          element: firstMatchInLayer,
-          selector: up.fragment.improveTarget(selector, firstMatchInLayer)
-        })
 
     # Cannot place <body> in an overlay
     if @layer.isOverlay() || @layer == 'new'
