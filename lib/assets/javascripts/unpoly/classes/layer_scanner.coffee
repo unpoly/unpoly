@@ -14,7 +14,7 @@ class TargetSolution extends up.Class
     e.isDetached(@element)
 
   @getter 'selector', ->
-    return @improvedSelector ||= e.improveSelector(@originalSelector, @element)
+    return @improvedSelector ||= up.fragment.improveTarget(@originalSelector, @element)
 
 class up.LayerScanner
 
@@ -85,11 +85,12 @@ class up.LayerScanner
 
         solutions.push({
           oldElement: firstMatchInLayer,
-          selector: e.improveSelector(selector, firstMatchInLayer)
+          selector: up.fragment.improveTarget(selector, firstMatchInLayer)
         })
 
-    if @layer.isOverlay()
-      solutions = u.reject solutions, (solution) -> up.fragment.targetsBody(solution.element)
+    # Cannot place <body> in an overlay
+    if @layer.isOverlay() || @layer == 'new'
+      solutions = u.reject solutions, (solution) -> e.isSingleton(solution.element)
 
     @solutionsBySelector[selector] = solutions
 

@@ -21,6 +21,6 @@ class up.FocusCapsule extends up.Record
   @preserveWithin: (oldElement) ->
     focusedElement = document.activeElement
     if focusedElement && e.isInSubtree(oldElement, focusedElement)
-      plan = { selector: e.toSelector(focusedElement) }
+      plan = { selector: up.fragment.toTarget(focusedElement) }
       transferProps(focusedElement, plan)
       return new @(plan)

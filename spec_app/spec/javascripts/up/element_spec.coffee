@@ -561,60 +561,6 @@ describe 'up.element', ->
       # Since this is not a fixture that would auto-remove itself after the test, remove it manually.
       up.element.remove(element)
 
-  describe 'up.element.toSelector', ->
-
-    it "prefers using the element's 'up-id' attribute to using the element's ID", ->
-      $element = $fixture('div[up-id=up-id-value]#id-value')
-      expect(up.element.toSelector($element)).toBe('[up-id="up-id-value"]')
-
-    it "prefers using the element's ID to using the element's name", ->
-      $element = $fixture('div#id-value[name=name-value]')
-      expect(up.element.toSelector($element)).toBe("#id-value")
-
-    it "selects the ID with an attribute selector if the ID contains a slash", ->
-      $element = $fixture('div').attr(id: 'foo/bar')
-      expect(up.element.toSelector($element)).toBe('[id="foo/bar"]')
-
-    it "selects the ID with an attribute selector if the ID contains a space", ->
-      $element = $fixture('div').attr(id: 'foo bar')
-      expect(up.element.toSelector($element)).toBe('[id="foo bar"]')
-
-    it "selects the ID with an attribute selector if the ID contains a dot", ->
-      $element = $fixture('div').attr(id: 'foo.bar')
-      expect(up.element.toSelector($element)).toBe('[id="foo.bar"]')
-
-    it "selects the ID with an attribute selector if the ID contains a quote", ->
-      $element = $fixture('div').attr(id: 'foo"bar')
-      expect(up.element.toSelector($element)).toBe('[id="foo\\"bar"]')
-
-    it "prefers using the element's tagName + [name] to using the element's classes", ->
-      $element = $fixture('input[name=name-value].class')
-      expect(up.element.toSelector($element)).toBe('input[name="name-value"]')
-
-    it "prefers using the element's class to using the element's ARIA label", ->
-      $element = $fixture('div.class[aria-label="ARIA label value"]')
-      expect(up.element.toSelector($element)).toBe(".class")
-
-    it 'does not use Unpoly classes to compose a class selector', ->
-      $element = $fixture('div.up-current.class')
-      expect(up.element.toSelector($element)).toBe(".class")
-
-    it 'uses the first of multiple classes', ->
-      $element = $fixture('div.class1.class2')
-      expect(up.element.toSelector($element)).toBe(".class1")
-
-    it "prefers using the element's ARIA label to using the element's tag name", ->
-      $element = $fixture('div[aria-label="ARIA label value"]')
-      expect(up.element.toSelector($element)).toBe('[aria-label="ARIA label value"]')
-
-    it "uses the element's tag name if no better description is available", ->
-      $element = $fixture('div')
-      expect(up.element.toSelector($element)).toBe("div")
-
-    it 'escapes quotes in attribute selector values', ->
-      $element = $fixture('div')
-      $element.attr('aria-label', 'foo"bar')
-      expect(up.element.toSelector($element)).toBe('[aria-label="foo\\"bar"]')
 
   describe 'up.element.createDocumentFromHTML', ->
 

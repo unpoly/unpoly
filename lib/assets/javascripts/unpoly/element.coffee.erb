@@ -603,99 +603,15 @@ up.element = do ->
   ###**
   Returns a CSS selector that matches the given element as good as possible.
 
-  To build the selector, the following element properties are used in decreasing
-  order of priority:
-
-  - The element's `[up-id]` attribute
-  - The element's `[id]` attribute
-  - The element's `[name]` attribute
-  - The element's `[class]` names
-  - The element's [`[aria-label]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute) attribute
-  - The element's tag name
-
-  \#\#\# Example
-
-      element = document.createElement('span')
-      element.className = 'klass'
-      selector = up.element.toSelector(element) // returns '.klass'
+  Alias for `up.fragment.toTarget()`.
 
   @function up.element.toSelector
   @param {string|Element|jQuery}
     The element for which to create a selector.
-  @experimental
-  ###
-  toSelector = (element) ->
-    return element if u.isString(element)
-
-    # resolveSelector() might be called with jQuery collections
-    element = getOne(element)
-
-    unless isSingleton(element)
-      selector = improveSelector('', element)
-
-    return selector || elementTagName(element)
-
-  attributeImprover = (attr) ->
-    return {
-      presence: new RegExp('\\[' + attr + '=')
-      attempt: (element) ->
-        if value = element.getAttribute(attr)
-          return attributeSelector(attr, value)
-    }
-
-  SELECTOR_IMPROVERS = [
-    attributeImprover('up-id'),
-    attributeImprover('up-zone'),
-    { presence: /\#|\[id=/, attempt: idSelector }
-    { presence: /\./, attempt: bestClassSelector }
-    attributeImprover('name'),
-    attributeImprover('aria-label')
-  ]
-
-  improveSelector = (selector, element) ->
-    if !u.contains(selector, ' ') && !isSingletonSelector(selector) && (improvement = findSelectorImprovement(selector, element))
-      selector += improvement
-    return selector
-
-  findSelectorImprovement = (selector, element) ->
-    u.detect SELECTOR_IMPROVERS, (improver) ->
-      return (!selector || !improver.presence.test(selector)) && improver.attempt(element)
-
-  ###**
-  Sets an unique identifier for this element.
-
-  This identifier is used by `up.element.toSelector()`
-  to create a CSS selector that matches this element precisely.
-
-  If the element already has other attributes that make a good identifier,
-  like a `[id]`, `[class]` or `[aria-label]`, it is not necessary to
-  set `[up-id]`.
-
-  \#\#\# Example
-
-  Take this element:
-
-      <a href="/">Homepage</a>
-
-  Unpoly cannot generate a good CSS selector for this element:
-
-      up.element.toSelector(element)
-      // returns 'a'
-
-  We can improve this by assigning an `[up-id]`:
-
-      <a href="/" up-id="link-to-home">Open user 4</a>
-
-  The attribute value is used to create a better selector:
-
-      up.element.toSelector(element)
-      // returns '[up-id="link-to-home"]'
-
-  @selector [up-id]
-  @param {string} up-id
-    A string that uniquely identifies this element.
   @stable
   ###
+  toSelector = (args...) ->
+    return up.fragment.toTarget(args...)
 
   # TODO: Do we really need to test for anything except BODY here?
   SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
@@ -730,15 +646,6 @@ up.element = do ->
       return "##{id}"
     else
       return attributeSelector('id', id)
-
-  bestClassSelector = (element) ->
-    if bestClass = nonUpClasses(element)[0]
-      return ".#{bestClass}"
-
-  nonUpClasses = (element) ->
-    classString = element.className
-    classes = u.splitValues(classString)
-    u.reject classes, (klass) -> klass.match(/^up-/)
 
   ###**
   Always creates a full document with a <html> root, even if the given `html`
@@ -1229,9 +1136,12 @@ up.element = do ->
     setTemporaryAttrs: setTemporaryAttrs
     affix: affix # practical for element creation
     toSelector: toSelector # practical
+    idSelector: idSelector
     isSingleton: isSingleton # internal
+    isSingletonSelector: isSingletonSelector
     attributeSelector: attributeSelector # internal
     trueAttributeSelector: trueAttributeSelector
+    elementTagName: elementTagName
     createDocumentFromHTML: createDocumentFromHTML # internal
     createFromHTML: createFromHTML # practical for element creation
     createFromHtml: (args...) ->

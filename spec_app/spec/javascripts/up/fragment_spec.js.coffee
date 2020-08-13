@@ -3614,3 +3614,94 @@ describe 'up.fragment', ->
           expect(layerSpy.calls.count()).toBe(2)
           expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.get(0)]
           expect(layerSpy.calls.argsFor(1)).toEqual [up.layer.get(1)]
+
+    describe 'up.fragment.toTarget', ->
+  
+      it "prefers using the element's 'up-id' attribute to using the element's ID", ->
+        element = fixture('div[up-id=up-id-value]#id-value')
+        expect(up.fragment.toTarget(element)).toBe('[up-id="up-id-value"]')
+  
+      it "prefers using the element's ID to using the element's name", ->
+        element = fixture('div#id-value[name=name-value]')
+        expect(up.fragment.toTarget(element)).toBe("#id-value")
+  
+      it "selects the ID with an attribute selector if the ID contains a slash", ->
+        element = fixture('div')
+        element.setAttribute('id', 'foo/bar')
+        expect(up.fragment.toTarget(element)).toBe('[id="foo/bar"]')
+  
+      it "selects the ID with an attribute selector if the ID contains a space", ->
+        element = fixture('div')
+        element.setAttribute('id', 'foo bar')
+        expect(up.fragment.toTarget(element)).toBe('[id="foo bar"]')
+  
+      it "selects the ID with an attribute selector if the ID contains a dot", ->
+        element = fixture('div')
+        element.setAttribute('id', 'foo.bar')
+        expect(up.fragment.toTarget(element)).toBe('[id="foo.bar"]')
+  
+      it "selects the ID with an attribute selector if the ID contains a quote", ->
+        element = fixture('div')
+        element.setAttribute('id', 'foo"bar')
+        expect(up.fragment.toTarget(element)).toBe('[id="foo\\"bar"]')
+
+      it "prefers using the element's [up-zone] to using the element's class", ->
+        element = fixture('div.foo[up-zone=bar]')
+        expect(up.fragment.toTarget(element)).toBe('[up-zone="bar"]')
+
+      it "does not use an [up-zone] without an attribute value", ->
+        element = fixture('div.foo[up-zone]')
+        expect(up.fragment.toTarget(element)).toBe('.foo')
+
+      it "prefers using the element's class to using the element's ARIA label", ->
+        element = fixture('div.class[aria-label="ARIA label value"]')
+        expect(up.fragment.toTarget(element)).toBe(".class")
+  
+      it 'does not use Unpoly classes to compose a class selector', ->
+        element = fixture('div.up-current.class')
+        expect(up.fragment.toTarget(element)).toBe(".class")
+
+      it 'does not use classes matching a RegExp in up.fragment.config.badTargetClasses', ->
+        up.fragment.config.badTargetClasses.push(/^fo+$/)
+        element = fixture('div.fooooo.bar')
+        expect(up.fragment.toTarget(element)).toBe(".bar")
+
+      it 'uses the first of multiple classes', ->
+        element = fixture('div.class1.class2')
+        expect(up.fragment.toTarget(element)).toBe(".class1")
+
+      it "prefers using the element's [name] attribute to using the element's tag name", ->
+        element = fixture('input[name=name-value]')
+        expect(up.fragment.toTarget(element)).toBe('[name="name-value"]')
+
+      it "prefers using the element's ARIA label to using the element's tag name", ->
+        element = fixture('div[aria-label="ARIA label value"]')
+        expect(up.fragment.toTarget(element)).toBe('[aria-label="ARIA label value"]')
+  
+      it "uses the element's tag name if no better description is available", ->
+        element = fixture('div')
+        expect(up.fragment.toTarget(element)).toBe("div")
+  
+      it 'escapes quotes in attribute selector values', ->
+        element = fixture('div')
+        element.setAttribute('aria-label', 'foo"bar')
+        expect(up.fragment.toTarget(element)).toBe('[aria-label="foo\\"bar"]')
+
+    describe 'up.fragment.improveTarget', ->
+
+      it 'improves an #id selector with an [up-id] selector', ->
+        element = fixture('div#foo[up-id=bar]')
+        expect(up.fragment.improveTarget('#foo', element)).toBe('#foo[up-id="bar"]')
+
+      it 'improves a class selector with an #id selector', ->
+        element = fixture('div.foo#bar')
+        expect(up.fragment.improveTarget('.foo', element)).toBe('.foo#bar')
+
+      it 'does not change a selector that already has an ID', ->
+        element = fixture('div.foo#bar')
+        expect(up.fragment.improveTarget('#bar', element)).toBe('#bar')
+
+      # We might change this in the future and reconsider classes
+      it 'does not improve a selector that already has a class', ->
+        element = fixture('.first.second')
+        expect(up.fragment.improveTarget('.second', element)).toBe('.second')

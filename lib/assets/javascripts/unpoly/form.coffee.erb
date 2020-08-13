@@ -229,7 +229,7 @@ up.form = do ->
       # a demo of vanilla browser behavior.
       options.url = up.Params.stripURL(options.url)
 
-    parser.string('failTarget', default: e.toSelector(form))
+    parser.string('failTarget', default: up.fragment.toTarget(form))
 
     # Take params from form, but allow to pass additional params as { params }
     options.params = up.Params.fromForm(form).addAll(options.params)
@@ -351,7 +351,7 @@ up.form = do ->
       return e.resolveSelector(givenTarget, options.origin)
     else if e.matches(element, 'form')
       # If element is the form, we cannot find a better validate target than this.
-      return e.toSelector(element)
+      return up.fragment.toTarget(element)
     else
       return findValidateTargetFromConfig(element, options) || up.fail('Could not find validation target for %o (tried defaults %o)', element, config.validateTargets)
 

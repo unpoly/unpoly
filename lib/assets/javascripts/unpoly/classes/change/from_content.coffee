@@ -57,7 +57,7 @@ class up.Change.FromContent extends up.Change
 
       for target in u.wrapList(target)
         if u.isElementish(target)
-          target = e.toSelector(target)
+          target = up.fragment.toTarget(target)
         else if u.isString(target)
           target = layerScanner.fixSelector(target)
         else

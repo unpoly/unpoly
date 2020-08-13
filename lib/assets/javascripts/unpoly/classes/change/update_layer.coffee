@@ -301,7 +301,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     hungries = up.fragment.all(up.radio.hungrySelector(), { @layer })
     transition = up.radio.config.hungryTransition ? @options.transition
     for oldElement in hungries
-      selector = e.toSelector(oldElement)
+      selector = up.fragment.toTarget(oldElement)
       if newElement = @responseDoc.select(selector)
         @steps.push({ selector, oldElement, newElement, transition, placement: 'swap' })
 

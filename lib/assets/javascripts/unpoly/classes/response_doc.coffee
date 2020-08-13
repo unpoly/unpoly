@@ -59,7 +59,7 @@ class up.ResponseDoc
     value
 
   rootSelector: ->
-    e.toSelector(@root)
+    up.fragment.toTarget(@root)
 
   wrapHTML: (html) ->
     html = @noscriptWrapper.wrap(html)

@@ -1852,8 +1852,8 @@ up.util = do ->
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
   selectorForElement: (args...) ->
-    up.legacy.warn('up.util.selectorForElement() has been renamed to up.element.toSelector()')
-    up.element.toSelector(args...)
+    up.legacy.warn('up.util.selectorForElement() has been renamed to up.fragment.toTarget()')
+    up.fragment.toTarget(args...)
   nextFrame: (args...) ->
     up.legacy.warn('up.util.nextFrame() has been renamed to up.util.task()')
     queueTask(args...)

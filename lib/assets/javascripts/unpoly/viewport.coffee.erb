@@ -445,7 +445,7 @@ up.viewport = do ->
     width
 
   scrollTopKey = (viewport) ->
-    e.toSelector(viewport)
+    up.fragment.toTarget(viewport)
 
   ###**
   Returns a hash with scroll positions.

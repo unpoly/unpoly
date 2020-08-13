@@ -41,9 +41,6 @@ class up.Change.OpenLayer extends up.Change.Addition
       else
         @alternatives.push(@target)
 
-      # We cannot place <body> in a new overlay
-      @alternatives = u.reject(@alternatives, up.fragment.targetsBody)
-
     unless @alternatives.length
       throw @notApplicable()
 

@@ -26,6 +26,10 @@ up.fragment = do ->
       get_targets: -> up.layer.config.any.targets
       resetTargets: ['body']
       zones: ['[up-zone]']
+      badTargetClasses: [/^up-/]
+
+  reset = ->
+    config.reset()
 
   setSource = (element, sourceURL) ->
     element.upSource = sourceURL
@@ -785,9 +789,6 @@ up.fragment = do ->
     up.legacy.warn("up.visit(url) has been deprecated. Use up.render({ url }) instead.")
     up.render(u.merge(options, { url }))
 
-  targetsBody = (selector) ->
-    /\bbody\b/i.test(selector)
-
   successKey = (key) ->
     return u.unprefixCamelCase(key, 'fail')
 
@@ -795,10 +796,132 @@ up.fragment = do ->
     unless key.match(/^fail[A-Z]/)
       return u.prefixCamelCase(key, 'fail')
 
+  ###**
+  Returns a CSS selector that matches the given element as good as possible.
+
+  To build the selector, the following element properties are used in decreasing
+  order of priority:
+
+  - The element's `[up-id]` attribute
+  - The element's `[id]` attribute
+  - The element's `[name]` attribute
+  - The element's `[class]` names
+  - The element's [`[aria-label]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute) attribute
+  - The element's tag name
+
+  \#\#\# Example
+
+      element = document.createElement('span')
+      element.className = 'klass'
+      selector = up.fragment.toTarget(element) // returns '.klass'
+
+  @function up.element.toTarget
+  @param {string|Element|jQuery}
+    The element for which to create a selector.
+  @experimental
+  ###
+  toTarget = (element) ->
+    if u.isString(element)
+      return element
+
+    # resolveSelector() might be called with jQuery collections
+    element = e.get(element)
+
+    unless e.isSingleton(element)
+      selector = improveTarget('', element)
+
+    return selector || e.elementTagName(element)
+
+  ###**
+  Sets an unique identifier for this element.
+
+  This identifier is used by `up.fragment.toSelector()`
+  to create a CSS selector that matches this element precisely.
+
+  If the element already has other attributes that make a good identifier,
+  like a good `[id]` or `[class]` attribute, it is not necessary to
+  also set `[up-id]`.
+
+  \#\#\# Example
+
+  Take this element:
+
+      <a href="/">Homepage</a>
+
+  Unpoly cannot generate a good CSS selector for this element:
+
+      up.fragment.toTarget(element)
+      // returns 'a'
+
+  We can improve this by assigning an `[up-id]`:
+
+      <a href="/" up-id="link-to-home">Open user 4</a>
+
+  The attribute value is used to create a better selector:
+
+      up.fragment.toTarget(element)
+      // returns '[up-id="link-to-home"]'
+
+  @selector [up-id]
+  @param {string} up-id
+    A string that uniquely identifies this element.
+  @stable
+  ###
+
+  attributeTargetImprover = (attr) ->
+    return {
+      presence: new RegExp('\\[' + attr + '=')
+      attempt: (element) ->
+        if value = element.getAttribute(attr)
+          return e.attributeSelector(attr, value)
+    }
+
+  idTarget = (element) ->
+    if id = element.id
+      return e.idSelector(id)
+
+  goodClassTarget = (element) ->
+    if goodClass = u.find(element.classList, isGoodClassForTarget)
+      return ".#{goodClass}"
+
+  TARGET_IMPROVERS = [
+    attributeTargetImprover('up-id'),
+    { presence: /\#|\[id=/, attempt: idTarget },
+    attributeTargetImprover('up-zone'),
+    { presence: /\./, attempt: goodClassTarget },
+    attributeTargetImprover('name'),
+    attributeTargetImprover('aria-label')
+  ]
+
+  isImprovableTarget = (selector) ->
+    return !/[ >]/.test(selector) && !e.isSingletonSelector(selector)
+
+  improveTarget = (selector, element) ->
+    if isImprovableTarget(selector)
+      for improver in TARGET_IMPROVERS
+        if improver.presence.test(selector)
+          # If the best improver is already present in the selector,
+          # don't improve further.
+          return selector
+        else
+          # If the improver returns a result, return the improvement and don't
+          # attempt later improvers (which are of lower precision).
+          # If the improver returns undefined, try the next improver in the next iteration.
+          if improvement = improver.attempt(element)
+            return selector + improvement
+
+    # If we could not improve, return the unchanged selector.
+    return selector
+
+  isGoodClassForTarget = (klass) ->
+    return !u.some(config.badTargetClasses, (pattern) -> pattern.test(klass))
+
   up.on 'up:app:boot', ->
     body = document.body
     setSource(body, up.history.location)
     hello(body)
+
+  up.on 'up:framework:reset', reset
 
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
@@ -824,9 +947,10 @@ up.fragment = do ->
     emitDestroyed: emitFragmentDestroyed
     emitKeep: emitFragmentKeep
     emitKept: emitFragmentKept
-    targetsBody: targetsBody
     successKey: successKey,
     failKey: failKey
+    toTarget: toTarget
+    improveTarget: improveTarget
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract
