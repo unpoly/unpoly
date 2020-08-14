@@ -150,9 +150,9 @@ appendDefaultFallback = (parent) ->
 
 beforeEach ->
   up.fragment.config.resetTargets = []
-  u.remove(up.layer.config.any.targets, ':top')
+  u.remove(up.layer.config.any.targets, ':layer-content')
   up.layer.config.any.targets.push('default-fallback')
-  up.layer.config.overlay.targets.push(':top') # this would usually be in config.any, but have removed it
+  up.layer.config.overlay.targets.push(':layer-content') # this would usually be in config.any, but have removed it
   up.history.config.restoreTargets = ['default-fallback']
   appendDefaultFallback(document.body)
 

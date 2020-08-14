@@ -30,7 +30,7 @@ class up.LayerScanner
     if selector == ':main'
       solutions = @getLayerMains() # could be one solution
 
-    else if selector == ':top'
+    else if selector == ':layer-content'
       solutions = [@getTop()]
 
     else if selector == ':zone'
@@ -106,7 +106,7 @@ class up.LayerScanner
       # the main closest to the root would be matched first. We wouldn't want this
       # if the user has configured e.g. ['.content', 'body'].
       for selector in @layer.defaultTargets() # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-        if selector == ':top'
+        if selector == ':layer-content'
           @layerMains.push(@getTop())
         else
           if element = up.fragment.get(selector, { @layer })

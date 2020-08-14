@@ -13,11 +13,11 @@ TODO for [up-zone]
     - It will not look up a zone around origin
   - This will not work: up.render({ target: ':main', content: 'xxx' })
     - ResponseDoc will fail to create an element matching :main
+    - Can't we use the preflightTarget?
+    - Same with :layer-content
   - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
     , but there was some cyclical flow (I think the ResponseDoc was missing from plans?)
     when I last tried that.
-- up-zone=name should produce a selector
-- up.element.config.ignoreClassesForSelector
 - Either implement overlay revivification OR remove support for { placement: 'root' }
 - Only in overlays the first swappable element should be a main
 - Tests!
@@ -30,9 +30,10 @@ TODO for [up-zone]
   - Users can target :closest-zone .foo
   - Users can target :main when updating layers
   - Users can target :main when opening layers
+  - Users can target :layer-content
 - Some custom selectors are not implemented in LayerScanner, some in Selector.
   - Can we implement :has() in LayerScanner?
-  - What about :main and :top? We also have these in OpenLayer?
+  - What about :main and :layer-content? We also have these in OpenLayer?
 - Rename config.xxx.targets to config.xxx.mains, or mainSelectors
 - Should :top be :content-root or :layer-content or :content or similar?
 
