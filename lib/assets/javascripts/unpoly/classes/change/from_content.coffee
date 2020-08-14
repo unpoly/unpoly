@@ -116,12 +116,16 @@ class up.Change.FromContent extends up.Change
       docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
       up.legacy.fixKey(docOptions, 'html', 'document')
 
-      # If neither doc source is given, we assume content: ''.
-      # In this case we also need a target, which unless given we derive
-      # from the first plan.
+      # If neither doc source is given, we assume { content }.
+      # Note that { content } might be missing, to allow people to open a new layer
+      # using up.layer.open().
       if !@options.document && !@options.fragment
         docOptions.content ?= ''
-        docOptions.target ?= @getPlans()[0]?.bestPreflightSelector()
+
+        # When processing { content }, ResponseDoc needs a { target } to create a matching
+        # element. We pick the target from the first plan, since it might either be empty
+        # OR it's a pseudo-selector like :main, which needs resolving.
+        docOptions.target = @getPlans()[0]?.bestPreflightSelector()
 
       @responseDoc = new up.ResponseDoc(docOptions)
 

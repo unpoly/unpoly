@@ -430,6 +430,7 @@ describe 'up.fragment', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->
           fixture('.target', text: 'old text')
+
           up.render('.target', content: 'new text')
 
           next =>
@@ -438,10 +439,21 @@ describe 'up.fragment', ->
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
           content = e.createFromSelector('div', text: 'new text')
+
           up.render('.target', { content })
 
           next =>
             expect('.target').toHaveText('new text')
+
+        it 'allows to target :main', asyncSpec (next) ->
+          up.layer.config.root.targets.unshift('.main-element')
+          fixture('.main-element', text: 'old text')
+
+          up.render(target: ':main', content: 'new text')
+
+          next =>
+            expect('.main-element').toHaveText('new text')
+
 
       describe 'with { document } option', ->
 
