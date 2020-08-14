@@ -270,7 +270,13 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   isElementSwappedByEarlierStep: (element) ->
     return u.some @steps, (step) ->
-      step.oldElement.contains(element)
+      earlierStepWillRemoveElement = (step.placement == 'swap' || step.placement == 'root')
+      if earlierStepWillRemoveElement
+        step.oldElement.contains(element)
+      else
+        # ResponseDoc only has a single new element for that old element,
+        # so we cannot e.g. append the same new element twice.
+        step.oldElement == element
 
   useSolution: (step, solution) ->
     console.log("useSolution(%o, %o)", u.copy(step), u.copy(solution))

@@ -30,6 +30,9 @@ TODO for [up-zone]
   - Users can target :closest-zone .foo
   - Users can target :main when updating layers
   - Users can target :main when opening layers
+- Some custom selectors are not implemented in LayerScanner, some in Selector.
+  - Can we implement :has() in LayerScanner?
+  - What about :main and :top? We also have these in OpenLayer?
 
 
 Other TODOs

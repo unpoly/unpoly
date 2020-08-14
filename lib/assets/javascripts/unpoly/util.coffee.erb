@@ -44,10 +44,10 @@ up.util = do ->
     cached = false
     (args...) ->
       if cached
-        cachedValue
+        return cachedValue
       else
         cached = true
-        cachedValue = func.apply(this, args)
+        return cachedValue = func.apply(this, args)
 
   ###**
   Returns if the given port is the default port for the given protocol.

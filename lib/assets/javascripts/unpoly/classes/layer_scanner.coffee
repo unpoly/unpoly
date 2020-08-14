@@ -28,24 +28,28 @@ class up.LayerScanner
     if selector == ':main'
       solutions = @getLayerMains()
 
+    else if selector = ':top'
+      solutions = [@getTop()]
+
     else if selector == ':zone'
-      if zone = @getOriginZone()
-        solutions = [zone]
+      solutions = [@getOriginZone()]
 
     else if match = selector.match(/^\:zone (.+)$/)
       zoneDescendantSelector = match[1]
       if (zoneSolution = @originZone()) && (zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector))
-        descendantSolution = new up.TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
+        descendantSolution = new up.TargetSolution.Improvable(zoneDescendantSelector, zoneDescendantMatch)
         # In this branch the user wants the zone to be part of the selector.
         solutions = [descendantSolution.within(zoneSolution)]
 
     else if selector == ':closest-zone'
+      # Here we want to allow all ancestor zones, in case our currently closest zone
+      # is not part of the response.
       solutions = @getOriginZones()
 
     else if match = selector.match(/^\:closest-zone (.+)$/)
       for zoneSolution in @getOriginZones()
         if zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector)
-          descendantSolution = new up.TargetSolution(zoneDescendantSelector, zoneDescendantMatch)
+          descendantSolution = new up.TargetSolution.Improvable(zoneDescendantSelector, zoneDescendantMatch)
           # In this branch the user wants the zone to be part of the selector.
           solutions = [descendantSolution.within(zoneSolution)]
 
@@ -58,20 +62,19 @@ class up.LayerScanner
         # If we have an @origin we can be smarter about finding oldElement.
         # First, we check if @origin itself or one of its ancestors would match.
         if closestMatchInLayer = up.fragment.closest(@origin, selector)
-          solutions.push(new up.TargetSolution(selector, closestMatchInLayer))
+          solutions.push(new up.TargetSolution.Improvable(selector, closestMatchInLayer))
 
         # Now we check if any zone around the element would match.
         for zone in @getOriginZones()
           if matchInZone = up.fragment.subtree(zone.element, selector)[0]
-            solutions.push(new up.TargetSolution(selector, matchInZone))
+            solutions.push(new up.TargetSolution.Improvable(selector, matchInZone))
 
       if firstMatchInLayer = up.fragment.get(selector, { @layer })
-        solutions.push(new up.TargetSolution(selector, firstMatchInLayer))
+        solutions.push(new up.TargetSolution.Improvable(selector, firstMatchInLayer))
 
-        solutions.push({
-          element: firstMatchInLayer,
-          selector: up.fragment.improveTarget(selector, firstMatchInLayer)
-        })
+    # Above we didn't care to check whether a solution existly exists
+    # (e.g. `solutions = [@getOriginZone()]`), so remove those undefined solutions.
+    solutions = u.compact(solutions)
 
     # Cannot place <body> in an overlay
     if @layer.isOverlay() || @layer == 'new'
@@ -89,15 +92,25 @@ class up.LayerScanner
     unless @layerMains
       @layerMains = []
 
+      # Select all mains in the configured order.
+      # Note that if we would run a single select on mainSelectors.join(','),
+      # the main closest to the root would be matched first. We wouldn't want this
+      # if the user has configured e.g. ['.content', 'body'].
       for selector in @layer.defaultTargets() # TODO: Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-        # Select all mains in the configured order.
-        # Note that if we would run a single select on mainSelectors.join(','),
-        # the main closest to the root would be matched first. We wouldn't want this
-        # if the user has configured e.g. ['.content', 'body'].
-        if element = up.fragment.get(selector, { @layer })
-          @layerMains.push(new up.TargetSolution(selector, element))
+        if selector == ':top'
+          @layerMains.push(@getTop())
+        else
+          if element = up.fragment.get(selector, { @layer })
+            @layerMains.push(new up.TargetSolution.Improvable(selector, element))
 
     return @layerMains
+
+  getTop: ->
+    unless @topRetrieved = true
+      if topElement = @layer.getFirstSwappableElement()
+        @top = new up.TargetSolution(up.fragment.toTarget(topElement), topElement)
+      @topRetrieved = true
+    return @top
 
   getOriginZone: ->
     return @originZones()[0]
@@ -113,7 +126,7 @@ class up.LayerScanner
     solutions = []
 
     if selector = u.find(up.fragment.config.zones, (s) -> e.matches(element, s))
-      solutions.push(new up.TargetSolution(selector, element))
+      solutions.push(new up.TargetSolution.Improvable(selector, element))
 
     if !e.matches(element, up.layer.anySelector()) && (parent = element.parentElement)
       solutions.push(@getClosestOriginZones(parent)...)

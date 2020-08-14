@@ -95,6 +95,8 @@ class up.Change.FromURL extends up.Change
     successPreview = new up.Change.FromContent(u.merge(@successOptions, preview: true))
     failPreview = new up.Change.FromContent(u.merge(@failOptions, preview: true))
 
+    debugger
+
     requestAttrs = u.merge(
       @successOptions,
       successPreview.requestAttributes(),
