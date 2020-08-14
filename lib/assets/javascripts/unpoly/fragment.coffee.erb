@@ -827,8 +827,6 @@ up.fragment = do ->
     # resolveSelector() might be called with jQuery collections
     element = e.get(element)
 
-    console.log("--- toTarget: isSingleton(%o) => %o", element, e.isSingleton(element))
-
     unless e.isSingleton(element)
       selector = improveTarget('', element)
 

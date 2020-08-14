@@ -13,6 +13,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @origin = options.origin
     @layerScanner = options.layerScanner
     @placement = options.placement
+    console.log("--- UpdateLayer: target is %o", @target)
 
   requestAttributes: ->
     @matchPreflight()
@@ -234,6 +235,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
       unless solutions.length
         throw @notApplicable()
 
+      console.log("--- UpdateLayer<%o>: step %o has solutions %o", @target, selector, solutions)
+
       # Each step inherits all options of this change.
       return u.merge(@options, { solutions, placement })
 
@@ -258,7 +261,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
         # We might not swap this element. Once the response is received, @matchPostflight()
         # will go through all alternatives and see which selector matches in *both*
         # the current page and response doc.
-        console.log("Calling useSolution() from matchPreflight")
         @useSolution(originalStep, remainingSolutions[0])
       else
         # This step's oldElement was already changed by a previous step.
@@ -312,7 +314,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
         if bestSolution
           # We will no longer look at other solutions.
-          console.log("Calling useSolution() from matchPostflight")
           @useSolution(step, bestSolution)
         else
           throw @notApplicable()

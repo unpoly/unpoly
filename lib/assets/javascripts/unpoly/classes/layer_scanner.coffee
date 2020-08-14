@@ -22,24 +22,27 @@ class up.LayerScanner
     return selector
 
   selectSolutions: (selector) ->
+    console.log("selectSolutions(%o)", selector)
+
     if solutions = @solutionsBySelector[selector]
       return solutions
 
     if selector == ':main'
-      solutions = @getLayerMains()
+      solutions = @getLayerMains() # could be one solution
 
-    else if selector = ':top'
+    else if selector == ':top'
       solutions = [@getTop()]
 
     else if selector == ':zone'
       solutions = [@getOriginZone()]
 
     else if match = selector.match(/^\:zone (.+)$/)
+      console.log("... is :zone xy")
       zoneDescendantSelector = match[1]
       if (zoneSolution = @originZone()) && (zoneDescendantMatch = up.fragment.get(zoneSolution.element, zoneDescendantSelector))
         descendantSolution = new up.TargetSolution.Improvable(zoneDescendantSelector, zoneDescendantMatch)
         # In this branch the user wants the zone to be part of the selector.
-        solutions = [descendantSolution.within(zoneSolution)]
+        solutions = [descendantSolution.within(zoneSolution)] # is one solution
 
     else if selector == ':closest-zone'
       # Here we want to allow all ancestor zones, in case our currently closest zone
@@ -52,14 +55,15 @@ class up.LayerScanner
           descendantSolution = new up.TargetSolution.Improvable(zoneDescendantSelector, zoneDescendantMatch)
           # In this branch the user wants the zone to be part of the selector.
           solutions = [descendantSolution.within(zoneSolution)]
+          break
 
     else
       # Now we have a regular selector like ".foo"
 
       solutions = []
 
+      # If we have an @origin we can be smarter about finding oldElement.
       if @isOriginLayerUpdate()
-        # If we have an @origin we can be smarter about finding oldElement.
         # First, we check if @origin itself or one of its ancestors would match.
         if closestMatchInLayer = up.fragment.closest(@origin, selector)
           solutions.push(new up.TargetSolution.Improvable(selector, closestMatchInLayer))
@@ -68,6 +72,7 @@ class up.LayerScanner
         for zone in @getOriginZones()
           if matchInZone = up.fragment.subtree(zone.element, selector)[0]
             solutions.push(new up.TargetSolution.Improvable(selector, matchInZone))
+            break
 
       if firstMatchInLayer = up.fragment.get(selector, { @layer })
         solutions.push(new up.TargetSolution.Improvable(selector, firstMatchInLayer))
@@ -76,11 +81,15 @@ class up.LayerScanner
     # (e.g. `solutions = [@getOriginZone()]`), so remove those undefined solutions.
     solutions = u.compact(solutions)
 
+    solutions = u.uniqBy(solutions, 'element')
+
     # Cannot place <body> in an overlay
     if @layer.isOverlay() || @layer == 'new'
       solutions = u.reject solutions, (solution) -> e.isSingleton(solution.element)
 
     @solutionsBySelector[selector] = solutions
+
+    console.log("*** Solutions for %o are %o", selector, solutions)
 
     return solutions
 
@@ -106,9 +115,9 @@ class up.LayerScanner
     return @layerMains
 
   getTop: ->
-    unless @topRetrieved = true
+    unless @topRetrieved
       if topElement = @layer.getFirstSwappableElement()
-        @top = new up.TargetSolution(up.fragment.toTarget(topElement), topElement)
+        @top = new up.TargetSolution.Final(up.fragment.toTarget(topElement), topElement)
       @topRetrieved = true
     return @top
 

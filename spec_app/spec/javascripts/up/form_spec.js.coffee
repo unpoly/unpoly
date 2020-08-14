@@ -1048,7 +1048,7 @@ describe 'up.form', ->
           next =>
             request = @lastRequest()
             expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
-            expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group:has(input[name="user"])')
+            expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group:has([name="user"])')
 
             @respondWith
               status: 500
@@ -1160,7 +1160,7 @@ describe 'up.form', ->
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(@lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
-          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-fieldset]:has(input[name="password"])')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-fieldset]:has([name="password"])')
 
 
           @respondWith """

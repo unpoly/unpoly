@@ -33,6 +33,8 @@ TODO for [up-zone]
 - Some custom selectors are not implemented in LayerScanner, some in Selector.
   - Can we implement :has() in LayerScanner?
   - What about :main and :top? We also have these in OpenLayer?
+- Rename config.xxx.targets to config.xxx.mains, or mainSelectors
+- Should :top be :content-root or :layer-content or :content or similar?
 
 
 Other TODOs
