@@ -4,25 +4,18 @@ TODO for [up-zone]
 - up.fragment.ancestorsWithSelf
 - re-use plans if old element is still attached
 - Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-- By default, update history only when targeting a main
-  - Does this also affect revealing?
-  - This is not true in cards?
+- Support [up-zone][up-history]
 - Issues with render({ content })
   - This will not work: up.render({ origin: 'foo', content: 'xxx' })
     - It will replace the main (because docOptions.defaultTarget = @firstDefaultTarget())
     - It will not look up a zone around origin
-  - This will not work: up.render({ target: ':main', content: 'xxx' })
-    - ResponseDoc will fail to create an element matching :main
-    - Can't we use the preflightTarget?
-    - Same with :layer-content
   - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
     , but there was some cyclical flow (I think the ResponseDoc was missing from plans?)
     when I last tried that.
 - Either implement overlay revivification OR remove support for { placement: 'root' }
-- Only in overlays the first swappable element should be a main
+- Rename :layer-content to just :layer
 - Tests!
   - Zones are preferred lookups
-  - Targets are improved
   - Zones are mains ("default targets")
   - Users can target :zone
   - Users can target :closest-zone

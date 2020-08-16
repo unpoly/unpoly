@@ -665,6 +665,28 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
 
+        it 'improves a selector with a more specific selector from the matching element in
+        the current page xxx', asyncSpec (next) ->
+          fixture('.klass#id')
+
+          up.render('.klass', url: '/path')
+
+          next =>
+            expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.klass#id')
+
+        it 'prefers to replace an an ancestor of the origin xxx', asyncSpec (next) ->
+          one = fixture('.element#one')
+          two = fixture('.element#two')
+          childOfTwo = e.affix(two, '.origin')
+          two = fixture('.element#three')
+
+          up.render('.element', origin: childOfTwo, url: '/path')
+
+          next =>
+            expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.element#two')
+
+
+
         describe 'merging of nested selectors', ->
 
           it 'replaces a single fragment if a selector contains a subsequent selector in the current page', asyncSpec (next) ->
