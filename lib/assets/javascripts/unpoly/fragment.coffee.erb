@@ -25,7 +25,6 @@ up.fragment = do ->
       # as up.fragment.config.targets.
       get_targets: -> up.layer.config.any.targets
       resetTargets: ['body']
-      zones: ['[up-zone]']
       badTargetClasses: [/^up-/]
 
   reset = ->
@@ -601,7 +600,7 @@ up.fragment = do ->
       # We do use e.get() to unwrap a jQuery collection.
       return [e.get(selectorOrElement)]
     else
-      selector = e.resolveSelector(selectorOrElement, options.origin)
+      selector = resolveTarget(selectorOrElement, options)
 
       if rootElement = args[0]
         # up.fragment.all(rootElement, selector) should find selector within
@@ -824,13 +823,23 @@ up.fragment = do ->
     if u.isString(element)
       return element
 
-    # resolveSelector() might be called with jQuery collections
+    # In case we're called called with a jQuery collection
     element = e.get(element)
 
-    unless e.isSingleton(element)
-      selector = improveTarget('', element)
-
-    return selector || e.elementTagName(element)
+    if e.isSingleton(element)
+       return e.elementTagName(element)
+     else if upId = element.getAttribute("up-id")
+       return e.attributeSelector('up-id', upId)
+     else if id = element.getAttribute("id")
+       return e.idSelector(id)
+     else if name = element.getAttribute("name")
+       return e.attributeSelector('name', name)
+     else if goodClass = u.find(element.classList, isGoodClassForTarget)
+       return ".#{goodClass}"
+     else if ariaLabel = element.getAttribute("aria-label")
+       return e.attributeSelector('aria-label', ariaLabel)
+     else
+       return e.elementTagName(element)
 
   ###**
   Sets an unique identifier for this element.
@@ -868,53 +877,33 @@ up.fragment = do ->
   @stable
   ###
 
-  attributeTargetImprover = (attr) ->
-    return {
-      presence: new RegExp('\\[' + attr + '=')
-      attempt: (element) ->
-        if value = element.getAttribute(attr)
-          return e.attributeSelector(attr, value)
-    }
-
-  idTarget = (element) ->
-    if id = element.id
-      return e.idSelector(id)
-
-  goodClassTarget = (element) ->
-    if goodClass = u.find(element.classList, isGoodClassForTarget)
-      return ".#{goodClass}"
-
-  TARGET_IMPROVERS = [
-    attributeTargetImprover('up-id'),
-    { presence: /\#|\[id=/, attempt: idTarget },
-    attributeTargetImprover('up-zone'),
-    { presence: /\./, attempt: goodClassTarget },
-    attributeTargetImprover('name'),
-    attributeTargetImprover('aria-label')
-  ]
-
-  isImprovableTarget = (selector) ->
-    return !/[ >\:]/.test(selector) && !e.isSingletonSelector(selector)
-
-  improveTarget = (selector, element) ->
-    if isImprovableTarget(selector)
-      for improver in TARGET_IMPROVERS
-        if selector && improver.presence.test(selector)
-          # If the best improver is already present in the selector,
-          # don't improve further.
-          return selector
-        else
-          # If the improver returns a result, return the improvement and don't
-          # attempt later improvers (which are of lower precision).
-          # If the improver returns undefined, try the next improver in the next iteration.
-          if improvement = improver.attempt(element)
-            return selector + improvement
-
-    # If we could not improve, return the unchanged selector.
-    return selector
-
   isGoodClassForTarget = (klass) ->
     return !u.some(config.badTargetClasses, (pattern) -> pattern.test(klass))
+
+  resolveTarget = (target, options= {}) ->
+    origin = options.origin
+
+    target = target.replace '&', (match) ->
+      if origin
+        return toTarget(origin)
+      else
+        up.fail("Missing origin for origin reference (%s) (found in %os)", match, target)
+
+    target = target.replace /^([^:]+):closest(?: (.+))?$/, (match, parentSelector, childSelector) ->
+      if origin
+        if parent = up.fragment.closest(origin, parentSelector)
+          improvedParentSelector = toTarget(parent)
+          if childSelector
+            return improvedParentSelector + ' ' + childSelector
+          else
+            return improvedParentSelector
+      else
+        up.fail('Missing origin for pseudo-class :closest (found in %s)', target)
+
+    if u.contains(target, ':closest')
+      up.fail('The :closest pseudo-class must be in the first part of a selector sequence (found in %s)', target)
+
+    return target
 
   up.on 'up:app:boot', ->
     body = document.body
@@ -949,8 +938,8 @@ up.fragment = do ->
     emitKept: emitFragmentKept
     successKey: successKey,
     failKey: failKey
+    resolveTarget: resolveTarget
     toTarget: toTarget
-    improveTarget: improveTarget
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

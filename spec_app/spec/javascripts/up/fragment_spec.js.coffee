@@ -665,27 +665,20 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
 
-        it 'improves a selector with a more specific selector from the matching element in
-        the current page xxx', asyncSpec (next) ->
-          fixture('.klass#id')
+        describe ':closest pseudo-class', ->
 
-          up.render('.klass', url: '/path')
+          it 'finds the closest ancestor of the origin and builds a specific selector for that element', asyncSpec (next) ->
 
-          next =>
-            expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.klass#id')
+            root = fixture('.element#root')
+            one = e.affix(root, '.element#one')
+            two = e.affix(root, '.element#two')
+            childOfTwo = e.affix(two, '.origin')
+            three = e.affix(root, '.element#three')
 
-        it 'prefers to replace an an ancestor of the origin xxx', asyncSpec (next) ->
-          one = fixture('.element#one')
-          two = fixture('.element#two')
-          childOfTwo = e.affix(two, '.origin')
-          two = fixture('.element#three')
+            up.render('.element:closest', origin: childOfTwo, url: '/path')
 
-          up.render('.element', origin: childOfTwo, url: '/path')
-
-          next =>
-            expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.element#two')
-
-
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('#two')
 
         describe 'merging of nested selectors', ->
 
@@ -717,33 +710,33 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-#          it 'replaces a single fragment if a selector is contained by a subsequent selector in the current page', asyncSpec (next) ->
-#            $outer = $fixture('.outer').text('old outer text')
-#            $inner = $outer.affix('.inner').text('old inner text')
-#
-#            replacePromise = up.render('.inner, .outer', url: '/path')
-#
-#            next =>
-#              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-#
-#              @respondWith """
-#                <div class="outer">
-#                  new outer text
-#                  <div class="inner">
-#                    new inner text
-#                  </div>
-#                </div>
-#                """
-#
-#            next =>
-#              expect($('.outer')).toBeAttached()
-#              expect($('.outer').text()).toContain('new outer text')
-#              expect($('.inner')).toBeAttached()
-#              expect($('.inner').text()).toContain('new inner text')
-#
-#            next.await =>
-#              promise = promiseState(replacePromise)
-#              promise.then (result) => expect(result.state).toEqual('fulfilled')
+          it 'replaces a single fragment if a selector is contained by a subsequent selector in the current page', asyncSpec (next) ->
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            replacePromise = up.render('.inner, .outer', url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+            next.await =>
+              promise = promiseState(replacePromise)
+              promise.then (result) => expect(result.state).toEqual('fulfilled')
 
           it 'does not merge selectors if a selector contains a subsequent selector, but prepends instead of replacing', asyncSpec (next) ->
             $outer = $fixture('.outer').text('old outer text')
@@ -841,66 +834,66 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-#          it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-#            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-#
-#            $outer = $fixture('.outer').text('old outer text')
-#            $inner = $outer.affix('.inner').text('old inner text')
-#
-#            up.render('.inner, .outer', url: '/path', reveal: true)
-#
-#            next =>
-#              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-#
-#              @respondWith """
-#                <div class="outer">
-#                  new outer text
-#                  <div class="inner">
-#                    new inner text
-#                  </div>
-#                </div>
-#                """
-#
-#            next =>
-#              expect($('.outer')).toBeAttached()
-#              expect($('.outer').text()).toContain('new outer text')
-#              expect($('.inner')).toBeAttached()
-#              expect($('.inner').text()).toContain('new inner text')
-#
-#              expect(revealStub).toHaveBeenCalled()
-#
-#          it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-#            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-#
-#            $outer = $fixture('.outer').text('old outer text')
-#            $inner = $outer.affix('.inner').text('old inner text')
-#
-#            up.render('.inner, .outer', url: '/path', reveal: '.revealee')
-#
-#            next =>
-#              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-#
-#              @respondWith """
-#                <div class="outer">
-#                  new outer text
-#                  <div class="inner">
-#                    new inner text
-#                    <div class="revealee">
-#                      revealee text
-#                    </div>
-#                  </div>
-#                </div>
-#                """
-#
-#            next =>
-#              expect($('.outer')).toBeAttached()
-#              expect($('.outer').text()).toContain('new outer text')
-#              expect($('.inner')).toBeAttached()
-#              expect($('.inner').text()).toContain('new inner text')
-#
-#              expect(revealStub).toHaveBeenCalled()
-#              revealArg = revealStub.calls.mostRecent().args[0]
-#              expect(revealArg).toMatchSelector('.revealee')
+          it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            up.render('.inner, .outer', url: '/path', reveal: true)
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+              expect(revealStub).toHaveBeenCalled()
+
+          it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+
+            $outer = $fixture('.outer').text('old outer text')
+            $inner = $outer.affix('.inner').text('old inner text')
+
+            up.render('.inner, .outer', url: '/path', reveal: '.revealee')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
+
+              @respondWith """
+                <div class="outer">
+                  new outer text
+                  <div class="inner">
+                    new inner text
+                    <div class="revealee">
+                      revealee text
+                    </div>
+                  </div>
+                </div>
+                """
+
+            next =>
+              expect($('.outer')).toBeAttached()
+              expect($('.outer').text()).toContain('new outer text')
+              expect($('.inner')).toBeAttached()
+              expect($('.inner').text()).toContain('new inner text')
+
+              expect(revealStub).toHaveBeenCalled()
+              revealArg = revealStub.calls.mostRecent().args[0]
+              expect(revealArg).toMatchSelector('.revealee')
 
           it 'replaces a single fragment if the nesting differs in current page and response', asyncSpec (next) ->
             $outer = $fixture('.outer').text('old outer text')
@@ -3707,14 +3700,6 @@ describe 'up.fragment', ->
         element.setAttribute('id', 'foo"bar')
         expect(up.fragment.toTarget(element)).toBe('[id="foo\\"bar"]')
 
-      it "prefers using the element's [up-zone] to using the element's class", ->
-        element = fixture('div.foo[up-zone=bar]')
-        expect(up.fragment.toTarget(element)).toBe('[up-zone="bar"]')
-
-      it "does not use an [up-zone] without an attribute value", ->
-        element = fixture('div.foo[up-zone]')
-        expect(up.fragment.toTarget(element)).toBe('.foo')
-
       it "prefers using the element's class to using the element's ARIA label", ->
         element = fixture('div.class[aria-label="ARIA label value"]')
         expect(up.fragment.toTarget(element)).toBe(".class")
@@ -3748,22 +3733,3 @@ describe 'up.fragment', ->
         element = fixture('div')
         element.setAttribute('aria-label', 'foo"bar')
         expect(up.fragment.toTarget(element)).toBe('[aria-label="foo\\"bar"]')
-
-    describe 'up.fragment.improveTarget', ->
-
-      it 'improves an #id selector with an [up-id] selector', ->
-        element = fixture('div#foo[up-id=bar]')
-        expect(up.fragment.improveTarget('#foo', element)).toBe('#foo[up-id="bar"]')
-
-      it 'improves a class selector with an #id selector', ->
-        element = fixture('div.foo#bar')
-        expect(up.fragment.improveTarget('.foo', element)).toBe('.foo#bar')
-
-      it 'does not change a selector that already has an ID', ->
-        element = fixture('div.foo#bar')
-        expect(up.fragment.improveTarget('#bar', element)).toBe('#bar')
-
-      # We might change this in the future and reconsider classes
-      it 'does not improve a selector that already has a class', ->
-        element = fixture('.first.second')
-        expect(up.fragment.improveTarget('.second', element)).toBe('.second')

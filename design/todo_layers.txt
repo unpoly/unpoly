@@ -34,6 +34,7 @@ TODO for [up-zone]
 Other TODOs
 ----------
 
+- Remove aria-labels for selectors, it doesn't feel right and might cause unparsable selectors
 - Allow transition: true for default transition
 - Allow animation: true for default animation
 - Do I get a value here? up.layer.open({ url: '/users/new', onRemoved: (event) => console.log(event.value) })
@@ -78,6 +79,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
+  - Test :origin instead of &
   - Test that pseudo-element targets are removed from target
   - Test that peeling dismissals can be detected by a dismiss value of ":peel"
   - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})

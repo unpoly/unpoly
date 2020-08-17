@@ -22,32 +22,17 @@ class up.Change.OpenLayer extends up.Change.Addition
       context: @options.context
       # The target will always exist in the current page, since
       # we're opening a new layer that will match the target.
-      target: @bestPreflightSelector(),
+      target: @target
     }
 
   bestPreflightSelector: ->
-    @getAlternatives()[0]
+    return @target
 
   toString: ->
     "Open \"#{@target}\" in new layer"
 
-  getAlternatives: ->
-    unless @alternatives
-      @alternatives = []
-
-      if @target.indexOf(':main') >= 0
-        for mainSelector in up.layer.defaultTargets(@mode)
-          @alternatives.push(@target.replace(/\:main\b/, mainSelector))
-      else
-        @alternatives.push(@target)
-
-    unless @alternatives.length
-      throw @notApplicable()
-
-    return @alternatives
-
   execute: (responseDoc) ->
-    @content = u.findResult(@getAlternatives(), (alternative) => responseDoc.select(alternative))
+    @content = responseDoc.select(@target)
 
     if !@content || @currentLayer.isClosed()
       throw @notApplicable()

@@ -7,7 +7,7 @@ class up.Change.FromURL extends up.Change
   constructor: (options) ->
     super(options)
 
-    @successOptions = u.merge(@options, { layerScanners: new Map() })
+    @successOptions = u.copy(@options)
     @successOptions.inspectResponse = @fullLoad
     @deriveFailOptions()
 

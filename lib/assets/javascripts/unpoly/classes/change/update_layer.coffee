@@ -11,9 +11,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @origin = options.origin
-    @layerScanner = options.layerScanner
     @placement = options.placement
     console.log("--- UpdateLayer: target is %o", @target)
+    @parseSteps()
 
   requestAttributes: ->
     @matchPreflight()
@@ -171,13 +171,24 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return unless options.keep
 
     keepable = options.oldElement
+
+    # We support these attribute forms:
+    #
+    # - up-keep             => match element itself
+    # - up-keep="true"      => match element itself
+    # - up-keep="false"     => don't keep
+    # - up-keep=".selector" => match .selector
     if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
-      u.isString(partnerSelector) or partnerSelector = '&'
-      partnerSelector = e.resolveSelector(partnerSelector, keepable)
+      if partnerSelector == true
+        partnerSelector = '&'
+
+      lookupOpts = { layer: @layer, origin: keepable }
+
       if options.descendantsOnly
-        partner = e.get(options.newElement, partnerSelector)
+        partner = up.fragment.get(options.newElement, partnerSelector, lookupOpts)
       else
-        partner = e.subtree(options.newElement, partnerSelector)[0]
+        partner = up.fragment.subtree(options.newElement, partnerSelector, lookupOpts)[0]
+
       if partner && e.matches(partner, '[up-keep]')
         plan =
           oldElement: keepable # the element that should be kept
@@ -215,6 +226,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     disjunction = u.splitValues(@target, ',')
 
     @steps = disjunction.map (target, i) =>
+      console.log("*** target is %o", target)
       expressionParts = target.match(/^(.+?)(?:\:(before|after|root))?$/) or
         throw up.error.invalidSelector(target)
 
@@ -222,133 +234,68 @@ class up.Change.UpdateLayer extends up.Change.Addition
       selector = expressionParts[1]
       placement = expressionParts[2] || @placement || 'swap'
 
-      solutions = @layerScanner.selectSolutions(selector)
-
       if placement == 'root'
         # The `root` placement can be modeled as a `swap` of the new element and
         # the first child of the current layer's' root element.
         placement = 'swap'
-
-        for solution in solutions
-          solution.element = @layer.getFirstSwappableElement()
-
-      unless solutions.length
-        throw @notApplicable()
-
-      console.log("--- UpdateLayer<%o>: step %o has solutions %o", @target, selector, solutions)
+        oldElement = @layer.getFirstSwappableElement()
 
       # Each step inherits all options of this change.
-      return u.merge(@options, { solutions, placement })
+      return u.merge(@options, { selector, placement, oldElement })
 
   matchPreflight: ->
     return if @matchedPreflight
 
-    # Since parsing steps involves many DOM lookups, we only do it when required.
-    @parseSteps()
+    for step in @steps
+      # Try to find fragments matching step.selector within step.layer.
+      # Note that step.oldElement might already have been set by @parseSteps().
+      step.oldElement ||= up.fragment.get(step.selector, step) or
+        throw @notApplicable("Could not find element \"#{@target}\" in current page")
 
-    originalSteps = @steps
-    @steps = []
-
-    for originalStep in originalSteps
-      solutions = originalStep.solutions
-
-      # If we don't have any solutions for this step, this change cannot be applied.
-      unless solutions.length
-        throw @notApplicable()
-
-      remainingSolutions = @rejectSolutionsSwappedByEarlierSteps(originalStep.solutions)
-      if remainingSolutions.length
-        # We might not swap this element. Once the response is received, @matchPostflight()
-        # will go through all alternatives and see which selector matches in *both*
-        # the current page and response doc.
-        @useSolution(originalStep, remainingSolutions[0])
-      else
-        # This step's oldElement was already changed by a previous step.
+    @resolveOldNesting()
 
     @matchedPreflight = true
-
-  rejectSolutionsSwappedByEarlierSteps: (solutions) ->
-    return u.reject solutions, (solution) => @isElementSwappedByEarlierStep(solution.element)
-
-  isElementSwappedByEarlierStep: (element) ->
-    return u.some @steps, (step) ->
-      earlierStepWillRemoveElement = (step.placement == 'swap' || step.placement == 'root')
-      if earlierStepWillRemoveElement
-        step.oldElement.contains(element)
-      else
-        # ResponseDoc only has a single new element for that old element,
-        # so we cannot e.g. append the same new element twice.
-        step.oldElement == element
-
-  useSolution: (step, solution) ->
-    console.log("useSolution(%o, %o)", u.copy(step), u.copy(solution))
-    step.oldElement = solution.element
-    step.selector = solution.selector
-    @steps.push(step)
 
   matchPostflight: ->
     return if @matchedPostflight
 
-    # Since parsing steps involves many DOM lookups, we only do it when required.
-    @parseSteps()
+    @matchPreflight()
 
-    originalSteps = @steps
-    @steps = []
-
-    for step in originalSteps
-      # If a solution's element was removed while the request was in flight,
-      # this solution is no longer relevant. Another solution for the same step still might.
-      attachedSolutions = u.reject step.solutions, (solution) -> e.isDetached(solution.element)
-
-      # If we cannot find an attached match in the current page, this change is not applicable.
-      unless attachedSolutions.length
-        throw @notApplicable()
-
-      remainingSolutions = @rejectSolutionsSwappedByEarlierSteps(attachedSolutions)
-
-      if remainingSolutions.length
-        bestSolution = u.find remainingSolutions, (solution) =>
-          # The responseDoc has no layers, so we can just select on the entire tree.
-          if step.newElement = @responseDoc.select(solution.selector)
-            return true
-
-        if bestSolution
-          # We will no longer look at other solutions.
-          @useSolution(step, bestSolution)
-        else
-          throw @notApplicable()
-
-      else
-        # This step's oldElement was already changed by a previous step
+    for step in @steps
+      # The responseDoc has no layers.
+      step.newElement = @responseDoc.select(step.selector) or
+        throw @notApplicable("Could not find element \"#{@target}\" in server response")
 
     # Only when we have a match in the required selectors, we
     # append the optional steps for [up-hungry] elements.
     if @options.hungry
       @addHungrySteps()
 
-    console.log("--- targets before collapse: %o", u.map(@steps, 'selector'))
-
 #    # Remove steps when their oldElement is nested inside the oldElement
 #    # of another step.
-#    @resolveOldNesting()
-
-    console.log("--- targets after collapse: %o", u.map(@steps, 'selector'))
+    @resolveOldNesting()
 
     @matchedPostflight = true
 
   addHungrySteps: ->
     # Find all [up-hungry] fragments within @layer
-    hungries = up.fragment.all(up.radio.hungrySelector(), { @layer })
-    transition = up.radio.config.hungryTransition ? @options.transition
+    hungries = up.fragment.all(up.radio.hungrySelector(), @options)
+    transition = up.radio.config.hungryTransition ? @transition
     for oldElement in hungries
-      # Don't touch an element a second time.
-      unless @isElementSwappedByEarlierStep(oldElement)
-        selector = up.fragment.toTarget(oldElement)
-        # Be opportunistic and only add a step if there is a new element
-        # in responseDoc. If there is no new element, we do nothing.
-        if newElement = @responseDoc.select(selector)
-          step = { selector, oldElement, newElement, transition, placement: 'swap' }
-          @steps.push(step)
+      selector = up.fragment.toTarget(oldElement)
+      if newElement = @responseDoc.select(selector)
+        @steps.push({ selector, oldElement, newElement, transition, placement: 'swap' })
+
+  containedByRivalStep: (steps, candidateStep) ->
+    return u.some steps, (rivalStep) ->
+      rivalStep != candidateStep &&
+        rivalStep.placement == 'swap' &&
+        rivalStep.oldElement.contains(candidateStep.oldElement)
+
+  resolveOldNesting: ->
+    compressed = u.uniqBy(@steps, 'oldElement')
+    compressed = u.reject compressed, (step) => @containedByRivalStep(compressed, step)
+    @steps = compressed
 
   setScrollAndFocusOptions: ->
     @steps.forEach (step, i) =>

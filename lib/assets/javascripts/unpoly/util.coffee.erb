@@ -1698,7 +1698,13 @@ up.util = do ->
     else if isRegExp(arg)
       string = arg.toString()
     else # object, array
-      string = JSON.stringify(arg)
+      try
+        string = JSON.stringify(arg)
+      catch e
+        if contains(e.message, 'circular')
+          string = '(circular structure)'
+        else
+          throw e
 
     if string.length > maxLength
       string = "#{string.substr(0, maxLength)} …"
