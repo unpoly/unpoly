@@ -1,10 +1,8 @@
 TODO for [up-zone]
 -------------------
 
-- up.fragment.ancestorsWithSelf
-- re-use plans if old element is still attached
-- Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-- Support [up-zone][up-history]
+- Rename config.xxx.targets to config.xxx.mainTargets (or mainSelectors?)
+- Rename options like up.link.config.follow to up.link.config.followSelectors
 - Issues with render({ content })
   - This will not work: up.render({ origin: 'foo', content: 'xxx' })
     - It will replace the main (because docOptions.defaultTarget = @firstDefaultTarget())
@@ -12,28 +10,34 @@ TODO for [up-zone]
   - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
     , but there was some cyclical flow (I think the ResponseDoc was missing from plans?)
     when I last tried that.
-- Either implement overlay revivification OR remove support for { placement: 'root' }
+- Remove support for { placement: 'root' }
 - Rename :layer-content to just :layer
 - Tests!
-  - Zones are preferred lookups
-  - Zones are mains ("default targets")
-  - Users can target :zone
-  - Users can target :closest-zone
-  - Users can target :zone .foo
-  - Users can target :closest-zone .foo
-  - Users can target :main when updating layers
-  - Users can target :main when opening layers
-  - Users can target :layer-content
+  - Test that default target is :main for updating layer
+  - Test that default target is :main for new layer
+  - Test that :layer is a fallback for updating layer
+  - Users can target .element:closest and we get an improved selector
+  - Users can target .element:closest .child and we get an improved selector for the first clause only
+  - Users can explicitely target :main when updating layers
+  - Users can explicitely target :main when opening layers
+  - Users can explicitely target :layer-content when updating layer
 - Some custom selectors are not implemented in LayerScanner, some in Selector.
   - Can we implement :has() in LayerScanner?
   - What about :main and :layer-content? We also have these in OpenLayer?
 - Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-- Should :top be :content-root or :layer-content or :content or similar?
+- Rename :layer-content to just :layer
+- No longer improve selectors
+- Remove improveSelector, we only need toSelector. We might even move this back to up.element.
+- Check if we still needup.fragment.ancestorsWithSelf()
 
 
 Other TODOs
 ----------
 
+- Allow transition: true for default transition
+- Allow animation: true for default animation
+- Do I get a value here? up.layer.open({ url: '/users/new', onRemoved: (event) => console.log(event.value) })
+- Fragment changes should support [up-on-appeared] and [up-on-removed] attributes
 - rename Options like up.viewport.config.viewports to up.viewport.config.viewportSelectors etc.
 - Why does protect_jasmine_runner create a default-fallback as a new child of overlay#contentElement? In real use #contentElement will only have a singel child!
 - Allow to refer to ":self" instead of "&"
@@ -322,15 +326,12 @@ Finishing up
 - E-Mail maintainers of rack-unpoly und unpoly_ex
 
 
-Accessibility
---------------
-
-- A11Y: check if [inert] etc. are enough to have the browser rotate focus within the layer
-
 
 Later?
 ------
 
+- Abort Up requests if the user navigates away
+  - Request#loadPage() already does this, but what about other links?
 - We could allow up.fragment.config.runInlineScripts again. I don't know why we removed it, now that we have HTMLWrapper.
 - up.element.config.nonSemanticClasses = [/^mb-\d$]
   - will be ignored in up.element.toSelector()
