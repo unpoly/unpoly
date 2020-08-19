@@ -668,7 +668,6 @@ describe 'up.fragment', ->
         describe ':closest pseudo-class', ->
 
           it 'finds the closest ancestor of the origin and builds a specific selector for that element', asyncSpec (next) ->
-
             root = fixture('.element#root')
             one = e.affix(root, '.element#one')
             two = e.affix(root, '.element#two')
@@ -679,6 +678,19 @@ describe 'up.fragment', ->
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('#two')
+
+          it 'allows to select a descendant of an ancestor, while keeping the specific selector for the ancestor', asyncSpec (next) ->
+            root = fixture('.element#root')
+            one = e.affix(root, '.element#one')
+            two = e.affix(root, '.element#two')
+            childOfTwo = e.affix(two, '.origin')
+            otherChildOfTwo = e.affix(two, '.descendant')
+            three = e.affix(root, '.element#three')
+
+            up.render('.element:closest .descendant', origin: childOfTwo, url: '/path')
+
+            next =>
+              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('#two .descendant')
 
         describe 'merging of nested selectors', ->
 
