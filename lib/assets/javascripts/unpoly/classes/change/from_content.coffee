@@ -26,37 +26,28 @@ class up.Change.FromContent extends up.Change
       @plans = []
       addFallbackPlans = (@options.fallback != false)
 
-      if @layers.length
-        if @options.fragment
-          # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
-          # requires a { target }. We use a target that matches the parsed { fragment }.
-          @options.target = @getResponseDoc().rootSelector()
+      if @options.fragment
+        # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
+        # requires a { target }. We use a target that matches the parsed { fragment }.
+        @options.target = @getResponseDoc().rootSelector()
 
-        # (1) We seek @options.target in all matching layers
-        @expandIntoPlans(@layers, @options.target)
+      # (1) We seek @options.target in all matching layers
+      @expandIntoPlans(@layers, @options.target)
 
-        if addFallbackPlans
-          # (2) In case fallback is a selector or array of selectors, we seek the fallback
-          # in all matching layers. If fallback is true or undefined, this won't add plans.
-          @expandIntoPlans(@layers,  @options.fallback)
+      if addFallbackPlans
+        # (2) In case fallback is a selector or array of selectors, we seek the fallback
+        # in all matching layers. If fallback is true or undefined, this won't add plans.
+        @expandIntoPlans(@layers,  @options.fallback)
 
-          # (3) We try to update the closest zone around the origin. If no origin is
-          # given, this will update the layer's main selectors.
-          @expandIntoPlans(@layers, ':main')
+        # (3) We try to update the closest zone around the origin. If no origin is
+        # given, this will update the layer's main selectors.
+        @expandIntoPlans(@layers, ':main')
 
-          # (4) In case nothing from the above matches, we close all layers and swap the
-          # body. The assumption is that the server has returned an unexpected response like
-          # an error message or a login screen (if a session expired) and we want to display
-          # this rather than fail the update.
-          @addResetPlans()
-
-      else if addFallbackPlans
-        # If { layer } doesn't resolve to an existing layer (e.g. layer: 'parent' when there
-        # are no overlays), we can still reset the world instead of failing.
+        # (4) In case nothing from the above matches, we close all layers and swap the
+        # body. The assumption is that the server has returned an unexpected response like
+        # an error message or a login screen (if a session expired) and we want to display
+        # this rather than fail the update.
         @addResetPlans()
-      else
-        up.fail("Layer %o does not exist", @options.layer)
-
 
     return @plans
 
@@ -64,7 +55,6 @@ class up.Change.FromContent extends up.Change
     @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true })
 
   expandIntoPlans: (layers, givenTarget, variantProps) ->
-    console.log("expandIntoPlans(%o)", givenTarget)
     for layer in layers
       for target in @expandTargets(layer, givenTarget)
         # Any plans we add will inherit all properties from @options
@@ -78,18 +68,14 @@ class up.Change.FromContent extends up.Change
           @plans.push(change)
 
   expandTargets: (layer, givenTarget) ->
-    console.log("... expandTargets(%o)", givenTarget)
     if givenTarget == ':main'
       targets = @defaultTargets(layer)
     else
       targets = u.wrapList(givenTarget)
 
-    console.log("... ... base targets are %o", targets)
-
     # Use u.map() instead of Array#map() because sometimes targets is a jQuery
     # collection which an incompatible #map() implementation.
     targets = u.map targets, (target) =>
-      console.log("... ... iteration target is %o", target)
       if target == ':layer'
         return @firstSwappableTarget(layer)
       if u.isElementish(target)
@@ -100,8 +86,6 @@ class up.Change.FromContent extends up.Change
         # @buildPlans() might call us with { target: false } or { target: nil }
         # In that case we don't add a plan.
         return
-
-    console.log("... ... results of expandTargets is %o (before compact)", targets)
 
     return u.compact(targets)
 
@@ -117,13 +101,6 @@ class up.Change.FromContent extends up.Change
       return up.fragment.toTarget(layer.getFirstSwappableElement())
 
   execute: ->
-    # In up.Change.FromURL we already set an X-Up-Title header as options.title.
-    # Now that we process an HTML document
-    @options.title = @improveHistoryValue(@options.title, @getResponseDoc().getTitle())
-
-    if @options.saveScroll
-      up.viewport.saveScroll()
-
     return @seekPlan
       attempt: (plan) => plan.execute(@getResponseDoc())
       noneApplicable: => @postflightTargetNotApplicable()
@@ -175,7 +152,10 @@ class up.Change.FromContent extends up.Change
     return @getPlans().length
 
   failFromEmptyPlans: (toastOpts) ->
-    up.fail(['No target for change %o', @options], toastOpts)
+    if @layers.length
+      up.fail(['No target for change %o', @options], toastOpts)
+    else
+      up.fail('Layer %o does not exist', @options.layer)
 
   planTargets: ->
     return u.uniq(u.map(@getPlans(), 'target'))

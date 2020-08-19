@@ -39,6 +39,8 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     up.puts('up.render()', "Opening element \"#{@target}\" in new layer")
 
+    @options.title = @improveHistoryValue(@options.title, responseDoc.getTitle())
+
     @layer = up.layer.build(@options)
 
     if @emitOpenEvent().defaultPrevented

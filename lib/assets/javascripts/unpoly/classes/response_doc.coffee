@@ -75,7 +75,6 @@ class up.ResponseDoc
     return @title
 
   select: (selector) ->
-    console.log("--- responseDoc selecting %o on %o => %o", selector, @root, e.subtree(@root, selector)[0])
     e.subtree(@root, selector)[0]
 
   activateElement: (element, options) ->

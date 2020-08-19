@@ -12,7 +12,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @target = options.target
     @origin = options.origin
     @placement = options.placement
-    console.log("--- UpdateLayer: target is %o", @target)
     @parseSteps()
 
   requestAttributes: ->
@@ -40,8 +39,13 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     up.puts('up.render()', "Updating \"#{@target}\" in #{@layer}")
 
+    @options.title = @improveHistoryValue(@options.title, @responseDoc.getTitle())
+
     # Make sure only the first step will have scroll-related options.
     @setScrollAndFocusOptions()
+
+    if @options.saveScroll
+      up.viewport.saveScroll()
 
     if @options.peel
       @layer.peel()
@@ -226,7 +230,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     disjunction = u.splitValues(@target, ',')
 
     @steps = disjunction.map (target, i) =>
-      console.log("*** target is %o", target)
       expressionParts = target.match(/^(.+?)(?:\:(before|after|root))?$/) or
         throw up.error.invalidSelector(target)
 
@@ -299,8 +302,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   setScrollAndFocusOptions: ->
     @steps.forEach (step, i) =>
-      console.log("setScrollAndFocusOptions for step %o", step)
-
       # Since up.motion will call @handleScrollAndFocus() after each fragment,
       # make sure that we only touch the scroll position once, for the first step.
       if i > 0

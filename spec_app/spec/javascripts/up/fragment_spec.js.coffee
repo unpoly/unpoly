@@ -1833,7 +1833,7 @@ describe 'up.fragment', ->
             onRemoved: onRemovedSpy
           )
 
-          next.after 50, ->
+          next.after 100, ->
             expect(onRemovedSpy.calls.count()).toBe(1)
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
