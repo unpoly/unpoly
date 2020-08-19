@@ -3,7 +3,6 @@ TODO for [up-zone]
 
 - Rename config.xxx.targets to config.xxx.mainTargets (or mainSelectors?)
 - Rename options like up.link.config.follow to up.link.config.followSelectors
-- Remove support for { placement: 'root' }
 - Rename :layer-content to just :layer
 - Tests!
   - Test that :layer will target the current content root of a layer

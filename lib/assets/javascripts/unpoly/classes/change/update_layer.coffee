@@ -230,21 +230,15 @@ class up.Change.UpdateLayer extends up.Change.Addition
     disjunction = u.splitValues(@target, ',')
 
     @steps = disjunction.map (target, i) =>
-      expressionParts = target.match(/^(.+?)(?:\:(before|after|root))?$/) or
+      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or
         throw up.error.invalidSelector(target)
 
       # selector = @layerScanner.fixSelector(expressionParts[1])
       selector = expressionParts[1]
       placement = expressionParts[2] || @placement || 'swap'
 
-      if placement == 'root'
-        # The `root` placement can be modeled as a `swap` of the new element and
-        # the first child of the current layer's' root element.
-        placement = 'swap'
-        oldElement = @layer.getFirstSwappableElement()
-
       # Each step inherits all options of this change.
-      return u.merge(@options, { selector, placement, oldElement })
+      return u.merge(@options, { selector, placement })
 
   matchPreflight: ->
     return if @matchedPreflight
