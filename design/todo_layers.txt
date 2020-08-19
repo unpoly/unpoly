@@ -3,32 +3,11 @@ TODO for [up-zone]
 
 - Rename config.xxx.targets to config.xxx.mainTargets (or mainSelectors?)
 - Rename options like up.link.config.follow to up.link.config.followSelectors
-- Issues with render({ content })
-  - This will not work: up.render({ origin: 'foo', content: 'xxx' })
-    - It will replace the main (because docOptions.defaultTarget = @firstDefaultTarget())
-    - It will not look up a zone around origin
-  - We probably need to build plans *before* building the ResponseDoc and then use the plans[0].bestPreflightSelector()
-    , but there was some cyclical flow (I think the ResponseDoc was missing from plans?)
-    when I last tried that.
 - Remove support for { placement: 'root' }
 - Rename :layer-content to just :layer
 - Tests!
-  - Test that default target is :main for updating layer
-  - Test that default target is :main for new layer
-  - Test that :layer is a fallback for updating layer
-  - Users can target .element:closest and we get an improved selector
-  - Users can target .element:closest .child and we get an improved selector for the first clause only
-  - Users can explicitely target :main when updating layers
-  - Users can explicitely target :main when opening layers
-  - Users can explicitely target :layer-content when updating layer
-- Some custom selectors are not implemented in LayerScanner, some in Selector.
-  - Can we implement :has() in LayerScanner?
-  - What about :main and :layer-content? We also have these in OpenLayer?
-- Rename config.xxx.targets to config.xxx.mains, or mainSelectors
-- Rename :layer-content to just :layer
-- No longer improve selectors
-- Remove improveSelector, we only need toSelector. We might even move this back to up.element.
-- Check if we still needup.fragment.ancestorsWithSelf()
+  - Test that :layer will target the current content root of a layer
+  - Test that user can target :main
 
 
 Other TODOs
