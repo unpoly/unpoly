@@ -176,7 +176,7 @@ describe 'up.feedback', ->
 
       it 'allows to configure additional nav selectors', ->
         up.history.replace('/foo')
-        up.feedback.config.navs.push('.navi')
+        up.feedback.config.navSelectors.push('.navi')
         $nav = $fixture('div.navi')
         $currentLink = $nav.affix('a[href="/foo"]')
         $otherLink = $nav.affix('a[href="/bar"]')

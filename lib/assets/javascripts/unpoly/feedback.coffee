@@ -55,13 +55,14 @@ up.feedback = do ->
   @property up.feedback.config
   @param {Array<string>} [config.currentClasses]
     An array of classes to set on [links that point the current location](/a.up-current).
-  @param {Array<string>} [config.navs]
+  @param {Array<string>} [config.navSelectors]
     An array of CSS selectors that match [navigation components](/up-nav).
   @stable
   ###
   config = new up.Config ->
     currentClasses: ['up-current']
-    navs: ['[up-nav]']
+    navSelectors: ['[up-nav]']
+  up.legacy.renamedProperty(config, 'navs', 'navSelectors')
 
   reset = ->
     config.reset()
@@ -70,7 +71,7 @@ up.feedback = do ->
   SELECTOR_LINK = 'a, [up-href]'
 
   navSelector = ->
-    config.navs.join(',')
+    config.navSelectors.join(',')
 
   normalizeURL = (url) ->
     if url

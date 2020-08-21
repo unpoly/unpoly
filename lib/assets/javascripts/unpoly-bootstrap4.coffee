@@ -2,7 +2,7 @@
 # of a navigation bar.
 up.feedback.config.currentClasses.push('active')
 
-up.feedback.config.navs.push('.nav', '.navbar')
+up.feedback.config.navSelectors.push('.nav', '.navbar')
 
 up.form.config.validateTargets.unshift('.form-group:has(&)')
 

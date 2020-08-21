@@ -2,7 +2,7 @@
 # of a navigation bar.
 up.feedback.config.currentClasses.push('active')
 
-up.feedback.config.navs.push('.nav', '.navbar')
+up.feedback.config.navSelectors.push('.nav', '.navbar')
 
 up.viewport.config.fixedTop.push('.navbar.fixed-top')
 up.viewport.config.fixedBottom.push('.navbar.fixed-bottom')
