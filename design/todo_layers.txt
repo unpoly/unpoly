@@ -66,13 +66,13 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - Test that { acceptLocation } (JS API) also takes an array of alternatives instead of a space-separated string
   - Test a[up-reveal=top]
   - Test that [up-main] is a default target
-  - Test up.link.config.preload.push('a')
+  - Test up.link.config.preloadSelectors.push('a')
     - Test that can be disabled at a link with [up-preload=false]
-  - Test up.link.config.instant.push('a')
+  - Test up.link.config.instantSelectors.push('a')
     - Test that can be disabled at a link with [up-instant=false]
-  - Test up.link.config.follow.push('a')
+  - Test up.link.config.followSelectors.push('a')
     - Test that can be disabled at a link with [up-follow=false]
-  - Test up.form.config.submit.push('a')
+  - Test up.form.config.submitSelectors.push('a')
     - Test that can be disabled at a form with [up-follow=false]
   - Preload requests are tentative by default, but tentative can be set to false and the request will then not be aborted by a foreground request
   - When a tentative request is promoted to the foreground, it is no longer tentative

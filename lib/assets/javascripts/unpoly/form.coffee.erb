@@ -21,7 +21,7 @@ up.form = do ->
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
-  @param {Array<string>} [config.submit=['form[up-target]', 'form[up-follow]']]
+  @param {Array<string>} [config.submitSelectors=['form[up-target]', 'form[up-follow]']]
     An array of CSS selectors matching forms that will be [submitted by Unpoly](/up.submit).
   @param {Array<string>} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
     An array of CSS selectors that are searched around a form field
@@ -39,13 +39,14 @@ up.form = do ->
   config = new up.Config ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
-    submit: up.link.combineFollowableSelectors(['form'])
+    submitSelectors: up.link.combineFollowableSelectors(['form'])
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
   up.legacy.renamedProperty(config, 'fields', 'fieldSelectors')
+  up.legacy.renamedProperty(config, 'submit', 'submitSelectors')
 
   fullSubmitSelector = ->
-    config.submit.join(',')
+    config.submitSelectors.join(',')
 
   reset = ->
     config.reset()
