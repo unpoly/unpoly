@@ -30,7 +30,7 @@ up.form = do ->
 
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field.
-  @param {string} [config.fields]
+  @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
   @param {string} [config.submitButtons]
     An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
@@ -38,10 +38,11 @@ up.form = do ->
   ###
   config = new up.Config ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
-    fields: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
+    fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submit: up.link.combineFollowableSelectors(['form'])
     submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
+  up.legacy.renamedProperty(config, 'fields', 'fieldSelectors')
 
   fullSubmitSelector = ->
     config.submit.join(',')
@@ -54,13 +55,13 @@ up.form = do ->
   @internal
   ###
   fieldSelector = (suffix = '') ->
-    config.fields.map((field) -> field + suffix).join(',')
+    config.fieldSelectors.map((field) -> field + suffix).join(',')
 
   ###**
   Returns a list of form fields within the given element.
 
   You can configure what Unpoly considers a form field by adding CSS selectors to the
-  [`up.form.config.fields`](/up.form.config#config.fields) array.
+  [`up.form.config.fieldSelectors`](/up.form.config#config.fieldSelectors) array.
 
   If the given element is itself a form field, a list of that given element is returned.
 
