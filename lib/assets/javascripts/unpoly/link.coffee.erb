@@ -90,18 +90,18 @@ up.link = do ->
 
   config = new up.Config ->
     preloadDelay: 75
-    follow: combineFollowableSelectors(LINKS_WITH_ANY_HTML)
-    instant: [e.trueAttributeSelector('up-instant')]
-    preload: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
+    followSelectors: combineFollowableSelectors(LINKS_WITH_ANY_HTML)
+    instantSelectors: [e.trueAttributeSelector('up-instant')]
+    preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
 
   fullFollowSelector = ->
-    config.follow.join(',')
+    config.followSelectors.join(',')
 
   fullPreloadSelector = ->
-    config.preload.join(',')
+    config.preloadSelectors.join(',')
 
   fullInstantSelector = ->
-    config.instant.join(',')
+    config.instantSelectors.join(',')
 
   isInstant = (linkOrDescendant) ->
     !!e.closest(linkOrDescendant, fullInstantSelector())
