@@ -25,15 +25,15 @@ up.layer = do ->
     newConfig =
       mode: 'modal'
       any:
-        targets: [
+        mainTargets: [
           "[up-main='']",
           'main',
           ':layer'
         ]
       root:
-        targets: ['[up-main~=root]']
+        mainTargets: ['[up-main~=root]']
       overlay:
-        targets: ['[up-main~=overlay]']
+        mainTargets: ['[up-main~=overlay]']
         history: true
         openAnimation: 'fade-in'
         closeAnimation: 'fade-out'
@@ -41,9 +41,9 @@ up.layer = do ->
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
       cover:
-        targets: ['[up-main~=cover]']
+        mainTargets: ['[up-main~=cover]']
       drawer:
-        targets: ['[up-main~=drawer]']
+        mainTargets: ['[up-main~=drawer]']
         backdrop: true
         position: 'left'
         size: 'medium'
@@ -56,11 +56,11 @@ up.layer = do ->
             when 'left' then 'move-to-left'
             when 'right' then 'move-to-right'
       modal:
-        targets: ['[up-main~=modal]']
+        mainTargets: ['[up-main~=modal]']
         backdrop: true
         size: 'medium'
       popup:
-        targets: ['[up-main~=popup]']
+        mainTargets: ['[up-main~=popup]']
         position: 'bottom'
         size: 'medium'
         align: 'left'
@@ -78,8 +78,8 @@ up.layer = do ->
   isOverlayMode = (mode) ->
     return u.contains(OVERLAY_MODES, mode)
 
-  defaultTargets = (mode) ->
-    return u.flatMap(modeConfigs(mode), 'targets')
+  mainTargets = (mode) ->
+    return u.flatMap(modeConfigs(mode), 'mainTargets')
 
   ###**
   Returns an array of config objects that apply to the given mode name.
@@ -194,7 +194,7 @@ up.layer = do ->
 
   api = u.literal({
     config
-    defaultTargets
+    mainTargets
     open
     build
     ask

@@ -31,8 +31,8 @@ class up.Layer extends up.Record
   teardownHandlers: ->
     # no-op for overriding
 
-  defaultTargets: ->
-    up.layer.defaultTargets(@mode)
+  mainTargets: ->
+    up.layer.mainTargets(@mode)
 
   # no-op so users can blindly sync without knowing the current mode
   sync: ->

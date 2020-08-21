@@ -69,7 +69,7 @@ class up.Change.FromContent extends up.Change
 
   expandTargets: (layer, givenTarget) ->
     if givenTarget == ':main'
-      targets = @defaultTargets(layer)
+      targets = @mainTargets(layer)
     else
       targets = u.wrapList(givenTarget)
 
@@ -89,11 +89,11 @@ class up.Change.FromContent extends up.Change
 
     return u.compact(targets)
 
-  defaultTargets: (layer) ->
+  mainTargets: (layer) ->
     if layer == 'new'
-      return up.layer.defaultTargets(@options.mode)
+      return up.layer.mainTargets(@options.mode)
     else
-      return layer.defaultTargets()
+      return layer.mainTargets()
 
   firstSwappableTarget: (layer) ->
     # We cannot target the topmost content child if the layer hasn't been opened yet.

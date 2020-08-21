@@ -336,9 +336,9 @@ describe 'up.layer', ->
       describe 'choice of target', ->
 
         beforeEach ->
-          up.layer.config.any.targets = []
-          up.layer.config.overlay.targets = []
-          up.layer.config.modal.targets = []
+          up.layer.config.any.mainTargets = []
+          up.layer.config.overlay.mainTargets = []
+          up.layer.config.modal.mainTargets = []
 
         it 'uses a selector given as { target } option', asyncSpec (next) ->
           up.layer.open(content: 'overlay text', target: '.target-from-option')
@@ -347,8 +347,8 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(document).toHaveSelector('up-modal .target-from-option')
 
-        it 'uses a target from up.layer.config.any.targets', asyncSpec (next) ->
-          up.layer.config.any.targets.push('.target-from-config-dot-all')
+        it 'uses a target from up.layer.config.any.mainTargets', asyncSpec (next) ->
+          up.layer.config.any.mainTargets.push('.target-from-config-dot-all')
 
           up.layer.open(content: 'overlay text')
 
@@ -356,9 +356,9 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(document).toHaveSelector('up-modal .target-from-config-dot-all')
 
-        it 'uses a target from up.layer.config.overlay.targets', asyncSpec (next) ->
-          up.layer.config.overlay.targets.push('.target-from-config-dot-overlay')
-          up.layer.config.any.targets.push('.target-from-config-dot-all')
+        it 'uses a target from up.layer.config.overlay.mainTargets', asyncSpec (next) ->
+          up.layer.config.overlay.mainTargets.push('.target-from-config-dot-overlay')
+          up.layer.config.any.mainTargets.push('.target-from-config-dot-all')
 
           up.layer.open(content: 'overlay text')
 
@@ -366,10 +366,10 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(document).toHaveSelector('up-modal .target-from-config-dot-overlay')
 
-        it "uses a target from up.layer.config.$mode.targets, where $mode is the new overlay's mode", asyncSpec (next) ->
-          up.layer.config.modal.targets.push('.target-from-config-dot-modal')
-          up.layer.config.overlay.targets.push('.target-from-config-dot-overlay')
-          up.layer.config.any.targets.push('.target-from-config-dot-all')
+        it "uses a target from up.layer.config.$mode.mainTargets, where $mode is the new overlay's mode", asyncSpec (next) ->
+          up.layer.config.modal.mainTargets.push('.target-from-config-dot-modal')
+          up.layer.config.overlay.mainTargets.push('.target-from-config-dot-overlay')
+          up.layer.config.any.mainTargets.push('.target-from-config-dot-all')
 
           up.layer.open(content: 'overlay text')
 

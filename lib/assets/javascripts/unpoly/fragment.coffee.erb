@@ -19,13 +19,23 @@ up.fragment = do ->
   u = up.util
   e = up.element
 
+  ###**
+  Returns the URL the given element was retrieved from.
+
+  @function up.fragment.source
+  @param {Array<string>} config.mainTargets
+  @param {Array<string>} config.resetTargets
+  @return {Array<RegExp>} config.targetClasses
+  @experimental
+  ###
   config = new up.Config ->
     u.literal
       # Users who are not using layers will prefer settings default targets
-      # as up.fragment.config.targets.
-      get_targets: -> up.layer.config.any.targets
+      # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
+      get_mainTargets: -> up.layer.config.any.mainTargets
       resetTargets: ['body']
       badTargetClasses: [/^up-/]
+  up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')
 
   reset = ->
     config.reset()
@@ -280,7 +290,7 @@ up.fragment = do ->
     The original request to the server.
   @param {up.Response} event.response
     The server response.
-  @param {object} event.change
+  @param {Object} event.change
     Options for the `up.render()` call that will process the server response.
   @event up:fragment:loaded
   ###
@@ -295,7 +305,7 @@ up.fragment = do ->
     here, in which case a selector will be inferred from the element's class and ID.
   @param {string} url
     The URL to fetch from the server.
-  @param {object} [options]
+  @param {Object} [options]
     See `options` for `up.render()
   @return {Promise}
     A promise that is fulfilled when the page has been updated.
@@ -749,7 +759,7 @@ up.fragment = do ->
   @param {string|Element|jQuery} [target]
     The element that should be reloaded.
 
-    If omitted, an element matching a selector in [`up.fragment.config.targets`](/up.fragment.config#targets)
+    If omitted, an element matching a selector in [`up.fragment.config.mainTargets`](/up.fragment.config#config.mainTargets)
     will be reloaded.
   @param {Object} [options]
     See options for `up.render()`

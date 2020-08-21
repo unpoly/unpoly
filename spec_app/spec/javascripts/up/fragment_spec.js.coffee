@@ -220,7 +220,7 @@ describe 'up.fragment', ->
         describe 'when the server responds with an error or unexpected content', ->
 
           it "replaces the layer's default target instead of the given selector", asyncSpec (next) ->
-            up.layer.config.root.targets = ['.default']
+            up.layer.config.root.mainTargets = ['.default']
             fixture('.target', text: 'old target text')
             fixture('.default', text: 'old fallback text')
 
@@ -446,7 +446,7 @@ describe 'up.fragment', ->
             expect('.target').toHaveText('new text')
 
         it 'allows to target :main', asyncSpec (next) ->
-          up.layer.config.root.targets.unshift('.main-element')
+          up.layer.config.root.mainTargets.unshift('.main-element')
           fixture('.main-element', text: 'old text')
 
           up.render(target: ':main', content: 'new text')
@@ -1057,7 +1057,7 @@ describe 'up.fragment', ->
             beforeEach ->
               # In helpers/protect_jasmine_runner wie have configured <default-fallback>
               # as a default target for all layers.
-              up.layer.config.any.targets = []
+              up.layer.config.any.mainTargets = []
 
             it 'tries selectors from options.fallback before making a request', asyncSpec (next) ->
               $fixture('.box').text('old box')
@@ -1091,14 +1091,14 @@ describe 'up.fragment', ->
                 expect('.fallback').toHaveText('new fallback')
 
             it "tries the layer's default target if options.fallback is missing", asyncSpec (next) ->
-              up.layer.config.any.targets = ['.existing']
+              up.layer.config.any.mainTargets = ['.existing']
               $fixture('.existing').text('old existing')
               up.render('.unknown', url: '/path')
               next => @respondWith '<div class="existing">new existing</div>'
               next => expect('.existing').toHaveText('new existing')
 
             it "does not try the layer's default targets and rejects the promise wieht { fallback: false }", (done) ->
-              up.layer.config.any.targets = ['.existing']
+              up.layer.config.any.mainTargets = ['.existing']
               $fixture('.existing').text('old existing')
               up.render('.unknown', url: '/path', fallback: false).catch (e) ->
                 expect(e).toBeError(/Could not find target in current page/i)
@@ -1107,7 +1107,7 @@ describe 'up.fragment', ->
         describe 'when selectors are missing on the page after the request was made', ->
 
           beforeEach ->
-            up.layer.config.any.targets = []
+            up.layer.config.any.mainTargets = []
 
           it 'tries the selector in options.fallback before swapping elements', asyncSpec (next) ->
             $target = $fixture('.target').text('old target')
@@ -1162,7 +1162,7 @@ describe 'up.fragment', ->
               expect('.fallback').toHaveText('new fallback')
 
           it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
-            up.layer.config.any.targets = ['.fallback']
+            up.layer.config.any.mainTargets = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target', url: '/path')
@@ -1198,7 +1198,7 @@ describe 'up.fragment', ->
         describe 'when selectors are missing in the response', ->
 
           beforeEach ->
-            up.layer.config.any.targets = []
+            up.layer.config.any.mainTargets = []
 
           it "tries the selector in options.fallback before swapping elements", asyncSpec (next) ->
             $target = $fixture('.target').text('old target')
@@ -1268,7 +1268,7 @@ describe 'up.fragment', ->
               expect('.fallback').toHaveText('new fallback')
 
           it "tries the layer's default targets if options.fallback is missing", asyncSpec (next) ->
-            up.layer.config.any.targets = ['.fallback']
+            up.layer.config.any.mainTargets = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
             up.render('.target', url: '/path')
@@ -1281,7 +1281,7 @@ describe 'up.fragment', ->
               expect('.fallback').toHaveText('new fallback')
 
           it "does not try the layer's default targets and rejects the promise with { fallback: false }", (done) ->
-            up.layer.config.any.targets = ['.fallback']
+            up.layer.config.any.mainTargets = ['.fallback']
             $target = $fixture('.target').text('old target')
             $fallback = $fixture('.fallback').text('old fallback')
             promise = up.render('.target', url: '/path', fallback: false)
