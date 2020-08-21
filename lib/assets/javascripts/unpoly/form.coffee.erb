@@ -32,7 +32,7 @@ up.form = do ->
     around the validating input field.
   @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
-  @param {string} [config.submitButtons]
+  @param {string} [config.submitButtonSelectors]
     An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
   @stable
   ###
@@ -40,10 +40,11 @@ up.form = do ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitSelectors: up.link.combineFollowableSelectors(['form'])
-    submitButtons: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
+    submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
   up.legacy.renamedProperty(config, 'fields', 'fieldSelectors')
   up.legacy.renamedProperty(config, 'submit', 'submitSelectors')
+  up.legacy.renamedProperty(config, 'submitButtons', 'submitButtonSelectors')
 
   fullSubmitSelector = ->
     config.submitSelectors.join(',')
@@ -118,7 +119,7 @@ up.form = do ->
   @internal
   ###
   submitButtonSelector = ->
-    config.submitButtons.join(',')
+    config.submitButtonSelectors.join(',')
 
   ###**
   Submits a form via AJAX and updates a page fragment with the response.
