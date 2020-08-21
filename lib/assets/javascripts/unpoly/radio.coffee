@@ -15,12 +15,12 @@ up.radio = do ->
   Configures defaults for passive updates.
 
   @property up.radio.config
-  @param {Array<string>} [options.hungry]
+  @param {Array<string>} [config.hungrySelectors]
     An array of CSS selectors that is replaced whenever a matching element is found in a response.
     These elements are replaced even when they were not targeted directly.
 
     By default this contains the [`[up-hungry]`](/up-hungry) attribute.
-  @param {string} [options.hungryTransition=null]
+  @param {string} [config.hungryTransition=null]
     The transition to use when a [hungry element](/up-hungry) is replacing itself
     while another target is replaced.
 
@@ -28,8 +28,9 @@ up.radio = do ->
   @stable
   ###
   config = new up.Config ->
-    hungry: ['[up-hungry]']
+    hungrySelectors: ['[up-hungry]']
     hungryTransition: null
+  up.legacy.renamedProperty(config, 'hungry', 'hungrySelectors')
 
   reset = ->
     config.reset()
@@ -39,7 +40,7 @@ up.radio = do ->
   @internal
   ###
   hungrySelector = ->
-    config.hungry.join(',')
+    config.hungrySelectors.join(',')
 
   ###**
   Elements with this attribute are [updated](/up.replace) whenever there is a
