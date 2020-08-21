@@ -126,7 +126,7 @@ describe 'up.history', ->
 
           waitForBrowser = 100
 
-          up.viewport.config.viewports = ['.viewport']
+          up.viewport.config.viewportSelectors = ['.viewport']
           up.history.config.restoreTargets = ['.viewport']
 
           up.history.replace('/scroll-restauration-spec')

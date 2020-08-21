@@ -464,14 +464,14 @@ describe 'up.viewport', ->
     describe 'up.viewport.get', ->
 
       it 'seeks upwards from the given element', ->
-        up.viewport.config.viewports = ['.viewport1', '.viewport2']
+        up.viewport.config.viewportSelectors = ['.viewport1', '.viewport2']
         $viewport1 = $fixture('.viewport1')
         $viewport2 = $fixture('.viewport2')
         $element = $fixture('div').appendTo($viewport2)
         expect(up.viewport.get($element)).toEqual($viewport2[0])
 
       it 'returns the given element if it is a configured viewport itself', ->
-        up.viewport.config.viewports = ['.viewport']
+        up.viewport.config.viewportSelectors = ['.viewport']
         $viewport = $fixture('.viewport')
         expect(up.viewport.get($viewport)).toEqual($viewport[0])
 
