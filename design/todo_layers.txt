@@ -1,42 +1,26 @@
-TODO for [up-zone]
--------------------
-
-- Rename config.xxx.targets to config.xxx.mainTargets (or mainSelectors?)
-- Rename options like up.link.config.follow to up.link.config.followSelectors
-- Rename :layer-content to just :layer
-- Tests!
-  - Test that :layer will target the current content root of a layer
-  - Test that user can target :main
-
-
-Other TODOs
-----------
+TODOs
+-----
 
 - Remove aria-labels for selectors, it doesn't feel right and might cause unparsable selectors
 - Allow transition: true for default transition
 - Allow animation: true for default animation
 - Do I get a value here? up.layer.open({ url: '/users/new', onRemoved: (event) => console.log(event.value) })
 - Fragment changes should support [up-on-appeared] and [up-on-removed] attributes
-- rename Options like up.viewport.config.viewports to up.viewport.config.viewportSelectors etc.
-- Why does protect_jasmine_runner create a default-fallback as a new child of overlay#contentElement? In real use #contentElement will only have a singel child!
-- Allow to refer to ":self" instead of "&"
-  - We can document this
 - The log trace for up.fail() exceptions is "up.fail()" instead of the actual source
 - Change options in event properties are sometimes called { options } and sometimes { change }
-- We cannot use `eval()` or `new Function()` with CSP.
-  - new Function will throw an EvalError (both e instanceof EvalError and e.name == 'EvalError')
-  - at least we need to report a more helpful error
-- When swapping { content } we should *not* change the wrapping element with any attributes it may have. { placement: 'content' } ?
-- up.target? etc. should split at commas
+- When swapping { content } we should *not* change the wrapping element with any attributes it may have.
+  - How would we animate this?
+  - { placement: 'content' } ?
+- Rails integration: up.target? etc. should split at commas
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH
-- Write remaining tests
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
 - Reach out to server-integration libs (make issues?) with the new changes
-- Consider removing history from modals
-- Should the default layer for up.fragment be 'current' instead of 'any'? Consider up-on-accepted="up.reload('.table')"
+- Remove history from modals (by default)
+  - Have a test that it can be enabled
+  - Have a test that { location } and .up-current works in layers withotu history
 - Should we allow updates and layer lookups in closed layers?
 - One last time consider whether up:layer:open and up:layer:dismissed/accepted should be emitted on the parent layer
 
@@ -57,7 +41,8 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
 
 
 - Tests
-  - Test :origin instead of &
+  - Test that :layer will target the current content root of a layer
+  - Test that user can target :main
   - Test that pseudo-element targets are removed from target
   - Test that peeling dismissals can be detected by a dismiss value of ":peel"
   - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
@@ -236,6 +221,7 @@ There is also a typo in https://unpoly.com/tutorial that you might want to fix y
   - up.Params#has
 
 - Docs
+  - Document Ampersand (&)
   - Log is prettier and less noisy
   - Async errors from event handlers are now printed to the console if the log is enabled
   - Layer lookup options
@@ -310,6 +296,10 @@ Finishing up
 Later?
 ------
 
+- We cannot use `eval()` or `new Function()` with CSP.
+  - new Function will throw an EvalError (both e instanceof EvalError and e.name == 'EvalError')
+  - at least we need to report a more helpful error
+  - consider adding [up-nonce] and { nonce }
 - Abort Up requests if the user navigates away
   - Request#loadPage() already does this, but what about other links?
 - We could allow up.fragment.config.runInlineScripts again. I don't know why we removed it, now that we have HTMLWrapper.
