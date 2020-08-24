@@ -7,7 +7,6 @@ TODOs
 - Do I get a value here? up.layer.open({ url: '/users/new', onRemoved: (event) => console.log(event.value) })
 - The log trace for up.fail() exceptions is "up.fail()" instead of the actual source
 - Change options in event properties are sometimes called { options } and sometimes { change }
-- Rails integration: up.target? etc. should split at commas
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
 - Reach out to server-integration libs (make issues?) with the new changes
