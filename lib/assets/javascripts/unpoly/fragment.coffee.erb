@@ -243,8 +243,8 @@ up.fragment = do ->
     promise = up.browser.whenConfirmed(options)
 
     if guardEvent = options.guardEvent
-      # Allow guard event handlers to manipulate options for the default behavior
-      guardEvent.options = options
+      # Allow guard event handlers to manipulate render options for the default behavior
+      guardEvent.renderOptions = options
       promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
 
     promise = promise.then ->
@@ -281,7 +281,7 @@ up.fragment = do ->
         }
       })
 
-  Instead of preventing the update, listeners may also access the `event.change` object
+  Instead of preventing the update, listeners may also access the `event.renderOptions` object
   to mutate options to the `up.render()` call that will process the server response.
 
   @param event.preventDefault()
@@ -290,7 +290,7 @@ up.fragment = do ->
     The original request to the server.
   @param {up.Response} event.response
     The server response.
-  @param {Object} event.change
+  @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
   @event up:fragment:loaded
   ###

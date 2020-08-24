@@ -352,7 +352,7 @@ describe 'up.fragment', ->
 
         describe 'interrupting the change', ->
 
-          it 'emits an up:fragment:loaded event that contains information about the request, response and change options', asyncSpec (next) ->
+          it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
             event = undefined
             up.on 'up:fragment:loaded', (e) -> event = e
             up.render(target: '.target', url: '/url', location: '/location-from-option', peel: false)
@@ -364,8 +364,8 @@ describe 'up.fragment', ->
               expect(event).toBeGiven()
               expect(event.request.url).toMatchURL('/url')
               expect(event.response.text).toContain('text from server')
-              expect(event.change.peel).toBe(false)
-              expect(event.change.location).toMatchURL('/location-from-option')
+              expect(event.renderOptions.peel).toBe(false)
+              expect(event.renderOptions.location).toMatchURL('/location-from-option')
 
           it 'allows listeners to prevent an up:fragment:loaded event to prevent changes to the DOM and browser history', (done) ->
             up.history.config.enabled = true
@@ -391,7 +391,7 @@ describe 'up.fragment', ->
             fixture('.one', text: 'old one')
             fixture('.two', text: 'old two')
 
-            up.on('up:fragment:loaded', (e) -> e.change.target = '.two')
+            up.on('up:fragment:loaded', (e) -> e.renderOptions.target = '.two')
 
             changePromise = up.render(target: '.one', url: '/url')
 

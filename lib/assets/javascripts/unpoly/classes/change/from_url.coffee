@@ -131,7 +131,7 @@ class up.Change.FromURL extends up.Change
     # or manipulate change options. An example for when this is useful is a maintenance
     # page with its own layout, that cannot be loaded as a fragment and must be loaded
     # with a full page load.
-    loadedEvent = up.event.build('up:fragment:loaded', { change: options, request: response.request, response })
+    loadedEvent = up.event.build('up:fragment:loaded', { renderOptions: options, request: response.request, response })
     promise = response.request.whenEmitted(loadedEvent, callback: options.onLoaded)
     promise = promise.then -> change.execute()
     promise
