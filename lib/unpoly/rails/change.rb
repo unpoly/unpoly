@@ -250,14 +250,17 @@ module Unpoly
         # The user may have chosen to not reveal their target for better
         # cacheability (see up.proxy.config#requestMetaKeys).
         if up? && frontend_target.present?
-          if frontend_target == tested_target
-            true
-          elsif frontend_target == 'html'
-            true
-          elsif frontend_target == 'body'
-            not ['head', 'title', 'meta'].include?(tested_target)
-          else
-            false
+          parts = frontend_target.split(/\s*,\s*/)
+          parts.any? do |part|
+            if part == tested_target
+              true
+            elsif part == 'html'
+              true
+            elsif part == 'body'
+              not ['head', 'title', 'meta'].include?(tested_target)
+            else
+              false
+            end
           end
         else
           true

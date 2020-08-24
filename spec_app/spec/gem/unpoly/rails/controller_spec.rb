@@ -259,6 +259,14 @@ describe Unpoly::Rails::Controller, type: :request do
         expect(result).to eq(true)
       end
 
+      it 'returns true if the tested CSS selector is included in a comma-separated group of requested selectors' do
+        result = controller_eval(headers: { 'X-Up-Target': '.foo, .bar, .baz' }) do
+          up.target?('.bar')
+        end
+        expect(result).to eq(true)
+      end
+
+
     end
 
     describe 'up.fail_target?' do
