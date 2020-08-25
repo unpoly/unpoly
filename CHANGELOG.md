@@ -9,6 +9,8 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Unreleased
 ----------
 
+- `[aria-label]` attributes are no longer used to build a target selector
+
 - Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
 - Failed responses now change the URL
 - TODO ...

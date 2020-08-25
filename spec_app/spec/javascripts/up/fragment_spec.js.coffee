@@ -3712,8 +3712,8 @@ describe 'up.fragment', ->
         element.setAttribute('id', 'foo"bar')
         expect(up.fragment.toTarget(element)).toBe('[id="foo\\"bar"]')
 
-      it "prefers using the element's class to using the element's ARIA label", ->
-        element = fixture('div.class[aria-label="ARIA label value"]')
+      it "prefers using the element's class to using the element's tag name", ->
+        element = fixture('div.class')
         expect(up.fragment.toTarget(element)).toBe(".class")
   
       it 'does not use Unpoly classes to compose a class selector', ->
@@ -3733,15 +3733,11 @@ describe 'up.fragment', ->
         element = fixture('input[name=name-value]')
         expect(up.fragment.toTarget(element)).toBe('[name="name-value"]')
 
-      it "prefers using the element's ARIA label to using the element's tag name", ->
-        element = fixture('div[aria-label="ARIA label value"]')
-        expect(up.fragment.toTarget(element)).toBe('[aria-label="ARIA label value"]')
-  
       it "uses the element's tag name if no better description is available", ->
         element = fixture('div')
         expect(up.fragment.toTarget(element)).toBe("div")
   
       it 'escapes quotes in attribute selector values', ->
         element = fixture('div')
-        element.setAttribute('aria-label', 'foo"bar')
-        expect(up.fragment.toTarget(element)).toBe('[aria-label="foo\\"bar"]')
+        element.setAttribute('name', 'foo"bar')
+        expect(up.fragment.toTarget(element)).toBe('[name="foo\\"bar"]')

@@ -1,7 +1,6 @@
 TODOs
 -----
 
-- Remove aria-labels for selectors, it doesn't feel right and might cause unparsable selectors
 - Allow transition: true for default transition
 - Allow animation: true for default animation
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running

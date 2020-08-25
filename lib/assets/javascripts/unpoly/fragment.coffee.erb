@@ -846,8 +846,6 @@ up.fragment = do ->
        return e.attributeSelector('name', name)
      else if goodClass = u.find(element.classList, isGoodClassForTarget)
        return ".#{goodClass}"
-     else if ariaLabel = element.getAttribute("aria-label")
-       return e.attributeSelector('aria-label', ariaLabel)
      else
        return e.elementTagName(element)
 
