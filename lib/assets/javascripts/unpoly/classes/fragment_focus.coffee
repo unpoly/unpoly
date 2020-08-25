@@ -45,4 +45,3 @@ class up.FragmentFocus
     up.viewport.makeFocusable(element)
     up.focus(element, PREVENT_SCROLL_OPTIONS)
     return true
-2

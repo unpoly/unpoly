@@ -10,6 +10,7 @@ passively receive updates from the server.
 up.radio = do ->
 
   u = up.util
+  e = up.element
 
   ###**
   Configures defaults for passive updates.
@@ -20,16 +21,12 @@ up.radio = do ->
     These elements are replaced even when they were not targeted directly.
 
     By default this contains the [`[up-hungry]`](/up-hungry) attribute.
-  @param {string} [config.hungryTransition=null]
-    The transition to use when a [hungry element](/up-hungry) is replacing itself
-    while another target is replaced.
-
-    By default this is not set and the original replacement's transition is used.
   @stable
   ###
   config = new up.Config ->
     hungrySelectors: ['[up-hungry]']
-    hungryTransition: null
+    pollInterval: 30000
+
   up.legacy.renamedProperty(config, 'hungry', 'hungrySelectors')
 
   reset = ->
@@ -43,7 +40,7 @@ up.radio = do ->
     config.hungrySelectors.join(',')
 
   ###**
-  Elements with this attribute are [updated](/up.replace) whenever there is a
+  Elements with an `[up-hungry]` attribute are [updated](/up.replace) whenever there is a
   matching element found in a successful response. The element is replaced even
   when it isn't [targeted](/a-up-target) directly.
 
@@ -52,10 +49,58 @@ up.radio = do ->
   being replaced.
 
   @selector [up-hungry]
+  @param [up-transition]
+    The transition to use when this element is updated.
   @stable
   ###
+
+  poll = (element, options = {}) ->
+    interval = options.interval ? e.numberAttr(element, 'up-poll') ? config.pollInterval
+    timer = null
+
+    doReload = ->
+      reloadDone = if document.hidden then Promise.resolve() else up.reload(element)
+      u.always(reloadDone, doSchedule)
+
+    doSchedule = ->
+      timer = setTimeout(doReload, interval)
+
+    doSchedule()
+    return -> clearTimeout(timer)
+
+  ###**
+  Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
+
+  \#\#\# Example
+
+      <div class="unread-count" up-poll>
+        2 new messages
+      </div>
+
+  \#\#\# Controlling the reload interval
+
+  The optional value of the `[up-poll]` attribute is the reload interval in milliseconds:
+
+      <div class="unread-count" up-poll="10000">
+        2 new messages
+      </div>
+
+  If the value is omitted, a global default is used. You may configure the default like this:
+
+      up.radio.config.pollInterval = 10000
+
+  @selector [up-poll]
+  @param [up-poll]
+    The reload interval in milliseconds.
+    Defaults to [`up.radio.config.pollInterval`](/up.radio.config#config.pollInterval).
+  @param [up-source]
+    The URL from which to reload the fragment.
+    Defaults to the URL from which this fragment was originally loaded.
+  ###
+  up.compiler '[up-poll]', poll
 
   up.on 'up:framework:reset', reset
 
   config: config
   hungrySelector: hungrySelector
+  poll: poll

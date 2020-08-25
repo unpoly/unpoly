@@ -4,7 +4,6 @@ TODOs
 - Remove aria-labels for selectors, it doesn't feel right and might cause unparsable selectors
 - Allow transition: true for default transition
 - Allow animation: true for default animation
-- Do I get a value here? up.layer.open({ url: '/users/new', onRemoved: (event) => console.log(event.value) })
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
 - Remove history from modals (by default)
@@ -20,6 +19,8 @@ TODOs
     - This should just be layer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
+- followSelectors etc. are not really a substitute for a macro. We cannot set a transition.
+
 
 
 Manual tests

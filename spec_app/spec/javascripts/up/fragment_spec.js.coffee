@@ -2594,7 +2594,7 @@ describe 'up.fragment', ->
             expect(destructor).toHaveBeenCalled()
 
         it 'marks the old element as .up-destroying before destructors', (done) ->
-          testElementState = (element) ->
+          testElementState = u.memoize (element) ->
             expect(element).toHaveText('old text')
             expect(element).toMatchSelector('.up-destroying')
             done()

@@ -52,7 +52,7 @@ class up.Change.FromContent extends up.Change
     return @plans
 
   addResetPlans: ->
-    @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true })
+    @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true, keep: false })
 
   expandIntoPlans: (layers, givenTarget, variantProps) ->
     for layer in layers

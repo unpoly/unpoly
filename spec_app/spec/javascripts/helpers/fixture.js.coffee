@@ -8,7 +8,7 @@ ensureContainerExists = ->
 
 afterEach ->
   if fixturesContainer
-    e.remove(fixturesContainer)
+    up.destroy(fixturesContainer)
     fixturesContainer = undefined
 
 appendFixture = (args...) ->

@@ -94,6 +94,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
           # Since we're keeping the element that was requested to be swapped,
           # there is nothing left to do here, except notify event listeners.
           up.fragment.emitKept(keepPlan)
+
+          @handleFocus(step.oldElement, step)
+          @handleScroll(step.oldElement, step)
+
           return Promise.resolve()
 
         else
@@ -172,9 +176,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
   # @param {boolean} options.keep
   # @param {boolean} options.descendantsOnly
   findKeepPlan: (options) ->
+    # Going back in history uses keep: false
     return unless options.keep
 
-    keepable = options.oldElement
+    { oldElement, newElement } = options
 
     # We support these attribute forms:
     #
@@ -182,20 +187,20 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # - up-keep="true"      => match element itself
     # - up-keep="false"     => don't keep
     # - up-keep=".selector" => match .selector
-    if partnerSelector = e.booleanOrStringAttr(keepable, 'up-keep')
+    if partnerSelector = e.booleanOrStringAttr(oldElement, 'up-keep')
       if partnerSelector == true
         partnerSelector = '&'
 
-      lookupOpts = { layer: @layer, origin: keepable }
+      lookupOpts = { layer: @layer, origin: oldElement }
 
       if options.descendantsOnly
-        partner = up.fragment.get(options.newElement, partnerSelector, lookupOpts)
+        partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
       else
-        partner = up.fragment.subtree(options.newElement, partnerSelector, lookupOpts)[0]
+        partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
 
       if partner && e.matches(partner, '[up-keep]')
         plan =
-          oldElement: keepable # the element that should be kept
+          oldElement: oldElement # the element that should be kept
           newElement: partner # the element that would have replaced it but now does not
           newData: up.syntax.data(partner) # the parsed up-data attribute of the element we will discard
 
@@ -277,10 +282,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
   addHungrySteps: ->
     # Find all [up-hungry] fragments within @layer
     hungries = up.fragment.all(up.radio.hungrySelector(), @options)
-    transition = up.radio.config.hungryTransition ? @transition
     for oldElement in hungries
       selector = up.fragment.toTarget(oldElement)
       if newElement = @responseDoc.select(selector)
+        transition = e.booleanOrStringAttr(oldElement, 'transition')
         @steps.push({ selector, oldElement, newElement, transition, placement: 'swap' })
 
   containedByRivalStep: (steps, candidateStep) ->

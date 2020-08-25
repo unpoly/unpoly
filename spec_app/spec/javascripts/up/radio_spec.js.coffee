@@ -172,3 +172,74 @@ describe 'up.radio', ->
           expect($('.inside-text')).toHaveText('new inside')
           expect($('.outside')).toHaveText('old outside')
 
+    describe '[up-poll]', ->
+
+      it 'reloads the element periodically', asyncSpec (next) ->
+        up.radio.config.pollInterval = 150
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        element = up.hello(fixture('.element[up-poll]'))
+
+        next.after 75, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+
+        next.after 150, ->
+          expect(reloadSpy).toHaveBeenCalledWith(element)
+          expect(reloadSpy.calls.count()).toBe(1)
+
+        next.after 150, ->
+          expect(reloadSpy.calls.count()).toBe(2)
+
+      it 'does not make additional requests while a previous requests is still in flight', asyncSpec (next) ->
+        deferred = u.newDeferred()
+
+        up.radio.config.pollInterval = 50
+        reloadSpy = spyOn(up, 'reload').and.returnValue(deferred)
+
+        up.hello(fixture('.element[up-poll]'))
+
+        next.after 100, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+
+        next.after 100, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+          deferred.resolve()
+
+        next.after 100, ->
+          expect(reloadSpy.calls.count()).toBe(2)
+
+      it 'keeps polling if a request failed', asyncSpec (next) ->
+        up.radio.config.pollInterval = 75
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject()
+
+        up.hello(fixture('.element[up-poll]'))
+
+        next.after 125, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+
+        next.after 75, ->
+          expect(reloadSpy.calls.count()).toBe(2)
+
+      it 'does not reload if the tab is hidden', asyncSpec (next) ->
+        up.radio.config.pollInterval = 50
+        spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        up.hello(fixture('.element[up-poll]'))
+
+        next.after 100, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+
+      it 'stops polling when the element is destroyed', asyncSpec (next) ->
+        up.radio.config.pollInterval = 75
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        element = up.hello(fixture('.element[up-poll]'))
+
+        next.after 125, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+          up.destroy(element)
+
+        next.after 75, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+
