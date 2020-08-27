@@ -167,7 +167,7 @@ up.layer = do ->
     handlers = u.filter(handlers, 'isDefault')
 
   open = (options) ->
-    options = u.options(options, layer: 'new')
+    options = u.options(options, layer: 'new', navigate: true)
 
     # Even if we are given { content } we need to pipe this through up.render()
     # since a lot of options processing is happening there.

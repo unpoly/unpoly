@@ -151,17 +151,11 @@ class up.Layer extends up.Record
     @stack.asCurrent(this, fn)
 
   updateHistory: (options) ->
-    # When the layer is opened, the { history } option defines whether the
-    # layer enables handling of location and title in general.
-    # When updating history, accept { history: false } as a shortcut to
-    # neither change { title } nor { location }.
-    return if options.history == false
+    if u.isString(options.title)
+      @title = options.title
 
-    if title = options.title
-      @title = title
-
-    if location = options.location
-      @location = location
+    if u.isString(options.location)
+      @location = options.location
 
   updateContext: (options) ->
     if context = options.context

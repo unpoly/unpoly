@@ -27,7 +27,8 @@ class up.Change.FromURL extends up.Change
     'confirm',
     'feedback',
     'origin',
-    'hungry'
+    'hungry',
+    'fallback'
   ]
 
   deriveFailOptions: ->

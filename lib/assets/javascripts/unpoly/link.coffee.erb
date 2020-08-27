@@ -185,7 +185,7 @@ up.link = do ->
     # Fragment options
     parser.string('failOptions')
     parser.options.origin ?= link
-    parser.boolean('navigate')
+    parser.boolean('navigate', default: true)
     parser.string('confirm')
     parser.string('target')
     parser.booleanOrString('fallback')

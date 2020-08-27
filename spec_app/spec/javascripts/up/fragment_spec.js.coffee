@@ -353,8 +353,10 @@ describe 'up.fragment', ->
         describe 'interrupting the change', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
+            fixture('.target')
             event = undefined
             up.on 'up:fragment:loaded', (e) -> event = e
+
             up.render(target: '.target', url: '/url', location: '/location-from-option', peel: false)
 
             next =>
@@ -1507,7 +1509,7 @@ describe 'up.fragment', ->
 
         it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.render('.container', url: '/path')
+          up.render('.container', url: '/path', history: true)
 
           next =>
             @respondWith

@@ -95,6 +95,9 @@ class up.Change.FromContent extends up.Change
     else
       return layer.mainTargets()
 
+#  firstExpandedMainTarget: ->
+#    @expandTargets(@layers[0], ':main')[0]
+
   firstSwappableTarget: (layer) ->
     # We cannot target the topmost content child if the layer hasn't been opened yet.
     unless layer == 'new'
@@ -110,16 +113,15 @@ class up.Change.FromContent extends up.Change
       docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
       up.legacy.fixKey(docOptions, 'html', 'document')
 
-      # If neither doc source is given, we assume { content }.
-      # Note that { content } might be missing, to allow people to open a new layer
-      # using up.layer.open().
+      # If neither { document } nor { fragment } source is given, we assume { content }.
       if !@options.document && !@options.fragment
+        # { content } might be missing, to allow people to open a new layer
+        # using up.layer.open().
         docOptions.content ?= ''
 
-        # When processing { content }, ResponseDoc needs a { target } to create a matching
-        # element. We pick the target from the first plan, since it might either be empty
-        # OR it's a pseudo-selector like :main, which needs resolving.
-        docOptions.target = @getPlans()[0]?.bestPreflightSelector()
+        # When processing { content }, ResponseDoc needs a { target }
+        # to create a matching element.
+        docOptions.target = @expandTargets(@layers[0], docOptions.target || ':main')[0]
 
       @responseDoc = new up.ResponseDoc(docOptions)
 

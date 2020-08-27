@@ -5,6 +5,7 @@ TODOs
 - Allow animation: true for default animation
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
+- badTargetClasses should also accept a string element
 - Remove history from modals (by default)
   - Have a test that it can be enabled
   - Have a test that { location } and .up-current works in layers withotu history
@@ -19,7 +20,7 @@ TODOs
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
 - followSelectors etc. are not really a substitute for a macro. We cannot set a transition.
-
+- Close issues.
 
 
 Manual tests
@@ -271,6 +272,12 @@ Docs
 Later?
 ------
 
+- Can we offer up.idle?
+  - No animations running
+  - No scrolling running
+  - No pending requests
+  - All compiled
+  - Offer to hook other code into this
 - allow link_to ..., up: { target: ... }
   begin
     prefixes = ActionView::Helpers::TagHelper.const_get(:TAG_PREFIXES)
@@ -279,7 +286,6 @@ Later?
   rescue NameError
     # Rails 3.2 does not define that constant
   end
-
 - Fragment changes should support [up-on-appeared] and [up-on-removed] attributes
   - But then we also need [up-then]?
 - We cannot use `eval()` or `new Function()` with CSP.
