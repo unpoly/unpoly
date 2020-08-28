@@ -1417,7 +1417,7 @@ describe 'up.fragment', ->
 
         it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
           fixture('.target')
-          up.render('.target', url: '/requested-path', method: 'post')
+          up.render('.target', url: '/requested-path', method: 'post', location: true)
           next =>
             @respondWithSelector('.target', {
               responseHeaders: {
@@ -1447,7 +1447,7 @@ describe 'up.fragment', ->
 
         it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
           fixture('.target')
-          up.render('.target', url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' })
+          up.render('.target', url: '/path', params: { 'foo-key': 'foo value', 'bar-key': 'bar value' }, location: true)
           next => @respondWithSelector('.target')
           next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
 
@@ -1469,7 +1469,7 @@ describe 'up.fragment', ->
           it 'does not override the response URL after a failed request', asyncSpec (next) ->
             fixture('.success-target')
             fixture('.failure-target')
-            up.render('.success-target', url: '/path', location: '/path4', failTarget: '.failure-target')
+            up.render('.success-target', url: '/path', location: '/path4', failLocation: true, failTarget: '.failure-target')
             next => @respondWithSelector('.failure-target', status: 500)
             next => expect(location.href).toMatchURL('/path')
 
@@ -1480,14 +1480,14 @@ describe 'up.fragment', ->
             next => @respondWithSelector('.failure-target', status: 500)
             next => expect(location.href).toMatchURL('/path6')
 
-      describe 'document title', ->
+      describe 'with { title } option', ->
 
         beforeEach ->
           up.history.config.enabled = true
 
         it "sets the document title to the response <title>", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.render('.container', url: '/path')
+          up.render('.container', url: '/path', title: true)
 
           next =>
             @respondWith """
@@ -1509,7 +1509,7 @@ describe 'up.fragment', ->
 
         it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.render('.container', url: '/path', history: true)
+          up.render('.container', url: '/path', title: true)
 
           next =>
             @respondWith
@@ -1527,7 +1527,7 @@ describe 'up.fragment', ->
 
         it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
           $fixture('.container').text('old container text')
-          up.render('.container', url: '/path')
+          up.render('.container', url: '/path', title: true)
 
           next =>
             @respondWith
@@ -1575,7 +1575,7 @@ describe 'up.fragment', ->
         it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
           $fixture('.container').text('old container text')
           oldTitle = document.title
-          up.render('.container', url: '/path', history: false, title: true)
+          up.render('.container', url: '/path', title: true)
 
           next =>
             @respondWith """
@@ -1595,10 +1595,10 @@ describe 'up.fragment', ->
             expect($('.container')).toHaveText('new container text')
             expect(document.title).toBe(oldTitle)
 
-        it "does not extract the title from the response or HTTP header if history isn't updated", asyncSpec (next) ->
+        it "does not extract the title from the response or HTTP header with { title: false }", asyncSpec (next) ->
           $fixture('.container').text('old container text')
           oldTitle = document.title
-          up.render('.container', url: '/path', history: false)
+          up.render('.container', url: '/path', title: false)
 
           next =>
             @respondWith
@@ -1736,7 +1736,7 @@ describe 'up.fragment', ->
           ]
 
           next ->
-            up.render('.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
+            up.render(target: '.target', failTarget: '.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -2103,7 +2103,7 @@ describe 'up.fragment', ->
             next =>
               expect(swapDirectlySpy).toHaveBeenCalled()
 
-      describe 'revealing', ->
+      describe 'with { reveal } option', ->
 
         beforeEach ->
           @revealedHTML = []
@@ -2156,7 +2156,7 @@ describe 'up.fragment', ->
             fixture('.target', text: 'target text')
             fixture('.other', text: 'other text')
             fixture('.fail-target', text: 'fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: '.other')
+            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: '.other', failReveal: true)
 
             next =>
               @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
@@ -2389,11 +2389,11 @@ describe 'up.fragment', ->
               contentType: 'text/html'
               responseText: '<div class="element" style="height: 300px"></div>'
 
-          up.render('.element', url: '/foo')
+          up.render('.element', url: '/foo', saveScroll: true)
 
           next => respond()
           next => $viewport.scrollTop(65)
-          next => up.replace('.element', '/bar')
+          next => up.replace('.element', '/bar', saveScroll: true)
           next => respond()
           next => $viewport.scrollTop(0)
           next.await => up.replace('.element', '/foo', restoreScroll: true)
@@ -2824,7 +2824,7 @@ describe 'up.fragment', ->
             next ->
               expect(up.layer.front.element).toBeFocused()
 
-      describe 'abortion of existing requests', ->
+      describe 'with { solo } option', ->
 
         it 'aborts the request of an existing change', asyncSpec (next) ->
           fixture('.element')
@@ -2833,13 +2833,13 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', url: '/path2')
+            change2Promise = up.render('.element', url: '/path2', solo: true)
 
           next =>
             expect(change1Error).toBeError(/aborted/)
@@ -2852,13 +2852,13 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', { content: 'local content' })
+            change2Promise = up.render('.element', content: 'local content', solo: true)
 
           next =>
             expect(change1Error).toBeError(/aborted/)
@@ -2871,13 +2871,13 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
 
           next =>
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', url: '/path2', preload: true)
+            change2Promise = up.render('.element', url: '/path2', preload: true, solo: true)
 
           next =>
             expect(change1Error).toBeUndefined()
@@ -2896,7 +2896,7 @@ describe 'up.fragment', ->
             expect(up.proxy.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', url: '/path2')
+            change2Promise = up.render('.element', url: '/path2', solo: true)
 
           next =>
             expect(change1Error).toBeError(/aborted/)
