@@ -39,7 +39,7 @@ class up.Change extends up.Class
   # Values we want to override:
   # - true (do update with defaults)
   improveHistoryValue: (existingValue, newValue) ->
-    if existingValue == true && newValue
-      newValue
-    else
+    if existingValue == false || u.isString(existingValue)
       existingValue
+    else
+      newValue

@@ -396,6 +396,9 @@ up.motion = do ->
       return promise
 
   findTransitionFn = (object) ->
+    if object == 'navigate'
+      object = up.fragment.config.navigateTransition
+
     if isNone(object)
       undefined
     else if u.isFunction(object)

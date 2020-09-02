@@ -183,7 +183,7 @@ up.link = do ->
     parser.boolean('feedback')   # preflight / same
 
     # Fragment options
-    parser.string('failOptions') # ??? can we get rid of this ??? or just have serverStatus = 'ignore'?
+    parser.boolean('fail')
     parser.options.origin ?= link              #  preflight / same
     parser.boolean('navigate', default: true)  # macro
     parser.string('confirm')                   #  preflight / same

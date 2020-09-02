@@ -2,12 +2,11 @@ TODOs
 -----
 
 - render() rework
-  - Some options should inherit to fail, e.g. { history, location, title, peel, saveScroll, scrollBehavior, easing, duration }.
-  - Keep offering something like { failOptions: mirror } for up-validate.
-    - Maybe: { ignoreServerError: true } or something more elegant
-    - We don't need to offer failOptions: inherit vs. explicit. The other case is simply our new defaults.
+  - Some options should inherit to fail, e.g. { history, location, title, saveScroll, easing, duration, peel }.
+  - saveScroll should default to true for both success and failure
+  - Keep { failOptions: 'inherit' }
   - { navigate: true } should set options.fallback = ':main'
-  - Introduce up.fragment.config.navigateTransition. navigate: true should set this transition. Also { transition: 'navigate' } and { transition: true } should use this.
+  - Introduce up.fragment.config.navigateTransition. navigate: true should set this transition. Also { transition: 'navigate' } should use this.
   - Remove resetTargets and the whole concept of resetting. The distinction between fallbacks and targets is too subtle.
   - The default for { target } in { navigate } should be { target: ':main' }
     - UpdateLayer should then no longer append main targets. There is only { target } and { fallback }, which values that are already set from the caller.
@@ -19,10 +18,8 @@ TODOs
   - Offer up.navigate() which just calls render with { navigate: true }
     - This allows shorter deprecation messages
   - Make sure that all defaults are in up.navigate() or up.render(), not up.follow()
-  - Consider removing the tost notification
 
 
-- Allow transition: true for default transition
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
 - badTargetClasses should also accept a string element

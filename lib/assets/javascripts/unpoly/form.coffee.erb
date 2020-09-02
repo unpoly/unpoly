@@ -396,20 +396,19 @@ up.form = do ->
     field = up.fragment.get(fieldOrSelector)
 
     options = u.options(options)
+    options.navigate = false
     options.origin = field
     options.history = false
     options.target = findValidateTarget(field, options)
 
     # The protocol doesn't define whether the validation results in a status code.
     # Hence we use the same options for both success and failure.
-    options.failOptions = 'mirror'
+    options.fail = false
 
     # Make sure the X-Up-Validate header is present, so the server-side
     # knows that it should not persist the form submission
-    options.validate = field.getAttribute('name') || ':none'
     options.headers ||= {}
-    options.headers[up.protocol.config.validateHeader] = options.validate
-    options.reveal ?= false
+    options.headers[up.protocol.config.validateHeader] = field.getAttribute('name') || ':none'
 
     # The guardEvent will also be assigned an { options } attribute in up.render()
     options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')

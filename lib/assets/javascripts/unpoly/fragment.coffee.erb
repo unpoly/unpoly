@@ -35,7 +35,7 @@ up.fragment = do ->
       get_mainTargets: -> up.layer.config.any.mainTargets
       resetTargets: ['body']
       badTargetClasses: [/^up-/]
-      transition: false
+      navigateTransition: false
   up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')
 
   reset = ->
@@ -207,53 +207,10 @@ up.fragment = do ->
   render = (args...) ->
     options = parseTargetAndOptions(args)
 
-    options.hungry ?= true # preflight option has no failVariant
-    options.keep ?= true
-    options.failKeep ?= true
-    options.focus ?= 'auto'
-    options.source ?= true
-
-    # When preloading, disable all preflight side effects.
     if options.preload
-      options.solo = false # preflight option has no failVariant
-      options.confirm = false # preflight option has no failVariant
-      options.feedback = false # preflight option has no failVariant
-
-    # By default we consider every change to be a user-initiated navigation
-    # that involves changing scroll positions, browser location, etc.
-    # Developers can pass { navigate: false } to only update a fragment without
-    # any other effects.
-    navigate = !!options.navigate ? false # preflight option has no fail variant
-
-    options.solo ?= navigate # preflight option has no failVariant
-    options.feedback ?= navigate # preflight option has no failVariant
-    options.fallback ?= navigate # preflight option has no failVariant
-    options.peel ?= navigate
-    options.failPeel ?= navigate
-    options.reveal ?= navigate
-    options.failReveal ?= navigate
-    options.saveScroll ?= navigate
-    options.failSaveScroll ?= navigate
-
-    # When the layer is opened, the { history } option defines whether the
-    # layer enables handling of location and title in general.
-    # When updating history, { history } is a shortcut to
-    # change both { title } and { location }.
-    if options.history == false
-      options.title ?= false
-      options.location ?= false
-
-    options.history ?= navigate
-    options.title ?= options.history
-    options.failTitle ?= options.history
-    options.location ?= options.history
-    options.failLocation ?= options.history
-
-#    unleess navigate
-#      # Only change this for non-default { navigate: false  } option.
-#      # For the default option history should depend on the layer mode setting.
-#      options.history ?= false
-#      options.failHistory ?= false
+      options.solo = false
+      options.confirm = false
+      options.feedback = false
 
     promise = up.browser.whenConfirmed(options)
 
@@ -263,17 +220,24 @@ up.fragment = do ->
       promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
 
     promise = promise.then ->
-      if options.solo && !options.preload
+      if options.solo
         up.proxy.abort()
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise
 
   makeChangeNow = (options) ->
+    assembler = new up.RenderOptionsAssembler(options)
+
     if options.url
-      return new up.Change.FromURL(options).executeAsync()
+      return new up.Change.FromURL(
+        assembler.getSuccessOptions(),
+        assembler.getFailureOptions()
+      ).executeAsync()
     else
-      return new up.Change.FromContent(options).executeAsync()
+      return new up.Change.FromContent(
+        assembler.getSuccessOptions()
+      ).executeAsync()
 
   ###**
   This event is [emitted](/up.emit) when the server responds with the HTML, before
