@@ -7,54 +7,6 @@ class up.Change.FromURL extends up.Change
   constructor: (@successOptions, @failureOptions) ->
     @successOptions.inspectResponse = @fullLoad
 
-  deriveFailOptions: ->
-    # `successOptions` is an object like
-    #
-    #     { foo: 1, failFoo: undefined, bar: 2, failBar: 3, baz: 4 }
-    #
-    # We want to use the failVariant keys where they exists and are defined.
-    # Hence the result should be:
-    #
-    #     { foo: 1, bar: 3, baz: 4 }
-    #
-    # Note how we *don't* override `foo` with `undefined`.
-    mode = @successOptions.failOptions || 'explicit'
-
-    switch mode
-      when 'explicit'
-        # In explicit mode (the default) the developer needs to pass all failVariant
-        # keys that should be used for failed responses. From the succcess options
-        # we only inherit keys that need to be known before the request goes out,
-        # like { method }, { url } or { params } ("preflight keys").
-        preflightOptions = u.pick(@successOptions, @constructor.PREFLIGHT_KEYS)
-        @failOptions = u.merge(preflightOptions, @explicitFailOptions())
-      when 'inherit'
-        # In inherit mode all success options are copied and can then be
-        # overridden with failVariant keys.
-        @failOptions = u.merge(@successOptions, @explicitFailOptions())
-      when 'mirror'
-        # In mirror mode we use the same options for fail that we use for success,
-        # ignoring all failVariant keys.
-        # This is useful for up.validate(), where we want to always use the form's
-        # success options regardless of the response status.
-        @failOptions = u.copy(@successOptions)
-
-  explicitFailOptions: ->
-    opts = {}
-    for key, value of @successOptions
-      # Only add a key/value pair if there is a defined failOverride.
-      # The condition below looks wrong at first, but really isn't. Be aware that
-      # up.fragment.successKey(key) only returns a value if the given key is prefixed with
-      # "fail"!
-      if unprefixedKey = up.fragment.successKey(key)
-        failValue = @successOptions[key]
-        # up.OptionsParser sets keys to undefined, even if neither options nor element
-        # produces that option. Hence we ignore undefined values. To override it with
-        # an empty value, the developer needs to pass null instead.
-        if u.isDefined(failValue)
-          opts[unprefixedKey] = failValue
-    return opts
-
   execute: ->
     unless up.browser.canPushState()
       @fullLoad() unless @successOptions.preload
