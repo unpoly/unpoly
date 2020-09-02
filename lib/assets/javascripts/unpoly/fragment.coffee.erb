@@ -33,7 +33,6 @@ up.fragment = do ->
       # Users who are not using layers will prefer settings default targets
       # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
       get_mainTargets: -> up.layer.config.any.mainTargets
-      resetTargets: ['body']
       badTargetClasses: [/^up-/]
       navigateTransition: false
   up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')

@@ -24,7 +24,6 @@ class up.Change.FromContent extends up.Change
   getPlans: ->
     unless @plans
       @plans = []
-      addFallbackPlans = (@options.fallback != false)
 
       if @options.fragment
         # ResponseDoc allows to pass innerHTML as { fragment }, but then it also
@@ -34,31 +33,21 @@ class up.Change.FromContent extends up.Change
       # (1) We seek @options.target in all matching layers
       @expandIntoPlans(@layers, @options.target)
 
-      if addFallbackPlans
+      if @options.fallback == true
+        @options.fallback = ':main'
+
+      if @options.fallback != @options.target
         # (2) In case fallback is a selector or array of selectors, we seek the fallback
-        # in all matching layers. If fallback is true or undefined, this won't add plans.
+        # in all matching layers. If fallback is false or undefined, this won't add plans.
         @expandIntoPlans(@layers,  @options.fallback)
-
-        # (3) We try to update the closest zone around the origin. If no origin is
-        # given, this will update the layer's main selectors.
-        @expandIntoPlans(@layers, ':main')
-
-        # (4) In case nothing from the above matches, we close all layers and swap the
-        # body. The assumption is that the server has returned an unexpected response like
-        # an error message or a login screen (if a session expired) and we want to display
-        # this rather than fail the update.
-        @addResetPlans()
 
     return @plans
 
-  addResetPlans: ->
-    @expandIntoPlans([up.layer.root], up.fragment.config.resetTargets, { peel: true, keep: false })
-
-  expandIntoPlans: (layers, givenTarget, variantProps) ->
+  expandIntoPlans: (layers, givenTarget) ->
     for layer in layers
       for target in @expandTargets(layer, givenTarget)
         # Any plans we add will inherit all properties from @options
-        props = u.merge(@options, { target, layer  }, variantProps)
+        props = u.merge(@options, { target, layer })
 
         if layer == 'new'
           change = new up.Change.OpenLayer(props)
