@@ -45,7 +45,7 @@ class up.RenderOptionsAssembler
   constructor: (givenOptions) ->
     @navigate = givenOptions.navigate
     @givenSuccessOptions = {}
-    @givenFailureOptions = {}
+    @givenFailOptions = {}
     for key, value of givenOptions
       # up.OptionsParser adds undefined values which we ignore here.
       # If a user wants to pass a missing value, they need to pass null.
@@ -53,7 +53,7 @@ class up.RenderOptionsAssembler
         # Note that up.fragment.successKey(key) only returns a value
         # if the given key is prefixed with "fail".
         if unprefixed = up.fragment.successKey(key)
-          @givenFailureOptions[unprefixed] = value
+          @givenFailOptions[unprefixed] = value
         else
           @givenSuccessOptions[key] = value
 
@@ -88,10 +88,10 @@ class up.RenderOptionsAssembler
 
     return @successOptions
 
-  getFailureOptions: ->
-    unless @failureOptions
+  getFailOptions: ->
+    unless @failOptions
       inheritedOptions = u.pick(@givenSuccessOptions, SHARED_KEYS)
-      givenOptions = u.merge(inheritedOptions, @givenFailureOptions)
-      @failureOptions = @assembleOptions(givenOptions)
+      givenOptions = u.merge(inheritedOptions, @givenFailOptions)
+      @failOptions = @assembleOptions(givenOptions)
 
-    return @failureOptions
+    return @failOptions

@@ -4,7 +4,7 @@ u = up.util
 
 class up.Change.FromURL extends up.Change
 
-  constructor: (@successOptions, @failureOptions) ->
+  constructor: (@successOptions, @failOptions) ->
     @successOptions.inspectResponse = @fullLoad
 
   execute: ->

@@ -232,7 +232,7 @@ up.fragment = do ->
     if options.url
       return new up.Change.FromURL(
         assembler.getSuccessOptions(),
-        assembler.getFailureOptions()
+        assembler.getFailOptions()
       ).executeAsync()
     else
       return new up.Change.FromContent(
