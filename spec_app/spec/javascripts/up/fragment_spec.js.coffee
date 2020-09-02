@@ -3646,6 +3646,10 @@ describe 'up.fragment', ->
         result = up.fragment.successKey('foo')
         expect(result).toBeUndefined()
 
+      it 'returns undefined for the key "fail"', ->
+        result = up.fragment.successKey('fail')
+        expect(result).toBeUndefined()
+
     describe 'up.hello()', ->
 
       it 'calls compilers with the given element', ->

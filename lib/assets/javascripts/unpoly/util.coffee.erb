@@ -1633,8 +1633,9 @@ up.util = do ->
     prefix + upperCaseFirst(str)
 
   unprefixCamelCase = (str, prefix) ->
-    if str.indexOf(prefix) == 0
-      lowerCaseFirst(str.slice(prefix.length))
+    pattern = new RegExp('^' + prefix + '([A-Z].*)$')
+    if match = str.match(pattern)
+      return lowerCaseFirst(match[1])
 
   lowerCaseFirst = (str) ->
     str[0].toLowerCase() + str.slice(1)
