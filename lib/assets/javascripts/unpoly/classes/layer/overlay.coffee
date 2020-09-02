@@ -184,7 +184,7 @@ class up.Layer.Overlay extends up.Layer
       origin = event.target
       value = e.jsonAttr(origin, attribute)
       closeOptions = { origin }
-      parser = new up.OptionParser(closeOptions, origin)
+      parser = new up.OptionsParser(closeOptions, origin)
       parser.booleanOrString('animation')
       parser.string('easing')
       parser.number('duration')

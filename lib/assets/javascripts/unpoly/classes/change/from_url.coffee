@@ -48,7 +48,7 @@ class up.Change.FromURL extends up.Change
       # "fail"!
       if unprefixedKey = up.fragment.successKey(key)
         failValue = @successOptions[key]
-        # up.OptionParser sets keys to undefined, even if neither options nor element
+        # up.OptionsParser sets keys to undefined, even if neither options nor element
         # produces that option. Hence we ignore undefined values. To override it with
         # an empty value, the developer needs to pass null instead.
         if u.isDefined(failValue)

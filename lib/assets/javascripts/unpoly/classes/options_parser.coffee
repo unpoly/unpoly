@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.OptionParser
+class up.OptionsParser
 
   constructor: (@options, @element, parserOptions) ->
     @fail = parserOptions?.fail
