@@ -30,53 +30,41 @@ class up.Change.FromContent extends up.Change
         # requires a { target }. We use a target that matches the parsed { fragment }.
         @options.target = @getResponseDoc().rootSelector()
 
-      # (1) We seek @options.target in all matching layers
-      @expandIntoPlans(@layers, @options.target)
-
-      if @options.fallback == true
-        @options.fallback = ':main'
-
-      if @options.fallback != @options.target
-        # (2) In case fallback is a selector or array of selectors, we seek the fallback
-        # in all matching layers. If fallback is false or undefined, this won't add plans.
-        @expandIntoPlans(@layers,  @options.fallback)
+      targets = u.flatten([@options.target, @options.fallback])
+      @expandIntoPlans(@layers, targets)
 
     return @plans
 
-  expandIntoPlans: (layers, givenTarget) ->
+  expandIntoPlans: (layers, targets) ->
     for layer in layers
-      for target in @expandTargets(layer, givenTarget)
+      for target in @expandTargets(targets, layer)
         # Any plans we add will inherit all properties from @options
         props = u.merge(@options, { target, layer })
-
         if layer == 'new'
           change = new up.Change.OpenLayer(props)
-          @plans.push(change)
         else
           change = new up.Change.UpdateLayer(props)
-          @plans.push(change)
+        @plans.push(change)
 
-  expandTargets: (layer, givenTarget) ->
-    if givenTarget == ':main'
-      targets = @mainTargets(layer)
-    else
-      targets = u.wrapList(givenTarget)
+  expandTargets: (targets, layer) ->
+    expanded = new Set()
 
-    # Use u.map() instead of Array#map() because sometimes targets is a jQuery
-    # collection which an incompatible #map() implementation.
-    targets = u.map targets, (target) =>
-      if target == ':layer'
-        return @firstSwappableTarget(layer)
-      if u.isElementish(target)
-        return up.fragment.toTarget(target)
+    while targets.length
+      target = targets.shift
+
+      if target == ':main' || target == true
+        targets.unshift @mainTargets(layer)...
+      else if target == ':layer' && layer != 'new'
+        targets.unshift layer.getFirstSwappableElement()
+      else if u.isElementish(target)
+        expanded.push up.fragment.toTarget(target)
       else if u.isString(target)
-        return up.fragment.resolveTarget(target, { layer, @origin })
+        expanded.push up.fragment.resolveTarget(target, { layer, @origin })
       else
         # @buildPlans() might call us with { target: false } or { target: nil }
         # In that case we don't add a plan.
-        return
 
-    return u.compact(targets)
+    expanded
 
   mainTargets: (layer) ->
     if layer == 'new'
