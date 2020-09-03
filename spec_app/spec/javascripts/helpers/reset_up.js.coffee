@@ -22,8 +22,6 @@ afterEach (done) ->
       # Give async reset behavior another frame to play out,
       # then start the next example.
       up.util.task ->
-        $('up-toast').remove()
-
         overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
         if overlays.length > 0
           console.error("Overlays survived reset!", overlays)

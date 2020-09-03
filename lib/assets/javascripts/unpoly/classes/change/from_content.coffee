@@ -119,20 +119,17 @@ class up.Change.FromContent extends up.Change
       @failFromEmptyPlans()
 
   postflightTargetNotApplicable: ->
-    if @options.inspectResponse
-      toastOpts = { action: { label: 'Open response', callback: @options.inspectResponse } }
-
     if @hasPlans()
-      up.fail(["Could not match targets in old and new content (tried selectors %o)", @planTargets()], toastOpts)
+      up.fail("Could not match targets in old and new content (tried selectors %o)", @planTargets())
     else
-      @failFromEmptyPlans(toastOpts)
+      @failFromEmptyPlans()
 
   hasPlans: ->
     return @getPlans().length
 
-  failFromEmptyPlans: (toastOpts) ->
+  failFromEmptyPlans: ->
     if @layers.length
-      up.fail(['No target for change %o', @options], toastOpts)
+      up.fail('No target for change %o', @options)
     else
       up.fail('Layer %o does not exist', @options.layer)
 

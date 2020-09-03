@@ -1230,28 +1230,6 @@ describe 'up.fragment', ->
                 expect(e).toBeError(/Could not match targets/i)
                 done()
 
-            it 'shows a link to open the unexpected response', (done) ->
-              $target = $fixture('.target').text('old target')
-              $fallback = $fixture('.fallback').text('old fallback')
-              promise = up.render('.target', url: '/path', fallback: '.fallback')
-              loadPage = spyOn(up.browser, 'loadPage')
-
-              u.task =>
-                @respondWith '<div class="unexpected">new unexpected</div>'
-
-              promise.catch (e) ->
-                $toast = $('up-toast')
-                expect($toast).toBeAttached()
-                $inspectLink = $toast.find("up-toast-action:contains('Open response')")
-                expect($inspectLink).toBeAttached()
-                expect(loadPage).not.toHaveBeenCalled()
-
-                Trigger.clickSequence($inspectLink)
-
-                u.task =>
-                  expect(loadPage).toHaveBeenCalledWith('/path', {})
-                  done()
-
           it 'considers a union selector to be missing if one of its selector-atoms are missing', asyncSpec (next) ->
             $target = $fixture('.target').text('old target')
             $target2 = $fixture('.target2').text('old target2')

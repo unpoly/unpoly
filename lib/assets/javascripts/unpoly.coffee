@@ -11,7 +11,6 @@
 #= require ./unpoly/event
 #= require ./unpoly/protocol
 #= require ./unpoly/log
-#= require ./unpoly/toast
 #= require ./unpoly/syntax
 #= require ./unpoly/history
 #= require ./unpoly/fragment

@@ -2,23 +2,7 @@ TODOs
 -----
 
 - render() rework
-  - Some options should inherit to fail, e.g. { history, location, title, saveScroll, easing, duration, peel }.
-  - saveScroll should default to true for both success and failure
-  - Keep { failOptions: 'inherit' }
-  - { navigate: true } should set options.fallback = ':main'
-  - Introduce up.fragment.config.navigateTransition. navigate: true should set this transition. Also { transition: 'navigate' } should use this.
-  - Remove resetTargets and the whole concept of resetting. The distinction between fallbacks and targets is too subtle.
-  - The default for { target } in { navigate } should be { target: ':main' }
-    - UpdateLayer should then no longer append main targets. There is only { target } and { fallback }, which values that are already set from the caller.
-  - fallback: true should mean fallback: ':main' for backwards compatibility
-    - UpdateLayer could then use targets u.uniq([options.target, options.fallback])
   - Offer { target: ':none' } so links can target nothing without throwing an error
-  - Remove the toast. Just print to the console.
-  - Parse [up-navigate] option
-  - Offer up.navigate() which just calls render with { navigate: true }
-    - This allows shorter deprecation messages
-  - Make sure that all defaults are in up.navigate() or up.render(), not up.follow()
-
 
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
@@ -464,7 +448,6 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
     - => Do we copy-paste the GIANT docs for up.emit()?
   - DECISION: We do it like this:
     - up.emit([target], [eventType], [eventProps]) ?
-- Are there still cases for up.toast()?
 - Should up.render() be named up.replace()?
   - up.replace(selectorOrElement, url, [options])
   - up.replace(selectorOrElement, url, [options])

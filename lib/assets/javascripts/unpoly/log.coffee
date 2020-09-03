@@ -28,13 +28,10 @@ up.log = do ->
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @param {boolean} [options.toast=true]
-    Whether fatal errors display a notification bar at the bottom of the screen.
   @stable
   ###
   config = new up.Config ->
     enabled: sessionStore.get('enabled')
-    toast: true
 
   reset = ->
     config.reset()
@@ -155,19 +152,8 @@ up.log = do ->
   @experimental
   ###
   fail = (args...) ->
-    if u.isArray(args[0])
-      messageArgs = args[0]
-      toastOptions = args[1] || {}
-    else
-      messageArgs = args
-      toastOptions = {}
-
-    printToError('up.fail()', messageArgs...)
-
-    if config.toast
-      up.event.onReady(-> up.toast.open(messageArgs, toastOptions))
-
-    throw up.error.failed(messageArgs)
+    printToError('error', args...)
+    throw up.error.failed(args)
 
   muteRejection = (promise) ->
     if config.enabled
