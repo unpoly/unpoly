@@ -8,7 +8,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
   constructor: (options) ->
     super(options)
     @layer = options.layer
-    # Plan#target is required by FromContent#firstDefaultTarget
     @target = options.target
     @origin = options.origin
     @placement = options.placement
