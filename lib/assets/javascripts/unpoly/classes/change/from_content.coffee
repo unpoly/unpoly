@@ -72,18 +72,9 @@ class up.Change.FromContent extends up.Change
     else
       return layer.mainTargets()
 
-#  firstExpandedMainTarget: ->
-#    @expandTargets(@layers[0], ':main')[0]
-
-  firstSwappableTarget: (layer) ->
-    # We cannot target the topmost content child if the layer hasn't been opened yet.
-    unless layer == 'new'
-      return up.fragment.toTarget(layer.getFirstSwappableElement())
-
   execute: ->
-    return @seekPlan
-      attempt: (plan) => plan.execute(@getResponseDoc())
-      noneApplicable: => @postflightTargetNotApplicable()
+    executePlan = (plan) => plan.execute(@getResponseDoc())
+    return @seekPlan(executePlan) or @postflightTargetNotApplicable()
 
   getResponseDoc: ->
     unless @preview || @responseDoc
@@ -92,8 +83,7 @@ class up.Change.FromContent extends up.Change
 
       # If neither { document } nor { fragment } source is given, we assume { content }.
       if !@options.document && !@options.fragment
-        # { content } might be missing, to allow people to open a new layer
-        # using up.layer.open().
+        # { content } might be missing, to allow people to open a new layer using up.layer.open() (no args).
         docOptions.content ?= ''
 
         # When processing { content }, ResponseDoc needs a { target }
@@ -107,10 +97,8 @@ class up.Change.FromContent extends up.Change
   # Returns information about the change that is most likely before the request was dispatched.
   # This might change postflight if the response does not contain the desired target.
   requestAttributes: (opts = {}) ->
-    @seekPlan
-      attempt: (plan) -> plan.requestAttributes()
-      noneApplicable: =>
-        opts.optional or @preflightTargetNotApplicable(opts)
+    planRequestAttributes = (plan) -> plan.requestAttributes()
+    @seekPlan(planRequestAttributes) or opts.optional or @preflightTargetNotApplicable()
 
   preflightTargetNotApplicable: ->
     if @hasPlans()
@@ -136,22 +124,10 @@ class up.Change.FromContent extends up.Change
   planTargets: ->
     return u.uniq(u.map(@getPlans(), 'target'))
 
-  seekPlan: (opts) ->
-#    unprintedMessages = []
-
+  seekPlan: (fn) ->
     for plan in @getPlans()
-      # opts.before?(plan)
       try
-        return opts.attempt(plan)
+        return fn(plan)
       catch error
-#        if up.error.notApplicable.is(error)
-#          unprintedMessages.push(error.message)
-#        else
-        unless up.error.notApplicable.is(error)
-          # Re-throw any unexpected type of error
-          throw error
-
-#    # If we're about to explode with a fatal error we print everything that we tried.
-#    unprintedMessages.forEach (message) -> up.puts('up.render()', message)
-
-    return opts.noneApplicable?()
+        # Re-throw any unexpected type of error
+        up.error.notApplicable.is(error) or throw error

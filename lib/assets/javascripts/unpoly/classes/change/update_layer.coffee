@@ -27,7 +27,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   bestPreflightSelector: ->
     @matchPreflight()
 
-    u.map(@steps, 'selector').join(', ')
+    u.map(@steps, 'selector').join(', ') || ':none'
 
   toString: ->
     "Update \"#{@target}\" in #{@layer}"
@@ -57,7 +57,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @layer.updateContext(u.pick(@options, ['context']))
 
     # Change history before compilation, so new fragments see the new location.
-    @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
+    @layer.updateHistory(u.pick(@options, ['location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
 
     # The server may trigger multiple signals that may cause the layer to close:
     #
@@ -232,18 +232,18 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   parseSteps: ->
     # resolveSelector was already called by up.Change.FromContent
-    disjunction = u.splitValues(@target, ',')
+    for simpleTarget in u.splitValues(@target, ',')
+      unless simpleTarget == ':none'
+        expressionParts = simpleTarget.match(/^(.+?)(?:\:(before|after))?$/) or
+          throw up.error.invalidSelector(simpleTarget)
 
-    @steps = disjunction.map (target, i) =>
-      expressionParts = target.match(/^(.+?)(?:\:(before|after))?$/) or
-        throw up.error.invalidSelector(target)
+        # Each step inherits all options of this change.
+        step = u.merge(@options,
+          selector: expressionParts[1]
+          placement: expressionParts[2] || @placement || 'swap'
+        )
 
-      # selector = @layerScanner.fixSelector(expressionParts[1])
-      selector = expressionParts[1]
-      placement = expressionParts[2] || @placement || 'swap'
-
-      # Each step inherits all options of this change.
-      return u.merge(@options, { selector, placement })
+        @steps.push(step)
 
   matchPreflight: ->
     return if @matchedPreflight
