@@ -1,9 +1,6 @@
 TODOs
 -----
 
-- render() rework
-  - Offer { target: ':none' } so links can target nothing without throwing an error
-
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
 - badTargetClasses should also accept a string element

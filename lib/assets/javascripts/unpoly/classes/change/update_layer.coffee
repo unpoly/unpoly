@@ -113,7 +113,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
               @responseDoc.activateElement(step.newElement, step)
             beforeDetach: =>
               up.syntax.clean(step.oldElement, { @layer })
-            afterDetach: =>
+            afterDetach: ->
               e.remove(step.oldElement) # clean up jQuery data
               up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
             scrollNew: =>
@@ -230,6 +230,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     step.keepPlans = keepPlans
 
   parseSteps: ->
+    @steps = []
+    
     # resolveSelector was already called by up.Change.FromContent
     for simpleTarget in u.splitValues(@target, ',')
       unless simpleTarget == ':none'

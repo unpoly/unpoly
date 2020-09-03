@@ -1633,7 +1633,7 @@ up.util = do ->
     prefix + upperCaseFirst(str)
 
   unprefixCamelCase = (str, prefix) ->
-    pattern = new RegExp('^' + prefix + '([A-Z].*)$')
+    pattern = new RegExp('^' + prefix + '(.+)$')
     if match = str.match(pattern)
       return lowerCaseFirst(match[1])
 

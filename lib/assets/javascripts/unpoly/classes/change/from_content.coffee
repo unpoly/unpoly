@@ -37,7 +37,7 @@ class up.Change.FromContent extends up.Change
 
   expandIntoPlans: (layers, targets) ->
     for layer in layers
-      for target in @expandTargets(targets, layer)
+      @expandTargets(targets, layer).forEach (target) =>
         # Any plans we add will inherit all properties from @options
         props = u.merge(@options, { target, layer })
         if layer == 'new'
@@ -50,21 +50,25 @@ class up.Change.FromContent extends up.Change
     expanded = new Set()
 
     while targets.length
-      target = targets.shift
+      console.log("Remaining targets are %o", targets)
+
+      target = targets.shift()
 
       if target == ':main' || target == true
         targets.unshift @mainTargets(layer)...
       else if target == ':layer' && layer != 'new'
         targets.unshift layer.getFirstSwappableElement()
       else if u.isElementish(target)
-        expanded.push up.fragment.toTarget(target)
+        expanded.add up.fragment.toTarget(target)
       else if u.isString(target)
-        expanded.push up.fragment.resolveTarget(target, { layer, @origin })
+        expanded.add up.fragment.resolveTarget(target, { layer, @origin })
       else
         # @buildPlans() might call us with { target: false } or { target: nil }
         # In that case we don't add a plan.
 
-    expanded
+    console.log("Expanded targets are %o", expanded)
+
+    return expanded
 
   mainTargets: (layer) ->
     if layer == 'new'

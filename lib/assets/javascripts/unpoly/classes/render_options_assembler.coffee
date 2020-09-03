@@ -1,9 +1,11 @@
+u = up.util
+
 GLOBAL_DEFAULTS = {
   hungry: true
   keep: true
   focus: 'auto'
-	source: true
-	saveScroll: true
+  source: true
+  saveScroll: true
   fail: (response) -> !response.ok
 }
 
@@ -28,10 +30,10 @@ SHARED_KEYS = [
 ]
 
 NAVIGATE_DEFAULTS = {
-	solo: true
+  solo: true
   feedback: true
-  fallback: ':main'
-	peel: true
+  fallback: true
+  peel: true
   reveal: true
   transition: 'navigate' # build in lookup
 }
