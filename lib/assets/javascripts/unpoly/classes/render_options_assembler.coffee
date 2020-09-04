@@ -10,6 +10,7 @@ GLOBAL_DEFAULTS = {
 }
 
 SHARED_KEYS = [
+  'fallback',
   'url',
   'method',
   'origin',
@@ -17,6 +18,7 @@ SHARED_KEYS = [
   'params',
   'cache',
   'solo',
+  'tentative',
   'confirm',
   'feedback',
   'origin',
@@ -81,7 +83,6 @@ class up.RenderOptionsAssembler
     result = @defaultOptions()
     @expandHistoryOption(givenOptions)
     u.assign(result, givenOptions)
-    @expandHistoryOption(result)
     return result
 
   getSuccessOptions: ->

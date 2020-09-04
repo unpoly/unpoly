@@ -30,14 +30,17 @@ class up.Change.FromContent extends up.Change
         # requires a { target }. We use a target that matches the parsed { fragment }.
         @options.target = @getResponseDoc().rootSelector()
 
-      targets = u.flatten([@options.target, @options.fallback])
-      @expandIntoPlans(@layers, targets)
+      # First seek { target } in all layers, then seek { fallback } in all layers.
+      @expandIntoPlans(@layers, @options.target)
+      @expandIntoPlans(@layers, @options.fallback)
 
     return @plans
 
   expandIntoPlans: (layers, targets) ->
+    targets = u.wrapList(targets)
+
     for layer in layers
-      @expandTargets(targets, layer).forEach (target) =>
+      for target in @expandTargets(targets, layer)
         # Any plans we add will inherit all properties from @options
         props = u.merge(@options, { target, layer })
         if layer == 'new'
@@ -47,11 +50,11 @@ class up.Change.FromContent extends up.Change
         @plans.push(change)
 
   expandTargets: (targets, layer) ->
-    expanded = new Set()
+    expanded = []
+
+    console.log("Expanding target %o", targets)
 
     while targets.length
-      console.log("Remaining targets are %o", targets)
-
       target = targets.shift()
 
       if target == ':main' || target == true
@@ -59,16 +62,16 @@ class up.Change.FromContent extends up.Change
       else if target == ':layer' && layer != 'new'
         targets.unshift layer.getFirstSwappableElement()
       else if u.isElementish(target)
-        expanded.add up.fragment.toTarget(target)
+        expanded.push up.fragment.toTarget(target)
       else if u.isString(target)
-        expanded.add up.fragment.resolveTarget(target, { layer, @origin })
+        expanded.push up.fragment.resolveTarget(target, { layer, @origin })
       else
         # @buildPlans() might call us with { target: false } or { target: nil }
         # In that case we don't add a plan.
 
     console.log("Expanded targets are %o", expanded)
 
-    return expanded
+    return u.uniq(expanded)
 
   mainTargets: (layer) ->
     if layer == 'new'
@@ -92,11 +95,14 @@ class up.Change.FromContent extends up.Change
 
         # When processing { content }, ResponseDoc needs a { target }
         # to create a matching element.
-        docOptions.target = @expandTargets(@layers[0], docOptions.target || ':main')[0]
+        docOptions.target = @firstExpandedTarget(docOptions.target)
 
       @responseDoc = new up.ResponseDoc(docOptions)
 
     return @responseDoc
+
+  firstExpandedTarget: (target) ->
+    return @expandTargets(target || ':main', @layers[0])[0]
 
   # Returns information about the change that is most likely before the request was dispatched.
   # This might change postflight if the response does not contain the desired target.
