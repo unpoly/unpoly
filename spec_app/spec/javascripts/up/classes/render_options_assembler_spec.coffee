@@ -41,6 +41,22 @@ describe 'up.RenderOptionsAssembler', ->
       expect(assembled.hungry).toBe(false)
       expect(assembled.source).toBe('/other-source')
 
+    describe 'with { history }', ->
+
+      it 'copies { history } to { title } and { location }', ->
+        givenOptions = { history: true }
+        assembler = new up.RenderOptionsAssembler(givenOptions)
+        assembled = assembler.getSuccessOptions()
+        expect(assembled.title).toBe(true)
+        expect(assembled.location).toBe(true)
+
+      it 'does not override a given { location } option', ->
+        givenOptions = { history: true, location: '/given-location' }
+        assembler = new up.RenderOptionsAssembler(givenOptions)
+        assembled = assembler.getSuccessOptions()
+        expect(assembled.title).toBe(true)
+        expect(assembled.location).toBe('/given-location')
+
   describe '#getFailOptions()', ->
 
     it 'has global defaults', ->
@@ -89,3 +105,26 @@ describe 'up.RenderOptionsAssembler', ->
       expect(assembled.target).toBe('.fail')
       expect(assembled.mode).toBe('popup')
       expect(assembled.source).toBe('/fail-source')
+
+    describe 'with { history }', ->
+
+      it 'copies { history } to { title } and { location }', ->
+        givenOptions = { history: true }
+        assembler = new up.RenderOptionsAssembler(givenOptions)
+        assembled = assembler.getFailOptions()
+        expect(assembled.title).toBe(true)
+        expect(assembled.location).toBe(true)
+
+      it 'may be overruled with { failHistory }', ->
+        givenOptions = { history: true, failHistory: false }
+        assembler = new up.RenderOptionsAssembler(givenOptions)
+        assembled = assembler.getFailOptions()
+        expect(assembled.title).toBe(false)
+        expect(assembled.location).toBe(false)
+
+      it 'does not override a given { location } option', ->
+        givenOptions = { history: true, location: '/given-location' }
+        assembler = new up.RenderOptionsAssembler(givenOptions)
+        assembled = assembler.getFailOptions()
+        expect(assembled.title).toBe(true)
+        expect(assembled.location).toBe('/given-location')
