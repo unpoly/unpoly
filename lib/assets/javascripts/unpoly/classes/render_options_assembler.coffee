@@ -6,7 +6,7 @@ GLOBAL_DEFAULTS = {
   focus: 'auto'
   source: true
   saveScroll: true
-  fail: (response) -> !response.ok
+  fail: 'auto'
 }
 
 # These properties are used before the request is sent.
@@ -24,6 +24,7 @@ PREFLIGHT_KEYS = [
   'feedback',
   'origin',
   'currentLayer',
+  'fail',
 ]
 
 # These properties are used between success options and fail options.
@@ -48,8 +49,8 @@ SHARED_KEYS = PREFLIGHT_KEYS.concat([
   'keep',         # If I want to discard [up-keep] elements, I also want to discard them for the fail case.
   'hungry',       # If I want to opportunistically update [up-hungry] elements, I also want it for the fail case.
   'history',      # Note that regardless of setting, we only set history for reloadable responses (GET).
-  'title',        # Note that regardless of setting, we only set history for reloadable responses (GET).
-  'location',     # Note that regardless of setting, we only set history for reloadable responses (GET).
+  # 'title',        # Note that regardless of setting, we only set history for reloadable responses (GET).
+  # 'location',     # Note that regardless of setting, we only set history for reloadable responses (GET).
   'source',       # No strong opinions about that one. Wouldn't one always have a source? Might as well not be an option.
   'saveScroll',   # No strong opinions about that one. Wouldn't one always want to saveScroll? Might as wellnot be an option.
   'fallback',     # If I always want to see the server response, I also want to see it for the fail case

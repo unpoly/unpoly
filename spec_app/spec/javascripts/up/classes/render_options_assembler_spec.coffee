@@ -8,6 +8,7 @@ describe 'up.RenderOptionsAssembler', ->
       expect(assembled.hungry).toBe(true)
       expect(assembled.keep).toBe(true)
       expect(assembled.source).toBe(true)
+      expect(assembled.fail).toBe('auto')
 
     describe 'with { navigate: true }', ->
 
@@ -65,6 +66,7 @@ describe 'up.RenderOptionsAssembler', ->
       expect(assembled.hungry).toBe(true)
       expect(assembled.keep).toBe(true)
       expect(assembled.source).toBe(true)
+      expect(assembled.fail).toBe('auto')
 
     describe 'with { navigate: true }', ->
 
@@ -98,6 +100,11 @@ describe 'up.RenderOptionsAssembler', ->
       expect(assembled.layer).toBeUndefined()
       expect(assembled.reveal).toBeUndefined()
 
+    it 'does not inherit a { location } option', ->
+      assembler = new up.RenderOptionsAssembler({ location: '/location' })
+      assembled = assembler.getFailOptions()
+      expect(assembled.location).not.toBe('/location')
+
     it 'overrides defaults with given fail-prefixed options', ->
       givenOptions = { failTarget: '.fail', failSource: '/fail-source', failMode: 'popup' }
       assembler = new up.RenderOptionsAssembler(givenOptions)
@@ -122,8 +129,8 @@ describe 'up.RenderOptionsAssembler', ->
         expect(assembled.title).toBe(false)
         expect(assembled.location).toBe(false)
 
-      it 'does not override a given { location } option', ->
-        givenOptions = { history: true, location: '/given-location' }
+      it 'does not override a given { failLocation } option', ->
+        givenOptions = { history: true, failLocation: '/given-location' }
         assembler = new up.RenderOptionsAssembler(givenOptions)
         assembled = assembler.getFailOptions()
         expect(assembled.title).toBe(true)

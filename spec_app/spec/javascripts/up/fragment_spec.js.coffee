@@ -1349,32 +1349,14 @@ describe 'up.fragment', ->
                 expect('.element').toHaveText(/new text/)
                 done()
 
-          it 'closes all overlays and replaces a target from up.fragment.config.resetTargets', (done) ->
-            up.fragment.config.resetTargets = ['.reset-target']
-            fixture('.reset-target', text: 'old reset target text')
-            fixture('.target', text: 'old target text')
-
-            fixture('.element', text: 'old text')
-            promise = up.render '.target', layer: 'parent', document: """
-              <div class="reset-target">new reset target text</div>div>
-              <div class="target">new target text</div>div>
-            """
-
-            u.task ->
-              promiseState(promise).then (result) ->
-                expect(result.state).toEqual('fulfilled')
-                expect('.target').toHaveText(/old target text/)
-                expect('.reset-target').toHaveText(/new reset target text/)
-                done()
-
-      describe 'browser location URL', ->
+      describe 'with { location } option', ->
 
         beforeEach ->
           up.history.config.enabled = true
 
         it 'sets the browser location to the requested URL', asyncSpec (next) ->
           fixture('.target')
-          promise = up.render('.target', url: '/path')
+          promise = up.render('.target', url: '/path', location: true)
           next =>
             @respondWithSelector('.target')
             next.await(promise)
@@ -1383,13 +1365,13 @@ describe 'up.fragment', ->
 
         it 'does not add a history entry after non-GET requests', asyncSpec (next) ->
           fixture('.target')
-          up.render('.target', url: '/path', method: 'post')
+          up.render('.target', url: '/path', method: 'post', location: true)
           next => @respondWithSelector('.target')
           next => expect(location.href).toMatchURL(@locationBeforeExample)
 
         it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
           fixture('.target')
-          up.render('.target', url: '/path')
+          up.render('.target', url: '/path', location: true)
           next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
           next => expect(location.href).toMatchURL('/other-path')
 
@@ -1407,7 +1389,7 @@ describe 'up.fragment', ->
 
         it 'does not add a history entry after a failed GET-request', asyncSpec (next) ->
           fixture('.target')
-          up.render('.target', url: '/path', method: 'post', failTarget: '.target')
+          up.render('.target', url: '/path', method: 'post', failTarget: '.target', location: true)
           next => @respondWithSelector('.target', status: 500)
           next => expect(location.href).toMatchURL(@locationBeforeExample)
 
@@ -1429,7 +1411,7 @@ describe 'up.fragment', ->
           next => @respondWithSelector('.target')
           next => expect(location.href).toMatchURL('/path?foo-key=foo%20value&bar-key=bar%20value')
 
-        describe 'with { location } option', ->
+        describe 'when a string is passed as { location } option', ->
 
           it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
             fixture('.target')
@@ -1980,7 +1962,7 @@ describe 'up.fragment', ->
             # of the viewport.
             expect($new.offset().top).toBeAround(0, 5)
 
-            # The absolitized $old is shifted upwards to make it looks like it
+            # The absolutized $old is shifted upwards to make it looks like it
             # was at the scroll position before we revealed $new.
             expect($old.offset().top).toBeAround(-300, 5)
 

@@ -37,8 +37,6 @@ class up.Change.FromContent extends up.Change
     return @plans
 
   expandIntoPlans: (layers, targets) ->
-    targets = u.wrapList(targets)
-
     for layer in layers
       for target in @expandTargets(targets, layer)
         # Any plans we add will inherit all properties from @options
@@ -50,6 +48,9 @@ class up.Change.FromContent extends up.Change
         @plans.push(change)
 
   expandTargets: (targets, layer) ->
+    # Copy the list since targets might be a jQuery collection, and this does not support shift or push.
+    targets = u.copy(u.wrapList(targets))
+
     expanded = []
 
     console.log("Expanding target %o", targets)

@@ -403,7 +403,7 @@ up.form = do ->
 
     # The protocol doesn't define whether the validation results in a status code.
     # Hence we use the same options for both success and failure.
-    options.fail = false
+    options.fail = 'never'
 
     # Make sure the X-Up-Validate header is present, so the server-side
     # knows that it should not persist the form submission
