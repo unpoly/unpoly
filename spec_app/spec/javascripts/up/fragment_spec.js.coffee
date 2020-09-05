@@ -2338,7 +2338,7 @@ describe 'up.fragment', ->
 
         it 'restores the scroll positions of all viewports around the target', asyncSpec (next) ->
 
-          $viewport = $fixture('div[up-viewport] .element').css
+          $viewport = $fixture('.viewport[up-viewport] .element').css
             'height': '100px'
             'width': '100px'
             'overflow-y': 'scroll'
@@ -2349,14 +2349,14 @@ describe 'up.fragment', ->
               contentType: 'text/html'
               responseText: '<div class="element" style="height: 300px"></div>'
 
-          up.render('.element', url: '/foo', saveScroll: true)
+          up.render('.element', url: '/foo', history: true)
 
           next => respond()
           next => $viewport.scrollTop(65)
-          next => up.replace('.element', '/bar', saveScroll: true)
+          next => up.render('.element', url: '/bar', history: true)
           next => respond()
-          next => $viewport.scrollTop(0)
-          next.await => up.replace('.element', '/foo', restoreScroll: true)
+          next => $viewport.scrollTop(10)
+          next.await => up.render('.element', url: '/foo', restoreScroll: true, history: true)
           # No need to respond because /foo has been cached before
           next => expect($viewport.scrollTop()).toEqual(65)
 

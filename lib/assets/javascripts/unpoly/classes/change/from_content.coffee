@@ -53,8 +53,6 @@ class up.Change.FromContent extends up.Change
 
     expanded = []
 
-    console.log("Expanding target %o", targets)
-
     while targets.length
       target = targets.shift()
 
@@ -69,8 +67,6 @@ class up.Change.FromContent extends up.Change
       else
         # @buildPlans() might call us with { target: false } or { target: nil }
         # In that case we don't add a plan.
-
-    console.log("Expanded targets are %o", expanded)
 
     return u.uniq(expanded)
 
