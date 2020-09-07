@@ -56,7 +56,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @layer.updateContext(u.pick(@options, ['context']))
 
     # Change history before compilation, so new fragments see the new location.
-    @layer.updateHistory(u.pick(@options, ['location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
+
+    throw "we do want history: false to be irrelevant if title: 'string' is given, yes?"
+
+    @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
 
     # The server may trigger multiple signals that may cause the layer to close:
     #

@@ -262,32 +262,47 @@ describe 'up.feedback', ->
               expect(@backgroundLinkToLayerURL).not.toHaveClass('up-current')
               expect(@backgroundLinkToOtherURL).not.toHaveClass('up-current')
 
-          it "marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", asyncSpec (next) ->
+          it "marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location zzz", asyncSpec (next) ->
             up.history.replace('/background-url')
 
-            next =>
-              up.layer.open(url: '/layer-url', target: '.layer-content', history: false)
+            fragment = """
+              <div class="layer-content" up-nav>
+                <a href="/background-url">text</a>
+                <a href="/layer-url">text</a>
+                <a href="/other-url">text</a>
+              </div>
+            """
+
+            findLinks = =>
+              @layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
+              @layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
+              @layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
 
             next =>
-              @respondWith """
-                <div class="layer-content" up-nav>
-                  <a href="/background-url">text</a>
-                  <a href="/layer-url">text</a>
-                  <a href="/other-url">text</a>
-                </div>
-              """
+              up.layer.open(target: '.layer-content', url: '/layer-url', { history: false })
+
+            next =>
+              @respondWith(fragment)
 
             next =>
               expect(up.layer.location).toMatchURL('/layer-url')
               expect(location.href).toMatchURL('/background-url')
 
-              @layerLinkToBackgroundURL = e.get('.layer-content a[href="/background-url"]')
-              @layerLinkToLayerURL = e.get('.layer-content a[href="/layer-url"]')
-              @layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
-
+              findLinks()
               expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
               expect(@layerLinkToLayerURL).toHaveClass('up-current')
               expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
+
+#              up.render(target: '.layer-content', url: '/other-url', navigate: true)
+#
+#            next =>
+#              @respondWith(fragment)
+#
+#            next =>
+#              findLinks()
+#              expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
+#              expect(@layerLinkToLayerURL).not.toHaveClass('up-current')
+#              expect(@layerLinkToOtherURL).toHaveClass('up-current')
 
           it "respects links that are added to an existing [up-nav] by a fragment update", asyncSpec (next) ->
             $nav = $fixture('.nav[up-nav]')

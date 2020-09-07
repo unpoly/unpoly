@@ -41,7 +41,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @options.title = @improveHistoryValue(@options.title, responseDoc.getTitle())
 
-    @layer = up.layer.build(@options)
+    @layer = up.layer.build(u.merge(@options, history: @historyOptionForLayer()))
 
     if @emitOpenEvent().defaultPrevented
       # We cannot use @abortWhenLayerClosed() here,
@@ -101,21 +101,26 @@ class up.Change.OpenLayer extends up.Change.Addition
     # layer = await up.layer.open(...)
     return Promise.resolve(@layer)
 
+  historyOptionForLayer: ->
+    # (1) The caller can pass { history: true } or { history: false } to control whether
+    #     the new layer will render history. Once set this setting will be honored for all
+    #     future fragment updates in that layer.
+    # (1) When the caller passes { history: 'auto' } we return undefined so the layer mode's
+    #     default history prop from up.layer.config will be used.
+    if @options.history != 'auto'
+      return @options.history
+
+  historyOptionForFragment: ->
+    # (1) If we cannot push state for some reason, we prefer disabling history for
+    #     child layers instead of blowing up the entire stack with a full page load.
+    # (2) It might be surprising options.history is not relevant here.
+    #     Even if the layer has a { history: false } property we want to set the
+    #     initial layer.location to the fragment to enable .up-current.
+    return up.browser.canPushState()
+
   handleHistory: ->
     @layer.parent.saveHistory()
-
-    # When the layer is opened, the { history } option defines whether the
-    # layer enables handling of location and title in general.
-    # When updating history, accept { history: false } as a shortcut to
-    # neither change { title } nor { location }.
-    historyOptions = u.omit(@options, ['history'])
-
-    # If we cannot push state for some reason, we prefer disabling history for
-    # child layers instead of blowing up the entire stack with a full page load.
-    unless up.browser.canPushState()
-      historyOptions.history = false
-
-    @layer.updateHistory(historyOptions)
+    @layer.updateHistory(u.merge(@options, history: @historyOptionForFragment()))
 
   handleFocus: ->
     @currentLayer.overlayFocus?.moveToBack()

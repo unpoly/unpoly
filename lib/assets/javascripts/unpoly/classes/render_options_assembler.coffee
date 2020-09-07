@@ -49,8 +49,6 @@ SHARED_KEYS = PREFLIGHT_KEYS.concat([
   'keep',         # If I want to discard [up-keep] elements, I also want to discard them for the fail case.
   'hungry',       # If I want to opportunistically update [up-hungry] elements, I also want it for the fail case.
   'history',      # Note that regardless of setting, we only set history for reloadable responses (GET).
-  # 'title',        # Note that regardless of setting, we only set history for reloadable responses (GET).
-  # 'location',     # Note that regardless of setting, we only set history for reloadable responses (GET).
   'source',       # No strong opinions about that one. Wouldn't one always have a source? Might as well not be an option.
   'saveScroll',   # No strong opinions about that one. Wouldn't one always want to saveScroll? Might as wellnot be an option.
   'fallback',     # If I always want to see the server response, I also want to see it for the fail case
@@ -62,6 +60,7 @@ NAVIGATE_DEFAULTS = {
   solo: true
   feedback: true
   fallback: true
+  history: 'auto'
   peel: true
   reveal: true
   transition: 'navigate' # build in lookup
@@ -70,10 +69,7 @@ NAVIGATE_DEFAULTS = {
 # These options will be set to both success and fail options
 # if { navigate: false } is given.
 NO_NAVIGATE_DEFAULTS = {
-  # Don't set { history: false }, since for new layer history should be governed
-  # by the layer default.
-  title: false
-  location: false
+  history: false
 }
 
 class up.RenderOptionsAssembler
@@ -92,14 +88,14 @@ class up.RenderOptionsAssembler
         else
           @givenSuccessOptions[key] = value
 
-  expandHistoryOption: (options) ->
-    if u.isDefined(options.history)
-      # When the layer is opened, the { history } option defines whether the
-      # layer enables handling of location and title in general.
-      # When updating history, { history } is a shortcut to
-      # change both { title } and { location }.
-      options.title ?= options.history
-      options.location ?= options.history
+#  expandHistoryOption: (options) ->
+#    if u.isDefined(options.history)
+#      # When the layer is opened, the { history } option defines whether the
+#      # layer enables handling of location and title in general.
+#      # When updating history, { history } is a shortcut to
+#      # change both { title } and { location }.
+#      options.title ?= options.history
+#      options.location ?= options.history
 
   defaultOptions: ->
     defaults = {}
@@ -112,8 +108,20 @@ class up.RenderOptionsAssembler
 
   assembleOptions: (givenOptions) ->
     result = @defaultOptions()
-    @expandHistoryOption(givenOptions)
+    # @expandHistoryOption(givenOptions)
     u.assign(result, givenOptions)
+
+    # Transform { history: false, title: 'foo'      } to { history: true, title: 'foo', location: false }
+    # Transform { history: false, location: '/path' } to { history: true, title: false, location: '/path' }
+    if result.history == false
+      if result.title && !result.location
+        result.history = true
+        result.location = false
+
+      if result.location && !result.title
+        result.history = true
+        result.title = false
+
     return result
 
   getSuccessOptions: ->

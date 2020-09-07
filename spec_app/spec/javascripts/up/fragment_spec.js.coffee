@@ -1349,12 +1349,15 @@ describe 'up.fragment', ->
                 expect('.element').toHaveText(/new text/)
                 done()
 
+      throw "context should be 'with { history } option"
       describe 'with { location } option', ->
+
+        # throw "should these specs not all fail since history: true is not given?"
 
         beforeEach ->
           up.history.config.enabled = true
 
-        it 'sets the browser location to the requested URL', asyncSpec (next) ->
+        it 'sets the browser location to the requested URL yyy', asyncSpec (next) ->
           fixture('.target')
           promise = up.render('.target', url: '/path', location: true)
           next =>
@@ -1387,7 +1390,7 @@ describe 'up.fragment', ->
           next =>
             expect(location.href).toMatchURL('/signaled-path')
 
-        it 'does not add a history entry after a failed GET-request', asyncSpec (next) ->
+        it 'does add a history entry after a failed GET-request (since that is reloadable)', asyncSpec (next) ->
           fixture('.target')
           up.render('.target', url: '/path', method: 'post', failTarget: '.target', location: true)
           next => @respondWithSelector('.target', status: 500)

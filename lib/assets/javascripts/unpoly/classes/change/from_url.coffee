@@ -50,7 +50,7 @@ class up.Change.FromURL extends up.Change
       return rejectWithFailedResponse()
 
   isSuccessfulResponse: (response) ->
-    @successOptions.fail == 'never' || response.ok
+    @successOptions.fail == false || response.ok
 
   updateContentFromResponse: (response, options) ->
     # The response might carry some updates for our change options,
