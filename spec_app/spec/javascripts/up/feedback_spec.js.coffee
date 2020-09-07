@@ -293,16 +293,16 @@ describe 'up.feedback', ->
               expect(@layerLinkToLayerURL).toHaveClass('up-current')
               expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
 
-#              up.render(target: '.layer-content', url: '/other-url', navigate: true)
-#
-#            next =>
-#              @respondWith(fragment)
-#
-#            next =>
-#              findLinks()
-#              expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
-#              expect(@layerLinkToLayerURL).not.toHaveClass('up-current')
-#              expect(@layerLinkToOtherURL).toHaveClass('up-current')
+              up.render(target: '.layer-content', url: '/other-url', navigate: true)
+
+            next =>
+              @respondWith(fragment)
+
+            next =>
+              findLinks()
+              expect(@layerLinkToBackgroundURL).not.toHaveClass('up-current')
+              expect(@layerLinkToLayerURL).not.toHaveClass('up-current')
+              expect(@layerLinkToOtherURL).toHaveClass('up-current')
 
           it "respects links that are added to an existing [up-nav] by a fragment update", asyncSpec (next) ->
             $nav = $fixture('.nav[up-nav]')

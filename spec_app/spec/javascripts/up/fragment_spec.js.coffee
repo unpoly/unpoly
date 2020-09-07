@@ -1349,10 +1349,13 @@ describe 'up.fragment', ->
                 expect('.element').toHaveText(/new text/)
                 done()
 
-      throw "context should be 'with { history } option"
-      describe 'with { location } option', ->
+      describe 'with { history } option', ->
 
-        # throw "should these specs not all fail since history: true is not given?"
+        it 'updates title and location'
+
+        it 'updates neither title nor location with { history: false }'
+
+      describe 'with { location } option', ->
 
         beforeEach ->
           up.history.config.enabled = true
