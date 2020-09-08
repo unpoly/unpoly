@@ -272,7 +272,12 @@ up.element = do ->
   [this WHATWG mailing list post](http://lists.w3.org/Archives/Public/public-whatwg-archive/2014Apr/0094.html).
 
   @function up.element.show
+<<<<<<< HEAD:lib/assets/javascripts/unpoly/element.coffee
   @stable
+=======
+  @param {Element} element
+  @experimental
+>>>>>>> 0d20e224... Adjust docs:lib/assets/javascripts/unpoly/element.coffee.erb
   ###
   show = (element) ->
     element.style.display = ''
@@ -309,9 +314,11 @@ up.element = do ->
   @function up.element.toggleClass
   @param {Element} element
     The element for which to add or remove the class.
-  @param {string} className
-    A boolean value to determine whether the class should be added or removed.
-  @param {string} state
+  @param {String} className
+    The class which should be added or removed.
+  @param {Boolean} [newPresent]
+    Pass `true` to add the class to the element or `false` to remove it.
+
     If omitted, the class will be added if missing and removed if present.
   @stable
   ###
