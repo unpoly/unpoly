@@ -2519,6 +2519,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     [this WHATWG mailing list post](http://lists.w3.org/Archives/Public/public-whatwg-archive/2014Apr/0094.html).
     
     @function up.element.show
+    @param {Element} element
     @experimental
      */
     show = function(element) {
@@ -2556,10 +2557,12 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     @function up.element.toggleClass
     @param {Element} element
       The element for which to add or remove the class.
-    @param {String} className
-      A boolean value to determine whether the class should be added or removed.
-    @param {String} state
-      If omitted, the class will be added if missing and removed if present.
+     @param {String} className
+     The class which should be added or removed.
+     @param {Boolean} [newPresent]
+     Pass `true` to add the class to the element or `false` to remove it.
+
+     If omitted, the class will be added if missing and removed if present.
     @experimental
      */
     toggleClass = function(element, klass, newPresent) {
