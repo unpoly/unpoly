@@ -319,7 +319,7 @@ describe 'up.link', ->
                 </div>
                 """
 
-            up.replace('.element', '/foo')
+            up.navigate('.element', url: '/foo')
 
             next =>
               # Provide the content at /foo with a link to /bar in the HTML
@@ -966,7 +966,7 @@ describe 'up.link', ->
 
           it 'morphs between the old and new target element', asyncSpec (next) ->
             $fixture('.target.old')
-            $link = $fixture('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="500"][up-easing="linear"]')
+            $link = $fixture('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="600"][up-easing="linear"]')
             Trigger.clickSequence($link)
 
             next =>
@@ -980,7 +980,7 @@ describe 'up.link', ->
               expect(@$oldGhost).toHaveOpacity(1, 0.15)
               expect(@$newGhost).toHaveOpacity(0, 0.15)
 
-            next.after 250, =>
+            next.after 300, =>
               expect(@$oldGhost).toHaveOpacity(0.5, 0.15)
               expect(@$newGhost).toHaveOpacity(0.5, 0.15)
 

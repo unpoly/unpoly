@@ -39,28 +39,6 @@ describe 'up.feedback', ->
         expect($currentLinkInNav).toHaveClass('up-current')
         expect($currentLinkOutsideNav).not.toHaveClass('up-current')
 
-      it 'marks a replaced child link as .up-current if it links to the current URL', asyncSpec (next) ->
-        up.history.replace('/foo')
-        $nav = $fixture('div[up-nav]')
-        $nav.affix('a.link[href="/bar"]').text('old link')
-        up.hello($nav)
-
-        expect('.link').toHaveText('old link')
-        expect('.link').not.toHaveClass('up-current')
-
-        up.replace('.link', '/src', history: false)
-
-        next =>
-          @respondWith """
-            <a class="link" href="/foo">
-              new link
-            </a>
-          """
-
-        next =>
-          expect('.link').toHaveText('new link')
-          expect('.link').toHaveClass('up-current')
-
       it 'marks any link as .up-current if its up-href attribute matches the current URL', ->
         up.history.replace('/foo')
         $nav = $fixture('div[up-nav]')
@@ -279,7 +257,7 @@ describe 'up.feedback', ->
               @layerLinkToOtherURL = e.get('.layer-content a[href="/other-url"]')
 
             next =>
-              up.layer.open(target: '.layer-content', url: '/layer-url', { history: false })
+              up.layer.open(target: '.layer-content', url: '/layer-url', history: false)
 
             next =>
               @respondWith(fragment)
@@ -293,7 +271,7 @@ describe 'up.feedback', ->
               expect(@layerLinkToLayerURL).toHaveClass('up-current')
               expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
 
-              up.render(target: '.layer-content', url: '/other-url', navigate: true)
+              up.navigate(target: '.layer-content', url: '/other-url')
 
             next =>
               @respondWith(fragment)

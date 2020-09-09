@@ -2,13 +2,7 @@ u = up.util
 
 class up.Change extends up.Class
 
-  constructor: (options) ->
-    if u.isString(options.history)
-      up.legacy.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
-      options.location = options.history
-      delete options.history
-
-    @options = options
+  constructor: (@options) ->
 
   onAppeared: ->
     @options.onAppeared?()

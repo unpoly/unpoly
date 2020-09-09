@@ -13,7 +13,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        up.replace('.target', '/path')
+        up.navigate('.target', url: '/path')
 
         next =>
           @respondWith """
@@ -36,7 +36,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        promise = up.replace('.target', '/path')
+        promise = up.navigate('.target', url: '/path')
 
         next =>
           @respondWith """
@@ -58,7 +58,7 @@ describe 'up.radio', ->
 
         revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-        up.replace('.target', '/path', reveal: true)
+        up.navigate('.target', url: '/path', reveal: true)
 
         next =>
           @respondWith """
@@ -79,7 +79,7 @@ describe 'up.radio', ->
         $fixture('.target').text('old target')
         $fixture('.fail-target').text('old fail target')
 
-        up.replace('.target', '/path', failTarget: '.fail-target')
+        up.navigate('.target', url: '/path', failTarget: '.fail-target')
 
         next =>
           expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
@@ -90,7 +90,7 @@ describe 'up.radio', ->
         $fixture('.target').text('old target')
         $fixture('.fail-target').text('old fail target')
 
-        up.replace('.target', '/path', failTarget: '.fail-target')
+        up.navigate('.target', url: '/path', failTarget: '.fail-target')
 
         next =>
           @respondWith
@@ -120,7 +120,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        up.replace('.target', '/path', hungry: false)
+        up.navigate('.target', url: '/path', hungry: false)
 
         next =>
           @respondWith

@@ -4,8 +4,11 @@ u = up.util
 
 class up.Change.FromURL extends up.Change
 
-  constructor: (@successOptions, @failOptions) ->
-    @successOptions.inspectResponse = @fullLoad
+  constructor: (@successOptions) ->
+    super(@successOptions)
+    @failOptions = up.RenderOptions.deriveFailOptions(@successOptions)
+
+    console.log("FromURL: success is %o, fail is %o", @successOptions, @failOptions)
 
   execute: ->
     unless up.browser.canPushState()

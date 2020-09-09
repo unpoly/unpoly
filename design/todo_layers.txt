@@ -1,6 +1,8 @@
 TODOs
 -----
 
+- Arne wants up.navigate()
+- Do we want to continue supporting up.render('.foo') instead of up.render({ target: '.foo' }) ?
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
 - badTargetClasses should also accept a string element
@@ -276,6 +278,7 @@ Docs
 Later?
 ------
 
+- { history: 'force' } (render history in layers that prevent it)
 - Can we offer up.idle?
   - No animations running
   - No scrolling running

@@ -24,14 +24,20 @@ class up.OptionsParser
   parse: (attrValueFn, key, keyOptions = {}) ->
     attrNames = u.wrapList(keyOptions.attr ? @attrNameForKey(key))
 
+    # Below we will only set @options[key] = value if value is defined.
+    # Setting undefined values would throw of up.RenderOptionsAssembler in up.render().
+    value = @options[key]
+
     if @element
       for attrName in attrNames
-        @options[key] ?= attrValueFn(@element, attrName)
+        value ?= attrValueFn(@element, attrName)
 
-    @options[key] ?= keyOptions.default
+    value ?= keyOptions.default
 
     if normalizeFn = keyOptions.normalize
-      @options[key] = normalizeFn(@options[key])
+      value = normalizeFn(value)
+
+    @options[key] = value if u.isDefined(value)
 
     if (keyOptions.fail || @fail) && failKey = up.fragment.failKey(key)
       failAttrNames = u.compact(u.map(attrNames, @deriveFailAttrName))

@@ -47,7 +47,7 @@ describe 'up.layer', ->
         it 'aborts a previous pending request for the current layer', asyncSpec (next) ->
           fixture('.root-element')
 
-          up.render('.root-element', url: '/path1')
+          up.navigate('.root-element', url: '/path1')
           abortedURLs = []
           up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
 
@@ -207,7 +207,7 @@ describe 'up.layer', ->
             expect(up.layer.isOverlay()).toBe(true)
             expect(location.href).toMatchURL('/modal-location')
 
-            up.render(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false)
+            up.navigate(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false)
 
           next ->
             expect(location.href).toMatchURL('/modal-location')
@@ -663,12 +663,12 @@ describe 'up.layer', ->
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'other content', location: '/other-location')
+              up.navigate('.overlay-content', content: 'other content', location: '/other-location')
 
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+              up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
 
             next ->
               value = { location: u.normalizeURL('/acceptable-location') }
@@ -687,7 +687,7 @@ describe 'up.layer', ->
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'acceptable content', location: '/records/new')
+              up.navigate('.overlay-content', content: 'acceptable content', location: '/records/new')
 
             next ->
               value = { location: u.normalizeURL('/records/new') }
@@ -706,7 +706,7 @@ describe 'up.layer', ->
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'acceptable content', location: '/records/edit/123')
+              up.navigate('.overlay-content', content: 'acceptable content', location: '/records/edit/123')
 
             next ->
               value = {
@@ -731,7 +731,7 @@ describe 'up.layer', ->
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+              up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
 
             next ->
               value = { location: u.normalizeURL('/acceptable-location') }
@@ -746,7 +746,7 @@ describe 'up.layer', ->
             ]
 
             next ->
-              up.render('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
+              up.navigate('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
 
             next ->
               expect(callback).not.toHaveBeenCalled()
@@ -768,12 +768,12 @@ describe 'up.layer', ->
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'other content', location: '/other-location')
+              up.navigate('.overlay-content', content: 'other content', location: '/other-location')
 
             next ->
               expect(callback).not.toHaveBeenCalled()
 
-              up.render('.overlay-content', content: 'dismissable content', location: '/dismissable-location')
+              up.navigate('.overlay-content', content: 'dismissable content', location: '/dismissable-location')
 
             next ->
               value = { location: u.normalizeURL('/dismissable-location') }

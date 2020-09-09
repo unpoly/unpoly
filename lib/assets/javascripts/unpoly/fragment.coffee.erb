@@ -206,10 +206,7 @@ up.fragment = do ->
   render = (args...) ->
     options = parseTargetAndOptions(args)
 
-    if options.preload
-      options.solo = false
-      options.confirm = false
-      options.feedback = false
+    options = up.RenderOptions.preprocess(options)
 
     promise = up.browser.whenConfirmed(options)
 
@@ -225,18 +222,15 @@ up.fragment = do ->
 
     return promise
 
-  makeChangeNow = (options) ->
-    assembler = new up.RenderOptionsAssembler(options)
+  navigate = (args...) ->
+    options = parseTargetAndOptions(args)
+    render(u.merge(options, navigate: true))
 
+  makeChangeNow = (options) ->
     if options.url
-      return new up.Change.FromURL(
-        assembler.getSuccessOptions(),
-        assembler.getFailOptions()
-      ).executeAsync()
+      return new up.Change.FromURL(options).executeAsync()
     else
-      return new up.Change.FromContent(
-        assembler.getSuccessOptions()
-      ).executeAsync()
+      return new up.Change.FromContent(options).executeAsync()
 
   ###**
   This event is [emitted](/up.emit) when the server responds with the HTML, before
@@ -292,8 +286,8 @@ up.fragment = do ->
   @stable
   ###
   replace = (target, url, options) ->
-    up.legacy.deprecated('up.replace(target, url)', 'up.render(target, { url })')
-    return render(target, u.merge(options, { url }))
+    up.legacy.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
+    return navigate(u.merge(options, { target, url }))
 
   ###**
   Updates a selector on the current page with the
@@ -333,8 +327,8 @@ up.fragment = do ->
   @stable
   ###
   extract = (target, document, options) ->
-    up.legacy.deprecated('up.extract(target, document)', 'up.render(target, { document })')
-    return render(target, u.merge(options, { document }))
+    up.legacy.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
+    return navigate(u.merge(options, { target, document }))
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -687,8 +681,7 @@ up.fragment = do ->
       return Promise.resolve()
 
   parseTargetAndOptions = (args) ->
-    options = u.parseArgIntoOptions(args, 'target')
-    options
+    return u.parseArgIntoOptions(args, 'target')
 
   ###**
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
@@ -772,7 +765,7 @@ up.fragment = do ->
   @stable
   ###
   visit = (url, options) ->
-    up.render(u.merge({ url, navigate: true }, options))
+    navigate(u.merge({ url }, options))
 
   successKey = (key) ->
     return u.unprefixCamelCase(key, 'fail')
@@ -903,6 +896,7 @@ up.fragment = do ->
     reload: reload
     destroy: destroy
     render: render
+    navigate: navigate
     extract: extract
     first: (args...) ->
       up.legacy.deprecated('up.fragment.get()', 'up.fragment.get()')
@@ -930,6 +924,7 @@ up.extract = up.fragment.extract
 up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
 up.render = up.fragment.render
+up.navigate = up.fragment.navigate
 up.hello = up.fragment.hello
 up.visit = up.fragment.visit
 
