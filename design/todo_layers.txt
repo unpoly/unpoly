@@ -1,11 +1,9 @@
 TODOs
 -----
 
-- Arne wants up.navigate()
 - Do we want to continue supporting up.render('.foo') instead of up.render({ target: '.foo' }) ?
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
-- badTargetClasses should also accept a string element
 - Remove history from modals (by default)
   - Have a test that it can be enabled
   - Have a test that { location } and .up-current works in layers withotu history
@@ -19,7 +17,6 @@ TODOs
     - This should just be layer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
-- followSelectors etc. are not really a substitute for a macro. We cannot set a transition.
 - Close issues.
 
 

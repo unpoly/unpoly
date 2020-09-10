@@ -3712,6 +3712,11 @@ describe 'up.fragment', ->
         element = fixture('div.up-current.class')
         expect(up.fragment.toTarget(element)).toBe(".class")
 
+      it 'does not use classes matching a string in up.fragment.config.badTargetClasses', ->
+        up.fragment.config.badTargetClasses.push('foo')
+        element = fixture('div.foo.bar')
+        expect(up.fragment.toTarget(element)).toBe(".bar")
+
       it 'does not use classes matching a RegExp in up.fragment.config.badTargetClasses', ->
         up.fragment.config.badTargetClasses.push(/^fo+$/)
         element = fixture('div.fooooo.bar')

@@ -855,7 +855,12 @@ up.fragment = do ->
   ###
 
   isGoodClassForTarget = (klass) ->
-    return !u.some(config.badTargetClasses, (pattern) -> pattern.test(klass))
+    matchesPattern = (pattern) ->
+      if u.isRegExp(pattern)
+        pattern.test(klass)
+      else
+        pattern == klass
+    return !u.some(config.badTargetClasses, matchesPattern)
 
   resolveTarget = (target, options= {}) ->
     origin = options.origin
