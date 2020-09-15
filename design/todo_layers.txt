@@ -1,7 +1,6 @@
 TODOs
 -----
 
-- Test and Document that up.observe() callback may return a promise that will prevent callback calls while running
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
 - Release as 1.0.0 or 2.0.0
