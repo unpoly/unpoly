@@ -1,7 +1,7 @@
 TODOs
 -----
 
-- Test and document that up.observe() callback may return a promise that will prevent callback calls while running
+- Test and Document that up.observe() callback may return a promise that will prevent callback calls while running
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
 - Release as 1.0.0 or 2.0.0
@@ -460,4 +460,4 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
   - Or maybe we do up:layer:overshadowed
 - Do we want to continue supporting up.render('.foo') instead of up.render({ target: '.foo' }) ?
   - YES, it's the thing we're changing.
-  
+

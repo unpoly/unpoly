@@ -305,10 +305,12 @@ up.form = do ->
 
     If given as a function, it receives two arguments (`value`, `name`).
     `value` is a string with the new attribute value and `string` is the name
-    of the form field that changed.
+    of the form field that changed. If given as a string, it will be evaled as
+    JavaScript code in a context where (`value`, `name`) are set.
 
-    If given as a string, it will be evaled as JavaScript code in a context where
-    (`value`, `name`) are set.
+    A long-running callback function may return a promise that settles when
+    the callback completes. In this case the callback will not be called again while
+    it is already running.
   @return {Function()}
     A destructor function that removes the observe watch when called.
   @stable
