@@ -44,7 +44,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @setScrollAndFocusOptions()
 
     if @options.saveScroll
-      up.viewport.saveScroll()
+      up.viewport.saveScroll({ @layer })
 
     if @options.peel
       @layer.peel()

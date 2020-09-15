@@ -153,13 +153,14 @@ up.history = do ->
       url = currentLocation()
 
       replaced = up.render
-        layer: 'root'        # Don't replace elements in a modal that might still be open
-        peel: true           # Close all overlays
-        keep: false
-        target: config.restoreTargets,
         url: url
         history: true
         location: false,    # don't push a new state. the browser will automatically set the URL from the popped state.
+        layer: 'root'        # Don't replace elements in a modal that might still be open
+        target: config.restoreTargets,
+        fallback: true
+        peel: true           # Close all overlays
+        keep: false
         restoreScroll: true
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
       replaced.then ->
@@ -170,7 +171,7 @@ up.history = do ->
 
   pop = (event) ->
     observeNewURL(currentLocation())
-    up.viewport.saveScroll(url: previousURL)
+    up.viewport.saveScroll(location: previousURL)
     state = event.state
     restoreStateOnPop(state)
 

@@ -514,6 +514,37 @@ describe 'up.viewport', ->
           expect($viewport.scrollTop()).toEqual(50)
           done()
 
+      it 'does not restore scroll positions that were saved for another layer', asyncSpec (next) ->
+        viewportHTML = """
+          <div class="viewport" up-viewport style="height: 100px; overflow-y: scroll">
+            <div style="height: 1000px">
+            </div>
+          </div>
+        """
+
+        makeLayers [
+          { content: viewportHTML },
+          { content: viewportHTML }
+        ]
+
+        next =>
+          @rootViewport = up.fragment.get('.viewport', layer: 'root')
+          @overlayViewport = up.fragment.get('.viewport', layer: 'overlay')
+
+          @rootViewport.scrollTop = 10
+          @overlayViewport.scrollTop = 20
+
+          up.viewport.saveScroll(layer: 'root')
+
+          @rootViewport.scrollTop = 0
+          @overlayViewport.scrollTop = 0
+
+          up.viewport.restoreScroll(layer: 'root')
+
+        next =>
+          expect(@rootViewport.scrollTop).toBe(10)
+          expect(@overlayViewport.scrollTop).toBe(0)
+
       it "scrolls a viewport to the top (and does not crash) if no previous scroll position is known", (done) ->
         $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')

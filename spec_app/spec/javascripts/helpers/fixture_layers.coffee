@@ -10,7 +10,7 @@ window.makeLayers = (stackPlans) ->
     unless stackPlan.target || stackPlan.fragment
       stackPlan.target = '.element'
 
-    unless stackPlan.content && stackPlan.fragment || stackPlan.document || stackPlan.url
+    unless stackPlan.content || stackPlan.fragment || stackPlan.document || stackPlan.url
       stackPlan.content = "text #{i}"
 
     if i == 0

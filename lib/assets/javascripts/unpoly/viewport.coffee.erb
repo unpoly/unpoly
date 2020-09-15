@@ -335,7 +335,7 @@ up.viewport = do ->
     e.around(element, allSelector())
 
   ###**
-  Returns a list of all the viewports on the screen.
+  Returns a list of all the viewports on the current layer.
 
   @function up.viewport.all
   @internal
@@ -505,16 +505,19 @@ up.viewport = do ->
       })
 
   @function up.viewport.saveScroll
-  @param {string} [options.url]
+  @param {string} [options.location]
     The URL for which to save scroll positions.
     If omitted, the current browser location is used.
+  @param {string} [options.layer]
+    The layer for which to save scroll positions.
+    If omitted, positions for the current layer will be saved.
   @param {Object<string, number>} [options.tops]
     An object mapping viewport selectors to vertical scroll positions in pixels.
   @experimental
   ###
   saveScroll = (options = {}) ->
     layer = up.layer.get(options)
-    if url = (options.url || layer.location)
+    if url = (options.location || layer.location)
       tops = options.tops ? scrollTops(options)
       layer.lastScrollTops.set(url, tops)
 
@@ -529,6 +532,8 @@ up.viewport = do ->
   @param {Element} [options.around]
     If set, only restores viewports that are either an ancestor
     or descendant of the given element.
+  @param {up.Layer|string} [options.layer]
+    The layer on which to restore scroll positions.
   @return {Promise}
     A promise that will be fulfilled once scroll positions have been restored.
   @experimental
