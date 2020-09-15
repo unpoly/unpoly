@@ -1,7 +1,6 @@
 TODOs
 -----
 
-- Do we want to continue supporting up.render('.foo') instead of up.render({ target: '.foo' }) ?
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
@@ -459,3 +458,6 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
   - Leave it as it is.
   - We can do events up:layer:child:open and up:layer:child:dismissed later
   - Or maybe we do up:layer:overshadowed
+- Do we want to continue supporting up.render('.foo') instead of up.render({ target: '.foo' }) ?
+  - YES, it's the thing we're changing.
+  
