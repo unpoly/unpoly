@@ -4,9 +4,6 @@ TODOs
 - Do we want to continue supporting up.render('.foo') instead of up.render({ target: '.foo' }) ?
 - Test and document that up.observe() callback may return a promise that will prevent callback calls while running
 - saveScroll: options.url should be renamed to options.location
-- Remove history from modals (by default)
-  - Have a test that it can be enabled
-  - Have a test that { location } and .up-current works in layers withotu history
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
 - Release as 1.0.0 or 2.0.0
