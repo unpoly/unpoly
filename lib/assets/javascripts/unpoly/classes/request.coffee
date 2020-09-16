@@ -344,7 +344,7 @@ class up.Request extends up.Record
   # (2) become part of our @cacheKey().
   metaProps: ->
     props = {}
-    for key in up.proxy.config.requestMetaKeys(@url)
+    for key in up.proxy.config.requestMetaKeys(@)
       value = this[key]
       if u.isGiven(value)
         props[key] = value
