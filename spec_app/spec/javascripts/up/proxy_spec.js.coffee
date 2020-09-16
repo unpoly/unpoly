@@ -906,32 +906,32 @@ describe 'up.proxy', ->
           next =>
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
-    describe 'up.proxy.get', ->
+    describe 'up.proxy.cache.get()', ->
 
       it 'returns an existing cache entry for the given request', ->
         promise1 = up.request(url: '/foo', params: { key: 'value' })
-        promise2 = up.proxy.get(url: '/foo', params: { key: 'value' })
+        promise2 = up.proxy.cache.get(url: '/foo', params: { key: 'value' })
         expect(promise1).toBe(promise2)
 
       it 'returns undefined if the given request is not cached', ->
-        promise = up.proxy.get(url: '/foo', params: { key: 'value' })
+        promise = up.proxy.cache.get(url: '/foo', params: { key: 'value' })
         expect(promise).toBeUndefined()
 
       describeCapability 'canInspectFormData', ->
 
         it "returns undefined if the given request's { params } is a FormData object", ->
-          promise = up.proxy.get(url: '/foo', params: new FormData())
+          promise = up.proxy.cache.get(url: '/foo', params: new FormData())
           expect(promise).toBeUndefined()
 
-    describe 'up.proxy.set', ->
+    describe 'up.proxy.cache.set()', ->
 
       it 'should have tests'
 
-    describe 'up.proxy.alias', ->
+    describe 'up.proxy.cache.alias()', ->
 
       it 'uses an existing cache entry for another request (used in case of redirects)'
 
-    describe 'up.proxy.remove', ->
+    describe 'up.proxy.cache.remove()', ->
 
       it 'removes the cache entry for the given request'
 
@@ -940,7 +940,7 @@ describe 'up.proxy', ->
       describeCapability 'canInspectFormData', ->
 
         it 'does not crash when passed a request with FormData (bugfix)', ->
-          removal = -> up.proxy.remove(url: '/path', params: new FormData())
+          removal = -> up.proxy.cache.remove(url: '/path', params: new FormData())
           expect(removal).not.toThrowError()
 
     describe 'up.proxy.clear', ->

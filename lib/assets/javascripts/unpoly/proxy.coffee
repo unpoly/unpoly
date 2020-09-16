@@ -514,18 +514,9 @@ up.proxy = do ->
   ajax: ajax
   request: makeRequest
   cache: cache
-  get: (args...) ->
-    up.legacy.deprecated('up.proxy.get()', 'up.proxy.cache.get()')
-    return cache.get(args...)
-  alias: (args...) ->
-    up.legacy.deprecated('up.proxy.alias()', 'up.proxy.cache.alias')
-    return cache.alias(args...)
-  clear: (args...) ->
+  clear: ->
     up.legacy.deprecated('up.proxy.clear()', 'up.proxy.cache.clear()')
-    return cache.clear(args...)
-  remove: (args...) ->
-    up.legacy.deprecated('up.proxy.remove()', 'up.proxy.cache.remove()')
-    return cache.remove(args...)
+    return cache.clear()
   isIdle: isIdle
   isBusy: isBusy
   isSafeMethod: isSafeMethod

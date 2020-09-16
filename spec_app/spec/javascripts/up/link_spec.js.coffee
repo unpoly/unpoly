@@ -662,7 +662,7 @@ describe 'up.link', ->
           up.proxy.preload($link)
 
           next =>
-            cachedPromise = up.proxy.get
+            cachedPromise = up.proxy.cache.get
               url: '/path'
               target: '.target'
               failTarget: 'default-fallback'
@@ -675,7 +675,7 @@ describe 'up.link', ->
 
           promiseState(preloadPromise).then (result) ->
             expect(result.state).toEqual('rejected')
-            expect(up.proxy.get(url: '/path', target: '.target')).toBeUndefined()
+            expect(up.proxy.cache.get(url: '/path', target: '.target')).toBeUndefined()
             done()
 
         it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
@@ -684,7 +684,7 @@ describe 'up.link', ->
           up.proxy.preload($link, url: '/options-path')
 
           next =>
-            cachedPromise = up.proxy.get
+            cachedPromise = up.proxy.cache.get
               url: '/options-path'
               target: '.target'
               failTarget: 'default-fallback'
