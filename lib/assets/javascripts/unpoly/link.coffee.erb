@@ -197,8 +197,8 @@ up.link = do ->
     # Layer options
     parser.boolean('peel') # inherit
     parser.string('layer') # differ
-    parser.string('mode') # Renamed to { close }. Legacy calls handled by up.Change.OpenLayer.
     parser.json('context')
+    parser.string('mode') # Renamed to { close }. Legacy calls handled by up.Change.OpenLayer.
     parser.string('align')
     parser.string('position')
     parser.string('class')
@@ -219,8 +219,8 @@ up.link = do ->
     parser.string('dismissLocation')
 
     # Viewport options
-    parser.booleanOrString('reveal')  # differs   default: false
     parser.booleanOrString('focus')   # differs   default: 'auto'
+    parser.booleanOrString('reveal')  # differs   default: false
     parser.boolean('saveScroll')      # inherits  default: true     we always want to saveScroll
     parser.boolean('resetScroll')     # differs
     parser.boolean('restoreScroll')   # differs
