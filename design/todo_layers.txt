@@ -6,12 +6,33 @@ TODOs
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
+- up.request() should not use the cache by default
+  - many users are using this is a better XHR and cache by accident
+  - navigate can use cache: true anyways
+- Rethink revealing by default
+  - Was a problem for Tobias
+  - Maybe only reveal or resetScroll when we're replacing a main?
+    - so default would be: { scroll: 'auto' }
+  - Maybe bring back substance?
+    - would be easy
+  - If we have something like resetScroll: auto we *would* need to consolidate all the scroll options
+    - scroll: 'top'
+    - scroll: 'reveal'
+    - scroll: 'auto smooth'  # resette wenn main, sonst mache nix
+    - scroll: 'top smooth'
+    - scroll: 'reveal .element'
+    - scroll: 'reveal top'
+    - scroll: 'reveal top .element'
+    - scroll: 'restore'
+    - scroll: false
+    - saveScroll auf jeden fall separat, weil das hat hiermit nix zu tun und will man immer haben
+  - up.viewport.config.autoRevealTargets = [':main'] # das müsste aufgelöst werden je nach layer
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
-    - This should just be layer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
+
 
 
 Manual tests
