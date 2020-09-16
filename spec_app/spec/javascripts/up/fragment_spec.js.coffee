@@ -3583,6 +3583,13 @@ describe 'up.fragment', ->
         next =>
           expect($('.element')).toHaveText('new text')
 
+      it 'does not use a cached response', ->
+        renderSpy = up.fragment.knife.mock('render')
+        element = fixture('.element')
+        up.fragment.setSource(element, '/source')
+        up.reload(element)
+        expect(renderSpy).toHaveBeenCalledWith(jasmine.objectContaining(target: element, cache: false))
+
       it 'does not reveal by default', asyncSpec (next) ->
         element = fixture('.element', text: 'old text')
 
