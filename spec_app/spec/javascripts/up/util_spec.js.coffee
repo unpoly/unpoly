@@ -1534,6 +1534,19 @@ describe 'up.util', ->
         value = null
         expect(up.util.isPromise(value)).toBe(false)
 
+    describe 'up.util.isRegExp', ->
+
+      it 'returns true for a RegExp', ->
+        value = /foo/
+        expect(up.util.isRegExp(value)).toBe(true)
+
+      it 'returns false for a string', ->
+        value = 'foo'
+        expect(up.util.isRegExp(value)).toBe(false)
+
+      it 'returns false for a undefined', ->
+        value = undefined
+        expect(up.util.isRegExp(value)).toBe(false)
 
     describe 'up.util.sprintf', ->
 
