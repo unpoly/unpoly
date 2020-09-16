@@ -1298,7 +1298,7 @@ describe 'up.fragment', ->
 
         describe 'if nothing else is specified', ->
 
-          it 'prefers updating the current layer', asyncSpec (next) ->
+          it 'updates the current layer', asyncSpec (next) ->
             makeLayers [
               { target: '.element', content: 'old text in root' }
               { target: '.element', content: 'old text in modal' }
@@ -1311,20 +1311,19 @@ describe 'up.fragment', ->
               expect(up.layer.get(0)).toHaveText(/old text in root/)
               expect(up.layer.get(1)).toHaveText(/new text/)
 
-          it 'updates the background layer closest to the front if the current layer does not match', asyncSpec (next) ->
+          it 'rejects if the current layer does not match', (done) ->
             makeLayers [
               { target: '.element', content: 'old text in root' }
               { target: '.other', content: 'old text in modal1' }
-              { target: '.element', content: 'old text in modal2' }
             ]
 
-            next ->
-              up.render('.element', content: 'new text', peel: false)
+            u.task ->
+              promise = up.render('.element', content: 'new text')
 
-            next ->
-              expect(up.layer.get(0)).toHaveText(/old text in root/)
-              expect(up.layer.get(1)).toHaveText(/new text/)
-              expect(up.layer.get(2)).toHaveText(/old text in modal2/)
+              u.task ->
+                promiseState(promise).then (result) ->
+                  expect(result.state).toBe('rejected')
+                  done()
 
         describe 'if the given layer does not exist', ->
 
