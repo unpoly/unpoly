@@ -149,8 +149,38 @@ up.fragment = do ->
     TODO: Docs
   @param {string} [options.document]
     TODO: Docs
-  @param {string} [options.failOptions]
-    TODO: Document failOptions and the general behavior of fail options
+  @param {string} [options.fail='auto']
+    You may pass different render options for successful and failed server responses.
+
+    A common use case for this is [form submissions](/up.form), where a successful response
+    should display a follow-up screen but a failed response should re-render the form
+    or display errors.
+
+    To pass an option for a failed server response, prefix the option with `fail`:
+
+        up.render({
+          url: '/action',
+          method: 'post',
+          target: '.content',
+          failTarget: 'form',
+          reveal: true,
+          failReveal: 'form .errors'
+        })
+
+    Options that are used before the request is made (like `{ url, method, confirm }`) do not
+    have a `fail`-prefixed variant. Some options (like `{ history, fallback }`) are used for both
+    successful and failed responses, but may be overriden with a fail-prefixed variant (e.g. `{ history: true, failHistory: false }`. Options related to layers, scrolling or focus are never shared.
+
+    The `{ fail }` option changes how Unpoly determines whether a server response was successful.
+    By default (`{ fail: 'auto' }`) any HTTP 2xx status code will be considered successful,
+    and any other status code will be considered failed.
+
+    You may also pass `{ fail: false }` to always consider the response to be successful, even
+    with a HTTP 4xx or 5xx status code.
+
+    When the updated fragment content is not requested from a `{ url }`, but rather passed as an
+    option (`{ content, fragment, document }`), the update is always considered successful, regardless
+    of the `{ fail }` option.
   @param {string} [options.fallback]
     The selector to update when the original target was not found in the page.
   @param {string} [options.title]

@@ -613,7 +613,6 @@ up.element = do ->
   toSelector = (args...) ->
     return up.fragment.toTarget(args...)
 
-  # TODO: Do we really need to test for anything except BODY here?
   SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
   SINGLETON_PATTERN = new RegExp('\\b(' + SINGLETON_TAG_NAMES.join('|') + ')\\b', 'i')
 
@@ -786,7 +785,12 @@ up.element = do ->
 #    u.presence(value)
 
   ###**
-  TODO: Document me
+  Returns the given `attribute` value for the given `element`.
+
+  If the element does not have the given attribute, it returns `undefined`.
+  This is a difference to the native `Element#getAttribute()`, which [mostly returns `null` in that case](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute#Non-existing_attributes).
+
+  If the element has the attribute but without value (e.g. '<input readonly>'>), it returns an empty string.
 
   @function up.element.attr
   @experimental

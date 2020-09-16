@@ -12,7 +12,7 @@ All Unpoly functions and selectors go through this cache, unless
 you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
 
 The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
-[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.clear()`](/up.proxy.clear).
+[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.cache.clear()`](/up.proxy.cache.clear).
 
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
@@ -76,7 +76,7 @@ up.proxy = do ->
     The proxy cache will only cache safe requests and will clear the entire
     cache after an unsafe request.
   @param {Function(string): Array<string>} [config.requestMetaKeys]
-    A function that accepts a URL and returns an array of [`up.Request`](/up.Request) property names
+    A function that accepts an [`up.Request`](/up.Request) and returns an array of request property names
     that are sent to the server. The server may return an optimized response based on these properties,
     e.g. by omitting a navigation bar that is not targeted.
 

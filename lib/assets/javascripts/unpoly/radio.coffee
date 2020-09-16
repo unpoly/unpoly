@@ -54,6 +54,7 @@ up.radio = do ->
   @stable
   ###
 
+  # TODO: Doku for up.radio.poll()
   poll = (element, options = {}) ->
     interval = options.interval ? e.numberAttr(element, 'up-poll') ? config.pollInterval
     timer = null
