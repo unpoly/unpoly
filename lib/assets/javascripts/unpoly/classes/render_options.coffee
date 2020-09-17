@@ -5,7 +5,6 @@ up.RenderOptions = do ->
   GLOBAL_DEFAULTS = {
     hungry: true
     keep: true
-    focus: 'auto'
     source: true
     saveScroll: true
     fail: 'auto'
@@ -66,6 +65,7 @@ up.RenderOptions = do ->
   # These defaults will be set to both success and fail options
   # if { navigate: true } is given.
   NAVIGATE_DEFAULTS = {
+    focus: 'auto'
     solo: true      # preflight
     feedback: true  # preflight
     fallback: true
