@@ -15,23 +15,26 @@ TODOs
     - so default would be: { scroll: 'auto' }
   - Maybe bring back substance?
     - would be easy
+    - would need to be disabled with { revealTop }
   - If we have something like resetScroll: auto we *would* need to consolidate all the scroll options
     - scroll: 'top'
     - scroll: 'reveal'
-    - scroll: 'auto smooth'  # resette wenn main, sonst mache nix
-    - scroll: 'top smooth'
-    - scroll: 'reveal .element'
-    - scroll: 'reveal top'
-    - scroll: 'reveal top .element'
-    - scroll: 'restore'
+    - scroll: 'auto'  # resette wenn main, sonst mache nix
+    - scroll: '.element'
     - scroll: false
     - saveScroll auf jeden fall separat, weil das hat hiermit nix zu tun und will man immer haben
+    - Sollte up.submit ein failScroll: 'reveal' kriegen?
   - up.viewport.config.autoRevealTargets = [':main'] # das müsste aufgelöst werden je nach layer
+  - Warum resetten wir Viewports *within*? Und nicht den closest?
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
+
+
+up.render({ target: '.foo', scroll: 'reveal', scrollBehavior: 'smooth',  revealTop: true })
+up.render({ target: '.foo', scroll: 'reveal top smooth' })
 
 
 
