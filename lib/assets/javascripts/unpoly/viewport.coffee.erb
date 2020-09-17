@@ -62,7 +62,16 @@ up.viewport = do ->
   @param {number} [config.revealPadding]
     The desired padding between a [revealed](/up.reveal) element and the
     closest [viewport](/up.viewport) edge (in pixels).
-  @param {number} [config.revealTop]
+  @param {number} [config.revealMax]
+    A number indicating how many top pixel rows of a high element to [reveal](/up.reveal).
+
+    Defaults to 50% of the available viewport height.
+
+    You may set this to `false` to always reveal as much of the element as the viewport allows.
+
+    You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
+    a maximum height in pixel. Each given rectangle has properties `{ top, right, buttom, left, width, height }`.
+   @param {number} [config.revealTop]
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.
@@ -82,7 +91,10 @@ up.viewport = do ->
     revealSnap: 200
     revealPadding: 0,
     revealTop: false,
+    revealMax: (options) ->
+      options.viewportRect.height * 0.5
     scrollSpeed: 1
+
   up.legacy.renamedProperty(config, 'viewports', 'viewportSelectors')
 
   scrollingController = new up.MotionController('scrolling')
@@ -196,9 +208,11 @@ up.viewport = do ->
     The scrolling element to scroll.
 
     Defaults to the [given element's viewport](/up.viewport.closest).
-  @param {boolean} [options.top=false]
+  @param {boolean} [options.top]
     Whether to scroll the viewport so that the first element row aligns
     with the top edge of the viewport.
+
+    Defaults to `up.viewport.config.revealTop`.
   @param {string}[options.behavior='auto']
     When set to `'auto'`, this will immediately scroll to the new position.
 
@@ -207,19 +221,15 @@ up.viewport = do ->
     The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
 
     Defaults to `up.viewport.config.scrollSpeed`.
-  @param {number} [options.padding=0]
+  @param {number} [options.padding]
     The desired padding between the revealed element and the
     closest [viewport](/up.viewport) edge (in pixels).
-  @param {number|boolean} [options.snap=true]
+  @param {number|boolean} [options.snap]
     Whether to snap to the top of the viewport if the new scroll position
     after revealing the element is close to the top edge.
 
-    You may pass a maximum number of pixels under which to snap to the top.
-
-    Passing `false` will disable snapping.
-
-    Passing `true` will use the snap pixel value from `up.viewport.config.revealSnap`.
-  @param {boolean} [options.reveal=true]
+    Defaults to `up.viewport.config.revealSnap`.
+  @param {boolean} [options.peel=true]
     Whether to close overlays obscuring the layer of `element`.
   @return {Promise}
     A promise that fulfills when the element is revealed.
@@ -227,7 +237,7 @@ up.viewport = do ->
   ###
   reveal = (elementOrSelector, options) ->
     # copy options, since we will mutate it below
-    options = u.options(options, peel: true, snap: true, top: config.revealTop)
+    options = u.options(options, peel: true)
     element = f.get(elementOrSelector, options)
 
     # Now that we have looked up the element with an option like { layer: 'any' },
@@ -235,15 +245,10 @@ up.viewport = do ->
     unless options.layer = up.layer.get(element)
       return up.failed.async('Cannot reveal a detached element')
 
+    options.layer.peel() if options.peel
+
     motion = new up.RevealMotion(element, options)
-
-    promise = Promise.resolve()
-
-    if options.peel
-      promise = promise.then -> options.layer.peel()
-    promise = promise.then ->
-      scrollingController.startMotion(element, motion, options)
-    return promise
+    return scrollingController.startMotion(element, motion, options)
 
   doFocus = (element, options = {}) ->
     if options.preventScroll # polyfill for IE11

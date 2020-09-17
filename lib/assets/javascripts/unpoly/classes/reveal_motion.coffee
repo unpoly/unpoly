@@ -3,31 +3,28 @@ u = up.util
 
 class up.RevealMotion
 
-  constructor: (@element, options = {}) ->
+  constructor: (@element, @options = {}) ->
     viewportConfig = up.viewport.config
-    @viewport = options.viewport || up.viewport.get(@element)
+    @viewport = e.get(@options.viewport) || up.viewport.get(@element)
     @obstructionsLayer = up.layer.get(@viewport)
 
     up.legacy.fixKey(viewportConfig, 'snap', 'revealSnap')
-    if options.snap == true # default set by up.viewport.reveal()
-      @snap = viewportConfig.revealSnap
-    else if options.snap == false
-      @snap = 0
-    else
-      # snap is now a given pixel value
 
-    @padding = options.padding ? options.revealPadding ? viewportConfig.revealPadding
-    @top = options.revealTop ? options.top
+    @snap = @options.snap ? @options.revealSnap ? viewportConfig.revealSnap
+    @padding = @options.padding ? @options.revealPadding ? viewportConfig.revealPadding
+    @top = @options.top ? @options.revealTop ? viewportConfig.revealTop
+    @max = @options.max ? @options.revealMax ? viewportConfig.revealMax
+
     @topObstructions = viewportConfig.fixedTop
     @bottomObstructions = viewportConfig.fixedBottom
 
-    # Options for up.ScrollMotion
-    @speed = options.speed ? options.scrollSpeed ? viewportConfig.scrollSpeed
-    @behavior = options.behavior ? options.scrollBehavior
-
   start: ->
-    elementRect = up.Rect.fromElement(@element)
     viewportRect = @getViewportRect(@viewport)
+    elementRect = up.Rect.fromElement(@element)
+    if @max
+      revealMaxArgs = { viewportRect, elementRect }
+      revealMaxPixels = u.evalOption(@max, revealMaxArgs)
+      elementRect.height = Math.min(elementRect.height, revealMaxPixels)
 
     @addPadding(elementRect)
     @substractObstructions(viewportRect)
@@ -56,14 +53,8 @@ class up.RevealMotion
       # Element is fully visible within viewport
       # => Do nothing
 
-    if newScrollTop < @snap && elementRect.top < (0.5 * viewportRect.height)
+    if u.isNumber(@snap) && newScrollTop < @snap && elementRect.top < (0.5 * viewportRect.height)
       newScrollTop = 0
-
-    # if elementRect.height < 0.5 * viewportRect.height && viewportRect.height -
-
-    # if (viewportRect.height - newScrollTop < @snap) && (elementRect.height + @snap < viewportRect.height)
-    #   if @viewport
-    #
 
     if newScrollTop != originalScrollTop
       @scrollTo(newScrollTop)
@@ -71,10 +62,7 @@ class up.RevealMotion
       Promise.resolve()
 
   scrollTo: (newScrollTop) ->
-    scrollOptions =
-      speed: @speed
-      behavior: @behavior
-    @scrollMotion = new up.ScrollMotion(@viewport, newScrollTop, scrollOptions)
+    @scrollMotion = new up.ScrollMotion(@viewport, newScrollTop, @options)
     @scrollMotion.start()
 
   getViewportRect: ->
