@@ -220,10 +220,12 @@ up.link = do ->
 
     # Viewport options
     parser.booleanOrString('focus')   # differs   default: 'auto'
-    parser.booleanOrString('reveal')  # differs   default: false
     parser.boolean('saveScroll')      # inherits  default: true     we always want to saveScroll
+    parser.booleanOrString('scroll')
+    parser.booleanOrString('reveal')  # legacy option for { scroll: 'reveal' }
     parser.boolean('resetScroll')     # differs
     parser.boolean('restoreScroll')   # differs
+
     parser.boolean('revealTop')       # differs
     parser.number('revealMax')        # differs
     parser.number('revealPadding')    # differs

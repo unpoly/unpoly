@@ -44,11 +44,10 @@ up.legacy = do ->
   warnedMessages = {}
 
   warn = (message, args...) ->
-    message = "[DEPRECATION] #{message}"
-    message = u.sprintf(message, args...)
-    unless warnedMessages[message]
-      warnedMessages[message] = true
-      up.warn(message)
+    formattedMessage = u.sprintf(message, args...)
+    unless warnedMessages[formattedMessage]
+      warnedMessages[formattedMessage] = true
+      up.warn('DEPRECATION', message, args...)
 
   deprecated = (deprecatedExpression, replacementExpression) ->
     warn("#{deprecatedExpression} has been deprecated. Use #{replacementExpression} instead.")

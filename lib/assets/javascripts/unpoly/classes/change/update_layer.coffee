@@ -95,9 +95,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
           up.fragment.emitKept(keepPlan)
 
           @handleFocus(step.oldElement, step)
-          @handleScroll(step.oldElement, step)
-
-          return Promise.resolve()
+          return @handleScroll(step.oldElement, step)
 
         else
           # This needs to happen before up.syntax.clean() below.
@@ -118,7 +116,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
               up.fragment.emitDestroyed(step.oldElement, parent: parent, log: false)
             scrollNew: =>
               @handleFocus(step.newElement, step)
-              @handleScroll(step.newElement, step)
+              # up.morph() expects { scrollNew } to return a promise.
+              return @handleScroll(step.newElement, step)
 
           return up.morph(
             step.oldElement,
@@ -303,79 +302,32 @@ class up.Change.UpdateLayer extends up.Change.Addition
   setScrollAndFocusOptions: ->
     @steps.forEach (step, i) =>
       # Since up.motion will call @handleScrollAndFocus() after each fragment,
-      # make sure that we only touch the scroll position once, for the first step.
+      # and we only have a single scroll position and focus, only scroll/focus  for the first step.
       if i > 0
-        u.assign step,
-          focus: false
-          reveal: false
-          resetScroll: false
-          restoreScroll: false
+        step.scroll = false
+        step.focus = false
 
-      # Store the focused element's selector, scroll position and selection range in an up.FocusCapsule
-      # for later restoration.
-      #
-      # Note that unlike the other scroll-related options, we might need to keep in a fragment that
-      # is not the first step. However, only a single step can include the focused element, or none.
       if step.placement == 'swap'
+        # We cannot animate scrolling when we're morphing between two elements.
+        step.scrollBehavior = 'auto'
+
+        # Store the focused element's selector, scroll position and selection range in an up.FocusCapsule
+        # for later restoration.
+        #
+        # We might need to preserve focus in a fragment that is not the first step.
+        # However, only a single step can include the focused element, or none.
         @focusCapsule ?= up.FocusCapsule.preserveWithin(step.oldElement)
 
-  handleFocus: (element, step) ->
+  handleFocus: (fragment, step) ->
     fragmentFocus = new up.FragmentFocus(
-      target: element,
+      fragment: fragment,
       layer: @layer,
       focusCapsule: @focusCapsule,
-      autoMeans: ['keep', 'autofocus'],
+      autoMeans: ['keep', 'autofocus-if-enabled'],
     )
     fragmentFocus.process(step.focus)
 
-  handleScroll: (element, options) ->
-    # Copy options since we will modify the object below.
-    options = u.options(options)
-
-    # We process one of multiple scroll-changing options.
-    hashOpt = options.hash
-    revealOpt = options.reveal
-    resetScrollOpt = options.resetScroll
-    restoreScrollOpt = options.restoreScroll
-
-    if options.placement == 'swap'
-      # If we're scrolling a swapped fragment, don't animate.
-      # If we're scrolling a prepended/appended fragment we allow the user to
-      # pass { scrollBehavior: 'smooth' }.
-      options.scrollBehavior = 'auto'
-
-    if resetScrollOpt
-      # If the user has passed { resetScroll: false } we scroll to the top all
-      # viewports that are either containing or are contained by element.
-      return up.viewport.resetScroll(u.merge(options, around: element))
-    else if restoreScrollOpt
-      # If the user has passed { restoreScroll } we restore the last known scroll
-      # positions for the new URL, for all viewports that are either containing or
-      # are contained by element.
-      return up.viewport.restoreScroll(u.merge(options, around: element))
-    else if hashOpt && revealOpt == true
-      # If a { hash } is given, we will reveal the element it refers to.
-      # This can be disabled with { reveal: false }.
-      return up.viewport.revealHash(hashOpt, options)
-
-    else if revealOpt
-      # We allow to pass another element as { reveal } option
-      if u.isElementish(revealOpt)
-        element = e.get(revealOpt) # unwrap jQuery
-      # If the user has passed a CSS selector as { reveal } option, we try to find
-      # and reveal a matching element in the layer that we're updating.
-      else if u.isString(revealOpt)
-        element = up.fragment.get(revealOpt, options)
-      else
-        # We reveal the given `element` argument.
-
-      # If selectorOrElement was a CSS selector, don't blow up by calling reveal()
-      # with an empty jQuery collection. This might happen if a failed form submission
-      # reveals the first validation error message, but the error is shown in an
-      # unexpected element.
-      if element
-        return up.reveal(element, options)
-
-    # If we didn't need to scroll above, just return a resolved promise
-    # to fulfill this function's signature.
-    return Promise.resolve()
+  handleScroll: (fragment, step) ->
+    options = u.merge(step, { fragment, autoMeans: ['hash', 'reset-if-main'] })
+    scrolling = new up.FragmentScrolling(options)
+    return scrolling.process(options.scroll)

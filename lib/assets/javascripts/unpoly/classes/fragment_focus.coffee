@@ -6,38 +6,43 @@ PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 class up.FragmentFocus
 
   constructor: (options) ->
-    @target = options.target or up.fail('Must pass an { target } options')
+    @fragment = options.fragment or up.fail('Must pass an { fragment } option')
     @autoMeans = options.autoMeans or up.fail('Must pass an { autoMeans } option')
     @layer = options.layer or up.fail('Must pass a { layer } option')
     @focusCapsule = options.focusCapsule
 
   process: (focusOpt) ->
-    if focusOpt == 'keep'
-      @restoreFocus(@focusCapsule)
-    else if focusOpt == 'target'
-      @focusElement(@target)
-    else if focusOpt == 'layer'
-      @focusElement(@layer.element)
-    else if focusOpt == 'autofocus'
-      @autofocus(@target)
-    else if focusOpt == 'auto'
-      u.detect @autoMeans, (autoOpt) => @process(autoOpt)
-    else if u.isString(focusOpt)
-      @focusSelector(focusOpt)
+    switch focusOpt
+      when 'keep'
+        return @restoreFocus(@focusCapsule)
+      when 'fragment'
+        return @focusElement(@fragment)
+      when 'layer'
+        return @focusElement(@layer.element)
+      when 'autofocus'
+        return @autofocus()
+      when 'autofocus-if-enabled'
+        return up.viewport.config.autofocus && @autofocus()
+      when 'auto'
+        return u.detect @autoMeans, (autoOpt) => @process(autoOpt)
+      else
+        return u.isString(focusOpt) && @focusSelector(focusOpt)
 
   focusSelector: (selector) ->
     lookupOpts = { @layer }
-    if (match = up.fragment.get(@target, selector, lookupOpts) || up.fragment.get(selector, lookupOpts))
+    # Prefer selecting a descendant of @fragment, but if not possible search through @fragment's entire layer
+    if (match = up.fragment.get(@fragment, selector, lookupOpts) || up.fragment.get(selector, lookupOpts))
       return @focusElement(match)
     else
       up.warn('up.render()', 'Tried to focus selector "%s", but no matching element found', selector)
+      # Return undefined so { focus: 'auto' } will try the next option from { autoMeans }
       return
 
   restoreFocus: (capsule) ->
-    return capsule?.restore(@target, PREVENT_SCROLL_OPTIONS)
+    return capsule?.restore(@fragment, PREVENT_SCROLL_OPTIONS)
 
-  autofocus: (scope) ->
-    if autofocusElement = e.subtree(scope, '[autofocus]')[0]
+  autofocus: ->
+    if autofocusElement = e.subtree(@fragment, '[autofocus]')[0]
       up.focus(autofocusElement, PREVENT_SCROLL_OPTIONS)
       return true
 

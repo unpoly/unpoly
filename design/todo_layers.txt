@@ -6,6 +6,7 @@ TODOs
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
+- Can fragment:loaded get and mutate the entire rendering options (currently it's after fail yes/no)
 - up.request() should not use the cache by default
   - many users are using this is a better XHR and cache by accident
   - navigate can use cache: true anyways
@@ -24,17 +25,18 @@ TODOs
     - scroll: false
     - saveScroll auf jeden fall separat, weil das hat hiermit nix zu tun und will man immer haben
     - Sollte up.submit ein failScroll: 'reveal' kriegen?
-  - up.viewport.config.autoRevealTargets = [':main'] # das müsste aufgelöst werden je nach layer
+  - up.viewport.config.autoResetTargets = [':main'] # das müsste aufgelöst werden je nach layer
   - Warum resetten wir Viewports *within*? Und nicht den closest?
+  - OpenLayer should process { scroll }
+  - Make sure that scrollBehavior: 'smooth' is ignored when swapping fragments (I think UpdateLayer does not do that)
+- Fix maxReveal
+  - revealMax: (options) -> options.viewportRect.height * 0.5
+    - Just half the window height?
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
-
-
-up.render({ target: '.foo', scroll: 'reveal', scrollBehavior: 'smooth',  revealTop: true })
-up.render({ target: '.foo', scroll: 'reveal top smooth' })
 
 
 

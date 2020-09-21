@@ -12,6 +12,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @currentLayer = options.currentLayer
     @source = options.source
     @focus = options.focus
+    @scroll = options.scroll
 
   requestAttributes: ->
     return {
@@ -86,7 +87,10 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer.startOpenAnimation().then =>
       # A11Y: Place the focus on the overlay element and setup a focus circle.
       # However, don't change focus if the layer has been closed while the animation was running.
-      @handleFocus() if @layer.isOpen()
+      if @layer.isOpen()
+        @handleFocus()
+        @handleScroll()
+
       @onAppeared()
 
     # Emit up:layer:opened to indicate that the layer was opened successfully.
@@ -127,11 +131,16 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer.overlayFocus.moveToFront()
 
     fragmentFocus = new up.FragmentFocus(
-      target: @content,
+      fragment: @content,
       layer: @layer,
-      autoMeans: ['autofocus', 'layer']
+      autoMeans: ['hash']
     )
     fragmentFocus.process(@focus)
+
+  handleScroll: ->
+    scrollingOptions = u.merge(@options, { fragment, autoMeans: ['hash', 'reset-if-main'] })
+    scrolling = new up.FragmentScrolling(scrollingOptions)
+    return scrolling.process(@scroll)
 
   buildEvent: (name) =>
     return up.event.build(name,

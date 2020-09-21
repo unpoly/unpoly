@@ -91,9 +91,10 @@ up.viewport = do ->
     revealSnap: 200
     revealPadding: 0,
     revealTop: false,
-    revealMax: (options) ->
-      options.viewportRect.height * 0.5
+    revealMax: (options) -> options.viewportRect.height * 0.5
     scrollSpeed: 1
+    autoResetTargets: [':main']
+    autofocus: true
 
   up.legacy.renamedProperty(config, 'viewports', 'viewportSelectors')
 
@@ -159,8 +160,8 @@ up.viewport = do ->
     # Don't emit expensive events if no animation can be running anyway
     return Promise.resolve() unless up.motion.isEnabled()
 
-    scrollable = closest(element)
-    scrollingController.finish(scrollable)
+    viewport = closest(element)
+    scrollingController.finish(viewport)
 
   ###**
   @function up.viewport.anchoredRight
@@ -295,9 +296,10 @@ up.viewport = do ->
   @experimental
   ###
   revealHash = (hash, options) ->
-    if (hash) && (match = firstHashTarget(hash, options))
+    if hash && (match = firstHashTarget(hash, options))
       up.reveal(match, top: true)
     else
+      up.warn('up.viewort.revealHash', 'Tried to reveal URL hash #%o, but no matching element found', hash)
       Promise.resolve()
 
   allSelector = ->
@@ -334,10 +336,6 @@ up.viewport = do ->
   getSubtree = (target, options = {}) ->
     element = f.get(target, options)
     e.subtree(element, allSelector())
-
-  getAround = (target, options = {}) ->
-    element = f.get(target, options)
-    e.around(element, allSelector())
 
   ###**
   Returns a list of all the viewports on the current layer.
@@ -479,8 +477,7 @@ up.viewport = do ->
     root.querySelectorAll(queryParts.join(','))
 
   ###**
-  Saves the top scroll positions of all the
-  viewports configured in [`up.viewport.config.viewportSelectors`](/up.viewport.config#config.viewportSelectors).
+  Saves the top scroll positions of all viewports in the current layer.
 
   The scroll positions will be associated with the current URL.
   They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
@@ -520,11 +517,14 @@ up.viewport = do ->
     An object mapping viewport selectors to vertical scroll positions in pixels.
   @experimental
   ###
-  saveScroll = (options = {}) ->
-    layer = up.layer.get(options)
-    if url = (options.location || layer.location)
-      tops = options.tops ? scrollTops(options)
-      layer.lastScrollTops.set(url, tops)
+  saveScroll = (args...) ->
+    [viewports, options] = parseOptions(args)
+    if url = (options.location || options.layer.location)
+      tops = options.tops ? getScrollTops(viewports)
+      options.layer.lastScrollTops.set(url, tops)
+
+  getScrollTops = (viewports) ->
+    u.mapObject viewports, (viewport) -> [scrollTopKey(viewport), viewport.scrollTop]
 
   ###**
   Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
@@ -534,34 +534,36 @@ up.viewport = do ->
   You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
 
   @function up.viewport.restoreScroll
-  @param {Element} [options.around]
-    If set, only restores viewports that are either an ancestor
-    or descendant of the given element.
+  @param {Element} [viewport]
   @param {up.Layer|string} [options.layer]
     The layer on which to restore scroll positions.
   @return {Promise}
     A promise that will be fulfilled once scroll positions have been restored.
   @experimental
   ###
-  restoreScroll = (options = {}) ->
-    layer = up.layer.get(options)
-
-    unless url = layer.location
-      return Promise.resolve()
-
-    viewports = if options.around then getAround(options.around, options) else getAll(options)
-    scrollTopsForURL = options.scrollTops || layer.lastScrollTops.get(url) || {}
-
+  restoreScroll = (args...) ->
+    [viewports, options] = parseOptions(args)
+    url = options.layer.location
+    scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
     up.puts 'up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL
+    return setScrollTops(viewports, scrollTopsForURL)
+
+  parseOptions = (args) ->
+    options = u.copy(u.extractOptions(args))
+    options.layer = up.layer.get(options)
+    viewports = if args[0] then [closest(args[0])] else getAll(options)
+    return [viewports, options]
+
+  resetScroll = (args...) ->
+    [viewports, options] = parseOptions(args)
+    return setScrollTops(viewports, {})
+
+  setScrollTops = (viewports, tops) ->
     allScrollPromises = u.map viewports, (viewport) ->
       key = scrollTopKey(viewport)
-      scrollTop = scrollTopsForURL[key] || 0
+      scrollTop = tops[key] || 0
       scroll(viewport, scrollTop, duration: 0)
-
-    Promise.all(allScrollPromises)
-
-  resetScroll: (options = {}) ->
-    return restoreScroll(u.merge(options, scrollTops: {}))
+    return Promise.all(allScrollPromises)
 
   ###**
   @internal
@@ -781,7 +783,14 @@ up.viewport = do ->
       value = value.substr(1)
     u.presence(value)
 
-  up.on 'up:app:booted', -> revealHash(location.hash)
+  autoResetSelector = ->
+    targets = up.viewport.config.autoResetTargets
+    targets = up.fragment.expandTargets(targets)
+    return targets.join(',')
+
+  up.on 'up:app:booted', ->
+    if hash = location.hash
+      revealHash(hash)
 
   up.on 'up:framework:reset', reset
 
@@ -797,7 +806,6 @@ up.viewport = do ->
       return closest(args...)
     get: closest
     subtree: getSubtree
-    around: getAround
     all: getAll
     rootSelector: rootSelector
     get_root: getRoot
@@ -817,6 +825,7 @@ up.viewport = do ->
     tryFocus: tryFocus
     autofocus: autofocus
     makeFocusable: makeFocusable
+    autoResetSelector: autoResetSelector
 
 up.focus = up.viewport.focus
 up.scroll = up.viewport.scroll
