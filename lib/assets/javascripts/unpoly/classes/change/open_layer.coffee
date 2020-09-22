@@ -138,7 +138,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     fragmentFocus.process(@focus)
 
   handleScroll: ->
-    scrollingOptions = u.merge(@options, { fragment, autoMeans: ['hash', 'reset-if-main'] })
+    scrollingOptions = u.merge(@options, { fragment: @content, autoMeans: ['hash', 'top-if-main'] })
     scrolling = new up.FragmentScrolling(scrollingOptions)
     return scrolling.process(@scroll)
 

@@ -36,6 +36,7 @@ TODOs
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
+- Selector is ignored in form[up-valid=".custom-selector"]
 - Close issues.
 
 
