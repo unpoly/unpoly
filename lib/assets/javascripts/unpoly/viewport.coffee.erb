@@ -65,7 +65,7 @@ up.viewport = do ->
   @param {number} [config.revealMax]
     A number indicating how many top pixel rows of a high element to [reveal](/up.reveal).
 
-    Defaults to 50% of the available viewport height.
+    Defaults to 50% of the available window height.
 
     You may set this to `false` to always reveal as much of the element as the viewport allows.
 
@@ -91,7 +91,7 @@ up.viewport = do ->
     revealSnap: 200
     revealPadding: 0,
     revealTop: false,
-    revealMax: (options) -> options.viewportRect.height * 0.5
+    revealMax: -> 0.5 * window.innerHeight
     scrollSpeed: 1
     autoResetTargets: [':main']
     autofocus: true
@@ -550,7 +550,6 @@ up.viewport = do ->
     url = options.layer.location
     scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
     up.puts 'up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL
-    console.log("::: viewports are %o", viewports)
     return setScrollTops(viewports, scrollTopsForURL)
 
   parseOptions = (args) ->

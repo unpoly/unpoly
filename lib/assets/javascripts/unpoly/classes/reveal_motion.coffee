@@ -13,7 +13,7 @@ class up.RevealMotion
     @snap = @options.snap ? @options.revealSnap ? viewportConfig.revealSnap
     @padding = @options.padding ? @options.revealPadding ? viewportConfig.revealPadding
     @top = @options.top ? @options.revealTop ? viewportConfig.revealTop
-    @max = @options.max ? @options.revealMax ? viewportConfig.revealMax
+    @max = u.evalOption(@options.max ? @options.revealMax ? viewportConfig.revealMax)
 
     @topObstructions = viewportConfig.fixedTop
     @bottomObstructions = viewportConfig.fixedBottom
@@ -22,9 +22,7 @@ class up.RevealMotion
     viewportRect = @getViewportRect(@viewport)
     elementRect = up.Rect.fromElement(@element)
     if @max
-      revealMaxArgs = { viewportRect, elementRect }
-      revealMaxPixels = u.evalOption(@max, revealMaxArgs)
-      elementRect.height = Math.min(elementRect.height, revealMaxPixels)
+      elementRect.height = Math.min(elementRect.height, @max)
 
     @addPadding(elementRect)
     @substractObstructions(viewportRect)
