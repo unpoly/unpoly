@@ -6,7 +6,6 @@ TODOs
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
-- Can fragment:loaded get and mutate the entire rendering options (currently it's after fail yes/no)
 - up.request() should not use the cache by default
   - many users are using this is a better XHR and cache by accident
   - navigate can use cache: true anyways
