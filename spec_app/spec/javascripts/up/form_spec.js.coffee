@@ -519,21 +519,6 @@ describe 'up.form', ->
 
         describe 'revealing', ->
 
-          it 'reaveals the target fragment if the submission succeeds', asyncSpec (next) ->
-            $form = $fixture('form[action="/action"][up-target=".target"]')
-            $target = $fixture('.target')
-
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-            up.submit($form)
-
-            next =>
-              @respondWith('<div class="target">new text</div>')
-
-            next =>
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
-
           it 'reveals the form if the submission fails', asyncSpec (next) ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
@@ -556,16 +541,16 @@ describe 'up.form', ->
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('#foo-form')
 
 
-          describe 'with { reveal } option', ->
+          describe 'with { scroll } option', ->
 
-            it 'allows to reveal a different selector', asyncSpec (next) ->
+            it 'reveals the given selector', asyncSpec (next) ->
               $form = $fixture('form[action="/action"][up-target=".target"]')
               $target = $fixture('.target')
               $other = $fixture('.other')
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.submit($form, reveal: '.other')
+              up.submit($form, scroll: '.other')
 
               next =>
                 @respondWith """
@@ -588,7 +573,7 @@ describe 'up.form', ->
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.submit($form, reveal: '.other')
+              up.submit($form, scroll: '.other')
 
               next =>
                 @respondWith
@@ -608,7 +593,7 @@ describe 'up.form', ->
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.submit($form, reveal: '& .form-child')
+              up.submit($form, scroll: '& .form-child')
 
               next =>
                 @respondWith """
@@ -625,7 +610,7 @@ describe 'up.form', ->
                 expect(revealStub).toHaveBeenCalled()
                 expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
 
-          describe 'with { failReveal } option', ->
+          describe 'with { failScroll } option', ->
 
             it 'reveals the given selector for a failed submission', asyncSpec (next) ->
               $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
@@ -634,7 +619,7 @@ describe 'up.form', ->
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.submit($form, reveal: '.other', failReveal: '.error')
+              up.submit($form, reveal: '.other', failScroll: '.error')
 
               next =>
                 @respondWith
@@ -650,12 +635,12 @@ describe 'up.form', ->
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
 
             it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
-              $form = $fixture('form#foo-form[action="/action"][up-target=".target"][up-fail-reveal="#foo-form .form-child"]')
+              $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
               $target = $fixture('.target')
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.submit($form, reveal: '& .form-child')
+              up.submit($form, failScroll: '& .form-child')
 
               next =>
                 @respondWith

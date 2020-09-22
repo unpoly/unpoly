@@ -23,7 +23,7 @@ class up.FragmentScrolling
         options.scroll = 'top'
 
       if u.isDefined(options.restoreScroll)
-        up.legacy.deprecated('Option { resetScroll: true }', "{ scroll: 'restore' }")
+        up.legacy.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
         options.scroll = 'restore'
 
     @fragment = options.fragment or up.fail('Must pass a { fragment } option')
@@ -31,6 +31,7 @@ class up.FragmentScrolling
     @hash = options.hash
     @origin = options.origin
     @layer = options.layer or up.fail('Must pass a { layer } option')
+    @mode = options.mode
     @scrollOptions = u.pick(options, ['revealTop', 'revealMax', 'revealSnap', 'scrollBehavior'])
 
   process: (scrollOpt) ->
@@ -49,16 +50,13 @@ class up.FragmentScrolling
       when 'top-if-main'
         return @resetIfTargetIsMain()
       when 'restore'
-        # If the user has passed { scroll: 'restore' } we restore the last known scroll
-        # positions for the new URL, for all viewports that are either containing or
-        # are contained by element.
         return @restore()
       when 'hash'
         return @hash && up.viewport.revealHash(@hash, @scrollOptions)
       when 'target'
         return @revealElement(@fragment)
       when 'auto'
-        return u.detect @autoMeans, (autoOpt) => @tryProcess(autoOpt)
+        return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
       else
         return u.isString(scrollOpt) && @revealSelector(scrollOpt)
 
@@ -72,13 +70,13 @@ class up.FragmentScrolling
       return
 
   reset: ->
-    return up.viewport.resetScroll(@fragment, @scrollOptions)
+    return up.viewport.resetScroll(u.merge(@scrollOptions, around: @fragment))
 
   restore: ->
-    return up.viewport.restoreScroll(@fragment, @scrollOptions)
+    return up.viewport.restoreScroll(u.merge(@scrollOptions, around: @fragment))
 
   resetIfTargetIsMain: ->
-    if e.matches(@fragment, up.viewport.autoResetSelector())
+    if e.matches(@fragment, up.viewport.autoResetSelector({ @layer, @mode }))
       return @reset()
 
   revealElement: (element) ->

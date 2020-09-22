@@ -161,7 +161,7 @@ up.history = do ->
         fallback: true
         peel: true           # Close all overlays
         keep: false
-        restoreScroll: true
+        scroll: 'restore'
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
       replaced.then ->
         url = currentLocation()

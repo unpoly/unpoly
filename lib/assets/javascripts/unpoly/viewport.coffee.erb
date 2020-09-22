@@ -333,9 +333,13 @@ up.viewport = do ->
   @return List<Element>
   @internal
   ###
-  getSubtree = (target, options = {}) ->
-    element = f.get(target, options)
+  getSubtree = (element, options = {}) ->
+    element = f.get(element, options)
     e.subtree(element, allSelector())
+
+  getAround = (element, options = {}) ->
+    element = f.get(element, options)
+    e.around(element, allSelector())
 
   ###**
   Returns a list of all the viewports on the current layer.
@@ -546,12 +550,20 @@ up.viewport = do ->
     url = options.layer.location
     scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
     up.puts 'up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL
+    console.log("::: viewports are %o", viewports)
     return setScrollTops(viewports, scrollTopsForURL)
 
   parseOptions = (args) ->
     options = u.copy(u.extractOptions(args))
     options.layer = up.layer.get(options)
-    viewports = if args[0] then [closest(args[0])] else getAll(options)
+    if args[0]
+      viewports = [closest(args[0], options)]
+    else if options.around
+      # This is relevant for up.history. When we go back for replace <body>
+      # and then restore the scroll tops of all viewports in <body>.
+      viewports = getAround(options.around, options)
+    else
+      viewports = getAll(options)
     return [viewports, options]
 
   resetScroll = (args...) ->
@@ -783,9 +795,11 @@ up.viewport = do ->
       value = value.substr(1)
     u.presence(value)
 
-  autoResetSelector = ->
+  autoResetSelector = (options) ->
     targets = up.viewport.config.autoResetTargets
-    targets = up.fragment.expandTargets(targets)
+    console.log("autoResetSelector: targets before is %o", u.copy(targets))
+    targets = up.fragment.expandTargets(targets, options)
+    console.log("autoResetSelector: targets after is %o", u.copy(targets))
     return targets.join(',')
 
   up.on 'up:app:booted', ->
@@ -806,6 +820,7 @@ up.viewport = do ->
       return closest(args...)
     get: closest
     subtree: getSubtree
+    around: getAround
     all: getAll
     rootSelector: rootSelector
     get_root: getRoot

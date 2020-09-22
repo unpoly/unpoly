@@ -21,7 +21,7 @@ describe 'up.RenderOptions', ->
         expect(options.fallback).toBe(true)
         expect(options.history).toBe('auto')
         expect(options.peel).toBe(true)
-        expect(options.reveal).toBe(true)
+        expect(options.scroll).toBe('auto')
         expect(options.transition).toBe('navigate')
 
     describe 'with { navigate: false }', ->
@@ -80,7 +80,7 @@ describe 'up.RenderOptions', ->
         expect(options.fallback).toBe(true)
         expect(options.history).toBe('auto')
         expect(options.peel).toBe(true)
-        expect(options.reveal).toBe(true)
+        expect(options.scroll).toBe('auto')
         expect(options.transition).toBe('navigate')
 
     describe 'with { navigate: false }', ->
@@ -100,11 +100,11 @@ describe 'up.RenderOptions', ->
       expect(options.history).toBe(true)
 
     it 'does not inherit non-shared keys from success options', ->
-      givenOptions = { mode: 'popup', reveal: '.reveal' }
+      givenOptions = { mode: 'popup', scroll: '.selector' }
       options = preprocessAndDerive(givenOptions)
 
       expect(options.layer).toBeUndefined()
-      expect(options.reveal).toBeUndefined()
+      expect(options.scroll).toBeUndefined()
 
     it 'overrides defaults with given fail-prefixed options', ->
       givenOptions = { failTarget: '.fail', failSource: '/fail-source', failMode: 'popup' }

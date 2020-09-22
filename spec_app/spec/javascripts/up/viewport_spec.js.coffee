@@ -507,6 +507,18 @@ describe 'up.viewport', ->
         results = up.viewport.subtree(viewportElement)
         expect(results).toMatchList([viewportElement])
 
+    describe 'up.viewport.around', ->
+
+      it 'returns viewports that  are either ancestors, descendants, or the given element itself', ->
+        $motherViewport = $fixture('.mother[up-viewport]')
+        $element = $motherViewport.affix('.element')
+        $childViewport = $element.affix('.child[up-viewport]')
+        $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
+        actual = up.viewport.around($element[0])
+        expected = $motherViewport.add($childViewport).add($grandChildViewport)
+
+        expect(actual).toMatchList(expected)
+
     describe 'up.viewport.get', ->
 
       it 'seeks upwards from the given element', ->

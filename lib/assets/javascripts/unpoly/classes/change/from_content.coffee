@@ -14,6 +14,7 @@ class up.Change.FromContent extends up.Change
     @layers = up.layer.getAll(@options)
     @origin = @options.origin
     @preview = @options.preview
+    @mode = @options.mode
 
     # When we're swapping elements in origin's layer, we can be choose a fallback
     # replacement zone close to the origin instead of looking up a selector in the
@@ -48,33 +49,7 @@ class up.Change.FromContent extends up.Change
         @plans.push(change)
 
   expandTargets: (targets, layer) ->
-    # Copy the list since targets might be a jQuery collection, and this does not support shift or push.
-    targets = u.copy(u.wrapList(targets))
-
-    expanded = []
-
-    while targets.length
-      target = targets.shift()
-
-      if target == ':main' || target == true
-        targets.unshift @mainTargets(layer)...
-      else if target == ':layer' && layer != 'new'
-        targets.unshift layer.getFirstSwappableElement()
-      else if u.isElementish(target)
-        expanded.push up.fragment.toTarget(target)
-      else if u.isString(target)
-        expanded.push up.fragment.resolveTarget(target, { layer, @origin })
-      else
-        # @buildPlans() might call us with { target: false } or { target: nil }
-        # In that case we don't add a plan.
-
-    return u.uniq(expanded)
-
-  mainTargets: (layer) ->
-    if layer == 'new'
-      return up.layer.mainTargets(@options.mode)
-    else
-      return layer.mainTargets()
+    return up.fragment.expandTargets(targets, { layer, @mode, @origin })
 
   execute: ->
     executePlan = (plan) => plan.execute(@getResponseDoc())

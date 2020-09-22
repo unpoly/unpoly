@@ -66,12 +66,12 @@ up.RenderOptions = do ->
   # if { navigate: true } is given.
   NAVIGATE_DEFAULTS = {
     focus: 'auto'
+    scroll: 'auto'
     solo: true      # preflight
     feedback: true  # preflight
     fallback: true
     history: 'auto'
     peel: true
-    reveal: true
     transition: 'navigate' # build in lookup
   }
 

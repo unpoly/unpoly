@@ -296,95 +296,50 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('#hash')
 
-        describe 'with { restoreScroll: true } option', ->
+        describe 'scrolling', ->
 
-          beforeEach ->
-            up.history.config.enabled = true
+          describe 'with { scroll: "target" }', ->
 
-          it "does not reveal, but instead restores the scroll positions of the target's viewport", asyncSpec (next) ->
+            it 'reaveals the target fragment', asyncSpec (next) ->
+              $link = $fixture('a[href="/action"][up-target=".target"]')
+              $target = $fixture('.target')
 
-            $viewport = $fixture('div[up-viewport] .element').css
-              'height': '100px'
-              'width': '100px'
-              'overflow-y': 'scroll'
+              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            followLink = (options = {}) ->
-              $link = $viewport.find('.link')
-              up.follow($link, options)
+              up.follow($link, scroll: 'target')
 
-            respond = (linkDestination) =>
-              @respondWith """
-                <div class="element" style="height: 300px">
-                  <a class="link" href="#{linkDestination}" up-target=".element">Link</a>
-                </div>
-                """
+              next =>
+                @respondWith('<div class="target">new text</div>')
 
-            up.navigate('.element', url: '/foo')
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
 
-            next =>
-              # Provide the content at /foo with a link to /bar in the HTML
-              respond('/bar')
+          describe 'with { failScroll: "target" }', ->
 
-            next =>
-              $viewport.scrollTop(65)
+            it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
+              $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+              $target = $fixture('.target')
+              $failTarget = $fixture('.fail-target')
 
-              # Follow the link to /bar
-              followLink()
+              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            next =>
-              # Provide the content at /bar with a link back to /foo in the HTML
-              respond('/foo')
+              up.follow($link, failScroll: "target")
 
-            next =>
-              # Follow the link back to /foo, restoring the scroll position of 65px
-              followLink(restoreScroll: true)
-              # No need to respond because /foo has been cached before
+              next =>
+                @respondWith
+                  status: 500,
+                  responseText: """
+                    <div class="fail-target">
+                      Errors here
+                    </div>
+                    """
 
-            next =>
-              expect($viewport.scrollTop()).toEqual(65)
+              next =>
+                expect(revealStub).toHaveBeenCalled()
+                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
 
-
-        describe 'revealing', ->
-
-          it 'reaveals the target fragment', asyncSpec (next) ->
-            $link = $fixture('a[href="/action"][up-target=".target"]')
-            $target = $fixture('.target')
-
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-            up.follow($link)
-
-            next =>
-              @respondWith('<div class="target">new text</div>')
-
-            next =>
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.target')
-
-          it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
-            $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-            $target = $fixture('.target')
-            $failTarget = $fixture('.fail-target')
-
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-            up.follow($link)
-
-            next =>
-              @respondWith
-                status: 500,
-                responseText: """
-                  <div class="fail-target">
-                    Errors here
-                  </div>
-                  """
-
-            next =>
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
-
-
-          describe 'with { reveal } option', ->
+          describe 'with { scroll: string } option', ->
 
             it 'allows to reveal a different selector', asyncSpec (next) ->
               $link = $fixture('a[href="/action"][up-target=".target"]')
@@ -393,7 +348,7 @@ describe 'up.link', ->
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.follow($link, reveal: '.other')
+              up.follow($link, scroll: '.other')
 
               next =>
                 @respondWith """
@@ -409,7 +364,7 @@ describe 'up.link', ->
                 expect(revealStub).toHaveBeenCalled()
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
-            it 'still reveals the { failTarget } for a failed submission', asyncSpec (next) ->
+            it 'ignores the { scroll } option for a failed response', asyncSpec (next) ->
               $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
               $target = $fixture('.target')
               $failTarget = $fixture('.fail-target')
@@ -417,7 +372,7 @@ describe 'up.link', ->
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.follow($link, reveal: '.other', failTarget: '.fail-target')
+              up.follow($link, scroll: '.other', failTarget: '.fail-target')
 
               next =>
                 @respondWith
@@ -429,10 +384,9 @@ describe 'up.link', ->
                     """
 
               next =>
-                expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
+                expect(revealStub).not.toHaveBeenCalled()
 
-          describe 'with { failReveal } option', ->
+          describe 'with { failScroll } option', ->
 
             it 'reveals the given selector when the server responds with an error', asyncSpec (next) ->
               $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
@@ -443,7 +397,7 @@ describe 'up.link', ->
 
               revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-              up.follow($link, reveal: '.other', failReveal: '.fail-other')
+              up.follow($link, reveal: '.other', failScroll: '.fail-other')
 
               next =>
                 @respondWith
@@ -460,6 +414,55 @@ describe 'up.link', ->
               next =>
                 expect(revealStub).toHaveBeenCalled()
                 expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-other')
+
+          describe 'with { scroll: "restore" } option', ->
+
+            beforeEach ->
+              up.history.config.enabled = true
+
+            it "does not reveal, but instead restores the scroll positions of the target's viewport", asyncSpec (next) ->
+
+              $viewport = $fixture('div[up-viewport] .element').css
+                'height': '100px'
+                'width': '100px'
+                'overflow-y': 'scroll'
+
+              followLink = (options = {}) ->
+                $link = $viewport.find('.link')
+                up.follow($link, options)
+
+              respond = (linkDestination) =>
+                @respondWith """
+                  <div class="element" style="height: 300px">
+                    <a class="link" href="#{linkDestination}" up-target=".element">Link</a>
+                  </div>
+                  """
+
+              up.navigate('.element', url: '/foo')
+
+              next =>
+                # Provide the content at /foo with a link to /bar in the HTML
+                respond('/bar')
+
+              next =>
+                $viewport.scrollTop(65)
+
+                # Follow the link to /bar
+                followLink()
+
+              next =>
+                # Provide the content at /bar with a link back to /foo in the HTML
+                respond('/foo')
+
+              next =>
+                # Follow the link back to /foo, restoring the scroll position of 65px
+                followLink(scroll: 'restore')
+                # No need to respond because /foo has been cached before
+
+              next =>
+                expect($viewport.scrollTop()).toEqual(65)
+
+
 
           describe "when the browser is already on the link's destination", ->
 

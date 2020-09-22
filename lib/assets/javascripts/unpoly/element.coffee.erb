@@ -164,6 +164,9 @@ up.element = do ->
   ancestor = (element, selector) ->
     parseSelector(selector).ancestor(element)
 
+  around = (element, selector) ->
+    getList(closest(element, selector), subtree(element, selector))
+
   ###**
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
@@ -1121,6 +1124,7 @@ up.element = do ->
     closest: closest # needed for IE11
     matches: matches # needed for IE11
     ancestor: ancestor # not practical. we use it to implement closest
+    around: around
     get: getOne # practical for code that also works with jQuery
     list: getList # practical for composing multiple collections, or wrapping.
     remove: remove # needed for IE11

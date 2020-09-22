@@ -835,41 +835,13 @@ describe 'up.fragment', ->
               promise = promiseState(replacePromise)
               promise.then (result) => expect(result.state).toEqual('fulfilled')
 
-          it 'does not lose a { reveal: true } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
+          it 'does not lose a { scroll } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
             $outer = $fixture('.outer').text('old outer text')
             $inner = $outer.affix('.inner').text('old inner text')
 
-            up.render('.inner, .outer', url: '/path', reveal: true)
-
-            next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
-
-              @respondWith """
-                <div class="outer">
-                  new outer text
-                  <div class="inner">
-                    new inner text
-                  </div>
-                </div>
-                """
-
-            next =>
-              expect($('.outer')).toBeAttached()
-              expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).toBeAttached()
-              expect($('.inner').text()).toContain('new inner text')
-
-              expect(revealStub).toHaveBeenCalled()
-
-          it 'does not lose a { reveal: string } option if the first selector was merged into a subsequent selector', asyncSpec (next) ->
-            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-            $outer = $fixture('.outer').text('old outer text')
-            $inner = $outer.affix('.inner').text('old inner text')
-
-            up.render('.inner, .outer', url: '/path', reveal: '.revealee')
+            up.render('.inner, .outer', url: '/path', scroll: '.revealee')
 
             next =>
               expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.outer')
@@ -1948,7 +1920,7 @@ describe 'up.fragment', ->
           $container.scrollTop(300)
           expect($container.scrollTop()).toEqual(300)
 
-          up.render($element, transition: 'cross-fade', duration: 60000, reveal: true, document: """
+          up.render($element, transition: 'cross-fade', duration: 60000, scroll: 'target', document: """
             <div class="element" style="height: 600px"></div>
             """
           )
@@ -1957,7 +1929,7 @@ describe 'up.fragment', ->
             $old = $('.element.up-destroying')
             $new = $('.element:not(.up-destroying)')
 
-            # Container is scrolled up due to { reveal: true } option.
+            # Container is scrolled up due to { scroll: 'target' } option.
             # Since $old and $new are sitting in the same viewport with a
             # single shared scrollbar, this will make the ghost for $old jump.
             expect($container.scrollTop()).toBeAround(0, 5)
@@ -2067,154 +2039,179 @@ describe 'up.fragment', ->
             next =>
               expect(swapDirectlySpy).toHaveBeenCalled()
 
-      describe 'with { reveal } option', ->
+      describe 'scrolling', ->
 
-        beforeEach ->
-          @revealedHTML = []
-          @revealedText = []
-          @revealOptions = {}
+        mockReveal = ->
+          beforeEach ->
+            @revealedHTML = []
+            @revealedText = []
+            @revealOptions = {}
 
-          @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
-            @revealedHTML.push element.outerHTML
-            @revealedText.push element.textContent.trim()
-            @revealOptions = options
-            Promise.resolve()
+            @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
+              @revealedHTML.push element.outerHTML
+              @revealedText.push element.textContent.trim()
+              @revealOptions = options
+              Promise.resolve()
 
-        it 'scrolls to the new element that is inserted into the DOM', asyncSpec (next) ->
-          fixture('.target')
-          up.render('.target', url: '/path', reveal: true)
+        describe 'with { scroll: false }', ->
 
-          next =>
-            @respondWithSelector('.target', text: 'new text')
+          mockReveal()
 
-          next =>
-            expect(@revealedText).toEqual ['new text']
+          it 'does not scroll', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path#hash', scroll: false)
 
-        it 'allows to pass another selector to reveal', asyncSpec (next)->
-          fixture('.target', text: 'target text')
-          fixture('.other', text: 'other text')
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div id="hash"></div>
+                </div>
+                """
 
-          up.render('.target', url: '/path', reveal: '.other')
+            next =>
+              expect(@revealMock).not.toHaveBeenCalled()
 
-          next =>
-            @respondWithSelector('.target')
+        describe 'with { scroll: "target" }', ->
 
-          next =>
-            expect(@revealedText).toEqual ['other text']
+          mockReveal()
 
-        it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
-          target = fixture('.target', text: 'target text')
-          origin = fixture('.origin', text: 'origin text')
+          it 'scrolls to the new element that is inserted into the DOM', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path', scroll: 'target')
 
-          up.render('.target', url: '/path', reveal: '&', origin: origin)
+            next =>
+              @respondWithSelector('.target', text: 'new text')
 
-          next =>
-            @respondWithSelector('.target')
+            next =>
+              expect(@revealedText).toEqual ['new text']
 
-          next =>
-            expect(@revealedText).toEqual ['origin text']
-
-        describe 'when the server responds with an error code', ->
-
-          it 'ignores the { reveal } option', asyncSpec (next) ->
+          it 'allows to pass another selector to reveal', asyncSpec (next)->
             fixture('.target', text: 'target text')
             fixture('.other', text: 'other text')
-            fixture('.fail-target', text: 'fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: '.other', failReveal: true)
+
+            up.render('.target', url: '/path', scroll: '.other')
 
             next =>
-              @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
-
-            next =>
-              expect(@revealedText).toEqual ['new fail-target text']
-
-          it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
-            fixture('.target', text: 'old target text')
-            fixture('.other', text: 'other text')
-            fixture('.fail-target', text: 'old fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '.other')
-
-            next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="fail-target">
-                    new fail-target text
-                  </div>
-                  """
+              @respondWithSelector('.target')
 
             next =>
               expect(@revealedText).toEqual ['other text']
 
-          it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
-            $origin = $fixture('.origin').text('origin text')
-            $fixture('.target').text('old target text')
-            $fixture('.fail-target').text('old fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', reveal: false, failReveal: '&', origin: $origin)
+          it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
+            target = fixture('.target', text: 'target text')
+            origin = fixture('.origin', text: 'origin text')
+
+            up.render('.target', url: '/path', scroll: '&', origin: origin)
 
             next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="fail-target">
-                    new fail-target text
-                  </div>
-                  """
+              @respondWithSelector('.target')
 
             next =>
               expect(@revealedText).toEqual ['origin text']
 
-        describe 'when more than one fragment is replaced', ->
+          describe 'when the server responds with an error code', ->
 
-          it 'only reveals the first fragment', asyncSpec (next) ->
-            fixture('.one', text: 'old one text')
-            fixture('.two', text: 'old two text')
-            up.render('.one, .two', url: '/path', reveal: true)
+            it 'ignores the { reveal } option', asyncSpec (next) ->
+              fixture('.target', text: 'target text')
+              fixture('.other', text: 'other text')
+              fixture('.fail-target', text: 'fail-target text')
+              up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other', failScroll: 'target')
 
-            next =>
-              @respondWith """
-                <div class="one">new one text</div>
-                <div class="two">new two text</div>
-                """
+              next =>
+                @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
 
-            next =>
-              expect(@revealedText).toEqual ['new one text']
+              next =>
+                expect(@revealedText).toEqual ['new fail-target text']
 
-        it 'reveals a new element that is being appended', asyncSpec (next) ->
-          fixture('.target')
-          up.render('.target:after', url: '/path', reveal: true)
+            it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
+              fixture('.target', text: 'old target text')
+              fixture('.other', text: 'other text')
+              fixture('.fail-target', text: 'old fail-target text')
+              up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other')
 
-          next =>
-            @respondWithSelector('.target', text: 'new target text')
+              next =>
+                @respondWith
+                  status: 500
+                  responseText: """
+                    <div class="fail-target">
+                      new fail-target text
+                    </div>
+                    """
 
-          next =>
-            # Text nodes are wrapped in a up-insertion container so we can
-            # animate them and measure their position/size for scrolling.
-            # This is not possible for container-less text nodes.
-            expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
-            # Show that the wrapper is done after the insertion.
-            expect($('up-insertion')).not.toBeAttached()
+              next =>
+                expect(@revealedText).toEqual ['other text']
 
-        it 'reveals a new element that is being prepended', asyncSpec (next) ->
-          fixture('.target')
-          up.render('.target:before', url: '/path', reveal: true)
+            it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
+              $origin = $fixture('.origin').text('origin text')
+              $fixture('.target').text('old target text')
+              $fixture('.fail-target').text('old fail-target text')
+              up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '&', origin: $origin)
 
-          next =>
-            @respondWithSelector('.target', text: 'new target text')
+              next =>
+                @respondWith
+                  status: 500
+                  responseText: """
+                    <div class="fail-target">
+                      new fail-target text
+                    </div>
+                    """
 
-          next =>
-            # Text nodes are wrapped in a up-insertion container so we can
-            # animate them and measure their position/size for scrolling.
-            # This is not possible for container-less text nodes.
-            expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
-            # Show that the wrapper is done after the insertion.
-            expect($('up-insertion')).not.toBeAttached()
+              next =>
+                expect(@revealedText).toEqual ['origin text']
 
-        describe 'when there is an anchor #hash in the URL', ->
+          describe 'when more than one fragment is replaced', ->
 
-          it 'scrolls to the top of an element with the ID of that #hash', asyncSpec (next) ->
+            it 'only reveals the first fragment', asyncSpec (next) ->
+              fixture('.one', text: 'old one text')
+              fixture('.two', text: 'old two text')
+              up.render('.one, .two', url: '/path', scroll: 'target')
+
+              next =>
+                @respondWith """
+                  <div class="one">new one text</div>
+                  <div class="two">new two text</div>
+                  """
+
+              next =>
+                expect(@revealedText).toEqual ['new one text']
+
+          it 'reveals a new element that is being appended', asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path#hash', reveal: true)
+            up.render('.target:after', url: '/path', scroll: 'target')
+
+            next =>
+              @respondWithSelector('.target', text: 'new target text')
+
+            next =>
+              # Text nodes are wrapped in a up-insertion container so we can
+              # animate them and measure their position/size for scrolling.
+              # This is not possible for container-less text nodes.
+              expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
+              # Show that the wrapper is done after the insertion.
+              expect($('up-insertion')).not.toBeAttached()
+
+          it 'reveals a new element that is being prepended', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target:before', url: '/path', scroll: 'target')
+
+            next =>
+              @respondWithSelector('.target', text: 'new target text')
+
+            next =>
+              # Text nodes are wrapped in a up-insertion container so we can
+              # animate them and measure their position/size for scrolling.
+              # This is not possible for container-less text nodes.
+              expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
+              # Show that the wrapper is done after the insertion.
+              expect($('up-insertion')).not.toBeAttached()
+
+        describe 'with { scroll: "hash" }', ->
+
+          mockReveal()
+
+          it "scrolls to the top of an element with the ID the location's #hash", asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path#hash', scroll: 'hash')
 
             next =>
               @respondWith """
@@ -2229,7 +2226,7 @@ describe 'up.fragment', ->
 
           it "scrolls to the top of an <a> element with the name of that hash", asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path#three', reveal: true)
+            up.render('.target', url: '/path#three', scroll: 'hash')
 
             next =>
               @respondWith """
@@ -2244,7 +2241,7 @@ describe 'up.fragment', ->
 
           it "scrolls to a hash that includes a dot character ('.') (bugfix)", asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path#foo.bar', reveal: true)
+            up.render('.target', url: '/path#foo.bar', scroll: 'hash')
 
             next =>
               @respondWith """
@@ -2257,23 +2254,9 @@ describe 'up.fragment', ->
               expect(@revealedHTML).toEqual ['<a name="foo.bar"></a>']
               expect(@revealOptions).toEqual jasmine.objectContaining(top: true)
 
-          it 'does not scroll if { reveal: false } is also set', asyncSpec (next) ->
-            fixture('.target')
-            up.render('.target', url: '/path#hash', reveal: false)
-
-            next =>
-              @respondWith """
-                <div class="target">
-                  <div id="hash"></div>
-                </div>
-                """
-
-            next =>
-              expect(@revealMock).not.toHaveBeenCalled()
-
           it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path#two', reveal: true)
+            up.render('.target', url: '/path#two', scroll: 'hash')
 
             next =>
               @respondWith """
@@ -2287,7 +2270,7 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['two']
 
-              up.render('.target', url: '/path#three', reveal: true)
+              up.render('.target', url: '/path#three', scroll: 'hash')
               # response is already cached
 
             next =>
@@ -2295,7 +2278,7 @@ describe 'up.fragment', ->
 
           it "does not scroll if there is no element with the ID of that #hash", asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path#hash', reveal: true)
+            up.render('.target', url: '/path#hash', scroll: 'hash')
 
             next =>
               @respondWithSelector('.target')
@@ -2305,11 +2288,13 @@ describe 'up.fragment', ->
 
         describe 'with { scrollBehavior } option', ->
 
+          mockReveal()
+
           it 'animates the revealing when prepending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.render('.element:before',
               html: '<div class="element">version 2</div>',
-              reveal: true,
+              scroll: 'target',
               scrollBehavior: 'smooth'
             )
             next =>
@@ -2319,7 +2304,7 @@ describe 'up.fragment', ->
             fixture('.element', text: 'version 1')
             up.render('.element:after',
               html: '<div class="element">version 2</div>',
-              reveal: true,
+              scroll: 'target',
               scrollBehavior: 'smooth'
             )
             next =>
@@ -2329,40 +2314,40 @@ describe 'up.fragment', ->
             fixture('.element', text: 'version 1')
             up.render('.element',
               html: '<div class="element">version 2</div>',
-              reveal: true,
+              scroll: 'target',
               scrollBehavior: 'smooth'
             )
             next =>
               expect(@revealOptions.scrollBehavior).toEqual('auto')
 
-      describe 'with { restoreScroll: true } option', ->
+        describe 'with { scroll: "reset" } option', ->
 
-        beforeEach ->
-          up.history.config.enabled = true
+          beforeEach ->
+            up.history.config.enabled = true
 
-        it "restores the scroll positions of the target's viewport", asyncSpec (next) ->
+          it "restores the scroll positions of the target's viewport", asyncSpec (next) ->
 
-          $viewport = $fixture('.viewport[up-viewport] .element').css
-            'height': '100px'
-            'width': '100px'
-            'overflow-y': 'scroll'
+            $viewport = $fixture('.viewport[up-viewport] .element').css
+              'height': '100px'
+              'width': '100px'
+              'overflow-y': 'scroll'
 
-          respond = =>
-            @respondWith
-              status: 200
-              contentType: 'text/html'
-              responseText: '<div class="element" style="height: 300px"></div>'
+            respond = =>
+              @respondWith
+                status: 200
+                contentType: 'text/html'
+                responseText: '<div class="element" style="height: 300px"></div>'
 
-          up.render('.element', url: '/foo', history: true)
+            up.render('.element', url: '/foo', history: true)
 
-          next => respond()
-          next => $viewport.scrollTop(65)
-          next => up.render('.element', url: '/bar', history: true)
-          next => respond()
-          next => $viewport.scrollTop(10)
-          next.await => up.render('.element', url: '/foo', restoreScroll: true, history: true)
-          # No need to respond because /foo has been cached before
-          next => expect($viewport.scrollTop()).toEqual(65)
+            next => respond()
+            next => $viewport.scrollTop(65)
+            next => up.render('.element', url: '/bar', history: true)
+            next => respond()
+            next => $viewport.scrollTop(10)
+            next.await => up.render('.element', url: '/foo', scroll: 'restore', history: true)
+            # No need to respond because /foo has been cached before
+            next => expect($viewport.scrollTop()).toEqual(65)
 
       describe 'execution of scripts', ->
 

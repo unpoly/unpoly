@@ -58,7 +58,7 @@ describe 'up.radio', ->
 
         revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-        up.navigate('.target', url: '/path', reveal: true)
+        up.navigate('.target', url: '/path', scroll: 'target')
 
         next =>
           @respondWith """

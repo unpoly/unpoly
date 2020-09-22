@@ -16,7 +16,7 @@ describe 'up.legacy', ->
     it 'prepends a deprecation prefix to the given message and prints it to the warning log', ->
       spy = spyOn(up, 'warn')
       up.legacy.warn("a legacy warning")
-      expect(spy).toHaveBeenCalledWith('[DEPRECATION] a legacy warning')
+      expect(spy).toHaveBeenCalledWith('DEPRECATION', 'a legacy warning')
 
     it 'only prints a given message once', ->
       spy = spyOn(up, 'warn')

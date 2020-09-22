@@ -26,7 +26,7 @@ class up.FragmentFocus
       when 'autofocus-if-enabled'
         return up.viewport.config.autofocus && @autofocus()
       when 'auto'
-        return u.detect @autoMeans, (autoOpt) => @process(autoOpt)
+        return u.find @autoMeans, (autoOpt) => @process(autoOpt)
       else
         return u.isString(focusOpt) && @focusSelector(focusOpt)
 

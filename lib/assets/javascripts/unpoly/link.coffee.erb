@@ -219,18 +219,18 @@ up.link = do ->
     parser.string('dismissLocation')
 
     # Viewport options
-    parser.booleanOrString('focus')   # differs   default: 'auto'
-    parser.boolean('saveScroll')      # inherits  default: true     we always want to saveScroll
+    parser.booleanOrString('focus')   # differs
+    parser.boolean('saveScroll')      # inherits
     parser.booleanOrString('scroll')
-    parser.booleanOrString('reveal')  # legacy option for { scroll: 'reveal' }
-    parser.boolean('resetScroll')     # differs
-    parser.boolean('restoreScroll')   # differs
+    parser.booleanOrString('reveal')  # legacy option for { scroll: 'target' }
+    parser.boolean('resetScroll')     # legacy option for { scroll: 'top' }
+    parser.boolean('restoreScroll')   # legacy option for { scroll: 'restore' }
 
     parser.boolean('revealTop')       # differs
     parser.number('revealMax')        # differs
     parser.number('revealPadding')    # differs
     parser.number('revealSnap')       # differs
-    parser.string('scrollBehavior')   # inherits
+    parser.string('scrollBehavior')   #
 
     # History options
     # { history } is actually a boolean, but we keep the deprecated string

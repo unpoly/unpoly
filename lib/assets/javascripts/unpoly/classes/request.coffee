@@ -179,7 +179,6 @@ class up.Request extends up.Record
 
   normalize: ->
     @method = u.normalizeMethod(@method)
-    console.debug("--- request has normalized method to %o, methodAllowsPayload: %o", @method, u.methodAllowsPayload(@method))
     @extractHashFromURL()
     unless u.methodAllowsPayload(@method)
       @transferParamsToURL()

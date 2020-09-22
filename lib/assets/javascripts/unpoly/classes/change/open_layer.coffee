@@ -133,7 +133,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     fragmentFocus = new up.FragmentFocus(
       fragment: @content,
       layer: @layer,
-      autoMeans: ['hash']
+      autoMeans: ['autofocus', 'layer']
     )
     fragmentFocus.process(@focus)
 
