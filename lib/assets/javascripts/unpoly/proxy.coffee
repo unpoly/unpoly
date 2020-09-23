@@ -256,6 +256,7 @@ up.proxy = do ->
 
     if request.preload
       request.timeout ?= config.preloadTimeout
+      request.cache = true
 
     # We clear the entire cache before an unsafe request, since we
     # assume the user is writing a change.
@@ -263,7 +264,7 @@ up.proxy = do ->
 
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
-    if (request.cache != false) && (cachedRequest = cache.get(request))
+    if request.cache && (cachedRequest = cache.get(request))
       up.puts('up.request()', 'Re-using cached response for %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
@@ -283,14 +284,15 @@ up.proxy = do ->
     else
       # If no existing promise is available, we make a network request.
 
-      # Cache the request for calls for calls with the same URL, method, params
-      # and target. See up.Request#cacheKey().
-      cache.set(request, request)
+      if request.cache
+        # Cache the request for calls for calls with the same URL, method, params
+        # and target. See up.Request#cacheKey().
+        cache.set(request, request)
 
-      # Immediately uncache failed requests.
-      # We have no control over the server, and another request with the
-      # same properties might succeed.
-      request.catch -> cache.remove(request)
+        # Immediately uncache failed requests.
+        # We have no control over the server, and another request with the
+        # same properties might succeed.
+        request.catch -> cache.remove(request)
 
       queue.asap(request)
 
@@ -457,7 +459,7 @@ up.proxy = do ->
   ###
 
   registerAliasForRedirect = (request, response) ->
-    if response.url && request.url != response.url
+    if request.cache && response.url && request.url != response.url
       newRequest = request.variant(
         method: response.method
         url: response.url

@@ -2258,20 +2258,24 @@ describe 'up.fragment', ->
             fixture('.target')
             up.render('.target', url: '/path#two', scroll: 'hash')
 
+            html = """
+              <div class="target">
+                <div id="one">one</div>
+                <div id="two">two</div>
+                <div id="three">three</div>
+              </div>
+              """
+
             next =>
-              @respondWith """
-                <div class="target">
-                  <div id="one">one</div>
-                  <div id="two">two</div>
-                  <div id="three">three</div>
-                </div>
-                """
+              @respondWith(html)
 
             next =>
               expect(@revealedText).toEqual ['two']
 
               up.render('.target', url: '/path#three', scroll: 'hash')
-              # response is already cached
+
+            next =>
+              @respondWith(html)
 
             next =>
               expect(@revealedText).toEqual ['two', 'three']
@@ -2345,8 +2349,8 @@ describe 'up.fragment', ->
             next => up.render('.element', url: '/bar', history: true)
             next => respond()
             next => $viewport.scrollTop(10)
-            next.await => up.render('.element', url: '/foo', scroll: 'restore', history: true)
-            # No need to respond because /foo has been cached before
+            next => up.render('.element', url: '/foo', scroll: 'restore', history: true)
+            next => respond()
             next => expect($viewport.scrollTop()).toEqual(65)
 
       describe 'execution of scripts', ->
@@ -3571,9 +3575,10 @@ describe 'up.fragment', ->
       it 'does not use a cached response', ->
         renderSpy = up.fragment.knife.mock('render')
         element = fixture('.element')
+
         up.fragment.setSource(element, '/source')
         up.reload(element)
-        expect(renderSpy).toHaveBeenCalledWith(jasmine.objectContaining(target: element, cache: false))
+        expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining(cache: true))
 
       it 'does not reveal by default', asyncSpec (next) ->
         element = fixture('.element', text: 'old text')

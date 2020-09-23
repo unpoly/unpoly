@@ -159,6 +159,7 @@ up.history = do ->
         layer: 'root'        # Don't replace elements in a modal that might still be open
         target: config.restoreTargets,
         fallback: true
+        cache: true
         peel: true           # Close all overlays
         keep: false
         scroll: 'restore'

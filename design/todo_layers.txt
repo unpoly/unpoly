@@ -1,14 +1,16 @@
 TODOs
 -----
 
+- Test { scroll: "auto" }
+  - hash
+  - mains
+  - nothing
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
-- up.request() should not use the cache by default
-  - many users are using this is a better XHR and cache by accident
-  - navigate can use cache: true anyways
+- Do we really want failReveal = true in up.submit()?
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass

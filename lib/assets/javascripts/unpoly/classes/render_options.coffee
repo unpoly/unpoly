@@ -72,6 +72,7 @@ up.RenderOptions = do ->
     fallback: true
     history: 'auto'
     peel: true
+    cache: true
     transition: 'navigate' # build in lookup
   }
 

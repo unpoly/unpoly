@@ -148,7 +148,7 @@ describe 'up.link', ->
 
           next.after waitForBrowser, =>
             # Since the response is cached, we don't have to respond
-            expect($('.target')).toHaveText('restored text from two', 'restored title from two')
+            expect($('.target')).toHaveText('restored text from two')
             expect(location.pathname).toEqual('/two')
             expect(document.title).toEqual('restored title from two')
 

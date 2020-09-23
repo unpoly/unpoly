@@ -82,14 +82,16 @@ describe 'up.RenderOptions', ->
         expect(options.peel).toBe(true)
         expect(options.scroll).toBe('auto')
         expect(options.transition).toBe('navigate')
+        expect(options.cache).toBe(true)
 
     describe 'with { navigate: false }', ->
 
-      it 'sets additional defaults appropriate to programmatic fragment changes', ->
+      it 'only sets defaults appropriate to programmatic fragment changes', ->
         givenOptions = { navigate: false }
         options = preprocessAndDerive(givenOptions)
 
         expect(options.history).toBe(false)
+        expect(options.cache).toBe(undefined)
 
     it 'inherits shared keys from success options', ->
       givenOptions = { confirm: 'Really?', origin: document.body, history: true }

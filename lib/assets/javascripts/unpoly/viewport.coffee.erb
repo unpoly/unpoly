@@ -796,9 +796,7 @@ up.viewport = do ->
 
   autoResetSelector = (options) ->
     targets = up.viewport.config.autoResetTargets
-    console.log("autoResetSelector: targets before is %o", u.copy(targets))
     targets = up.fragment.expandTargets(targets, options)
-    console.log("autoResetSelector: targets after is %o", u.copy(targets))
     return targets.join(',')
 
   up.on 'up:app:booted', ->
@@ -832,6 +830,7 @@ up.viewport = do ->
     scrollTops: scrollTops
     saveScroll: saveScroll
     restoreScroll: restoreScroll
+    resetScroll: resetScroll
     anchoredRight: anchoredRight
     fixedElements: fixedElements
     absolutize: absolutize

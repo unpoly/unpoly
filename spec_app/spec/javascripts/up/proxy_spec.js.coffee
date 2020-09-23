@@ -214,57 +214,59 @@ describe 'up.proxy', ->
               expect(response.url).toMatchURL('/response-url')
               done()
 
-        it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
-          up.request('/foo')
+        describe 'when caching', ->
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseHeaders:
-                'X-Up-Location': '/bar'
-                'X-Up-Method': 'GET'
+          it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
+            up.request('/foo', cache: true)
 
-          next =>
-            up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseHeaders:
+                  'X-Up-Location': '/bar'
+                  'X-Up-Method': 'GET'
 
-          next =>
-            # See that the cached alias is used and no additional requests are made
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            next =>
+              up.request('/bar', cache: true)
 
-        it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
-          up.request('/foo', method: 'post') # POST requests are not cached
+            next =>
+              # See that the cached alias is used and no additional requests are made
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseHeaders:
-                'X-Up-Location': '/bar'
-                'X-Up-Method': 'GET'
+          it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
+            up.request('/foo', method: 'post', cache: true) # POST requests are not cached
 
-          next =>
-            up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseHeaders:
+                  'X-Up-Location': '/bar'
+                  'X-Up-Method': 'GET'
 
-          next =>
-            # See that an additional request was made
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
+            next =>
+              up.request('/bar', cache: true)
 
-        it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
-          up.request('/foo')
+            next =>
+              # See that an additional request was made
+              expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseHeaders:
-                'X-Up-Location': '/bar'
-                'X-Up-Method': 'GET'
-              status: 500
+          it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
+            up.request('/foo', cache: true)
 
-          next =>
-            up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseHeaders:
+                  'X-Up-Location': '/bar'
+                  'X-Up-Method': 'GET'
+                status: 500
 
-          next =>
-            # See that an additional request was made
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
+            next =>
+              up.request('/bar', cache: true)
+
+            next =>
+              # See that an additional request was made
+              expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         describeCapability 'canInspectFormData', ->
 
@@ -301,47 +303,49 @@ describe 'up.proxy', ->
               expect(response.url).toMatchURL('/response-url')
               done()
 
-        it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
-          up.request('/foo')
+        describe 'when caching', ->
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseURL: '/bar'
+          it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
+            up.request('/foo', cache: true)
 
-          next =>
-            up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseURL: '/bar'
 
-          next =>
-            # See that the cached alias is used and no additional requests are made
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            next =>
+              up.request('/bar', cache: true)
 
-        it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
-          up.request('/foo', method: 'post') # POST requests are not cached
+            next =>
+              # See that the cached alias is used and no additional requests are made
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseURL: '/bar'
+          it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
+            up.request('/foo', method: 'post', cache: true) # POST requests are not cached
 
-          next =>
-            up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseURL: '/bar'
 
-          next =>
-            # See that an additional request was made
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
+            next =>
+              up.request('/bar', cache: true)
 
-        it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
-          up.request('/foo')
+            next =>
+              # See that an additional request was made
+              expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-          next =>
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            @respondWith
-              responseURL: '/bar'
-              status: 500
+          it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
+            up.request('/foo', cache: true)
 
-          next =>
-            up.request('/bar')
+            next =>
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              @respondWith
+                responseURL: '/bar'
+                status: 500
+
+            next =>
+              up.request('/bar', cache: true)
 
       describe 'CSRF', ->
 
@@ -401,7 +405,7 @@ describe 'up.proxy', ->
               expect(response.request.params).toBeBlank()
               done()
 
-      describe 'caching of responses', ->
+      describe 'with { cache } option', ->
 
         it 'caches server responses for the configured duration', asyncSpec (next) ->
           up.proxy.config.cacheExpiry = 200 # 1 second for test
@@ -410,13 +414,14 @@ describe 'up.proxy', ->
           trackResponse = (response) -> responses.push(response.text)
 
           next =>
-            up.request(url: '/foo').then(trackResponse)
+            up.request(url: '/foo', cache: true).then(trackResponse)
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           next.after (10), =>
             # Send the same request for the same path
-            up.request(url: '/foo').then(trackResponse)
+            up.request(url: '/foo', cache: true).then(trackResponse)
 
+          next =>
             # See that only a single network request was triggered
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(responses).toEqual([])
@@ -433,7 +438,7 @@ describe 'up.proxy', ->
             # Send another request after another 3 minutes
             # The clock is now a total of 6 minutes after the first request,
             # exceeding the cache's retention time of 5 minutes.
-            up.request(url: '/foo').then(trackResponse)
+            up.request(url: '/foo', cache: true).then(trackResponse)
 
             # See that we have triggered a second request
             expect(jasmine.Ajax.requests.count()).toEqual(2)
@@ -446,14 +451,14 @@ describe 'up.proxy', ->
 
         it "does not cache responses if config.cacheExpiry is 0", asyncSpec (next) ->
           up.proxy.config.cacheExpiry = 0
-          next => up.request(url: '/foo')
-          next => up.request(url: '/foo')
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "does not cache responses if config.cacheSize is 0", asyncSpec (next) ->
           up.proxy.config.cacheSize = 0
-          next => up.request(url: '/foo')
-          next => up.request(url: '/foo')
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it 'does not limit the number of cache entries if config.cacheSize is undefined'
@@ -462,50 +467,50 @@ describe 'up.proxy', ->
 
         it 'respects a config.cacheSize setting', asyncSpec (next) ->
           up.proxy.config.cacheSize = 2
-          next => up.request(url: '/foo')
-          next => up.request(url: '/bar')
-          next => up.request(url: '/baz')
-          next => up.request(url: '/foo')
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/bar', cache: true)
+          next => up.request(url: '/baz', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(4)
 
         it "doesn't reuse responses when asked for the same path, but different selectors", asyncSpec (next) ->
-          next => up.request(url: '/path', target: '.a')
-          next => up.request(url: '/path', target: '.b')
+          next => up.request(url: '/path', target: '.a', cache: true)
+          next => up.request(url: '/path', target: '.b', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "doesn't reuse responses when asked for the same path, but different params", asyncSpec (next) ->
-          next => up.request(url: '/path', params: { query: 'foo' })
-          next => up.request(url: '/path', params: { query: 'bar' })
+          next => up.request(url: '/path', params: { query: 'foo' }, cache: true)
+          next => up.request(url: '/path', params: { query: 'bar' }, cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
-          next => up.request(url: '/path', target: 'html')
-          next => up.request(url: '/path', target: 'body')
-          next => up.request(url: '/path', target: 'p')
-          next => up.request(url: '/path', target: '.klass')
+          next => up.request(url: '/path', target: 'html', cache: true)
+          next => up.request(url: '/path', target: 'body', cache: true)
+          next => up.request(url: '/path', target: 'p', cache: true)
+          next => up.request(url: '/path', target: '.klass', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", asyncSpec (next) ->
-          next => up.request(url: '/path', target: 'body')
-          next => up.request(url: '/path', target: 'p')
-          next => up.request(url: '/path', target: '.klass')
+          next => up.request(url: '/path', target: 'body', cache: true)
+          next => up.request(url: '/path', target: 'p', cache: true)
+          next => up.request(url: '/path', target: '.klass', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", asyncSpec (next) ->
-          next => up.request(url: '/path', target: 'body')
-          next => up.request(url: '/path', target: 'html')
+          next => up.request(url: '/path', target: 'body', cache: true)
+          next => up.request(url: '/path', target: 'html', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "doesn't reuse responses for different paths", asyncSpec (next) ->
-          next => up.request(url: '/foo')
-          next => up.request(url: '/bar')
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/bar', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         u.each ['GET', 'HEAD', 'OPTIONS'], (method) ->
 
           it "caches #{method} requests", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: method)
-            next => up.request(url: '/foo', method: method)
+            next => up.request(url: '/foo', method: method, cache: true)
+            next => up.request(url: '/foo', method: method, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           it "does not cache #{method} requests with { cache: false }", asyncSpec (next) ->
@@ -516,14 +521,14 @@ describe 'up.proxy', ->
         u.each ['POST', 'PUT', 'DELETE'], (method) ->
 
           it "does not cache #{method} requests", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: method)
-            next => up.request(url: '/foo', method: method)
+            next => up.request(url: '/foo', method: method, cache: true)
+            next => up.request(url: '/foo', method: method, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it 'does not cache responses with a non-200 status code', asyncSpec (next) ->
-          next => up.request(url: '/foo')
+          next => up.request(url: '/foo', cache: true)
           next => @respondWith(status: 500, contentType: 'text/html', responseText: 'foo')
-          next => up.request(url: '/foo')
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
       describe 'with config.wrapMethods set', ->
@@ -705,7 +710,7 @@ describe 'up.proxy', ->
 
           next =>
             # The same request with preloading does trigger up:proxy:slow.
-            up.request(url: '/foo')
+            up.request(url: '/foo', cache: true)
 
           next.after 10, =>
             expect(@events).toEqual([
@@ -909,7 +914,7 @@ describe 'up.proxy', ->
     describe 'up.proxy.cache.get()', ->
 
       it 'returns an existing cache entry for the given request', ->
-        promise1 = up.request(url: '/foo', params: { key: 'value' })
+        promise1 = up.request(url: '/foo', params: { key: 'value' }, cache: true)
         promise2 = up.proxy.cache.get(url: '/foo', params: { key: 'value' })
         expect(promise1).toBe(promise2)
 
@@ -920,7 +925,7 @@ describe 'up.proxy', ->
       describeCapability 'canInspectFormData', ->
 
         it "returns undefined if the given request's { params } is a FormData object", ->
-          promise = up.proxy.cache.get(url: '/foo', params: new FormData())
+          promise = up.proxy.cache.get(url: '/foo', params: new FormData(), cache: true)
           expect(promise).toBeUndefined()
 
     describe 'up.proxy.cache.set()', ->
