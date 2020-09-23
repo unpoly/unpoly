@@ -461,12 +461,6 @@ describe 'up.viewport', ->
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
 
-      it 'reveals an element with an [up-id] attribute matching the given #hash', asyncSpec (next) ->
-        revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-        $match = $fixture('div[up-id="hash"]')
-        up.viewport.revealHash('#hash')
-        next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
-
       it 'does nothing and returns a fulfilled promise if no element or anchor matches the given #hash', (done) ->
         revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
         promise = up.viewport.revealHash('#hash')

@@ -770,10 +770,6 @@ up.viewport = do ->
   firstHashTarget = (hash, options = {}) ->
     if hash = pureHash(hash)
       selector = [
-        # First match an <* up-id="hash">. This won't be picked up without JS,
-        # preventing the scroll position from jump if up.viewport.revealPadding
-        # is set.
-        e.attributeSelector('up-id', hash),
         # Match an <* id="hash">
         e.attributeSelector('id', hash),
         # Match an <a name="hash">
