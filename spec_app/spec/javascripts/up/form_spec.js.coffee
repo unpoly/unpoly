@@ -1142,6 +1142,30 @@ describe 'up.form', ->
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
+      it 'uses a target given as [up-validate] attribute value for all validations', asyncSpec (next) ->
+        container = fixture('.container')
+        container.innerHTML = """
+          <form action="/users" id="registration" up-validate='.result'>
+
+            <div up-fieldset>
+              <input name="email">
+            </div>
+
+            <div class="result">
+              Validation resutls will appear here
+            </div>
+
+          </form>
+        """
+        up.hello(container)
+
+        Trigger.change container.querySelector('input[name=email]')
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(@lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
+
     describe '[up-switch]', ->
 
       describe 'on a select', ->

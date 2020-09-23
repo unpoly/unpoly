@@ -77,16 +77,17 @@ up.form = do ->
   findFields = (root) ->
     root = e.get(root) # unwrap jQuery
     fields = e.subtree(root, fieldSelector())
+
+    # If findFields() is called with an entire form, gather fields outside the form
+    # element that are associated with the form (through <input form="id-of-form">, which
+    # is an HTML feature.)
     if e.matches(root, 'form[id]')
       outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.id))
       outsideFields = e.all(outsideFieldSelector)
       fields.push(outsideFields...)
       fields = u.uniq(fields)
-    fields
 
-#  findFields = (rootOrRoots) ->
-#    rootOrRoots = e.list(rootOrRoots)
-#    u.flatMap rootOrRoots, (root) -> e.subtree(root, fieldSelector())
+    fields
 
   ###***
   @function up.form.submissionFields
@@ -351,9 +352,11 @@ up.form = do ->
     observe(target, options, -> submit(target))
 
   findValidateTarget = (element, options) ->
+    container = closestContainer(element)
+
     if u.isElementish(options.target)
       return up.fragment.toTarget(options.target)
-    else if givenTarget = options.target ? element.getAttribute('up-validate')
+    else if givenTarget = options.target || element.getAttribute('up-validate') || container.getAttribute('up-validate')
       return givenTarget
     else if e.matches(element, 'form')
       # If element is the form, we cannot find a better validate target than this.
@@ -509,7 +512,7 @@ up.form = do ->
     return switcher or up.fail('Could not find [up-switch] field for %o', target)
 
   closestContainer = (element) ->
-    e.closest(element, 'form, body')
+    e.closest(element, "form, #{up.layer.anySelector()}")
 
   focusedField = ->
     if (element = document.activeElement) && e.matches(element, fieldSelector())
@@ -805,9 +808,15 @@ up.form = do ->
   [`up.form.config.validateTargets`](/up.form.config#config.validateTargets) array.
 
   @selector form[up-validate]
+  @param {string} up-validate
+    The CSS selector to update with the server response.
+
+    This defaults to a fieldset or form group around the changing field.
   @stable
   ###
   up.on 'change', '[up-validate]', (event) ->
+    # Even though [up-validate] may be used on either an entire form or an individual input,
+    # the change event will trigger on a given field.
     field = findFields(event.target)[0]
     up.log.muteRejection validate(field)
 
