@@ -222,7 +222,6 @@ up.form = do ->
     form = e.closest(form, 'form')
 
     parser = new up.OptionsParser(options, form)
-    parser.boolean('navigate', default: true)  # macro
 
     parser.string('url', attr: ['up-action', 'action'], default: up.fragment.source(form))
     parser.string('method', attr: ['up-method', 'data-method', 'method'], default: 'POST', normalize: u.normalizeMethod)
@@ -234,7 +233,6 @@ up.form = do ->
       options.url = up.Params.stripURL(options.url)
 
     parser.string('failTarget', default: up.fragment.toTarget(form))
-    parser.booleanOrString('failScroll', default: 'target') if options.navigate
 
     # Take params from form, but allow to pass additional params as { params }
     options.params = up.Params.fromForm(form).addAll(options.params)

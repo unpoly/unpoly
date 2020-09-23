@@ -49,7 +49,7 @@ describe 'up.history', ->
     describe 'back button', ->
 
       it 'calls destructor functions when destroying compiled elements (bugfix)', asyncSpec (next) ->
-        waitForBrowser = 70
+        waitForBrowser = 100
 
         # By default, up.history will replace the <body> tag when
         # the user presses the back-button. We reconfigure this

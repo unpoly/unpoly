@@ -517,86 +517,89 @@ describe 'up.form', ->
             next => @respondWith('<div class="response">new-text</div>')
             next =>expect(up.history.location).toEqual(@locationBeforeExample)
 
-        describe 'revealing', ->
+        describe 'with { scroll } option', ->
 
-          it 'reveals the form if the submission fails', asyncSpec (next) ->
-            $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
+          it 'reveals the given selector', asyncSpec (next) ->
+            $form = $fixture('form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
+            $other = $fixture('.other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.submit($form)
+            up.submit($form, scroll: '.other')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  new text
+                </div>
+                <div class="other">
+                  new other
+                </div>
+              """
+
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
+
+          it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
+            $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
+
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+
+            up.submit($form, scroll: '& .form-child')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  new text
+                </div>
+
+                <form id="foo-form">
+                  <div class="form-child">other</div>
+                </form>
+              """
+
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
+
+        describe 'with { failScroll } option', ->
+
+          it 'reveals the given selector for a failed submission', asyncSpec (next) ->
+            $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
+            $target = $fixture('.target')
+            $other = $fixture('.other')
+
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+
+            up.submit($form, reveal: '.other', failScroll: '.error')
 
             next =>
               @respondWith
                 status: 500,
                 responseText: """
                   <form id="foo-form">
-                    Errors here
+                    <div class="error">Errors here</div>
                   </form>
                   """
 
             next =>
               expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('#foo-form')
+              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
 
+          it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
+            $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
+            $target = $fixture('.target')
 
-          describe 'with { scroll } option', ->
+            revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            it 'reveals the given selector', asyncSpec (next) ->
-              $form = $fixture('form[action="/action"][up-target=".target"]')
-              $target = $fixture('.target')
-              $other = $fixture('.other')
+            up.submit($form, failScroll: '& .form-child')
 
-              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-              up.submit($form, scroll: '.other')
-
-              next =>
-                @respondWith """
-                  <div class="target">
-                    new text
-                  </div>
-                  <div class="other">
-                    new other
-                  </div>
-                """
-
-              next =>
-                expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
-
-            it 'still reveals the form for a failed submission', asyncSpec (next) ->
-              $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
-              $target = $fixture('.target')
-              $other = $fixture('.other')
-
-              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-              up.submit($form, scroll: '.other')
-
-              next =>
-                @respondWith
-                  status: 500,
-                  responseText: """
-                    <form id="foo-form">
-                      Errors here
-                    </form>
-                    """
-
-              next =>
-                expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('#foo-form')
-
-            it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
-              $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
-
-              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-              up.submit($form, scroll: '& .form-child')
-
-              next =>
-                @respondWith """
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
                   <div class="target">
                     new text
                   </div>
@@ -604,60 +607,11 @@ describe 'up.form', ->
                   <form id="foo-form">
                     <div class="form-child">other</div>
                   </form>
-                """
+                  """
 
-              next =>
-                expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
-
-          describe 'with { failScroll } option', ->
-
-            it 'reveals the given selector for a failed submission', asyncSpec (next) ->
-              $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
-              $target = $fixture('.target')
-              $other = $fixture('.other')
-
-              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-              up.submit($form, reveal: '.other', failScroll: '.error')
-
-              next =>
-                @respondWith
-                  status: 500,
-                  responseText: """
-                    <form id="foo-form">
-                      <div class="error">Errors here</div>
-                    </form>
-                    """
-
-              next =>
-                expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
-
-            it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
-              $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
-              $target = $fixture('.target')
-
-              revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-
-              up.submit($form, failScroll: '& .form-child')
-
-              next =>
-                @respondWith
-                  status: 500
-                  responseText: """
-                    <div class="target">
-                      new text
-                    </div>
-
-                    <form id="foo-form">
-                      <div class="form-child">other</div>
-                    </form>
-                    """
-
-              next =>
-                expect(revealStub).toHaveBeenCalled()
-                expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
+            next =>
+              expect(revealStub).toHaveBeenCalled()
+              expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
 
         describe 'in a form with file inputs', ->
 
