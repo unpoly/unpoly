@@ -10,12 +10,16 @@ TODOs
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
-- Do we really want failReveal = true in up.submit()?
 - Fix up-guide
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
-- Selector is ignored in form[up-valid=".custom-selector"]
+- Clear cache
+  - up.proxy.cache => up.cache
+  - up.cache.clear()
+  - Rails: up.cache.clear()
+    - Sends X-Up-Cache: 'clear'
+    - Clears the cache after the response was received
 - Close issues.
 
 
@@ -276,6 +280,8 @@ Docs
 Later?
 ------
 
+- Rename up.request() to up.fetch()
+  - Rename the entire up.proxy module to up.request
 - { history: 'force' } (render history in layers that prevent it)
 - Can we offer up.idle?
   - No animations running
