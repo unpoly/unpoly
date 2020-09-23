@@ -1,6 +1,9 @@
 TODOs
 -----
 
+- Rename up.request() to up.request.queue() vs. up.request.load()
+  - Rename the entire up.proxy module to up.request
+  - This also means renaming all the events
 - Test { scroll: "auto" }
   - hash
   - mains
@@ -280,8 +283,6 @@ Docs
 Later?
 ------
 
-- Rename up.request() to up.fetch()
-  - Rename the entire up.proxy module to up.request
 - { history: 'force' } (render history in layers that prevent it)
 - Can we offer up.idle?
   - No animations running
