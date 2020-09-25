@@ -1,9 +1,7 @@
 TODOs
 -----
 
-- Rename up.request() to up.request.queue() vs. up.request.load()
-  - Rename the entire up.proxy module to up.request
-  - This also means renaming all the events
+- The current implementation of up:fragment:loaded is not helping the Laravel people with their JSON response. https://github.com/webstronauts/php-unpoly/issues/2
 - Test { scroll: "auto" }
   - hash
   - mains
@@ -23,6 +21,9 @@ TODOs
   - Rails: up.cache.clear()
     - Sends X-Up-Cache: 'clear'
     - Clears the cache after the response was received
+- Rename up.request() to up.request.queue() vs. up.request.load()
+  - Rename the entire up.proxy module to up.request
+  - This also means renaming all the events
 - Close issues.
 
 
