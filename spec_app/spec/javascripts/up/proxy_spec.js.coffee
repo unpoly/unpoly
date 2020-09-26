@@ -911,32 +911,32 @@ describe 'up.proxy', ->
           next =>
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
-    describe 'up.proxy.cache.get()', ->
+    describe 'up.cache.get()', ->
 
       it 'returns an existing cache entry for the given request', ->
         promise1 = up.request(url: '/foo', params: { key: 'value' }, cache: true)
-        promise2 = up.proxy.cache.get(url: '/foo', params: { key: 'value' })
+        promise2 = up.cache.get(url: '/foo', params: { key: 'value' })
         expect(promise1).toBe(promise2)
 
       it 'returns undefined if the given request is not cached', ->
-        promise = up.proxy.cache.get(url: '/foo', params: { key: 'value' })
+        promise = up.cache.get(url: '/foo', params: { key: 'value' })
         expect(promise).toBeUndefined()
 
       describeCapability 'canInspectFormData', ->
 
         it "returns undefined if the given request's { params } is a FormData object", ->
-          promise = up.proxy.cache.get(url: '/foo', params: new FormData(), cache: true)
+          promise = up.cache.get(url: '/foo', params: new FormData(), cache: true)
           expect(promise).toBeUndefined()
 
-    describe 'up.proxy.cache.set()', ->
+    describe 'up.cache.set()', ->
 
       it 'should have tests'
 
-    describe 'up.proxy.cache.alias()', ->
+    describe 'up.cache.alias()', ->
 
       it 'uses an existing cache entry for another request (used in case of redirects)'
 
-    describe 'up.proxy.cache.remove()', ->
+    describe 'up.cache.remove()', ->
 
       it 'removes the cache entry for the given request'
 
@@ -945,9 +945,14 @@ describe 'up.proxy', ->
       describeCapability 'canInspectFormData', ->
 
         it 'does not crash when passed a request with FormData (bugfix)', ->
-          removal = -> up.proxy.cache.remove(url: '/path', params: new FormData())
+          removal = -> up.cache.remove(url: '/path', params: new FormData())
           expect(removal).not.toThrowError()
 
-    describe 'up.proxy.clear', ->
+    describe 'up.cache.clear', ->
 
-      it 'removes all cache entries'
+      it 'removes all cache entries', ->
+        promise = up.request(url: '/foo', cache: true)
+        expect(up.cache.get(url: '/foo')).toBe(promise)
+        up.cache.clear()
+        expect(up.cache.get(url: '/foo')).toBeUndefined()
+

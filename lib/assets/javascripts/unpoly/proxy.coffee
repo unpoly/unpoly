@@ -12,7 +12,7 @@ All Unpoly functions and selectors go through this cache, unless
 you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
 
 The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
-[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.proxy.cache.clear()`](/up.proxy.cache.clear).
+[`up.proxy.config`](/up.proxy.config), or clear the cache manually using [`up.cache.clear()`](/up.cache.clear).
 
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
@@ -133,7 +133,7 @@ up.proxy = do ->
 
   Returns `undefined` if the given request is not currently cached.
 
-  @function up.proxy.cache.get
+  @function up.cache.get
   @return {Promise<up.Response>}
     A promise for the response.
   @experimental
@@ -146,7 +146,7 @@ up.proxy = do ->
   a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `POST`.
 
-  @function up.proxy.cache.clear
+  @function up.cache.clear
   @stable
   ###
 
@@ -157,7 +157,7 @@ up.proxy = do ->
   Unpoly uses this internally when the user redirects from `/old` to `/new`.
   In that case, both `/old` and `/new` will cache the same response from `/new`.
 
-  @function up.proxy.cache.alias
+  @function up.cache.alias
   @param {Object} oldRequest
   @param {Object} newRequest
   @experimental
@@ -168,7 +168,7 @@ up.proxy = do ->
 
   Manually stores a promise for the response to the given request.
 
-  @function up.proxy.cache.set
+  @function up.cache.set
   @param {string} request.url
   @param {string} [request.method='GET']
   @param {string} [request.target='body']
@@ -183,7 +183,7 @@ up.proxy = do ->
   You can also [configure](/up.proxy.config) when the proxy
   automatically removes cache entries.
 
-  @function up.proxy.cache.remove
+  @function up.cache.remove
   @param {string} request.url
   @param {string} [request.method='GET']
   @param {string} [request.target='body']
@@ -517,7 +517,7 @@ up.proxy = do ->
   request: makeRequest
   cache: cache
   clear: ->
-    up.legacy.deprecated('up.proxy.clear()', 'up.proxy.cache.clear()')
+    up.legacy.deprecated('up.proxy.clear()', 'up.cache.clear()')
     return cache.clear()
   isIdle: isIdle
   isBusy: isBusy
@@ -531,3 +531,4 @@ up.proxy = do ->
 
 up.ajax = up.proxy.ajax
 up.request = up.proxy.request
+up.cache = up.proxy.cache

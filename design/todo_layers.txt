@@ -21,8 +21,8 @@ TODOs
   - Rails: up.cache.clear()
     - Sends X-Up-Cache: 'clear'
     - Clears the cache after the response was received
-- Rename up.request() to up.request.queue() vs. up.request.load()
-  - Rename the entire up.proxy module to up.request
+- Rename the entire up.proxy module to up.request
+  - Rename up.request() to up.request.fetch() (alias up.fetch())
   - This also means renaming all the events
 - Close issues.
 
