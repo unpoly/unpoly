@@ -35,7 +35,6 @@ class up.FragmentScrolling
     @scrollOptions = u.pick(options, ['revealTop', 'revealMax', 'revealSnap', 'scrollBehavior'])
 
   process: (scrollOpt) ->
-    console.log("--- Scrolling %o with %o", @fragment, scrollOpt)
     # @tryProcess() returns undefined if an option cannot be applied.
     # @process() returns a resolved promise if no option cannot be applied,
     # satisfying our external signature as async method.

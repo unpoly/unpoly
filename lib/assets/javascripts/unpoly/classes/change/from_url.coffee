@@ -8,8 +8,6 @@ class up.Change.FromURL extends up.Change
     super(@successOptions)
     @failOptions = up.RenderOptions.deriveFailOptions(@successOptions)
 
-    console.log("FromURL: success is %o, fail is %o", @successOptions, @failOptions)
-
   execute: ->
     unless up.browser.canPushState()
       @fullLoad() unless @successOptions.preload

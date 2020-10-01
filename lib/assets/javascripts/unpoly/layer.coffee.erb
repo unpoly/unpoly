@@ -149,7 +149,6 @@ up.layer = do ->
     Class = config[mode].Class
     configs = u.reverse(modeConfigs(mode))
     options = u.mergeDefined(configs..., { mode, stack }, options)
-    console.debug("--- building layer with options %o", options)
     return new Class(options)
 
 #  modeClass = (options = {}) ->

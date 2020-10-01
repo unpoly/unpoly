@@ -13,7 +13,6 @@ class up.FragmentFocus
     @focusCapsule = options.focusCapsule
 
   process: (focusOpt) ->
-    console.log("--- Focusing %o with %o", @fragment, focusOpt)
     switch focusOpt
       when 'keep'
         return @restoreFocus(@focusCapsule)

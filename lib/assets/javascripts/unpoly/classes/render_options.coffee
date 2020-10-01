@@ -101,16 +101,7 @@ up.RenderOptions = do ->
       options.history = 'auto'
 
   preprocess = (options) ->
-    console.debug("--- preprocessing %o", u.copy(options))
-
     fixLegacyHistoryOption(options)
-
-    console.debug("----- will merge %o", [
-      u.copy(GLOBAL_DEFAULTS),
-      u.copy(navigateDefaults(options)),
-      u.copy(options),
-      u.copy(preloadOverrides(options))
-    ])
 
     result = u.merge(
       GLOBAL_DEFAULTS,
