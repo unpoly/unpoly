@@ -110,6 +110,47 @@ describe 'up.proxy', ->
           expect(headers['X-Requested-With']).toBeMissing()
           done()
 
+      describe 'setting meta attributes', ->
+
+        it 'allows to quickly construct a cachable up.Request by passing { layer, failLayer } options', asyncSpec (next) ->
+          makeLayers [
+            { mode: 'root', context: { rootKey: 'rootValue' }}
+            { mode: 'popup', context: { popupKey: 'popupValue' }}
+          ]
+
+          next =>
+            request = up.request({ url: '/foo', layer: 'root', failLayer: 'front' })
+            expect(request.mode).toEqual('root')
+            expect(request.failMode).toEqual('popup')
+            expect(request.context).toEqual({ rootKey: 'rootValue' })
+            expect(request.failContext).toEqual({ popupKey: 'popupValue' })
+
+        it 'allows to quickly construct a cachable up.Request by passing an { origin } option', asyncSpec (next) ->
+          makeLayers [
+            { mode: 'root', context: { rootKey: 'rootValue' }}
+            { mode: 'popup', context: { popupKey: 'popupValue' }}
+          ]
+
+          next =>
+            request = up.request({ url: '/foo', origin: up.layer.front.element })
+            expect(request.mode).toEqual('popup')
+            expect(request.failMode).toEqual('popup')
+            expect(request.context).toEqual({ popupKey: 'popupValue' })
+            expect(request.failContext).toEqual({ popupKey: 'popupValue' })
+
+        it 'assumes the current layer if neither { layer, failLayer, origin} are given', asyncSpec (next) ->
+          makeLayers [
+            { mode: 'root', context: { rootKey: 'rootValue' }}
+            { mode: 'popup', context: { popupKey: 'popupValue' }}
+          ]
+
+          next =>
+            request = up.request({ url: '/foo' })
+            expect(request.mode).toEqual('popup')
+            expect(request.failMode).toEqual('popup')
+            expect(request.context).toEqual({ popupKey: 'popupValue' })
+            expect(request.failContext).toEqual({ popupKey: 'popupValue' })
+
       describe 'error handling', ->
 
         it 'rejects with up.Failed when there was a network error', (done) ->
@@ -540,6 +581,32 @@ describe 'up.proxy', ->
           next => @respondWith(status: 500, contentType: 'text/html', responseText: 'foo')
           next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+        it 'clears the cache if the server responds with an X-Up-Cache: clear header', asyncSpec (next) ->
+          up.request(url: '/foo', cache: true)
+          up.request(url: '/bar', cache: true)
+          expect(url: '/foo').toBeCached()
+          expect(url: '/bar').toBeCached()
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+            jasmine.Ajax.requests.at(0).respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: 'foo'
+              responseHeaders: { 'X-Up-Cache': 'clear' }
+
+          next ->
+            expect(url: '/foo').not.toBeCached()
+            expect(url: '/bar').not.toBeCached()
+
+        it 'clears the cache when passed { cache: "clear" }', ->
+          up.request(url: '/foo', cache: true)
+          expect(url: '/foo').toBeCached()
+
+          up.request(url: '/bar', cache: 'clear')
+          expect(url: '/foo').not.toBeCached()
 
       describe 'with config.wrapMethods set', ->
 

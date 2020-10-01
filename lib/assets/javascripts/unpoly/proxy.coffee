@@ -84,7 +84,7 @@ up.proxy = do ->
     [preloading](/up.link.preload). To improve cacheability, you may configure a function that returns
     fewer fields.
 
-    By default the following properties are sent to the reserver:
+    By default the following properties are sent to the server:
 
     - [`up.Request.prototype.target`](/up.Request.prototype.target)
     - [`up.Request.prototype.failTarget`](/up.Request.prototype.failTarget)
@@ -102,11 +102,10 @@ up.proxy = do ->
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
     preloadQueueSize: 5
-    preloadEnabled: 'auto'
+    preloadEnabled: 'auto' # true | false | 'auto'
     preloadTimeout: 10 * 1000
     preloadMaxResponseTime: 850
-    preloadSampleSize: 3      # set to 0 to prevent sampling
-
+    preloadSampleSize: 3 # set to 0 to prevent sampling, but still look at connection type and data saving setting
     requestMetaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
@@ -253,18 +252,18 @@ up.proxy = do ->
   ###
   makeRequest = (args...) ->
     request = up.Request.wrap(args...)
+    return useCachedRequest(request) || queueRequest(request)
 
-    if request.preload
-      request.timeout ?= config.preloadTimeout
-      request.cache = true
+  useCachedRequest = (request) ->
+    if !request.isSafe() || request.cache == 'clear'
+      # We clear the entire cache before an unsafe request, since we
+      # assume the user is writing a change.
+      cache.clear()
+      return
 
-    # We clear the entire cache before an unsafe request, since we
-    # assume the user is writing a change.
-    cache.clear() unless request.isSafe()
-
-    # If we have an existing promise matching this new request,
-    # we use it unless `request.cache` is explicitly set to `false`.
-    if request.cache && (cachedRequest = cache.get(request))
+    if request.isSafe() && request.cache && (cachedRequest = cache.get(request))
+      # If we have an existing promise matching this new request,
+      # we use it unless `request.cache` is explicitly set to `false`.
       up.puts('up.request()', 'Re-using cached response for %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
@@ -280,21 +279,26 @@ up.proxy = do ->
       unless request.preload
         queue.promoteToForeground(cachedRequest)
 
-      request = cachedRequest
-    else
-      # If no existing promise is available, we make a network request.
+      return cachedRequest
 
-      if request.cache
-        # Cache the request for calls for calls with the same URL, method, params
-        # and target. See up.Request#cacheKey().
-        cache.set(request, request)
+  queueRequest = (request) ->
+    # If no existing promise is available, we queue a network request.
 
-        # Immediately uncache failed requests.
-        # We have no control over the server, and another request with the
-        # same properties might succeed.
-        request.catch -> cache.remove(request)
+    if request.cache
+      # Cache the request for calls for calls with the same URL, method, params
+      # and target. See up.Request#cacheKey().
+      cache.set(request, request)
 
-      queue.asap(request)
+      # Immediately uncache failed requests.
+      # We have no control over the server, and another request with the
+      # same properties might succeed.
+      request.catch -> cache.remove(request)
+
+    u.always request, (response) ->
+      if response.getHeader?('X-Up-Cache') == 'clear'
+        cache.clear()
+
+    queue.asap(request)
 
     # The request is also a promise for its response.
     return request

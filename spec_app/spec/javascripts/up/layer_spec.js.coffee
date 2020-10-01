@@ -839,6 +839,14 @@ describe 'up.layer', ->
           next ->
             expect(up.layer.get(2)).toBeMissing()
 
+      describe 'for undefined', ->
+
+        it 'returns the current layer', asyncSpec (next) ->
+          makeLayers(2)
+
+          next ->
+            expect(up.layer.get(undefined)).toBe(up.layer.front)
+
     describe 'up.layer.stack', ->
 
       it 'returns an array-like object of all layers, starting with the root layer, for easy access to the entire stack', (done) ->

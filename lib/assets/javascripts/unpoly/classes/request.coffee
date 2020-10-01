@@ -110,16 +110,18 @@ class up.Request extends up.Record
       'preload' # since up.proxy.request() options are sometimes wrapped in this class
       'tentative',
       'cache',  # since up.proxy.request() options are sometimes wrapped in this class
+
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
       # Note that when opening a new layer, this { layer } attribute will be the set to
       # the current layer. The { mode } and { failMode } attributes will belong to the
       # new layer being opened.
       'layer',
-      'mode',
-      'failMode',
-      'context',
-      'failContext',
+      'mode',        # we would love to delegate @mode to @layer.mode, but @layer might be the string "new"
+      'context',     # we would love to delegate @context to @layer.context, but @layer might be string "new"
+      'failLayer',
+      'failMode',    # we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
+      'failContext', # we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
       'solo',
       'queueTime',
@@ -154,23 +156,29 @@ class up.Request extends up.Record
 
     @normalize()
 
+    if @preload
+      @timeout ?= up.proxy.config.preloadTimeout
+      @cache = true
+
     @aborted = false
     @headers ||= {}
     @preload = !!@preload
+
+    # By default preload requests will be aborted to make space in an exhausted
+    # queue. Users may prevent this to be canceled by passing { tentative: false }.
     @tentative ?= @preload
 
-    if @origin
-      @layer ||= up.layer.get(@origin)
+    # Help users programmatically build a request that will match an existing cache key.
+    @layer = up.layer.get(@layer || @origin) # If @origin is undefined, this will choose the current layer.
+    @failLayer = up.layer.get(@failLayer || @layer)
+    @context ||= @layer.context || {} # @layer might be "new", so we default to {}
+    @failContext ||= @failLayer.context || {} # @failLayer might be "new", so we default to {}
+    @mode ||= @layer.mode
+    @failMode ||= @failLayer.mode
 
-    # Make sure @context is always an object, even if no @layer is given.
-    # Note that @context is a part of our @cacheKey(), since different contexts
-    # might yield different server responses.
-    @context ||= @layer?.context || {}
-    @failContext ||= {}
-
-    @mode ||= @layer?.mode || 'root'
-    @failMode ||= @layer?.mode || 'root'
-
+    # This up.Request object is also promise for its up.Response.
+    # We delegate all promise-related methods (then, catch, finally) to an internal
+    # deferred object.
     @deferred = u.newDeferred()
 
     @finally => @evictExpensiveAttrs()
@@ -194,6 +202,7 @@ class up.Request extends up.Record
       # prevent the layer DOM tree from garbage collection while the response
       # is cached by up.proxy.
       @layer = undefined
+      @failLayer = undefined
 
       # We want to provide the triggering element as { origin } to the function
       # providing the CSRF function. We now evict this property, since

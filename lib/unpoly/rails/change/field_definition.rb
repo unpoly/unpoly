@@ -11,24 +11,24 @@ module Unpoly
 
         module ClassMethods
 
-          def field(name, type)
+          def field(name, type, method: name)
             field = type.new(name)
 
-            define_method "#{name}_field" do
+            define_method "#{method}_field" do
               field
             end
 
-            define_method "#{name}_from_request_headers" do
+            define_method "#{method}_from_request_headers" do
               raw_value = request.headers[field.header_name]
               field.parse(raw_value)
             end
 
-            define_method "#{name}_param_name" do
+            define_method "#{method}_param_name" do
               field.param_name
             end
 
-            define_method "serialized_#{name}" do
-              value = send(name)
+            define_method "serialized_#{method}" do
+              value = send(method)
               field.stringify(value)
             end
 
@@ -37,21 +37,21 @@ module Unpoly
             #   field.parse(raw_value)
             # end
 
-            define_method "#{name}_from_params" do
+            define_method "#{method}_from_params" do
               raw_value = params[field.param_name]
               field.parse(raw_value)
             end
 
-            define_method "#{name}_from_request" do
-              value = send("#{name}_from_request_headers")
+            define_method "#{method}_from_request" do
+              value = send("#{method}_from_request_headers")
               if value.nil?
-                value = send("#{name}_from_params")
+                value = send("#{method}_from_params")
               end
               value
             end
 
-            define_method "write_#{name}_to_response_headers" do
-              value = send(name)
+            define_method "write_#{method}_to_response_headers" do
+              value = send(method)
               response.headers[field.header_name] = field.stringify(value)
             end
           end

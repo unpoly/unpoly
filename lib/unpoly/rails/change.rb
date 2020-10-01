@@ -24,6 +24,7 @@ module Unpoly
       field :context_changed, Field::Boolean
       field :fail_context, Field::Hash
       field :events, Field::Array
+      field :cache, Field::String, method: :cache_command
 
       ##
       # Returns whether the current request is an
@@ -160,7 +161,7 @@ module Unpoly
       alias :context_changed? :context_changed
 
       ##
-      # TODO: DOcs
+      # TODO: Docs
       memoize def fail_context
         # The protocol currently allow users to change the fail_context.
         fail_context_from_request.freeze
@@ -205,6 +206,7 @@ module Unpoly
         if context_changed?
           write_context_to_response_headers
         end
+        write_cache_command_to_response_headers
       end
 
       def url_with_field_values(url)
@@ -237,6 +239,20 @@ module Unpoly
 
       memoize def fail_layer
         Layer.new(self, mode: fail_mode, context: fail_context)
+      end
+
+      memoize def cache
+        Cache.new(self)
+      end
+
+      def cache_command
+        # Cache commands are outgoing only. They wouldn't be passed as a request header.
+        # We might however pass them as params so they can survive a redirect.
+        @cache_command || cache_command_from_params
+      end
+
+      def cache_command=(value)
+        @cache_command = value
       end
 
       private
@@ -283,8 +299,11 @@ module Unpoly
         params[context_changed_param_name] = serialized_context_changed
         params[fail_context_param_name]    = serialized_fail_context
         params[events_param_name]          = serialized_events
+        params[cache_command_param_name]   = serialized_cache_command
 
+        # Don't send empty response headers.
         params = params.select { |_key, value| value.present? }
+
         params
       end
 

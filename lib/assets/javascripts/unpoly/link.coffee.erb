@@ -175,7 +175,7 @@ up.link = do ->
     options.method = followMethod(link, options)    # preflight / same
     parser.json('headers')       # preflight / same
     parser.json('params')        # preflight / same
-    parser.boolean('cache')      # preflight / same
+    parser.booleanOrString('cache')      # preflight / same
     parser.boolean('solo')       # preflight / same
     parser.boolean('tentative')  # preflight / same
 
