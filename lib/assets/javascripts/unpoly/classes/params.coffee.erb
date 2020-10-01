@@ -21,7 +21,7 @@ The following types of parameter representation are supported:
 
 @class up.Params
 ###
-class up.Params
+class up.Params extends up.Class
 
   ###**
   Constructs a new `up.Params` instance.
@@ -559,6 +559,5 @@ class up.Params
   @function up.Params.wrap
   @param {Object|Array|string|up.Params|undefined} params
   @return {up.Params}
+  @experimental
   ###
-  @wrap: (value) ->
-    u.wrapValue(this, value)

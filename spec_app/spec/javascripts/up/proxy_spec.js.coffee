@@ -914,19 +914,12 @@ describe 'up.proxy', ->
     describe 'up.cache.get()', ->
 
       it 'returns an existing cache entry for the given request', ->
-        promise1 = up.request(url: '/foo', params: { key: 'value' }, cache: true)
-        promise2 = up.cache.get(url: '/foo', params: { key: 'value' })
-        expect(promise1).toBe(promise2)
+        requestAttrs = { url: '/foo', params: { key: 'value' }, cache: true }
+        up.request(requestAttrs)
+        expect(requestAttrs).toBeCached()
 
       it 'returns undefined if the given request is not cached', ->
-        promise = up.cache.get(url: '/foo', params: { key: 'value' })
-        expect(promise).toBeUndefined()
-
-      describeCapability 'canInspectFormData', ->
-
-        it "returns undefined if the given request's { params } is a FormData object", ->
-          promise = up.cache.get(url: '/foo', params: new FormData(), cache: true)
-          expect(promise).toBeUndefined()
+        expect(url: '/foo').not.toBeCached()
 
     describe 'up.cache.set()', ->
 
@@ -934,7 +927,15 @@ describe 'up.proxy', ->
 
     describe 'up.cache.alias()', ->
 
-      it 'uses an existing cache entry for another request (used in case of redirects)'
+      it 'uses an existing cache entry for another request (used in case of redirects)', ->
+        up.request({ url: '/foo', cache: true })
+        expect({ url: '/foo' }).toBeCached()
+        expect({ url: '/bar' }).not.toBeCached()
+
+        up.cache.alias({ url: '/foo' }, { url: '/bar' })
+
+        expect({ url: '/bar' }).toBeCached()
+        expect(up.cache.get({ url: '/bar' })).toBe(up.cache.get({ url: '/foo' }))
 
     describe 'up.cache.remove()', ->
 
@@ -942,17 +943,11 @@ describe 'up.proxy', ->
 
       it 'does nothing if the given request is not cached'
 
-      describeCapability 'canInspectFormData', ->
-
-        it 'does not crash when passed a request with FormData (bugfix)', ->
-          removal = -> up.cache.remove(url: '/path', params: new FormData())
-          expect(removal).not.toThrowError()
-
-    describe 'up.cache.clear', ->
+    describe 'up.cache.clear()', ->
 
       it 'removes all cache entries', ->
-        promise = up.request(url: '/foo', cache: true)
-        expect(up.cache.get(url: '/foo')).toBe(promise)
+        up.request(url: '/foo', cache: true)
+        expect(url: '/foo').toBeCached()
         up.cache.clear()
-        expect(up.cache.get(url: '/foo')).toBeUndefined()
+        expect(url: '/foo').not.toBeCached()
 

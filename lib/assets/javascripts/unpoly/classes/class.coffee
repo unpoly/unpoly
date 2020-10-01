@@ -15,3 +15,6 @@ class up.Class
 #    for key in Object.keys(mixin.prototype)
 #      descriptor = mixin.getOwnPropertyDescriptor(mixin)
 #      Object.defineProperty(@prototype, descritpr)
+
+  @wrap: (args...) ->
+    u.wrapValue(this, args...)

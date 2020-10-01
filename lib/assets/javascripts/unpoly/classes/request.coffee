@@ -349,9 +349,6 @@ class up.Request extends up.Record
         props[key] = value
     props
 
-  @wrap: (args...) ->
-    u.wrapValue(@, args...)
-
   buildEventEmitter: (args) ->
     # We prefer emitting request-related events on the targeted layer.
     # This way listeners can observe event-related events on a given layer.
