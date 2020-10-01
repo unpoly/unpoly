@@ -506,24 +506,34 @@ describe 'up.proxy', ->
           next => up.request(url: '/bar', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        u.each ['GET', 'HEAD', 'OPTIONS'], (method) ->
+        u.each ['GET', 'HEAD', 'OPTIONS'], (safeMethod) ->
 
-          it "caches #{method} requests", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: method, cache: true)
-            next => up.request(url: '/foo', method: method, cache: true)
+          it "caches #{safeMethod} requests", asyncSpec (next) ->
+            next => up.request(url: '/foo', method: safeMethod, cache: true)
+            next => up.request(url: '/foo', method: safeMethod, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          it "does not cache #{method} requests with { cache: false }", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: method, cache: false)
-            next => up.request(url: '/foo', method: method, cache: false)
+          it "does not cache #{safeMethod} requests with { cache: false }", asyncSpec (next) ->
+            next => up.request(url: '/foo', method: safeMethod, cache: false)
+            next => up.request(url: '/foo', method: safeMethod, cache: false)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        u.each ['POST', 'PUT', 'DELETE'], (method) ->
+        u.each ['POST', 'PUT', 'DELETE'], (unsafeMethod) ->
 
-          it "does not cache #{method} requests", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: method, cache: true)
-            next => up.request(url: '/foo', method: method, cache: true)
+          it "does not cache #{unsafeMethod} requests", asyncSpec (next) ->
+            next => up.request(url: '/foo', method: unsafeMethod, cache: true)
+            next => up.request(url: '/foo', method: unsafeMethod, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          it "clears the entire cache if a #{unsafeMethod} request is made", asyncSpec (next) ->
+            safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
+            unsafeRequestAttrs = { method: unsafeMethod, url: '/foo' }
+
+            up.request(safeRequestAttrs)
+            expect(safeRequestAttrs).toBeCached()
+
+            up.request(unsafeRequestAttrs)
+            expect(safeRequestAttrs).not.toBeCached()
 
         it 'does not cache responses with a non-200 status code', asyncSpec (next) ->
           next => up.request(url: '/foo', cache: true)
