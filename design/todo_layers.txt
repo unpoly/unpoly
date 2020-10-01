@@ -24,6 +24,19 @@ TODOs
 - Rename the entire up.proxy module to up.request
   - Rename up.request() to up.request.fetch() (alias up.fetch())
   - This also means renaming all the events
+- Preloading
+  - Offer up.request.preload
+    - This only sets the preload: true option
+    - So it makes sense we have some preload options in up.request
+    - Be careful to forward the old up.proxy.preload to up.link.preload
+    - Document { tentative } option
+  - Document up.link.preload
+    - Document { tentative } option
+- Dismissable-Options are named badly
+  - keyDismissable sounds too much like buttonDismissable
+    - escapeDismissable?
+    - iconDismissable?
+  - outsideDismissable => backgroundDismissable?
 - Close issues.
 
 
