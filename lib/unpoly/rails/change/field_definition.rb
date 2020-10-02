@@ -52,7 +52,10 @@ module Unpoly
 
             define_method "write_#{method}_to_response_headers" do
               value = send(method)
-              response.headers[field.header_name] = field.stringify(value)
+              stringified = field.stringify(value)
+              if stringified.present? # app servers don't like blank header values
+                response.headers[field.header_name] = stringified
+              end
             end
           end
 
