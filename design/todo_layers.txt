@@ -15,12 +15,6 @@ TODOs
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
-- Clear cache
-  - up.proxy.cache => up.cache
-  - up.cache.clear()
-  - Rails: up.cache.clear()
-    - Sends X-Up-Cache: 'clear'
-    - Clears the cache after the response was received
 - Rename the entire up.proxy module to up.request
   - Rename up.request() to up.request.fetch() (alias up.fetch())
   - This also means renaming all the events
@@ -29,14 +23,17 @@ TODOs
     - This only sets the preload: true option
     - So it makes sense we have some preload options in up.request
     - Be careful to forward the old up.proxy.preload to up.link.preload
-    - Document { tentative } option
   - Document up.link.preload
-    - Document { tentative } option
 - Dismissable-Options are named badly
   - keyDismissable sounds too much like buttonDismissable
     - escapeDismissable?
     - iconDismissable?
   - outsideDismissable => backgroundDismissable?
+- isBusy / isIdle should also respect preload requests
+  - We use this in tests!
+- The check whether to preload a request also needs to be in up.proxy.preload()
+- form[up-accept], form[up-dismiss]
+  - Resolution value is the params
 - Close issues.
 
 
@@ -235,6 +232,8 @@ Tests
 Docs
 ----
 
+- Document { cache: 'clear' }
+- Document X-Up-Cache: clear
 - Document new selectors
   - Ampersand (&) (do :origin?)
   - :none
@@ -297,6 +296,7 @@ Docs
 Later?
 ------
 
+- up.render() should resolve to an up.RenderResult that shows me what changed ({ fragments: [...], layer: ... }
 - { history: 'force' } (render history in layers that prevent it)
 - Can we offer up.idle?
   - No animations running
