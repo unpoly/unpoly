@@ -19,7 +19,7 @@ up.framework = do ->
   @internal
   ###
   emitReset = ->
-    up.emit('up:framework:reset', log: 'Reset framework')
+    up.emit('up:framework:reset', log: false)
 
   ###**
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.

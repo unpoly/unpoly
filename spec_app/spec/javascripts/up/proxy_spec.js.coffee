@@ -25,14 +25,14 @@ describe 'up.proxy', ->
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
-      it 'allows to pass in an up.Request instance instead of an options object', ->
-        requestArg = new up.Request(url: '/foo', params: { key: 'value' }, method: 'post')
-        up.request(requestArg)
-
-        jasmineRequest = @lastRequest()
-        expect(jasmineRequest.url).toMatchURL('/foo')
-        expect(jasmineRequest.data()).toEqual(key: ['value'])
-        expect(jasmineRequest.method).toEqual('POST')
+#      it 'allows to pass in an up.Request instance instead of an options object', ->
+#        requestArg = new up.Request(url: '/foo', params: { key: 'value' }, method: 'post')
+#        up.request(requestArg)
+#
+#        jasmineRequest = @lastRequest()
+#        expect(jasmineRequest.url).toMatchURL('/foo')
+#        expect(jasmineRequest.data()).toEqual(key: ['value'])
+#        expect(jasmineRequest.method).toEqual('POST')
 
       it 'submits the replacement targets as HTTP headers, so the server may choose to only frender the requested fragments', asyncSpec (next) ->
         up.request(url: '/foo', target: '.target', failTarget: '.fail-target')
@@ -191,18 +191,6 @@ describe 'up.proxy', ->
               expect(result.value.ok).toEqual(false)
               done()
 
-
-        it 'rejects with AbortError when the request was aborted', (done) ->
-          request = up.request('/url')
-
-          u.task =>
-            up.proxy.abort(request)
-
-            promiseState(request).then (result) ->
-              expect(result.state).toEqual('rejected')
-              expect(result.value.name).toEqual('AbortError')
-              done()
-
         it 'rejects with AbortError when the request times out', (done) ->
           request = up.request('/url')
 
@@ -238,6 +226,105 @@ describe 'up.proxy', ->
               expect(response.url).toMatchURL('/redirect')
               expect(response.method).toEqual('GET')
               done()
+
+      describe 'aborting', ->
+
+        it 'may be aborted with up.proxy.abort()', asyncSpec (next) ->
+          request = up.request('/url')
+
+          next ->
+            up.proxy.abort(request)
+
+          next.await ->
+            promiseState(request)
+
+          next (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(result.value.name).toEqual('AbortError')
+
+        it 'may be aborted with up.Request#abort()', asyncSpec (next) ->
+          request = up.request('/url')
+
+          next ->
+            request.abort()
+
+          next.await ->
+            promiseState(request)
+
+          next (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(result.value.name).toEqual('AbortError')
+
+        it "may be aborted through an AbortController's { signal }", asyncSpec (next) ->
+          abortController = new up.AbortController()
+          request = up.request('/url', signal: abortController.signal)
+
+          next ->
+            abortController.abort()
+
+          next.await ->
+            promiseState(request)
+
+          next (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(result.value.name).toEqual('AbortError')
+
+        it 'emits an up:proxy:aborted event', asyncSpec (next) ->
+          abortController = new up.AbortController()
+          listener = jasmine.createSpy('event listener')
+          up.on('up:proxy:aborted', listener)
+
+          request = up.request('/url', signal: abortController.signal)
+
+          next ->
+            abortController.abort()
+
+          next ->
+            expect(listener).toHaveBeenCalled()
+            expect(listener.calls.argsFor(0)[0]).toBeEvent('up:proxy:aborted')
+
+        it 'does not send multiple up:proxy:aborted events if the request is aborted multiple times', asyncSpec (next) ->
+          listener = jasmine.createSpy('event listener')
+          up.on('up:proxy:aborted', listener)
+
+          request = up.request('/url')
+
+          next ->
+            up.proxy.abort(request)
+            up.proxy.abort(request)
+
+          next ->
+            expect(listener.calls.count()).toBe(1)
+
+        it 'does not abort a request that was already fulfilled with a response', asyncSpec (next) ->
+          abortController = new up.AbortController()
+          listener = jasmine.createSpy('event listener')
+          up.on('up:proxy:aborted', listener)
+
+          request = up.request('/url', signal: abortController.signal)
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respondWith('response from server')
+
+          next.await ->
+            promiseState(request)
+
+          next (result) ->
+            expect(result.state).toBe('fulfilled')
+            expect(result.value).toEqual(jasmine.any(up.Response))
+            expect(listener).not.toHaveBeenCalled()
+
+          next ->
+            abortController.abort()
+
+          next.await ->
+            promiseState(request)
+
+          next (result) ->
+            expect(result.state).toBe('fulfilled')
+            expect(result.value).toEqual(jasmine.any(up.Response))
+            expect(listener).not.toHaveBeenCalled()
 
       describe 'when the server responds with an X-Up-Location header', ->
 
@@ -662,13 +749,6 @@ describe 'up.proxy', ->
           next =>
             expect(responses).toEqual ['first response', 'second response']
 
-        it 'ignores preloading for the request limit', asyncSpec (next) ->
-          next => up.request(url: '/foo', preload: true)
-          next => up.request(url: '/bar')
-          next => expect(jasmine.Ajax.requests.count()).toEqual(2)
-          next => up.request(url: '/bar')
-          next => expect(jasmine.Ajax.requests.count()).toEqual(2)
-
       describe 'up:proxy:load event', ->
 
         it 'emits an up:proxy:load event before the request touches the network', asyncSpec (next) ->
@@ -962,6 +1042,14 @@ describe 'up.proxy', ->
               'up:proxy:recover'
             ])
 
+    describe 'up.proxy.preload', ->
+
+      it 'queues a request with attributes suitable for preloading', ->
+        request = up.proxy.preload({ url: '/foo' })
+        expect(request.preload).toBe(true)
+        expect(request.cache).toBe(true)
+        expect(request.timeout).toBe(up.proxy.config.preloadTimeout)
+
     describe 'up.ajax', ->
 
       it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
@@ -978,15 +1066,6 @@ describe 'up.proxy', ->
 
           promise.catch (reason) ->
             done.fail(reason)
-
-      describeFallback 'canPushState', ->
-
-        it "does nothing", asyncSpec (next) ->
-          $fixture('.target')
-          $link = $fixture('a[href="/path"][up-target=".target"]')
-          up.proxy.preload($link)
-          next =>
-            expect(jasmine.Ajax.requests.count()).toBe(0)
 
     describe 'up.cache.get()', ->
 

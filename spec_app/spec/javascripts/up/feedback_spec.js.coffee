@@ -316,7 +316,7 @@ describe 'up.feedback', ->
           $link = $fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
 
-          up.proxy.preload($link)
+          up.link.preload($link)
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -367,7 +367,7 @@ describe 'up.feedback', ->
         it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec (next) ->
           $link = $fixture('a[href="/foo"][up-modal=".main"]')
           up.hello($link)
-          up.proxy.preload($link)
+          up.link.preload($link)
 
           next =>
             @respondWith('<div class="main">new-text</div>')
@@ -380,7 +380,7 @@ describe 'up.feedback', ->
         it 'removes .up-active from a clicked link if the target is already preloaded (bugfix)', asyncSpec (next) ->
           $link = $fixture('a[href="/foo"][up-target=".main"]')
           fixture('.main')
-          up.proxy.preload($link)
+          up.link.preload($link)
 
           next => @respondWith('<div class="main">new-text</div>')
           next => Trigger.clickSequence($link)

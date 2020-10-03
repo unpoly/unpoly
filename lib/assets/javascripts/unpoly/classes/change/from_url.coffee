@@ -13,15 +13,13 @@ class up.Change.FromURL extends up.Change
       @fullLoad() unless @successOptions.preload
       return u.unresolvablePromise()
 
-    @buildRequest()
-
-    promise = up.request(@request)
-
+    promise = @makeRequest()
     unless @successOptions.preload
       promise = u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
+
     return promise
 
-  buildRequest: ->
+  makeRequest: ->
     successPreview = new up.Change.FromContent(u.merge(@successOptions, preview: true))
     failPreview = new up.Change.FromContent(u.merge(@failOptions, preview: true))
 
@@ -31,7 +29,7 @@ class up.Change.FromURL extends up.Change
       u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
     )
 
-    @request = new up.Request(requestAttrs)
+    return @request = up.request(requestAttrs)
 
   onRequestSettled: (responseOrError) ->
     rejectWithFailedResponse = -> Promise.reject(responseOrError)

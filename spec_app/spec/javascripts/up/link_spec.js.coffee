@@ -462,8 +462,6 @@ describe 'up.link', ->
               next =>
                 expect($viewport.scrollTop()).toEqual(65)
 
-
-
           describe "when the browser is already on the link's destination", ->
 
             it "doesn't make a request and reveals the target container"
@@ -507,6 +505,13 @@ describe 'up.link', ->
             next =>
               expect(window.confirm).not.toHaveBeenCalled()
               expect(up.render).toHaveBeenCalled()
+
+#       it 'returns an up.AbortablePromise with an #abort() method to abort the request zzz', asyncSpec (next) ->
+#        fixture('.target')
+#        link = fixture('a[href="/foo"][up-target=".target"]')
+#        returnValue = up.link.follow(link)
+#
+#        expect(returnValue).toEqual(jasmine.any(up.AbortablePromise))
 
       describeFallback 'canPushState', ->
 
@@ -662,7 +667,7 @@ describe 'up.link', ->
           $fixture('.target')
           $link = $fixture('a[href="/path"][up-target=".target"]')
 
-          up.proxy.preload($link)
+          up.link.preload($link)
 
           next =>
             cachedPromise = up.cache.get
@@ -674,7 +679,7 @@ describe 'up.link', ->
         it "does not load a link whose method has side-effects", (done) ->
           $fixture('.target')
           $link = $fixture('a[href="/path"][up-target=".target"][data-method="post"]')
-          preloadPromise = up.proxy.preload($link)
+          preloadPromise = up.link.preload($link)
 
           promiseState(preloadPromise).then (result) ->
             expect(result.state).toEqual('rejected')
@@ -684,7 +689,7 @@ describe 'up.link', ->
         it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
           $fixture('.target')
           $link = $fixture('a[href="/path"][up-target=".target"]')
-          up.proxy.preload($link, url: '/options-path')
+          up.link.preload($link, url: '/options-path')
 
           next =>
             cachedPromise = up.cache.get
@@ -698,24 +703,15 @@ describe 'up.link', ->
           it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->
             $fixture('.target')
             $link = $fixture('a[href="/path"][up-target=".target"]')
-            up.proxy.preload($link)
+            up.link.preload($link)
             next => expect(@requestTarget()).toEqual('.target')
 
           it 'replaces the [up-target] selector as with a fallback and uses that as an X-Up-Target header if the targeted element is not currently on the page', asyncSpec (next) ->
             $link = $fixture('a[href="/path"][up-target=".target"]')
-            up.proxy.preload($link)
+            up.link.preload($link)
             # The default fallback would usually be `body`, but in Jasmine specs we change
             # it to protect the test runner during failures.
             next => expect(@requestTarget()).toEqual('default-fallback')
-
-          it 'calls up.request() with a { preload: true } option so it bypasses the concurrency limit', asyncSpec (next) ->
-            requestSpy = spyOn(up, 'request')
-
-            $link = $fixture('a[href="/path"][up-target=".target"]')
-            up.proxy.preload($link)
-
-            next =>
-              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
         describe 'for a link opening a new layer', ->
 
@@ -1321,6 +1317,25 @@ describe 'up.link', ->
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+      it 'aborts a preload request if the user stops hovering before the response was received', asyncSpec (next) ->
+        up.link.config.preloadDelay = 50
+        $fixture('.target').text('old text')
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello($link)
+        abortListener = jasmine.createSpy('up:proxy:abort listener')
+        up.on('up:proxy:aborted', abortListener)
+
+        Trigger.hoverSequence($link)
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(abortListener).not.toHaveBeenCalled()
+
+          Trigger.unhoverSequence($link)
+
+        next.after 50, ->
+          expect(abortListener).toHaveBeenCalled()
+
       it 'does not cache a failed response', asyncSpec (next) ->
         up.link.config.preloadDelay = 0
 
@@ -1355,30 +1370,6 @@ describe 'up.link', ->
           # Since there isn't anyone who could handle the rejection inside
           # the event handler, our handler mutes the rejection.
           expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
-
-      it 'triggers a separate AJAX request when hovered multiple times and the cache expires between hovers', asyncSpec (next)  ->
-        up.proxy.config.cacheExpiry = 100
-        up.link.config.preloadDelay = 0
-
-        $element = $fixture('a[href="/foo"][up-preload]')
-        up.hello($element)
-
-        Trigger.hoverSequence($element)
-
-        next.after 10, =>
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-        next.after 10, =>
-          Trigger.hoverSequence($element)
-
-        next.after 10, =>
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-        next.after 150, =>
-          Trigger.hoverSequence($element)
-
-        next.after 30, =>
-          expect(jasmine.Ajax.requests.count()).toEqual(2)
 
   describe 'up:click', ->
 

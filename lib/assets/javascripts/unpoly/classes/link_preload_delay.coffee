@@ -5,42 +5,39 @@ class up.LinkPreloadDelay
 
   constructor: ->
 
-  reset: ->
-    @cancelTimer()
-    @waitingLink = undefined
-
   observeLink: (link) ->
+    # If the link has an unsafe method (like POST) and is hence not preloadable,
+    # prevent up.link.preload() from blowing up by not observing the link (even if
+    # the user uses [up-preload] everywhere).
     if up.link.isSafe(link)
       link.addEventListener('mouseenter', @onMouseEnter)
       link.addEventListener('mouseleave', @onMouseLeave)
 
-  onMouseEnter: (event) =>
-    link = event.target
-    if up.link.shouldFollowEvent(event, link)
-      @preloadAfterDelay(link)
+  onMouseEnter: ({ target }) =>
+    if target != @currentLink
+      @reset()
 
-  onMouseLeave: (event) =>
-    link = event.target
-    @stopPreload(link)
+      # Don't preload when the user is holding down CTRL or SHIFT.
+      if up.link.shouldFollowEvent(event, target)
+        @preloadAfterDelay(target)
+
+  onMouseLeave: ({ target }) =>
+    if target == @currentLink
+      @reset()
+
+  reset: ->
+    return unless @currentLink
+
+    clearTimeout(@timer)
+    @abortController?.abort()
+    @abortController = undefined
+    @currentLink = undefined
 
   preloadAfterDelay: (link) ->
+    @currentLink = link
     delay = e.numberAttr(link, 'up-delay') ? up.link.config.preloadDelay
+    @timer = u.timer(delay, => @preloadNow(link))
 
-    unless link == @waitingLink
-      @waitingLink = link
-      @startTimer delay, =>
-        up.log.muteRejection up.link.preload(link)
-        @waitingLink = null
-
-  startTimer: (delay, block) ->
-    @cancelTimer()
-    @timer = setTimeout(block, delay)
-
-  cancelTimer: ->
-    clearTimeout(@timer)
-    @timer = undefined
-
-  stopPreload: (link) ->
-    if link == @waitingLink
-      @waitingLink = undefined
-      @cancelTimer()
+  preloadNow: (link) ->
+    @abortController = new up.AbortController()
+    u.muteRejection up.link.preload(link, signal: @abortController.signal)

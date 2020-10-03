@@ -26,7 +26,6 @@ up.RenderOptions = do ->
     'params',
     'cache',
     'solo',
-    'tentative',
     'confirm',
     'feedback',
     'origin',

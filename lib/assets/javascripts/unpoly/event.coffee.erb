@@ -444,6 +444,11 @@ up.event = do ->
     u.assign(forkedEvent, eventProps)
     up.emit(element, forkedEvent)
 
+#  abortable = ->
+#    signal = document.createElement('up-abort-signal')
+#    abort = -> up.emit(signal, 'abort')
+#    [abort, signal]
+
   bind 'up:click', 'a[up-emit]', executeEmitAttr
 
   bind 'up:framework:reset', reset

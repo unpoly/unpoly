@@ -56,24 +56,24 @@ window.asyncSpec = (args...) ->
     # Call example body
     plan.call(this, next)
 
-    runBlockSyncAndPoke = (block) ->
+    runBlockSyncAndPoke = (block, previousValue) ->
       try
         log('runBlockSync')
-        block()
-        pokeQueue()
+        value = block(previousValue)
+        pokeQueue(value)
       catch e
         fail(e)
         throw e
 
-    runBlockAsyncThenPoke = (blockOrPromise) ->
+    runBlockAsyncThenPoke = (blockOrPromise, previousValue) ->
       log('runBlockAsync')
       # On plan-level people will usually pass a function returning a promise.
       # During runtime people will usually pass a promise to delay the next step.
-      promise = if u.isPromise(blockOrPromise) then blockOrPromise else blockOrPromise()
-      promise.then -> pokeQueue()
+      promise = if u.isPromise(blockOrPromise) then blockOrPromise else blockOrPromise(previousValue)
+      promise.then (value) -> pokeQueue(value)
       promise.catch (e) -> fail(e)
 
-    pokeQueue = ->
+    pokeQueue = (previousValue) ->
       if entry = queue[runtimeCursor]
         log('Playing task at index %d', runtimeCursor)
         runtimeCursor++
@@ -87,15 +87,15 @@ window.asyncSpec = (args...) ->
 
         switch timing
           when 'now'
-            runBlockSyncAndPoke(block)
+            runBlockSyncAndPoke(block, previousValue)
           else
             fun = ->
               # Move the block behind the microtask queue of that frame
               Promise.resolve().then ->
                 if callStyle == 'sync'
-                  runBlockSyncAndPoke(block)
+                  runBlockSyncAndPoke(block, previousValue)
                 else # async
-                  runBlockAsyncThenPoke(block)
+                  runBlockAsyncThenPoke(block, previousValue)
 
             # Also move to the next frame
             unstubbedSetTimeout(fun, timing)

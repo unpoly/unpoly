@@ -54,19 +54,22 @@ up.radio = do ->
   @stable
   ###
 
-  # TODO: Doku for up.radio.poll()
-  poll = (element, options = {}) ->
+  # TODO: Docs for up.radio.startPolling()
+  startPolling = (element, options = {}) ->
     interval = options.interval ? e.numberAttr(element, 'up-poll') ? config.pollInterval
     timer = null
 
     doReload = ->
-      reloadDone = if document.hidden then Promise.resolve() else up.reload(element)
-      u.always(reloadDone, doSchedule)
+      if document.hidden
+        doSchedule()
+      else
+        u.always(up.reload(element), doSchedule)
 
     doSchedule = ->
       timer = setTimeout(doReload, interval)
 
     doSchedule()
+
     return -> clearTimeout(timer)
 
   ###**
@@ -98,10 +101,10 @@ up.radio = do ->
     The URL from which to reload the fragment.
     Defaults to the URL from which this fragment was originally loaded.
   ###
-  up.compiler '[up-poll]', poll
+  up.compiler '[up-poll]', startPolling
 
   up.on 'up:framework:reset', reset
 
   config: config
   hungrySelector: hungrySelector
-  poll: poll
+  startPolling: startPolling

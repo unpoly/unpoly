@@ -30,7 +30,7 @@ class up.ConnectionSpeed
     @isSlowFromNetInfo() && @isSlowFromResponseTimes()
 
   isSlowFromResponseTimes: ->
-    if u.isPresent(@responseTimes)
+    if @responseTimes.length
       u.average(@responseTimes) > u.evalOption(@maxResponseTime)
 
   isSlowFromNetInfo: ->

@@ -21,13 +21,13 @@ up.browser = do ->
 
   ###**
   @function up.browser.loadPage
-  @param {string} url
+  @param {string} options.url
   @param {string} [options.method='get']
   @param {Object|Array|FormData|string} [options.params]
   @internal
   ###
-  loadPage = (args...) ->
-    new up.Request(args...).loadPage()
+  loadPage = (requestsAttrs) ->
+    new up.Request(requestsAttrs).loadPage()
 
   ###**
   For mocking in specs.

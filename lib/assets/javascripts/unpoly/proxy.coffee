@@ -101,7 +101,6 @@ up.proxy = do ->
     wrapMethods: ['PATCH', 'PUT', 'DELETE']
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
-    preloadQueueSize: 5
     preloadEnabled: 'auto' # true | false | 'auto'
     preloadTimeout: 10 * 1000
     preloadMaxResponseTime: 850
@@ -250,9 +249,26 @@ up.proxy = do ->
     A promise for the response.
   @stable
   ###
-  makeRequest = (args...) ->
-    request = up.Request.wrap(args...)
+  fetch = (args...) ->
+    request = new up.Request(parseOptions(args))
     return useCachedRequest(request) || queueRequest(request)
+
+  preload = (args...) ->
+    if u.isElementish(args[0])
+      up.legacy.warn('up.proxy.preload(link) has been renamed to up.link.preload(link)')
+      return up.link.preload(args...)
+
+    options = parseOptions(args)
+    options.preload = true
+    # The constructor of up.Request will set additional options when passed { preload: true }:
+    # { cache: true, timeout: config.preloadTimeout }.
+    fetch(options)
+
+  parseOptions = (args) ->
+    options = u.extractOptions(args)
+    options.url ||= args[0]
+    up.legacy.fixKey(options, 'data', 'params')
+    options
 
   useCachedRequest = (request) ->
     if !request.isSafe() || request.cache == 'clear'
@@ -349,7 +365,7 @@ up.proxy = do ->
   ajax = (args...) ->
     up.legacy.deprecated('up.ajax()', 'up.request()')
     pickResponseText = (response) -> return response.text
-    makeRequest(args...).then(pickResponseText)
+    fetch(args...).then(pickResponseText)
 
   ###**
   Returns `true` if the proxy is not currently waiting
@@ -514,11 +530,9 @@ up.proxy = do ->
 
   up.on 'up:framework:reset', reset
 
-  preload: (args...) ->
-    up.legacy.warn('up.proxy.preload() has been renamed to up.link.preload()')
-    up.link.preload(args...)
   ajax: ajax
-  request: makeRequest
+  request: fetch
+  preload: preload
   cache: cache
   clear: ->
     up.legacy.deprecated('up.proxy.clear()', 'up.cache.clear()')

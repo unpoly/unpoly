@@ -6,7 +6,6 @@ class up.Request.Queue extends up.Class
 
   constructor: (options = {}) ->
     @concurrency = options.concurrency ? -> up.proxy.config.concurrency
-    @preloadQueueSize = options.preloadQueueSize ? -> up.proxy.config.preloadQueueSize
     @slowDelay = options.slowDelay ? -> up.proxy.config.slowDelay
     @reset()
 
@@ -31,27 +30,7 @@ class up.Request.Queue extends up.Class
     if @hasConcurrencyLeft()
       @sendRequestNow(request)
     else
-      if request.preload
-        # The preload queue is limited in size
-        if @hasPreloadQueueSpaceLeft()
-          @queueRequest(request)
-        else if oldestQueuedTentativeRequest = @oldestTentativePreloadRequest(@queuedRequests)
-          @abort(oldestQueuedTentativeRequest)
-          @queueRequest(request)
-        else if request.tentative
-          @abort(request)
-        else
-          # If neither existing nor new requests are tentative,
-          # we must exceed the size of the preload queue.
-          @queueRequest(request)
-      else
-        if oldestCurrentTentativeRequest = @oldestTentativePreloadRequest(@currentRequests)
-          @abort(oldestCurrentTentativeRequest)
-          @sendRequestNow(request)
-        else
-          @queueRequest(request)
-
-    return request
+      @queueRequest(request)
 
   # Changes a preload request to a non-preload request.
   # Does not change the request's position in the queue.
@@ -69,30 +48,20 @@ class up.Request.Queue extends up.Class
     maxConcurrency = u.evalOption(@concurrency)
     return maxConcurrency == -1 || @currentRequests.length < maxConcurrency
 
-  hasPreloadQueueSpaceLeft: ->
-    maxSize = u.evalOption(@preloadQueueSize)
-    return maxSize == -1 || u.filter(@queuedRequests, 'preload').length < maxSize
-
   isBusy: ->
     u.reject(@currentRequests, 'preload').length > 0
 
   queueRequest: (request) ->
+    # Queue the request at the end of our FIFO queue.
     @queuedRequests.push(request)
 
-  oldestTentativePreloadRequest: (list) ->
-    u.find list, (request) -> request.preload && request.tentative
-
   pluckNextRequest: ->
-    # We process the most recently queued request first.
-    # The assumption is that recently queued requests are caused by a recent user interaction.
-    lifoQueue = u.reverse(@queuedRequests)
-
     # We always prioritize foreground requests over preload requests.
     # Only when there is no foreground request left in the queue we will send a preload request.
     # Note that if a queued preload request is requested without { preload: true } we will
     # promote it to the foreground (see @promoteToForeground()).
-    request = u.find(lifoQueue, (request) -> !request.preload)
-    request ||= lifoQueue[0]
+    request = u.find(@queuedRequests, (request) -> !request.preload)
+    request ||= @queuedRequests[0]
     return u.remove(@queuedRequests, request)
 
   sendRequestNow: (request) ->
@@ -102,7 +71,7 @@ class up.Request.Queue extends up.Class
       request.abort('Prevented by event listener')
     else
       @currentRequests.push(request)
-      request.send()
+      request.load()
 
   onRequestSettled: (request, responseOrError) ->
     u.remove(@currentRequests, request)

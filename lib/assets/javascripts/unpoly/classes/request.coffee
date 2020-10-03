@@ -100,6 +100,7 @@ class up.Request extends up.Record
 
   keys: ->
     [
+      'signal',
       'method',
       'url',
       'params',
@@ -108,7 +109,6 @@ class up.Request extends up.Record
       'headers',
       'timeout',
       'preload' # since up.proxy.request() options are sometimes wrapped in this class
-      'tentative',
       'cache',  # since up.proxy.request() options are sometimes wrapped in this class
 
       # While requests are queued or in flight we keep the layer they're targeting.
@@ -143,30 +143,21 @@ class up.Request extends up.Record
   @param {number} [attrs.timeout]
   @internal
   ###
-  constructor: (args...) ->
-    options = u.extractOptions(args)
-    options.url ||= args[0]
-
-    up.legacy.fixKey(options, 'data', 'params')
-
+  constructor: (options) ->
     super(options)
 
     @params = new up.Params(@params) # copies, which we want
+    @state = 'new' # new | loading | loaded | aborted
+    @headers ||= {}
     @uid = u.uid() # TODO: Remove me
 
     @normalize()
 
     if @preload
+      # Shorter timeout when preloading
       @timeout ?= up.proxy.config.preloadTimeout
+      # Preloading requires caching.
       @cache = true
-
-    @aborted = false
-    @headers ||= {}
-    @preload = !!@preload
-
-    # By default preload requests will be aborted to make space in an exhausted
-    # queue. Users may prevent this to be canceled by passing { tentative: false }.
-    @tentative ?= @preload
 
     # Help users programmatically build a request that will match an existing cache key.
     @layer = up.layer.get(@layer || @origin) # If @origin is undefined, this will choose the current layer.
@@ -182,6 +173,8 @@ class up.Request extends up.Record
     @deferred = u.newDeferred()
 
     @finally => @evictExpensiveAttrs()
+
+    @signal?.addEventListener('abort', => @abort())
 
   @delegate ['then', 'catch', 'finally'], 'deferred'
 
@@ -228,10 +221,11 @@ class up.Request extends up.Record
   isSafe: ->
     up.proxy.isSafeMethod(@method)
 
-  send: ->
+  load: ->
     # If the request was aborted before it was sent (e.g. because it was queued)
     # we don't send it.
-    return if @aborted
+    return unless @state == 'new'
+    @state = 'loading'
 
     # In case an up:proxy:load listener changed { url, method, params } we need to
     # normalize again.
@@ -259,7 +253,7 @@ class up.Request extends up.Record
     @emit('up:proxy:fatal', { log })
 
   onXHRTimeout: (_progressEvent) ->
-    # We treat a timeout like a client-side abort (which is is).
+    # We treat a timeout like a client-side abort (which it is).
     @setAbortedState('Requested timed out')
 
   onXHRAbort: (_progressEvent) ->
@@ -273,12 +267,15 @@ class up.Request extends up.Record
     @xhr?.abort()
 
   setAbortedState: (reason = 'Request was aborted') ->
-    unless @aborted
-      @emit('up:proxy:aborted', log: reason)
-      @aborted = true
-      @deferred.reject(up.error.aborted(reason))
+    return unless @state == 'new' || @state == 'loading'
+    @emit('up:proxy:aborted', log: reason)
+    @state = 'aborted'
+    @deferred.reject(up.error.aborted(reason))
 
   respondWith: (response) ->
+    return unless @state == 'loading'
+    @state = 'loaded'
+
     log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, @method, @url, response.text.length]
     @emit('up:proxy:loaded', { response, log })
 
@@ -293,6 +290,10 @@ class up.Request extends up.Record
 
   # TODO: Document API
   loadPage: ->
+    # This method works independently of @state, since it is often
+    # a fallback for a request that cannot be processed as a fragment update
+    # (see up:fragment:loaded event).
+
     # Abort all pending requests so their callbacks won't run
     # while we're already navigating away.
     up.proxy.abort()
