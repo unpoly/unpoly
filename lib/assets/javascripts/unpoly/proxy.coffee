@@ -297,8 +297,10 @@ up.proxy = do ->
 
       return cachedRequest
 
+  # If no existing promise is available, we queue a network request.
   queueRequest = (request) ->
-    # If no existing promise is available, we queue a network request.
+    if request.preload && !request.isSafe()
+      up.fail('Will not preload a %o request (%o)', request.method, request)
 
     if request.cache
       # Cache the request for calls for calls with the same URL, method, params

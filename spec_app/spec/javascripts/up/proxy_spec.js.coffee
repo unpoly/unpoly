@@ -1050,6 +1050,10 @@ describe 'up.proxy', ->
         expect(request.cache).toBe(true)
         expect(request.timeout).toBe(up.proxy.config.preloadTimeout)
 
+      it 'throws an error when trying to preload an unsafe request', ->
+        preload = -> up.proxy.preload({ url: '/foo', method: 'put' })
+        expect(preload).toThrowError(/will not preload a PUT request/i)
+
     describe 'up.ajax', ->
 
       it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
