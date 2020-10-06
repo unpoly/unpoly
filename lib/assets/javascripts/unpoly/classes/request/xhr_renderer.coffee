@@ -10,13 +10,13 @@ class up.Request.XHRRenderer
     @xhr = new XMLHttpRequest()
 
     # We copy params since we will modify them below.
-    # This would confuse API clients and cache key logic in up.proxy.
+    # This would confuse API clients and cache key logic in up.request.
     xhrParams = u.copy(@request.params)
 
     # By default HTTP methods other than `GET` or `POST` will be converted into a `POST`
     # request and carry their original method as a `_method` parameter. This is to
     # [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-    @xhrMethod = up.proxy.wrapMethod(@request.method, xhrParams)
+    @xhrMethod = up.request.wrapMethod(@request.method, xhrParams)
 
     @xhr.timeout = @request.timeout
 

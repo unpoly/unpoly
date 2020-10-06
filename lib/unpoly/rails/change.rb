@@ -264,7 +264,7 @@ module Unpoly
       def test_target(frontend_target, tested_target)
         # We must test whether the frontend has passed us a target.
         # The user may have chosen to not reveal their target for better
-        # cacheability (see up.proxy.config#requestMetaKeys).
+        # cacheability (see up.request.config#metaKeys).
         if up? && frontend_target.present?
           parts = frontend_target.split(/\s*,\s*/)
           parts.any? do |part|

@@ -2,13 +2,13 @@
 
 u = up.util
 
-class up.ProxyCache extends up.Cache
+class up.Request.Cache extends up.Cache
 
   maxKeys: ->
-    up.proxy.config.cacheSize
+    up.request.config.cacheSize
 
   expiryMillis: ->
-    up.proxy.config.cacheExpiry
+    up.request.config.cacheExpiry
 
   normalizeStoreKey: (key) ->
     up.Request.wrap(key).cacheKey()

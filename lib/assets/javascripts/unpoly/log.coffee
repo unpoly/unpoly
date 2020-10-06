@@ -5,7 +5,7 @@ Logging
 Unpoly can print debugging information to the developer console, e.g.:
 
 - Which [events](/up.event) are called
-- When we're [making requests to the network](/up.proxy)
+- When we're [making requests to the network](/up.request)
 - Which [compilers](/up.syntax) are applied to which elements
 
 You can activate logging by calling [`up.log.enable()`](/up.log.enable).

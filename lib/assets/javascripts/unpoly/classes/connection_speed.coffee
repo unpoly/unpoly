@@ -8,7 +8,7 @@ class up.ConnectionSpeed
 
     @reset()
 
-    up.on 'up:proxy:loaded', (event) => @addResponseTime(event.request.startTime, event.response.endTime)
+    up.on 'up:request:loaded', (event) => @addResponseTime(event.request.startTime, event.response.endTime)
 
   reset: ->
     @responseTimes = []

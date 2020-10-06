@@ -36,7 +36,7 @@ up.legacy = do ->
     else
       eventType
 
-  renamedModule = (oldName, newName) ->
+  renamedPackage = (oldName, newName) ->
     Object.defineProperty up, oldName, get: ->
       warn("up.#{oldName} has been renamed to up.#{newName}")
       up[newName]
@@ -53,7 +53,7 @@ up.legacy = do ->
     warn("#{deprecatedExpression} has been deprecated. Use #{replacementExpression} instead.")
 
   deprecated: deprecated
-  renamedModule: renamedModule
+  renamedPackage: renamedPackage
   renamedProperty: renamedProperty
 #  removedProperty: removedProperty
   renamedEvent: renamedEvent

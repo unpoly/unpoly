@@ -49,7 +49,7 @@ describe 'up.layer', ->
 
           up.navigate('.root-element', url: '/path1')
           abortedURLs = []
-          up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+          up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
           next ->
             expect(abortedURLs).toBeBlank()
@@ -63,7 +63,7 @@ describe 'up.layer', ->
         it 'aborts a previous pending request that would result in opening a new overlay', asyncSpec (next) ->
           up.layer.open(url: '/path1')
           abortedURLs = []
-          up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+          up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
           next ->
             expect(abortedURLs).toBeBlank()

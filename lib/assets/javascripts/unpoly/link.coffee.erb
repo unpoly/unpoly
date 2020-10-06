@@ -412,7 +412,7 @@ up.link = do ->
   ###
   isSafe = (selectorOrLink, options) ->
     method = followMethod(selectorOrLink, options)
-    up.proxy.isSafeMethod(method)
+    up.request.isSafeMethod(method)
 
   targetMacro = (queryAttr, fixedResultAttrs, callback) ->
     up.macro "[#{queryAttr}]", (link) ->

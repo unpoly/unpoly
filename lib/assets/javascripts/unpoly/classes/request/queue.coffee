@@ -5,8 +5,8 @@ u = up.util
 class up.Request.Queue extends up.Class
 
   constructor: (options = {}) ->
-    @concurrency = options.concurrency ? -> up.proxy.config.concurrency
-    @slowDelay = options.slowDelay ? -> up.proxy.config.slowDelay
+    @concurrency = options.concurrency ? -> up.request.config.concurrency
+    @slowDelay = options.slowDelay ? -> up.request.config.slowDelay
     @reset()
 
   reset: ->
@@ -65,9 +65,9 @@ class up.Request.Queue extends up.Class
     return u.remove(@queuedRequests, request)
 
   sendRequestNow: (request) ->
-    if request.preload && !up.proxy.shouldPreload(request)
+    if request.preload && !up.request.shouldPreload(request)
       request.abort('Preloading is disabled')
-    else if request.emit('up:proxy:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
+    else if request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
       request.abort('Prevented by event listener')
     else
       @currentRequests.push(request)
@@ -76,9 +76,9 @@ class up.Request.Queue extends up.Class
   onRequestSettled: (request, responseOrError) ->
     u.remove(@currentRequests, request)
     if (responseOrError instanceof up.Response) && responseOrError.ok
-      up.proxy.registerAliasForRedirect(request, responseOrError)
+      up.request.registerAliasForRedirect(request, responseOrError)
 
-    # Check if we can emit up:proxy:recover after a previous up:proxy:slow event.
+    # Check if we can emit up:request:recover after a previous up:request:slow event.
     @checkSlow()
 
     u.microtask(=> @poke())
@@ -107,9 +107,9 @@ class up.Request.Queue extends up.Class
       @emittedSlow = currentSlow
 
       if currentSlow
-        up.emit('up:proxy:slow', log: 'Proxy is slow to respond')
+        up.emit('up:request:slow', log: 'Server is slow to respond')
       else
-        up.emit('up:proxy:recover', log: 'Proxy has recovered from slow response')
+        up.emit('up:request:recover', log: 'Slow requests were loaded')
 
   isSlow: ->
     now = new Date()

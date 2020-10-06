@@ -16,7 +16,7 @@
 #= require ./unpoly/fragment
 #= require ./unpoly/viewport
 #= require ./unpoly/motion
-#= require ./unpoly/proxy
+#= require ./unpoly/request
 #= require ./unpoly/layer
 #= require ./unpoly/link
 #= require ./unpoly/form

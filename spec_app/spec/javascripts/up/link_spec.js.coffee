@@ -160,7 +160,7 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
-          up.proxy.config.cacheExpiry = 0
+          up.request.config.cacheExpiry = 0
 
           waitForBrowser = 150
 
@@ -229,7 +229,7 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
-          up.proxy.config.cacheExpiry = 0
+          up.request.config.cacheExpiry = 0
 
           waitForBrowser = 150
 
@@ -776,15 +776,15 @@ describe 'up.link', ->
             next =>
               expect('up-modal .content').toBeAttached()
 
-          it 'calls up.request() with a { preload: true } option', asyncSpec (next) ->
-            requestSpy = spyOn(up, 'request')
+          it 'calls up.fetch() with a { preload: true } option', asyncSpec (next) ->
+            fetchSpy = spyOn(up, 'fetch')
 
             $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
             up.hello($link)
             up.link.preload($link)
 
             next =>
-              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
+              expect(fetchSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
   describe 'unobtrusive behavior', ->
 
@@ -1257,7 +1257,7 @@ describe 'up.link', ->
 
       beforeEach ->
         # Disable response time measuring for these tests
-        up.proxy.config.preloadEnabled = true
+        up.request.config.preloadEnabled = true
 
       it 'preloads the link destination when hovering, after a delay', asyncSpec (next) ->
         up.link.config.preloadDelay = 100
@@ -1322,8 +1322,8 @@ describe 'up.link', ->
         $fixture('.target').text('old text')
         $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)
-        abortListener = jasmine.createSpy('up:proxy:abort listener')
-        up.on('up:proxy:aborted', abortListener)
+        abortListener = jasmine.createSpy('up:request:abort listener')
+        up.on('up:request:aborted', abortListener)
 
         Trigger.hoverSequence($link)
 

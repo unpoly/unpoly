@@ -240,7 +240,7 @@ describe 'up.history', ->
       describeCapability 'canPushState', ->
 
         it 'emits up:history:* events as the user goes forwards and backwards through history', asyncSpec (next) ->
-          up.proxy.config.cacheSize = 0
+          up.request.config.cacheSize = 0
           up.history.config.restoreTargets = ['.viewport']
 
           fixture('.viewport .content')

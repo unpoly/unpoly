@@ -62,7 +62,7 @@ class up.Request extends up.Record
   ###**
   A timeout in milliseconds.
 
-  If [`up.proxy.config.maxRequests`](/up.proxy.config#config.maxRequests) is set,
+  If [`up.request.config.maxRequests`](/up.request.config#config.maxRequests) is set,
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request#timeout
@@ -108,8 +108,8 @@ class up.Request extends up.Record
       'failTarget',
       'headers',
       'timeout',
-      'preload' # since up.proxy.request() options are sometimes wrapped in this class
-      'cache',  # since up.proxy.request() options are sometimes wrapped in this class
+      'preload' # since up.request.request() options are sometimes wrapped in this class
+      'cache',  # since up.request.request() options are sometimes wrapped in this class
 
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
@@ -131,7 +131,7 @@ class up.Request extends up.Record
   ###**
   Creates a new `up.Request` object.
 
-  This will not actually send the request over the network. For that use `up.request()`.
+  This will not actually send the request over the network. For that use `up.fetch()`.
 
   @constructor up.Request
   @param {string} attrs.url
@@ -155,7 +155,7 @@ class up.Request extends up.Record
 
     if @preload
       # Shorter timeout when preloading
-      @timeout ?= up.proxy.config.preloadTimeout
+      @timeout ?= up.request.config.preloadTimeout
       # Preloading requires caching.
       @cache = true
 
@@ -185,7 +185,7 @@ class up.Request extends up.Record
       @transferParamsToURL()
 
   evictExpensiveAttrs: ->
-    # We want to allow up:proxy:loaded events etc. to still access the properties that
+    # We want to allow up:request:loaded events etc. to still access the properties that
     # we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
 
     u.task =>
@@ -193,14 +193,14 @@ class up.Request extends up.Record
       # to be able to cancel it when the layers gets closed. We now
       # evict this property, since response.request.layer.element will
       # prevent the layer DOM tree from garbage collection while the response
-      # is cached by up.proxy.
+      # is cached by up.request.
       @layer = undefined
       @failLayer = undefined
 
       # We want to provide the triggering element as { origin } to the function
       # providing the CSRF function. We now evict this property, since
       # response.request.origin will prevent its (now maybe detached) DOM tree
-      # from garbage collection while the response is cached by up.proxy.
+      # from garbage collection while the response is cached by up.request.
       @origin = undefined
 
   extractHashFromURL: ->
@@ -219,7 +219,7 @@ class up.Request extends up.Record
       @params.clear()
 
   isSafe: ->
-    up.proxy.isSafeMethod(@method)
+    up.request.isSafeMethod(@method)
 
   load: ->
     # If the request was aborted before it was sent (e.g. because it was queued)
@@ -227,7 +227,7 @@ class up.Request extends up.Record
     return unless @state == 'new'
     @state = 'loading'
 
-    # In case an up:proxy:load listener changed { url, method, params } we need to
+    # In case an up:request:load listener changed { url, method, params } we need to
     # normalize again.
     @normalize()
 
@@ -250,7 +250,7 @@ class up.Request extends up.Record
     # Hence we ignore the passed ProgressEvent and use our own error message.
     log = 'Fatal error during request'
     @deferred.reject(up.error.failed(log))
-    @emit('up:proxy:fatal', { log })
+    @emit('up:request:fatal', { log })
 
   onXHRTimeout: (_progressEvent) ->
     # We treat a timeout like a client-side abort (which it is).
@@ -268,7 +268,7 @@ class up.Request extends up.Record
 
   setAbortedState: (reason = 'Request was aborted') ->
     return unless @state == 'new' || @state == 'loading'
-    @emit('up:proxy:aborted', log: reason)
+    @emit('up:request:aborted', log: reason)
     @state = 'aborted'
     @deferred.reject(up.error.aborted(reason))
 
@@ -277,7 +277,7 @@ class up.Request extends up.Record
     @state = 'loaded'
 
     log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, @method, @url, response.text.length]
-    @emit('up:proxy:loaded', { response, log })
+    @emit('up:request:loaded', { request: response.request, response, log })
 
     if response.ok
       @deferred.resolve(response)
@@ -296,7 +296,7 @@ class up.Request extends up.Record
 
     # Abort all pending requests so their callbacks won't run
     # while we're already navigating away.
-    up.proxy.abort()
+    up.request.abort()
     new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
@@ -353,7 +353,7 @@ class up.Request extends up.Record
   # (2) become part of our @cacheKey().
   metaProps: ->
     props = {}
-    for key in up.proxy.config.requestMetaKeys(@)
+    for key in up.request.config.metaKeys(@)
       value = this[key]
       if u.isGiven(value)
         props[key] = value

@@ -17,7 +17,7 @@ class up.Request.FormRenderer
     paramsFromQuery = up.Params.fromURL(action)
     params.addAll(paramsFromQuery)
     action = u.normalizeURL(action, search: false)
-    method = up.proxy.wrapMethod(@request.method, params)
+    method = up.request.wrapMethod(@request.method, params)
 
     @form = e.affix(document.body, 'form.up-page-loader', { method, action })
 

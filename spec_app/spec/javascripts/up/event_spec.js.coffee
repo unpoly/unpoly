@@ -287,23 +287,25 @@ describe 'up.event', ->
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
 
-#      it 'allows to bind and unbind events by their old, deprecated name', ->
-#        warnSpy = spyOn(up, 'warn')
-#        listener = jasmine.createSpy('listener')
-#
-#        # Reister listener for the old event name
-#        up.on('up:proxy:received', listener)
-#        expect(warnSpy).toHaveBeenCalled()
-#
-#        # Emit event with new name and see that it invokes the legacy listener
-#        up.emit('up:proxy:loaded')
-#        expect(listener.calls.count()).toBe(1)
-#
-#        # Check that up.off works with the old event name
-#        up.off('up:proxy:received', listener)
-#
-#        up.emit('up:proxy:loaded')
-#        expect(listener.calls.count()).toBe(1)
+      it 'allows to bind and unbind events by their old, deprecated name', ->
+        up.legacy.renamedEvent('up:spec:old', 'up:spec:new')
+
+        warnSpy = spyOn(up, 'warn')
+        listener = jasmine.createSpy('listener')
+
+        # Reister listener for the old event name
+        up.on('up:spec:old', listener)
+        expect(warnSpy).toHaveBeenCalled()
+
+        # Emit event with new name and see that it invokes the legacy listener
+        up.emit('up:spec:new')
+        expect(listener.calls.count()).toBe(1)
+
+        # Check that up.off works with the old event name
+        up.off('up:spec:old', listener)
+
+        up.emit('up:spec:new')
+        expect(listener.calls.count()).toBe(1)
 
 
     describe 'up.$on', ->

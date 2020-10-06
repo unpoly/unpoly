@@ -22,7 +22,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       return Promise.resolve()
 
     # Abort all pending requests targeting the layer we're now closing.
-    up.proxy.abort (request) => request.layer == @layer
+    up.request.abort (request) => request.layer == @layer
 
     if @emitCloseEvent().defaultPrevented && @preventable
       throw up.error.aborted('Close event was prevented')

@@ -22,7 +22,7 @@
   - Offer up.request.preload
     - This only sets the preload: true option
     - So it makes sense we have some preload options in up.request
-    - Be careful to forward the old up.proxy.preload to up.link.preload
+    - Be careful to forward the old up.request.preload to up.link.preload
   - Document up.link.preload
 - Dismissable-Options are named badly
   - keyDismissable sounds too much like buttonDismissable
@@ -31,7 +31,7 @@
   - outsideDismissable => backgroundDismissable?
 - isBusy / isIdle should also respect preload requests
   - We use this in tests!
-- The check whether to preload a request also needs to be in up.proxy.preload()
+- The check whether to preload a request also needs to be in up.request.preload()
 - form[up-accept], form[up-dismiss]
   - Resolution value is { params, ... params.toObject() }
   - existing [up-accept] is then only a[up-accept]
@@ -39,6 +39,8 @@
   - Event value is { params, ... params.toObject() }
   - existing [up-emit] is then only a[up-emit]
 - Close issues.
+- Move class methods of up.Params to up.params (lowercase)
+- Consider integrating up.radio into up.fragment
 
 
 
@@ -83,7 +85,7 @@ Tests
   - test that saveScroll() doesn't break
   - test that feedback highlighting doesn't break
 - test that layers with { history: false } inherit that settings to child layers, even if the child layer was opened with { history: true }
-- Aborting a slow request emits :up:proxy:recover event
+- Aborting a slow request emits :up:request:recover event
 - Test that unsafe links are not preloaded (does that exist?)
 - Edge Cases for concurrent Layer Changes:
   - up.render()
@@ -113,7 +115,7 @@ Tests
 - Test new queue behavior
   - Size vs. preloadSize
   - Aborting of preload requests
-- Test up.proxy.config.requestMetaKeys
+- Test up.request.config.metaKeys
 - { onLoaded }, up:fragment:loaded
   - Should be preventable, preventing history changes and fragment updates
   - Allows listener to manipulate change options
@@ -141,13 +143,13 @@ Tests
   - Only for existing overlays we open will also attempt to place a new element as the
     new first child of the layer's root element. This mirrors the behavior that we get when
     opening a layer: The new element does not need to match anything in the current document.
-- Test: up:proxy:fatal is not emitted when a request was aborted
+- Test: up:request:fatal is not emitted when a request was aborted
 - Test that up.reload takes { params } option: `up.reload('.author-select', { params: result.id }) } }``
 - Test that event closers ({acceptEvent, dismissEvent}) can take both an array and a space-separated list of event types
 - Test: When a layer is accidentally removed from the DOM through a fragment update, it is either re-attached or dismissed (up.Layer#repair). In any case the stack is consistent after the update.
 - Test: History events are emitted on the history-enabled layer closest to the front
 - Test: Re-clicking the popup opener while the popup is open should close the popup instead of re-opening
-- Test that up:proxy:load has access to the { preload } attribute
+- Test that up:request:load has access to the { preload } attribute
 - Test that a modal opener with [up-instant] doesn't immediately close the new layer (because that closes on parent click)
 - Test that responses for a closed layer will not update anything
 - Test that up.validate will never update another layer, even if [up-layer] is set on the form and the server responds with 500
@@ -187,9 +189,9 @@ Tests
 - Test that proxy-events are emitted a second time on the document if the layer has been detached
 - Test that proxy-events don't crash when a request has { layer: 'new' }
 - Test that proxy-events don't crash when a request has no { layer }
-- Test and document up.proxy.abort().
-- Test and document up.proxy.abort(request)
-- Test and document up.proxy.abort(conditionsObj)
+- Test and document up.request.abort().
+- Test and document up.request.abort(request)
+- Test and document up.request.abort(conditionsObj)
 - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
 - Test that back button closes all layers
 - Test that up.render() can be called with { target: Element }
@@ -214,7 +216,7 @@ Tests
 - Test that ResetWorld is actually happening
 - Test that up.render({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
 - Test that we can submit a form into a new layer (success / fail)
-- Test up.proxy.abort()
+- Test up.request.abort()
 - Test that opening a new layer cancels requests that also open a new layer
 - Test { abort: 'conflict' } (is this now { solo: true }?)
 - Test that closing a layer cancels all requests for that layer
@@ -288,10 +290,10 @@ Docs
 - New up.Request properties (at least { origin }, { layer })
 - Publish up.Request#loadPage()
 - Document that { target } can be an array
-- Document up.proxy.abort().
-- Document up.proxy.abort(request)
-- Document up.proxy.abort(conditionsObj)
-- Document up:proxy:aborted
+- Document up.request.abort().
+- Document up.request.abort(request)
+- Document up.request.abort(conditionsObj)
+- Document up:request:aborted
 - More Documentation from Diff
 - CHANGELOG from diff
 
@@ -354,16 +356,6 @@ Later?
 - Instead of normalizing URL strings and carefully making sure to never double-normalize the same string (for performance reasons), have an exposed up.Location object that toString() to its origin URL. Normalizing can happen when comparing.
 - Make the { request } available to up:fragment:inserted, so we can have a variant of https://makandracards.com/makandra/79164 that does not react to { preload } events
 - When xhr.responseURL is not the requested URL, assume that there was a redirect and the response method is now GET
-- Rename request-related events
-  - up:request:load
-    up:request:loaded
-    up:request:fatal
-    up:request:aborted
-    up:network:slow
-    up:network:recover
-  - Possibly rename up.proxy to up.request?
-    - What about the up.request method?
-      - up.request.fetch()?
 - Allow shortcuts like up-any-target that set both success and fail options (if up-fail-options is not sufficient)
 - Allow placement of body in overlays with <up-body>
   - Then <body> can really be a default target for all fragments
@@ -385,14 +377,14 @@ Later?
 - Support :destroy pseudo-class up up.render() target
 - Do we need an API to change context from JS? from server via header?
 - Should up.reload / up.render etc. resolve to the updated elements?
-- There should be a preload() function in up.proxy, but that should also take a request
-  - For this we also need to decide whether up.proxy.preload() would reject unsafe requests
+- There should be a preload() function in up.request, but that should also take a request
+  - For this we also need to decide whether up.request.preload() would reject unsafe requests
 - form[up-target] without a target now looks funny
   - I now have form[up-follow] as a workaround
-- When up:proxy:load is prevented, the request should be resolved with an AbortError
+- When up:request:load is prevented, the request should be resolved with an AbortError
 - Replace up.Response.isSuccess() with up.Response#ok
 - Replace up.Response.isFatal() with !up.Response#body
-- Emit up:proxy:fatal when responses are aborted due to user or timeout
+- Emit up:request:fatal when responses are aborted due to user or timeout
 - up:fragment:inserted should receive the entire document from which the fragment was extracted
 - Support named layers
 - Better cache hits (uhm really?)

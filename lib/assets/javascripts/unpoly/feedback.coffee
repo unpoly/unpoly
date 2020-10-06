@@ -142,7 +142,7 @@ up.feedback = do ->
 
       button.addEventListener('click', () => {
         up.feedback.start(button)
-        up.request(...).then(() => {
+        up.fetch(...).then(() => {
           up.feedback.stop(button)
         })
       })
@@ -392,4 +392,4 @@ up.feedback = do ->
   aroundForOptions: aroundForOptions
   normalizeURL: normalizeURL
 
-up.legacy.renamedModule 'navigation', 'feedback'
+up.legacy.renamedPackage 'navigation', 'feedback'

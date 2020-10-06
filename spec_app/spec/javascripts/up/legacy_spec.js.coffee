@@ -3,7 +3,7 @@ $ = jQuery
 
 describe 'up.legacy', ->
 
-  describe 'renamedModule()', ->
+  describe 'renamedPackage()', ->
 
     it 'prints a warning and forwards the call to the new module', ->
       warnSpy = spyOn(up, 'warn')

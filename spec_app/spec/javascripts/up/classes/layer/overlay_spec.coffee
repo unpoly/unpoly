@@ -38,7 +38,7 @@ describe 'up.Layer.Overlay', ->
 
     it 'aborts pending requests for this layer', asyncSpec (next) ->
       abortedURLs = []
-      up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+      up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
       makeLayers(2)
 
@@ -54,7 +54,7 @@ describe 'up.Layer.Overlay', ->
 
     it 'does not abort a pending request for another layer', asyncSpec (next) ->
       abortedURLs = []
-      up.on 'up:proxy:aborted', (event) -> abortedURLs.push(event.request.url)
+      up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
       makeLayers(2)
 
