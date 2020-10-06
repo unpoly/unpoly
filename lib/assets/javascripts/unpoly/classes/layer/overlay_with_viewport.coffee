@@ -15,7 +15,7 @@ class up.Layer.OverlayWithViewport extends up.Layer.Overlay
     # might be swapped out with a new element.
     document.body
 
-    ###**
+  ###**
   @function up.Layer.OverlayWithViewport#openNow
   @param {Element} options.content
   ###

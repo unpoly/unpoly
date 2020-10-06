@@ -9,6 +9,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Unreleased
 ----------
 
+- up.request.isBusy() / isIdle() takes preload events into account
 -  up.observe() callback may return a promise that will prevent callback calls while running
 - `[aria-label]` attributes are no longer used to build a target selector
 - Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
