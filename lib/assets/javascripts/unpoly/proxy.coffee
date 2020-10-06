@@ -277,7 +277,7 @@ up.proxy = do ->
       cache.clear()
       return
 
-    if request.isSafe() && request.cache && (cachedRequest = cache.get(request))
+    if request.cache && (cachedRequest = cache.get(request))
       # If we have an existing promise matching this new request,
       # we use it unless `request.cache` is explicitly set to `false`.
       up.puts('up.request()', 'Re-using cached response for %s %s', request.method, request.url)
