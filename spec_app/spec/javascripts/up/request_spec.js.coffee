@@ -863,7 +863,6 @@ describe 'up.request', ->
             expect(@events).toEqual([
               'up:request:load'
             ])
-            expect(up.request.isBusy()).toBe(false)
 
           next =>
             # The same request with preloading does trigger up:request:slow.
@@ -874,7 +873,6 @@ describe 'up.request', ->
               'up:request:load',
               'up:request:slow'
             ])
-            expect(up.request.isBusy()).toBe(true)
 
           next =>
             # The response resolves both promises and makes
@@ -891,7 +889,6 @@ describe 'up.request', ->
               'up:request:loaded',
               'up:request:recover'
             ])
-            expect(up.request.isBusy()).toBe(false)
 
         it 'can delay the up:request:slow event to prevent flickering of spinners', asyncSpec (next) ->
           next =>

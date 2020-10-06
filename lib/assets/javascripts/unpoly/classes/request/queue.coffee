@@ -49,7 +49,7 @@ class up.Request.Queue extends up.Class
     return maxConcurrency == -1 || @currentRequests.length < maxConcurrency
 
   isBusy: ->
-    u.reject(@currentRequests, 'preload').length > 0
+    @currentRequests.length > 0
 
   queueRequest: (request) ->
     # Queue the request at the end of our FIFO queue.
