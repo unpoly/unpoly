@@ -6,33 +6,33 @@ e = up.element
 
 class up.FragmentScrolling
 
-  constructor: (options) ->
-    if u.isUndefined(options.scroll)
-      if u.isString(options.reveal)
-        up.legacy.deprecated("Option { reveal: '#{options.reveal}' }", "{ scroll: '#{options.reveal}' }")
-        options.scroll = options.reveal
-      else if options.reveal == true
+  constructor: (@options) ->
+    if u.isUndefined(@options.scroll)
+      if u.isString(@options.reveal)
+        up.legacy.deprecated("Option { reveal: '#{@options.reveal}' }", "{ scroll: '#{@options.reveal}' }")
+        @options.scroll = @options.reveal
+      else if @options.reveal == true
         up.legacy.deprecated('Option { reveal: true }', "{ scroll: 'target' }")
-        options.scroll = 'target'
-      else if options.reveal == false
+        @options.scroll = 'target'
+      else if @options.reveal == false
         up.legacy.deprecated('Option { reveal: false }', "{ scroll: false }")
-        options.scroll = false
+        @options.scroll = false
 
-      if u.isDefined(options.resetScroll)
+      if u.isDefined(@options.resetScroll)
         up.legacy.deprecated('Option { resetScroll: true }', "{ scroll: 'top' }")
-        options.scroll = 'top'
+        @options.scroll = 'top'
 
-      if u.isDefined(options.restoreScroll)
+      if u.isDefined(@options.restoreScroll)
         up.legacy.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
-        options.scroll = 'restore'
+        @options.scroll = 'restore'
 
-    @fragment = options.fragment or up.fail('Must pass a { fragment } option')
-    @autoMeans = options.autoMeans or up.fail('Must pass an { autoMeans } option')
-    @hash = options.hash
-    @origin = options.origin
-    @layer = options.layer or up.fail('Must pass a { layer } option')
-    @mode = options.mode
-    @scrollOptions = u.pick(options, ['revealTop', 'revealMax', 'revealSnap', 'scrollBehavior'])
+    @fragment = @options.fragment or up.fail('Must pass a { fragment } option')
+    @autoMeans = @options.autoMeans or up.fail('Must pass an { autoMeans } option')
+    @hash = @options.hash
+    @origin = @options.origin
+    @layer = @options.layer or up.fail('Must pass a { layer } option')
+    @mode = @options.mode
+    @scrollOptions = u.pick(@options, ['revealTop', 'revealMax', 'revealSnap', 'scrollBehavior'])
 
   process: (scrollOpt) ->
     # @tryProcess() returns undefined if an option cannot be applied.
@@ -52,12 +52,15 @@ class up.FragmentScrolling
         return @restore()
       when 'hash'
         return @hash && up.viewport.revealHash(@hash, @scrollOptions)
-      when 'target'
+      when 'target', 'reveal'
         return @revealElement(@fragment)
       when 'auto'
         return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
       else
-        return u.isString(scrollOpt) && @revealSelector(scrollOpt)
+        if u.isString(scrollOpt)
+          return @revealSelector(scrollOpt)
+        if u.isFunction(scrollOpt)
+          return scrollOpt(@options)
 
   revealSelector: (selector) ->
     getFragmentOpts = { @layer, @origin }

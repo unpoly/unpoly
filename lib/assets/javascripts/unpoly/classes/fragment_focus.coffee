@@ -5,12 +5,12 @@ PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
 class up.FragmentFocus
 
-  constructor: (options) ->
-    @fragment = options.fragment or up.fail('Must pass an { fragment } option')
-    @autoMeans = options.autoMeans or up.fail('Must pass an { autoMeans } option')
-    @layer = options.layer or up.fail('Must pass a { layer } option')
-    @origin = options.origin
-    @focusCapsule = options.focusCapsule
+  constructor: (@options) ->
+    @fragment = @options.fragment or up.fail('Must pass an { fragment } option')
+    @autoMeans = @options.autoMeans or up.fail('Must pass an { autoMeans } option')
+    @layer = @options.layer or up.fail('Must pass a { layer } option')
+    @origin = @options.origin
+    @focusCapsule = @options.focusCapsule
 
   process: (focusOpt) ->
     switch focusOpt
@@ -27,7 +27,10 @@ class up.FragmentFocus
       when 'auto'
         return u.find @autoMeans, (autoOpt) => @process(autoOpt)
       else
-        return u.isString(focusOpt) && @focusSelector(focusOpt)
+        if u.isString(focusOpt)
+          return @focusSelector(focusOpt)
+        if u.isFunction(focusOpt)
+          return focusOpt(@options)
 
   focusSelector: (selector) ->
     lookupOpts = { @layer, @origin }
