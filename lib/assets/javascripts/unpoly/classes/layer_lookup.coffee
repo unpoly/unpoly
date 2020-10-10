@@ -57,7 +57,7 @@ class up.LayerLookup
     if u.isElementish(value)
       return @forElement(value)
 
-    return switch (value || 'any')
+    return switch value
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
