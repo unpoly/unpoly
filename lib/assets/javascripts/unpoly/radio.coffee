@@ -97,9 +97,6 @@ up.radio = do ->
   @param [up-poll]
     The reload interval in milliseconds.
     Defaults to [`up.radio.config.pollInterval`](/up.radio.config#config.pollInterval).
-  @param [up-source]
-    The URL from which to reload the fragment.
-    Defaults to the URL from which this fragment was originally loaded.
   ###
   up.compiler '[up-poll]', startPolling
 
