@@ -56,7 +56,7 @@ up.radio = do ->
 
   # TODO: Docs for up.radio.startPolling()
   startPolling = (element, options = {}) ->
-    interval = options.interval ? e.numberAttr(element, 'up-poll') ? config.pollInterval
+    interval = options.interval ? e.numberAttr(element, 'up-inteval') ? config.pollInterval
     timer = null
 
     doReload = ->
@@ -83,9 +83,9 @@ up.radio = do ->
 
   \#\#\# Controlling the reload interval
 
-  The optional value of the `[up-poll]` attribute is the reload interval in milliseconds:
+  You may set an optional `[up-interval]` attribute to set the reload interval in milliseconds:
 
-      <div class="unread-count" up-poll="10000">
+      <div class="unread-count" up-poll up-interval="10000">
         2 new messages
       </div>
 
@@ -94,7 +94,7 @@ up.radio = do ->
       up.radio.config.pollInterval = 10000
 
   @selector [up-poll]
-  @param [up-poll]
+  @param [up-interval]
     The reload interval in milliseconds.
     Defaults to [`up.radio.config.pollInterval`](/up.radio.config#config.pollInterval).
   ###

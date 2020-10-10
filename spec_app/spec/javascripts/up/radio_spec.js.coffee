@@ -243,3 +243,5 @@ describe 'up.radio', ->
         next.after 75, ->
           expect(reloadSpy.calls.count()).toBe(1)
 
+      it 'allows to pass a polling interval per [up-interval] attribute'
+
