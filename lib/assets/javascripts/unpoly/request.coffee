@@ -536,7 +536,7 @@ requestPackage = do ->
   preload: preload
   cache: cache
   clear: ->
-    up.legacy.deprecated('up.request.clear()', 'up.cache.clear()')
+    up.legacy.deprecated('up.proxy.clear()', 'up.cache.clear()')
     return cache.clear()
   isIdle: isIdle
   isBusy: isBusy
@@ -547,17 +547,33 @@ requestPackage = do ->
   registerAliasForRedirect: registerAliasForRedirect
   queue: queue # for testing
   shouldPreload: shouldPreload
+  getMedianLoadTime: -> connectionSpeed.getMedianLoadTime()
 
 # We used to offer up.fetch() as a function, but it is now a package.
 # Hence the up.request object must be both a function and a hash-like object.
 up.request = (args...) ->
   up.legacy.deprecated('up.fetch()', 'up.fetch()')
   return up.fetch(args...)
-
 u.assign(up.request, requestPackage)
 
+###**
+The median load time of the most recent requests.
+
+The load time is the duration between the request being sent and the response being received.
+
+You may configure the number of requests being taken into account by setting [`up.request.config.loadTimeSamples`](/up.request.config#config.loadTimeSamples).
+
+@property up.request.medianLoadTime
+@param {number}
+  The median load time of the most recent requests.
+@experimental
+###
+u.getter(up.request, 'medianLoadTime', -> up.request.getMedianLoadTime())
+
+# up.request used to be called up.proxy
 up.legacy.renamedPackage('proxy', 'request')
 
+# Shortcuts
 up.ajax = up.request.ajax
 up.fetch = up.request.fetch
 up.cache = up.request.cache

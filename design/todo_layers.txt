@@ -29,10 +29,7 @@ TODOs
   - config.navigatePriority = 1000
   - Get rid of Request#preload
     - promoteToForeground should just max out the priorities
- - Measure Connection Speed: responseTime => loadTime
- - Measure Connection Speed: Use median, not mean
-- Consider up.request.averageLoadTime
-  - config.preloadSampleSize => config.medianLoadTime
+- Consider up.request.medianLoadTime
 
 - Offer up.Response#json
 - Close issues.

@@ -31,7 +31,10 @@ class up.ConnectionSpeed
 
   isSlowFromLoadTimes: ->
     if @loadTimes.length
-      u.naiveMedian(@loadTimes) > u.evalOption(@maxLoadTime)
+      @getMedianLoadTime() > u.evalOption(@maxLoadTime)
+
+  getMedianLoadTime: ->
+    u.naiveMedian(@loadTimes)
 
   isSlowFromNetInfo: ->
     # Network Information API Spec: https://wicg.github.io/netinfo/
