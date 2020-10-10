@@ -102,8 +102,8 @@ requestPackage = do ->
     concurrency: 4
     preloadEnabled: 'auto' # true | false | 'auto'
     preloadTimeout: 10 * 1000
-    preloadMaxResponseTime: 850
-    preloadSampleSize: 3 # set to 0 to prevent sampling, but still look at connection type and data saving setting
+    preloadMaxLoadTime: 850
+    loadTimeSamples: 7 # set to 0 to prevent sampling, but still look at connection type and data saving setting
     metaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
@@ -122,8 +122,8 @@ requestPackage = do ->
   cache = new up.Request.Cache()
 
   connectionSpeed = new up.ConnectionSpeed
-    sampleSize: -> config.preloadSampleSize
-    maxResponseTime: -> config.preloadMaxResponseTime
+    samples: -> config.loadTimeSamples
+    maxLoadTime: -> config.preloadMaxLoadTime
 
   ###**
   Returns a cached response for the given request.

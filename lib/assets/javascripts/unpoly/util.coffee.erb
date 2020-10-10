@@ -1741,7 +1741,13 @@ up.util = do ->
 #    before()
 #    return fn().finally(after)
 
-  average = (array) -> array.reduce((a, b) -> a + b) / array.length
+  naiveMedian = (list) ->
+    sorted = copy(list).sort()
+    midIndex = Math.floor(sorted.length / 2)
+    # A more correct implementation would, for arrays with even length,
+    # return the mean of the two values in the middle. This would need
+    # a little more code and also extra handling for empty arrays.
+    return sorted[midIndex] # returns undefined for empty arrays
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseURL: parseURL
@@ -1895,5 +1901,5 @@ up.util = do ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   renameKeys: renameKeys
-  average: average
+  naiveMedian: naiveMedian
 

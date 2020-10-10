@@ -3,35 +3,35 @@ u = up.util
 class up.ConnectionSpeed
 
   constructor: (options) ->
-    @sampleSize = options.sampleSize
-    @maxResponseTime = options.maxResponseTime
+    @samples = options.samples
+    @maxLoadTime = options.maxLoadTime
 
     @reset()
 
-    up.on 'up:request:loaded', (event) => @addResponseTime(event.request.startTime, event.response.endTime)
+    up.on 'up:request:loaded', (event) => @addLoadTime(event.request.startTime, event.response.endTime)
 
   reset: ->
-    @responseTimes = []
-    @addInitialResponseTime()
+    @loadTimes = []
+    @addInitialLoadTime()
 
-  addResponseTime: (startTime, endTime) ->
+  addLoadTime: (startTime, endTime) ->
     return unless startTime && endTime
 
-    @responseTimes.push(startTime - endTime)
+    @loadTimes.push(startTime - endTime)
 
-    if @responseTimes.length > u.evalOption(@sampleSize)
-      @responseTimes.shift()
+    if @loadTimes.length > u.evalOption(@samples)
+      @loadTimes.shift()
 
-  addInitialResponseTime: ->
+  addInitialLoadTime: ->
     if (performance = window.performance) && (timing = performance.timing)
-      @addResponseTime(timing.requestStart, timing.responseEnd)
+      @addLoadTime(timing.requestStart, timing.responseEnd)
 
   isSlow: ->
-    @isSlowFromNetInfo() && @isSlowFromResponseTimes()
+    @isSlowFromNetInfo() && @isSlowFromLoadTimes()
 
-  isSlowFromResponseTimes: ->
-    if @responseTimes.length
-      u.average(@responseTimes) > u.evalOption(@maxResponseTime)
+  isSlowFromLoadTimes: ->
+    if @loadTimes.length
+      u.naiveMedian(@loadTimes) > u.evalOption(@maxLoadTime)
 
   isSlowFromNetInfo: ->
     # Network Information API Spec: https://wicg.github.io/netinfo/
