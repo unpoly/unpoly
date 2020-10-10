@@ -1,4 +1,4 @@
- yTODOs
+TODOs
 -----
 
 - The current implementation of up:fragment:loaded is not helping the Laravel people with their JSON response. https://github.com/webstronauts/php-unpoly/issues/2
@@ -22,9 +22,25 @@
   - form[up-emit]
     - Event value is { params, ... params.toObject() }
     - existing [up-emit] is then only a[up-emit]
+- Normalize request URL to just the path for same-origin requests
+- Request priorities
+  - config.pollPriority = 50
+  - config.preloadPriority = -100
+  - config.navigatePriority = 1000
+  - Get rid of Request#preload
+    - promoteToForeground should just max out the priorities
+ - Measure Connection Speed: responseTime => loadTime
+ - Measure Connection Speed: Use median, not mean
+- Consider up.request.averageLoadTime
+  - config.preloadSampleSize => config.medianLoadTime
+
+- Offer up.Response#json
 - Close issues.
 - Move class methods of up.Params to up.params (lowercase)
 - Consider integrating up.radio into up.fragment
+- Rename class files to Uppercase
+- Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
+- Can we reset master to hk/layers without merging?
 
 
 
