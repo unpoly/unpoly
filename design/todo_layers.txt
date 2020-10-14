@@ -29,7 +29,6 @@ TODOs
   - config.navigatePriority = 1000
   - Get rid of Request#preload
     - promoteToForeground should just max out the priorities
-- Consider up.request.medianLoadTime
 
 - Offer up.Response#json
 - Close issues.

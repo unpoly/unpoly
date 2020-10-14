@@ -102,8 +102,6 @@ requestPackage = do ->
     concurrency: 4
     preloadEnabled: 'auto' # true | false | 'auto'
     preloadTimeout: 10 * 1000
-    preloadMaxLoadTime: 850
-    loadTimeSamples: 7 # set to 0 to prevent sampling, but still look at connection type and data saving setting
     metaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
@@ -120,10 +118,6 @@ requestPackage = do ->
   queue = new up.Request.Queue()
 
   cache = new up.Request.Cache()
-
-  connectionSpeed = new up.ConnectionSpeed
-    samples: -> config.loadTimeSamples
-    maxLoadTime: -> config.preloadMaxLoadTime
 
   ###**
   Returns a cached response for the given request.
@@ -396,12 +390,30 @@ requestPackage = do ->
   isBusy = ->
     queue.isBusy()
 
+  isSlowFromNetInfo = ->
+    # Browser support: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/connection
+    netInfo = navigator.connection
+
+    # connection.effectiveType is calculated from real user measurement on Chrome on Android:
+    #
+    # - "2g"      is RTT >= 1400 ms and downlink <=  70 Kbps
+    # - "slow-2g" is RTT >= 2000 ms and downlink <=  50 Kbps
+    # - "3g"      is RTT >=  270 ms and downlink <= 700 Kbps
+    # - "4g"      is anything better
+    #
+    # Spec draft: https://wicg.github.io/netinfo/
+    #
+    # connection.saveData has a spec draft here:
+    # https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
+    return netInfo && (netInfo.effectiveType?.includes('2g') || netInfo.saveData)
+
   shouldPreload = (request) ->
     setting = u.evalOption(config.preloadEnabled, request)
     if setting == 'auto'
-      return !connectionSpeed.isSlow()
-    else
-      setting
+      # Since connection.effectiveType might change during a session we need to
+      # re-evaluate the value every time.
+      return !isSlowFromNetInfo()
+    return setting
 
   abortRequests = (args...) ->
     queue.abort(args...)
@@ -547,7 +559,6 @@ requestPackage = do ->
   registerAliasForRedirect: registerAliasForRedirect
   queue: queue # for testing
   shouldPreload: shouldPreload
-  getMedianLoadTime: -> connectionSpeed.getMedianLoadTime()
 
 # We used to offer up.fetch() as a function, but it is now a package.
 # Hence the up.request object must be both a function and a hash-like object.
@@ -555,20 +566,6 @@ up.request = (args...) ->
   up.legacy.deprecated('up.fetch()', 'up.fetch()')
   return up.fetch(args...)
 u.assign(up.request, requestPackage)
-
-###**
-The median load time of the most recent requests.
-
-The load time is the duration between the request being sent and the response being received.
-
-You may configure the number of requests being taken into account by setting [`up.request.config.loadTimeSamples`](/up.request.config#config.loadTimeSamples).
-
-@property up.request.medianLoadTime
-@param {number}
-  The median load time of the most recent requests.
-@experimental
-###
-u.getter(up.request, 'medianLoadTime', -> up.request.getMedianLoadTime())
 
 # up.request used to be called up.proxy
 up.legacy.renamedPackage('proxy', 'request')
