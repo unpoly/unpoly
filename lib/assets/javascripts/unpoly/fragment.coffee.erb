@@ -209,7 +209,7 @@ up.fragment = do ->
     will be reset to the last known top position before a previous
     history change for the current URL.
   @param {boolean} [options.cache]
-    Whether to use a [cached response](/up.request) if available.
+    Whether to use a [cached response](/up.network) if available.
   @param {Object} [options.headers={}]
     An object of additional header key/value pairs to send along
     with the request.
@@ -246,7 +246,7 @@ up.fragment = do ->
 
     promise = promise.then ->
       if options.solo
-        up.request.abort()
+        up.network.abort()
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise

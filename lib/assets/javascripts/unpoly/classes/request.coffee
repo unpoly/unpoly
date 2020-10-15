@@ -62,7 +62,7 @@ class up.Request extends up.Record
   ###**
   A timeout in milliseconds.
 
-  If [`up.request.config.maxRequests`](/up.request.config#config.maxRequests) is set,
+  If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set,
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request#timeout
@@ -108,8 +108,8 @@ class up.Request extends up.Record
       'failTarget',
       'headers',
       'timeout',
-      'preload' # since up.request.request() options are sometimes wrapped in this class
-      'cache',  # since up.request.request() options are sometimes wrapped in this class
+      'preload' # since up.network.request() options are sometimes wrapped in this class
+      'cache',  # since up.network.request() options are sometimes wrapped in this class
 
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
@@ -130,7 +130,7 @@ class up.Request extends up.Record
   ###**
   Creates a new `up.Request` object.
 
-  This will not actually send the request over the network. For that use `up.fetch()`.
+  This will not actually send the request over the network. For that use `up.request()`.
 
   @constructor up.Request
   @param {string} attrs.url
@@ -154,7 +154,7 @@ class up.Request extends up.Record
 
     if @preload
       # Shorter timeout when preloading
-      @timeout ?= up.request.config.preloadTimeout
+      @timeout ?= up.network.config.preloadTimeout
       # Preloading requires caching.
       @cache = true
 
@@ -192,14 +192,14 @@ class up.Request extends up.Record
       # to be able to cancel it when the layers gets closed. We now
       # evict this property, since response.request.layer.element will
       # prevent the layer DOM tree from garbage collection while the response
-      # is cached by up.request.
+      # is cached by up.network.
       @layer = undefined
       @failLayer = undefined
 
       # We want to provide the triggering element as { origin } to the function
       # providing the CSRF function. We now evict this property, since
       # response.request.origin will prevent its (now maybe detached) DOM tree
-      # from garbage collection while the response is cached by up.request.
+      # from garbage collection while the response is cached by up.network.
       @origin = undefined
 
   extractHashFromURL: ->
@@ -218,7 +218,7 @@ class up.Request extends up.Record
       @params.clear()
 
   isSafe: ->
-    up.request.isSafeMethod(@method)
+    up.network.isSafeMethod(@method)
 
   load: ->
     # If the request was aborted before it was sent (e.g. because it was queued)
@@ -293,7 +293,7 @@ class up.Request extends up.Record
 
     # Abort all pending requests so their callbacks won't run
     # while we're already navigating away.
-    up.request.abort()
+    up.network.abort()
     new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
@@ -349,7 +349,7 @@ class up.Request extends up.Record
   # (2) become part of our @cacheKey().
   metaProps: ->
     props = {}
-    for key in up.request.config.metaKeys(@)
+    for key in up.network.config.metaKeys(@)
       value = this[key]
       if u.isGiven(value)
         props[key] = value

@@ -160,7 +160,7 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
-          up.request.config.cacheExpiry = 0
+          up.network.config.cacheExpiry = 0
 
           waitForBrowser = 150
 
@@ -229,7 +229,7 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
-          up.request.config.cacheExpiry = 0
+          up.network.config.cacheExpiry = 0
 
           waitForBrowser = 150
 
@@ -776,15 +776,15 @@ describe 'up.link', ->
             next =>
               expect('up-modal .content').toBeAttached()
 
-          it 'calls up.fetch() with a { preload: true } option', asyncSpec (next) ->
-            fetchSpy = spyOn(up, 'fetch')
+          it 'calls up.request() with a { preload: true } option', asyncSpec (next) ->
+            requestSpy = spyOn(up, 'request')
 
             $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
             up.hello($link)
             up.link.preload($link)
 
             next =>
-              expect(fetchSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
+              expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
   describe 'unobtrusive behavior', ->
 
@@ -1257,7 +1257,7 @@ describe 'up.link', ->
 
       beforeEach ->
         # Disable response time measuring for these tests
-        up.request.config.preloadEnabled = true
+        up.network.config.preloadEnabled = true
 
       it 'preloads the link destination when hovering, after a delay', asyncSpec (next) ->
         up.link.config.preloadDelay = 100

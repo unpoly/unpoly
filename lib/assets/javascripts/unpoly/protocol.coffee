@@ -263,7 +263,7 @@ up.protocol = do ->
     The name of the optional cookie the server can send to
     [signal the initial request method](/up.protocol#signaling-the-initial-request-method).
   @param {string} [config.methodParam='_method']
-    The name of the POST parameter when [wrapping HTTP methods](/up.request.config#config.wrapMethods)
+    The name of the POST parameter when [wrapping HTTP methods](/up.network.config#config.wrapMethods)
     in a `POST` request.
   @param {string} [config.csrfHeader='X-CSRF-Token']
     The name of the HTTP header that will include the

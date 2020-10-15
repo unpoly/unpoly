@@ -142,7 +142,7 @@ up.feedback = do ->
 
       button.addEventListener('click', () => {
         up.feedback.start(button)
-        up.fetch(...).then(() => {
+        up.request(...).then(() => {
           up.feedback.stop(button)
         })
       })

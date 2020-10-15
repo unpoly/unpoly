@@ -29,7 +29,7 @@ class up.Change.FromURL extends up.Change
       u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
     )
 
-    return @request = up.fetch(requestAttrs)
+    return @request = up.request(requestAttrs)
 
   onRequestSettled: (responseOrError) ->
     rejectWithFailedResponse = -> Promise.reject(responseOrError)

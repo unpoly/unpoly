@@ -2789,14 +2789,14 @@ describe 'up.fragment', ->
           change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
 
           next =>
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', url: '/path2', solo: true)
 
           next =>
             expect(change1Error).toBeError(/aborted/)
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
 
         it 'aborts the request of an existing change if the new change is made from local content', asyncSpec (next) ->
           fixture('.element')
@@ -2808,14 +2808,14 @@ describe 'up.fragment', ->
           change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
 
           next =>
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', content: 'local content', solo: true)
 
           next =>
             expect(change1Error).toBeError(/aborted/)
-            expect(up.request.queue.allRequests.length).toEqual(0)
+            expect(up.network.queue.allRequests.length).toEqual(0)
 
         it "does not abort an existing change's request when preloading", asyncSpec (next) ->
           fixture('.element')
@@ -2827,14 +2827,14 @@ describe 'up.fragment', ->
           change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
 
           next =>
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', url: '/path2', preload: true, solo: true)
 
           next =>
             expect(change1Error).toBeUndefined()
-            expect(up.request.queue.allRequests.length).toEqual(2)
+            expect(up.network.queue.allRequests.length).toEqual(2)
 
         it "aborts an existing change's request that was queued with { solo: false }", asyncSpec (next) ->
           fixture('.element')
@@ -2846,14 +2846,14 @@ describe 'up.fragment', ->
           change1Promise = up.render('.element', url: '/path1', solo: false).catch (e) -> change1Error = e
 
           next =>
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', url: '/path2', solo: true)
 
           next =>
             expect(change1Error).toBeError(/aborted/)
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
 
         it "does not abort an existing change's request when called with { solo: false }", asyncSpec (next) ->
           fixture('.element')
@@ -2865,14 +2865,14 @@ describe 'up.fragment', ->
           change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
 
           next =>
-            expect(up.request.queue.allRequests.length).toEqual(1)
+            expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', url: '/path2', solo: false)
 
           next =>
             expect(change1Error).toBeUndefined()
-            expect(up.request.queue.allRequests.length).toEqual(2)
+            expect(up.network.queue.allRequests.length).toEqual(2)
 
       describe 'handling of [up-keep] elements', ->
 

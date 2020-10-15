@@ -931,7 +931,7 @@ describe 'up.modal (deprecated)', ->
         next =>
           $link = $('up-overlay .content a')
           expect($link).toBeAttached()
-          up.request.preload($link)
+          up.network.preload($link)
 
         next =>
           @respondWith """

@@ -5,8 +5,8 @@ u = up.util
 class up.Request.Queue extends up.Class
 
   constructor: (options = {}) ->
-    @concurrency = options.concurrency ? -> up.request.config.concurrency
-    @slowDelay = options.slowDelay ? -> up.request.config.slowDelay
+    @concurrency = options.concurrency ? -> up.network.config.concurrency
+    @slowDelay = options.slowDelay ? -> up.network.config.slowDelay
     @reset()
 
   reset: ->
@@ -65,7 +65,7 @@ class up.Request.Queue extends up.Class
     return u.remove(@queuedRequests, request)
 
   sendRequestNow: (request) ->
-    if request.preload && !up.request.shouldPreload(request)
+    if request.preload && !up.network.shouldPreload(request)
       request.abort('Preloading is disabled')
     else if request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
       request.abort('Prevented by event listener')
@@ -76,9 +76,9 @@ class up.Request.Queue extends up.Class
   onRequestSettled: (request, responseOrError) ->
     u.remove(@currentRequests, request)
     if (responseOrError instanceof up.Response) && responseOrError.ok
-      up.request.registerAliasForRedirect(request, responseOrError)
+      up.network.registerAliasForRedirect(request, responseOrError)
 
-    # Check if we can emit up:request:recover after a previous up:request:slow event.
+    # Check if we can emit up:network:recover after a previous up:network:slow event.
     @checkSlow()
 
     u.microtask(=> @poke())
@@ -107,9 +107,9 @@ class up.Request.Queue extends up.Class
       @emittedSlow = currentSlow
 
       if currentSlow
-        up.emit('up:request:slow', log: 'Server is slow to respond')
+        up.emit('up:network:slow', log: 'Server is slow to respond')
       else
-        up.emit('up:request:recover', log: 'Slow requests were loaded')
+        up.emit('up:network:recover', log: 'Slow requests were loaded')
 
   isSlow: ->
     now = new Date()

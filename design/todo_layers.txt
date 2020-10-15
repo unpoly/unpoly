@@ -81,7 +81,7 @@ Tests
   - test that saveScroll() doesn't break
   - test that feedback highlighting doesn't break
 - test that layers with { history: false } inherit that settings to child layers, even if the child layer was opened with { history: true }
-- Aborting a slow request emits :up:request:recover event
+- Aborting a slow request emits :up:network:recover event
 - Test that unsafe links are not preloaded (does that exist?)
 - Edge Cases for concurrent Layer Changes:
   - up.render()
@@ -111,7 +111,7 @@ Tests
 - Test new queue behavior
   - Size vs. preloadSize
   - Aborting of preload requests
-- Test up.request.config.metaKeys
+- Test up.network.config.metaKeys
 - { onLoaded }, up:fragment:loaded
   - Should be preventable, preventing history changes and fragment updates
   - Allows listener to manipulate change options
@@ -185,9 +185,9 @@ Tests
 - Test that proxy-events are emitted a second time on the document if the layer has been detached
 - Test that proxy-events don't crash when a request has { layer: 'new' }
 - Test that proxy-events don't crash when a request has no { layer }
-- Test and document up.request.abort().
-- Test and document up.request.abort(request)
-- Test and document up.request.abort(conditionsObj)
+- Test and document up.network.abort().
+- Test and document up.network.abort(request)
+- Test and document up.network.abort(conditionsObj)
 - Test that all Change#execute() functions check if they're still applicable (or if the layer has been removed)
 - Test that back button closes all layers
 - Test that up.render() can be called with { target: Element }
@@ -212,7 +212,7 @@ Tests
 - Test that ResetWorld is actually happening
 - Test that up.render({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
 - Test that we can submit a form into a new layer (success / fail)
-- Test up.request.abort()
+- Test up.network.abort()
 - Test that opening a new layer cancels requests that also open a new layer
 - Test { abort: 'conflict' } (is this now { solo: true }?)
 - Test that closing a layer cancels all requests for that layer
@@ -286,9 +286,9 @@ Docs
 - New up.Request properties (at least { origin }, { layer })
 - Publish up.Request#loadPage()
 - Document that { target } can be an array
-- Document up.request.abort().
-- Document up.request.abort(request)
-- Document up.request.abort(conditionsObj)
+- Document up.network.abort().
+- Document up.network.abort(request)
+- Document up.network.abort(conditionsObj)
 - Document up:request:aborted
 - More Documentation from Diff
 - CHANGELOG from diff
@@ -373,8 +373,6 @@ Later?
 - Support :destroy pseudo-class up up.render() target
 - Do we need an API to change context from JS? from server via header?
 - Should up.reload / up.render etc. resolve to the updated elements?
-- There should be a preload() function in up.request, but that should also take a request
-  - For this we also need to decide whether up.request.preload() would reject unsafe requests
 - form[up-target] without a target now looks funny
   - I now have form[up-follow] as a workaround
 - When up:request:load is prevented, the request should be resolved with an AbortError

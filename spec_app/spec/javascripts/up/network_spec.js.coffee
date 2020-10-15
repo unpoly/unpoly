@@ -1,25 +1,25 @@
 u = up.util
 $ = jQuery
 
-describe 'up.request', ->
+describe 'up.network', ->
 
   beforeEach ->
     # Disable response time measuring for these tests
-    up.request.config.preloadEnabled = true
+    up.network.config.preloadEnabled = true
 
   describe 'JavaScript functions', ->
 
-    describe 'up.fetch()', ->
+    describe 'up.request()', ->
 
       it 'makes a request with the given URL and params', ->
-        up.fetch('/foo', params: { key: 'value' }, method: 'post')
+        up.request('/foo', params: { key: 'value' }, method: 'post')
         request = @lastRequest()
         expect(request.url).toMatchURL('/foo')
         expect(request.data()).toEqual(key: ['value'])
         expect(request.method).toEqual('POST')
 
       it 'also allows to pass the URL as a { url } option instead', ->
-        up.fetch(url: '/foo', params: { key: 'value' }, method: 'post')
+        up.request(url: '/foo', params: { key: 'value' }, method: 'post')
         request = @lastRequest()
         expect(request.url).toMatchURL('/foo')
         expect(request.data()).toEqual(key: ['value'])
@@ -27,7 +27,7 @@ describe 'up.request', ->
 
 #      it 'allows to pass in an up.Request instance instead of an options object', ->
 #        requestArg = new up.Request(url: '/foo', params: { key: 'value' }, method: 'post')
-#        up.fetch(requestArg)
+#        up.request(requestArg)
 #
 #        jasmineRequest = @lastRequest()
 #        expect(jasmineRequest.url).toMatchURL('/foo')
@@ -35,7 +35,7 @@ describe 'up.request', ->
 #        expect(jasmineRequest.method).toEqual('POST')
 
       it 'submits the replacement targets as HTTP headers, so the server may choose to only frender the requested fragments', asyncSpec (next) ->
-        up.fetch(url: '/foo', target: '.target', failTarget: '.fail-target')
+        up.request(url: '/foo', target: '.target', failTarget: '.fail-target')
 
         next =>
           request = @lastRequest()
@@ -43,7 +43,7 @@ describe 'up.request', ->
           expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
 
       it 'resolves to a Response object that contains information about the response and request', (done) ->
-        promise = up.fetch(
+        promise = up.request(
           url: '/url'
           params: { key: 'value' }
           method: 'post'
@@ -72,7 +72,7 @@ describe 'up.request', ->
             done()
 
       it 'resolves to a Response that contains the response headers', (done) ->
-        promise = up.fetch(url: '/url')
+        promise = up.request(url: '/url')
 
         u.task =>
           @respondWith
@@ -88,7 +88,7 @@ describe 'up.request', ->
           done()
 
       it "preserves the URL hash in a separate { hash } property, since although it isn't sent to server, code might need it to process the response", (done) ->
-        promise = up.fetch('/url#hash')
+        promise = up.request('/url#hash')
 
         u.task =>
           request = @lastRequest()
@@ -103,7 +103,7 @@ describe 'up.request', ->
             done()
 
       it 'does not send a X-Requested-With header that a server-side framework might use to detect AJAX requests and be "smart" about its response', (done) ->
-        up.fetch('/url')
+        up.request('/url')
 
         u.task =>
           headers = @lastRequest().requestHeaders
@@ -119,7 +119,7 @@ describe 'up.request', ->
           ]
 
           next =>
-            request = up.fetch({ url: '/foo', layer: 'root', failLayer: 'front' })
+            request = up.request({ url: '/foo', layer: 'root', failLayer: 'front' })
             expect(request.mode).toEqual('root')
             expect(request.failMode).toEqual('popup')
             expect(request.context).toEqual({ rootKey: 'rootValue' })
@@ -132,7 +132,7 @@ describe 'up.request', ->
           ]
 
           next =>
-            request = up.fetch({ url: '/foo', origin: up.layer.front.element })
+            request = up.request({ url: '/foo', origin: up.layer.front.element })
             expect(request.mode).toEqual('popup')
             expect(request.failMode).toEqual('popup')
             expect(request.context).toEqual({ popupKey: 'popupValue' })
@@ -145,7 +145,7 @@ describe 'up.request', ->
           ]
 
           next =>
-            request = up.fetch({ url: '/foo' })
+            request = up.request({ url: '/foo' })
             expect(request.mode).toEqual('popup')
             expect(request.failMode).toEqual('popup')
             expect(request.context).toEqual({ popupKey: 'popupValue' })
@@ -154,7 +154,7 @@ describe 'up.request', ->
       describe 'error handling', ->
 
         it 'rejects with up.Failed when there was a network error', (done) ->
-          request = up.fetch('/url')
+          request = up.request('/url')
 
           u.task =>
             @lastRequest().responseError()
@@ -166,7 +166,7 @@ describe 'up.request', ->
               done()
 
         it 'rejects with a non-ok up.Response when the server sends a 404 status code', (done) ->
-          request = up.fetch('/url')
+          request = up.request('/url')
 
           u.task =>
             @respondWith('text', status: 404)
@@ -179,7 +179,7 @@ describe 'up.request', ->
               done()
 
         it 'rejects with a non-ok up.Response when the server sends a 500 status code', (done) ->
-          request = up.fetch('/url')
+          request = up.request('/url')
 
           u.task =>
             @respondWith('text', status: 500)
@@ -192,7 +192,7 @@ describe 'up.request', ->
               done()
 
         it 'rejects with AbortError when the request times out', (done) ->
-          request = up.fetch('/url')
+          request = up.request('/url')
 
           u.task =>
             jasmine.clock().install() # required by responseTimeout()
@@ -206,7 +206,7 @@ describe 'up.request', ->
       describe 'when the server responds with an X-Up-Method header', ->
 
         it 'updates the { method } property in the response object', (done) ->
-          promise = up.fetch(
+          promise = up.request(
             url: '/url'
             params: { key: 'value' }
             method: 'post'
@@ -229,11 +229,11 @@ describe 'up.request', ->
 
       describe 'aborting', ->
 
-        it 'may be aborted with up.request.abort()', asyncSpec (next) ->
-          request = up.fetch('/url')
+        it 'may be aborted with up.network.abort()', asyncSpec (next) ->
+          request = up.request('/url')
 
           next ->
-            up.request.abort(request)
+            up.network.abort(request)
 
           next.await ->
             promiseState(request)
@@ -243,7 +243,7 @@ describe 'up.request', ->
             expect(result.value.name).toEqual('AbortError')
 
         it 'may be aborted with up.Request#abort()', asyncSpec (next) ->
-          request = up.fetch('/url')
+          request = up.request('/url')
 
           next ->
             request.abort()
@@ -257,7 +257,7 @@ describe 'up.request', ->
 
         it "may be aborted through an AbortController's { signal }", asyncSpec (next) ->
           abortController = new up.AbortController()
-          request = up.fetch('/url', signal: abortController.signal)
+          request = up.request('/url', signal: abortController.signal)
 
           next ->
             abortController.abort()
@@ -274,7 +274,7 @@ describe 'up.request', ->
           listener = jasmine.createSpy('event listener')
           up.on('up:request:aborted', listener)
 
-          request = up.fetch('/url', signal: abortController.signal)
+          request = up.request('/url', signal: abortController.signal)
 
           next ->
             abortController.abort()
@@ -287,11 +287,11 @@ describe 'up.request', ->
           listener = jasmine.createSpy('event listener')
           up.on('up:request:aborted', listener)
 
-          request = up.fetch('/url')
+          request = up.request('/url')
 
           next ->
-            up.request.abort(request)
-            up.request.abort(request)
+            up.network.abort(request)
+            up.network.abort(request)
 
           next ->
             expect(listener.calls.count()).toBe(1)
@@ -301,7 +301,7 @@ describe 'up.request', ->
           listener = jasmine.createSpy('event listener')
           up.on('up:request:aborted', listener)
 
-          request = up.fetch('/url', signal: abortController.signal)
+          request = up.request('/url', signal: abortController.signal)
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -329,7 +329,7 @@ describe 'up.request', ->
       describe 'when the server responds with an X-Up-Location header', ->
 
         it 'sets the { url } property on the response object', (done) ->
-          promise = up.fetch('/request-url#request-hash')
+          promise = up.request('/request-url#request-hash')
 
           u.task =>
             @respondWith
@@ -345,7 +345,7 @@ describe 'up.request', ->
         describe 'when caching', ->
 
           it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
-            up.fetch('/foo', cache: true)
+            up.request('/foo', cache: true)
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -355,14 +355,14 @@ describe 'up.request', ->
                   'X-Up-Method': 'GET'
 
             next =>
-              up.fetch('/bar', cache: true)
+              up.request('/bar', cache: true)
 
             next =>
               # See that the cached alias is used and no additional requests are made
               expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
-            up.fetch('/foo', method: 'post', cache: true) # POST requests are not cached
+            up.request('/foo', method: 'post', cache: true) # POST requests are not cached
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -372,14 +372,14 @@ describe 'up.request', ->
                   'X-Up-Method': 'GET'
 
             next =>
-              up.fetch('/bar', cache: true)
+              up.request('/bar', cache: true)
 
             next =>
               # See that an additional request was made
               expect(jasmine.Ajax.requests.count()).toEqual(2)
 
           it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
-            up.fetch('/foo', cache: true)
+            up.request('/foo', cache: true)
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -390,7 +390,7 @@ describe 'up.request', ->
                 status: 500
 
             next =>
-              up.fetch('/bar', cache: true)
+              up.request('/bar', cache: true)
 
             next =>
               # See that an additional request was made
@@ -399,7 +399,7 @@ describe 'up.request', ->
         describeCapability 'canInspectFormData', ->
 
           it "does not explode if the original request's { params } is a FormData object", asyncSpec (next) ->
-            up.fetch('/foo', method: 'post', params: new FormData()) # POST requests are not cached
+            up.request('/foo', method: 'post', params: new FormData()) # POST requests are not cached
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -409,7 +409,7 @@ describe 'up.request', ->
                   'X-Up-Method': 'GET'
 
             next =>
-              @secondAjaxPromise = up.fetch('/bar')
+              @secondAjaxPromise = up.request('/bar')
 
             next.await =>
               promiseState(@secondAjaxPromise).then (result) ->
@@ -419,7 +419,7 @@ describe 'up.request', ->
       describe 'when the XHR object has a { responseURL } property', ->
 
         it 'sets the { url } property on the response object', (done) ->
-          promise = up.fetch('/request-url#request-hash')
+          promise = up.request('/request-url#request-hash')
 
           u.task =>
             @respondWith
@@ -434,7 +434,7 @@ describe 'up.request', ->
         describe 'when caching', ->
 
           it 'considers a redirection URL an alias for the requested URL', asyncSpec (next) ->
-            up.fetch('/foo', cache: true)
+            up.request('/foo', cache: true)
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -442,14 +442,14 @@ describe 'up.request', ->
                 responseURL: '/bar'
 
             next =>
-              up.fetch('/bar', cache: true)
+              up.request('/bar', cache: true)
 
             next =>
               # See that the cached alias is used and no additional requests are made
               expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
-            up.fetch('/foo', method: 'post', cache: true) # POST requests are not cached
+            up.request('/foo', method: 'post', cache: true) # POST requests are not cached
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -457,14 +457,14 @@ describe 'up.request', ->
                 responseURL: '/bar'
 
             next =>
-              up.fetch('/bar', cache: true)
+              up.request('/bar', cache: true)
 
             next =>
               # See that an additional request was made
               expect(jasmine.Ajax.requests.count()).toEqual(2)
 
           it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
-            up.fetch('/foo', cache: true)
+            up.request('/foo', cache: true)
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -473,7 +473,7 @@ describe 'up.request', ->
                 status: 500
 
             next =>
-              up.fetch('/bar', cache: true)
+              up.request('/bar', cache: true)
 
       describe 'CSRF', ->
 
@@ -482,26 +482,26 @@ describe 'up.request', ->
           up.protocol.config.csrfToken = 'csrf-token'
 
         it 'sets a CSRF token in the header', asyncSpec (next) ->
-          up.fetch('/path', method: 'post')
+          up.request('/path', method: 'post')
           next =>
             headers = @lastRequest().requestHeaders
             expect(headers['csrf-header']).toEqual('csrf-token')
 
         it 'does not add a CSRF token if there is none', asyncSpec (next) ->
           up.protocol.config.csrfToken = ''
-          up.fetch('/path', method: 'post')
+          up.request('/path', method: 'post')
           next =>
             headers = @lastRequest().requestHeaders
             expect(headers['csrf-header']).toBeMissing()
 
         it 'does not add a CSRF token for GET requests', asyncSpec (next) ->
-          up.fetch('/path', method: 'get')
+          up.request('/path', method: 'get')
           next =>
             headers = @lastRequest().requestHeaders
             expect(headers['csrf-header']).toBeMissing()
 
         it 'does not add a CSRF token when loading content from another domain', asyncSpec (next) ->
-          up.fetch('http://other-domain.tld/path', method: 'post')
+          up.request('http://other-domain.tld/path', method: 'post')
           next =>
             headers = @lastRequest().requestHeaders
             expect(headers['csrf-header']).toBeMissing()
@@ -510,7 +510,7 @@ describe 'up.request', ->
 
         it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
           givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-          up.fetch(url: '/path', method: 'put', params: givenParams)
+          up.request(url: '/path', method: 'put', params: givenParams)
 
           next =>
             expect(@lastRequest().data()['foo-key']).toEqual(['foo-value'])
@@ -518,7 +518,7 @@ describe 'up.request', ->
 
         it "encodes the given params into the URL of a GET request", (done) ->
           givenParams = { 'foo-key': 'foo-value', 'bar-key': 'bar-value' }
-          promise = up.fetch(url: '/path', method: 'get', params: givenParams)
+          promise = up.request(url: '/path', method: 'get', params: givenParams)
 
           u.task =>
             expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
@@ -536,18 +536,18 @@ describe 'up.request', ->
       describe 'with { cache } option', ->
 
         it 'caches server responses for the configured duration', asyncSpec (next) ->
-          up.request.config.cacheExpiry = 200 # 1 second for test
+          up.network.config.cacheExpiry = 200 # 1 second for test
 
           responses = []
           trackResponse = (response) -> responses.push(response.text)
 
           next =>
-            up.fetch(url: '/foo', cache: true).then(trackResponse)
+            up.request(url: '/foo', cache: true).then(trackResponse)
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           next.after (10), =>
             # Send the same request for the same path
-            up.fetch(url: '/foo', cache: true).then(trackResponse)
+            up.request(url: '/foo', cache: true).then(trackResponse)
 
           next =>
             # See that only a single network request was triggered
@@ -566,7 +566,7 @@ describe 'up.request', ->
             # Send another request after another 3 minutes
             # The clock is now a total of 6 minutes after the first request,
             # exceeding the cache's retention time of 5 minutes.
-            up.fetch(url: '/foo', cache: true).then(trackResponse)
+            up.request(url: '/foo', cache: true).then(trackResponse)
 
             # See that we have triggered a second request
             expect(jasmine.Ajax.requests.count()).toEqual(2)
@@ -578,15 +578,15 @@ describe 'up.request', ->
             expect(responses).toEqual(['foo', 'foo', 'bar'])
 
         it "does not cache responses if config.cacheExpiry is 0", asyncSpec (next) ->
-          up.request.config.cacheExpiry = 0
-          next => up.fetch(url: '/foo', cache: true)
-          next => up.fetch(url: '/foo', cache: true)
+          up.network.config.cacheExpiry = 0
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "does not cache responses if config.cacheSize is 0", asyncSpec (next) ->
-          up.request.config.cacheSize = 0
-          next => up.fetch(url: '/foo', cache: true)
-          next => up.fetch(url: '/foo', cache: true)
+          up.network.config.cacheSize = 0
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it 'does not limit the number of cache entries if config.cacheSize is undefined'
@@ -594,84 +594,84 @@ describe 'up.request', ->
         it 'never discards old cache entries if config.cacheExpiry is undefined'
 
         it 'respects a config.cacheSize setting', asyncSpec (next) ->
-          up.request.config.cacheSize = 2
-          next => up.fetch(url: '/foo', cache: true)
-          next => up.fetch(url: '/bar', cache: true)
-          next => up.fetch(url: '/baz', cache: true)
-          next => up.fetch(url: '/foo', cache: true)
+          up.network.config.cacheSize = 2
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/bar', cache: true)
+          next => up.request(url: '/baz', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(4)
 
         it "doesn't reuse responses when asked for the same path, but different selectors", asyncSpec (next) ->
-          next => up.fetch(url: '/path', target: '.a', cache: true)
-          next => up.fetch(url: '/path', target: '.b', cache: true)
+          next => up.request(url: '/path', target: '.a', cache: true)
+          next => up.request(url: '/path', target: '.b', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "doesn't reuse responses when asked for the same path, but different params", asyncSpec (next) ->
-          next => up.fetch(url: '/path', params: { query: 'foo' }, cache: true)
-          next => up.fetch(url: '/path', params: { query: 'bar' }, cache: true)
+          next => up.request(url: '/path', params: { query: 'foo' }, cache: true)
+          next => up.request(url: '/path', params: { query: 'bar' }, cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
-          next => up.fetch(url: '/path', target: 'html', cache: true)
-          next => up.fetch(url: '/path', target: 'body', cache: true)
-          next => up.fetch(url: '/path', target: 'p', cache: true)
-          next => up.fetch(url: '/path', target: '.klass', cache: true)
+          next => up.request(url: '/path', target: 'html', cache: true)
+          next => up.request(url: '/path', target: 'body', cache: true)
+          next => up.request(url: '/path', target: 'p', cache: true)
+          next => up.request(url: '/path', target: '.klass', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", asyncSpec (next) ->
-          next => up.fetch(url: '/path', target: 'body', cache: true)
-          next => up.fetch(url: '/path', target: 'p', cache: true)
-          next => up.fetch(url: '/path', target: '.klass', cache: true)
+          next => up.request(url: '/path', target: 'body', cache: true)
+          next => up.request(url: '/path', target: 'p', cache: true)
+          next => up.request(url: '/path', target: '.klass', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
         it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", asyncSpec (next) ->
-          next => up.fetch(url: '/path', target: 'body', cache: true)
-          next => up.fetch(url: '/path', target: 'html', cache: true)
+          next => up.request(url: '/path', target: 'body', cache: true)
+          next => up.request(url: '/path', target: 'html', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "doesn't reuse responses for different paths", asyncSpec (next) ->
-          next => up.fetch(url: '/foo', cache: true)
-          next => up.fetch(url: '/bar', cache: true)
+          next => up.request(url: '/foo', cache: true)
+          next => up.request(url: '/bar', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         u.each ['GET', 'HEAD', 'OPTIONS'], (safeMethod) ->
 
           it "caches #{safeMethod} requests", asyncSpec (next) ->
-            next => up.fetch(url: '/foo', method: safeMethod, cache: true)
-            next => up.fetch(url: '/foo', method: safeMethod, cache: true)
+            next => up.request(url: '/foo', method: safeMethod, cache: true)
+            next => up.request(url: '/foo', method: safeMethod, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           it "does not cache #{safeMethod} requests with { cache: false }", asyncSpec (next) ->
-            next => up.fetch(url: '/foo', method: safeMethod, cache: false)
-            next => up.fetch(url: '/foo', method: safeMethod, cache: false)
+            next => up.request(url: '/foo', method: safeMethod, cache: false)
+            next => up.request(url: '/foo', method: safeMethod, cache: false)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         u.each ['POST', 'PUT', 'DELETE'], (unsafeMethod) ->
 
           it "does not cache #{unsafeMethod} requests", asyncSpec (next) ->
-            next => up.fetch(url: '/foo', method: unsafeMethod, cache: true)
-            next => up.fetch(url: '/foo', method: unsafeMethod, cache: true)
+            next => up.request(url: '/foo', method: unsafeMethod, cache: true)
+            next => up.request(url: '/foo', method: unsafeMethod, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
           it "clears the entire cache if a #{unsafeMethod} request is made", asyncSpec (next) ->
             safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
             unsafeRequestAttrs = { method: unsafeMethod, url: '/foo' }
 
-            up.fetch(safeRequestAttrs)
+            up.request(safeRequestAttrs)
             expect(safeRequestAttrs).toBeCached()
 
-            up.fetch(unsafeRequestAttrs)
+            up.request(unsafeRequestAttrs)
             expect(safeRequestAttrs).not.toBeCached()
 
         it 'does not cache responses with a non-200 status code', asyncSpec (next) ->
-          next => up.fetch(url: '/foo', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => @respondWith(status: 500, contentType: 'text/html', responseText: 'foo')
-          next => up.fetch(url: '/foo', cache: true)
+          next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it 'clears the cache if the server responds with an X-Up-Cache: clear header', asyncSpec (next) ->
-          up.fetch(url: '/foo', cache: true)
-          up.fetch(url: '/bar', cache: true)
+          up.request(url: '/foo', cache: true)
+          up.request(url: '/bar', cache: true)
           expect(url: '/foo').toBeCached()
           expect(url: '/bar').toBeCached()
 
@@ -689,21 +689,21 @@ describe 'up.request', ->
             expect(url: '/bar').not.toBeCached()
 
         it 'clears the cache when passed { cache: "clear" }', ->
-          up.fetch(url: '/foo', cache: true)
+          up.request(url: '/foo', cache: true)
           expect(url: '/foo').toBeCached()
 
-          up.fetch(url: '/bar', cache: 'clear')
+          up.request(url: '/bar', cache: 'clear')
           expect(url: '/foo').not.toBeCached()
 
       describe 'with config.wrapMethods set', ->
 
         it 'should be set by default', ->
-          expect(up.request.config.wrapMethods).toBePresent()
+          expect(up.network.config.wrapMethods).toBePresent()
 
         u.each ['GET', 'POST', 'HEAD', 'OPTIONS'], (method) ->
 
           it "does not change the method of a #{method} request", asyncSpec (next) ->
-            up.fetch(url: '/foo', method: method)
+            up.request(url: '/foo', method: method)
 
             next =>
               request = @lastRequest()
@@ -713,7 +713,7 @@ describe 'up.request', ->
         u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
 
           it "turns a #{method} request into a POST request and sends the actual method as a { _method } param to prevent unexpected redirect behavior (https://makandracards.com/makandra/38347)", asyncSpec (next) ->
-            up.fetch(url: '/foo', method: method)
+            up.request(url: '/foo', method: method)
 
             next =>
               request = @lastRequest()
@@ -724,14 +724,14 @@ describe 'up.request', ->
       describe 'with config.concurrency set', ->
 
         beforeEach ->
-          up.request.config.concurrency = 1
+          up.network.config.concurrency = 1
 
         it 'limits the number of concurrent requests', asyncSpec (next) ->
           responses = []
           trackResponse = (response) -> responses.push(response.text)
 
-          up.fetch(url: '/foo').then(trackResponse)
-          up.fetch(url: '/bar').then(trackResponse)
+          up.request(url: '/foo').then(trackResponse)
+          up.request(url: '/bar').then(trackResponse)
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1) # only one request was made
@@ -754,7 +754,7 @@ describe 'up.request', ->
         it 'emits an up:request:load event before the request touches the network', asyncSpec (next) ->
           listener = jasmine.createSpy('listener')
           up.on 'up:request:load', listener
-          up.fetch('/bar')
+          up.request('/bar')
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -774,7 +774,7 @@ describe 'up.request', ->
 
           up.on 'up:request:load', listener
 
-          promise = up.fetch('/bar')
+          promise = up.request('/bar')
 
           u.task ->
             expect(listener).toHaveBeenCalled()
@@ -786,7 +786,7 @@ describe 'up.request', ->
               done()
 
         it 'does not block the queue when an up:request:load event was prevented', (done) ->
-          up.request.config.concurrency = 1
+          up.network.config.concurrency = 1
 
           listener = jasmine.createSpy('listener').and.callFake (event) ->
             # only prevent the first request
@@ -795,8 +795,8 @@ describe 'up.request', ->
 
           up.on 'up:request:load', listener
 
-          promise1 = up.fetch('/path1')
-          promise2 = up.fetch('/path2')
+          promise1 = up.request('/path1')
+          promise2 = up.request('/path2')
 
           u.task =>
             expect(listener.calls.count()).toBe(2)
@@ -810,7 +810,7 @@ describe 'up.request', ->
 
           up.on 'up:request:load', listener
 
-          up.fetch('/path1')
+          up.request('/path1')
 
           u.task =>
             expect(@lastRequest().requestHeaders['X-From-Listener']).toEqual('foo')
@@ -822,7 +822,7 @@ describe 'up.request', ->
 
           up.on('up:request:load', listener)
 
-          up.fetch('/path1', method: 'post')
+          up.request('/path1', method: 'post')
 
           u.task =>
             expect(@lastRequest().params).toMatchParams(key: 'value')
@@ -834,7 +834,7 @@ describe 'up.request', ->
 
           up.on('up:request:load', listener)
 
-          up.fetch('/path1?key1=value1', params: { key2: 'value2' }, method: 'get')
+          up.request('/path1?key1=value1', params: { key2: 'value2' }, method: 'get')
 
           u.task =>
 
@@ -842,22 +842,22 @@ describe 'up.request', ->
             expect(@lastRequest().params).toMatchParams({})
             done()
 
-      describe 'up:request:slow and up:request:recover events', ->
+      describe 'up:network:slow and up:network:recover events', ->
 
         beforeEach ->
-          up.request.config.slowDelay = 0
+          up.network.config.slowDelay = 0
           @events = []
-          u.each ['up:request:load', 'up:request:loaded', 'up:request:slow', 'up:request:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) =>
+          u.each ['up:request:load', 'up:request:loaded', 'up:network:slow', 'up:network:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) =>
             up.on eventType, =>
               @events.push eventType
 
-        it 'emits an up:request:slow event if the server takes too long to respond'
+        it 'emits an up:network:slow event if the server takes too long to respond'
 
-        it 'does not emit an up:request:slow event if preloading', asyncSpec (next) ->
+        it 'does not emit an up:network:slow event if preloading', asyncSpec (next) ->
           next =>
             # A request for preloading preloading purposes
             # doesn't make us busy.
-            up.fetch(url: '/foo', preload: true)
+            up.request(url: '/foo', preload: true)
 
           next =>
             expect(@events).toEqual([
@@ -865,13 +865,13 @@ describe 'up.request', ->
             ])
 
           next =>
-            # The same request with preloading does trigger up:request:slow.
-            up.fetch(url: '/foo', cache: true)
+            # The same request with preloading does trigger up:network:slow.
+            up.request(url: '/foo', cache: true)
 
           next.after 10, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow'
+              'up:network:slow'
             ])
 
           next =>
@@ -885,15 +885,15 @@ describe 'up.request', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow',
+              'up:network:slow',
               'up:request:loaded',
-              'up:request:recover'
+              'up:network:recover'
             ])
 
-        it 'can delay the up:request:slow event to prevent flickering of spinners', asyncSpec (next) ->
+        it 'can delay the up:network:slow event to prevent flickering of spinners', asyncSpec (next) ->
           next =>
-            up.request.config.slowDelay = 50
-            up.fetch(url: '/foo')
+            up.network.config.slowDelay = 50
+            up.request(url: '/foo')
 
           next =>
             expect(@events).toEqual([
@@ -908,7 +908,7 @@ describe 'up.request', ->
           next.after 200, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow'
+              'up:network:slow'
             ])
 
           next =>
@@ -917,15 +917,15 @@ describe 'up.request', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow',
+              'up:network:slow',
               'up:request:loaded',
-              'up:request:recover'
+              'up:network:recover'
             ])
 
-        it 'does not emit up:request:recover if a delayed up:request:slow was never emitted due to a fast response', asyncSpec (next) ->
+        it 'does not emit up:network:recover if a delayed up:network:slow was never emitted due to a fast response', asyncSpec (next) ->
           next =>
-            up.request.config.slowDelay = 200
-            up.fetch(url: '/foo')
+            up.network.config.slowDelay = 200
+            up.request(url: '/foo')
 
           next =>
             expect(@events).toEqual([
@@ -944,14 +944,14 @@ describe 'up.request', ->
               'up:request:loaded'
             ])
 
-        it 'emits up:request:recover if a request returned but failed with an error code', asyncSpec (next) ->
+        it 'emits up:network:recover if a request returned but failed with an error code', asyncSpec (next) ->
           next =>
-            up.fetch(url: '/foo')
+            up.request(url: '/foo')
 
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow'
+              'up:network:slow'
             ])
 
           next =>
@@ -963,22 +963,22 @@ describe 'up.request', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow',
+              'up:network:slow',
               'up:request:loaded',
-              'up:request:recover'
+              'up:network:recover'
             ])
 
 
-        it 'emits up:request:recover if a request timed out', asyncSpec (next) ->
-          up.request.config.slowDelay = 10
+        it 'emits up:network:recover if a request timed out', asyncSpec (next) ->
+          up.network.config.slowDelay = 10
 
           next =>
-            up.fetch(url: '/foo')
+            up.request(url: '/foo')
 
           next.after 50, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow'
+              'up:network:slow'
             ])
 
           next =>
@@ -988,44 +988,44 @@ describe 'up.request', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow',
+              'up:network:slow',
               'up:request:aborted',
-              'up:request:recover'
+              'up:network:recover'
             ])
 
-        it 'emits up:request:recover if a request was aborted', asyncSpec (next) ->
-          up.request.config.slowDelay = 10
+        it 'emits up:network:recover if a request was aborted', asyncSpec (next) ->
+          up.network.config.slowDelay = 10
 
           next =>
-            @request = up.fetch(url: '/foo')
+            @request = up.request(url: '/foo')
 
           next.after 100, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow'
+              'up:network:slow'
             ])
 
           next =>
-            up.request.abort(@request)
+            up.network.abort(@request)
 
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow',
+              'up:network:slow',
               'up:request:aborted',
-              'up:request:recover'
+              'up:network:recover'
             ])
 
-        it 'emits up:request:recover if a request failed fatally', asyncSpec (next) ->
-          up.request.config.slowDelay = 10
+        it 'emits up:network:recover if a request failed fatally', asyncSpec (next) ->
+          up.network.config.slowDelay = 10
 
           next =>
-            @request = up.fetch(url: '/foo')
+            @request = up.request(url: '/foo')
 
           next.after 100, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow'
+              'up:network:slow'
             ])
 
           next =>
@@ -1034,21 +1034,21 @@ describe 'up.request', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:request:slow',
+              'up:network:slow',
               'up:request:fatal',
-              'up:request:recover'
+              'up:network:recover'
             ])
 
-    describe 'up.request.preload', ->
+    describe 'up.network.preload', ->
 
       it 'queues a request with attributes suitable for preloading', ->
-        request = up.request.preload({ url: '/foo' })
+        request = up.network.preload({ url: '/foo' })
         expect(request.preload).toBe(true)
         expect(request.cache).toBe(true)
-        expect(request.timeout).toBe(up.request.config.preloadTimeout)
+        expect(request.timeout).toBe(up.network.config.preloadTimeout)
 
       it 'throws an error when trying to preload an unsafe request', ->
-        preload = -> up.request.preload({ url: '/foo', method: 'put' })
+        preload = -> up.network.preload({ url: '/foo', method: 'put' })
         expect(preload).toThrowError(/will not preload a PUT request/i)
 
     describe 'up.ajax', ->
@@ -1068,20 +1068,11 @@ describe 'up.request', ->
           promise.catch (reason) ->
             done.fail(reason)
 
-    describe 'up.request()', ->
-
-      it 'forwards the call to up.fetch()', ->
-        fetchSpy = spyOn(up, 'fetch')
-
-        up.request(url: '/foo')
-
-        expect(fetchSpy).toHaveBeenCalledWith(url: '/foo')
-
     describe 'up.cache.get()', ->
 
       it 'returns an existing cache entry for the given request', ->
         requestAttrs = { url: '/foo', params: { key: 'value' }, cache: true }
-        up.fetch(requestAttrs)
+        up.request(requestAttrs)
         expect(requestAttrs).toBeCached()
 
       it 'returns undefined if the given request is not cached', ->
@@ -1094,7 +1085,7 @@ describe 'up.request', ->
     describe 'up.cache.alias()', ->
 
       it 'uses an existing cache entry for another request (used in case of redirects)', ->
-        up.fetch({ url: '/foo', cache: true })
+        up.request({ url: '/foo', cache: true })
         expect({ url: '/foo' }).toBeCached()
         expect({ url: '/bar' }).not.toBeCached()
 
@@ -1112,7 +1103,7 @@ describe 'up.request', ->
     describe 'up.cache.clear()', ->
 
       it 'removes all cache entries', ->
-        up.fetch(url: '/foo', cache: true)
+        up.request(url: '/foo', cache: true)
         expect(url: '/foo').toBeCached()
         up.cache.clear()
         expect(url: '/foo').not.toBeCached()

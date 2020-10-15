@@ -5,10 +5,10 @@ u = up.util
 class up.Request.Cache extends up.Cache
 
   maxKeys: ->
-    up.request.config.cacheSize
+    up.network.config.cacheSize
 
   expiryMillis: ->
-    up.request.config.cacheExpiry
+    up.network.config.cacheExpiry
 
   normalizeStoreKey: (key) ->
     up.Request.wrap(key).cacheKey()

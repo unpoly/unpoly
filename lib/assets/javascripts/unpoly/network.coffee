@@ -14,12 +14,12 @@ All Unpoly functions and selectors go through this cache, unless
 you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
 
 The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
-[`up.request.config`](/up.request.config), or clear the cache manually using [`up.cache.clear()`](/up.cache.clear).
+[`up.network.config`](/up.network.config), or clear the cache manually using [`up.cache.clear()`](/up.cache.clear).
 
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
 
 If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
-use [`up.fetch()`](/up.request).
+use [`up.request()`](/up.request).
 
 \#\#\# Preloading links
 
@@ -30,7 +30,7 @@ the user releases the mouse/finger.
 
 \#\#\# Spinners
 
-You can listen to the [`up:request:slow`](/up:request:slow) event to implement a spinner
+You can listen to the [`up:network:slow`](/up:network:slow) event to implement a spinner
 that appears during a long-running request.
 
 \#\#\# More acceleration
@@ -42,9 +42,9 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 
 @module up.request
 ###
-requestPackage = do ->
+up.network = do ->
   ###**
-  @property up.request.config
+  @property up.network.config
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
@@ -55,7 +55,7 @@ requestPackage = do ->
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
   @param {number} [config.slowDelay=300]
-    How long the proxy waits until emitting the [`up:request:slow` event](/up:request:slow).
+    How long the proxy waits until emitting the [`up:network:slow` event](/up:network:slow).
     Use this to prevent flickering of spinners.
   @param {number} [config.maxRequests=4]
     The maximum number of concurrent requests to allow before additional
@@ -171,7 +171,7 @@ requestPackage = do ->
   ###**
   Manually removes the given request from the cache.
 
-  You can also [configure](/up.request.config) when the proxy
+  You can also [configure](/up.network.config) when the proxy
   automatically removes cache entries.
 
   @function up.cache.remove
@@ -192,7 +192,7 @@ requestPackage = do ->
 
   \#\#\# Example
 
-      up.fetch('/search', { params: { query: 'sunshine' } }).then(function(response) {
+      up.request('/search', { params: { query: 'sunshine' } }).then(function(response) {
         console.log('The response text is %o', response.text)
       }).catch(function() {
         console.error('The request failed')
@@ -203,7 +203,7 @@ requestPackage = do ->
   All responses are cached by default. If requesting a URL with a non-`GET` method, the response will
   not be cached and the entire cache will be cleared.
 
-  You can configure caching with the [`up.request.config`](/up.request.config) property.
+  You can configure caching with the [`up.network.config`](/up.network.config) property.
 
   \#\#\# Events
 
@@ -232,7 +232,7 @@ requestPackage = do ->
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
-    If [`up.request.config.maxRequests`](/up.request.config#config.maxRequests) is set, the timeout
+    If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
   @param {string} [options.target='body']
     The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
@@ -242,7 +242,7 @@ requestPackage = do ->
     A promise for the response.
   @stable
   ###
-  fetch = (args...) ->
+  makeRequest = (args...) ->
     request = new up.Request(parseOptions(args))
     return useCachedRequest(request) || queueRequest(request)
 
@@ -255,7 +255,7 @@ requestPackage = do ->
     options.preload = true
     # The constructor of up.Request will set additional options when passed { preload: true }:
     # { cache: true, timeout: config.preloadTimeout }.
-    fetch(options)
+    makeRequest(options)
 
   parseOptions = (args) ->
     options = u.extractOptions(args)
@@ -273,18 +273,18 @@ requestPackage = do ->
     if request.cache && (cachedRequest = cache.get(request))
       # If we have an existing promise matching this new request,
       # we use it unless `request.cache` is explicitly set to `false`.
-      up.puts('up.fetch()', 'Re-using cached response for %s %s', request.method, request.url)
+      up.puts('up.request()', 'Re-using cached response for %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
-      # This might affect whether we're going to emit an up:request:slow event further
+      # This might affect whether we're going to emit an up:network:slow event further
       # down. Consider this case:
       #
       # - User preloads a request (1). We have a cache miss and connect to the network.
-      #   This will never trigger `up:request:slow`, because we only track foreground requests.
+      #   This will never trigger `up:network:slow`, because we only track foreground requests.
       # - User loads the same request (2) in the foreground (no preloading).
       #   We have a cache hit and receive the earlier request that is still preloading.
-      #   Now we *should* trigger `up:request:slow`.
-      # - The request (1) finishes. This triggers `up:request:recover`.
+      #   Now we *should* trigger `up:network:slow`.
+      # - The request (1) finishes. This triggers `up:network:recover`.
       unless request.preload
         queue.promoteToForeground(cachedRequest)
 
@@ -321,7 +321,7 @@ requestPackage = do ->
 
   \#\#\# Example
 
-      up.fetch('/search', { params: { query: 'sunshine' } }).then(function(text) {
+      up.request('/search', { params: { query: 'sunshine' } }).then(function(text) {
         console.log('The response text is %o', text)
       }).catch(function() {
         console.error('The request failed')
@@ -350,17 +350,17 @@ requestPackage = do ->
   @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 
-    If [`up.request.config.maxRequests`](/up.request.config#config.maxRequests) is set, the timeout
+    If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
   @return {Promise<string>}
     A promise for the response text.
   @deprecated
-    Use [`up.fetch()`](/up.request) instead.
+    Use [`up.request()`](/up.request) instead.
   ###
   ajax = (args...) ->
-    up.legacy.deprecated('up.ajax()', 'up.fetch()')
+    up.legacy.deprecated('up.ajax()', 'up.request()')
     pickResponseText = (response) -> return response.text
-    fetch(args...).then(pickResponseText)
+    makeRequest(args...).then(pickResponseText)
 
   ###**
   Returns `true` if the proxy is not currently waiting
@@ -368,7 +368,7 @@ requestPackage = do ->
 
   [Preload requests](/up.link.preload) will not be considered for this check.
 
-  @function up.request.isIdle
+  @function up.network.isIdle
   @return {boolean}
     Whether the proxy is idle
   @experimental
@@ -382,7 +382,7 @@ requestPackage = do ->
 
   [Preload requests](/up.link.preload) will not be considered for this check.
 
-  @function up.request.isBusy
+  @function up.network.isBusy
   @return {boolean}
     Whether the proxy is busy
   @experimental
@@ -396,8 +396,8 @@ requestPackage = do ->
 
     # connection.effectiveType is calculated from real user measurement on Chrome on Android:
     #
-    # - "2g"      is RTT >= 1400 ms and downlink <=  70 Kbps
     # - "slow-2g" is RTT >= 2000 ms and downlink <=  50 Kbps
+    # - "2g"      is RTT >= 1400 ms and downlink <=  70 Kbps
     # - "3g"      is RTT >=  270 ms and downlink <= 700 Kbps
     # - "4g"      is anything better
     #
@@ -423,21 +423,21 @@ requestPackage = do ->
   are taking long to finish.
 
   By default Unpoly will wait 300 ms for an AJAX request to finish
-  before emitting `up:request:slow`. You can configure this time like this:
+  before emitting `up:network:slow`. You can configure this time like this:
 
-      up.request.config.slowDelay = 150;
+      up.network.config.slowDelay = 150;
 
-  Once all responses have been received, an [`up:request:recover`](/up:request:recover)
+  Once all responses have been received, an [`up:network:recover`](/up:network:recover)
   will be emitted.
 
   Note that if additional requests are made while Unpoly is already busy
-  waiting, **no** additional `up:request:slow` events will be triggered.
+  waiting, **no** additional `up:network:slow` events will be triggered.
 
 
   \#\#\# Spinners
 
-  You can [listen](/up.on) to the `up:request:slow`
-  and [`up:request:recover`](/up:request:recover) events to implement a spinner
+  You can [listen](/up.on) to the `up:network:slow`
+  and [`up:network:recover`](/up:network:recover) events to implement a spinner
   that appears during a long-running request,
   and disappears once the response has been received:
 
@@ -452,31 +452,31 @@ requestPackage = do ->
         hide()
 
         return [
-          up.on('up:request:slow', show),
-          up.on('up:request:recover', hide)
+          up.on('up:network:slow', show),
+          up.on('up:network:recover', hide)
         ]
       })
 
-  The `up:request:slow` event will be emitted after a delay of 300 ms
+  The `up:network:slow` event will be emitted after a delay of 300 ms
   to prevent the spinner from flickering on and off.
-  You can change (or remove) this delay by [configuring `up.request`](/up.request.config) like this:
+  You can change (or remove) this delay like this:
 
-      up.request.config.slowDelay = 150;
+      up.network.config.slowDelay = 150;
 
 
-  @event up:request:slow
+  @event up:network:slow
   @stable
   ###
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
-  have [taken long to finish](/up:request:slow), but have finished now.
+  have [taken long to finish](/up:network:slow), but have finished now.
 
-  See [`up:request:slow`](/up:request:slow) for more documentation on
+  See [`up:network:slow`](/up:network:slow) for more documentation on
   how to use this event for implementing a spinner that shows during
   long-running requests.
 
-  @event up:request:recover
+  @event up:network:recover
   @stable
   ###
 
@@ -517,7 +517,7 @@ requestPackage = do ->
   ###**
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters fatal error like a timeout, loss of network connectivity,
-  or when the request was [aborted](/up.request.abort).
+  or when the request was [aborted](/up.network.abort).
 
   Note that this event will *not* be emitted when the server produces an
   error message with an HTTP status like `500`. When the server can produce
@@ -544,7 +544,7 @@ requestPackage = do ->
   up.on 'up:framework:reset', reset
 
   ajax: ajax
-  fetch: fetch
+  request: makeRequest
   preload: preload
   cache: cache
   clear: ->
@@ -560,22 +560,15 @@ requestPackage = do ->
   queue: queue # for testing
   shouldPreload: shouldPreload
 
-# We used to offer up.fetch() as a function, but it is now a package.
-# Hence the up.request object must be both a function and a hash-like object.
-up.request = (args...) ->
-  up.legacy.deprecated('up.fetch()', 'up.fetch()')
-  return up.fetch(args...)
-u.assign(up.request, requestPackage)
+up.request = up.network.request
+up.ajax = up.network.ajax
+up.cache = up.network.cache
 
-# up.request used to be called up.proxy
-up.legacy.renamedPackage('proxy', 'request')
-
-# Shortcuts
-up.ajax = up.request.ajax
-up.fetch = up.request.fetch
-up.cache = up.request.cache
-
-# Forward up.on() calls listening to a deprecated event type.
-for name in ['load', 'loaded', 'fatal', 'aborted', 'slow', 'recover']
-  up.legacy.renamedEvent("up:proxy:#{name}", "up:request:#{name}")
-up.legacy.renamedEvent('up:proxy:received', 'up:proxy:loaded')
+up.legacy.renamedPackage('proxy', 'network')
+up.legacy.renamedEvent('up:proxy:load',     'up:request:load')    # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:received', 'up:request:loaded')  # renamed in 0.50.0
+up.legacy.renamedEvent('up:proxy:loaded',   'up:request:loaded')  # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:fatal',    'up:request:fatal')   # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:aborted',  'up:request:aborted') # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:slow',     'up:network:slow')    # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:slow',     'up:network:recover') # renamed in 1.0.0
