@@ -101,6 +101,10 @@ up.network = do ->
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
     preloadEnabled: 'auto' # true | false | 'auto'
+    # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
+    # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
+    preloadMinDownlink: 0.6
+    preloadMaxRTT: 750
     preloadTimeout: 10 * 1000
     metaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
@@ -391,21 +395,14 @@ up.network = do ->
     queue.isBusy()
 
   isSlowFromNetInfo = ->
-    # Browser support: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/connection
-    netInfo = navigator.connection
-
-    # connection.effectiveType is calculated from real user measurement on Chrome on Android:
-    #
-    # - "slow-2g" is RTT >= 2000 ms and downlink <=  50 Kbps
-    # - "2g"      is RTT >= 1400 ms and downlink <=  70 Kbps
-    # - "3g"      is RTT >=  270 ms and downlink <= 700 Kbps
-    # - "4g"      is anything better
-    #
-    # Spec draft: https://wicg.github.io/netinfo/
-    #
-    # connection.saveData has a spec draft here:
-    # https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
-    return netInfo && (netInfo.effectiveType?.includes('2g') || netInfo.saveData)
+    # Browser support for navigator.connection: https://caniuse.com/?search=networkinformation
+    if netInfo = navigator.connection
+      # API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
+      # API for NetworkInformation#rtt:      https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
+      # API for NetworkInformation#saveData: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
+      return netInfo.saveData ||
+        (netInfo.rtt      && netInfo.rtt      > config.preloadMaxRTT) ||
+        (netInfo.downlink && netInfo.downlink < config.preloadMinDownlink)
 
   shouldPreload = (request) ->
     setting = u.evalOption(config.preloadEnabled, request)
