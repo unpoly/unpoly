@@ -188,7 +188,7 @@ up.link = do ->
     parser.string('confirm')                   #  preflight / same
     parser.string('target')                    # differs
     parser.booleanOrString('fallback')         # inherit,
-    parser.parse(((link, attrName) -> e.callbackAttr(link, attrName, ['request', 'response', 'change'])), 'onLoaded') # same
+    parser.parse(((link, attrName) -> e.callbackAttr(link, attrName, ['request', 'response', 'renderOptions'])), 'onLoaded') # same
     parser.string('content')                   # no fail branch when passing local content
     parser.string('fragment')                  # no fail branch when passing local content
     parser.string('document')                  # no fail branch when passing local content
