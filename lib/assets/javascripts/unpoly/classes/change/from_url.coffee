@@ -15,6 +15,8 @@ class up.Change.FromURL extends up.Change
 
     promise = @makeRequest()
     unless @successOptions.preload
+      # Use always() since onRequestSettled() will decide whether the promise
+      # will be fulfilled or rejected.
       promise = u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
 
     return promise

@@ -1096,8 +1096,8 @@ up.util = do ->
   @function up.util.only
   @param {Object} object
   @param {Array} keys...
-  @stable
   @deprecated
+    Use `up.util.pick()` instead.
   ###
   only = (object, keys...) ->
     up.legacy.deprecated('up.util.only(object, keys...)', 'up.util.pick(object, keys)')
@@ -1134,8 +1134,8 @@ up.util = do ->
   @function up.util.except
   @param {Object} object
   @param {Array} keys...
-  @stable
   @deprecated
+    Use `up.util.omit()` instead.
   ###
   except = (object, keys...) ->
     up.legacy.deprecated('up.util.except(object, keys...)', 'up.util.omit(object, keys)')
@@ -1394,10 +1394,27 @@ up.util = do ->
   always = (promise, callback) ->
     promise.then(callback, callback)
 
+#  mutedFinally = (promise, callback) ->
+#    # Use finally() instead of always() so we don't accidentally
+#    # register a rejection handler, which would prevent an "Uncaught in Exception" error.
+#    finallyDone = promise.finally(callback)
+#
+#    # Since finally's return value is itself a promise with the same state
+#    # as `promise`, we don't want to see "Uncaught in Exception".
+#    # If we didn't do this, we couldn't mute rejections in `promise`:
+#    #
+#    #     promise = new Promise(...)
+#    #     promise.finally(function() { ... })
+#    #     up.util.muteRejection(promise) // has no effect
+#    muteRejection(finallyDone)
+#
+#    # Return the original promise and *not* finally's return value.
+#    return promise
+
   ###**
   # Registers an empty rejection handler with the given promise.
   # This prevents browsers from printing "Uncaught (in promise)" to the error
-  # console when the promise is rejection.
+  # console when the promise is rejected.
   #
   # This is helpful for event handlers where it is clear that no rejection
   # handler will be registered:
@@ -1412,7 +1429,7 @@ up.util = do ->
   # @function up.util.muteRejection
   # @param {Promise|undefined|null} promise
   # @return {Promise}
-  # @experimental
+  # @internal
   ###
   muteRejection = (promise) ->
     return promise?.catch(noop)
@@ -1852,6 +1869,7 @@ up.util = do ->
   isTruthy: isTruthy
   newDeferred: newDeferred
   always: always
+  # mutedFinally: mutedFinally
   muteRejection: muteRejection
   rejectOnError: rejectOnError
   isBasicObjectProperty: isBasicObjectProperty

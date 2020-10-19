@@ -40,4 +40,4 @@ class up.LinkPreloadDelay
 
   preloadNow: (link) ->
     @abortController = new up.AbortController()
-    u.muteRejection up.link.preload(link, signal: @abortController.signal)
+    up.log.muteRejection up.link.preload(link, signal: @abortController.signal)

@@ -155,6 +155,28 @@ up.log = do ->
     printToError('error', args...)
     throw up.error.failed(args)
 
+  ###**
+  # Registers an empty rejection handler with the given promise.
+  # This prevents browsers from printing "Uncaught (in promise)" to the error
+  # console when the promise is rejected.
+  #
+  # This is helpful for event handlers where it is clear that no rejection
+  # handler will be registered:
+  #
+  #     up.on('submit', 'form[up-target]', (event, $form) => {
+  #       promise = up.submit($form)
+  #       up.util.muteRejection(promise)
+  #     })
+  #
+  # Does nothing if passed a missing value.
+  #
+  # Does nothing if the log is [enabled](/up.log.enable).
+  #
+  # @function up.log.muteRejection
+  # @param {Promise|undefined|null} promise
+  # @return {Promise}
+  # @internal
+  ###
   muteRejection = (promise) ->
     if config.enabled
       return promise

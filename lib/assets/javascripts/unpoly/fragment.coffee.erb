@@ -312,7 +312,6 @@ up.fragment = do ->
     A promise that is fulfilled when the page has been updated.
   @deprecated
     Use `up.render()` instead.
-  @stable
   ###
   replace = (target, url, options) ->
     up.legacy.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')

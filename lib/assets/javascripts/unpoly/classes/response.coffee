@@ -110,8 +110,8 @@ class up.Response extends up.Record
 
   @function up.Response#isSuccess
   @return {boolean}
-  @experimental
   @deprecated
+    Use `up.Response#ok` instead.
   ###
   isSuccess: ->
     up.legacy.deprecated('up.Response#isSuccess()', 'up.Response#ok')
@@ -133,8 +133,8 @@ class up.Response extends up.Record
 
   @function up.Response#isError
   @return {boolean}
-  @experimental
   @deprecated
+    Use `!up.Response#ok` instead.
   ###
   isError: ->
     up.legacy.deprecated('up.Response#isError()', '!up.Response#ok')
@@ -167,6 +167,11 @@ class up.Response extends up.Record
 
   ###**
   The response body parsed as a JSON string.
+
+  \#\#\# Example
+
+      response = await up.request('/profile.json')
+      console.log("User name is " + response.json.name)
 
   @property up.Response#json
   @param {Object} json

@@ -171,10 +171,6 @@ class up.Request extends up.Record
     # deferred object.
     @deferred = u.newDeferred()
 
-    @finally => @evictExpensiveAttrs()
-
-    @signal?.addEventListener('abort', => @abort())
-
   @delegate ['then', 'catch', 'finally'], 'deferred'
 
   normalize: ->
@@ -220,6 +216,11 @@ class up.Request extends up.Record
   isSafe: ->
     up.network.isSafeMethod(@method)
 
+  willQueue: ->
+    u.always(this, => @evictExpensiveAttrs())
+
+    @signal?.addEventListener('abort', => @abort())
+
   load: ->
     # If the request was aborted before it was sent (e.g. because it was queued)
     # we don't send it.
@@ -263,10 +264,10 @@ class up.Request extends up.Record
     @setAbortedState(reason)
     @xhr?.abort()
 
-  setAbortedState: (reason = 'Request was aborted') ->
+  setAbortedState: (reason = "Request was aborted") ->
     return unless @state == 'new' || @state == 'loading'
-    @emit('up:request:aborted', log: reason)
     @state = 'aborted'
+    @emit('up:request:aborted', log: reason)
     @deferred.reject(up.error.aborted(reason))
 
   respondWith: (response) ->

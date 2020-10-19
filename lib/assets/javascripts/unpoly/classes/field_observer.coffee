@@ -54,9 +54,9 @@ class up.FieldObserver
 
       # Promise.all() will wait for any promises that might be
       # contained in the `callbackReturnValues` array.
-      callbacksDone = Promise.all(callbackReturnValues)
+      callbacksDone = Promise.allSettled(callbackReturnValues)
 
-      callbacksDone.finally =>
+      callbacksDone.then =>
         @callbackRunning = false
         @requestCallback()
 
