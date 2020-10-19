@@ -36,7 +36,7 @@ class up.Response extends up.Record
   using an [`X-Up-Location: /new-url` header](/up.protocol#redirect-detection).
 
   @property up.Response#url
-  @param {string} method
+  @param {string} url
   @stable
   ###
 
@@ -84,7 +84,7 @@ class up.Response extends up.Record
 
   @property up.Response#title
   @param {string} [title]
-  @stable
+  @experimental
   ###
   keys: ->
     [
@@ -121,8 +121,8 @@ class up.Response extends up.Record
   Returns whether the server responded with a 2xx HTTP status.
 
   @property up.Response#ok
-  @return {boolean}
-  @experimental
+  @param {boolean} ok
+  @stable
   ###
   @getter 'ok', ->
     # 0 is falsy in JavaScript
@@ -155,6 +155,22 @@ class up.Response extends up.Record
   getHeader: (name) ->
     @headers[name] || @xhr?.getResponseHeader(name)
 
+  ###**
+  The response's [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+
+  @property up.Response#contentType
+  @param {string} contentType
+  @experimental
+  ###
   @getter 'contentType', ->
     @getHeader('Content-Type')
 
+  ###**
+  The response body parsed as a JSON string.
+
+  @property up.Response#json
+  @param {Object} json
+  @stable
+  ###
+  @getter 'json', ->
+    return @parsedJSON ||= JSON.parse(@text)

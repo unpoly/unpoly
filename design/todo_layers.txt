@@ -2,10 +2,6 @@ TODOs
 -----
 
 - The current implementation of up:fragment:loaded is not helping the Laravel people with their JSON response. https://github.com/webstronauts/php-unpoly/issues/2
-- Test { scroll: "auto" }
-  - hash
-  - mains
-  - nothing
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
 - Release as 1.0.0 or 2.0.0
@@ -15,13 +11,6 @@ TODOs
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
-- Is there a use case for this?
-  - form[up-accept], form[up-dismiss]
-    - Resolution value is { params, ... params.toObject() }
-    - existing [up-accept] is then only a[up-accept]
-  - form[up-emit]
-    - Event value is { params, ... params.toObject() }
-    - existing [up-emit] is then only a[up-emit]
 - Normalize request URL to just the path for same-origin requests
 - Request priorities
   - config.pollPriority = 50
@@ -29,19 +18,12 @@ TODOs
   - config.navigatePriority = 1000
   - Get rid of Request#preload
     - promoteToForeground should just max out the priorities
-- CSP-Support
-  - Allow all event handlers to have a "#foo", which can be registered as up.action('foo', function(event) { ... })
-    - For this up-observe needs to be an event
-- What is [up-on-keep]?
-- up.syntax => up.behavior
-  - up.hello into up.behavior
 - Offer up.Response#json
-- Close issues.
 - Move class methods of up.Params to up.params (lowercase)
-- Consider integrating up.radio into up.fragment
 - Rename class files to Uppercase
 - Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
 - Can we reset master to hk/layers without merging?
+- Close issues.
 
 
 
@@ -55,6 +37,10 @@ Manual tests
 Tests
 -----
 
+- Test { scroll: "auto" }
+  - hash
+  - mains
+  - nothing
 - Test that up.viewport.saveScroll() only saves scroll positions for the current layer
 - Test that user can target :none
 - Test that :layer will target the current content root of a layer
@@ -303,6 +289,15 @@ Docs
 Later?
 ------
 
+- up.syntax => up.behavior
+  - up.hello into up.behavior
+- Is there a use case for this?
+  - form[up-accept], form[up-dismiss]
+    - Resolution value is { params, ... params.toObject() }
+    - existing [up-accept] is then only a[up-accept]
+  - form[up-emit]
+    - Event value is { params, ... params.toObject() }
+    - existing [up-emit] is then only a[up-emit]
 - up.render() should resolve to an up.RenderResult that shows me what changed ({ fragments: [...], layer: ... }
 - { history: 'force' } (render history in layers that prevent it)
 - Can we offer up.idle?
