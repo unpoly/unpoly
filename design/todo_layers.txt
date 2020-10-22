@@ -4,6 +4,14 @@ TODOs
 - The current implementation of up:fragment:loaded is not helping the Laravel people with their JSON response. https://github.com/webstronauts/php-unpoly/issues/2
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
+- Normalize request URL to just the path for same-origin requests
+- Naming
+  - Move class methods of up.Params to up.params (lowercase)
+  - Rename class files to Uppercase
+  - Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
+- Can we reset master to hk/layers without merging?
+
+
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
@@ -11,18 +19,6 @@ TODOs
   - Simplify content-link, modal-link, drawer-link
   - up_modal.sass
 - Reach out to server-integration libs (make issues?) with the new changes
-- Normalize request URL to just the path for same-origin requests
-- Request priorities
-  - config.pollPriority = 50
-  - config.preloadPriority = -100
-  - config.navigatePriority = 1000
-  - Get rid of Request#preload
-    - promoteToForeground should just max out the priorities
-- Offer up.Response#json
-- Move class methods of up.Params to up.params (lowercase)
-- Rename class files to Uppercase
-- Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
-- Can we reset master to hk/layers without merging?
 - Close issues.
 
 
