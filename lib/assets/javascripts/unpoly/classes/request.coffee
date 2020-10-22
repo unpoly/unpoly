@@ -199,12 +199,12 @@ class up.Request extends up.Record
       @origin = undefined
 
   extractHashFromURL: ->
-    return unless u.contains(@url, '#')
-    urlParts = u.parseURL(@url)
-    # Remember the #hash for later revealing.
-    # It will be lost during normalization.
-    @hash = u.presence(urlParts.hash)
-    @url = u.normalizeURL(urlParts, hash: false)
+    # Don't use u.parseURL() / u.normalizeURL() since that will add a hostname
+    # and clutter up logs.
+    if match = @url.match(/^(.+)(#.+)$/)
+      @url = match[1]
+      # Remember the #hash for later revealing.
+      @hash = match[2]
 
   transferParamsToURL: ->
     unless u.isBlank(@params)
