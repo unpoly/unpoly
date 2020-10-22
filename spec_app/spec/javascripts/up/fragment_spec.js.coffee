@@ -215,7 +215,7 @@ describe 'up.fragment', ->
             up.render('.selector', url: '/path')
 
             next =>
-              expect(up.browser.loadPage).toHaveBeenCalledWith('/path', jasmine.anything())
+              expect(up.browser.loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path'))
 
         describe 'when the server responds with an error or unexpected content', ->
 
@@ -237,9 +237,13 @@ describe 'up.fragment', ->
               expect('.success-target').toHaveText('old success text')
               expect('.failure-target').toHaveText('new failure text')
 
-          it 'does not update a fragment if the response contains no text', asyncSpec (next) ->
+          it 'emits up:fragment:unusable and does not update a fragment if the response contains no text', asyncSpec (next) ->
             insertedListener = jasmine.createSpy('up:fragment:inserted listener')
             up.on('up:fragment:inserted', insertedListener)
+            loadedListener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', loadedListener)
+            unusableListener = jasmine.createSpy('up:fragment:unusable listener')
+            up.on('up:fragment:unusable', unusableListener)
 
             fixture('.success-target', text: 'old success text')
             fixture('.failure-target', text: 'old failure text')
@@ -251,10 +255,16 @@ describe 'up.fragment', ->
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
+              expect(loadedListener).not.toHaveBeenCalled()
+              expect(unusableListener).toHaveBeenCalled()
 
-          it 'does not update a fragment if the response has no HTML content-type', asyncSpec (next) ->
+          it 'emits up:fragment:unusable and does not update a fragment if the response has no HTML content-type', asyncSpec (next) ->
             insertedListener = jasmine.createSpy('up:fragment:inserted listener')
             up.on('up:fragment:inserted', insertedListener)
+            loadedListener = jasmine.createSpy('up:fragment:loaded listener')
+            up.on('up:fragment:loaded', loadedListener)
+            unusableListener = jasmine.createSpy('up:fragment:unusable listener')
+            up.on('up:fragment:unusable', unusableListener)
 
             fixture('.success-target', text: 'old success text')
             fixture('.failure-target', text: 'old failure text')
@@ -271,6 +281,8 @@ describe 'up.fragment', ->
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
+              expect(loadedListener).not.toHaveBeenCalled()
+              expect(unusableListener).toHaveBeenCalled()
 
           it 'does update a fragment if the server has an XHTML content-type', asyncSpec (next) ->
             fixture('.target', text: 'old text')
@@ -393,6 +405,29 @@ describe 'up.fragment', ->
             next ->
               expect('.one').toHaveText('old one')
               expect('.two').toHaveText('new two')
+
+          it 'allows listeners to mutate up.render() options before the fragment is updated when the server responds with an error code (bugfix)', asyncSpec (next) ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+            fixture('.three', text: 'old three')
+
+            up.on('up:fragment:loaded', (e) -> e.renderOptions.target = '.three')
+
+            changePromise = up.render(target: '.one', failTarget: '.two', url: '/url')
+
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="one">new one</div>
+                  <div class="two">new two</div>
+                  <div class="three">new three</div>
+                  """
+
+            next ->
+              expect('.one').toHaveText('old one')
+              expect('.two').toHaveText('old two')
+              expect('.three').toHaveText('new three')
 
         describe 'when the server sends an X-Up-Events header', ->
 
@@ -3606,7 +3641,7 @@ describe 'up.fragment', ->
           up.reload('.element')
 
           next =>
-            expect(up.browser.loadPage).toHaveBeenCalledWith('/source', jasmine.anything())
+            expect(up.browser.loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/source'))
 
     describe 'up.fragment.failKey', ->
 

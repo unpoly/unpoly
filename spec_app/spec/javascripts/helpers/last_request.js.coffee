@@ -15,7 +15,10 @@ beforeEach ->
       options = args[0] || {}
     else
       options = firstArg
-      responseText = options.responseText || 'response-text'
+      responseText = options.responseText
+
+    if u.isMissing(responseText) # don't override ""
+      responseText = 'response-text'
 
     contentType = options.contentType || 'text/html'
     headers = options.responseHeaders || {}

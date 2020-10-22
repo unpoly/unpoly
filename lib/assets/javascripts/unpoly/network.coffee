@@ -394,7 +394,7 @@ up.network = do ->
   isBusy = ->
     queue.isBusy()
 
-  isSlowFromNetInfo = ->
+  isConnectionTooSlowForPreload = ->
     # Browser support for navigator.connection: https://caniuse.com/?search=networkinformation
     if netInfo = navigator.connection
       # API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
@@ -409,7 +409,7 @@ up.network = do ->
     if setting == 'auto'
       # Since connection.effectiveType might change during a session we need to
       # re-evaluate the value every time.
-      return !isSlowFromNetInfo()
+      return !isConnectionTooSlowForPreload() && up.browser.canPushState()
     return setting
 
   abortRequests = (args...) ->
