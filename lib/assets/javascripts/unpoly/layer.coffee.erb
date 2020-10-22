@@ -93,8 +93,18 @@ up.layer = do ->
       return [config[mode], config.overlay, config.any]
       
   normalizeOptions = (options) ->
-    up.legacy.fixKey(options, 'closable', 'dismissable')
     up.legacy.fixKey(options, 'flavor', 'mode')
+    up.legacy.fixKey(options, 'closable', 'dismissable')
+    up.legacy.fixKey(options, 'closeLabel', 'dismissLabel')
+
+    if options.width || options.maxWidth
+      up.legacy.warn('Layer options { width } and { maxWidth } have been removed. Use { size } or { class } instead.')
+
+    if options.sticky
+      up.legacy.warn('Layer option { sticky } has been removed. Give links an [up-peel=false] attribute to prevent layer dismissal on click.')
+
+    if options.template
+      up.legacy.warn('Layer option { template } has been removed. Use { class } or modify the layer HTML on up:layer:open.')
 
     if u.isGiven(options.layer) # might be the number 0, which is falsy
       if options.layer == 'swap'
