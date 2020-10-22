@@ -219,6 +219,7 @@ Tests
 Docs
 ----
 
+- Document up.AbortController
 - Document { cache: 'clear' }
 - Document X-Up-Cache: clear
 - Document new selectors
@@ -265,7 +266,6 @@ Docs
 - { navigate }
 - Document that up.on selector can be a function
 - I think the slow/recover events changed
-- New gerund-events (up:layer:opening)
 - { failOptions }
 - up.link.config
 - New up.Request properties (at least { origin }, { layer })
