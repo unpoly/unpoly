@@ -1515,3 +1515,20 @@ describe 'up.form', ->
             expect(switchTargetSpy.calls.count()).toBe(2)
             expect(switchTargetSpy.calls.argsFor(0)[0]).toEqual($existingTarget[0])
             expect(switchTargetSpy.calls.argsFor(1)[0]).toEqual(@$lateTarget[0])
+
+      it "works on inputs outside the form (associated with [form=form-id] attribute)", asyncSpec (next) ->
+        form = fixture('form#form-id')
+        select = e.affix(form, 'select[name="select-name"][up-switch=".target"][form="#form-id"]')
+        fooOption = e.affix(select, 'option[value="foo"]', text: 'Foo')
+        barOption = e.affix(select, 'option[value="bar"]', text: 'Bar')
+        bazOption = e.affix(select, 'option[value="baz"]', text: 'Baz')
+        target = e.affix(form, '.target[up-show-for="bar"]')
+        up.hello(select)
+
+        next =>
+          expect(target).toBeHidden()
+          select.value = 'bar'
+          Trigger.change(select)
+
+        next =>
+          expect(target).toBeVisible()

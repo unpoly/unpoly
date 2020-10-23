@@ -31,6 +31,7 @@ Manual tests
 Tests
 -----
 
+- Test that in up.on(event, selector), selector may be a function
 - Test { scroll: "auto" }
   - hash
   - mains

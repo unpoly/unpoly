@@ -259,6 +259,12 @@ up.form = do ->
   @stable
   ###
 
+  # MacOS does not focus buttons on click.
+  # That means that submittingButton() cannot rely on document.activeElement.
+  # See https://github.com/unpoly/unpoly/issues/103
+  up.on 'up:click', submitButtonSelector, (event, button) ->
+    button.focus()
+
   ###**
   Observes form fields and runs a callback when a value changes.
 
@@ -352,7 +358,7 @@ up.form = do ->
     observe(target, options, -> submit(target))
 
   findValidateTarget = (element, options) ->
-    container = closestContainer(element)
+    container = getContainer(element)
 
     if u.isElementish(options.target)
       return up.fragment.toTarget(options.target)
@@ -432,7 +438,7 @@ up.form = do ->
       else
         meta = ':unchecked'
     else if e.matches(field, 'input[type=radio]')
-      form = closestContainer(field)
+      form = getContainer(field)
       groupName = field.getAttribute('name')
       checkedButton = form.querySelector("input[type=radio]#{e.attributeSelector('name', groupName)}:checked")
       if checkedButton
@@ -471,7 +477,7 @@ up.form = do ->
   ###
   switchTargets = (switcher, options = {}) ->
     targetSelector = options.target ? switcher.getAttribute('up-switch')
-    form = closestContainer(switcher)
+    form = getContainer(switcher)
     targetSelector or up.fail("No switch target given for %o", switcher)
     fieldValues = switcherValues(switcher)
 
@@ -504,15 +510,16 @@ up.form = do ->
   @internal
   ###
   findSwitcherForTarget = (target) ->
-    form = closestContainer(target)
+    form = getContainer(target)
     switchers = e.all(form, '[up-switch]')
     switcher = u.find switchers, (switcher) ->
       targetSelector = switcher.getAttribute('up-switch')
       e.matches(target, targetSelector)
     return switcher or up.fail('Could not find [up-switch] field for %o', target)
 
-  closestContainer = (element) ->
-    e.closest(element, "form, #{up.layer.anySelector()}")
+  getContainer = (element) ->
+    element.form || # Element#form will also work if the element is outside the form with an [form=form-id] attribute
+      e.closest(element, "form, #{up.layer.anySelector()}")
 
   focusedField = ->
     if (element = document.activeElement) && e.matches(element, fieldSelector())
