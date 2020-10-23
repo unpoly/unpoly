@@ -80,10 +80,13 @@ $ = jQuery
       element.dispatchEvent(event)
 
   clickSequence = (element, options) ->
+    isButton = e.matches(element, 'button, input[type=button], input[type=submit], input[type=image]')
     element = e.get(element)
     mouseover(element, options)
     mousedown(element, options)
-    focus(element, options)
+    # MacOS by default does not focus buttons on click
+    unless isButton && AgentDetector.isSafari()
+      focus(element, options)
     mouseup(element, options)
     click(element, options)
 
