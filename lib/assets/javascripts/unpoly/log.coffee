@@ -87,16 +87,21 @@ up.log = do ->
 
   printBanner = ->
     # The ASCII art looks broken in code since we need to escape backslashes
-    banner = " __ _____  ___  ___  / /_ __\n" +
-             "/ // / _ \\/ _ \\/ _ \\/ / // /  #{up.version}\n" +
-             "\\___/_//_/ .__/\\___/_/\\_. / \n" +
-             "        / /            / /\n" +
-             "\n"
+    logo = " __ _____  ___  ___  / /_ __\n" +
+           "/ // / _ \\/ _ \\/ _ \\/ / // /  #{up.version}\n" +
+           "\\___/_//_/ .__/\\___/_/\\_. / \n" +
+           "        / /            / /\n\n"
+
     if config.enabled
-      banner += "Call `up.log.disable()` to disable logging for this session."
+      logInfo = "Call `up.log.disable()` to disable logging for this session."
     else
-      banner += "Call `up.log.enable()` to enable logging for this session."
-    console.log(banner)
+      logInfo = "Call `up.log.enable()` to enable logging for this session."
+
+    if up.browser.canFormatLog()
+      console.log('%c' + logo + '%c' + logInfo, 'font-family: monospace', '')
+    else
+      console.log(logo + logInfo)
+
 
   up.on 'up:framework:booted', printBanner
   up.on 'up:framework:reset', reset
