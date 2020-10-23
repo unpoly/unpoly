@@ -8,6 +8,7 @@ TODOs
   - Rename class files to Uppercase
   - Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
 - Can we reset master to hk/layers without merging?
+- I don't see how fallback: true is processed => I think in up.fragment.expandTargets
 
 
 - Release as 1.0.0 or 2.0.0
@@ -31,6 +32,7 @@ Manual tests
 Tests
 -----
 
+- Test that fallback: true expands to fallback: ':main'
 - Test that in up.on(event, selector), selector may be a function
 - Test { scroll: "auto" }
   - hash
