@@ -828,7 +828,7 @@ describe 'up.form', ->
             expect(params['submit-button-1']).toBeUndefined()
             expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
 
-        it 'includes the first submit button if the form was submitted with enter', asyncSpec (next) ->
+        it 'assumes the first submit button if the form was submitted with enter', asyncSpec (next) ->
           $form = $fixture('form[action="/action"][up-target=".target"]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
@@ -854,6 +854,18 @@ describe 'up.form', ->
             params = @lastRequest().data()
             keys = Object.keys(params)
             expect(keys).toEqual(['text-field'])
+
+        it "lets submit buttons override the form's action and method with button[formaction] and button[formmethod] attributes", asyncSpec (next) ->
+          $form = $fixture('form[action="/form-path"][method="GET"][up-follow]')
+          $submitButton1 = $form.affix('input[type="submit"]')
+          $submitButton2 = $form.affix('input[type="submit"][formaction="/button-path"][formmethod="POST"]')
+          up.hello($form)
+          Trigger.clickSequence($submitButton2)
+
+          next =>
+            request = @lastRequest()
+            expect(request.url).toMatchURL('/button-path')
+            expect(request.method).toBe('POST')
 
     describe 'input[up-autosubmit]', ->
 

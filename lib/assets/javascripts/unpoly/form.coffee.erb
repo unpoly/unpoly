@@ -89,17 +89,6 @@ up.form = do ->
 
     fields
 
-  ###***
-  @function up.form.submissionFields
-  @internal
-  ###
-  findSubmissionFields = (root) ->
-    fields = findFields(root)
-    if button = submittingButton(root)
-      fields = u.toArray(fields)
-      fields.push(button)
-    fields
-
   ###**
   @function up.form.submittingButton
   @param {Element} form
@@ -217,12 +206,25 @@ up.form = do ->
   ###
   submit = (formOrSelector, options) ->
     options = u.options(options)
-
-    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     form = up.fragment.get(formOrSelector)
     form = e.closest(form, 'form')
-
     parser = new up.OptionsParser(options, form)
+
+    # Parse params from form fields.
+    params = up.Params.fromForm(form)
+
+    if submitButton = submittingButton(form)
+      # Submit buttons with a [name] attribute will add to the params.
+      # Note that addField() will only add an entry if the given button has a [name] attribute.
+      params.addField(submitButton)
+
+      # Submit buttons may have [formmethod] and [formaction] attribute
+      # that override [method] and [action] attribute from the <form> element.
+      options.method ||= submitButton.getAttribute('formmethod')
+      options.url ||= submitButton.getAttribute('formaction')
+
+    params.addAll(options.params)
+    options.params = params
 
     parser.string('url', attr: ['up-action', 'action'], default: up.fragment.source(form))
     parser.string('method', attr: ['up-method', 'data-method', 'method'], default: 'POST', normalize: u.normalizeMethod)
@@ -235,10 +237,7 @@ up.form = do ->
 
     parser.string('failTarget', default: up.fragment.toTarget(form))
 
-    # Take params from form, but allow to pass additional params as { params }
-    options.params = up.Params.fromForm(form).addAll(options.params)
-
-    # The guardEvent will also be assigned an { options } attribute in up.render()
+    # The guardEvent will also be assigned an { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', log: 'Submitting form')
 
     # Now that we have extracted everything form-specific into options, we can call
@@ -422,7 +421,7 @@ up.form = do ->
     options.headers ||= {}
     options.headers[up.protocol.config.validateHeader] = field.getAttribute('name') || ':none'
 
-    # The guardEvent will also be assigned an { options } attribute in up.render()
+    # The guardEvent will also be assigned a { renderOptions } attribute in up.render()
     options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')
 
     return submit(field, options)
@@ -1088,7 +1087,6 @@ up.form = do ->
   fieldSelector: fieldSelector
   fields: findFields
   focusedField: focusedField
-  submissionFields: findSubmissionFields
 
 up.submit = up.form.submit
 up.observe = up.form.observe

@@ -221,13 +221,10 @@ class up.Params extends up.Class
     The name of the new entry.
   @param {any} value
     The value of the new entry.
-  @return {up.Params}
-    The modified `up.Params` instance.
   @experimental
   ###
   add: (name, value) ->
     @entries.push({name, value})
-    return this
 
   ###**
   Adds all entries from the given list of params.
@@ -236,8 +233,6 @@ class up.Params extends up.Class
 
   @function up.Params#addAll
   @param {Object|Array|string|up.Params|undefined} params
-  @return {up.Params}
-    The modified `up.Params` instance.
   @experimental
   ###
   addAll: (raw) ->
@@ -256,7 +251,6 @@ class up.Params extends up.Class
       @addAllFromObject(raw)
     else
       up.fail("Unsupport params type: %o", raw)
-    return this
 
   addAllFromObject: (object) ->
     for key, value of object
@@ -295,27 +289,21 @@ class up.Params extends up.Class
     The name of the entry to set.
   @param {any} value
     The new value of the entry.
-  @return {up.Params}
-    The modified `up.Params` instance.
   @experimental
   ###
   set: (name, value) ->
     @delete(name)
     @add(name, value)
-    return this
 
   ###**
   Deletes all entries with the given `name`.
 
   @function up.Params#delete
   @param {string} name
-  @return {up.Params}
-    The modified `up.Params` instance.
   @experimental
   ###
   delete: (name) ->
     @entries = u.reject(@entries, @matchEntryFn(name))
-    return this
 
   matchEntryFn: (name) ->
     (entry) -> entry.name == name
@@ -412,8 +400,6 @@ class up.Params extends up.Class
     If passed a `<select multiple>`, all selected values are added.
   - Fields that are `[disabled]` are ignored
   - Fields without a `[name]` attribute are ignored.
-  - The serialized params will include the form's submit button, if that
-    button as a `name` attribute.
 
   \#\#\# Example
 
@@ -439,9 +425,8 @@ class up.Params extends up.Class
   ###
   @fromForm: (form) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    if form = up.fragment.get(form)
-      fields = up.form.submissionFields(form)
-      @fromFields(fields)
+    form = up.fragment.get(form)
+    @fromFields(up.form.fields(form))
 
   ###**
   Constructs a new `up.Params` instance from one or more
