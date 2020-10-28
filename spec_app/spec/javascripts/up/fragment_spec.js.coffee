@@ -3769,3 +3769,69 @@ describe 'up.fragment', ->
         element = fixture('div')
         element.setAttribute('name', 'foo"bar')
         expect(up.fragment.toTarget(element)).toBe('[name="foo\\"bar"]')
+
+    describe 'up.fragment.expandTargets', ->
+
+      beforeEach ->
+        up.layer.config.any.mainTargets = []
+        up.layer.config.overlay.mainTargets = []
+
+      it 'returns a list of simple selectors without changes', ->
+        targets = ['.foo', '.bar']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.foo', '.bar']
+
+      it "expands ':main' to the given layer mode's main targets", ->
+        targets = ['.before', ':main', '.after']
+        up.layer.config.root.mainTargets = ['.main1', '.main2']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before', '.main1', '.main2', '.after']
+
+      it "expands true to the given layer mode's main targets (useful because { fallback } is often passed as a target)", ->
+        targets = ['.before', true, '.after']
+        up.layer.config.root.mainTargets = ['.main1', '.main2']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before', '.main1', '.main2', '.after']
+
+      it "expands ':layer' to a selector for the given layer's first swappable element", ->
+        targets = ['.before', ':layer', '.after']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before', 'body', '.after']
+
+      it "expands ':main' to the given layer mode's main targets if a main target is itself ':layer'", ->
+        targets = ['.before', ':main', '.after']
+        up.layer.config.root.mainTargets = [':layer']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before', 'body', '.after']
+
+      it 'expands an element to a matching selector', ->
+        element = fixture('#foo')
+        targets = ['.before', element, '.after']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.before', '#foo', '.after']
+
+      it "it expands '&' to a selector for { origin }", ->
+        targets = ['.before', '& .child', '.after']
+        origin = fixture('#foo')
+        up.layer.config.root.mainTargets = [':layer']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
+        expect(expanded).toEqual ['.before', '#foo .child', '.after']
+
+      it 'expands ".foo:closest" to a specific selector for the .foo closest to { origin }', ->
+        targets = ['.before', '.foo:closest', '.after']
+        foo1 = fixture('.foo#foo1')
+        foo2 = fixture('.foo#foo2')
+        origin = e.affix(foo2, '.origin')
+        up.layer.config.root.mainTargets = [':layer']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
+        expect(expanded).toEqual ['.before', '#foo2', '.after']
+
+      it 'expands ".foo:closest .child" by replacing the first simple selector with a specific selector for the .foo closest to { origin }', ->
+        targets = ['.before', '.foo:closest .child', '.after']
+        foo1 = fixture('.foo#foo1')
+        foo2 = fixture('.foo#foo2')
+        origin = e.affix(foo2, '.origin')
+        up.layer.config.root.mainTargets = [':layer']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
+        expect(expanded).toEqual ['.before', '#foo2 .child', '.after']
+
