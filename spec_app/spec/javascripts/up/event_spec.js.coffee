@@ -64,6 +64,35 @@ describe 'up.event', ->
           )
           expect(listener.calls.count()).toBe(1)
 
+      it 'allows to pass a function that returns a selector', asyncSpec (next) ->
+        foo = fixture('.foo')
+        bar = fixture('.bar')
+
+        @selector = '.foo'
+        selectorFn = => @selector
+
+        listener = jasmine.createSpy('dynamic listener')
+        up.on('click', selectorFn, listener)
+
+        Trigger.click(foo)
+
+        next =>
+          expect(listener.calls.count()).toBe(1)
+
+          @selector = '.bar'
+
+          Trigger.click(foo)
+
+        next =>
+          # Selector no longer matches event target, so the listener is not called
+          expect(listener.calls.count()).toBe(1)
+
+          Trigger.click(bar)
+
+        next =>
+          # Selector again matches event target
+          expect(listener.calls.count()).toBe(2)
+
       it 'allows to bind the listener to a given element while also passing a selector', asyncSpec (next) ->
         element1 = fixture('.element.one')
         element2 = fixture('.element.two')

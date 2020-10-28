@@ -32,7 +32,6 @@ Manual tests
 Tests
 -----
 
-- Test that fallback: true expands to fallback: ':main'
 - Test that in up.on(event, selector), selector may be a function
 - Test { scroll: "auto" }
   - hash
@@ -40,9 +39,7 @@ Tests
   - nothing
 - Test that up.viewport.saveScroll() only saves scroll positions for the current layer
 - Test that user can target :none
-- Test that :layer will target the current content root of a layer
-- Test that user can target :main
-- Test that pseudo-element targets are removed from target
+- Test that pseudo-element targets are removed from target in X-Up-Target header
 - Test that peeling dismissals can be detected by a dismiss value of ":peel"
 - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
 - Test that layer callbacks via option always set the layer as current AND the layer as `this`
