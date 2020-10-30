@@ -104,3 +104,31 @@ describe 'up.Layer', ->
 
         expect(eventLayer).not.toBe(up.layer.front)
         expect(eventLayer).toBe(up.layer.root)
+
+  describe '#peel()', ->
+
+    it 'dismisses all descendants', asyncSpec (next) ->
+      makeLayers(4)
+
+      next ->
+        expect(up.layer.stack.length).toBe(4)
+        secondLayer = up.layer.get(1)
+        secondLayer.peel()
+
+      next ->
+        expect(up.layer.stack.length).toBe(2)
+
+    it 'uses a dismissal value :peel', asyncSpec (next) ->
+      listener = jasmine.createSpy('dismiss listener')
+      up.on('up:layer:dismiss', listener)
+
+      makeLayers(2)
+
+      next ->
+        up.layer.root.peel()
+
+      next ->
+        expect(listener.calls.argsFor(0)[0]).toEqual jasmine.objectContaining(value: ':peel')
+
+
+

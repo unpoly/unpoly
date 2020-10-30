@@ -29,7 +29,7 @@ class up.MotionController
   @param {Function(): Promise} startMotion
   @param {Object} [memory.trackMotion=true]
   @return {Promise}
-    A promise that is fulfilled when the animation ends.
+    A promise that fulfills when the animation ends.
   ###
   startFunction: (cluster, startMotion, memory = {}) =>
     cluster = e.list(cluster)
@@ -84,7 +84,7 @@ class up.MotionController
   @param {List<Element>} [elements]
     If no element is given, finishes all animations in the documnet.
     If an element is given, only finishes animations in its subtree and ancestors.
-  @return {Promise} A promise that is fulfilled when animations have finished.
+  @return {Promise} A promise that fulfills when animations have finished.
   ###
   finish: (elements) =>
     @finishCount++

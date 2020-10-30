@@ -146,18 +146,19 @@ up.event = do ->
     The element on which to register the event listener.
 
     If no element is given, the listener is registered on the `document`.
-  @param {string} events
-    A space-separated list of event names to bind to.
+  @param {string} types
+    A space-separated list of event types to bind to.
   @param {string} [selector]
     The selector of an element on which the event must be triggered.
-    Omit the selector to listen to all events with that name, regardless
+
+    Omit the selector to listen to all events of the given type, regardless
     of the event target.
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
-    The function takes the affected element as the first argument).
+    The function takes the affected element as a second argument.
     If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
-    and passed as a second argument.
+    and passed as a third argument.
   @return {Function()}
     A function that unbinds the event listeners when called.
   @stable
@@ -213,7 +214,7 @@ up.event = do ->
     up.EventListenerGroup.fromBindArgs(args, options).bind()
 
   ###**
-  Unbinds an event listener previously bound with [`up.on()`](/up.on).
+  Unbinds an event listener previously bound with `up.on()`.
 
   \#\#\# Example
 
@@ -226,10 +227,15 @@ up.event = do ->
 
       up.off('click', '.button', listener)
 
-  Note that you need to pass `up.off()` a reference to the same listener function
-  that was passed to `up.on()` earlier.
-
   @function up.off
+  @param {Element|jQuery} [element=document]
+  @param {string} events
+  @param {string} [selector]
+  @param {Function(event, [element], [data])} listener
+    The listener function to unbind.
+
+    Note that you must pass a reference to the exact same listener function
+    that was passed to `up.on()` earlier.
   @stable
   ###
   unbind = (args...) ->

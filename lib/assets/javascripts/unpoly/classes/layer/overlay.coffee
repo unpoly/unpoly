@@ -4,11 +4,17 @@ e = up.element
 u = up.util
 
 ###**
-Base class for all non-root layer modes
-
-@class up.Layer.Overlay
+@class up.Layer
 ###
 class up.Layer.Overlay extends up.Layer
+
+  ###**
+  The link or form element that opened this overlay.
+
+  @property up.Layer#origin
+  @return {Element}
+  @stable
+  ###
 
   keys: ->
     super().concat [
@@ -221,7 +227,7 @@ class up.Layer.Overlay extends up.Layer
   Destroys the elements that make up this overlay.
 
   @function up.Layer.prototype.destroyElements
-  @param {string|Function<Element>} [options.animation=this.closeAnimation]
+  @param {string|Function(Element, Object)} [options.animation=this.closeAnimation]
   @param {number} [options.duration=this.closeDuration]
   @param {string} [options.easing=this.closeEasing]
   @param {Function} [options.onRemoved]
@@ -275,10 +281,10 @@ class up.Layer.Overlay extends up.Layer
       duration: options.duration || @closeDuration,
     )
 
-  accept: (value, options = {}) ->
+  accept: (value = null, options = {}) ->
     @executeCloseChange('accept', value, options)
 
-  dismiss: (value, options = {}) ->
+  dismiss: (value = null, options = {}) ->
     @executeCloseChange('dismiss', value, options)
 
   executeCloseChange: (verb, value, options) ->
