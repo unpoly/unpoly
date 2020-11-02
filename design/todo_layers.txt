@@ -9,6 +9,10 @@ TODOs
   - Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
 - Can we reset master to hk/layers without merging?
 - I don't see how fallback: true is processed => I think in up.fragment.expandTargets
+- up.Layer#on should set up.layer.current
+- Merge up.radio into up.fragment
+- In protocol docs, mention that headers might be missing
+- Guide: Cached Responses are sometimes unusable because missing content-type
 
 
 - Release as 1.0.0 or 2.0.0

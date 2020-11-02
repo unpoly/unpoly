@@ -73,6 +73,22 @@ describe 'up.Layer', ->
         up.emit(two, 'foo')
         expect(listener).toHaveBeenCalled()
 
+    it 'sets up.layer.current to this layer while the listener is running', asyncSpec (next) ->
+      currentSpy = jasmine.createSpy()
+
+      makeLayers(3)
+
+      next ->
+        expect(up.layer.current).toEqual(up.layer.get(2))
+
+        up.layer.get(1).on('foo', -> currentSpy(up.layer.current))
+
+        up.emit(up.layer.get(1).element, 'foo')
+
+      next ->
+        expect(currentSpy).toHaveBeenCalledWith(up.layer.get(1))
+        expect(up.layer.current).toEqual(up.layer.get(2))
+
   describe '#emit()', ->
 
     it "emits an event on this layer's element", asyncSpec (next) ->

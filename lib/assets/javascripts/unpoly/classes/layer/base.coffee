@@ -409,7 +409,8 @@ class up.Layer extends up.Record
   buildEventListenerGroup: (args) ->
     return up.EventListenerGroup.fromBindArgs(args,
       guard: @containsEventTarget,
-      elements: [@element]
+      elements: [@element],
+      currentLayer: this
     )
 
   containsEventTarget: (event) =>

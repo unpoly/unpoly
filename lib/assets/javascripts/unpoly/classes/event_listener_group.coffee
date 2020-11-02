@@ -11,7 +11,8 @@ class up.EventListenerGroup extends up.Record
       'selector',
       'callback',
       'jQuery',
-      'guard'
+      'guard',
+      'currentLayer',
     ]
 
   bind: ->
