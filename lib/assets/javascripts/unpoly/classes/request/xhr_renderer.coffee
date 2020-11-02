@@ -9,15 +9,6 @@ class up.Request.XHRRenderer
   buildAndSend: (handlers) ->
     @xhr = new XMLHttpRequest()
 
-    # We copy params since we will modify them below.
-    # This would confuse API clients and cache key logic in up.network.
-    xhrParams = u.copy(@request.params)
-
-    # By default HTTP methods other than `GET` or `POST` will be converted into a `POST`
-    # request and carry their original method as a `_method` parameter. This is to
-    # [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-    @xhrMethod = up.network.wrapMethod(@request.method, xhrParams)
-
     @xhr.timeout = @request.timeout
 
     # xhrParams is always given, but we only want to send a FormData payload if
@@ -25,11 +16,11 @@ class up.Request.XHRRenderer
     # cause the browser to change the request's content type to `multipart/form-data`.
     #
     # TODO: There is a feature request to allow the user to control the request's content type (https://github.com/unpoly/unpoly/issues/107)
-    if u.isPresent(xhrParams)
-      @xhrPayload = xhrParams.toFormData()
+    if u.isPresent(@request.params)
+      @xhrPayload = @request.params.toFormData()
 
     # The XMLHttpRequest method must be opened before we can add headers to it.
-    @xhr.open(@xhrMethod, @request.url)
+    @xhr.open(@request.method, @request.url)
 
     # Add information about the response's intended use so the server may
     # customize or shorten its response.
