@@ -3757,18 +3757,22 @@ describe 'up.fragment', ->
         element = fixture('div.class1.class2')
         expect(up.fragment.toTarget(element)).toBe(".class1")
 
-      it "prefers using the element's [name] attribute to using the element's tag name", ->
+      it "prefers using the element's [name] attribute to only using the element's tag name", ->
         element = fixture('input[name=name-value]')
-        expect(up.fragment.toTarget(element)).toBe('[name="name-value"]')
+        expect(up.fragment.toTarget(element)).toBe('input[name="name-value"]')
+
+      it "refers to meta tags by both tag name and [name] attribute", ->
+        element = fixture('meta[name="csrf-token"]')
+        expect(up.fragment.toTarget(element)).toBe('meta[name="csrf-token"]')
 
       it "uses the element's tag name if no better description is available", ->
         element = fixture('div')
         expect(up.fragment.toTarget(element)).toBe("div")
   
       it 'escapes quotes in attribute selector values', ->
-        element = fixture('div')
+        element = fixture('input')
         element.setAttribute('name', 'foo"bar')
-        expect(up.fragment.toTarget(element)).toBe('[name="foo\\"bar"]')
+        expect(up.fragment.toTarget(element)).toBe('input[name="foo\\"bar"]')
 
     describe 'up.fragment.expandTargets', ->
 
