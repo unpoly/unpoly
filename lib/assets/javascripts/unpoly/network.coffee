@@ -274,10 +274,10 @@ up.network = do ->
       cache.clear()
       return
 
+    # If we have an existing promise matching this new request,
+    # we use it unless `request.cache` is explicitly set to `false`.
     if request.cache && (cachedRequest = cache.get(request))
-      # If we have an existing promise matching this new request,
-      # we use it unless `request.cache` is explicitly set to `false`.
-      up.puts('up.request()', 'Re-using cached response for %s %s', request.method, request.url)
+      up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
       # This might affect whether we're going to emit an up:network:slow event further

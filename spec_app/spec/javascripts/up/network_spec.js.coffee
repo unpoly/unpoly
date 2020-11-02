@@ -296,6 +296,35 @@ describe 'up.network', ->
           next ->
             expect(listener.calls.count()).toBe(1)
 
+        it 'does not reset the XHR object by calling xhr.abort() on a loaded XHR object (bugfix)', asyncSpec (next) ->
+          request = up.request('/url')
+          response = null
+          request.then (r) -> response = r
+
+          next =>
+            expect(request.xhr).toBeGiven()
+
+            # Just to make sure that the fake XHR object we have in specs has different
+            # side effects than the real one: Check that xhr.abort() is never called.
+            spyOn(request.xhr, 'abort').and.callThrough()
+
+            @respondWith('response text')
+
+          next =>
+            expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
+            expect(response.contentType).toEqual('text/html')
+
+            request.abort()
+
+          next =>
+            # Calling xhr.abort() on a loaded XHR will reset the readyState to 0
+            expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
+
+            # Calling xhr.abort() on a loaded XHR will lose all response headers
+            expect(response.contentType).toEqual('text/html')
+
+            expect(request.xhr.abort).not.toHaveBeenCalled()
+
         it 'does not abort a request that was already fulfilled with a response', asyncSpec (next) ->
           abortController = new up.AbortController()
           listener = jasmine.createSpy('event listener')

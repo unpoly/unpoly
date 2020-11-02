@@ -270,14 +270,15 @@ class up.Request extends up.Record
   abort: (reason) ->
     # setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     # will call setAbortedState() a second time, without a message.
-    @setAbortedState(reason)
-    @xhr?.abort()
+    if @setAbortedState(reason) && @xhr
+      @xhr.abort()
 
-  setAbortedState: (reason = "Request was aborted") ->
+  setAbortedState: (reason = ["Request to %s %s was aborted", @method, @url]) ->
     return unless @state == 'new' || @state == 'loading'
     @state = 'aborted'
     @emit('up:request:aborted', log: reason)
     @deferred.reject(up.error.aborted(reason))
+    return true
 
   respondWith: (response) ->
     return unless @state == 'loading'

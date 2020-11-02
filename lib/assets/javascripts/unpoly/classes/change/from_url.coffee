@@ -64,11 +64,11 @@ class up.Change.FromURL extends up.Change
 
   responseIssue: ->
     unless @response.text
-      return 'Response is empty'
+      return ['Response to %s %s is empty', @request.method, @request.url]
 
     contentType = @response.contentType
     unless /\bx?html\b/.test(contentType)
-      return "Response is not HTML (Content-Type #{contentType})"
+      return ["Response to %s %s is not HTML (Content-Type %s)", @request.method, @request.url, @response.contentType]
 
   isSuccessfulResponse: ->
     @successOptions.fail == false || @response.ok
