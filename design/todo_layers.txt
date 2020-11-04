@@ -36,6 +36,7 @@ Manual tests
 Tests
 -----
 
+- Test that requests don't normalize their { url }, which would clog logs
 - Test { scroll: "auto" }
   - hash
   - mains

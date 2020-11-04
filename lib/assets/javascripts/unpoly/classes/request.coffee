@@ -45,7 +45,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
+  The CSS selector that will be sent as an `X-Up-Target` header.
 
   @property up.Request#target
   @param {string} target
@@ -53,7 +53,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
+  The CSS selector that will be sent as an `X-Up-Fail-Target` header.
 
   @property up.Request#failTarget
   @param {string} failTarget
@@ -335,10 +335,23 @@ class up.Request extends up.Record
       eventPlans: up.protocol.eventPlansFromXHR(@xhr)
       context: up.protocol.contextFromXHR(@xhr)
 
-    if urlFromServer = up.protocol.locationFromXHR(@xhr)
-      responseAttrs.url = urlFromServer
-      # If the server changes a URL, it is expected to signal a new method as well.
-      responseAttrs.method = up.protocol.methodFromXHR(@xhr) ? 'GET'
+    methodFromResponse = up.protocol.methodFromXHR(@xhr)
+
+    if urlFromResponse = up.protocol.locationFromXHR(@xhr)
+      # On browsers other than IE11 we can ask the XHR object for its { responseURL },
+      # which contains the final URL after redirects. The server may also use the
+      # custom X-Up-Location header to signal the final URL for all browsers.
+      #
+      # Unfortunately we cannot ask the XHR object for its response method.
+      # The server may use the custom X-Up-Method for that. If that header is missing
+      # AND the URLs changed between request and response, we assume GET.
+      if !methodFromResponse && !u.matchURLs(responseAttrs.url, urlFromResponse)
+        methodFromResponse = 'GET'
+
+      responseAttrs.url = urlFromResponse
+
+    if methodFromResponse
+      responseAttrs.method = methodFromResponse
 
     return new up.Response(responseAttrs)
 
@@ -360,7 +373,7 @@ class up.Request extends up.Record
   # (2) become part of our @cacheKey().
   metaProps: ->
     props = {}
-    for key in up.network.config.metaKeys(@)
+    for key in u.evalOption(up.network.config.metaKeys, this)
       value = this[key]
       if u.isGiven(value)
         props[key] = value

@@ -37,3 +37,8 @@ describe 'up.protocol', ->
       up.protocol.config.csrfParam = -> 'configured-param'
       expect(up.protocol.csrfParam()).toEqual('configured-param')
 
+  describe 'up.protocol.headerize', ->
+
+    it 'turns a camelized identifier into an X-Up-Foo-Bar style header name', ->
+      header = up.protocol.headerize('fooBar')
+      expect(header).toEqual('X-Up-Foo-Bar')

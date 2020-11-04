@@ -20,11 +20,17 @@ up.browser = do ->
   u = up.util
 
   ###**
+  Makes a full page request, replacing the entire JavaScript environment with a new page from the server response.
+
   @function up.browser.loadPage
   @param {string} options.url
+    The URL to load.
   @param {string} [options.method='get']
+    The method for the request.
+
+    Methods other than GET or POST will be [wrapped](/up.protocol.config#config.methodParam) in a POST request.
   @param {Object|Array|FormData|string} [options.params]
-  @internal
+  @external
   ###
   loadPage = (requestsAttrs) ->
     new up.Request(requestsAttrs).loadPage()

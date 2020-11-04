@@ -90,6 +90,9 @@ up.util = do ->
   urlWithoutHost = (url) ->
     normalizeURL(url, host: false)
 
+  matchURLs = (leftURL, rightURL) ->
+    return normalizeURL(leftURL) == normalizeURL(rightURL)
+
   isCrossDomain = (targetURL) ->
     currentURL = parseURL(location.href)
     targetURL = parseURL(targetURL)
@@ -1765,6 +1768,7 @@ up.util = do ->
     parseURL(args...)
   normalizeURL: normalizeURL
   urlWithoutHost: urlWithoutHost
+  matchURLs: matchURLs
   normalizeMethod: normalizeMethod
   methodAllowsPayload: methodAllowsPayload
 #  isGoodSelector: isGoodSelector

@@ -21,7 +21,7 @@ class up.Request.FormRenderer
     # By default HTTP methods other than `GET` or `POST` will be converted into a `POST`
     # request and carry their original method as a `_method` parameter. This is to
     # [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-    method = up.network.wrapMethod(@request.method, params)
+    method = up.protocol.wrapMethod(@request.method, params)
 
     @form = e.affix(document.body, 'form.up-page-loader', { method, action })
 

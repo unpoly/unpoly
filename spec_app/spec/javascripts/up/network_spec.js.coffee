@@ -34,14 +34,6 @@ describe 'up.network', ->
 #        expect(jasmineRequest.data()).toEqual(key: ['value'])
 #        expect(jasmineRequest.method).toEqual('POST')
 
-      it 'submits the replacement targets as HTTP headers, so the server may choose to only frender the requested fragments', asyncSpec (next) ->
-        up.request(url: '/foo', target: '.target', failTarget: '.fail-target')
-
-        next =>
-          request = @lastRequest()
-          expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
-          expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
-
       it 'resolves to a Response object that contains information about the response and request', (done) ->
         promise = up.request(
           url: '/url'
@@ -109,6 +101,49 @@ describe 'up.network', ->
           headers = @lastRequest().requestHeaders
           expect(headers['X-Requested-With']).toBeMissing()
           done()
+
+      describe 'transfer of meta attributes', ->
+
+        it 'submits information about the fragment update as HTTP headers, so the server may choose to optimize its responses', asyncSpec (next) ->
+          makeLayers(2)
+
+          next =>
+            up.request(
+              url: '/foo',
+              target: '.target',
+              layer: 'overlay',
+              failTarget: '.fail-target',
+              failLayer: 'root'
+            )
+
+          next =>
+            request = @lastRequest()
+            expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
+            expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
+            expect(request.requestHeaders['X-Up-Mode']).toEqual('modal')
+            expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
+
+        it 'lets the user configure a smaller set of meta keys for better cacheability', asyncSpec (next) ->
+          makeLayers(2)
+
+          up.network.config.metaKeys = ['target']
+
+          next =>
+            up.request(
+              url: '/foo',
+              target: '.target',
+              layer: 'overlay',
+              failTarget: '.fail-target',
+              failLayer: 'root'
+            )
+
+          next =>
+            request = @lastRequest()
+            expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
+            expect(request.requestHeaders['X-Up-Fail-Target']).toBeMissing()
+            expect(request.requestHeaders['X-Up-Mode']).toBeMissing()
+            expect(request.requestHeaders['X-Up-Fail-Mode']).toBeMissing()
+
 
       describe 'setting meta attributes', ->
 
@@ -445,6 +480,7 @@ describe 'up.network', ->
                 # See that the promise was not rejected due to an internal error.
                 expect(result.state).toEqual('pending')
 
+      # All browsers except IE11 make the response URL available through `xhr.responseURL`.
       describe 'when the XHR object has a { responseURL } property', ->
 
         it 'sets the { url } property on the response object', (done) ->
@@ -458,6 +494,43 @@ describe 'up.network', ->
               expect(response.request.url).toMatchURL('/request-url')
               expect(response.request.hash).toEqual('#request-hash')
               expect(response.url).toMatchURL('/response-url')
+              done()
+
+        it "assumes a response method of GET if the { reponseURL } is not the request URL", (done) ->
+          promise = up.request('/request-url', method: 'post')
+
+          u.task =>
+            @respondWith
+              responseURL: '/response-url'
+
+            promise.then (response) ->
+              expect(response.url).toMatchURL('/response-url')
+              expect(response.method).toEqual('GET')
+              done()
+
+        it "assumes the method did not change if if the { reponseURL } equals the request's URL", (done) ->
+          promise = up.request('/request-url', method: 'post')
+
+          u.task =>
+            @respondWith
+              responseURL: '/request-url'
+
+            promise.then (response) ->
+              expect(response.url).toMatchURL('/request-url')
+              expect(response.method).toEqual('POST')
+              done()
+
+        it "sets the { method } to an X-Up-Method header, even if if the { reponseURL } equals the request's URL", (done) ->
+          promise = up.request('/request-url', method: 'post')
+
+          u.task =>
+            @respondWith
+              responseURL: '/request-url'
+              responseHeaders: { 'X-Up-Method': 'GET' }
+
+            promise.then (response) ->
+              expect(response.url).toMatchURL('/request-url')
+              expect(response.method).toEqual('GET')
               done()
 
         describe 'when caching', ->

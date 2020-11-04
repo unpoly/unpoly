@@ -119,8 +119,8 @@ Use the methods below to interact with the [layer](/up.layer) of the fragment be
 - `up.layer.root?`: Returns whether the targeted layer is the root layer.
 - `up.layer.overlay?`: Returns whether the targeted layer is an overlay (not the root layer).
 - `up.layer.context`: Returns the [context](https://unpoly.com/up.layer.context) hash of the targeted layer. Keys can be accessed as either strings or symbols. Returns an empty hash if the targeted layer has no given context.
-- `up.layer.accept(value)`: [Accepts](https://unpoly.com/up.layer.accept) the current layer. Does nothing if the targeted layer is the root layer.
-- `up.layer.dismiss(value)`: [Dismisses](https://unpoly.com/up.layer.dismisses) the current layer. Does nothing if the targeted layer is the root layer.
+- `up.layer.accept(value)`: [Accepts](https://unpoly.com/up.layer.accept) the current overlay. Does nothing if the root layer is targeted. Your action must still respond with `text/html` content.
+- `up.layer.dismiss(value)`: [Dismisses](https://unpoly.com/up.layer.dismisses) the current overlay. Does nothing if the root layer is targeted. Your action must still respond with `text/html` content.
 - `up.layer.emit(type, options)`: [Emits an event](https://unpoly.com/up.layer.emit) on the targeted layer.
 
 Fragment updates may target different layers for successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.

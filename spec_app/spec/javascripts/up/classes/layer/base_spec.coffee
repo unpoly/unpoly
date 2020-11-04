@@ -145,6 +145,3 @@ describe 'up.Layer', ->
 
       next ->
         expect(listener.calls.argsFor(0)[0]).toEqual jasmine.objectContaining(value: ':peel')
-
-
-

@@ -74,30 +74,53 @@ up.network = do ->
     An array of uppercase HTTP method names that are considered [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1).
     The proxy cache will only cache safe requests and will clear the entire
     cache after an unsafe request.
-  @param {Function(string): Array<string>} [config.metaKeys]
-    A function that accepts an [`up.Request`](/up.Request) and returns an array of request property names
+  @param {Array<string>|Function(up.Request): Array<string>} [config.metaKeys]
+    An array of request property names
     that are sent to the server. The server may return an optimized response based on these properties,
     e.g. by omitting a navigation bar that is not targeted.
 
-    Two requests with different `serverFields` are considered cache misses when [caching](/up.request) and
-    [preloading](/up.link.preload). To improve cacheability, you may configure a function that returns
+    Two requests with different `metaKeys` are considered cache misses when [caching](/up.request) and
+    [preloading](/up.link.preload). To **improve cacheability**, you may configure a function that returns
     fewer fields.
 
-    By default the following properties are sent to the server:
+    \#\#\# Available fields
 
-    - [`up.Request.prototype.target`](/up.Request.prototype.target)
-    - [`up.Request.prototype.failTarget`](/up.Request.prototype.failTarget)
-    - [`up.Request.prototype.context`](/up.Request.prototype.context)
-    - [`up.Request.prototype.failContext`](/up.Request.prototype.failContext)
-    - [`up.Request.prototype.mode`](/up.Request.prototype.mode)
-    - [`up.Request.prototype.failMode`](/up.Request.prototype.failMode)
+    The default configuration is `['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']`.
+    This means the following properties are sent to the server:
+
+    | Request property         | Request header      |
+    |--------------------------|---------------------|
+    | `up.Request#target`      | `X-Up-Target`       |
+    | `up.Request#failTarget`  | `X-Up-Fail-Target`  |
+    | `up.Request#context`     | `X-Up-Context`      |
+    | `up.Request#failContext` | `X-Up-Fail-Context` |
+    | `up.Request#mode`        | `X-Up-Mode`         |
+    | `up.Request#failMode`    | `X-Up-Fail-Mode`    |
+
+    \#\#\# Per-route configuration
+
+    You may also configure a function that accepts an [`up.Request`](/up.Request) and returns
+    an array of request property names that are sent to the server.
+
+    With this you may send different request properties for different URLs:
+
+    ```javascript
+    up.protocol.config.metaKeys = function(request) {
+      if (request.url == '/search') {
+        // The server optimizes responses on the /search route.
+        return ['target', 'failTarget']
+      } else {
+        // The server doesn't optimize any other route,
+        // so configure maximum cacheability.
+        return []
+      }
+    }
   @stable
   ###
   config = new up.Config ->
     slowDelay: 300
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
-    wrapMethods: ['PATCH', 'PUT', 'DELETE']
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
     preloadEnabled: 'auto' # true | false | 'auto'
@@ -106,7 +129,7 @@ up.network = do ->
     preloadMinDownlink: 0.6
     preloadMaxRTT: 750
     preloadTimeout: 10 * 1000
-    metaKeys: (request) -> ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+    metaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty config, 'preloadDelay',
@@ -239,9 +262,11 @@ up.network = do ->
     If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set, the timeout
     will not include the time spent waiting in the queue.
   @param {string} [options.target='body']
-    The CSS selector that will be sent as an [`X-Up-Target` header](/up.protocol#optimizing-responses).
+    The CSS selector that will be sent as an `X-Up-Target` header.
   @param {string} [options.failTarget='body']
-    The CSS selector that will be sent as an [`X-Up-Fail-Target` header](/up.protocol#optimizing-responses).
+    The CSS selector that will be sent as an `X-Up-Fail-Target` header.
+  @param {Element} [options.origin]
+    The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
   @return {Promise<up.Response>}
     A promise for the response.
   @stable
@@ -529,15 +554,6 @@ up.network = do ->
   isSafeMethod = (method) ->
     u.contains(config.safeMethods, method)
 
-  ###**
-  @internal
-  ###
-  wrapMethod = (method, params) ->
-    if u.contains(config.wrapMethods, method)
-      params.add(up.protocol.config.methodParam, method)
-      method = 'POST'
-    method
-
   up.on 'up:framework:reset', reset
 
   ajax: ajax
@@ -550,7 +566,6 @@ up.network = do ->
   isIdle: isIdle
   isBusy: isBusy
   isSafeMethod: isSafeMethod
-  wrapMethod: wrapMethod
   config: config
   abort: abortRequests
   registerAliasForRedirect: registerAliasForRedirect
