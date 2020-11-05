@@ -273,7 +273,10 @@ up.network = do ->
   ###
   makeRequest = (args...) ->
     request = new up.Request(parseOptions(args))
-    return useCachedRequest(request) || queueRequest(request)
+    request = useCachedRequest(request) || queueRequest(request)
+    if request.solo
+      abortRequests (r) -> r != request
+    return request
 
   preload = (args...) ->
     if u.isElementish(args[0])

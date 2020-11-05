@@ -21,6 +21,7 @@ describe 'up.RenderOptions', ->
         expect(options.fallback).toBe(true)
         expect(options.history).toBe('auto')
         expect(options.peel).toBe(true)
+        expect(options.cache).toBe(true)
         expect(options.scroll).toBe('auto')
         expect(options.transition).toBe('navigate')
 
@@ -49,6 +50,7 @@ describe 'up.RenderOptions', ->
         expect(options.solo).toBe(false)
         expect(options.confirm).toBe(false)
         expect(options.feedback).toBe(false)
+        expect(options.cache).toBe(true)
 
   describe '.deriveFailOptions()', ->
     

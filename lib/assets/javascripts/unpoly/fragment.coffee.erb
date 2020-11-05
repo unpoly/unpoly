@@ -245,8 +245,6 @@ up.fragment = do ->
       promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
 
     promise = promise.then ->
-      if options.solo
-        up.network.abort()
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
 
     return promise

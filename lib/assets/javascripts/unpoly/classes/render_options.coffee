@@ -14,6 +14,7 @@ up.RenderOptions = do ->
     solo: false
     confirm: false
     feedback: false
+    cache: true
   }
 
   # These properties are used before the request is sent.

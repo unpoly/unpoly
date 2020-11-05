@@ -2871,6 +2871,29 @@ describe 'up.fragment', ->
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(2)
 
+        it 'does not cancel its own pending preload request (bugfix)', asyncSpec (next) ->
+          fixture('.element')
+
+          change1Error  = undefined
+          change2Error  = undefined
+          change1Promise = undefined
+          change2Promise = undefined
+
+          change1Promise = up.render('.element', url: '/path', preload: true)
+          change1Promise.catch (e) -> change1Error = e
+
+          next =>
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(change1Error).toBeUndefined()
+
+            change2Promise = up.render('.element', url: '/path', solo: true, cache: true)
+            change2Promise.catch (e) -> change2Error = e
+
+          next =>
+            expect(change1Error).toBeUndefined()
+            expect(change2Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(1)
+
         it "aborts an existing change's request that was queued with { solo: false }", asyncSpec (next) ->
           fixture('.element')
 
