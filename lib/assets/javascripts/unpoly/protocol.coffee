@@ -2,22 +2,22 @@
 Server protocol
 ===============
 
-You rarely need to change server-side code
-in order to use Unpoly. There is no need to provide a JSON API, or add
-extra routes for AJAX requests. The server simply renders a series
-of full HTML pages, like it would without Unpoly.
+You rarely need to change server-side code to use Unpoly. You don't need
+to provide a JSON API, or add extra routes for AJAX requests. The server simply renders
+a series of full HTML pages, like it would without Unpoly.
 
-That said, there is an **optional** protocol your server can use to
-exchange additional information when Unpoly is [updating fragments](/up.link).
+There is an **optional** protocol your server may use to exchange additional information
+when Unpoly is [updating fragments](/up.link). The protocol mostly works by adding
+additional HTTP headers (like `X-Up-Target`) to requests and responses.
 
-While the protocol can help you optimize performance and handle some
-edge cases, implementing it is **entirely optional**. For instance,
-`unpoly.com` itself is a static site that uses Unpoly on the frontend
-and doesn't even have a server component.
+While the protocol can help you optimize performance and handle some edge cases,
+implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
+that uses Unpoly on the frontend and doesn't even have an active server component.
 
 ## Existing implementations
 
 You should be able to implement the protocol in a very short time.
+
 There are existing implementations for various web frameworks:
 
 - [Ruby on Rails](/install/rails)
@@ -437,6 +437,7 @@ up.protocol = do ->
   an existing `_up_method` cookie should be deleted.
 
   @cookie _up_method
+  @stable
   ###
 
   ###**
@@ -554,7 +555,7 @@ up.protocol = do ->
     _method=PUT
     ```
 
-  @experimental
+  @stable
   ###
   config = new up.Config ->
     acceptLayerHeader: 'X-Up-Accept-Layer'     # @header
