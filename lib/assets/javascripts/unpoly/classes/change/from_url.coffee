@@ -54,9 +54,9 @@ class up.Change.FromURL extends up.Change
       @request.emit(@buildEvent('up:fragment:unusable'), log: issue)
       return rejectWithFailedResponse()
     else if @isSuccessfulResponse()
-      return @updateContentFromResponse('Loaded fragment from successful response', @successOptions)
+      return @updateContentFromResponse(['Loaded fragment from successful response to %s', @request.description], @successOptions)
     else
-      log = ['Loaded fragment from failed response (HTTP %d)', @response.status]
+      log = ['Loaded fragment from failed response to %s (HTTP %d)', @request.description, @response.status]
       contentUpdated = @updateContentFromResponse(log, @failOptions)
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
@@ -64,11 +64,11 @@ class up.Change.FromURL extends up.Change
 
   responseIssue: ->
     unless @response.text
-      return ['Response to %s %s is empty', @request.method, @request.url]
+      return ['Response to %s is empty', @request.description]
 
     contentType = @response.contentType
     unless /\bx?html\b/.test(contentType)
-      return ["Response to %s %s is not HTML (Content-Type %s)", @request.method, @request.url, @response.contentType]
+      return ["Response to %s is not HTML (Content-Type %s)", @request.description, @response.contentType]
 
   isSuccessfulResponse: ->
     @successOptions.fail == false || @response.ok

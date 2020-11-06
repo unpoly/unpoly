@@ -391,3 +391,6 @@ class up.Request extends up.Record
 
   whenEmitted: (args...) ->
     return @buildEventEmitter(args).whenEmitted()
+
+  @getter 'description', ->
+    @method + ' ' + @url
