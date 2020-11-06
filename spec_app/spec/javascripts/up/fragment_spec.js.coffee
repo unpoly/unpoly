@@ -2932,6 +2932,53 @@ describe 'up.fragment', ->
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(2)
 
+      describe 'with { cache } option', ->
+
+        it 'reuses a cached request with { cache: true }', asyncSpec (next) ->
+          fixture('.element')
+
+          up.render('.element', url: '/path', cache: true)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(target: '.element', url: '/path').toBeCached()
+
+            up.render('.element', url: '/path', cache: true)
+
+          next ->
+            # See that the cached request is used.
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        it 'does not reuse a cached request with { cache: false }', asyncSpec (next) ->
+          fixture('.element')
+
+          up.render('.element', url: '/path', cache: false)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(target: '.element', url: '/path').not.toBeCached()
+
+            up.render('.element', url: '/path', cache: false)
+
+          next ->
+            # See that the cached request is used.
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        it 'does not reuse a cached request when no { cache } option is given', asyncSpec (next) ->
+          fixture('.element')
+
+          up.render('.element', url: '/path')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(target: '.element', url: '/path').not.toBeCached()
+
+            up.render('.element', url: '/path')
+
+          next ->
+            # See that the cached request is used.
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->
