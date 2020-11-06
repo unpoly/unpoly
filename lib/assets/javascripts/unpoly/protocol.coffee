@@ -568,13 +568,6 @@ up.protocol = do ->
   @stable
   ###
   config = new up.Config ->
-    acceptLayerHeader: 'X-Up-Accept-Layer'     # @header
-    dismissLayerHeader: 'X-Up-Dismiss-Layer'   # @header
-    eventsHeader: 'X-Up-Events'                # @header
-    contextHeader: 'X-Up-Context'              # @header, also Up-Fail-Context
-                                               # @header X-Up-Target, X-Up-Fail-Target
-                                               # @header X-Up-Mode, X-Up-Fail-Mode
-
     methodParam: '_method'                     # up.network.config.methodParam
 
     csrfParam: -> e.metaContent('csrf-param')  # das muss echt configurierbar sein, evtl. up.network.config.csrfParam
