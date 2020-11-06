@@ -257,6 +257,11 @@ up.fragment = do ->
     if options.url
       return new up.Change.FromURL(options).executeAsync()
     else
+      # When we have a given { url }, the { solo } option is honored by up.request().
+      # But up.request() is never called when we have local content given as { document },
+      # { content } or { fragment }. Hence we abort here.
+      if options.solo
+        up.network.abort()
       return new up.Change.FromContent(options).executeAsync()
 
   ###**
