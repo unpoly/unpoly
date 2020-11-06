@@ -13,6 +13,7 @@ class up.EventListenerGroup extends up.Record
       'jQuery',
       'guard',
       'currentLayer',
+      'passive',
     ]
 
   bind: ->
@@ -36,17 +37,14 @@ class up.EventListenerGroup extends up.Record
           listener.unbind()
 
   ###
-  Constructs a new up.EventListenerGroup from the following arg variants:
+  Constructs a new up.EventListenerGroup from arguments with many different combinations:
 
-  - [elements, eventTypes, selector, callback]
-  - [elements, eventTypes,           callback]
-  - [          eventTypes, selector, callback]
-  - [          eventTypes,           callback]
+      [[elements], eventTypes, [selector], [options], callback]
 
   @function up.EventListenerGroup.fromBindArgs
   @internal
   ###
-  @fromBindArgs: (args, options) ->
+  @fromBindArgs: (args, defaults) ->
     args = u.copy(args)
 
     # A callback function is given in all arg variants.
@@ -65,9 +63,11 @@ class up.EventListenerGroup extends up.Record
     eventTypes = u.splitValues(args.shift())
     eventTypes = u.map(eventTypes, up.legacy.fixEventType)
 
+    options = u.extractOptions(args)
+
     # A selector is given if the user wants to delegate events.
     # It might be undefined.
     selector = args[0]
 
-    attributes = u.merge({ elements, eventTypes, selector, callback }, options)
+    attributes = u.merge({ elements, eventTypes, selector, callback }, options, defaults)
     new @(attributes)

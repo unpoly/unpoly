@@ -11,7 +11,8 @@ class up.EventListener extends up.Record
       'callback',
       'jQuery',
       'guard',
-      'currentLayer'
+      'currentLayer',
+      'passive'
     ]
 
   constructor: (attributes) ->
@@ -24,12 +25,19 @@ class up.EventListener extends up.Record
     if map[@key]
       up.fail('up.on(): The %o callback %o cannot be registered more than once', @eventType, @callback)
     map[@key] = this
-    @element.addEventListener(@eventType, @nativeCallback)
+
+    @element.addEventListener(@addListenerArgs()...)
+
+  addListenerArgs: ->
+    args = [@eventType, @nativeCallback]
+    if @passive && up.browser.canPassiveEventListener()
+      args.push({ passive: true })
+    return args
 
   unbind: =>
     if map = @element.upEventListeners
       delete map[@key]
-    @element.removeEventListener(@eventType, @nativeCallback)
+    @element.removeEventListener(@addListenerArgs()...)
 
   nativeCallback: (event) =>
     # 1. Since we're listing on `document`, event.currentTarget is now `document`.

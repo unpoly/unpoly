@@ -400,6 +400,12 @@ class up.Layer extends up.Record
 
     Omit the selector to listen to all events of the given type, regardless
     of the event target.
+  @param {boolean} [options.passive=false]
+    Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).
+
+    A passive event listener may not call `event.preventDefault()`.
+    This in particular may improve the frame rate when registering
+    `touchstart` and `touchmove` events.
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 

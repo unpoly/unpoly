@@ -176,6 +176,9 @@ up.browser = do ->
   canControlScrollRestoration = u.memoize ->
     'scrollRestoration' of history
 
+  canPassiveEventListener = u.memoize ->
+    !isIE11()
+
   # Don't memoize so a build may publish window.jQuery after Unpoly was loaded
   canJQuery = ->
     !!window.jQuery
@@ -236,6 +239,7 @@ up.browser = do ->
     canCustomElements: canCustomElements
     canControlScrollRestoration: canControlScrollRestoration
     canFormatLog: canFormatLog
+    canPassiveEventListener: canPassiveEventListener
     canJQuery: canJQuery
     whenConfirmed: whenConfirmed
     isSupported: isSupported

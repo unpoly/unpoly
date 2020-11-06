@@ -267,6 +267,30 @@ describe 'up.event', ->
           document.removeEventListener('foo', nativeCallbackBefore)
           document.removeEventListener('foo', nativeCallbackAfter)
 
+      describe 'with { passive } option', ->
+
+        describeCapability 'canPassiveEventListener', ->
+
+          it 'registers a passive event listener', ->
+            element = fixture('.element')
+            spyOn(element, 'addEventListener')
+            listener = ->
+
+            up.on(element, 'my:event', { passive: true }, listener)
+
+            expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function), { passive: true })
+
+        describeFallback 'canPassiveEventListener', ->
+
+          it 'registers a non-passive event listener', ->
+            element = fixture('.element')
+            spyOn(element, 'addEventListener')
+            listener = ->
+
+            up.on(element, 'my:event', { passive: true }, listener)
+
+            expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function))
+
       describe 'passing of [up-data]', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->

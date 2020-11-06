@@ -45,6 +45,8 @@ Unreleased
     - unpoly-bootstrap5.js
 - Hungry elements no longer get the transition by default. You need to set [up-transition] on the hungry element.
 - Rejections are now shown if the log is enabled
+- up.on() can passive: true
+- Preloads on touchstart and mousedown
 
 
 
