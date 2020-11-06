@@ -89,7 +89,7 @@ up.link = do ->
     return u.flatMap(elementSelectors, (l) -> attributeSelectors.map((r) -> l + r))
 
   config = new up.Config ->
-    preloadDelay: 75
+    preloadDelay: 90
     followSelectors: combineFollowableSelectors(LINKS_WITH_ANY_HTML)
     instantSelectors: [e.trueAttributeSelector('up-instant')]
     preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
