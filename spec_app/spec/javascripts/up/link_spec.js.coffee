@@ -1336,6 +1336,88 @@ describe 'up.link', ->
         next.after 50, ->
           expect(abortListener).toHaveBeenCalled()
 
+      it 'preloads the link destination on touchstart (without delay)', asyncSpec (next) ->
+        up.link.config.preloadDelay = 100
+
+        $fixture('.target').text('old text')
+
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello($link)
+
+        Trigger.touchstart($link)
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(@lastRequest().url).toMatchURL('/foo')
+          expect(@lastRequest()).toHaveRequestMethod('GET')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+
+          @respondWith """
+            <div class="target">
+              new text
+            </div>
+            """
+
+        next =>
+          # We only preloaded, so the target isn't replaced yet.
+          expect('.target').toHaveText('old text')
+
+          Trigger.click($link)
+
+        next =>
+          # No additional request has been sent since we already preloaded
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          # The target is replaced instantly
+          expect('.target').toHaveText('new text')
+
+      describeCapability 'canPassiveEventListener', ->
+
+        it 'registers the touchstart callback as a passive event listener', ->
+          fixture('.target')
+          link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+
+          spyOn(link, 'addEventListener')
+
+          up.hello(link)
+
+          expect(link.addEventListener).toHaveBeenCalledWith('touchstart', jasmine.any(Function), { passive: true })
+
+      it 'preloads the link destination on mousedown (without delay)', asyncSpec (next) ->
+        up.link.config.preloadDelay = 100
+
+        $fixture('.target').text('old text')
+
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello($link)
+
+        Trigger.mousedown($link)
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(@lastRequest().url).toMatchURL('/foo')
+          expect(@lastRequest()).toHaveRequestMethod('GET')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
+
+          @respondWith """
+            <div class="target">
+              new text
+            </div>
+            """
+
+        next =>
+          # We only preloaded, so the target isn't replaced yet.
+          expect('.target').toHaveText('old text')
+
+          Trigger.click($link)
+
+        next =>
+          # No additional request has been sent since we already preloaded
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          # The target is replaced instantly
+          expect('.target').toHaveText('new text')
+
       it 'does not cache a failed response', asyncSpec (next) ->
         up.link.config.preloadDelay = 0
 

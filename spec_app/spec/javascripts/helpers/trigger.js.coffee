@@ -34,6 +34,11 @@ $ = jQuery
     event = createMouseEvent('mouseup', u.merge({ element }, options))
     dispatch(element, event)
 
+  touchstart = (element, options) ->
+    element = e.get(element)
+    event = createEvent('touchstart', u.merge({ element }, options))
+    dispatch(element, event)
+
   click = (element, options) ->
     element = e.get(element)
     event = createMouseEvent('click', u.merge({ element }, options))
@@ -204,6 +209,7 @@ $ = jQuery
   mouseleave: mouseleave
   click: click
   clickSequence: clickSequence
+  touchstart: touchstart
   hoverSequence: hoverSequence
   unhoverSequence: unhoverSequence
   escapeSequence: escapeSequence

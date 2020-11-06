@@ -10,19 +10,29 @@ class up.LinkPreloadDelay
     # prevent up.link.preload() from blowing up by not observing the link (even if
     # the user uses [up-preload] everywhere).
     if up.link.isSafe(link)
-      link.addEventListener('mouseenter', @onMouseEnter)
-      link.addEventListener('mouseleave', @onMouseLeave)
+      @on link, 'mouseenter',           (event) => @considerPreload(event, true)
+      @on link, 'mousedown touchstart', (event) => @considerPreload(event)
+      @on link, 'mouseleave',           (event) => @stopPreload(event)
 
-  onMouseEnter: ({ target }) =>
-    if target != @currentLink
+  on: (link, eventTypes, callback) ->
+    up.on(link, eventTypes, { passive: true }, callback)
+
+  considerPreload: (event, applyDelay) =>
+    link = event.target
+    if link != @currentLink
       @reset()
 
-      # Don't preload when the user is holding down CTRL or SHIFT.
-      if up.link.shouldFollowEvent(event, target)
-        @preloadAfterDelay(target)
+      @currentLink = link
 
-  onMouseLeave: ({ target }) =>
-    if target == @currentLink
+      # Don't preload when the user is holding down CTRL or SHIFT.
+      if up.link.shouldFollowEvent(event, link)
+        if applyDelay
+          @preloadAfterDelay(link)
+        else
+          @preloadNow(link)
+
+  stopPreload: (event) ->
+    if event.target == @currentLink
       @reset()
 
   reset: ->
@@ -34,7 +44,6 @@ class up.LinkPreloadDelay
     @currentLink = undefined
 
   preloadAfterDelay: (link) ->
-    @currentLink = link
     delay = e.numberAttr(link, 'up-delay') ? up.link.config.preloadDelay
     @timer = u.timer(delay, => @preloadNow(link))
 
