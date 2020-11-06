@@ -585,14 +585,14 @@ up.protocol = do ->
     header = camel.replace /(^.|[A-Z])/g, (char) -> '-' + char.toUpperCase()
     return 'X-Up' + header
 
-  csrfHeader = (request) ->
-    u.evalOption(config.csrfHeader, request)
+  csrfHeader = ->
+    u.evalOption(config.csrfHeader)
 
-  csrfParam = (request) ->
-    u.evalOption(config.csrfParam, request)
+  csrfParam = ->
+    u.evalOption(config.csrfParam)
 
-  csrfToken = (request) ->
-    u.evalOption(config.csrfToken, request)
+  csrfToken = ->
+    u.evalOption(config.csrfToken)
 
   ###**
   @internal

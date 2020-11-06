@@ -308,15 +308,15 @@ class up.Request extends up.Record
     new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
-    up.protocol.csrfHeader(this)
+    up.protocol.csrfHeader()
 
   csrfParam: ->
-    up.protocol.csrfParam(this)
+    up.protocol.csrfParam()
 
   # Returns a csrfToken if this request requires it
   csrfToken: ->
     if !@isSafe() && !@isCrossDomain()
-      up.protocol.csrfToken(this)
+      up.protocol.csrfToken()
 
   isCrossDomain: =>
     u.isCrossDomain(@url)
