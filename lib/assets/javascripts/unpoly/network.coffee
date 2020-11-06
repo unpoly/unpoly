@@ -577,6 +577,8 @@ up.network = do ->
 
 up.request = up.network.request
 up.ajax = up.network.ajax
+
+# TODO: Docs for up.cache()
 up.cache = up.network.cache
 
 up.legacy.renamedPackage('proxy', 'network')

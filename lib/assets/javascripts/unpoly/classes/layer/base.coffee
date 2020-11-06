@@ -14,7 +14,7 @@ E.g. `up.layer.dismiss()` is a shortcut for `up.layer.current.dismiss()`.
 class up.Layer extends up.Record
 
   ###**
-  Returns this layer's outmost element.
+  This layer's outmost element.
 
   \#\#\# Example
 
@@ -30,7 +30,7 @@ class up.Layer extends up.Record
   ###
 
   ###**
-  Returns this layer's mode.
+  This layer's mode which governs its appearance and behavior.
 
   Available layer modes are:
 
@@ -46,20 +46,44 @@ class up.Layer extends up.Record
   ###
 
   ###**
-  Returns whether fragment updates within this layer will affect browser history and window title.
+  Whether fragment updates within this layer will affect browser history and window title.
 
   @property up.Layer#history
   @return {boolean}
   ###
 
   ###**
-  Returns this layer's context object.
+  This layer's context object.
 
-  The context is an object that is sent as an `X-Up-Context` header along with every
-  [request](/up.request) to the server.
+  Think of *context* as [session storage](/https://makandracards.com/makandra/32865), but specific to a [layer](/up.layer)
+  rather than specific to an entire browser tab.
+
+  You may access the context object's properties like a regular JavaScript object.
+
+  \#\#\# Example
+
+      let layer = up.layer.current
+      layer.context.message = 'Please select a contact'
+      console.log(layer.context) // logs "{ message: 'Please select a contact' }"
+
+  \#\#\# Accessing the context from the server
+
+  The context is is sent as an `X-Up-Context` header along with every
+  [request](/up.request) to the server. The server may also update the updating
+  layer's context by including an `X-Up-Context` header in its response.
 
   @property up.Layer#context
   @return {Object}
+  @stable
+  ###
+
+  ###*
+  Whether fragment updates within this layer will affect [browser history](/up.history).
+
+  If a layer does not affect history, its desendant layers cannot affect history either.
+
+  @property up.Layer#history
+  @return {boolean}
   @stable
   ###
 
@@ -427,12 +451,38 @@ class up.Layer extends up.Record
     return up.EventEmitter.fromEmitArgs(args, layer: this)
 
   ###**
-  [Emits](/up.emit) an event on this layer's element.
+  [Emits](/up.emit) an event on [this layer's element](/up.Layer#element).
 
-  TODO: Fix docs for up.event with new EventEmitter options
-  TODO: Document this
+  The value of [up.layer.current](/up.layer.current) will be set to the this layer
+  while event listeners are running.
+
+  \#\#\# Example
+
+      let rootLayer = up.layer.root
+      let overlay = await up.layer.open()
+
+      rootLayer.on('foo', (event) => console.log('Listener called'))
+
+      rootLayer.emit('foo') // logs "Listener called"
+      overlay.emit('foo')   // listener is not called
 
   @function up.Layer#emit
+  @param {Element|jQuery} [target=this.element]
+    The element on which the event is triggered.
+
+    If omitted, the event will be emitted on the [this layer's element](/up.Layer#element).
+  @param {string} eventType
+    The event type, e.g. `my:event`.
+  @param {Object} [props={}]
+    A list of properties to become part of the event object that will be passed to listeners.
+  @param {string|Array} [props.log]
+    A message to print to the [log](/up.log) when the event is emitted.
+
+    Pass `false` to not log this event emission.
+  @param {Element|jQuery} [props.target=this.element]
+    The element on which the event is triggered.
+
+    Alternatively the target element may be passed as the first argument.
   @stable
   ###
   emit: (args...) ->
@@ -459,6 +509,20 @@ class up.Layer extends up.Record
       document.title = @savedTitle
       @savedTitle = null
 
+  ###**
+  Temporarily changes the [current layer](/up.layer.current) while the given
+  function is running.
+
+  Calls the given function and restores the original current layer when the function
+  terminates.
+
+  @param {Function()} fn
+    The synchronous function to call.
+
+    Async functions are not supported.
+  @function up.Layer#asCurrent
+  @experimental
+  ###
   asCurrent: (fn) ->
     @stack.asCurrent(this, fn)
 
@@ -479,6 +543,19 @@ class up.Layer extends up.Record
     if context = options.context
       @context = context
 
+  ###**
+  This layer's window title.
+
+  If this layer does not [affect browser history](/up.Layer#history), this property will
+  still return the string the layer would otherwise use.
+
+  When this layer opens a child layer with history, the browser window will change to the child
+  layer's title. When the child layer is closed, this layer's title will be restored.
+
+  @property up.Layer#title
+  @param {string} title
+  @experimental
+  ###
   @accessor 'title',
     get: ->
       if @hasLiveHistory()
@@ -494,6 +571,20 @@ class up.Layer extends up.Record
       if @hasLiveHistory()
         document.title = title
 
+
+  ###**
+  This layer's URL for the browser's address bar.
+
+  If this layer does not [affect browser history](/up.Layer#history), this property will
+  still return the URL the layer would otherwise use.
+
+  When this layer opens a child layer with history, the browser URL will change to the child
+  layer's location. When the child layer is closed, this layer's laytion will be restored.
+
+  @property up.Layer#title
+  @param {string} title
+  @experimental
+  ###
   @accessor 'location',
     get: ->
       if @hasLiveHistory()

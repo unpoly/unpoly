@@ -268,18 +268,23 @@ up.event = do ->
 
     If omitted, the event will be emitted on the `document`.
   @param {string} eventType
-    The name of the event.
-  @param {Object} [eventProps={}]
-    A list of properties to become part of the event object
-    that will be passed to listeners. Note that the event object
-    will by default include properties like `preventDefault()`
-    or `stopPropagation()`.
-  @param {string|Array} [eventProps.log=false]
-    A message to print to the console when the event is emitted.
+    The event type, e.g. `my:event`.
+  @param {Object} [props={}]
+    A list of properties to become part of the event object that will be passed to listeners.
+  @param {string|up.Layer} [props.layer]
+    The [layer](/up.layer) on which to emit this event.
 
-    Pass `true` to print a default message
-  @param {Element|jQuery} [eventProps.target=document]
+    If this property is set, the event will be emitted on the [layer's outmost element](/up.Layer#element).
+    Also [up.layer.current](/up.layer.current) will be set to the given layer while event listeners
+    are running.
+  @param {string|Array} [props.log]
+    A message to print to the [log](/up.log) when the event is emitted.
+
+    Pass `false` to not log this event emission.
+  @param {Element|jQuery} [props.target=document]
     The element on which the event is triggered.
+
+    Alternatively the target element may be passed as the first argument.
   @stable
   ###
   emit = (args...) ->

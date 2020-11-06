@@ -173,8 +173,6 @@ up.protocol = do ->
   ###**
   This request header contains the targeted layer's [context](/up.layer.context), serialized as JSON.
 
-  The server may update the layer context by including a `X-Up-Context` header in its response.
-
   The user may choose to not send this header by configuring
   [`up.network.config.metaKeys`](/up.network.config#config.metaKeys).
 
@@ -183,6 +181,17 @@ up.protocol = do ->
   ```http
   X-Up-Context: { "context": "Choose a company contact" }
   ```
+
+  \#\#\# Updating context from the server
+
+  The server may update the layer context by including a `X-Up-Context` header in its response.
+  Upon seeing the response header, Unpoly will replace the updating layer's context with the
+  server-provided context object. If no such response header is set, the updating layer's context
+  will not be changed.
+
+  It is recommended that the server only sets the `X-Up-Context` response header if the
+  context was changed on the server side. Otherwise any client-side changes made while
+  the request was in flight will get overridden by the server-provided context.
 
   @header X-Up-Context
   @stable
@@ -217,7 +226,8 @@ up.protocol = do ->
   Without this header Unpoly will set the browser location to the response URL, which is usually sufficient.
 
   When setting `X-Up-Location` it is recommended to also set `X-Up-Method`. If no `X-Up-Method` header is given
-  Unpoly will assume a `GET` method if the response's URL changed from the request's URL,
+  and the response's URL changed from the request's URL, Unpoly will assume a redirect and set the
+  method to `GET`.
 
   \#\#\# Internet Explorer 11
 

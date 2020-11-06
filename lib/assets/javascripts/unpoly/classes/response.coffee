@@ -17,11 +17,15 @@ Instances of `up.Response` describe the server response to an [`AJAX request`](/
 class up.Response extends up.Record
 
   ###**
-  The HTTP method used for the response.
+  The HTTP method used for the request that produced this response.
 
-  This is usually the HTTP method used by the request.
-  However, after a redirect the server should signal a `GET` method using
-  an [`X-Up-Method: GET` header](/up.protocol#redirect-detection).
+  This is usually the HTTP method used by the initial request, but if the server
+  redirected multiple requests may have been involved. In this case this property reflects
+  the method used by the last request.
+
+  If the response's URL changed from the request's URL,
+  Unpoly will assume a redirect and set the method to `GET`.
+  Also see the `X-Up-Method` header.
 
   @property up.Response#method
   @param {string} method
@@ -31,9 +35,9 @@ class up.Response extends up.Record
   ###**
   The URL used for the response.
 
-  This is usually the requested URL.
-  However, after a redirect the server should signal a the new URL
-  using an [`X-Up-Location: /new-url` header](/up.protocol#redirect-detection).
+  This is usually the requested URL, or the final URL after the server redirected.
+
+  On Internet Explorer 11 this property is only set when the server sends an `X-Up-Location` header.
 
   @property up.Response#url
   @param {string} url
@@ -61,7 +65,7 @@ class up.Response extends up.Record
   ###
 
   ###**
-  The [request](/up.Request) that triggered this response.
+  The original [request](/up.Request) that triggered this response.
 
   @property up.Response#request
   @param {up.Request} request
@@ -129,7 +133,7 @@ class up.Response extends up.Record
     @status && (@status >= 200 && @status <= 299)
 
   ###**
-  Returns whether the response was not [successful](/up.Request.prototype.isSuccess).
+  Returns whether the response was not [successful](/up.Response.prototype.ok).
 
   @function up.Response#isError
   @return {boolean}
@@ -167,6 +171,9 @@ class up.Response extends up.Record
 
   ###**
   The response body parsed as a JSON string.
+
+  The parsed JSON object is cached with the response object,
+  so multiple accesses will call `JSON.parse()` only once.
 
   \#\#\# Example
 
