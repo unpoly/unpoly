@@ -1333,7 +1333,7 @@ describe 'up.link', ->
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       it 'aborts a preload request if the user stops hovering before the response was received', asyncSpec (next) ->
-        up.link.config.preloadDelay = 50
+        up.link.config.preloadDelay = 10
         $fixture('.target').text('old text')
         $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)

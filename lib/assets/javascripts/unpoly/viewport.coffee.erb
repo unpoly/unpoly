@@ -56,7 +56,8 @@ up.viewport = do ->
     See [`[up-anchored="right"]`](/up-anchored-right) for details.
   @param {number} [config.revealSnap]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
-    to the top when the revealed element is closer to the top than `config.revealSnap`.
+    to the top when the revealed element is closer to the viewport's top edge
+    than `config.revealSnap`.
 
     Set to `0` to disable snapping.
   @param {number} [config.revealPadding]
@@ -71,7 +72,7 @@ up.viewport = do ->
 
     You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
     a maximum height in pixel. Each given rectangle has properties `{ top, right, buttom, left, width, height }`.
-   @param {number} [config.revealTop]
+  @param {number} [config.revealTop=false]
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.
@@ -203,8 +204,21 @@ up.viewport = do ->
 
   @function up.reveal
   @param {string|Element|jQuery} element
-  @param {number} [options.speed]
+    The element to reveal.
+  @param {number} [options.speed=1]
+    The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
+
+    The default value (`1`) roughly corresponds to the speed of Chrome's
+    [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
+
+    Defaults to `up.viewport.config.scrollSpeed`.
   @param {string} [options.snap]
+    When the the revealed element would be closer to the viewport's top edge
+    than this value, Unpoly will scroll the viewport to the top.
+
+    Set to `0` to disable snapping.
+
+    Defaults to `up.viewport.config.scrollSnap`.
   @param {string|Element|jQuery} [options.viewport]
     The scrolling element to scroll.
 
@@ -225,6 +239,8 @@ up.viewport = do ->
   @param {number} [options.padding]
     The desired padding between the revealed element and the
     closest [viewport](/up.viewport) edge (in pixels).
+
+    Defaults to `up.viewport.config.revealPadding`.
   @param {number|boolean} [options.snap]
     Whether to snap to the top of the viewport if the new scroll position
     after revealing the element is close to the top edge.
@@ -234,12 +250,18 @@ up.viewport = do ->
     Whether to close overlays obscuring the layer of `element`.
   @return {Promise}
     A promise that fulfills when the element is revealed.
+
+    When the scrolling is animated with `{ behavior: 'smooth' }`, the promise
+    fulfills when the animation is finished.
+
+    When the scrolling is not animated, the promise will fulfill
+    in the next [microtask](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
   @stable
   ###
-  reveal = (elementOrSelector, options) ->
+  reveal = (element, options) ->
     # copy options, since we will mutate it below
     options = u.options(options, peel: true)
-    element = f.get(elementOrSelector, options)
+    element = f.get(element, options)
 
     # Now that we have looked up the element with an option like { layer: 'any' },
     # the only layer relevant from here on is the element's layer.
@@ -532,7 +554,7 @@ up.viewport = do ->
 
   ###**
   Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
-  viewports configured in [`up.viewport.config.viewportSelectors`](/up.viewport.config#config.viewportSelectors).
+  viewports configured in `up.viewport.config.viewportSelectors`.
 
   Unpoly automatically restores scroll positions when the user presses the back button.
   You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
@@ -639,7 +661,7 @@ up.viewport = do ->
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
   instead of scrolling `<body>`. As an alternative you can also push a selector
-  matching your custom viewport to the [`up.viewport.config.viewportSelectors`](/up.viewport.config#config.viewportSelectors) array.
+  matching your custom viewport to the `up.viewport.config.viewportSelectors` array.
 
   [`up.reveal()`](/up.reveal) will always try to scroll the viewport closest
   to the element that is being revealed. By default this is the `<body>` element.
@@ -697,7 +719,7 @@ up.viewport = do ->
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in [`up.viewport.config.fixedTop`](/up.viewport.config#config.fixedTop).
+  you can also configure a selector in `up.viewport.config.fixedTop`.
 
   \#\#\# Example
 
@@ -717,7 +739,7 @@ up.viewport = do ->
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
 
   Instead of using this attribute,
-  you can also configure a selector in [`up.viewport.config.fixedBottom`](/up.viewport.config#config.fixedBottom).
+  you can also configure a selector in `up.viewport.config.fixedBottom`.
 
   \#\#\# Example
 
@@ -741,7 +763,7 @@ up.viewport = do ->
   with a CSS of `right: 0` with `position: fixed` or `position:absolute`.
 
   Instead of giving this attribute to any affected element,
-  you can also configure a selector in [`up.viewport.config.anchoredRight`](/up.viewport.config#config.anchoredRight).
+  you can also configure a selector in `up.viewport.config.anchoredRight`.
 
   \#\#\# Example
 

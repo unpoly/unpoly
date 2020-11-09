@@ -62,7 +62,7 @@ up.form = do ->
   Returns a list of form fields within the given element.
 
   You can configure what Unpoly considers a form field by adding CSS selectors to the
-  [`up.form.config.fieldSelectors`](/up.form.config#config.fieldSelectors) array.
+  `up.form.config.fieldSelectors` array.
 
   If the given element is itself a form field, a list of that given element is returned.
 
@@ -126,7 +126,7 @@ up.form = do ->
   Emits the event [`up:form:submit`](/up:form:submit).
 
   @function up.submit
-  @param {Element|jQuery|string} formOrSelector
+  @param {Element|jQuery|string} form
     A reference or selector for the form to submit.
     If the argument points to an element that is not a form,
     Unpoly will search its ancestors for the closest form.
@@ -415,7 +415,8 @@ up.form = do ->
       up.validate('input[name=email]', { target: '.email-errors' })
 
   @function up.validate
-  @param {string|Element|jQuery} fieldOrSelector
+  @param {string|Element|jQuery} field
+    The form field to validate.
   @param {string|Element|jQuery} [options.target]
     The element that will be [updated](/up.render) with the validation results.
   @return {Promise}
@@ -423,9 +424,9 @@ up.form = do ->
     validation is received and the form was updated.
   @stable
   ###
-  validate = (fieldOrSelector, options) ->
+  validate = (field, options) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    field = up.fragment.get(fieldOrSelector)
+    field = up.fragment.get(field)
 
     options = u.options(options)
     options.navigate = false
@@ -786,7 +787,7 @@ up.form = do ->
   With the Bootstrap bindings, Unpoly will also look
   for a container with the `form-group` class.
 
-  You can change this default behavior by setting [`up.form.config.validateTargets`](/up.form.config#config.validateTargets):
+  You can change this default behavior by setting `up.form.config.validateTargets`:
 
       // Always update the entire form containing the current field ("&")
       up.form.config.validateTargets = ['form &']
@@ -832,7 +833,7 @@ up.form = do ->
   Performs [server-side validation](/input-up-validate) when any fieldset within this form changes.
 
   You can configure what Unpoly considers a fieldset by adding CSS selectors to the
-  [`up.form.config.validateTargets`](/up.form.config#config.validateTargets) array.
+  `up.form.config.validateTargets` array.
 
   @selector form[up-validate]
   @param {string} up-validate

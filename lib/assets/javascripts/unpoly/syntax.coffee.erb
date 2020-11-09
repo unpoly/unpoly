@@ -397,12 +397,13 @@ up.syntax = do ->
       up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
 
   @function up.data
-  @param {string|Element|jQuery} elementOrSelector
+  @param {string|Element|jQuery} element
+    The element for which to return data.
   @return
     The JSON-decoded value of the `up-data` attribute.
 
     Returns `undefined` if the element has no (or an empty) `up-data` attribute.
-  @experimental
+  @stable
   ###
 
   ###**
@@ -445,9 +446,9 @@ up.syntax = do ->
     A serialized JSON string
   @stable
   ###
-  readData = (elementOrSelector) ->
+  readData = (element) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    element = up.fragment.get(elementOrSelector)
+    element = up.fragment.get(element)
     e.jsonAttr(element, 'up-data') || {}
 
   ###**

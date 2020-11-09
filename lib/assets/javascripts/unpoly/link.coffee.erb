@@ -138,7 +138,7 @@ up.link = do ->
       up.follow(link)
 
   @function up.follow
-  @param {Element|jQuery|string} linkOrSelector
+  @param {Element|jQuery|string} link
     An element or selector which is either an `<a>` tag or any element with an `[up-href]` attribute.
   @param {string} [options.target]
     The selector to replace.
@@ -349,13 +349,13 @@ up.link = do ->
   like `a[up-target]` or `a[up-modal]`.
 
   @function up.link.isFollowable
-  @param {Element|jQuery|string} linkOrSelector
+  @param {Element|jQuery|string} link
     The link to check.
   @experimental
   ###
-  isFollowable = (linkOrSelector) ->
+  isFollowable = (link) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    link = up.fragment.get(linkOrSelector)
+    link = up.fragment.get(link)
     e.matches(link, fullFollowSelector())
 
   ###**
@@ -366,8 +366,8 @@ up.link = do ->
   unless it already have it an attribute like `a[up-target]` or `a[up-modal]`.
 
   @function up.link.makeFollowable
-  @param {Element|jQuery|string} linkOrSelector
-    The link to process.
+  @param {Element|jQuery|string} link
+    The element or selector for the link to make followable.
   @experimental
   ###
   makeFollowable = (link) ->

@@ -140,7 +140,7 @@ up.motion = do ->
   the new animation begins.
 
   @function up.animate
-  @param {Element|jQuery|string} elementOrSelector
+  @param {Element|jQuery|string} element
     The element to animate.
   @param {string|Function(element, options): Promise|Object} animation
     Can either be:
@@ -159,9 +159,9 @@ up.motion = do ->
     A promise for the animation's end.
   @stable
   ###
-  animate = (elementOrSelector, animation, options) ->
+  animate = (element, animation, options) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    element = up.fragment.get(elementOrSelector)
+    element = up.fragment.get(element)
     options = u.options(options)
     applyConfig(options)
 
@@ -196,7 +196,7 @@ up.motion = do ->
   finish event.
 
   @function animateNow
-  @param {Element|jQuery|string} elementOrSelector
+  @param {Element|jQuery|string} element
     The element to animate.
   @param {Object} lastFrame
     The CSS properties that should be transitioned to.
@@ -237,13 +237,14 @@ up.motion = do ->
   Does nothing if there are no animation to complete.
   
   @function up.motion.finish
-  @param {Element|jQuery|string} [elementOrSelector]
+  @param {Element|jQuery|string} [element]
+    The element around which to finish all animations.
   @return {Promise}
     A promise that fulfills when animations and transitions have finished.
   @stable
   ###
-  finish = (elementOrSelector) ->
-    motionController.finish(elementOrSelector)
+  finish = (element) ->
+    motionController.finish(element)
 
   ###**
   This event is emitted on an [animating](/up.animating) element by `up.motion.finish()` to

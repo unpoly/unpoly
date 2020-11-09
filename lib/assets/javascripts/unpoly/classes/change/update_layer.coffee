@@ -73,9 +73,12 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     Promise.all(swapPromises).then =>
       @abortWhenLayerClosed()
+
+      # Run callbacks for callers that need to know when animations are done.
       @onRemoved()
       @onAppeared()
 
+    # Don't wait for animations to finish.
     return Promise.resolve()
 
   executeStep: (step) =>

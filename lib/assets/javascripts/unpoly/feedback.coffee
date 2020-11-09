@@ -119,7 +119,7 @@ up.feedback = do ->
 
   ###**
   @function findActivatableArea
-  @param {string|Element|jQuery} elementOrSelector
+  @param {string|Element|jQuery} element
   @internal
   ###
   findActivatableArea = (element) ->
@@ -256,7 +256,7 @@ up.feedback = do ->
 
   You may also assign `[up-nav]` to an individual link instead of an navigational container.
 
-  If you don't want to manually add this attribute to every navigational element, you can configure selectors to automatically match your navigation components in [`up.feedback.config.navs`](/up.feedback.config#config.navs).
+  If you don't want to manually add this attribute to every navigational element, you can configure selectors to automatically match your navigation components in `up.feedback.config.navs`.
 
 
   \#\#\# Example

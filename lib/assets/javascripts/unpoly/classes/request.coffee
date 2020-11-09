@@ -71,7 +71,7 @@ class up.Request extends up.Record
   ###**
   A timeout in milliseconds.
 
-  If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set,
+  If `up.network.config.maxRequests` is set,
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request#timeout

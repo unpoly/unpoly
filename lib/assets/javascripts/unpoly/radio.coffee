@@ -96,7 +96,7 @@ up.radio = do ->
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.
-    Defaults to [`up.radio.config.pollInterval`](/up.radio.config#config.pollInterval).
+    Defaults to `up.radio.config.pollInterval`.
   ###
   up.compiler '[up-poll]', startPolling
 

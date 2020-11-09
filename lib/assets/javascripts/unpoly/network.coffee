@@ -259,7 +259,7 @@ up.network = do ->
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
-    If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set, the timeout
+    If `up.network.config.maxRequests` is set, the timeout
     will not include the time spent waiting in the queue.
   @param {string} [options.target='body']
     The CSS selector that will be sent as an `X-Up-Target` header.
@@ -382,7 +382,7 @@ up.network = do ->
   @param {string} [request.timeout]
     A timeout in milliseconds for the request.
 
-    If [`up.network.config.maxRequests`](/up.network.config#config.maxRequests) is set, the timeout
+    If `up.network.config.maxRequests` is set, the timeout
     will not include the time spent waiting in the queue.
   @return {Promise<string>}
     A promise for the response text.

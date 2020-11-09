@@ -91,6 +91,7 @@ class up.Change.OpenLayer extends up.Change.Addition
         @handleFocus()
         @handleScroll()
 
+      # Run callbacks for callers that need to know when animations are done.
       @onAppeared()
 
     # Emit up:layer:opened to indicate that the layer was opened successfully.
@@ -102,7 +103,10 @@ class up.Change.OpenLayer extends up.Change.Addition
     @abortWhenLayerClosed()
 
     # Resolve the promise with the layer instance, so callers can do:
-    # layer = await up.layer.open(...)
+    #
+    #     layer = await up.layer.open(...)
+    #
+    # Don't wait to animations to finish:
     return Promise.resolve(@layer)
 
   historyOptionForLayer: ->
