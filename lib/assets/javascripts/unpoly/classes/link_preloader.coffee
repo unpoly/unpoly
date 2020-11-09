@@ -1,7 +1,7 @@
 u = up.util
 e = up.element
 
-class up.LinkPreloadDelay
+class up.LinkPreloader
 
   constructor: ->
 

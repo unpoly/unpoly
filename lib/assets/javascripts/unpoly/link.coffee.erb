@@ -78,7 +78,7 @@ up.link = do ->
 
   preloadDelayTimer = undefined
   waitingLink = undefined
-  preloadDelay = new up.LinkPreloadDelay()
+  linkPreloader = new up.LinkPreloader()
 
   LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
   LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]']
@@ -114,7 +114,7 @@ up.link = do ->
   ###
   reset = ->
     config.reset()
-    preloadDelay.reset()
+    linkPreloader.reset()
 
   ###**
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
@@ -735,7 +735,7 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    preloadDelay.observeLink(link)
+    linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset
 
