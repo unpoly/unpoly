@@ -636,6 +636,21 @@ describe 'up.form', ->
 
           next => expect(loadPageSpy).toHaveBeenCalled()
 
+    describe 'up.form.submitOptions()', ->
+
+      it 'parses the render options that would be used to submit the given frm', ->
+        form = fixture('form[action="/path"][up-method="PUT"][up-layer="new"]')
+        options = up.form.submitOptions(form)
+        expect(options.url).toEqual('/path')
+        expect(options.method).toEqual('PUT')
+        expect(options.layer).toEqual('new')
+
+      it 'does not render', ->
+        spyOn(up, 'render')
+        form = fixture('form[action="/path"][up-method="PUT"][up-layer="new"]')
+        options = up.form.submitOptions(form)
+        expect(up.render).not.toHaveBeenCalled()
+
     describe 'up.validate()', ->
 
       it 'emits an up:form:validate event instead of an up:form:submit event', asyncSpec (next) ->

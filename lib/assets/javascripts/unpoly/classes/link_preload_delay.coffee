@@ -39,8 +39,17 @@ class up.LinkPreloadDelay
     return unless @currentLink
 
     clearTimeout(@timer)
-    @abortController?.abort()
-    @abortController = undefined
+
+    if @queued
+      followOptions = up.link.followOptions(@currentLink)
+      up.network.abort (request) ->
+        # Only abort when we're still preloading, not when navigation
+        # has started.
+        request.preload &&
+          request.method == followOptions.method &&
+          request.url == followOptions.url
+
+    @queued = false
     @currentLink = undefined
 
   preloadAfterDelay: (link) ->
@@ -48,5 +57,5 @@ class up.LinkPreloadDelay
     @timer = u.timer(delay, => @preloadNow(link))
 
   preloadNow: (link) ->
-    @abortController = new up.AbortController()
-    up.log.muteRejection up.link.preload(link, signal: @abortController.signal)
+    up.log.muteRejection up.link.preload(link)
+    @queued = true

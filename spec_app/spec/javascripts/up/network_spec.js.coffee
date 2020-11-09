@@ -290,29 +290,28 @@ describe 'up.network', ->
             expect(result.state).toEqual('rejected')
             expect(result.value.name).toEqual('AbortError')
 
-        it "may be aborted through an AbortController's { signal }", asyncSpec (next) ->
-          abortController = new up.AbortController()
-          request = up.request('/url', signal: abortController.signal)
-
-          next ->
-            abortController.abort()
-
-          next.await ->
-            promiseState(request)
-
-          next (result) ->
-            expect(result.state).toEqual('rejected')
-            expect(result.value.name).toEqual('AbortError')
+#        it "may be aborted through an AbortController's { signal }", asyncSpec (next) ->
+#          abortController = new up.AbortController()
+#          request = up.request('/url', signal: abortController.signal)
+#
+#          next ->
+#            abortController.abort()
+#
+#          next.await ->
+#            promiseState(request)
+#
+#          next (result) ->
+#            expect(result.state).toEqual('rejected')
+#            expect(result.value.name).toEqual('AbortError')
 
         it 'emits an up:request:aborted event', asyncSpec (next) ->
-          abortController = new up.AbortController()
           listener = jasmine.createSpy('event listener')
           up.on('up:request:aborted', listener)
 
-          request = up.request('/url', signal: abortController.signal)
+          request = up.request('/url')
 
           next ->
-            abortController.abort()
+            request.abort()
 
           next ->
             expect(listener).toHaveBeenCalled()
@@ -361,11 +360,10 @@ describe 'up.network', ->
             expect(request.xhr.abort).not.toHaveBeenCalled()
 
         it 'does not abort a request that was already fulfilled with a response', asyncSpec (next) ->
-          abortController = new up.AbortController()
           listener = jasmine.createSpy('event listener')
           up.on('up:request:aborted', listener)
 
-          request = up.request('/url', signal: abortController.signal)
+          request = up.request('/url')
 
           next =>
             expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -380,7 +378,7 @@ describe 'up.network', ->
             expect(listener).not.toHaveBeenCalled()
 
           next ->
-            abortController.abort()
+            request.abort()
 
           next.await ->
             promiseState(request)

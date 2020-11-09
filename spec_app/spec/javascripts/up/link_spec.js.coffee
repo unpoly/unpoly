@@ -531,6 +531,21 @@ describe 'up.link', ->
           next =>
             expect(up.browser.loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path', method: 'PUT'))
 
+    describe 'up.link.followOptions()', ->
+
+      it 'parses the render options that would be used to follow the given link', ->
+        link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
+        options = up.link.followOptions(link)
+        expect(options.url).toEqual('/path')
+        expect(options.method).toEqual('PUT')
+        expect(options.layer).toEqual('new')
+
+      it 'does not render', ->
+        spyOn(up, 'render')
+        link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
+        options = up.link.followOptions(link)
+        expect(up.render).not.toHaveBeenCalled()
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->
@@ -1328,13 +1343,37 @@ describe 'up.link', ->
         Trigger.hoverSequence($link)
 
         next.after 50, ->
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(abortListener).not.toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           Trigger.unhoverSequence($link)
 
         next.after 50, ->
           expect(abortListener).toHaveBeenCalled()
+
+      it 'does not abort a request if the user followed the link while it was preloading, and then stopped hovering', asyncSpec (next) ->
+        up.link.config.preloadDelay = 10
+        $fixture('.target').text('old text')
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello($link)
+        abortListener = jasmine.createSpy('up:request:abort listener')
+        up.on('up:request:aborted', abortListener)
+
+        Trigger.hoverSequence($link)
+
+        next.after 50, ->
+          expect(abortListener).not.toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          Trigger.click($link)
+
+        next ->
+          expect(abortListener).not.toHaveBeenCalled()
+
+          Trigger.unhoverSequence($link)
+
+        next ->
+          expect(abortListener).not.toHaveBeenCalled()
 
       it 'preloads the link destination on touchstart (without delay)', asyncSpec (next) ->
         up.link.config.preloadDelay = 100

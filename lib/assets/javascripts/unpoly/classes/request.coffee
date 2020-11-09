@@ -109,7 +109,7 @@ class up.Request extends up.Record
 
   keys: ->
     [
-      'signal',
+      # 'signal',
       'method',
       'url',
       'params',
@@ -228,7 +228,7 @@ class up.Request extends up.Record
   willQueue: ->
     u.always(this, => @evictExpensiveAttrs())
 
-    @signal?.addEventListener('abort', => @abort())
+    # @signal?.addEventListener('abort', => @abort())
 
   load: ->
     # If the request was aborted before it was sent (e.g. because it was queued)

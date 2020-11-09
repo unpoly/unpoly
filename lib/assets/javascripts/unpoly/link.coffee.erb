@@ -163,6 +163,26 @@ up.link = do ->
   @stable
   ###
   follow = (link, options) ->
+    return up.render(followOptions(link, options))
+
+
+  ###**
+  Parses the `render()` options that would be used to
+  [`follow`](/up.follow) the given link, but does not render.
+
+  @param {Element|jQuery|string} link
+    A reference or selector for the link to follow.
+  @param {Object} [options]
+    Additional options for the form submissions.
+
+    Will override any attribute values set on the given form element.
+
+    See `up.submit()` for detailled documentation of individual option properties.
+  @function up.link.followOptions
+  @return {Object}
+  @stable
+  ###
+  followOptions = (link, options) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
     options = u.options(options)
@@ -249,7 +269,7 @@ up.link = do ->
     # The guardEvent will also be assigned a { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:link:follow', log: 'Following link')
 
-    return up.render(options)
+    return options
 
   ###**
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
@@ -280,17 +300,21 @@ up.link = do ->
   @experimental
   ###
   preload = (link, options) ->
-    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    # If passed a selector, up.fragment.get() will match in the current layer.
     link = up.fragment.get(link)
 
-    unless isSafe(link)
-      return up.error.failed.async("Won't preload unsafe link")
-
-    unless e.matches(link, '[href], [up-href]')
-      return up.error.failed.async("Won't preload link without a URL")
+    if issue = preloadIssue(link)
+      return up.error.failed.async(preloadIssue)
 
     guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
     follow(link, u.merge(options, preload: true, { guardEvent }))
+
+  preloadIssue = (link) ->
+    unless isSafe(link)
+      return "Won't preload unsafe link"
+
+    unless e.matches(link, '[href], [up-href]')
+      return "Won't preload link without a URL"
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
@@ -717,6 +741,7 @@ up.link = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   follow: follow
+  followOptions: followOptions
   preload: preload
   makeFollowable: makeFollowable
   isSafe: isSafe

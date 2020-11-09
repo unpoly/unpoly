@@ -204,9 +204,28 @@ up.form = do ->
     A promise for a successful form submission.
   @stable
   ###
-  submit = (formOrSelector, options) ->
+  submit = (form, options) ->
+    return up.render(submitOptions(form, options))
+
+  ###**
+  Parses the `render()` options that would be used to
+  [`submit`](/up.submit) the given form, but does not render.
+
+  @param {Element|jQuery|string} form
+    A reference or selector for the form to submit.
+  @param {Object} [options]
+    Additional options for the form submissions.
+
+    Will override any attribute values set on the given form element.
+
+    See `up.submit()` for detailled documentation of individual option properties.
+  @function up.form.submitOptions
+  @return {Object}
+  @stable
+  ###
+  submitOptions = (form, options) ->
     options = u.options(options)
-    form = up.fragment.get(formOrSelector)
+    form = up.fragment.get(form)
     form = e.closest(form, 'form')
     parser = new up.OptionsParser(options, form)
 
@@ -241,9 +260,11 @@ up.form = do ->
     options.guardEvent ||= up.event.build('up:form:submit', log: 'Submitting form')
 
     # Now that we have extracted everything form-specific into options, we can call
-    # up.link.follow(). This will also parse the myriads of other options that are
-    # possible on the <form> element.
-    return up.link.follow(form, options)
+    # up.link.followOptions(). This will also parse the myriads of other options
+    # that are possible on both <form> and <a> elements.
+    u.assign(options, up.link.followOptions(form, options))
+
+    return options
 
   ###**
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
@@ -1081,6 +1102,7 @@ up.form = do ->
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   config: config
   submit: submit
+  submitOptions: submitOptions
   observe: observe
   validate: validate
   autosubmit: autosubmit
