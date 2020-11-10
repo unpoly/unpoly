@@ -850,6 +850,18 @@ up.form = do ->
     # the change event will trigger on a given field.
     field = findFields(event.target)[0]
 
+    # There is an edge case where the user is changing an input with [up-validate],
+    # but blurs the input by directly clicking the submit button. In this case the
+    # following events will be emitted:
+    #
+    # - change on the input
+    # - focus on the buttom
+    # - submit on the form
+    #
+    # In this case we do not want to send a validate request to the server, but
+    # simply submit the form. Because this event handler does not know if a submit
+    # event is about to fire, we delay the validation to the next microtask.
+    # In case we receive a submit event after this, we can cancel the validation.
     abortScheduledValidate = u.abortableMicrotask ->
       up.log.muteRejection validate(field)
 
