@@ -80,17 +80,22 @@ up.link = do ->
   waitingLink = undefined
   linkPreloader = new up.LinkPreloader()
 
-  LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
+  # Links with attribute-provided HTML are always followable.
   LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]']
-  LINKS_WITH_ANY_HTML = LINKS_WITH_REMOTE_HTML.concat(LINKS_WITH_LOCAL_HTML)
+
+  # Links with remote HTML are followable if there is one additional attribute
+  # suggesting "follow me through Unpoly".
+  LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
   ATTRIBUTES_SUGGESTING_FOLLOW = [e.trueAttributeSelector('up-follow'), '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
 
   combineFollowableSelectors = (elementSelectors, attributeSelectors = ATTRIBUTES_SUGGESTING_FOLLOW) ->
-    return u.flatMap(elementSelectors, (l) -> attributeSelectors.map((r) -> l + r))
+    return u.flatMap(elementSelectors, (elementSelector) ->
+      attributeSelectors.map((attributeSelector) -> elementSelector + attributeSelector)
+    )
 
   config = new up.Config ->
     preloadDelay: 90
-    followSelectors: combineFollowableSelectors(LINKS_WITH_ANY_HTML)
+    followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML).concat(LINKS_WITH_LOCAL_HTML)
     instantSelectors: [e.trueAttributeSelector('up-instant')]
     preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
 
@@ -117,11 +122,12 @@ up.link = do ->
     linkPreloader.reset()
 
   ###**
-  Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the current page with HTML from the response.
+  Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the
+  [current layer](/up.layer.current) with HTML from the response.
 
-  By default the page's `<body>` element will be replaced.
-  If the link has an attribute like `a[up-target]`
-  or `a[up-modal]`, the respective Unpoly behavior will be used.
+  By default the layer's [main element](/up.fragment.config.mainSelectors)
+  will be replaced. Attributes like `a[up-target]`
+  or `a[up-modal]` will be honored.
 
   Emits the event `up:link:follow`.
 
@@ -177,7 +183,7 @@ up.link = do ->
 
     Will override any attribute values set on the given form element.
 
-    See `up.submit()` for detailled documentation of individual option properties.
+    See `up.follow()` for detailled documentation of individual option properties.
   @function up.link.followOptions
   @return {Object}
   @stable
@@ -287,7 +293,7 @@ up.link = do ->
   ###**
   Preloads the given link.
 
-  When the link is clicked later, the response will already be cached,
+  When the link is clicked later, the response will already be [cached](/up.cache),
   making the interaction feel instant.
 
   @function up.link.preload
@@ -297,7 +303,7 @@ up.link = do ->
     See options for `up.follow()`.
   @return
     A promise that will be fulfilled when the request was loaded and cached
-  @experimental
+  @stable
   ###
   preload = (link, options) ->
     # If passed a selector, up.fragment.get() will match in the current layer.
@@ -345,13 +351,24 @@ up.link = do ->
   Returns whether the given link will be [followed](/up.follow) by Unpoly
   instead of making a full page load.
 
-  A link will be followed by Unpoly if it has an attribute
-  like `a[up-target]` or `a[up-modal]`.
+  By default Unpoly will follow links and elements with an `[up-href]` attribute if the element has
+  one of the following attributes:
+
+  - `[up-follow]`
+  - `[up-target]`
+  - `[up-layer]`
+  - `[up-mode]`
+  - `[up-transition]`
+  - `[up-content]`
+  - `[up-fragment]`
+  - `[up-document]`
+
+  To make additional elements followable, see `up.link.config.followSelectors`.
 
   @function up.link.isFollowable
   @param {Element|jQuery|string} link
     The link to check.
-  @experimental
+  @stable
   ###
   isFollowable = (link) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
@@ -362,13 +379,13 @@ up.link = do ->
   Makes sure that the given link will be [followed](/up.follow)
   by Unpoly instead of making a full page load.
 
-  This is done by giving the link an `a[up-follow]` attribute
-  unless it already have it an attribute like `a[up-target]` or `a[up-modal]`.
+  If the link is not already [followable](/up.link.isFollowable), the link
+  will receive an `a[up-follow]` attribute.
 
   @function up.link.makeFollowable
   @param {Element|jQuery|string} link
     The element or selector for the link to make followable.
-  @experimental
+  @stable
   ###
   makeFollowable = (link) ->
     unless isFollowable(link)
@@ -385,7 +402,7 @@ up.link = do ->
     return !betterTarget || betterTarget == link
 
   ###**
-  Provide an up:click event that improves on standard click
+  Provide an `up:click` event that improves on standard click
   in several ways:
 
   - It is emitted on mousedown for [up-instant] elements
@@ -394,6 +411,8 @@ up.link = do ->
     over the element, or if a mousedown handler removes a handler.
 
   Stopping an up:click event will also stop the underlying event.
+
+  Also see docs for `up.click.
 
   @function up.link.convertClicks
   @param {up.Layer} layer
@@ -429,11 +448,56 @@ up.link = do ->
     up.emit(originalEvent.target, newEvent, log: false)
 
   ###**
+  A `click` event that honors the [`[up-instant]`](/a-up-instant) attribute.
+
+  This event is generally emitted when an element is clicked. However, for elements
+  with an [`[up-instant]`](/a-up-instant) attribute this event is emitted on `mousedown` instead.
+
+  This is useful to listen to links being activated, without needing to know whether
+  a link is `[up-instant]`.
+
+  \#\#\# Example
+
+  Assume we have two links, one of which is `[up-instant]`:
+
+      <a href="/one">Link 1</a>
+      <a href="/two" up-instant>Link 2</a>
+
+  The following event listener will be called when either link is activated:
+
+      document.addEventListener('up:click', function(event) {
+
+      })
+
+  \#\#\# Cancelation is forwarded
+
+  If the user cancels an `up:click` event, the underlying `click` or `mousedown` will also be canceled.
+  The following cancelation methods will be forwarded:
+
+  - `event.stopPropagation()`
+  - `event.stopImmediatePropagation()`
+  - `event.preventDefault()
+
+  \#\#\# Accessibility
+
+  If the user activates an element using their keyboard, the `up:click` event will be emitted
+  on `click`, even if the element has an `[up-instant]` attribute.
+
+  @event up:click
+  @param {Element} event.target
+    The clicked element.
+  @param {Event} event.originalEvent
+    The underlying `click` or `mousedown` event.
+  @stable
+  ###
+
+  ###**
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `GET`.
 
   @function up.link.isSafe
-  @experimental
+  @return {boolean}
+  @stable
   ###
   isSafe = (selectorOrLink, options) ->
     method = followMethod(selectorOrLink, options)
@@ -618,7 +682,7 @@ up.link = do ->
   By adding an `up-instant` attribute to a link, the destination will be
   fetched on `mousedown` instead of `click` (`mouseup`).
 
-      <a href="/users" up-target=".main" up-instant>User list</a>
+      <a href="/users" up-follow up-instant>User list</a>
 
   This will save precious milliseconds that otherwise spent
   on waiting for the user to release the mouse button. Since an
@@ -630,7 +694,12 @@ up.link = do ->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  `[up-instant]` will also work for links that open [modals](/up.modal) or [popups](/up.popup).
+  `[up-instant]` will also work for links that open [overlays](/up.layer).
+
+  \#\#\# Accessibility
+
+  If the user activates an element using their keyboard, the `up:click` event will be emitted
+  on `click`, even if the element has an `[up-instant]` attribute.
 
   @selector a[up-instant]
   @stable
@@ -647,7 +716,7 @@ up.link = do ->
 
   \#\#\# Example
 
-  Use `up-dash` like this:
+  Use `[up-dash]` like this:
 
       <a href="/users" up-dash=".main">User list</a>
 
@@ -728,10 +797,12 @@ up.link = do ->
   making the interaction feel instant.
 
   @selector a[up-preload]
-  @param [up-delay=75]
+  @param [up-delay]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
+
+    Defaults to `up.link.config.preloadDelay`.
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->

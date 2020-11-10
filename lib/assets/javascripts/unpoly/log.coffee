@@ -28,7 +28,7 @@ up.log = do ->
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @stable
+  @internal
   ###
   config = new up.Config ->
     enabled: sessionStore.get('enabled')
@@ -115,6 +115,8 @@ up.log = do ->
 
   Debugging information includes which elements are being [compiled](/up.syntax)
   and which [events](/up.event) are being emitted.
+
+  Errors will always be printed, regardless of this setting.
 
   @function up.log.enable
   @stable

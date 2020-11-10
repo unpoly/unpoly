@@ -53,7 +53,7 @@ up.element = do ->
   You can also use [`:has()` in jQuery](https://api.jquery.com/has-selector/).
 
   @selector :has()
-  @experimental
+  @stable
   ###
 
   parseSelector = (selector) ->
@@ -97,7 +97,7 @@ up.element = do ->
     A list of all elements matching the selector.
 
     Returns an empty list if there are no matches.
-  @experimental
+  @stable
   ###
   all = (args...) ->
     selector = args.pop()
@@ -115,7 +115,7 @@ up.element = do ->
     The CSS selector to match.
   @return {NodeList<Element>|Array<Element>}
     A list of all matching elements.
-  @experimental
+  @stable
   ###
   subtree = (root, selector) ->
     parseSelector(selector).subtree(root)
@@ -137,7 +137,7 @@ up.element = do ->
     The matching element.
 
     Returns `null` or `undefined` if no element matches.
-  @experimental
+  @stable
   ###
   closest = (element, selector) ->
     parseSelector(selector).closest(element)
@@ -152,7 +152,7 @@ up.element = do ->
     The CSS selector to match.
   @return {boolean}
     Whether `element` matches `selector`.
-  @experimental
+  @stable
   ###
   matches = (element, selector) ->
     parseSelector(selector).matches(element)
@@ -187,7 +187,7 @@ up.element = do ->
     The value to look up.
   @return {Element}
     The obtained `Element`.
-  @experimental
+  @stable
   ###
   getOne = (args...) ->
     value = args.pop()
@@ -251,7 +251,7 @@ up.element = do ->
   @function up.element.remove
   @param {Element} element
     The element to remove.
-  @experimental
+  @stable
   ###
   remove = (element) ->
     if element.remove
@@ -270,7 +270,7 @@ up.element = do ->
 
   @function up.element.hide
   @param {Element} element
-  @experimental
+  @stable
   ###
   hide = (element) ->
     element.style.display = 'none'
@@ -293,7 +293,7 @@ up.element = do ->
   [this WHATWG mailing list post](http://lists.w3.org/Archives/Public/public-whatwg-archive/2014Apr/0094.html).
 
   @function up.element.show
-  @experimental
+  @stable
   ###
   show = (element) ->
     element.style.display = ''
@@ -307,7 +307,7 @@ up.element = do ->
     Pass `true` to show the element or `false` to hide it.
 
     If omitted, the element will be hidden if shown and shown if hidden.
-  @experimental
+  @stable
   ###
   toggle = (element, newVisible) ->
     newVisible ?= !isVisible(element)
@@ -334,7 +334,7 @@ up.element = do ->
     A boolean value to determine whether the class should be added or removed.
   @param {string} state
     If omitted, the class will be added if missing and removed if present.
-  @experimental
+  @stable
   ###
   toggleClass = (element, klass, newPresent) ->
     list = element.classList
@@ -363,7 +363,7 @@ up.element = do ->
     The element on which to set attributes.
   @param {Object} attributes
     An object of attributes to set.
-  @experimental
+  @stable
   ###
   setAttrs = (element, attrs) ->
     for key, value of attrs
@@ -408,7 +408,7 @@ up.element = do ->
   @function up.element.replace
   @param {Element} oldElement
   @param {Element} newElement
-  @experimental
+  @stable
   ###
   replace = (oldElement, newElement) ->
     oldElement.parentElement.replaceChild(newElement, oldElement)
@@ -484,7 +484,7 @@ up.element = do ->
     The given object may use kebab-case or camelCase keys.
   @return {Element}
     The created element.
-  @experimental
+  @stable
   ###
   createFromSelector = (selector, attrs) ->
     # Extract attribute values before we do anything else.
@@ -583,7 +583,7 @@ up.element = do ->
     The given object may use kebab-case or camelCase keys.
   @return {Element}
     The created element.
-  @experimental
+  @stable
   ###
   affix = (parent, args...) ->
     attributes = u.extractOptions(args)
@@ -668,7 +668,7 @@ up.element = do ->
       element.children[0].textContent // returns 'text'
 
   @function up.element.createFromHTML
-  @experimental
+  @stable
   ###
   createFromHTML = (html) ->
     # We cannot use createDocumentFromHTML() here, since up.ResponseDoc
@@ -793,7 +793,7 @@ up.element = do ->
   If the element has the attribute but without value (e.g. '<input readonly>'>), it returns an empty string.
 
   @function up.element.attr
-  @experimental
+  @stable
   ###
   stringAttr = (element, attribute) ->
     u.nullToUndefined(element.getAttribute(attribute))
@@ -831,7 +831,7 @@ up.element = do ->
     The attribute name.
   @return {boolean|undefined}
     The cast attribute value.
-  @experimental
+  @stable
   ###
   booleanAttr = (element, attribute, pass) ->
     value = stringAttr(element, attribute)
@@ -865,7 +865,7 @@ up.element = do ->
     The attribute name.
   @return {number|undefined}
     The cast attribute value.
-  @experimental
+  @stable
   ###
   numberAttr = (element, attribute) ->
     value = element.getAttribute(attribute)
@@ -886,7 +886,7 @@ up.element = do ->
     The attribute name.
   @return {Object|undefined}
     The cast attribute value.
-  @experimental
+  @stable
   ###
   jsonAttr = (element, attribute) ->
     # The document does not respond to #getAttribute()
@@ -951,7 +951,7 @@ up.element = do ->
   @param {String|Array} propOrProps
     One or more CSS property names in kebab-case or camelCase.
   @return {string|object}
-  @experimental
+  @stable
   ###
   computedStyle = (element, props) ->
     style = window.getComputedStyle(element)
@@ -982,7 +982,7 @@ up.element = do ->
   @param {string} prop
     A single property name in kebab-case or camelCase.
   @return {number|undefined}
-  @experimental
+  @stable
   ###
   computedStyleNumber = (element, prop) ->
     rawValue = computedStyle(element, prop)
@@ -1019,7 +1019,7 @@ up.element = do ->
   @param {Object} props
     One or more CSS properties with kebab-case keys or camelCase keys.
   @return {string|object}
-  @experimental
+  @stable
   ###
   setInlineStyle = (element, props) ->
     style = element.style
@@ -1094,7 +1094,7 @@ up.element = do ->
   @function up.element.isVisible
   @param {Element} element
     The element to check.
-  @experimental
+  @stable
   ###
   isVisible = (element) ->
     # From https://github.com/jquery/jquery/blame/9cb162f6b62b6d4403060a0f0d2065d3ae96bbcc/src/css/hiddenVisibleSelectors.js#L12

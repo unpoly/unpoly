@@ -283,7 +283,7 @@ up.event = do ->
     The event type, e.g. `my:event`.
   @param {Object} [props={}]
     A list of properties to become part of the event object that will be passed to listeners.
-  @param {string|up.Layer} [props.layer]
+  @param {up.Layer|string|number} [props.layer]
     The [layer](/up.layer) on which to emit this event.
 
     If this property is set, the event will be emitted on the [layer's outmost element](/up.Layer#element).
@@ -302,6 +302,33 @@ up.event = do ->
   emit = (args...) ->
     buildEmitter(args).emit()
 
+  ###**
+  Builds an event with the given type and properties.
+
+  The returned event is not [emitted](/up.emit).
+
+  \#\#\# Example
+
+      let event = up.event.build('my:event', { foo: 'bar' })
+      console.log(event.type)              // logs "my:event"
+      console.log(event.foo)               // logs "bar"
+      console.log(event.defaultPrevented)  // logs "false"
+      up.emit(event)                       // emits the event
+
+  @function up.event.build
+  @param {string} [type]
+    The event type.
+
+    May also be passed as a property `{ type }`.
+  @param {Object} [props={}]
+    An object with event properties.
+  @param {string} [props.type]
+    The event type.
+
+    May also be passed as a first string argument.
+  @return {Event}
+  @experimental
+  ###
   build = (args...) ->
     props = u.extractOptions(args)
     type = args[0] || props.type || up.fail('Expected event type to be passed as string argument or { type } property')
@@ -398,7 +425,7 @@ up.event = do ->
 
   @function up.event.halt
   @param {Event} event
-  @experimental
+  @stable
   ###
   halt = (event) ->
     event.stopImmediatePropagation()

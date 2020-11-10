@@ -78,7 +78,7 @@ up.motion = do ->
   ###**
   Returns whether Unpoly will perform animations.
 
-  Set [`up.motion.config.enabled`](/up.motion.config) `false` in order to disable animations globally.
+  Set [`up.motion.config.enabled = false`](/up.motion.config#config.enabled) in order to disable animations globally.
 
   @function up.motion.isEnabled
   @return {boolean}
@@ -250,14 +250,14 @@ up.motion = do ->
   This event is emitted on an [animating](/up.animating) element by `up.motion.finish()` to
   request the animation to instantly finish and skip to the last frame.
 
-  Promises returned by completed animation functions are expected to settle.
+  Promises returned by now-finished animation functions are expected to settle.
 
   Animations started by `up.animate()` already handle this event.
 
   @event up:motion:finish
   @param {Element} event.target
     The animating element.
-  @experimental
+  @stable
   ###
 
   ###**

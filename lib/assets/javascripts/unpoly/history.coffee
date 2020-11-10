@@ -32,7 +32,7 @@ up.history = do ->
   ###
   config = new up.Config ->
     enabled: true
-    restoreTargets: ['body'] # will be prepended to the root layer's default target
+    restoreTargets: ['body']
 
   up.legacy.renamedProperty(config, 'popTargets', 'restoreTargets')
 
@@ -99,6 +99,18 @@ up.history = do ->
     else
       emit('up:history:muted', url: url, log: doLog && "Did not replace state with #{u.urlWithoutHost url} (history is disabled)")
 
+
+  ###**
+  This event is [emitted](/up.emit) after a new history entry has been replaced.
+
+  Also see `up:history:pushed` and `up:history:restored`.
+
+  @event up:history:replaced
+  @param {string} event.url
+    The URL for the history entry that has been added.
+  @stable
+  ###
+
   ###**
   Adds a new history entry and updates the browser's
   address bar with the given URL.
@@ -126,14 +138,15 @@ up.history = do ->
       else
         up.emit('up:history:muted', url: url, log: "Did not advance to #{u.urlWithoutHost url} (history is disabled)")
 
-
   ###**
   This event is [emitted](/up.emit) after a new history entry has been added.
+
+  Also see `up:history:replaced` and `up:history:restored`.
 
   @event up:history:pushed
   @param {string} event.url
     The URL for the history entry that has been added.
-  @experimental
+  @stable
   ###
 
   manipulate = (method, url) ->
@@ -185,10 +198,12 @@ up.history = do ->
 
   History entries are restored when the user uses the *Back* or *Forward* button.
 
+  Also see `up:history:pushed` and `up:history:replaced`.
+
   @event up:history:restored
   @param {string} event.url
     The URL for the history entry that has been restored.
-  @experimental
+  @stable
   ###
 
   up.on 'up:app:boot', ->

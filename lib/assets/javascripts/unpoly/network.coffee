@@ -147,13 +147,35 @@ up.network = do ->
   cache = new up.Request.Cache()
 
   ###**
-  Returns a cached response for the given request.
+  Returns an earlier request [matching](/up.network.config.metaKeys) the given request options.
 
   Returns `undefined` if the given request is not currently cached.
 
+  Note that `up.request()` will only write to the cache with `{ cache: true }`.
+
+  \#\#\# Example
+
+  ```
+  let request = up.cache.get({ url: '/foo' })
+
+  if (request) {
+    let response = await request
+    console.log("Response is %o", response)
+  } else {
+    console.log("The path /foo has not been requested before!")
+  }
+  ```
+
   @function up.cache.get
-  @return {Promise<up.Response>}
-    A promise for the response.
+  @param {Object} requestOptions
+    The request options to match against the cache.
+
+    See `options` for `up.request()` for documentation.
+
+    The user may configure `up.network.config.metaKeys` to define
+    which request options are relevant for cache matching.
+  @return {up.Request|undefined}
+    The cached request.
   @experimental
   ###
 
@@ -169,7 +191,7 @@ up.network = do ->
   ###
 
   ###**
-  Makes the proxy assume that `newRequest` has the same response as the
+  Makes the cache assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
   Unpoly uses this internally when the user redirects from `/old` to `/new`.
@@ -177,34 +199,38 @@ up.network = do ->
 
   @function up.cache.alias
   @param {Object} oldRequest
+    The earlier [request options](/up.request).
   @param {Object} newRequest
+    The new [request options](/up.request).
   @experimental
   ###
 
   ###**
-  TODO: Remove this method. It's hard to use it.
+  Manually stores a request in the cache.
 
-  Manually stores a promise for the response to the given request.
+  Future calls to `up.request()` will try to re-use this request before
+  making a new request.
 
   @function up.cache.set
   @param {string} request.url
   @param {string} [request.method='GET']
   @param {string} [request.target='body']
-  @param {Promise<up.Response>} response
-    A promise for the response.
-  @experimental
+  @param {up.Request} request
+    The request to cache. The cache is also a promise for the response.
+  @internal
   ###
 
   ###**
   Manually removes the given request from the cache.
 
-  You can also [configure](/up.network.config) when the proxy
-  automatically removes cache entries.
+  You can also [configure](/up.network.config) when
+  cache entries expire automatically.
 
   @function up.cache.remove
-  @param {string} request.url
-  @param {string} [request.method='GET']
-  @param {string} [request.target='body']
+  @param {Object} requestOptions
+    The request options for which to remove cached requests.
+
+    See `options` for `up.request()` for documentation.
   @experimental
   ###
 
@@ -217,28 +243,64 @@ up.network = do ->
   ###**
   Makes an AJAX request to the given URL.
 
+  Returns an `up.Request` object which contains information about the request.
+  The request object is also a promise for its `up.Response`.
+
   \#\#\# Example
 
-      up.request('/search', { params: { query: 'sunshine' } }).then(function(response) {
-        console.log('The response text is %o', response.text)
-      }).catch(function() {
-        console.error('The request failed')
-      })
+      let request = up.request('/search', { params: { query: 'sunshine' } })
+      console.log('We made a request to', request.url)
+
+      let response = await request
+      console.log('The response text is', response.text)
+
+  \#\#\# Error handling
+
+  The returned promise will fulfill with an `up.Response` when the server
+  responds with an HTTP status of 2xx (like `200`).
+
+  When the server responds with an error code (like `422` or `500`), the promise
+  will *reject* with `up.Response`.
+
+  When the request fails from a fatal error (like a timeout or loss of connectivity),
+  the promise will reject with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) object.
+
+  Here is an example for a complete control flow that also handles errors:
+
+      try {
+        let response = await up.request('/search', { params: { query: 'sunshine' } })
+        console.log('Successful response with text:', response.text)
+      } catch (e) {
+        if (e instanceof up.Response) {
+          console.log('Server responded with HTTP status %s and text %s', e.status, e.text)
+        } else {
+          console.log('Fatal error during request:', e.message)
+        }
+      }
+
 
   \#\#\# Caching
 
-  All responses are cached by default. If requesting a URL with a non-`GET` method, the response will
+  When an `{ cache: true }` option is given, responses are cached.
+
+  If requesting a URL with a non-`GET` method, the response will
   not be cached and the entire cache will be cleared.
 
   You can configure caching with the [`up.network.config`](/up.network.config) property.
 
   \#\#\# Events
 
-  If a network connection is attempted, the proxy will emit
-  a [`up:request:load`](/up:request:load) event with the `request` as its argument.
-  Once the response is received, a [`up:request:loaded`](/up:request:loaded) event will
-  be emitted.
-  
+  Multiple events may be emitted throughout the lifecycle of a request:
+
+  - If a network connection is attempted,
+    an `up:request:load` event is emitted.
+  - When a response is received,
+    an `up:request:loaded` event is emitted.
+  - When the request fails from a fatal error like a timeout or loss of network connectivity,
+    an `up:request:fatal` event is emitted.
+  - When a request is [aborted](/up.network.abort),
+    an `up:request:aborted` event is emitted.
+
   @function up.request
   @param {string} [url]
     The URL for the request.
@@ -249,7 +311,7 @@ up.network = do ->
     a `request` property instead.
   @param {string} [options.method='GET']
     The HTTP method for the options.
-  @param {boolean} [options.cache]
+  @param {boolean} [options.cache=false]
     Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
     requests, if available. If set to `false` a network connection will always be attempted.
   @param {Object} [options.headers={}]
@@ -267,8 +329,10 @@ up.network = do ->
     The CSS selector that will be sent as an `X-Up-Fail-Target` header.
   @param {Element} [options.origin]
     The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
-  @return {Promise<up.Response>}
-    A promise for the response.
+  @return {up.Request}
+    An object with information about the request.
+
+    The request object is also a promise for its `up.Response`.
   @stable
   ###
   makeRequest = (args...) ->
@@ -541,8 +605,7 @@ up.network = do ->
 
   ###**
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  encounters fatal error like a timeout, loss of network connectivity,
-  or when the request was [aborted](/up.network.abort).
+  encounters fatal error like a timeout or loss of network connectivity.
 
   Note that this event will *not* be emitted when the server produces an
   error message with an HTTP status like `500`. When the server can produce

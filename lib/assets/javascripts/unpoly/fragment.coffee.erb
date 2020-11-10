@@ -22,11 +22,15 @@ up.fragment = do ->
   ###**
   Returns the URL the given element was retrieved from.
 
-  @function up.fragment.source
+  @function up.fragment.config
   @param {Array<string>} config.mainTargets
   @param {Array<string>} config.resetTargets
-  @return {Array<RegExp>} config.targetClasses
-  @experimental
+  @return {Array<string|RegExp>} config.badTargetClasses
+    A list of class names that should be ignored when
+    [deriving a target selector from a fragment](/up.fragment.toTarget).
+
+    The class names may also be passed as a regular expression.
+  @stable
   ###
   config = new up.Config ->
     u.literal
@@ -46,11 +50,22 @@ up.fragment = do ->
   ###**
   Returns the URL the given element was retrieved from.
 
+  If the given element was never directly updated,
+  but part of a larger fragment update,
+  the closest known source of an ancestor element is returned.
+
+  For elements that were never changed since the page was initially loaded
+  this returns the URL of the initial page load.
+
   @function up.fragment.source
-  @param {string|Element|jQuery} target
-  @param {Object} options
+  @param {string|Element|jQuery} element
+  @param {up.Layer|string|number} options.layer
+    The [layer](/up.layer) for the fragment lookup if `element` is passed
+    as a selector string.
+
+    Will be ignored if `element` is passed as a DOM element.
   @return {string|undefined}
-  @experimental
+  @stable
   ###
   source = (args...) ->
     options = parseTargetAndOptions(args)
@@ -60,7 +75,6 @@ up.fragment = do ->
       url
     else if parent = element.parentElement
       source(parent)
-
 
   ###**
   Replaces elements on the current page with corresponding elements
@@ -554,22 +568,26 @@ up.fragment = do ->
   ignores elements that are being [destroyed](/up.destroy) or that are being
   removed by a [transition](/up.morph).
 
+  By default this function only selects elements in the [current layer](/up.layer.current).
+  Pass a `{ layer }`option to match elements in other layers. See `up.layer.get()` for a list
+  of supported layer values.
+
   Returns `undefined` if no element matches these conditions.
 
   \#\#\# Example
 
-  To select the first element with the selector `.foo`:
+  To select the first element with the selector `.foo` on the [current layer](/up.layer.current):
 
-      var fooInModal = up.fragment.get('.foo')
+      let foo = up.fragment.get('.foo')
 
-  You may also pass a `{ layer }` option to only match elements witin a layer:
+  You may also pass a `{ layer }` option to match elements within another layer:
 
-      var fooInModal = up.fragment.get('.foo', { layer: 'modal' })
+      let foo = up.fragment.get('.foo', { layer: 'any' })
 
-  You may also pass a root element as a first argument:
+  To select in the descendants of an element, pass a root element as the first argument:
 
-      var container = up.fragment.get('.container')
-      var fooInContainer = up.fragment.get(container, '.foo')
+      let container = up.fragment.get('.container')
+      let fooInContainer = up.fragment.get(container, '.foo')
 
   \#\#\# Similar features
 
@@ -583,26 +601,81 @@ up.fragment = do ->
 
     May be omitted to search through all elements in the `document`.
   @param {string} selector
-    The selector to match
-  @param {string} [options.layer='auto']
-    The name of the layer in which to find the element.
+    The selector to match.
+  @param {string} [options.layer='current']
+    The layer in which to select elements.
 
-    Valid values are `'auto'`, `'page'`, `'modal'` and `'popup'`.
+    See `up.layer.get()` for a list of supported layer values.
+
+    If a root element was passed as first argument, this option is ignored and the
+    root element's layer is searched.
   @param {string|Element|jQuery} [options.origin]
     An second element or selector that can be referenced as `&` in the first selector:
 
         var input = document.querySelector('input.email')
         up.fragment.get('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
   @return {Element|undefined}
-    The first element that is neither a ghost or being destroyed,
-    or `undefined` if no such element was found.
-  @experimental
+    The first matching element, or `undefined` if no such element matched.
+  @stable
   ###
   getOne = (args...) ->
-    # TODO: Change docs
     getAll(args...)[0]
 
-  # TODO: Docs for up.fragment.all
+  ###**
+  Returns all elements matching the given selector, but
+  ignores elements that are being [destroyed](/up.destroy) or that are being
+  removed by a [transition](/up.morph).
+
+  By default this function only selects elements in the [current layer](/up.layer.current).
+  Pass a `{ layer }`option to match elements in other layers. See `up.layer.get()` for a list
+  of supported layer values.
+
+  Returns an empty list if no element matches these conditions.
+
+  \#\#\# Example
+
+  To select all elements with the selector `.foo` on the [current layer](/up.layer.current):
+
+      let foos = up.fragment.all('.foo')
+
+  You may also pass a `{ layer }` option to match elements within another layer:
+
+      let foos = up.fragment.all('.foo', { layer: 'any' })
+
+  To select in the descendants of an element, pass a root element as the first argument:
+
+      var container = up.fragment.get('.container')
+      var foosInContainer = up.fragment.all(container, '.foo')
+
+  \#\#\# Similar features
+
+  - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
+  - The [`up.element.all()`](/up.element.get) function simply returns the all elements matching a selector
+    without further filtering.
+
+  @function up.fragment.get
+  @param {Element|jQuery} [root=document]
+    The root element for the search. Only the root's children will be matched.
+
+    May be omitted to search through all elements in the `document`.
+  @param {string} selector
+    The selector to match.
+  @param {string} [options.layer='current']
+    The layer in which to select elements.
+
+    See `up.layer.get()` for a list of supported layer values.
+
+    If a root element was passed as first argument, this option is ignored and the
+    root element's layer is searched.
+  @param {string|Element|jQuery} [options.origin]
+    An second element or selector that can be referenced as `&` in the first selector:
+
+        var input = document.querySelector('input.email')
+        up.fragment.get('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
+  @return {Element|undefined}
+    The first matching element, or `undefined` if no such element matched.
+  @stable
+  ###
   getAll = (args...) ->
     options = u.extractOptions(args)
     selectorOrElement = args.pop()
@@ -644,24 +717,24 @@ up.fragment = do ->
   getSubtree = (element, selector, options = {}) ->
     getAll(element, selector, u.merge(options, subtree: true))
 
-#  ###**
-#  Returns the first element that matches the selector by testing the element itself
-#  and traversing up through ancestors in element's layers.
-#
-#  `up.fragment.closest()` will only match elements in the same [layer](/up.layer) as element.
-#  To match ancestors regardless of layers, use `up.element.closest()`.
-#
-#  @function up.fragment.closest
-#  @param {Element} element
-#    The element on which to start the search.
-#  @param {string} selector
-#    The CSS selector to match.
-#  @return {Element|null|undefined} element
-#    The matching element.
-#
-#    Returns `null` or `undefined` if no element matches in the same layer.
-#  @experimental
-#  ###
+  ###**
+  Returns the first element that matches the selector by testing the element itself
+  and traversing up through ancestors in element's layers.
+
+  `up.fragment.closest()` will only match elements in the same [layer](/up.layer) as
+  the given element. To match ancestors regardless of layers, use `up.element.closest()`.
+
+  @function up.fragment.closest
+  @param {Element} element
+    The element on which to start the search.
+  @param {string} selector
+    The CSS selector to match.
+  @return {Element|null|undefined} element
+    The matching element.
+
+    Returns `null` or `undefined` if no element matches in the same layer.
+  @experimental
+  ###
   closest = (element, selector) ->
     match = e.closest(element, selector)
     if match && (up.layer.get(match) == up.layer.get(element)) && !isDestroying(match)
@@ -670,13 +743,28 @@ up.fragment = do ->
   ###**
   Destroys the given element or selector.
 
-  Takes care that all [`up.compiler()`](/up.compiler) destructors, if any, are called.
-
-  The element is removed from the DOM.
-  Note that if you choose to animate the element removal using `options.animate`,
-  the element won't be removed until after the animation has completed.
+  All [`up.compiler()`](/up.compiler) destructors, if any, are called.
+  The element is then removed from the DOM.
 
   Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
+
+  \#\#\# Animating the removal
+
+  You may animate the element's removal by passing an option like `{ animate: 'fade-out' }`.
+  Unpoly ships with a number of [predefined animations](/up.animate#named-animations) and
+  you may so define [custom animations](/up.animation).
+
+  If the element's removal is animated, the element will remain in the DOM until after the animation
+  has completed. While the animation is running the element will be given the `.up-destroying` class.
+  The element will also be given the `[aria-hidden]` attribute to remove it from
+  the accessibility tree.
+
+  Elements that are about to be destroyed (but still animating) are ignored by all
+  functions for fragment lookup:
+
+  - `up.fragment.all()`
+  - `up.fragment.first()`
+  - `up.fragment.closest()`
 
   @function up.destroy
   @param {string|Element|jQuery} target
@@ -718,14 +806,20 @@ up.fragment = do ->
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
   or while they are being removed by a [transition](/up.morph).
 
-  If the removal is animated, the class is assigned before the animation starts.
+  If the removal is [animated](/up.destroy#animating-the-removal),
+  the class is assigned before the animation starts.
 
-  To select an element while ignoring elements that are being destroyed,
-  see the [`up.fragment.get()`](/up.fragment.get) function.
+  Elements that are about to be destroyed (but still animating) are ignored by all
+  functions for fragment lookup:
+
+  - `up.fragment.all()`
+  - `up.fragment.first()`
+  - `up.fragment.closest()`
 
   @selector .up-destroying
   @stable
   ###
+
   markFragmentAsDestroying = (element) ->
     element.classList.add('up-destroying')
     element.setAttribute('aria-hidden', 'true')
@@ -750,6 +844,9 @@ up.fragment = do ->
   ###**
   Replaces the given element with a fresh copy fetched from the server.
 
+  By default, reloading is not considered a [user navigation](/up.navigate) and e.g. will not update
+  the browser location. You may change this with `{ navigate: true }`.
+
   \#\#\# Example
 
       up.on('new-mail', function() { up.reload('.inbox') })
@@ -764,10 +861,12 @@ up.fragment = do ->
     If omitted, an element matching a selector in `up.fragment.config.mainTargets`
     will be reloaded.
   @param {Object} [options]
-    See options for `up.render()`
+    See options for `up.render()`.
   @param {string} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
+  @param {string} [options.navigate=false]
+    Whether the reloading constitutes a [user navigation](/up.navigate).
   @stable
   ###
   reload = (args...) ->
@@ -777,7 +876,8 @@ up.fragment = do ->
 
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
-  current `<body>` element with the response's `<body>` element.
+  [current layer](/up.layer.current)'s [main element](/up.fragment.config.mainSelectors)
+  with a matching fragment from the server response.
 
   \#\#\# Example
 
@@ -788,10 +888,9 @@ up.fragment = do ->
   @function up.visit
   @param {string} url
     The URL to visit.
-  @param {string} [options.target]
-    The selector to replace.
   @param {Object} [options]
     See options for `up.render()`
+  @param {up.Layer|string|number} [options.layer='current']
   @stable
   ###
   visit = (url, options) ->
@@ -813,8 +912,7 @@ up.fragment = do ->
   - The element's `[up-id]` attribute
   - The element's `[id]` attribute
   - The element's `[name]` attribute
-  - The element's `[class]` names
-  - The element's [`[aria-label]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute) attribute
+  - The element's `[class]` names, ignoring `up.fragment.config.badTargetClasses`.
   - The element's tag name
 
   \#\#\# Example
@@ -826,7 +924,7 @@ up.fragment = do ->
   @function up.element.toTarget
   @param {string|Element|jQuery}
     The element for which to create a selector.
-  @experimental
+  @stable
   ###
   toTarget = (element) ->
     if u.isString(element)
