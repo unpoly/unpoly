@@ -7,24 +7,7 @@ e = up.element
 class up.FragmentScrolling
 
   constructor: (@options) ->
-    if u.isUndefined(@options.scroll)
-      if u.isString(@options.reveal)
-        up.legacy.deprecated("Option { reveal: '#{@options.reveal}' }", "{ scroll: '#{@options.reveal}' }")
-        @options.scroll = @options.reveal
-      else if @options.reveal == true
-        up.legacy.deprecated('Option { reveal: true }', "{ scroll: 'target' }")
-        @options.scroll = 'target'
-      else if @options.reveal == false
-        up.legacy.deprecated('Option { reveal: false }', "{ scroll: false }")
-        @options.scroll = false
-
-      if u.isDefined(@options.resetScroll)
-        up.legacy.deprecated('Option { resetScroll: true }', "{ scroll: 'top' }")
-        @options.scroll = 'top'
-
-      if u.isDefined(@options.restoreScroll)
-        up.legacy.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
-        @options.scroll = 'restore'
+    @rewriteDeprecatedOptions()
 
     @fragment = @options.fragment or up.fail('Must pass a { fragment } option')
     @autoMeans = @options.autoMeans or up.fail('Must pass an { autoMeans } option')
@@ -33,12 +16,13 @@ class up.FragmentScrolling
     @layer = @options.layer or up.fail('Must pass a { layer } option')
     @mode = @options.mode
     @scrollOptions = u.pick(@options, ['revealTop', 'revealMax', 'revealSnap', 'scrollBehavior'])
+    @scroll = @options.scroll
 
-  process: (scrollOpt) ->
+  process: ->
     # @tryProcess() returns undefined if an option cannot be applied.
     # @process() returns a resolved promise if no option cannot be applied,
     # satisfying our external signature as async method.
-    @tryProcess(scrollOpt) || Promise.resolve()
+    (@shouldProcess() && @tryProcess(@options.scroll)) || Promise.resolve()
 
   tryProcess: (scrollOpt) ->
     switch scrollOpt
@@ -54,7 +38,7 @@ class up.FragmentScrolling
         return @hash && up.viewport.revealHash(@hash, @scrollOptions)
       when 'target', 'reveal'
         return @revealElement(@fragment)
-      when 'auto'
+      when 'auto', true
         return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
       else
         if u.isString(scrollOpt)
@@ -83,3 +67,31 @@ class up.FragmentScrolling
 
   revealElement: (element) ->
     return up.reveal(element, @scrollOptions)
+    
+  shouldProcess: ->
+    # Only emit an up:fragment:scroll event if a truthy scrollOpt would
+    # otherwise trigger a built-in scroll strategy.
+    return @scroll && up.event.nobodyPrevents(@fragment, 'up:fragment:scroll', @options)
+
+  rewriteDeprecatedOptions: ->
+    if u.isUndefined(@options.scroll)
+      # Rewrite deprecated { reveal } option (it had multiple variants)
+      if u.isString(@options.reveal)
+        up.legacy.deprecated("Option { reveal: '#{@options.reveal}' }", "{ scroll: '#{@options.reveal}' }")
+        @options.scroll = @options.reveal
+      else if @options.reveal == true
+        up.legacy.deprecated('Option { reveal: true }', "{ scroll: 'target' }")
+        @options.scroll = 'target'
+      else if @options.reveal == false
+        up.legacy.deprecated('Option { reveal: false }', "{ scroll: false }")
+        @options.scroll = false
+
+      # Rewrite deprecated { resetScroll } option
+      if u.isDefined(@options.resetScroll)
+        up.legacy.deprecated('Option { resetScroll: true }', "{ scroll: 'top' }")
+        @options.scroll = 'top'
+
+      # Rewrite deprecated { restoreScroll } option
+      if u.isDefined(@options.restoreScroll)
+        up.legacy.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
+        @options.scroll = 'restore'

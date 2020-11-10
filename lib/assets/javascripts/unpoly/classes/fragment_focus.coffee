@@ -11,21 +11,29 @@ class up.FragmentFocus
     @layer = @options.layer or up.fail('Must pass a { layer } option')
     @origin = @options.origin
     @focusCapsule = @options.focusCapsule
+    @focusOpt = @options.focus
 
-  process: (focusOpt) ->
+  process: ->
+    if @shouldProcess()
+      @tryProcess(@focusOpt)
+
+  tryProcess: (focusOpt) ->
     switch focusOpt
       when 'keep'
         return @restoreFocus(@focusCapsule)
       when 'target'
         return @focusElement(@fragment)
       when 'layer'
+        # One could argue that this should focus @fragment == @layer.getFirstSwappableElement() instead.
+        # However, @layer.element is already given a focusable [tabindex] (attr set by up.OverlayFocus#moveToFront()),
+        # while @fragment has no [tabindex] yet.
         return @focusElement(@layer.element)
       when 'autofocus'
         return @autofocus()
       when 'autofocus-if-enabled'
         return up.viewport.config.autofocus && @autofocus()
-      when 'auto'
-        return u.find @autoMeans, (autoOpt) => @process(autoOpt)
+      when 'auto', true
+        return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
       else
         if u.isString(focusOpt)
           return @focusSelector(focusOpt)
@@ -54,3 +62,8 @@ class up.FragmentFocus
     up.viewport.makeFocusable(element)
     up.focus(element, PREVENT_SCROLL_OPTIONS)
     return true
+
+  shouldProcess: ->
+    # Only emit an up:fragment:focus event if a truthy focusOpt would
+    # otherwise trigger a built-in focus strategy.
+    return @focusOpt && up.event.nobodyPrevents(@fragment, 'up:fragment:focus', @options)

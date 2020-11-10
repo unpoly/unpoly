@@ -933,7 +933,7 @@ up.fragment = do ->
         targets.unshift mainTargets...
       else if target == ':layer'
         # Discard this target for new layers, which don't have a first-swappable-element.
-        # Don't && the layer check into the `else if` condition above, or it will
+        # Also don't && the layer check into the `else if` condition above, or it will
         # be returned as a verbatim string below.
         unless layer == 'new'
           targets.unshift layer.getFirstSwappableElement()

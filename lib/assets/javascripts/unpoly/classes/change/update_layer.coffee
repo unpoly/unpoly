@@ -323,14 +323,15 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
   handleFocus: (fragment, step) ->
     fragmentFocus = new up.FragmentFocus(
+      focus: step.focus,
       fragment: fragment,
       layer: @layer,
       focusCapsule: @focusCapsule,
       autoMeans: ['keep', 'autofocus-if-enabled'],
     )
-    fragmentFocus.process(step.focus)
+    fragmentFocus.process()
 
   handleScroll: (fragment, step) ->
     options = u.merge(step, { fragment, autoMeans: ['hash', 'top-if-main'] })
     scrolling = new up.FragmentScrolling(options)
-    return scrolling.process(options.scroll)
+    return scrolling.process()
