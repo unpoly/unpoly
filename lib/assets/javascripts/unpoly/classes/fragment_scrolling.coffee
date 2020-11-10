@@ -39,7 +39,7 @@ class up.FragmentScrolling extends up.Record
     'revealMax'
     'revealSnap'
     'scrollBehavior'
-    'speed'
+    'scrollSpeed'
     'scroll'
   ]
 
