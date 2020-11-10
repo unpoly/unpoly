@@ -3,10 +3,6 @@ TODOs
 
 - Consider promoting some experimental functions to stable
 - Consider removing some stable functions
-- Naming
-  - Move class methods of up.Params to up.params (lowercase)
-  - Rename class files to Uppercase
-  - Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
 - Can we reset master to hk/layers without merging?
 - Merge up.radio into up.fragment
 
