@@ -1788,7 +1788,7 @@ describe 'up.fragment', ->
             expect($version2).not.toHaveClass('up-destroying')
 
         # render with { transition } option
-        it 'runs an { onRemoved } callback after the element has been removed from the DOM', (done) ->
+        it 'runs an { onFinished } callback after the element has been removed from the DOM', (done) ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element.v1').text('v1')
 
@@ -1800,26 +1800,26 @@ describe 'up.fragment', ->
             document: '<div class="element v2">v2</div>',
             transition: 'cross-fade',
             duration: 50,
-            onRemoved: testElementAttachment
+            onFinished: testElementAttachment
           )
 
           expect($element).toBeAttached()
 
-        it 'runs an { onRemoved } callback once when updating multiple elements', asyncSpec (next) ->
+        it 'runs an { onFinished } callback once when updating multiple elements', asyncSpec (next) ->
           fixture('.foo')
           fixture('.bar')
 
-          onRemovedSpy = jasmine.createSpy('onRemoved spy')
+          onFinishedSpy = jasmine.createSpy('onFinished spy')
 
           up.render('.foo, .bar',
             document: '<div class="foo"></div> <div class="bar"></div>',
             transition: 'cross-fade',
             duration: 10,
-            onRemoved: onRemovedSpy
+            onFinished: onFinishedSpy
           )
 
           next.after 100, ->
-            expect(onRemovedSpy.calls.count()).toBe(1)
+            expect(onFinishedSpy.calls.count()).toBe(1)
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
           $fixture('.element.v1').text('version 1')
@@ -1879,55 +1879,55 @@ describe 'up.fragment', ->
 
             done()
 
-        it 'runs an { onAppeared } callback when the transition has finished', asyncSpec (next) ->
+        it 'runs an { onFinished } callback when the transition has finished', asyncSpec (next) ->
           fixture('.element', text: 'version 1')
-          onAppeared = jasmine.createSpy('onAppeared callback')
+          onFinished = jasmine.createSpy('onFinished callback')
 
           up.render(
             fragment: '<div class="element">version 2</div>'
             transition: 'cross-fade'
             duration: 60
-            onAppeared: onAppeared
+            onFinished: onFinished
           )
 
-          expect(onAppeared).not.toHaveBeenCalled()
+          expect(onFinished).not.toHaveBeenCalled()
 
           next.after 20, ->
-            expect(onAppeared).not.toHaveBeenCalled()
+            expect(onFinished).not.toHaveBeenCalled()
 
           next.after 100, ->
-            expect(onAppeared).toHaveBeenCalled()
+            expect(onFinished).toHaveBeenCalled()
 
-        it 'runs an { onAppeared } callback once when updating multiple elements', asyncSpec (next) ->
+        it 'runs an { onFinished } callback once when updating multiple elements', asyncSpec (next) ->
           fixture('.foo')
           fixture('.bar')
 
-          onAppearedSpy = jasmine.createSpy('onAppeared spy')
+          onFinishedSpy = jasmine.createSpy('onFinished spy')
 
           up.render('.foo, .bar',
             document: '<div class="foo"></div> <div class="bar"></div>',
             transition: 'cross-fade',
             duration: 10,
-            onAppeared: onAppearedSpy
+            onFinished: onFinishedSpy
           )
 
           next.after 70, ->
-            expect(onAppearedSpy.calls.count()).toBe(1)
+            expect(onFinishedSpy.calls.count()).toBe(1)
 
-        it 'runs an { onAppeared } callback once when appending an element', asyncSpec (next) ->
+        it 'runs an { onFinished } callback once when appending an element', asyncSpec (next) ->
           fixture('.foo')
 
-          onAppearedSpy = jasmine.createSpy('onAppeared spy')
+          onFinishedSpy = jasmine.createSpy('onFinished spy')
 
           up.render('.foo:after',
             document: '<div class="foo"></div>',
             transition: 'fade-in',
             duration: 10,
-            onAppeared: onAppearedSpy
+            onFinished: onFinishedSpy
           )
 
           next.after 50, ->
-            expect(onAppearedSpy.calls.count()).toBe(1)
+            expect(onFinishedSpy.calls.count()).toBe(1)
 
         it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next)->
           $parent = $fixture('.parent')
@@ -2000,7 +2000,7 @@ describe 'up.fragment', ->
               transition: transition,
               duration: 50,
               easing: 'linear'
-              onAppeared: testListenerCalls
+              onFinished: testListenerCalls
             )
 
           it "does not compile the element multiple times (bugfix)", (done) ->
@@ -2044,7 +2044,7 @@ describe 'up.fragment', ->
               transition: transition,
               duration: 50,
               easing: 'linear',
-              onAppeared: testDestructorCalls
+              onFinished: testDestructorCalls
             )
 
         describe 'when animation is disabled', ->
@@ -3419,7 +3419,7 @@ describe 'up.fragment', ->
           up.render('.container',
             fragment: newHTML,
             transition: transition,
-            onAppeared: assertElements
+            onFinished: assertElements
           )
 
       describeCapability 'canCustomElements', ->
@@ -3599,22 +3599,22 @@ describe 'up.fragment', ->
           expect($element).toHaveClass('up-destroying')
 
       # up.destroy
-      it 'runs an { onRemoved } callback after the element has been removed from the DOM', asyncSpec (next) ->
+      it 'runs an { onFinished } callback after the element has been removed from the DOM', asyncSpec (next) ->
         $parent = $fixture('.parent')
         $element = $parent.affix('.element')
         expect($element).toBeAttached()
 
-        onRemoved = jasmine.createSpy('onRemoved callback')
+        onFinished = jasmine.createSpy('onFinished callback')
 
-        up.destroy($element, { animation: 'fade-out', duration: 30, onRemoved })
+        up.destroy($element, { animation: 'fade-out', duration: 30, onFinished })
 
         next ->
           expect($element).toBeAttached()
-          expect(onRemoved).not.toHaveBeenCalled()
+          expect(onFinished).not.toHaveBeenCalled()
 
         next.after 60, ->
           expect($element).toBeDetached()
-          expect(onRemoved).toHaveBeenCalled()
+          expect(onFinished).toHaveBeenCalled()
 
       # up.destroy
       it 'emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', asyncSpec (next) ->

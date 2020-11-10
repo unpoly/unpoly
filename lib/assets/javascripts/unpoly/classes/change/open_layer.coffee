@@ -91,7 +91,7 @@ class up.Change.OpenLayer extends up.Change.Addition
         @handleScroll()
 
       # Run callbacks for callers that need to know when animations are done.
-      @onAppeared()
+      @onFinished()
 
     # Emit up:layer:opened to indicate that the layer was opened successfully.
     # This is a good time for listeners to manipulate the overlay optics.

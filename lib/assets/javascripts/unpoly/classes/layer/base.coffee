@@ -147,14 +147,14 @@ class up.Layer extends up.Record
   @param {number} options.easing
     The [timing function]((http://www.w3.org/TR/css3-transitions/#transition-timing-function))
     that controls the acceleration of the close animation.
-  @param {Function} [options.onRemoved]
+  @param {Function} [options.onFinished]
     A callback that will run when the elements have been removed from the DOM.
 
-    If the destruction is animated, the callback will run after the animation has finished.
+    If the layer has a close animation, the callback will run after the animation has finished.
   @return {Promise}
     A promise that fulfills when this layer was removed from the [layer stack](/up.layer.stack).
 
-    If the closing is animated, the animation will play out *after* the promise fulfills.
+    If the layer has a close animation, the animation will play out *after* the promise fulfills.
   @stable
   ###
   accept: ->

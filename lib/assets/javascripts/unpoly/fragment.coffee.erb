@@ -230,7 +230,7 @@ up.fragment = do ->
     If the update is animated, the promise will be resolved *before* the existing element was
     removed from the DOM tree. The old element will be marked with the `.up-destroying` class
     and removed once the animation finishes. To run code after the old element was removed,
-    pass an `{ onRemoved }` callback.
+    pass an `{ onFinished }` callback.
   @stable
   ###
   render = (args...) ->
@@ -692,15 +692,15 @@ up.fragment = do ->
     The delay before the animation starts. See [`up.animate()`](/up.animate).
   @param {string} [options.easing]
     The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
-  @param {Function} [options.onRemoved]
-    A callback that is run when the element was removed from the DOM.
+  @param {Function} [options.onFinished]
+    A callback that is run when any animations are finished and the element was removed from the DOM.
   @return {Promise}
     A promise that fulfills when the element has been destroyed.
 
     If the destruction is animated, the promise will be resolved *before* the element was
     removed from the DOM tree. The element will be marked with the `.up-destroying` class
     and removed once the animation finishes. To run code after the element was removed,
-    pass an `{ onRemoved }` callback.
+    pass an `{ onFinished }` callback.
   @stable
   ###
   destroy = (args...) ->

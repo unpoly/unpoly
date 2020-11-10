@@ -166,7 +166,7 @@ describe 'up.layer', ->
             expect(up.layer.element).toBeFocused()
             done()
 
-          up.layer.open(target: '.element', onAppeared: assertFocus)
+          up.layer.open(target: '.element', onFinished: assertFocus)
 
         it 'focuses a CSS selector passed as { focus } option', (done) ->
           assertFocus =  ->
@@ -179,7 +179,7 @@ describe 'up.layer', ->
             target: '.element',
             content: '<div class="child">child text</div>',
             focus: '.child',
-            onAppeared: assertFocus
+            onFinished: assertFocus
           )
 
       describe 'history', ->

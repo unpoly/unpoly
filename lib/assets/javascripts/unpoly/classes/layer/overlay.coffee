@@ -230,7 +230,7 @@ class up.Layer.Overlay extends up.Layer
   @param {string|Function(Element, Object)} [options.animation=this.closeAnimation]
   @param {number} [options.duration=this.closeDuration]
   @param {string} [options.easing=this.closeEasing]
-  @param {Function} [options.onRemoved]
+  @param {Function} [options.onFinished]
     A callback that will run when the elements have been removed from the DOM.
     If the destruction is animated, the callback will run after the animation has finished.
   @return {Promise}
@@ -241,12 +241,12 @@ class up.Layer.Overlay extends up.Layer
     animation = =>
       @startCloseAnimation(options)
 
-    onRemoved = =>
-      @onElementsRemoved() # callback for layer implementations that need to clean up
-      options.onRemoved?() # callback for callers of up.layer.dismiss/accept()
+    onFinished = =>
+      @onElementsRemoved()  # callback for layer implementations that need to clean up
+      options.onFinished?() # callback for callers of up.layer.dismiss/accept()
 
     # Do not re-use `options`, or we would call startCloseAnimation(animation: startCloseAnimation)!
-    destroyOptions = u.merge(options, { animation, onRemoved, log: false })
+    destroyOptions = u.merge(options, { animation, onFinished, log: false })
     up.destroy(@element, destroyOptions)
 
   onElementsRemoved: ->

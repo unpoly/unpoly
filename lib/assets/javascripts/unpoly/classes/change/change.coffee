@@ -4,11 +4,8 @@ class up.Change extends up.Class
 
   constructor: (@options) ->
 
-  onAppeared: ->
-    @options.onAppeared?()
-
-  onRemoved: ->
-    @options.onRemoved?()
+  onFinished: ->
+    @options.onFinished?()
 
   notApplicable: (reason) ->
     return up.error.notApplicable(this, reason)
