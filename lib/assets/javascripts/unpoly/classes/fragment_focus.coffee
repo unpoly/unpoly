@@ -3,19 +3,19 @@ e = up.element
 
 PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
-class up.FragmentFocus
+class up.FragmentFocus extends up.Record
 
-  constructor: (@options) ->
-    @fragment = @options.fragment or up.fail('Must pass an { fragment } option')
-    @autoMeans = @options.autoMeans or up.fail('Must pass an { autoMeans } option')
-    @layer = @options.layer or up.fail('Must pass a { layer } option')
-    @origin = @options.origin
-    @focusCapsule = @options.focusCapsule
-    @focusOpt = @options.focus
+  keys: -> [
+    'fragment'
+    'autoMeans'
+    'layer'
+    'origin'
+    'focusCapsule'
+    'focus'
+  ]
 
   process: ->
-    if @shouldProcess()
-      @tryProcess(@focusOpt)
+    @tryProcess(@focus)
 
   tryProcess: (focusOpt) ->
     switch focusOpt
@@ -38,7 +38,7 @@ class up.FragmentFocus
         if u.isString(focusOpt)
           return @focusSelector(focusOpt)
         if u.isFunction(focusOpt)
-          return focusOpt(@options)
+          return focusOpt(@attributes())
 
   focusSelector: (selector) ->
     lookupOpts = { @layer, @origin }
@@ -63,7 +63,10 @@ class up.FragmentFocus
     up.focus(element, PREVENT_SCROLL_OPTIONS)
     return true
 
-  shouldProcess: ->
-    # Only emit an up:fragment:focus event if a truthy focusOpt would
-    # otherwise trigger a built-in focus strategy.
-    return @focusOpt && up.event.nobodyPrevents(@fragment, 'up:fragment:focus', @options)
+#  shouldProcess: ->
+#    # Only emit an up:fragment:focus event if a truthy focusOpt would
+#    # otherwise trigger a built-in focus strategy.
+#    return @focusOpt && up.event.nobodyPrevents(@fragment, @focusEvent())
+#
+#  focusEvent: ->
+#    return up.event.build('up:fragment:focus', @attributes())
