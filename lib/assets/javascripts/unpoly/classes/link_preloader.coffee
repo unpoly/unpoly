@@ -40,22 +40,20 @@ class up.LinkPreloader
 
     clearTimeout(@timer)
 
-    if @queued
-      followOptions = up.link.followOptions(@currentLink)
-      up.network.abort (request) ->
-        # Only abort when we're still preloading, not when navigation
-        # has started.
-        request.preload &&
-          request.method == followOptions.method &&
-          request.url == followOptions.url
+    # Only abort if the request is still preloading.
+    # If the user has clicked on the link while the request was in flight,
+    # and then unhovered the link, we do not abort the navigation.
+    if @currentRequest?.preload
+      @currentRequest.abort()
 
-    @queued = false
     @currentLink = undefined
+    @currentRequest = undefined
 
   preloadAfterDelay: (link) ->
     delay = e.numberAttr(link, 'up-delay') ? up.link.config.preloadDelay
     @timer = u.timer(delay, => @preloadNow(link))
 
   preloadNow: (link) ->
-    up.log.muteRejection up.link.preload(link)
+    onQueued = ({ request }) => @currentRequest = request
+    up.log.muteRejection up.link.preload(link, { onQueued })
     @queued = true

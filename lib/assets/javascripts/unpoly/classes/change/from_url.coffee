@@ -39,7 +39,12 @@ class up.Change.FromURL extends up.Change
       u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
     )
 
-    return @request = up.request(requestAttrs)
+    @request = up.request(requestAttrs)
+
+    # Callback for callers who need to access the request object.
+    @options.onQueued?({ @request })
+
+    return @request
 
   onRequestSettled: (@response) ->
     # Wrap @response in Promise.reject() so it always causes our return value to reject.

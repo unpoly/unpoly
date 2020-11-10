@@ -9,7 +9,7 @@ TODOs
   - Consider moving nested classes into package instead of parent-class, e.g. up.layer.Overlay
 - Can we reset master to hk/layers without merging?
 - Merge up.radio into up.fragment
-- If we want to later implement up:fragment:focus, up:fragment:scroll, the callback functions for { scroll } and { focus } need to be events, not the element?
+- onQueued
 
 
 - Release as 1.0.0 or 2.0.0
