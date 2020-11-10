@@ -1349,3 +1349,5 @@ describe 'up.layer', ->
         next ->
           expect(up.layer.isRoot()).toBe(true)
           expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', value: { foo: 'bar' })
+
+      # More specs in example group for "[up-accept]"

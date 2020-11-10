@@ -1110,6 +1110,23 @@ describe 'up.form', ->
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
 
+      it 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', asyncSpec (next) ->
+        form = fixture('form[up-follow][action="/path"]')
+        textField = e.affix(form, 'input[type=text][name=input][up-validate]')
+        submitButton = e.affix(form, 'input[type=submit]')
+        textField.value = "foo"
+
+        form.addEventListener 'change', (event) -> console.log("CHANGE on %o", event.target)
+        form.addEventListener 'submit', -> console.log("SUBMIT")
+
+        Trigger.change(textField)
+        Trigger.clickSequence(submitButton)
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(@lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
+
+
     describe 'form[up-validate]', ->
 
       # it 'prints an error saying that this form is not yet supported', ->

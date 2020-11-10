@@ -1054,6 +1054,11 @@ up.util = do ->
   queueMicrotask = (task) ->
     return Promise.resolve().then(task)
 
+  abortableMicrotask = (task) ->
+    aborted = false
+    queueMicrotask(-> task() unless aborted)
+    return -> aborted = true
+
   ###**
   Returns the last element of the given array.
 
@@ -1886,6 +1891,7 @@ up.util = do ->
     queueTask(args...)
   task: queueTask
   microtask: queueMicrotask
+  abortableMicrotask: abortableMicrotask
   isEqual: isEqual
   splitValues : splitValues
   endsWith: endsWith

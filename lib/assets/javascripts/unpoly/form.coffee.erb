@@ -48,6 +48,8 @@ up.form = do ->
   fullSubmitSelector = ->
     config.submitSelectors.join(',')
 
+  abortScheduledValidate = null
+
   reset = ->
     config.reset()
 
@@ -680,6 +682,7 @@ up.form = do ->
   @stable
   ###
   up.on 'submit', fullSubmitSelector, (event, form) ->
+    abortScheduledValidate?()
     up.event.halt(event)
     up.log.muteRejection submit(form)
 
@@ -846,7 +849,9 @@ up.form = do ->
     # Even though [up-validate] may be used on either an entire form or an individual input,
     # the change event will trigger on a given field.
     field = findFields(event.target)[0]
-    up.log.muteRejection validate(field)
+
+    abortScheduledValidate = u.abortableMicrotask ->
+      up.log.muteRejection validate(field)
 
   ###**
   Show or hide elements when a `<select>` or `<input>` has a given value.
