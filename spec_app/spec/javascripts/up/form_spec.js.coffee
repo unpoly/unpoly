@@ -363,6 +363,16 @@ describe 'up.form', ->
           # No request should be made because we prevented the event
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+      it 'submits an form that has both an [id] attribute and a field with [name=id] (bugfix)', asyncSpec (next) ->
+        form = fixture('form#form-id[action="/path"][up-follow]')
+        e.affix(form, 'input[name="id"][value="value"]')
+
+        up.submit(form)
+
+        next =>
+          params = @lastRequest().data()
+          expect(params['id']).toEqual(['value'])
+
       describeCapability 'canPushState', ->
 
         beforeEach ->

@@ -82,7 +82,7 @@ up.form = do ->
     # element that are associated with the form (through <input form="id-of-form">, which
     # is an HTML feature.)
     if e.matches(root, 'form[id]')
-      outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.id))
+      outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.getAttribute('id')))
       outsideFields = e.all(outsideFieldSelector)
       fields.push(outsideFields...)
       fields = u.uniq(fields)
