@@ -48,7 +48,7 @@ up.network = do ->
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
-  @param {number} [config.cacheSize=70]
+  @param {number} [config.cacheSize=50]
     The maximum number of responses to cache.
     If the size is exceeded, the oldest items will be dropped from the cache.
   @param {number} [config.cacheExpiry=300000]
@@ -57,12 +57,14 @@ up.network = do ->
   @param {number} [config.slowDelay=300]
     How long the proxy waits until emitting the [`up:network:slow` event](/up:network:slow).
     Use this to prevent flickering of spinners.
-  @param {number} [config.maxRequests=4]
-    The maximum number of concurrent requests to allow before additional
-    requests are queued. This currently ignores preloading requests.
+  @param {number} [config.concurrency=4]
+    The maximum number of concurrent active requests.
 
-    You might find it useful to set this to `1` in full-stack integration
-    tests (e.g. Selenium).
+    Additional requests are queued. [Preload](/up.network.preload) requests are
+    always queued behind non-preload requests.
+
+    You might find it useful to set the request concurrency `1` in full-stack
+    integration tests (e.g. Selenium) to prevent race conditions.
 
     Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
     regardless of what you configure here.
@@ -74,10 +76,41 @@ up.network = do ->
     An array of uppercase HTTP method names that are considered [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1).
     The proxy cache will only cache safe requests and will clear the entire
     cache after an unsafe request.
+  @param {boolean|string} [config.preloadEnabled='auto']
+    Whether Unpoly will load [preload requests](/up.network.preload).
+
+    With the default setting (`"auto"`) Unpoly will load preload requests
+    if the connection's effective round-trip time is at most `up.network.config.preloadMaxRTT`
+    and the connection's effective bandwidth estimate is at least `up.network.config.preloadMinDownlink`.
+    If the connection does not satisfy these requirements, Unpoly will
+    automatically [abort](/up.network.abort) any preload requests. Note that connection
+    speed may change during a session.
+
+    If set to `true`, Unpoly will always load preload requests.
+
+    If set to `false`, Unpoly will automatically [abort](/up.network.abort) all preload requests.
+  @param {number} [config.preloadMinDownlink=0.6]
+    The connection's minimum effective bandwidth estimate required
+    to [enable preloading](/up.network.config#config.preloadEnabled).
+
+    The value is given in megabits per second.
+
+    This setting is only honored if `up.network.config.preloadEnabled` is set to `'auto'` (the default).
+  @param {number} [config.preloadMaxRTT=0.6]
+    The connection's maximum effective round-trip time required
+    to [enable preloading](/up.network.config#config.preloadEnabled).
+
+    The value is given in milliseconds.
+
+    This setting is only honored if `up.network.config.preloadEnabled` is set to `'auto'` (the default).
   @param {Array<string>|Function(up.Request): Array<string>} [config.metaKeys]
     An array of request property names
-    that are sent to the server. The server may return an optimized response based on these properties,
+    that are sent to the server as [HTTP headers](/up.protocol).
+
+    The server may return an optimized response based on these properties,
     e.g. by omitting a navigation bar that is not targeted.
+
+    \#\#\# Cacheability considerations
 
     Two requests with different `metaKeys` are considered cache misses when [caching](/up.request) and
     [preloading](/up.link.preload). To **improve cacheability**, you may configure a function that returns
@@ -115,10 +148,11 @@ up.network = do ->
         return []
       }
     }
+
   @stable
   ###
   config = new up.Config ->
-    slowDelay: 300
+    slowDelay: 800
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
     safeMethods: ['GET', 'OPTIONS', 'HEAD']
@@ -128,7 +162,6 @@ up.network = do ->
     # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     preloadMinDownlink: 0.6
     preloadMaxRTT: 750
-    preloadTimeout: 10 * 1000
     metaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
@@ -180,11 +213,13 @@ up.network = do ->
   ###
 
   ###**
-  Removes all cache entries.
+  Removes all [cache](/up.cache.get) entries.
 
   Unpoly also automatically clears the cache whenever it processes
   a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `POST`.
+
+  The server may also clear the cache by sending an [`X-Up-Cache: clear`](/X-Up-Cache) header.
 
   @function up.cache.clear
   @stable
@@ -349,8 +384,7 @@ up.network = do ->
 
     options = parseOptions(args)
     options.preload = true
-    # The constructor of up.Request will set additional options when passed { preload: true }:
-    # { cache: true, timeout: config.preloadTimeout }.
+    # The constructor of up.Request will set { cache: true } when passed { preload: true }
     makeRequest(options)
 
   parseOptions = (args) ->
@@ -402,7 +436,7 @@ up.network = do ->
       request.catch -> cache.remove(request)
 
     u.always request, (response) ->
-      if response.getHeader?('X-Up-Cache') == 'clear'
+      if response.getHeader?(up.protocol.headerize('cache')) == 'clear'
         cache.clear()
 
     queue.asap(request)
@@ -428,30 +462,12 @@ up.network = do ->
     The URL for the request.
 
     Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
-  @param {string} [request.url]
-    You can omit the first string argument and pass the URL as
-    a `request` property instead.
-  @param {string} [request.method='GET']
-    The HTTP method for the request.
-  @param {boolean} [request.cache]
-    Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
-    requests, if available. If set to `false` a network connection will always be attempted.
-  @param {Object} [request.headers={}]
-    An object of additional header key/value pairs to send along
-    with the request.
-  @param {Object|FormData|string|Array} [options.params]
-    [Parameters](/up.Params) that should be sent as the request's payload.
-
-    On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
-  @param {string} [request.timeout]
-    A timeout in milliseconds for the request.
-
-    If `up.network.config.maxRequests` is set, the timeout
-    will not include the time spent waiting in the queue.
+  @param {Object} [options]
+    See options for `up.request()`.
   @return {Promise<string>}
     A promise for the response text.
   @deprecated
-    Use [`up.request()`](/up.request) instead.
+    Use `up.request()` instead.
   ###
   ajax = (args...) ->
     up.legacy.deprecated('up.ajax()', 'up.request()')
@@ -459,29 +475,21 @@ up.network = do ->
     makeRequest(args...).then(pickResponseText)
 
   ###**
-  Returns `true` if the proxy is not currently waiting
-  for a request to finish. Returns `false` otherwise.
-
-  [Preload requests](/up.link.preload) will not be considered for this check.
+  Returns whether Unpoly is not currently waiting for a [request](/up.request) to finish.
 
   @function up.network.isIdle
   @return {boolean}
-    Whether the proxy is idle
-  @experimental
+  @stable
   ###
   isIdle = ->
     not isBusy()
 
   ###**
-  Returns `true` if the proxy is currently waiting
-  for a request to finish. Returns `false` otherwise.
-
-  [Preload requests](/up.link.preload) will not be considered for this check.
+  Returns whether Unpoly is currently waiting for a [request](/up.request) to finish.
 
   @function up.network.isBusy
   @return {boolean}
-    Whether the proxy is busy
-  @experimental
+  @stable
   ###
   isBusy = ->
     queue.isBusy()
@@ -504,24 +512,76 @@ up.network = do ->
       return !isConnectionTooSlowForPreload() && up.browser.canPushState()
     return setting
 
+  ###**
+  Aborts pending [requests](/up.request).
+
+  The event `up:request:aborted` will be emitted.
+
+  The promise returned by `up.request()` will be rejected with an exception named `AbortError`:
+
+      try {
+        let response = await up.request('/path')
+        console.log(response.text)
+      } catch (err) {
+        if (err.name == 'AbortError') {
+          console.log('Request was aborted')
+        }
+      }
+
+  \#\#\# Examples
+
+  Without arguments, this will abort all pending requests:
+
+      up.network.abort()
+
+  To abort a given `up.Request` object, pass it as the first argument:
+
+      let request = up.request('/path')
+      up.network.abort(request)
+
+  To abort all requests matching a condition, pass a function that takes a request
+  and returns a boolean value. Unpoly will abort all request for which the given
+  function returns `true`. E.g. to abort all requests with a HTTP method as `GET`:
+
+      up.network.abort((request) => request.method == 'GET')
+
+  @function up.network.abort
+  @param {up.Request|boolean|Function(up.Request): boolean} [matcher=true]
+    If this argument is omitted, all pending requests are aborted.
+  @stable
+  ###
   abortRequests = (args...) ->
     queue.abort(args...)
+
+  ###**
+  This event is [emitted](/up.emit) when an [AJAX request](/up.request)
+  was [aborted](/up.network.abort()).
+
+  The event is emitted on the layer that caused the request.
+
+  @event up:request:aborted
+  @param {up.Request} event.request
+    The aborted request.
+  @param {up.Layer} [event.layer]
+    The [layer](/up.layer) that caused the request.
+  @param event.preventDefault()
+  @experimental
+  ###
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish.
 
-  By default Unpoly will wait 300 ms for an AJAX request to finish
+  By default Unpoly will wait 800 ms for an AJAX request to finish
   before emitting `up:network:slow`. You can configure this time like this:
 
-      up.network.config.slowDelay = 150;
+      up.network.config.slowDelay = 400;
 
   Once all responses have been received, an [`up:network:recover`](/up:network:recover)
   will be emitted.
 
   Note that if additional requests are made while Unpoly is already busy
   waiting, **no** additional `up:network:slow` events will be triggered.
-
 
   \#\#\# Spinners
 
@@ -546,12 +606,11 @@ up.network = do ->
         ]
       })
 
-  The `up:network:slow` event will be emitted after a delay of 300 ms
+  The `up:network:slow` event will be emitted after a delay
   to prevent the spinner from flickering on and off.
   You can change (or remove) this delay like this:
 
-      up.network.config.slowDelay = 150;
-
+      up.network.config.slowDelay = 400;
 
   @event up:network:slow
   @stable
@@ -573,11 +632,16 @@ up.network = do ->
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
 
+  The event is emitted on the layer that caused the request.
+
   @event up:request:load
   @param {up.Request} event.request
+    The request to be sent.
+  @param {up.Layer} [event.layer]
+    The [layer](/up.layer) that caused the request.
   @param event.preventDefault()
     Event listeners may call this method to prevent the request from being sent.
-  @experimental
+  @stable
   ###
 
   registerAliasForRedirect = (request, response) ->
@@ -589,18 +653,24 @@ up.network = do ->
       cache.alias(request, newRequest)
 
   ###**
-  This event is [emitted](/up.emit) when the response to an
-  [AJAX request](/up.request) has been received.
+  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
+  has been received.
 
   Note that this event will also be emitted when the server signals an
   error with an HTTP status like `500`. Only if the request
   encounters a fatal error (like a loss of network connectivity),
   [`up:request:fatal`](/up:request:fatal) is emitted instead.
 
+  The event is emitted on the layer that caused the request.
+
   @event up:request:loaded
   @param {up.Request} event.request
-  @param {up.Response|Error} event.error
-  @experimental
+    The request.
+  @param {up.Response} event.response
+    The response that was received from the server.
+  @param {up.Layer} [event.layer]
+    The [layer](/up.layer) that caused the request.
+  @stable
   ###
 
   ###**
@@ -611,7 +681,14 @@ up.network = do ->
   error message with an HTTP status like `500`. When the server can produce
   any response, [`up:request:loaded`](/up:request:loaded) is emitted instead.
 
+  The event is emitted on the layer that caused the request.
+
   @event up:request:fatal
+  @param {up.Request} event.request
+    The request.
+  @param {up.Layer} [event.layer]
+    The [layer](/up.layer) that caused the request.
+  @stable
   ###
 
   ###**

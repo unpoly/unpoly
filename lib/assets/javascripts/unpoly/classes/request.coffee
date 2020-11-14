@@ -162,8 +162,6 @@ class up.Request extends up.Record
     @normalize()
 
     if @preload
-      # Shorter timeout when preloading
-      @timeout ?= up.network.config.preloadTimeout
       # Preloading requires caching.
       @cache = true
 

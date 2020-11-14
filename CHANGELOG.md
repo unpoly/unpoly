@@ -9,6 +9,8 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Unreleased
 ----------
 
+- up.network.config.slowDelay is now 800 (up from 300)
+- up.network.config.cacheSize is now 50 (down from 70)
 - up.network.isBusy() / isIdle() takes preload events into account
 -  up.observe() callback may return a promise that will prevent callback calls while running
 - `[aria-label]` attributes are no longer used to build a target selector

@@ -33,6 +33,14 @@ up.protocol = do ->
   u = up.util
   e = up.element
 
+  headerize = (camel) ->
+    header = camel.replace /(^.|[A-Z])/g, (char) -> '-' + char.toUpperCase()
+    return 'X-Up' + header
+
+  extractHeader = (xhr, shortHeader, parseFn = u.identity) ->
+    if value = xhr.getResponseHeader(headerize(shortHeader))
+      return parseFn(value)
+
   ###**
   This request header contains the current Unpoly version to mark this request as a fragment update.
 
@@ -170,6 +178,23 @@ up.protocol = do ->
   @stable
   ###
 
+  ###*
+  The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
+
+  \#\#\# Example
+
+  ```http
+  X-Up-Cache: clear
+  ```
+
+  @header X-Up-Cache
+  @param value
+    The string `"clear"`.
+  ###
+
+  contextFromXHR = (xhr) ->
+    extractHeader(xhr, 'context', JSON.parse)
+
   ###**
   This request header contains the targeted layer's [context](/up.layer.context), serialized as JSON.
 
@@ -219,6 +244,13 @@ up.protocol = do ->
   @header X-Up-Fail-Context
   @stable
   ###
+
+  ###**
+  @function up.protocol.methodFromXHR
+  @internal
+  ###
+  methodFromXHR = (xhr) ->
+    extractHeader(xhr, 'method', u.normalizeMethod)
 
   ###**
   The server may set this optional response header to change the browser location after a fragment update.
@@ -311,6 +343,9 @@ up.protocol = do ->
   @stable
   ###
 
+  eventPlansFromXHR = (xhr) ->
+    extractHeader(xhr, 'events', JSON.parse)
+
   ###**
   The server may set this response header to [emit events](/up.emit) with the
   requested [fragment update](a-up-target).
@@ -354,6 +389,11 @@ up.protocol = do ->
   @stable
   ###
 
+  acceptLayerFromXHR = (xhr) ->
+    # Even if acceptance has no value, the server will send
+    # X-Up-Accept-Layer: null
+    extractHeader(xhr, 'acceptLayer', JSON.parse)
+
   ###*
   The server may set this response header to [accept](/up.layer.accept) the targeted overlay
   in response to a fragment update.
@@ -384,6 +424,11 @@ up.protocol = do ->
   @stable
   ###
 
+  dismissLayerFromXHR = (xhr) ->
+    # Even if dismissal has no value, the server will send
+    # X-Up-Dismiss-Layer: null
+    extractHeader(xhr, 'dismissLayer', JSON.parse)
+
   ###*
   The server may set this response header to [dismiss](/up.layer.dismiss) the targeted overlay
   in response to a fragment update.
@@ -413,6 +458,18 @@ up.protocol = do ->
   @header X-Up-Dismiss-Layer
   @stable
   ###
+
+  ###**
+  Server-side companion libraries like unpoly-rails set this cookie so we
+  have a way to detect the request method of the initial page load.
+  There is no JavaScript API for this.
+
+  @function up.protocol.initialRequestMethod
+  @internal
+  ###
+  initialRequestMethod = u.memoize ->
+    methodFromServer = up.browser.popCookie('_up_method')
+    (methodFromServer || 'get').toLowerCase()
 
   ###**
   The server may set this optional cookie to echo the HTTP method of the initial request.
@@ -473,45 +530,6 @@ up.protocol = do ->
   titleFromXHR = (xhr) ->
     extractHeader(xhr, 'title')
 
-  ###**
-  @function up.protocol.methodFromXHR
-  @internal
-  ###
-  methodFromXHR = (xhr) ->
-    extractHeader(xhr, 'method', u.normalizeMethod)
-
-  acceptLayerFromXHR = (xhr) ->
-    # Even if acceptance has no value, the server will send
-    # X-Up-Accept-Layer: null
-    extractHeader(xhr, 'acceptLayer', JSON.parse)
-
-  dismissLayerFromXHR = (xhr) ->
-    # Even if dismissal has no value, the server will send
-    # X-Up-Dismiss-Layer: null
-    extractHeader(xhr, 'dismissLayer', JSON.parse)
-
-  eventPlansFromXHR = (xhr) ->
-    extractHeader(xhr, 'events', JSON.parse)
-
-  contextFromXHR = (xhr) ->
-    extractHeader(xhr, 'context', JSON.parse)
-
-  extractHeader = (xhr, shortHeader, parseFn = u.identity) ->
-    if value = xhr.getResponseHeader(headerize(shortHeader))
-      return parseFn(value)
-
-  ###**
-  Server-side companion libraries like unpoly-rails set this cookie so we
-  have a way to detect the request method of the initial page load.
-  There is no JavaScript API for this.
-
-  @function up.protocol.initialRequestMethod
-  @internal
-  ###
-  initialRequestMethod = u.memoize ->
-    methodFromServer = up.browser.popCookie('_up_method')
-    (methodFromServer || 'get').toLowerCase()
-
   # Remove the method cookie as soon as possible.
   # Don't wait until the first call to initialRequestMethod(),
   # which might be much later.
@@ -564,19 +582,13 @@ up.protocol = do ->
 
     _method=PUT
     ```
-
   @stable
   ###
   config = new up.Config ->
     methodParam: '_method'                     # up.network.config.methodParam
-
     csrfParam: -> e.metaContent('csrf-param')  # das muss echt configurierbar sein, evtl. up.network.config.csrfParam
     csrfToken: -> e.metaContent('csrf-token')  # das muss echt configurierbar sein, evtl. up.network.config.csrfToken
     csrfHeader: 'X-CSRF-Token'                 # MUSS KONFIGURIERBAR BLEIBEN, andere frameworks nutzen X-XSRF-Token
-
-  headerize = (camel) ->
-    header = camel.replace /(^.|[A-Z])/g, (char) -> '-' + char.toUpperCase()
-    return 'X-Up' + header
 
   csrfHeader = ->
     u.evalOption(config.csrfHeader)

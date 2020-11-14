@@ -1129,7 +1129,6 @@ describe 'up.network', ->
         request = up.network.preload({ url: '/foo' })
         expect(request.preload).toBe(true)
         expect(request.cache).toBe(true)
-        expect(request.timeout).toBe(up.network.config.preloadTimeout)
 
       it 'throws an error when trying to preload an unsafe request', ->
         preload = -> up.network.preload({ url: '/foo', method: 'put' })
