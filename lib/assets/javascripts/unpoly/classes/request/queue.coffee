@@ -90,11 +90,10 @@ class up.Request.Queue extends up.Class
 
   # Aborting a request will cause its promise to reject, which will also uncache it
   abort: (conditions = true) ->
-    reason = u.pluckKey(conditions, 'reason')
     for list in [@currentRequests, @queuedRequests]
       matches = u.filter list, (request) => @requestMatches(request, conditions)
       matches.forEach (match) ->
-        match.abort(reason)
+        match.abort()
         u.remove(list, match)
       return
 
