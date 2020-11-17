@@ -412,7 +412,7 @@ up.link = do ->
 
   Stopping an up:click event will also stop the underlying event.
 
-  Also see docs for `up.click.
+  Also see docs for `up:click`.
 
   @function up.link.convertClicks
   @param {up.Layer} layer
@@ -463,10 +463,10 @@ up.link = do ->
       <a href="/one">Link 1</a>
       <a href="/two" up-instant>Link 2</a>
 
-  The following event listener will be called when either link is activated:
+  The following event listener will be called when *either* link is activated:
 
       document.addEventListener('up:click', function(event) {
-
+        ...
       })
 
   \#\#\# Cancelation is forwarded

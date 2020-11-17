@@ -8,6 +8,7 @@ up.RenderOptions = do ->
     source: true
     saveScroll: true
     fail: 'auto'
+    history: false # will be set to 'auto' when navigating
   }
 
   PRELOAD_OVERRIDES = {
@@ -62,31 +63,10 @@ up.RenderOptions = do ->
     'navigate'      # Also set navigate defaults for fail options
   ])
 
-  # These defaults will be set to both success and fail options
-  # if { navigate: true } is given.
-  NAVIGATE_DEFAULTS = {
-    focus: 'auto'
-    scroll: 'auto'
-    solo: true      # preflight
-    feedback: true  # preflight
-    fallback: true
-    history: 'auto'
-    peel: true
-    cache: true
-    transition: 'navigate' # build in lookup
-  }
-
-  # These options will be set to both success and fail options
-  # if { navigate: false } is given.
-  NO_NAVIGATE_DEFAULTS = {
-    history: false
-  }
 
   navigateDefaults = (options) ->
     if options.navigate
-      NAVIGATE_DEFAULTS
-    else
-      NO_NAVIGATE_DEFAULTS
+      up.fragment.config.navigateOptions
 
   preloadOverrides = (options) ->
     if options.preload

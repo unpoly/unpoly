@@ -397,13 +397,6 @@ up.motion = do ->
       return promise
 
   findTransitionFn = (object) ->
-    if object == 'navigate'
-      # We could also register a transition "navigate" that returns a resolved promise.
-      # However, swapping elements need a lot more preparation works when Unpoly thinks
-      # a transition is going to happen. Since this config option is false for most apps,
-      # we want to avoid this work, if possible.
-      object = up.fragment.config.navigateTransition
-
     if isNone(object)
       undefined
     else if u.isFunction(object)

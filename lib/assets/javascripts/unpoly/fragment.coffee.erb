@@ -38,7 +38,19 @@ up.fragment = do ->
       # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
       get_mainTargets: -> up.layer.config.any.mainTargets
       badTargetClasses: [/^up-/]
-      navigateTransition: false
+      # These defaults will be set to both success and fail options
+      # if { navigate: true } is given.
+      navigateOptions: {
+        focus: 'auto'
+        scroll: 'auto'
+        solo: true      # preflight
+        feedback: true  # preflight
+        fallback: true
+        history: 'auto'
+        peel: true
+        cache: true
+      }
+
   up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')
 
   reset = ->

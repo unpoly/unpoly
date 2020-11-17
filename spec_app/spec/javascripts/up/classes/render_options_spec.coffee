@@ -25,6 +25,18 @@ describe 'up.RenderOptions', ->
         expect(options.scroll).toBe('auto')
         expect(options.transition).toBe('navigate')
 
+      it 'allows to configure defaults using up.fragment.config.navigateOptions', ->
+        up.fragment.config.navigateOptions.feedback = false
+        up.fragment.config.navigateOptions.scroll = 'target'
+        up.fragment.config.navigateOptions.transition = 'move-left'
+
+        givenOptions = { navigate: true }
+        options = up.RenderOptions.preprocess(givenOptions)
+
+        expect(options.feedback).toBe(false)
+        expect(options.scroll).toBe('target')
+        expect(options.transition).toBe('move-left')
+
     describe 'with { navigate: false }', ->
 
       it 'sets additional defaults appropriate to programmatic fragment changes', ->
