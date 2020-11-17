@@ -113,8 +113,8 @@ up.network = do ->
     \#\#\# Cacheability considerations
 
     Two requests with different `metaKeys` are considered cache misses when [caching](/up.request) and
-    [preloading](/up.link.preload). To **improve cacheability**, you may configure a function that returns
-    fewer fields.
+    [preloading](/up.link.preload). To **improve cacheability**, you may set
+    `up.network.config.metaKeys` to a shorter list of property keys.
 
     \#\#\# Available fields
 
@@ -138,7 +138,7 @@ up.network = do ->
     With this you may send different request properties for different URLs:
 
     ```javascript
-    up.protocol.config.metaKeys = function(request) {
+    up.network.config.metaKeys = function(request) {
       if (request.url == '/search') {
         // The server optimizes responses on the /search route.
         return ['target', 'failTarget']

@@ -359,7 +359,7 @@ class up.Layer extends up.Record
   Listens to a ([DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events) that originated
   on an element [contained](/up.Layer.prototype.contains) by this layer.
 
-  Note that this will always return `false` for elements in [descendant](/up.Layer.prototype.descendants) overlays,
+  This will ignore events emitted on elements in [descendant](/up.Layer.prototype.descendants) overlays,
   even if the descendant overlay's element is nested into the DOM tree of this layer.
 
   The arguments for this function are the same as for `up.on()`.
