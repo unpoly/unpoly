@@ -253,10 +253,14 @@ up.fragment = do ->
 
     promise = up.browser.whenConfirmed(options)
 
-    if guardEvent = options.guardEvent
-      # Allow guard event handlers to manipulate render options for the default behavior
+    if guardEvent = u.pluckKey(options, 'guardEvent')
+      # Allow guard event handlers to manipulate render options for the default behavior.
+      #
+      # Note that we have removed { guardEvent } from options to not recursively define
+      # guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
+      # listeners that prevent the default and re-render.
       guardEvent.renderOptions = options
-      promise = promise.then -> up.event.whenEmitted(options.origin, guardEvent)
+      promise = promise.then -> up.event.whenEmitted(guardEvent, { target: options.origin })
 
     promise = promise.then ->
       up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))

@@ -2812,6 +2812,72 @@ describe 'up.fragment', ->
             next ->
               expect(up.layer.front.element).toBeFocused()
 
+      describe 'with { guardEvent } option', ->
+
+        it 'emits the given event before rendering', asyncSpec (next) ->
+          fixture('.target', text: 'old content')
+          guardEvent = up.event.build('my:guard')
+          listener = jasmine.createSpy('listener').and.callFake (event) ->
+            expect('.target').toHaveText('old content')
+          up.on 'my:guard', listener
+
+          up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
+
+          next ->
+            expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
+            expect('.target').toHaveText('new content')
+
+        it 'prefers to emit the given event on the given { origin } instead of the document', asyncSpec (next) ->
+          fixture('.target', text: 'old content')
+          origin = fixture('.origin')
+          guardEvent = up.event.build('my:guard')
+          listener = jasmine.createSpy('listener')
+          origin.addEventListener('my:guard', listener)
+
+          up.render(target: '.target', content: 'new content', guardEvent: guardEvent, origin: origin)
+
+          next ->
+            expect(listener).toHaveBeenCalledWith(guardEvent)
+
+        it 'lets listeners prevent the event, aborting the fragment update', asyncSpec (next) ->
+          fixture('.target', text: 'old content')
+          guardEvent = up.event.build('my:guard')
+          up.on('my:guard', (event) -> event.preventDefault())
+
+          promise = up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
+
+          next ->
+            next.await promiseState(promise)
+
+          next (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(result.value).toBeError(/(Aborted|Prevented)/i)
+
+        it 'sets { renderOptions } on the emitted event', asyncSpec (next) ->
+          fixture('.target', text: 'old content')
+          listener = jasmine.createSpy('listener').and.callFake((event) -> event.preventDefault())
+          guardEvent = up.event.build('my:guard')
+          up.on('my:guard', listener)
+
+          up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
+
+          next ->
+            expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
+            expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
+
+        it 'omits the { guardEvent } key from the { renderOptions }, so event handlers can pass this to render() without causing an infinite loop', asyncSpec (next) ->
+          fixture('.target', text: 'old content')
+          listener = jasmine.createSpy('listener').and.callFake((event) -> event.preventDefault())
+          guardEvent = up.event.build('my:guard')
+          up.on('my:guard', listener)
+
+          up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
+
+          next ->
+            expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
+            expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
+            expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
+
       describe 'with { solo } option', ->
 
         it 'aborts the request of an existing change', asyncSpec (next) ->
@@ -3463,6 +3529,8 @@ describe 'up.fragment', ->
 
             next =>
               expect(constructorSpy.calls.count()).toBe(1)
+
+
 
     describe 'up.replace()', ->
 
