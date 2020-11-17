@@ -98,8 +98,11 @@ class up.Request.Queue extends up.Class
         u.remove(list, match)
       return
 
+  abortExcept: (excusedRequest, additionalConditions = true) ->
+    @abort (queuedRequest) -> queuedRequest != excusedRequest && u.evalOption(additionalConditions, queuedRequest)
+
   requestMatches: (request, conditions) ->
-    return conditions == true || request == conditions || conditions(request)
+    return request == conditions || u.evalOption(conditions, request)
 
   checkSlow: =>
     currentSlow = @isSlow()

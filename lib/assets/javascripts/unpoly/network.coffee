@@ -373,8 +373,8 @@ up.network = do ->
   makeRequest = (args...) ->
     request = new up.Request(parseOptions(args))
     request = useCachedRequest(request) || queueRequest(request)
-    if request.solo
-      abortRequests (r) -> r != request
+    if solo = request.solo
+      queue.abortExcept(request, solo)
     return request
 
   preload = (args...) ->
