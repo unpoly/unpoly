@@ -8,7 +8,9 @@ TODOs
 - Remove unused option up.network.abort({ reason })
 
 - Support [up-source] as an alternative to the upSource prop, to manually define reload
-    - Also document in [up-poll]
+  - Revert upSource traversal
+  - Also document in [up-poll]
+  - Document [up-source] in fragment.coffee
 
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO

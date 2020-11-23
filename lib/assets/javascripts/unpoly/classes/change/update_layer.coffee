@@ -81,13 +81,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return Promise.resolve()
 
   executeStep: (step) =>
-    # When the server responds with an error, or when the request method is not
-    # reloadable (not GET), we keep the same source as before.
-    if step.source == 'keep'
-      step.source = up.fragment.source(step.oldElement)
-
-    # Remember where the element came from in case someone needs to up.reload(newElement) later.
-    up.fragment.setSource(step.newElement, step.source)
+    # Remember where the element came from to support up.reload(element).
+    @setSource(step)
 
     switch step.placement
       when 'swap'

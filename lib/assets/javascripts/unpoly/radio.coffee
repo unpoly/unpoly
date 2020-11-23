@@ -63,7 +63,7 @@ up.radio = do ->
       if document.hidden
         doSchedule()
       else
-        u.always(up.reload(element), doSchedule)
+        u.always(up.reload(element, options), doSchedule)
 
     doSchedule = ->
       timer = setTimeout(doReload, interval)
@@ -92,6 +92,12 @@ up.radio = do ->
   If the value is omitted, a global default is used. You may configure the default like this:
 
       up.radio.config.pollInterval = 10000
+
+  \#\#\# Controlling the source URL
+
+  The element will be reloaded from the URL from which it was originally loaded.
+
+
 
   @selector [up-poll]
   @param [up-interval]

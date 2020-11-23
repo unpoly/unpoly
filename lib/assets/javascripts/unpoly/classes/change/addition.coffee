@@ -61,3 +61,15 @@ class up.Change.Addition extends up.Change
       # Wind up the call stack. Whoever has closed the layer will also clean up
       # elements, handlers, etc.
       throw up.error.aborted('Layer was closed')
+
+  setSource: ({ oldElement, newElement, source }) ->
+    # When the server responds with an error, or when the request method is not
+    # reloadable (not GET), we keep the same source as before.
+    if source == 'keep'
+      source = oldElement && up.fragment.source(oldElement)
+
+    # Don't set a source if { false } is passed.
+    # Don't set a source if the element HTML already has an [up-source] attribute.
+    if source && !newElement.getAttribute('up-source')
+      # Remember where the element came from in case someone needs to up.reload(newElement) later.
+      up.fragment.setSource(newElement, source)

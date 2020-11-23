@@ -1632,6 +1632,14 @@ describe 'up.fragment', ->
           next =>
             expect(up.fragment.source('.target')).toMatchURL('/previous-source')
 
+        it 'does not overwrite an [up-source] attribute from the element HTML', asyncSpec (next) ->
+          fixture('.target')
+          up.render('.target', url: '/path')
+          next =>
+            @respondWithSelector('.target[up-source="/other"]')
+          next =>
+            expect(up.fragment.source('.target')).toMatchURL('/other')
+
         describe 'with { source } option', ->
 
           it 'uses that URL as the source for a GET request', asyncSpec (next) ->
@@ -3793,7 +3801,7 @@ describe 'up.fragment', ->
           expect(up.layer.stack[0].sync).toHaveBeenCalled()
           expect(up.layer.stack[1].sync).toHaveBeenCalled()
 
-    describe 'up.reload', ->
+    describe 'up.reload()', ->
 
       it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
         $container = $fixture('.container .element').find('.element').text('old text')
@@ -3848,6 +3856,48 @@ describe 'up.fragment', ->
 
           next =>
             expect(up.browser.loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/source'))
+
+    describe 'up.fragment.source()', ->
+
+      it 'returns the source the fragment was retrieved from', asyncSpec (next) ->
+        fixture('.target')
+        up.render('.target', url: '/path')
+        next =>
+          @respondWithSelector('.target')
+        next =>
+          expect(up.fragment.source('.target')).toMatchURL('/path')
+
+      it 'returns the source of a parent fragment if the given fragment has no reloadable source', asyncSpec (next) ->
+        fixture('.target')
+        up.render('.target', url: '/outer')
+        next =>
+          @respondWith """
+            <div class="target">
+              <div class="inner">
+                inner
+              </div>
+            </div>
+            """
+        next =>
+          up.render('.inner', url: '/inner', method: 'post')
+
+        next =>
+          @respondWithSelector('.inner')
+
+        next =>
+          expect(up.fragment.source('.inner')).toMatchURL('/outer')
+
+      it 'allows users to provide an alternate reloading URL with an [up-source] attribute', asyncSpec (next) ->
+        fixture('.outer')
+        up.render('.outer', url: '/outer')
+
+        next =>
+          @respondWithSelector('.outer .between[up-source="/between"] .inner')
+
+        next =>
+          expect(up.fragment.source('.outer')).toMatchURL('/outer')
+          expect(up.fragment.source('.between')).toMatchURL('/between')
+          expect(up.fragment.source('.inner')).toMatchURL('/between')
 
     describe 'up.fragment.failKey', ->
 

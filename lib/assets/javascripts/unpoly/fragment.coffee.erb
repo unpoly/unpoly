@@ -57,17 +57,14 @@ up.fragment = do ->
     config.reset()
 
   setSource = (element, sourceURL) ->
-    element.upSource = sourceURL
+    # This is used by UpdateLayer and OpenLayer.
+    element.setAttribute('up-source', sourceURL)
 
   ###**
   Returns the URL the given element was retrieved from.
 
-  If the given element was never directly updated,
-  but part of a larger fragment update,
+  If the given element was never directly updated, but part of a larger fragment update,
   the closest known source of an ancestor element is returned.
-
-  For elements that were never changed since the page was initially loaded
-  this returns the URL of the initial page load.
 
   @function up.fragment.source
   @param {string|Element|jQuery} element
@@ -82,11 +79,7 @@ up.fragment = do ->
   source = (args...) ->
     options = parseTargetAndOptions(args)
     element = getOne(options.target, options)
-
-    if url = element.upSource
-      url
-    else if parent = element.parentElement
-      source(parent)
+    return e.closest(element, '[up-source]')?.getAttribute('up-source')
 
   ###**
   Replaces elements on the current page with corresponding elements

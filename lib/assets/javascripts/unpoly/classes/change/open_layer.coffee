@@ -66,8 +66,8 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Change history before compilation, so new fragments see the new location.
     @handleHistory() # location event soll hier nicht mehr automatuisch fliegen
 
-    # Remember where the content was loaded from, to support up.fragment.reload().
-    up.fragment.setSource(@content, @source)
+    # Remember where the element came from to support up.reload(element).
+    @setSource({ newElement: @content, @source })
 
     # Compile the new content and emit up:fragment:inserted.
     responseDoc.activateElement(@content, { @layer, @origin })
