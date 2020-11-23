@@ -49,6 +49,7 @@ Unreleased
 - Rejections are now shown if the log is enabled
 - up.on() can passive: true
 - Preloads on touchstart and mousedown
+- Digit groups separators (`60_000`) are a stage 3 ES6 feature and also supported in number attributes.
 
 
 

@@ -868,9 +868,10 @@ up.element = do ->
   @stable
   ###
   numberAttr = (element, attribute) ->
-    value = element.getAttribute(attribute)
-    if value?.match(/^[\d\.]+$/)
-      parseFloat(value)
+    if value = element.getAttribute(attribute)
+      value = value.replaceAll('_', '')
+      if value.match(/^[\d\.]+$/)
+        parseFloat(value)
 
   ###**
   Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).

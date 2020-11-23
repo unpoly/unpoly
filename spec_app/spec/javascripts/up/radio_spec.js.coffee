@@ -243,5 +243,10 @@ describe 'up.radio', ->
         next.after 75, ->
           expect(reloadSpy.calls.count()).toBe(1)
 
-      it 'allows to pass a polling interval per [up-interval] attribute'
+      it 'allows to pass a polling interval per [up-interval] attribute', asyncSpec (next) ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
 
+        up.hello(fixture('.element[up-poll=10]'))
+
+        next.after 40, ->
+          expect(reloadSpy).not.toHaveBeenCalled()

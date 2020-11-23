@@ -13,7 +13,7 @@ up.viewport.config.anchoredRight.push('.navbar.fixed-top', '.navbar.fixed-bottom
 # and inputs. All the examples now use <div class="mb-3"> .
 
 up.fragment.config.badTargetClasses.push(
-  /^row$/
-  /^col(-xs|-sm|-md|-lg|-xl)?(-\d+)?$/
+  'row',
+  /^col(-xs|-sm|-md|-lg|-xl)?(-\d+)?$/,
   /^[mp][tblrxy]?-\d+$/
 )

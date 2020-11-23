@@ -11,7 +11,7 @@ up.viewport.config.fixedBottom.push('.navbar.fixed-bottom')
 up.viewport.config.anchoredRight.push('.navbar.fixed-top', '.navbar.fixed-bottom')
 
 up.fragment.config.badTargetClasses.push(
-  /^row$/
-  /^col(-xs|-sm|-md|-lg|-xl)?(-\d+)?$/
+  'row',
+  /^col(-xs|-sm|-md|-lg|-xl)?(-\d+)?$/,
   /^[mp][tblrxy]?-\d+$/
 )

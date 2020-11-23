@@ -7,6 +7,9 @@ TODOs
 - Merge up.radio into up.fragment
 - Remove unused option up.network.abort({ reason })
 
+- Regexp URL patterns for match locations with slugs, but exclude new?
+  - Or exclusion pattern?
+
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
 - Test in all browsers
@@ -213,6 +216,7 @@ Tests
 Docs
 ----
 
+- Document URL placeholder ($id vs. :id)
 - Document up.AbortController
 - Document { cache: 'clear' }
 - Document X-Up-Cache: clear

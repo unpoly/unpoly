@@ -822,6 +822,24 @@ describe 'up.element', ->
       element = up.element.createFromHTML('<div foo="some text"></div>')
       expect(up.element.booleanOrStringAttr(element, 'foo')).toEqual('some text')
 
+  describe 'up.element.numberAttr', ->
+
+    it "returns the given attribute's value parsed as an integer", ->
+      element = up.element.createFromHTML('<div foo="123">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBe(123)
+
+    it "returns the given attribute's value parsed as a float", ->
+      element = up.element.createFromHTML('<div foo="123.4">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBe(123.4)
+
+    it "returns undefined if the given attribute value cannot be parsed as a number", ->
+      element = up.element.createFromHTML('<div foo="bar">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBeUndefined()
+
+    it "ignores underscores for digit groups", ->
+      element = up.element.createFromHTML('<div foo="123_000">/div>')
+      expect(up.element.numberAttr(element, 'foo')).toBe(123000)
+
   describe 'up.element.jsonAttr', ->
 
     it "returns the given attribute's value parsed as JSON", ->

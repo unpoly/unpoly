@@ -56,7 +56,7 @@ up.radio = do ->
 
   # TODO: Docs for up.radio.startPolling()
   startPolling = (element, options = {}) ->
-    interval = options.interval ? e.numberAttr(element, 'up-inteval') ? config.pollInterval
+    interval = options.interval ? e.numberAttr(element, 'up-interval') ? config.pollInterval
     timer = null
 
     doReload = ->
