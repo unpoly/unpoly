@@ -77,6 +77,9 @@ up.radio = do ->
 
   \#\#\# Example
 
+  Assume an application layout with an unread message counter.
+  You can use `[up-poll]` to refresh the counter every 30 seconds:
+
       <div class="unread-count" up-poll>
         2 new messages
       </div>
@@ -97,7 +100,11 @@ up.radio = do ->
 
   The element will be reloaded from the URL from which it was originally loaded.
 
+  To reload from another URL, set an `[up-source]` attribute on the polling element:
 
+      <div class="unread-count" up-poll up-source="/unread-count">
+        2 new messages
+      </div>
 
   @selector [up-poll]
   @param [up-interval]

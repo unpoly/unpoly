@@ -184,7 +184,7 @@ describe 'up.radio', ->
           expect(reloadSpy).not.toHaveBeenCalled()
 
         next.after 150, ->
-          expect(reloadSpy).toHaveBeenCalledWith(element)
+          expect(reloadSpy).toHaveBeenCalledWith(element, jasmine.anything())
           expect(reloadSpy.calls.count()).toBe(1)
 
         next.after 150, ->
@@ -246,7 +246,20 @@ describe 'up.radio', ->
       it 'allows to pass a polling interval per [up-interval] attribute', asyncSpec (next) ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
 
-        up.hello(fixture('.element[up-poll=10]'))
+        up.radio.config.pollInterval = 5
 
-        next.after 40, ->
+        up.hello(fixture('.element[up-poll][up-interval=80]'))
+
+        next.after 30, ->
           expect(reloadSpy).not.toHaveBeenCalled()
+
+        next.after 90, ->
+          expect(reloadSpy).toHaveBeenCalled()
+
+      it 'allows to change the URL with an [up-source] attribute', asyncSpec (next) ->
+        up.radio.config.pollInterval = 1
+
+        up.hello(fixture('.element[up-poll][up-source="/optimized-path"]'))
+
+        next.after 20, =>
+          expect(@lastRequest().url).toMatchURL('/optimized-path')
