@@ -971,34 +971,34 @@ describe 'up.util', ->
       it 'normalizes a relative path', ->
         up.history.config.enabled = true
         up.history.replace('/qux/')
-        expect(up.util.normalizeURL('foo')).toBe("http://#{location.hostname}:#{location.port}/qux/foo")
+        expect(up.util.normalizeURL('foo')).toBe("/qux/foo")
 
       it 'normalizes an absolute path', ->
-        expect(up.util.normalizeURL('/foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+        expect(up.util.normalizeURL('/foo')).toBe("/foo")
 
-      it 'normalizes a full URL', ->
+      it 'preserves a protocol and hostname for a URL from another domain', ->
         expect(up.util.normalizeURL('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
 
       it 'preserves a query string', ->
-        expect(up.util.normalizeURL('http://example.com/foo/bar?key=value')).toBe('http://example.com/foo/bar?key=value')
+        expect(up.util.normalizeURL('/foo/bar?key=value')).toBe('/foo/bar?key=value')
 
       it 'strips a query string with { search: false } option', ->
-        expect(up.util.normalizeURL('http://example.com/foo/bar?key=value', search: false)).toBe('http://example.com/foo/bar')
+        expect(up.util.normalizeURL('/foo/bar?key=value', search: false)).toBe('/foo/bar')
 
       it 'does not strip a trailing slash by default', ->
-        expect(up.util.normalizeURL('/foo/')).toEqual("http://#{location.hostname}:#{location.port}/foo/")
+        expect(up.util.normalizeURL('/foo/')).toEqual("/foo/")
 
       it 'normalizes redundant segments', ->
-        expect(up.util.normalizeURL('/foo/../foo')).toBe("http://#{location.hostname}:#{location.port}/foo")
+        expect(up.util.normalizeURL('/foo/../foo')).toBe("/foo")
 
       it 'strips a #hash by default', ->
-        expect(up.util.normalizeURL('http://example.com/foo/bar#fragment')).toBe('http://example.com/foo/bar')
+        expect(up.util.normalizeURL('/foo/bar#fragment')).toBe('/foo/bar')
 
       it 'preserves a #hash with { hash: true } option', ->
-        expect(up.util.normalizeURL('http://example.com/foo/bar#fragment', hash: true)).toBe('http://example.com/foo/bar#fragment')
+        expect(up.util.normalizeURL('/foo/bar#fragment', hash: true)).toBe('/foo/bar#fragment')
 
       it 'puts a #hash behind the query string', ->
-        expect(up.util.normalizeURL('http://example.com/foo/bar?key=value#fragment', hash: true)).toBe('http://example.com/foo/bar?key=value#fragment')
+        expect(up.util.normalizeURL('/foo/bar?key=value#fragment', hash: true)).toBe('/foo/bar?key=value#fragment')
 
     describe 'up.util.find', ->
 

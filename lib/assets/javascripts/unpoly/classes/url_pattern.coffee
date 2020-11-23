@@ -14,8 +14,6 @@ class up.URLPattern
       else
         positiveList.push(pattern)
 
-    console.log({ positiveList, negativeList })
-
     @positiveRegexp = @buildRegexp(positiveList, true)
     @negativeRegexp = @buildRegexp(negativeList, false)
 
@@ -34,8 +32,6 @@ class up.URLPattern
       else
         @groups.push({ name, cast: String }) if capture
         return '([^/?#]+)'
-
-    console.log("Code for %o is %o", list, reCode)
 
     return new RegExp('^' + reCode + '$')
 

@@ -58,7 +58,7 @@ up.fragment = do ->
 
   setSource = (element, sourceURL) ->
     # This is used by UpdateLayer and OpenLayer.
-    element.setAttribute('up-source', sourceURL)
+    element.setAttribute('up-source', u.normalizeURL(sourceURL))
 
   ###**
   Returns the URL the given element was retrieved from.

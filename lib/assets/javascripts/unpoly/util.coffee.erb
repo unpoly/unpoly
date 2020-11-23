@@ -59,6 +59,13 @@ up.util = do ->
     port = port.toString()
     ((port == "" || port == "80") && protocol == 'http:') || (port == "443" && protocol == 'https:')
 
+  NORMALIZE_URL_DEFAULTS = {
+    host: 'cross-domain'
+    stripTrailingSlash: false
+    search: true
+    hash: false
+  }
+
   ###**
   Normalizes relative paths and absolute paths to a full URL
   that can be checked for equality with other normalized URLs.
@@ -66,6 +73,8 @@ up.util = do ->
   By default hashes are ignored, search queries are included.
   
   @function up.util.normalizeURL
+  @param {boolean} [options.host='cross-domain']
+    Whether to include protocol, hostname and port in the normalized URL.
   @param {boolean} [options.hash=false]
     Whether to include an `#hash` anchor in the normalized URL
   @param {boolean} [options.search=true]
@@ -74,17 +83,34 @@ up.util = do ->
     Whether to strip a trailing slash from the pathname
   @internal
   ###
-  normalizeURL = (urlOrAnchor, options = {}) ->
+  normalizeURL = (urlOrAnchor, options) ->
+    options = newOptions(options, NORMALIZE_URL_DEFAULTS)
+
     parts = parseURL(urlOrAnchor)
     normalized = ''
-    if options.host != false
+
+    if options.host == 'cross-domain'
+      options.host = isCrossDomain(parts)
+
+    if options.host
       normalized += parts.protocol + "//" + parts.hostname
-      normalized += ":#{parts.port}" unless isStandardPort(parts.protocol, parts.port)
+      # Once we drop IE11 we can just use { host }, which contains port and hostname
+      # and also handles standard ports.
+      # See https://developer.mozilla.org/en-US/docs/Web/API/URL/host
+      unless isStandardPort(parts.protocol, parts.port)
+        normalized += ":#{parts.port}"
+
     pathname = parts.pathname
-    pathname = pathname.replace(/\/$/, '') if options?.stripTrailingSlash == true
+    if options.stripTrailingSlash
+      pathname = pathname.replace(/\/$/, '')
     normalized += pathname
-    normalized += parts.search unless options.search == false
-    normalized += parts.hash if options.hash == true
+
+    if options.search
+      normalized += parts.search
+
+    if options.hash
+      normalized += parts.hash
+
     normalized
 
   urlWithoutHost = (url) ->
@@ -93,10 +119,16 @@ up.util = do ->
   matchURLs = (leftURL, rightURL) ->
     return normalizeURL(leftURL) == normalizeURL(rightURL)
 
+  # We're calling isCrossDomain() a lot.
+  # Accessing location.protocol and location.hostname every time
+  # is much slower than comparing cached strings.
+  # https://jsben.ch/kBATt
+  APP_PROTOCOL = location.protocol
+  APP_HOSTNAME = location.hostname
+
   isCrossDomain = (targetURL) ->
-    currentURL = parseURL(location.href)
     targetURL = parseURL(targetURL)
-    currentURL.protocol != targetURL.protocol || currentURL.hostname != targetURL.hostname
+    return APP_HOSTNAME != targetURL.hostname || APP_PROTOCOL != targetURL.protocol
 
   ###**
   Parses the given URL into components such as hostname and path.

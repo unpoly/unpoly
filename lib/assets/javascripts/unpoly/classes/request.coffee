@@ -206,8 +206,6 @@ class up.Request extends up.Record
       @origin = undefined
 
   extractHashFromURL: ->
-    # Don't use u.parseURL() / u.normalizeURL() since that will add a hostname
-    # and clutter up logs.
     if match = @url.match(/^(.+)(#.+)$/)
       @url = match[1]
       # Remember the #hash for later revealing.
