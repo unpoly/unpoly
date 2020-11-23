@@ -49,6 +49,10 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/:one/$two/baz')
       expect(pattern.recognize('/foo/bar/123/baz')).toEqual { one: 'bar', two: 123 }
 
+    it 'does not match a slash character into a named group', ->
+      pattern = new up.URLPattern('/foo/:one')
+      expect(pattern.recognize('/foo/123/456')).toBeMissing()
+
     it 'returns an object if two space-separated URLs have the same named string segment', ->
       pattern = new up.URLPattern('/foo/:one /bar/:one')
       expect(pattern.recognize('/foo/bar')).toEqual { one: 'bar' }
@@ -60,3 +64,20 @@ describe 'up.URLPattern', ->
     it 'matches query params', ->
       pattern = new up.URLPattern('/search?query=:query&page=$page')
       expect(pattern.recognize('/search?query=hello&page=3')).toEqual { query: 'hello', page: 3 }
+
+    it 'allows to exclude patterns with a minus-prefixed pattern', ->
+      pattern = new up.URLPattern('/foo/:one -/foo/bar')
+      expect(pattern.recognize('/foo/bar')).toBeMissing()
+
+    it 'still matches when a exclude pattern does not match', ->
+      pattern = new up.URLPattern('/foo/:one -/foo/bar')
+      expect(pattern.recognize('/foo/baz')).toEqual { one: 'baz' }
+
+    it 'allows to exclude multiple patterns', ->
+      pattern = new up.URLPattern('/foo/:one -/foo/bar -/foo/baz')
+      expect(pattern.recognize('/foo/baz')).toBeMissing()
+
+    it 'does not override named segments when a blacklisted pattern has a segment with the same name', ->
+      pattern = new up.URLPattern('/foo/:one -/bar/:one')
+      expect(pattern.recognize('/foo/1234')).toEqual { one: '1234' }
+

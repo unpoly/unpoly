@@ -9,10 +9,6 @@ TODOs
 
 - Support [up-source] as an alternative to the upSource prop, to manually define reload
     - Also document in [up-poll]
-- URL Pattern: Exclude with -
-    upAcceptLication: '/users/:id -/users/new'
-- URL Pattern: should :id, $id match /?
-
 
 - Release as 1.0.0 or 2.0.0
 - Grep for TODO
@@ -220,7 +216,12 @@ Tests
 Docs
 ----
 
-- Document URL placeholder ($id vs. :id)
+- Document URL placeholder
+  - *
+  - :foo
+  - $foo
+  - minus-prefixed exclude patterns
+
 - Document up.AbortController
 - Document { cache: 'clear' }
 - Document X-Up-Cache: clear
