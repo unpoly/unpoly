@@ -450,6 +450,32 @@ describe 'up.fragment', ->
               expect(up.emit).toHaveBeenCalledWith(event1)
               expect(up.emit).toHaveBeenCalledWith(event2)
 
+        describe 'when the server sends an X-Up-Accept-Layer header', ->
+
+          it 'accepts the layer', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+            next =>
+              expect(callback).not.toHaveBeenCalled()
+
+              @respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+
+          it 'does not require the server to render content when the overlay will close anyway', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+            next =>
+              expect(callback).not.toHaveBeenCalled()
+
+              @respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+            next ->
+              expect(callback).toHaveBeenCalled()
+
       describe 'with { content } option', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->

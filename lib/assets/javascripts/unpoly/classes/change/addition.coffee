@@ -69,7 +69,8 @@ class up.Change.Addition extends up.Change
       source = oldElement && up.fragment.source(oldElement)
 
     # Don't set a source if { false } is passed.
+    # Don't set a source if someone tries to 'keep' when opening a new layer
     # Don't set a source if the element HTML already has an [up-source] attribute.
     if source && !newElement.getAttribute('up-source')
-      # Remember where the element came from in case someone needs to up.reload(newElement) later.
+      # Remember where the element came from in case someone needs to up.reload(element) later.
       up.fragment.setSource(newElement, source)

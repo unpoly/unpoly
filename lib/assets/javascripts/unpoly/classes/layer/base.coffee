@@ -77,7 +77,7 @@ class up.Layer extends up.Record
   @stable
   ###
 
-  ###*
+  ###**
   Whether fragment updates within this layer will affect [browser history](/up.history).
 
   If a layer does not affect history, its desendant layers cannot affect history either.

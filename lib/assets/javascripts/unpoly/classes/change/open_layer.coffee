@@ -79,7 +79,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # - Update the location to a URL for which { acceptLocation } or { dismissLocation }
     #   will close the layer.
     #
-    # Note that @handleLayerChangeRequests() also calls @abortWhenLayerClosed()
+    # Note that @handleLayerChangeRequests() also calls throws an up.error.aborted
     # if any of these options cause the layer to close.
     @handleLayerChangeRequests()
 

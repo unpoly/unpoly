@@ -59,7 +59,7 @@ class up.MotionController
         @markCluster(cluster, promise)
         return promise
 
-  ###*
+  ###**
   Finishes all animations in the given elements' ancestors and
   descendants, then calls `motion.start()`.
 

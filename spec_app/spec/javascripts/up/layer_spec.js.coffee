@@ -513,6 +513,19 @@ describe 'up.layer', ->
             next ->
               expect(callback).not.toHaveBeenCalled()
 
+          it 'sets up.layer.current to the layer that opened the overlay', asyncSpec (next) ->
+            rootLayer = up.layer.root
+            currentLayerSpy = jasmine.createSpy('current layer spy')
+
+            up.layer.open({ onAccepted: -> currentLayerSpy(up.layer.current) })
+
+            next ->
+              expect(up.layer.current.mode).toEqual('modal')
+              up.layer.accept()
+
+            next ->
+              expect(currentLayerSpy).toHaveBeenCalledWith(rootLayer)
+
         describe '{ onDismissed }', ->
 
           it 'runs the given callback when they layer is dimissed', asyncSpec (next) ->
@@ -541,6 +554,19 @@ describe 'up.layer', ->
 
             next ->
               expect(callback).not.toHaveBeenCalled()
+
+          it 'sets up.layer.current to the layer that opened the overlay', asyncSpec (next) ->
+            rootLayer = up.layer.root
+            currentLayerSpy = jasmine.createSpy('current layer spy')
+
+            up.layer.open({ onDismissed: -> currentLayerSpy(up.layer.current) })
+
+            next ->
+              expect(up.layer.current.mode).toEqual('modal')
+              up.layer.dismiss()
+
+            next ->
+              expect(currentLayerSpy).toHaveBeenCalledWith(rootLayer)
 
         describe '{ acceptEvent }', ->
 

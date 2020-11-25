@@ -178,7 +178,7 @@ up.protocol = do ->
   @stable
   ###
 
-  ###*
+  ###**
   The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
 
   \#\#\# Example
@@ -394,7 +394,7 @@ up.protocol = do ->
     # X-Up-Accept-Layer: null
     extractHeader(xhr, 'acceptLayer', JSON.parse)
 
-  ###*
+  ###**
   The server may set this response header to [accept](/up.layer.accept) the targeted overlay
   in response to a fragment update.
 
@@ -429,7 +429,7 @@ up.protocol = do ->
     # X-Up-Dismiss-Layer: null
     extractHeader(xhr, 'dismissLayer', JSON.parse)
 
-  ###*
+  ###**
   The server may set this response header to [dismiss](/up.layer.dismiss) the targeted overlay
   in response to a fragment update.
 
