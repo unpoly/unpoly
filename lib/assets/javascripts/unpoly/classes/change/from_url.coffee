@@ -30,13 +30,18 @@ class up.Change.FromURL extends up.Change
       return u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
 
   makeRequest: ->
-    successPreview = new up.Change.FromContent(u.merge(@successOptions, preview: true))
-    failPreview = new up.Change.FromContent(u.merge(@failOptions, preview: true))
+    successAttrs = @preflightPropsForRenderOptions(@successOptions)
+    failAttrs = @preflightPropsForRenderOptions(@failOptions, { optional: true })
+
+    # Remember the layer for which we send the context object.
+    # If the server responds with a new context object, we only want to use this object
+    # if we're updating the same layer for which we sent the request.
+    @contextLayer = successAttrs.contextLayer
 
     requestAttrs = u.merge(
-      @successOptions,
-      successPreview.requestAttributes(),
-      u.renameKeys(failPreview.requestAttributes(optional: true), up.fragment.failKey)
+      @successOptions, # contains preflight keys relevant for the request, e.g. { url, method, solo }
+      successAttrs,    # contains meta information for an successful update, e.g. { layer, mode, context, target }
+      u.renameKeys(failAttrs, up.fragment.failKey) # contains meta information for a failed update, e.g. { failTarget }
     )
 
     @request = up.request(requestAttrs)
@@ -45,6 +50,13 @@ class up.Change.FromURL extends up.Change
     @options.onQueued?({ @request })
 
     return @request
+
+  preflightPropsForRenderOptions: (renderOptions, requestAttributesOptions) ->
+    preview = new up.Change.FromContent(u.merge(renderOptions, preview: true))
+    # #preflightProps() will return meta information about the change that is most
+    # likely before the request was dispatched.
+    # This might change postflight if the response does not contain the desired target.
+    return preview.preflightProps(requestAttributesOptions)
 
   onRequestSettled: (@response) ->
     # Wrap @response in Promise.reject() so it always causes our return value to reject.
@@ -68,9 +80,6 @@ class up.Change.FromURL extends up.Change
       return u.always(contentUpdated, rejectWithFailedResponse)
 
   responseIssue: ->
-    unless @response.text
-      return ['Response to %s is empty', @request.description]
-
     contentType = @response.contentType
     unless /\bx?html\b/.test(contentType)
       return ["Response to %s is not HTML (Content-Type %s)", @request.description, @response.contentType]
@@ -96,14 +105,12 @@ class up.Change.FromURL extends up.Change
       return new up.Change.FromContent(renderOptions).execute()
 
   augmentOptionsFromResponse: (renderOptions) ->
-    renderOptions.document = @response.text
-
     responseURL = @response.url
-    locationFromExchange = responseURL
+    serverLocation = responseURL
 
     if hash = @request.hash
       renderOptions.hash = hash
-      locationFromExchange += hash
+      serverLocation += hash
 
     isReloadable = (@response.method == 'GET')
 
@@ -117,13 +124,26 @@ class up.Change.FromURL extends up.Change
       # we can only provide history if a location URL is passed as an option.
       renderOptions.history = !!renderOptions.location
 
-    renderOptions.location = @improveHistoryValue(renderOptions.location, locationFromExchange)
+    renderOptions.location = @improveHistoryValue(renderOptions.location, serverLocation)
     renderOptions.title = @improveHistoryValue(renderOptions.title, @response.title)
+    renderOptions.eventPlans = @response.eventPlans
+
+    if serverTarget = @response.target
+      renderOptions.target = serverTarget
+
+    renderOptions.document = @response.text
+
     renderOptions.acceptLayer = @response.acceptLayer
     renderOptions.dismissLayer = @response.dismissLayer
-    renderOptions.eventPlans = @response.eventPlans
+
+    # Don't require a target match if the server wants to close the overlay and doesn't send content.
+    if !renderOptions.document && (u.isDefined(renderOptions.acceptLayer) || u.isDefined(renderOptions.dismissLayer))
+      renderOptions.target = ':none'
 
     # Only if the @response contains a new context object (set by the server)
     # we will override the context from options.
     if context = @response.context
       renderOptions.context = context
+      # If the server responds with a new context object, we only want to use this object
+      # if we're updating the same layer for which we sent the request.
+      renderOptions.contextLayer = @contextLayer

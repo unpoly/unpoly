@@ -13,26 +13,35 @@ class up.Change.OpenLayer extends up.Change.Addition
     @source = options.source
     @focus = options.focus
 
-  requestAttributes: ->
+  preflightProps: ->
+    # We assume that the server will respond with our target.
+    # Hence this change will always be applicable.
+
     return {
-      # We associate this request to our current layer. This way other { solo }
-      # navigations on { currentLayer } will cancel this request to open a new layer.
+      # We associate this request to our current layer so up:request events
+      # may be emitted on something more specific than the document.
       layer: @currentLayer
       mode: @mode,
       context: @options.context
+      # Always accept a server-provided context object.
+      contextLayer: null
       # The target will always exist in the current page, since
       # we're opening a new layer that will match the target.
       target: @target
     }
 
   bestPreflightSelector: ->
+    # We assume that the server will respond with our target.
     return @target
 
   toString: ->
     "Open \"#{@target}\" in new layer"
 
   execute: (responseDoc) ->
-    @content = responseDoc.select(@target)
+    if @target == ':none'
+      @content = document.createElement('up-none')
+    else
+      @content = responseDoc.select(@target)
 
     if !@content || @currentLayer.isClosed()
       throw @notApplicable()

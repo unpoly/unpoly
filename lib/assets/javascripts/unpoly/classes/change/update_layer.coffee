@@ -13,13 +13,16 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @placement = options.placement
     @parseSteps()
 
-  requestAttributes: ->
+  preflightProps: ->
+    # This will throw up.error.notApplicable() if { target } cannot
+    # be found in { layer }.
     @matchPreflight()
 
     return {
       layer: @layer
       mode: @layer.mode
       context: @layer.context
+      contextLayer: @layer
       target: @bestPreflightSelector(),
     }
 
@@ -53,7 +56,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     # If either the server or the up.render() caller has provided a new
     # { context } object, we set the layer's context to that object.
-    @layer.updateContext(u.pick(@options, ['context']))
+    @layer.updateContext(@options)
 
     # Change history before compilation, so new fragments see the new location.
     @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen

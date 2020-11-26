@@ -16,11 +16,6 @@ TODOs
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
 
-- Should X-Up-Context from the response get processed for the fail-case?
-  - The fail case might hit another layer
-  - Updating both is not great either, since we're transmitting the whole object?
-  => Get rid of server-side X-Up-Context manipulation
-  => Get rid of up.render({ context }) which replaces the entire context object
 
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
@@ -116,6 +111,7 @@ Manual tests
 Tests
 -----
 
+- Test that if the server responds with a new context object, we only want to use this object if we're updating the same layer for which we originally sent the request.
 - Test that requests don't normalize their { url }, which would clog logs
 - Test { scroll: "auto" }
   - hash

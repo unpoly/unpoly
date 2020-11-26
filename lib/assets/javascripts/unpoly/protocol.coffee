@@ -79,6 +79,30 @@ up.protocol = do ->
   X-Up-Fail-Target: body
   ```
 
+  \#\#\# Changing the render target from the server
+
+  The server may change the render target context by including a CSS selector as an `X-Up-Target` header
+  in its response.
+
+  ```http
+  Content-Type: text/html
+  X-Up-Target: .selector-from-server
+
+  <div class="selector-from-server">
+    ...
+  </div>
+  ```
+
+  The frontend will use the server-provided target for both successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
+
+  The server may also set a target of `:none` to have the frontend render nothing.
+  In this case no response body is required:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Target: :none
+  ```
+
   @header X-Up-Target
   @stable
   ###
@@ -405,8 +429,6 @@ up.protocol = do ->
   The header value is the acceptance value serialized as a JSON object.
   To accept an overlay without value, set the header value to `null`.
 
-  The response must also contain `text/html` content.
-
   \#\#\# Example
 
   The response below will accept the targeted overlay with the value `{user_id: 1012 }`:
@@ -418,6 +440,21 @@ up.protocol = do ->
   <html>
     ...
   </html>
+  ```
+
+  \#\#\# Rendering content
+
+  The response may contain `text/html` content. If the root layer is targeted,
+  the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
+  the response's HTML content.
+
+  If you know that an overlay will be closed don't want to render HTML,
+  have the server change the render target to `:none`:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Accept-Layer: {"user_id": 1012}
+  X-Up-Target: :none
   ```
 
   @header X-Up-Accept-Layer
@@ -440,19 +477,34 @@ up.protocol = do ->
   The header value is the dismissal value serialized as a JSON object.
   To accept an overlay without value, set the header value to `null`.
 
-  The response must also contain `text/html` content.
-
   \#\#\# Example
 
   The response below will dismiss the targeted overlay without a dismissal value:
 
   ```http
+  HTTP/1.1 200 OK
   Content-Type: text/html
   X-Up-Dismiss-Layer: null
 
   <html>
     ...
   </html>
+  ```
+
+  \#\#\# Rendering content
+
+  The response may contain `text/html` content. If the root layer is targeted,
+  the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
+  the response's HTML content.
+
+  If you know that an overlay will be closed don't want to render HTML,
+  have the server change the render target to `:none`:
+
+  ```http
+  HTTP/1.1 200 OK
+  Content-Type: text/html
+  X-Up-Accept-Layer: {"user_id": 1012}
+  X-Up-Target: :none
   ```
 
   @header X-Up-Dismiss-Layer
@@ -529,6 +581,13 @@ up.protocol = do ->
   ###
   titleFromXHR = (xhr) ->
     extractHeader(xhr, 'title')
+
+  ###**
+  @function up.protocol.targetFromXHR
+  @internal
+  ###
+  targetFromXHR = (xhr) ->
+    extractHeader(xhr, 'target')
 
   # Remove the method cookie as soon as possible.
   # Don't wait until the first call to initialRequestMethod(),
@@ -620,6 +679,7 @@ up.protocol = do ->
   reset: reset
   locationFromXHR: locationFromXHR
   titleFromXHR: titleFromXHR
+  targetFromXHR: targetFromXHR
   methodFromXHR: methodFromXHR
   acceptLayerFromXHR: acceptLayerFromXHR
   contextFromXHR: contextFromXHR

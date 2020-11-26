@@ -1,3 +1,4 @@
+
 unpoly-rails: Ruby on Rails bindings for Unpoly
 ===============================================
 
@@ -40,6 +41,51 @@ Use these methods to inspect the target for failed responses:
 - `up.fail_target?(selector)`: Whether the given selector is targeted for a failed response
 - `up.any_target?(selector)`: Whether the given selector is targeted for either a successful or a failed response
 
+### Changing the render target
+
+The server may instruct the frontend to render a different target by assigning a new CSS selector to the `up.target` property:
+
+```ruby
+unless signed_in?
+  up.target = 'body'
+  render 'sign_in'
+end
+```
+
+The frontend will use the server-provided target for both successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
+
+
+### Rendering nothing
+
+Sometimes it's OK to render nothing, e.g. when you know that the current layer is to be closed.
+
+In this case you may call `up.render_nothing`:
+
+```ruby
+class NotesController < ApplicationController
+  def create
+    @note = Note.new(note_params)
+    if @note.save
+      if up.layer.overlay?
+        up.accept_layer(@note.id)
+        up.render_nothing
+      else
+        redirect_to @note
+      end
+    end
+  end
+end
+```
+
+This will render a 200 OK response with a header `X-Up-Target: none` and an empty body.
+
+You may render nothing with a different HTTP status by passing a `:status` option:
+
+```
+up.render_nothing(status: :bad_request)
+```
+
+
 ### Pushing a document title to the client
 
 To force Unpoly to set a document title when processing the response:
@@ -49,7 +95,6 @@ up.title = 'Title from server'
 ```
 
 This is useful when you skip rendering the `<head>` in an Unpoly request.
-
 
 ### Emitting events on the frontend
 
@@ -113,23 +158,67 @@ end
 
 ### Accessing the targeted layer
 
-Use the methods below to interact with the [layer](/up.layer) of the fragment being targeted:
+Use the methods below to interact with the [layer](/up.layer) of the fragment being targeted.
 
-- `up.layer.mode`: Returns the [mode](https://unpoly.com/up.layer.mode) of the targeted layer (e.g. `"root"` or `"modal"`).
-- `up.layer.root?`: Returns whether the targeted layer is the root layer.
-- `up.layer.overlay?`: Returns whether the targeted layer is an overlay (not the root layer).
-- `up.layer.context`: Returns the [context](https://unpoly.com/up.layer.context) hash of the targeted layer. Keys can be accessed as either strings or symbols. Returns an empty hash if the targeted layer has no given context.
-- `up.layer.accept(value)`: [Accepts](https://unpoly.com/up.layer.accept) the current overlay. Does nothing if the root layer is targeted. Your action must still respond with `text/html` content.
-- `up.layer.dismiss(value)`: [Dismisses](https://unpoly.com/up.layer.dismisses) the current overlay. Does nothing if the root layer is targeted. Your action must still respond with `text/html` content.
-- `up.layer.emit(type, options)`: [Emits an event](https://unpoly.com/up.layer.emit) on the targeted layer.
+Note that fragment updates may target different layers for successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
 
-Fragment updates may target different layers for successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
-Use these methods to inspect the layer target for failed responses:
+#### `up.layer.mode`
 
-- `up.fail_layer.mode`: Returns the [mode](https://unpoly.com/up.layer.mode) of the layer targeted for a failed response.
-- `up.fail_layer.root?`: Returns whether the layer targeted for a failed response is the root layer.
-- `up.fail_layer.overlay?`: Returns whether the layer targeted for a failed response is an overlay.
-- `up.fail_layer.context`: Returns the [context](https://unpoly.com/up.layer.context) hash of the layer targeted for a failed response.
+Returns the [mode](https://unpoly.com/up.layer.mode) of the targeted layer (e.g. `"root"` or `"modal"`).
+
+#### `up.layer.root?`
+
+Returns whether the targeted layer is the root layer.
+
+#### `up.layer.overlay?`
+
+Returns whether the targeted layer is an overlay (not the root layer).
+
+#### `up.layer.context`
+
+Returns the [context](https://unpoly.com/up.layer.context) hash of the targeted layer.
+
+Keys can be accessed as either strings or symbols.
+
+Returns an empty hash if the targeted layer has no given context.
+
+#### `up.layer.accept(value)`
+
+[Accepts](https://unpoly.com/up.layer.accept) the current overlay.
+
+Does nothing if the root layer is targeted.
+
+Note that Rails expects every controller action to render or redirect.
+Your action should either call `up.render_nothing` or respond with `text/html` content matching the requested target.
+
+#### `up.layer.dismiss(value)`
+
+[Dismisses](https://unpoly.com/up.layer.dismisses) the current overlay.
+
+Does nothing if the root layer is targeted.
+
+Note that Rails expects every controller action to render or redirect.
+Your action should either call `up.render_nothing` or respond with `text/html` content matching the requested target.
+
+#### `up.layer.emit(type, options)`
+
+[Emits an event](https://unpoly.com/up.layer.emit) on the targeted layer.
+
+#### `up.fail_layer.mode`
+
+Returns the [mode](https://unpoly.com/up.layer.mode) of the layer targeted for a failed response.
+
+#### `up.fail_layer.root?`
+
+Returns whether the layer targeted for a failed response is the root layer.
+
+#### `up.fail_layer.overlay?`
+
+Returns whether the layer targeted for a failed response is an overlay.
+
+#### `up.fail_layer.context`
+
+Returns the [context](https://unpoly.com/up.layer.context) hash of the layer targeted for a failed response.
 
 
 ### Preserving Unpoly-related request information through redirects

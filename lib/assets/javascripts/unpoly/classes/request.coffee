@@ -326,6 +326,7 @@ class up.Request extends up.Record
       text: @xhr.responseText
       status: @xhr.status
       title: up.protocol.titleFromXHR(@xhr)
+      target: up.protocol.targetFromXHR(@xhr)
       acceptLayer: up.protocol.acceptLayerFromXHR(@xhr)
       dismissLayer: up.protocol.dismissLayerFromXHR(@xhr)
       eventPlans: up.protocol.eventPlansFromXHR(@xhr)

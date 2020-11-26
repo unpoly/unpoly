@@ -14,7 +14,9 @@ describe Unpoly::Rails::Controller, type: :request do
       rescue RuntimeError => e
         self.eval_error = e
       end
-      render nothing: true
+      unless performed?
+        render nothing: true
+      end
     end
 
     attr_accessor :eval_result, :eval_error
@@ -151,6 +153,100 @@ describe Unpoly::Rails::Controller, type: :request do
     it_behaves_like 'string field',
       header: 'X-Up-Target',
       reader: -> { up.target }
+
+  end
+
+  describe 'up.target=' do
+
+    it 'sends the given target as an X-Up-Target response header' do
+      controller_eval(headers: { 'X-Up-Target': '.client' }) do
+        up.target = '.server'
+      end
+
+      expect(response.headers['X-Up-Target']).to eq('.server')
+    end
+
+    it "sends no X-Up-Target header if the target wasn't changed (the client might have something more generic like :main)" do
+      controller_eval(headers: { 'X-Up-Target': '.client' }) do
+      end
+
+      expect(response.headers['X-Up-Target']).to be_blank
+    end
+
+    it 'sends no X-Up-Target header if the target was set to the existing value from the request' do
+      controller_eval(headers: { 'X-Up-Target': '.client' }) do
+        up.target = '.client'
+      end
+
+      expect(response.headers['X-Up-Target']).to be_blank
+    end
+
+    it 'returns the given target in subsequent calls to up.target' do
+      result = controller_eval(headers: { 'X-Up-Target': '.client' }) do
+        up.target = '.server'
+        up.target
+      end
+
+      expect(result).to eq('.server')
+    end
+
+    it 'returns the given target in subsequent calls to up.fail_target' do
+      result = controller_eval(headers: { 'X-Up-Target': '.client' }) do
+        up.target = '.server'
+        up.fail_target
+      end
+
+      expect(result).to eq('.server')
+    end
+
+  end
+
+  describe 'up.render_nothing' do
+
+    it 'renders an empty response' do
+      controller_eval do
+        up.render_nothing
+      end
+
+      expect(response.body).to be_blank
+    end
+
+    it 'sets an X-Up-Target: :none header to prevent matching errors on the client' do
+      controller_eval do
+        up.render_nothing
+      end
+
+      expect(response.headers['X-Up-Target']).to eq(':none')
+    end
+
+    it 'responds with a 200 OK status' do
+      controller_eval do
+        up.render_nothing
+      end
+
+      expect(response.status).to eq(200)
+    end
+
+    it 'allows to pass a different status code with :status option' do
+      controller_eval do
+        up.render_nothing(status: :bad_request)
+      end
+
+      expect(response.status).to eq(400)
+    end
+
+  end
+
+  describe 'up.fail_target=' do
+
+    it 'is not defined, as the target provided through up.target=() is used for all render cases' do
+      expect do
+        controller_eval(headers: { 'X-Up-Target': '.client' }) do
+          up.fail_target = '.server'
+        end
+      end.to raise_error(NoMethodError)
+
+    end
 
   end
 

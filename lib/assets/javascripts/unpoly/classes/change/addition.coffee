@@ -45,16 +45,14 @@ class up.Change.Addition extends up.Change
         @abortWhenLayerClosed()
 
   tryAcceptLayerFromServer: ->
-    if u.isDefined(@acceptLayer)
-      # Even if acceptance has no value, the server will send
-      # X-Up-Accept-Layer: null
+    # When accepting without a value, the server will send X-Up-Accept-Layer: null
+    if u.isDefined(@acceptLayer) && @layer.isOverlay()
       @layer.accept(@acceptLayer)
 
   tryDismissLayerFromServer: ->
-    if u.isDefined(@dismissLayer)
-      # Even if acceptance has no value, the server will send
-      # X-Up-Accept-Layer: null
-      @layer.accept(@dismissLayer)
+    # When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
+    if u.isDefined(@dismissLayer) && @layer.isOverlay()
+      @layer.dismiss(@dismissLayer)
 
   abortWhenLayerClosed: ->
     if @layer.isClosed()

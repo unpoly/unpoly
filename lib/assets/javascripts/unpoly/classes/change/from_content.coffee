@@ -73,14 +73,16 @@ class up.Change.FromContent extends up.Change
 
     return @responseDoc
 
+  # When the user provided a { content } we need an actual CSS selector for
+  # which up.ResponseDoc can create a matching element.
   firstExpandedTarget: (target) ->
     return @expandTargets(target || ':main', @layers[0])[0]
 
   # Returns information about the change that is most likely before the request was dispatched.
   # This might change postflight if the response does not contain the desired target.
-  requestAttributes: (opts = {}) ->
-    planRequestAttributes = (plan) -> plan.requestAttributes()
-    @seekPlan(planRequestAttributes) or opts.optional or @preflightTargetNotApplicable()
+  preflightProps: (opts = {}) ->
+    getPlanProps = (plan) -> plan.preflightProps()
+    @seekPlan(getPlanProps) or opts.optional or @preflightTargetNotApplicable()
 
   preflightTargetNotApplicable: ->
     if @hasPlans()
@@ -109,6 +111,8 @@ class up.Change.FromContent extends up.Change
   seekPlan: (fn) ->
     for plan in @getPlans()
       try
+        # A return statement stops iteration of a vanilla for loop,
+        # but would not stop an u.each() or Array#forEach().
         return fn(plan)
       catch error
         # Re-throw any unexpected type of error

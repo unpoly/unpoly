@@ -82,12 +82,22 @@ class up.Response extends up.Record
   ###
 
   ###**
-  A [document title pushed by the server](/up.protocol#pushing-a-document-title-to-the-client).
+  A [document title pushed by the server](/X-Up-Title).
 
   If the server pushed no title via HTTP header, this will be `undefined`.
 
   @property up.Response#title
   @param {string} [title]
+  @experimental
+  ###
+
+  ###**
+  A [render target pushed by the server](/X-Up-Target).
+
+  If the server pushed no title via HTTP header, this will be `undefined`.
+
+  @property up.Response#target
+  @param {string} [target]
   @experimental
   ###
   keys: ->
@@ -98,11 +108,12 @@ class up.Response extends up.Record
       'status',
       'request',
       'xhr', # optional
+      'target',
       'title',
-      'acceptLayer'
-      'dismissLayer'
-      'eventPlans'
-      'context'
+      'acceptLayer',
+      'dismissLayer',
+      'eventPlans',
+      'context',
       'headers' # custom headers to for synthetic reponses without { xhr } property
     ]
 

@@ -25,6 +25,8 @@ window.makeLayers = (stackPlans) ->
 
   promise = Promise.resolve()
   stackPlans.forEach (stackPlan) ->
+    # up.navigate() will either update the root layer with the given props
+    # or open a new layer with the given props.
     promise = promise.then -> up.navigate(stackPlan)
 
   return promise

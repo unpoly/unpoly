@@ -55,8 +55,16 @@ module Unpoly
       #
       # Server-side code is free to optimize its successful response by only returning HTML
       # that matches this selector.
-      memoize def target
-        target_from_request
+      def target
+        @server_target || target_from_request
+      end
+
+      def target=(new_target)
+        @server_target = new_target
+      end
+
+      def target_changed?
+        target != target_from_request
       end
 
       ##
@@ -73,6 +81,12 @@ module Unpoly
         test_target(target, tested_target)
       end
 
+      def render_nothing(options = {})
+        status = options.fetch(:status, :ok)
+        self.target = ':none'
+        controller.head(status)
+      end
+
       ##
       # Returns the CSS selector for a fragment that Unpoly will update in
       # case of an failed response. Server errors or validation failures are
@@ -85,7 +99,7 @@ module Unpoly
       # that matches this selector.
       #
       memoize def fail_target
-        fail_target_from_request
+        @server_target || fail_target_from_request
       end
 
       ##
@@ -203,10 +217,9 @@ module Unpoly
 
       def after_action
         write_events_to_response_headers
-        if context_changed?
-          write_context_to_response_headers
-        end
         write_cache_command_to_response_headers
+        write_context_to_response_headers if context_changed?
+        write_target_to_response_headers if target_changed?
       end
 
       def url_with_field_values(url)

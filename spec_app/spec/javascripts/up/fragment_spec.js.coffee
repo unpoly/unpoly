@@ -152,7 +152,7 @@ describe 'up.fragment', ->
 
       describe 'with { url } option', ->
 
-        it 'replaces the given selector with the same selector from a freshly fetched page xxx', asyncSpec (next) ->
+        it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
           fixture('.before', text: 'old-before')
           fixture('.middle', text: 'old-middle')
           fixture('.after', text: 'old-after')
@@ -236,27 +236,6 @@ describe 'up.fragment', ->
             next =>
               expect('.success-target').toHaveText('old success text')
               expect('.failure-target').toHaveText('new failure text')
-
-          it 'emits up:fragment:unusable and does not update a fragment if the response contains no text', asyncSpec (next) ->
-            insertedListener = jasmine.createSpy('up:fragment:inserted listener')
-            up.on('up:fragment:inserted', insertedListener)
-            loadedListener = jasmine.createSpy('up:fragment:loaded listener')
-            up.on('up:fragment:loaded', loadedListener)
-            unusableListener = jasmine.createSpy('up:fragment:unusable listener')
-            up.on('up:fragment:unusable', unusableListener)
-
-            fixture('.success-target', text: 'old success text')
-            fixture('.failure-target', text: 'old failure text')
-
-            up.render('.success-target', url: '/path', failTarget: '.failure-target')
-
-            next =>
-              @respondWith(responseText: '')
-
-            next =>
-              expect(insertedListener).not.toHaveBeenCalled()
-              expect(loadedListener).not.toHaveBeenCalled()
-              expect(unusableListener).toHaveBeenCalled()
 
           it 'emits up:fragment:unusable and does not update a fragment if the response has no HTML content-type', asyncSpec (next) ->
             insertedListener = jasmine.createSpy('up:fragment:inserted listener')
@@ -452,29 +431,137 @@ describe 'up.fragment', ->
 
         describe 'when the server sends an X-Up-Accept-Layer header', ->
 
-          it 'accepts the layer', asyncSpec (next) ->
-            callback = jasmine.createSpy('onAccepted callback')
-            up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+          describe 'when updating an overlay', ->
+
+            it 'accepts the layer with the header value', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+              next =>
+                @respondWithSelector('.target')
+
+              next =>
+                up.render({ url: '/path2', target: '.target'})
+
+              next =>
+                expect(callback).not.toHaveBeenCalled()
+
+                @respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "123" })
+
+              next ->
+                expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 123))
+
+            it 'does not require the server to render content when the overlay will close anyway (when updating a layer)', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+
+              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+              next =>
+                @respondWithSelector('.target')
+
+              next =>
+                up.render({ url: '/path2', target: '.target' })
+
+              next =>
+                expect(callback).not.toHaveBeenCalled()
+
+                @respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+              next ->
+                expect(callback).toHaveBeenCalled()
+
+          describe 'when updating the root layer', ->
+
+            it 'ignores the header and updates the root layer with the response body', asyncSpec (next) ->
+              element = fixture('.element', text: 'old content')
+              acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+              up.on('up:layer:accepted', acceptedListener)
+
+              up.render({ url: '/path', target: '.element'})
+
+              next =>
+                @respondWithSelector('.element', text: 'new content', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+              next =>
+                expect('.element').toHaveText('new content')
+                expect(acceptedListener).not.toHaveBeenCalled()
+
+          describe 'when opening a layer', ->
+
+            it 'accepts the layer that is about to open', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+              next =>
+                expect(callback).not.toHaveBeenCalled()
+
+                @respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+              next ->
+                expect(callback).toHaveBeenCalled()
+
+            it 'does not require the server to render content when the overlay will close anyway', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+              next =>
+                expect(callback).not.toHaveBeenCalled()
+
+                @respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+              next ->
+                expect(callback).toHaveBeenCalled()
+
+
+        describe 'when the server sends an X-Up-Dismiss-Layer header', ->
+
+          it 'dismisses the targeted overlay with the header value', asyncSpec (next) ->
+            callback = jasmine.createSpy('onDismissed callback')
+            up.layer.open({ onDismissed: callback, url: '/path', target: '.target' })
+
+            next =>
+              @respondWithSelector('.target')
+
+            next =>
+              up.render({ url: '/path2', target: '.target'})
 
             next =>
               expect(callback).not.toHaveBeenCalled()
 
-              @respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+              @respondWithSelector('.target', responseHeaders: { 'X-Up-Dismiss-Layer': "123" })
 
             next ->
-              expect(callback).toHaveBeenCalled()
+              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 123))
 
-          it 'does not require the server to render content when the overlay will close anyway', asyncSpec (next) ->
-            callback = jasmine.createSpy('onAccepted callback')
-            up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+        describe 'when the server sends an X-Up-Target header', ->
+
+          it 'renders the server-provided target', asyncSpec (next) ->
+            fixture('.one', text: 'old content')
+            fixture('.two', text: 'old content')
+
+            up.render(target: '.one', url: '/path')
 
             next =>
-              expect(callback).not.toHaveBeenCalled()
-
-              @respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+              @respondWithSelector('.two', text: 'new content', responseHeaders: { 'X-Up-Target': '.two' })
 
             next ->
-              expect(callback).toHaveBeenCalled()
+              expect('.one').toHaveText('old content')
+              expect('.two').toHaveText('new content')
+
+          it 'renders the server-provided target for a failed update', asyncSpec (next) ->
+            fixture('.one', text: 'old content')
+            fixture('.two', text: 'old content')
+            fixture('.three', text: 'old content')
+
+            up.render(target: '.one', failTarget: '.two', url: '/path')
+
+            next =>
+              @respondWithSelector('.three', text: 'new content', responseHeaders: { 'X-Up-Target': '.three' }, status: 500)
+
+            next ->
+              expect('.one').toHaveText('old content')
+              expect('.two').toHaveText('old content')
+              expect('.three').toHaveText('new content')
 
       describe 'with { content } option', ->
 
@@ -1733,6 +1820,49 @@ describe 'up.fragment', ->
           next ->
             expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
             expect(up.layer.get(1).context).toEqual({ newKey: 'newValue' })
+
+        it 'lets the server change the context for a new layer', asyncSpec (next) ->
+          up.layer.open({ url: '/path', target: '.target' })
+
+          next =>
+            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+
+          next =>
+            expect(up.layer.stack.length).toBe(2)
+
+            expect(up.layer.front.context).toEqual({ newKey: 'newValue' })
+
+        it "ignores an X-Up-Context response header if we're not updating the layer for which we sent X-Up-Context in the request", asyncSpec (next) ->
+          up.layer.config.root.mainTargets = ['.root-main']
+          up.layer.config.overlay.mainTargets = ['.overlay-main']
+
+          makeLayers [
+            { target: '.root-main', content: 'root text', context: { rootKey: 'rootValue' }},
+            { target: '.overlay-main', content: 'overlay text', context: { overlayKey: 'overlayValue' }}
+          ]
+
+          next =>
+            up.render(target: ':main', layer: 'any', url: '/path')
+
+          next =>
+            expect(@lastRequest().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
+
+          next =>
+            @respondWithSelector('.root-main', text: 'server text', responseHeaders: { 'X-Up-Context': JSON.stringify({ serverKey: 'serverValue'}) })
+
+          next =>
+            rootLayer = up.layer.get('root')
+            overlay = up.layer.get('overlay')
+
+            # Show that the root layer was updated, although we assumed it would
+            # be the overlay preflight.
+            expect('.root-main').toHaveText('server text')
+            expect('.overlay-main').toHaveText('overlay text')
+
+            # Show that we discarded the context from the response.
+            expect(rootLayer.context).toEqual({ rootKey: 'rootValue' })
+            expect(overlay.context).toEqual({ overlayKey: 'overlayValue' })
+
 
         it "sends the fail layer's context as an X-Up-Fail-Context request header", asyncSpec (next) ->
           makeLayers [
