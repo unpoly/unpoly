@@ -92,12 +92,15 @@ class up.Change.OpenLayer extends up.Change.Addition
     # if any of these options cause the layer to close.
     @handleLayerChangeRequests()
 
+    # Don't wait for the open animation to finish.
+    # Otherwise a popup would start to open and only reveal itself after the animation.
+    @handleScroll()
+
     @layer.startOpenAnimation().then =>
       # A11Y: Place the focus on the overlay element and setup a focus circle.
       # However, don't change focus if the layer has been closed while the animation was running.
       if @layer.isOpen()
         @handleFocus()
-        @handleScroll()
 
       # Run callbacks for callers that need to know when animations are done.
       @onFinished()
@@ -151,7 +154,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     fragmentFocus.process()
 
   handleScroll: ->
-    scrollingOptions = u.merge(@options, { fragment: @content, autoMeans: ['hash', 'top-if-main'] })
+    scrollingOptions = u.merge(@options, { fragment: @content, layer: @layer, autoMeans: ['hash', 'layer'] })
     scrolling = new up.FragmentScrolling(scrollingOptions)
     return scrolling.process()
 

@@ -2308,56 +2308,6 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['origin text']
 
-          describe 'when the server responds with an error code', ->
-
-            it 'ignores the { reveal } option', asyncSpec (next) ->
-              fixture('.target', text: 'target text')
-              fixture('.other', text: 'other text')
-              fixture('.fail-target', text: 'fail-target text')
-              up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other', failScroll: 'target')
-
-              next =>
-                @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
-
-              next =>
-                expect(@revealedText).toEqual ['new fail-target text']
-
-            it 'accepts a { failReveal } option for error responses', asyncSpec (next) ->
-              fixture('.target', text: 'old target text')
-              fixture('.other', text: 'other text')
-              fixture('.fail-target', text: 'old fail-target text')
-              up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other')
-
-              next =>
-                @respondWith
-                  status: 500
-                  responseText: """
-                    <div class="fail-target">
-                      new fail-target text
-                    </div>
-                    """
-
-              next =>
-                expect(@revealedText).toEqual ['other text']
-
-            it 'allows to refer to the replacement { origin } as "&" in the { failTarget } selector', asyncSpec (next) ->
-              $origin = $fixture('.origin').text('origin text')
-              $fixture('.target').text('old target text')
-              $fixture('.fail-target').text('old fail-target text')
-              up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '&', origin: $origin)
-
-              next =>
-                @respondWith
-                  status: 500
-                  responseText: """
-                    <div class="fail-target">
-                      new fail-target text
-                    </div>
-                    """
-
-              next =>
-                expect(@revealedText).toEqual ['origin text']
-
           describe 'when more than one fragment is replaced', ->
 
             it 'only reveals the first fragment', asyncSpec (next) ->
@@ -2488,6 +2438,58 @@ describe 'up.fragment', ->
 
             next =>
               expect(@revealMock).not.toHaveBeenCalled()
+
+
+        describe 'when the server responds with an error code', ->
+
+          it 'ignores the { scroll } option', asyncSpec (next) ->
+            fixture('.target', text: 'target text')
+            fixture('.other', text: 'other text')
+            fixture('.fail-target', text: 'fail-target text')
+            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other', failScroll: 'target')
+
+            next =>
+              @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
+
+            next =>
+              expect(@revealedText).toEqual ['new fail-target text']
+
+          it 'accepts a { failScroll } option for error responses', asyncSpec (next) ->
+            fixture('.target', text: 'old target text')
+            fixture('.other', text: 'other text')
+            fixture('.fail-target', text: 'old fail-target text')
+            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other')
+
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="fail-target">
+                    new fail-target text
+                  </div>
+                  """
+
+            next =>
+              expect(@revealedText).toEqual ['other text']
+
+          it 'allows to refer to the replacement { origin } as "&" in the { failScroll } selector', asyncSpec (next) ->
+            $origin = $fixture('.origin').text('origin text')
+            $fixture('.target').text('old target text')
+            $fixture('.fail-target').text('old fail-target text')
+            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '&', origin: $origin)
+
+            next =>
+              @respondWith
+                status: 500
+                responseText: """
+                  <div class="fail-target">
+                    new fail-target text
+                  </div>
+                  """
+
+            next =>
+              expect(@revealedText).toEqual ['origin text']
+
 
         describe 'with { scrollBehavior } option', ->
 

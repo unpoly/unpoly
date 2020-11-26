@@ -223,12 +223,13 @@ up.link = do ->
     parser.boolean('peel') # inherit
     parser.string('layer') # differ
     parser.json('context')
-    parser.string('mode') # Renamed to { close }. Legacy calls handled by up.Change.OpenLayer.
+    parser.string('flavor') # Renamed to { mode }. Legacy calls handled by up.layer.normalizeOptions.
+    parser.string('mode')
     parser.string('align')
     parser.string('position')
     parser.string('class')
     parser.string('size')
-    parser.boolean('closable') # Renamed to { closable }. Legacy calls handled by up.Change.OpenLayer.
+    parser.boolean('closable') # Renamed to { dismissable }. Legacy calls handled by up.layer.normalizeOptions.
     parser.boolean('dismissable')
     parser.boolean('buttonDismissable')
     parser.boolean('keyDismissable')

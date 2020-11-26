@@ -137,6 +137,7 @@ class up.Change.FromURL extends up.Change
     renderOptions.dismissLayer = @response.dismissLayer
 
     # Don't require a target match if the server wants to close the overlay and doesn't send content.
+    # However the server is still free to send matching HTML. It would be used if the root layer is updated.
     if !renderOptions.document && (u.isDefined(renderOptions.acceptLayer) || u.isDefined(renderOptions.dismissLayer))
       renderOptions.target = ':none'
 

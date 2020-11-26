@@ -59,8 +59,14 @@ class up.FragmentScrolling extends up.Record
         # If the user has passed { scroll: 'top' } we scroll to the top all
         # viewports that are either containing or are contained by element.
         return @reset()
-      when 'top-if-main'
-        return @resetIfTargetIsMain()
+#      when 'top-if-main'
+#        if @isTargetMain()
+#          return @reset()
+      when 'layer'
+        return @revealLayer()
+      when 'layer-if-main'
+        if @isTargetMain()
+          return @revealLayer()
       when 'restore'
         return @restore()
       when 'hash'
@@ -87,12 +93,18 @@ class up.FragmentScrolling extends up.Record
   reset: ->
     return up.viewport.resetScroll(u.merge(@attributes(), around: @fragment))
 
+  isTargetMain: ->
+    return e.matches(@fragment, up.viewport.autoResetSelector({ @layer, @mode }))
+
   restore: ->
     return up.viewport.restoreScroll(u.merge(@attributes(), around: @fragment))
 
-  resetIfTargetIsMain: ->
-    if e.matches(@fragment, up.viewport.autoResetSelector({ @layer, @mode }))
-      return @reset()
+  revealLayer: ->
+    # Reveal the layer's box instead of the layer's element.
+    # If the layer has its own viewport, like a modal, revealing the box will
+    # scroll the layer viewport. Revealing the layer element would scroll
+    # the main document viewport.
+    @revealElement(@layer.getBoxElement())
 
   revealElement: (element) ->
     return up.reveal(element, @attributes())
