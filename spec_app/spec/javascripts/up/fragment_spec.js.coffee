@@ -2417,17 +2417,19 @@ describe 'up.fragment', ->
 
         describe 'when the server responds with an error code', ->
 
+          mockReveal()
+
           it 'ignores the { scroll } option', asyncSpec (next) ->
             fixture('.target', text: 'target text')
             fixture('.other', text: 'other text')
             fixture('.fail-target', text: 'fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other', failScroll: 'target')
+            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other')
 
             next =>
               @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
 
             next =>
-              expect(@revealedText).toEqual ['new fail-target text']
+              expect(@revealMock).not.toHaveBeenCalled()
 
           it 'accepts a { failScroll } option for error responses', asyncSpec (next) ->
             fixture('.target', text: 'old target text')
