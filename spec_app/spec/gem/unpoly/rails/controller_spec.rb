@@ -57,7 +57,7 @@ describe Unpoly::Rails::Controller, type: :request do
     end
   end
 
-  matcher :equal_json do |expected|
+  matcher :match_json do |expected|
     match do |actual_json|
       # Convert to JSON to stringify keys in arrays
       expected = expected.to_json unless expected.is_a?(String)
@@ -487,9 +487,7 @@ describe Unpoly::Rails::Controller, type: :request do
         up.context[:bar] = 'barValue'
       end
 
-      expect(response.headers['X-Up-Context']).to equal_json(
-        bar: 'barValue'
-      )
+      expect(response.headers['X-Up-Context']).to match_json(bar: 'barValue')
     end
 
     it 'changes the value for subsequent calls of up.context[]' do
@@ -511,10 +509,46 @@ describe Unpoly::Rails::Controller, type: :request do
     end
 
     it 'does not send an X-Up-Context response header if the context did not change' do
-      controller_eval(headers: { 'X-Up-Context': { 'foo': 'fooValue' }.to_json }) do
+      controller_eval(headers: { 'X-Up-Context': { foo: 'fooValue' }.to_json }) do
       end
 
       expect(response.headers['X-Up-Context']).to be_nil
+    end
+    
+    it 'sends mutated sub-arrays as an X-Up-Context response header' do
+      controller_eval(headers: { 'X-Up-Context': { foo: [1, 2, 3] }.to_json }) do
+        up.context[:foo] << 4
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: [1, 2, 3, 4])
+    end
+
+    it 'sends mutated sub-hashes as an X-Up-Context response header' do
+      controller_eval(headers: { 'X-Up-Context': { foo: { bar: 'barValue'} }.to_json }) do
+        up.context[:foo][:baz] = 'bazValue'
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: { bar: 'barValue', baz: 'bazValue' })
+    end
+
+  end
+
+  describe 'up.context.replace' do
+
+    it 'replaces the entire context on the client' do
+      controller_eval do
+        up.context.replace(foo: 'fooValue')
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: 'fooValue')
+    end
+
+    it 'nilifies keys that no longer exist (since the frontend merges)' do
+      controller_eval(headers: { 'X-Up-Context': { 'foo': 'fooValue' }.to_json }) do
+        up.context.replace(bar: 'barValue')
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: nil, bar: 'barValue')
     end
 
   end
@@ -536,7 +570,7 @@ describe Unpoly::Rails::Controller, type: :request do
         up.fail_context[:bar] = 'barValue'
       end
 
-      expect(response.headers['X-Up-Context']).to equal_json(
+      expect(response.headers['X-Up-Context']).to match_json(
         bar: 'barValue'
       )
     end
@@ -557,6 +591,22 @@ describe Unpoly::Rails::Controller, type: :request do
       end
 
       expect(value).to eq('barValue')
+    end
+
+    it 'sends mutated sub-arrays as an X-Up-Context response header' do
+      controller_eval(headers: { 'X-Up-Fail-Context': { foo: [1, 2, 3] }.to_json }) do
+        up.fail_context[:foo] << 4
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: [1, 2, 3, 4])
+    end
+
+    it 'sends mutated sub-hashes as an X-Up-Context response header' do
+      controller_eval(headers: { 'X-Up-Fail-Context': { foo: { bar: 'barValue'} }.to_json }) do
+        up.fail_context[:foo][:baz] = 'bazValue'
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: { bar: 'barValue', baz: 'bazValue' })
     end
 
   end
@@ -580,7 +630,7 @@ describe Unpoly::Rails::Controller, type: :request do
         up.emit('my:event', { 'foo' => 'bar' })
       end
 
-      expect(response.headers['X-Up-Events']).to equal_json([
+      expect(response.headers['X-Up-Events']).to match_json([
         { type: 'my:event', foo: 'bar' }
       ])
     end
@@ -591,7 +641,7 @@ describe Unpoly::Rails::Controller, type: :request do
         up.emit('other:event', { 'bam' => 'baz' })
       end
 
-      expect(response.headers['X-Up-Events']).to equal_json([
+      expect(response.headers['X-Up-Events']).to match_json([
         { foo: 'bar', type: 'my:event' },
         { bam: 'baz', type: 'other:event' }
       ])
@@ -606,7 +656,7 @@ describe Unpoly::Rails::Controller, type: :request do
         up.layer.emit('my:event', { 'foo' => 'bar' })
       end
 
-      expect(response.headers['X-Up-Events']).to equal_json([
+      expect(response.headers['X-Up-Events']).to match_json([
         { type: 'my:event', foo: 'bar', layer: 'current' }
       ])
     end
@@ -822,7 +872,7 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response).to be_redirect
       follow_redirect!
       expect(response.body).to eq('.foo')
-      expect(response.headers['X-Up-Events']).to equal_json([
+      expect(response.headers['X-Up-Events']).to match_json([
         { type: 'event1' }
       ])
       expect(response.headers['X-Up-Cache']).to eq('clear')
@@ -835,7 +885,7 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response).to be_redirect
       follow_redirect!
       expect(response.body).to eq('.foo')
-      expect(response.headers['X-Up-Events']).to equal_json([
+      expect(response.headers['X-Up-Events']).to match_json([
         { type: 'event0' },
         { type: 'event1' },
       ])

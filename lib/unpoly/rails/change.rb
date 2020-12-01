@@ -20,8 +20,8 @@ module Unpoly
       field :validate, Field::String
       field :mode, Field::String
       field :fail_mode, Field::String
-      field :context, Field::Hash, method: :original_context
-      field :fail_context, Field::Hash, method: :original_fail_context
+      field :context, Field::Hash, method: :input_context
+      field :fail_context, Field::Hash, method: :input_fail_context
       field :context_changes, Field::Hash, response_header_name: 'X-Up-Context'
       field :events, Field::Array
       field :cache, Field::String, method: :cache_command
@@ -163,32 +163,38 @@ module Unpoly
       # Returns the context object as sent from the frontend,
       # before any changes made on the server.
       #
-      memoize def original_context
-        original_context_from_request
+      memoize def input_context
+        input_context_from_request
       end
 
       ##
       # TODO: Docs
       memoize def context
-        Context.new(original_context, context_changes)
+        Context.new(input_context, unfinalized_context_changes)
       end
 
-      memoize def context_changes
+      memoize def unfinalized_context_changes
         context_changes_from_params&.dup || {}
+      end
+
+      def context_changes
+        context.finalize_changes
+        fail_context.finalize_changes
+        unfinalized_context_changes
       end
 
       ##
       # Returns the context object for failed responses as
       # sent from the frontend, before any changes made on the server.
       #
-      memoize def original_fail_context
-        original_fail_context_from_request
+      memoize def input_fail_context
+        input_fail_context_from_request
       end
 
       ##
       # TODO: Docs
       memoize def fail_context
-        Context.new(original_fail_context, context_changes)
+        Context.new(input_fail_context, unfinalized_context_changes)
       end
 
       memoize def events
@@ -318,17 +324,17 @@ module Unpoly
 
       def fields_as_params
         params = {}
-        params[version_param_name]         = serialized_version
-        params[target_param_name]          = serialized_target
-        params[fail_target_param_name]     = serialized_fail_target
-        params[validate_param_name]        = serialized_validate
-        params[mode_param_name]            = serialized_mode
-        params[fail_mode_param_name]       = serialized_fail_mode
-        params[original_context_param_name]      = serialized_original_context
-        params[original_fail_context_param_name] = serialized_original_fail_context
-        params[context_changes_param_name] = serialized_context_changes
-        params[events_param_name]          = serialized_events
-        params[cache_command_param_name]   = serialized_cache_command
+        params[version_param_name]            = serialized_version
+        params[target_param_name]             = serialized_target
+        params[fail_target_param_name]        = serialized_fail_target
+        params[validate_param_name]           = serialized_validate
+        params[mode_param_name]               = serialized_mode
+        params[fail_mode_param_name]          = serialized_fail_mode
+        params[input_context_param_name]      = serialized_input_context
+        params[input_fail_context_param_name] = serialized_input_fail_context
+        params[context_changes_param_name]    = serialized_context_changes
+        params[events_param_name]             = serialized_events
+        params[cache_command_param_name]      = serialized_cache_command
 
         # Don't send empty response headers.
         params = params.select { |_key, value| value.present? }
