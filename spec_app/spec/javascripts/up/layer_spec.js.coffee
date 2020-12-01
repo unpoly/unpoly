@@ -285,11 +285,41 @@ describe 'up.layer', ->
           next ->
             expect(up.layer.get(1).context).toEqual({ linkKey: 'linkValue', serverKey: 'serverValue' })
 
-        it "inherits from the parent layer's context with { context: 'inherit' }"
+        it "inherits from the parent layer's context with { contextScope: 'inherit' }", asyncSpec (next) ->
+          up.layer.root.context.rootKey1 = 'rootValue1'
 
-        it "shares the parent layer's context with { context: 'share' }"
+          up.layer.open(fragment: '<div class="target">overlay text</div>', context: { linkKey: 'linkValue' }, contextScope: 'inherit')
 
-        it "allows to set both a scope and make an update with { context: { scope, updatedKey } }"
+          next =>
+            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.root.context.rootKey1).toEqual('rootValue1')
+            expect(up.layer.root.context.linkKey).toBeMissing()
+            expect(up.layer.front.context.rootKey1).toEqual('rootValue1')
+            expect(up.layer.front.context.linkKey).toEqual('linkValue')
+
+            up.layer.root.context.rootKey2 = 'rootValue2'
+            expect(up.layer.root.context.rootKey2).toEqual('rootValue2')
+            expect(up.layer.front.context.rootKey2).toEqual('rootValue2')
+
+            up.layer.front.context.overlayKey = 'overlayValue'
+            expect(up.layer.root.context.overlayKey).toBeMissing()
+            expect(up.layer.front.context.overlayKey).toEqual('overlayValue')
+
+        it "shares the parent layer's context with { contextScope: 'share' }", asyncSpec (next) ->
+          up.layer.root.context.rootKey1 = 'rootValue1'
+
+          up.layer.open(fragment: '<div class="target">overlay text</div>', context: { linkKey: 'linkValue' }, contextScope: 'share')
+
+          next =>
+            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.root.context.rootKey1).toEqual('rootValue1')
+            expect(up.layer.root.context.linkKey).toEqual('linkValue')
+            expect(up.layer.front.context.rootKey1).toEqual('rootValue1')
+            expect(up.layer.front.context.linkKey).toEqual('linkValue')
+
+            up.layer.root.context.rootKey2 = 'rootValue2'
+            expect(up.layer.root.context.rootKey2).toEqual('rootValue2')
+            expect(up.layer.front.context.rootKey2).toEqual('rootValue2')
 
       describe 'mode', ->
 

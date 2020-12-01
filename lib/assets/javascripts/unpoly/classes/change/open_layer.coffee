@@ -22,14 +22,11 @@ class up.Change.OpenLayer extends up.Change.Addition
       # may be emitted on something more specific than the document.
       layer: @currentLayer
       mode: @mode,
-      context: @buildContext()
+      context: @buildLayer().context
       # The target will always exist in the current page, since
       # we're opening a new layer that will match the target.
       target: @target
     }
-
-  buildContext: ->
-    return up.ContextOption.buildContextForNewLayer(@currentLayer, @options.context)
 
   bestPreflightSelector: ->
     # We assume that the server will respond with our target.
@@ -37,6 +34,12 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   toString: ->
     "Open \"#{@target}\" in new layer"
+
+  buildLayer: ->
+    up.layer.build(u.merge(@options,
+      history: @historyOptionForLayer(),
+      parent: @currentLayer
+    ))
 
   execute: (responseDoc) ->
     if @target == ':none'
@@ -51,10 +54,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @options.title = @improveHistoryValue(@options.title, responseDoc.getTitle())
 
-    @layer = up.layer.build(u.merge(@options,
-      history: @historyOptionForLayer(),
-      context: @buildContext()
-    ))
+    @layer = @buildLayer()
 
     if @emitOpenEvent().defaultPrevented
       # We cannot use @abortWhenLayerClosed() here,

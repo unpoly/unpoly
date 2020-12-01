@@ -138,4 +138,4 @@ class up.Change.FromURL extends up.Change
 
     # If the server has provided an update to our context via the X-Up-Context
     # response header, merge it into our existing { context } option.
-    renderOptions.context = up.ContextOption.merge(renderOptions.context, @response.context)
+    renderOptions.context = u.merge(renderOptions.context, @response.context)
