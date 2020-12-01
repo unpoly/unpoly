@@ -545,26 +545,6 @@ class up.Layer extends up.Record
     if u.isString(options.location)
       @location = options.location
 
-  updateContext: ({ context, contextLayer }) ->
-    # If the server responds with a new context object, we only want to use this object
-    # if we're updating the same layer for which we originally sent the request.
-    #
-    # This covers the following edge case:
-    #
-    # - We're rendering a change with { target: ':main', layer: 'any' },
-    #   which might eventually update either of two layers.
-    # - We're sending an X-Up-Context for the first layer, since we're assuming that is
-    #   going to get updated.
-    # - The server responds with an X-Up-Context, but also with HTML that only matches
-    #   the second layer. Unpoly will choose to update that second layer.
-    # - We should discard the server-provided context object,
-    #   as it was meant for the first layer.
-    #
-    # The { contextLayer } is set by up.Change.FromURL, which was responsible
-    # for the initial server request.
-    if context && (!contextLayer || contextLayer == this)
-      @context = context
-
   ###**
   This layer's window title.
 

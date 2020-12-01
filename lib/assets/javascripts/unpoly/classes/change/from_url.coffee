@@ -33,11 +33,6 @@ class up.Change.FromURL extends up.Change
     successAttrs = @preflightPropsForRenderOptions(@successOptions)
     failAttrs = @preflightPropsForRenderOptions(@failOptions, { optional: true })
 
-    # Remember the layer for which we send the context object.
-    # If the server responds with a new context object, we only want to use this object
-    # if we're updating the same layer for which we sent the request.
-    @contextLayer = successAttrs.contextLayer
-
     requestAttrs = u.merge(
       @successOptions, # contains preflight keys relevant for the request, e.g. { url, method, solo }
       successAttrs,    # contains meta information for an successful update, e.g. { layer, mode, context, target }
@@ -141,10 +136,6 @@ class up.Change.FromURL extends up.Change
     if !renderOptions.document && (u.isDefined(renderOptions.acceptLayer) || u.isDefined(renderOptions.dismissLayer))
       renderOptions.target = ':none'
 
-    # Only if the @response contains a new context object (set by the server)
-    # we will override the context from options.
-    if context = @response.context
-      renderOptions.context = context
-      # If the server responds with a new context object, we only want to use this object
-      # if we're updating the same layer for which we sent the request.
-      renderOptions.contextLayer = @contextLayer
+    # If the server has provided an update to our context via the X-Up-Context
+    # response header, merge it into our existing { context } option.
+    renderOptions.context = up.ContextOption.merge(renderOptions.context, @response.context)

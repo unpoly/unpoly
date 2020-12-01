@@ -93,7 +93,8 @@ up.protocol = do ->
   </div>
   ```
 
-  The frontend will use the server-provided target for both successful (HTTP status `200 OK`) and failed (status `4xx` or `5xx`) responses.
+  The frontend will use the server-provided target for both successful (HTTP status `200 OK`)
+  and failed (status `4xx` or `5xx`) responses.
 
   The server may also set a target of `:none` to have the frontend render nothing.
   In this case no response body is required:
@@ -233,13 +234,19 @@ up.protocol = do ->
 
   \#\#\# Updating context from the server
 
-  The server may update the layer context by including a `X-Up-Context` header in its response.
-  Upon seeing the response header, Unpoly will replace the updating layer's context with the
-  server-provided context object. If no such response header is set, the updating layer's context
-  will not be changed.
+  The server may update the layer context by sending a `X-Up-Context` response header with
+  changed key/value pairs.
 
-  It is recommended that the server only sets the `X-Up-Context` response header if the
-  context was changed on the server side. Otherwise any client-side changes made while
+  Upon seeing the response header, Unpoly will assign the server-provided context object to
+  the layer's context object, adding or replacing keys as needed. There is no explicit protocol
+  to remove keys from the context, but the server may send a key with a `null` value.
+
+  The frontend will use the server-provided context upates for both successful (HTTP status `200 OK`)
+  and failed (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,
+  the updating layer's context will not be changed.
+
+  It is recommended that the server only places changed key/value pairs into the `X-Up-Context`
+  response header, and not echo the entire context object. Otherwise any client-side changes made while
   the request was in flight will get overridden by the server-provided context.
 
   @header X-Up-Context

@@ -11,7 +11,7 @@ module Unpoly
 
         module ClassMethods
 
-          def field(name, type, method: name)
+          def field(name, type, method: name, response_header_name: nil)
             field = type.new(name)
 
             define_method "#{method}_field" do
@@ -54,7 +54,8 @@ module Unpoly
               value = send(method)
               stringified = field.stringify(value)
               if stringified.present? # app servers don't like blank header values
-                response.headers[field.header_name] = stringified
+                header_name = response_header_name || field.header_name
+                response.headers[header_name] = stringified
               end
             end
           end

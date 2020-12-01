@@ -7,7 +7,9 @@ TODOs
 - Merge up.radio into up.fragment
 - Remove unused option up.network.abort({ reason })
 
-- Release as 1.0.0 or 2.0.0
+- Release as 0.62 as 1.0.0
+- Release hk/layers as 2.0.0
+
 - Grep for TODO
 - Test in all browsers
 - Fix up-guide
@@ -21,84 +23,21 @@ TODOs
   - leere antworten müssen OK sein für target: ':none'
   - up:fragment:unusable erst nach up:fragment:loaded emitten
 
+- Context zum "Durchschleifen" nutzbar machen
+  - { context } ist immer additiv (merges), löschen mit { key: null }
+  - Beim öffnen des Layers { context: 'share', context: 'inherit' }
+    - Oder will man gleichzeitig adden?
+    - inherit ist dann prototypical inheritance
+  - Der Server sollte nur geänderte Keys schicken
+  - context: ['share', { add: 'value' }]
+    - dann noch das server-update vom open-layer-request dranhängen:
+      - ['share', { add: 'value' }, { server: 'value']
 
-- Das hier geht nicht:
-
-      def create
-        build_user
-        if @user.save
-          if up.overlay?
-            up.layer.accept(id: @user.id)
-            head :ok
-          else
-            redirect_to @user
-          end
-        end
-      end
-
-   Das Update würde abbrechen mit up:fragment:unusable
-   Selbst wenn ich HTML schicke würde es danach abbrechen mit "Could not find element in Response"
-
-   Was tun?
-
-   ### Idee 1
-
-   - up:fragment:unusable erst nach up:fragment:loaded emitten
-   - Nach up:fragment:loaded alle Layer Change Requests abarbeiten:
-   - SaveHistory (nur bei Update??)
-   - History updaten (das ist bei OpenLayer aber auch anders!)
-   - Context updaten
-   - DANN Layer Change Requests
-      - Emittet Events
-      - Processed X-Up-Accept/Dismiss-Layer
-      - Wirft ggf. up.error.aborted
-
-   ### Idee 2
-
-   - X-Up-Accept/Dismiss-Layer entfernen
-   - Leute müssen immer noch was rendern, aber zumindest fühlt es sich nicht so komisch an
-
-   ## Idee 3
-
-   - Wenn der Server nix rendert, setze ich das Target auf :none
-   - Wäre vielleicht ein einfacher Workaround, allerdings auch inkonsequent zum bisherigen Verhalten wenn was fehlt
-   - Nur machen wenn ich einen Header sehe: X-Up-Accept-Layer / X-Up-Dismiss-layer / X-Up-Events ?
-    - Bei X-Up-Accept/Dismiss-Layer ist es klar: Hier wird nie Content gerendert werden
-    - Bei X-Up-Events ist es unklar, ob der Layer geschlossen wird.
-      - Es gibt ja viele andere Use Cases dafür, z.B. Tracking-Events
-    - OpenLayer kann bisher ":none" noch nicht verarbeiten, nur UpdateLayer
-
-   # Idee 3.1
-
-   - Server schickt
-               response.headers['X-Up-Target'] = ':none'
-               head :ok
-   - Das X-Up-Target wäre dann für positiven und negativen Fall
-
-           def create
-             build_user
-             if @user.save
-               if up.overlay?
-                 up.layer.accept(id: @user.id)
-                 up.render_nothing
-               else
-                 redirect_to @user
-               end
-             end
-           end
-
-   ## Idee 4
-
-   - Die User müssen einfach doch passenden Content schicken
-
-   ### Vereinfacht das irgendwas?
-
-   - Aktuell gibt es KEIN "Reset World" mehr!
-   - Es könnte aber sein dass UpdateLayer einen anderen Layer wählt wg. { layer: 'any' }
-   - Zumindest kriege ivh immer entweder OpenLayer oder UpdateLayer
-
-
-
+- up.layer.config.overlay.contextScope
+  - use in overlay constructor
+  - needs to know parent layer
+- parse [up-context]
+- parse [up-context-scope]
 
 
 Manual tests

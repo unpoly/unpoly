@@ -20,9 +20,9 @@ module Unpoly
       field :validate, Field::String
       field :mode, Field::String
       field :fail_mode, Field::String
-      field :context, Field::Hash
-      field :context_changed, Field::Boolean
-      field :fail_context, Field::Hash
+      field :context, Field::Hash, method: :original_context
+      field :fail_context, Field::Hash, method: :original_fail_context
+      field :context_changes, Field::Hash, response_header_name: 'X-Up-Context'
       field :events, Field::Array
       field :cache, Field::String, method: :cache_command
 
@@ -160,25 +160,35 @@ module Unpoly
       end
 
       ##
+      # Returns the context object as sent from the frontend,
+      # before any changes made on the server.
+      #
+      memoize def original_context
+        original_context_from_request
+      end
+
+      ##
       # TODO: Docs
       memoize def context
-        context_from_request.deep_dup
+        Context.new(original_context, context_changes)
       end
 
-      def context_changed
-        # In case context was persisted through a redirect (using params) we also
-        # need to check _up_context_changed since we don't know whether _up_context
-        # has been changed by a previous request.
-        (context != context_from_request) || context_changed_from_params
+      memoize def context_changes
+        context_changes_from_params&.dup || {}
       end
 
-      alias :context_changed? :context_changed
+      ##
+      # Returns the context object for failed responses as
+      # sent from the frontend, before any changes made on the server.
+      #
+      memoize def original_fail_context
+        original_fail_context_from_request
+      end
 
       ##
       # TODO: Docs
       memoize def fail_context
-        # The protocol currently allow users to change the fail_context.
-        fail_context_from_request.freeze
+        Context.new(original_fail_context, context_changes)
       end
 
       memoize def events
@@ -217,9 +227,19 @@ module Unpoly
 
       def after_action
         write_events_to_response_headers
+
         write_cache_command_to_response_headers
-        write_context_to_response_headers if context_changed?
-        write_target_to_response_headers if target_changed?
+
+        if context_changes.present?
+          write_context_changes_to_response_headers
+        end
+
+        if target_changed?
+          # Only write the target to the response if it has changed.
+          # The client might have a more abstract target like :main
+          # that we don't want to override with an echo of the first match.
+          write_target_to_response_headers
+        end
       end
 
       def url_with_field_values(url)
@@ -304,13 +324,9 @@ module Unpoly
         params[validate_param_name]        = serialized_validate
         params[mode_param_name]            = serialized_mode
         params[fail_mode_param_name]       = serialized_fail_mode
-        params[context_param_name]         = serialized_context
-        # We only send X-Up-Context back to the frontend if the context was changed by the server.
-        # If we're persisting context through a redirect (using params) we need to track whether
-        # it was changed before the redirect. Otherwise we wouldn't know whether it has changed
-        # after the redirect.
-        params[context_changed_param_name] = serialized_context_changed
-        params[fail_context_param_name]    = serialized_fail_context
+        params[original_context_param_name]      = serialized_original_context
+        params[original_fail_context_param_name] = serialized_original_fail_context
+        params[context_changes_param_name] = serialized_context_changes
         params[events_param_name]          = serialized_events
         params[cache_command_param_name]   = serialized_cache_command
 

@@ -22,13 +22,14 @@ class up.Change.OpenLayer extends up.Change.Addition
       # may be emitted on something more specific than the document.
       layer: @currentLayer
       mode: @mode,
-      context: @options.context
-      # Always accept a server-provided context object.
-      contextLayer: null
+      context: @buildContext()
       # The target will always exist in the current page, since
       # we're opening a new layer that will match the target.
       target: @target
     }
+
+  buildContext: ->
+    return up.ContextOption.buildContextForNewLayer(@currentLayer, @options.context)
 
   bestPreflightSelector: ->
     # We assume that the server will respond with our target.
@@ -50,7 +51,10 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @options.title = @improveHistoryValue(@options.title, responseDoc.getTitle())
 
-    @layer = up.layer.build(u.merge(@options, history: @historyOptionForLayer()))
+    @layer = up.layer.build(u.merge(@options,
+      history: @historyOptionForLayer(),
+      context: @buildContext()
+    ))
 
     if @emitOpenEvent().defaultPrevented
       # We cannot use @abortWhenLayerClosed() here,
@@ -61,10 +65,6 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Note that this cannot be prevented with { peel: false }!
     # We don't wait for the peeling to finish.
     @currentLayer.peel()
-
-    # If the server has provided an updated { context } object,
-    # we set the layer's context to that object.
-    @layer.updateContext(@options)
 
     # Change the stack sync. Don't wait for peeling to finish.
     up.layer.stack.push(@layer)

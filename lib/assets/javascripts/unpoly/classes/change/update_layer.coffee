@@ -11,6 +11,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     @target = options.target
     @origin = options.origin
     @placement = options.placement
+    @context = options.context
     @parseSteps()
 
   preflightProps: ->
@@ -21,8 +22,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return {
       layer: @layer
       mode: @layer.mode
-      context: @layer.context
-      contextLayer: @layer
+      context: u.merge(@layer.context, @context)
       target: @bestPreflightSelector(),
     }
 
@@ -54,9 +54,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       # Layer#peel() will manipulate the stack sync.
       # We don't wait for the peeling animation to finish.
 
-    # If either the server or the up.render() caller has provided a new
-    # { context } object, we set the layer's context to that object.
-    @layer.updateContext(@options)
+    u.assign(@layer.context, @context)
 
     # Change history before compilation, so new fragments see the new location.
     @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen

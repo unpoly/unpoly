@@ -276,14 +276,20 @@ describe 'up.layer', ->
           next =>
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ key: 'value'}))
 
-        it 'allows the server to change the initial context object', asyncSpec (next) ->
-          up.layer.open(url: '/modal', target: '.target', context: { key: 'value' })
+        it 'allows the server to update the initial context object', asyncSpec (next) ->
+          up.layer.open(url: '/modal', target: '.target', context: { linkKey: 'linkValue' })
 
           next =>
-            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ serverKey: 'serverValue'})})
 
           next ->
-            expect(up.layer.get(1).context).toEqual({ newKey: 'newValue' })
+            expect(up.layer.get(1).context).toEqual({ linkKey: 'linkValue', serverKey: 'serverValue' })
+
+        it "inherits from the parent layer's context with { context: 'inherit' }"
+
+        it "shares the parent layer's context with { context: 'share' }"
+
+        it "allows to set both a scope and make an update with { context: { scope, updatedKey } }"
 
       describe 'mode', ->
 

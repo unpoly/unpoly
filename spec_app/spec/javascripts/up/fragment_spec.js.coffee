@@ -1805,65 +1805,6 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
 
-        it 'lets the server change the context by responding with an X-Up-Context response header', asyncSpec (next) ->
-          makeLayers [
-            { target: '.target', context: { rootKey: 'rootValue' }},
-            { target: '.target', context: { overlayKey: 'overlayValue' }}
-          ]
-
-          next ->
-            up.render('.target', layer: up.layer.get(1), url: '/path1')
-
-          next =>
-            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
-
-          next ->
-            expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
-            expect(up.layer.get(1).context).toEqual({ newKey: 'newValue' })
-
-        it 'lets the server change the context for a new layer', asyncSpec (next) ->
-          up.layer.open({ url: '/path', target: '.target' })
-
-          next =>
-            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
-
-          next =>
-            expect(up.layer.stack.length).toBe(2)
-
-            expect(up.layer.front.context).toEqual({ newKey: 'newValue' })
-
-        it "ignores an X-Up-Context response header if we're not updating the layer for which we sent X-Up-Context in the request", asyncSpec (next) ->
-          up.layer.config.root.mainTargets = ['.root-main']
-          up.layer.config.overlay.mainTargets = ['.overlay-main']
-
-          makeLayers [
-            { target: '.root-main', content: 'root text', context: { rootKey: 'rootValue' }},
-            { target: '.overlay-main', content: 'overlay text', context: { overlayKey: 'overlayValue' }}
-          ]
-
-          next =>
-            up.render(target: ':main', layer: 'any', url: '/path')
-
-          next =>
-            expect(@lastRequest().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
-
-          next =>
-            @respondWithSelector('.root-main', text: 'server text', responseHeaders: { 'X-Up-Context': JSON.stringify({ serverKey: 'serverValue'}) })
-
-          next =>
-            rootLayer = up.layer.get('root')
-            overlay = up.layer.get('overlay')
-
-            # Show that the root layer was updated, although we assumed it would
-            # be the overlay preflight.
-            expect('.root-main').toHaveText('server text')
-            expect('.overlay-main').toHaveText('overlay text')
-
-            # Show that we discarded the context from the response.
-            expect(rootLayer.context).toEqual({ rootKey: 'rootValue' })
-            expect(overlay.context).toEqual({ overlayKey: 'overlayValue' })
-
-
         it "sends the fail layer's context as an X-Up-Fail-Context request header", asyncSpec (next) ->
           makeLayers [
             { target: '.target', context: { rootKey: 'rootValue' }},
@@ -1877,6 +1818,40 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ rootKey: 'rootValue'}))
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Fail-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
+
+        it 'lets the server update the context by responding with an X-Up-Context response header', asyncSpec (next) ->
+          makeLayers [
+            { target: '.target', context: { rootKey: 'rootValue' }},
+            { target: '.target', context: { overlayKey: 'overlayValue' }}
+          ]
+
+          next ->
+            up.render('.target', layer: up.layer.get(1), url: '/path1')
+
+          next =>
+            @respondWithSelector('.target', responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})})
+
+          next ->
+            expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+            expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
+
+        it 'uses updates from an X-Up-Context header for failed responses', asyncSpec (next) ->
+          fixture('.success-target', text: 'success target')
+          fixture('.failure-target', text: 'failure target')
+
+          next ->
+            up.render(target: '.success-target', failTarget: '.failure-target', url: '/path1')
+
+          next =>
+            @respondWithSelector('.failure-target',
+              text: 'new text',
+              status: 500,
+              responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})}
+            )
+
+          next ->
+            expect('.failure-target').toHaveText('new text')
+            expect(up.layer.get(0).context).toEqual({ newKey: 'newValue' })
 
       describe 'with { transition } option', ->
 

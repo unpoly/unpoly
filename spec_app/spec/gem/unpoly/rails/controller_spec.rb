@@ -95,7 +95,7 @@ describe Unpoly::Rails::Controller, type: :request do
   shared_examples_for 'hash field' do |reader:, header:|
     it "returns value of the #{header} request header, parsed as JSON" do
       result = controller_eval(headers: { header => '{ "foo": "bar" }'}, &reader)
-      expect(result).to be_a(Hash)
+      expect(result).to respond_to(:[])
       expect(result['foo']).to eq('bar')
     end
 
@@ -106,7 +106,7 @@ describe Unpoly::Rails::Controller, type: :request do
 
     it "returns an empty hash if no #{header} request header is set" do
       result = controller_eval(&reader)
-      expect(result).to eq({})
+      expect(result.to_h).to eq({})
     end
   end
 
@@ -488,9 +488,26 @@ describe Unpoly::Rails::Controller, type: :request do
       end
 
       expect(response.headers['X-Up-Context']).to equal_json(
-        foo: 'fooValue',
         bar: 'barValue'
       )
+    end
+
+    it 'changes the value for subsequent calls of up.context[]' do
+      value = controller_eval do
+        up.context[:bar] = 'barValue'
+        up.context[:bar]
+      end
+
+      expect(value).to eq('barValue')
+    end
+
+    it 'changes the value for subsequent calls of up.fail_context[], since context updates will be applied to whatever layer ends up being updated' do
+      value = controller_eval do
+        up.context[:bar] = 'barValue'
+        up.fail_context[:bar]
+      end
+
+      expect(value).to eq('barValue')
     end
 
     it 'does not send an X-Up-Context response header if the context did not change' do
@@ -514,12 +531,32 @@ describe Unpoly::Rails::Controller, type: :request do
 
   describe 'up.fail_context[]=' do
 
-    it "raises an error since we don't have a protocol for updating the failure layer" do
-      expect {
-        controller_eval do
-          up.fail_context[:foo] = 'fooValue'
-        end
-      }.to raise_error(/can't modify/i)
+    it 'sends a changed context hash as an X-Up-Context response header' do
+      controller_eval(headers: { 'X-Up-Context': { 'foo': 'fooValue' }.to_json }) do
+        up.fail_context[:bar] = 'barValue'
+      end
+
+      expect(response.headers['X-Up-Context']).to equal_json(
+        bar: 'barValue'
+      )
+    end
+
+    it 'changes the value for subsequent calls of up.fail_context[]' do
+      value = controller_eval do
+        up.fail_context[:bar] = 'barValue'
+        up.fail_context[:bar]
+      end
+
+      expect(value).to eq('barValue')
+    end
+
+    it 'changes the value for subsequent calls of up.context[], since context updates will be applied to whatever layer ends up being updated' do
+      value = controller_eval do
+        up.fail_context[:bar] = 'barValue'
+        up.context[:bar]
+      end
+
+      expect(value).to eq('barValue')
     end
 
   end
@@ -648,7 +685,7 @@ describe Unpoly::Rails::Controller, type: :request do
 
     it 'returns the parsed JSON object from the X-Up-Context header' do
       result = controller_eval(headers: { 'X-Up-Context': { 'foo' => 'bar' }.to_json}) do
-        up.layer.context
+        up.layer.context.to_h
       end
       expect(result).to eq('foo' => 'bar')
     end
@@ -760,7 +797,7 @@ describe Unpoly::Rails::Controller, type: :request do
 
     it 'returns the parsed JSON object from the X-Up-Fail-Context header' do
       result = controller_eval(headers: { 'X-Up-Fail-Context': { 'foo' => 'bar' }.to_json}) do
-        up.fail_layer.context
+        up.fail_layer.context.to_h
       end
       expect(result).to eq('foo' => 'bar')
     end
