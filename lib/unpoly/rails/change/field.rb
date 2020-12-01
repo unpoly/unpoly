@@ -15,7 +15,7 @@ module Unpoly
           result = name.to_s
           result = result.capitalize
           result = result.gsub(/_(.)/) { "-#{$1.upcase}" }
-          result= "X-Up-#{result}"
+          result = "X-Up-#{result}"
           result
         end
 

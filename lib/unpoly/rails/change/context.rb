@@ -21,6 +21,10 @@ module Unpoly
           end
         end
 
+        def delete(key)
+          self[key] = nil
+        end
+
         # Although we have mutation tracking in finalize_changes, we're still tracking
         # direct changes in #[]=. We don't want to force user code know whether to use
         # up.context[]= or up.fail_context[]=. Changes in either will be pushed to the
@@ -40,9 +44,9 @@ module Unpoly
           # The frontend merges X-Up-Context updates.
           # Hence we must nilify every key that no longer exists in the
           # replaced hash.
-          nilify_keys = (input.keys | changes.keys) - new_hash.keys
+          deleted_keys = (input.keys | changes.keys) - new_hash.keys
           changes.replace(new_hash)
-          nilify_keys.each { |nilify_key| changes[nilify_key] = nil }
+          deleted_keys.each { |deleted_key| changes[deleted_key] = nil }
           input.clear
           unmutated_input.clear
         end

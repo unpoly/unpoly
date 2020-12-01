@@ -229,17 +229,29 @@ up.protocol = do ->
   \#\#\# Example
 
   ```http
-  X-Up-Context: { "context": "Choose a company contact" }
+  X-Up-Context: { "lives": 3 }
   ```
 
   \#\#\# Updating context from the server
 
   The server may update the layer context by sending a `X-Up-Context` response header with
-  changed key/value pairs.
+  changed key/value pairs:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Context: { "lives": 2 }
+
+  <html>
+    ...
+  </html>
+  ```
 
   Upon seeing the response header, Unpoly will assign the server-provided context object to
-  the layer's context object, adding or replacing keys as needed. There is no explicit protocol
-  to remove keys from the context, but the server may send a key with a `null` value.
+  the layer's context object, adding or replacing keys as needed.
+
+  Client-side context keys not mentioned in the response will remain unchanged.
+  There is no explicit protocol to *remove* keys from the context, but the server may send a key
+  with a `null` value to effectively remove a key.
 
   The frontend will use the server-provided context upates for both successful (HTTP status `200 OK`)
   and failed (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,

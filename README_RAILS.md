@@ -156,6 +156,51 @@ class UsersController < ApplicationController
 end
 ```
 
+### Working with context
+
+Calling `up.context` will return the [context](https://unpoly.com/up.layer.context) object of the targeted layer.
+
+The context is a JSON object shared between the frontend and the server.
+It persists for a series of Unpoly navigation, but is cleared when the user makes a full page load.
+Different Unpoly [layers](https://unpoly.com/up.layer) will usually have separate context objects,
+although layers may choose to share their context scope. 
+
+You may read and change the context object. Changes will be sent to the frontend with your response.
+
+```ruby
+class GamesController < ApplicationController
+
+  def restart
+    up.context[:lives] = 3
+    render 'stage1'
+  end
+
+end
+```
+
+Keys can be accessed as either strings or symbols:
+
+```ruby
+puts "You have " + up.layer.context[:lives] + " lives left"
+puts "You have " + up.layer.context['lives'] + " lives left"
+````
+
+You may delete a key from the frontend by calling `up.context.delete`:
+
+```ruby
+up.context.delete(:foo)
+````
+
+You may replace the entire context by calling `up.context.replace`: 
+
+```
+context_from_file = JSON.parse(File.read('context.json))
+up.context.replace(context_from_file)
+```
+
+`up.context` is an alias for `up.layer.context`.
+
+
 ### Accessing the targeted layer
 
 Use the methods below to interact with the [layer](/up.layer) of the fragment being targeted.
@@ -176,11 +221,8 @@ Returns whether the targeted layer is an overlay (not the root layer).
 
 #### `up.layer.context`
 
-Returns the [context](https://unpoly.com/up.layer.context) hash of the targeted layer.
-
-Keys can be accessed as either strings or symbols.
-
-Returns an empty hash if the targeted layer has no given context.
+Returns the [context](https://unpoly.com/up.layer.context) object of the targeted layer.
+See documentation for `up.context`, which is an alias for `up.layer.context`.
 
 #### `up.layer.accept(value)`
 
@@ -218,7 +260,7 @@ Returns whether the layer targeted for a failed response is an overlay.
 
 #### `up.fail_layer.context`
 
-Returns the [context](https://unpoly.com/up.layer.context) hash of the layer targeted for a failed response.
+Returns the [context](https://unpoly.com/up.layer.context) object of the layer targeted for a failed response.
 
 
 ### Preserving Unpoly-related request information through redirects

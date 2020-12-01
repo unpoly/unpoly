@@ -553,6 +553,18 @@ describe Unpoly::Rails::Controller, type: :request do
 
   end
 
+  describe 'up.context.delete' do
+
+    it 'updates the key with a null value' do
+      controller_eval(headers: { 'X-Up-Context': { 'foo': 'fooValue' }.to_json }) do
+        up.context.delete(:foo)
+      end
+
+      expect(response.headers['X-Up-Context']).to match_json(foo: nil)
+    end
+
+  end
+
   describe 'up.fail_context' do
 
     subject { controller.up.fail_context }
