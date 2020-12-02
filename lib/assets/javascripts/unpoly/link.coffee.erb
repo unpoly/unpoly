@@ -223,7 +223,6 @@ up.link = do ->
     parser.boolean('peel') # inherit
     parser.string('layer') # differ
     parser.json('context')
-    parser.string('contextScope')
     parser.string('flavor') # Renamed to { mode }. Legacy calls handled by up.layer.normalizeOptions.
     parser.string('mode')
     parser.string('align')

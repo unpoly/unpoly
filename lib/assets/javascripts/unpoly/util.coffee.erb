@@ -1400,11 +1400,11 @@ up.util = do ->
         flattened.push(object)
     flattened
 
-  flattenObject = (object) ->
-    result = {}
-    for key, value of object
-      result[key] = value
-    result
+#  flattenObject = (object) ->
+#    result = {}
+#    for key, value of object
+#      result[key] = value
+#    result
 
   ###**
   Maps each element using a mapping function,
@@ -1913,7 +1913,7 @@ up.util = do ->
   evalOption: evalOption
   # horizontalScreenHalf: horizontalScreenHalf
   flatten: flatten
-  flattenObject: flattenObject
+  # flattenObject: flattenObject
   isTruthy: isTruthy
   newDeferred: newDeferred
   always: always

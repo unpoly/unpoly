@@ -18,26 +18,9 @@ TODOs
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
 
-
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
   - up:fragment:unusable erst nach up:fragment:loaded emitten
-
-- Context zum "Durchschleifen" nutzbar machen
-  - { context } ist immer additiv (merges), löschen mit { key: null }
-  - Beim öffnen des Layers { context: 'share', context: 'inherit' }
-    - Oder will man gleichzeitig adden?
-    - inherit ist dann prototypical inheritance
-  - Der Server sollte nur geänderte Keys schicken
-  - context: ['share', { add: 'value' }]
-    - dann noch das server-update vom open-layer-request dranhängen:
-      - ['share', { add: 'value' }, { server: 'value']
-
-- up.layer.config.overlay.contextScope
-  - use in overlay constructor
-  - needs to know parent layer
-- parse [up-context]
-- parse [up-context-scope]
 
 
 Manual tests

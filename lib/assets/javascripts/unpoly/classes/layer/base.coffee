@@ -107,22 +107,6 @@ class up.Layer extends up.Record
     unless @mode
       throw "missing { mode } option"
 
-    @buildContext(options)
-
-  buildContext: (options) ->
-    # First build the object we're starting with.
-    switch options.contextScope
-      when 'inherit'
-        @context = Object.create(options.parent.context)
-      when 'share'
-        @context = options.parent.context
-      else
-        @context = {}
-
-    # Then assign any context updates from the render() call.
-    # Any context updates from the server are merged into that.
-    u.assign(@context, options.context)
-
   setupHandlers: ->
     up.link.convertClicks(this)
 

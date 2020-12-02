@@ -373,11 +373,6 @@ class up.Request extends up.Record
     for key in u.evalOption(up.network.config.metaKeys, this)
       value = this[key]
       if u.isGiven(value)
-        # Context object may inherit from the parent context.
-        # We need to flatten the object properties or we would only send
-        # the object's own properties, while omitting inherited properties.
-        if u.isOptions(value)
-          value = u.flattenObject(value)
         props[key] = value
     props
 
