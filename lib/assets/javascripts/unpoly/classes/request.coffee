@@ -373,6 +373,8 @@ class up.Request extends up.Record
     for key in u.evalOption(up.network.config.metaKeys, this)
       value = this[key]
       if u.isGiven(value)
+        if u.isOptions(value)
+          value = u.flattenObject(value)
         props[key] = value
     props
 

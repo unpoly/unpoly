@@ -274,7 +274,7 @@ describe 'up.layer', ->
           up.layer.open(url: '/modal', context: { key: 'value' })
 
           next =>
-            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ key: 'value'}))
+            expect(@lastRequest().requestHeaders['X-Up-Context']).toMatchJSON({ key: 'value'})
 
         it 'allows the server to update the initial context object', asyncSpec (next) ->
           up.layer.open(url: '/modal', target: '.target', context: { linkKey: 'linkValue' })
@@ -304,6 +304,13 @@ describe 'up.layer', ->
             up.layer.front.context.overlayKey = 'overlayValue'
             expect(up.layer.root.context.overlayKey).toBeMissing()
             expect(up.layer.front.context.overlayKey).toEqual('overlayValue')
+
+        it 'includes inherited keys in the X-Up-Context object sent to the server', asyncSpec (next) ->
+          up.layer.root.context.rootKey = 'rootValue'
+          up.layer.open(url: '/path', context: { linkKey: 'linkValue' }, contextScope: 'inherit')
+
+          next =>
+            expect(@lastRequest().requestHeaders['X-Up-Context']).toMatchJSON({ rootKey: 'rootValue', linkKey: 'linkValue'})
 
         it "shares the parent layer's context with { contextScope: 'share' }", asyncSpec (next) ->
           up.layer.root.context.rootKey1 = 'rootValue1'
