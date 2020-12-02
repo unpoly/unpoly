@@ -12,26 +12,26 @@
 Unpoly is an unobtrusive JavaScript framework for server-side web applications.\
 It enables fast and flexible frontends while keeping rendering logic on the server.
 
-This presentation is for experienced Unpoly 0.x users who want to learn
-about the major changes in Unpoly 1.0.
+This presentation is for experienced Unpoly 1 users who want to learn
+about the major changes in Unpoly 2.
 
 
 
-Motivation 1.0
-==============
+History
+=======
 
 | Date    | Event              |
 | ------- | ------------------ |
 | 2018-02 | Start branch       |
 | 2019-01 | `git reset --hard` |
 | 2020-12 | Today              |
-| 2021-01 | Release 1.0        |
+| 2021-01 | Release Unpoly 2   |
 
 
 It's the result of many observations of my colleagues at makandra, and the limits they ran into when using Unpoly for non-trivial interactions. For this I looked through a lot of code on our Gitlab to see how Unpoly was used.
 
 💡 Learnings from past projects\
-🎁 New feature in Unpoly 1.0\
+🎁 New feature in Unpoly 2\
 🥋 Master class slides (separate session next week)
 
 
@@ -62,7 +62,7 @@ Don't panic!
 ============
 
 You will see some major changes in these slides, but **don't panic**!\
-Unpoly 1.0 still supports deprecated APIs going back to 2016.
+Unpoly 2 still supports deprecated APIs going back to 2016.
 
 Usage of old APIs will forwarded to the new version and log a deprecation with trace.\
 This way you upgrade Unpoly, revive your application with few changes, then replace old API calls under green tests.
@@ -121,7 +121,7 @@ All our projects have helpers like `content_link()` and `modal_link()` to config
 - Set a default target
 - Set a transition (sometimes)
 
-**In Unpoly 1.0 these helpers (and their macros) are no longer needed.**\
+**In Unpoly 2 these helpers (and their macros) are no longer needed.**\
 You can now configure Unpoly to handle standard `<a href>` links without any `[up-...]` attributes.\
 Rails users can now use the standard `link_to()` helper without extra options.
 
@@ -196,7 +196,7 @@ Default targets
 Most links don't need a target selector anymore
 -----------------------------------------------
 
-Unpoly 1.0 lets you mark elements as *default targets* using the `[up-main]` attribute:
+Unpoly 2 lets you mark elements as *default targets* using the `[up-main]` attribute:
 
 ```html
 <body>
@@ -324,9 +324,9 @@ Layers are now isolated
 
 If we want to support sub-interactions, multiple copies of the same app must be able to run in the same document. E.g. one copy runs on the root page and a second copy runs in a modal overlay.
 
-In Unpoly 0.x you could accidentally update another layer if there was no match in the current layer. 💥
+In Unpoly 1 you could accidentally update another layer if there was no match in the current layer. 💥
 
-In Unpoly 1.0 layers are fully isolated. You cannot accidentally target an element in another layer:
+In Unpoly 2 layers are fully isolated. You cannot accidentally target an element in another layer:
 
 ```html
 <a up-target=".foo">                    <!-- will only match in current layer -->
@@ -355,8 +355,8 @@ Values for `{ layer }` 🥋
 
 | Value            | Description                                                  |
 | ---------------- | ------------------------------------------------------------ |
-| `current`        | The current layer (Unpoly 1.0 default)                       |
-| `any`            | Any layer, preferring the current layer (Unpoly 0.x default) |
+| `current`        | The current layer (Unpoly 2 default)                         |
+| `any`            | Any layer, preferring the current layer (Unpoly 1 default) |
 | `closest`        | The current layer or any ancestor, preferring closer layers  |
 | `parent`         | The layer that opened the current layer                      |
 | `ancestor`       | Any ancestor layer of the current layer                      |
@@ -413,13 +413,13 @@ Deprecated macros
 Layers can be stacked infinitely
 ================================
 
-In Unpoly 0.x you may only stack two screens (three if you count popups).
+In Unpoly 1 you may only stack two screens (three if you count popups).
 
 - The root page shows a list of record
 - Clicking a record opens a record in a modal overlay. This is useful since the user retains the scroll position of the list in the background.
 - 💥 The details screen cannot open another modal overlay, since on is already open.
 
-**Unpoly 1.0 lets you stack an arbitrary number of screens.**
+**Unpoly 2 lets you stack an arbitrary number of screens.**
 
 
 
@@ -452,7 +452,7 @@ Example: Flight Picker
 Ending a sub-interaction
 ========================
 
-In Unpoly 0.x it was very hard to communicate the "result" of a sub-interaction within an overlay back to the parent layer.
+In Unpoly 1 it was very hard to communicate the "result" of a sub-interaction within an overlay back to the parent layer.
 
 Take the following example (from the demo):
 
@@ -478,11 +478,11 @@ Take the following example (from the demo):
 - The user may open a new overlay to create the missing company. The unfinished project form remains open in the background.
 - When the company was created in the overlay, the overlay should close. The project form should now have the newly created company selected.
 
-This required a lot of custom code in Unpoly 0.x.
+This required a lot of custom code in Unpoly 1.
 Basically overlay content needed to update fragments in the parent layer.
 This required the overlay to know the parent layer's state, coupling the sub-interaction to the parent interaction.
 
-**When opening an overlay in Unpoly 1.0, you may define a *condition* when the overlay interaction ends.**
+**When opening an overlay in Unpoly 2, you may define a *condition* when the overlay interaction ends.**
 When the condition occurs, the overlay is automatically closed and a callback is run.
 
 This way overlays no longer need to know about the parent layer's state.
@@ -630,7 +630,7 @@ Instead of rendering nothing you may also render a HTML response.
 Positive vs. negative close intent
 ==================================
 
-When an overlay is closed, Unpoly 1.0 distinguishes two kinds close intents:
+When an overlay is closed, Unpoly 2 distinguishes two kinds close intents:
 
 - *Accepting* a layer (user picks a value, confirms with "OK", etc.), optionally with a value
 - *Dismissing* a layer (user presses "Cancel", "X", "Close" or Escape)
@@ -914,13 +914,13 @@ up-modal.warning {
 Overlay sizes
 =============
 
-**💡 In Unpoly 0.x, overlays grew with the size of the content.
+**💡 In Unpoly 1, overlays grew with the size of the content.
 This was impractical because a single long line of text would stretch the overlay to its maximum width.**
 
 Because of this most projects have configured modals to have a fixed size.
 Many projects also have hacks to open modals with different sizes.
 
-In Unpoly 1.0 all overlays have a given size that sets a maximum width:
+In Unpoly 2 all overlays have a given size that sets a maximum width:
 
 ```html
 <a href="/path" up-layer="new" up-size="small">open small modal</a>
@@ -957,9 +957,9 @@ up-modal[size=medium] up-modal-box {
 🥋 Dismissability can be fine-tuned
 ===================================
 
-In Unpoly 0.x you could prevent a user from closing a layer with the `{ closable: false }` option.
+In Unpoly 1 you could prevent a user from closing a layer with the `{ closable: false }` option.
 
-In Unpoly 1.0 you may choose which closing methods are available to the user:
+In Unpoly 2 you may choose which closing methods are available to the user:
 
 | Option                   | Effect                                           | Dismiss value |
 | ------------------------ | ------------------------------------------------ | ------------- |
@@ -975,7 +975,7 @@ You may also enable or disable *all* closing methods together with the `{ dismis
 New layer mode: Cover
 =====================
 
-`cover` is a new layer mode in Unpoly 1.0. It overlays the *entire* page, including application layout and scroll bar.
+`cover` is a new layer mode in Unpoly 2. It overlays the *entire* page, including application layout and scroll bar.
 
 ```html
 <a href="/path" up-layer="cover">
@@ -988,9 +988,9 @@ You often see cover overlays on mobile apps.
 History in overlays
 ===================
 
-In Unpoly 0.x you could use `{ history: true }` to open an overlay without updating the browser history. However, every user navigation within that overlay *would* affect history, unless you had `[up-history=false]` on *every* link. This is impractical, since a link should not need to know whether it is used within an overlay.
+In Unpoly 1 you could use `{ history: true }` to open an overlay without updating the browser history. However, every user navigation within that overlay *would* affect history, unless you had `[up-history=false]` on *every* link. This is impractical, since a link should not need to know whether it is used within an overlay.
 
-In Unpoly 1.0:
+In Unpoly 2:
 
 - When an overlay is opened without history, no contained link or form will never update history.
 - When an overlay without history opens another overlay, that other overlay will never update history.
@@ -1006,9 +1006,9 @@ In Unpoly 1.0:
 🥋 Async functions no longer wait for animations
 ================================================
 
-In Unpoly 0.x async functions didn't settle until animation fnished.
+In Unpoly 1 async functions didn't settle until animation fnished.
 
-Un Unpoly 1.0 Updates and removals settle as soon as the DOM was changed. Any animation will play out after settling.
+Un Unpoly 2 Updates and removals settle as soon as the DOM was changed. Any animation will play out after settling.
 
 This generally makes code more responsive:
 
@@ -1217,9 +1217,9 @@ Unpoly will enable/disable preloading as conditions change.
 Unified fragment update API
 ===========================
 
-Unpoly 0.x had a number of functions for updating fragments.
+Unpoly 1 had a number of functions for updating fragments.
 
-Unpoly 1.0 has unified these into a single function `up.render()`:
+Unpoly 2 has unified these into a single function `up.render()`:
 
 ```js
 up.visit('/path')                   => up.render({ url: '/path' })
@@ -1335,7 +1335,7 @@ There are countless alternatives:
 - [Balloon.css](https://kazzkiq.github.io/balloon.css/) (CSS only)
 - [Plain [title] attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/title) (built into the browser)
 
-Unpoly 1.0 will convert `[up-tooltip]` attributes to `[title]` attributes.
+Unpoly 2 will convert `[up-tooltip]` attributes to `[title]` attributes.
 
 
 Do you really want a tooltip?
@@ -1420,7 +1420,7 @@ Already backported to 0.62:
 Reworked Boostrap integration
 =============================
 
-Unpoly 1.0 now supports the three major Bootstrap versions we're using:
+Unpoly 2 now supports the three major Bootstrap versions we're using:
 
 - `unpoly-bootstrap3.js`
 - `unpoly-bootstrap3.css`
@@ -1436,7 +1436,7 @@ Integration is now minimal
 
 They ended up using their own configuration, which is much more minimal.
 
-Unpoly 1.0 now ships with a **minimal Bootstrap integration**:
+Unpoly 2 now ships with a **minimal Bootstrap integration**:
 
 This is all of `unpoly-boostrap4.js`:
 
@@ -1500,7 +1500,7 @@ In this example we have two links that replace `.card`:
 </div>
 ```
 
-When clicking "Sow full card #2", Unpoly 0.x would have replaced `.card`, matching the first card.
+When clicking "Sow full card #2", Unpoly 1 would have replaced `.card`, matching the first card.
 
 This makes it hard to use interactive components more than once in the same page.
 
@@ -1508,7 +1508,7 @@ This makes it hard to use interactive components more than once in the same page
 Introducing `:closest`
 ----------------------
 
-In Unpoly 1.0, links may refer to the closest ancestor with the experimental `:closest` pseudo class:
+In Unpoly 2, links may refer to the closest ancestor with the experimental `:closest` pseudo class:
 
 ```html
 <div class="card" id="card1">
@@ -1522,7 +1522,7 @@ In Unpoly 1.0, links may refer to the closest ancestor with the experimental `:c
 </div>
 ```
 
-When clicking *"Show full card #2"*, Unpoly 1.0 will replace `#card2` matching the second card.
+When clicking *"Show full card #2"*, Unpoly 2 will replace `#card2` matching the second card.
 
 While the card container still requires a unique selector (e.g. `[id=card1]`), none of the content elements do need to know about it.
 
@@ -1540,7 +1540,7 @@ This also works with descendant selectors:
 </div>
 ```
 
-When clicking *"Show card #2 links"*, Unpoly 1.0 will replace `#card2 .card-links`.
+When clicking *"Show card #2 links"*, Unpoly 2 will replace `#card2 .card-links`.
 
 
 
@@ -1614,7 +1614,7 @@ All scroll-related options (`{ reveal, resetScroll, restoreScroll }`) have been 
 
 | Option value        | Effect                                     |
 | ------------------- | ------------------------------------------ |
-| `'target'`          | Reveal the updated fragment (0.x default)  |
+| `'target'`          | Reveal the updated fragment (Unpoly 1 default)  |
 | `'top'`             | Scroll to the top                          |
 | `'restore'`         | Restore last known scroll position for URL |
 | `'hash'`            | Scroll to a #hash in the updated URL       |
@@ -1626,9 +1626,9 @@ All scroll-related options (`{ reveal, resetScroll, restoreScroll }`) have been 
 Calmer scrolling
 ================
 
-**💡 Unpoly 0.x scrolled too much.**
+**💡 Unpoly 1 scrolled too much.**
 
-Unpoly 1.0 no longer scrolls by default.
+Unpoly 2 no longer scrolls by default.
 
 Only when **navigating** the new default is `{ scroll: 'auto' }`, which *sometimes* scrolls:
 
@@ -1688,7 +1688,7 @@ Polling
 
 **💡️ Polling was a much-requested feature. Userland implementations often don't handle slow connections, failed requests or hidden browser tabs.**
 
-Unpoly 1.0 ships with a polling implementation that handles edge cases.
+Unpoly 2 ships with a polling implementation that handles edge cases.
 
 This reloads the fragment every 30 seconds:
 
@@ -1717,7 +1717,7 @@ Unpoly always had an *optional* protocol your server may use to exchange additio
 information when Unpoly is updating fragments. The protocol mostly works by adding
 additional HTTP headers (like `X-Up-Target`) to requests and responses.
 
-Unpoly 1.0 extends the optional protocol with additional headers that the server
+Unpoly 2 extends the optional protocol with additional headers that the server
 may use to interact with the frontend.
 
 The code examples on the following slides are for the `unpoly-rails` integration.
@@ -1796,18 +1796,18 @@ When Unpoly makes a request, it sends along meta information as request headers:
 
 ```http
 POST /notes HTTP/1.1
-X-Up-Version: 1.0
+X-Up-Version: 2.0
 X-Up-Target: foo
 X-Up-Mode: root
 ```
 
-In Unpoly 0.x, these headers were lost after a redirect.
+In Unpoly 1, these headers were lost after a redirect.
 Subsequent requests would see a non-Unpoly request.
 
-**In Unpoly 1.0 meta information is persisted across redirects.**
+**In Unpoly 2 meta information is persisted across redirects.**
 
 In the example below the `#create` action saves a `Note` record and redirects to
-that note's `#show` action. In Unpoly 1.0 the `#show` can still see if the
+that note's `#show` action. In Unpoly 2 the `#show` can still see if the
 original request to `#create` was made by Unpoly, and not render an unneeded layout:
 
 
@@ -1896,7 +1896,7 @@ end
 Renamed packages
 ================
 
-| Unpoly 0.x              | Unpoly 1.0 |
+| Unpoly 1              | Unpoly 2 |
 |-------------------------|-------------|
 | `up.proxy`              | `up.network` |
 | `up.modal`              | `up.layer`   |
