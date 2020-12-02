@@ -70,7 +70,7 @@ module Unpoly
           if hash.is_a?(ActiveSupport::HashWithIndifferentAccess)
             hash
           else
-            raise "Constructor args must be an ActiveSupport::HashWithIndifferentaccess"
+            raise Error, "Constructor args must be an ActiveSupport::HashWithIndifferentaccess"
           end
         end
 

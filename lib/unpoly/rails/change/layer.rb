@@ -2,6 +2,7 @@ module Unpoly
   module Rails
     class Change
       class Layer
+        class CannotClose < Error; end
 
         def initialize(change, mode:, context:)
           @change = change
@@ -38,12 +39,14 @@ module Unpoly
         ##
         # TODO: Docs
         def accept(value = nil)
+          overlay? or raise CannotClose, 'Cannot accept the root layer'
           change.response.headers['X-Up-Accept-Layer'] = value.to_json
         end
 
         ##
         # TODO: Docs
         def dismiss(value = nil)
+          overlay? or raise CannotClose, 'Cannot dismiss the root layer'
           change.response.headers['X-Up-Dismiss-Layer'] = value.to_json
         end
 
