@@ -20,7 +20,10 @@ TODOs
 
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
+  - non-HTML antworten müssen OK sein für target: ':none'
+    - wie mach ich das denn
   - up:fragment:unusable erst nach up:fragment:loaded emitten
+  -
 
 
 Manual tests
