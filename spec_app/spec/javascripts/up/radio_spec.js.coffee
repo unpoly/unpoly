@@ -243,6 +243,23 @@ describe 'up.radio', ->
         next.after 75, ->
           expect(reloadSpy.calls.count()).toBe(1)
 
+      it 'stops polling when the element is destroyed while waiting for a previous request (bugfix)', asyncSpec (next) ->
+        up.radio.config.pollInterval = 75
+        respond = null
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return new Promise((resolve) -> respond = resolve)
+
+        element = up.hello(fixture('.element[up-poll]'))
+
+        next.after 125, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+          up.destroy(element)
+
+        next ->
+          respond()
+
+        next.after 125, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+
       it 'allows to pass a polling interval per [up-interval] attribute', asyncSpec (next) ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
 

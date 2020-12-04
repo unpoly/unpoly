@@ -58,6 +58,7 @@ up.radio = do ->
   startPolling = (element, options = {}) ->
     interval = options.interval ? e.numberAttr(element, 'up-interval') ? config.pollInterval
     timer = null
+    running = true
 
     doReload = ->
       if document.hidden
@@ -66,11 +67,14 @@ up.radio = do ->
         u.always(up.reload(element, options), doSchedule)
 
     doSchedule = ->
-      timer = setTimeout(doReload, interval)
+      if running
+        timer = setTimeout(doReload, interval)
 
     doSchedule()
 
-    return -> clearTimeout(timer)
+    return ->
+      running = false     # Stop scheduling if we're waiting for a response
+      clearTimeout(timer) # Stop a scheduled timer
 
   ###**
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
