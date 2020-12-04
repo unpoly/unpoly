@@ -83,6 +83,7 @@ Quality of live improvements
 - Calmer scrolling.
 - Polling.
 - New `:closest` selector for targeting self-contained components.
+- Preloading eats less bandwidth and server resources
 
 
 Changes ahead, but don't panic!
