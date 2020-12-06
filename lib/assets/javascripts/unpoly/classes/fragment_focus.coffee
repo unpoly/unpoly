@@ -24,10 +24,7 @@ class up.FragmentFocus extends up.Record
       when 'target'
         return @focusElement(@fragment)
       when 'layer'
-        # One could argue that this should focus @fragment == @layer.getFirstSwappableElement() instead.
-        # However, @layer.element is already given a focusable [tabindex] (attr set by up.OverlayFocus#moveToFront()),
-        # while @fragment has no [tabindex] yet.
-        return @focusElement(@layer.element)
+        return @focusElement(@layer.getFocusElement())
       when 'autofocus'
         return @autofocus()
       when 'autofocus-if-enabled'

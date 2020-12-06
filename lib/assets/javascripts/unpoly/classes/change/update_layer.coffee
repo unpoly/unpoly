@@ -106,7 +106,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
             beforeStart: ->
               up.fragment.markAsDestroying(step.oldElement)
             afterInsert: =>
-              @responseDoc.activateElement(step.newElement, step)
+              @responseDoc.finalizeElement(step.newElement)
+              up.hello(step.newElement, step)
             beforeDetach: =>
               up.syntax.clean(step.oldElement, { @layer })
             afterDetach: ->
@@ -142,8 +143,9 @@ class up.Change.UpdateLayer extends up.Change.Addition
           step.oldElement.insertAdjacentElement('beforeend', wrapper)
 
         for child in wrapper.children
+          @responseDoc.finalizeElement(child)
           # Compile the new content and emit up:fragment:inserted.
-          @responseDoc.activateElement(child, step)
+          up.hello(child, step)
 
         @handleFocus(wrapper, step)
 

@@ -1030,6 +1030,26 @@ describe 'up.link', ->
               expect('.target').toHaveText('new target')
               expect('.fallback').toHaveText('old fallback')
 
+        describe 'with [up-content] modifier', ->
+
+          it 'updates a fragment with the given inner HTML string', asyncSpec (next) ->
+            target = fixture('.target', text: 'old content')
+            link = fixture('a[up-target=".target"][up-content="new content"]')
+
+            Trigger.clickSequence(link)
+
+            next ->
+              expect('.target').toHaveText('new content')
+
+          it 'updates a fragment with the given inner HTML string when the element also has an [href="#"] attribute (bugfix)', asyncSpec (next) ->
+            target = fixture('.target', text: 'old content')
+            link = fixture('a[href="#"][up-target=".target"][up-content="new content"]')
+
+            Trigger.clickSequence(link)
+
+            next ->
+              expect('.target').toHaveText('new content')
+
       it 'does not add a history entry when an up-history attribute is set to "false"', asyncSpec (next) ->
         up.history.config.enabled = true
 
@@ -1558,3 +1578,19 @@ describe 'up.link', ->
 
         next ->
           expect(listener).not.toHaveBeenCalled()
+
+  describe '[up-clickable]', ->
+
+    it 'makes the element emit up:click events on Enter', ->
+      fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+      clickListener = jasmine.createSpy('up:click listener')
+      fauxLink.addEventListener('up:click', clickListener)
+
+      Trigger.keySequence(fauxLink, 'Enter')
+
+      expect(clickListener).toHaveBeenCalled()
+
+    it 'makes the element focusable for keyboard users', ->
+      fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+
+      expect(fauxLink).toBeKeyboardFocusable()

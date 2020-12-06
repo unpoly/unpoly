@@ -20,7 +20,5 @@ up.rails = do ->
 
     up.macro "[#{dataAttribute}]", (element) ->
       if isRails() && up.link.isFollowable(element)
-        replacement = {}
-        replacement[upAttribute] = element.getAttribute(dataAttribute)
-        e.setMissingAttrs(element, replacement)
+        e.setMissingAttr(element, upAttribute, element.getAttribute(dataAttribute))
         element.removeAttribute(dataAttribute)

@@ -2953,7 +2953,7 @@ describe 'up.fragment', ->
               up.render('.overlay', focus: 'layer', content: 'new overlay text')
 
             next ->
-              expect(up.layer.front.element).toBeFocused()
+              expect(up.layer.front).toBeFocused()
 
       describe 'with { guardEvent } option', ->
 

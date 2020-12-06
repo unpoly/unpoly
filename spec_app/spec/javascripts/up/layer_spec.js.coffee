@@ -163,7 +163,7 @@ describe 'up.layer', ->
 
         it "focuses the new overlay's element", (done) ->
           assertFocus = ->
-            expect(up.layer.element).toBeFocused()
+            expect(up.layer.current).toBeFocused()
             done()
 
           up.layer.open(target: '.element', onFinished: assertFocus)

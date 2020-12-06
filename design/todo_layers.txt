@@ -18,11 +18,78 @@ TODOs
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
 
+- Context is not UJS
+  - Consider removing server-side changes
+
+- Should we cache responses with X-Up-Target: :none ?
+
+- If we make a request without caching, should we remove a matching cache entry?
+  - E.g. we navigate to /foo
+  - Then we reload /foo through polling
+  - But polling does not write to the cache, since reloading doesn't cache
+  - I navigate to /bar
+  - I navigate to /foo
+  - I see the old version
+
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
   - non-HTML antworten müssen OK sein für target: ':none'
     - wie mach ich das denn
   - up:fragment:unusable erst nach up:fragment:loaded emitten
+  - bringt mir up:fragment:unusable wirklich was?
+  => löschen
+
+- Polling
+      X-Up-Reload-From: Tue, 15 Nov 1994 12:45:26 GMT
+
+      Caching ist aus bei reload, d.h. über Cache Keys muss ich mir keine Gedanken machen!
+
+      def inbox
+        if up.reloading? && up.reload_from < current_user.last_message_at
+          up.render_nothing
+        else
+          render 'messages'
+        end
+      end
+
+      def inbox
+        if up.reloading_from_before?(current_user.last_message_at)
+          up.render_nothing
+        else
+          render 'messages'
+        end
+      end
+
+      <div class="foo" up-source="/messages" up-time="243254543">
+
+- Caching
+  - up.cache.clear('/users/*')
+  - Protokoll ändern von `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
+  - up.Request#matchURL('/users/*')
+    - or up.util.matchURL
+    - or publish URLPattern
+  - up.network.config.clearCache = (request) -> if (!request.isSafe()) { return '*' }
+  - up.network.config.clearCache = function(request) {
+      if (!request.isSafe()) return '*'
+      if (request.matchURL('/users/search')) return '/users/*'
+    }
+  - Die { cache }-Option aufteilen
+    - { readCache: 'auto' }    auto oder true: wenn cachable
+    - { writeCache: 'auto' }   auto oder true: wenn cachable
+    - { clearCache: 'auto' }   auto: clearCacheScope wird immer angewendet, außer Server schickt X-Up-Clear-Cache
+    - { clearCache } ist immer auf auto
+    - { cache: true } setzt { readCache: true, writeCache: true }
+  - up.reload() setzt { writeCache: true }
+  - Weiterhin automatisch:
+    - { writeCache: true } speichert keine unsafen requests
+    - { writeCache: true } speichert keine requests mit target: ':none'
+    - { writeCache: true } speichert keine failed requests
+    - evtl. auch konfigurierbar machen mit config.isCachable: (request) -> ...
+  - server kann auch schicken
+    - X-Up-Clear-Cache: /users/*
+    - wenn der server-schickt müssen wir das clearen des caches auf nach der response verschieben
+  - wir brauchen dann [up-read-cache], [up-write-cache], [up-clear-cache]
+  - { clearCache } müsste per default an sein, auch ohne { navigate }
   -
 
 

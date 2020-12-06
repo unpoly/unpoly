@@ -77,9 +77,6 @@ class up.ResponseDoc
   select: (selector) ->
     e.subtree(@root, selector)[0]
 
-  activateElement: (element, options) ->
-    # Restore <noscript> tags so they become available to compilers
+  finalizeElement: (element) ->
+    # Restore <noscript> tags so they become available to compilers.
     @noscriptWrapper.unwrap(element)
-
-    # Compile the new fragment
-    up.hello(element, options)

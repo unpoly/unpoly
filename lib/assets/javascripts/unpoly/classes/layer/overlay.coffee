@@ -99,7 +99,6 @@ class up.Layer.Overlay extends up.Layer
     @dismissElement = @affixPart(parentElement, 'dismiss',
       'up-dismiss': '":button"' # value must be JSON
       'aria-label': @dismissAriaLabel
-      'tabindex': '0'
     )
     # Since the dismiss button already has an accessible [aria-label]
     # we hide the "X" label from screen readers.

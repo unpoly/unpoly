@@ -752,8 +752,11 @@ up.element = do ->
   ###
   setMissingAttrs = (element, attrs) ->
     for key, value of attrs
-      if u.isMissing(element.getAttribute(key))
-        element.setAttribute(key, value)
+      setMissingAttr(element, key, value)
+
+  setMissingAttr = (element, key, value) ->
+    if u.isMissing(element.getAttribute(key))
+      element.setAttribute(key, value)
 
   ###**
   @function up.element.unwrap
@@ -1158,6 +1161,7 @@ up.element = do ->
     hasCSSTransition: hasCSSTransition # internal
     fixedToAbsolute: fixedToAbsolute # internal
     setMissingAttrs: setMissingAttrs # internal
+    setMissingAttr: setMissingAttr # internal
     unwrap: unwrap # practical for jQuery migration
     # presentAttr: presentAttr # experimental
     attr: stringAttr

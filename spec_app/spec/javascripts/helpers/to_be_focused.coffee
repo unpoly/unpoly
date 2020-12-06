@@ -4,8 +4,9 @@ $ = jQuery
 beforeEach ->
   jasmine.addMatchers
     toBeFocused: (util, customEqualityTesters) ->
-      compare: (elementOrSelector) ->
-        element = up.element.get(elementOrSelector)
+      compare: (element) ->
+        if element instanceof up.Layer
+          element = element.getFocusElement()
+        else
+          element = up.element.get(element)
         pass: element && document.activeElement == element
-
-

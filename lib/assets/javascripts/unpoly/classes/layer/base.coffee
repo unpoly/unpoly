@@ -336,6 +336,9 @@ class up.Layer extends up.Record
   getBoxElement: ->
     @boxElement || @element
 
+  getFocusElement: ->
+    @getBoxElement()
+
   getFirstSwappableElement: ->
     throw up.error.notImplemented()
 

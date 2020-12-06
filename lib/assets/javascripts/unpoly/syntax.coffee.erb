@@ -26,6 +26,7 @@ up.syntax = do ->
 
   SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100        # sets [up-href] to previous URL
+    '[up-content]': -200     # A11y for link-like elements
     '[up-drawer]': -200      #
     '[up-modal]': -200       #
     '[up-cover]': -200       #
@@ -300,6 +301,7 @@ up.syntax = do ->
     macro
 
   detectSystemMacroPriority = (macroSelector) ->
+    macroSelector = u.evalOption(macroSelector)
     for substr, priority of SYSTEM_MACRO_PRIORITIES
       if macroSelector.indexOf(substr) >= 0
         return priority

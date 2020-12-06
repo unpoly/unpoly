@@ -137,6 +137,8 @@ module Unpoly
         validate.present?
       end
 
+      alias validating? validate?
+
       ##
       # If the current form submission is a [validation](https://unpoly.com/input-up-validate),
       # this returns the name attribute of the form field that has triggered
@@ -145,7 +147,7 @@ module Unpoly
         validate_from_request
       end
 
-      alias :validate_name :validate
+      alias validate_name validate
 
       ##
       # TODO: Docs

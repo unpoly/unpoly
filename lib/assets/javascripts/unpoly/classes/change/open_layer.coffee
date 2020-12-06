@@ -78,8 +78,12 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Remember where the element came from to support up.reload(element).
     @setSource({ newElement: @content, @source })
 
-    # Compile the new content and emit up:fragment:inserted.
-    responseDoc.activateElement(@content, { @layer, @origin })
+    # Unwrap <noscript> tags
+    responseDoc.finalizeElement(@content)
+
+    # Compile the entire layer, not just the user content.
+    # E.g. [up-dismiss] in the layer elements needs to go through a macro.
+    up.hello(@layer.element, { @layer, @origin })
 
     # The server may trigger multiple signals that may cause the layer to close:
     #

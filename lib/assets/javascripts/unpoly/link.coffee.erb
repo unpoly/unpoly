@@ -98,6 +98,7 @@ up.link = do ->
     followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML).concat(LINKS_WITH_LOCAL_HTML)
     instantSelectors: [e.trueAttributeSelector('up-instant')]
     preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
+    clickableSelectors: LINKS_WITH_LOCAL_HTML.concat ['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']
 
   fullFollowSelector = ->
     config.followSelectors.join(',')
@@ -107,6 +108,9 @@ up.link = do ->
 
   fullInstantSelector = ->
     config.instantSelectors.join(',')
+
+  fullClickableSelector = ->
+    config.clickableSelectors.join(',')
 
   isInstant = (linkOrDescendant) ->
     !!e.closest(linkOrDescendant, fullInstantSelector())
@@ -198,30 +202,35 @@ up.link = do ->
 
     # Request options
     parser.string('url', attr: ['up-href', 'href']) # preflight / same
-    options.method = followMethod(link, options)    # preflight / same
-    parser.json('headers')       # preflight / same
-    parser.json('params')        # preflight / same
-    parser.booleanOrString('cache')      # preflight / same
-    parser.boolean('solo')       # preflight / same
+    # Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
+    # link behavior (keyboard navigation). However, we don't want to consider this
+    # a link with remote content, and rather honor [up-content], [up-document] and
+    # [up-fragment] attributes.
+    options.url = undefined if options.url == '#'
+    options.method = followMethod(link, options)
+    parser.json('headers')
+    parser.json('params')
+    parser.booleanOrString('cache')
+    parser.boolean('solo')
 
     # Feedback options
-    parser.boolean('feedback')   # preflight / same
+    parser.boolean('feedback')
 
     # Fragment options
     parser.boolean('fail')
-    parser.options.origin ?= link              #  preflight / same
-    parser.boolean('navigate', default: true)  # macro
-    parser.string('confirm')                   #  preflight / same
-    parser.string('target')                    # differs
-    parser.booleanOrString('fallback')         # inherit,
+    parser.options.origin ?= link
+    parser.boolean('navigate', default: true)
+    parser.string('confirm')
+    parser.string('target')
+    parser.booleanOrString('fallback')
     parser.parse(((link, attrName) -> e.callbackAttr(link, attrName, ['request', 'response', 'renderOptions'])), 'onLoaded') # same
-    parser.string('content')                   # no fail branch when passing local content
-    parser.string('fragment')                  # no fail branch when passing local content
-    parser.string('document')                  # no fail branch when passing local content
+    parser.string('content')
+    parser.string('fragment')
+    parser.string('document')
 
     # Layer options
-    parser.boolean('peel') # inherit
-    parser.string('layer') # differ
+    parser.boolean('peel')
+    parser.string('layer')
     parser.json('context')
     parser.string('flavor') # Renamed to { mode }. Legacy calls handled by up.layer.normalizeOptions.
     parser.string('mode')
@@ -245,31 +254,31 @@ up.link = do ->
     parser.string('dismissLocation')
 
     # Viewport options
-    parser.booleanOrString('focus')   # differs
-    parser.boolean('saveScroll')      # inherits
+    parser.booleanOrString('focus')
+    parser.boolean('saveScroll')
     parser.booleanOrString('scroll')
     parser.booleanOrString('reveal')  # legacy option for { scroll: 'target' }
     parser.boolean('resetScroll')     # legacy option for { scroll: 'top' }
     parser.boolean('restoreScroll')   # legacy option for { scroll: 'restore' }
 
-    parser.boolean('revealTop')       # differs
-    parser.number('revealMax')        # differs
-    parser.number('revealPadding')    # differs
-    parser.number('revealSnap')       # differs
-    parser.string('scrollBehavior')   #
+    parser.boolean('revealTop')
+    parser.number('revealMax')
+    parser.number('revealPadding')
+    parser.number('revealSnap')
+    parser.string('scrollBehavior')
 
     # History options
     # { history } is actually a boolean, but we keep the deprecated string
     # variant which should now be passed as { location }.
-    parser.booleanOrString('history')   # inherits
-    parser.booleanOrString('location')  # inherits
-    parser.booleanOrString('title')     # inherits
+    parser.booleanOrString('history')
+    parser.booleanOrString('location')
+    parser.booleanOrString('title')
 
     # Motion options
-    parser.booleanOrString('animation')  # differs
-    parser.booleanOrString('transition') # differs
-    parser.string('easing')              # inherits
-    parser.number('duration')            # inheirts
+    parser.booleanOrString('animation')
+    parser.booleanOrString('transition')
+    parser.string('easing')
+    parser.number('duration')
 
     # This is the event that may be prevented to stop the follow.
     # up.form.submit() changes this to be up:form:submit instead.
@@ -392,6 +401,26 @@ up.link = do ->
     unless isFollowable(link)
       link.setAttribute('up-follow', '')
 
+  # TODO: Document up.link.makeClickable
+  makeClickable = (link) ->
+    if e.matches(link, 'a[href], button')
+      return
+
+    e.setMissingAttrs(link, {
+      tabindex: '0' # Make them part of the natural tab order
+      role: 'link'  # Make screen readers pronounce "link"
+    })
+
+    link.addEventListener 'keydown', (event) ->
+      if event.key == 'Enter' || event.key == 'Space'
+        forkEventAsUpClick(event)
+
+
+  # Support keyboard navigation for elements that behave like links
+  # or buttons, but  aren't <a href> or <button> elements..
+  # TODO: Document [up-clickable]
+  up.macro(fullClickableSelector, makeClickable)
+
   shouldFollowEvent = (event, link) ->
     # We never handle events for the right mouse button, or when Shift/CTRL/Meta/ALT is pressed
     return false unless up.event.isUnmodified(event)
@@ -434,7 +463,7 @@ up.link = do ->
       # Ignore that event and only process if we would still hit the
       # expect layers at the click coordinates.
       else if layer.wasHitByMouseEvent(event)
-        convertClick(event)
+        forkEventAsUpClick(event)
 
     layer.on 'mousedown', (event, element) ->
       if isInstant(element)
@@ -442,9 +471,9 @@ up.link = do ->
         # We also don't want to listen to the enter key, since some screen readers
         # use the enter key for something else.
         element.upInstantSupported = true
-        convertClick(event)
+        forkEventAsUpClick(event)
 
-  convertClick = (originalEvent) ->
+  forkEventAsUpClick = (originalEvent) ->
     newEvent = up.event.fork(originalEvent, 'up:click', ['clientX', 'clientY', 'button', up.event.keyModifiers...])
     up.emit(originalEvent.target, newEvent, log: false)
 
@@ -816,6 +845,7 @@ up.link = do ->
   followOptions: followOptions
   preload: preload
   makeFollowable: makeFollowable
+  makeClickable: makeClickable
   isSafe: isSafe
   isFollowable: isFollowable
   shouldFollowEvent: shouldFollowEvent
