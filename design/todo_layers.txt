@@ -62,6 +62,8 @@ TODOs
 
       <div class="foo" up-source="/messages" up-time="243254543">
 
+
+
 - Allow to disable polling if slow
   - rename config.preloadMinDownlink => config.slowDownlink
   - rename config.preloadMaxRTT => config.slowRTT
@@ -78,6 +80,29 @@ TODOs
       if (!request.isSafe()) return '*'
       if (request.matchURL('/users/search')) return '/users/*'
     }
+
+    Kein guter Use case außer für Search
+
+    up.cache.keep sends X-Up-Clear-Cache: false ?
+
+    ```
+    def NotesController < ApplcationController
+
+      def create
+        note = Note.create!(params[:note].permit(...))
+        if note.save
+          up.cache.clear('/notes/*')
+          redirect_to(note)
+        else
+          up.cache.keep
+          render 'new'
+        end
+      end
+
+      ...
+    end
+    ```
+
   - Die { cache }-Option aufteilen
     - { readCache: 'auto' }    auto oder true: wenn cachable
     - { writeCache: 'auto' }   auto oder true: wenn cachable
@@ -95,7 +120,7 @@ TODOs
     - wenn der server-schickt müssen wir das clearen des caches auf nach der response verschieben
   - wir brauchen dann [up-read-cache], [up-write-cache], [up-clear-cache]
   - { clearCache } müsste per default an sein, auch ohne { navigate }
-  -
+
 
 
 Manual tests
