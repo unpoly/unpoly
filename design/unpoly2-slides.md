@@ -310,6 +310,8 @@ Demo of new layer implementation
 - Show returning with value
 - Show isolation
 
+TODO: Fill demo database with factory data
+
 
 New layer terminology
 ======================
@@ -390,6 +392,19 @@ When updating fragments you have two additional options:
 
 
 
+Only look at `{ layer }`
+------------------------
+
+We want you to look at a single attribute `[up-layer]` to know what layer is going to be updated.
+
+`[up-popup]` is deprecated. Use `[up-layer=popup]` instead.
+
+`[up-modal]` is deprecated. Use `[up-layer=modal]` or `[up-layer=new]` instead.\
+You can configure the mode for `[up-layer=new]` in `up.layer.config.mode`.
+
+
+
+
 Most events are associated with a layer
 ======================================
 
@@ -411,13 +426,6 @@ up.layer.emit('may:event')  // emit my:event on the layer element
 ```
 
 
-
-Deprecated macros
------------------
-
-`[up-modal]` is deprecated. Use `[up-layer=modal]` or `[up-layer=new]` instead.
-
-`[up-popup]` is deprecated. Use `[up-layer=popup]` instead.
 
 
 
@@ -658,8 +666,8 @@ up.layer.open({
 })
 ```
 
-Overlays as promises
---------------------
+Overlays as async operations
+----------------------------
 
 You can think of overlays as async [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 which may either be fulfilled (accepted) or rejected (dismissed).
@@ -679,7 +687,7 @@ console.log("New user is " + user)
 🥋 Layer context
 ================
 
-"Ab hier immer durchschleifen"
+TODO: "Ab hier immer durchschleifen"
 
 The web platform gives you several tools to persist state across requests:
 
@@ -739,13 +747,31 @@ end
 Use case: Re-using interactions in an overlay, but with a variation
 -------------------------------------------------------------------
 
-This is useful when you want to re-use an existing interaction in an overlay, but make a slight variation:
+Context is useful when you want to re-use an existing interaction in an overlay, but make a slight variation.
 
-```html
-<a href='/contacts' up-layer='new' up-context='{ "project": "Hosting 2021" }'>
-  Pick a contact for this project
-</a>
+- Assume you want to re-use your existing contacts index for a contact picker widget.
+- The contact picker opens the context index in an overlay where the user can choose a contact.
+- In this case the contact index should show an additional message "Pick a context for project Foo", replacing `Foo` with the actual name of the project.
+
+We can implement such an contact picker with this ERB template:
+
+```erb
+<% form_for @project do |form| %>
+
+  Contact: <%= form.object.contact %>
+
+  <a href='/contacts'
+    up-layer='new'
+    up-accept-location='/contacts/*'
+    up-context='<%= { project: @project.name }.to_json %>'>
+    Pick a contact
+  </a>
+
+  ...
+<% end %>
 ```
+
+Our effective contact object would now be something like `{ project: 'Hosting 2021' }`.
 
 In `/contacts/index.erb`:
 
@@ -760,7 +786,6 @@ In `/contacts/index.erb`:
   <li>...</li>
 <% end %>  
 ```
-
 
 
 🥋 Accessing the current layer
@@ -1087,55 +1112,95 @@ up.network.config.metaKeys = function(request) {
 }
 ```
 
-
+TODO: up.network.config.clearCache
 
 
 
 Navigation intent
 =================
 
-Learning: Not all fragment updates are user navigation.
+**💡 Not all fragment updates are user navigation.**
 
-There is a fundamental difference:
+When Unpoly 1 updates fragment, it applies many opinionated defaults:
 
-- User follows a link
-- Updating a message count every 60 seconds
+- Update the browser location
+- Scroll to reveal the new fragment
+- Cache responses for 5 minutes
+- Replace `<body>` for unexpected responses
 
-People tried to replace a box on the screen, but needed many option to disable scrolling, etc.
+While these are good defaults when the user follows a link a to *navigate* to a new screen,
+they get in the way when you only want to update a small box.
 
-up.render(options) does not navigate by default. Use up.navigate(options) or up.render({ ...options, navigate: true }).
-
-THE POINTS BELOW NO LONGER CORRECT!
-
-E.g. when updating a message counter:
+So actual usage often looked like this:
 
 ```js
-up.render({ target: '.unread-count', navigate: true })
+up.replace('.message-count', '/inbox', {
+  cache: false,    // opt out of caching
+  history: false,  // opt out of history
+  reveal: false,   // opt out of scrolling
+  fallback: false  // opt out of fallback targets
+})
 ```
 
-This will set multiple options:
 
-| Setting           | Effect                                             |
-| ----------------- | -------------------------------------------------- |
-| `history: false`  | Don't update URL bar or document title             |
-| `solo: false`     | Don't cancel existing requests                     |
-| `reveal: false`   | Don't scroll to the new element                    |
-| `peel: false`     | Don't close overlays when targeting a veiled layer |
-| `feedback: false` | Don't set .up-active on the origin link            |
-| `focus: false`    | Don't focus ater update                            |
+Defaults in Unpoly 2
+=====================
+
+When updating a fragment in Unpoly 2 with `up.render()`, you will get very few defaults:
+
+```js
+// Will not update history, will not scroll, etc.
+up.render('.message-count', { url: '/inbox' })
+```
+
+Options are now **opt-in** instead of **opt-out**:
+
+```js
+// Will update history, but not scroll, etc.
+up.render('.message-count', { url: '/inbox', history: true })
+```
+
+Navigation defaults
+===================
+
+You can opt into *all* navigation defaults with `{ navigate: true }`:
+
+```js
+// Will update history, will scroll, etc.
+up.render('.message-count', { url: '/inbox', navigate: true })
+```
+
+
+| Option         | Effect                                       | Default | Navigation default |
+| -------------- | -------------------------------------------- | ------- | ------------------ |
+| `{ solo }`     | Cancel existing requests                     | `false` | `true`             |
+| `{ peel }`     | Close overlays when targeting a layer below  | `false` | `true`             |
+| `{ feedback }` | Set `.up-active` on the activated link       | `false` | `true`             |
+| `{ fallback }` | Update `<body>` for unexpected responses     | `false` | `true`             |
+| `{ cache }`    | Cache responses for 5 minutes                | `false` | `true`             |
+| `{ history }`  | Update browser location and window title     | `false` | `'auto'`           |
+| `{ scroll }`   | Scroll to the new element                    | `false` | `'auto'`           |
+| `{ focus }`    | Focus ater update                            | `false` | `'auto'`           |
+
+You can configure your navigation defaults with `up.fragment.config.navigateOptions`.
+
+**Following links and form submissions are still considered navigation by default**.\
+You can opt out with the `[up-navigate=false]` attribute.
 
 
 
-| Setting          | Effect                                         |
-| ---------------- | ---------------------------------------------- |
-| `focus: 'auto'`  | Focus [autofocus] elements or new layers       |
-| `scroll: 'auto'` | Reset scroll positions when updating [up-main] |
-| `solo: true`     | Abort unfinished requests                      |
-| `feedback: true` | Mark clicked links as .up-active while loading |
-| `fallback: true` |                                                |
+Navigation shorthand
+--------------------
+
+Instead of `up.render({ navigate: true })` you may also use `up.navigate()`:
+
+```js
+// Will update history, will scroll, etc.
+up.navigate('.message-count', { url: '/inbox' })
+```
 
 
-Configure with `up.fragment.config.navigateOptions`
+
 
 
 
@@ -1164,7 +1229,6 @@ You may disable this with `{ solo: false }` (JS) or `[up-solo="false"]` (HTML)
 
 
 
-
 Smarter bandwidth usage
 =======================
 
@@ -1173,6 +1237,7 @@ Smarter bandwidth usage
 - Preload requests are aborted as the user un-hovers the link
 - There is a single concurrency setting (default 4) for both regular requests and preload requests.
 - Preload starts on mousedown and touchstart
+- Bandwidth-friendly polling implementation (see below)
 
 
 Slow connection?
@@ -1181,8 +1246,8 @@ Slow connection?
 We consider a connection to be slow if at least one of these conditions are true:
 
 - User has data saving enabled ("Lite mode" in Chrome)
-- RTT >= 750 ms (`up.network.config.preloadMaxRTT`)
-- Downlink <= 600 Kbps (`up.network.config.preloadMinDownlink`)
+- TCP Round Trip Time is >= 750 ms (`up.network.config.slowRTT`)
+- Downlink is <= 600 Kbps (`up.network.config.slownDownlink`)
 
 The values above may change during a session.
 Unpoly will enable/disable preloading as conditions change.
@@ -1302,16 +1367,52 @@ up.on('up:link:follow', 'a[authorize]', async function(event) {
 ```
 
 
+
+
+🥋 Content Security Policy
+==========================
+
+By choosing a strict CSP, you also decide against using event handlers in your HTML.
+
+Handlers like `[up-on-accepted]` cannot work with CSP:
+
+```html
+<a href="/contacts/new"
+  up-layer="new"
+  up-accept-location="/contacts/$id"
+  up-on-accepted="up.reload('.table')">
+  ...
+</a>  
+```
+
+You will need to move your JavaScript code into your JavaScript sources.
+This is easier now that event handlers can change render options:
+
+```html
+<a href="/contacts/new" class="add-contact" up-follow>...</a>
+```
+
+```js
+up.on('up:link:follow', '.add-contact', function(event) {
+  event.renderOptions.layer = 'new'
+  event.renderOptions.acceptLocation = '/contacts/$id'
+  event.renderOptions.onAccepted = (event) => up.reload('.table')
+})
+```
+
+
+
+
 🥋 up.request() rework
 ======================
 
 Unpoly 1 had a `up.request()` method to fetch HTML fragments for manual insertion.
 
-What `up.request()` was often used for instead:
+**💡️ What `up.request()` was often used for instead:**
 
-- A cross-browser alternative to jQuery's `$.ajax()`
-- A cross-browser alternative to `fetch()` with a slightly nicer API
-- To fetch JSON from APIs.
+- **A cross-browser alternative to jQuery's `$.ajax()`**
+- **A cross-browser alternative to `fetch()` with a slightly nicer API**
+- **To fetch JSON from APIs.**
 
 Actual usage would often look like this:
 
@@ -1346,6 +1447,16 @@ console.log(response.json)
 Return value contains information about the request
 --------------------------------------------------
 
+```js
+let request = up.request('/api/v3/foo')
+console.log(request.method) // logs "GET"
+
+// The request is also a promise for its response.
+let response = await request
+console.log(response.text)
+```
+
+
 
 Requests are abortable
 ----------------------
@@ -1357,7 +1468,7 @@ let request = up.request('/api/v3/foo')
 request.abort()
 ```
 
-Emits a new event `up:layer:aborted`.
+This emits a new event `up:layer:aborted`.
 
 We already learnt that user navigation now aborts existing requests.
 You may opt in and out of this with the `{ solo }` flag.
@@ -1369,7 +1480,7 @@ You may opt in and out of this with the `{ solo }` flag.
 Tooltips are gone
 =================
 
-The tooltip component has been removed from Unpoly.
+The tooltip component has been removed from Unpoly 2.
 
 We want to focus on things that are hard to implement in userland.
 
@@ -1430,6 +1541,10 @@ There is also `up:fragment:unusable` in case the server responds with non-HTML c
 Accessibility
 =============
 
+Demo with VoiceVox on LTS
+
+Show code onclick example with many A11y problems
+
 Explain how important focus is to A11y.
 
 `[up-nav]` sets `[aria-current]`
@@ -1482,11 +1597,11 @@ Unpoly 2 now supports the three major Bootstrap versions we're using:
 Integration is now minimal
 --------------------------
 
-**💡 Many projects didn't end up using the built-in Bootstrap integration, because it was too opinionated. E.g. Unpoly tried to re-use the Bootstrap modal styles, but most projects simply wanted the white box from the Unpoly default.**
+**💡 Many projects didn't end up using the built-in Bootstrap integration, because it was too opinionated.**
 
-They ended up using their own configuration, which was much more minimal.
+E.g. Unpoly tried to re-use the Bootstrap modal styles, but most projects simply wanted the white box from the Unpoly default. Projects ended up using their own configuration, which was much more minimal.
 
-Unpoly 2 now ships with a **minimal Bootstrap integration**:
+Unpoly 2 now ships with a **unopinionated Bootstrap integration**:
 
 This is all of `unpoly-boostrap4.js`:
 
@@ -1606,12 +1721,13 @@ New log
 
 - Flat
 - Function is highlighted at the beginning
+- Show screenshot
 
 
 🥋 up:click
 ===========
 
-Pain point: Userland code wants to handle `click`, but elements with [up-intant] activate on `mousedown`.
+Pain point: Userland code wants to handle `click`, but elements with [up-instant] activate on `mousedown`.
 
 `up:click` is a `click` event that honors the [`[up-instant]`](/a-up-instant) attribute.
 
@@ -1655,6 +1771,9 @@ Accessibility
 If the user activates an element using their keyboard, the `up:click` event will be emitted
 on `click`, even if the element has an `[up-instant]` attribute.
 
+TODO: [up-clickable]
+
+
 
 
 Unified scroll options
@@ -1668,7 +1787,7 @@ All scroll-related options (`{ reveal, resetScroll, restoreScroll }`) have been 
 | `'top'`             | Scroll to the top                               |
 | `'restore'`         | Restore last known scroll position for URL      |
 | `'hash'`            | Scroll to a #hash in the updated URL            |
-| `Function(options)` | Pass your own scrolling *logic                  |
+| `Function(options)` | Pass your own scrolling logic                   |
 | `false`             | Don't scroll                                    |
 | `'auto'`            | Scroll to the top **if** updating a main target (see below) |
 
@@ -1677,6 +1796,8 @@ Calmer scrolling
 ================
 
 **💡 Unpoly 1 scrolled too much.**
+
+TODO: Explain why Unpoly 1 reveals by default
 
 Unpoly 2 no longer scrolls by default.
 
@@ -1701,42 +1822,10 @@ Only when **navigating** the new default is `{ scroll: 'auto' }`, which *sometim
 | `{ scrollSpeed }`    | Acceleration of smooth scrolling              | `1` (mimic Chrome)      |
 
 
-
-🥋 Content Security Policy
-==========================
-
-By choosing a strict CSP, you also decide against using event handlers in your HTML.
-
-Handlers like `[up-on-accepted]` cannot work with CSP:
-
-```html
-<a href="/contacts/new"
-  up-layer="new"
-  up-accept-location="/contacts/$id"
-  up-on-accepted="up.reload('.table')">
-  ...
-</a>  
-```
-
-Move it to UJS:
-
-```html
-<a href="/contacts/new" class="add-contact" up-follow>...</a>
-```
-
-```js
-up.on('up:link:follow', '.add-contact', function(event) {
-  event.renderOptions.layer = 'new'
-  event.renderOptions.acceptLocation = '/contacts/$id'
-  event.renderOptions.onAccepted = (event) => { up.reload('.table') }
-})
-```
-
-
 Polling
 =======
 
-**💡️ Polling was a much-requested feature. Userland implementations often don't handle slow connections, failed requests or hidden browser tabs.**
+**💡️ Polling was a much-requested feature. Userland implementations often don't handle edge cases.**
 
 Unpoly 2 ships with a polling implementation that handles edge cases.
 
@@ -1744,7 +1833,7 @@ This reloads the fragment every 30 seconds:
 
 ```html
 <div class="unread-messages" up-poll>
-  You have 2 unrread messages
+  You have 2 unread messages
 </div>
 ```
 
@@ -1752,31 +1841,97 @@ You may set an optional `[up-interval]` attribute to change the reload interval:
 
 ```html
 <div class="unread-messages" up-poll up-interval="10_000">
-  You have 2 unrread messages
+  You have 2 unread messages
 </div>
 ```
 
 Digit groups separators (`60_000`) are a stage 3 ES6 feature and also supported in Unpoly number attributes.
+
+Making poll requests cheap
+==========================
+
+**💡️ Naive polling implementation will often cause unchanged content to be re-rendered unnecessarily.**
+
+When reloading, Unpoly sends a timestamp for the current fragment (`X-Up-Reload-From` header).
+You can compare this timestamp with the time of your last data update. If no more recent data
+is available, you can render nothing:
+
+```ruby
+class MessagesController < ApplicationController
+
+  def index
+    if up.reload_from_before?(current_user.last_message_at)
+      up.render_nothing
+    else
+      @messages = current_user.messages.order(time: :desc).to_a
+    end  
+  end
+
+end
+```
+
+This saves resources on your server, which spends most of its response time
+rendering HTML.
+
+This also reduces the bandwidth cost for a request/response exchange to **~1 KB**.\
+For comparison: A typical request/response exchange on [Cards](https://makandracards.com/makandra) eats **25-35 KB**.
+
+
+Polling pauses for background tabs
+==================================
+
+**💡️ Polling causes unnecessary server load when the polling tab is in the background,
+or when users keep apps running over night.**
+
+Unpoly 2 will only poll while the browser tab is visible.
+
+
+Polling pauses on slow connections
+==================================
+
+**💡️ Polling can DoS slow cellular connections.**
+
+Unpoly will pause polling while the connection is slow.
+
+
+Slow connection?
+----------------
+
+We consider a connection to be slow if at least one of these conditions are true:
+
+- User has data saving enabled ("Lite mode" in Chrome)
+- TCP Round Trip Time is >= 750 ms (`up.network.config.slowRTT`)
+- Downlink is <= 600 Kbps (`up.network.config.slownDownlink`)
+
+The values above may change during a session.
+Unpoly will enable/disable polling as conditions change.
 
 
 
 Improved server integration
 ===========================
 
-Unpoly always had an *optional* protocol your server may use to exchange additional
+Unpoly always had an *optional* [protocol](https://unpoly.com/up.protocol)
+your server may use to exchange additional
 information when Unpoly is updating fragments. The protocol mostly works by adding
 additional HTTP headers (like `X-Up-Target`) to requests and responses.
 
 Unpoly 2 extends the optional protocol with additional headers that the server
 may use to interact with the frontend.
 
-The code examples on the following slides are for the `unpoly-rails` integration.
+The Ruby code examples on the following slides are for the `unpoly-rails` integration.
+Expect integrations for other frameworks and languages to be updated for the new protocol
+after the release of Unpoly 2.
+
+**While you wait for your integration to be updated for Unpoly 2, existing protocol
+implementations will keep working with an Unpoly 2 frontend**.
+You can use any new features by setting a response header as documented in <https://unpoly.com/up.protocol>.
 
 
 Emitting frontend events from the server
 =======================================
 
-The server can emit events on the frontend:
+The server can emit events on the frontend. The following is Ruby code on the backend:
 
 ```ruby
 up.emit('user:selected', id: 5)       # emits on the document
@@ -1789,7 +1944,7 @@ The events are emitted before fragments are updated with the response HTML.
 Closing layers from the server
 ==============================
 
-The server can now close layers:
+The server can now close layers. The following is Ruby code on the backend:
 
 ```ruby
 up.layer.dismiss()     # the dismissal value is null
@@ -1856,6 +2011,9 @@ Subsequent requests would see a non-Unpoly request.
 
 **In Unpoly 2 meta information is persisted across redirects.**
 
+Example
+-------
+
 In the example below the `#create` action saves a `Note` record and redirects to
 that note's `#show` action. In Unpoly 2 the `#show` can still see if the
 original request to `#create` was made by Unpoly, and not render an unneeded layout:
@@ -1913,6 +2071,19 @@ The server can now clear Unpoly's client-side response cache:
 up.cache.clear
 ```
 
+You may also clear a single page:
+
+```ruby
+up.cache.clear('/notes/1034')
+```
+
+You may also clear all entries matching a URL pattern:
+
+```ruby
+up.cache.clear('/notes/*')
+```
+
+
 Example
 -------
 
@@ -1925,14 +2096,17 @@ def NotesController < ApplcationController
 
   def index
     if params[:query].nil?
+      # Restore a query from a previous visit.
       query = current_user.last_notes_query
     else
       query = params[:query]
+      
+      # Remember the query for the next visit.
       current_user.update_attribute(:last_notes_query, query)
 
-      # Earlier responses to /index might now be cached with
-      # the wrong results, so clear the cache.
-      up.cache.clear
+      # Earlier responses might now be cached with the wrong results,
+      # so clear the cache for all index URLs.
+      up.cache.clear('/notes/*')
     end  
 
     @notes = Note.search(query).paginate
@@ -1945,7 +2119,7 @@ end
 up.proxy is now up.network
 ==========================
 
-Your calls are forwarded.
+All calls are forwarded.
 
 
 

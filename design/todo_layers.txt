@@ -45,7 +45,7 @@ TODOs
       Caching ist aus bei reload, d.h. über Cache Keys muss ich mir keine Gedanken machen!
 
       def inbox
-        if up.reloading? && up.reload_from < current_user.last_message_at
+        if up.reload? && up.reload_from < current_user.last_message_at
           up.render_nothing
         else
           render 'messages'
@@ -53,7 +53,7 @@ TODOs
       end
 
       def inbox
-        if up.reloading_from_before?(current_user.last_message_at)
+        if up.reload_from_before?(current_user.last_message_at)
           up.render_nothing
         else
           render 'messages'
@@ -61,6 +61,11 @@ TODOs
       end
 
       <div class="foo" up-source="/messages" up-time="243254543">
+
+- Allow to disable polling if slow
+  - rename config.preloadMinDownlink => config.slowDownlink
+  - rename config.preloadMaxRTT => config.slowRTT
+  - then allow [up-poll][up-fast-network]
 
 - Caching
   - up.cache.clear('/users/*')
