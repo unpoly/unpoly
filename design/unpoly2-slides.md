@@ -42,8 +42,14 @@ Icons
 Unpoly 2: Highlights
 ====================
 
-Layers
-------
+Kill boilerplate configuration
+------------------------------
+- Configure default targets.
+- Handle all links/forms without helpers and macros.
+- Minimal Bootstrap integration you actually want to use.
+
+New layers
+----------
 - A new *layer* API replaces modals and popups. The root page is also a layer.
 - Layers are now isolated. They cannot accidentally target another layer, or accidentally react to events from other layers.
 - Layers may be stacked infinitely.
@@ -63,17 +69,12 @@ Navigation intent
 - Only user navigation scrolls, focuses, falls back to default targets.
 - User navigation now aborts earlier requests.
 
-Kill boilerplate configuration
-------------------------------
-- Configure default targets.
-- Handle all links/forms without helpers and macros.
-- Minimal Bootstrap integration you actually want to use.
-
 Accessibility
 -------------
 - New `{ focus }` option lets you control focus after a fragment update.
 - Overlays are accessible by trapping focus and removing other layers from the accessibility tree.
 - Focus, selection, scroll positions within updated fragments are now preserved.
+- Support keyboard navigations for all interactive elements.
 
 Quality of live improvements
 ----------------------------
@@ -116,8 +117,11 @@ E.g. `up.proxy.config` will return `up.network.config`.
 E.g. `<a up-close>` will translate to `<a up-dismiss>`.
 
 
-Delete your Unpoly link helpers
-===============================
+
+Delete your link helpers
+========================
+
+**💡 Our projects need too much code to configure Unpoly.**
 
 All our projects have helpers like `content_link()` and `modal_link()` to configure defaults:
 
@@ -126,8 +130,10 @@ All our projects have helpers like `content_link()` and `modal_link()` to config
 - Set a default target
 - Set a transition (sometimes)
 
-**In Unpoly 2 these helpers (and their macros) are no longer needed.**\
-You can now configure Unpoly to handle standard `<a href>` links without any `[up-...]` attributes.\
+**In Unpoly 2 these helpers (and their macros) are no longer needed.**
+
+You can configure Unpoly 2 to handle standard `<a href>` links without any `[up-...]` attributes.
+
 Rails users can now use the standard `link_to()` helper without extra options.
 
 
@@ -163,7 +169,7 @@ You may still opt out individual links or forms by setting `[up-follow=false]`:
 ```
 
 Accelerating links by default
-=============================
+==============================
 
 **💡 Most links should follow on `mousedown`  and be preloaded.**
 
@@ -343,15 +349,15 @@ In Unpoly 1 you could accidentally update another layer if there was no match in
 In Unpoly 2 layers are fully isolated. You cannot accidentally target an element in another layer:
 
 ```html
-<a up-target=".foo">                    <!-- will only match in current layer -->
+<a href="/path" up-target=".foo"> <!-- will only match in current layer -->
 ```
 
 If you want to do *anything* in another layer, you use `[up-layer]`:
 
 ```html
-<a up-target=".foo" up-layer="parent">  <!-- will only match in parent layer -->
-<a up-target=".foo" up-layer="root">    <!-- will only match in root layer -->
-<a up-target=".foo" up-layer="new">     <!-- opens a new modal overlay -->
+<a href="/path" up-target=".foo" up-layer="parent"> <!-- will only match in parent layer -->
+<a href="/path" up-target=".foo" up-layer="root">   <!-- will only match in root layer -->
+<a href="/path" up-target=".foo" up-layer="new">    <!-- opens a new modal overlay -->
 ```
 
 
@@ -359,8 +365,9 @@ Functions only see the current layer by default
 -----------------------------------------------
 
 ```js
-up.fragment.first('.foo')                     // will only find in current layer
-up.fragment.first('.first', { layer: 'any' }) // will find in any layer
+up.fragment.get('.foo')                        // will only find in current layer
+up.fragment.get('.first', { layer: 'any' })    // will find in any layer
+up.fragment.get('.first', { layer: 'parent' }) // will find in parent layer
 ```
 
 
@@ -405,67 +412,57 @@ You can configure the mode for `[up-layer=new]` in `up.layer.config.mode`.
 
 
 
-Most events are associated with a layer
-======================================
-
-**💡 Layers are rarely interested in events of other layers.**
-
-Whenever possible Unpoly will emit its events on associated layers instead of `document`.\
-This way you can listen to events on one layer without receiving events from other layers.
-
-Events from user navigation (e.g. `up:link:follow`) are associated with the layer of the activated element.
-
-Unpoly provides convenience functions `up.layer.on()`  and `up.layer.emit()` to listen / emit on the current layer:
-
-```js
-up.on('up:request:load', callback)       // listen to all up:request:load events
-up.layer.on('up:request:load', callback) // only listen to events originating from within this layer
-
-up.emit('my:event')         // emit my:event on document
-up.layer.emit('may:event')  // emit my:event on the layer element
-```
-
-
-
-
 
 
 Layers can be stacked infinitely
 ================================
 
-In Unpoly 1 you could only stack two screens (three if you count popups).
-This limited its practical applications:
+**💡 In Unpoly 1 you could only stack two screens (the root page and one modal overlay). This limited its practical applications.**
+
+Example from a real application:
 
 - The root page shows a list of record
 - Clicking a record opens a record in a modal overlay. This is useful since the user retains the scroll position of the list in the background.
-- 💥 The details screen cannot open another modal overlay, since on is already open.
+- The details screen cannot open another modal overlay, since one is already open.
 
 **Unpoly 2 lets you stack an arbitrary number of screens.**
 
+🎥 *Show demo*
 
 
 
+Most events are associated with a layer
+=======================================
 
-Overlay results
-===============
+**💡 Layers are rarely interested in events of other layers.**
 
-Overlays may have a *result*. E.g. if the user selects a value, we consider the overlay to be "accepted" with that value.
+Where possible Unpoly will emit its events on associated layers instead of `document`.\
+This way you can listen to events on one layer without receiving events from other layers.
+
+Events from user navigation (like `up:link:follow`) are associated with the layer of the activated element.
+
+Unpoly provides convenience functions `up.layer.on()`  and `up.layer.emit()` to listen / emit on the current layer:
 
 ```js
-up.layer.open({
-  url: '/select-user',
-  onAccepted: (event) => console.log('Got user ', event.user)
-})
+up.layer.on('up:request:load', callback) // only listen to events from the current layer
+up.layer.emit('may:event') // emit my:event on the current layer's element
 ```
 
-The following slides examine how an overlay can be "accepted".
+Layer events will still bubble up to the `document`, so you can still register
+a listener for events from any layer:
+
+```js
+up.on('up:request:load', callback) // listen to events from all layers
+up.emit('my:event') // emit my:event on document
+```
 
 
 
-Ending a sub-interaction
-========================
 
-**💡 In Unpoly 1 made it hard to communicate the "result" of an overlay interaction back to the parent layer.**
+Sub-interactions
+================
+
+**💡 Unpoly 1 made it hard to communicate the "result" of an overlay interaction back to the parent layer.**
 
 This story is the base use case for a sub-interaction (from the demo):
 
@@ -505,6 +502,24 @@ When the condition occurs, the overlay is automatically closed and a callback is
 
 This way overlays no longer need to know about the parent layer's state.
 This completely *decouples* the outer interaction from sub-interactions.
+
+
+
+
+Overlay results
+===============
+
+Overlays may have a *result*. E.g. if the user selects a value, we consider the overlay to be "accepted" with that value.
+
+```js
+up.layer.open({
+  url: '/select-user',
+  onAccepted: (event) => console.log('Got user ', event.user)
+})
+```
+
+The following slides examine how an overlay can be "accepted".
+
 
 
 Accepting when a location is reached
@@ -563,7 +578,7 @@ Why I like this a lot:
 
 
 URL patterns
-============
+------------
 
 Unpoly 1 supported URL wildcards like `/users/*` for `[up-alias]`.
 
@@ -652,9 +667,35 @@ Positive vs. negative close intent
 When an overlay is closed, Unpoly 2 distinguishes two kinds close intents:
 
 - *Accepting* a layer (user picks a value, confirms with "OK", etc.), optionally with a value
-- *Dismissing* a layer (user presses "Cancel", "X", "Close" or Escape)
+- *Dismissing* a layer (user clicks "Cancel", "X", "Close" or presses the ESC key)
 
-[Show selection dialog with differences intents for selection, cancel button, X button, background click, escape click]
+```
++-------------------------------+
+| Select a company          [X]-+---> dismiss()
++-------------------------------+
+|                               |
+|  +-------------------------+  |
+|  [ Foo Corp ]               +------> accept('Foo Corp')
+|  +-------------------------+  |
+|                               |
+|  +-------------------------+  |
+|  | Bar GmbH                +------> accept('Bar GmbH')
+|  +-------------------------+  |
+|                               |
+|  +-------------------------+  |
+|  | Baz AG                  +------> accept('Baz AG')
+|  +-------------------------+  |
+|                               |
++-------------------------------+
+|                      [CANCEL]-+---> dismiss()
++-------------------------------+
+
+                Click on backdrop:    dismiss()
+ 
+                         ESC key:     dismiss()
+```
+
+
 
 When opening a layer you may pass separate `{ onAccepted }` and `{ onDismissed }`  callbacks:
 
@@ -773,7 +814,7 @@ We can implement such an contact picker with this ERB template:
 
 Our effective contact object would now be something like `{ project: 'Hosting 2021' }`.
 
-In `/contacts/index.erb`:
+The server can inspect the context in `/contacts/index.erb`:
 
 ```erb
 <% if up.context[:project] %>
@@ -1074,8 +1115,8 @@ up.destroy(element, {
 
 
 
-🥋 Cacheability may be fine-tuned
-=================================
+🥋 Optimizing cacheability
+==========================
 
 Unpoly sends some additional HTTP headers to provide information about the fragment update:
 
@@ -1112,7 +1153,36 @@ up.network.config.metaKeys = function(request) {
 }
 ```
 
-TODO: up.network.config.clearCache
+# Clearing the cache less
+
+By default, Unpoly clears the entire cache with every unsafe (non-`GET` request).
+This is a safe default, but discards too many cache entries.
+
+In Unpoly 2 the server may also clear a smaller scope, or keep the cache:
+
+```ruby
+def NotesController < ApplcationController
+
+  def create
+    @note = Note.create!(params[:note].permit(...))
+    if @note.save
+      # Only clear a part of the cache
+      up.cache.clear('/notes/*')
+      redirect_to(@note)
+    else
+      # Keep the cache because we haven't saved
+      up.cache.keep
+      render 'new'
+    end
+  end
+
+  ...
+end
+```
+
+
+
+
 
 
 
@@ -1541,44 +1611,76 @@ There is also `up:fragment:unusable` in case the server responds with non-HTML c
 Accessibility
 =============
 
-Demo with VoiceVox on LTS
 
-Show code onclick example with many A11y problems
 
-Explain how important focus is to A11y.
+🎥 *Demo with VoiceVox on <https://railslts.com>*
 
-`[up-nav]` sets `[aria-current]`
+It's hard to get right with JavaScript
+--------------------------------------
 
-focus cycle in layers
-focus returns after closing layer
+Is this accessible for visually impaired users?
+<https://codepen.io/triskweline/pen/abmZZJb>
+
+Issues:
+
+- The *Show details* and *Hide details* buttons cannot be focused
+- The *Show details* and *Hide details* buttons cannot be activated with the keyboard
+- When the modal is opened, the modal should be focused.
+- When the modal is closed, the link that opened the modal should be focused.
+- While the modal is open, background elements should be removed from the accessibility tree.
+- While the modal is open, focus should be trapped in a cycle within the modal.
+
+
+🥋 Focus control
+================
+
 
 focus controllable by user. List focus options!
 
 | Value     | Case | Meaning |
 |-----------|------|---------|
 | keep      |      |         |
-| target    |      |         |
-| layer     |      |         |
-| autofocus |      |         |
+| target    |      | Focus the updated fragment |
+| layer     |      | Focus the updated layer |
+| autofocus |      | Focus any [autofocus] elements in the new fragment |
 | auto      | new layer    | autofocus, then layer
 | auto      | update layer | keep,      then autofocus
 
 
- Explain default (autofocus, new layer, nothing)
+🥋 Focus is preserved
+==================
 
-Focus is preserved when updating a fragment that contains focus
-  Cursor ("Caret")
-  Selection range
-  Scroll position
+When updating a fragment that contains focus, Unpoly 2 preserves:
+
+- Cursor position ("Caret")
+- Selection range
+- Scroll position (X/Y)
 
 
-Already backported to 0.62:
+🥋 Overlays are accessible
+=========================
 
+When on overlay is opened, the overlay is focused. Screen readers start reading the overlay content.
+
+When an overlay closed, focus is returned to the link that originally opened the modal.
+
+While the modal is open, focus is trapped in a cycle within the modal.
+
+While an overlay is open, background elements are marked as outside the modal.
+
+
+
+🥋 Various A11y improvements
+==========================
+
+(Some backported to 1.0):
+
+- `[up-nav]` sets `[aria-current]` to the current link.
 - Links with an [`[up-instant]`](/a-up-instant) attribute can now be followed with the keyboard.
 - Fragments that are being [destroyed](/up.destroy) now get an [`[aria-hidden=true]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-hidden_attribute)
   attribute while its disappearance is being animated. When a fragment is being swapped with a new version, the old fragment version is also
   given `[aria-hidden=true]` while it's disappearing.
-- [Modal dialogs](/up.modal) now get an [`[aria-modal=true]`](https://a11ysupport.io/tech/aria/aria-modal_attribute) attribute.
+- Overlays now get an [`[aria-modal=true]`](https://a11ysupport.io/tech/aria/aria-modal_attribute) attribute.
 
 
 
@@ -1647,7 +1749,12 @@ up-modal, up-drawer, up-popup {
 🥋 Targeting self-contained components
 ======================================
 
-**💡 We sometimes have multiple self-contained components on the same page. E.g. Deskbot cards.**
+🎥 *Demo: DeskBot cards*
+
+TODO: Implement self-contained components in the layers demo app
+
+
+**💡 We sometimes have multiple self-contained components on the same page.**
 
 The position of a clicked link may now considered when deciding which element to replace.
 
@@ -1797,15 +1904,25 @@ Calmer scrolling
 
 **💡 Unpoly 1 scrolled too much.**
 
-TODO: Explain why Unpoly 1 reveals by default
+Unpoly 1 always scrolled to reveal an updated fragment.
+This default was chosen to reset scroll positions when navigating to another screen.
 
-Unpoly 2 no longer scrolls by default.
+🎥 *Show demo on <https://makandra.com>:*
+
+- *Scroll down a long page*
+- *Follow a link in the navigation to a second page*
+- *Explain how without revealing, the second page would open with the first page's scroll positions*
+
+However, this default also casued scrolling when a smaller fragment was updated.
+E.g. when the user switches between tabs, they wouldn't expect scroll changes.
+
+**Unpoly 2 no longer scrolls by default.**
 
 Only when **navigating** the new default is `{ scroll: 'auto' }`, which *sometimes* scrolls:
 
 - If the URL has a `#hash`, scroll to the hash.
-- If updating a main target, scroll to the top.
-- Else don't scroll. 
+- If updating a main target, scroll to the top. The assumption here is that we navigated to a new screen.
+- Otherwise don't scroll. 
 
 
 
@@ -1891,7 +2008,7 @@ Polling pauses on slow connections
 
 **💡️ Polling can DoS slow cellular connections.**
 
-Unpoly will pause polling while the connection is slow.
+Unpoly 2 will pause polling while the connection is slow.
 
 
 Slow connection?
@@ -1910,6 +2027,8 @@ Unpoly will enable/disable polling as conditions change.
 
 Improved server integration
 ===========================
+
+**💡 In Unpoly 1 the server could not trigger changes in the frontend.**
 
 Unpoly always had an *optional* [protocol](https://unpoly.com/up.protocol)
 your server may use to exchange additional
@@ -2112,6 +2231,7 @@ def NotesController < ApplcationController
     @notes = Note.search(query).paginate
   end
 
+  ...
 end
 ```
 
