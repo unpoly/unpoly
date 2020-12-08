@@ -31,6 +31,8 @@ TODOs
   - I navigate to /foo
   - I see the old version
 
+- Florian braucht up:layer:location:changed für sein menu
+
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
   - non-HTML antworten müssen OK sein für target: ':none'
