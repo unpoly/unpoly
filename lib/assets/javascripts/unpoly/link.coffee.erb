@@ -535,8 +535,11 @@ up.link = do ->
 
   targetMacro = (queryAttr, fixedResultAttrs, callback) ->
     up.macro "[#{queryAttr}]", (link) ->
-      optionalTarget = link.getAttribute(queryAttr)
-      resultAttrs = u.merge(fixedResultAttrs, 'up-target': optionalTarget)
+      resultAttrs = u.copy(fixedResultAttrs)
+      if optionalTarget = link.getAttribute(queryAttr)
+        resultAttrs['up-target'] = optionalTarget
+      else
+        resultAttrs['up-follow'] = ''
       e.setMissingAttrs(link, resultAttrs)
       link.removeAttribute(queryAttr)
       callback?()

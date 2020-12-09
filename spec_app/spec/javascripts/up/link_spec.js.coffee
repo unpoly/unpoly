@@ -1154,6 +1154,13 @@ describe 'up.link', ->
         expect($link.attr('up-instant')).toEqual('')
         expect($link.attr('up-target')).toEqual('.target')
 
+      it 'sets [up-follow] instead of [up-target] if no target is given (bugfix)', ->
+        link = fixture('a[href="/path"][up-dash]', text: 'label')
+        up.hello(link)
+
+        expect(link).not.toHaveAttribute('up-target')
+        expect(link).toHaveAttribute('up-follow')
+
 #      it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
 #        $link = $fixture('a[href="/path"][up-dash="true"]').text('label')
 #        up.hello($link)
