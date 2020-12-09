@@ -18,8 +18,31 @@ TODOs
 - Reach out to server-integration libs (make issues?) with the new changes
 - Close issues.
 
-- Context is not UJS
-  - Consider removing server-side changes
+- When dragging from inside an overlay to the backdrop, we emit an up:click and the overlay closes
+
+- Possibly remove :closest
+  - Is there a second use case for :closest?
+  - I'm not sure if this is really the pattern that we want
+    - The link *still* must know about the container outside it
+    - Another pattern that we have more success with is like overlays:
+      The overlay content does not need to know that it lives in an overlay
+    - Maybe we were to quick to dismiss the old [up-zone] idea
+      - Yes it was impractical that the zoned content always needed to render the [up-zone]
+      - But maybe we don't need to have an absolute selector for both sides if the lookup considers the origin zone
+      - We also don't need to support the case that the other side might have many components
+        - In any list case (Ambulance, Deskbot), actions would update from the member resource, not the collection
+    - What I really want is box in multiple copies of a partial.
+      Any links should default to updating the box instead of the layer :main
+
+      <up-frame>
+        <div class="inner"> <!-- up.frame.firstSwappableElement() -->
+          <a href="/foo" up-follow> <!-- will update this .inner, even if other .inners are in the same page -->
+        </div>
+      </up-frame>
+
+    - How do we break out of the frame?
+      - Do we need this?
+      - [up-frame=parent]?
 
 - Should we cache responses with X-Up-Target: :none ?
 
@@ -32,6 +55,8 @@ TODOs
   - I see the old version
 
 - Florian braucht up:layer:location:changed für sein menu
+
+- Pause polling for background layers
 
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
