@@ -20,6 +20,13 @@ TODOs
 
 - When dragging from inside an overlay to the backdrop, we emit an up:click and the overlay closes
 
+- Bootstrap 5 has an xxl Breakpoint
+
+- Deleting records in the Demo app throws weird errors:
+  DELETE http://localhost:3001/companies?_up_context=%7B%7D&_up_context_changes=%7B%7D&_up_events=%5B%5D&_up_fail_context=%7B%7D&_up_fail_mode=modal&_up_fail_target=%5Bup-main%3D%27%27%5D&_up_mode=modal&_up_target=%5Bup-main%3D%27%27%5D&_up_version=1.0.0 404 (Not Found)
+  => We do need to wrap AJAX requests
+  => maybe option wrapMethod: true / false
+
 - Possibly remove :closest
   - Is there a second use case for :closest?
   - I'm not sure if this is really the pattern that we want
@@ -46,6 +53,8 @@ TODOs
 
 - Should we cache responses with X-Up-Target: :none ?
 
+- Arne wollte onRendered()
+
 - If we make a request without caching, should we remove a matching cache entry?
   - E.g. we navigate to /foo
   - Then we reload /foo through polling
@@ -57,6 +66,8 @@ TODOs
 - Florian braucht up:layer:location:changed für sein menu
 
 - Pause polling for background layers
+
+- Polling: Don't override an [up-source] attribute rendered by the server
 
 - up:fragment:unusable ist so nicht gut
   - leere antworten müssen OK sein für target: ':none'
