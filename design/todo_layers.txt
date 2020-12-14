@@ -1,59 +1,56 @@
-TODOs
------
+Release process
+===============
 
-- Consider promoting some experimental functions to stable
-- Consider removing some stable functions
-- Can we reset master to hk/layers without merging?
-- Merge up.radio into up.fragment
+- Branch from master to 1.x-maintenance
+- Release 1.x-maintenance as 1.0.0
+- Hard-reset master to hk/layers
+- Release master as 2.0.0
+- CHANGELOG 2 is the "Objectives" slide from the Unpoly 2 presentation, links to slides for details
+- unpoly.com
+  - Merge master into hk/layers
+  - Fix hk/layers
+    - Simplify content-link, modal-link, drawer-link
+    - up_modal.sass
+  - New primary color
+  - New logo (rising glyph, 2 suffix)
+  - New favicon (rising glyph)
+  - Deploy
+- Reach out to server-integration libs (make issues?) with the new changes
+- Announce on Twitter
+  - Retweet
+- Announce on mailing list
+- Announce on makandra cards
+- Close fixed issues.
+
+
+Remaining feature work
+======================
+
 - Remove unused option up.network.abort({ reason })
 
-- Release as 0.62 as 1.0.0
-- Release hk/layers as 2.0.0
+- up.request()
+  - Remove up.Request#uid
+  - Remove up.Request#json
+  - Add up.Request#payload
+  - Add up.Request#contentType = 'auto'
+  - Parse as [up-content-type], [enctype]
+  - If #payload is missing, serialize with given contentType
+  - If contentType is 'auto', prefer x-www-form-urlencoded, but use multipart/form-data if !params#hasOnlyPrimitiveValues()
+    - params#hasOnlyPrimitiveValues() ? 'urlencoded' : 'formdata'
+  - contentType must also be honored in FormRenderer
 
-- Grep for TODO
-- Test in all browsers
-- Fix up-guide
-  - Simplify content-link, modal-link, drawer-link
-  - up_modal.sass
-- Reach out to server-integration libs (make issues?) with the new changes
-- Close issues.
-
-- When dragging from inside an overlay to the backdrop, we emit an up:click and the overlay closes
+- When dragging from inside an overlay (even from inside an input!) to the backdrop, we emit an up:click and the overlay closes
+  - Test if that is really the behavior of regular click events
 
 - Bootstrap 5 has an xxl Breakpoint
+  - add to unpoly-bootstrap5.css
 
 - Deleting records in the Demo app throws weird errors:
   DELETE http://localhost:3001/companies?_up_context=%7B%7D&_up_context_changes=%7B%7D&_up_events=%5B%5D&_up_fail_context=%7B%7D&_up_fail_mode=modal&_up_fail_target=%5Bup-main%3D%27%27%5D&_up_mode=modal&_up_target=%5Bup-main%3D%27%27%5D&_up_version=1.0.0 404 (Not Found)
   => We do need to wrap AJAX requests
-  => maybe option wrapMethod: true / false
+  => Add { wrapMethod: true } option
 
-- Possibly remove :closest
-  - Is there a second use case for :closest?
-  - I'm not sure if this is really the pattern that we want
-    - The link *still* must know about the container outside it
-    - Another pattern that we have more success with is like overlays:
-      The overlay content does not need to know that it lives in an overlay
-    - Maybe we were to quick to dismiss the old [up-zone] idea
-      - Yes it was impractical that the zoned content always needed to render the [up-zone]
-      - But maybe we don't need to have an absolute selector for both sides if the lookup considers the origin zone
-      - We also don't need to support the case that the other side might have many components
-        - In any list case (Ambulance, Deskbot), actions would update from the member resource, not the collection
-    - What I really want is box in multiple copies of a partial.
-      Any links should default to updating the box instead of the layer :main
-
-      <up-frame>
-        <div class="inner"> <!-- up.frame.firstSwappableElement() -->
-          <a href="/foo" up-follow> <!-- will update this .inner, even if other .inners are in the same page -->
-        </div>
-      </up-frame>
-
-    - How do we break out of the frame?
-      - Do we need this?
-      - [up-frame=parent]?
-
-- Should we cache responses with X-Up-Target: :none ?
-
-- Arne wollte onRendered()
+- Remove support for :closest
 
 - If we make a request without caching, should we remove a matching cache entry?
   - E.g. we navigate to /foo
@@ -63,53 +60,32 @@ TODOs
   - I navigate to /foo
   - I see the old version
 
-- Florian braucht up:layer:location:changed für sein menu
-
-- Pause polling for background layers
-
-- Polling: Don't override an [up-source] attribute rendered by the server
-
-- up:fragment:unusable ist so nicht gut
-  - leere antworten müssen OK sein für target: ':none'
-  - non-HTML antworten müssen OK sein für target: ':none'
-    - wie mach ich das denn
-  - up:fragment:unusable erst nach up:fragment:loaded emitten
-  - bringt mir up:fragment:unusable wirklich was?
-  => löschen
+- Expose up:layer:location:changed for menus inside history-less overlays
 
 - Polling
-      X-Up-Reload-From: Tue, 15 Nov 1994 12:45:26 GMT
+  - Configure polling pauses
+    - up.radio.config.pollingEnabled = ({ fragment }) -> !up.network.isConnectionSlow() && up.layer.get(fragment).isFront() && !document.hidden
+  - Pause polling for background layers
+    - Polling: Don't override an [up-source] attribute rendered by the server
 
-      Caching ist aus bei reload, d.h. über Cache Keys muss ich mir keine Gedanken machen!
-
-      def inbox
-        if up.reload? && up.reload_from < current_user.last_message_at
-          up.render_nothing
-        else
-          render 'messages'
-        end
-      end
-
-      def inbox
-        if up.reload_from_before?(current_user.last_message_at)
-          up.render_nothing
-        else
-          render 'messages'
-        end
-      end
-
-      <div class="foo" up-source="/messages" up-time="243254543">
-
-
-
-- Allow to disable polling if slow
+- Expose slow connection checks in up.network
   - rename config.preloadMinDownlink => config.slowDownlink
   - rename config.preloadMaxRTT => config.slowRTT
-  - then allow [up-poll][up-fast-network]
+  - Expose up.network.isConnectionSlow()
+
+- Remove up:fragment:unusable
+
+- Polling
+  - setSource() should also set [up-time]
+  - Send X-Up-Reload-From timestamp
+  - in unpoly-rails, support up.reload?, up.reload_from and up.reload_from_before?
 
 - Caching
-  - up.cache.clear('/users/*')
+  - Allow to clear a pattern: up.cache.clear('/users/*')
   - Protokoll ändern von `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
+  - This also means we need to postpone cache-clearing until the response was received
+  - Also X-Up-Clear-Cache: false
+  - In unpoly-rails, support up.cache.clear(pattern) and up.cache.keep
   - up.Request#matchURL('/users/*')
     - or up.util.matchURL
     - or publish URLPattern
@@ -119,54 +95,16 @@ TODOs
       if (request.matchURL('/users/search')) return '/users/*'
     }
 
-    Kein guter Use case außer für Search
-
-    up.cache.keep sends X-Up-Clear-Cache: false ?
-
-    ```
-    def NotesController < ApplcationController
-
-      def create
-        note = Note.create!(params[:note].permit(...))
-        if note.save
-          up.cache.clear('/notes/*')
-          redirect_to(note)
-        else
-          up.cache.keep
-          render 'new'
-        end
-      end
-
-      ...
-    end
-    ```
-
-  - Die { cache }-Option aufteilen
-    - { readCache: 'auto' }    auto oder true: wenn cachable
-    - { writeCache: 'auto' }   auto oder true: wenn cachable
-    - { clearCache: 'auto' }   auto: clearCacheScope wird immer angewendet, außer Server schickt X-Up-Clear-Cache
-    - { clearCache } ist immer auf auto
-    - { cache: true } setzt { readCache: true, writeCache: true }
-  - up.reload() setzt { writeCache: true }
-  - Weiterhin automatisch:
-    - { writeCache: true } speichert keine unsafen requests
-    - { writeCache: true } speichert keine requests mit target: ':none'
-    - { writeCache: true } speichert keine failed requests
-    - evtl. auch konfigurierbar machen mit config.isCachable: (request) -> ...
-  - server kann auch schicken
-    - X-Up-Clear-Cache: /users/*
-    - wenn der server-schickt müssen wir das clearen des caches auf nach der response verschieben
-  - wir brauchen dann [up-read-cache], [up-write-cache], [up-clear-cache]
-  - { clearCache } müsste per default an sein, auch ohne { navigate }
-
-
-
 Manual tests
 ------------
 
+- Specs in IE11
+- Specs in Firefox
+- Specs in Safari
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH
+
 
 Tests
 -----
@@ -427,6 +365,23 @@ Docs
 Later?
 ------
 
+- Die { cache }-Option aufteilen
+  - { readCache: 'auto' }    auto oder true: wenn cachable
+  - { writeCache: 'auto' }   auto oder true: wenn cachable
+  - { clearCache: 'auto' }   auto: clearCacheScope wird immer angewendet, außer Server schickt X-Up-Clear-Cache
+  - { clearCache } ist immer auf auto
+  - { cache: true } setzt { readCache: true, writeCache: true }
+- up.reload() setzt { writeCache: true }
+- Weiterhin automatisch:
+  - { writeCache: true } speichert keine unsafen requests
+  - { writeCache: true } speichert keine requests mit target: ':none'
+  - { writeCache: true } speichert keine failed requests
+  - evtl. auch konfigurierbar machen mit config.isCachable: (request) -> ...
+- server kann auch schicken
+  - X-Up-Clear-Cache: /users/*
+  - wenn der server-schickt müssen wir das clearen des caches auf nach der response verschieben
+- wir brauchen dann [up-read-cache], [up-write-cache], [up-clear-cache]
+- { clearCache } müsste per default an sein, auch ohne { navigate }
 - up.syntax => up.behavior
   - up.hello into up.behavior
 - Is there a use case for this?
@@ -619,4 +574,27 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
           response.headers['X-Up-Target'] = ':none'
           head :ok
   => Weiß ich wirklich, dass es hier kein Default-Template gegeben hätte? NEIN!
+- Possibly remove :closest
+  - Is there a second use case for :closest?
+  - I'm not sure if this is really the pattern that we want
+    - The link *still* must know about the container outside it
+    - Another pattern that we have more success with is like overlays:
+      The overlay content does not need to know that it lives in an overlay
+    - Maybe we were to quick to dismiss the old [up-zone] idea
+      - Yes it was impractical that the zoned content always needed to render the [up-zone]
+      - But maybe we don't need to have an absolute selector for both sides if the lookup considers the origin zone
+      - We also don't need to support the case that the other side might have many components
+        - In any list case (Ambulance, Deskbot), actions would update from the member resource, not the collection
+    - What I really want is box in multiple copies of a partial.
+      Any links should default to updating the box instead of the layer :main
+
+      <up-frame>
+        <div class="inner"> <!-- up.frame.firstSwappableElement() -->
+          <a href="/foo" up-follow> <!-- will update this .inner, even if other .inners are in the same page -->
+        </div>
+      </up-frame>
+
+    - How do we break out of the frame?
+      - Do we need this?
+      - [up-frame=parent]?
 
