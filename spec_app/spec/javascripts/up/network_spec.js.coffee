@@ -795,15 +795,37 @@ describe 'up.network', ->
           up.request(url: '/bar', cache: 'clear')
           expect(url: '/foo').not.toBeCached()
 
-      u.each ['GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'], (method) ->
+        u.each ['GET', 'POST', 'HEAD', 'OPTIONS'], (method) ->
 
-        it "does not wrap the method of a #{method} request", asyncSpec (next) ->
-          up.request(url: '/foo', method: method)
+          it "does not change the method of a #{method} request", asyncSpec (next) ->
+            up.request(url: '/foo', method: method)
 
-          next =>
-            request = @lastRequest()
-            expect(request.method).toEqual(method)
-            expect(request.data()['_method']).toBeUndefined()
+            next =>
+              request = @lastRequest()
+              expect(request.method).toEqual(method)
+              expect(request.data()['_method']).toBeUndefined()
+
+        u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
+
+          it "turns a #{method} request into a POST request and sends the actual method as a { _method } param to prevent unexpected redirect behavior (https://makandracards.com/makandra/38347)", asyncSpec (next) ->
+            up.request(url: '/foo', method: method)
+
+            next =>
+              request = @lastRequest()
+              expect(request.method).toEqual('POST')
+              expect(request.data()['_method']).toEqual([method])
+
+        describe 'with { wrapMethod: false }', ->
+
+          u.each ['GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'], (method) ->
+
+            it "does not wrap the method of a #{method} request", asyncSpec (next) ->
+              up.request(url: '/foo', method: method, wrapMethod: false)
+
+              next =>
+                request = @lastRequest()
+                expect(request.method).toEqual(method)
+                expect(request.data()['_method']).toBeUndefined()
 
       describe 'with config.concurrency set', ->
 

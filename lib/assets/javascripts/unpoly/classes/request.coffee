@@ -80,6 +80,19 @@ class up.Request extends up.Record
   ###
 
   ###**
+  Whether to wrap non-standard HTTP methods in a POST request.
+
+  If this is set, methods other than GET and POST will be converted to a `POST` request
+  and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+
+  Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
+
+  @property up.Request#wrapMethod
+  @param {boolean} enabled
+  @stable
+  ###
+
+  ###**
   TODO: Docs
 
   @property up.Request#context
@@ -134,6 +147,7 @@ class up.Request extends up.Record
       'origin',
       'solo',
       'queueTime',
+      'wrapMethod',
     ]
 
   ###**
@@ -165,6 +179,8 @@ class up.Request extends up.Record
       # Preloading requires caching.
       @cache = true
 
+    @wrapMethod ?= up.network.config.wrapMethod
+
     # Help users programmatically build a request that will match an existing cache key.
     @layer = up.layer.get(@layer || @origin) # If @origin is undefined, this will choose the current layer.
     @failLayer = up.layer.get(@failLayer || @layer)
@@ -189,6 +205,7 @@ class up.Request extends up.Record
   evictExpensiveAttrs: ->
     # We want to allow up:request:loaded events etc. to still access the properties that
     # we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
+    # Don't evict properties that may be part of our @cacheKey().
 
     u.task =>
       # While the request is still in flight, we require the target layer
@@ -220,6 +237,9 @@ class up.Request extends up.Record
 
   isSafe: ->
     up.network.isSafeMethod(@method)
+
+  will302RedirectWithGET: ->
+    @isSafe() || @method == 'POST'
 
   willQueue: ->
     u.always(this, => @evictExpensiveAttrs())

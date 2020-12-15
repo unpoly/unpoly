@@ -68,14 +68,14 @@ up.network = do ->
 
     Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
     regardless of what you configure here.
-  @param {Array<string>} [config.wrapMethods]
-    An array of uppercase HTTP method names. AJAX requests with one of these methods
-    will be converted into a `POST` request and carry their original method as a `_method`
-    parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-  @param {Array<string>} [config.safeMethods]
-    An array of uppercase HTTP method names that are considered [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1).
-    The proxy cache will only cache safe requests and will clear the entire
-    cache after an unsafe request.
+  @param {boolean} [config.wrapMethod]
+    Whether to wrap non-standard HTTP methods in a POST request.
+
+    If this is set, methods other than GET and POST will be converted to a `POST` request
+    and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+
+    If you disable method wrapping, make sure that your server always redirects with
+    with a 303 status code (rather than 302).
   @param {boolean|string} [config.preloadEnabled='auto']
     Whether Unpoly will load [preload requests](/up.network.preload).
 
@@ -155,8 +155,8 @@ up.network = do ->
     slowDelay: 800
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
-    safeMethods: ['GET', 'OPTIONS', 'HEAD']
     concurrency: 4
+    wrapMethod: true
     preloadEnabled: 'auto' # true | false | 'auto'
     # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
@@ -695,7 +695,7 @@ up.network = do ->
   @internal
   ###
   isSafeMethod = (method) ->
-    u.contains(config.safeMethods, method)
+    u.contains(['GET', 'OPTIONS', 'HEAD'], method)
 
   up.on 'up:framework:reset', reset
 

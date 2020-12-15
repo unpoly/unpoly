@@ -10,7 +10,7 @@ describe 'up.browser', ->
       afterEach ->
         # We're preventing the form to be submitted during tests,
         # so we need to remove it manually after each example.
-        $('form.up-page-loader').remove()
+        $('form.up-request-loader').remove()
 
       describe "for GET requests", ->
 
@@ -19,7 +19,7 @@ describe 'up.browser', ->
           up.browser.loadPage(url: '/foo', method: 'GET', params: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
 
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
 
           expect($form).toBeAttached()
           # GET forms cannot have an URL with a query section in their [action] attribute.
@@ -33,7 +33,7 @@ describe 'up.browser', ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.loadPage(url: '/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           expect($form).toBeAttached()
           # GET forms cannot have an URL with a query section in their [action] attribute.
           # The query section would be overridden by the serialized input values on submission.
@@ -47,7 +47,7 @@ describe 'up.browser', ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.loadPage(url: '/foo', method: 'POST', params: { param1: 'param1 value', param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           expect($form).toBeAttached()
           expect($form.attr('action')).toMatchURL('/foo')
           expect($form.attr('method')).toEqual('POST')
@@ -58,7 +58,7 @@ describe 'up.browser', ->
           submitForm = spyOn(up.browser, 'submitForm')
           up.browser.loadPage(url: '/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' })
           expect(submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           expect($form).toBeAttached()
           expect($form.attr('action')).toMatchURL('/foo')
           expect($form.attr('method')).toEqual('POST')
@@ -73,7 +73,7 @@ describe 'up.browser', ->
             submitForm = spyOn(up.browser, 'submitForm')
             up.browser.loadPage(url: '/foo', method: method)
             expect(submitForm).toHaveBeenCalled()
-            $form = $('form.up-page-loader')
+            $form = $('form.up-request-loader')
             expect($form).toBeAttached()
             expect($form.attr('method')).toEqual('POST')
             expect($form.find('input[name="_method"]').val()).toEqual(method)
@@ -88,7 +88,7 @@ describe 'up.browser', ->
         it 'submits an CSRF token as another hidden field', ->
           up.browser.loadPage(url: '/foo', method: 'post')
           expect(@submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
           expect($tokenInput).toBeAttached()
           expect($tokenInput.val()).toEqual('csrf-token')
@@ -97,21 +97,21 @@ describe 'up.browser', ->
           up.protocol.config.csrfToken = -> ''
           up.browser.loadPage(url: '/foo', method: 'post')
           expect(@submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
           expect($tokenInput).not.toBeAttached()
 
         it 'does not add a CSRF token for GET requests', ->
           up.browser.loadPage(url: '/foo', method: 'get')
           expect(@submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
           expect($tokenInput).not.toBeAttached()
 
         it 'does not add a CSRF token when loading content from another domain', ->
           up.browser.loadPage(url: 'http://other-domain.tld/foo', method: 'get')
           expect(@submitForm).toHaveBeenCalled()
-          $form = $('form.up-page-loader')
+          $form = $('form.up-request-loader')
           $tokenInput = $form.find('input[name="csrf-param"]')
           expect($tokenInput).not.toBeAttached()
 

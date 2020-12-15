@@ -3,6 +3,12 @@
 u = up.util
 e = up.element
 
+
+# In HTML5, forms may only have a GET or POST method.
+# There were several proposals to extend this to PUT, DELETE, etc.
+# but they have all been abandoned.
+HTML_FORM_METHODS = ['GET', 'POST']
+
 class up.Request.FormRenderer
 
   constructor: (@request) ->
@@ -18,12 +24,12 @@ class up.Request.FormRenderer
     params.addAll(paramsFromQuery)
     action = u.normalizeURL(action, search: false)
 
-    # By default HTTP methods other than `GET` or `POST` will be converted into a `POST`
-    # request and carry their original method as a `_method` parameter. This is to
-    # [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-    method = up.protocol.wrapMethod(@request.method, params)
+    unless u.contains(HTML_FORM_METHODS, method)
+      # HTML forms can only have a GET or POST method. Other HTTP methods will be converted
+      # to a `POST` request and carry their original method as a `_method` parameter.
+      method = up.protocol.wrapMethod(@request.method, params)
 
-    @form = e.affix(document.body, 'form.up-page-loader', { method, action })
+    @form = e.affix(document.body, 'form.up-request-loader', { method, action })
 
     if (csrfParam = @request.csrfParam()) && (csrfToken = @request.csrfToken())
       params.add(csrfParam, csrfToken)

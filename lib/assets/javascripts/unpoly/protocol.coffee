@@ -681,13 +681,8 @@ up.protocol = do ->
   @internal
   ###
   wrapMethod = (method, params) ->
-    # In HTML5, forms may only have a GET or POST method.
-    # There were several proposals to extend this to PUT, DELETE, etc.
-    # but they have all been abandoned.
-    if method != 'GET' && method != 'POST'
-      params.add(config.methodParam, method)
-      method = 'POST'
-    method
+    params.add(config.methodParam, method)
+    return 'POST'
 
   reset = ->
     config.reset()
