@@ -39,9 +39,6 @@ Remaining feature work
     - params#hasOnlyPrimitiveValues() ? 'urlencoded' : 'formdata'
   - contentType must also be honored in FormRenderer
 
-- When dragging from inside an overlay (even from inside an input!) to the backdrop, we emit an up:click and the overlay closes
-  - Test if that is really the behavior of regular click events
-
 - Bootstrap 5 has an xxl Breakpoint
   - add to unpoly-bootstrap5.css
 

@@ -80,6 +80,8 @@ up.link = do ->
   waitingLink = undefined
   linkPreloader = new up.LinkPreloader()
 
+  lastMousedownTarget = null
+
   # Links with attribute-provided HTML are always followable.
   LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]']
 
@@ -122,6 +124,7 @@ up.link = do ->
     starts preloading.
   ###
   reset = ->
+    lastMousedownTarget = null
     config.reset()
     linkPreloader.reset()
 
@@ -454,24 +457,30 @@ up.link = do ->
       # This would trigger the browsers default follow-behavior and possibly activate JS libs.
       # A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
       # Keyboard navigation will not necessarily trigger a mousedown event.
-      if isInstant(element) && element.upInstantSupported
+      if isInstant(element) && lastMousedownTarget
         up.event.halt(event)
-        element.upInstantSupported = false
 
       # In case mousedown has created a layer over the click coordinates,
       # Chrome will emit an event with { target: document.body } on click.
       # Ignore that event and only process if we would still hit the
       # expect layers at the click coordinates.
-      else if layer.wasHitByMouseEvent(event)
+      else if layer.wasHitByMouseEvent(event) && !didUserDragAway(event)
         forkEventAsUpClick(event)
 
+      # In case the user switches input modes.
+      lastMousedownTarget = null
+
     layer.on 'mousedown', (event, element) ->
+      lastMousedownTarget = element
+
       if isInstant(element)
         # A11Y: Keyboard navigation will not necessarily trigger a mousedown event.
         # We also don't want to listen to the enter key, since some screen readers
         # use the enter key for something else.
-        element.upInstantSupported = true
         forkEventAsUpClick(event)
+
+  didUserDragAway = (clickEvent) ->
+    lastMousedownTarget && lastMousedownTarget != clickEvent.target
 
   forkEventAsUpClick = (originalEvent) ->
     newEvent = up.event.fork(originalEvent, 'up:click', ['clientX', 'clientY', 'button', up.event.keyModifiers...])

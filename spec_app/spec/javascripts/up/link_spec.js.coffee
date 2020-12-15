@@ -1586,6 +1586,42 @@ describe 'up.link', ->
         next ->
           expect(listener).not.toHaveBeenCalled()
 
+    describe 'on an non-link element that is [up-instant]', ->
+
+      it 'emits on up:click event on mousedown', ->
+        div = fixture('div[up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        div.addEventListener('up:click', listener)
+        Trigger.mousedown(div)
+        expect(listener).toHaveBeenCalled()
+
+    describe 'on an non-link element that is not [up-instant]', ->
+
+      it 'emits an up:click event on click', ->
+        div = fixture('div')
+        listener = jasmine.createSpy('up:click listener')
+        div.addEventListener('up:click', listener)
+        Trigger.click(div)
+        expect(listener).toHaveBeenCalled()
+
+      it 'does not emit an up:click event on ANY element if the user has dragged away between mousedown and mouseup', ->
+        div = fixture('div')
+        other = fixture('div')
+        listener = jasmine.createSpy('up:click listener')
+        up.on('up:click', listener) # use up.on() instead of addEventListener(), since up.on() cleans up after each test
+        Trigger.mousedown(other)
+        Trigger.mouseup(div)
+        Trigger.click(document.body) # this is the behavior of Chrome and Firefox
+        expect(listener).not.toHaveBeenCalled()
+
+      it 'prevents the click event when the up:click event is prevented', ->
+        clickEvent = null
+        div = fixture('div')
+        div.addEventListener('click', (event) -> clickEvent = event)
+        div.addEventListener('up:click', (event) -> event.preventDefault())
+        Trigger.click(div)
+        expect(clickEvent.defaultPrevented).toBe(true)
+
   describe '[up-clickable]', ->
 
     it 'makes the element emit up:click events on Enter', ->
