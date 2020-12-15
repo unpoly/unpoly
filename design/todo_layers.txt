@@ -39,9 +39,6 @@ Remaining feature work
     - params#hasOnlyPrimitiveValues() ? 'urlencoded' : 'formdata'
   - contentType must also be honored in FormRenderer
 
-- Bootstrap 5 has an xxl Breakpoint
-  - add to unpoly-bootstrap5.css
-
 - Deleting records in the Demo app throws weird errors:
   DELETE http://localhost:3001/companies?_up_context=%7B%7D&_up_context_changes=%7B%7D&_up_events=%5B%5D&_up_fail_context=%7B%7D&_up_fail_mode=modal&_up_fail_target=%5Bup-main%3D%27%27%5D&_up_mode=modal&_up_target=%5Bup-main%3D%27%27%5D&_up_version=1.0.0 404 (Not Found)
   => We do need to wrap AJAX requests
