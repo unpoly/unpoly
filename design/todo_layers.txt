@@ -77,12 +77,15 @@ Remaining feature work
 
 - Polling
   - setSource() should also set [up-time]
+  - up.fragment.source() should return { url, time }.
   - Send X-Up-Reload-From timestamp
   - in unpoly-rails, support up.reload?, up.reload_from and up.reload_from_before?
 
 - Caching
-  - Allow to clear a pattern: up.cache.clear('/users/*')
-  - Protokoll ändern von `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
+  - Allow to clear a pattern from the client: up.cache.clear('/users/*')
+  - Allow to clear a pattern from the client: up.render(..., clearCache: '/users/*')
+  - Read [up-clear-cache]
+  - Change protocol from `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
   - This also means we need to postpone cache-clearing until the response was received
   - Also X-Up-Clear-Cache: false
   - In unpoly-rails, support up.cache.clear(pattern) and up.cache.keep
