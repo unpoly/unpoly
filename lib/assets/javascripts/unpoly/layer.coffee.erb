@@ -183,6 +183,19 @@ up.layer = do ->
     # since a lot of options processing is happening there.
     return up.render(options)
 
+  ###**
+  This event is emitted after a layer's [location property](/up.Layer#location)
+  has changed value.
+
+  This event is also emitted when a layer [without history](/up.Layer#history)
+  has reached a new location.
+
+  @param {string} event.location
+    The new location URL.
+  @event up:layer:location:changed
+  @experimental
+  ###
+
   # TODO: Docs for up.layer.ask()
   ask = (options) ->
     return new Promise (resolve, reject) ->

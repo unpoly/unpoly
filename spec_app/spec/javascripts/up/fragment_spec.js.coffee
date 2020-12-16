@@ -1475,7 +1475,7 @@ describe 'up.fragment', ->
 
         describe 'browser location', ->
 
-          it 'sets the browser location to the requested URL yyy', asyncSpec (next) ->
+          it 'sets the browser location to the requested URL', asyncSpec (next) ->
             fixture('.target')
             promise = up.render('.target', url: '/path', history: true)
             next =>
@@ -1517,7 +1517,13 @@ describe 'up.fragment', ->
           it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/path', history: false)
-            next => @respondWithSelector('.target', status: 500)
+            next => @respondWithSelector('.target')
+            next => expect(location.href).toMatchURL(@locationBeforeExample)
+
+          it 'does not add a history entry without a { history } option', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path')
+            next => @respondWithSelector('.target')
             next => expect(location.href).toMatchURL(@locationBeforeExample)
 
           it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
@@ -1566,6 +1572,62 @@ describe 'up.fragment', ->
               up.render('.success-target', url: '/path', history: true, location: '/path5', failLocation: '/path6', failTarget: '.failure-target')
               next => @respondWithSelector('.failure-target', status: 500)
               next => expect(location.href).toMatchURL('/path6')
+
+          describe 'up:layer:location:changed event', ->
+
+            it 'is emited when the location changed', asyncSpec (next) ->
+              history.replaceState?({}, 'original title', '/original-url')
+              fixture('.target')
+
+              listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', listener)
+
+              next ->
+                up.render(target: '.target', location: '/new-url', content: 'new content', history: true)
+
+              next ->
+                expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url' })
+
+            it 'is not emitted when the location did not change', asyncSpec (next) ->
+              up.layer.open(target: '.target', location: '/original-layer-url', content: 'old overlay text')
+              listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', listener)
+
+              next =>
+                expect(up.layer.isOverlay()).toBe(true)
+                expect(up.layer.location).toMatchURL('/original-layer-url')
+                expect(listener.calls.count()).toBe(1)
+
+              next ->
+                up.render(target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true)
+
+              next ->
+                expect(up.layer.current).toHaveText('new overlay text')
+                expect(listener.calls.count()).toBe(1)
+
+            it "is emitted in layers that doesn't render history", asyncSpec (next) ->
+              listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', listener)
+
+              up.layer.open(target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text')
+
+              next =>
+                expect(up.layer.isOverlay()).toBe(true)
+                # Browser location is unchanged, but the overlay still needs its internal location
+                expect(location.href).toMatchURL(@locationBeforeExample)
+                expect(up.layer.location).toMatchURL('/original-layer-url')
+
+                expect(listener.calls.count()).toBe(1)
+
+                up.render(target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true)
+
+              next =>
+                # Browser location is unchanged, but the overlay still needs its internal location
+                expect(location.href).toMatchURL(@locationBeforeExample)
+                expect(up.layer.location).toMatchURL('/next-layer-url')
+
+                # Listener was called again, as we're tracking changes to the layer's { location } prop
+                expect(listener.calls.count()).toBe(2)
 
         describe 'window title', ->
 

@@ -38,7 +38,18 @@ describe 'up.RenderOptions', ->
 
     describe 'with { navigate: false }', ->
 
-      it 'sets additional defaults appropriate to programmatic fragment changes', ->
+      it 'does not set navigation defaults, which are often in the way for smaller fragment changes', ->
+        givenOptions = { navigate: false }
+        options = up.RenderOptions.preprocess(givenOptions)
+
+        expect(options.solo).toBeUndefined()
+        expect(options.feedback).toBeUndefined()
+        expect(options.fallback).toBeUndefined()
+        expect(options.peel).toBeUndefined()
+        expect(options.cache).toBeUndefined()
+        expect(options.scroll).toBeUndefined()
+
+      it 'sets { history: false } to not update { title, location } props, even in history-less layers', ->
         givenOptions = { navigate: false }
         options = up.RenderOptions.preprocess(givenOptions)
 
@@ -57,11 +68,12 @@ describe 'up.RenderOptions', ->
         givenOptions = { preload: true, solo: true, confirm: true, feedback: true, url: '/path' }
         options = up.RenderOptions.preprocess(givenOptions)
 
-        expect(options.url).toBe('/path')
         expect(options.solo).toBe(false)
         expect(options.confirm).toBe(false)
         expect(options.feedback).toBe(false)
-        expect(options.cache).toBe(true)
+
+        # Other options are left unchanged
+        expect(options.url).toBe('/path')
 
   describe '.deriveFailOptions()', ->
     
