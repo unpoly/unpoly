@@ -41,8 +41,6 @@ Remaining feature work
 
 - Remove support for :closest
 
-- Expose up:layer:location:changed for menus inside history-less overlays
-
 - Polling
   - Configure polling pauses
     - up.radio.config.pollingEnabled = ({ fragment }) -> !up.network.isConnectionSlow() && up.layer.get(fragment).isFront() && !document.hidden
