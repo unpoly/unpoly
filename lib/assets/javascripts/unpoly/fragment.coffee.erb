@@ -618,7 +618,7 @@ up.fragment = do ->
 
   emitFragmentDestroyed = (fragment, options) ->
     log = options.log ? ['Destroyed fragment %o', fragment]
-    parent = options.parent or up.fail("Missing { parent } option")
+    parent = options.parent || document
     up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log })
 
   isDestroying = (element) ->

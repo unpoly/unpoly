@@ -6,7 +6,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
 
   constructor: (options) ->
     super(options)
-    @layer = up.layer.get(options)
+    @layer = up.layer.get(options) || up.layer.current
     @element = @options.element
     @animation = @options.animation
     @log = @options.log

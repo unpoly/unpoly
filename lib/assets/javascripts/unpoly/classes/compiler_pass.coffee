@@ -12,8 +12,9 @@ class up.CompilerPass
     unless @skipSubtrees.length && @root.querySelector('[up-keep]')
       @skipSubtrees = undefined
 
-    # If a caller has already looked up the layer we don't want to look it up again.
-    @layer = options.layer || up.layer.get(@root)
+    # (1) If a caller has already looked up the layer we don't want to look it up again.
+    # (2) Ddefault to the current layer in case the user manually compiles a detached element.
+    @layer = options.layer || up.layer.get(@root) || up.layer.current
 
     @errors = []
 

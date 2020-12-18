@@ -3998,6 +3998,15 @@ describe 'up.fragment', ->
           expect(up.layer.stack[0].sync).toHaveBeenCalled()
           expect(up.layer.stack[1].sync).toHaveBeenCalled()
 
+      it 'does not crash and runs destructors when destroying a detached element (bugfix)', (done) ->
+        destructor = jasmine.createSpy('destructor')
+        up.compiler('.element', (element) -> destructor)
+        detachedElement = up.element.createFromSelector('.element')
+        up.hello(detachedElement)
+        up.destroy(detachedElement).then ->
+          expect(destructor).toHaveBeenCalled()
+          done()
+
     describe 'up.reload()', ->
 
       it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
@@ -4157,6 +4166,20 @@ describe 'up.fragment', ->
           expect(layerSpy.calls.count()).toBe(2)
           expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.get(0)]
           expect(layerSpy.calls.argsFor(1)).toEqual [up.layer.get(1)]
+
+      it 'keeps up.layer.current and does not crash when compiling a detached element (bugfix)', asyncSpec (next) ->
+        layerSpy = jasmine.createSpy('layer spy')
+        up.compiler('.foo', -> layerSpy(up.layer.current))
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.current.isOverlay()).toBe(true)
+
+          element = up.element.createFromSelector('.foo')
+          compileFn = -> up.hello(element)
+
+          expect(compileFn).not.toThrowError()
+          expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.current]
 
     describe 'up.fragment.toTarget', ->
   
