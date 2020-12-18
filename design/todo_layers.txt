@@ -40,17 +40,18 @@ Remaining feature work
   - contentType must also be honored in FormRenderer
 
 - Remove support for :closest
+  - I think we cannot move :has to resolveTarget() because :has does not produce a selector
 
-- Polling
-  - Configure polling pauses
-    - up.radio.config.pollingEnabled = ({ fragment }) -> !up.network.isConnectionSlow() && up.layer.get(fragment).isFront() && !document.hidden
-  - Pause polling for background layers
-    - Polling: Don't override an [up-source] attribute rendered by the server
+- Allow the server to send an abstract target: X-Up-Target: :main
 
-- Expose slow connection checks in up.network
-  - rename config.preloadMinDownlink => config.slowDownlink
-  - rename config.preloadMaxRTT => config.slowRTT
-  - Expose up.network.isConnectionSlow()
+- { history: 'auto' } for UpdateLayer:
+  - Update history IF we're replacing a fragment.config.autoHistorySelectors = ['*']
+  - The default is * to not break everyone's APP but users may replace that with [':main']
+
+- Slow events
+  - Rename up.network.config.slowDelay to up.network.config.badResponseTime
+  - Rename up:network:slow to up:request:late
+  - Rename up:network:recover to up:request:recover
 
 - Remove up:fragment:unusable
 
@@ -59,10 +60,12 @@ Remaining feature work
   - up.fragment.source() should return { url, time }.
   - Send X-Up-Reload-From timestamp
   - in unpoly-rails, support up.reload?, up.reload_from and up.reload_from_before?
+  - when preloading is paused, try again in 10 seconds
 
 - Caching
-  - Allow to clear a pattern from the client: up.cache.clear('/users/*')
-  - Allow to clear a pattern from the client: up.render(..., clearCache: '/users/*')
+  - Allow to clear a pattern from the client:
+    - up.cache.clear('/users/*')
+    - up.render(..., clearCache: '/users/*')
   - Read [up-clear-cache]
   - Change protocol from `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
   - This also means we need to postpone cache-clearing until the response was received
@@ -76,6 +79,14 @@ Remaining feature work
       if (!request.isSafe()) return '*'
       if (request.matchURL('/users/search')) return '/users/*'
     }
+
+- Now that up.request is up.network
+  - Rename up.network.config.metaKeys to up.network.config.requestMetaKeys
+
+- Consider extracting deprecated aliases to unpoly-migrate.js
+  - Would save ~ 15 KB .js, 3 KB+ gzipped
+  - We would keep a few of the more complex rewrites in the code
+
 
 Manual tests
 ------------
