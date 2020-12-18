@@ -21,11 +21,26 @@ up.radio = do ->
     These elements are replaced even when they were not targeted directly.
 
     By default this contains the [`[up-hungry]`](/up-hungry) attribute.
+  @param {number} [config.pollInterval=30000]
+    The default [polling](/up-poll] interval in milliseconds.
+  @param {boolean|string} [config.pollEnabled='auto']
+    Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
+
+    When set to `'auto'` Unpoly will poll if one of the following applies:
+
+    - The browser tab is in the foreground
+    - The fragment's layer is the [frontmost layer](/up.layer.front).
+    - We should not [avoid optional requests](/up.network.shouldReduceRequests)
+
+    When set to `true`, Unpoly will always allow polling.
+
+    When set to `false`, Unpoly will never allow polling.
   @stable
   ###
   config = new up.Config ->
     hungrySelectors: ['[up-hungry]']
     pollInterval: 30000
+    pollEnabled: 'auto'
 
   up.legacy.renamedProperty(config, 'hungry', 'hungrySelectors')
 
@@ -54,35 +69,73 @@ up.radio = do ->
   @stable
   ###
 
-  # TODO: Docs for up.radio.startPolling()
-  startPolling = (element, options = {}) ->
-    interval = options.interval ? e.numberAttr(element, 'up-interval') ? config.pollInterval
+  ###**
+  Starts [polling](/up-poll) the given element.
 
-    timer = null
-    running = true
+  @function up.radio.startPolling
+  @param {Element|jQuery|string} fragment
+    The fragment to reload periodically.
+  @param {number} options.interval
+    The reload interval in milliseconds.
+
+    Defaults to `up.radio.config.pollInterval`.
+  @stable
+  ###
+  startPolling = (fragment, options = {}) ->
+    interval = options.interval ? e.numberAttr(fragment, 'up-interval') ? config.pollInterval
+
+    stopped = false
 
     lastRequest = null
     options.onQueued = ({ request }) -> lastRequest = request
 
     doReload = ->
-      if isPollingPaused()
-        doSchedule()
-      else
-        u.always(up.reload(element, options), doSchedule)
+      # The setTimeout(doReload) callback might already be scheduled
+      # before the polling stopped.
+      return if stopped
 
-    doSchedule = ->
-      if running
-        timer = setTimeout(doReload, interval)
+      if shouldPoll(fragment)
+        console.log("SHOULD POLL!")
+        u.always(up.reload(fragment, options), doSchedule)
+      else
+        console.log("SHOULD *NOT* POLL! Retrying in ", Math.min(10 * 1000, interval))
+        # Reconsider after 10 seconds at most
+        doSchedule(Math.min(10 * 1000, interval))
+
+    doSchedule = (delay = interval) ->
+      # The up.reload().then(doSchedule) callback might already be
+      # registered before the polling stopped.
+      return if stopped
+
+      setTimeout(doReload, delay)
+
+    destructor = ->
+      stopped = true       # Don't execute already-scheduled callbacks
+      lastRequest?.abort() # Abort any pending request
+
+    # up.radio.stopPolling() will emit up:poll:stop to signal cancelation.
+    up.on(fragment, 'up:poll:stop', destructor)
 
     doSchedule()
 
-    return ->
-      running = false      # Don't execute the up.always() handler
-      lastRequest?.abort() # Abort any pending request
-      clearTimeout(timer)  # Stop a scheduled timer
+    return destructor
 
-  isPollingPaused = ->
-    return document.hidden
+  ###**
+  Stops [polling](/up-poll) the given element.
+
+  @function up.radio.stopPolling
+  @param {Element|jQuery|string} fragment
+    The fragment to stop reloading.
+  @stable
+  ###
+  stopPolling = (element) ->
+    up.emit(element, 'up:poll:stop')
+
+  shouldPoll = (fragment) ->
+    setting = u.evalOption(config.pollEnabled, fragment)
+    if setting == 'auto'
+      return !document.hidden && !up.network.shouldReduceRequests() && up.layer.get(fragment)?.isFront?()
+    return setting
 
   ###**
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
@@ -121,7 +174,9 @@ up.radio = do ->
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.
+
     Defaults to `up.radio.config.pollInterval`.
+  @stable
   ###
   up.compiler '[up-poll]', startPolling
 
@@ -130,3 +185,4 @@ up.radio = do ->
   config: config
   hungrySelector: hungrySelector
   startPolling: startPolling
+  stopPolling: stopPolling

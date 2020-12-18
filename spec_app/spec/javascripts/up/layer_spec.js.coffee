@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 describe 'up.layer', ->
 
@@ -831,6 +832,10 @@ describe 'up.layer', ->
           makeLayers(3).then ->
             expect(up.layer.get(up.layer.get(1).element)).toBe up.layer.get(1)
             done()
+
+        it 'returns a missing value if the element is detached', ->
+          element = e.createFromSelector('.element')
+          expect(element).toBeDetached()
 
       describe 'for an up.Layer', ->
 

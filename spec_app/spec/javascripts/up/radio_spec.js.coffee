@@ -5,6 +5,40 @@ describe 'up.radio', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.radio.startPolling()', ->
+
+      it 'starts polling the given element', asyncSpec (next) ->
+        up.radio.config.pollInterval = 150
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        element = fixture('.element')
+        up.radio.startPolling(element)
+
+        next.after 75, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+
+        next.after 150, ->
+          expect(reloadSpy).toHaveBeenCalledWith(element, jasmine.anything())
+          expect(reloadSpy.calls.count()).toBe(1)
+
+        next.after 150, ->
+          expect(reloadSpy.calls.count()).toBe(2)
+
+    describe 'up.radio.stopPolling()', ->
+
+      it 'stops polling the given, polling element', asyncSpec (next) ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        element = fixture('.element')
+        up.radio.startPolling(element, interval: 100)
+
+        next.after 150, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+          up.radio.stopPolling(element)
+
+        next.after 100, ->
+          expect(reloadSpy.calls.count()).toBe(1)
+
   describe 'unobtrusive behavior', ->
 
     describe '[up-hungry]', ->
@@ -274,9 +308,57 @@ describe 'up.radio', ->
           expect(reloadSpy).toHaveBeenCalled()
 
       it 'allows to change the URL with an [up-source] attribute', asyncSpec (next) ->
-        up.radio.config.pollInterval = 1
-
-        up.hello(fixture('.element[up-poll][up-source="/optimized-path"]'))
+        up.hello(fixture('.element[up-poll][up-source="/optimized-path"][up-interval=2]'))
 
         next.after 20, =>
           expect(@lastRequest().url).toMatchURL('/optimized-path')
+
+      it 'pauses polling while we avoid optional requests', asyncSpec (next) ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        shouldReduceRequests = true
+        spyOn(up.network, 'shouldReduceRequests').and.callFake -> shouldReduceRequests
+
+        up.hello(fixture('.element[up-poll][up-interval=1]'))
+
+        next.after 20, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+          shouldReduceRequests = false
+
+        next.after 20, ->
+          expect(reloadSpy).toHaveBeenCalled()
+
+      it 'pauses polling while the element is detached', asyncSpec (next) ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        element = up.element.createFromSelector('.element[up-poll][up-interval=2]')
+        registerFixture(element) # make sure this element is destroyed after the example
+        up.hello(element)
+
+        next.after 20, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+
+          document.body.appendChild(element)
+
+        next.after 20, ->
+          expect(reloadSpy).toHaveBeenCalled()
+
+      it "pauses polling while the element's layer is in the background", asyncSpec (next) ->
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          element = up.layer.root.affix('.element[up-poll][up-interval=2]')
+          registerFixture(element) # make sure this element is destroyed after the example
+          up.hello(element) # start polling
+
+        next.after 20, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+
+          up.layer.dismiss()
+
+        next.after 20, ->
+          expect(up.layer.isRoot()).toBe(true)
+          expect(reloadSpy).toHaveBeenCalled()

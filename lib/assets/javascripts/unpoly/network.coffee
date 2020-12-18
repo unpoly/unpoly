@@ -80,23 +80,19 @@ up.network = do ->
     Whether Unpoly will load [preload requests](/up.network.preload).
 
     With the default setting (`"auto"`) Unpoly will load preload requests
-    if the connection's effective round-trip time is at most `up.network.config.preloadMaxRTT`
-    and the connection's effective bandwidth estimate is at least `up.network.config.preloadMinDownlink`.
-    If the connection does not satisfy these requirements, Unpoly will
-    automatically [abort](/up.network.abort) any preload requests. Note that connection
-    speed may change during a session.
+    unless `up.network.shouldReduceRequests()` detects a poor connection.
 
     If set to `true`, Unpoly will always load preload requests.
 
     If set to `false`, Unpoly will automatically [abort](/up.network.abort) all preload requests.
-  @param {number} [config.preloadMinDownlink=0.6]
+  @param {number} [config.badDownlink=0.6]
     The connection's minimum effective bandwidth estimate required
     to [enable preloading](/up.network.config#config.preloadEnabled).
 
     The value is given in megabits per second.
 
     This setting is only honored if `up.network.config.preloadEnabled` is set to `'auto'` (the default).
-  @param {number} [config.preloadMaxRTT=0.6]
+  @param {number} [config.badRTT=0.6]
     The connection's maximum effective round-trip time required
     to [enable preloading](/up.network.config#config.preloadEnabled).
 
@@ -160,8 +156,8 @@ up.network = do ->
     preloadEnabled: 'auto' # true | false | 'auto'
     # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
-    preloadMinDownlink: 0.6
-    preloadMaxRTT: 750
+    badDownlink: 0.6
+    badRTT: 750
     metaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
@@ -494,22 +490,39 @@ up.network = do ->
   isBusy = ->
     queue.isBusy()
 
-  isConnectionTooSlowForPreload = ->
+  ###**
+  Returns whether optional requests should be avoided where possible.
+
+  We assume the user wants to avoid requests if either of following applies:
+
+  - The user has enabled data saving in their browser ("Lite Mode" in Chrome for Android).
+  - The connection's effective round-trip time is longer than `up.network.config.badRTT`.
+  - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
+
+  By default Unpoly will disable [preloading](/up-preload) or [polling](/up-poll) if requests
+  should be avoided.
+
+  @function up.network.shouldReduceRequests
+  @return {boolean}
+    Whether requests should be avoided where possible.
+  @experimental
+  ###
+  shouldReduceRequests = ->
     # Browser support for navigator.connection: https://caniuse.com/?search=networkinformation
     if netInfo = navigator.connection
       # API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
       # API for NetworkInformation#rtt:      https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
       # API for NetworkInformation#saveData: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
       return netInfo.saveData ||
-        (netInfo.rtt      && netInfo.rtt      > config.preloadMaxRTT) ||
-        (netInfo.downlink && netInfo.downlink < config.preloadMinDownlink)
+        (netInfo.rtt      && netInfo.rtt      > config.badRTT) ||
+        (netInfo.downlink && netInfo.downlink < config.badDownlink)
 
   shouldPreload = (request) ->
     setting = u.evalOption(config.preloadEnabled, request)
     if setting == 'auto'
       # Since connection.effectiveType might change during a session we need to
       # re-evaluate the value every time.
-      return !isConnectionTooSlowForPreload() && up.browser.canPushState()
+      return !shouldReduceRequests() && up.browser.canPushState()
     return setting
 
   ###**
@@ -714,11 +727,12 @@ up.network = do ->
   registerAliasForRedirect: registerAliasForRedirect
   queue: queue # for testing
   shouldPreload: shouldPreload
+  shouldReduceRequests: shouldReduceRequests
 
 up.request = up.network.request
 up.ajax = up.network.ajax
 
-# TODO: Docs for up.cache()
+# TODO: Docs for up.cache.clear
 up.cache = up.network.cache
 
 up.legacy.renamedPackage('proxy', 'network')
