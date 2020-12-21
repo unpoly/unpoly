@@ -18,7 +18,8 @@ function file(srcPath, outputFilename) {
       filename: outputFilename,
     },
     devServer: {
-      contentBase: './dist'
+      contentBase: './dist',
+      // contentBasePublicPath: '/dist'
     }
   }
 }

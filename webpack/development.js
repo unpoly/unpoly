@@ -18,6 +18,7 @@ module.exports = [
   merge(
     file('./spec/specs.js', 'specs.js'),
     scriptPipeline('ES5'),
+    stylePipeline(),
     minify(false)
   ),
 

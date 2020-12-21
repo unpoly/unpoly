@@ -3,3 +3,5 @@ context1.keys().forEach(context1)
 
 var context2 = require.context('./up', true, /(\.js|\.coffee)$/);
 context2.keys().forEach(context2)
+
+require('./specs.sass')

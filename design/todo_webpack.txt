@@ -3,6 +3,8 @@
 - Remove redundant sprockets requires (we now import it all in unpoly.js)
 
 
+- Style Pipeline for production files
+
 
 spec/index.html -- lädt den runner
 
