@@ -27,9 +27,9 @@
     "dist/unpoly.min.css"
   ],
   "scripts": {
-    "test": "echo \"Open specs/index.html in a browser to run tests\" && exit 1",
+    "test": "echo \"Open specs/runner.html in a browser to run tests\" && exit 1",
     "build": "webpack --config ./webpack/production.js",
-    "dev-server": "webpack-dev-server --config ./development.js",
+    "dev-server": "webpack-dev-server --config ./webpack/development.js",
     "build-dev": "webpack --config ./webpack/development.js"
   },
   "dependencies": {},
