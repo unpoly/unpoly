@@ -19,6 +19,7 @@ function file(srcPath, outputFilename) {
     },
     devServer: {
       contentBase: './dist',
+      writeToDisk: true,
       // contentBasePublicPath: '/dist'
     }
   }
