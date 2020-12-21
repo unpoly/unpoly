@@ -33,3 +33,92 @@ production:
 
 - upgrade to node 14 (lts/fermium)
 - upgrade typescript
+
+
+
+Final folder structure
+======================
+
+- Webpack should WATCH instead of boot a dev server!
+- Or be both with writeToDisk: true
+- Maybe have a separate watch task
+- Maybe don't have separate development and build configs
+
+
+/unpoly
+  Rakefile // publish scripts are still here, eventually move to package.json; Must update VERSION in package.json or throw if differs
+
+  package.json // must rename contents from dist/ to build/
+
+  VERSION
+
+  build/
+    <output folder for webpack>
+    specs.html -> ../test/specs.html
+    unpoly.es5.js // in .gitignore
+    unpoly.esnext.js // in .gitignore
+    unpoly.development.es5.js // in .gitignore     => do we really need this if we got regular and .min?
+    unpoly.development.esnext.js // in .gitignore
+    // consider building everything
+
+  src/
+    unpoly.js
+    unpoly-bootstrap3.js
+    unpoly-bootstrap4.js
+    unpoly-bootstrap5.js
+    not needed anymore: unpoly.css (manifest is in pack.js)
+
+    unpoly/
+      fragment.coffee
+      fragment.sass
+      protocol.coffee
+      form.coffee
+      form.sass
+
+  test/
+    helpers/
+      to_match_url.coffee
+      to_have_text.coffee
+    unpoly/
+      fragment_spec.coffee
+      protocol_spec.coffee
+    specs.js
+    specs.css
+    specs.html
+
+
+/unpoly-rails
+
+  unpoly-rails.gemspec
+
+  lib/
+    unpoly-rails.rb
+    unpoly/
+      rails/
+        engine.rb
+        ...
+    assets/
+      javascripts/
+        unpoly.es5.js -> ../../../unpoly/build/unpoly.es5.js
+      stylesheets/
+        unpoly.css -> ../../../unpoly/build/unpoly.css
+
+
+/unpoly-manual-test
+  app/...
+
+  Gemfile uses unpoly-rails from ../unpoly-rails
+
+
+/unpoly-site
+  app/...
+
+  vendor
+    unpoly-local
+      unpoly.es5.js -> ../../../unpoly/build.es5.js
+      unpoly.es5.css -> ../../../unpoly/build/unpoly.css
+
+
+
+
+
