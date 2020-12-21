@@ -27,3 +27,7 @@ production:
   dist/unpoly.es5.min.js
   dist/unpoly.esnext.js
   dist/unpoly.esnext.min.js
+
+
+- upgrade to node 14 (lts/fermium)
+- upgrade typescript
