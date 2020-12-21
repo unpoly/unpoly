@@ -12,3 +12,4 @@ node_modules
 /dist/*.development.*
 /dist/specs.js
 /dist/jasmine.*
+/dist/unpoly*.*
