@@ -10,6 +10,7 @@ tmp
 npm-debug.log
 node_modules
 /dist/*.development.*
-/dist/specs.js
+/dist/specs.*
 /dist/jasmine.*
 /dist/unpoly*.*
+
