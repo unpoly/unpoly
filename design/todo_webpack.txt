@@ -5,6 +5,8 @@
 
 - Style Pipeline for production files
 
+- Use https://www.npmjs.com/package/webpack-preprocessor-loader instead of ERB so we keep valid JS files
+
 
 spec/index.html -- lädt den runner
 
@@ -57,7 +59,7 @@ Final folder structure
     specs.html -> ../test/specs.html
     unpoly.es5.js // in .gitignore
     unpoly.esnext.js // in .gitignore
-    unpoly.development.es5.js // in .gitignore     => do we really need this if we got regular and .min?
+    unpoly.development.es5.js // in .gitignore     => do we really need this if we got regular and .min? We do need it for .knife
     unpoly.development.esnext.js // in .gitignore
     // consider building everything
 
