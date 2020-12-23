@@ -907,6 +907,9 @@ up.element = do ->
         exposedValues = u.values(u.pick(event, exposedKeys))
         callback.call(link, event, exposedValues...)
 
+  closestAttr = (element, attr) ->
+    return closest(element, '[' + attr + ']')?.getAttribute(attr)
+
   ###**
   Temporarily sets the inline CSS styles on the given element.
 
@@ -1126,6 +1129,7 @@ up.element = do ->
     subtree: subtree # practical
     isInSubtree: isInSubtree
     closest: closest # needed for IE11
+    closestAttr: closestAttr
     matches: matches # needed for IE11
     ancestor: ancestor # not practical. we use it to implement closest
     around: around

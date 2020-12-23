@@ -1796,16 +1796,15 @@ describe 'up.fragment', ->
           next =>
             @respondWithSelector('.target')
           next =>
-            expect(up.fragment.source('.target')).toMatchURL('/path')
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/path')
 
         it 'keeps the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
-          target = fixture('.target')
-          up.fragment.setSource(target, '/previous-source')
+          target = fixture('.target[up-source="/previous-source"]')
           up.render('.target', url: '/path', method: 'post')
           next =>
             @respondWithSelector('.target')
           next =>
-            expect(up.fragment.source('.target')).toMatchURL('/previous-source')
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/previous-source')
 
         it 'does not overwrite an [up-source] attribute from the element HTML', asyncSpec (next) ->
           fixture('.target')
@@ -1813,7 +1812,7 @@ describe 'up.fragment', ->
           next =>
             @respondWithSelector('.target[up-source="/other"]')
           next =>
-            expect(up.fragment.source('.target')).toMatchURL('/other')
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/other')
 
         describe 'with { source } option', ->
 
@@ -1823,7 +1822,7 @@ describe 'up.fragment', ->
             next =>
               @respondWithSelector('.target')
             next =>
-              expect(up.fragment.source('.target')).toMatchURL('/given-path')
+              expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
 
           it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
             fixture('.target')
@@ -1831,16 +1830,15 @@ describe 'up.fragment', ->
             next =>
               @respondWithSelector('.target')
             next =>
-              expect(up.fragment.source('.target')).toMatchURL('/given-path')
+              expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
 
           it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
-            target = fixture('.target')
-            up.fragment.setSource(target, '/previous-source')
+            target = fixture('.target[up-source="/previous-source"]')
             up.navigate('.target', url: '/path', method: 'post', source: '/given-path', failTarget: '.target')
             next =>
               @respondWithSelector('target', status: 500)
             next =>
-              expect(up.fragment.source('.target')).toMatchURL('/previous-source')
+              expect(up.fragment.source(e.get '.target')).toMatchURL('/previous-source')
 
       describe 'context', ->
 
@@ -4010,8 +4008,8 @@ describe 'up.fragment', ->
     describe 'up.reload()', ->
 
       it 'reloads the given selector from the closest known source URL', asyncSpec (next) ->
-        $container = $fixture('.container .element').find('.element').text('old text')
-        up.fragment.setSource($container[0], "/source")
+        container = fixture('.container[up-source="/source"]')
+        element = e.affix(container, '.element', text: 'old text')
 
         next =>
           up.reload('.element')
@@ -4025,20 +4023,18 @@ describe 'up.fragment', ->
             """
 
         next =>
-          expect($('.element')).toHaveText('new text')
+          expect('.element').toHaveText('new text')
 
       it 'does not use a cached response', ->
         renderSpy = up.fragment.knife.mock('render')
-        element = fixture('.element')
+        element = fixture('.element[up-source="/source"]')
 
-        up.fragment.setSource(element, '/source')
         up.reload(element)
         expect(renderSpy).not.toHaveBeenCalledWith(jasmine.objectContaining(cache: true))
 
       it 'does not reveal by default', asyncSpec (next) ->
-        element = fixture('.element', text: 'old text')
+        element = fixture('.element[up-source="/source"]', text: 'old text')
 
-        up.fragment.setSource(element, '/source')
         spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
         next ->
@@ -4051,12 +4047,20 @@ describe 'up.fragment', ->
           expect('.element').toHaveText('new text')
           expect(up.reveal).not.toHaveBeenCalled()
 
+      it "sets an X-Up-Reload-From-Time header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec (next) ->
+        element = fixture('.element[up-source="/source"][up-time="1608712106"]')
+
+        up.reload(element)
+
+        next =>
+          expect(@lastRequest().url).toMatchURL('/source')
+          expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
 
       describeFallback 'canPushState', ->
 
         it 'makes a page load from the closest known source URL', asyncSpec (next) ->
-          $container = $fixture('.container .element').find('.element').text('old text')
-          up.fragment.setSource($container[0], "/source")
+          container = fixture('.container[up-source="/source"]')
+          element = e.affix(container, '.element', text: 'old text')
           spyOn(up.browser, 'loadPage')
           up.reload('.element')
 
@@ -4071,7 +4075,7 @@ describe 'up.fragment', ->
         next =>
           @respondWithSelector('.target')
         next =>
-          expect(up.fragment.source('.target')).toMatchURL('/path')
+          expect(up.fragment.source(e.get '.target')).toMatchURL('/path')
 
       it 'returns the source of a parent fragment if the given fragment has no reloadable source', asyncSpec (next) ->
         fixture('.target')
@@ -4091,7 +4095,7 @@ describe 'up.fragment', ->
           @respondWithSelector('.inner')
 
         next =>
-          expect(up.fragment.source('.inner')).toMatchURL('/outer')
+          expect(up.fragment.source(e.get '.inner')).toMatchURL('/outer')
 
       it 'allows users to provide an alternate reloading URL with an [up-source] attribute', asyncSpec (next) ->
         fixture('.outer')
@@ -4101,9 +4105,9 @@ describe 'up.fragment', ->
           @respondWithSelector('.outer .between[up-source="/between"] .inner')
 
         next =>
-          expect(up.fragment.source('.outer')).toMatchURL('/outer')
-          expect(up.fragment.source('.between')).toMatchURL('/between')
-          expect(up.fragment.source('.inner')).toMatchURL('/between')
+          expect(up.fragment.source(e.get '.outer')).toMatchURL('/outer')
+          expect(up.fragment.source(e.get '.between')).toMatchURL('/between')
+          expect(up.fragment.source(e.get '.inner')).toMatchURL('/between')
 
     describe 'up.fragment.failKey', ->
 

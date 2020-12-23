@@ -471,8 +471,7 @@ describe 'up.form', ->
             expect(up.history.location).toMatchURL('/other-path')
 
         it "submits the form's source URL if the form has no [action] attribute", asyncSpec (next) ->
-          form = fixture('form')
-          up.fragment.setSource(form, '/form-source')
+          form = fixture('form[up-source="/form-source"]')
 
           up.submit(form)
 

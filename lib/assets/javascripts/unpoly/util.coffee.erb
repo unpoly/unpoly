@@ -1777,6 +1777,9 @@ up.util = do ->
 
   SPRINTF_PLACEHOLDERS = /\%[oOdisf]/g
 
+  secondsSinceEpoch = ->
+    Math.floor(Date.now() * 0.001)
+
   ###**
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
 
@@ -1960,4 +1963,5 @@ up.util = do ->
   sprintf: sprintf
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   renameKeys: renameKeys
+  timestamp: secondsSinceEpoch
 

@@ -854,6 +854,23 @@ describe 'up.element', ->
       element = up.element.createFromHTML('<div></div>')
       expect(up.element.jsonAttr(element, 'foo')).toBeUndefined()
 
+  describe 'up.element.closestAttr', ->
+
+    it 'returns the the value of the given attribute on the given element', ->
+      element = fixture('div[foo=value]')
+      expect(up.element.closestAttr(element, 'foo')).toEqual('value')
+
+    it 'returns the the value of the given attribute of an ancestor of the given element', ->
+      grandParent = fixture('div[foo=value]')
+      parent = up.element.affix(grandParent, 'div')
+      element = up.element.affix(parent, 'div')
+      expect(up.element.closestAttr(element, 'foo')).toEqual('value')
+
+    it 'returns a missing value if neither the given element nor an ancestor have the given attribute', ->
+      parent = fixture('div')
+      element = up.element.affix(parent, 'div')
+      expect(up.element.closestAttr(element, 'foo')).toBeMissing()
+
   describe 'up.element.setTemporaryStyle', ->
 
     it "sets the given inline styles and returns a function that will restore the previous inline styles", ->

@@ -25,6 +25,7 @@ module Unpoly
       field :context_changes, Field::Hash, response_header_name: 'X-Up-Context'
       field :events, Field::Array
       field :cache, Field::String, method: :cache_command
+      field :reload_from_time, Field::Time
 
       ##
       # Returns whether the current request is an
@@ -296,6 +297,14 @@ module Unpoly
         @cache_command = value
       end
 
+      def reload_from_time
+        reload_from_time_from_request
+      end
+
+      def reload?
+        !!reload_from_time
+      end
+
       private
 
       attr_reader :controller
@@ -337,6 +346,7 @@ module Unpoly
         params[context_changes_param_name]    = serialized_context_changes
         params[events_param_name]             = serialized_events
         params[cache_command_param_name]      = serialized_cache_command
+        params[reload_from_time_param_name]   = serialized_reload_from_time
 
         # Don't send empty response headers.
         params = params.select { |_key, value| value.present? }

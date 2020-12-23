@@ -80,9 +80,21 @@ describe Unpoly::Rails::Controller, type: :request do
     end
   end
 
+  shared_examples_for 'time field' do |reader:, header:|
+    it "returns the value of the #{header} request header, parsed from epoch seconds to a Time object" do
+      result = controller_eval(headers: { header => '1608714891' }, &reader)
+      expect(result).to eq(Time.at(1608714891))
+    end
+
+    it "returns nil if no #{header} request header is set" do
+      result = controller_eval(&reader)
+      expect(result).to be_nil
+    end
+  end
+
   shared_examples_for 'string field' do |reader:, header:|
     it "returns the value of the #{header} request header" do
-      result = controller_eval( headers: { header => 'header value' }, &reader)
+      result = controller_eval(headers: { header => 'header value' }, &reader)
       expect(result).to eq('header value')
     end
 
@@ -873,6 +885,34 @@ describe Unpoly::Rails::Controller, type: :request do
         up.title = 'Title from controller'
       end
       expect(response.headers['X-Up-Title']).to eq('Title from controller')
+    end
+
+  end
+
+  describe 'up.reload_from_time' do
+
+    include_examples 'time field',
+      header: 'X-Up-Reload-From-Time',
+      reader: -> { up.reload_from_time }
+
+  end
+
+  describe 'up.reload?' do
+
+    it 'returns true if an X-Up-Reload-From-Time header is given' do
+      result = controller_eval(headers: { 'X-Up-Reload-From-Time': '1608714891' }) do
+        up.reload?
+      end
+
+      expect(result).to eq(true)
+    end
+
+    it 'returns false if no X-Up-Reload-From-Time header is given' do
+      result = controller_eval do
+        up.reload?
+      end
+
+      expect(result).to eq(false)
     end
 
   end

@@ -55,6 +55,22 @@ module Unpoly
 
         end
 
+        class Time < Field
+
+          def parse(raw)
+            if raw.present?
+              ::Time.at(raw.to_i)
+            end
+            end
+
+          def stringify(value)
+            if value
+              value.to_i
+            end
+          end
+
+        end
+
         class Hash < Field
 
           def parse(raw)

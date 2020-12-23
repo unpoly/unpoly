@@ -1,6 +1,7 @@
 #= require ./change
 
 u = up.util
+e = up.element
 
 class up.Change.Addition extends up.Change
 
@@ -61,14 +62,15 @@ class up.Change.Addition extends up.Change
       throw up.error.aborted('Layer was closed')
 
   setSource: ({ oldElement, newElement, source }) ->
-    # When the server responds with an error, or when the request method is not
-    # reloadable (not GET), we keep the same source as before.
+    # (1) When the server responds with an error, or when the request method is not
+    #     reloadable (not GET), we keep the same source as before.
+    # (2) Don't set a source if someone tries to 'keep' when opening a new layer
     if source == 'keep'
-      source = oldElement && up.fragment.source(oldElement)
+      source = (oldElement && up.fragment.source(oldElement))
 
-    # Don't set a source if { false } is passed.
-    # Don't set a source if someone tries to 'keep' when opening a new layer
-    # Don't set a source if the element HTML already has an [up-source] attribute.
-    if source && !newElement.getAttribute('up-source')
-      # Remember where the element came from in case someone needs to up.reload(element) later.
-      up.fragment.setSource(newElement, source)
+    # (1) Don't set a source if { false } is passed.
+    # (2) Don't set a source if the element HTML already has an [up-source] attribute.
+    if source
+      e.setMissingAttrs newElement,
+        'up-source': u.normalizeURL(source),
+        'up-time': u.timestamp()

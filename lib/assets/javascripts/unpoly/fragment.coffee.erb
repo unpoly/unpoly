@@ -56,10 +56,6 @@ up.fragment = do ->
   reset = ->
     config.reset()
 
-  setSource = (element, sourceURL) ->
-    # This is used by UpdateLayer and OpenLayer.
-    element.setAttribute('up-source', u.normalizeURL(sourceURL))
-
   ###**
   Returns the URL the given element was retrieved from.
 
@@ -67,45 +63,23 @@ up.fragment = do ->
   the closest known source of an ancestor element is returned.
 
   @function up.fragment.source
-  @param {string|Element|jQuery} element
-  @param {up.Layer|string|number} options.layer
-    The [layer](/up.layer) for the fragment lookup if `element` is passed
-    as a selector string.
-
-    Will be ignored if `element` is passed as a DOM element.
+  @param {Element} element
   @return {string|undefined}
-  @stable
+  @experimental
   ###
-  source = (args...) ->
-    options = parseTargetAndOptions(args)
-    element = getOne(options.target, options)
-    return e.closest(element, '[up-source]')?.getAttribute('up-source')
+  sourceOf = (element) ->
+    return e.closestAttr(element, 'up-source')
 
   ###**
-  Sets this element's source URL for [reloading](/up.reload) and [polling](/up-poll)
+  Returns a timestamp for the  the given element was retrieved from.
 
-  When an element is reloaded, Unpoly will make a request from the URL
-  that originally brought the element into the DOM. You may use `[up-source]` to
-  use another URL instead.
-
-  \#\#\# Example
-
-  Assume an application layout with an unread message counter.
-  You use `[up-poll]` to refresh the counter every 30 seconds.
-
-  By default this would make a request to the URL that originally brought the
-  counter element into the DOM. To save the server from rendering a lot of
-  unused HTML, you may poll from a different URL like so:
-
-      <div class="unread-count" up-poll up-source="/unread-count">
-        2 new messages
-      </div>
-
-  @selector [up-source]
-  @param {String} up-source
-    The URL from which to reload this element.
-  @stable
+  @function up.fragment.time
+  @param {Element} element
+  @return {string}
+  @internal
   ###
+  timeOf = (element) ->
+    return e.closestAttr(element, 'up-time')
 
   ###**
   Sets this element's source URL for [reloading](/up.reload) and [polling](/up-poll)
@@ -937,7 +911,10 @@ up.fragment = do ->
   ###
   reload = (args...) ->
     options = parseTargetAndOptions(args)
-    options.url ?= source(options.target)
+    element = getOne(options.target, options)
+    options.url ?= sourceOf(element)
+    options.headers ||= {}
+    options.headers[up.protocol.headerize('reloadFromTime')] = timeOf(element)
     return render(options)
 
   ###**
@@ -1113,7 +1090,7 @@ up.fragment = do ->
 
   up.on 'up:app:boot', ->
     body = document.body
-    setSource(body, up.history.location)
+    body.setAttribute('up-source', up.history.location)
     hello(body)
 
   up.on 'up:framework:reset', reset
@@ -1134,8 +1111,7 @@ up.fragment = do ->
     all: getAll
     subtree: getSubtree
     closest: closest
-    source: source
-    setSource: setSource
+    source: sourceOf
     hello: hello
     visit: visit
     markAsDestroying: markFragmentAsDestroying

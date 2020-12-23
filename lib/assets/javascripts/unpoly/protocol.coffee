@@ -217,6 +217,51 @@ up.protocol = do ->
     The string `"clear"`.
   ###
 
+  ###**
+  This request header contains the creation time of an existing fragment that is being [reloaded](/up.reload).
+
+  Its value is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
+
+  \#\#\# Example
+
+  The request header below signals the server that a fragment is being reloaded.
+  The old fragment was originally inserted on December 23rd 2020, 13:40:18 UTC:
+
+  ```http
+  X-Up-Reload-From-Time: 1608730818
+  ```
+
+  \#\# Cheap polling responses
+
+  A use case for the `X-Up-Reload-From-Time` header is to avoid rendering unchanged content
+  while [polling](/up-poll).
+
+  The server can compare the time from the request with the time of the last data update.
+  If no more recent data is available, the server can [render nothing](/X-Up-Target):
+
+  ```ruby
+  class MessagesController < ApplicationController
+
+    def index
+      if up.reload_from_time == current_user.last_message_at
+        up.render_nothing
+      else
+        @messages = current_user.messages.order(time: :desc).to_a
+        render 'index'
+      end
+    end
+
+  end
+  ```
+
+  Only rendering when needed saves <b>CPU time</b> on your server, which spends most of its response time rendering HTML.
+
+  This also reduces the <b>bandwidth cost</b> for a request/response exchange to **~1 KB**.
+
+  @header X-Up-Reload-From-Time
+  @stable
+  ###
+
   contextFromXHR = (xhr) ->
     extractHeader(xhr, 'context', JSON.parse)
 
