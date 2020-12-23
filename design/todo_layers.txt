@@ -52,7 +52,11 @@ Remaining feature work
   - Rename up:network:slow to up:request:late
   - Rename up:network:recover to up:request:recover
 
-- Document :none
+- Document pseudo-selectors
+  - :none
+  - :main
+  - :layer
+  - consider moving :has() to up.fragment
 
 - Caching
   - Allow to clear a pattern from the client:
