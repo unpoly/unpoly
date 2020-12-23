@@ -21,12 +21,11 @@ Release process
 - Announce on mailing list
 - Announce on makandra cards
 - Close fixed issues.
+- Update https://makandracards.com/makandra/54158-html-forms-with-multiple-submit-buttons
 
 
 Remaining feature work
 ======================
-
-- Remove unused option up.network.abort({ reason })
 
 - up.request()
   - Remove up.Request#uid

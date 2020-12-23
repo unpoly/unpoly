@@ -283,10 +283,10 @@ class up.Request extends up.Record
     # Use the default message that callers of request.abort() would also get.
     @setAbortedState()
 
-  abort: (reason) ->
+  abort: ->
     # setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     # will call setAbortedState() a second time, without a message.
-    if @setAbortedState(reason) && @xhr
+    if @setAbortedState() && @xhr
       @xhr.abort()
 
   setAbortedState: (reason = ["Request to %s %s was aborted", @method, @url]) ->
