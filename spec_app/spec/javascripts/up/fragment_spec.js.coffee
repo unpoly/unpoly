@@ -237,33 +237,7 @@ describe 'up.fragment', ->
               expect('.success-target').toHaveText('old success text')
               expect('.failure-target').toHaveText('new failure text')
 
-          it 'emits up:fragment:unusable and does not update a fragment if the response has no HTML content-type', asyncSpec (next) ->
-            insertedListener = jasmine.createSpy('up:fragment:inserted listener')
-            up.on('up:fragment:inserted', insertedListener)
-            loadedListener = jasmine.createSpy('up:fragment:loaded listener')
-            up.on('up:fragment:loaded', loadedListener)
-            unusableListener = jasmine.createSpy('up:fragment:unusable listener')
-            up.on('up:fragment:unusable', unusableListener)
-
-            fixture('.success-target', text: 'old success text')
-            fixture('.failure-target', text: 'old failure text')
-
-            up.render('.success-target', url: '/path', failTarget: '.failure-target')
-
-            next =>
-              @respondWith
-                contentType: 'text/plain'
-                responseText: """
-                  <div class="failure-target">new failure text</div>
-                  <div class="success-target">new success text</div>
-                """
-
-            next =>
-              expect(insertedListener).not.toHaveBeenCalled()
-              expect(loadedListener).not.toHaveBeenCalled()
-              expect(unusableListener).toHaveBeenCalled()
-
-          it 'does update a fragment if the server has an XHTML content-type', asyncSpec (next) ->
+          it 'does update a fragment if the server sends an XHTML content-type instead of text/html', asyncSpec (next) ->
             fixture('.target', text: 'old text')
 
             up.render('.target', url: '/path', failTarget: '.failure')
@@ -562,6 +536,24 @@ describe 'up.fragment', ->
               expect('.one').toHaveText('old content')
               expect('.two').toHaveText('old content')
               expect('.three').toHaveText('new content')
+
+          it 'does not require a response body when the server sends X-Up-Target: :none', asyncSpec (next) ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+
+            promise = up.render(target: '.one', url: '/path')
+
+            next =>
+              @respondWith(responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain')
+
+            next ->
+              expect('.one').toHaveText('old one')
+              expect('.two').toHaveText('old two')
+
+              next.await promiseState(promise)
+
+            next (result) ->
+              expect(result.state).toBe('fulfilled')
 
       describe 'with { content } option', ->
 

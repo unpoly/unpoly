@@ -62,9 +62,6 @@ class up.Change.FromURL extends up.Change
       # be used as a fragment update. At this point up:request:aborted or up:request:fatal
       # have already been emitted by up.Request.
       return rejectWithFailedResponse()
-    else if issue = @responseIssue()
-      @request.emit(@buildEvent('up:fragment:unusable'), log: issue)
-      return rejectWithFailedResponse()
     else if @isSuccessfulResponse()
       return @updateContentFromResponse(['Loaded fragment from successful response to %s', @request.description], @successOptions)
     else
@@ -73,11 +70,6 @@ class up.Change.FromURL extends up.Change
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
       return u.always(contentUpdated, rejectWithFailedResponse)
-
-  responseIssue: ->
-    contentType = @response.contentType
-    unless /\bx?html\b/.test(contentType)
-      return ["Response to %s is not HTML (Content-Type %s)", @request.description, @response.contentType]
 
   isSuccessfulResponse: ->
     @successOptions.fail == false || @response.ok
