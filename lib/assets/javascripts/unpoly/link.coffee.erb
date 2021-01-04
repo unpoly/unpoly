@@ -231,6 +231,8 @@ up.link = do ->
     parser.string('fragment')
     parser.string('document')
 
+    parser.string('contentType', attr: ['enctype', 'up-content-type'])
+
     # Layer options
     parser.boolean('peel')
     parser.string('layer')

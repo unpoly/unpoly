@@ -373,6 +373,40 @@ describe 'up.form', ->
           params = @lastRequest().data()
           expect(params['id']).toEqual(['value'])
 
+      describe 'content type', ->
+
+        it 'defaults to application/x-www-form-urlencoded in a form without file inputs', asyncSpec (next) ->
+          form = fixture('form[action="/path"]')
+
+          up.submit(form)
+
+          next =>
+            expect(@lastRequest().requestHeaders['Content-Type']).toEqual('application/x-www-form-urlencoded')
+
+        it 'defaults to multipart/form-data in a form with file inputs', asyncSpec (next) ->
+          form = fixture('form[action="/path"]')
+
+          # Since this test cannot programmatically append an <input type="file"> with
+          # a value, we pass a binary param with the { params } option.
+          params = { 'file-input': new Blob(['data'])}
+          up.submit(form, { params })
+
+          next =>
+            # Unpoly will set an empty content type so the browser will automatically append
+            # a MIME boundary like multipart/form-data; boundary=----WebKitFormBoundaryHkiKAbOweEFUtny8
+            expect(@lastRequest().requestHeaders['Content-Type']).toBeMissing()
+
+            # Jasmine's fake request contains the original payload in { params }
+            expect(@lastRequest().params).toEqual(jasmine.any(FormData))
+
+        it "uses the form's [enctype] attribute", asyncSpec (next) ->
+          form = fixture('form[action="/path"][enctype="my-type"]')
+
+          up.submit(form)
+
+          next =>
+            expect(@lastRequest().requestHeaders['Content-Type']).toEqual('my-type')
+
       describeCapability 'canPushState', ->
 
         beforeEach ->
@@ -621,18 +655,6 @@ describe 'up.form', ->
             next =>
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
-
-        describe 'in a form with file inputs', ->
-
-          beforeEach ->
-            @$form.affix('input[name="text-field"][type="text"]').val("value")
-            @$form.affix('input[name="file-field"][type="file"]')
-
-          it 'transfers the form fields via FormData', asyncSpec (next) ->
-            up.submit(@$form)
-            next =>
-              rawData = @lastRequest().params
-              expect(u.isFormData(rawData)).toBe(true)
 
       describeFallback 'canPushState', ->
 

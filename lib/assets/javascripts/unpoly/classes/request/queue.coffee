@@ -71,6 +71,10 @@ class up.Request.Queue extends up.Class
     else if request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
       request.abort('Prevented by event listener')
     else
+      # Since up:request:load listeners may have mutated properties used in
+      # the request's cache key ({ url, method, params }), we need to normalize
+      # again. Normalizing e.g. moves the params into the URL for GET requests.
+      request.normalizeForCaching()
       @currentRequests.push(request)
       request.load()
 

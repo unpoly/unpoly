@@ -5,4 +5,12 @@ class ApplicationController < ActionController::Base
 
   layout 'integration_test'
 
+  before_filter :log_content_type
+
+  private
+
+  def log_content_type
+    Rails.logger.info("*** Got Content-Type: " + request.media_type.inspect)
+  end
+
 end

@@ -30,13 +30,6 @@ Remaining feature work
 - up.request()
   - Remove up.Request#uid
   - Remove up.Request#json
-  - Add up.Request#payload
-  - Add up.Request#contentType = 'auto'
-  - Parse as [up-content-type], [enctype]
-  - If #payload is missing, serialize with given contentType
-  - If contentType is 'auto', prefer x-www-form-urlencoded, but use multipart/form-data if !params#hasOnlyPrimitiveValues()
-    - params#hasOnlyPrimitiveValues() ? 'urlencoded' : 'formdata'
-  - contentType must also be honored in FormRenderer
 
 - Remove support for :closest
   - I think we cannot move :has to resolveTarget() because :has does not produce a selector
@@ -82,6 +75,7 @@ Remaining feature work
 - Consider extracting deprecated aliases to unpoly-migrate.js
   - Would save ~ 15 KB .js, 3 KB+ gzipped
   - We would keep a few of the more complex rewrites in the code
+  - Emanuel asked for an option to turn deprecation warnings into error logs
 
 
 Manual tests

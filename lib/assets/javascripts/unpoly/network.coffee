@@ -360,6 +360,14 @@ up.network = do ->
     The CSS selector that will be sent as an `X-Up-Fail-Target` header.
   @param {Element} [options.origin]
     The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
+  @param {Element} [options.contentType]
+    The format in which to encode the request params.
+
+    Allowed values are `application/x-www-form-urlencoded` and `multipart/form-data`.
+    Only `multipart/form-data` can transport binary data.
+
+    If this option is omitted Unpoly will prefer `application/x-www-form-urlencoded`,
+    unless request params contains binary data.
   @return {up.Request}
     An object with information about the request.
 

@@ -96,6 +96,7 @@ class up.Request extends up.Record
   TODO: Docs
 
   @property up.Request#context
+  @param {Object} context
   @stable
   ###
 
@@ -103,6 +104,7 @@ class up.Request extends up.Record
   TODO: Docs
 
   @property up.Request#failContext
+  @param {Object} context
   @stable
   ###
 
@@ -110,6 +112,7 @@ class up.Request extends up.Record
   TODO: Docs
 
   @property up.Request#mode
+  @param {string} mode
   @stable
   ###
 
@@ -117,6 +120,23 @@ class up.Request extends up.Record
   TODO: Docs
 
   @property up.Request#failMode
+  @param {string} mode
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @property up.Request#contentType
+  @param {string} contentType
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @property up.Request#payload
+  @param {string} payload
   @stable
   ###
 
@@ -148,6 +168,8 @@ class up.Request extends up.Record
       'solo',
       'queueTime',
       'wrapMethod',
+      'contentType',
+      'payload'
     ]
 
   ###**
@@ -173,8 +195,6 @@ class up.Request extends up.Record
     @headers ||= {}
     @uid = u.uid() # TODO: Remove me
 
-    @normalize()
-
     if @preload
       # Preloading requires caching.
       @cache = true
@@ -189,6 +209,9 @@ class up.Request extends up.Record
     @mode ||= @layer.mode
     @failMode ||= @failLayer.mode
 
+    # Normalize a first time to get a normalized cache key.
+    @normalizeForCaching()
+
     # This up.Request object is also promise for its up.Response.
     # We delegate all promise-related methods (then, catch, finally) to an internal
     # deferred object.
@@ -196,17 +219,15 @@ class up.Request extends up.Record
 
   @delegate ['then', 'catch', 'finally'], 'deferred'
 
-  normalize: ->
+  normalizeForCaching: ->
     @method = u.normalizeMethod(@method)
     @extractHashFromURL()
-    unless u.methodAllowsPayload(@method)
+    unless @allowsPayload()
       @transferParamsToURL()
 
   evictExpensiveAttrs: ->
     # We want to allow up:request:loaded events etc. to still access the properties that
     # we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
-    # Don't evict properties that may be part of our @cacheKey().
-
     u.task =>
       # While the request is still in flight, we require the target layer
       # to be able to cancel it when the layers gets closed. We now
@@ -221,6 +242,8 @@ class up.Request extends up.Record
       # response.request.origin will prevent its (now maybe detached) DOM tree
       # from garbage collection while the response is cached by up.network.
       @origin = undefined
+
+      # Don't evict properties that may be part of our @cacheKey()!
 
   extractHashFromURL: ->
     if match = @url.match(/^(.+)(#.+)$/)
@@ -238,6 +261,9 @@ class up.Request extends up.Record
   isSafe: ->
     up.network.isSafeMethod(@method)
 
+  allowsPayload: ->
+    u.methodAllowsPayload(@method)
+
   will302RedirectWithGET: ->
     @isSafe() || @method == 'POST'
 
@@ -252,34 +278,45 @@ class up.Request extends up.Record
     return unless @state == 'new'
     @state = 'loading'
 
-    # In case an up:request:load listener changed { url, method, params } we need to
-    # normalize again.
-    @normalize()
-
     # Convert from XHR's callback-based API to up.Request's promise-based API
     @xhr = new up.Request.XHRRenderer(this).buildAndSend(
-      onload: (_event) => @onXHRLoad(_event)
-      onerror: (_event) => @onXHRError(_event)
-      ontimeout: (_event) => @onXHRTimeout(_event)
-      onabort: (_event) => @onXHRAbort(_event)
+      onload:    => @onXHRLoad()
+      onerror:   => @onXHRError()
+      ontimeout: => @onXHRTimeout()
+      onabort:   => @onXHRAbort()
     )
 
-  onXHRLoad: (_progressEvent) ->
+  # TODO: Document API
+  loadPage: ->
+    # This method works independently of @state, since it is often
+    # a fallback for a request that cannot be processed as a fragment update
+    # (see up:fragment:loaded event).
+
+    # Abort all pending requests so their callbacks won't run
+    # while we're already navigating away.
+    up.network.abort()
+    new up.Request.FormRenderer(this).buildAndSubmit()
+
+  navigate: ->
+    up.legacy.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
+    @loadPage()
+
+  onXHRLoad: ->
     response = @extractResponseFromXHR()
     @respondWith(response)
 
-  onXHRError: (_progressEvent) ->
+  onXHRError: ->
     # Neither XHR nor fetch() provide any meaningful error message.
     # Hence we ignore the passed ProgressEvent and use our own error message.
     log = 'Fatal error during request'
     @deferred.reject(up.error.failed(log))
     @emit('up:request:fatal', { log })
 
-  onXHRTimeout: (_progressEvent) ->
+  onXHRTimeout: ->
     # We treat a timeout like a client-side abort (which it is).
     @setAbortedState('Requested timed out')
 
-  onXHRAbort: (_progressEvent) ->
+  onXHRAbort: ->
     # Use the default message that callers of request.abort() would also get.
     @setAbortedState()
 
@@ -307,21 +344,6 @@ class up.Request extends up.Record
       @deferred.resolve(response)
     else
       @deferred.reject(response)
-
-  navigate: ->
-    up.legacy.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
-    @loadPage()
-
-  # TODO: Document API
-  loadPage: ->
-    # This method works independently of @state, since it is often
-    # a fallback for a request that cannot be processed as a fragment update
-    # (see up:fragment:loaded event).
-
-    # Abort all pending requests so their callbacks won't run
-    # while we're already navigating away.
-    up.network.abort()
-    new up.Request.FormRenderer(this).buildAndSubmit()
 
   csrfHeader: ->
     up.protocol.csrfHeader()
@@ -373,7 +395,7 @@ class up.Request extends up.Record
     return new up.Response(responseAttrs)
 
   isCachable: ->
-    @isSafe() && @params.hasOnlyPrimitiveValues()
+    @isSafe() && !@params.hasBinaryValues()
 
   cacheKey: ->
     JSON.stringify [

@@ -156,7 +156,11 @@ class up.Params extends up.Class
 
   arrayEntryToQuery: (entry) =>
     value = entry.value
-    return undefined unless @isPrimitiveValue(value)
+
+    # We cannot transpot a binary value in a query string.
+    if @isBinaryValue(value)
+      return undefined
+
     query = encodeURIComponent(entry.name)
     # There is a subtle difference when encoding blank values:
     # 1. An undefined or null value is encoded to `key` with no equals sign
@@ -167,20 +171,20 @@ class up.Params extends up.Class
     query
 
   ###**
-  Returns whether the given value can be encoded into a query string.
+  Returns whether the given value cannot be encoded into a query string.
 
   We will have `File` values in our params when we serialize a form with a file input.
   These entries will be filtered out when converting to a query string.
 
-  @function up.Params#isPrimitiveValue
+  @function up.Params#isBinaryValue
   @internal
   ###
-  isPrimitiveValue: (value) ->
-    u.isMissing(value) || u.isString(value) || u.isNumber(value) || u.isBoolean(value)
+  isBinaryValue: (value) ->
+    value instanceof Blob
 
-  hasOnlyPrimitiveValues: ->
+  hasBinaryValues: ->
     values = u.map(@entries, 'value')
-    u.every(values, @isPrimitiveValue)
+    return u.some(values, @isBinaryValue)
 
   ###**
   Builds an URL string from the given base URL and

@@ -65,6 +65,14 @@ describe 'up.browser', ->
           expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
           expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
 
+        it 'uses the given { contentType }', ->
+          submitForm = spyOn(up.browser, 'submitForm')
+          up.browser.loadPage(url: '/foo', method: 'POST', params: { foo: 'bar' }, contentType: 'multipart/form-data')
+          expect(submitForm).toHaveBeenCalled()
+          $form = $('form.up-request-loader')
+          expect($form).toBeAttached()
+          expect($form.attr('enctype')).toEqual('multipart/form-data')
+
       u.each ['PUT', 'PATCH', 'DELETE'], (method) ->
 
         describe "for #{method} requests", ->

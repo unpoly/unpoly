@@ -4,34 +4,25 @@
 
   <%= form_tag "/form_test/upload", method: :post, multipart: true, 'up-target' => '.result' do %>
 
-    <p>
-      <label>
-        input[type=text]
-        <input type="text" name="text-param" value="text-value" />
+    <div class="form-group">
+      <label> input[type=text]
       </label>
-    </p>
+      <input type="text" name="text-param" value="text-value" class="form-control">
+    </div>
 
-    <p>
-      <label>
-        input[type=file]
-       <input type="file" name="file-param" />
+    <div class="form-group">
+      <label> input[type=file]
       </label>
-    </p>
+      <input type="file" name="file-param" class="form-control">
+    </div>
 
-    <p>
-      <label>
-        input[type=file][multiple]
-       <input type="file" name="multiple-file-param" multiple />
+    <div class="form-group">
+      <label> input[type=file][multiple]
       </label>
-    </p>
+      <input type="file" name="multiple-file-param" multiple class="form-control">
+    </div>
 
-    <p>
-      <input type="file" name="multiple-file-param" multiple />
-    </p>
-
-    <p>
-      <button type="submit">Submit</button>
-    </p>
+    <button type="submit" class="btn btn-primary">Submit</button>
 
   <% end %>
 
