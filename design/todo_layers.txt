@@ -31,23 +31,15 @@ Remaining feature work
   - Remove up.Request#uid
   - Remove up.Request#json
 
-- Remove support for :closest
-  - I think we cannot move :has to resolveTarget() because :has does not produce a selector
-
-- Allow the server to send an abstract target: X-Up-Target: :main
-
 - { history: 'auto' } for UpdateLayer:
   - Update history IF we're replacing a fragment.config.autoHistorySelectors = ['*']
   - The default is '*' to not break everyone's APP but users may replace that with [':main']
 
-- Slow events
-  - Rename up.network.config.slowDelay to up.network.config.badResponseTime; Rename up:network:slow to up:request:late; Rename up:network:recover to up:request:recover
-
-- Document pseudo-selectors
+- Document pseudo-targets
   - :none
   - :main
   - :layer
-  - consider moving :has() to up.fragment
+  - consider making :has() a target only
 
 - Caching
   - Allow to clear a pattern from the client:

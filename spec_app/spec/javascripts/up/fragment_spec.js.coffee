@@ -794,33 +794,6 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
 
-        describe ':closest pseudo-class', ->
-
-          it 'finds the closest ancestor of the origin and builds a specific selector for that element', asyncSpec (next) ->
-            root = fixture('.element#root')
-            one = e.affix(root, '.element#one')
-            two = e.affix(root, '.element#two')
-            childOfTwo = e.affix(two, '.origin')
-            three = e.affix(root, '.element#three')
-
-            up.render('.element:closest', origin: childOfTwo, url: '/path')
-
-            next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('#two')
-
-          it 'allows to select a descendant of an ancestor, while keeping the specific selector for the ancestor', asyncSpec (next) ->
-            root = fixture('.element#root')
-            one = e.affix(root, '.element#one')
-            two = e.affix(root, '.element#two')
-            childOfTwo = e.affix(two, '.origin')
-            otherChildOfTwo = e.affix(two, '.descendant')
-            three = e.affix(root, '.element#three')
-
-            up.render('.element:closest .descendant', origin: childOfTwo, url: '/path')
-
-            next =>
-              expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('#two .descendant')
-
         describe 'merging of nested selectors', ->
 
           it 'replaces a single fragment if a selector contains a subsequent selector in the current page', asyncSpec (next) ->
@@ -4292,22 +4265,3 @@ describe 'up.fragment', ->
         up.layer.config.root.mainTargets = [':layer']
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
         expect(expanded).toEqual ['.before', '#foo .child', '.after']
-
-      it 'expands ".foo:closest" to a specific selector for the .foo closest to { origin }', ->
-        targets = ['.before', '.foo:closest', '.after']
-        foo1 = fixture('.foo#foo1')
-        foo2 = fixture('.foo#foo2')
-        origin = e.affix(foo2, '.origin')
-        up.layer.config.root.mainTargets = [':layer']
-        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
-        expect(expanded).toEqual ['.before', '#foo2', '.after']
-
-      it 'expands ".foo:closest .child" by replacing the first simple selector with a specific selector for the .foo closest to { origin }', ->
-        targets = ['.before', '.foo:closest .child', '.after']
-        foo1 = fixture('.foo#foo1')
-        foo2 = fixture('.foo#foo2')
-        origin = e.affix(foo2, '.origin')
-        up.layer.config.root.mainTargets = [':layer']
-        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
-        expect(expanded).toEqual ['.before', '#foo2 .child', '.after']
-

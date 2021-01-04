@@ -1036,27 +1036,11 @@ up.fragment = do ->
   resolveTarget = (target, options = {}) ->
     origin = options.origin
 
-    target = target.replace '&', (match) ->
+    return target.replace '&', (match) ->
       if origin
         return toTarget(origin)
       else
         up.fail("Missing origin for origin reference (%s) (found in %os)", match, target)
-
-    target = target.replace /^([^:]+):closest(?: (.+))?$/, (match, parentSelector, childSelector) ->
-      if origin
-        if parent = up.fragment.closest(origin, parentSelector)
-          improvedParentSelector = toTarget(parent)
-          if childSelector
-            return improvedParentSelector + ' ' + childSelector
-          else
-            return improvedParentSelector
-      else
-        up.fail('Missing origin for pseudo-class :closest (found in %s)', target)
-
-    if u.contains(target, ':closest')
-      up.fail('The :closest pseudo-class must be in the first part of a selector sequence (found in %s)', target)
-
-    return target
 
   expandTargets = (targets, options = {}) ->
     layer = options.layer or up.fail('Must pass a { layer } option')
