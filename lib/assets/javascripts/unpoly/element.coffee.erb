@@ -1,5 +1,3 @@
-#= require ./classes/selector
-
 ###**
 DOM helpers
 ===========
@@ -22,48 +20,10 @@ up.element = do ->
   ###
   NONE = { getAttribute: -> undefined }
 
-  ###**
-  Matches all elements that have a descendant matching the given selector.
-
-  \#\#\# Example
-
-  `up.element.all('div:has(span)')`  matches all `<div>` elements with at least one `<span>` among its descendants:
-
-  ```html
-  <div>
-    <span>Will be matched</span>
-  </div>
-  <div>
-    Will NOT be matched
-  </div>
-  <div>
-    <span>Will be matched</span>
-  </div>
-  ```
-
-  \#\#\# Compatibility
-
-  `:has()` is supported by all Unpoly functions (like `up.element.all()`) and
-   selectors (like `a[up-target]`).
-
-  As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
-  `:has()` [has yet to be implemented](https://caniuse.com/#feat=css-has)
-  in native browser functions like [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
-
-  You can also use [`:has()` in jQuery](https://api.jquery.com/has-selector/).
-
-  @selector :has()
-  @stable
-  ###
-
-  parseSelector = (selector) ->
-    up.Selector.parse(selector)
+  MATCH_FN_NAME = if up.browser.isIE11() then 'msMatchesSelector' else 'matches'
 
   ###**
   Returns the first descendant element matching the given selector.
-
-  It is similar to [`element.querySelector()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector),
-  but also supports the [`:has()`](/has) selector.
 
   @function first
   @param {Element} [parent=document]
@@ -80,8 +40,8 @@ up.element = do ->
   ###
   first = (args...) ->
     selector = args.pop()
-    parent = args[0] ? document
-    parseSelector(selector).descendant(parent)
+    root = args[0] || document
+    return root.querySelector(selector)
 
   ###**
   Returns all descendant elements matching the given selector.
@@ -101,8 +61,8 @@ up.element = do ->
   ###
   all = (args...) ->
     selector = args.pop()
-    parent = args[0] ? document
-    parseSelector(selector).descendants(parent)
+    root = args[0] || document
+    return root.querySelectorAll(selector)
 
   ###**
   Returns a list of the given parent's descendants matching the given selector.
@@ -118,11 +78,18 @@ up.element = do ->
   @stable
   ###
   subtree = (root, selector) ->
-    parseSelector(selector).subtree(root)
+    results = []
+
+    if matches(root, selector)
+      results.push(root)
+
+    results.push(all(root, selector)...)
+
+    return results
 
   isInSubtree = (root, selectorOrElement) ->
     element = getOne(selectorOrElement)
-    return (root == element) || root.contains(element)
+    return root.contains(element)
 
   ###**
   Returns the first element that matches the selector by testing the element itself
@@ -140,7 +107,13 @@ up.element = do ->
   @stable
   ###
   closest = (element, selector) ->
-    parseSelector(selector).closest(element)
+    if element.closest
+      return element.closest(selector)
+    # If the browser doesn't support Element#closest, we mimic the behavior.
+    else if matches(element, selector)
+      return element
+    else
+      return ancestor(element, selector)
 
   ###**
   Returns whether the given element matches the given CSS selector.
@@ -155,14 +128,18 @@ up.element = do ->
   @stable
   ###
   matches = (element, selector) ->
-    parseSelector(selector).matches(element)
+    return element[MATCH_FN_NAME]?(selector)
 
   ###**
   @function up.element.ancestor
   @internal
   ###
   ancestor = (element, selector) ->
-    parseSelector(selector).ancestor(element)
+    if parentElement = element.parentElement
+      if matches(parentElement, selector)
+        parentElement
+      else
+        ancestor(parentElement, selector)
 
   around = (element, selector) ->
     getList(closest(element, selector), subtree(element, selector))
@@ -1121,7 +1098,6 @@ up.element = do ->
 
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-    # also document :has()!
     first: (args...) ->
       up.legacy.deprecated('up.element.first()', 'up.element.get()')
       getOne(args...)

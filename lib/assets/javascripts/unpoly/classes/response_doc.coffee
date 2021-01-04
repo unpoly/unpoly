@@ -75,7 +75,11 @@ class up.ResponseDoc
     return @title
 
   select: (selector) ->
-    e.subtree(@root, selector)[0]
+    # Use up.fragment.subtree() instead of up.element.subtree()
+    # so we can support the non-standard :has() selector.
+    # We need to disable layer matching with { layer: 'any' } since
+    # our detached document is not part of the layer stack.
+    up.fragment.subtree(@root, selector, layer: 'any')[0]
 
   finalizeElement: (element) ->
     # Restore <noscript> tags so they become available to compilers.

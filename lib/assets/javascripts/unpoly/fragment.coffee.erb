@@ -645,16 +645,15 @@ up.fragment = do ->
     If a root element was passed as first argument, this option is ignored and the
     root element's layer is searched.
   @param {string|Element|jQuery} [options.origin]
-    An second element or selector that can be referenced as `&` in the first selector:
-
-        var input = document.querySelector('input.email')
-        up.fragment.get('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
+    An second element or selector that can be referenced as `&` in the first selector.
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
   @stable
   ###
   getOne = (args...) ->
     getAll(args...)[0]
+
+  CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
 
   ###**
   Returns all elements matching the given selector, but
@@ -721,7 +720,12 @@ up.fragment = do ->
       # We do use e.get() to unwrap a jQuery collection.
       return [e.get(selectorOrElement)]
     else
-      selector = resolveTarget(selectorOrElement, options)
+      selector = resolveOriginReference(selectorOrElement, options)
+
+      filterFn = null
+      selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
+        filterFn = (element) -> element.querySelector(descendantSelector)
+        return ''
 
       if rootElement = args[0]
         # up.fragment.all(rootElement, selector) should find selector within
@@ -731,7 +735,7 @@ up.fragment = do ->
 
         # Check if the root element has a child layer whose elements we need
         # to exclude fromt the matches.
-        if childLayerElement = e.get(rootElement, up.layer.anySelector())
+        if options.layer != 'any' && (childLayerElement = e.get(rootElement, up.layer.anySelector()))
           # Since we have already have the child layer's element, we're using the native
           # Element#contains() instead of the slower up.Element#contains().
           candidates = u.reject(candidates, (candidate) -> childLayerElement.contains(candidate))
@@ -747,7 +751,40 @@ up.fragment = do ->
       unless options.destroying
         candidates = u.reject(candidates, isDestroying)
 
+      if filterFn
+        candidates = u.select(candidates, filterFn)
+
       return candidates
+
+  ###**
+  Matches all elements that have a descendant matching the given selector.
+
+  \#\#\# Example
+
+  `up.render('div:has(span)', { url: '...' })`  replaces the first `<div>` elements with at least one `<span>` among its descendants:
+
+  ```html
+  <div>
+    <span>Will be replaced</span>
+  </div>
+  <div>
+    Will NOT be replaced
+  </div>
+  ```
+
+  \#\#\# Compatibility
+
+  `:has()` is supported by target selectors like `a[up-target]` and `up.render({ target })`.
+
+  As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
+  `:has()` [has yet to be implemented](https://caniuse.com/#feat=css-has)
+  in native browser functions like [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
+
+  You can also use [`:has()` in jQuery](https://api.jquery.com/has-selector/).
+
+  @selector :has()
+  @stable
+  ###
 
   getSubtree = (element, selector, options = {}) ->
     getAll(element, selector, u.merge(options, subtree: true))
@@ -1033,7 +1070,7 @@ up.fragment = do ->
         pattern == klass
     return !u.some(config.badTargetClasses, matchesPattern)
 
-  resolveTarget = (target, options = {}) ->
+  resolveOriginReference = (target, options = {}) ->
     origin = options.origin
 
     return target.replace '&', (match) ->
@@ -1065,7 +1102,7 @@ up.fragment = do ->
       else if u.isElementish(target)
         expanded.push toTarget(target)
       else if u.isString(target)
-        expanded.push resolveTarget(target, options)
+        expanded.push resolveOriginReference(target, options)
       else
         # @buildPlans() might call us with { target: false } or { target: nil }
         # In that case we don't add a plan.

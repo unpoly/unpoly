@@ -39,6 +39,8 @@ class up.Change.FromContent extends up.Change
 
   expandIntoPlans: (layers, targets) ->
     for layer in layers
+      # An abstract selector like :main may expand into multiple
+      # concrete selectors, like ['main', '.content'].
       for target in @expandTargets(targets, layer)
         # Any plans we add will inherit all properties from @options
         props = u.merge(@options, { target, layer })

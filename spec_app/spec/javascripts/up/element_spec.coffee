@@ -41,14 +41,6 @@ describe 'up.element', ->
         result = up.element.get('.match')
         expect(result).toBe(match)
 
-      it 'supports the custom :has() selector', ->
-        match = fixture('.match')
-        otherMatch = fixture('.match')
-        otherMatchChild = up.element.affix(otherMatch, '.child')
-
-        result = up.element.get('.match:has(.child)')
-        expect(result).toBe(otherMatch)
-
       describe 'when given a root element for the search', ->
 
         it 'returns the first descendant of the given root that matches the given selector', ->
@@ -78,26 +70,6 @@ describe 'up.element', ->
           result = up.element.get($element[0], '.match')
           expect(result).toBeMissing()
 
-        it 'supports the custom :has() selector', ->
-          $element = $fixture('.element')
-          $childWithSelectorWithChild = $element.affix('.selector')
-          $childWithSelectorWithChild.affix('.match')
-          $childWithSelectorWithoutChild = $element.affix('.selector')
-          $childWithoutSelectorWithChild = $element.affix('.other-selector')
-          $childWithoutSelectorWithChild.affix('.match')
-          $childWithoutSelectorWithoutChild = $fixture('.other-selector')
-
-          result = up.element.get($element[0], '.selector:has(.match)')
-          expect(result).toBe $childWithSelectorWithChild[0]
-
-        it 'supports the custom :has() selector when a previous sibling only matches its own selector, but not the descendant selector (bugfix)', ->
-          $element = $fixture('.element')
-          $childWithSelectorWithoutChild = $element.affix('.selector')
-          $childWithSelectorWithChild = $element.affix('.selector')
-          $childWithSelectorWithChild.affix('.match')
-
-          result = up.element.get($element[0], '.selector:has(.match)')
-          expect(result).toBe $childWithSelectorWithChild[0]
 
   describe 'up.element.all()', ->
 
@@ -107,8 +79,6 @@ describe 'up.element', ->
       noMatch = fixture('.no-match')
       result = up.element.all('.match')
       expect(result).toMatchList [match, otherMatch]
-
-    it 'supports the custom :has() selector'
 
     describe 'when given a root element for the search', ->
 
@@ -139,17 +109,6 @@ describe 'up.element', ->
         results = up.element.all($element[0], '.match')
         expect(results).toEqual []
 
-      it 'supports the custom :has() selector', ->
-        $element = $fixture('.element')
-        $childWithSelectorWithChild = $element.affix('.selector')
-        $childWithSelectorWithChild.affix('.match')
-        $childWithSelectorWithoutChild = $element.affix('.selector')
-        $childWithoutSelectorWithChild = $element.affix('.other-selector')
-        $childWithoutSelectorWithChild.affix('.match')
-        $childWithoutSelectorWithoutChild = $fixture('.other-selector')
-
-        results = up.element.all($element[0], '.selector:has(.match)')
-        expect(results).toEqual [$childWithSelectorWithChild[0]]
 
   describe 'up.element.list()', ->
 
@@ -211,9 +170,9 @@ describe 'up.element', ->
       result = up.element.matches(element, '.bar')
       expect(result).toBe(false)
 
-    it 'returns (false) and does not crash if the given "element" is a document', ->
+    it 'does not crash if the given "element" is a document', ->
       result = up.element.matches(document, '.foo')
-      expect(result).toBe(false)
+      expect(result).toBeFalsy()
 
   describe 'up.element.subtree()', ->
 
@@ -246,18 +205,6 @@ describe 'up.element', ->
       $child = $element.affix('.child')
       results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
-
-    it 'supports the custom :has() selector', ->
-      $element = $fixture('.selector')
-      $childWithSelectorWithChild = $element.affix('.selector')
-      $childWithSelectorWithChild.affix('.match')
-      $childWithSelectorWithoutChild = $element.affix('.selector')
-      $childWithoutSelectorWithChild = $element.affix('.other-selector')
-      $childWithoutSelectorWithChild.affix('.match')
-      $childWithoutSelectorWithoutChild = $fixture('.other-selector')
-
-      results = up.element.subtree($element[0], '.selector:has(.match)')
-      expect(results).toEqual [$element[0], $childWithSelectorWithChild[0]]
 
   describe 'up.element.closest()', ->
 

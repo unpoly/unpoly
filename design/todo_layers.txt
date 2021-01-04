@@ -39,7 +39,6 @@ Remaining feature work
   - :none
   - :main
   - :layer
-  - consider making :has() a target only
 
 - Caching
   - Allow to clear a pattern from the client:

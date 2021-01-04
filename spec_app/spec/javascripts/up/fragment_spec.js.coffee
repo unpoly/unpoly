@@ -37,6 +37,14 @@ describe 'up.fragment', ->
         results = up.fragment.all('html')
         expect(results).toEqual [document.documentElement]
 
+      it 'supports the custom :has() selector', ->
+        match = fixture('.match')
+        otherMatch = fixture('.match')
+        otherMatchChild = up.element.affix(otherMatch, '.child')
+
+        results = up.fragment.all('.match:has(.child)')
+        expect(results).toEqual [otherMatch]
+
       describe 'when given a root element for the search', ->
 
         it 'only matches descendants of that root', ->
@@ -72,6 +80,16 @@ describe 'up.fragment', ->
           match = fixture('.match')
           result = up.fragment.all(root, match)
           expect(result).toEqual [match]
+
+        it 'supports the custom :has() selector', ->
+          container = fixture('.container')
+
+          match = e.affix(container, '.match')
+          otherMatch = e.affix(container, '.match')
+          otherMatchChild = e.affix(otherMatch, '.child')
+
+          results = up.fragment.all(container, '.match:has(.child)')
+          expect(results).toEqual [otherMatch]
 
       it 'resolves an & in the selector string with an selector for the { origin }'
 
@@ -764,19 +782,22 @@ describe 'up.fragment', ->
           $second = $fixture('.boxx#second')
           $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
 
-          promise = up.navigate('.boxx:has(.first-child)', url: '/path')
+          promise = up.navigate('.boxx:has(.second-child)', url: '/path')
 
           next =>
             @respondWith """
               <div class="boxx" id="first">
                 <span class="first-child">new first</span>
               </div>
+              <div class="boxx" id="second">
+                <span class="second-child">new second</span>
+              </div>
               """
             next.await(promise)
 
           next =>
-            expect($('#first span')).toHaveText('new first')
-            expect($('#second span')).toHaveText('old second')
+            expect($('#first span')).toHaveText('old first')
+            expect($('#second span')).toHaveText('new second')
 
         it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
           fixture('.before', text: 'old-before')
