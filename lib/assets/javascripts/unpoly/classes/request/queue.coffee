@@ -6,7 +6,7 @@ class up.Request.Queue extends up.Class
 
   constructor: (options = {}) ->
     @concurrency = options.concurrency ? -> up.network.config.concurrency
-    @slowDelay = options.slowDelay ? -> up.network.config.slowDelay
+    @badResponseTime = options.badResponseTime ? -> up.network.config.badResponseTime
     @reset()
 
   reset: ->
@@ -42,8 +42,8 @@ class up.Request.Queue extends up.Class
       @setSlowTimer()
 
   setSlowTimer: ->
-    slowDelay = u.evalOption(@slowDelay)
-    @checkSlowTimout = setTimeout(@checkSlow, slowDelay)
+    badResponseTime = u.evalOption(@badResponseTime)
+    @checkSlowTimout = setTimeout(@checkSlow, badResponseTime)
 
   hasConcurrencyLeft: ->
     maxConcurrency = u.evalOption(@concurrency)
@@ -83,7 +83,7 @@ class up.Request.Queue extends up.Class
     if (responseOrError instanceof up.Response) && responseOrError.ok
       up.network.registerAliasForRedirect(request, responseOrError)
 
-    # Check if we can emit up:network:recover after a previous up:network:slow event.
+    # Check if we can emit up:network:recover after a previous up:request:late event.
     @checkSlow()
 
     u.microtask(=> @poke())
@@ -114,16 +114,16 @@ class up.Request.Queue extends up.Class
       @emittedSlow = currentSlow
 
       if currentSlow
-        up.emit('up:network:slow', log: 'Server is slow to respond')
+        up.emit('up:request:late', log: 'Server is slow to respond')
       else
         up.emit('up:network:recover', log: 'Slow requests were loaded')
 
   isSlow: ->
     now = new Date()
-    delay = u.evalOption(@slowDelay)
+    delay = u.evalOption(@badResponseTime)
     allForegroundRequests = u.reject(@allRequests, 'preload')
 
-    # If slowDelay is 200, we're scheduling the checkSlow() timer after 200 ms.
+    # If badResponseTime is 200, we're scheduling the checkSlow() timer after 200 ms.
     # The request must be slow when checkSlow() is called, or we will never look
     # at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     # to "be slow" a few ms earlier than actually configured.

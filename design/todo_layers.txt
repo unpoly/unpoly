@@ -41,9 +41,7 @@ Remaining feature work
   - The default is '*' to not break everyone's APP but users may replace that with [':main']
 
 - Slow events
-  - Rename up.network.config.slowDelay to up.network.config.badResponseTime
-  - Rename up:network:slow to up:request:late
-  - Rename up:network:recover to up:request:recover
+  - Rename up.network.config.slowDelay to up.network.config.badResponseTime; Rename up:network:slow to up:request:late; Rename up:network:recover to up:request:recover
 
 - Document pseudo-selectors
   - :none

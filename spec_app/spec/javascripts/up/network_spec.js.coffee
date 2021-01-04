@@ -948,18 +948,18 @@ describe 'up.network', ->
             expect(@lastRequest().params).toMatchParams({})
             done()
 
-      describe 'up:network:slow and up:network:recover events', ->
+      describe 'up:request:late and up:network:recover events', ->
 
         beforeEach ->
-          up.network.config.slowDelay = 0
+          up.network.config.badResponseTime = 0
           @events = []
-          u.each ['up:request:load', 'up:request:loaded', 'up:network:slow', 'up:network:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) =>
+          u.each ['up:request:load', 'up:request:loaded', 'up:request:late', 'up:network:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) =>
             up.on eventType, =>
               @events.push eventType
 
-        it 'emits an up:network:slow event if the server takes too long to respond'
+        it 'emits an up:request:late event if the server takes too long to respond'
 
-        it 'does not emit an up:network:slow event if preloading', asyncSpec (next) ->
+        it 'does not emit an up:request:late event if preloading', asyncSpec (next) ->
           next =>
             # A request for preloading preloading purposes
             # doesn't make us busy.
@@ -971,13 +971,13 @@ describe 'up.network', ->
             ])
 
           next =>
-            # The same request with preloading does trigger up:network:slow.
+            # The same request with preloading does trigger up:request:late.
             up.request(url: '/foo', cache: true)
 
           next.after 10, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow'
+              'up:request:late'
             ])
 
           next =>
@@ -991,14 +991,14 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow',
+              'up:request:late',
               'up:request:loaded',
               'up:network:recover'
             ])
 
-        it 'can delay the up:network:slow event to prevent flickering of spinners', asyncSpec (next) ->
+        it 'can delay the up:request:late event to prevent flickering of spinners', asyncSpec (next) ->
           next =>
-            up.network.config.slowDelay = 50
+            up.network.config.badResponseTime = 50
             up.request(url: '/foo')
 
           next =>
@@ -1014,7 +1014,7 @@ describe 'up.network', ->
           next.after 200, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow'
+              'up:request:late'
             ])
 
           next =>
@@ -1023,14 +1023,14 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow',
+              'up:request:late',
               'up:request:loaded',
               'up:network:recover'
             ])
 
-        it 'does not emit up:network:recover if a delayed up:network:slow was never emitted due to a fast response', asyncSpec (next) ->
+        it 'does not emit up:network:recover if a delayed up:request:late was never emitted due to a fast response', asyncSpec (next) ->
           next =>
-            up.network.config.slowDelay = 200
+            up.network.config.badResponseTime = 200
             up.request(url: '/foo')
 
           next =>
@@ -1057,7 +1057,7 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow'
+              'up:request:late'
             ])
 
           next =>
@@ -1069,14 +1069,14 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow',
+              'up:request:late',
               'up:request:loaded',
               'up:network:recover'
             ])
 
 
         it 'emits up:network:recover if a request timed out', asyncSpec (next) ->
-          up.network.config.slowDelay = 10
+          up.network.config.badResponseTime = 10
 
           next =>
             up.request(url: '/foo')
@@ -1084,7 +1084,7 @@ describe 'up.network', ->
           next.after 50, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow'
+              'up:request:late'
             ])
 
           next =>
@@ -1094,13 +1094,13 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow',
+              'up:request:late',
               'up:request:aborted',
               'up:network:recover'
             ])
 
         it 'emits up:network:recover if a request was aborted', asyncSpec (next) ->
-          up.network.config.slowDelay = 10
+          up.network.config.badResponseTime = 10
 
           next =>
             @request = up.request(url: '/foo')
@@ -1108,7 +1108,7 @@ describe 'up.network', ->
           next.after 100, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow'
+              'up:request:late'
             ])
 
           next =>
@@ -1117,13 +1117,13 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow',
+              'up:request:late',
               'up:request:aborted',
               'up:network:recover'
             ])
 
         it 'emits up:network:recover if a request failed fatally', asyncSpec (next) ->
-          up.network.config.slowDelay = 10
+          up.network.config.badResponseTime = 10
 
           next =>
             @request = up.request(url: '/foo')
@@ -1131,7 +1131,7 @@ describe 'up.network', ->
           next.after 100, =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow'
+              'up:request:late'
             ])
 
           next =>
@@ -1140,7 +1140,7 @@ describe 'up.network', ->
           next =>
             expect(@events).toEqual([
               'up:request:load',
-              'up:network:slow',
+              'up:request:late',
               'up:request:fatal',
               'up:network:recover'
             ])

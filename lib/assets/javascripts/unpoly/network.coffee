@@ -30,7 +30,7 @@ the user releases the mouse/finger.
 
 \#\#\# Spinners
 
-You can listen to the [`up:network:slow`](/up:network:slow) event to implement a spinner
+You can listen to the [`up:request:late`](/up:request:late) event to implement a spinner
 that appears during a long-running request.
 
 \#\#\# More acceleration
@@ -54,8 +54,8 @@ up.network = do ->
   @param {number} [config.cacheExpiry=300000]
     The number of milliseconds until a cache entry expires.
     Defaults to 5 minutes.
-  @param {number} [config.slowDelay=300]
-    How long the proxy waits until emitting the [`up:network:slow` event](/up:network:slow).
+  @param {number} [config.badResponseTime=300]
+    How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
     Use this to prevent flickering of spinners.
   @param {number} [config.concurrency=4]
     The maximum number of concurrent active requests.
@@ -148,7 +148,7 @@ up.network = do ->
   @stable
   ###
   config = new up.Config ->
-    slowDelay: 800
+    badResponseTime: 800
     cacheSize: 70
     cacheExpiry: 1000 * 60 * 5
     concurrency: 4
@@ -170,6 +170,7 @@ up.network = do ->
       up.link.config.preloadDelay = value
 
   up.legacy.renamedProperty(config, 'maxRequests', 'concurrency')
+  up.legacy.renamedProperty(config, 'slowDelay', 'badResponseTime')
 
   queue = new up.Request.Queue()
 
@@ -410,14 +411,14 @@ up.network = do ->
       up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
-      # This might affect whether we're going to emit an up:network:slow event further
+      # This might affect whether we're going to emit an up:request:late event further
       # down. Consider this case:
       #
       # - User preloads a request (1). We have a cache miss and connect to the network.
-      #   This will never trigger `up:network:slow`, because we only track foreground requests.
+      #   This will never trigger `up:request:late`, because we only track foreground requests.
       # - User loads the same request (2) in the foreground (no preloading).
       #   We have a cache hit and receive the earlier request that is still preloading.
-      #   Now we *should* trigger `up:network:slow`.
+      #   Now we *should* trigger `up:request:late`.
       # - The request (1) finishes. This triggers `up:network:recover`.
       unless request.preload
         queue.promoteToForeground(cachedRequest)
@@ -594,19 +595,19 @@ up.network = do ->
   are taking long to finish.
 
   By default Unpoly will wait 800 ms for an AJAX request to finish
-  before emitting `up:network:slow`. You can configure this time like this:
+  before emitting `up:request:late`. You can configure this time like this:
 
-      up.network.config.slowDelay = 400;
+      up.network.config.badResponseTime = 400;
 
   Once all responses have been received, an [`up:network:recover`](/up:network:recover)
   will be emitted.
 
   Note that if additional requests are made while Unpoly is already busy
-  waiting, **no** additional `up:network:slow` events will be triggered.
+  waiting, **no** additional `up:request:late` events will be triggered.
 
   \#\#\# Spinners
 
-  You can [listen](/up.on) to the `up:network:slow`
+  You can [listen](/up.on) to the `up:request:late`
   and [`up:network:recover`](/up:network:recover) events to implement a spinner
   that appears during a long-running request,
   and disappears once the response has been received:
@@ -622,26 +623,26 @@ up.network = do ->
         hide()
 
         return [
-          up.on('up:network:slow', show),
+          up.on('up:request:late', show),
           up.on('up:network:recover', hide)
         ]
       })
 
-  The `up:network:slow` event will be emitted after a delay
+  The `up:request:late` event will be emitted after a delay
   to prevent the spinner from flickering on and off.
   You can change (or remove) this delay like this:
 
-      up.network.config.slowDelay = 400;
+      up.network.config.badResponseTime = 400;
 
-  @event up:network:slow
+  @event up:request:late
   @stable
   ###
 
   ###**
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
-  have [taken long to finish](/up:network:slow), but have finished now.
+  have [taken long to finish](/up:request:late), but have finished now.
 
-  See [`up:network:slow`](/up:network:slow) for more documentation on
+  See [`up:request:late`](/up:request:late) for more documentation on
   how to use this event for implementing a spinner that shows during
   long-running requests.
 
@@ -749,5 +750,5 @@ up.legacy.renamedEvent('up:proxy:received', 'up:request:loaded')  # renamed in 0
 up.legacy.renamedEvent('up:proxy:loaded',   'up:request:loaded')  # renamed in 1.0.0
 up.legacy.renamedEvent('up:proxy:fatal',    'up:request:fatal')   # renamed in 1.0.0
 up.legacy.renamedEvent('up:proxy:aborted',  'up:request:aborted') # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:slow',     'up:network:slow')    # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:slow',     'up:network:recover') # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:slow',     'up:request:late')    # renamed in 1.0.0
+up.legacy.renamedEvent('up:proxy:recover',  'up:network:recover') # renamed in 1.0.0
