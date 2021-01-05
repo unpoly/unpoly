@@ -24,7 +24,6 @@ up.fragment = do ->
 
   @function up.fragment.config
   @param {Array<string>} config.mainTargets
-  @param {Array<string>} config.resetTargets
   @return {Array<string|RegExp>} config.badTargetClasses
     A list of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
@@ -34,9 +33,6 @@ up.fragment = do ->
   ###
   config = new up.Config ->
     u.literal
-      # Users who are not using layers will prefer settings default targets
-      # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-      get_mainTargets: -> up.layer.config.any.mainTargets
       badTargetClasses: [/^up-/]
       # These defaults will be set to both success and fail options
       # if { navigate: true } is given.
@@ -51,6 +47,9 @@ up.fragment = do ->
         cache: true
       }
 
+  # Users who are not using layers will prefer settings default targets
+  # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
+  u.getter config, 'mainTargets', -> up.layer.config.any.mainTargets
   up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')
 
   reset = ->
@@ -63,11 +62,13 @@ up.fragment = do ->
   the closest known source of an ancestor element is returned.
 
   @function up.fragment.source
-  @param {Element} element
+  @param {Element|string} element
+    The element or CSS selector for which to look up the source URL.
   @return {string|undefined}
   @experimental
   ###
-  sourceOf = (element) ->
+  sourceOf = (element, options = {}) ->
+    element = getOne(element, options)
     return e.closestAttr(element, 'up-source')
 
   ###**
@@ -757,7 +758,8 @@ up.fragment = do ->
       return candidates
 
   ###**
-  Matches all elements that have a descendant matching the given selector.
+  Your [target selectors](/a-up-target) may use this pseudo-selector
+  to replace an element with an descendant matching the given selector.
 
   \#\#\# Example
 
@@ -1091,8 +1093,8 @@ up.fragment = do ->
       target = targets.shift()
 
       if target == ':main' || target == true
-        mainTargets = if layer == 'new' then up.layer.mainTargets(options.mode) else layer.mainTargets()
-        targets.unshift mainTargets...
+        mode = if layer == 'new' then options.mode else layer.mode
+        targets.unshift(up.layer.mainTargets(mode)...)
       else if target == ':layer'
         # Discard this target for new layers, which don't have a first-swappable-element.
         # Also don't && the layer check into the `else if` condition above, or it will
@@ -1108,6 +1110,43 @@ up.fragment = do ->
         # In that case we don't add a plan.
 
     return u.uniq(expanded)
+
+  ###**
+  Your [target selectors](/a-up-target) may use this pseudo-selector
+  to replace the layer's [main element](/up.fragment.config.mainTargets).
+
+  \#\#\# Example
+
+  ```js
+  up.render(':main', { url: '/page2' })
+  ```
+
+  @selector :main
+  @experimental
+  ###
+
+  ###**
+  Your [target selectors](/a-up-target) may use this pseudo-selector
+  to replace the layer's topmost swappable element.
+
+  The topmost swappable element is the first child of the layer's container element.
+  For the [root layer](/up.layer.root) it is the `<body>` element. For an overlay
+  it is the target with which the overlay was opened with.
+
+  In canonical usage the topmost swappable element is often a [main element](/up.fragment.config.mainTargets).
+
+  \#\#\# Example
+
+  The following will replace the `<body>` element in the root layer,
+  and the topmost swappable element in an overlay:
+
+  ```js
+  up.render(':layer', { url: '/page2' })
+  ```
+
+  @selector :layer
+  @experimental
+  ###
 
   up.on 'up:app:boot', ->
     body = document.body

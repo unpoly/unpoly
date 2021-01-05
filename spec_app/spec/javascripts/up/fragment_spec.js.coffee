@@ -776,29 +776,6 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('old-afternew-after')
 
-        it 'understands non-standard CSS selector extensions such as :has(...)', asyncSpec (next) ->
-          $first = $fixture('.boxx#first')
-          $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
-          $second = $fixture('.boxx#second')
-          $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
-
-          promise = up.navigate('.boxx:has(.second-child)', url: '/path')
-
-          next =>
-            @respondWith """
-              <div class="boxx" id="first">
-                <span class="first-child">new first</span>
-              </div>
-              <div class="boxx" id="second">
-                <span class="second-child">new second</span>
-              </div>
-              """
-            next.await(promise)
-
-          next =>
-            expect($('#first span')).toHaveText('old first')
-            expect($('#second span')).toHaveText('new second')
-
         it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
           fixture('.before', text: 'old-before')
           fixture('.middle', text: 'old-middle')
@@ -814,6 +791,72 @@ describe 'up.fragment', ->
             expect($('.before')).toHaveText('old-before')
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
+
+        describe 'non-standard selector extensions', ->
+
+          describe ':has()', ->
+
+            it 'matches elements with a given descendant', asyncSpec (next) ->
+              $first = $fixture('.boxx#first')
+              $firstChild = $('<span class="first-child">old first</span>').appendTo($first)
+              $second = $fixture('.boxx#second')
+              $secondChild = $('<span class="second-child">old second</span>').appendTo($second)
+
+              promise = up.navigate('.boxx:has(.second-child)', url: '/path')
+
+              next =>
+                @respondWith """
+                  <div class="boxx" id="first">
+                    <span class="first-child">new first</span>
+                  </div>
+                  <div class="boxx" id="second">
+                    <span class="second-child">new second</span>
+                  </div>
+                  """
+                next.await(promise)
+
+              next =>
+                expect($('#first span')).toHaveText('old first')
+                expect($('#second span')).toHaveText('new second')
+
+          describe ':layer', ->
+
+            it 'matches the first swappable element in a layer', asyncSpec (next) ->
+              up.render(':layer', url: '/path')
+
+              next =>
+                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('body')
+
+          describe ':main', ->
+
+            it 'matches a main selector in a layer', asyncSpec (next) ->
+              main = fixture('.main-element')
+              up.layer.config.root.mainTargets = ['.main-element']
+              up.render(':main', url: '/path')
+
+              next =>
+                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-element')
+
+          describe ':none', ->
+
+            it 'contacts the server but does not update any fragment', asyncSpec (next) ->
+              fixture('.one', text: 'old one')
+              fixture('.two', text: 'old two')
+
+              promise = up.render(target: ':none', url: '/path')
+
+              next =>
+                expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual(':none')
+                @respondWith(responseText: '', contentType: 'text/plain')
+
+              next ->
+                expect('.one').toHaveText('old one')
+                expect('.two').toHaveText('old two')
+
+                next.await promiseState(promise)
+
+              next (result) ->
+                expect(result.state).toBe('fulfilled')
 
         describe 'merging of nested selectors', ->
 
@@ -1185,7 +1228,7 @@ describe 'up.fragment', ->
                 expect('.target').toHaveText('old target')
                 expect('.fallback').toHaveText('new fallback')
 
-            it "tries the layer's default target with { fallback: true }", asyncSpec (next) ->
+            it "tries the layer's main target with { fallback: true }", asyncSpec (next) ->
               up.layer.config.any.mainTargets = ['.existing']
               $fixture('.existing').text('old existing')
               up.render('.unknown', url: '/path', fallback: true)
@@ -3814,6 +3857,15 @@ describe 'up.fragment', ->
         up.navigate({ url: 'url' })
         expect(renderSpy).toHaveBeenCalledWith({ url: 'url', navigate: true })
 
+      it "updates the layer's main target by default (since navigation sets { fallback: true })", asyncSpec (next) ->
+        up.fragment.config.mainTargets.unshift('.main-target')
+        fixture('.main-target')
+
+        up.navigate({ url: '/path2' })
+
+        next =>
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-target')
+
     describe 'up.destroy()', ->
 
       it 'removes the element with the given selector', (done) ->
@@ -4095,6 +4147,10 @@ describe 'up.fragment', ->
           expect(up.fragment.source(e.get '.between')).toMatchURL('/between')
           expect(up.fragment.source(e.get '.inner')).toMatchURL('/between')
 
+      it 'also accepts a CSS selector instead of an element (used e.g. by unpoly-site)', ->
+        fixture('.target[up-source="/my-source"]')
+        expect(up.fragment.source('.target')).toMatchURL('/my-source')
+
     describe 'up.fragment.failKey', ->
 
       it 'returns a failVariant for the given object key', ->
@@ -4286,3 +4342,9 @@ describe 'up.fragment', ->
         up.layer.config.root.mainTargets = [':layer']
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
         expect(expanded).toEqual ['.before', '#foo .child', '.after']
+
+    describe 'up.fragment.config.mainTargets', ->
+
+      it 'returns up.layer.config.any.mainTargets', ->
+        up.layer.config.any.mainTargets = ['.my-special-main-target']
+        expect(up.fragment.config.mainTargets).toEqual ['.my-special-main-target']
