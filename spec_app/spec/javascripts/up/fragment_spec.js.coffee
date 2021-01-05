@@ -555,7 +555,7 @@ describe 'up.fragment', ->
               expect('.two').toHaveText('old content')
               expect('.three').toHaveText('new content')
 
-          it 'does not require a response body when the server sends X-Up-Target: :none', asyncSpec (next) ->
+          it 'does not require a response body and succeeds when the server sends X-Up-Target: :none', asyncSpec (next) ->
             fixture('.one', text: 'old one')
             fixture('.two', text: 'old two')
 
