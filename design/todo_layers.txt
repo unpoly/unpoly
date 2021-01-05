@@ -27,10 +27,6 @@ Release process
 Remaining feature work
 ======================
 
-- up.request()
-  - Remove up.Request#uid
-  - Remove up.Request#json
-
 - { history: 'auto' } for UpdateLayer:
   - Update history IF we're replacing a fragment.config.autoHistorySelectors = ['*']
   - The default is '*' to not break everyone's APP but users may replace that with [':main']
