@@ -126,7 +126,7 @@ describe 'up.network', ->
         it 'lets the user configure a smaller set of meta keys for better cacheability', asyncSpec (next) ->
           makeLayers(2)
 
-          up.network.config.metaKeys = ['target']
+          up.network.config.requestMetaKeys = ['target']
 
           next =>
             up.request(

@@ -99,7 +99,7 @@ up.network = do ->
     The value is given in milliseconds.
 
     This setting is only honored if `up.network.config.preloadEnabled` is set to `'auto'` (the default).
-  @param {Array<string>|Function(up.Request): Array<string>} [config.metaKeys]
+  @param {Array<string>|Function(up.Request): Array<string>} [config.requestMetaKeys]
     An array of request property names
     that are sent to the server as [HTTP headers](/up.protocol).
 
@@ -108,9 +108,9 @@ up.network = do ->
 
     \#\#\# Cacheability considerations
 
-    Two requests with different `metaKeys` are considered cache misses when [caching](/up.request) and
+    Two requests with different `requestMetaKeys` are considered cache misses when [caching](/up.request) and
     [preloading](/up.link.preload). To **improve cacheability**, you may set
-    `up.network.config.metaKeys` to a shorter list of property keys.
+    `up.network.config.requestMetaKeys` to a shorter list of property keys.
 
     \#\#\# Available fields
 
@@ -134,7 +134,7 @@ up.network = do ->
     With this you may send different request properties for different URLs:
 
     ```javascript
-    up.network.config.metaKeys = function(request) {
+    up.network.config.requestMetaKeys = function(request) {
       if (request.url == '/search') {
         // The server optimizes responses on the /search route.
         return ['target', 'failTarget']
@@ -158,7 +158,7 @@ up.network = do ->
     # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     badDownlink: 0.6
     badRTT: 750
-    metaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+    requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty config, 'preloadDelay',
@@ -177,7 +177,7 @@ up.network = do ->
   cache = new up.Request.Cache()
 
   ###**
-  Returns an earlier request [matching](/up.network.config.metaKeys) the given request options.
+  Returns an earlier request [matching](/up.network.config.requestMetaKeys) the given request options.
 
   Returns `undefined` if the given request is not currently cached.
 
@@ -202,7 +202,7 @@ up.network = do ->
 
     See `options` for `up.request()` for documentation.
 
-    The user may configure `up.network.config.metaKeys` to define
+    The user may configure `up.network.config.requestMetaKeys` to define
     which request options are relevant for cache matching.
   @return {up.Request|undefined}
     The cached request.

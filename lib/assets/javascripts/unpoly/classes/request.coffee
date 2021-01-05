@@ -411,7 +411,7 @@ class up.Request extends up.Record
   # (2) become part of our @cacheKey().
   metaProps: ->
     props = {}
-    for key in u.evalOption(up.network.config.metaKeys, this)
+    for key in u.evalOption(up.network.config.requestMetaKeys, this)
       value = this[key]
       if u.isGiven(value)
         props[key] = value

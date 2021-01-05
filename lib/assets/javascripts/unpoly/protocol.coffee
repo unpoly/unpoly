@@ -70,7 +70,7 @@ up.protocol = do ->
   This selector is sent as a second header, `X-Up-Fail-Target`.
 
   The user may choose to not send this header by configuring
-  `up.network.config.metaKeys`.
+  `up.network.config.requestMetaKeys`.
 
   \#\#\# Example
 
@@ -119,7 +119,7 @@ up.protocol = do ->
   expensive sidebar if the sidebar is not targeted.
 
   The user may choose to not send this header by configuring
-  `up.network.config.metaKeys`.
+  `up.network.config.requestMetaKeys`.
 
   \#\#\# Example
 
@@ -167,7 +167,7 @@ up.protocol = do ->
   For example, you might prefer to not render a site navigation for overlays.
 
   The user may choose to not send this header by configuring
-  `up.network.config.metaKeys`.
+  `up.network.config.requestMetaKeys`.
 
   \#\#\# Example
 
@@ -190,7 +190,7 @@ up.protocol = do ->
   For example, you might prefer to not render a site navigation for overlays.
 
   The user may choose to not send this header by configuring
-  `up.network.config.metaKeys`.
+  `up.network.config.requestMetaKeys`.
 
   \#\#\# Example
 
@@ -269,7 +269,7 @@ up.protocol = do ->
   This request header contains the targeted layer's [context](/up.layer.context), serialized as JSON.
 
   The user may choose to not send this header by configuring
-  `up.network.config.metaKeys`.
+  `up.network.config.requestMetaKeys`.
 
   \#\#\# Example
 
@@ -321,7 +321,7 @@ up.protocol = do ->
   For example, you might prefer to not render a site navigation for overlays.
 
   The user may choose to not send this header by configuring
-  `up.network.config.metaKeys`.
+  `up.network.config.requestMetaKeys`.
 
   \#\#\# Example
 

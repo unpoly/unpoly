@@ -53,9 +53,6 @@ Remaining feature work
       if (request.matchURL('/users/search')) return '/users/*'
     }
 
-- Now that up.request is up.network
-  - Rename up.network.config.metaKeys to up.network.config.requestMetaKeys
-
 - Consider extracting deprecated aliases to unpoly-migrate.js
   - Would save ~ 15 KB .js, 3 KB+ gzipped
   - We would keep a few of the more complex rewrites in the code
@@ -140,7 +137,7 @@ Tests
 - Test new queue behavior
   - Size vs. preloadSize
   - Aborting of preload requests
-- Test up.network.config.metaKeys
+- Test up.network.config.requestMetaKeys
 - { onLoaded }, up:fragment:loaded
   - Should be preventable, preventing history changes and fragment updates
   - Allows listener to manipulate change options
