@@ -193,7 +193,6 @@ class up.Request extends up.Record
     @params = new up.Params(@params) # copies, which we want
     @state = 'new' # new | loading | loaded | aborted
     @headers ||= {}
-    @uid = u.uid() # TODO: Remove me
 
     if @preload
       # Preloading requires caching.
