@@ -71,6 +71,4 @@ class up.Change.Addition extends up.Change
     # (1) Don't set a source if { false } is passed.
     # (2) Don't set a source if the element HTML already has an [up-source] attribute.
     if source
-      e.setMissingAttrs newElement,
-        'up-source': u.normalizeURL(source),
-        'up-time': u.timestamp()
+      e.setMissingAttr(newElement, 'up-source', u.normalizeURL(source))

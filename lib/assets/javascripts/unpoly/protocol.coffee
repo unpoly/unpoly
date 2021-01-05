@@ -218,14 +218,27 @@ up.protocol = do ->
   ###
 
   ###**
-  This request header contains the creation time of an existing fragment that is being [reloaded](/up.reload).
+  This request header contains a timestamp of an existing fragment that is being [reloaded](/up.reload).
+
+  The timestamp must be explicitely set by the user as an `[up-time]` attribute on the fragment.
+  It should indicate the time when the fragment's underlying data was last changed.
 
   Its value is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
 
+  If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Time: 0`).
+
   \#\#\# Example
 
-  The request header below signals the server that a fragment is being reloaded.
-  The old fragment was originally inserted on December 23rd 2020, 13:40:18 UTC:
+  You may timestamp your fragments with an `[up-time]` attribute to indicate when the underlying data
+  was last changed. For instance, when the last message in a list was received from December 24th, 1:51:46 PM UTC:
+
+  ```html
+  <div class="messages" up-time="1608730818">
+    ...
+  </div>
+  ```
+
+  When reloading the `.messages` fragment, Unpoly will echo that timestamp in an `X-Up-Reload-From-Time` header:
 
   ```http
   X-Up-Reload-From-Time: 1608730818

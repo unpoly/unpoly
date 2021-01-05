@@ -80,7 +80,7 @@ up.fragment = do ->
   @internal
   ###
   timeOf = (element) ->
-    return e.closestAttr(element, 'up-time')
+    return e.closestAttr(element, 'up-time') || '0'
 
   ###**
   Sets this element's source URL for [reloading](/up.reload) and [polling](/up-poll)
