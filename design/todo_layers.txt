@@ -35,10 +35,18 @@ Remaining feature work
   - Update history IF we're replacing a fragment.config.autoHistorySelectors = ['*']
   - The default is '*' to not break everyone's APP but users may replace that with [':main']
 
+- Allow servers to respond with 304 not modified
+  - Automatically sets X-Up-Target: :none
+  - Resolve the promise
+
 - Document pseudo-targets
   - :none
   - :main
   - :layer
+
+- [up-time] is broken
+  - Must be given at the fragment level
+  - X-Up-Reload-From-Time should be set to "0" if no time is set
 
 - Caching
   - Allow to clear a pattern from the client:
@@ -573,4 +581,7 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
     - How do we break out of the frame?
       - Do we need this?
       - [up-frame=parent]?
-
+- Should we use [up-etag] and If-None-Match ?
+  - No, HTTP Caching Infrastrcture is not fragment-aware (would need to vary by X-Up-Target)
+  - How would we signal reloading otherwise?
+    - Do we need to?
