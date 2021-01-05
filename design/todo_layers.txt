@@ -31,9 +31,6 @@ Remaining feature work
   - Update history IF we're replacing a fragment.config.autoHistorySelectors = ['*']
   - The default is '*' to not break everyone's APP but users may replace that with [':main']
 
-- [up-time] is broken
-  - Must be given at the fragment level
-  - X-Up-Reload-From-Time should be set to "0" if no time is set
 
 - Caching
   - Allow to clear a pattern from the client:
