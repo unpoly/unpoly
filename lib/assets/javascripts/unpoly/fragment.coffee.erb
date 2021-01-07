@@ -737,45 +737,6 @@ up.fragment = do ->
       selector = parseSelector(selectorOrElement, element, options)
       return selector.descendants(element || document)
 
-#      if rootElement = args[0]
-#        # up.fragment.all(rootElement, selector) should find selector within
-#        # the descendants of rootElement.
-#        selectFn = if options.subtree then e.subtree else e.all
-#        candidates = selectFn(rootElement, selector)
-#
-#        # Check if the root element has a child layer whose elements we need
-#        # to exclude fromt the matches.
-#        if options.layer != 'any' && (childLayerElement = e.get(rootElement, up.layer.anySelector()))
-#          # Since we have already have the child layer's element, we're using the native
-#          # Element#contains() instead of the slower up.Element#contains().
-#          candidates = u.reject(candidates, (candidate) -> childLayerElement.contains(candidate))
-#
-#      else
-#        # up.fragment.all(selector, [options]) should lookup the selector
-#        # in all layers (prefering the current layer), or in options.layer.
-#        # Note that options.layer might resolve to more than one layer, e.g.
-#        # with { layer: 'ancestor' } or { layer: 'any' }.
-#        layers = up.layer.getAll(options)
-#        candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
-#
-#      unless options.destroying
-#        candidates = u.reject(candidates, isDestroying)
-#
-#      candidates = u.select(candidates, filter)
-#
-#      return candidates
-#
-#  NO_FILTER = -> true
-#
-#  parseSelector = (selector, options = {}) ->
-#    selector = resolveOriginReference(selector, options)
-#
-#    filter = NO_FILTER
-#    selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
-#      filter = (element) -> element.querySelector(descendantSelector)
-#      return ''
-#    return { selector, filter }
-
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
   to replace an element with an descendant matching the given selector.
