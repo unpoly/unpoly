@@ -88,6 +88,8 @@ describe 'up.link', ->
 #            respondWith(html, title)
 #            promise
 
+          up.fragment.config.autoHistoryTargets.push('.target')
+
           $link1 = $fixture('a[href="/one"][up-target=".target"]')
           $link2 = $fixture('a[href="/two"][up-target=".target"]')
           $link3 = $fixture('a[href="/three"][up-target=".target"]')
@@ -160,6 +162,8 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
+          up.fragment.config.autoHistoryTargets.push('.target')
+
           up.network.config.cacheExpiry = 0
 
           waitForBrowser = 150
@@ -228,6 +232,8 @@ describe 'up.link', ->
           # the user presses the back-button. We reconfigure this
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
+
+          up.fragment.config.autoHistoryTargets.push('.target')
 
           up.network.config.cacheExpiry = 0
 
@@ -830,6 +836,7 @@ describe 'up.link', ->
 
         it 'adds a history entry', asyncSpec (next) ->
           up.history.config.enabled = true
+          up.fragment.config.autoHistoryTargets.push('.target')
 
           $fixture('.target')
           $link = $fixture('a[href="/new-path"][up-target=".target"]')
@@ -846,7 +853,7 @@ describe 'up.link', ->
           up.history.config.enabled = true
 
           $fixture('.target')
-          $link = $fixture('a[href="/path"][up-target=".target"]')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-history]')
           Trigger.clickSequence($link)
 
           next =>

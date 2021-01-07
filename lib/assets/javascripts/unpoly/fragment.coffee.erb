@@ -32,24 +32,29 @@ up.fragment = do ->
   @stable
   ###
   config = new up.Config ->
-    u.literal
-      badTargetClasses: [/^up-/]
-      # These defaults will be set to both success and fail options
-      # if { navigate: true } is given.
-      navigateOptions: {
-        focus: 'auto'
-        scroll: 'auto'
-        solo: true      # preflight
-        feedback: true  # preflight
-        fallback: true
-        history: 'auto'
-        peel: true
-        cache: true
-      }
+    badTargetClasses: [/^up-/]
+    # These defaults will be set to both success and fail options
+    # if { navigate: true } is given.
+    navigateOptions: {
+      focus: 'auto'
+      scroll: 'auto'
+      solo: true      # preflight
+      feedback: true  # preflight
+      fallback: true
+      history: 'auto'
+      peel: true
+      cache: true
+    }
+    autoHistoryTargets: [':main']
+    autoScrollTargets: [':main']
 
   # Users who are not using layers will prefer settings default targets
   # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-  u.getter config, 'mainTargets', -> up.layer.config.any.mainTargets
+  Object.defineProperty(config, 'mainTargets'
+    get: -> up.layer.config.any.mainTargets
+    set: (value) -> up.layer.config.any.mainTargets = value
+  )
+
   up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')
 
   reset = ->
@@ -1148,6 +1153,35 @@ up.fragment = do ->
   @experimental
   ###
 
+  ###**
+  @function up.fragment.matches
+  @param {Element} fragment
+  @param {string|Array<string>} selectorOrSelectors
+  @param {string|up.Layer} options.layer
+    The layer for which to match.
+
+    Pseudo-selectors like :main may expand to different selectors
+    in different layers.
+  @param {string|up.Layer} options.mode
+    Required if `{ layer: 'new' }` is passed.
+  @return {boolean}
+  ###
+  matches = (fragment, selectorOrSelectors, options) ->
+    options.layer ||= fragment
+    targets = up.fragment.expandTargets(selectorOrSelectors, options)
+    # If the user has set config.mainTargets = [] then a selector :main
+    # will resolve to an empty array.
+    if targets.length
+      return e.matches(fragment, targets.join(','))
+
+  shouldAutoScroll = (fragment, options) ->
+    result = matches(fragment, config.autoScrollTargets, options)
+    result
+
+  shouldAutoHistory = (fragment, options) ->
+    result = matches(fragment, config.autoHistoryTargets, options)
+    result
+
   up.on 'up:app:boot', ->
     body = document.body
     body.setAttribute('up-source', up.history.location)
@@ -1183,6 +1217,9 @@ up.fragment = do ->
     failKey: failKey
     expandTargets: expandTargets
     toTarget: toTarget
+    matches: matches
+    shouldAutoScroll: shouldAutoScroll
+    shouldAutoHistory: shouldAutoHistory
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

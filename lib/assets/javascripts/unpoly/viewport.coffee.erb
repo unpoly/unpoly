@@ -94,7 +94,6 @@ up.viewport = do ->
     revealTop: false,
     revealMax: -> 0.5 * window.innerHeight
     scrollSpeed: 1
-    autoResetTargets: [':main']
     autofocus: true
 
   up.legacy.renamedProperty(config, 'viewports', 'viewportSelectors')
@@ -812,11 +811,6 @@ up.viewport = do ->
       value = value.substr(1)
     u.presence(value)
 
-  autoResetSelector = (options) ->
-    targets = up.viewport.config.autoResetTargets
-    targets = up.fragment.expandTargets(targets, options)
-    return targets.join(',')
-
   up.on 'up:app:booted', ->
     if hash = location.hash
       revealHash(hash)
@@ -852,8 +846,6 @@ up.viewport = do ->
     anchoredRight: anchoredRight
     fixedElements: fixedElements
     absolutize: absolutize
-    autoResetSelector: autoResetSelector
-
     focus: doFocus
     tryFocus: tryFocus
     autofocus: autofocus

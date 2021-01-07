@@ -1573,6 +1573,30 @@ describe 'up.fragment', ->
             next => @respondWithSelector('.target')
             next => expect(location.href).toMatchURL(@locationBeforeExample)
 
+          describe 'with { history: "auto" }', ->
+
+            it 'adds an history entry when updating a main target', asyncSpec (next) ->
+              up.fragment.config.mainTargets = ['.target']
+              fixture('.target')
+              promise = up.render('.target', url: '/path3', history: 'auto')
+
+              next =>
+                @respondWithSelector('.target')
+                next.await(promise)
+              next =>
+                expect(location.href).toMatchURL('/path3')
+
+            it 'does not add an history entry when updating a non-main targets', asyncSpec (next) ->
+              up.fragment.config.mainTargets = ['.other']
+              fixture('.target')
+              promise = up.render('.target', url: '/path4', history: 'auto')
+
+              next =>
+                @respondWithSelector('.target')
+                next.await(promise)
+              next =>
+                expect(location.href).toMatchURL(@locationBeforeExample)
+
           describe 'when a string is passed as { location } option', ->
 
             it 'uses that URL as the new location after a GET request', asyncSpec (next) ->

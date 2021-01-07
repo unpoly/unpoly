@@ -9,7 +9,6 @@ class up.Layer.Root extends up.Layer
 
   constructor: (options) ->
     super(options)
-    @history = true
     @setupHandlers()
 
   # Always return the current <body> instead of caching it,

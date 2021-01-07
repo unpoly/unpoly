@@ -12,6 +12,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @currentLayer = options.currentLayer
     @source = options.source
     @focus = options.focus
+    @history = options.history
 
   preflightProps: ->
     # We assume that the server will respond with our target.
@@ -34,12 +35,6 @@ class up.Change.OpenLayer extends up.Change.Addition
 
   toString: ->
     "Open \"#{@target}\" in new layer"
-
-  buildLayer: ->
-    up.layer.build(u.merge(@options,
-      history: @historyOptionForLayer(),
-      parent: @currentLayer
-    ))
 
   execute: (responseDoc) ->
     if @target == ':none'
@@ -113,8 +108,8 @@ class up.Change.OpenLayer extends up.Change.Addition
     # This is a good time for listeners to manipulate the overlay optics.
     @emitOpenedEvent()
 
-    # In case a listener immediately dimisses the new layer, reject the promise
-    # returned by up.layer.open().
+    # In case a listener to up:layer:opened immediately dimisses the new layer,
+    # reject the promise returned by up.layer.open().
     @abortWhenLayerClosed()
 
     # Resolve the promise with the layer instance, so callers can do:
@@ -124,26 +119,50 @@ class up.Change.OpenLayer extends up.Change.Addition
     # Don't wait to animations to finish:
     return Promise.resolve(@layer)
 
-  historyOptionForLayer: ->
-    # (1) The caller can pass { history: true } or { history: false } to control whether
-    #     the new layer will render history. Once set this setting will be honored for all
-    #     future fragment updates in that layer.
-    # (1) When the caller passes { history: 'auto' } we return undefined so the layer mode's
-    #     default history prop from up.layer.config will be used.
-    if @options.history != 'auto'
-      return @options.history
+  buildLayer: ->
+    optionsWithDefaultHistory = u.omit(@options, ['history'])
+    resolveAutoHistory = (layerOptions) => layerOptions.history = @resolveAutoHistoryForLayer(layerOptions.history)
+    return up.layer.build(optionsWithDefaultHistory, resolveAutoHistory)
 
-  historyOptionForFragment: ->
-    # (1) If we cannot push state for some reason, we prefer disabling history for
-    #     child layers instead of blowing up the entire stack with a full page load.
-    # (2) It might be surprising options.history is not relevant here.
-    #     Even if the layer has a { history: false } property we want to set the
-    #     initial layer.location to the fragment to enable .up-current.
-    return up.browser.canPushState()
+  resolveAutoHistoryForLayer: (modeDefault) ->
+    # Both the change's options and the layer mode defaults can set { history: 'auto' }.
+    # We use the table below to resolve this to either true or false:
+    #
+    # | options.history | config.mode.history | layer has history?                         |
+    # |-----------------|---------------------|--------------------------------------------|
+    # | auto            | auto                | iff initial content is auto-history target |
+    # | auto            | true                | yes                                        |
+    # | auto            | false               | no                                         |
+    # | true            | *                   | yes                                        |
+    # | false           | *                   | no                                         |
+    if @history == 'auto'
+      # The mode default is now in layerOptions.history.
+      # If it's a boolean value we use it.
+      # If it's 'auto' we enable history IFF @content matches an auto-history target.
+      if modeDefault == 'auto'
+        # We build a layer in @preflightOptions(), before we have a @content element.
+        # In that case we cannot resolve { history: 'auto' }, and we don't need it.
+        unless @content
+          return false
+
+        unless (autoResult = up.fragment.shouldAutoHistory(@content, @options))
+          up.puts('up.layer.open()', "Opening layer without history as initial content doesn't match up.fragment.config.autoHistoryTargets")
+
+        return autoResult
+      else
+        return modeDefault
+    else
+      # If up.layer.open() was called with a boolean { history } option,
+      # we will use that option regardless of the mode default.
+      return @history
 
   handleHistory: ->
     @layer.parent.saveHistory()
-    @layer.updateHistory(u.merge(@options, history: @historyOptionForFragment()))
+
+    # options.history dictates whether or not the overlay renders history to the address bar.
+    # Even if the layer has a { history: false } property we want to set the initial
+    # layer.location to the fragment to support .up-current.
+    @layer.updateHistory(u.merge(@options, history: true))
 
   handleFocus: ->
     @currentLayer.overlayFocus?.moveToBack()
@@ -158,7 +177,11 @@ class up.Change.OpenLayer extends up.Change.Addition
     fragmentFocus.process()
 
   handleScroll: ->
-    scrollingOptions = u.merge(@options, { fragment: @content, layer: @layer, autoMeans: ['hash', 'layer'] })
+    scrollingOptions = u.merge(@options, {
+      fragment: @content,
+      layer: @layer,
+      autoMeans: ['hash', 'layer']
+    })
     scrolling = new up.FragmentScrolling(scrollingOptions)
     return scrolling.process()
 
@@ -188,4 +211,3 @@ class up.Change.OpenLayer extends up.Change.Addition
       callback: @layer.callback('onOpened'),
       log: "Opened new #{@layer}"
     )
-

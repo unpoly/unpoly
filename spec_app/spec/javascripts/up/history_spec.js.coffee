@@ -131,7 +131,7 @@ describe 'up.history', ->
 
           up.history.replace('/scroll-restauration-spec')
 
-          up.navigate('.content', url: '/test-one')
+          up.navigate('.content', url: '/test-one', history: true)
 
           next.after waitForBrowser, =>
             respond()
@@ -139,7 +139,7 @@ describe 'up.history', ->
           next.after waitForBrowser, =>
             expect(location.href).toMatchURL('/test-one')
             $viewport.scrollTop(50)
-            up.navigate('.content', url: '/test-two')
+            up.navigate('.content', url: '/test-two', history: true)
 
           next.after waitForBrowser, =>
             respond()
@@ -147,7 +147,7 @@ describe 'up.history', ->
           next.after waitForBrowser, =>
             expect(location.href).toMatchURL('/test-two')
             $('.viewport').scrollTop(150)
-            up.navigate('.content', url: '/test-three')
+            up.navigate('.content', url: '/test-three', history: true)
 
           next.after waitForBrowser, =>
             respond()
@@ -206,7 +206,7 @@ describe 'up.history', ->
           $screen = $fixture('.screen')
           $screen.html(html)
 
-          up.navigate('.content1, .content2', url: '/one', reveal: false)
+          up.navigate('.content1, .content2', url: '/one', reveal: false, history: true)
 
           next =>
             respond()
@@ -217,7 +217,7 @@ describe 'up.history', ->
             expect('.viewport1').toBeScrolledTo(3000)
             expect('.viewport2').toBeScrolledTo(3050)
 
-            up.navigate('.content1, .content2', url: '/two', reveal: false)
+            up.navigate('.content1, .content2', url: '/two', reveal: false, history: true)
 
           next =>
             respond()
@@ -258,7 +258,7 @@ describe 'up.history', ->
 
           normalize = up.history.normalizeURL
 
-          up.navigate('.content', url: '/foo')
+          up.navigate('.content', url: '/foo', history: true)
 
           next =>
             respond()
@@ -268,7 +268,7 @@ describe 'up.history', ->
               ['up:history:pushed', normalize('/foo')]
             ]
 
-            up.navigate('.content', url: '/bar')
+            up.navigate('.content', url: '/bar', history: true)
 
           next =>
             respond()
@@ -279,7 +279,7 @@ describe 'up.history', ->
               ['up:history:pushed', normalize('/bar')]
             ]
 
-            up.navigate('.content', url: '/baz')
+            up.navigate('.content', url: '/baz', history: true)
 
           next =>
             respond()

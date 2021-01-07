@@ -115,6 +115,7 @@ describe 'up.Layer.Overlay', ->
         target: '.element',
         location: '/path/to/modal'
         content: 'element text'
+        history: true
       )
 
       next =>

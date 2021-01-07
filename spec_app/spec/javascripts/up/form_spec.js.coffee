@@ -417,7 +417,7 @@ describe 'up.form', ->
           $fixture('.response').text('old-text')
 
         it 'submits the given form and replaces the target with the response', asyncSpec (next) ->
-          up.submit(@$form)
+          up.submit(@$form, history: true)
 
           next =>
             expect(@lastRequest().url).toMatchURL('/form-target')
@@ -485,7 +485,7 @@ describe 'up.form', ->
 
 
         it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', asyncSpec (next) ->
-          up.submit(@$form)
+          up.submit(@$form, history: true)
 
           next =>
             @respondWith

@@ -59,14 +59,15 @@ class up.FragmentScrolling extends up.Record
         # If the user has passed { scroll: 'top' } we scroll to the top all
         # viewports that are either containing or are contained by element.
         return @reset()
-#      when 'top-if-main'
-#        if @isTargetMain()
-#          return @reset()
       when 'layer'
         return @revealLayer()
       when 'layer-if-main'
-        if @isTargetMain()
+        if @shouldAutoScroll()
           return @revealLayer()
+        else
+          up.puts('up.render()', "Will not auto-scroll because fragment doesn't match up.fragment.config.autoScrollTargets")
+          # Try the next value from { autoMeans }.
+          return undefined
       when 'restore'
         return @restore()
       when 'hash'
@@ -93,8 +94,8 @@ class up.FragmentScrolling extends up.Record
   reset: ->
     return up.viewport.resetScroll(u.merge(@attributes(), around: @fragment))
 
-  isTargetMain: ->
-    return e.matches(@fragment, up.viewport.autoResetSelector({ @layer, @mode }))
+  shouldAutoScroll: ->
+    return up.fragment.shouldAutoScroll(@fragment, { @layer, @mode })
 
   restore: ->
     return up.viewport.restoreScroll(u.merge(@attributes(), around: @fragment))
@@ -108,11 +109,3 @@ class up.FragmentScrolling extends up.Record
 
   revealElement: (element) ->
     return up.reveal(element, @attributes())
-    
-#  shouldProcess: ->
-#    # Only emit an up:fragment:scroll event if a truthy scrollOpt would
-#    # otherwise trigger a built-in scroll strategy.
-#    return @scroll && up.event.nobodyPrevents(@fragment, @scrollEvent())
-
-#  scrollEvent: ->
-#    return up.event.build('up:fragment:scroll', @attributes())

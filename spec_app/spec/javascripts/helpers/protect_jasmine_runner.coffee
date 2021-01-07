@@ -22,17 +22,6 @@ afterEach ->
   if links = u.presence(window.defaultSubmittedForms)
     up.fail('Unhandled default submit behavior for forms %o', links)
 
-
-oldPushState = history.pushState
-oldReplaceState = history.replaceState
-oldBack = history.back
-oldForward = history.forward
-
-history.pushState = (args...) -> safeHistory.pushState(args...)
-history.replaceState = (args...) -> safeHistory.replaceState(args...)
-history.back = (args...) -> safeHistory.back(args...)
-history.forward = (args...) -> safeHistory.forward(args...)
-
 window.safeHistory = new class
   constructor: ->
     @logEnabled = false
@@ -112,6 +101,16 @@ window.safeHistory = new class
     @log("safeHistory: reset()")
     @cursor = 0
     @stateIndexes = [0]
+
+oldPushState = history.pushState
+oldReplaceState = history.replaceState
+oldBack = history.back
+oldForward = history.forward
+
+history.pushState = (args...) -> safeHistory.pushState(args...)
+history.replaceState = (args...) -> safeHistory.replaceState(args...)
+history.back = (args...) -> safeHistory.back(args...)
+history.forward = (args...) -> safeHistory.forward(args...)
 
 window.addEventListener('popstate', (event) -> safeHistory.onPopState(event))
 

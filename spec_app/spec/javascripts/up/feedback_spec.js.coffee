@@ -168,7 +168,7 @@ describe 'up.feedback', ->
 
           it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
-            $link = $nav.affix('a[href="/fork"][up-target=".main"]')
+            $link = $nav.affix('a[href="/fork"][up-target=".main"][up-history]')
             fixture('.main')
             up.hello($nav)
 
@@ -185,7 +185,7 @@ describe 'up.feedback', ->
 
           it 'marks a link as .up-current if it links to the current URL, but has an extra trailing slash', asyncSpec (next) ->
             $nav = $fixture('div[up-nav]')
-            $link = $nav.affix('a[href="/foo/"][up-target=".main"]')
+            $link = $nav.affix('a[href="/foo/"][up-target=".main"][up-history]')
             up.hello($nav)
 
             fixture('.main')
@@ -288,7 +288,7 @@ describe 'up.feedback', ->
             $more = $nav.affix('.more')
             up.hello($nav)
 
-            up.extract '.more', '<div class="more"><a href="/bar"></div>', history: '/bar'
+            up.extract '.more', '<div class="more"><a href="/bar"></div>', history: true, location: '/bar'
 
             next =>
               $moreLink = $('.more').find('a')

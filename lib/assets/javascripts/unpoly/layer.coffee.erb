@@ -29,17 +29,18 @@ up.layer = do ->
           "[up-main='']",
           'main',
           ':layer' # this is <body> for the root layer
-        ]
+        ],
       root:
         mainTargets: ['[up-main~=root]']
+        history: true
       overlay:
         mainTargets: ['[up-main~=overlay]']
-        history: true
         openAnimation: 'fade-in'
         closeAnimation: 'fade-out'
         dismissLabel: '×'
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
+        history: 'auto'
       cover:
         mainTargets: ['[up-main~=cover]']
       drawer:
@@ -64,7 +65,6 @@ up.layer = do ->
         position: 'bottom'
         size: 'medium'
         align: 'left'
-        history: false
 
     for Class in LAYER_CLASSES
       newConfig[Class.mode].Class = Class
@@ -154,11 +154,13 @@ up.layer = do ->
     # TODO: Test this
     options.currentLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
 
-  build = (options) ->
+  build = (options, transformOptions) ->
+    console.log("up.layer.build(%o, %o)", u.copy(options), transformOptions)
     mode = options.mode
     Class = config[mode].Class
     configs = u.reverse(modeConfigs(mode))
     options = u.mergeDefined(configs..., { mode, stack }, options)
+    transformOptions?(options)
     return new Class(options)
 
 #  modeClass = (options = {}) ->
