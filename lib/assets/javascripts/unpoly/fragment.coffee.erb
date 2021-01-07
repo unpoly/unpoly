@@ -909,7 +909,10 @@ up.fragment = do ->
       return Promise.resolve()
 
   parseTargetAndOptions = (args) ->
-    return u.parseArgIntoOptions(args, 'target')
+    options = u.parseArgIntoOptions(args, 'target')
+    if u.isElement(options.target)
+      options.origin ||= options.target
+    options
 
   ###**
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)

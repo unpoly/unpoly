@@ -844,6 +844,31 @@ describe 'up.fragment', ->
               expect(children[2]).toHaveText('old element2Child1')
               expect(children[3]).toHaveText('new text')
 
+          it 'considers an Element argument to be the origin if no { origin } is given', asyncSpec (next) ->
+            root = fixture('.element#root')
+            one = e.affix(root, '.element', text: 'old one')
+            two = e.affix(root, '.element', text: 'old two')
+            three = e.affix(root, '.element', text: 'old three')
+
+            up.render(two, content: 'new text')
+
+            next =>
+              elements = e.all('.element')
+              expect(elements.length).toBe(4)
+
+              # While #root is an ancestor, two was closer
+              expect(elements[0]).toMatchSelector('#root')
+
+              # One is a sibling of two
+              expect(elements[1]).toHaveText('old one')
+
+              # Two is the closest match around the origin (childOfTwo)
+              expect(elements[2]).toHaveText('new text')
+
+              # Three is a sibling of three
+              expect(elements[3]).toHaveText('old three')
+
+
         describe 'non-standard selector extensions', ->
 
           describe ':has()', ->
@@ -2201,22 +2226,6 @@ describe 'up.fragment', ->
 
           next.after 100, ->
             expect(onFinished).toHaveBeenCalled()
-
-        it 'runs an { onFinished } callback once when updating multiple elements', asyncSpec (next) ->
-          fixture('.foo')
-          fixture('.bar')
-
-          onFinishedSpy = jasmine.createSpy('onFinished spy')
-
-          up.render('.foo, .bar',
-            document: '<div class="foo"></div> <div class="bar"></div>',
-            transition: 'cross-fade',
-            duration: 10,
-            onFinished: onFinishedSpy
-          )
-
-          next.after 70, ->
-            expect(onFinishedSpy.calls.count()).toBe(1)
 
         it 'runs an { onFinished } callback once when appending an element', asyncSpec (next) ->
           fixture('.foo')
