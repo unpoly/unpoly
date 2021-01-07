@@ -792,6 +792,58 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('new-middle')
             expect($('.after')).toHaveText('new-after')
 
+        describe 'matching old fragments around the origin', ->
+          it 'prefers to match an element closest to origin', asyncSpec (next) ->
+            root = fixture('.element#root')
+            one = e.affix(root, '.element', text: 'old one')
+            two = e.affix(root, '.element', text: 'old two')
+            childOfTwo = e.affix(two, '.origin')
+            three = e.affix(root, '.element', text: 'old three')
+
+            up.render('.element', origin: childOfTwo, content: 'new text')
+
+            next =>
+              elements = e.all('.element')
+              expect(elements.length).toBe(4)
+
+              # While #root is an ancestor, two was closer
+              expect(elements[0]).toMatchSelector('#root')
+
+              # One is a sibling of two
+              expect(elements[1]).toHaveText('old one')
+
+              # Two is the closest match around the origin (childOfTwo)
+              expect(elements[2]).toHaveText('new text')
+
+              # Three is a sibling of three
+              expect(elements[3]).toHaveText('old three')
+
+          it 'prefers to match a descendant selector in the vicinity of the origin', asyncSpec (next) ->
+            element1 = fixture('.element')
+            element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
+            element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
+
+            element2 = fixture('.element')
+            element2Child1 = e.affix(element2, '.child',         text: 'old element2Child1')
+            element2Child2 = e.affix(element2, '.child.sibling', text: 'old element2Child2')
+
+            up.render('.element .sibling', origin: element2Child1, document: """
+              <div class="element">
+                <div class="child sibling">new text</div>
+              </div>
+            """)
+
+            next =>
+              children = e.all('.child')
+
+              expect(children.length).toBe(4)
+
+              expect(children[0]).toHaveText('old element1Child1')
+              expect(children[1]).toHaveText('old element1Child2')
+
+              expect(children[2]).toHaveText('old element2Child1')
+              expect(children[3]).toHaveText('new text')
+
         describe 'non-standard selector extensions', ->
 
           describe ':has()', ->

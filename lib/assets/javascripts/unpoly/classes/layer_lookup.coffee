@@ -6,9 +6,10 @@ class up.LayerLookup
   constructor: (@stack, args...) ->
     options = u.parseArgIntoOptions(args, 'layer')
 
-    # Options normalization might change `options` relevant to the lookup.
-    # In particular it will default { layer } to 'origin' if an { origin } element is given.
-    # It will also lookup options.currentLayer.
+    # Options normalization might change `options` relevant to the lookup:
+    # (1) It will default { layer } to 'origin' if an { origin } element is given.
+    # (2) It will also lookup a string { currentLayer }.
+    # (3) It will set the default layer to 'current' if nothing matches.
     if options.normalizeLayerOptions != false
       up.layer.normalizeOptions(options)
 

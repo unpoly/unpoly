@@ -252,10 +252,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return if @matchedPreflight
 
     for step in @steps
+      fragmentLookup = new up.OldFragmentLookup(step)
       # Try to find fragments matching step.selector within step.layer.
       # Note that step.oldElement might already have been set by @parseSteps().
-      step.oldElement ||= up.fragment.get(step.selector, step) or
-        throw @notApplicable("Could not find element \"#{@target}\" in current page")
+      step.oldElement ||= fragmentLookup.find() or throw @notApplicable("Could not find element \"#{@target}\" in current page")
 
     @resolveOldNesting()
 

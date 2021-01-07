@@ -604,6 +604,9 @@ up.fragment = do ->
   isDestroying = (element) ->
     !!e.closest(element, '.up-destroying')
 
+  isNotDestroying = (element) ->
+    !isDestroying(element)
+
   ###**
   Returns the first element matching the given selector, but
   ignores elements that are being [destroyed](/up.destroy) or that are being
@@ -726,41 +729,52 @@ up.fragment = do ->
       # We do use e.get() to unwrap a jQuery collection.
       return [e.get(selectorOrElement)]
     else
-      selector = resolveOriginReference(selectorOrElement, options)
+      # (1) up.fragment.all(rootElement, selector) should find selector within
+      #     the descendants of rootElement.
+      # (2) up.fragment.all(selector) should find selector within the current layer.
+      # (3) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
+      element = args[0]
+      selector = parseSelector(selectorOrElement, element, options)
+      return selector.descendants(element || document)
 
-      filterFn = null
-      selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
-        filterFn = (element) -> element.querySelector(descendantSelector)
-        return ''
-
-      if rootElement = args[0]
-        # up.fragment.all(rootElement, selector) should find selector within
-        # the descendants of rootElement.
-        selectFn = if options.subtree then e.subtree else e.all
-        candidates = selectFn(rootElement, selector)
-
-        # Check if the root element has a child layer whose elements we need
-        # to exclude fromt the matches.
-        if options.layer != 'any' && (childLayerElement = e.get(rootElement, up.layer.anySelector()))
-          # Since we have already have the child layer's element, we're using the native
-          # Element#contains() instead of the slower up.Element#contains().
-          candidates = u.reject(candidates, (candidate) -> childLayerElement.contains(candidate))
-
-      else
-        # up.fragment.all(selector, [options]) should lookup the selector
-        # in all layers (prefering the current layer), or in options.layer.
-        # Note that options.layer might resolve to more than one layer, e.g.
-        # with { layer: 'ancestor' } or { layer: 'any' }.
-        layers = up.layer.getAll(options)
-        candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
-
-      unless options.destroying
-        candidates = u.reject(candidates, isDestroying)
-
-      if filterFn
-        candidates = u.select(candidates, filterFn)
-
-      return candidates
+#      if rootElement = args[0]
+#        # up.fragment.all(rootElement, selector) should find selector within
+#        # the descendants of rootElement.
+#        selectFn = if options.subtree then e.subtree else e.all
+#        candidates = selectFn(rootElement, selector)
+#
+#        # Check if the root element has a child layer whose elements we need
+#        # to exclude fromt the matches.
+#        if options.layer != 'any' && (childLayerElement = e.get(rootElement, up.layer.anySelector()))
+#          # Since we have already have the child layer's element, we're using the native
+#          # Element#contains() instead of the slower up.Element#contains().
+#          candidates = u.reject(candidates, (candidate) -> childLayerElement.contains(candidate))
+#
+#      else
+#        # up.fragment.all(selector, [options]) should lookup the selector
+#        # in all layers (prefering the current layer), or in options.layer.
+#        # Note that options.layer might resolve to more than one layer, e.g.
+#        # with { layer: 'ancestor' } or { layer: 'any' }.
+#        layers = up.layer.getAll(options)
+#        candidates = u.flatMap layers, (layer) -> getAll(layer.element, selector, subtree: true)
+#
+#      unless options.destroying
+#        candidates = u.reject(candidates, isDestroying)
+#
+#      candidates = u.select(candidates, filter)
+#
+#      return candidates
+#
+#  NO_FILTER = -> true
+#
+#  parseSelector = (selector, options = {}) ->
+#    selector = resolveOriginReference(selector, options)
+#
+#    filter = NO_FILTER
+#    selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
+#      filter = (element) -> element.querySelector(descendantSelector)
+#      return ''
+#    return { selector, filter }
 
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
@@ -793,8 +807,24 @@ up.fragment = do ->
   @stable
   ###
 
+  ###**
+  Returns a list of the given parent's descendants matching the given selector.
+  The list will also include the parent element if it matches the selector itself.
+
+  @function up.fragment.subtree
+  @param {Element} parent
+    The parent element for the search.
+  @param {string} selector
+    The CSS selector to match.
+  @param {up.Layer|string|Element}
+    options.layer
+  @return {NodeList<Element>|Array<Element>}
+    A list of all matching elements.
+  @experimental
+  ###
   getSubtree = (element, selector, options = {}) ->
-    getAll(element, selector, u.merge(options, subtree: true))
+    selector = parseSelector(selector, element, options)
+    return selector.subtree(element)
 
   ###**
   Returns the first element that matches the selector by testing the element itself
@@ -814,10 +844,10 @@ up.fragment = do ->
     Returns `null` or `undefined` if no element matches in the same layer.
   @experimental
   ###
-  closest = (element, selector) ->
-    match = e.closest(element, selector)
-    if match && (up.layer.get(match) == up.layer.get(element)) && !isDestroying(match)
-      return match
+  closest = (element, selector, options) ->
+    element = e.get(element)
+    selector = parseSelector(selector, element, options)
+    return selector.closest(element)
 
   ###**
   Destroys the given element or selector.
@@ -1086,8 +1116,13 @@ up.fragment = do ->
       else
         up.fail("Missing origin for origin reference (%s) (found in %os)", match, target)
 
+  ###**
+  @internal
+  ###
   expandTargets = (targets, options = {}) ->
-    layer = options.layer or up.fail('Must pass a { layer } option')
+    layer = options.layer
+    unless layer == 'new' || (layer instanceof up.Layer)
+      up.fail('Must pass an up.Layer as { layer } option, but got %o', layer)
 
     # Copy the list since targets might be a jQuery collection, and this does not support shift or push.
     targets = u.copy(u.wrapList(targets))
@@ -1115,6 +1150,30 @@ up.fragment = do ->
         # In that case we don't add a plan.
 
     return u.uniq(expanded)
+
+  parseSelector = (selector, element, options = {}) ->
+    filters = []
+
+    unless options.destroying
+      filters.push(isNotDestroying)
+
+    # Some up.fragment function center around an element, like closest() or matches().
+    options.layer ||= element
+    layers = up.layer.getAll(options)
+
+    if options.layer != 'any' && !(element && e.isDetached(element))
+      filters.push (match) -> u.some layers, (layer) -> layer.contains(match)
+
+    expandedTargets = up.fragment.expandTargets(selector, u.merge(options, layer: layers[0]))
+    # If the user has set config.mainTargets = [] then a selector :main
+    # will resolve to an empty array.
+    selector = expandedTargets.join(',') || 'match-none'
+
+    selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
+      filters.push (element) -> element.querySelector(descendantSelector)
+      return ''
+
+    return new up.Selector(selector, filters)
 
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
@@ -1166,13 +1225,10 @@ up.fragment = do ->
     Required if `{ layer: 'new' }` is passed.
   @return {boolean}
   ###
-  matches = (fragment, selectorOrSelectors, options) ->
-    options.layer ||= fragment
-    targets = up.fragment.expandTargets(selectorOrSelectors, options)
-    # If the user has set config.mainTargets = [] then a selector :main
-    # will resolve to an empty array.
-    if targets.length
-      return e.matches(fragment, targets.join(','))
+  matches = (element, selector, options = {}) ->
+    element = e.get(element)
+    selector = parseSelector(selector, element, options)
+    return selector.matches(element)
 
   shouldAutoScroll = (fragment, options) ->
     result = matches(fragment, config.autoScrollTargets, options)
