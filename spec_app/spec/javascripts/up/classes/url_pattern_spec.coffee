@@ -1,43 +1,43 @@
 describe 'up.URLPattern', ->
 
-  describe '#matches', ->
+  describe '#test', ->
 
-    it 'returns true if the given URL matches an exact pattern completely', ->
+    it 'returns true if the given URL test an exact pattern completely', ->
       pattern = new up.URLPattern('/foo/bar')
-      expect(pattern.matches('/foo/bar')).toBe(true)
+      expect(pattern.test('/foo/bar')).toBe(true)
 
-    it 'returns false if the given URL matches the end of an exact pattern, but misses a prefix', ->
+    it 'returns false if the given URL test the end of an exact pattern, but misses a prefix', ->
       pattern = new up.URLPattern('/foo/bar')
-      expect(pattern.matches('/bar')).toBe(false)
+      expect(pattern.test('/bar')).toBe(false)
 
-    it 'returns false if the given URL matches the beginning of an exact pattern, but misses a suffix', ->
+    it 'returns false if the given URL test the beginning of an exact pattern, but misses a suffix', ->
       pattern = new up.URLPattern('/foo/bar')
-      expect(pattern.matches('/foo')).toBe(false)
+      expect(pattern.test('/foo')).toBe(false)
 
-    it 'returns true if the given URL matches a pattern with a wildcard (*)', ->
+    it 'returns true if the given URL test a pattern with a wildcard (*)', ->
       pattern = new up.URLPattern('/foo/*/baz')
-      expect(pattern.matches('/foo/bar/baz')).toBe(true)
+      expect(pattern.test('/foo/bar/baz')).toBe(true)
 
-    it 'returns true if the given URL matches a pattern with a named string segment', ->
+    it 'returns true if the given URL test a pattern with a named string segment', ->
       pattern = new up.URLPattern('/foo/:middle/baz')
-      expect(pattern.matches('/foo/bar/baz')).toBe(true)
+      expect(pattern.test('/foo/bar/baz')).toBe(true)
 
-    it 'returns true if the given URL matches a pattern with a named number segment', ->
+    it 'returns true if the given URL test a pattern with a named number segment', ->
       pattern = new up.URLPattern('/foo/$middle/baz')
-      expect(pattern.matches('/foo/123/baz')).toBe(true)
+      expect(pattern.test('/foo/123/baz')).toBe(true)
 
     it 'returns false if named number segment would match a string', ->
       pattern = new up.URLPattern('/users/$id')
-      expect(pattern.matches('/users/new')).toBe(false)
+      expect(pattern.test('/users/new')).toBe(false)
 
-    it 'returns true if the given URL matches either of two space-separated URLs', ->
+    it 'returns true if the given URL test either of two space-separated URLs', ->
       pattern = new up.URLPattern('/foo /bar')
-      expect(pattern.matches('/foo')).toBe(true)
-      expect(pattern.matches('/bar')).toBe(true)
+      expect(pattern.test('/foo')).toBe(true)
+      expect(pattern.test('/bar')).toBe(true)
 
     it 'returns false if the given URL matchers neither of two space-separated URLs', ->
       pattern = new up.URLPattern('/foo /bar')
-      expect(pattern.matches('/baz')).toBe(false)
+      expect(pattern.test('/baz')).toBe(false)
 
   describe '#recognize', ->
 

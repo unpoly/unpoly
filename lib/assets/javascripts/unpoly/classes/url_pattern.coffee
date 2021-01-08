@@ -37,7 +37,7 @@ class up.URLPattern
 
   # This method is performance-sensitive. It's called for every link in an [up-nav]
   # after every fragment update.
-  matches: (url, doNormalize = true) ->
+  test: (url, doNormalize = true) ->
     url = @normalizeURL(url) if doNormalize
     # Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     # and we only need to know whether the URL matches (true / false).

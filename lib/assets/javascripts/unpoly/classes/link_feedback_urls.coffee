@@ -27,5 +27,5 @@ class up.LinkFeedbackURLs
     return @isSafe && !!(
       (@href && @href == normalizedLocation) ||
       (@upHREF && @upHREF == normalizedLocation) ||
-      (@aliasPattern && @aliasPattern.matches(normalizedLocation, false))
+      (@aliasPattern && @aliasPattern.test(normalizedLocation, false))
     )
