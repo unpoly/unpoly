@@ -20,15 +20,26 @@ up.fragment = do ->
   e = up.element
 
   ###**
-  Returns the URL the given element was retrieved from.
+  Configures defaults for fragment updates.
 
   @function up.fragment.config
   @param {Array<string>} config.mainTargets
-  @return {Array<string|RegExp>} config.badTargetClasses
+  @param {Array<string|RegExp>} config.badTargetClasses
     A list of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
 
     The class names may also be passed as a regular expression.
+  @param {Object} config.navigateOptions
+    An object of default options to apply when [navigating](/up.navigate).
+  @param {Array<string>} config.autoHistoryTargets
+    An array of CSS selectors for which the browser history is updated with `{ history: 'auto' }`.
+  @param {Array<string>} config.autoScrollTargets
+    An array of CSS selectors for which the scroll position is [reset](/up.viewport.resetScroll) with `{ scroll: 'auto' }`.
+  @param {boolean} config.matchAroundOrigin
+    Whether to match an existing fragment around the triggered link.
+
+    If set to `false` Unpoly will replace the first fragment
+    matching the given target selector in the link's [layer](/up.layer).
   @stable
   ###
   config = new up.Config ->
