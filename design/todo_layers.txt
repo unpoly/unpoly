@@ -35,15 +35,18 @@ Remaining feature work
   - Change protocol from `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
   - This also means we need to postpone cache-clearing until the response was received
   - Also X-Up-Clear-Cache: false
+  - We might need to honor { clearCache } in makeChangeNow if we're doing alocal replacement:       if solo = options.solo
+                                                                                                      up.network.abort(solo)
   - In unpoly-rails, support up.cache.clear(pattern) and up.cache.keep
   - up.Request#matchURL('/users/*')
     - or up.util.matchURL
     - or publish URLPattern
   - up.network.config.clearCache = (request) -> if (!request.isSafe()) { return '*' }
-  - up.network.config.clearCache = function(request) {
-      if (!request.isSafe()) return '*'
-      if (request.matchURL('/users/search')) return '/users/*'
-    }
+  - More complex example:
+    - up.network.config.clearCache = function(request) {
+        if (!request.isSafe()) return '*'
+        if (request.matchURL('/users/search')) return '/users/*'
+      }
 
 - Consider extracting deprecated aliases to unpoly-migrate.js
   - Would save ~ 15 KB .js, 3 KB+ gzipped

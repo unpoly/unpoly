@@ -1,6 +1,6 @@
 DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
-class up.OldFragmentLookup
+class up.OldFragmentFinder
 
   constructor: (options) ->
     @origin = options.origin
@@ -9,13 +9,17 @@ class up.OldFragmentLookup
     @layerOption = { @layer }
 
   find: ->
-    @findClosest() || @findInVicinity() || @findInLayer()
+    return @findAroundOrigin() || @findInLayer()
+
+  findAroundOrigin: ->
+    if @origin && up.fragment.config.matchAroundOrigin
+      return @findClosest() || @findInVicinity()
 
   findClosest: ->
-    return @origin && up.fragment.closest(@origin, @selector, @layerOption)
+    return up.fragment.closest(@origin, @selector, @layerOption)
 
   findInVicinity: ->
-    if @origin && (parts = @selector.match(DESCENDANT_SELECTOR))
+    if (parts = @selector.match(DESCENDANT_SELECTOR))
       if parent = up.fragment.closest(@origin, parts[1], @layerOption)
         return up.fragment.get(parent, parts[2])
 
