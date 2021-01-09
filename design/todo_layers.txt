@@ -27,6 +27,10 @@ Release process
 Remaining feature work
 ======================
 
+- up.render({ content }) should keep the container
+
+- Test that the server can re-target to ":main"
+
 - Caching
   - Allow to clear a pattern from the client:
     - up.cache.clear('/users/*')

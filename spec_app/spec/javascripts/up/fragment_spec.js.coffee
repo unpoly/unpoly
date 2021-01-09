@@ -601,6 +601,13 @@ describe 'up.fragment', ->
           next =>
             expect('.main-element').toHaveText('new text')
 
+        it "removes the target's inner HTML with { content: '' }", asyncSpec (next) ->
+          fixture('.target', text: 'old text')
+
+          up.render('.target', content: '')
+
+          next =>
+            expect(document.querySelector('.target').innerHTML).toBe('')
 
       describe 'with { document } option', ->
 

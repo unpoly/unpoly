@@ -1057,6 +1057,15 @@ describe 'up.link', ->
             next ->
               expect('.target').toHaveText('new content')
 
+          it "removes the target's inner HTML with [up-content='']", asyncSpec (next) ->
+            target = fixture('.target', text: 'old content')
+            link = fixture('a[up-target=".target"][up-content=""]')
+
+            Trigger.clickSequence(link)
+
+            next ->
+              expect(document.querySelector('.target').innerHTML).toBe('')
+
       it 'does not add a history entry when an up-history attribute is set to "false"', asyncSpec (next) ->
         up.history.config.enabled = true
 
