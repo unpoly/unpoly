@@ -43,7 +43,7 @@ class up.Change.FromContent extends up.Change
       # concrete selectors, like ['main', '.content'].
       for target in @expandTargets(targets, layer)
         # Any plans we add will inherit all properties from @options
-        props = u.merge(@options, { target, layer })
+        props = u.merge(@options, { target, layer, placement: @defaultPlacement() })
         if layer == 'new'
           change = new up.Change.OpenLayer(props)
         else
@@ -63,10 +63,7 @@ class up.Change.FromContent extends up.Change
       up.legacy.fixKey(docOptions, 'html', 'document')
 
       # If neither { document } nor { fragment } source is given, we assume { content }.
-      if !@options.document && !@options.fragment
-        # { content } might be missing, to allow people to open a new layer using up.layer.open() (no args).
-        docOptions.content ?= ''
-
+      if @defaultPlacement() == 'content'
         # When processing { content }, ResponseDoc needs a { target }
         # to create a matching element.
         docOptions.target = @firstExpandedTarget(docOptions.target)
@@ -74,6 +71,10 @@ class up.Change.FromContent extends up.Change
       @responseDoc = new up.ResponseDoc(docOptions)
 
     return @responseDoc
+
+  defaultPlacement: ->
+    if !@options.document && !@options.fragment
+      return 'content'
 
   # When the user provided a { content } we need an actual CSS selector for
   # which up.ResponseDoc can create a matching element.

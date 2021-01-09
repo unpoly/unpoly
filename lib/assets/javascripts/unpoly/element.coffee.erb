@@ -746,6 +746,13 @@ up.element = do ->
       parent.insertBefore(wrappedNode, wrapper)
     parent.removeChild(wrapper)
 
+  wrapChildren = (element, wrapperSelector = 'up-wrapper') ->
+    wrapper = createFromSelector(wrapperSelector)
+    while childNode = element.firstChild
+      wrapper.appendChild(childNode)
+    element.appendChild(wrapper)
+    return wrapper
+
 #  ###**
 #  Returns the value of the given attribute on the given element, if the value is [present](/up.util.isPresent).
 #
@@ -1143,6 +1150,7 @@ up.element = do ->
     setMissingAttrs: setMissingAttrs # internal
     setMissingAttr: setMissingAttr # internal
     unwrap: unwrap # practical for jQuery migration
+    wrapChildren: wrapChildren
     # presentAttr: presentAttr # experimental
     attr: stringAttr
     booleanAttr: booleanAttr # it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?

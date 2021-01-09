@@ -27,6 +27,8 @@ Release process
 Remaining feature work
 ======================
 
+- up.fragment.get() and up.fragment.all() should honor { origin }
+
 - up.render({ content }) should keep the container
 
 - Test that the server can re-target to ":main"

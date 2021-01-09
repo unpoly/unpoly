@@ -609,6 +609,25 @@ describe 'up.fragment', ->
           next =>
             expect(document.querySelector('.target').innerHTML).toBe('')
 
+        it 'keeps the target element and only updates its children', asyncSpec (next) ->
+          originalTarget = fixture('.target.klass', text: 'old text')
+
+          up.render('.target', content: 'new text')
+
+          next =>
+            rediscoveredTarget = document.querySelector('.target')
+            expect(rediscoveredTarget).toBe(originalTarget)
+            expect(rediscoveredTarget).toHaveClass('klass')
+
+        it 'does not leave <up-wrapper> elements in the DOM', asyncSpec (next) ->
+          fixture('.target', text: 'old text')
+
+          up.render('.target', content: 'new text')
+
+          next =>
+            expect('.target').toHaveText('new text')
+            expect(document.querySelectorAll('up-wrapper').length).toBe(0)
+
       describe 'with { document } option', ->
 
         it 'replaces the given selector with a matching element that has the outer HTML from the given { document } string', asyncSpec (next) ->
@@ -2488,12 +2507,12 @@ describe 'up.fragment', ->
               @respondWithSelector('.target', text: 'new target text')
 
             next =>
-              # Text nodes are wrapped in a up-insertion container so we can
+              # Text nodes are wrapped in a up-wrapper container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
+              expect(@revealedHTML).toEqual ['<up-wrapper>new target text</up-wrapper>']
               # Show that the wrapper is done after the insertion.
-              expect($('up-insertion')).not.toBeAttached()
+              expect($('up-wrapper')).not.toBeAttached()
 
           it 'reveals a new element that is being prepended', asyncSpec (next) ->
             fixture('.target')
@@ -2503,12 +2522,12 @@ describe 'up.fragment', ->
               @respondWithSelector('.target', text: 'new target text')
 
             next =>
-              # Text nodes are wrapped in a up-insertion container so we can
+              # Text nodes are wrapped in a up-wrapper container so we can
               # animate them and measure their position/size for scrolling.
               # This is not possible for container-less text nodes.
-              expect(@revealedHTML).toEqual ['<up-insertion>new target text</up-insertion>']
+              expect(@revealedHTML).toEqual ['<up-wrapper>new target text</up-wrapper>']
               # Show that the wrapper is done after the insertion.
-              expect($('up-insertion')).not.toBeAttached()
+              expect($('up-wrapper')).not.toBeAttached()
 
         describe 'with { scroll: "hash" }', ->
 
@@ -3051,6 +3070,21 @@ describe 'up.fragment', ->
         describe 'with { focus: "keep" }', ->
 
           it 'preserves focus of an element within the changed fragment', asyncSpec (next) ->
+            container = fixture('.container')
+            oldFocused = e.affix(container, '.focused[tabindex=0]', text: 'old focused')
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container', focus: 'keep', document: """
+              <div class="container">
+                <div class="focused" tabindex="0">new focused</div>
+              </div>
+            """)
+
+            next ->
+              expect('.focused').toBeFocused()
+
+          it 'preserves focus of an element within the changed fragment when updating inner HTML with { content } (bugfix)', asyncSpec (next) ->
             container = fixture('.container')
             oldFocused = e.affix(container, '.focused[tabindex=0]', text: 'old focused')
             oldFocused.focus()

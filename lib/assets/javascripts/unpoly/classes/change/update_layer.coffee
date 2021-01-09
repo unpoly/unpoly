@@ -128,27 +128,41 @@ class up.Change.UpdateLayer extends up.Change.Addition
             morphOptions
           )
 
+      when 'content'
+        oldWrapper = e.wrapChildren(step.oldElement)
+        # oldWrapper.appendTo(step.oldElement)
+        newWrapper = e.wrapChildren(step.newElement)
+
+        wrapperStep = u.merge(step,
+          placement: 'swap',
+          oldElement: oldWrapper,
+          newElement: newWrapper,
+          focus: false
+        )
+        promise = @executeStep(wrapperStep)
+
+        promise = promise.then =>
+          e.unwrap(newWrapper)
+          # Unwrapping will destroy focus, so we need to handle it again.
+          @handleFocus(step.oldElement, step)
+
+        return promise
+
       when 'before', 'after'
         # We're either appending or prepending. No keepable elements must be honored.
 
-        # Text nodes are wrapped in a up-insertion container so we can
+        # Text nodes are wrapped in an <up-wrapper> container so we can
         # animate them and measure their position/size for scrolling.
         # This is not possible for container-less text nodes.
-        wrapper = e.createFromSelector('up-insertion')
-        while childNode = step.newElement.firstChild
-          wrapper.appendChild(childNode)
+        wrapper = e.wrapChildren(step.newElement)
 
         # Note that since we're prepending/appending instead of replacing,
         # newElement will not actually be inserted into the DOM, only its children.
-        if step.placement == 'before'
-          step.oldElement.insertAdjacentElement('afterbegin', wrapper)
-        else
-          step.oldElement.insertAdjacentElement('beforeend', wrapper)
+        position = if step.placement == 'before' then 'afterbegin' else 'beforeend'
+        step.oldElement.insertAdjacentElement(position, wrapper)
 
-        for child in wrapper.children
-          @responseDoc.finalizeElement(child)
-          # Compile the new content and emit up:fragment:inserted.
-          up.hello(child, step)
+        @responseDoc.finalizeElement(wrapper)
+        up.hello(wrapper, step)
 
         @handleFocus(wrapper, step)
 
@@ -294,7 +308,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   containedByRivalStep: (steps, candidateStep) ->
     return u.some steps, (rivalStep) ->
       rivalStep != candidateStep &&
-        rivalStep.placement == 'swap' &&
+        (rivalStep.placement == 'swap' || rivalStep.placement == 'content') &&
         rivalStep.oldElement.contains(candidateStep.oldElement)
 
   resolveOldNesting: ->
@@ -310,7 +324,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
         step.scroll = false
         step.focus = false
 
-      if step.placement == 'swap'
+      if step.placement == 'swap' || step.placement == 'content'
         # We cannot animate scrolling when we're morphing between two elements.
         step.scrollBehavior = 'auto'
 
