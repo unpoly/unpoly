@@ -98,7 +98,6 @@ up.radio = do ->
         console.log("SHOULD POLL!")
         u.always(up.reload(fragment, options), doSchedule)
       else
-        console.log("SHOULD *NOT* POLL! Retrying in ", Math.min(10 * 1000, interval))
         # Reconsider after 10 seconds at most
         doSchedule(Math.min(10 * 1000, interval))
 

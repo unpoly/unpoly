@@ -23,6 +23,7 @@ describe 'up.radio', ->
 
         next.after 150, ->
           expect(reloadSpy.calls.count()).toBe(2)
+          up.radio.stopPolling(element)
 
     describe 'up.radio.stopPolling()', ->
 
