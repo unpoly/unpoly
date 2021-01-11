@@ -620,17 +620,20 @@ up.fragment = do ->
     !isDestroying(element)
 
   ###**
-  Returns the first element matching the given selector, but
-  ignores elements that are being [destroyed](/up.destroy) or that are being
-  removed by a [transition](/up.morph).
+  Returns the first fragment matching the given selector.
 
-  By default this function only selects elements in the [current layer](/up.layer.current).
-  Pass a `{ layer }`option to match elements in other layers. See `up.layer.get()` for a list
-  of supported layer values.
+  This function differs from `document.querySelector()` and `up.element.get()`:
 
-  Returns `undefined` if no element matches these conditions.
+  - This function only selects elements in the [current layer](/up.layer.current).
+    Pass a `{ layer }`option to match elements in other layers.
+  - This function ignores elements that are being [destroyed](/up.destroy) or that are being
+    removed by a [transition](/up.morph).
+  - This function prefers to match elements in the vicinity of a given `{ origin }` element (optional).
+  - This function supports non-standard CSS selectors like `:main` and `:has()`.
 
-  \#\#\# Example
+  If no element matches these conditions, `undefined` is returned.
+
+  \#\#\# Example: Matching a selector in a layer
 
   To select the first element with the selector `.foo` on the [current layer](/up.layer.current):
 
@@ -640,10 +643,69 @@ up.fragment = do ->
 
       let foo = up.fragment.get('.foo', { layer: 'any' })
 
-  To select in the descendants of an element, pass a root element as the first argument:
+  \#\#\# Example: Matching the descendant of an element
+
+  To only select in the descendants of an element, pass a root element as the first argument:
 
       let container = up.fragment.get('.container')
       let fooInContainer = up.fragment.get(container, '.foo')
+
+  \#\#\# Example: Matching around an origin element
+
+  When processing a user interaction, it is often helpful to match elements around the link
+  that's being clicked or the form field that's being changed. In this case you may pass
+  the triggering element as `{ origin }` element.
+
+  Assume the following HTML:
+
+  ```html
+  <div class="element"></div>
+  <div class="element">
+    <a href="..."></a>
+  </div>
+  ```
+
+  When processing an event for the `<a href"...">` you can pass the link element
+  as `{ origin }` to match the closest element in the link's ancestry:
+
+  ```javascript
+  let link = event.target
+  up.fragment.get('.element') // returns the first .element
+  up.fragment.get('.element', { origin: link }) // returns the second .element
+  ```
+
+  When the link's does not have an ancestor matching `.element`,
+  Unpoly will search the entire layer for `.element`.
+
+  \#\#\# Example: Matching an origin sibling
+
+  When processing a user interaction, it is often helpful to match elements
+  within the same container as the the link that's being clicked or the form field that's
+  being changed.
+
+  Assume the following HTML:
+
+  ```html
+  <div class="element" id="one">
+    <div class="inner"></div>
+  </div>
+  <div class="element" id="two">
+    <a href="..."></a>
+    <div class="inner"></div>
+  </div>
+  ```
+
+  When processing an event for the `<a href"...">` you can pass the link element
+  as `{ origin }` to match within the link's container:
+
+  ```javascript
+  let link = event.target
+  up.fragment.get('.element .inner') // returns the first .inner
+  up.fragment.get('.element .inner', { origin: link }) // returns the second .inner
+  ```
+
+  Note that when the link's `.element` container does not have a child `.inner`,
+  Unpoly will search the entire layer for `.element .inner`.
 
   \#\#\# Similar features
 
@@ -672,7 +734,29 @@ up.fragment = do ->
   @stable
   ###
   getOne = (args...) ->
-    getAll(args...)[0]
+    options = u.extractOptions(args)
+    selector = args.pop()
+    root = args[0]
+
+    if u.isElementish(selector)
+      # up.fragment.get(root: Element, element: Element, [options]) should just return element.
+      # The given root and options are ignored. We also don't check if it's destroying.
+      # We do use e.get() to unwrap a jQuery collection.
+      return e.get(selector)
+
+    if root
+      # We don't match around { origin } if we're given a root for the search.
+      return getFirst(root, selector, options)
+
+    finder = new up.FragmentFinder(
+      selector: selector
+      origin: options.origin
+      layer: options.layer
+    )
+    return finder.find()
+
+  getFirst = (args...) ->
+    return getAll(args...)[0]
 
   CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
 
@@ -733,21 +817,15 @@ up.fragment = do ->
   ###
   getAll = (args...) ->
     options = u.extractOptions(args)
-    selectorOrElement = args.pop()
+    selector = args.pop()
+    root = args[0]
 
-    if u.isElementish(selectorOrElement)
-      # up.fragment.all([root], element, [options]) should just return [element].
-      # The given root and options are ignored. We also don't check if it's destroying.
-      # We do use e.get() to unwrap a jQuery collection.
-      return [e.get(selectorOrElement)]
-    else
-      # (1) up.fragment.all(rootElement, selector) should find selector within
-      #     the descendants of rootElement.
-      # (2) up.fragment.all(selector) should find selector within the current layer.
-      # (3) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
-      element = args[0]
-      selector = parseSelector(selectorOrElement, element, options)
-      return selector.descendants(element || document)
+    # (1) up.fragment.all(rootElement, selector) should find selector within
+    #     the descendants of rootElement.
+    # (2) up.fragment.all(selector) should find selector within the current layer.
+    # (3) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
+    selector = parseSelector(selector, root, options)
+    return selector.descendants(root || document)
 
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
@@ -1230,9 +1308,7 @@ up.fragment = do ->
     render: render
     navigate: navigate
     extract: extract
-    first: (args...) ->
-      up.legacy.deprecated('up.fragment.get()', 'up.fragment.get()')
-      getOne(args...)
+    first: getFirst
     get: getOne
     all: getAll
     subtree: getSubtree

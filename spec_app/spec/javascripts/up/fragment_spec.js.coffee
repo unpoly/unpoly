@@ -6,6 +6,88 @@ describe 'up.fragment', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.fragment.get()', ->
+
+      it 'returns the first element matching the given selector', ->
+        noMatch = fixture('.no-match')
+        match = fixture('.match')
+        otherMatch = fixture('.match.other')
+
+        result = up.fragment.get('.match')
+
+        expect(result).toEqual(match)
+
+      it 'returns an Element argument unchanged', ->
+        element = fixture('.element')
+        result = up.fragment.get(element)
+        expect(result).toBe(element)
+
+      describe 'when a root element is given as the optional first argument', ->
+
+        it 'returns the first matching descendant of the given root element', ->
+          elementBeforeContainer = fixture('.element')
+          container = fixture('.container')
+          elementWithinContainer = e.affix(container, '.element')
+          elementAfterContainer = fixture('.element')
+
+          result = up.fragment.get('.element')
+
+          expect(result).toEqual(elementWithinContainer)
+
+        it 'returns a second Element argument unchanged, even if its not a descendant of the given root', ->
+          root = fixture('.root')
+          element = fixture('.element')
+
+          result = up.fragment.get(root, element)
+
+          expect(result).toBe(element)
+
+      describe 'layers', ->
+
+        it 'matches elements in the given { layer }', asyncSpec (next) ->
+          makeLayers [{ target: '.element' }, { target: '.element' }]
+
+          next ->
+            expect(up.layer.stack.length).toBe(2)
+            result = up.fragment.get('.element', layer: 'root')
+
+            expect(up.layer.get(result)).toBe(up.layer.get(0))
+
+        it 'matches elements in the current layer if no { layer } option is given', asyncSpec (next) ->
+          makeLayers [{ target: '.element' }, { target: '.element' }]
+
+          next ->
+            expect(up.layer.stack.length).toBe(2)
+            result = up.fragment.get('.element')
+
+            expect(up.layer.get(result)).toBe(up.layer.get(1))
+
+      describe 'matching around the { origin }', ->
+
+        it 'prefers to match an element closest to origin', asyncSpec (next) ->
+          root = fixture('.element#root')
+          one = e.affix(root, '.element', text: 'old one')
+          two = e.affix(root, '.element', text: 'old two')
+          childOfTwo = e.affix(two, '.origin')
+          three = e.affix(root, '.element', text: 'old three')
+
+          result = up.fragment.get('.element', origin: childOfTwo)
+
+          expect(result).toBe(two)
+
+        it 'prefers to match a descendant selector in the vicinity of the origin', asyncSpec (next) ->
+          element1 = fixture('.element')
+          element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
+          element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
+
+          element2 = fixture('.element')
+          element2Child1 = e.affix(element2, '.child',         text: 'old element2Child1')
+          element2Child2 = e.affix(element2, '.child.sibling', text: 'old element2Child2')
+
+          result = up.fragment.get('.element .sibling', origin: element2Child1)
+
+          expect(result).toBe(element2Child2)
+
     describe 'up.fragment.all()', ->
 
       it 'returns elements matching the given selector', ->
@@ -74,12 +156,6 @@ describe 'up.fragment', ->
             results = up.fragment.all(document.body, '.element')
             expect(results.length).toBe(1)
             expect(up.layer.get(results[0])).toBe(up.layer.root)
-
-        it 'returns an array of the second argument if the second argument is already an element', ->
-          root = fixture('.root')
-          match = fixture('.match')
-          result = up.fragment.all(root, match)
-          expect(result).toEqual [match]
 
         it 'supports the custom :has() selector', ->
           container = fixture('.container')
@@ -819,6 +895,7 @@ describe 'up.fragment', ->
             expect($('.after')).toHaveText('new-after')
 
         describe 'matching old fragments around the origin', ->
+
           it 'prefers to match an element closest to origin', asyncSpec (next) ->
             root = fixture('.element#root')
             one = e.affix(root, '.element', text: 'old one')

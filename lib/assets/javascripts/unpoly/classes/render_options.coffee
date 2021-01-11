@@ -79,8 +79,15 @@ up.RenderOptions = do ->
       # where it would be expanded to { failLocation }.
       options.history = 'auto'
 
+  fixLegacyJQueryOptions = (options) ->
+    for prop in ['target', 'origin']
+      if u.isJQuery(options[prop])
+        up.legacy.warn('Passing a jQuery collection as { %s } is deprecated. Pass it as a native element instead.', prop)
+        options[prop] = up.element.get(options[prop])
+
   preprocess = (options) ->
     fixLegacyHistoryOption(options)
+    fixLegacyJQueryOptions(options)
 
     result = u.merge(
       GLOBAL_DEFAULTS,

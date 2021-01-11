@@ -266,7 +266,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return if @matchedPreflight
 
     for step in @steps
-      finder = new up.OldFragmentFinder(step)
+      finder = new up.FragmentFinder(step)
       # Try to find fragments matching step.selector within step.layer.
       # Note that step.oldElement might already have been set by @parseSteps().
       step.oldElement ||= finder.find() or throw @notApplicable("Could not find element \"#{@target}\" in current page")

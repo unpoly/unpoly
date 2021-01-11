@@ -577,6 +577,45 @@ up.link = do ->
 
       <a href="/posts/5" up-target=".main, .unread-count">Read post</a>
 
+  \#\#\# Matching in the link's vicinity
+
+  It is often helpful to match elements within the same container as the the
+  link that's being followed.
+
+  Let's say we have two links that replace `.card`:
+
+  ```html
+  <div class="card">
+    Card #1 preview
+    <a href="/cards/1" up-target=".card">Show full card #1</a>
+  </div>
+
+  <div class="card">
+    Card #2 preview
+    <a href="/cards/2" up-target=".card">Show full card #2</a>
+  </div>
+  ```
+
+  When clicking on *"Show full card #2"*, Unpoly will replace the second card.
+  The server should only render a single `.card` element.
+
+  This also works with descendant selectors:
+
+  ```html
+  <div class="card">
+    <a href="/cards/1/links" up-target=".card .card-links">Show card #2 links</a>
+    <div class="card-links"></div>
+  </div>
+
+  <div class="card">
+    <a href="/cards/2/links" up-target=".card .card-links">Show card #2 links</a>
+    <div class="card-links"></div>
+  </div>
+  ```
+
+  When clicking on *"Show full card #2"*, Unpoly will replace the second card.
+  The server should only render a single `.card` element.
+
   \#\#\# Appending or prepending content
 
   By default Unpoly will replace the given selector with the same
@@ -598,6 +637,13 @@ up.link = do ->
       <a href="/page/2" class="next-page" up-target=".tasks:after, .next-page">
         Load more tasks
       </a>
+
+  \#\#\# Replacing an element's inner HTML
+
+  If you would like to preserve the target element, but replace all of its child content,
+  use the `:content` pseudo selector:
+
+      <a href="/cards/5" up-target=".card:content">Show card #5</a>
 
   \#\#\# Following elements that are no links
 

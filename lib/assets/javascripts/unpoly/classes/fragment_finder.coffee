@@ -1,6 +1,6 @@
 DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
-class up.OldFragmentFinder
+class up.FragmentFinder
 
   constructor: (@options) ->
     @origin = @options.origin
@@ -8,11 +8,9 @@ class up.OldFragmentFinder
     @layer = @options.layer
 
   find: ->
-    # TODO: Should not be named OldFragmentFinder
     return @findAroundOrigin() || @findInLayer()
 
   findAroundOrigin: ->
-    console.log("O is %o", @origin)
     if @origin && up.fragment.config.matchAroundOrigin && !up.element.isDetached(@origin)
       return @findClosest() || @findInVicinity()
 
