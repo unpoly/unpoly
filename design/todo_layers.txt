@@ -29,8 +29,6 @@ Remaining feature work
 
 - Test that the server can re-target to ":main"
 
-- Layer constructor sets a lot of defaults to make requests cachable, but we don't set { target }.
-
 - Remove X- prefix from headers?
 
 - Consider extracting deprecated aliases to unpoly-migrate.js
