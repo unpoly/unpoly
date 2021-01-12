@@ -769,7 +769,7 @@ describe Unpoly::Rails::Controller, type: :request do
   describe 'up.layer.accept' do
 
     it 'sets an X-Up-Accept-Layer response header with the given value' do
-      controller_eval do
+      controller_eval(headers: { 'X-Up-Mode': 'modal' }) do
         up.layer.accept('foo')
       end
 
@@ -777,11 +777,21 @@ describe Unpoly::Rails::Controller, type: :request do
     end
 
     it 'sets an X-Up-Accept-Layer response header with a null value if no value is given' do
-      controller_eval do
+      controller_eval(headers: { 'X-Up-Mode': 'modal' }) do
         up.layer.accept
       end
 
       expect(response.headers['X-Up-Accept-Layer']).to eq('null')
+    end
+
+    it 'raises an error when updating the root layer' do
+      accept_root = lambda do
+        controller_eval(headers: { 'X-Up-Mode': 'root' }) do
+          up.layer.accept('foo')
+        end
+      end
+
+      expect(accept_root).to raise_error(/cannot accept/i)
     end
 
   end
@@ -789,7 +799,7 @@ describe Unpoly::Rails::Controller, type: :request do
   describe 'up.layer.dismiss' do
 
     it 'sets an X-Up-Dismiss-Layer response header with the given value' do
-      controller_eval do
+      controller_eval(headers: { 'X-Up-Mode': 'modal' }) do
         up.layer.dismiss('foo')
       end
 
@@ -797,11 +807,21 @@ describe Unpoly::Rails::Controller, type: :request do
     end
 
     it 'sets an X-Up-Dismiss-Layer response header with a null value if no value is given' do
-      controller_eval do
+      controller_eval(headers: { 'X-Up-Mode': 'modal' }) do
         up.layer.dismiss
       end
 
       expect(response.headers['X-Up-Dismiss-Layer']).to eq('null')
+    end
+
+    it 'raises an error when updating the root layer' do
+      dismiss_root = lambda do
+        controller_eval(headers: { 'X-Up-Mode': 'root' }) do
+          up.layer.dismiss('foo')
+        end
+      end
+
+      expect(dismiss_root).to raise_error(/cannot dismiss/i)
     end
 
   end
