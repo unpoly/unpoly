@@ -649,6 +649,20 @@ describe 'up.fragment', ->
             next (result) ->
               expect(result.state).toBe('fulfilled')
 
+          it 'lets the server sends an abstract target like :main', asyncSpec (next) ->
+            fixture('.one', text: 'old content')
+            fixture('.two', text: 'old content')
+            up.fragment.config.mainTargets = ['.two']
+
+            up.render(target: '.one', url: '/path')
+
+            next =>
+              @respondWithSelector('.two', text: 'new content', responseHeaders: { 'X-Up-Target': ':main' })
+
+            next ->
+              expect('.one').toHaveText('old content')
+              expect('.two').toHaveText('new content')
+
       describe 'with { content } option', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->

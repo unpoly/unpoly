@@ -27,8 +27,6 @@ Release process
 Remaining feature work
 ======================
 
-- Test that the server can re-target to ":main"
-
 - Consider extracting deprecated aliases to unpoly-migrate.js
   - Would save ~ 15 KB .js, 3 KB+ gzipped
   - We would keep a few of the more complex rewrites in the code
