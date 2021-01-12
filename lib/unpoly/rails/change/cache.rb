@@ -8,8 +8,12 @@ module Unpoly
         end
 
         # TODO: Docs
-        def clear
-          change.cache_command = 'clear'
+        def clear(pattern = '*')
+          change.clear_cache = pattern
+        end
+
+        def keep
+          clear(false)
         end
 
         private

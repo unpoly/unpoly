@@ -1803,9 +1803,6 @@ up.util = do ->
       i += 1
       arg
 
-#  asyncWrap = (fn, before, after) ->
-#    before()
-#    return fn().finally(after)
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseURL: parseURL

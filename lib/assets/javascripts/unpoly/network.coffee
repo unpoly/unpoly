@@ -13,7 +13,7 @@ making requests to these URLs return instantly.
 All Unpoly functions and selectors go through this cache, unless
 you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
 
-The cache holds up to 70 responses for 5 minutes. You can configure the cache size and expiry using
+The cache holds up to 50 responses for 5 minutes. You can configure the cache size and expiry using
 [`up.network.config`](/up.network.config), or clear the cache manually using [`up.cache.clear()`](/up.cache.clear).
 
 Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
@@ -159,6 +159,7 @@ up.network = do ->
     badDownlink: 0.6
     badRTT: 750
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+    clearCache: ({ request }) -> !request.isSafe()
 
   preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty config, 'preloadDelay',
@@ -382,6 +383,12 @@ up.network = do ->
       queue.abortExcept(request, solo)
     return request
 
+  mimicLocalRequest = (options) ->
+    if solo = options.solo
+      abortRequests(solo)
+    if clearCache = options.clearCache
+      cache.clear(clearCache)
+
   preload = (args...) ->
     if u.isElementish(args[0])
       up.legacy.warn('up.proxy.preload(link) has been renamed to up.link.preload(link)')
@@ -399,12 +406,6 @@ up.network = do ->
     options
 
   useCachedRequest = (request) ->
-    if !request.isSafe() || request.cache == 'clear'
-      # We clear the entire cache before an unsafe request, since we
-      # assume the user is writing a change.
-      cache.clear()
-      return
-
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
     if request.cache && (cachedRequest = cache.get(request))
@@ -430,24 +431,35 @@ up.network = do ->
     if request.preload && !request.isSafe()
       up.fail('Will not preload a %o request (%o)', request.method, request)
 
-    if request.cache
-      # Cache the request for calls for calls with the same URL, method, params
-      # and target. See up.Request#cacheKey().
-      cache.set(request, request)
-
-      # Immediately uncache failed requests.
-      # We have no control over the server, and another request with the
-      # same properties might succeed.
-      request.catch -> cache.remove(request)
-
-    u.always request, (response) ->
-      if response.getHeader?(up.protocol.headerize('cache')) == 'clear'
-        cache.clear()
+    handleCaching(request)
 
     queue.asap(request)
 
     # The request is also a promise for its response.
     return request
+
+  handleCaching = (request) ->
+    if request.cache
+      # Cache the request for calls for calls with the same URL, method, params
+      # and target. See up.Request#cacheKey().
+      cache.set(request, request)
+
+    u.always request, (response) ->
+      # Three places can request the cache to be cleared or kept:
+      # (1) The server via X-Up-Clear-Cache header, found in response.clearCache
+      # (2) The interaction via { clearCache } option, found in request.clearCache
+      # (3) The default in up.network.config.clearCache({ request, response })
+
+      if clearCache = (response.clearCache ? request.clearCache ? config.clearCache({ request, response }))
+        cache.clear(clearCache)
+        # Re-cache the request in case we just threw it out.
+        if request.cache
+          cache.set(request, request)
+
+      unless response.ok
+        # Uncache failed requests. We have no control over the server,
+        # and another request with the same properties might succeed.
+        cache.remove(request)
 
   ###**
   Makes an AJAX request to the given URL and caches the response.
@@ -737,6 +749,7 @@ up.network = do ->
   queue: queue # for testing
   shouldPreload: shouldPreload
   shouldReduceRequests: shouldReduceRequests
+  mimicLocalRequest: mimicLocalRequest
 
 up.request = up.network.request
 up.ajax = up.network.ajax

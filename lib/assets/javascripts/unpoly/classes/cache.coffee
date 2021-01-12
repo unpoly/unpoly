@@ -27,7 +27,10 @@ class up.Cache
   constructor: (@config = {}) ->
     @store = @config.store || new up.store.Memory()
 
-  maxKeys: =>
+  size: ->
+    @store.size()
+
+  maxSize: =>
     u.evalOption(@config.size)
 
   expiryMillis: =>
@@ -40,7 +43,7 @@ class up.Cache
       key.toString()
 
   isEnabled: =>
-    @maxKeys() isnt 0 && @expiryMillis() isnt 0
+    @maxSize() isnt 0 && @expiryMillis() isnt 0
 
   isCachable: (key) =>
     if @config.cachable
@@ -58,21 +61,30 @@ class up.Cache
 
   keys: =>
     @store.keys()
+    
+  each: (fn) ->
+    u.each @keys(), (key) =>
+      entry = @store.get(key)
+      fn(key, entry.value, entry.timestamp)
 
-  makeRoomForAnotherKey: =>
-    storeKeys = u.copy(@keys())
-    max = @maxKeys()
-    if max && storeKeys.length >= max
-      oldestKey = undefined
-      oldestTimestamp = undefined
-      u.each storeKeys, (key) =>
-        entry = @store.get(key) # we don't need to call cacheKey here
-        timestamp = entry.timestamp
-        if !oldestTimestamp || oldestTimestamp > timestamp
-          oldestKey = key
-          oldestTimestamp = timestamp
-      @store.remove(oldestKey) if oldestKey
+  makeRoomForAnotherEntry: =>
+    if @hasRoomForAnotherEntry()
+      return
 
+    oldestKey = undefined
+    oldestTimestamp = undefined
+    @each (key, request, timestamp) ->
+      if !oldestTimestamp || oldestTimestamp > timestamp
+        oldestKey = key
+        oldestTimestamp = timestamp
+
+    if oldestKey
+      @store.remove(oldestKey)
+
+  hasRoomForAnotherEntry: ->
+    maxSize = @maxSize()
+    return !maxSize || @size() < maxSize
+      
   alias: (oldKey, newKey) =>
     value = @get(oldKey, silent: true)
     if u.isDefined(value)
@@ -83,12 +95,12 @@ class up.Cache
 
   set: (key, value) =>
     if @isEnabled() && @isCachable(key)
-      @makeRoomForAnotherKey()
+      @makeRoomForAnotherEntry()
       storeKey = @normalizeStoreKey(key)
-      timestampedValue =
+      entry =
         timestamp: @timestamp()
         value: value
-      @store.set(storeKey, timestampedValue)
+      @store.set(storeKey, entry)
 
   remove: (key) =>
     if @isCachable(key)
@@ -116,12 +128,3 @@ class up.Cache
     else
       @log("Cache miss for '%s'", key) unless options.silent
       undefined
-
-#  first: (keyOrKeys) =>
-#    @all(keyOrKeys)[0]
-#
-#  all: (keys = @keys()) =>
-#    keys = u.wrapArray(keys)
-#    matches = u.map keys, (key) =>
-#      @get(key)
-#    u.filter(matches, u.isPresent)

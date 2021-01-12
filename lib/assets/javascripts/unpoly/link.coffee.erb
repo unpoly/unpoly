@@ -214,6 +214,7 @@ up.link = do ->
     parser.json('headers')
     parser.json('params')
     parser.booleanOrString('cache')
+    parser.booleanOrString('clearCache')
     parser.boolean('solo')
 
     # Feedback options

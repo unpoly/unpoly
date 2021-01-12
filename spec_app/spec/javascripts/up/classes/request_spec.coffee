@@ -28,6 +28,16 @@ describe 'up.Request', ->
       expect(request.url).toEqual('http://host.com/foo?key=value')
       expect(request.params).toBeBlank()
 
+  describe '#testURL', ->
+
+    it "returns true if the given URL pattern matches this request's URL", ->
+      request = new up.Request(url: '/foo/123')
+      expect(request.testURL('/foo/*')).toBe(true)
+
+    it "returns false if the given URL pattern does not match this request's URL", ->
+      request = new up.Request(url: '/foo/123')
+      expect(request.testURL('/bar/*')).toBe(false)
+
   describe '#method', ->
 
     it 'defaults to "GET"', ->

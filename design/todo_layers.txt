@@ -29,26 +29,9 @@ Remaining feature work
 
 - Test that the server can re-target to ":main"
 
-- Caching
-  - Allow to clear a pattern from the client:
-    - up.cache.clear('/users/*')
-    - up.render(..., clearCache: '/users/*')
-  - Read [up-clear-cache]
-  - Change protocol from `X-Up-Cache: clear` zu `X-Up-Clear-Cache: *`
-  - This also means we need to postpone cache-clearing until the response was received
-  - Also X-Up-Clear-Cache: false
-  - We might need to honor { clearCache } in makeChangeNow if we're doing alocal replacement:       if solo = options.solo
-                                                                                                      up.network.abort(solo)
-  - In unpoly-rails, support up.cache.clear(pattern) and up.cache.keep
-  - up.Request#matchURL('/users/*')
-    - or up.util.matchURL
-    - or publish URLPattern
-  - up.network.config.clearCache = (request) -> if (!request.isSafe()) { return '*' }
-  - More complex example:
-    - up.network.config.clearCache = function(request) {
-        if (!request.isSafe()) return '*'
-        if (request.matchURL('/users/search')) return '/users/*'
-      }
+- Layer constructor sets a lot of defaults to make requests cachable, but we don't set { target }.
+
+- Remove X- prefix from headers?
 
 - Consider extracting deprecated aliases to unpoly-migrate.js
   - Would save ~ 15 KB .js, 3 KB+ gzipped

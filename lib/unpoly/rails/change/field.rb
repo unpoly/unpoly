@@ -38,7 +38,7 @@ module Unpoly
           end
 
           def stringify(value)
-            value
+            value.to_s
           end
 
         end

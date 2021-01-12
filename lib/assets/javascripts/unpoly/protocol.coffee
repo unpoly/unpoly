@@ -203,6 +203,18 @@ up.protocol = do ->
   @stable
   ###
 
+  clearCacheFromXHR = (xhr) ->
+    parseValue = (value) ->
+      switch value
+        when 'true'
+          true
+        when 'false'
+          false
+        else
+          value
+
+    extractHeader(xhr, 'clearCache', parseValue)
+
   ###**
   The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
 
@@ -757,6 +769,7 @@ up.protocol = do ->
   contextFromXHR: contextFromXHR
   dismissLayerFromXHR: dismissLayerFromXHR
   eventPlansFromXHR: eventPlansFromXHR
+  clearCacheFromXHR: clearCacheFromXHR
   csrfHeader: csrfHeader
   csrfParam: csrfParam
   csrfToken: csrfToken

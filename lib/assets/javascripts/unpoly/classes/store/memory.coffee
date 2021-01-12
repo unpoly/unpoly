@@ -22,5 +22,8 @@ class up.store.Memory
   keys: =>
     Object.keys(@data)
 
+  size: =>
+    @keys().length
+
   values: =>
     u.values(@data)

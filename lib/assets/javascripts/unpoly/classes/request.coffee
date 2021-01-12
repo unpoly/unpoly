@@ -152,6 +152,7 @@ class up.Request extends up.Record
       'timeout',
       'preload' # since up.network.request() options are sometimes wrapped in this class
       'cache',  # since up.network.request() options are sometimes wrapped in this class
+      'clearCache',  # since up.network.request() options are sometimes wrapped in this class
 
       # While requests are queued or in flight we keep the layer they're targeting.
       # If that layer is closed we will cancel all pending requests targeting that layer.
@@ -201,7 +202,7 @@ class up.Request extends up.Record
     @wrapMethod ?= up.network.config.wrapMethod
 
     # Help users programmatically build a request that will match an existing cache key.
-    @layer = up.layer.get(@layer || @origin) # If @origin is undefined, this will choose the current layer.
+    @layer = up.layer.get(@layer || @origin) # If @layer and @origin is undefined, this will choose the current layer.
     @failLayer = up.layer.get(@failLayer || @layer)
     @context ||= @layer.context || {} # @layer might be "new", so we default to {}
     @failContext ||= @failLayer.context || {} # @failLayer might be "new", so we default to {}
@@ -372,6 +373,7 @@ class up.Request extends up.Record
       dismissLayer: up.protocol.dismissLayerFromXHR(@xhr)
       eventPlans: up.protocol.eventPlansFromXHR(@xhr)
       context: up.protocol.contextFromXHR(@xhr)
+      clearCache: up.protocol.clearCacheFromXHR(@xhr)
 
     methodFromResponse = up.protocol.methodFromXHR(@xhr)
 
@@ -432,3 +434,22 @@ class up.Request extends up.Record
 
   @getter 'description', ->
     @method + ' ' + @url
+
+  ###**
+  Returns whether the given URL pattern matches this request's URL.
+
+  \#\#\# Example
+
+  ````javascript
+  let request = up.request({ url: '/foo/123' })
+  request.testURL('/foo/*') // returns true
+  request.testURL('/bar/*') // returns false
+  ```
+
+  @property up.Request#testURL
+  @param {string} pattern
+  @return {boolean}
+  @experimental
+  ###
+  testURL: (pattern) ->
+    return new up.URLPattern(pattern).test(@url)

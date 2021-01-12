@@ -637,12 +637,32 @@ describe Unpoly::Rails::Controller, type: :request do
 
   describe 'up.cache.clear' do
 
-    it 'sets an X-Up-Cache: clear header' do
+    it 'sets an `X-Up-Clear-Cache: *` header' do
       controller_eval do
         up.cache.clear
       end
 
-      expect(response.headers['X-Up-Cache']).to eq('clear')
+      expect(response.headers['X-Up-Clear-Cache']).to eq('*')
+    end
+
+    it 'sets an X-Up-Clear-Cache header with the given URL pattern' do
+      controller_eval do
+        up.cache.clear('/foo/*')
+      end
+
+      expect(response.headers['X-Up-Clear-Cache']).to eq('/foo/*')
+   end
+
+  end
+
+  describe 'up.cache.keep' do
+
+    it 'sets an `X-Up-Clear-Cache: false` header' do
+      controller_eval do
+        up.cache.keep
+      end
+
+      expect(response.headers['X-Up-Clear-Cache']).to eq('false')
     end
 
   end
@@ -947,7 +967,7 @@ describe Unpoly::Rails::Controller, type: :request do
       expect(response.headers['X-Up-Events']).to match_json([
         { type: 'event1' }
       ])
-      expect(response.headers['X-Up-Cache']).to eq('clear')
+      expect(response.headers['X-Up-Clear-Cache']).to eq('*')
     end
 
     it 'preserves Unpoly-releated headers over multiple redirects' do

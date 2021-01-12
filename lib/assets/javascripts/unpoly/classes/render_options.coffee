@@ -96,10 +96,6 @@ up.RenderOptions = do ->
       preloadOverrides(options)
     )
 
-     # # Expand up.render({ location: '/path' }) to up.render({ history: true, location: '/path' })
-     # if !result.history && (result.title || result.location)
-     #   result.history = 'auto'
-
     return result
 
   failOverrides = (options) ->

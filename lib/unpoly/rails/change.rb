@@ -24,7 +24,7 @@ module Unpoly
       field :fail_context, Field::Hash, method: :input_fail_context
       field :context_changes, Field::Hash, response_header_name: 'X-Up-Context'
       field :events, Field::Array
-      field :cache, Field::String, method: :cache_command
+      field :clear_cache, Field::String
       field :reload_from_time, Field::Time
 
       ##
@@ -237,7 +237,7 @@ module Unpoly
       def after_action
         write_events_to_response_headers
 
-        write_cache_command_to_response_headers
+        write_clear_cache_to_response_headers
 
         if context_changes.present?
           write_context_changes_to_response_headers
@@ -287,14 +287,18 @@ module Unpoly
         Cache.new(self)
       end
 
-      def cache_command
+      def clear_cache
         # Cache commands are outgoing only. They wouldn't be passed as a request header.
         # We might however pass them as params so they can survive a redirect.
-        @cache_command || cache_command_from_params
+        if @clear_cache.nil?
+          clear_cache_from_params
+        else
+          @clear_cache
+        end
       end
 
-      def cache_command=(value)
-        @cache_command = value
+      def clear_cache=(value)
+        @clear_cache = value
       end
 
       def reload_from_time
@@ -345,7 +349,7 @@ module Unpoly
         params[input_fail_context_param_name] = serialized_input_fail_context
         params[context_changes_param_name]    = serialized_context_changes
         params[events_param_name]             = serialized_events
-        params[cache_command_param_name]      = serialized_cache_command
+        params[clear_cache_param_name]        = serialized_clear_cache
         params[reload_from_time_param_name]   = serialized_reload_from_time
 
         # Don't send empty response headers.

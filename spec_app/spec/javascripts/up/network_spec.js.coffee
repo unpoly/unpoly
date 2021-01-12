@@ -711,23 +711,23 @@ describe 'up.network', ->
           next => up.request(url: '/path', params: { query: 'bar' }, cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
-          next => up.request(url: '/path', target: 'html', cache: true)
-          next => up.request(url: '/path', target: 'body', cache: true)
-          next => up.request(url: '/path', target: 'p', cache: true)
-          next => up.request(url: '/path', target: '.klass', cache: true)
-          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-        it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", asyncSpec (next) ->
-          next => up.request(url: '/path', target: 'body', cache: true)
-          next => up.request(url: '/path', target: 'p', cache: true)
-          next => up.request(url: '/path', target: '.klass', cache: true)
-          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
-
-        it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", asyncSpec (next) ->
-          next => up.request(url: '/path', target: 'body', cache: true)
-          next => up.request(url: '/path', target: 'html', cache: true)
-          next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+#        it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
+#          next => up.request(url: '/path', target: 'html', cache: true)
+#          next => up.request(url: '/path', target: 'body', cache: true)
+#          next => up.request(url: '/path', target: 'p', cache: true)
+#          next => up.request(url: '/path', target: '.klass', cache: true)
+#          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
+#
+#        it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", asyncSpec (next) ->
+#          next => up.request(url: '/path', target: 'body', cache: true)
+#          next => up.request(url: '/path', target: 'p', cache: true)
+#          next => up.request(url: '/path', target: '.klass', cache: true)
+#          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
+#
+#        it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", asyncSpec (next) ->
+#          next => up.request(url: '/path', target: 'body', cache: true)
+#          next => up.request(url: '/path', target: 'html', cache: true)
+#          next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
         it "doesn't reuse responses for different paths", asyncSpec (next) ->
           next => up.request(url: '/foo', cache: true)
@@ -748,52 +748,179 @@ describe 'up.network', ->
 
         u.each ['POST', 'PUT', 'DELETE'], (unsafeMethod) ->
 
-          it "does not cache #{unsafeMethod} requests", asyncSpec (next) ->
+          it "does not cache #{unsafeMethod} requests, even with { cache: true }", asyncSpec (next) ->
             next => up.request(url: '/foo', method: unsafeMethod, cache: true)
             next => up.request(url: '/foo', method: unsafeMethod, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+      describe 'cache clearing', ->
+
+        it 'clears the cache when passed { clearCache: true }', asyncSpec (next) ->
+          up.request(url: '/foo', cache: true)
+          expect(url: '/foo').toBeCached()
+
+          up.request(url: '/bar', clearCache: true)
+
+          next =>
+            @respondWith('foo')
+
+          next =>
+            expect(url: '/foo').not.toBeCached()
+            expect(url: '/bar').not.toBeCached()
+
+        it 'keeps this new request in the cache with { cache: true, clearCache: true }', asyncSpec (next) ->
+          up.request(url: '/foo', cache: true)
+          expect(url: '/foo').toBeCached()
+
+          up.request(url: '/bar', cache: true, clearCache: true)
+
+          next =>
+            @respondWith('foo')
+
+          next =>
+            expect(url: '/foo').not.toBeCached()
+            expect(url: '/bar').toBeCached()
+
+        it 'accepts an URL pattern as { clearCache } option', asyncSpec (next) ->
+          up.request(url: '/foo/1', cache: true)
+          up.request(url: '/foo/2', cache: true)
+          up.request(url: '/bar/1', cache: true)
+
+          expect(url: '/foo/1').toBeCached()
+          expect(url: '/foo/2').toBeCached()
+          expect(url: '/bar/1').toBeCached()
+
+          up.request(url: '/other', clearCache: '/foo/*')
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            @respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: 'foo'
+              # responseHeaders: { 'X-Up-Clear-Cache': '/foo/*' }
+
+          next ->
+            expect(url: '/foo/1').not.toBeCached()
+            expect(url: '/foo/2').not.toBeCached()
+            expect(url: '/bar/1').toBeCached()
+
+        u.each ['POST', 'PUT', 'DELETE'], (unsafeMethod) ->
 
           it "clears the entire cache if a #{unsafeMethod} request is made", asyncSpec (next) ->
             safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
             unsafeRequestAttrs = { method: unsafeMethod, url: '/foo' }
 
             up.request(safeRequestAttrs)
-            expect(safeRequestAttrs).toBeCached()
 
-            up.request(unsafeRequestAttrs)
-            expect(safeRequestAttrs).not.toBeCached()
+            next =>
+              @respondWith('foo')
 
-        it 'does not cache responses with a non-200 status code', asyncSpec (next) ->
+            next =>
+              expect(safeRequestAttrs).toBeCached()
+
+              up.request(unsafeRequestAttrs)
+
+            next =>
+              @respondWith('foo')
+
+            next =>
+              expect(safeRequestAttrs).not.toBeCached()
+
+          it "does not clear the cache if a #{unsafeMethod} request is made with { clearCache: false }", asyncSpec (next) ->
+            safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
+            unsafeRequestAttrs = { method: unsafeMethod, url: '/foo', clearCache: false }
+
+            up.request(safeRequestAttrs)
+
+            next =>
+              @respondWith('false')
+
+            next =>
+              expect(safeRequestAttrs).toBeCached()
+
+              up.request(unsafeRequestAttrs)
+
+            next =>
+              @respondWith('foo')
+
+            next =>
+              expect(safeRequestAttrs).toBeCached()
+
+          it "does not clear the cache the server responds to an #{unsafeMethod} request with X-Up-Clear-Cache: false", asyncSpec (next) ->
+            safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
+            unsafeRequestAttrs = { method: unsafeMethod, url: '/foo', cache: true }
+
+            up.request(safeRequestAttrs)
+
+            next =>
+              @respondWith('foo')
+
+            next =>
+              expect(safeRequestAttrs).toBeCached()
+
+              up.request(unsafeRequestAttrs)
+
+            next =>
+              @respondWith('foo', responseHeaders: { 'X-Up-Clear-Cache': 'false' })
+
+            next =>
+              expect(safeRequestAttrs).toBeCached()
+
+        it 'does not cache responses with a non-200 status code (even with { cache: true })', asyncSpec (next) ->
           next => up.request(url: '/foo', cache: true)
           next => @respondWith(status: 500, contentType: 'text/html', responseText: 'foo')
           next => up.request(url: '/foo', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        it 'clears the cache if the server responds with an X-Up-Cache: clear header', asyncSpec (next) ->
+        it 'clears the cache if the server responds with an X-Up-Clear-Cache: * header', asyncSpec (next) ->
           up.request(url: '/foo', cache: true)
           up.request(url: '/bar', cache: true)
           expect(url: '/foo').toBeCached()
           expect(url: '/bar').toBeCached()
 
-          next ->
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
+          up.request(url: '/baz')
 
-            jasmine.Ajax.requests.at(0).respondWith
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+            @respondWith
               status: 200
               contentType: 'text/html'
               responseText: 'foo'
-              responseHeaders: { 'X-Up-Cache': 'clear' }
+              responseHeaders: { 'X-Up-Clear-Cache': '*' }
 
           next ->
             expect(url: '/foo').not.toBeCached()
             expect(url: '/bar').not.toBeCached()
 
-        it 'clears the cache when passed { cache: "clear" }', ->
-          up.request(url: '/foo', cache: true)
-          expect(url: '/foo').toBeCached()
+        it 'lets the server send an URL pattern as X-Up-Clear-Cache response header', asyncSpec (next) ->
+          up.request(url: '/foo/1', cache: true)
+          up.request(url: '/foo/2', cache: true)
+          up.request(url: '/bar/1', cache: true)
 
-          up.request(url: '/bar', cache: 'clear')
-          expect(url: '/foo').not.toBeCached()
+          expect(url: '/foo/1').toBeCached()
+          expect(url: '/foo/2').toBeCached()
+          expect(url: '/bar/1').toBeCached()
+
+          up.request(url: '/other')
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            @respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: 'foo'
+              responseHeaders: { 'X-Up-Clear-Cache': '/foo/*' }
+
+          next ->
+            expect(url: '/foo/1').not.toBeCached()
+            expect(url: '/foo/2').not.toBeCached()
+            expect(url: '/bar/1').toBeCached()
+
+      describe 'method wrapping', ->
 
         u.each ['GET', 'POST', 'HEAD', 'OPTIONS'], (method) ->
 
@@ -1213,3 +1340,16 @@ describe 'up.network', ->
         up.cache.clear()
         expect(url: '/foo').not.toBeCached()
 
+      it 'accepts an URL pattern that determines which entries are purged', ->
+        up.request(url: '/foo/1', cache: true)
+        up.request(url: '/foo/2', cache: true)
+        up.request(url: '/bar/1', cache: true)
+        expect(url: '/foo/1').toBeCached()
+        expect(url: '/foo/2').toBeCached()
+        expect(url: '/bar/1').toBeCached()
+
+        up.cache.clear('/foo/*')
+
+        expect(url: '/foo/1').not.toBeCached()
+        expect(url: '/foo/2').not.toBeCached()
+        expect(url: '/bar/1').toBeCached()

@@ -114,6 +114,7 @@ class up.Response extends up.Record
       'dismissLayer',
       'eventPlans',
       'context',
+      'clearCache',
       'headers' # custom headers to for synthetic reponses without { xhr } property
     ]
 
