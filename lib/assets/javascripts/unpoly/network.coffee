@@ -161,18 +161,6 @@ up.network = do ->
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
     clearCache: ({ request }) -> !request.isSafe()
 
-  preloadDelayMoved = -> up.legacy.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
-  Object.defineProperty config, 'preloadDelay',
-    get: ->
-      preloadDelayMoved()
-      return up.link.config.preloadDelay
-    set: (value) ->
-      preloadDelayMoved()
-      up.link.config.preloadDelay = value
-
-  up.legacy.renamedProperty(config, 'maxRequests', 'concurrency')
-  up.legacy.renamedProperty(config, 'slowDelay', 'badResponseTime')
-
   queue = new up.Request.Queue()
 
   cache = new up.Request.Cache()
@@ -377,7 +365,7 @@ up.network = do ->
   @stable
   ###
   makeRequest = (args...) ->
-    request = new up.Request(parseOptions(args))
+    request = new up.Request(parseRequestOptions(args))
     request = useCachedRequest(request) || queueRequest(request)
     if solo = request.solo
       queue.abortExcept(request, solo)
@@ -390,19 +378,17 @@ up.network = do ->
       cache.clear(clearCache)
 
   preload = (args...) ->
-    if u.isElementish(args[0])
-      up.legacy.warn('up.proxy.preload(link) has been renamed to up.link.preload(link)')
-      return up.link.preload(args...)
+    up.migrate.handleNetworkPreloadArgs?(args...)
 
-    options = parseOptions(args)
+    options = parseRequestOptions(args)
     options.preload = true
     # The constructor of up.Request will set { cache: true } when passed { preload: true }
     makeRequest(options)
 
-  parseOptions = (args) ->
+  parseRequestOptions = (args) ->
     options = u.extractOptions(args)
     options.url ||= args[0]
-    up.legacy.fixKey(options, 'data', 'params')
+    up.migrate.handleRequestOptions?(options)
     options
 
   useCachedRequest = (request) ->
@@ -460,36 +446,6 @@ up.network = do ->
         # Uncache failed requests. We have no control over the server,
         # and another request with the same properties might succeed.
         cache.remove(request)
-
-  ###**
-  Makes an AJAX request to the given URL and caches the response.
-
-  The function returns a promise that fulfills with the response text.
-
-  \#\#\# Example
-
-      up.request('/search', { params: { query: 'sunshine' } }).then(function(text) {
-        console.log('The response text is %o', text)
-      }).catch(function() {
-        console.error('The request failed')
-      })
-
-  @function up.ajax
-  @param {string} [url]
-    The URL for the request.
-
-    Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
-  @param {Object} [options]
-    See options for `up.request()`.
-  @return {Promise<string>}
-    A promise for the response text.
-  @deprecated
-    Use `up.request()` instead.
-  ###
-  ajax = (args...) ->
-    up.legacy.deprecated('up.ajax()', 'up.request()')
-    pickResponseText = (response) -> return response.text
-    makeRequest(args...).then(pickResponseText)
 
   ###**
   Returns whether Unpoly is not currently waiting for a [request](/up.request) to finish.
@@ -733,13 +689,9 @@ up.network = do ->
 
   up.on 'up:framework:reset', reset
 
-  ajax: ajax
   request: makeRequest
   preload: preload
   cache: cache
-  clear: ->
-    up.legacy.deprecated('up.proxy.clear()', 'up.cache.clear()')
-    return cache.clear()
   isIdle: isIdle
   isBusy: isBusy
   isSafeMethod: isSafeMethod
@@ -752,16 +704,6 @@ up.network = do ->
   mimicLocalRequest: mimicLocalRequest
 
 up.request = up.network.request
-up.ajax = up.network.ajax
 
 # TODO: Docs for up.cache.clear
 up.cache = up.network.cache
-
-up.legacy.renamedPackage('proxy', 'network')
-up.legacy.renamedEvent('up:proxy:load',     'up:request:load')    # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:received', 'up:request:loaded')  # renamed in 0.50.0
-up.legacy.renamedEvent('up:proxy:loaded',   'up:request:loaded')  # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:fatal',    'up:request:fatal')   # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:aborted',  'up:request:aborted') # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:slow',     'up:request:late')    # renamed in 1.0.0
-up.legacy.renamedEvent('up:proxy:recover',  'up:network:recover') # renamed in 1.0.0

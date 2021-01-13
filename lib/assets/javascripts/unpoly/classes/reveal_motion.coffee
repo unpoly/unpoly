@@ -8,8 +8,6 @@ class up.RevealMotion
     @viewport = e.get(@options.viewport) || up.viewport.get(@element)
     @obstructionsLayer = up.layer.get(@viewport)
 
-    up.legacy.fixKey(viewportConfig, 'snap', 'revealSnap')
-
     @snap = @options.snap ? @options.revealSnap ? viewportConfig.revealSnap
     @padding = @options.padding ? @options.revealPadding ? viewportConfig.revealPadding
     @top = @options.top ? @options.revealTop ? viewportConfig.revealTop

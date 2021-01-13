@@ -34,8 +34,6 @@ up.history = do ->
     enabled: true
     restoreTargets: ['body']
 
-  up.legacy.renamedProperty(config, 'popTargets', 'restoreTargets')
-
   previousURL = undefined
   nextPreviousURL = undefined
 

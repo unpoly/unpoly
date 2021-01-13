@@ -32,6 +32,9 @@ Remaining feature work
   - We would keep a few of the more complex rewrites in the code
   - Emanuel asked for an option to turn deprecation warnings into error logs
 
+- Rework the TODO feature in the demo without a modal for "new"
+
+
 
 Manual tests
 ------------

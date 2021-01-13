@@ -1,6 +1,12 @@
 u = up.util
 
-up.legacy = do ->
+###**
+@module up.migrate
+###
+up.migrate = do ->
+
+  config = new up.Config ->
+    logLevel: 'warn'
 
   renamedProperty = (object, oldKey, newKey) ->
     warning = -> warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
@@ -47,10 +53,15 @@ up.legacy = do ->
     formattedMessage = u.sprintf(message, args...)
     unless warnedMessages[formattedMessage]
       warnedMessages[formattedMessage] = true
-      up.warn('DEPRECATION', message, args...)
+      up.log[config.logLevel]('DEPRECATION', message, args...)
 
   deprecated = (deprecatedExpression, replacementExpression) ->
     warn("#{deprecatedExpression} has been deprecated. Use #{replacementExpression} instead.")
+
+  reset = ->
+    config.reset()
+
+  up.on 'up:framework:reset', reset
 
   deprecated: deprecated
   renamedPackage: renamedPackage
@@ -60,3 +71,5 @@ up.legacy = do ->
   fixEventType: fixEventType
   fixKey: fixKey
   warn: warn
+  loaded: true
+

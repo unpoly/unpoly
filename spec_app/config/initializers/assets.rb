@@ -13,3 +13,6 @@ Rails.application.config.assets.precompile += %w( integration_test.js integratio
 
 # Precompile jQuery versions from jquery-rails individually, so we can include them as individual <script> tags
 Rails.application.config.assets.precompile += %w( jquery.js jquery2.js jquery3.js )
+
+# Precompile unpoly-migrate as a separate assets so we can run tests with and without it
+Rails.application.config.assets.precompile += %w( unpoly-migrate.js )

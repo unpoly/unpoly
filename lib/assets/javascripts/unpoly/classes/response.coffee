@@ -124,18 +124,6 @@ class up.Response extends up.Record
   ###**
   Returns whether the server responded with a 2xx HTTP status.
 
-  @function up.Response#isSuccess
-  @return {boolean}
-  @deprecated
-    Use `up.Response#ok` instead.
-  ###
-  isSuccess: ->
-    up.legacy.deprecated('up.Response#isSuccess()', 'up.Response#ok')
-    return @ok
-
-  ###**
-  Returns whether the server responded with a 2xx HTTP status.
-
   @property up.Response#ok
   @param {boolean} ok
   @stable
@@ -143,18 +131,6 @@ class up.Response extends up.Record
   @getter 'ok', ->
     # 0 is falsy in JavaScript
     @status && (@status >= 200 && @status <= 299)
-
-  ###**
-  Returns whether the response was not [successful](/up.Response.prototype.ok).
-
-  @function up.Response#isError
-  @return {boolean}
-  @deprecated
-    Use `!up.Response#ok` instead.
-  ###
-  isError: ->
-    up.legacy.deprecated('up.Response#isError()', '!up.Response#ok')
-    return !@ok
 
   ###**
   Returns the HTTP header value with the given name.

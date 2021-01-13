@@ -1,27 +1,29 @@
 u = up.util
 $ = jQuery
 
-describe 'up.legacy', ->
+describe 'up.migrate', ->
 
-  describe 'renamedPackage()', ->
+  if up.migrate.loaded
 
-    it 'prints a warning and forwards the call to the new module', ->
-      warnSpy = spyOn(up, 'warn')
-      value = up.dom
-      expect(warnSpy).toHaveBeenCalled()
-      expect(value).toBe(up.fragment)
+    describe 'renamedPackage()', ->
 
-  describe 'warn()', ->
+      it 'prints a warning and forwards the call to the new module', ->
+        warnSpy = spyOn(up, 'warn')
+        value = up.dom
+        expect(warnSpy).toHaveBeenCalled()
+        expect(value).toBe(up.fragment)
 
-    it 'prepends a deprecation prefix to the given message and prints it to the warning log', ->
-      spy = spyOn(up, 'warn')
-      up.legacy.warn("a legacy warning")
-      expect(spy).toHaveBeenCalledWith('DEPRECATION', 'a legacy warning')
+    describe 'warn()', ->
 
-    it 'only prints a given message once', ->
-      spy = spyOn(up, 'warn')
-      up.legacy.warn("a very unique legacy warning")
-      up.legacy.warn("a very unique legacy warning")
-      expect(spy.calls.count()).toBe(1)
+      it 'prepends a deprecation prefix to the given message and prints it to the warning log', ->
+        spy = spyOn(up, 'warn')
+        up.migrate.warn("a legacy warning")
+        expect(spy).toHaveBeenCalledWith('DEPRECATION', 'a legacy warning')
 
-    it 'allows substitution'
+      it 'only prints a given message once', ->
+        spy = spyOn(up, 'warn')
+        up.migrate.warn("a very unique legacy warning")
+        up.migrate.warn("a very unique legacy warning")
+        expect(spy.calls.count()).toBe(1)
+
+      it 'allows substitution'

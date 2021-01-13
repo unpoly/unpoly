@@ -849,7 +849,7 @@ describe 'up.fragment', ->
         it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
           target = fixture('.target')
           e.affix(target, '.child', text: 'old')
-          up.render('.target:before', html: """
+          up.render('.target:before', document: """
             <div class='target'>
               <div class='child'>new</div>
             </div>"
@@ -2385,7 +2385,7 @@ describe 'up.fragment', ->
           $container.scrollTop(300)
           expect($container.scrollTop()).toEqual(300)
 
-          up.render($element, transition: 'cross-fade', duration: 60000, scroll: 'target', document: """
+          up.render($element.get(0), transition: 'cross-fade', duration: 60000, scroll: 'target', document: """
             <div class="element" style="height: 600px"></div>
             """
           )
@@ -2744,7 +2744,7 @@ describe 'up.fragment', ->
             $origin = $fixture('.origin').text('origin text')
             $fixture('.target').text('old target text')
             $fixture('.fail-target').text('old fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '&', origin: $origin)
+            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '&', origin: $origin[0])
 
             next =>
               @respondWith
@@ -2766,7 +2766,7 @@ describe 'up.fragment', ->
           it 'animates the revealing when prepending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.render('.element:before',
-              html: '<div class="element">version 2</div>',
+              document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             )
@@ -2776,7 +2776,7 @@ describe 'up.fragment', ->
           it 'animates the revealing when appending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.render('.element:after',
-              html: '<div class="element">version 2</div>',
+              document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             )
@@ -2786,7 +2786,7 @@ describe 'up.fragment', ->
           it 'does not animate the revealing when swapping out an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
             up.render('.element',
-              html: '<div class="element">version 2</div>',
+              document: '<div class="element">version 2</div>',
               scroll: 'target',
               scrollBehavior: 'smooth'
             )
@@ -3602,7 +3602,7 @@ describe 'up.fragment', ->
             old-after
             """
 
-          up.render '.container', html: """
+          up.render '.container', document: """
             <div class='container'>
               new-before
               <div class='element' up-keep>new-inside</div>
@@ -4047,25 +4047,25 @@ describe 'up.fragment', ->
             next =>
               expect(constructorSpy.calls.count()).toBe(1)
 
+    if up.migrate.loaded
+      describe 'up.replace()', ->
 
+        it 'delegates to up.navigate({ target, url }) (deprecated)', ->
+          navigateSpy = up.fragment.knife.mock('navigate')
+          deprecatedSpy = spyOn(up.migrate, 'deprecated')
+          up.replace('target', 'url')
+          expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', url: 'url' })
+          expect(deprecatedSpy).toHaveBeenCalled()
 
-    describe 'up.replace()', ->
+    if up.migrate.loaded
+      describe 'up.extract()', ->
 
-      it 'delegates to up.navigate({ target, url }) (deprecated)', ->
-        navigateSpy = up.fragment.knife.mock('navigate')
-        deprecatedSpy = spyOn(up.legacy, 'deprecated')
-        up.replace('target', 'url')
-        expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', url: 'url' })
-        expect(deprecatedSpy).toHaveBeenCalled()
-
-    describe 'up.extract()', ->
-
-      it 'delegates to up.navigate({ target, document }) (deprecated)', ->
-        navigateSpy = up.fragment.knife.mock('navigate')
-        deprecatedSpy = spyOn(up.legacy, 'deprecated')
-        up.extract('target', 'document')
-        expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', document: 'document' })
-        expect(deprecatedSpy).toHaveBeenCalled()
+        it 'delegates to up.navigate({ target, document }) (deprecated)', ->
+          navigateSpy = up.fragment.knife.mock('navigate')
+          deprecatedSpy = spyOn(up.migrate, 'deprecated')
+          up.extract('target', 'document')
+          expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', document: 'document' })
+          expect(deprecatedSpy).toHaveBeenCalled()
 
     describe 'up.navigate()', ->
 
@@ -4160,20 +4160,21 @@ describe 'up.fragment', ->
         next.after 100, ->
           expect(destructor).toHaveBeenCalledWith('old text')
 
-      it 'allows to pass a new history entry as { history } option (deprecated)', (done) ->
-        up.history.config.enabled = true
-        warnSpy = spyOn(up.legacy, 'warn')
-        $fixture('.element')
-        up.destroy('.element', history: '/new-path').then ->
-          u.timer 100, ->
-            expect(location.href).toMatchURL('/new-path')
-            expect(warnSpy).toHaveBeenCalled()
-            done()
+      if up.migrate.loaded
+        it 'allows to pass a new history entry as { history } option (deprecated)', (done) ->
+          up.history.config.enabled = true
+          warnSpy = spyOn(up.migrate, 'warn')
+          $fixture('.element')
+          up.destroy('.element', history: '/new-path').then ->
+            u.timer 100, ->
+              expect(location.href).toMatchURL('/new-path')
+              expect(warnSpy).toHaveBeenCalled()
+              done()
 
-      it 'allows to pass a new history entry as { title } option', (done) ->
+      it 'allows to pass a new history entry as { location } option', (done) ->
         up.history.config.enabled = true
         $fixture('.element')
-        up.destroy('.element', title: '/new-path').then ->
+        up.destroy('.element', location: '/new-path').then ->
           u.timer 100, ->
             expect(location.href).toMatchURL('/new-path')
             done()
@@ -4181,7 +4182,7 @@ describe 'up.fragment', ->
       it 'allows to pass a new document title as { title } option', (done) ->
         up.history.config.enabled = true
         $fixture('.element')
-        up.destroy('.element', history: '/new-path', title: 'Title from options').then ->
+        up.destroy('.element', title: 'Title from options').then ->
           expect(document.title).toEqual('Title from options')
           done()
 

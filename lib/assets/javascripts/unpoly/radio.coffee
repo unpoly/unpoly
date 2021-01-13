@@ -42,8 +42,6 @@ up.radio = do ->
     pollInterval: 30000
     pollEnabled: 'auto'
 
-  up.legacy.renamedProperty(config, 'hungry', 'hungrySelectors')
-
   reset = ->
     config.reset()
 

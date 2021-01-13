@@ -151,10 +151,7 @@ class up.Layer.Overlay extends up.Layer
     @registerClickCloser 'up-dismiss', (value, closeOptions) =>
       @dismiss(value, closeOptions)
 
-    # <a up-close>Close</a> (legacy close attribute)
-    @registerClickCloser 'up-close', (value, closeOptions) =>
-      up.legacy.deprecated('[up-close]', '[up-dismiss]')
-      @dismiss(value, closeOptions)
+    up.migrate.registerLayerCloser?(this)
 
     # let { userId } = await up.layer.open({ acceptEvent: 'user:show' })
     @registerEventCloser(@acceptEvent, @accept)

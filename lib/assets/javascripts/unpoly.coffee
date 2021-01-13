@@ -1,7 +1,7 @@
 #= require ./unpoly/namespace
 #= require ./unpoly/util
 #= require ./unpoly/error
-#= require ./unpoly/legacy
+#= require ./unpoly/migrate_stub
 #= require ./unpoly/browser
 #= require ./unpoly/element
 #= require ./unpoly/classes/class
@@ -20,10 +20,8 @@
 #= require ./unpoly/layer
 #= require ./unpoly/link
 #= require ./unpoly/form
-#= require ./unpoly/tooltip
 #= require ./unpoly/feedback
 #= require ./unpoly/radio
 #= require ./unpoly/rails
-#= require_tree ./unpoly/deprecated
 
 up.framework.boot()

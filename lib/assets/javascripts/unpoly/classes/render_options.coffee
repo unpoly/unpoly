@@ -70,24 +70,9 @@ up.RenderOptions = do ->
   preloadOverrides = (options) ->
     if options.preload
       PRELOAD_OVERRIDES
-      
-  fixLegacyHistoryOption = (options) ->
-    if u.isString(options.history) && options.history != 'auto'
-      up.legacy.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
-      options.location = options.history
-      # Also the URL in { history } is truthy, keeping a value in there would also inherit to failOptions,
-      # where it would be expanded to { failLocation }.
-      options.history = 'auto'
-
-  fixLegacyJQueryOptions = (options) ->
-    for prop in ['target', 'origin']
-      if u.isJQuery(options[prop])
-        up.legacy.warn('Passing a jQuery collection as { %s } is deprecated. Pass it as a native element instead.', prop)
-        options[prop] = up.element.get(options[prop])
 
   preprocess = (options) ->
-    fixLegacyHistoryOption(options)
-    fixLegacyJQueryOptions(options)
+    up.migrate.handleRenderOptions?(options)
 
     result = u.merge(
       GLOBAL_DEFAULTS,
@@ -117,5 +102,4 @@ up.RenderOptions = do ->
   return {
     preprocess,
     deriveFailOptions,
-    fixLegacyHistoryOption
   }

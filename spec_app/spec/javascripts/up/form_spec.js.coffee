@@ -543,19 +543,21 @@ describe 'up.form', ->
                 expect(@lastRequest().url).toMatchURL('/action?foo=value-from-action')
                 expect(@lastRequest().data()['foo']).toEqual ['value-from-input', 'other-value-from-input']
 
-        describe 'with { history } option', ->
+        describe 'with { location } option', ->
 
           it 'uses the given URL as the new browser location if the request succeeded', asyncSpec (next) ->
-            up.submit(@$form, history: '/given-path')
+            up.submit(@$form, location: '/given-path')
             next => @respondWith('<div class="response">new-text</div>')
             next => expect(up.history.location).toMatchURL('/given-path')
 
           it 'keeps the current browser location if the request failed', asyncSpec (next) ->
-            up.submit(@$form, history: '/given-path', failTarget: '.response')
+            up.submit(@$form, location: '/given-path', failTarget: '.response')
             next => @respondWith('<div class="response">new-text</div>', status: 500)
             next => expect(up.history.location).toMatchURL(@locationBeforeExample)
 
-          it 'keeps the current browser location if the option is set to false', asyncSpec (next) ->
+        describe 'with { history: false } option', ->
+
+          it 'keeps the current browser location', asyncSpec (next) ->
             up.submit(@$form, history: false)
             next => @respondWith('<div class="response">new-text</div>')
             next =>expect(up.history.location).toMatchURL(@locationBeforeExample)

@@ -1,31 +1,6 @@
 u = up.util
 e = up.element
 
-# Not an instance method because we eventually will migrate to ES6.
-# In ES6 we may not access `this` before `super()`.
-rewriteDeprecatedOptions = (options) ->
-  if u.isUndefined(options.scroll)
-    # Rewrite deprecated { reveal } option (it had multiple variants)
-    if u.isString(options.reveal)
-      up.legacy.deprecated("Option { reveal: '#{options.reveal}' }", "{ scroll: '#{options.reveal}' }")
-      options.scroll = options.reveal
-    else if options.reveal == true
-      up.legacy.deprecated('Option { reveal: true }', "{ scroll: 'target' }")
-      options.scroll = 'target'
-    else if options.reveal == false
-      up.legacy.deprecated('Option { reveal: false }', "{ scroll: false }")
-      options.scroll = false
-
-    # Rewrite deprecated { resetScroll } option
-    if u.isDefined(options.resetScroll)
-      up.legacy.deprecated('Option { resetScroll: true }', "{ scroll: 'top' }")
-      options.scroll = 'top'
-
-    # Rewrite deprecated { restoreScroll } option
-    if u.isDefined(options.restoreScroll)
-      up.legacy.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
-      options.scroll = 'restore'
-
 class up.FragmentScrolling extends up.Record
 
   keys: -> [
@@ -44,7 +19,7 @@ class up.FragmentScrolling extends up.Record
   ]
 
   constructor: (options) ->
-    rewriteDeprecatedOptions(options)
+    up.migrate.handleScrollOptions?(options)
     super(options)
 
   process: ->

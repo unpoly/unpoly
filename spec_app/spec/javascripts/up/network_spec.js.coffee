@@ -1283,22 +1283,23 @@ describe 'up.network', ->
         preload = -> up.network.preload({ url: '/foo', method: 'put' })
         expect(preload).toThrowError(/will not preload a PUT request/i)
 
-    describe 'up.ajax', ->
+    if up.migrate.loaded
+      describe 'up.ajax', ->
 
-      it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
-        promise = up.ajax('/url')
+        it 'fulfills to the response text in order to match the $.ajax() API as good as possible', (done) ->
+          promise = up.ajax('/url')
 
-        u.task =>
-          expect(jasmine.Ajax.requests.count()).toEqual(1)
-          @respondWith('response-text')
+          u.task =>
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            @respondWith('response-text')
 
-          promise.then (text) ->
-            expect(text).toEqual('response-text')
+            promise.then (text) ->
+              expect(text).toEqual('response-text')
 
-            done()
+              done()
 
-          promise.catch (reason) ->
-            done.fail(reason)
+            promise.catch (reason) ->
+              done.fail(reason)
 
     describe 'up.cache.get()', ->
 

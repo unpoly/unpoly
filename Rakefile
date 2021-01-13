@@ -10,6 +10,7 @@ module Unpoly
     SPROCKETS_MANIFESTS = %w(
       unpoly.js
       unpoly.css
+      unpoly-migrate.js
       unpoly-bootstrap3.js
       unpoly-bootstrap3.css
       unpoly-bootstrap4.js

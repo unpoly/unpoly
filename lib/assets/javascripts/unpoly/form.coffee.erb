@@ -42,8 +42,6 @@ up.form = do ->
     submitSelectors: up.link.combineFollowableSelectors(['form'])
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
-  up.legacy.renamedProperty(config, 'fields', 'fieldSelectors')
-  up.legacy.renamedProperty(config, 'submitButtons', 'submitButtonSelectors')
 
   fullSubmitSelector = ->
     config.submitSelectors.join(',')

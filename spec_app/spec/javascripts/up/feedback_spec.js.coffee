@@ -233,7 +233,7 @@ describe 'up.feedback', ->
               expect(@layerLinkToLayerURL).toHaveClass('up-current')
               expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
 
-              next.await up.modal.close()
+              next.await up.layer.dismiss()
 
             next =>
               expect(@backgroundLinkToBackgroundURL).toHaveClass('up-current')
@@ -288,7 +288,7 @@ describe 'up.feedback', ->
             $more = $nav.affix('.more')
             up.hello($nav)
 
-            up.extract '.more', '<div class="more"><a href="/bar"></div>', history: true, location: '/bar'
+            up.render(fragment: '<div class="more"><a href="/bar"></div>', history: true, location: '/bar')
 
             next =>
               $moreLink = $('.more').find('a')
@@ -365,7 +365,7 @@ describe 'up.feedback', ->
           next => expect($link).not.toHaveClass('up-active')
 
         it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec (next) ->
-          $link = $fixture('a[href="/foo"][up-modal=".main"]')
+          $link = $fixture('a[href="/foo"][up-target=".main"][up-layer=modal]')
           up.hello($link)
           up.link.preload($link)
 

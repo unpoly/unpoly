@@ -646,20 +646,21 @@ describe 'up.link', ->
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
-      it 'returns true for an [up-modal] link', ->
-        $link = $fixture('a[href="/foo"][up-modal=".target"]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+      if up.migrate.loaded
+        it 'returns true for an [up-modal] link', ->
+          $link = $fixture('a[href="/foo"][up-modal=".target"]')
+          up.hello $link
+          expect(up.link.isFollowable($link)).toBe(true)
 
-      it 'returns true for an [up-popup] link', ->
-        $link = $fixture('a[href="/foo"][up-popup=".target"]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+        it 'returns true for an [up-popup] link', ->
+          $link = $fixture('a[href="/foo"][up-popup=".target"]')
+          up.hello $link
+          expect(up.link.isFollowable($link)).toBe(true)
 
-      it 'returns true for an [up-drawer] link', ->
-        $link = $fixture('a[href="/foo"][up-drawer=".target"]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
+        it 'returns true for an [up-drawer] link', ->
+          $link = $fixture('a[href="/foo"][up-drawer=".target"]')
+          up.hello $link
+          expect(up.link.isFollowable($link)).toBe(true)
 
       it 'returns true for an [up-target] span with [up-href]', ->
         $link = $fixture('span[up-href="/foo"][up-target=".target"]')
@@ -872,7 +873,7 @@ describe 'up.link', ->
 
           it 'updates a target in the same layer as the clicked link', asyncSpec (next) ->
             $fixture('.document').affix('.target').text('old document text')
-            up.modal.extract('.target', "<div class='target'>old modal text</div>")
+            up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
             next =>
               expect($('.document .target')).toHaveText('old document text')
@@ -895,7 +896,7 @@ describe 'up.link', ->
 
             it 'allows to name a layer for the update', asyncSpec (next) ->
               $fixture('.document').affix('.target').text('old document text')
-              up.modal.extract('.target', "<div class='target'>old modal text</div>")
+              up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
               next =>
                 expect($('.document .target')).toHaveText('old document text')
@@ -913,7 +914,7 @@ describe 'up.link', ->
 
             it 'ignores [up-layer] if the server responds with an error', asyncSpec (next) ->
               $fixture('.document').affix('.target').text('old document text')
-              up.modal.extract('.target', "<div class='target'>old modal text</div>")
+              up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
               next =>
                 expect($('.document .target')).toHaveText('old document text')
@@ -933,7 +934,7 @@ describe 'up.link', ->
 
             it 'allows to name a layer for a non-200 response using an [up-fail-layer] modifier', asyncSpec (next) ->
               $fixture('.document').affix('.target').text('old document text')
-              up.modal.extract('.target', "<div class='target'>old modal text</div>")
+              up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
               next =>
                 expect($('.document .target')).toHaveText('old document text')

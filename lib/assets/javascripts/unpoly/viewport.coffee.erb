@@ -96,8 +96,6 @@ up.viewport = do ->
     scrollSpeed: 1
     autofocus: true
 
-  up.legacy.renamedProperty(config, 'viewports', 'viewportSelectors')
-
   scrollingController = new up.MotionController('scrolling')
 
   reset = ->
@@ -824,9 +822,6 @@ up.viewport = do ->
     firstHashTarget: firstHashTarget
     scroll: scroll
     config: config
-    closest: (args...) ->
-      up.legacy.deprecated('up.viewport.closest()', 'up.viewport.get()')
-      return closest(args...)
     get: closest
     subtree: getSubtree
     around: getAround
@@ -856,4 +851,3 @@ up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal
 up.revealHash = up.viewport.revealHash
 
-up.legacy.renamedPackage 'layout', 'viewport'

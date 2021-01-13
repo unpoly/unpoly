@@ -75,6 +75,25 @@ describe 'up.RenderOptions', ->
         # Other options are left unchanged
         expect(options.url).toBe('/path')
 
+    if up.migrate.loaded
+      it 'moves an URL string from the { history } option (legacy syntax) to the { location } option (next syntax)', ->
+        options = { history: '/foo' }
+        warnSpy = spyOn(up.migrate, 'warn')
+
+        up.RenderOptions.preprocess(options)
+
+        expect(options).toEqual { history: 'auto', location: '/foo' }
+        expect(warnSpy).toHaveBeenCalled()
+
+      it 'does nothing for { history: "auto" }', ->
+        options = { location: '/foo' }
+        warnSpy = spyOn(up.migrate, 'warn')
+
+        up.RenderOptions.preprocess(options)
+
+        expect(options).toEqual { location: '/foo' }
+        expect(warnSpy).not.toHaveBeenCalled()
+
   describe '.deriveFailOptions()', ->
     
     # In the code flow in up.fragment, options are first preprocessed and then
@@ -140,22 +159,3 @@ describe 'up.RenderOptions', ->
       expect(options.mode).toBe('popup')
       expect(options.source).toBe('/fail-source')
 
-  describe '.fixLegacyHistoryOption()', ->
-
-    it 'moves an URL string from the { history } option (legacy syntax) to the { location } option (next syntax)', ->
-      options = { history: '/foo' }
-      warnSpy = spyOn(up.legacy, 'warn')
-
-      up.RenderOptions.fixLegacyHistoryOption(options)
-
-      expect(options).toEqual { history: 'auto', location: '/foo' }
-      expect(warnSpy).toHaveBeenCalled()
-
-    it 'does nothing for { history: "auto" }', ->
-      options = { location: '/foo' }
-      warnSpy = spyOn(up.legacy, 'warn')
-
-      up.RenderOptions.fixLegacyHistoryOption(options)
-
-      expect(options).toEqual { location: '/foo' }
-      expect(warnSpy).not.toHaveBeenCalled()

@@ -3,7 +3,9 @@ $ = jQuery
 
 describe 'up.rails', ->
 
-  upAttributes = ['up-follow', 'up-target', 'up-modal', 'up-popup']
+  upAttributes = ['up-follow', 'up-target']
+  if up.migrate.loaded
+    upAttributes.push('up-modal', 'up-popup')
 
   describe '[data-method]', ->
 

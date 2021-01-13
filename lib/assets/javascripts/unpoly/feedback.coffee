@@ -62,7 +62,6 @@ up.feedback = do ->
   config = new up.Config ->
     currentClasses: ['up-current']
     navSelectors: ['[up-nav]']
-  up.legacy.renamedProperty(config, 'navs', 'navSelectors')
 
   reset = ->
     config.reset()
@@ -391,5 +390,3 @@ up.feedback = do ->
   around: around
   aroundForOptions: aroundForOptions
   normalizeURL: normalizeURL
-
-up.legacy.renamedPackage 'navigation', 'feedback'

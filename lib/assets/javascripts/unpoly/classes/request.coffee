@@ -297,10 +297,6 @@ class up.Request extends up.Record
     up.network.abort()
     new up.Request.FormRenderer(this).buildAndSubmit()
 
-  navigate: ->
-    up.legacy.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
-    @loadPage()
-
   onXHRLoad: ->
     response = @extractResponseFromXHR()
     @respondWith(response)

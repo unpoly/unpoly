@@ -1105,9 +1105,6 @@ up.element = do ->
 
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
-    first: (args...) ->
-      up.legacy.deprecated('up.element.first()', 'up.element.get()')
-      getOne(args...)
     all: all # same as document.querySelectorAll
     subtree: subtree # practical
     isInSubtree: isInSubtree
@@ -1139,9 +1136,6 @@ up.element = do ->
     elementTagName: elementTagName
     createDocumentFromHTML: createDocumentFromHTML # internal
     createFromHTML: createFromHTML # practical for element creation
-    createFromHtml: (args...) ->
-      up.legacy.deprecated('up.element.createFromHtml', 'up.element.createFromHTML')
-      up.element.createFromHTML(args...)
     get_root: getRoot # internal
     paint: paint # internal
     concludeCSSTransition: concludeCSSTransition # internal

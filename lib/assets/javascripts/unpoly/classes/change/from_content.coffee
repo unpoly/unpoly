@@ -60,7 +60,7 @@ class up.Change.FromContent extends up.Change
   getResponseDoc: ->
     unless @preview || @responseDoc
       docOptions = u.pick(@options, ['target', 'content', 'fragment', 'document', 'html'])
-      up.legacy.fixKey(docOptions, 'html', 'document')
+      up.migrate.handleResponseDocOptions?(docOptions)
 
       # If neither { document } nor { fragment } source is given, we assume { content }.
       if @defaultPlacement() == 'content'

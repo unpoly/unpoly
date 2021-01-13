@@ -1035,12 +1035,13 @@ describe 'up.layer', ->
             expect(up.layer.getAll('root')).toEqual [up.layer.root]
             done()
 
-      describe 'for "page"', ->
+      if up.migrate.loaded
+        describe 'for "page"', ->
 
-        it "returns an array of the root layer, which used to be called 'page' in older Unpoly versions", (done) ->
-          makeLayers(2).then ->
-            expect(up.layer.getAll('page')).toEqual [up.layer.root]
-            done()
+          it "returns an array of the root layer, which used to be called 'page' in older Unpoly versions", (done) ->
+            makeLayers(2).then ->
+              expect(up.layer.getAll('page')).toEqual [up.layer.root]
+              done()
 
       describe 'for "front"', ->
 
@@ -1233,19 +1234,20 @@ describe 'up.layer', ->
           up.layer.normalizeOptions(options)
           expect(options).toEqual jasmine.objectContaining(layer: 'root')
 
-      describe 'for an mode passed as the legacy { flavor } option', ->
+      if up.migrate.loaded
+        describe 'for an mode passed as the legacy { flavor } option', ->
 
-        it 'transfers the mode to the { mode } option', ->
-          options = { flavor: 'cover' }
-          up.layer.normalizeOptions(options)
-          expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'cover')
+          it 'transfers the mode to the { mode } option', ->
+            options = { flavor: 'cover' }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'cover')
 
-      describe 'for the legacy { layer: "page" } option', ->
+        describe 'for the legacy { layer: "page" } option', ->
 
-        it 'sets { layer: "root" }', ->
-          options = { layer: 'page' }
-          up.layer.normalizeOptions(options)
-          expect(options).toEqual jasmine.objectContaining(layer: 'root')
+          it 'sets { layer: "root" }', ->
+            options = { layer: 'page' }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual jasmine.objectContaining(layer: 'root')
 
       describe 'for { layer: "new" }', ->
 

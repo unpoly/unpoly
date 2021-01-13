@@ -17,7 +17,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
     # but the logic needs to be interwoven with the insertion logic for the new
     # version.
 
-    up.RenderOptions.fixLegacyHistoryOption(@options)
+    up.migrate.handleHistoryOption?(@options)
     @layer.updateHistory(@options)
 
     # Save the parent because we sometimes emit up:fragment:destroyed

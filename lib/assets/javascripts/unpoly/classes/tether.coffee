@@ -4,13 +4,10 @@ e = up.element
 class up.Tether
 
   constructor: (options) ->
+    up.migrate.handleTetherOptions?(options)
     @anchor = options.anchor
-
-    [@position, @align] = options.position.split('-')
-    if @align
-      up.legacy.warn('The position value %o is deprecated. Use %o instead.', options.position, @describeConstraints())
-    else
-      @align = options.align
+    @align = options.align
+    @position = options.position
 
     @alignAxis = if @position == 'top' || @position == 'bottom' then 'horizontal' else 'vertical'
 

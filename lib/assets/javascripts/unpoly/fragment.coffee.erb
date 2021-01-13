@@ -67,8 +67,6 @@ up.fragment = do ->
     set: (value) -> up.layer.config.any.mainTargets = value
   )
 
-  up.legacy.renamedProperty(config, 'fallbacks', 'mainTargets')
-
   reset = ->
     config.reset()
 
@@ -364,68 +362,6 @@ up.fragment = do ->
     Options for the `up.render()` call that will process the server response.
   @event up:fragment:loaded
   ###
-
-  ###**
-  Replaces elements on the current page with corresponding elements
-  from a new page fetched from the server.
-
-  @function up.replace
-  @param {string|Element|jQuery} target
-    The CSS selector to update. You can also pass a DOM element or jQuery element
-    here, in which case a selector will be inferred from the element's class and ID.
-  @param {string} url
-    The URL to fetch from the server.
-  @param {Object} [options]
-    See `options` for `up.render()
-  @return {Promise}
-    A promise that fulfills when the page has been updated.
-  @deprecated
-    Use `up.render()` instead.
-  ###
-  replace = (target, url, options) ->
-    up.legacy.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
-    return navigate(u.merge(options, { target, url }))
-
-  ###**
-  Updates a selector on the current page with the
-  same selector from the given HTML string.
-
-  \#\#\# Example
-
-  Let's say your current HTML looks like this:
-
-      <div class="one">old one</div>
-      <div class="two">old two</div>
-
-  We now replace the second `<div>`, using an HTML string
-  as the source:
-
-      html = '<div class="one">new one</div>' +
-             '<div class="two">new two</div>';
-
-      up.extract('.two', html)
-
-  Unpoly looks for the selector `.two` in the strings and updates its
-  contents in the current page. The current page now looks like this:
-
-      <div class="one">old one</div>
-      <div class="two">new two</div>
-
-  Note how only `.two` has changed. The update for `.one` was
-  discarded, since it didn't match the selector.
-
-  @function up.extract
-  @param {string|Element|jQuery} target
-  @param {string} html
-  @param {Object} [options]
-    See options for [`up.render()`](/up.render).
-  @return {Promise}
-    A promise that will be fulfilled then the selector was updated.
-  @stable
-  ###
-  extract = (target, document, options) ->
-    up.legacy.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
-    return navigate(u.merge(options, { target, document }))
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
@@ -1301,12 +1237,10 @@ up.fragment = do ->
   u.literal
     <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     config: config
-    replace: replace
     reload: reload
     destroy: destroy
     render: render
     navigate: navigate
-    extract: extract
     first: getFirst
     get: getOne
     all: getAll
@@ -1336,10 +1270,3 @@ up.render = up.fragment.render
 up.navigate = up.fragment.navigate
 up.hello = up.fragment.hello
 up.visit = up.fragment.visit
-
-up.first = (args...) ->
-  up.legacy.deprecated('up.first()', 'up.fragment.get()')
-  up.fragment.get(args...)
-
-up.legacy.renamedPackage 'flow', 'fragment'
-up.legacy.renamedPackage 'dom', 'fragment'

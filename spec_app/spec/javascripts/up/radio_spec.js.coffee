@@ -173,15 +173,15 @@ describe 'up.radio', ->
           expect('.hungry').toHaveText('old hungry')
 
       it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', asyncSpec (next) ->
-        up.modal.config.openDuration = 0
-        up.modal.config.closeDuration = 0
+        up.layer.config.openDuration = 0
+        up.layer.config.closeDuration = 0
 
         $fixture('.outside').text('old outside').attr('up-hungry', true)
 
         closeEventHandler = jasmine.createSpy('close event handler')
-        up.on('up:modal:close', closeEventHandler)
+        up.on('up:layer:dismiss', closeEventHandler)
 
-        up.modal.extract '.inside', """
+        up.layer.open fragment: """
           <div class='inside'>
             <div class="inside-text">old inside</div>
             <div class="inside-link">update</div>
@@ -189,18 +189,20 @@ describe 'up.radio', ->
           """
 
         next =>
-          expect(up.modal.isOpen()).toBe(true)
+          expect(up.layer.isOverlay()).toBe(true)
 
-          up.extract '.inside-text', """
-            <div class="outside">
-              new outside
-            </div>
-            <div class='inside'>
-              <div class="inside-text">new inside</div>
-              <div class="inside-link">update</div>
-            </div>
-            """,
-            origin: $('.inside-link')
+          up.render
+            target: '.inside-text',
+            document: """
+              <div class="outside">
+                new outside
+              </div>
+              <div class='inside'>
+                <div class="inside-text">new inside</div>
+                <div class="inside-link">update</div>
+              </div>
+              """,
+            origin: document.querySelector('.inside-link')
 
         next =>
           expect(closeEventHandler).not.toHaveBeenCalled()

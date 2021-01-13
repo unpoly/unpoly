@@ -10,5 +10,5 @@ This feature is now deprecated.
 up.tooltip = do ->
   
   up.macro '[up-tooltip]', (opener) ->
-    up.legacy.warn('[up-tooltip] has been deprecated. A [title] was set instead.')
+    up.migrate.warn('[up-tooltip] has been deprecated. A [title] was set instead.')
     up.element.setMissingAttr(opener, 'title', opener.getAttribute('up-tooltip'))

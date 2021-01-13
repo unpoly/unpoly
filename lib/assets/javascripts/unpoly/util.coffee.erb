@@ -1133,20 +1133,6 @@ up.util = do ->
   Returns a copy of the given object that only contains
   the given keys.
 
-  @function up.util.only
-  @param {Object} object
-  @param {Array} keys...
-  @deprecated
-    Use `up.util.pick()` instead.
-  ###
-  only = (object, keys...) ->
-    up.legacy.deprecated('up.util.only(object, keys...)', 'up.util.pick(object, keys)')
-    pick(object, keys)
-
-  ###**
-  Returns a copy of the given object that only contains
-  the given keys.
-
   @function up.util.pick
   @param {Object} object
   @param {Array} keys
@@ -1166,20 +1152,6 @@ up.util = do ->
       if tester(value, key, object)
         filtered[key] = object[key]
     return filtered
-
-  ###**
-  Returns a copy of the given object that contains all except
-  the given keys.
-
-  @function up.util.except
-  @param {Object} object
-  @param {Array} keys...
-  @deprecated
-    Use `up.util.omit()` instead.
-  ###
-  except = (object, keys...) ->
-    up.legacy.deprecated('up.util.except(object, keys...)', 'up.util.omit(object, keys)')
-    omit(object, keys)
 
   ###**
   Returns a copy of the given object that contains all except
@@ -1806,9 +1778,6 @@ up.util = do ->
 
   <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   parseURL: parseURL
-  parseUrl: (args...) ->
-    up.legacy.warn('up.util.parseUrl() has been renamed to up.util.parseURL()')
-    parseURL(args...)
   normalizeURL: normalizeURL
   urlWithoutHost: urlWithoutHost
   matchURLs: matchURLs
@@ -1834,20 +1803,8 @@ up.util = do ->
   times: times
   findResult: findResult
   some: some
-  any: (args...) ->
-    up.legacy.warn('up.util.any() has been renamed to up.util.some()')
-    some(args...)
   every: every
-  all: (args...) ->
-    up.legacy.warn('up.util.all() has been renamed to up.util.every()')
-    every(args...)
-  detect: (args...) ->
-    up.legacy.warn('up.util.detect() has been renamed to up.util.find()')
-    findInList(args...)
   find: findInList
-  select: (args...) ->
-    up.legacy.warn('up.util.select() has been renamed to up.util.filter()')
-    filterList(args...)
   filter: filterList
   reject: reject
   intersect: intersect
@@ -1881,16 +1838,11 @@ up.util = do ->
   isList: isList
   isRegExp: isRegExp
   timer: scheduleTimer
-  setTimer: (args...) ->
-    up.legacy.warn('up.util.setTimer() has been renamed to up.util.timer()')
-    scheduleTimer(args...)
   contains: contains
   objectContains: objectContains
   toArray: toArray
-  only: only
   pick: pick
   pickBy: pickBy
-  except: except
   omit: omit
   unresolvablePromise: unresolvablePromise
   remove: remove
@@ -1902,9 +1854,6 @@ up.util = do ->
   noop: noop
   asyncNoop: asyncNoop
   identity: identity
-  escapeHtml: (args...) ->
-    up.legacy.deprecated('up.util.escapeHtml', 'up.util.escapeHTML')
-    escapeHTML(args...)
   escapeHTML: escapeHTML
   escapeRegExp: escapeRegExp
   sequence: sequence
@@ -1922,12 +1871,6 @@ up.util = do ->
   rejectOnError: rejectOnError
   isBasicObjectProperty: isBasicObjectProperty
   isCrossDomain: isCrossDomain
-  selectorForElement: (args...) ->
-    up.legacy.warn('up.util.selectorForElement() has been renamed to up.fragment.toTarget()')
-    up.fragment.toTarget(args...)
-  nextFrame: (args...) ->
-    up.legacy.warn('up.util.nextFrame() has been renamed to up.util.task()')
-    queueTask(args...)
   task: queueTask
   microtask: queueMicrotask
   abortableMicrotask: abortableMicrotask
@@ -1961,4 +1904,3 @@ up.util = do ->
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   renameKeys: renameKeys
   timestamp: secondsSinceEpoch
-

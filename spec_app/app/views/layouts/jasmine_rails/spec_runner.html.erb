@@ -12,6 +12,9 @@
       javascript_include_tag jquery_asset
     %>
     <%= javascript_include_tag *jasmine_js_files %>
+    <% if params[:migrate] %>
+      <%= javascript_include_tag 'unpoly-migrate' %>
+    <% end %>
   </head>
   <body>
     <div id="jasmine_content"></div>

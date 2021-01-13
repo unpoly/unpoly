@@ -7,6 +7,7 @@
   <ul>
     <li>
       <%= link_to 'Jasmine specs with jQuery 3', '/specs?jquery=3' %>
+      <%= link_to 'Jasmine specs with up-migrate', '/specs?migrate=1' %>
       <ul>
         <% %w[
           up.browser
@@ -18,7 +19,7 @@
           up.fragment
           up.layer
           up.history
-          up.legacy
+          up.migrate
           up.link
           up.log
           up.modal
@@ -32,7 +33,6 @@
           up.tooltip
           up.util
           up.viewport
-          xxx
         ].each do |mod| %>
           <li><%= link_to mod, "/specs?spec=#{mod}" %></li>
         <% end %>
