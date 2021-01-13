@@ -27,12 +27,14 @@ Release process
 Remaining feature work
 ======================
 
-- Consider extracting deprecated aliases to unpoly-migrate.js
-  - Would save ~ 15 KB .js, 3 KB+ gzipped
-  - We would keep a few of the more complex rewrites in the code
-  - Emanuel asked for an option to turn deprecation warnings into error logs
-
-- Rework the TODO feature in the demo without a modal for "new"
+- Remove the extensive compatibility checks in up.browser
+  - canInputEvent
+  - canCSSTransition
+  - canFormData
+  - canInspectFormData (only used in specs)
+  - canConsole
+  - canAnimationFrame
+  - canDOMParser
 
 
 
