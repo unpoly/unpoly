@@ -316,6 +316,30 @@ class up.Request extends up.Record
     # Use the default message that callers of request.abort() would also get.
     @setAbortedState()
 
+  ###**
+  Aborts this request.
+
+  The request's promise will reject with an error object that has `{ name: 'AbortError' }`.
+
+  \#\#\# Example
+
+  ```javascript
+  let request = await up.request('/path')
+
+  try {
+    let response = await request('/path')
+  } catch (result) {
+    if (result.name === 'AbortError') {
+      console.log('Request was aborted.')
+    }
+  }
+
+  request.abort()
+  ```
+  
+  @function up.Request#abort
+  @experimental
+  ###
   abort: ->
     # setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     # will call setAbortedState() a second time, without a message.

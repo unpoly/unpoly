@@ -30,7 +30,7 @@ up.error = do ->
 
   # Emulate the exception that aborted fetch() would throw
   aborted = errorInterface('AbortError', (message) ->
-    build(message || 'Aborted', aborted: true)
+    build(message || 'Aborted')
   )
 
   notImplemented = errorInterface('up.NotImplemented')
