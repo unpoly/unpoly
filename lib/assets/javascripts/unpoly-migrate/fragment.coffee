@@ -12,7 +12,7 @@ up.migrate.renamedProperty(up.fragment.config, 'fallbacks', 'mainTargets')
 up.migrate.handleResponseDocOptions = (docOptions) ->
   up.migrate.fixKey(docOptions, 'html', 'document')
 
-###
+###**
 Replaces elements on the current page with corresponding elements
 from a new page fetched from the server.
 
@@ -68,7 +68,7 @@ discarded, since it didn't match the selector.
   See options for [`up.render()`](/up.render).
 @return {Promise}
   A promise that will be fulfilled then the selector was updated.
-@stable
+@deprecated
 ###
 up.fragment.extract = (target, document, options) ->
   up.migrate.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')

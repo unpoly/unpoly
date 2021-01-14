@@ -22,7 +22,7 @@ up.fragment = do ->
   ###**
   Configures defaults for fragment updates.
 
-  @function up.fragment.config
+  @property up.fragment.config
   @param {Array<string>} config.mainTargets
   @param {Array<string|RegExp>} config.badTargetClasses
     A list of class names that should be ignored when
@@ -278,7 +278,7 @@ up.fragment = do ->
     The element that triggered the replacement.
 
     The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [options.layer='auto']
+  @param {string} [options.layer='current']
     TODO: Docs for all layer-related options. However, opts for new layers we will document on up.layer.open().
   @param {boolean} [options.keep=true]
     Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
@@ -982,7 +982,7 @@ up.fragment = do ->
 
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
-  [current layer](/up.layer.current)'s [main element](/up.fragment.config.mainSelectors)
+  [current layer](/up.layer.current)'s [main element](/up.fragment.config#config.mainSelectors)
   with a matching fragment from the server response.
 
   \#\#\# Example
@@ -1186,7 +1186,7 @@ up.fragment = do ->
   For the [root layer](/up.layer.root) it is the `<body>` element. For an overlay
   it is the target with which the overlay was opened with.
 
-  In canonical usage the topmost swappable element is often a [main element](/up.fragment.config.mainTargets).
+  In canonical usage the topmost swappable element is often a [main element](/up.fragment.config#config.mainTargets).
 
   \#\#\# Example
 

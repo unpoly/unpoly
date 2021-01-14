@@ -1053,6 +1053,10 @@ up.util = do ->
   @function up.util.timer
   @param {number} millis
   @param {Function()} callback
+  @return {number}
+    The ID of the scheduled timeout.
+
+    You may pass this ID to `clearTimeout()` to un-schedule the timeout.
   @stable
   ###
   scheduleTimer = (millis, callback) ->

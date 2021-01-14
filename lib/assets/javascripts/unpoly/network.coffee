@@ -166,7 +166,7 @@ up.network = do ->
   cache = new up.Request.Cache()
 
   ###**
-  Returns an earlier request [matching](/up.network.config.requestMetaKeys) the given request options.
+  Returns an earlier request [matching](/up.network.config#config.requestMetaKeys) the given request options.
 
   Returns `undefined` if the given request is not currently cached.
 
