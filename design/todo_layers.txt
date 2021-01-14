@@ -35,7 +35,7 @@ Remaining feature work
   - canConsole
   - canAnimationFrame
   - canDOMParser
-
+- Remove boxed type checks from up.util
 
 
 Manual tests
