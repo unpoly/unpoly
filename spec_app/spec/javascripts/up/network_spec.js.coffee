@@ -677,6 +677,22 @@ describe 'up.network', ->
           next =>
             expect(responses).toEqual(['foo', 'foo', 'bar'])
 
+        it 'reuses a request with the same URL but a different #hash', ->
+          request1 = up.request(url: '/url#foo', cache: true)
+          expect(request1.hash).toEqual('#foo')
+          expect(url: '/url#foo').toBeCached()
+          expect(url: '/url#bar').toBeCached()
+
+        it "does not lose a request's #hash when re-using a cached request without a #hash (bugfix)", ->
+          request1 = up.request(url: '/url#foo', cache: true)
+          expect(request1.hash).toEqual('#foo')
+          expect(url: '/url#foo').toBeCached()
+
+          request2 = up.request(url: '/url#bar', cache: true)
+          expect(request2.hash).toEqual('#bar')
+          expect(request1.hash).toEqual('#foo') # also make sure that the first request was not mutated
+          expect(url: '/url#bar').toBeCached()
+
         it "does not cache responses if config.cacheExpiry is 0", asyncSpec (next) ->
           up.network.config.cacheExpiry = 0
           next => up.request(url: '/foo', cache: true)

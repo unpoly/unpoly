@@ -101,8 +101,10 @@ class up.Request.Queue extends up.Class
         u.remove(list, match)
       return
 
-  abortExcept: (excusedRequest, additionalConditions = true) ->
-    @abort (queuedRequest) -> queuedRequest != excusedRequest && u.evalOption(additionalConditions, queuedRequest)
+  abortExcept: (excusedRequest) ->
+    excusedCacheKey = excusedRequest.cacheKey()
+    @abort (queuedRequest) ->
+      queuedRequest.cacheKey() != excusedCacheKey
 
   requestMatches: (request, conditions) ->
     return request == conditions || u.evalOption(conditions, request)

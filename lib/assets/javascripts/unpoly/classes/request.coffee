@@ -145,6 +145,7 @@ class up.Request extends up.Record
       # 'signal',
       'method',
       'url',
+      'hash',
       'params',
       'target',
       'failTarget',
@@ -218,6 +219,9 @@ class up.Request extends up.Record
     @deferred = u.newDeferred()
 
   @delegate ['then', 'catch', 'finally'], 'deferred'
+
+  followState: (sourceRequest) ->
+    u.delegate(this, ['deferred', 'state', 'preload'], -> sourceRequest)
 
   normalizeForCaching: ->
     @method = u.normalizeMethod(@method)
@@ -299,6 +303,10 @@ class up.Request extends up.Record
 
   onXHRLoad: ->
     response = @extractResponseFromXHR()
+
+    log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, @method, @url, response.text.length]
+    @emit('up:request:loaded', { request: response.request, response, log })
+
     @respondWith(response)
 
   onXHRError: ->
@@ -356,9 +364,6 @@ class up.Request extends up.Record
   respondWith: (response) ->
     return unless @state == 'loading'
     @state = 'loaded'
-
-    log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, @method, @url, response.text.length]
-    @emit('up:request:loaded', { request: response.request, response, log })
 
     if response.ok
       @deferred.resolve(response)

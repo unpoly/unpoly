@@ -366,9 +366,9 @@ up.network = do ->
   ###
   makeRequest = (args...) ->
     request = new up.Request(parseRequestOptions(args))
-    request = useCachedRequest(request) || queueRequest(request)
-    if solo = request.solo
-      queue.abortExcept(request, solo)
+    useCachedRequest(request) || queueRequest(request)
+    if request.solo
+      queue.abortExcept(request)
     return request
 
   mimicLocalRequest = (options) ->
@@ -410,7 +410,13 @@ up.network = do ->
       unless request.preload
         queue.promoteToForeground(cachedRequest)
 
-      return cachedRequest
+      # We cannot simply return `cachedRequest`, since that might have a different #hash property.
+      # While two requests with a different #hash have the same cache key, they are
+      # not the same object.
+      #
+      # What we do instead is have `request` follow the state of `cachedRequest`'s exchange.
+      request.followState(cachedRequest)
+      return true
 
   # If no existing promise is available, we queue a network request.
   queueRequest = (request) ->
@@ -420,9 +426,6 @@ up.network = do ->
     handleCaching(request)
 
     queue.asap(request)
-
-    # The request is also a promise for its response.
-    return request
 
   handleCaching = (request) ->
     if request.cache

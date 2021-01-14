@@ -28,6 +28,25 @@ describe 'up.Request', ->
       expect(request.url).toEqual('http://host.com/foo?key=value')
       expect(request.params).toBeBlank()
 
+  describe '#followState', ->
+
+    it 'resolves this request when the given source request is resolved'
+
+    it 'rejects this request when the given source request is rejected'
+
+    it 'aborts this request when the given source request is aborted', ->
+      sourceRequest = new up.Request(url: '/foo')
+      followingRequest = new up.Request(url: '/foo')
+      followingRequest.followState(sourceRequest)
+
+      expect(sourceRequest.state).toEqual('new')
+      expect(followingRequest.state).toEqual('new')
+
+      sourceRequest.abort()
+
+      expect(sourceRequest.state).toEqual('aborted')
+      expect(followingRequest.state).toEqual('aborted')
+
   describe '#testURL', ->
 
     it "returns true if the given URL pattern matches this request's URL", ->

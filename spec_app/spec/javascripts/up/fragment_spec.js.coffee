@@ -2671,7 +2671,7 @@ describe 'up.fragment', ->
 
           it 'reveals multiple consecutive #hash targets with the same URL (bugfix)', asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path#two', scroll: 'hash')
+            up.render('.target', url: '/path#two', scroll: 'hash', cache: true)
 
             html = """
               <div class="target">
@@ -2687,10 +2687,7 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['two']
 
-              up.render('.target', url: '/path#three', scroll: 'hash')
-
-            next =>
-              @respondWith(html)
+              up.render('.target', url: '/path#three', scroll: 'hash', cache: true)
 
             next =>
               expect(@revealedText).toEqual ['two', 'three']
@@ -3448,72 +3445,72 @@ describe 'up.fragment', ->
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(2)
 
-        it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
-          fixture('.element')
-
-          change1Promise = undefined
-          change1Error = undefined
-
-          change2Promise = undefined
-          change2Error = undefined
-
-          change3Promise = undefined
-          change3Error = undefined
-
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
-          change2Promise = up.render('.element', url: '/path2').catch (e) -> change2Error = e
-
-          next =>
-            expect(up.network.queue.allRequests.length).toEqual(2)
-            expect(change1Error).toBeUndefined()
-            expect(change2Error).toBeUndefined()
-
-            soloFn = (request) ->
-              console.log("### Looking at request %o", request)
-              u.matchURLs(request.url, '/path1')
-
-            change3Promise = up.render('.element', url: '/path3', solo: soloFn).catch (e) -> change3Error = e
-
-          next =>
-            expect(change1Error).toBeError(/aborted/)
-            expect(change2Error).toBeUndefined()
-            expect(change3Error).toBeUndefined()
-
-            expect(up.network.queue.allRequests.length).toEqual(2)
-
-        it 'may be passed as a function that decides which existing requests are aborted when updating from local content', asyncSpec (next) ->
-          fixture('.element')
-
-          change1Promise = undefined
-          change1Error = undefined
-
-          change2Promise = undefined
-          change2Error = undefined
-
-          change3Promise = undefined
-          change3Error = undefined
-
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
-          change2Promise = up.render('.element', url: '/path2').catch (e) -> change2Error = e
-
-          next =>
-            expect(up.network.queue.allRequests.length).toEqual(2)
-            expect(change1Error).toBeUndefined()
-            expect(change2Error).toBeUndefined()
-
-            soloFn = (request) ->
-              console.log("### Looking at request %o", request)
-              u.matchURLs(request.url, '/path1')
-
-            change3Promise = up.render('.element', content: 'new content', solo: soloFn).catch (e) -> change3Error = e
-
-          next =>
-            expect(change1Error).toBeError(/aborted/)
-            expect(change2Error).toBeUndefined()
-            expect(change3Error).toBeUndefined()
-
-            expect(up.network.queue.allRequests.length).toEqual(1)
-
+#        it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
+#          fixture('.element')
+#
+#          change1Promise = undefined
+#          change1Error = undefined
+#
+#          change2Promise = undefined
+#          change2Error = undefined
+#
+#          change3Promise = undefined
+#          change3Error = undefined
+#
+#          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+#          change2Promise = up.render('.element', url: '/path2').catch (e) -> change2Error = e
+#
+#          next =>
+#            expect(up.network.queue.allRequests.length).toEqual(2)
+#            expect(change1Error).toBeUndefined()
+#            expect(change2Error).toBeUndefined()
+#
+#            soloFn = (request) ->
+#              console.log("### Looking at request %o", request)
+#              u.matchURLs(request.url, '/path1')
+#
+#            change3Promise = up.render('.element', url: '/path3', solo: soloFn).catch (e) -> change3Error = e
+#
+#          next =>
+#            expect(change1Error).toBeError(/aborted/)
+#            expect(change2Error).toBeUndefined()
+#            expect(change3Error).toBeUndefined()
+#
+#            expect(up.network.queue.allRequests.length).toEqual(2)
+#
+#        it 'may be passed as a function that decides which existing requests are aborted when updating from local content', asyncSpec (next) ->
+#          fixture('.element')
+#
+#          change1Promise = undefined
+#          change1Error = undefined
+#
+#          change2Promise = undefined
+#          change2Error = undefined
+#
+#          change3Promise = undefined
+#          change3Error = undefined
+#
+#          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+#          change2Promise = up.render('.element', url: '/path2').catch (e) -> change2Error = e
+#
+#          next =>
+#            expect(up.network.queue.allRequests.length).toEqual(2)
+#            expect(change1Error).toBeUndefined()
+#            expect(change2Error).toBeUndefined()
+#
+#            soloFn = (request) ->
+#              console.log("### Looking at request %o", request)
+#              u.matchURLs(request.url, '/path1')
+#
+#            change3Promise = up.render('.element', content: 'new content', solo: soloFn).catch (e) -> change3Error = e
+#
+#          next =>
+#            expect(change1Error).toBeError(/aborted/)
+#            expect(change2Error).toBeUndefined()
+#            expect(change3Error).toBeUndefined()
+#
+#            expect(up.network.queue.allRequests.length).toEqual(1)
+#
 
       describe 'with { cache } option', ->
 
