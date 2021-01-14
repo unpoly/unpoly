@@ -1,6 +1,6 @@
 u = up.util
 
-FLAVORS_ERROR = 'up.modal.flavors has been removed without direct replacement. You may give new layers a { class } or modify layer elements on up:layer:open.'
+FLAVORS_ERROR = new Error('up.modal.flavors has been removed without direct replacement. You may give new layers a { class } or modify layer elements on up:layer:open.')
 
 up.modal = u.literal
   visit: (url, options = {}) ->
