@@ -2,51 +2,37 @@
 Events
 ======
 
+This module contains functions to [build](/up.event.build), [dispatch](/up.emit) and [listen to](/up.on) DOM events.
+
+While the browser also ships with functions like [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent)
+and [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) to
+work with DOM events, you will find the functions in this module to be more convenient and feature-rich.
+
+## Events emitted by Unpoly
+
 Most Unpoly interactions emit DOM events that are prefixed with `up:`.
 
-    document.addEventListener('up:modal:opened', (event) => {
-      console.log('A new modal has just opened!')
-    })
+```javascript
+document.addEventListener('up:modal:opened', (event) => {
+  console.log('A new modal has just opened!')
+})
+```
 
-Events often have both present and past forms. For example,
-`up:modal:open` is emitted before a modal starts to open.
-`up:modal:opened` is emitted when the modal has finished its
-opening animation.
+Events often have both present and past forms. For example, `up:layer:open` is emitted before an overlay starts to open.
+`up:layer:opened` is emitted when the overlay has appeared in the DOM tree.
 
 \#\#\# Preventing events
 
 You can prevent most present form events by calling `preventDefault()`:
 
-    document.addEventListener('up:modal:open', (event) => {
-      if (event.url == '/evil') {
-        // Prevent the modal from opening
-        event.preventDefault()
-      }
-    })
-
-
-\#\#\# A better way to bind event listeners
-
-Instead of using [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener),
-you may find it convenient to use [`up.on()`](/up.on) instead:
-
-    up.on('click', 'button', function(event, button, data) {
-      // button is the clicked element
-      // data is the parsed [`up-data`](/up-data) attribute
-    })
-
-There are some advantages to using `up.on()`:
-
-  - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
-  - The event target is automatically passed as a second argument.
-  - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`).
-  - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
-  - You may use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
-    to observed elements. If an `[up-data]` attribute is set, its value will automatically be
-    parsed as JSON and passed as a third argument.
-  - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
-    leaving you with an application without JavaScript. This is typically preferable to
-    a soup of randomly broken JavaScript in ancient browsers.
+```javascript
+document.addEventListener('up:modal:open', (event) => {
+  if (event.url == '/evil') {
+    // Prevent the modal from opening
+    event.preventDefault()
+  }
+})
+```
 
 @module up.event
 ###
@@ -79,7 +65,7 @@ up.event = do ->
     leaving you with an application without JavaScript. This is typically preferable to
     a soup of randomly broken JavaScript in ancient browsers.
 
-  \#\#\# Examples
+  \#\#\# Basic example
 
   The code below will call the listener when a `<a>` is clicked
   anywhere in the `document`:
@@ -95,12 +81,17 @@ up.event = do ->
         console.log("Click within %o", form)
       })
 
-  You may also pass both an element and a selector
-  for [event delegation](https://davidwalsh.name/event-delegate):
+  \#\#\# Event delegation
+
+  You may pass both an element and a selector
+  for [event delegation](https://davidwalsh.name/event-delegate).
+
+  The example below registers a single event listener to the given `form`,
+  but only calls the listener when the clicked element is a `select` element:
 
       var form = document.querySelector('form')
-      up.on(form, 'click', 'a', function(event, link) {
-        console.log("Click on a link %o within %o", link, form)
+      up.on(form, 'click', 'select', function(event, select) {
+        console.log("Click on select %o within %o", select, form)
       })
 
   \#\#\# Attaching structured data
@@ -140,6 +131,28 @@ up.event = do ->
 
       // Unbind the listener
       up.off('click', listener)
+
+  \#\#\# Binding to multiple elements
+
+  You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements:
+
+  ```javascript
+  let allForms = document.querySelectorAll('form')
+  up.on(allForms, 'submit', function(event, form) {
+    console.log('Submitting form %o', form)
+  })
+  ```
+
+  \#\#\# Binding to multiple event types
+
+  You may register a listener to multiple event types by passing a space-separated list of event types:
+
+  ```javascript
+  let element = document.querySelector(...)
+  up.on(element, 'mouseenter mouseleave', function(event) {
+    console.log('Mouse entered or left')
+  })
+  ```
 
   @function up.on
   @param {Element|jQuery} [element=document]
@@ -355,6 +368,14 @@ up.event = do ->
   [Emits an event](/up.emit) and returns whether no listener
   has prevented the default action.
 
+  \#\#\# Example
+
+  ```javascript
+  if (up.event.nobodyPrevents('disk:erase')) {
+    Disk.erase()
+  })
+  ```
+
   @function up.event.nobodyPrevents
   @param {string} eventType
   @param {Object} eventProps
@@ -388,11 +409,17 @@ up.event = do ->
   Registers an event listener to be called when the user
   presses the `Escape` key.
 
+  \#\#\# Example
+
+  ```javascript
+  up.event.onEscape(function(event) {
+    console.log('Escape pressed!')
+  })
+  ```
+
   @function up.event.onEscape
-  @param {Function(event)} listener
-    The listener function to register.
-  @return {Function()}
-    A function that unbinds the event listeners when called.
+  @param {Function(Event)} listener
+    The listener function that will be called when `Escape` is pressed.
   @experimental
   ###
   onEscape = (listener) ->
@@ -405,6 +432,7 @@ up.event = do ->
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.escapePressed
+  @param {Event} event
   @internal
   ###
   escapePressed = (event) ->
@@ -413,9 +441,13 @@ up.event = do ->
     key == 'Escape' || key == 'Esc'
 
   ###**
-  Prevents the event from bubbling up the DOM.
-  Also prevents other event handlers bound on the same element.
-  Also prevents the event's default action.
+  Prevents the event from being processed further.
+
+  In detail:
+
+  - It prevents the event from bubbling up the DOM tree.
+  - It prevents other event handlers bound on the same element.
+  - It prevents the event's default action.
 
   \#\#\# Example
 
@@ -431,6 +463,20 @@ up.event = do ->
     event.stopImmediatePropagation()
     event.preventDefault()
 
+  ###**
+  Runs the given callback when the the initial HTML document has been completely loaded.
+
+  The callback is guaranteed to see the fully parsed DOM tree.
+  This function does not wait for stylesheets, images or frames to finish loading.
+
+  If `up.event.onReady()` is called after the initial document was loaded,
+  the given callback is run immediately.
+
+  @function up.event.onReady
+  @param {Function} callback
+    The function to call then the DOM tree is acessible.
+  @experimental
+  ###
   onReady = (callback) ->
     # Values are "loading", "interactive" and "completed".
     # https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
