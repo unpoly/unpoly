@@ -27,7 +27,7 @@ from a new page fetched from the server.
 @return {Promise}
   A promise that fulfills when the page has been updated.
 @deprecated
-  Use `up.render()` instead.
+  Use `up.render()` or `up.navigate()` instead.
 ###
 up.fragment.replace = (target, url, options) ->
   up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
@@ -69,6 +69,7 @@ discarded, since it didn't match the selector.
 @return {Promise}
   A promise that will be fulfilled then the selector was updated.
 @deprecated
+  Use `up.render()` or `up.navigate()` instead.
 ###
 up.fragment.extract = (target, document, options) ->
   up.migrate.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
