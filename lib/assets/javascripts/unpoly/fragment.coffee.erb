@@ -326,7 +326,7 @@ up.fragment = do ->
     pass an `{ onFinished }` callback.
   @stable
   ###
-  render = (args...) ->
+  render = up.mockable (args...) ->
     options = parseTargetAndOptions(args)
     options = up.RenderOptions.preprocess(options)
 
@@ -404,7 +404,7 @@ up.fragment = do ->
     See options for `up.render()`.
   @stable
   ###
-  navigate = (args...) ->
+  navigate = up.mockable (args...) ->
     options = parseTargetAndOptions(args)
     render(u.merge(options, navigate: true))
 
@@ -1325,7 +1325,6 @@ up.fragment = do ->
   up.on 'up:framework:reset', reset
 
   u.literal
-    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     config: config
     reload: reload
     destroy: destroy

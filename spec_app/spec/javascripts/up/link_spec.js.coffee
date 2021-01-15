@@ -815,7 +815,7 @@ describe 'up.link', ->
       it 'does not follow a form with up-target attribute (bugfix)', asyncSpec (next) ->
         $form = $fixture('form[up-target]')
         up.hello($form)
-        followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
+        followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence($form)
 
         next =>
@@ -1088,7 +1088,7 @@ describe 'up.link', ->
 
       beforeEach ->
         @$link = $fixture('a[href="/follow-path"][up-follow]')
-        @followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
+        @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
       it "calls up.follow with the clicked link", asyncSpec (next) ->
         Trigger.click(@$link)
@@ -1255,7 +1255,7 @@ describe 'up.link', ->
         $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
         $otherLink = $area.affix('a[href="/other-path"][up-follow]')
         up.hello($area)
-        followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
+        followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence($otherLink)
         next =>
           expect(followSpy.calls.count()).toEqual(1)
@@ -1266,7 +1266,7 @@ describe 'up.link', ->
         $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
         $input = $area.affix('input[type=text]')
         up.hello($area)
-        followSpy = up.link.knife.mock('follow').and.returnValue(Promise.resolve())
+        followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence($input)
         next =>
           expect(followSpy).not.toHaveBeenCalled()

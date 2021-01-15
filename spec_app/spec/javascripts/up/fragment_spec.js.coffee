@@ -2494,7 +2494,7 @@ describe 'up.fragment', ->
               expect($('.up-ghost')).toHaveLength(0)
 
           it "replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec (next) ->
-            swapDirectlySpy = up.motion.knife.mock('swapElementsDirectly')
+            swapDirectlySpy = up.motion.swapElementsDirectly.mock()
             $fixture('.element').text('version 1')
             up.render(
               fragment: '<div class="element">version 2</div>',
@@ -3000,7 +3000,7 @@ describe 'up.fragment', ->
 
         it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.knife.mock('isSingleton').and.callFake (element) -> e.matches(element, '.container')
+          up.element.isSingleton.mock().and.callFake (element) -> e.matches(element, '.container')
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', -> destructor
           $container = $fixture('.container')
@@ -4048,7 +4048,7 @@ describe 'up.fragment', ->
       describe 'up.replace()', ->
 
         it 'delegates to up.navigate({ target, url }) (deprecated)', ->
-          navigateSpy = up.fragment.knife.mock('navigate')
+          navigateSpy = up.fragment.navigate.mock()
           deprecatedSpy = spyOn(up.migrate, 'deprecated')
           up.replace('target', 'url')
           expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', url: 'url' })
@@ -4058,7 +4058,7 @@ describe 'up.fragment', ->
       describe 'up.extract()', ->
 
         it 'delegates to up.navigate({ target, document }) (deprecated)', ->
-          navigateSpy = up.fragment.knife.mock('navigate')
+          navigateSpy = up.fragment.navigate.mock()
           deprecatedSpy = spyOn(up.migrate, 'deprecated')
           up.extract('target', 'document')
           expect(navigateSpy).toHaveBeenCalledWith({ target: 'target', document: 'document' })
@@ -4067,7 +4067,7 @@ describe 'up.fragment', ->
     describe 'up.navigate()', ->
 
       it 'delegates to up.render({ ...options, navigate: true })', ->
-        renderSpy = up.fragment.knife.mock('render')
+        renderSpy = up.fragment.render.mock()
         up.navigate({ url: 'url' })
         expect(renderSpy).toHaveBeenCalledWith({ url: 'url', navigate: true })
 
@@ -4279,7 +4279,7 @@ describe 'up.fragment', ->
           expect('.element').toHaveText('new text')
 
       it 'does not use a cached response', ->
-        renderSpy = up.fragment.knife.mock('render')
+        renderSpy = up.fragment.render.mock()
         element = fixture('.element[up-source="/source"]')
 
         up.reload(element)

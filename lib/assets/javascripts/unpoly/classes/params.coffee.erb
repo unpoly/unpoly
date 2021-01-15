@@ -125,7 +125,10 @@ class up.Params extends up.Class
     formData = new FormData()
     for entry in @entries
       formData.append(entry.name, entry.value)
-    <% if ENV['JS_KNIFE'] %>formData.originalArray = @entries<% end %>
+    unless formData.entries
+      # If this browser cannot inspect FormData with the #entries()
+      # iterator, assign the original array for inspection by specs.
+      formData.originalArray = @entries
     formData
 
   ###**

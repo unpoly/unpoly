@@ -175,7 +175,7 @@ up.link = do ->
     has been loaded and rendered.
   @stable
   ###
-  follow = (link, options) ->
+  follow = up.mockable (link, options) ->
     return up.render(followOptions(link, options))
 
 
@@ -901,7 +901,6 @@ up.link = do ->
 
   up.on 'up:framework:reset', reset
 
-  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   follow: follow
   followOptions: followOptions
   preload: preload

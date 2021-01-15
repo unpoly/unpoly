@@ -816,7 +816,6 @@ up.viewport = do ->
   up.on 'up:framework:reset', reset
 
   u.literal
-    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     reveal: reveal
     revealHash: revealHash
     firstHashTarget: firstHashTarget

@@ -60,8 +60,6 @@ namespace :publish do
 
   desc 'Build release artifacts'
   task :build do
-    ENV['JS_KNIFE'] = nil
-
     Rake::Task['minified_assets:compile'].invoke
     Unpoly::Tasks::SPROCKETS_MANIFESTS.each do |manifest|
       source = "dist/#{manifest}"

@@ -921,7 +921,7 @@ describe 'up.form', ->
         $form = $fixture('form')
         $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
         up.hello($field)
-        submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
+        submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
@@ -932,7 +932,7 @@ describe 'up.form', ->
         radio1 = e.affix(group, 'input[type=radio][name=foo][value=1]')
         radio2 = e.affix(group, 'input[type=radio][name=foo][value=2]')
         up.hello(form)
-        submitSpy = up.form.knife.mock('submit').and.returnValue(Promise.reject())
+        submitSpy = up.form.submit.mock().and.returnValue(Promise.reject())
         Trigger.clickSequence(radio1)
         next =>
           expect(submitSpy.calls.count()).toBe(1)
@@ -949,7 +949,7 @@ describe 'up.form', ->
         $form = $fixture('form[up-autosubmit]')
         $field = $form.affix('input[name="input-name"][value="old-value"]')
         up.hello($form)
-        submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
+        submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
         $field.val('new-value')
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
@@ -960,7 +960,7 @@ describe 'up.form', ->
           $form = $fixture('form[up-autosubmit][up-delay="50"]')
           $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
-          submitSpy = up.form.knife.mock('submit').and.returnValue(u.unresolvablePromise())
+          submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
           $field.val('new-value-1')
           Trigger.change($field)
           $field.val('new-value-2')
@@ -1579,7 +1579,7 @@ describe 'up.form', ->
           $select.val('foo')
           $existingTarget = $container.affix('.target.existing[up-show-for="bar"]')
 
-          switchTargetSpy = up.form.knife.mock('switchTarget').and.callThrough()
+          switchTargetSpy = up.form.switchTarget.mock().and.callThrough()
 
           up.hello($container)
 

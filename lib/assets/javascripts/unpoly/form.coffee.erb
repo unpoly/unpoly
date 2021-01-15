@@ -204,7 +204,7 @@ up.form = do ->
     A promise for a successful form submission.
   @stable
   ###
-  submit = (form, options) ->
+  submit = up.mockable (form, options) ->
     return up.render(submitOptions(form, options))
 
   ###**
@@ -508,7 +508,7 @@ up.form = do ->
   ###**
   @internal
   ###
-  switchTarget = (target, fieldValues) ->
+  switchTarget = up.mockable (target, fieldValues) ->
     fieldValues ||= switcherValues(findSwitcherForTarget(target))
 
     if hideValues = target.getAttribute('up-hide-for')
@@ -1115,7 +1115,6 @@ up.form = do ->
 
   up.on 'up:framework:reset', reset
 
-  <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
   config: config
   submit: submit
   submitOptions: submitOptions
@@ -1125,6 +1124,7 @@ up.form = do ->
   fieldSelector: fieldSelector
   fields: findFields
   focusedField: focusedField
+  switchTarget: switchTarget
 
 up.submit = up.form.submit
 up.observe = up.form.observe

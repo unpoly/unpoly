@@ -1,4 +1,5 @@
 #= require ./unpoly/namespace
+#= require ./unpoly/mockable
 #= require ./unpoly/util
 #= require ./unpoly/error
 #= require ./unpoly/migrate_stub

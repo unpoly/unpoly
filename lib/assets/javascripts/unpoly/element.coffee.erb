@@ -597,7 +597,7 @@ up.element = do ->
   @function up.element.isSingleton
   @internal
   ###
-  isSingleton = (element) ->
+  isSingleton = up.mockable (element) ->
     return matches(element, SINGLETON_TAG_NAMES.join(','))
 
   isSingletonSelector = (selector) ->
@@ -1104,7 +1104,6 @@ up.element = do ->
     element != document && !getRoot().contains(element)
 
   u.literal
-    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     all: all # same as document.querySelectorAll
     subtree: subtree # practical
     isInSubtree: isInSubtree

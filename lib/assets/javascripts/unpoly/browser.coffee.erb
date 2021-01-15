@@ -232,7 +232,6 @@ up.browser = do ->
     return jQuery(args...)
 
   u.literal
-    <% if ENV['JS_KNIFE'] %>knife: eval(Knife.point)<% end %>
     loadPage: loadPage
     submitForm: submitForm
     canPushState: canPushState
