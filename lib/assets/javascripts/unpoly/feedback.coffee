@@ -155,8 +155,9 @@ up.feedback = do ->
     findActivatableArea(element).classList.add(CLASS_ACTIVE)
 
   ###**
-  Links that are currently [loading through Unpoly](/form-up-target)
+  Links that are currently [loading through Unpoly](/a-up-follow)
   are assigned the `up-active` class automatically.
+
   Style `.up-active` in your CSS to improve the perceived responsiveness
   of your user interface.
 
