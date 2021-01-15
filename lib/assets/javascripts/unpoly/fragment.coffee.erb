@@ -23,14 +23,29 @@ up.fragment = do ->
   Configures defaults for fragment updates.
 
   @property up.fragment.config
-  @param {Array<string>} config.mainTargets
+  @param {Array<string>} config.mainTargets=['[up-main]', 'main', ':layer']
+    An array of CSS selectors for default targets.
+
+    When no other render target is given, Unpoly will try to find and replace a main target.
+
+    When [navigating](/up.navigate) to a main target, Unpoly will automatically
+    [reset scroll positions](/up.render#options.scroll) and
+    [update the browser history](/up.render#options.history).
+
+    The default main targets are the HTML5 [`<main>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main),
+    any element with an `[up-main]` attribute and the current layer's
+    [topmost swappable element](/main). For the [root layer](/up.layer.root)
+    the topmos swappable element is the `<body>`. For an overlay
+    it is the target with which the overlay was opened with.
   @param {Array<string|RegExp>} config.badTargetClasses
-    A list of class names that should be ignored when
+    An array of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
 
     The class names may also be passed as a regular expression.
   @param {Object} config.navigateOptions
     An object of default options to apply when [navigating](/up.navigate).
+
+    See `up.navigate()` for a table of default navigate options and their effects.
   @param {Array<string>} config.autoHistoryTargets
     An array of CSS selectors for which the browser history is updated with `{ history: 'auto' }`.
   @param {Array<string>} config.autoScrollTargets
@@ -201,9 +216,19 @@ up.fragment = do ->
   element that replaces it.
 
   @function up.render
+  @param {string|Element|jQuery} [target]
+    The CSS selector to update.
+
+    If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
+
+    You can also pass a DOM element or jQuery element here, in which case a selector
+    will be [inferred from the element attributes](/up.fragment.target). The given element
+    will also be set as the `{ origin }` option.
+
+    Instead of passing the target as the first argument, you may also pass it as
+    [´{ target }` option](/up.fragment.render#options.target).
   @param {string|Element|jQuery} [options.target]
-    The CSS selector to update. You can also pass a DOM element or jQuery element
-    here, in which case a selector will be inferred from the element's class and ID.
+    The CSS selector to update.
   @param {string} [options.url]
     The URL to fetch from the server.
   @param {string} [options.fragment]
@@ -314,6 +339,64 @@ up.fragment = do ->
 
     return promise
 
+  ###**
+  Navigates to the given URL by replacing a major fragment in the current page.
+
+  The current page and JavaScript environment is kept intact.
+
+  \#\#\# Navigation is rendering with defaults
+
+  When updating a fragment `up.render()`, it will only swap the fragment, but not update
+  the history, scroll, focus, etc. You need to explicitely update into each additional behavior:
+
+  ```js
+  // Will not update history, will not scroll, etc.
+  up.render('.message-count', { url: '/inbox' })
+
+  // Will update history, but not scroll, etc.
+  up.render('.message-count', { url: '/inbox', history: true })
+  ```
+
+  You can opt into defaults suited for user navigation bei either passing `{ navigate: true }`
+  or using `up.navigate()`
+
+  ```js
+  // Will update history, will scroll, etc.
+  up.render('.content', { url: '/users/5', navigate: true })
+  up.navigate('.content', { url: '/inbox' })
+  ```
+
+  Unpoly ships with the following navigation defaults:
+
+  | Option                  | Effect                                       |
+  | ----------------------- | -------------------------------------------- |
+  | `{ history: 'auto' }`   | Update browser location and window title if updating a main target |
+  | `{ scroll: 'auto' }`    | Reset scroll position if updating a main target |
+  | `{ fallback: ':main' }` | Replace a [main target](/up.fragment.config#config.mainTargets) if response doesn't contain target |
+  | `{ cache: true }`       | Cache responses for 5 minutes |
+  | `{ feedback: true }`    | Set [`.up-active`](/a-up-update) on the activated link |
+  | `{ focus: 'auto' }`     | Focus [autofocus] elements in the new fragment |
+  | `{ solo: true }`        | Cancel existing requests |
+  | `{ peel: true }`        | Close overlays when targeting a layer below |
+
+  You can configure your navigation defaults with `up.fragment.config.navigateOptions`.
+
+  @function up.navigate
+  @param {string|Element|jQuery} [target]
+    The CSS selector to update.
+
+    If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
+
+    You can also pass a DOM element or jQuery element here, in which case a selector
+    will be [inferred from the element attributes](/up.fragment.target). The given element
+    will also be set as the `{ origin }` option.
+
+    Instead of passing the target as the first argument, you may also pass it as
+    [´{ target }` option](/up.fragment.render#options.target).
+  @param {Object} [options]
+    See options for `up.render()`.
+  @stable
+  ###
   navigate = (args...) ->
     options = parseTargetAndOptions(args)
     render(u.merge(options, navigate: true))
@@ -1166,7 +1249,7 @@ up.fragment = do ->
 
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
-  to replace the layer's [main element](/up.fragment.config.mainTargets).
+  to replace the layer's [main element](/up.fragment.config#config.mainTargets).
 
   \#\#\# Example
 
