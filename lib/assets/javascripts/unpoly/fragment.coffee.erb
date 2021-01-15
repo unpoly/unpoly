@@ -255,7 +255,8 @@ up.fragment = do ->
 
     Options that are used before the request is made (like `{ url, method, confirm }`) do not
     have a `fail`-prefixed variant. Some options (like `{ history, fallback }`) are used for both
-    successful and failed responses, but may be overriden with a fail-prefixed variant (e.g. `{ history: true, failHistory: false }`. Options related to layers, scrolling or focus are never shared.
+    successful and failed responses, but may be overriden with a fail-prefixed variant (e.g. `{ history: true, failHistory: false }`.
+    Options related to layers, scrolling or focus are never shared.
 
     The `{ fail }` option changes how Unpoly determines whether a server response was successful.
     By default (`{ fail: 'auto' }`) any HTTP 2xx status code will be considered successful,
@@ -267,8 +268,14 @@ up.fragment = do ->
     When the updated fragment content is not requested from a `{ url }`, but rather passed as an
     option (`{ content, fragment, document }`), the update is always considered successful, regardless
     of the `{ fail }` option.
-  @param {string} [options.fallback]
-    The selector to update when the original target was not found in the page.
+  @param {string|boolean} [options.fallback]
+    Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
+
+    If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
+
+    If set to `true` Unpoly will attempt to replace a [main target](/up.fragment.config#config.mainTargets) instead.
+
+    If set to `false` Unpoly will immediately reject the render promise.
   @param {string} [options.title]
     The document title after the replacement.
 
