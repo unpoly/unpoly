@@ -1,39 +1,9 @@
 - Module build
 - Also compile and minify CSS
 - Remove redundant sprockets requires (we now import it all in unpoly.js)
-
-
 - Style Pipeline for production files
-
-- Use https://www.npmjs.com/package/webpack-preprocessor-loader instead of ERB so we keep valid JS files
-
-
-spec/index.html -- lädt den runner
-
-
-development:
-  dist/specs.js
-    JS spec helpers
-
-
-  dist/unpoly.development.es5.js
-    transpilet
-    nicht minimized
-    mit Knifes
-
-  dist/unpoly.development.esnext.js
-    ES6
-    nicht minified
-    mit Knifes
-
-production:
-  dist/unpoly.es5.js
-  dist/unpoly.es5.min.js
-  dist/unpoly.esnext.js
-  dist/unpoly.esnext.min.js
-
-
 - upgrade to node 14 (lts/fermium)
+- Remove JS_KNIFE env
 - upgrade typescript
 
 
@@ -52,15 +22,7 @@ Why compile down to ES5?
 ========================
 Every app has an ES5 pipeline.
 
-=> But Sprockets / Uglifier cannot do destructiring, even with harmony: true
-
-
-unpoly.js // in .gitignore
-unpoly.min.js
-unpoly.dev.es5.js
-unpoly.dev.esnext.js
-
-Build everything all the time!
+=> But Sprockets / Uglifier cannot do destructuring, even with { harmony: true }
 
 
 
@@ -78,21 +40,18 @@ Structure
   build/
     <output folder for webpack>
     specs.html -> ../test/specs.html
-    unpoly.js              // in .gitignore
-    unpoly.min.js          // in .gitignore
+    unpoly.esnext.js                  // in .gitignore
+    unpoly.esnext.min.js              // in .gitignore
     unpoly.es5.js              // in .gitignore
-    unpoly.es5.min.js              // in .gitignore
+    unpoly.es5.min.js          // in .gitignore
 
-    unpoly.dev.es5.js      // in .gitignore
-    unpoly.dev.js          // in .gitignore
-
-    specs.js               // in .gitignore
-    jasmine.js             // in .gitignore
+    specs.js                   // in .gitignore
+    jasmine.js                 // in .gitignore
 
     unpoly-bootstrap3.js       // in .gitignore
     unpoly-bootstrap3.min.js   // in .gitignore
-    unpoly-bootstrap3.css      // in .gitignore
-    unpoly-bootstrap3.min.css  // in .gitignore
+    unpoly-bootstrap4.css      // in .gitignore
+    unpoly-bootstrap4.min.css  // in .gitignore
     ...
     unpoly-migrate.js          // in .gitignore
 
@@ -102,7 +61,7 @@ Structure
     unpoly-bootstrap4.js
     unpoly-bootstrap5.js
     unpoly-migrate.js
-    not needed anymore: unpoly.css (manifest is in pack.js)
+    not needed anymore: unpoly.css (the manifest is in unpoly.js)
 
     unpoly/
       fragment.coffee
@@ -122,6 +81,8 @@ Structure
     specs.js
     specs.css
     specs.html
+      <script type="module" src="unpoly.esnext.js">
+      <script type="nomodule" src="unpoly.es5.js">
 
 
 /unpoly-rails
@@ -136,18 +97,35 @@ Structure
         ...
     assets/
       javascripts/
-        unpoly.js  -> ../../../unpoly/build/unpoly.js   # must be copied into gem!
+        unpoly.es5.js     # .gitignore, will be copied into gem before release OR check what the gem build task does with a symlink
+        unpoly.esnext.js  # .gitignore, will be copied into gem before release
       stylesheets/
-        unpoly.css -> ../../../unpoly/build/unpoly.css   # must be copied into gem!
+        unpoly.css ->     # .gitignore, will be copied into gem before release
+
+  spec
+
 
   Rakefile
-    release-task kopiert assets und macht version.rb aus package.json
+    release-task:
+    - copies assets from local unpoly-repo into assets/
+    - macht version.rb aus package.json
 
 
-/unpoly-manual-test
+/unpoly-human-test
   app/...
 
   Gemfile uses unpoly-rails from ../unpoly-rails
+
+
+
+  vendor/
+    unpoly-local/
+      unpoly.es5.js  -> ../../../unpoly/build/unpoly.es5.js
+      unpoly.css     -> ../../../unpoly/build/unpoly.css
+
+
+
+  WOHER KOMMEN DIE ASSETS?
 
 
 /unpoly-site
@@ -155,5 +133,5 @@ Structure
 
   vendor
     unpoly-local
-      unpoly.js  -> ../../../unpoly/build/unpoly.js
-      unpoly.css -> ../../../unpoly/build/unpoly.css
+      unpoly.es5.js  -> ../../../unpoly/build/unpoly.es5.js
+      unpoly.css     -> ../../../unpoly/build/unpoly.css
