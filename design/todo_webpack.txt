@@ -47,6 +47,27 @@ Final folder structure
 - Maybe don't have separate development and build configs
 
 
+
+Why compile down to ES5?
+========================
+Every app has an ES5 pipeline.
+
+=> But Sprockets / Uglifier cannot do destructiring, even with harmony: true
+
+
+unpoly.js // in .gitignore
+unpoly.min.js
+unpoly.dev.es5.js
+unpoly.dev.esnext.js
+
+Build everything all the time!
+
+
+
+Structure
+=========
+
+
 /unpoly
   Rakefile // publish scripts are still here, eventually move to package.json; Must update VERSION in package.json or throw if differs
 
@@ -57,17 +78,30 @@ Final folder structure
   build/
     <output folder for webpack>
     specs.html -> ../test/specs.html
-    unpoly.es5.js // in .gitignore
-    unpoly.esnext.js // in .gitignore
-    unpoly.development.es5.js // in .gitignore     => do we really need this if we got regular and .min? We do need it for .knife
-    unpoly.development.esnext.js // in .gitignore
-    // consider building everything
+    unpoly.js              // in .gitignore
+    unpoly.min.js          // in .gitignore
+    unpoly.es5.js              // in .gitignore
+    unpoly.es5.min.js              // in .gitignore
+
+    unpoly.dev.es5.js      // in .gitignore
+    unpoly.dev.js          // in .gitignore
+
+    specs.js               // in .gitignore
+    jasmine.js             // in .gitignore
+
+    unpoly-bootstrap3.js       // in .gitignore
+    unpoly-bootstrap3.min.js   // in .gitignore
+    unpoly-bootstrap3.css      // in .gitignore
+    unpoly-bootstrap3.min.css  // in .gitignore
+    ...
+    unpoly-migrate.js          // in .gitignore
 
   src/
     unpoly.js
     unpoly-bootstrap3.js
     unpoly-bootstrap4.js
     unpoly-bootstrap5.js
+    unpoly-migrate.js
     not needed anymore: unpoly.css (manifest is in pack.js)
 
     unpoly/
@@ -84,6 +118,7 @@ Final folder structure
     unpoly/
       fragment_spec.coffee
       protocol_spec.coffee
+    jasmine.js
     specs.js
     specs.css
     specs.html
@@ -101,9 +136,12 @@ Final folder structure
         ...
     assets/
       javascripts/
-        unpoly.es5.js -> ../../../unpoly/build/unpoly.es5.js
+        unpoly.js  -> ../../../unpoly/build/unpoly.js   # must be copied into gem!
       stylesheets/
-        unpoly.css -> ../../../unpoly/build/unpoly.css
+        unpoly.css -> ../../../unpoly/build/unpoly.css   # must be copied into gem!
+
+  Rakefile
+    release-task kopiert assets und macht version.rb aus package.json
 
 
 /unpoly-manual-test
@@ -117,10 +155,5 @@ Final folder structure
 
   vendor
     unpoly-local
-      unpoly.es5.js -> ../../../unpoly/build.es5.js
-      unpoly.es5.css -> ../../../unpoly/build/unpoly.css
-
-
-
-
-
+      unpoly.js  -> ../../../unpoly/build/unpoly.js
+      unpoly.css -> ../../../unpoly/build/unpoly.css
