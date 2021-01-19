@@ -43,7 +43,7 @@ class up.Request.Queue extends up.Class
 
   setSlowTimer: ->
     badResponseTime = u.evalOption(@badResponseTime)
-    @checkSlowTimout = setTimeout(@checkSlow, badResponseTime)
+    @checkSlowTimout = u.timer(badResponseTime, => @checkSlow())
 
   hasConcurrencyLeft: ->
     maxConcurrency = u.evalOption(@concurrency)
@@ -109,7 +109,7 @@ class up.Request.Queue extends up.Class
   requestMatches: (request, conditions) ->
     return request == conditions || u.evalOption(conditions, request)
 
-  checkSlow: =>
+  checkSlow: ->
     currentSlow = @isSlow()
 
     if @emittedSlow != currentSlow

@@ -42,6 +42,8 @@ Remaining feature work
 
 - Remove fine-grained pushState checks in the code, don't load unpoly if we cannot pushState
 
+- Remove history options for up.destroy()
+
 
 Manual tests
 ------------

@@ -7,23 +7,23 @@ class up.store.Memory
   constructor: ->
     @clear()
 
-  clear: =>
+  clear: ->
     @data = {}
 
-  get: (key) =>
+  get: (key) ->
     @data[key]
 
-  set: (key, value) =>
+  set: (key, value) ->
     @data[key] = value
 
-  remove: (key) =>
+  remove: (key) ->
     delete @data[key]
 
-  keys: =>
+  keys: ->
     Object.keys(@data)
 
-  size: =>
+  size: ->
     @keys().length
 
-  values: =>
+  values: ->
     u.values(@data)

@@ -28,7 +28,7 @@ class up.store.Session extends up.store.Memory
     @rootKey = rootKey
     @loadFromSessionStorage()
 
-  clear: =>
+  clear: ->
     super()
     @saveToSessionStorage()
 
@@ -40,7 +40,7 @@ class up.store.Session extends up.store.Memory
     super(key)
     @saveToSessionStorage()
 
-  loadFromSessionStorage: =>
+  loadFromSessionStorage: ->
     try
       if raw = sessionStorage?.getItem(@rootKey)
         @data = JSON.parse(raw)
@@ -50,7 +50,7 @@ class up.store.Session extends up.store.Memory
 
     @data ||= {}
 
-  saveToSessionStorage: =>
+  saveToSessionStorage: ->
     json = JSON.stringify(@data)
     try
       sessionStorage?.setItem(@rootKey, json)

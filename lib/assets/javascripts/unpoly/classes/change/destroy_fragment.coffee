@@ -31,7 +31,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
       # The destroy animation will then play out, but the destroying
       # element is ignored by all up.fragment.* functions.
       @emitDestroyed()
-      @animate().then(@wipe).then(=> @onFinished())
+      @animate().then(=> @wipe()).then(=> @onFinished())
     else
       # If we're not animating, we can remove the element and then resolve.
       @wipe()
@@ -44,7 +44,7 @@ class up.Change.DestroyFragment extends up.Change.Removal
   animate: ->
     up.motion.animate(@element, @animation, @options)
 
-  wipe: =>
+  wipe: ->
     @layer.asCurrent =>
       up.syntax.clean(@element, { @layer })
 
