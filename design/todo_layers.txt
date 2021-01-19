@@ -35,7 +35,12 @@ Remaining feature work
   - canConsole
   - canAnimationFrame
   - canDOMParser
+
 - Remove boxed type checks from up.util
+
+- Remove fat arrows in all classes
+
+- Remove fine-grained pushState checks in the code, don't load unpoly if we cannot pushState
 
 
 Manual tests
