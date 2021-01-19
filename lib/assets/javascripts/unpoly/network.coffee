@@ -367,8 +367,11 @@ up.network = do ->
   makeRequest = (args...) ->
     request = new up.Request(parseRequestOptions(args))
     useCachedRequest(request) || queueRequest(request)
-    if request.solo
-      queue.abortExcept(request)
+    if solo = request.solo
+      # The { solo } option may also contain a function.
+      # This way users can excempt some requests from being solo-aborted
+      # by configuring up.fragment.config.navigateOptions.
+      queue.abortExcept(request, solo)
     return request
 
   mimicLocalRequest = (options) ->
