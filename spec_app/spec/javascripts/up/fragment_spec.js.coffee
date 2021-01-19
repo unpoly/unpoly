@@ -4168,21 +4168,6 @@ describe 'up.fragment', ->
               expect(warnSpy).toHaveBeenCalled()
               done()
 
-      it 'allows to pass a new history entry as { location } option', (done) ->
-        up.history.config.enabled = true
-        $fixture('.element')
-        up.destroy('.element', location: '/new-path').then ->
-          u.timer 100, ->
-            expect(location.href).toMatchURL('/new-path')
-            done()
-
-      it 'allows to pass a new document title as { title } option', (done) ->
-        up.history.config.enabled = true
-        $fixture('.element')
-        up.destroy('.element', title: 'Title from options').then ->
-          expect(document.title).toEqual('Title from options')
-          done()
-
       it 'marks the element as .up-destroying while it is animating', asyncSpec (next) ->
         $element = $fixture('.element')
         up.destroy($element, animation: 'fade-out', duration: 80, easing: 'linear')

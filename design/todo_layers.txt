@@ -38,11 +38,9 @@ Remaining feature work
 
 - Remove boxed type checks from up.util
 
-- Remove fat arrows in all classes
-
 - Remove fine-grained pushState checks in the code, don't load unpoly if we cannot pushState
 
-- Remove history options for up.destroy()
+- Support solo: function() again so we can excempt certain requests in up.fragment.config.navigateOptions.solo
 
 
 Manual tests
