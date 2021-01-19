@@ -381,7 +381,7 @@ class up.Request extends up.Record
     if !@isSafe() && !@isCrossDomain()
       up.protocol.csrfToken()
 
-  isCrossDomain: =>
+  isCrossDomain: ->
     u.isCrossDomain(@url)
 
   extractResponseFromXHR:  ->

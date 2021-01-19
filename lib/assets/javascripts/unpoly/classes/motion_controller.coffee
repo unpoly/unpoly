@@ -151,7 +151,7 @@ class up.MotionController
     # Our own pseudo-animation finishes when the actual animation on $ghost finishes
     fn().then(unbindFinish)
 
-  reset: =>
+  reset: ->
     @finish().then =>
       @finishCount = 0
       @clusterCount = 0

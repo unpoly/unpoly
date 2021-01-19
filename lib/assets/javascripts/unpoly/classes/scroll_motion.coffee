@@ -16,7 +16,7 @@ class up.ScrollMotion
     # from up.replace() it's { scrollSpeed }.
     @speed = (options.speed ? options.scrollSpeed ? up.viewport.config.scrollSpeed) * SPEED_CALIBRATION
 
-  start: =>
+  start: ->
     return new Promise (@resolve, @reject) =>
       if @behavior == 'smooth' && up.motion.isEnabled()
         @startAnimation()
@@ -30,9 +30,9 @@ class up.ScrollMotion
     # We're applying a square root to become slower for small distances
     # and faster for large distances.
     @duration = Math.sqrt(Math.abs(@topDiff)) / @speed
-    requestAnimationFrame(@animationFrame)
+    requestAnimationFrame(=> @animationFrame())
 
-  animationFrame: =>
+  animationFrame: ->
     return if @settled
 
     # When the scroll position is not the one we previously set, we assume
@@ -52,13 +52,13 @@ class up.ScrollMotion
       @finish()
     else
       @scrollable.scrollTop = @frameTop
-      requestAnimationFrame(@animationFrame)
+      requestAnimationFrame(=> @animationFrame())
 
   abort: (reason) =>
     @settled = true
     @reject(up.error.aborted(reason))
 
-  finish: =>
+  finish: ->
     # In case we're animating with emulation, cancel the next scheduled frame
     @settled = true
     # Setting the { scrollTop } prop will also finish a native scrolling
