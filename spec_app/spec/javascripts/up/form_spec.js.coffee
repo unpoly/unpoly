@@ -407,7 +407,7 @@ describe 'up.form', ->
           next =>
             expect(@lastRequest().requestHeaders['Content-Type']).toEqual('my-type')
 
-      describeCapability 'canPushState', ->
+      describe 'submission', ->
 
         beforeEach ->
           up.history.config.enabled = true
@@ -657,17 +657,6 @@ describe 'up.form', ->
             next =>
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
-
-      describeFallback 'canPushState', ->
-
-        it 'falls back to a vanilla form submission', asyncSpec (next) ->
-          $form = $fixture('form[action="/qux"][method="put"][up-target=".response"]')
-          form = $form.get(0)
-          loadPageSpy = spyOn(up.browser, 'loadPage')
-
-          up.submit($form)
-
-          next => expect(loadPageSpy).toHaveBeenCalled()
 
     describe 'up.form.submitOptions()', ->
 

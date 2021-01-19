@@ -499,10 +499,12 @@ up.network = do ->
 
   shouldPreload = (request) ->
     setting = u.evalOption(config.preloadEnabled, request)
+
     if setting == 'auto'
       # Since connection.effectiveType might change during a session we need to
       # re-evaluate the value every time.
-      return !shouldReduceRequests() && up.browser.canPushState()
+      return !shouldReduceRequests()
+
     return setting
 
   ###**

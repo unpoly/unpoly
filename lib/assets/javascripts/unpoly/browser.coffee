@@ -41,12 +41,10 @@ up.browser = do ->
   For mocking in specs.
 
   @function up.browser.submitForm
+  @internal
   ###
   submitForm = (form) ->
     form.submit()
-
-  isIE10OrWorse = u.memoize ->
-    !window.atob
 
   isIE11 = u.memoize ->
     'ActiveXObject' of window # this is undefined, but the key is set
@@ -63,7 +61,7 @@ up.browser = do ->
 
   @function up.browser.canPushState
   @return {boolean}
-  @stable
+  @internal
   ###
   canPushState = ->
     # We cannot use pushState if the initial request method is a POST for two reasons:
@@ -82,32 +80,7 @@ up.browser = do ->
     # initial request method was anything other than GET (but allow the rest of the
     # Unpoly framework to work). This way Unpoly will fall back to full page loads until
     # the framework was booted from a GET request.
-    u.isDefined(history.pushState) && up.protocol.initialRequestMethod() == 'get'
-
-  ###**
-  Returns whether this browser supports animation using
-  [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions).
-
-  When Unpoly is asked to animate history on a browser that doesn't support
-  CSS transitions (e.g. through [`up.animate()`](/up.animate)), it will skip the
-  animation by instantly jumping to the last frame.
-
-  @function up.browser.canCSSTransition
-  @return {boolean}
-  @internal
-  ###
-  canCSSTransition = u.memoize ->
-    'transition' of document.documentElement.style
-
-  ###**
-  Returns whether this browser supports the DOM event [`input`](https://developer.mozilla.org/de/docs/Web/Events/input).
-
-  @function up.browser.canInputEvent
-  @return {boolean}
-  @internal
-  ###
-  canInputEvent = u.memoize ->
-    'oninput' of document.createElement('input')
+    history.pushState && up.protocol.initialRequestMethod() == 'GET'
 
   ###**
   Returns whether this browser supports promises.
@@ -119,64 +92,8 @@ up.browser = do ->
   canPromise = u.memoize ->
     !!window.Promise
 
-  ###**
-  Returns whether this browser supports the [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
-  interface.
-
-  @function up.browser.canFormData
-  @return {boolean}
-  @experimental
-  ###
-  canFormData = u.memoize ->
-    !!window.FormData
-
-  ###**
-  @function up.browser.canInspectFormData
-  @return {boolean}
-  @internal
-  ###
-  canInspectFormData = u.memoize ->
-    canFormData() && !!FormData.prototype.entries
-
-  ###**
-  Returns whether this browser supports the [`DOMParser`](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
-  interface.
-
-  @function up.browser.canDOMParser
-  @return {boolean}
-  @internal
-  ###
-  canDOMParser = u.memoize ->
-    !!window.DOMParser
-
   canFormatLog = u.memoize ->
     !isIE11()
-
-  ###**
-  Returns whether this browser supports the [`debugging console`](https://developer.mozilla.org/en-US/docs/Web/API/Console).
-
-  @function up.browser.canConsole
-  @return {boolean}
-  @internal
-  ###
-  canConsole = u.memoize ->
-    window.console &&
-      console.debug &&
-      console.info &&
-      console.warn &&
-      console.error &&
-      console.group &&
-      console.groupCollapsed &&
-      console.groupEnd
-
-  canCustomElements = u.memoize ->
-    !!window.customElements
-
-  canAnimationFrame = u.memoize ->
-    'requestAnimationFrame' of window
-
-  canControlScrollRestoration = u.memoize ->
-    'scrollRestoration' of history
 
   canPassiveEventListener = u.memoize ->
     !isIE11()
@@ -216,16 +133,7 @@ up.browser = do ->
   @stable
   ###
   isSupported = ->
-    !isIE10OrWorse() &&
-      canConsole() &&
-      # We don't require pushState in order to cater for Safari booting Unpoly with a non-GET method.
-      # canPushState() &&
-      canDOMParser() &&
-      canFormData() &&
-      canCSSTransition() &&
-      canInputEvent() &&
-      canPromise() &&
-      canAnimationFrame()
+    return canPushState() && canPromise()
 
   callJQuery = (args...) ->
     canJQuery() or up.fail("jQuery must be published as window.jQuery")
@@ -234,11 +142,6 @@ up.browser = do ->
   u.literal
     loadPage: loadPage
     submitForm: submitForm
-    canPushState: canPushState
-    canFormData: canFormData
-    canInspectFormData: canInspectFormData
-    canCustomElements: canCustomElements
-    canControlScrollRestoration: canControlScrollRestoration
     canFormatLog: canFormatLog
     canPassiveEventListener: canPassiveEventListener
     canJQuery: canJQuery

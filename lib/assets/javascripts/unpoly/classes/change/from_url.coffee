@@ -14,12 +14,6 @@ class up.Change.FromURL extends up.Change
     @failOptions = up.RenderOptions.deriveFailOptions(@successOptions)
 
   execute: ->
-    if !up.browser.canPushState() && !@options.preload
-      up.browser.loadPage(@options)
-      # Prevent our caller from executing any further code, since we're already
-      # navigating away from this JavaScript environment.
-      return u.unresolvablePromise()
-
     promise = @makeRequest()
 
     if @options.preload

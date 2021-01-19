@@ -458,7 +458,7 @@ describe 'up.network', ->
               # See that an additional request was made
               expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        describeCapability 'canInspectFormData', ->
+        if FormData.prototype.entries
 
           it "does not explode if the original request's { params } is a FormData object", asyncSpec (next) ->
             up.request('/foo', method: 'post', params: new FormData()) # POST requests are not cached

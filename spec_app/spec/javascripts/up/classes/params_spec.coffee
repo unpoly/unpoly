@@ -169,7 +169,7 @@ describe 'up.Params', ->
 
   describe '#toFormData', ->
 
-    describeCapability 'canInspectFormData', ->
+    if FormData.prototype.entries
 
       it 'converts undefined to an empty FormData object', ->
         params = undefined

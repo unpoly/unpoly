@@ -609,8 +609,7 @@ up.protocol = do ->
   @internal
   ###
   initialRequestMethod = u.memoize ->
-    methodFromServer = up.browser.popCookie('_up_method')
-    (methodFromServer || 'get').toLowerCase()
+    return u.normalizeMethod(up.browser.popCookie('_up_method'))
 
   ###**
   The server may set this optional cookie to echo the HTTP method of the initial request.
@@ -677,11 +676,6 @@ up.protocol = do ->
   ###
   targetFromXHR = (xhr) ->
     extractHeader(xhr, 'target')
-
-  # Remove the method cookie as soon as possible.
-  # Don't wait until the first call to initialRequestMethod(),
-  # which might be much later.
-  up.on('up:framework:booted', initialRequestMethod)
 
   ###**
   Configures strings used in the optional [server protocol](/up.protocol).

@@ -232,10 +232,6 @@ up.event = do ->
     bindNow(args, jQuery: true)
 
   bindNow = (args, options) ->
-    # Silently discard any event handlers that are registered on unsupported
-    # browsers and return a no-op destructor
-    return (->) unless up.browser.isSupported()
-
     up.EventListenerGroup.fromBindArgs(args, options).bind()
 
   ###**
@@ -546,7 +542,6 @@ up.event = do ->
 #    [abort, signal]
 
   bind 'up:click', 'a[up-emit]', executeEmitAttr
-
   bind 'up:framework:reset', reset
 
   on: bind # can't name symbols `on` in Coffeescript

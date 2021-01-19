@@ -94,9 +94,6 @@ up.history = do ->
 
     if manipulate('replaceState', url)
       emit('up:history:replaced', url: url, log: doLog && "Replaced state for #{u.urlWithoutHost url}")
-    else
-      emit('up:history:muted', url: url, log: doLog && "Did not replace state with #{u.urlWithoutHost url} (history is disabled)")
-
 
   ###**
   This event is [emitted](/up.emit) after a new history entry has been replaced.
@@ -133,8 +130,6 @@ up.history = do ->
     if (options.force || !isCurrentLocation(url))
       if manipulate('pushState', url)
         up.emit('up:history:pushed', url: url, log: "Advanced to location #{u.urlWithoutHost url}")
-      else
-        up.emit('up:history:muted', url: url, log: "Did not advance to #{u.urlWithoutHost url} (history is disabled)")
 
   ###**
   This event is [emitted](/up.emit) after a new history entry has been added.
@@ -148,13 +143,11 @@ up.history = do ->
   ###
 
   manipulate = (method, url) ->
-    if up.browser.canPushState() && config.enabled
+    if config.enabled
       state = buildState()
       window.history[method](state, '', url)
       observeNewURL(currentLocation())
       return state
-    else
-      false
 
   buildState = ->
     up: {}
@@ -205,21 +198,22 @@ up.history = do ->
   ###
 
   up.on 'up:app:boot', ->
-    if up.browser.canPushState()
-      register = ->
-        window.history.scrollRestoration = 'manual' if up.browser.canControlScrollRestoration()
-        window.addEventListener('popstate', pop)
-        # Replace the vanilla state of the initial page load with an Unpoly-enabled state
-        replace(currentLocation(), log: false)
+    register = ->
+      # Supported by all browser except IE:
+      # https://developer.mozilla.org/en-US/docs/Web/API/History/scrollRestoration
+      window.history.scrollRestoration = 'manual'
+      window.addEventListener('popstate', pop)
+      # Replace the vanilla state of the initial page load with an Unpoly-enabled state
+      replace(currentLocation(), log: false)
 
-      if jasmine?
-        # Can't delay this in tests.
-        register()
-      else
-        # Defeat an unnecessary popstate that some browsers trigger
-        # on pageload (Safari, Chrome < 34).
-        # We should check in 2023 if we can remove this.
-        setTimeout(register, 100)
+    if jasmine?
+      # Can't delay this in tests.
+      register()
+    else
+      # Defeat an unnecessary popstate that some browsers trigger
+      # on pageload (Safari, Chrome < 34).
+      # We should check in 2023 if we can remove this.
+      setTimeout(register, 100)
 
   ###**
   Changes the link's destination so it points to the previous URL.

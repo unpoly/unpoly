@@ -302,15 +302,6 @@ describe 'up.fragment', ->
             up.render('.target', url: '/path', method: 'get', params: givenParams)
             next => expect(@lastRequest().url).toMatchURL('/path?foo-key=foo-value&bar-key=bar-value')
 
-        describeFallback 'canPushState', ->
-
-          it 'makes a full page load', asyncSpec (next) ->
-            spyOn(up.browser, 'loadPage')
-            up.render('.selector', url: '/path')
-
-            next =>
-              expect(up.browser.loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path'))
-
         describe 'when the server responds with an error or unexpected content', ->
 
           it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
@@ -4002,7 +3993,7 @@ describe 'up.fragment', ->
             onFinished: assertElements
           )
 
-      describeCapability 'canCustomElements', ->
+      if window.customElements
 
         describe 'custom elements', ->
 
@@ -4302,17 +4293,6 @@ describe 'up.fragment', ->
         next =>
           expect(@lastRequest().url).toMatchURL('/source')
           expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
-
-      describeFallback 'canPushState', ->
-
-        it 'makes a page load from the closest known source URL', asyncSpec (next) ->
-          container = fixture('.container[up-source="/source"]')
-          element = e.affix(container, '.element', text: 'old text')
-          spyOn(up.browser, 'loadPage')
-          up.reload('.element')
-
-          next =>
-            expect(up.browser.loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/source'))
 
     describe 'up.fragment.source()', ->
 

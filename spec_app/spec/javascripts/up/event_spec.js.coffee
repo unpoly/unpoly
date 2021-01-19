@@ -747,4 +747,5 @@ describe 'up.event', ->
           Trigger.clickSequence(link)
 
           next ->
+            console.log("*** EXPECTATION")
             expect(followListener).not.toHaveBeenCalled()

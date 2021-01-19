@@ -5,7 +5,7 @@ beforeEach ->
       up.util.isFormData(xhr.params)
 
     parse: (params) ->
-      if up.browser.canInspectFormData()
+      if FormData.prototype.entries
         array = new up.Params(params).toArray()
       else if params.originalArray
         # In browser that don't support FormData#entries(),
