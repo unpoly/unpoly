@@ -351,7 +351,7 @@ up.form = do ->
     options.delay = options.delay ? e.numberAttr(elements[0], 'up-delay') ? config.observeDelay
     observer = new up.FieldObserver(fields, options, callback)
     observer.start()
-    return observer.stop
+    return -> observer.stop()
 
   observeCallbackFromElement = (element) ->
     if rawCallback = element.getAttribute('up-observe')

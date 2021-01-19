@@ -8,24 +8,24 @@ class up.FieldObserver
     @delay = options.delay
     @batch = options.batch
 
-  start: =>
+  start: ->
     @scheduledValues = null
     @processedValues = @readFieldValues()
     @currentTimer = undefined
     @callbackRunning = false
     # Although (depending on the browser) we only need/receive either input or change,
     # we always bind to both events in case another script manually triggers it.
-    @unbind = up.on(@fields, 'input change', @check)
+    @unbind = up.on(@fields, 'input change', => @check())
 
-  stop: =>
+  stop: ->
     @unbind()
     @cancelTimer()
 
-  cancelTimer: =>
+  cancelTimer: ->
     clearTimeout(@currentTimer)
     @currentTimer = undefined
 
-  scheduleTimer: =>
+  scheduleTimer: ->
     @cancelTimer()
     @currentTimer = u.timer @delay, =>
       @currentTimer = undefined
@@ -38,7 +38,7 @@ class up.FieldObserver
   isNewValues: (values) =>
     !u.isEqual(values, @processedValues) && !u.isEqual(@scheduledValues, values)
 
-  requestCallback: =>
+  requestCallback: ->
     if @scheduledValues != null && !@currentTimer && !@callbackRunning
       diff = @changedValues(@processedValues, @scheduledValues)
       @processedValues = @scheduledValues
@@ -72,9 +72,9 @@ class up.FieldObserver
         changes[key] = nextValue
     changes
 
-  readFieldValues: =>
+  readFieldValues: ->
     up.Params.fromFields(@fields).toObject()
 
-  check: =>
+  check: ->
     values = @readFieldValues()
     @scheduleValues(values) if @isNewValues(values)

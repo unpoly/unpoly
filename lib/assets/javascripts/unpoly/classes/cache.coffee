@@ -30,36 +30,36 @@ class up.Cache
   size: ->
     @store.size()
 
-  maxSize: =>
+  maxSize: ->
     u.evalOption(@config.size)
 
-  expiryMillis: =>
+  expiryMillis: ->
     u.evalOption(@config.expiry)
 
-  normalizeStoreKey: (key) =>
+  normalizeStoreKey: (key) ->
     if @config.key
       @config.key(key)
     else
       key.toString()
 
-  isEnabled: =>
+  isEnabled: ->
     @maxSize() isnt 0 && @expiryMillis() isnt 0
 
-  isCachable: (key) =>
+  isCachable: (key) ->
     if @config.cachable
       @config.cachable(key)
     else
       true
 
-  clear: =>
+  clear: ->
     @store.clear()
 
-  log: (args...) =>
+  log: (args...) ->
     if @config.logPrefix
       args[0] = "[#{@config.logPrefix}] #{args[0]}"
       up.puts('up.Cache', args...)
 
-  keys: =>
+  keys: ->
     @store.keys()
     
   each: (fn) ->
