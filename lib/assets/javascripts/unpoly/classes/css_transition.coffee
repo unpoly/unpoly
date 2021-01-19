@@ -12,7 +12,7 @@ class up.CSSTransition
     @easing = options.easing
     @finished = false
 
-  start: =>
+  start: ->
     if @lastFrameKeysKebab.length == 0
       @finished = true
       # If we have nothing to animate, we will never get a transitionEnd event
@@ -30,7 +30,7 @@ class up.CSSTransition
 
     return @deferred.promise()
 
-  listenToFinishEvent: =>
+  listenToFinishEvent: ->
     if @finishEvent
       @stopListenToFinishEvent = @element.addEventListener(@finishEvent, @onFinishEvent)
 
@@ -39,15 +39,15 @@ class up.CSSTransition
     event.stopPropagation()
     @finish()
 
-  startFallbackTimer: =>
+  startFallbackTimer: ->
     timingTolerance = 100
     @fallbackTimer = u.timer (@duration + timingTolerance), =>
       @finish()
 
-  stopFallbackTimer: =>
+  stopFallbackTimer: ->
     clearTimeout(@fallbackTimer)
 
-  listenToTransitionEnd: =>
+  listenToTransitionEnd: ->
     @stopListenToTransitionEnd = up.on(@element, 'transitionend', @onTransitionEnd)
 
   onTransitionEnd: (event) =>
@@ -65,7 +65,7 @@ class up.CSSTransition
 
     @finish()
 
-  finish: =>
+  finish: ->
     # Make sure that any queued events won't finish multiple times.
     return if @finished
     @finished = true
@@ -82,7 +82,7 @@ class up.CSSTransition
 
     @deferred.resolve()
 
-  pauseOldTransition: =>
+  pauseOldTransition: ->
     oldTransition = e.style(@element, [
       'transitionProperty',
       'transitionDuration',
@@ -102,11 +102,11 @@ class up.CSSTransition
       # Stop the existing CSS transition so it does not emit transitionEnd events
       @setOldTransition = e.concludeCSSTransition(@element)
 
-  resumeOldTransition: =>
+  resumeOldTransition: ->
     @setOldTransitionTargetFrame?()
     @setOldTransition?()
 
-  startMotion: =>
+  startMotion: ->
     e.setStyle @element,
       transitionProperty: Object.keys(@lastFrameKebab).join(', ')
       transitionDuration: "#{@duration}ms"

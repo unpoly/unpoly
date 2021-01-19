@@ -67,7 +67,7 @@ class up.Cache
       entry = @store.get(key)
       fn(key, entry.value, entry.timestamp)
 
-  makeRoomForAnotherEntry: =>
+  makeRoomForAnotherEntry: ->
     if @hasRoomForAnotherEntry()
       return
 
@@ -90,7 +90,7 @@ class up.Cache
     if u.isDefined(value)
       @set(newKey, value)
 
-  timestamp: =>
+  timestamp: ->
     (new Date()).valueOf()
 
   set: (key, value) =>

@@ -34,7 +34,7 @@ class up.EventListener extends up.Record
       args.push({ passive: true })
     return args
 
-  unbind: =>
+  unbind: ->
     if map = @element.upEventListeners
       delete map[@key]
     @element.removeEventListener(@addListenerArgs()...)

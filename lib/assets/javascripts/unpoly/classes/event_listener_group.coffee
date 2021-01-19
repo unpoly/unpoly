@@ -19,22 +19,25 @@ class up.EventListenerGroup extends up.Record
   bind: ->
     unbindFns = []
 
+    @eachListenerAttributes (attrs) ->
+      listener = new up.EventListener(attrs)
+      listener.bind()
+      unbindFns.push(-> listener.unbind())
+
+    return u.sequence(unbindFns)
+
+  eachListenerAttributes: (fn) ->
     for element in @elements
       for eventType in @eventTypes
-        listener = new up.EventListener(@listenerAttributes(element, eventType))
-        listener.bind()
-        unbindFns.push(listener.unbind)
-
-    u.sequence(unbindFns)
+        fn(@listenerAttributes(element, eventType))
 
   listenerAttributes: (element, eventType) ->
     u.merge(@attributes(), { element, eventType })
 
   unbind: ->
-    for element in @elements
-      for eventType in @eventTypes
-        if listener = up.EventListener.fromElement(@listenerAttributes(element, eventType))
-          listener.unbind()
+    @eachListenerAttributes (attrs) ->
+      if listener = up.EventListener.fromElement(attrs)
+        listener.unbind()
 
   ###
   Constructs a new up.EventListenerGroup from arguments with many different combinations:
