@@ -27,18 +27,7 @@ Release process
 Remaining feature work
 ======================
 
-- Remove the extensive compatibility checks in up.browser
-  - canInputEvent
-  - canCSSTransition
-  - canFormData
-  - canInspectFormData (only used in specs)
-  - canConsole
-  - canAnimationFrame
-  - canDOMParser
-
 - Remove boxed type checks from up.util
-
-- Remove fine-grained pushState checks in the code, don't load unpoly if we cannot pushState
 
 - Support solo: function() again so we can excempt certain requests in up.fragment.config.navigateOptions.solo
 
