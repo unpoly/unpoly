@@ -13119,11 +13119,12 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
 
       var action;
-      if( event.submitter.tagName === "BUTTON" ) {
+      if ( event.submitter.tagName === "BUTTON" ) {
         action = event.submitter.getAttribute('formaction');
         url = action;
       }
-      if (up.util.isMissing(action) {
+      
+      if (up.util.isMissing(action)) {
         action = form.getAttribute('action');
         url = (ref9 = (ref10 = options.url) != null ? ref10 : action) != null ? ref9 : up.browser.url();
       }
