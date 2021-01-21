@@ -13118,8 +13118,9 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.headers[up.protocol.config.validateHeader] = options.validate;
       }
 
+      var action;
       if( event.submitter.tagName === "BUTTON" ) {
-        var action = event.submitter.getAttribute('formaction');
+        action = event.submitter.getAttribute('formaction');
         url = action;
       }
       if (up.util.isMissing(action) {
