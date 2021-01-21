@@ -13119,8 +13119,8 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
 
       var action;
-      if ( event.submitter.tagName === "BUTTON" ) {
-        action = event.submitter.getAttribute('formaction');
+      if ( event?.submitter?.tagName === "BUTTON" ) {
+        action = event?.submitter?.getAttribute('formaction');
         url = action;
       }
       
