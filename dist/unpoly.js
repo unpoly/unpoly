@@ -13064,7 +13064,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       A promise for the successful form submission.
     @stable
      */
-    submit = function(formOrSelector, options) {
+    submit = function(formOrSelector, event, options) {
       var form, ref, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, target, url;
       options = u.options(options);
       form = e.get(formOrSelector);
@@ -13117,7 +13117,16 @@ open dialogs with sub-forms, etc. all without losing form state.
         options.failTransition = false;
         options.headers[up.protocol.config.validateHeader] = options.validate;
       }
-      url = (ref9 = (ref10 = options.url) != null ? ref10 : form.getAttribute('action')) != null ? ref9 : up.browser.url();
+
+      if( event.submitter.tagName === "BUTTON" ) {
+        var action = event.submitter.getAttribute('formaction');
+        url = action;
+      }
+      if (up.util.isMissing(action) {
+        action = form.getAttribute('action');
+        url = (ref9 = (ref10 = options.url) != null ? ref10 : action) != null ? ref9 : up.browser.url();
+      }
+      
       if (options.method === 'GET') {
         url = up.Params.stripURL(url);
       }
@@ -13546,7 +13555,7 @@ open dialogs with sub-forms, etc. all without losing form state.
      */
     up.on('submit', 'form[up-target]', function(event, form) {
       up.event.consumeAction(event);
-      return u.muteRejection(submit(form));
+      return u.muteRejection(submit(form, event));
     });
 
     /***
