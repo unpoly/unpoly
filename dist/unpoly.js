@@ -13125,7 +13125,7 @@ open dialogs with sub-forms, etc. all without losing form state.
       }
       
       if (up.util.isMissing(action)) {
-        action = form.getAttribute('action');
+        action = options?.action ? options?.action : options?.formaction ? options?.formaction :  form.getAttribute('action');
         url = (ref9 = (ref10 = options.url) != null ? ref10 : action) != null ? ref9 : up.browser.url();
       }
       
