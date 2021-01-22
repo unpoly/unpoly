@@ -13064,6 +13064,10 @@ open dialogs with sub-forms, etc. all without losing form state.
       A promise for the successful form submission.
     @stable
      */
+    submit = function(formOrSelector, options) {
+      return submit(formOrSelector, {}, options);
+    }
+    
     submit = function(formOrSelector, event, options) {
       var form, ref, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, target, url;
       options = u.options(options);
