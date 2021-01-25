@@ -3249,6 +3249,17 @@ describe 'up.fragment', ->
             next ->
               expect(up.layer.front).toBeFocused()
 
+        describe 'with an array of { focus } options', ->
+
+          it 'tries each option until one succeeds', asyncSpec (next) ->
+            fixture('.container')
+            # Options can be functions, which can again return arrays or functions
+            fn = -> [false, '.element']
+            up.render('.container', focus: ['.other', fn, '.container'], content: "<div class='element'>element</div>")
+
+            next ->
+              expect('.container .element').toBeFocused()
+
       describe 'with { guardEvent } option', ->
 
         it 'emits the given event before rendering', asyncSpec (next) ->

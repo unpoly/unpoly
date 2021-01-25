@@ -94,7 +94,6 @@ up.viewport = do ->
     revealTop: false,
     revealMax: -> 0.5 * window.innerHeight
     scrollSpeed: 1
-    autofocus: true
 
   scrollingController = new up.MotionController('scrolling')
 
@@ -270,14 +269,24 @@ up.viewport = do ->
     motion = new up.RevealMotion(element, options)
     return scrollingController.startMotion(element, motion, options)
 
+  ###**
+  TODO: Docs
+  ###
   doFocus = (element, options = {}) ->
-    if options.preventScroll # polyfill for IE11
+    # First focus without scrolling, since we're going to use our custom scrolling
+    # logic below.
+    if up.browser.isIE11()
       viewport = closest(element)
       oldScrollTop = viewport.scrollTop
       element.focus()
       viewport.scrollTop = oldScrollTop
     else
-      element.focus()
+      element.focus({ preventScroll: true })
+
+    unless options.preventScroll
+      # Use up.reveal() which scrolls far enough to ignore fixed nav bars
+      # obstructing the focused element.
+      reveal(element)
 
   tryFocus = (element, options) ->
     doFocus(element, options)

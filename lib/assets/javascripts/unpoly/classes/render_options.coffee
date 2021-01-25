@@ -9,6 +9,7 @@ up.RenderOptions = do ->
     saveScroll: true
     fail: 'auto'
     history: false # will be set to 'auto' when navigating
+    focus: 'keep'
   }
 
   PRELOAD_OVERRIDES = {

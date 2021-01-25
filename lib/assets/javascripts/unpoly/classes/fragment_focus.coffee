@@ -18,6 +18,7 @@ class up.FragmentFocus extends up.Record
     @tryProcess(@focus)
 
   tryProcess: (focusOpt) ->
+    console.log("*** tryProcess(%o)", focusOpt)
     switch focusOpt
       when 'keep'
         return @restoreFocus(@focusCapsule)
@@ -27,15 +28,15 @@ class up.FragmentFocus extends up.Record
         return @focusElement(@layer.getFocusElement())
       when 'autofocus'
         return @autofocus()
-      when 'autofocus-if-enabled'
-        return up.viewport.config.autofocus && @autofocus()
       when 'auto', true
-        return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
+        return @tryProcess(@autoMeans)
       else
+        if u.isArray(focusOpt)
+          return u.find(focusOpt, (opt) => @tryProcess(opt))
         if u.isString(focusOpt)
           return @focusSelector(focusOpt)
         if u.isFunction(focusOpt)
-          return focusOpt(@attributes())
+          return @tryProcess(focusOpt(@fragment))
 
   focusSelector: (selector) ->
     lookupOpts = { @layer, @origin }

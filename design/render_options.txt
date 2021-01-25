@@ -1,0 +1,131 @@
+up.render()
+-----------
+
+history: 'auto'    Update browser location and window title if updating a main target
+scroll: 'auto'     Reset scroll position if updating a main target
+fallback: ':main'  Replace a [main target](/up.fragment.config#config.mainTargets) if response doesn't contain target
+cache: true        Cache responses for 5 minutes
+feedback: true     Set [.up-active](/a-up-update) on the activated link
+focus: 'auto'      Focus [autofocus] elements in the new fragment
+solo: true         Cancel existing requests
+peel: true         Close overlays when targeting a layer below
+
+
+target
+
+[ok] history
+[ok] title      requires history: true
+[ok] location   requires history: true
+
+navigate
+[ok] fallback    if false then no fallbacks are used, also no main selectors
+
+layer       if == 'new' then options for up.layer.open() may be used
+
+confirm
+
+[ok] fail
+
+saveScroll
+scroll
+focus
+revealTop
+revealMax
+revealPadding
+revealSnap
+scrollBehavior
+
+[ok] keep
+[ok] hungry
+
+cache
+clearCache
+
+currentLayer    internal?
+
+[ok] url
+[ok] method
+[ok] params
+[ok] headers
+
+[ok] content
+[ok] fragment
+[ok] document
+
+[ok] origin
+
+[ok] onLoaded            see event
+[ok] onFinished          no event
+
+context             is merged
+
+[ok] animation
+[ok] transition
+[ok] easing
+[ok] duration
+
+
+
+a[up-follow]
+------------
+
+Adapt from render()
+
+
+
+
+up.form.submit()
+----------------
+
+
+contentType
+params            explain that they're added to the form's
+method            explain that they default to the action, or the pressed submit button's formmethod
+url               explain that they default to the form's action, or the pressed submit button's formaction
+fail
+
+
+form[up-follow]
+---------------
+
+Add new @params-note:
+  All modifying attributes from a[up-follow] may be used.
+
+Adapt from up.form.submit()
+
+
+
+up.layer.open()
+---------------
+
+mode
+position
+align
+size
+origin
+class
+backdrop
+openAnimation
+closeAnimation
+openDuration
+closeDuration
+openEasing
+closeEasing
+backdropOpenAnimation
+backdropCloseAnimation
+dismissable
+buttonDismissable
+keyDismissable
+outsideDismissable
+dismissLabel
+dismissAriaLabel
+onOpened            see event
+onAccepted          see event
+onDismissed         see event
+acceptEvent         see event
+dismissEvent        see event
+acceptLocation
+dismissLocation
+context
+
+@return {Promise<up.Layer>}

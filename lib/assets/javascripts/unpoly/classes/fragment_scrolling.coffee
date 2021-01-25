@@ -52,10 +52,12 @@ class up.FragmentScrolling extends up.Record
       when 'auto', true
         return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
       else
+        if u.isArray(scrollOpt)
+          return u.find(scrollOpt, (opt) => @tryProcess(opt))
         if u.isString(scrollOpt)
           return @revealSelector(scrollOpt)
         if u.isFunction(scrollOpt)
-          return scrollOpt(@attributes())
+          return @tryProcess(scrollOpt(@fragment))
 
   revealSelector: (selector) ->
     getFragmentOpts = { @layer, @origin }

@@ -341,7 +341,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       fragment: fragment,
       layer: @layer,
       focusCapsule: @focusCapsule,
-      autoMeans: ['keep', 'autofocus-if-enabled'],
+      autoMeans: up.fragment.config.autoFocus,
     )
     fragmentFocus.process()
 

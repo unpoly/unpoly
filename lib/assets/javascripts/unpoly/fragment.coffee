@@ -73,6 +73,8 @@ up.fragment = do ->
     }
     autoHistoryTargets: [':main']
     autoScrollTargets: [':main']
+    autoFocus: ['keep', 'autofocus', 'target']
+
     matchAroundOrigin: true
 
   # Users who are not using layers will prefer settings default targets
