@@ -291,7 +291,7 @@ up.protocol = do ->
     extractHeader(xhr, 'context', JSON.parse)
 
   ###**
-  This request header contains the targeted layer's [context](/up.layer.context), serialized as JSON.
+  This request header contains the targeted layer's [context](/up.context), serialized as JSON.
 
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
@@ -336,7 +336,7 @@ up.protocol = do ->
   ###
 
   ###**
-  This request header contains the [context](/up.layer.context) of the layer
+  This request header contains the [context](/up.context) of the layer
   targeted for a failed fragment update, serialized as JSON.
 
   A fragment update is considered *failed* if the server responds with a

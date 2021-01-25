@@ -126,6 +126,8 @@ up.form = do ->
   Emits the event [`up:form:submit`](/up:form:submit).
 
   @function up.submit
+  @params-note
+    All options from `up.render()` may be used.
   @param {Element|jQuery|string} form
     A reference or selector for the form to submit.
     If the argument points to an element that is not a form,

@@ -91,6 +91,22 @@ up.fragment = do ->
   If the given element was never directly updated, but part of a larger fragment update,
   the closest known source of an ancestor element is returned.
 
+  \#\#\# Example
+
+  In the HTML below, the element `#one` was loaded from the URL `/foo`:
+
+  ```html
+  <div id="one" up-source"/foo">
+    <div id="two">...</div>
+  </div>
+  ```
+
+  We can now ask for the source of an element:
+
+  ```javascript
+  up.fragment.source('#two') // returns '/foo'
+  ```
+
   @function up.fragment.source
   @param {Element|string} element
     The element or CSS selector for which to look up the source URL.
@@ -139,102 +155,156 @@ up.fragment = do ->
   ###
 
   ###**
-  Replaces elements on the current page with corresponding elements
-  from a new page fetched from the server.
+  Replaces elements on the current page with matching elements from a server response or HTML string.
 
-  The current and new elements must both match the given CSS selector.
+  The current and new elements must both match the same CSS selector.
+  The selector is either given as `{ target }` option,
+  or a [main target](/up.fragment.config#config.mainTargets) is used as default.
 
-  The unobtrusive variant of this is the [`a[up-target]`](/a-up-target) selector.
+  See the [`a[up-target]`](/a-up-target) selector for many examples for how you can target content.
+
+  This function has many options to enable scrolling, focus, request cancelation and other side
+  effects. These options are all disabled by default and must be opted into one-by-one. To enable
+  defaults that a user would expects for navigation (like clicking a link),
+  pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
+
+  \#\#\# Passing the new fragment
+
+  The new fragment content can be passed as one of the following options:
+
+  - [`{ url }`](#options.url) fetches and renders content from the server
+  - [`{ document }`](#options.document) renders content from a given HTML document string or partial document
+  - [`{ fragment }`](#options.fragment) renders content from a given HTML string that only contains the new fragment
+  - [`{ content }`](#options-content) replaces the targeted fragment's inner HTML with the given HTML string
 
   \#\#\# Example
 
   Let's say your current HTML looks like this:
 
-      <div class="one">old one</div>
-      <div class="two">old two</div>
+  ```html
+  <div class="one">old one</div>
+  <div class="two">old two</div>
+  ```
 
-  We now replace the second `<div>`:
+  We now replace the second `<div>` by targeting its CSS class:
 
-      up.replace('.two', '/new')
+  ```js
+  up.render({ target: '.two', url: '/new' })
+  ```
 
   The server renders a response for `/new`:
 
-      <div class="one">new one</div>
-      <div class="two">new two</div>
+  ```html
+  <div class="one">new one</div>
+  <div class="two">new two</div>
+  ```
 
   Unpoly looks for the selector `.two` in the response and [implants](/up.extract) it into
   the current page. The current page now looks like this:
 
-      <div class="one">old one</div>
-      <div class="two">new two</div>
+  ```html
+  <div class="one">old one</div>
+  <div class="two">new two</div>
+  ```
 
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
-  \#\#\# Appending or prepending instead of replacing
-
-  By default Unpoly will replace the given selector with the same
-  selector from a freshly fetched page. Instead of replacing you
-  can *append* the loaded content to the existing content by using the
-  `:after` pseudo selector. In the same fashion, you can use `:before`
-  to indicate that you would like the *prepend* the loaded content.
-
-  A practical example would be a paginated list of items:
-
-      <ul class="tasks">
-        <li>Wash car</li>
-        <li>Purchase supplies</li>
-        <li>Fix tent</li>
-      </ul>
-
-  In order to append more items from a URL, replace into
-  the `.tasks:after` selector:
-
-      up.replace('.tasks:after', '/page/2')
-
-  \#\#\# Setting the window title from the server
-
-  If the `replace` call changes history, the document title will be set
-  to the contents of a `<title>` tag in the response.
-
-  The server can also change the document title by setting
-  an `X-Up-Title` header in the response.
-
-  \#\#\# Optimizing response rendering
-
-  The server is free to optimize Unpoly requests by only rendering the HTML fragment
-  that is being updated. The request's `X-Up-Target` header will contain
-  the CSS selector for the updating fragment.
-
-  If you are using the `unpoly-rails` gem you can also access the selector via
-  `up.target` in all controllers, views and helpers.
-
   \#\#\# Events
 
-  Unpoly will emit [`up:fragment:destroyed`](/up:fragment:destroyed) on the element
-  that was replaced and [`up:fragment:inserted`](/up:fragment:inserted) on the new
-  element that replaces it.
+  Unpoly will emit events at various stages of the rendering process:
+
+  - `up:fragment:destroyed`
+  - `up:fragment:loaded`
+  - `up:fragment:inserted`
 
   @function up.render
+
   @param {string|Element|jQuery} [target]
     The CSS selector to update.
 
     If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
 
     You can also pass a DOM element or jQuery element here, in which case a selector
-    will be [inferred from the element attributes](/up.fragment.target). The given element
-    will also be set as the `{ origin }` option.
+    will be [inferred from the element attributes](/up.fragment.toTarget). The given element
+    will also be used as [`{ origin }`](#options.origin) for the fragment update.
 
     Instead of passing the target as the first argument, you may also pass it as
-    [´{ target }` option](/up.fragment.render#options.target).
+    a [´{ target }`](#options.target) option..
+
   @param {string|Element|jQuery} [options.target]
     The CSS selector to update.
+
+    If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
+
+  @param {string|boolean} [options.fallback=false]
+    Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
+
+    If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
+
+    If set to `true` Unpoly will attempt to replace a [main target](/up.fragment.config#config.mainTargets) instead.
+
+    If set to `false` Unpoly will immediately reject the render promise.
+
+  @param {boolean} [options.navigate=false]
+    Whether this fragment is considered [navigation](/up.navigate).
+
   @param {string} [options.url]
     The URL to fetch from the server.
-  @param {string} [options.fragment]
-    TODO: Docs
-  @param {string} [options.document]
-    TODO: Docs
+
+    Instead of making a server request, you may also pass an existing HTML string as
+    [`{ document }`](#options.document), [`{ fragment }`](#options.fragment) or
+    [`{ content }`] option.
+
+  @param {string} [options.method='GET']
+    The request's HTTP method to use for the request.
+
+    Common values are `'GET'`, `'POST'`, '`PUT`', '`PATCH`' and `'DELETE`'.  `The value is case insensitive.
+
+  @param {Object|FormData|string|Array} [options.params]
+    Additional [parameters](/up.Params) that should be sent as the request's [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
+
+  @param {Object} [options.headers={}]
+    An object with additional request headers.
+
+    Note that Unpoly will by default send a number of custom request headers.
+    E.g. the `X-Up-Target` header includes the targeted CSS selector.
+    See `up.protocol` and `up.network.config.metaKeys` for details.
+
+  @param {string|Element} [options.fragment]
+    A string of HTML comprising only the new fragment.
+
+    The `{ target }` selector will be derived from the root element in the given
+    HTML:
+
+    ```js
+    // This will update .foo
+    up.render({ fragment: '<div class=".foo">inner</div>' })
+    ```
+
+    If your HTML string contains other fragments that will not be rendered, use
+    the [`{ document }`](#options.document) option instead of `{ fragment }`.
+
+    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
+    consider the [`{ content }`](#options.content) option.
+
+  @param {string|Element|Document} [options.document]
+    A string of HTML containing the new fragment.
+
+    The string may contain other HTML, but only the element matching the
+    `{ target }` selector will be extracted and placed into the page.
+    Other elements will be discarded.
+
+    If your HTML string comprises only the new fragment, consider the [`{ fragment }`](#options.fragment)
+    option instead of `{ document }`. With `{ fragment }` you don't need to pass a `{ target }`, since
+    Unpoly can derive it from the root element in the given HTML.
+
+    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
+    consider the [`{ content }`](#options.content) option.
+
   @param {string} [options.fail='auto']
     You may pass different render options for successful and failed server responses.
 
@@ -247,10 +317,10 @@ up.fragment = do ->
         up.render({
           url: '/action',
           method: 'post',
-          target: '.content',
-          failTarget: 'form',
-          scroll: 'auto',
-          failScroll: 'form .errors'
+          target: '.content',   // when submission succeeds update '.content'
+          failTarget: 'form',   // when submission fails update the form
+          scroll: 'auto',       // when submission succeeds use default scroll behavior
+          failScroll: '.errors' // when submission falis scroll to the error messages
         })
 
     Options that are used before the request is made (like `{ url, method, confirm }`) do not
@@ -265,35 +335,72 @@ up.fragment = do ->
     You may also pass `{ fail: false }` to always consider the response to be successful, even
     with a HTTP 4xx or 5xx status code.
 
-    When the updated fragment content is not requested from a `{ url }`, but rather passed as an
-    option (`{ content, fragment, document }`), the update is always considered successful, regardless
-    of the `{ fail }` option.
-  @param {string|boolean} [options.fallback]
-    Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
+    When the updated fragment content is not requested from a `{ url }`, but rather passed as a
+    HTML string, the update is always considered successful, regardless of the `{ fail }` option.
 
-    If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
+  @param {boolean|string} [options.history=false]
+    Whether the browser URL and window title will be updated.
 
-    If set to `true` Unpoly will attempt to replace a [main target](/up.fragment.config#config.mainTargets) instead.
+    If set to `true`, the history will always be updated, using the title and URL from
+    the server response, or from given `{ title }` and `{ location }` options.
 
-    If set to `false` Unpoly will immediately reject the render promise.
-  @param {string} [options.title]
-    The document title after the replacement.
+    If set to `'auto'` history will be updated if the `{ target }` matches
+    a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
+    [main targets](/up.fragment.config.mainTargets).
 
-    If the call pushes an history entry and this option is missing, the title is extracted from the response's `<title>` tag.
-    You can also pass `false` to explicitly prevent the title from being updated.
-  @param {string} [options.method='get']
-    The HTTP method to use for the request.
-  @param {Object|FormData|string|Array} [options.params]
-    [Parameters](/up.Params) that should be sent as the request's payload.
-  @param {string} [options.transition='none']
-  @param {string|boolean} [options.history=true]
-    If a string is given, it is used as the URL the browser's location bar and history.
-    If omitted or true, the `url` argument will be used.
     If set to `false`, the history will remain unchanged.
+
+    [Overlays](/up.layer) will only change the browser URL and window title if the overlay
+    has [enabled history](/up.layer.history), even with `{ history: true }`.
+
+  @param {string} [options.title]
+    An explicit document title to use after rendering.
+
+    By default the title is extracted from the response's `<title>` tag.
+    You may also pass `{ title: false }` to explicitly prevent the title from being updated.
+
+    Note that the browser's window title will only be updated it you also
+    pass a [`{ history }`](#options.history) option.
+
+    [Overlays](/up.layer) will only change the window title if the overlay
+    has [enabled history](/up.layer.history).
+
+  @param {string} [options.location]
+    An explicit URL to use after rendering.
+
+    By default Unpoly will use the `{ url }` or the final URL after the server redirected.
+    You may also pass `{ location: false }` to explicitly prevent the URL from being updated.
+
+    Note that the browser's URL will only be updated it you also
+    pass a [`{ history }`](#options.history) option.
+
+    [Overlays](/up.layer) will only change the browser's URL if the overlay
+    has [enabled history](/up.layer.history).
+
+  @param {string} [options.transition='none']
+    The name of an [transition](/up.motion) to morph between the old and few fragment.
+
+    If you are prepending or appending content, use the `{ animate }` option instead.
+
+  @param {string} [options.animation]
+    The name of an [animation](/up.motion) to reveal a new fragment when prepending or appending content.
+
+    If you are replacing content (the default), use the `{ transition }` option instead.
+
+  @param {number} [options.duration]
+    The duration of the transition or animation (in millisconds).
+
+  @param {string} [options.easing='ease']
+    The timing function that accelerates the transition or animation.
+
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of pre-defined timing functions.
+
   @param {boolean|string} [options.reveal=false]
     Whether to [reveal](/up.reveal) the new fragment.
 
     You can also pass a CSS selector for the element to reveal.
+
   @param {number} [options.revealPadding]
 
   @param {boolean} [options.restoreScroll=false]
@@ -301,21 +408,52 @@ up.fragment = do ->
     of all the the updated element's viewport. The position
     will be reset to the last known top position before a previous
     history change for the current URL.
-  @param {boolean} [options.cache]
-    Whether to use a [cached response](/up.network) if available.
-  @param {Object} [options.headers={}]
-    An object of additional header key/value pairs to send along
-    with the request.
+
+  @param {boolean} [options.cache=false]
+    Whether to read from and write to the [cache](/up.cache).
+
+    With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
+    to the network. If no cached response exists, Unpoly will make a request and cache
+    the server response.
+
+    Only cache GET requests are cachable.
+
+  @param {boolean} [options.clearCache]
+    Whether existing [cache](/up.cache)
+
   @param {Element|jQuery} [options.origin]
     The element that triggered the replacement.
 
-    The element's selector will be substituted for the `&` shorthand in the target selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+    When multiple elements in the current page match the `{ target }`,
+    Unpoly will replace an element in the [origin's vicinity](/a-up-target#matching-in-the-links-vicinity).
+
+    The element's selector will be substituted for the `&` shorthand in the target
+    selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+
+    If no `{ layer }` option is given, the layer of the given `{ origin }` element is used.
+
   @param {string} [options.layer='current']
     TODO: Docs for all layer-related options. However, opts for new layers we will document on up.layer.open().
+
+  @param {Object} [options.context]
+    An object that will be merged into the [context](/up.context) of the current layer once the fragment is rendered.
+
   @param {boolean} [options.keep=true]
     Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
+
   @param {boolean} [options.hungry=true]
     Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
+
+  @param {Function(Event)} [options.onLoaded]
+    A callback that will be run when when the server responds with new HTML,
+    but before the HTML is rendered.
+
+    The callback argument is a preventable `up:fragment:loaded` event.
+    See its documentation for details.
+
+  @param {Function()} [options.onFinished]
+    A callback that will be run when all animations have concluded and
+    the element was removed from the DOM tree.
 
   @return {Promise}
     A promise that fulfills when the page has been updated.
@@ -324,6 +462,7 @@ up.fragment = do ->
     removed from the DOM tree. The old element will be marked with the `.up-destroying` class
     and removed once the animation finishes. To run code after the old element was removed,
     pass an `{ onFinished }` callback.
+
   @stable
   ###
   render = up.mockable (args...) ->
@@ -347,9 +486,16 @@ up.fragment = do ->
     return promise
 
   ###**
-  Navigates to the given URL by replacing a major fragment in the current page.
+  Navigates to the given URL by updating a major fragment in the current page.
 
-  The current page and JavaScript environment is kept intact.
+  `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
+  regarding scrolling, focus, request cancelation and many other side effects detailed below.
+  If you only want to update an element without side effects, use `up.render()` instead.
+
+  [Following a link](/a-up-target), [submitting a form](/form-up-target) or
+  [opening an overlay](/up.layer.open) is considered navigation.
+  You may opt out of navigation defaults by passing a `{ navigate: false }` option
+  or setting an `[up-navigate=false]` attribute.
 
   \#\#\# Navigation is rendering with defaults
 
@@ -953,18 +1099,12 @@ up.fragment = do ->
 
   @function up.destroy
   @param {string|Element|jQuery} target
-  @param {string} [options.location]
-    A URL that will be pushed as a new history entry when the element was destroyed.
-  @param {string} [options.title]
-    The document title to set after the element was destroyed.
   @param {string|Function(element, options): Promise} [options.animation='none']
     The animation to use before the element is removed from the DOM.
   @param {number} [options.duration]
     The duration of the animation. See [`up.animate()`](/up.animate).
-  @param {number} [options.delay]
-    The delay before the animation starts. See [`up.animate()`](/up.animate).
   @param {string} [options.easing]
-    The timing function that controls the animation's acceleration. [`up.animate()`](/up.animate).
+    The timing function that controls the animation's acceleration. See [`up.animate()`](/up.animate).
   @param {Function} [options.onFinished]
     A callback that is run when any animations are finished and the element was removed from the DOM.
   @return {Promise}

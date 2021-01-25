@@ -193,7 +193,7 @@ This also reduces the <b>bandwidth cost</b> for a request/response exchange to *
 
 ### Working with context
 
-Calling `up.context` will return the [context](https://unpoly.com/up.layer.context) object of the targeted layer.
+Calling `up.context` will return the [context](https://unpoly.com/up.context) object of the targeted layer.
 
 The context is a JSON object shared between the frontend and the server.
 It persists for a series of Unpoly navigation, but is cleared when the user makes a full page load.
@@ -256,7 +256,7 @@ Returns whether the targeted layer is an overlay (not the root layer).
 
 #### `up.layer.context`
 
-Returns the [context](https://unpoly.com/up.layer.context) object of the targeted layer.
+Returns the [context](https://unpoly.com/up.context) object of the targeted layer.
 See documentation for `up.context`, which is an alias for `up.layer.context`.
 
 #### `up.layer.accept(value)`
@@ -295,7 +295,7 @@ Returns whether the layer targeted for a failed response is an overlay.
 
 #### `up.fail_layer.context`
 
-Returns the [context](https://unpoly.com/up.layer.context) object of the layer targeted for a failed response.
+Returns the [context](https://unpoly.com/up.context) object of the layer targeted for a failed response.
 
 
 ### Managing the client-side cache

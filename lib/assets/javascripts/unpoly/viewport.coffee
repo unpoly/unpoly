@@ -289,6 +289,9 @@ up.viewport = do ->
       return true
 
   makeFocusable = (element) ->
+    # Although element.tabIndex is -1 for all elements regardless
+    # of [tabindex] attribute, only the [tabindex] attribute is relevant
+    # for focusability.
     e.setMissingAttr(element, 'tabindex', '-1')
 
   ###**

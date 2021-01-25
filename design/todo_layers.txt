@@ -27,6 +27,8 @@ Release process
 Remaining feature work
 ======================
 
+- Should { hungry: true } be navigate only? => no
+- Failed form submissions update the form, which is no main target and does not scroll or focus => ok, but what should we do?
 
 
 Manual tests
@@ -229,15 +231,20 @@ Tests
 Docs
 ----
 
-- Document URL placeholder
+- Redirect all proxy methods in .htaccess
+
+- Move a[up-target] docs to a[up-follow]
+  - [up-target] is then a modifying option
+- Move form[up-target] docs to form[up-follow]
+  - [up-target] is then a modifying option
+- Remove unused link options in followOptions
+- Document URL patterns
   - *
   - :foo
   - $foo
   - minus-prefixed exclude patterns
-
-- Document up.AbortController
-- Document { cache: 'clear' }
-- Document X-Up-Cache: clear
+  - Capture groups
+- Document that up:click is available on all elements, not just Unpoly links
 - Document new selectors
   - Ampersand (&) (do :origin?)
   - :none

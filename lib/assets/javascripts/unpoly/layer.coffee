@@ -164,6 +164,18 @@ up.layer = do ->
     stack.reset()
     handlers = u.filter(handlers, 'isDefault')
 
+  ###**
+
+  Opening a layer is considered [navigation](/up.navigate).
+  You may opt out of [navigation defaults](/up.fragment.config.navigateOptions)
+  by passing `{ navigate: false }`.
+
+  @function up.layer.open
+  @stable
+  @params-note
+    All options from `up.render()` may be used.
+
+  ###
   open = (options) ->
     options = u.options(options, layer: 'new', navigate: true)
 
