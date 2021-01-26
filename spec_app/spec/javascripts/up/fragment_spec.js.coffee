@@ -3108,6 +3108,22 @@ describe 'up.fragment', ->
             next =>
               expect('.foo-bar').toBeFocused()
 
+        describe 'with { focus: "hash" }', ->
+
+          it 'focuses the target of a URL #hash', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path#hash', focus: 'hash')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div id="hash"></div>
+                </div>
+                """
+
+            next =>
+              expect('#hash').toBeFocused()
+
         describe 'with a CSS selector as { focus } option', ->
 
           it 'focuses a matching element within the new fragment', asyncSpec (next) ->
@@ -3296,6 +3312,20 @@ describe 'up.fragment', ->
 
             next =>
               expect('.autofocused-input').toBeFocused()
+
+          it 'focuses the target of a URL #hash', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path#hash', focus: 'auto')
+
+            next =>
+              @respondWith """
+                <div class="target">
+                  <div id="hash"></div>
+                </div>
+                """
+
+            next =>
+              expect('#hash').toBeFocused()
 
       describe 'with { guardEvent } option', ->
 

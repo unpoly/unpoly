@@ -27,13 +27,6 @@ Release process
 Remaining feature work
 ======================
 
-- { focus: 'keep' } will rediscover force-focused main targets
-  - Maybe only have focus: 'keep' for validations and failed submissions?
-    - But how would we set other focus for validation?
-      - we never need it
-- Do we need { focus: 'hash' } ?
-- Should { hungry: true } be navigate only? => no
-- Failed form submissions update the form, which is no main target and does not scroll or focus => ok, but what should we do?
 
 
 Manual tests
@@ -555,3 +548,5 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
   - No, HTTP Caching Infrastrcture is not fragment-aware (would need to vary by X-Up-Target)
   - How would we signal reloading otherwise?
     - Do we need to?
+- Should { hungry: true } be navigate only? => no
+- Failed form submissions update the form, which is no main target and does not scroll or focus => ok, but what should we do?

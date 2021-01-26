@@ -76,7 +76,7 @@ up.fragment = do ->
       return isMain(fragment)
 
     autoFocus: (fragment) ->
-      return ['autofocus', u.presence(fragment, isMain)]
+      return ['hash', 'autofocus', 'target' if isMain(fragment)]
 
     autoScroll: (fragment) ->
       return ['hash', 'layer' if isMain(fragment)]

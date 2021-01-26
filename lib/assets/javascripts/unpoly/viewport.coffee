@@ -811,15 +811,13 @@ up.viewport = do ->
   ###**
   Returns `'foo'` if the hash is `'#foo'`.
 
-  Returns undefined if the hash is `'#'`, `''` or `undefined`.
-
   @function pureHash
   @internal
   ###
   pureHash = (value) ->
     if value && value[0] == '#'
       value = value.substr(1)
-    u.presence(value)
+    return value
 
   up.on 'up:app:booted', ->
     if hash = location.hash

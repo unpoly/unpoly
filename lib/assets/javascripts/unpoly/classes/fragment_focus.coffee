@@ -10,6 +10,7 @@ class up.FragmentFocus extends up.Record
     'autoMeans'
     'layer'
     'origin'
+    'hash'
     'focusCapsule'
     'focus'
   ]
@@ -25,6 +26,8 @@ class up.FragmentFocus extends up.Record
         return @focusElement(@fragment)
       when 'layer'
         return @focusElement(@layer.getFocusElement())
+      when 'hash'
+        return @focusHash()
       when 'autofocus'
         return @autofocus()
       when 'auto', true
@@ -61,6 +64,10 @@ class up.FragmentFocus extends up.Record
     up.viewport.makeFocusable(element)
     up.focus(element, PREVENT_SCROLL_OPTIONS)
     return true
+
+  focusHash: ->
+    if hashTarget = up.viewport.firstHashTarget(@hash, { @layer })
+      return @focusElement(hashTarget)
 
 #  shouldProcess: ->
 #    # Only emit an up:fragment:focus event if a truthy focusOpt would

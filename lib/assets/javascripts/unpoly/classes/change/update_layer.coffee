@@ -336,18 +336,18 @@ class up.Change.UpdateLayer extends up.Change.Addition
         @focusCapsule ?= up.FocusCapsule.preserveWithin(step.oldElement)
 
   handleFocus: (fragment, step) ->
-    fragmentFocus = new up.FragmentFocus(
-      focus: step.focus,
-      fragment: fragment,
-      layer: @layer,
-      focusCapsule: @focusCapsule,
+    fragmentFocus = new up.FragmentFocus(u.merge(step, {
+      fragment,
+      @layer,
+      @focusCapsule,
       autoMeans: up.fragment.config.autoFocus,
-    )
+    }))
     fragmentFocus.process()
 
   handleScroll: (fragment, step) ->
     scrolling = new up.FragmentScrolling(u.merge(step, {
       fragment,
+      @layer,
       autoMeans: up.fragment.config.autoScroll
     }))
     return scrolling.process()
