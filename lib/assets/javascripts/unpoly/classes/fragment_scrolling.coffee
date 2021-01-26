@@ -36,13 +36,6 @@ class up.FragmentScrolling extends up.Record
         return @reset()
       when 'layer'
         return @revealLayer()
-      when 'layer-if-main'
-        if @shouldAutoScroll()
-          return @revealLayer()
-        else
-          up.puts('up.render()', "Will not auto-scroll because fragment doesn't match up.fragment.config.autoScrollTargets")
-          # Try the next value from { autoMeans }.
-          return undefined
       when 'restore'
         return @restore()
       when 'hash'
@@ -50,7 +43,7 @@ class up.FragmentScrolling extends up.Record
       when 'target', 'reveal'
         return @revealElement(@fragment)
       when 'auto', true
-        return u.find @autoMeans, (autoOpt) => @tryProcess(autoOpt)
+        return @tryProcess(@autoMeans)
       else
         if u.isArray(scrollOpt)
           return u.find(scrollOpt, (opt) => @tryProcess(opt))
@@ -58,6 +51,8 @@ class up.FragmentScrolling extends up.Record
           return @revealSelector(scrollOpt)
         if u.isFunction(scrollOpt)
           return @tryProcess(scrollOpt(@fragment))
+        if u.isElement(scrollOpt)
+          return @revealElement(scrollOpt)
 
   revealSelector: (selector) ->
     getFragmentOpts = { @layer, @origin }
@@ -70,9 +65,6 @@ class up.FragmentScrolling extends up.Record
 
   reset: ->
     return up.viewport.resetScroll(u.merge(@attributes(), around: @fragment))
-
-  shouldAutoScroll: ->
-    return up.fragment.shouldAutoScroll(@fragment, { @layer, @mode })
 
   restore: ->
     return up.viewport.restoreScroll(u.merge(@attributes(), around: @fragment))

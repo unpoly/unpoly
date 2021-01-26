@@ -48,7 +48,7 @@ up.fragment = do ->
     See `up.navigate()` for a table of default navigate options and their effects.
   @param {Array<string>} config.autoHistoryTargets
     An array of CSS selectors for which the browser history is updated with `{ history: 'auto' }`.
-  @param {Array<string>} config.autoScrollTargets
+  @param {Array<string>} config.autoResetScrollTargets
     An array of CSS selectors for which the scroll position is [reset](/up.viewport.resetScroll) with `{ scroll: 'auto' }`.
   @param {boolean} config.matchAroundOrigin
     Whether to match an existing fragment around the triggered link.
@@ -71,9 +71,15 @@ up.fragment = do ->
       peel: true
       cache: true
     }
-    autoHistoryTargets: [':main']
-    autoScrollTargets: [':main']
-    autoFocus: ['keep', 'autofocus', 'target']
+
+    autoHistory: (fragment) ->
+      return isMain(fragment)
+
+    autoFocus: (fragment) ->
+      return ['keep', 'autofocus', u.presence(fragment, isMain)]
+
+    autoScroll: (fragment) ->
+      return ['hash', 'layer' if isMain(fragment)]
 
     matchAroundOrigin: true
 
@@ -1360,7 +1366,7 @@ up.fragment = do ->
         # Discard this target for new layers, which don't have a first-swappable-element.
         # Also don't && the layer check into the `else if` condition above, or it will
         # be returned as a verbatim string below.
-        unless layer == 'new'
+        unless layer == 'new' || layer.opening
           targets.unshift layer.getFirstSwappableElement()
       else if u.isElementish(target)
         expanded.push toTarget(target)
@@ -1381,11 +1387,14 @@ up.fragment = do ->
     # Some up.fragment function center around an element, like closest() or matches().
     options.layer ||= element
     layers = up.layer.getAll(options)
-
     if options.layer != 'any' && !(element && e.isDetached(element))
       filters.push (match) -> u.some layers, (layer) -> layer.contains(match)
 
+
     expandedTargets = up.fragment.expandTargets(selector, u.merge(options, layer: layers[0]))
+
+    console.log("--- expandTargets(%o, %o) => %o", selector, u.merge(options, layer: layers[0]), expandedTargets)
+
     # If the user has set config.mainTargets = [] then a selector :main
     # will resolve to an empty array.
     selector = expandedTargets.join(',') || 'match-none'
@@ -1448,16 +1457,13 @@ up.fragment = do ->
   ###
   matches = (element, selector, options = {}) ->
     element = e.get(element)
+    console.log("*** parseSelector(%o, %o, %o)", selector, element, options)
     selector = parseSelector(selector, element, options)
+    console.log(">>> selector is %o", selector)
     return selector.matches(element)
 
-  shouldAutoScroll = (fragment, options) ->
-    result = matches(fragment, config.autoScrollTargets, options)
-    result
-
-  shouldAutoHistory = (fragment, options) ->
-    result = matches(fragment, config.autoHistoryTargets, options)
-    result
+  isMain = (element) ->
+    return matches(element, ':main')
 
   up.on 'up:app:boot', ->
     body = document.body
@@ -1490,8 +1496,7 @@ up.fragment = do ->
     expandTargets: expandTargets
     toTarget: toTarget
     matches: matches
-    shouldAutoScroll: shouldAutoScroll
-    shouldAutoHistory: shouldAutoHistory
+    isMain: isMain
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

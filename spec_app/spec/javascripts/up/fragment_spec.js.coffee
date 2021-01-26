@@ -3253,12 +3253,49 @@ describe 'up.fragment', ->
 
           it 'tries each option until one succeeds', asyncSpec (next) ->
             fixture('.container')
-            # Options can be functions, which can again return arrays or functions
-            fn = -> [false, '.element']
-            up.render('.container', focus: ['.other', fn, '.container'], content: "<div class='element'>element</div>")
+            up.render('.container', focus: ['autofocus', '.element', '.container'], content: "<div class='element'>element</div>")
 
             next ->
               expect('.container .element').toBeFocused()
+
+        describe 'with { focus: "auto" }', ->
+
+          it 'focuses a main target', asyncSpec (next) ->
+            fixture('.foo-bar')
+
+            up.fragment.config.mainTargets.push('.foo-bar')
+
+            up.render focus: 'auto', fragment: """
+              <form class='foo-bar'>
+                <input>
+              </form>
+            """
+
+            next =>
+              expect('.foo-bar').toBeFocused()
+
+          it 'does not focus a non-main target', asyncSpec (next) ->
+            fixture('.foo-bar')
+
+            up.render focus: 'auto', fragment: """
+              <form class='foo-bar'>
+                <input>
+              </form>
+            """
+
+            next =>
+              expect('.foo-bar').not.toBeFocused()
+
+          it 'focuses an child element with [autofocus] attribute (even when not replacing a main target)', asyncSpec (next) ->
+            fixture('.foo-bar')
+            up.render focus: 'auto', fragment: """
+              <form class='foo-bar'>
+                <input class="autofocused-input" autofocus>
+              </form>
+            """
+
+            next =>
+              expect('.autofocused-input').toBeFocused()
 
       describe 'with { guardEvent } option', ->
 

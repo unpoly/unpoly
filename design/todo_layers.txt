@@ -27,6 +27,11 @@ Release process
 Remaining feature work
 ======================
 
+- { focus: 'keep' } will rediscover force-focused main targets
+  - Maybe only have focus: 'keep' for validations and failed submissions?
+    - But how would we set other focus for validation?
+      - we never need it
+- Do we need { focus: 'hash' } ?
 - Should { hungry: true } be navigate only? => no
 - Failed form submissions update the form, which is no main target and does not scroll or focus => ok, but what should we do?
 

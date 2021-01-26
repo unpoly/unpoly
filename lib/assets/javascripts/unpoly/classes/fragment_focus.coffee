@@ -18,7 +18,6 @@ class up.FragmentFocus extends up.Record
     @tryProcess(@focus)
 
   tryProcess: (focusOpt) ->
-    console.log("*** tryProcess(%o)", focusOpt)
     switch focusOpt
       when 'keep'
         return @restoreFocus(@focusCapsule)
@@ -37,6 +36,8 @@ class up.FragmentFocus extends up.Record
           return @focusSelector(focusOpt)
         if u.isFunction(focusOpt)
           return @tryProcess(focusOpt(@fragment))
+        if u.isElement(focusOpt)
+          return @focusElement(focusOpt)
 
   focusSelector: (selector) ->
     lookupOpts = { @layer, @origin }

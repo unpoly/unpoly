@@ -140,13 +140,15 @@ up.layer = do ->
     # TODO: Test this
     options.currentLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
 
-  build = (options, transformOptions) ->
-    console.log("up.layer.build(%o, %o)", u.copy(options), transformOptions)
+  build = (options) ->
     mode = options.mode
     Class = config[mode].Class
+
+    # modeConfigs() returns the most specific options first,
+    # but in merge() below later args override keys from earlier args.
     configs = u.reverse(modeConfigs(mode))
     options = u.mergeDefined(configs..., { mode, stack }, options)
-    transformOptions?(options)
+
     return new Class(options)
 
 #  modeClass = (options = {}) ->

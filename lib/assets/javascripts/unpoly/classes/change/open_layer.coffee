@@ -106,6 +106,7 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     # Emit up:layer:opened to indicate that the layer was opened successfully.
     # This is a good time for listeners to manipulate the overlay optics.
+    @layer.opening = false
     @emitOpenedEvent()
 
     # In case a listener to up:layer:opened immediately dimisses the new layer,
@@ -120,12 +121,13 @@ class up.Change.OpenLayer extends up.Change.Addition
     return Promise.resolve(@layer)
 
   buildLayer: ->
-    optionsWithDefaultHistory = u.omit(@options, ['history'])
-    resolveAutoHistory = (layerOptions) => layerOptions.history = @resolveAutoHistoryForLayer(layerOptions.history)
-    return up.layer.build(optionsWithDefaultHistory, resolveAutoHistory)
+    # We build the layer with the default { history } setting from config.mode.history.
+    # Both this change's options and the layer mode defaults can set { history: 'auto' } and
+    # must be resolved to a boolean. This is done in @resolveAutoHistoryForLayer().
+    return up.layer.build(u.merge(@options, history: undefined, opening: true))
 
-  resolveAutoHistoryForLayer: (modeDefault) ->
-    # Both the change's options and the layer mode defaults can set { history: 'auto' }.
+  resolveAutoHistoryForLayer: ->
+    # Both this change's options and the layer mode defaults can set { history: 'auto' }.
     # We use the table below to resolve this to either true or false:
     #
     # | options.history | config.mode.history | layer has history?                         |
@@ -135,28 +137,26 @@ class up.Change.OpenLayer extends up.Change.Addition
     # | auto            | false               | no                                         |
     # | true            | *                   | yes                                        |
     # | false           | *                   | no                                         |
-    if @history == 'auto'
-      # The mode default is now in layerOptions.history.
-      # If it's a boolean value we use it.
-      # If it's 'auto' we enable history IFF @content matches an auto-history target.
-      if modeDefault == 'auto'
-        # We build a layer in @preflightOptions(), before we have a @content element.
-        # In that case we cannot resolve { history: 'auto' }, and we don't need it.
-        unless @content
-          return false
+    changeHistory = @history
+    defaultHistory = @layer.history
 
-        unless (autoResult = up.fragment.shouldAutoHistory(@content, @options))
-          up.puts('up.layer.open()', "Opening layer without history as initial content doesn't match up.fragment.config.autoHistoryTargets")
-
-        return autoResult
-      else
-        return modeDefault
-    else
+    if u.isBoolean(changeHistory)
       # If up.layer.open() was called with a boolean { history } option,
       # we will use that option regardless of the mode default.
-      return @history
+      @layer.history = changeHistory
+
+    else if changeHistory == 'auto' && defaultHistory == 'auto'
+      # Enable history IFF @content matches an auto-history target.
+      unless @layer.history = u.evalOption(up.fragment.config.autoHistory, @content)
+        up.puts('up.layer.open()', "Opening layer without history as up.fragment.config.autoHistory(fragment) returned false")
+
+    else
+      # Keep the boolean value already in layer.history (set by config.mode.history).
+      # This empty else-branch will be removed by the minifier.
 
   handleHistory: ->
+    @resolveAutoHistoryForLayer()
+
     @layer.parent.saveHistory()
 
     # options.history dictates whether or not the overlay renders history to the address bar.

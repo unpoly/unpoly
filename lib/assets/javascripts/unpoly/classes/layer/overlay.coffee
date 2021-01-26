@@ -46,6 +46,7 @@ class up.Layer.Overlay extends up.Layer
       'dismissEvent',
       'acceptLocation',
       'dismissLocation',
+      'opening' # internal flag to know that the layer is being opened
     ]
 
   defaults: (options) ->

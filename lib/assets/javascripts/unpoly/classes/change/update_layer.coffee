@@ -56,8 +56,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     u.assign(@layer.context, @context)
 
-    if (@options.history == 'auto') && !(@options.history = @shouldAutoHistory())
-      up.puts('up.render()', "Will not auto-update history because fragment doesn't match up.fragment.config.autoHistoryTargets")
+    if (@options.history == 'auto')
+      @options.history = @shouldAutoHistory()
 
     # Change history before compilation, so new fragments see the new location.
     @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
@@ -346,9 +346,14 @@ class up.Change.UpdateLayer extends up.Change.Addition
     fragmentFocus.process()
 
   handleScroll: (fragment, step) ->
-    options = u.merge(step, { fragment, autoMeans: ['hash', 'layer-if-main'] })
-    scrolling = new up.FragmentScrolling(options)
+    scrolling = new up.FragmentScrolling(u.merge(step, {
+      fragment,
+      autoMeans: up.fragment.config.autoScroll
+    }))
     return scrolling.process()
 
   shouldAutoHistory: ->
-    up.fragment.shouldAutoHistory(@steps[0].oldElement, { @layer })
+    newFragment = @steps[0].oldElement
+    unless autoHistory = u.evalOption(up.fragment.config.autoHistory, newFragment)
+      up.puts('up.render()', "Will not auto-update history because up.fragment.config.autoHistory(fragment) returned false")
+      return autoHistory
