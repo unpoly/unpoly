@@ -1079,6 +1079,29 @@ describe 'up.form', ->
           next =>
             expect(revealSpy).not.toHaveBeenCalled()
 
+        it 'keeps focus in the updated fragment', asyncSpec (next) ->
+          $form = $fixture('form[action="/path/to"]')
+          $group = $("""
+            <div class="field-group">
+              <input name="user" value="judy" up-validate=".field-group:has(&)">
+            </div>
+          """).appendTo($form)
+
+          $input = $('input[name=user]')
+          $input.focus()
+          Trigger.change($input)
+
+          next =>
+            @respondWith """
+              <div class="field-group has-error">
+                <div class='error'>Username has already been taken</div>
+                <input name="user" value="judy" up-validate=".field-group:has(&)">
+              </div>
+            """
+
+          next =>
+            expect('input[name=user]').toBeFocused()
+
       describe 'when no selector is given', ->
 
         it 'automatically finds a form group around the input field and only updates that', asyncSpec (next) ->

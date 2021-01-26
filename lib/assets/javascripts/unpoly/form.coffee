@@ -435,6 +435,7 @@ up.form = do ->
     options.origin = field
     options.history = false
     options.target = findValidateTarget(field, options)
+    options.focus = 'keep'
 
     # The protocol doesn't define whether the validation results in a status code.
     # Hence we use the same options for both success and failure.
