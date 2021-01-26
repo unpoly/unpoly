@@ -16,8 +16,8 @@ Release process
   - New favicon (rising glyph)
   - Deploy
 - Reach out to server-integration libs (make issues?) with the new changes
-- Announce on Twitter
-  - Retweet
+- Announce on Twitter as @unpolyjs
+  - Retweet from private account
 - Announce on mailing list
 - Announce on makandra cards
 - Close fixed issues.
@@ -43,12 +43,7 @@ Manual tests
 Tests
 -----
 
-- Test that if the server responds with a new context object, we only want to use this object if we're updating the same layer for which we originally sent the request.
 - Test that requests don't normalize their { url }, which would clog logs
-- Test { scroll: "auto" }
-  - hash
-  - mains
-  - nothing
 - Test that up.viewport.saveScroll() only saves scroll positions for the current layer
 - Test that user can target :none
 - Test that pseudo-element targets are removed from target in X-Up-Target header
