@@ -38,7 +38,7 @@ class up.FragmentFocus extends up.Record
         if u.isString(focusOpt)
           return @focusSelector(focusOpt)
         if u.isFunction(focusOpt)
-          return @tryProcess(focusOpt(@fragment))
+          return @tryProcess(focusOpt(@fragment, @attributes()))
         if u.isElement(focusOpt)
           return @focusElement(focusOpt)
 

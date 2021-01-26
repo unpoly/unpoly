@@ -23,6 +23,7 @@ up.fragment = do ->
   Configures defaults for fragment updates.
 
   @property up.fragment.config
+
   @param {Array<string>} config.mainTargets=['[up-main]', 'main', ':layer']
     An array of CSS selectors for default targets.
 
@@ -37,24 +38,56 @@ up.fragment = do ->
     [topmost swappable element](/main). For the [root layer](/up.layer.root)
     the topmos swappable element is the `<body>`. For an overlay
     it is the target with which the overlay was opened with.
+
   @param {Array<string|RegExp>} config.badTargetClasses
     An array of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
 
     The class names may also be passed as a regular expression.
+
   @param {Object} config.navigateOptions
     An object of default options to apply when [navigating](/up.navigate).
 
     See `up.navigate()` for a table of default navigate options and their effects.
-  @param {Array<string>} config.autoHistoryTargets
-    An array of CSS selectors for which the browser history is updated with `{ history: 'auto' }`.
-  @param {Array<string>} config.autoResetScrollTargets
-    An array of CSS selectors for which the scroll position is [reset](/up.viewport.resetScroll) with `{ scroll: 'auto' }`.
+
   @param {boolean} config.matchAroundOrigin
     Whether to match an existing fragment around the triggered link.
 
     If set to `false` Unpoly will replace the first fragment
     matching the given target selector in the link's [layer](/up.layer).
+
+  @param {Function(Element)} config.autoHistory
+    A function that returns whether rendering the given fragment will update history with `{ history: 'auto' }`.
+
+    The function is expected to return a boolean value.
+
+    By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
+
+  @param {Function(Element)} config.autoScroll
+    A function that is called when the given fragment is rendered with `{ scroll: 'auto' }`.
+
+    The function will be called with the new fragment.
+
+    The function may either:
+
+    - Scroll the fragment to the desired position. The scrolling must not be animated.
+    - Return a [`{ scroll }` option](/up.render#options.scroll) value like `'target'`.
+    - Return an array of `{ scroll }` option values like `['hash', 'top']`. Unpoly will try each option until one applies.
+    - Do nothing.
+
+  @param {Function(Element)} config.autoFocus
+    A function that is called when the given fragment is rendered with `{ focus: 'auto' }`.
+
+    The function will be called with the new fragment.
+
+    The function may either:
+
+    - Focus the desired fragment. Focusing must not change scroll positions, since scrolling is governed
+      by `up.fragment.config.autoScroll`. Both `Element#focus()` and `up.focus()` accept a `{ preventScroll: true }` option
+      to prevent scrolling.
+    - Return a [`{ focus }` option](/up.render#options.focus) value like `'target'`.
+    - Return an array of `{ focus }` option values like `['autofocus', 'layer']`. Unpoly will try each option until one applies.
+    - Do nothing.
   @stable
   ###
   config = new up.Config ->
@@ -72,6 +105,8 @@ up.fragment = do ->
       cache: true
     }
 
+    matchAroundOrigin: true
+
     autoHistory: (fragment) ->
       return isMain(fragment)
 
@@ -80,8 +115,6 @@ up.fragment = do ->
 
     autoScroll: (fragment) ->
       return ['hash', 'layer' if isMain(fragment)]
-
-    matchAroundOrigin: true
 
   # Users who are not using layers will prefer settings default targets
   # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.

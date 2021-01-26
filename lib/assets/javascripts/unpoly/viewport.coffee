@@ -138,7 +138,7 @@ up.viewport = do ->
     Defaults to `up.viewport.config.scrollSpeed`.
   @return {Promise}
     A promise that will be fulfilled when the scrolling ends.
-  @experimental
+  @internal
   ###
   scroll = (viewport, scrollTop, options = {}) ->
     viewport = f.get(viewport, options)
@@ -186,7 +186,7 @@ up.viewport = do ->
   - the `<body>` element
   - an element matching the selector you have configured using `up.viewport.config.viewportSelectors.push('my-custom-selector')`
 
-  \#\#\# Fixed elements obstruction the viewport
+  \#\#\# Fixed elements obstructing the viewport
 
   Many applications have a navigation bar fixed to the top or bottom,
   obstructing the view on an element.

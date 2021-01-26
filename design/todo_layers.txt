@@ -27,6 +27,8 @@ Release process
 Remaining feature work
 ======================
 
+- When opening a new overlay, is the animation option { animation } or { openAnimation }?
+  - Are all animation options parsed by link.follow?
 
 
 Manual tests

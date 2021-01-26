@@ -50,7 +50,7 @@ class up.FragmentScrolling extends up.Record
         if u.isString(scrollOpt)
           return @revealSelector(scrollOpt)
         if u.isFunction(scrollOpt)
-          return @tryProcess(scrollOpt(@fragment))
+          return @tryProcess(scrollOpt(@fragment, @attributes()))
         if u.isElement(scrollOpt)
           return @revealElement(scrollOpt)
 
