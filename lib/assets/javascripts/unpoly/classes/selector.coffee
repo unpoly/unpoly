@@ -3,10 +3,13 @@ u = up.util
 
 class up.Selector
 
-  constructor: (@selector, @filters = []) ->
+  constructor: (@selectors, @filters = []) ->
+    # If the user has set config.mainTargets = [] then a selector :main
+    # will resolve to an empty array.
+    @unionSelector = @selectors.join(',') || 'match-none'
 
   matches: (element) ->
-    e.matches(element, @selector) && @passesFilter(element)
+    e.matches(element, @unionSelector) && @passesFilter(element)
 
   closest: (element) ->
     if @matches(element)
@@ -18,7 +21,7 @@ class up.Selector
     return u.every @filters, (filter) -> filter(element)
 
   descendants: (root) ->
-    results = e.all(root, @selector)
+    results = u.flatMap(@selectors, (selector) -> e.all(root, selector))
     return u.filter results, (element) => @passesFilter(element)
 
   subtree: (root) ->

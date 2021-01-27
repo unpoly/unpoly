@@ -960,6 +960,9 @@ up.fragment = do ->
       # We don't match around { origin } if we're given a root for the search.
       return getFirst(root, selector, options)
 
+    # If we don't have a root element we will use a context-sensitive lookup strategy
+    # that tries to match elements in the vicinity of { origin } before going through
+    # the entire layer.
     finder = new up.FragmentFinder(
       selector: selector
       origin: options.origin
@@ -1428,15 +1431,13 @@ up.fragment = do ->
 
     console.log("--- expandTargets(%o, %o) => %o", selector, u.merge(options, layer: layers[0]), expandedTargets)
 
-    # If the user has set config.mainTargets = [] then a selector :main
-    # will resolve to an empty array.
-    selector = expandedTargets.join(',') || 'match-none'
+    expandedTargets = expandedTargets.map (target) ->
+      target = target.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
+        filters.push (element) -> element.querySelector(descendantSelector)
+        return ''
+      return target || '*'
 
-    selector = selector.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->
-      filters.push (element) -> element.querySelector(descendantSelector)
-      return ''
-
-    return new up.Selector(selector, filters)
+    return new up.Selector(expandedTargets, filters)
 
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
@@ -1490,9 +1491,7 @@ up.fragment = do ->
   ###
   matches = (element, selector, options = {}) ->
     element = e.get(element)
-    console.log("*** parseSelector(%o, %o, %o)", selector, element, options)
     selector = parseSelector(selector, element, options)
-    console.log(">>> selector is %o", selector)
     return selector.matches(element)
 
   isMain = (element) ->

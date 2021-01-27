@@ -9,7 +9,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     super(options)
     @layer = options.layer
     @target = options.target
-    @origin = options.origin
     @placement = options.placement
     @context = options.context
     @parseSteps()

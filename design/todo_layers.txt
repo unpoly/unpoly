@@ -29,6 +29,9 @@ Remaining feature work
 
 - When opening a new overlay, is the animation option { animation } or { openAnimation }?
   - Are all animation options parsed by link.follow?
+- Calling up.reload() without a target selector throws because it cannot find the source URL of undefined
+  - It should update a main target
+
 
 
 Manual tests
@@ -547,3 +550,4 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
     - Do we need to?
 - Should { hungry: true } be navigate only? => no
 - Failed form submissions update the form, which is no main target and does not scroll or focus => ok, but what should we do?
+- It would be great to have up.fragment.currentOrigin in all callbacks, but that's a lter change

@@ -127,6 +127,35 @@ describe 'up.fragment', ->
         results = up.fragment.all('.match:has(.child)')
         expect(results).toEqual [otherMatch]
 
+      describe 'expansion of :main', ->
+
+        it 'expands :main to the configured main target selectors', ->
+          one = fixture('.one')
+          two = fixture('.two')
+          three = fixture('.three')
+
+          up.fragment.config.mainTargets = ['.two']
+
+          results = up.fragment.all(':main')
+          expect(results).toEqual [two]
+
+        it 'matches nothing if the user has configured no main targets', ->
+          up.fragment.config.mainTargets = []
+
+          results = up.fragment.all(':main')
+          expect(results).toEqual []
+
+        it 'matches earlier main targets first', ->
+          one = fixture('.one')
+          two = fixture('.two')
+          three = fixture('.three')
+          four = fixture('.four')
+
+          up.fragment.config.mainTargets = ['.three', '.one', '.four']
+
+          results = up.fragment.all(':main')
+          expect(results).toEqual [three, one, four]
+
       describe 'when given a root element for the search', ->
 
         it 'only matches descendants of that root', ->
