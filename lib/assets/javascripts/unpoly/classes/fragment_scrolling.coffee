@@ -30,7 +30,7 @@ class up.FragmentScrolling extends up.Record
 
   tryProcess: (scrollOpt) ->
     switch scrollOpt
-      when 'top'
+      when 'top', 'reset'
         # If the user has passed { scroll: 'top' } we scroll to the top all
         # viewports that are either containing or are contained by element.
         return @reset()
@@ -40,9 +40,9 @@ class up.FragmentScrolling extends up.Record
         return @restore()
       when 'hash'
         return @hash && up.viewport.revealHash(@hash, @attributes())
-      when 'target', 'reveal'
+      when 'target', 'reveal', true
         return @revealElement(@fragment)
-      when 'auto', true
+      when 'auto'
         return @tryProcess(@autoMeans)
       else
         if u.isArray(scrollOpt)

@@ -22,7 +22,7 @@ class up.FragmentFocus extends up.Record
     switch focusOpt
       when 'keep'
         return @restoreFocus(@focusCapsule)
-      when 'target'
+      when 'target', true
         return @focusElement(@fragment)
       when 'layer'
         return @focusElement(@layer.getFocusElement())
@@ -30,7 +30,7 @@ class up.FragmentFocus extends up.Record
         return @focusHash()
       when 'autofocus'
         return @autofocus()
-      when 'auto', true
+      when 'auto'
         return @tryProcess(@autoMeans)
       else
         if u.isArray(focusOpt)
