@@ -1297,7 +1297,7 @@ describe 'up.network', ->
 
       it 'throws an error when trying to preload an unsafe request', ->
         preload = -> up.network.preload({ url: '/foo', method: 'put' })
-        expect(preload).toThrowError(/will not preload a PUT request/i)
+        expect(preload).toThrowError(/will not preload .*? PUT/i)
 
     if up.migrate.loaded
       describe 'up.ajax', ->

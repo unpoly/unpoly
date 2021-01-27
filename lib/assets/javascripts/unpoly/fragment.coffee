@@ -1426,10 +1426,7 @@ up.fragment = do ->
     if options.layer != 'any' && !(element && e.isDetached(element))
       filters.push (match) -> u.some layers, (layer) -> layer.contains(match)
 
-
     expandedTargets = up.fragment.expandTargets(selector, u.merge(options, layer: layers[0]))
-
-    console.log("--- expandTargets(%o, %o) => %o", selector, u.merge(options, layer: layers[0]), expandedTargets)
 
     expandedTargets = expandedTargets.map (target) ->
       target = target.replace CSS_HAS_SUFFIX_PATTERN, (match, descendantSelector) ->

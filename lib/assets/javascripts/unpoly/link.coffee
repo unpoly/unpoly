@@ -513,12 +513,8 @@ up.link = do ->
 
   \#\#\# Cancelation is forwarded
 
-  If the user cancels an `up:click` event, the underlying `click` or `mousedown` will also be canceled.
-  The following cancelation methods will be forwarded:
-
-  - `event.stopPropagation()`
-  - `event.stopImmediatePropagation()`
-  - `event.preventDefault()
+  If the user cancels an `up:click` event using `event.preventDefault()`,
+  the underlying `click` or `mousedown` will also be canceled.
 
   \#\#\# Accessibility
 

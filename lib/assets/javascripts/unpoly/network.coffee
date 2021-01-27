@@ -424,7 +424,7 @@ up.network = do ->
   # If no existing promise is available, we queue a network request.
   queueRequest = (request) ->
     if request.preload && !request.isSafe()
-      up.fail('Will not preload a %o request (%o)', request.method, request)
+      up.fail('Will not preload request to %s', request.description)
 
     handleCaching(request)
 

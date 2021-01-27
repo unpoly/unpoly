@@ -3242,7 +3242,7 @@ describe 'up.fragment', ->
             expect(oldFocused.scrollTop).toBe(12)
             expect(oldFocused.scrollLeft).toBe(13)
 
-            up.render('.container', focus: 'keep', content: "<textarea wrap='off' rows='2' cols='2'>#{longText}</textarea>")
+            up.render('.container', focus: 'keep', content: "<textarea wrap='off' rows='3' cols='6'>#{longText}</textarea>")
 
             next ->
               textarea = document.querySelector('.container textarea')

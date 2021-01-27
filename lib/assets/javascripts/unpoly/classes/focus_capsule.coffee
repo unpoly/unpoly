@@ -22,8 +22,9 @@ class up.FocusCapsule extends up.Record
       return
 
     if rediscoveredElement = e.get(scope, @selector)
-      up.focus(rediscoveredElement, options)
+      # Firefox needs focus-related props to be set *before* we focus the element
       transferProps(this, rediscoveredElement)
+      up.focus(rediscoveredElement, options)
       # Signals callers that we could restore
       return true
 
