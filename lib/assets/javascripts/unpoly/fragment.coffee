@@ -110,8 +110,7 @@ up.fragment = do ->
     autoHistory: (fragment) ->
       return isMain(fragment)
 
-    autoFocus: (fragment) ->
-      return ['hash', 'autofocus', 'target' if isMain(fragment)]
+    autoFocus: ['hash', 'autofocus', 'lost-target', 'main-target']
 
     autoScroll: (fragment) ->
       return ['hash', 'layer' if isMain(fragment)]

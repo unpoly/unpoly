@@ -3293,7 +3293,70 @@ describe 'up.fragment', ->
 
             next ->
               expect(up.layer.front).toBeFocused()
+              
 
+        describe 'with { focus: "main-target" }', ->
+
+          it 'focuses a main target', asyncSpec (next) ->
+            fixture('.foo-bar')
+
+            up.fragment.config.mainTargets.push('.foo-bar')
+
+            up.render focus: 'main-target', fragment: """
+              <form class='foo-bar'>
+                <input>
+              </form>
+            """
+
+            next =>
+              expect('.foo-bar').toBeFocused()
+
+          it 'does not focus a non-main target', asyncSpec (next) ->
+            fixture('.foo-bar')
+
+            up.render focus: 'main-target', fragment: """
+              <form class='foo-bar'>
+                <input>
+              </form>
+            """
+
+            next =>
+              expect('.foo-bar').not.toBeFocused()
+              
+        describe 'with { focus: "lost-target" }', ->
+
+          it 'focuses the target if the focus was lost with the old fragment', asyncSpec (next) ->
+            container = fixture('.container')
+            child = e.affix(container, '.child[tabindex=0]')
+            child.focus()
+
+            expect(child).toBeFocused()
+
+            up.render focus: 'lost-target', fragment: """
+              <div class='container'>
+                <div class='child' tabindex='0'></div>
+              </div>
+            """
+
+            next ->
+              expect('.container').toBeFocused()
+
+          it 'does not focus the target if an element outside the updating fragment was focused', asyncSpec (next) ->
+            container = fixture('.container')
+            child = e.affix(container, '.child')
+
+            outside = fixture('.outside[tabindex=0]')
+            outside.focus()
+
+            up.render focus: 'lost-target', fragment: """
+              <div class='container'>
+                <div class='child' tabindex='0'></div>
+              </div>
+            """
+
+            next ->
+              expect('.outside').toBeFocused()
+              
         describe 'with an array of { focus } options', ->
 
           it 'tries each option until one succeeds', asyncSpec (next) ->

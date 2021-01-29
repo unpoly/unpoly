@@ -16,9 +16,9 @@ class up.FocusCapsule extends up.Record
     ['selector'].concat(PRESERVE_KEYS)
 
   restore: (scope, options) ->
-    if @oldElement && focusedElementWithin(@oldElement)
+    unless @wasLost()
       # If the old element was never detached (e.g. because it was kept),
-      # and still has focused, we don't need to do anything.
+      # and still has focus, we don't need to do anything.
       return
 
     if rediscoveredElement = e.get(scope, @selector)
@@ -33,3 +33,6 @@ class up.FocusCapsule extends up.Record
       plan = { oldElement, selector: up.fragment.toTarget(focusedElement) }
       transferProps(focusedElement, plan)
       return new @(plan)
+
+  wasLost: ->
+    return !focusedElementWithin(@oldElement)

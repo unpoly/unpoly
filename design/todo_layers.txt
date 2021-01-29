@@ -27,8 +27,10 @@ Release process
 Remaining feature work
 ======================
 
-- When opening a new overlay, is the animation option { animation } or { openAnimation }?
-  - Are all animation options parsed by link.follow?
+- Focus und Scroll-Option: main-target statt Funktion
+  => In FragmentScroll wäre es eher "main-reset" oder so
+  => wollen wir doch lieber target-if-main, top-if-main und target-if-lost?
+
 - Calling up.reload() without a target selector throws because it cannot find the source URL of undefined
   - It should update a main target
 - It makes no sense for up:click event to propagate stopPropagation() and stopImmediatePropagation() since we only convert them at the layer base. Propagation has already (mostly) happened.
@@ -551,3 +553,7 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
 - Should { hungry: true } be navigate only? => no
 - Failed form submissions update the form, which is no main target and does not scroll or focus => ok, but what should we do?
 - It would be great to have up.fragment.currentOrigin in all callbacks, but that's a lter change
+- When opening a new overlay, is the animation option { animation } or { openAnimation }?
+  - Are all animation options parsed by link.follow?
+  => it's just { animation }
+

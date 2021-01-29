@@ -21,9 +21,13 @@ class up.FragmentFocus extends up.Record
   tryProcess: (focusOpt) ->
     switch focusOpt
       when 'keep'
-        return @restoreFocus(@focusCapsule)
+        return @restoreFocus()
       when 'target', true
         return @focusElement(@fragment)
+      when 'main-target', true
+        return @focusMainTarget()
+      when 'lost-target'
+        return @preventFocusReset()
       when 'layer'
         return @focusElement(@layer.getFocusElement())
       when 'hash'
@@ -52,8 +56,8 @@ class up.FragmentFocus extends up.Record
       # Return undefined so { focus: 'auto' } will try the next option from { autoMeans }
       return
 
-  restoreFocus: (capsule) ->
-    return capsule?.restore(@fragment, PREVENT_SCROLL_OPTIONS)
+  restoreFocus: ->
+    return @focusCapsule?.restore(@fragment, PREVENT_SCROLL_OPTIONS)
 
   autofocus: ->
     if autofocusElement = e.subtree(@fragment, '[autofocus]')[0]
@@ -68,6 +72,14 @@ class up.FragmentFocus extends up.Record
   focusHash: ->
     if hashTarget = up.viewport.firstHashTarget(@hash, { @layer })
       return @focusElement(hashTarget)
+
+  preventFocusReset: ->
+    if @focusCapsule?.wasLost()
+      return @focusElement(@fragment)
+
+  focusMainTarget: ->
+    if up.fragment.isMain(@fragment)
+      return @focusElement(@fragment)
 
 #  shouldProcess: ->
 #    # Only emit an up:fragment:focus event if a truthy focusOpt would
