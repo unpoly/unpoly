@@ -27,7 +27,7 @@ Release process
 Remaining feature work
 ======================
 
-- Focus und Scroll-Option: main-target statt Funktion
+- Focus und Scroll-Option: target-if-main statt Funktion
   => In FragmentScroll wäre es eher "main-reset" oder so
   => wollen wir doch lieber target-if-main, top-if-main und target-if-lost?
 

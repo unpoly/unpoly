@@ -110,10 +110,9 @@ up.fragment = do ->
     autoHistory: (fragment) ->
       return isMain(fragment)
 
-    autoFocus: ['hash', 'autofocus', 'lost-target', 'main-target']
+    autoFocus: ['hash', 'autofocus', 'target-if-main', 'target-if-lost']
 
-    autoScroll: (fragment) ->
-      return ['hash', 'layer' if isMain(fragment)]
+    autoScroll: ['hash', 'layer-if-main']
 
   # Users who are not using layers will prefer settings default targets
   # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.

@@ -12,6 +12,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @currentLayer = options.currentLayer
     @source = options.source
     @focus = options.focus
+    @scroll = options.scroll
     @history = options.history
 
   preflightProps: ->
@@ -171,10 +172,9 @@ class up.Change.OpenLayer extends up.Change.Addition
     fragmentFocus = new up.FragmentFocus(
       fragment: @content,
       layer: @layer,
-      focus: @focus
       autoMeans: ['autofocus', 'layer'],
     )
-    fragmentFocus.process()
+    fragmentFocus.process(@focus)
 
   handleScroll: ->
     scrollingOptions = u.merge(@options, {
@@ -183,7 +183,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       autoMeans: ['hash', 'layer']
     })
     scrolling = new up.FragmentScrolling(scrollingOptions)
-    return scrolling.process()
+    return scrolling.process(@scroll)
 
   buildEvent: (name) =>
     return up.event.build(name,

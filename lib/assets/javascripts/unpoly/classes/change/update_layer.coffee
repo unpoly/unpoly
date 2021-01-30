@@ -341,7 +341,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       @focusCapsule,
       autoMeans: up.fragment.config.autoFocus,
     }))
-    fragmentFocus.process()
+    fragmentFocus.process(step.focus)
 
   handleScroll: (fragment, step) ->
     scrolling = new up.FragmentScrolling(u.merge(step, {
@@ -349,7 +349,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       @layer,
       autoMeans: up.fragment.config.autoScroll
     }))
-    return scrolling.process()
+    return scrolling.process(step.scroll)
 
   shouldAutoHistory: ->
     newFragment = @steps[0].oldElement

@@ -3295,14 +3295,14 @@ describe 'up.fragment', ->
               expect(up.layer.front).toBeFocused()
               
 
-        describe 'with { focus: "main-target" }', ->
+        describe 'with { focus: "target-if-main" }', ->
 
           it 'focuses a main target', asyncSpec (next) ->
             fixture('.foo-bar')
 
             up.fragment.config.mainTargets.push('.foo-bar')
 
-            up.render focus: 'main-target', fragment: """
+            up.render focus: 'target-if-main', fragment: """
               <form class='foo-bar'>
                 <input>
               </form>
@@ -3314,7 +3314,7 @@ describe 'up.fragment', ->
           it 'does not focus a non-main target', asyncSpec (next) ->
             fixture('.foo-bar')
 
-            up.render focus: 'main-target', fragment: """
+            up.render focus: 'target-if-main', fragment: """
               <form class='foo-bar'>
                 <input>
               </form>
@@ -3323,7 +3323,7 @@ describe 'up.fragment', ->
             next =>
               expect('.foo-bar').not.toBeFocused()
               
-        describe 'with { focus: "lost-target" }', ->
+        describe 'with { focus: "target-if-lost" }', ->
 
           it 'focuses the target if the focus was lost with the old fragment', asyncSpec (next) ->
             container = fixture('.container')
@@ -3332,7 +3332,7 @@ describe 'up.fragment', ->
 
             expect(child).toBeFocused()
 
-            up.render focus: 'lost-target', fragment: """
+            up.render focus: 'target-if-lost', fragment: """
               <div class='container'>
                 <div class='child' tabindex='0'></div>
               </div>
@@ -3348,7 +3348,7 @@ describe 'up.fragment', ->
             outside = fixture('.outside[tabindex=0]')
             outside.focus()
 
-            up.render focus: 'lost-target', fragment: """
+            up.render focus: 'target-if-lost', fragment: """
               <div class='container'>
                 <div class='child' tabindex='0'></div>
               </div>

@@ -1,73 +1,58 @@
+#= require ./fragment_processor
+
 u = up.util
 e = up.element
 
-class up.FragmentScrolling extends up.Record
+class up.FragmentScrolling extends up.FragmentProcessor
 
-  keys: -> [
-    'fragment'
-    'autoMeans'
+  keys: -> super.concat [
     'hash'
-    'origin'
-    'layer'
     'mode'
     'revealTop'
     'revealMax'
     'revealSnap'
     'scrollBehavior'
     'scrollSpeed'
-    'scroll'
   ]
 
   constructor: (options) ->
     up.migrate.handleScrollOptions?(options)
     super(options)
 
-  process: ->
-    # @tryProcess() returns undefined if an option cannot be applied.
-    # @process() returns a resolved promise if no option cannot be applied,
-    # satisfying our external signature as async method.
-    @tryProcess(@scroll) || Promise.resolve()
+  process: (opt) ->
+    # If no option can be applied, return a fulfilled promise to
+    # satisfy our signature as an async function.
+    super(opt) || Promise.resolve()
 
-  tryProcess: (scrollOpt) ->
-    switch scrollOpt
+  processPrimitive: (opt) ->
+    switch opt
       when 'top', 'reset'
         # If the user has passed { scroll: 'top' } we scroll to the top all
         # viewports that are either containing or are contained by element.
         return @reset()
       when 'layer'
         return @revealLayer()
+      when 'main'
+        return @revealSelector(':main')
       when 'restore'
         return @restore()
       when 'hash'
         return @hash && up.viewport.revealHash(@hash, @attributes())
       when 'target', 'reveal', true
         return @revealElement(@fragment)
-      when 'auto'
-        return @tryProcess(@autoMeans)
       else
-        if u.isArray(scrollOpt)
-          return u.find(scrollOpt, (opt) => @tryProcess(opt))
-        if u.isString(scrollOpt)
-          return @revealSelector(scrollOpt)
-        if u.isFunction(scrollOpt)
-          return @tryProcess(scrollOpt(@fragment, @attributes()))
-        if u.isElement(scrollOpt)
-          return @revealElement(scrollOpt)
+        if u.isString(opt)
+          return @revealSelector(opt)
+
+  processElement: (element) ->
+    return @revealElement(element)
+
+  revealElement: (element) ->
+    return up.reveal(element, @attributes())
 
   revealSelector: (selector) ->
-    getFragmentOpts = { @layer, @origin }
-    # Prefer selecting a descendant of @fragment, but if not possible search through @fragment's entire layer
-    if (match = up.fragment.get(@fragment, selector, getFragmentOpts) || up.fragment.get(selector, getFragmentOpts))
+    if match = @findSelector(selector)
       return @revealElement(match)
-    else
-      up.warn('up.render()', 'Tried to reveal selector "%s", but no matching element found', selector)
-      return
-
-  reset: ->
-    return up.viewport.resetScroll(u.merge(@attributes(), around: @fragment))
-
-  restore: ->
-    return up.viewport.restoreScroll(u.merge(@attributes(), around: @fragment))
 
   revealLayer: ->
     # Reveal the layer's box instead of the layer's element.
@@ -76,5 +61,8 @@ class up.FragmentScrolling extends up.Record
     # the main document viewport.
     @revealElement(@layer.getBoxElement())
 
-  revealElement: (element) ->
-    return up.reveal(element, @attributes())
+  reset: ->
+    return up.viewport.resetScroll(u.merge(@attributes(), around: @fragment))
+
+  restore: ->
+    return up.viewport.restoreScroll(u.merge(@attributes(), around: @fragment))
