@@ -1246,6 +1246,7 @@ up.fragment = do ->
   ###
   reload = (args...) ->
     options = parseTargetAndOptions(args)
+    options.target ||= ':main'
     element = getOne(options.target, options)
     options.url ?= sourceOf(element)
     options.headers ||= {}

@@ -27,9 +27,6 @@ Release process
 Remaining feature work
 ======================
 
-- Calling up.reload() without a target selector throws because it cannot find the source URL of undefined
-  - It should update a main target
-
 - It makes no sense for up:click event to propagate stopPropagation() and stopImmediatePropagation() since we only convert them at the layer base. Propagation has already (mostly) happened.
 
 

@@ -4463,6 +4463,22 @@ describe 'up.fragment', ->
           expect(@lastRequest().url).toMatchURL('/source')
           expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
 
+      it "reloads the layer's main element if no selector is given", asyncSpec (next) ->
+        up.fragment.config.mainTargets = ['.element']
+
+        fixture('.element[up-source="/source"]', text: 'old text')
+
+        next =>
+          up.reload()
+
+        next =>
+          expect(@lastRequest().url).toMatch(/\/source$/)
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+          @respondWithSelector('.element', content: 'new text')
+
+        next =>
+          expect('.element').toHaveText('new text')
+
     describe 'up.fragment.source()', ->
 
       it 'returns the source the fragment was retrieved from', asyncSpec (next) ->
