@@ -27,6 +27,7 @@ Release process
 Remaining feature work
 ======================
 
+- scroll-option and focus-option need 'auto'
 
 
 Manual tests

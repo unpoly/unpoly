@@ -56,31 +56,35 @@ up.fragment = do ->
     If set to `false` Unpoly will replace the first fragment
     matching the given target selector in the link's [layer](/up.layer).
 
-  @param {Function(Element)} config.autoHistory
-    A function that returns whether rendering the given fragment will update history with `{ history: 'auto' }`.
-
-    The function is expected to return a boolean value.
+  @param {boolean|Function(Element)} config.autoHistory
+    Whether update history with `{ history: 'auto' }`.
 
     By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
 
+    You may also configure a function that accepts the new fragment and return a boolean value.
+
   @param {boolean|string|Function(Element)} config.autoScroll
-    A function that is called when the given fragment is rendered with `{ scroll: 'auto' }`.
+    How to scroll after updating a fragment with `{ scroll: 'auto' }`.
 
     See [scroll option](/scroll-option) for a list of allowed values.
 
-  @param {Function(Element)} config.autoFocus
-    A function that is called when the given fragment is rendered with `{ focus: 'auto' }`.
+    The default configuration tries, in this order:
 
-    The function will be called with the new fragment.
+    - If the URL has a `#hash`, scroll to the hash.
+    - If updating a [main target](/up.fragment.config.mainTargets), reset scroll positions.
 
-    The function may either:
+  @param {boolean|string|Function(Element)} config.autoFocus
+    How to focus when updating a fragment with `{ focus: 'auto' }`.
 
-    - Focus the desired fragment. Focusing must not change scroll positions, since scrolling is governed
-      by `up.fragment.config.autoScroll`. Both `Element#focus()` and `up.focus()` accept a `{ preventScroll: true }` option
-      to prevent scrolling.
-    - Return a [`{ focus }` option](/up.render#options.focus) value like `'target'`.
-    - Return an array of `{ focus }` option values like `['autofocus', 'layer']`. Unpoly will try each option until one applies.
-    - Do nothing.
+    See [focus option](/focus-option) for a list of allowed values.
+
+    The default configuration tries, in this order:
+
+    - Focus a `#hash` in the URL.
+    - Focus an `[autofocus]` element in the new fragment.
+    - If focus was lost with the old fragment, focus the new fragment.
+    - If updating a [main target](/up.fragment.config.mainTargets), focus the new fragment.
+
   @stable
   ###
   config = new up.Config ->
@@ -480,6 +484,11 @@ up.fragment = do ->
     How to scroll after the new fragment was rendered.
 
     See [scroll option](/scroll-option) for a list of allowed values.
+
+  @param {boolean|string|Function} [options.focus]
+    What to focus after the new fragment was rendered.
+
+    See [focus option](/scroll-option) for a list of allowed values.
 
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when when the server responds with new HTML,
