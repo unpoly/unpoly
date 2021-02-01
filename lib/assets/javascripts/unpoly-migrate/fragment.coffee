@@ -94,8 +94,8 @@ up.migrate.handleScrollOptions = (options) ->
 
     # Rewrite deprecated { resetScroll } option
     if u.isDefined(options.resetScroll)
-      up.migrate.deprecated('Option { resetScroll: true }', "{ scroll: 'top' }")
-      options.scroll = 'top'
+      up.migrate.deprecated('Option { resetScroll: true }', "{ scroll: 'reset' }")
+      options.scroll = 'teset'
 
     # Rewrite deprecated { restoreScroll } option
     if u.isDefined(options.restoreScroll)

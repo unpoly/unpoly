@@ -172,10 +172,6 @@ up.viewport = do ->
   Scroll's the given element's viewport so the first rows of the
   element are visible for the user.
 
-  By default Unpoly will always reveal an element before
-  updating it with JavaScript functions like [`up.replace()`](/up.replace)
-  or UJS behavior like [`[up-target]`](/a-up-target).
-
   \#\#\# How Unpoly finds the viewport
 
   The viewport (the container that is going to be scrolled)

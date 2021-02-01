@@ -30,7 +30,7 @@ up.fragment = do ->
     When no other render target is given, Unpoly will try to find and replace a main target.
 
     When [navigating](/up.navigate) to a main target, Unpoly will automatically
-    [reset scroll positions](/up.render#options.scroll) and
+    [reset scroll positions](/scroll-option) and
     [update the browser history](/up.render#options.history).
 
     The default main targets are the HTML5 [`<main>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main),
@@ -63,17 +63,10 @@ up.fragment = do ->
 
     By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
 
-  @param {Function(Element)} config.autoScroll
+  @param {boolean|string|Function(Element)} config.autoScroll
     A function that is called when the given fragment is rendered with `{ scroll: 'auto' }`.
 
-    The function will be called with the new fragment.
-
-    The function may either:
-
-    - Scroll the fragment to the desired position. The scrolling must not be animated.
-    - Return a [`{ scroll }` option](/up.render#options.scroll) value like `'target'`.
-    - Return an array of `{ scroll }` option values like `['hash', 'top']`. Unpoly will try each option until one applies.
-    - Do nothing.
+    See [scroll option](/scroll-option) for a list of allowed values.
 
   @param {Function(Element)} config.autoFocus
     A function that is called when the given fragment is rendered with `{ focus: 'auto' }`.
@@ -482,6 +475,11 @@ up.fragment = do ->
 
   @param {boolean} [options.hungry=true]
     Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
+
+  @param {boolean|string|Function} [options.scroll]
+    How to scroll after the new fragment was rendered.
+
+    See [scroll option](/scroll-option) for a list of allowed values.
 
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when when the server responds with new HTML,

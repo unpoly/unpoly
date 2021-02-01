@@ -26,7 +26,7 @@ class up.FragmentScrolling extends up.FragmentProcessor
 
   processPrimitive: (opt) ->
     switch opt
-      when 'top', 'reset'
+      when 'reset'
         # If the user has passed { scroll: 'top' } we scroll to the top all
         # viewports that are either containing or are contained by element.
         return @reset()
