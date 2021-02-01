@@ -294,10 +294,16 @@ up.viewport = do ->
       return true
 
   makeFocusable = (element) ->
-    # Although element.tabIndex is -1 for all elements regardless
-    # of [tabindex] attribute, only the [tabindex] attribute is relevant
-    # for focusability.
-    e.setMissingAttr(element, 'tabindex', '-1')
+    # (1) Element#tabIndex is -1 for all non-interactive elements,
+    #     whether or not the element has an [tabindex=-1] attribute.
+    # (2) Element#tabIndex is 0 for interactive elements, like links,
+    #     inputs or buttons. [up-clickable] elements also get a [tabindex=0].
+    #     to participate in the regular tab order.
+    unless element.hasAttribute('tabindex') || element.tabIndex >= 0
+      element.setAttribute('tabindex', '-1')
+
+      # A11Y: OK to hide the focus ring of a non-interactive element.
+      element.classList.add('up-focusable-content')
 
   ###**
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
