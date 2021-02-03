@@ -35,7 +35,7 @@ class up.LayerLookup
   all: ->
     results = u.flatMap @values, (value) => @resolveValue(value)
     results = u.compact(results)
-    results = u.uniq(results) if @values.length > 1
+    results = u.uniq(results)
     results
 
   forElement: (element) ->
@@ -62,7 +62,7 @@ class up.LayerLookup
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
-        u.uniq [@currentLayer, @stack.reversed()...]
+        [@currentLayer, @stack.reversed()...]
       when 'current'
         @currentLayer
       when 'closest'
@@ -84,6 +84,6 @@ class up.LayerLookup
       when 'front'
         @stack.front
       when 'origin'
-        @originLayer() || up.fail("Need { origin } option for { layer: 'origin' }")
+        @originLayer()
       else
         up.fail("Unknown { layer } option: %o", value)

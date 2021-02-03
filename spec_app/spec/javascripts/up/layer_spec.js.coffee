@@ -1063,9 +1063,8 @@ describe 'up.layer', ->
             expect(up.layer.getAll('origin', origin: up.layer.get(1).element)).toEqual [up.layer.get(1)]
             done()
 
-        it "throws an error if no { origin } was passed", (done) ->
-          expect(-> up.layer.getAll('origin')).toThrowError(/(need|missing) \{ origin \} option/i)
-          done()
+        it "returns an empty list if if no { origin } was passed", (done) ->
+          expect(up.layer.getAll('origin')).toEqual []
 
       describe 'for "current"', ->
 
