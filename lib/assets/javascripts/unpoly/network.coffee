@@ -333,8 +333,16 @@ up.network = do ->
   @param {string} [options.method='GET']
     The HTTP method for the options.
   @param {boolean} [options.cache=false]
-    Whether to use a cached response for [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
-    requests, if available. If set to `false` a network connection will always be attempted.
+    Whether to read from and write to the [cache](/up.cache).
+
+    With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
+    to the network. If no cached response exists, Unpoly will make a request and cache
+    the server response.
+
+    With `{ cache: false }` (the default) Unpoly will always make a network request.
+
+    Only cache GET requests are cachable.
+
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
   @param {Object|FormData|string|Array} [options.params={}]

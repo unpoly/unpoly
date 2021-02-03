@@ -342,37 +342,11 @@ up.fragment = do ->
     consider the [`{ content }`](#options.content) option.
 
   @param {string} [options.fail='auto']
-    You may pass different render options for successful and failed server responses.
+    How to render a server response with an error code.
 
-    A common use case for this is [form submissions](/up.form), where a successful response
-    should display a follow-up screen but a failed response should re-render the form
-    or display errors.
+    Any HTTP status code other than 2xx is considered an error code.
 
-    To pass an option for a failed server response, prefix the option with `fail`:
-
-        up.render({
-          url: '/action',
-          method: 'post',
-          target: '.content',   // when submission succeeds update '.content'
-          failTarget: 'form',   // when submission fails update the form
-          scroll: 'auto',       // when submission succeeds use default scroll behavior
-          failScroll: '.errors' // when submission falis scroll to the error messages
-        })
-
-    Options that are used before the request is made (like `{ url, method, confirm }`) do not
-    have a `fail`-prefixed variant. Some options (like `{ history, fallback }`) are used for both
-    successful and failed responses, but may be overriden with a fail-prefixed variant (e.g. `{ history: true, failHistory: false }`.
-    Options related to layers, scrolling or focus are never shared.
-
-    The `{ fail }` option changes how Unpoly determines whether a server response was successful.
-    By default (`{ fail: 'auto' }`) any HTTP 2xx status code will be considered successful,
-    and any other status code will be considered failed.
-
-    You may also pass `{ fail: false }` to always consider the response to be successful, even
-    with a HTTP 4xx or 5xx status code.
-
-    When the updated fragment content is not requested from a `{ url }`, but rather passed as a
-    HTML string, the update is always considered successful, regardless of the `{ fail }` option.
+    For details see [handling server errors](/server-errors).
 
   @param {boolean|string} [options.history=false]
     Whether the browser URL and window title will be updated.
@@ -413,7 +387,7 @@ up.fragment = do ->
     [Overlays](/up.layer) will only change the browser's URL if the overlay
     has [enabled history](/up.layer.history).
 
-  @param {string} [options.transition='none']
+  @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 
     If you are prepending or appending content, use the `{ animate }` option instead.
@@ -432,19 +406,6 @@ up.fragment = do ->
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
 
-  @param {boolean|string} [options.reveal=false]
-    Whether to [reveal](/up.reveal) the new fragment.
-
-    You can also pass a CSS selector for the element to reveal.
-
-  @param {number} [options.revealPadding]
-
-  @param {boolean} [options.restoreScroll=false]
-    If set to true, Unpoly will try to restore the scroll position
-    of all the the updated element's viewport. The position
-    will be reset to the last known top position before a previous
-    history change for the current URL.
-
   @param {boolean} [options.cache=false]
     Whether to read from and write to the [cache](/up.cache).
 
@@ -452,10 +413,15 @@ up.fragment = do ->
     to the network. If no cached response exists, Unpoly will make a request and cache
     the server response.
 
-    Only cache GET requests are cachable.
+    Also see [`up.request({ cache })`](/up.request#options.cache).
 
-  @param {boolean} [options.clearCache]
-    Whether existing [cache](/up.cache)
+  @param {boolean|string} [options.clearCache]
+    Whether existing [cache](/up.cache) entries will be cleared with this request.
+
+    By default a non-GET request will clear the entire cache.
+    You may also pass a [URL pattern](/url-pattern) to only clear matching requests.
+
+    Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
   @param {Element|jQuery} [options.origin]
     The element that triggered the replacement.
@@ -463,13 +429,16 @@ up.fragment = do ->
     When multiple elements in the current page match the `{ target }`,
     Unpoly will replace an element in the [origin's vicinity](/a-up-target#matching-in-the-links-vicinity).
 
-    The element's selector will be substituted for the `&` shorthand in the target
+    The origin's selector will be substituted for the `&` shorthand in the target
     selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
 
-    If no `{ layer }` option is given, the layer of the given `{ origin }` element is used.
+  @param {string|up.Layer|Element} [options.layer='origin current']
+    The [layer](/up.layer) in which to match and render the fragment.
 
-  @param {string} [options.layer='current']
-    TODO: Docs for all layer-related options. However, opts for new layers we will document on up.layer.open().
+    See [layer option](/layer-option) for a list of allowed values.
+
+    Pass `{ layer: 'new' }` to open the fragment in a new overlay.
+    In this case all options for `up.layer.open()` may also be used.
 
   @param {Object} [options.context]
     An object that will be merged into the [context](/up.context) of the current layer once the fragment is rendered.
@@ -480,12 +449,17 @@ up.fragment = do ->
   @param {boolean} [options.hungry=true]
     Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
 
-  @param {boolean|string|Function} [options.scroll]
+  @param {boolean|string|Element|Function} [options.scroll]
     How to scroll after the new fragment was rendered.
 
     See [scroll option](/scroll-option) for a list of allowed values.
 
-  @param {boolean|string|Function} [options.focus]
+  @param {boolean} [options.saveScroll=true]
+    Whether to save scroll positions before updating the fragment.
+
+    Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scroll-option#restoring-scroll-options).
+
+  @param {boolean|string|Element|Function} [options.focus]
     What to focus after the new fragment was rendered.
 
     See [focus option](/scroll-option) for a list of allowed values.
@@ -499,7 +473,7 @@ up.fragment = do ->
 
   @param {Function()} [options.onFinished]
     A callback that will be run when all animations have concluded and
-    the element was removed from the DOM tree.
+    elements were removed from the DOM tree.
 
   @return {Promise}
     A promise that fulfills when the page has been updated.

@@ -27,7 +27,8 @@ Release process
 Remaining feature work
 ======================
 
-
+- We have up:request:late but up:network:recover
+  - rename to up:request:recover
 
 Manual tests
 ------------

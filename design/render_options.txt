@@ -32,8 +32,8 @@ confirm
 
 [ok] fail
 
-saveScroll
-scroll
+[ok] saveScroll
+[ok] scroll
 focus
 revealTop
 revealMax

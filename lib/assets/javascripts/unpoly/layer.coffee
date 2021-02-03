@@ -236,9 +236,9 @@ up.layer = do ->
   The *current* layer is usually the [frontmost layer](/up.layer.front).
   There are however some cases where the current layer is a layer in the background:
 
-  - When an element in a background layer is compiled.
-  - When an Unpoly event like `up:request:loaded` is triggered from a background layer.
-  - When the event listener was bound to a background layer using `up.Layer#on()`.
+  - While an element in a background layer is [compiled](/up.compiler).
+  - While an Unpoly event like `up:request:loaded` is being triggered from a background layer.
+  - While a running event listener was bound to a background layer using `up.Layer#on()`.
 
   To temporarily change the current layer from your own code, use `up.Layer#asCurrent()`.
 
