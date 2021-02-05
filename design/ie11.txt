@@ -1,9 +1,36 @@
 Code we can remove once we drop IE11
 ====================================
 
+Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
+--------------------------------------------------------------------
+
 - up.util.assign => Object.assign
 - up.util.toArray => Array.from
-- up.element.toggleClass can just be classList.toggleClass
-- we can switch to Babel without requiring Polyfills
-- we might want to parse URLs faster with URL
-- test if we can make CSS more configurable by exposing CSS variables ("custom properties")
+- up.element.remove => Element#remove
+- up.element.matches => Element#matches
+- up.element.closest => Eelement#closest
+- up.element.all => Element#querySelectorAll
+- up.element.toggleClass can just be classList.toggleClass => deprecate
+
+
+Quick wins: Removals
+--------------------
+
+- maybe stop stripping <noscript> tags
+    # (1) IE11 and Edge cannot find <noscript> tags with jQuery or querySelector() or
+    #     getElementsByTagName() when the tag was created by DOMParser. This is a bug.
+    #     https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/
+- up.focus() can use native preventScroll: true
+- passive event listeners are supported natively
+- IE11 hack to implement defaultPrevented in custom events
+- normalizeURL can use { host } to strip away standard ports
+- ie11 hacks in parseURL
+- viewport.rootSelector can just be document.scrollingElement
+
+
+More work required
+------------------
+
+- maybe don't even have a ES5 build?
+- we might want to parse URLs faster with the URL class
+- maybe replace up.Params with FormData, but we would need a lot of utility methods around it

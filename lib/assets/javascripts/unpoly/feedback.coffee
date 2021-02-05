@@ -111,7 +111,6 @@ up.feedback = do ->
     if layerLocation = layer.feedbackLocation
       u.each links, (link) ->
         isCurrent = linkURLs(link).isCurrent(layerLocation)
-        # Once we drop IE11 support in 2020 we can call add() with multiple arguments
         for currentClass in config.currentClasses
           e.toggleClass(link, currentClass, isCurrent)
         e.toggleAttr(link, 'aria-current', 'page', isCurrent)
