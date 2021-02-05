@@ -35,8 +35,6 @@ Remaining feature work
 Manual tests
 ------------
 
-- Specs in IE11
-- Specs in Safari
 - Try changes in demo.unpoly.com
 - Try changes on makandracards.com
 - Try changes on DAH
