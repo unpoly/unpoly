@@ -61,9 +61,9 @@ window.asyncSpec = (args...) ->
         log('runBlockSync')
         value = block(previousValue)
         pokeQueue(value)
-      catch e
-        fail(e)
-        throw e
+      catch error
+        fail(error)
+        throw error
 
     runBlockAsyncThenPoke = (blockOrPromise, previousValue) ->
       log('runBlockAsync')

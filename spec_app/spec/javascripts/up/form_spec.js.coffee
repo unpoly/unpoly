@@ -1089,6 +1089,9 @@ describe 'up.form', ->
 
           $input = $('input[name=user]')
           $input.focus()
+
+          expect('input[name=user]').toBeFocused()
+
           Trigger.change($input)
 
           next =>
@@ -1100,6 +1103,7 @@ describe 'up.form', ->
             """
 
           next =>
+            expect(document).toHaveSelector('.field-group.has-error')
             expect('input[name=user]').toBeFocused()
 
       describe 'when no selector is given', ->
@@ -1150,9 +1154,6 @@ describe 'up.form', ->
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
         submitButton = e.affix(form, 'input[type=submit]')
         textField.value = "foo"
-
-        form.addEventListener 'change', (event) -> console.log("CHANGE on %o", event.target)
-        form.addEventListener 'submit', -> console.log("SUBMIT")
 
         Trigger.change(textField)
         Trigger.clickSequence(submitButton)

@@ -97,13 +97,13 @@ describe 'up.motion', ->
             e.setStyle($element, opacity: 0)
             up.animate($element, { opacity: 1 }, options)
 
-          up.animate($element, animation, duration: 300, easing: 'linear')
+          up.animate($element, animation, duration: 400, easing: 'linear')
 
-          u.timer 5, ->
+          u.timer 10, ->
             expect($element).toHaveOpacity(0.0, 0.25)
-          u.timer 150, ->
+          u.timer 200, ->
             expect($element).toHaveOpacity(0.5, 0.25)
-          u.timer 300, ->
+          u.timer (400), ->
             expect($element).toHaveOpacity(1.0, 0.25)
             done()
 

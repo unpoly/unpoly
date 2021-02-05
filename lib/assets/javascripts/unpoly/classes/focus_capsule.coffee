@@ -1,10 +1,15 @@
 u = up.util
 e = up.element
 
-PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop', 'oldElement']
+PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
 transferProps = (from, to) ->
-  u.assign(to, u.pick(from, PRESERVE_KEYS))
+  for key in PRESERVE_KEYS
+    try
+      to[key] = from[key]
+    catch error
+      # Safari throws a TypeError when accessing { selectionStart }
+      # from a focused <input type="submit">. We ignore it.
 
 focusedElementWithin = (scopeElement) ->
   focusedElement = document.activeElement
@@ -13,7 +18,7 @@ focusedElementWithin = (scopeElement) ->
 
 class up.FocusCapsule extends up.Record
   keys: ->
-    ['selector'].concat(PRESERVE_KEYS)
+    ['selector', 'oldElement'].concat(PRESERVE_KEYS)
 
   restore: (scope, options) ->
     unless @wasLost()

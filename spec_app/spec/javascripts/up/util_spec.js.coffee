@@ -1411,12 +1411,13 @@ describe 'up.util', ->
 
         copy = up.util.copy(date)
 
-        expect(copy.getFullYear()).toBe(1995)
-        expect(copy.getHours()).toBe(3)
-        expect(copy.getMinutes()).toBe(24)
+        expect(copy.getFullYear()).toBe(date.getFullYear())
+        expect(copy.getHours()).toBe(date.getHours())
+        expect(copy.getMinutes()).toBe(date.getMinutes())
 
+        # Check that it's actually a copied object
+        expect(copy).not.toBe(date)
         date.setFullYear(2018)
-
         expect(copy.getFullYear()).toBe(1995)
 
 

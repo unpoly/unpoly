@@ -1740,7 +1740,7 @@ up.util = do ->
     else # object, array
       try
         string = JSON.stringify(arg)
-      catch e
+      catch error
         if contains(e.message, 'circular')
           string = '(circular structure)'
         else

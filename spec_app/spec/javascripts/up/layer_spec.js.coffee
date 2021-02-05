@@ -1063,7 +1063,7 @@ describe 'up.layer', ->
             expect(up.layer.getAll('origin', origin: up.layer.get(1).element)).toEqual [up.layer.get(1)]
             done()
 
-        it "returns an empty list if if no { origin } was passed", (done) ->
+        it "returns an empty list if if no { origin } was passed", ->
           expect(up.layer.getAll('origin')).toEqual []
 
       describe 'for "current"', ->

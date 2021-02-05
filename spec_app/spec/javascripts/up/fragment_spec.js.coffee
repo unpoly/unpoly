@@ -3237,19 +3237,19 @@ describe 'up.fragment', ->
             oldFocused.focus()
 
             expect(oldFocused).toBeFocused()
-            expect(oldFocused.selectionStart).toBe(10)
-            expect(oldFocused.selectionEnd).toBe(11)
-            expect(oldFocused.scrollTop).toBe(12)
-            expect(oldFocused.scrollLeft).toBe(13)
+            expect(oldFocused.selectionStart).toBeAround(10, 2)
+            expect(oldFocused.selectionEnd).toBeAround(11, 2)
+            expect(oldFocused.scrollTop).toBeAround(12, 2)
+            expect(oldFocused.scrollLeft).toBeAround(13, 2)
 
             up.render('.container', focus: 'keep', content: "<textarea wrap='off' rows='3' cols='6'>#{longText}</textarea>")
 
             next ->
               textarea = document.querySelector('.container textarea')
-              expect(textarea.selectionStart).toBe(10)
-              expect(textarea.selectionEnd).toBe(11)
-              expect(textarea.scrollTop).toBe(12)
-              expect(textarea.scrollLeft).toBe(13)
+              expect(textarea.selectionStart).toBeAround(10, 2)
+              expect(textarea.selectionEnd).toBeAround(11, 2)
+              expect(textarea.scrollTop).toBeAround(12, 2)
+              expect(textarea.scrollLeft).toBeAround(13, 2)
               expect(textarea).toBeFocused()
 
           it 'does not lose focus of an element outside the changed fragment', asyncSpec (next) ->
