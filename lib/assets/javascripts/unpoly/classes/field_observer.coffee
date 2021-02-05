@@ -52,9 +52,7 @@ class up.FieldObserver
         for name, value of diff
           callbackReturnValues.push(@callback(value, name))
 
-      # Promise.all() will wait for any promises that might be
-      # contained in the `callbackReturnValues` array.
-      callbacksDone = Promise.allSettled(callbackReturnValues)
+      callbacksDone = u.allSettled(callbackReturnValues)
 
       callbacksDone.then =>
         @callbackRunning = false

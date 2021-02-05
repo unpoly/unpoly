@@ -36,7 +36,7 @@ $ = jQuery
 
   touchstart = (element, options) ->
     element = e.get(element)
-    event = createEvent('touchstart', u.merge({ element }, options))
+    event = createSimpleEvent('touchstart', u.merge({ element }, options))
     dispatch(element, event)
 
   click = (element, options) ->
@@ -54,7 +54,7 @@ $ = jQuery
       cancelable: true,
       bubbles: true
     )
-    event = createEvent('submit', options)
+    event = createSimpleEvent('submit', options)
     form.dispatchEvent(event)
 
   change = (field, options) ->
@@ -63,7 +63,7 @@ $ = jQuery
       cancelable: false,
       bubbles: true
     )
-    event = createEvent('change', options)
+    event = createSimpleEvent('change', options)
     field.dispatchEvent(event)
 
   input = (field, options) ->
@@ -72,7 +72,7 @@ $ = jQuery
       cancelable: false,
       bubbles: true
     )
-    event = createEvent('input', options)
+    event = createSimpleEvent('input', options)
     field.dispatchEvent(event)
 
   escapeSequence = (element, options) ->
@@ -83,7 +83,7 @@ $ = jQuery
     keypress(element, key, options)
     keyup(element, key, options)
 
-  FOCUSABLE_SELECTOR = 'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]'
+  FOCUSABLE_SELECTOR = 'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
   isFocusable = (element) ->
     return e.matches(element, FOCUSABLE_SELECTOR)
@@ -149,14 +149,31 @@ $ = jQuery
     mouseout(element, options)
     mouseleave(element, options)
 
+  buildEvent = (klass) ->
+    event = document.createEvent(klass)
+
+    # IE11 does not set { defaultPrevented: true } after #preventDefault()
+    # was called on a custom event.
+    # See discussion here: https://stackoverflow.com/questions/23349191
+    if up.browser.isIE11()
+      originalPreventDefault = event.preventDefault
+
+      event.preventDefault = ->
+        # Even though we're swapping out defaultPrevented() with our own implementation,
+        # we still need to call the original method to trigger the forwarding of up:click.
+        originalPreventDefault.call(event)
+        u.getter(event, 'defaultPrevented', -> true)
+
+    return event
+
   # Can't use the new Event constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
-  createEvent = (type, options) ->
+  createSimpleEvent = (type, options) ->
     options = u.options(options,
       cancelable: true,
       bubbles: true
     )
-    event = document.createEvent('Event')
+    event = buildEvent('Event')
     event.initEvent(type, options.bubbles, options.cancelable)
     event
 
@@ -192,7 +209,7 @@ $ = jQuery
     options.screenX ?= options.clientX + window.screenX
     options.screenY ?= options.clientY + window.screenY
 
-    event = document.createEvent('MouseEvent')
+    event = buildEvent('MouseEvent')
     event.initMouseEvent(type,
       options.bubbles,
       options.cancelable,
@@ -222,7 +239,7 @@ $ = jQuery
     if canEventConstructors()
       event = new KeyboardEvent(type, options)
     else
-      event = document.createEvent('KeyboardEvent')
+      event = buildEvent('KeyboardEvent')
       # The argument of initKeyboardEvent differs wildly between browsers.
       # In IE 11 it is initKeyboardEvent(type, canBubble, cancelable, view, key, location, modifierList, repeat, locale).
 
@@ -274,7 +291,7 @@ $ = jQuery
   submit: submit
   change: change
   input: input
-  createEvent: createEvent
+  createSimpleEvent: createSimpleEvent
   createMouseEvent: createMouseEvent
   createKeyboardEvent: createKeyboardEvent
 

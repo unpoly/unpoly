@@ -856,7 +856,7 @@ up.element = do ->
   ###
   numberAttr = (element, attribute) ->
     if value = element.getAttribute(attribute)
-      value = value.replaceAll('_', '')
+      value = value.replace(/_/g, '')
       if value.match(/^[\d\.]+$/)
         parseFloat(value)
 

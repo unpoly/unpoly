@@ -906,6 +906,9 @@ describe 'up.form', ->
 
     describe 'input[up-autosubmit]', ->
 
+      beforeEach ->
+        up.form.config.observeDelay = 0
+
       it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
         $form = $fixture('form')
         $field = $form.affix('input[up-autosubmit][name="input-name"][value="old-value"]')
@@ -926,13 +929,16 @@ describe 'up.form', ->
         next =>
           expect(submitSpy.calls.count()).toBe(1)
           Trigger.clickSequence(radio2)
-        next =>
+        next.after 100, =>
           expect(submitSpy.calls.count()).toBe(2)
           Trigger.clickSequence(radio1)
-        next =>
+        next.after 100, =>
           expect(submitSpy.calls.count()).toBe(3)
 
     describe 'form[up-autosubmit]', ->
+
+      beforeEach ->
+        up.form.config.observeDelay = 0
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
         $form = $fixture('form[up-autosubmit]')

@@ -26,6 +26,7 @@ Quick wins: Removals
 - normalizeURL can use { host } to strip away standard ports
 - ie11 hacks in parseURL
 - viewport.rootSelector can just be document.scrollingElement
+- replace isNativelyFocusable() with element.tabIndex >= 0
 
 
 More work required

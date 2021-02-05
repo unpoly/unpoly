@@ -186,6 +186,7 @@ up.util = do ->
   methodAllowsPayload = (method) ->
     method != 'GET' && method != 'HEAD'
 
+  # Remove with IE11
   assignPolyfill = (target, sources...) ->
     for source in sources
       for own key, value of source
@@ -202,6 +203,7 @@ up.util = do ->
   ###
   assign = Object.assign || assignPolyfill
 
+  # Remove with IE11
   valuesPolyfill = (object) ->
     value for key, value of object
 
@@ -1779,6 +1781,10 @@ up.util = do ->
       i += 1
       arg
 
+  # Remove with IE11
+  allSettled = (promises) ->
+    return Promise.all(map(promises, muteRejection))
+
   parseURL: parseURL
   normalizeURL: normalizeURL
   urlWithoutHost: urlWithoutHost
@@ -1906,3 +1912,4 @@ up.util = do ->
   sprintfWithFormattedArgs: sprintfWithFormattedArgs
   renameKeys: renameKeys
   timestamp: secondsSinceEpoch
+  allSettled: allSettled

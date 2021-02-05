@@ -16,7 +16,7 @@ afterEach (done) ->
   # Most pending promises will wait for an animation to finish.
   promise = up.motion.finish()
 
-  promise.finally ->
+  u.always promise, ->
 
     # Wait one more frame so pending callbacks have a chance to run.
     # Pending callbacks might change the URL or cause errors that bleed into

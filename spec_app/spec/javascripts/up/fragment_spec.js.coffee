@@ -2284,7 +2284,7 @@ describe 'up.fragment', ->
             onFinished: onFinishedSpy
           )
 
-          next.after 100, ->
+          next.after 200, ->
             expect(onFinishedSpy.calls.count()).toBe(1)
 
         it 'cancels an existing transition by instantly jumping to the last frame', asyncSpec (next) ->
@@ -2361,7 +2361,7 @@ describe 'up.fragment', ->
           next.after 20, ->
             expect(onFinished).not.toHaveBeenCalled()
 
-          next.after 100, ->
+          next.after 200, ->
             expect(onFinished).toHaveBeenCalled()
 
         it 'runs an { onFinished } callback once when appending an element', asyncSpec (next) ->
@@ -2376,7 +2376,7 @@ describe 'up.fragment', ->
             onFinished: onFinishedSpy
           )
 
-          next.after 50, ->
+          next.after 200, ->
             expect(onFinishedSpy.calls.count()).toBe(1)
 
         it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next)->
@@ -4278,7 +4278,7 @@ describe 'up.fragment', ->
         up.destroy(element, animation: 'fade-out', duration: 10)
         up.destroy(element, animation: 'fade-out', duration: 10)
 
-        next.after 60, ->
+        next.after 150, ->
           expect(destructor.calls.count()).toBe(1)
 
       it 'marks the old element as [aria-hidden=true] before destructors', (done) ->
@@ -4313,7 +4313,7 @@ describe 'up.fragment', ->
         next.after 50, ->
           expect(destructor).not.toHaveBeenCalled()
 
-        next.after 100, ->
+        next.after 200, ->
           expect(destructor).toHaveBeenCalledWith('old text')
 
       if up.migrate.loaded
@@ -4348,7 +4348,7 @@ describe 'up.fragment', ->
           expect($element).toBeAttached()
           expect(onFinished).not.toHaveBeenCalled()
 
-        next.after 60, ->
+        next.after 200, ->
           expect($element).toBeDetached()
           expect(onFinished).toHaveBeenCalled()
 
