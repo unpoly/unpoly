@@ -93,7 +93,6 @@ up.radio = do ->
       return if stopped
 
       if shouldPoll(fragment)
-        console.log("SHOULD POLL!")
         u.always(up.reload(fragment, options), doSchedule)
       else
         # Reconsider after 10 seconds at most

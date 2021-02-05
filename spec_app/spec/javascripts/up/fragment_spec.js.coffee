@@ -3627,7 +3627,6 @@ describe 'up.fragment', ->
             expect(change2Error).toBeUndefined()
 
             soloFn = (request) ->
-              console.log("### Looking at request %o", request)
               u.matchURLs(request.url, '/path1')
 
             change3Promise = up.render('.element', url: '/path3', solo: soloFn).catch (e) -> change3Error = e
