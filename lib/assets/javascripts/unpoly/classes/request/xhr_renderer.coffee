@@ -16,7 +16,9 @@ class up.Request.XHRRenderer
     # This would confuse API clients and cache key logic in up.network.
     @params = u.copy(@request.params)
 
-    @xhr.timeout = @request.timeout
+    # IE11 explodes it we're setting an undefined timeout property
+    if @request.timeout
+      @xhr.timeout = @request.timeout
 
     # The XMLHttpRequest method must be opened before we can add headers to it.
     @xhr.open(@getMethod(), @request.url)
