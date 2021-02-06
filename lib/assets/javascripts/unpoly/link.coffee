@@ -238,21 +238,20 @@ up.link = do ->
     parser.boolean('peel')
     parser.string('layer')
     parser.json('context')
-    parser.string('flavor') # Renamed to { mode }. Legacy calls handled by up.layer.normalizeOptions.
+
+    up.migrate.parseFollowOptions?(parser)
+
     parser.string('mode')
     parser.string('align')
     parser.string('position')
     parser.string('class')
     parser.string('size')
-    parser.boolean('closable') # Renamed to { dismissable }. Legacy calls handled by up.layer.normalizeOptions.
     parser.boolean('dismissable')
     parser.boolean('buttonDismissable')
     parser.boolean('keyDismissable')
     parser.boolean('outsideDismissable')
     parser.parse(up.layer.openCallbackAttr, 'onOpened')
-    # parser.parse(up.layer.closeCallbackAttr, 'onAccept')
     parser.parse(up.layer.closeCallbackAttr, 'onAccepted')
-    # parser.parse(up.layer.closeCallbackAttr, 'onDismiss')
     parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
     parser.string('acceptEvent')
     parser.string('dismissEvent')
@@ -263,10 +262,6 @@ up.link = do ->
     parser.booleanOrString('focus')
     parser.boolean('saveScroll')
     parser.booleanOrString('scroll')
-    parser.booleanOrString('reveal')  # legacy option for { scroll: 'target' }
-    parser.boolean('resetScroll')     # legacy option for { scroll: 'top' }
-    parser.boolean('restoreScroll')   # legacy option for { scroll: 'restore' }
-
     parser.boolean('revealTop')
     parser.number('revealMax')
     parser.number('revealPadding')

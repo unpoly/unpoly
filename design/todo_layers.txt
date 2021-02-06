@@ -30,6 +30,7 @@ Remaining feature work
 - We have up:request:late but up:network:recover
   - rename to up:request:recover
 - Deprecate up.element.all (use querySelectorAll)
+- Layer option: Document that we can pass a mode as { layer }
 
 
 Manual tests

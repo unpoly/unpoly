@@ -7,8 +7,9 @@ up.migrate.handleLayerOptions = (options) ->
   up.migrate.fixKey(options, 'closable', 'dismissable')
   up.migrate.fixKey(options, 'closeLabel', 'dismissLabel')
 
-  if options.width || options.maxWidth
-    up.migrate.warn('Layer options { width } and { maxWidth } have been removed. Use { size } or { class } instead.')
+  for dimensionKey in ['width', 'maxWidth', 'height']
+    if options[dimensionKey]
+      up.migrate.warn("Layer option { #{dimensionKey} } has been removed. Use { size } or { class } instead.")
 
   if options.sticky
     up.migrate.warn('Layer option { sticky } has been removed. Give links an [up-peel=false] attribute to prevent layer dismissal on click.')
