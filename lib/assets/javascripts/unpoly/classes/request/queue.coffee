@@ -83,7 +83,7 @@ class up.Request.Queue extends up.Class
     if (responseOrError instanceof up.Response) && responseOrError.ok
       up.network.registerAliasForRedirect(request, responseOrError)
 
-    # Check if we can emit up:network:recover after a previous up:request:late event.
+    # Check if we can emit up:request:recover after a previous up:request:late event.
     @checkSlow()
 
     u.microtask(=> @poke())
@@ -118,7 +118,7 @@ class up.Request.Queue extends up.Class
       if currentSlow
         up.emit('up:request:late', log: 'Server is slow to respond')
       else
-        up.emit('up:network:recover', log: 'Slow requests were loaded')
+        up.emit('up:request:recover', log: 'Slow requests were loaded')
 
   isSlow: ->
     now = new Date()

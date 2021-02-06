@@ -11,7 +11,7 @@ up.migrate.renamedEvent('up:proxy:loaded',   'up:request:loaded')  # renamed in 
 up.migrate.renamedEvent('up:proxy:fatal',    'up:request:fatal')   # renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:aborted',  'up:request:aborted') # renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:slow',     'up:request:late')    # renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:recover',  'up:network:recover') # renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:recover',  'up:request:recover') # renamed in 1.0.0
 
 preloadDelayMoved = -> up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
 Object.defineProperty up.network.config, 'preloadDelay',

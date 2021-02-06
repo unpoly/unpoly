@@ -417,7 +417,7 @@ up.network = do ->
       # - User loads the same request (2) in the foreground (no preloading).
       #   We have a cache hit and receive the earlier request that is still preloading.
       #   Now we *should* trigger `up:request:late`.
-      # - The request (1) finishes. This triggers `up:network:recover`.
+      # - The request (1) finishes. This triggers `up:request:recover`.
       unless request.preload
         queue.promoteToForeground(cachedRequest)
 
@@ -583,7 +583,7 @@ up.network = do ->
 
       up.network.config.badResponseTime = 400;
 
-  Once all responses have been received, an [`up:network:recover`](/up:network:recover)
+  Once all responses have been received, an [`up:request:recover`](/up:request:recover)
   will be emitted.
 
   Note that if additional requests are made while Unpoly is already busy
@@ -592,7 +592,7 @@ up.network = do ->
   \#\#\# Spinners
 
   You can [listen](/up.on) to the `up:request:late`
-  and [`up:network:recover`](/up:network:recover) events to implement a spinner
+  and [`up:request:recover`](/up:request:recover) events to implement a spinner
   that appears during a long-running request,
   and disappears once the response has been received:
 
@@ -608,7 +608,7 @@ up.network = do ->
 
         return [
           up.on('up:request:late', show),
-          up.on('up:network:recover', hide)
+          up.on('up:request:recover', hide)
         ]
       })
 
@@ -630,7 +630,7 @@ up.network = do ->
   how to use this event for implementing a spinner that shows during
   long-running requests.
 
-  @event up:network:recover
+  @event up:request:recover
   @stable
   ###
 

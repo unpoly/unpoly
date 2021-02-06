@@ -1091,12 +1091,12 @@ describe 'up.network', ->
             expect(@lastRequest().params).toMatchParams({})
             done()
 
-      describe 'up:request:late and up:network:recover events', ->
+      describe 'up:request:late and up:request:recover events', ->
 
         beforeEach ->
           up.network.config.badResponseTime = 0
           @events = []
-          u.each ['up:request:load', 'up:request:loaded', 'up:request:late', 'up:network:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) =>
+          u.each ['up:request:load', 'up:request:loaded', 'up:request:late', 'up:request:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) =>
             up.on eventType, =>
               @events.push eventType
 
@@ -1136,7 +1136,7 @@ describe 'up.network', ->
               'up:request:load',
               'up:request:late',
               'up:request:loaded',
-              'up:network:recover'
+              'up:request:recover'
             ])
 
         it 'can delay the up:request:late event to prevent flickering of spinners', asyncSpec (next) ->
@@ -1168,10 +1168,10 @@ describe 'up.network', ->
               'up:request:load',
               'up:request:late',
               'up:request:loaded',
-              'up:network:recover'
+              'up:request:recover'
             ])
 
-        it 'does not emit up:network:recover if a delayed up:request:late was never emitted due to a fast response', asyncSpec (next) ->
+        it 'does not emit up:request:recover if a delayed up:request:late was never emitted due to a fast response', asyncSpec (next) ->
           next =>
             up.network.config.badResponseTime = 200
             up.request(url: '/foo')
@@ -1193,7 +1193,7 @@ describe 'up.network', ->
               'up:request:loaded'
             ])
 
-        it 'emits up:network:recover if a request returned but failed with an error code', asyncSpec (next) ->
+        it 'emits up:request:recover if a request returned but failed with an error code', asyncSpec (next) ->
           next =>
             up.request(url: '/foo')
 
@@ -1214,11 +1214,11 @@ describe 'up.network', ->
               'up:request:load',
               'up:request:late',
               'up:request:loaded',
-              'up:network:recover'
+              'up:request:recover'
             ])
 
 
-        it 'emits up:network:recover if a request timed out', asyncSpec (next) ->
+        it 'emits up:request:recover if a request timed out', asyncSpec (next) ->
           up.network.config.badResponseTime = 10
 
           next =>
@@ -1239,10 +1239,10 @@ describe 'up.network', ->
               'up:request:load',
               'up:request:late',
               'up:request:aborted',
-              'up:network:recover'
+              'up:request:recover'
             ])
 
-        it 'emits up:network:recover if a request was aborted', asyncSpec (next) ->
+        it 'emits up:request:recover if a request was aborted', asyncSpec (next) ->
           up.network.config.badResponseTime = 10
 
           next =>
@@ -1262,10 +1262,10 @@ describe 'up.network', ->
               'up:request:load',
               'up:request:late',
               'up:request:aborted',
-              'up:network:recover'
+              'up:request:recover'
             ])
 
-        it 'emits up:network:recover if a request failed fatally', asyncSpec (next) ->
+        it 'emits up:request:recover if a request failed fatally', asyncSpec (next) ->
           up.network.config.badResponseTime = 10
 
           next =>
@@ -1285,7 +1285,7 @@ describe 'up.network', ->
               'up:request:load',
               'up:request:late',
               'up:request:fatal',
-              'up:network:recover'
+              'up:request:recover'
             ])
 
     describe 'up.network.preload', ->

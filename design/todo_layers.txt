@@ -27,8 +27,6 @@ Release process
 Remaining feature work
 ======================
 
-- We have up:request:late but up:network:recover
-  - rename to up:request:recover
 - Deprecate up.element.all (use querySelectorAll)
 - Layer option: Document that we can pass a mode as { layer }
 
@@ -73,7 +71,7 @@ Tests
   - test that saveScroll() doesn't break
   - test that feedback highlighting doesn't break
 - test that layers with { history: false } inherit that settings to child layers, even if the child layer was opened with { history: true }
-- Aborting a slow request emits :up:network:recover event
+- Aborting a slow request emits :up:request:recover event
 - Test that unsafe links are not preloaded (does that exist?)
 - Edge Cases for concurrent Layer Changes:
   - up.render()

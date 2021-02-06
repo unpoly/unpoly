@@ -613,7 +613,7 @@ up.form = do ->
 
   You can also [implement a spinner](/up.network/#spinners)
   by [listening](/up.on) to the [`up:request:late`](/up:request:late)
-  and [`up:network:recover`](/up:network:recover) events.
+  and [`up:request:recover`](/up:request:recover) events.
 
   @selector form[up-target]
   @param {string} up-target
