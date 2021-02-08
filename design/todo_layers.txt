@@ -27,7 +27,6 @@ Release process
 Remaining feature work
 ======================
 
-- Deprecate up.element.all (use querySelectorAll)
 - Layer option: Document that we can pass a mode as { layer }
 
 
@@ -548,4 +547,5 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
 - When opening a new overlay, is the animation option { animation } or { openAnimation }?
   - Are all animation options parsed by link.follow?
   => it's just { animation }
+- focus: follow-scroll
 
