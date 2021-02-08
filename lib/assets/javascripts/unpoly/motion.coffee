@@ -514,9 +514,16 @@ up.motion = do ->
   registerAnimation = (name, animation) ->
     namedAnimations[name] = findAnimationFn(animation)
 
-  snapshot = ->
+  onBooted = ->
+    # Remember original named animations so we can purge user-defined
+    # animtions during reset.
     defaultNamedAnimations = u.copy(namedAnimations)
     defaultNamedTransitions = u.copy(namedTransitions)
+
+    # Explain to the user why animations aren't working.
+    # E.g. the user might have disabled animations in her OS.
+    unless isEnabled()
+      up.puts 'up.motion', 'Animations are disabled'
 
   ###**
   Returns whether the given animation option will cause the animation
