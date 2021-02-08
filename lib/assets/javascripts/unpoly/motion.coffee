@@ -529,97 +529,61 @@ up.motion = do ->
     # false, undefined, '', null and the string "none" are all ways to skip animations
     !animationOrTransition || animationOrTransition == 'none'
 
-  registerAnimation('fade-in', (element, options) ->
-    e.setStyle(element, opacity: 0)
-    animateNow(element, { opacity: 1 }, options)
-  )
-
-  registerAnimation('fade-out', (element, options) ->
-    e.setStyle(element, opacity: 1)
-    animateNow(element, { opacity: 0 }, options)
-  )
-
-  translateCSS = (x, y) ->
-    { transform: "translate(#{x}px, #{y}px)" }
-
-  registerAnimation('move-to-top', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = box.top + box.height
-    animateNow(element, translateCSS(0, -travelDistance), options)
-  )
-
-  registerAnimation('move-from-top', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = box.top + box.height
-    e.setStyle(element, translateCSS(0, -travelDistance))
-    animateNow(element, translateCSS(0, 0), options)
-  )
-
-  registerAnimation('move-to-bottom', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = e.root.clientHeight - box.top
-    animateNow(element, translateCSS(0, travelDistance), options)
-  )
-
-  registerAnimation('move-from-bottom', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = up.viewport.rootHeight() - box.top
-    e.setStyle(element, translateCSS(0, travelDistance))
-    animateNow(element, translateCSS(0, 0), options)
-  )
-
-  registerAnimation('move-to-left', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = box.left + box.width
-    animateNow(element, translateCSS(-travelDistance, 0), options)
-  )
-
-  registerAnimation('move-from-left', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = box.left + box.width
-    e.setStyle(element, translateCSS(-travelDistance, 0))
-    animateNow(element, translateCSS(0, 0), options)
-  )
-
-  registerAnimation('move-to-right', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = up.viewport.rootWidth() - box.left
-    animateNow(element, translateCSS(travelDistance, 0), options)
-  )
-
-  registerAnimation('move-from-right', (element, options) ->
-    e.setStyle(element, translateCSS(0, 0))
-    box = element.getBoundingClientRect()
-    travelDistance = up.viewport.rootWidth() - box.left
-    e.setStyle(element, translateCSS(travelDistance, 0))
-    animateNow(element, translateCSS(0, 0), options)
-  )
-
-  registerAnimation('roll-down', (element, options) ->
-    previousHeightStr = e.style(element, 'height')
-    styleMemo = e.setTemporaryStyle(element,
-      height: '0px'
-      overflow: 'hidden'
+  registerOpacityAnimation = (name, from, to) ->
+    registerAnimation(name, (element, options) ->
+      element.style.opacity = 0
+      e.setStyle(element, { opacity: from })
+      animateNow(element, { opacity: to }, options)
     )
-    deferred = animate(element, { height: previousHeightStr }, options)
-    deferred.then(styleMemo)
-    deferred
-  )
 
+  registerOpacityAnimation('fade-in', 0, 1)
+  registerOpacityAnimation('fade-out', 1, 0)
+
+  translateCSS = (dx, dy) ->
+    return { transform: "translate(#{dx}px, #{dy}px)" }
+
+  untranslatedBox = (element) ->
+    e.setStyle(element, translateCSS(0, 0))
+    return element.getBoundingClientRect()
+
+  registerMoveMotions = (direction, boxToTransform) ->
+    animationToName = "move-to-#{direction}"
+    animationFromName = "move-from-#{direction}"
+
+    registerAnimation animationToName, (element, options) ->
+      box = untranslatedBox(element)
+      transform = boxToTransform(box)
+      return animateNow(element, transform, options)
+
+    registerAnimation animationFromName, (element, options) ->
+      box = untranslatedBox(element)
+      transform = boxToTransform(box)
+      e.setStyle(element, transform)
+      return animateNow(element, translateCSS(0, 0), options)
+
+  registerMoveMotions 'top', (box) ->
+    travelDistance = box.top + box.height
+    return translateCSS(0, -travelDistance)
+
+  registerMoveMotions 'bottom', (box) ->
+    travelDistance = up.viewport.rootHeight() - box.top
+    return translateCSS(0, travelDistance)
+
+  registerMoveMotions 'left', (box) ->
+    travelDistance = box.left + box.width
+    return translateCSS(-travelDistance, 0)
+
+  registerMoveMotions 'right', (box) ->
+    travelDistance = up.viewport.rootWidth() - box.left
+    return translateCSS(travelDistance, 0)
+
+  registerTransition('cross-fade', ['fade-out', 'fade-in'])
   registerTransition('move-left', ['move-to-left', 'move-from-right'])
   registerTransition('move-right', ['move-to-right', 'move-from-left'])
   registerTransition('move-up', ['move-to-top', 'move-from-bottom'])
   registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
-  registerTransition('cross-fade', ['fade-out', 'fade-in'])
 
-  up.on 'up:framework:booted', snapshot
+  up.on 'up:framework:booted', onBooted
   up.on 'up:framework:reset', reset
     
   morph: morph

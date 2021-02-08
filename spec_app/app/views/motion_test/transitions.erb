@@ -1,6 +1,6 @@
 <div class="fixed-top-bar">
   <% for animation in %w(cross-fade move-up move-right move-down move-left) do %>
-    <span class="btn btn-primary" onclick="up.replace('.morphed-object', 'transitions', { transition: '<%= animation %>', duration: 2000, cache: false })">
+    <span class="btn btn-primary" onclick="up.render('.morphed-object', { url: 'transitions', transition: '<%= animation %>', duration: 2000, cache: false })">
       <%= animation %>
     </span>
   <% end %>
