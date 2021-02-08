@@ -146,21 +146,6 @@ up.viewport = do ->
     scrollingController.startMotion(viewport, motion, options)
 
   ###**
-  Finishes scrolling animations in the given element, its ancestors or its descendants.
-
-  @function up.viewport.finishScrolling
-  @param {string|Element|jQuery}
-  @return {Promise}
-  @internal
-  ###
-  finishScrolling = (element) ->
-    # Don't emit expensive events if no animation can be running anyway
-    return Promise.resolve() unless up.motion.isEnabled()
-
-    viewport = closest(element)
-    scrollingController.finish(viewport)
-
-  ###**
   @function up.viewport.anchoredRight
   @internal
   ###
