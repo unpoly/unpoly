@@ -182,20 +182,20 @@ up.viewport = do ->
   @function up.reveal
   @param {string|Element|jQuery} element
     The element to reveal.
-  @param {number} [options.speed=1]
+  @param {number} [options.scrollSpeed=1]
     The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
 
     The default value (`1`) roughly corresponds to the speed of Chrome's
     [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
 
     Defaults to `up.viewport.config.scrollSpeed`.
-  @param {string} [options.snap]
+  @param {string} [options.revealSnap]
     When the the revealed element would be closer to the viewport's top edge
     than this value, Unpoly will scroll the viewport to the top.
 
     Set to `0` to disable snapping.
 
-    Defaults to `up.viewport.config.scrollSnap`.
+    Defaults to `up.viewport.config.revealSnap`.
   @param {string|Element|jQuery} [options.viewport]
     The scrolling element to scroll.
 
