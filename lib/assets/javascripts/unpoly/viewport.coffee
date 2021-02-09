@@ -84,7 +84,6 @@ up.viewport = do ->
   @stable
   ###
   config = new up.Config ->
-    duration: 0
     viewportSelectors: ['[up-viewport]', '[up-fixed]']
     fixedTop: ['[up-fixed~=top]']
     fixedBottom: ['[up-fixed~=bottom]']

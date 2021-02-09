@@ -2,7 +2,7 @@
 Animation
 =========
   
-Whenever you [update a page fragment](/up.link) you can animate the change.
+When you [update a page fragment](/up.link) you can animate the change.
 
 Let's say you are using an [`up-target`](/a-up-target) link to update an element
 with content from the server. You can add an attribute [`up-transition`](/a-up-target#up-transition)
@@ -26,8 +26,8 @@ of the dialog by adding an [`[up-animation]`](/a-up-modal#up-animation) attribut
 Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
 and [predefined animations](/up.animate#named-animations).
 
-You can define custom animations using [`up.transition()`](/up.transition) and
-[`up.animation()`](/up.animation).
+You can define custom animations using `up.transition()` and
+`up.animation()`.
 
 @module up.motion
 ###
@@ -47,7 +47,7 @@ up.motion = do ->
   Sets default options for animations and transitions.
 
   @property up.motion.config
-  @param {number} [config.duration=200]
+  @param {number} [config.duration=175]
     The default duration for all animations and transitions (in milliseconds).
   @param {string} [config.easing='ease']
     The default timing function that controls the acceleration of animations and transitions.
@@ -58,10 +58,7 @@ up.motion = do ->
     Whether animation is enabled.
 
     Set this to `false` to disable animation globally.
-    This can be useful in full-stack integration tests like a Selenium test suite.
-
-    Regardless of this setting, all animations will be skipped on browsers
-    that do not support [CSS transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions).
+    This can be useful in full-stack integration tests.
   @stable
   ###
   config = new up.Config ->

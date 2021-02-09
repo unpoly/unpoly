@@ -437,8 +437,8 @@ up.fragment = do ->
 
     See [layer option](/layer-option) for a list of allowed values.
 
-    Pass `{ layer: 'new' }` to open the fragment in a new overlay.
-    In this case all options for `up.layer.open()` may also be used.
+    To open the fragment in a new [overlay](/up.layer), pass `{ layer: 'new' }` or a [layer mode](/up.layer.mode).
+    In this case options for `up.layer.open()` may also be used.
 
   @param {Object} [options.context]
     An object that will be merged into the [context](/up.context) of the current layer once the fragment is rendered.
@@ -987,12 +987,15 @@ up.fragment = do ->
     without further filtering.
 
   @function up.fragment.get
+
   @param {Element|jQuery} [root=document]
     The root element for the search. Only the root's children will be matched.
 
-    May be omitted to search through all elements in the `document`.
+    May be omitted to search through all elements in the given [layer](#options.layer).
+
   @param {string} selector
     The selector to match.
+
   @param {string} [options.layer='current']
     The layer in which to select elements.
 
@@ -1000,11 +1003,13 @@ up.fragment = do ->
 
     If a root element was passed as first argument, this option is ignored and the
     root element's layer is searched.
+
   @param {string|Element|jQuery} [options.origin]
     An second element or selector that can be referenced as `&` in the first selector:
 
         var input = document.querySelector('input.email')
         up.fragment.get('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
+
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
   @stable
