@@ -71,5 +71,5 @@
   /users/:$id
   ```
 
-  @page url-pattern
+  @page url-patterns
   ###
