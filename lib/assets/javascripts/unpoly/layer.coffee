@@ -199,6 +199,17 @@ up.layer = do ->
   ###
 
   # TODO: Docs for up.layer.ask()
+  #
+  #  It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+  #  which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
+  #
+  #  Instead of using `up.layer.open()` and passing callbacks, you may use `up.layer.ask()`.
+  #  `up.layer.ask()` returns a promise for the acceptance value, which you can `await`:
+  #
+  #  ```js
+  #  let user = await up.layer.ask({ url: '/users/new' })
+  #  console.log("New user is " + user)
+  #  ```
   ask = (options) ->
     return new Promise (resolve, reject) ->
       options = u.merge options,

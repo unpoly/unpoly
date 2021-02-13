@@ -12,7 +12,8 @@
 
   ## Rendering failed responses differently
 
-  To pass an option for a failed server response, prefix the option with `fail`:
+  To use a different [render option](/up.render) for a failed server response,
+  prefix the option with `fail`:
 
       up.render({
         url: '/action',
@@ -40,12 +41,12 @@
   (e.g. `{ history: true, failHistory: false }`. Options related to layers, scrolling or
   focus are never shared.
 
-  ## Local content cannot fail
+  \#\#\# Local content cannot fail
 
   When the updated fragment content is not requested from a `{ url }`, but rather passed as a
   HTML string, the update is always considered successful.
 
-  ## Ignoring HTTP error codes
+  \#\#\# Ignoring HTTP error codes
 
   The `{ fail }` option or `[up-fail]` attribute changes how Unpoly determines whether a
   server response was successful.
@@ -57,12 +58,16 @@
 
   ## Handling other types of failure
 
+  \#\#\# Fatal network errors
+
   When a request encounters fatal error like a timeout or loss of network connectivity, Unpoly
   will emit `up:request:fatal` and not render.
 
+  \#\#\# Aborted requests
+
   When a request was aborted, Unpoly will emit `up:request:aborted` and not render.
 
-  ## Handling unexpected content
+  \#\#\# Unexpected content
 
   A server might sometimes respond with unexpected content, like a maintenance page or a
   login form.
