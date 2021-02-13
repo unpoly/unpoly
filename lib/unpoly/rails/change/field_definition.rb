@@ -7,7 +7,14 @@ module Unpoly
           base.extend ClassMethods
         end
 
-        delegate :fields, to: :class
+        # Rails 3.2 delegate generated invalid Ruby with `to: :class`.
+        delegate :fields, to: :get_class
+
+        private
+
+        def get_class
+          self.class
+        end
 
         module ClassMethods
 

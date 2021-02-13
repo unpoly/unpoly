@@ -12,9 +12,9 @@ GIT
 PATH
   remote: ..
   specs:
-    unpoly-rails (1.0.0)
+    unpoly-rails (2.0.0)
       memoized
-      rails (>= 4.2)
+      rails (>= 3.2)
 
 GEM
   remote: https://rubygems.org/
