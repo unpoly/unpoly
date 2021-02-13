@@ -4716,8 +4716,18 @@ describe 'up.fragment', ->
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
         expect(expanded).toEqual ['.before', '#foo .child', '.after']
 
+      it 'removes duplicate selectors', ->
+        targets = ['.foo', ':main']
+        up.layer.config.root.mainTargets = ['.foo']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
+        expect(expanded).toEqual ['.foo']
+
     describe 'up.fragment.config.mainTargets', ->
 
-      it 'returns up.layer.config.any.mainTargets', ->
+      it 'gets up.layer.config.any.mainTargets', ->
         up.layer.config.any.mainTargets = ['.my-special-main-target']
         expect(up.fragment.config.mainTargets).toEqual ['.my-special-main-target']
+
+      it 'sets up.layer.config.any.mainTargets', ->
+        up.fragment.config.mainTargets = ['.new-target']
+        expect(up.layer.config.any.mainTargets).toEqual ['.new-target']

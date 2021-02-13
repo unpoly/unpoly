@@ -888,7 +888,7 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    linkPreloader.observeLink(link)
+    return linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset
 
