@@ -72,4 +72,6 @@ up.migrate = do ->
   fixKey: fixKey
   warn: warn
   loaded: true
+  config: config
+
 
