@@ -1095,25 +1095,25 @@ describe 'up.util', ->
 #
 #        expect(up.util.offsetParent($b[0])).toBeMissing()
 
-    describe 'up.util.isCrossDomain', ->
+    describe 'up.util.isCrossOrigin', ->
 
       it 'returns false for an absolute path', ->
-        expect(up.util.isCrossDomain('/foo')).toBe(false)
+        expect(up.util.isCrossOrigin('/foo')).toBe(false)
 
       it 'returns false for an relative path', ->
-        expect(up.util.isCrossDomain('foo')).toBe(false)
+        expect(up.util.isCrossOrigin('foo')).toBe(false)
 
       it 'returns false for a fully qualified URL with the same protocol and hostname as the current location', ->
         fullURL = "#{location.protocol}//#{location.host}/foo"
-        expect(up.util.isCrossDomain(fullURL)).toBe(false)
+        expect(up.util.isCrossOrigin(fullURL)).toBe(false)
 
       it 'returns true for a fully qualified URL with a different protocol than the current location', ->
         fullURL = "otherprotocol://#{location.host}/foo"
-        expect(up.util.isCrossDomain(fullURL)).toBe(true)
+        expect(up.util.isCrossOrigin(fullURL)).toBe(true)
 
       it 'returns false for a fully qualified URL with a different hostname than the current location', ->
         fullURL = "#{location.protocol}//other-host.tld/foo"
-        expect(up.util.isCrossDomain(fullURL)).toBe(true)
+        expect(up.util.isCrossOrigin(fullURL)).toBe(true)
 
     describe 'up.util.isOptions', ->
 

@@ -676,14 +676,24 @@ describe 'up.link', ->
             failTarget: 'default-fallback'
           expect(u.isPromise(cachedPromise)).toBe(true)
 
-      it "does not load a link whose method has side-effects", (done) ->
+      it "does not preload a link with an unsafe method", (done) ->
         $fixture('.target')
         $link = $fixture('a[href="/path"][up-target=".target"][data-method="post"]')
         preloadPromise = up.link.preload($link)
 
         promiseState(preloadPromise).then (result) ->
           expect(result.state).toEqual('rejected')
-          expect(up.cache.get(url: '/path', target: '.target')).toBeUndefined()
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+          done()
+
+      it "does not preload a link with cross-origin [href]", (done) ->
+        $fixture('.target')
+        $link = $fixture('a[href="https://other-domain.com/path"][up-target=".target"]')
+        preloadPromise = up.link.preload($link)
+
+        promiseState(preloadPromise).then (result) ->
+          expect(result.state).toEqual('rejected')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
           done()
 
       it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
@@ -1086,13 +1096,13 @@ describe 'up.link', ->
           expect(@followSpy).not.toHaveBeenCalled()
           expect(@$link).toHaveBeenDefaultFollowed()
 
-      it 'does nothing if ctrl is pressed during the click', asyncSpec (next)->
+      it 'does nothing if ctrl is pressed during the click', asyncSpec (next) ->
         Trigger.click(@$link, ctrlKey: true)
         next =>
           expect(@followSpy).not.toHaveBeenCalled()
           expect(@$link).toHaveBeenDefaultFollowed()
 
-      it 'does nothing if meta is pressed during the click', asyncSpec (next)->
+      it 'does nothing if meta is pressed during the click', asyncSpec (next) ->
         Trigger.click(@$link, metaKey: true)
         next =>
           expect(@followSpy).not.toHaveBeenCalled()
@@ -1103,7 +1113,7 @@ describe 'up.link', ->
         beforeEach ->
           @$link.attr('up-instant', '')
 
-        it 'follows a link on mousedown (instead of on click)', asyncSpec (next)->
+        it 'follows a link on mousedown (instead of on click)', asyncSpec (next) ->
           Trigger.mousedown(@$link)
           next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
@@ -1111,7 +1121,7 @@ describe 'up.link', ->
           Trigger.mouseup(@$link)
           next => expect(@followSpy).not.toHaveBeenCalled()
 
-        it 'does nothing on click if there was an earlier mousedown event', asyncSpec (next)->
+        it 'does nothing on click if there was an earlier mousedown event', asyncSpec (next) ->
           Trigger.mousedown(@$link)
           Trigger.click(@$link)
           next => expect(@followSpy.calls.count()).toBe(1)
@@ -1122,7 +1132,7 @@ describe 'up.link', ->
 
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()
-          it 'does nothing if the right mouse button is pressed down', asyncSpec (next)->
+          it 'does nothing if the right mouse button is pressed down', asyncSpec (next) ->
             Trigger.mousedown(@$link, button: 2)
             next => expect(@followSpy).not.toHaveBeenCalled()
 
@@ -1137,6 +1147,18 @@ describe 'up.link', ->
         it 'does nothing if meta is pressed during mousedown', asyncSpec (next) ->
           Trigger.mousedown(@$link, metaKey: true)
           next => expect(@followSpy).not.toHaveBeenCalled()
+
+        describe 'for a cross-origin link', ->
+
+          beforeEach ->
+            @$link.attr('href', 'http://external-domain.com/path')
+
+          it 'loads the external content as a new page page on mousedown', asyncSpec (next) ->
+            loadPage = spyOn(up.browser, 'loadPage')
+            Trigger.mousedown(@$link)
+
+            next =>
+              expect(@followSpy).toHaveBeenCalledWith(@$link[0])
 
     describe '[up-dash]', ->
 

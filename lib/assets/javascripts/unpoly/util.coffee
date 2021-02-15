@@ -90,7 +90,7 @@ up.util = do ->
     normalized = ''
 
     if options.host == 'cross-domain'
-      options.host = isCrossDomain(parts)
+      options.host = isCrossOrigin(parts)
 
     if options.host
       normalized += parts.protocol + "//" + parts.hostname
@@ -119,14 +119,14 @@ up.util = do ->
   matchURLs = (leftURL, rightURL) ->
     return normalizeURL(leftURL) == normalizeURL(rightURL)
 
-  # We're calling isCrossDomain() a lot.
+  # We're calling isCrossOrigin() a lot.
   # Accessing location.protocol and location.hostname every time
   # is much slower than comparing cached strings.
   # https://jsben.ch/kBATt
   APP_PROTOCOL = location.protocol
   APP_HOSTNAME = location.hostname
 
-  isCrossDomain = (targetURL) ->
+  isCrossOrigin = (targetURL) ->
     targetURL = parseURL(targetURL)
     return APP_HOSTNAME != targetURL.hostname || APP_PROTOCOL != targetURL.protocol
 
@@ -1878,7 +1878,7 @@ up.util = do ->
   muteRejection: muteRejection
   rejectOnError: rejectOnError
   isBasicObjectProperty: isBasicObjectProperty
-  isCrossDomain: isCrossDomain
+  isCrossOrigin: isCrossOrigin
   task: queueTask
   microtask: queueMicrotask
   abortableMicrotask: abortableMicrotask

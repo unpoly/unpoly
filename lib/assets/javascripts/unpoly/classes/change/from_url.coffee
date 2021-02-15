@@ -14,6 +14,16 @@ class up.Change.FromURL extends up.Change
     @failOptions = up.RenderOptions.deriveFailOptions(@successOptions)
 
   execute: ->
+    # Rendering content from cross-origin URLs is out of scope for Unpoly.
+    # We still allow users to call up.render() with a cross-origin URL, but
+    # we will then make a full-page request.
+    if u.isCrossOrigin(@options.url)
+      up.puts 'up.render()', 'Loading cross-origin content in new page'
+      up.browser.loadPage(@options)
+      # Prevent our caller from executing any further code, since we're already
+      # navigating away from this JavaScript environment.
+      return u.unresolvablePromise()
+
     promise = @makeRequest()
 
     if @options.preload

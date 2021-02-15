@@ -374,12 +374,15 @@ up.network = do ->
   ###
   makeRequest = (args...) ->
     request = new up.Request(parseRequestOptions(args))
+
     useCachedRequest(request) || queueRequest(request)
+
     if solo = request.solo
       # The { solo } option may also contain a function.
       # This way users can excempt some requests from being solo-aborted
       # by configuring up.fragment.config.navigateOptions.
       queue.abortExcept(request, solo)
+
     return request
 
   mimicLocalRequest = (options) ->
@@ -701,7 +704,7 @@ up.network = do ->
   @internal
   ###
   isSafeMethod = (method) ->
-    u.contains(['GET', 'OPTIONS', 'HEAD'], method)
+    u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method))
 
   up.on 'up:framework:reset', reset
 

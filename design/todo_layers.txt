@@ -33,6 +33,8 @@ Remaining feature work
 
 - Layer option: Document that we can pass a mode as { layer }
 
+- Remove up.network.preload(). It's the same as up.request(cache: true).
+
 
 Manual tests
 ------------

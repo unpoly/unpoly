@@ -683,6 +683,28 @@ describe 'up.fragment', ->
               expect('.one').toHaveText('old content')
               expect('.two').toHaveText('new content')
 
+        describe 'for a cross-origin URL', ->
+
+          it 'loads the content in a new page', asyncSpec (next) ->
+            loadPage = spyOn(up.browser, 'loadPage')
+
+            fixture('.one')
+            up.render(target: '.one', url: 'http://other-domain.com/path/to')
+
+            next ->
+              expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: 'http://other-domain.com/path/to'))
+              expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", (done) ->
+            loadPage = spyOn(up.browser, 'loadPage')
+
+            fixture('.one')
+            promise = up.render(target: '.one', url: 'http://other-domain.com/path/to')
+
+            promiseState(promise).then (result) ->
+              expect(result.state).toBe('pending')
+              done()
+
       describe 'with { content } option', ->
 
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } string', asyncSpec (next) ->

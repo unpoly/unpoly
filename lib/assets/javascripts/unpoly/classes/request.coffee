@@ -378,11 +378,11 @@ class up.Request extends up.Record
 
   # Returns a csrfToken if this request requires it
   csrfToken: ->
-    if !@isSafe() && !@isCrossDomain()
+    if !@isSafe() && !@isCrossOrigin()
       up.protocol.csrfToken()
 
-  isCrossDomain: ->
-    u.isCrossDomain(@url)
+  isCrossOrigin: ->
+    u.isCrossOrigin(@url)
 
   extractResponseFromXHR:  ->
     responseAttrs =

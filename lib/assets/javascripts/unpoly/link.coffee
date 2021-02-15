@@ -204,12 +204,7 @@ up.link = do ->
     parser = new up.OptionsParser(options, link, fail: true)
 
     # Request options
-    parser.string('url', attr: ['up-href', 'href']) # preflight / same
-    # Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
-    # link behavior (keyboard navigation). However, we don't want to consider this
-    # a link with remote content, and rather honor [up-content], [up-document] and
-    # [up-fragment] attributes.
-    options.url = undefined if options.url == '#'
+    options.url = followURL(link, options)
     options.method = followMethod(link, options)
     parser.json('headers')
     parser.json('params')
@@ -321,7 +316,7 @@ up.link = do ->
     link = up.fragment.get(link)
 
     if issue = preloadIssue(link)
-      return up.error.failed.async(preloadIssue)
+      return up.error.failed.async(issue)
 
     guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
     follow(link, u.merge(options, preload: true, { guardEvent }))
@@ -330,8 +325,13 @@ up.link = do ->
     unless isSafe(link)
       return "Won't preload unsafe link"
 
-    unless e.matches(link, '[href], [up-href]')
+    url = followURL(link)
+
+    unless url
       return "Won't preload link without a URL"
+
+    if u.isCrossOrigin(url)
+      return "Won't preload cross-origin content"
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
@@ -357,6 +357,16 @@ up.link = do ->
   ###
   followMethod = (link, options = {}) ->
     u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
+
+  followURL = (link, options = {}) ->
+    url = options.url || link.getAttribute('up-href') || link.getAttribute('href')
+
+    # Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
+    # link behavior (keyboard navigation). However, we don't want to consider this
+    # a link with remote content, and rather honor [up-content], [up-document] and
+    # [up-fragment] attributes.
+    if url != '#'
+      return url
 
   ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly
@@ -529,11 +539,12 @@ up.link = do ->
   HTTP method like `GET`.
 
   @function up.link.isSafe
+  @param {Element} link
   @return {boolean}
   @stable
   ###
-  isSafe = (selectorOrLink, options) ->
-    method = followMethod(selectorOrLink, options)
+  isSafe = (link) ->
+    method = followMethod(link)
     up.network.isSafeMethod(method)
 
   targetMacro = (queryAttr, fixedResultAttrs, callback) ->
