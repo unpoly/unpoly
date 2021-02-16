@@ -23,7 +23,7 @@ class up.ResponseDoc
     # We strip <script> tags from the HTML.
     # If you need a fragment update to call JavaScript code, call it from a compiler
     # ([Google Analytics example](https://makandracards.com/makandra/41488-using-google-analytics-with-unpoly)).
-    @scriptStripper = new up.HTMLWrapper('script')
+    @scriptWrapper = new up.HTMLWrapper('script')
 
     @root =
       @parseDocument(options) || @parseFragment(options) || @parseContent(options)
@@ -63,7 +63,15 @@ class up.ResponseDoc
 
   wrapHTML: (html) ->
     html = @noscriptWrapper.wrap(html)
-    html = @scriptStripper.strip(html)
+
+    if up.fragment.config.runScripts
+      # <script> tags instantiated by DOMParser are inert and will not run
+      # when appended. So we wrap them, then unwrap once attach. This will
+      # cause the script to run.
+      html = @scriptWrapper.wrap(html)
+    else
+      html = @scriptWrapper.strip(html)
+
     html
 
   getTitle: ->
@@ -84,3 +92,6 @@ class up.ResponseDoc
   finalizeElement: (element) ->
     # Restore <noscript> tags so they become available to compilers.
     @noscriptWrapper.unwrap(element)
+
+    # Restore <script> so they will run.
+    @scriptWrapper.unwrap(element)

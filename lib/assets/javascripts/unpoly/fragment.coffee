@@ -85,6 +85,14 @@ up.fragment = do ->
     - If focus was lost with the old fragment, focus the new fragment.
     - If updating a [main target](/up.fragment.config.mainTargets), focus the new fragment.
 
+  @param {boolean} config.runScripts=false
+    Whether to execute `<script>` tags in updated fragments.
+
+    If you set this to `true`, mind that a default [main target](/up.fragment.config.mainTargets)
+    is the `<body>` element. If you are including your script at the end of your `<body>`
+    for performance reasons, swapping the `<body>` will re-execute these scripts.
+    Consider configuring a different main target that does not include scripts.
+
   @stable
   ###
   config = new up.Config ->
@@ -103,6 +111,8 @@ up.fragment = do ->
     }
 
     matchAroundOrigin: true
+
+    runScripts: false
 
     autoHistory: (fragment) ->
       return isMain(fragment)

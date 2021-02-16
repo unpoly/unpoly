@@ -648,12 +648,17 @@ up.element = do ->
   @stable
   ###
   createFromHTML = (html) ->
-    # We cannot use createDocumentFromHTML() here, since up.ResponseDoc
-    # needs to create <noscript> elements with that, and DOMParser cannot
-    # create those.
-    mother = document.createElement('div')
-    mother.innerHTML = html
-    return mother.children[0]
+    # (1) We cannot use createDocumentFromHTML() here, since up.ResponseDoc
+    #     needs to create <noscript> elements, and DOMParser cannot create those.
+    # (2) We cannot use innerHTML on an anonymous element here, since up.ResponseDoc
+    #     needs to create executable <script> elements and setting innerHTML will
+    #     create intert <script> elements.
+    # (3) Using Range#createContextualFragment() is significantly faster than setting
+    #     innerHTML on Chrome. See https://jsben.ch/QQngJ
+    range = document.createRange()
+    range.setStart(document.body, 0)
+    fragment = range.createContextualFragment(html)
+    return fragment.children[0]
 
   ###**
   @function up.element.root

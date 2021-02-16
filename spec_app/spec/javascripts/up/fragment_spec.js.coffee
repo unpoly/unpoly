@@ -2870,16 +2870,12 @@ describe 'up.fragment', ->
 
           it 'does not execute inline script tags', asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path')
-
-            next =>
-              @respondWith """
-                <div class="target">
-                  <script type="text/javascript">
-                    alert("foo")
-                    window.scriptTagExecuted()
-                  </script>
-                </div>
+            up.render fragment: """
+              <div class="target">
+                <script type="text/javascript">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
               """
 
             next.after 100, =>
@@ -2887,22 +2883,36 @@ describe 'up.fragment', ->
               expect(document).toHaveSelector('.target')
               expect(document).not.toHaveSelector('.target script')
 
+          it 'executes inline script tags with up.fragment.config.runScripts = true', asyncSpec (next) ->
+            up.fragment.config.runScripts = true
+
+            fixture('.target')
+            up.render fragment: """
+              <div class="target">
+                <script type="text/javascript">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).toHaveSelector('.target script')
+
           it 'does not crash when the new fragment contains inline script tag that is followed by another sibling (bugfix)', asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path')
+            up.render fragment: """
+              <div class="target">
+                <div>before</div>
+                <script type="text/javascript">
+                  window.scriptTagExecuted()
+                </script>
+                <div>after</div>
+              </div>
+              """
 
-            next =>
-              @respondWith """
-                <div class="target">
-                  <div>before</div>
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
-                  <div>after</div>
-                </div>
-                """
-
-            next =>
+            next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
               expect(document).not.toHaveSelector('.target script')
@@ -2911,23 +2921,35 @@ describe 'up.fragment', ->
 
           beforeEach ->
             # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
-            @linkedScriptPath = "/assets/fixtures/linked_script.js?cache-buster=#{Math.random().toString()}"
+            @linkedScriptPath = "/linked_script.js?cache-buster=#{Math.random().toString()}"
 
           it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
             fixture('.target')
-            up.render('.target', url: '/path')
+            up.render fragment: """
+              <div class="target">
+                <script type="text/javascript" src="#{@linkedScriptPath}"></script>
+              </div>
+              """
 
-            next =>
-              @respondWith """
-                <div class="target">
-                  <script type="text/javascript" src="#{@linkedScriptPath}"></script>
-                </div>
-                """
-
-            next =>
+            next.after 100, =>
               expect(window.scriptTagExecuted).not.toHaveBeenCalled()
               expect(document).toHaveSelector('.target')
               expect(document).not.toHaveSelector('.target script')
+
+          it 'executes linked scripts with up.fragment.config.runScripts = true', asyncSpec (next) ->
+            up.fragment.config.runScripts = true
+
+            fixture('.target')
+            up.render fragment: """
+              <div class="target">
+                <script type="text/javascript" src="#{@linkedScriptPath}"></script>
+              </div>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).toHaveSelector('.target script')
 
         describe '<noscript> tags', ->
 
