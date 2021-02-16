@@ -1610,6 +1610,12 @@ describe 'up.util', ->
           formatted = up.util.sprintf('before %o after', object)
           expect(formatted).toEqual('before {"foo":"foo-value","bar":"bar-value"} after')
 
+        it 'serializes to a fallback string if the given structure has circular references', ->
+          object = { foo: {} }
+          object.foo.bar = object
+          formatted = up.util.sprintf('before %o after', object)
+          expect(formatted).toEqual('before (circular structure) after')
+
         it "skips a key if a getter crashes", ->
           object = {}
           Object.defineProperty(object, 'foo', get: (-> throw "error"))

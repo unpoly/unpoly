@@ -1743,7 +1743,7 @@ up.util = do ->
       try
         string = JSON.stringify(arg)
       catch error
-        if contains(e.message, 'circular')
+        if contains(error.message, 'circular')
           string = '(circular structure)'
         else
           throw e
