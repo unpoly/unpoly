@@ -27,9 +27,7 @@ Release process
 Remaining feature work
 ======================
 
-- This is not great: followSelectors.push('a:not([href*="://"])')
-  - Just don't preload cross-domain links
-  - Make vanilla requests when rendering cross-domain { url }
+- Can we not focus if a compiler has focused?
 
 - Layer option: Document that we can pass a mode as { layer }
 
@@ -57,14 +55,6 @@ Tests
 - Test that { acceptLocation } (JS API) also takes an array of alternatives instead of a space-separated string
 - Test a[up-reveal=top]
 - Test that [up-main] is a default target
-- Test up.link.config.preloadSelectors.push('a')
-  - Test that can be disabled at a link with [up-preload=false]
-- Test up.link.config.instantSelectors.push('a')
-  - Test that can be disabled at a link with [up-instant=false]
-- Test up.link.config.followSelectors.push('a')
-  - Test that can be disabled at a link with [up-follow=false]
-- Test up.form.config.submitSelectors.push('a')
-  - Test that can be disabled at a form with [up-follow=false]
 - Preload requests are tentative by default, but tentative can be set to false and the request will then not be aborted by a foreground request
 - When a tentative request is promoted to the foreground, it is no longer tentative
 - Test that we can have serverless popups with inline [up-content]: <a up-layer="popup" up-content="Locking a user will prevent them from using the application">
@@ -222,7 +212,6 @@ Tests
   - The next request only has .content
   - => We should clear out the modal and build a new .content, since that is also what we would do on "new"!
   - => In case that the current modal DOES have .content we should update this instead of re-rooting
-- Tests for up.modal and up.popup should do nothing but test the legacy fallbacks
 - up.Params#has
 
 Docs
