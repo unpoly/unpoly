@@ -179,7 +179,11 @@ up.layer = do ->
 
   ###
   open = (options) ->
-    options = u.options(options, layer: 'new', navigate: true)
+    options = u.options(options,
+      layer: 'new',
+      defaultToEmptyContent: true,
+      navigate: true
+    )
 
     # Even if we are given { content } we need to pipe this through up.render()
     # since a lot of options processing is happening there.

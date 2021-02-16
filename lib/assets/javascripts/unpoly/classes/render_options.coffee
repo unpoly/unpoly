@@ -62,6 +62,7 @@ up.RenderOptions = do ->
     'navigate'      # Also set navigate defaults for fail options
   ])
 
+  CONTENT_KEYS = ['url', 'content', 'fragment', 'document']
 
   navigateDefaults = (options) ->
     if options.navigate
@@ -83,6 +84,14 @@ up.RenderOptions = do ->
 
     return result
 
+  ensureContentGiven = (options) ->
+    unless u.some(CONTENT_KEYS, (contentKey) -> return u.isGiven(options[contentKey]))
+      # up.layer.open() should open an empty layer without a content key.
+      if options.defaultToEmptyContent
+        options.content = ''
+      else
+        up.fail('up.render() needs either { ' + CONTENT_KEYS.join(', ') + ' } option')
+
   failOverrides = (options) ->
     overrides = {}
     for key, value of options
@@ -101,5 +110,6 @@ up.RenderOptions = do ->
 
   return {
     preprocess,
+    ensureContentGiven,
     deriveFailOptions,
   }

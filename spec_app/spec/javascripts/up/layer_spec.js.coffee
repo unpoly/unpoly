@@ -16,6 +16,11 @@ describe 'up.layer', ->
           expect(value).toEqual(jasmine.any(up.Layer))
           done()
 
+      it 'opens a layer with empty content when neither { url, document, fragment, content } option is given', (done) ->
+          up.layer.open().then (layer) ->
+            expect(layer).toHaveText('')
+            done()
+
       it 'closes existing overlays over the { currentLayer }', (done) ->
         makeLayers(2).then ->
           [root, oldOverlay] = up.layer.stack

@@ -510,12 +510,33 @@ describe 'up.link', ->
             expect(window.confirm).not.toHaveBeenCalled()
             expect(up.render).toHaveBeenCalled()
 
-#       it 'returns an up.AbortablePromise with an #abort() method to abort the request zzz', asyncSpec (next) ->
-#        fixture('.target')
-#        link = fixture('a[href="/foo"][up-target=".target"]')
-#        returnValue = up.link.follow(link)
-#
-#        expect(returnValue).toEqual(jasmine.any(up.AbortablePromise))
+    describe "when the link's [href] is '#'", ->
+
+      it 'does not follow the link', asyncSpec (next) ->
+        fixture('.target', text: 'old text')
+
+        link = fixture('a[href="#"][up-target=".target"]')
+        promise = up.follow(link)
+
+        next.await ->
+          return promiseState(promise)
+
+        next (result) ->
+          expect(result.state).toBe('rejected')
+          expect('.target').toHaveText('old text')
+
+      it 'does follow the link if it has a local content attribute', asyncSpec (next) ->
+        fixture('.target', text: 'old text')
+
+        link = fixture('a[href="#"][up-target=".target"][up-content="new text"]')
+        promise = up.follow(link)
+
+        next.await ->
+          return promiseState(promise)
+
+        next (result) ->
+          expect(result.state).toBe('fulfilled')
+          expect('.target').toHaveText('new text')
 
     describe 'up.link.followOptions()', ->
 

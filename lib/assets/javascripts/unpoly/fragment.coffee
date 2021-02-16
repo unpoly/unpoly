@@ -572,9 +572,11 @@ up.fragment = do ->
   ###
   navigate = up.mockable (args...) ->
     options = parseTargetAndOptions(args)
-    render(u.merge(options, navigate: true))
+    return render(u.merge(options, navigate: true))
 
   makeChangeNow = (options) ->
+    up.RenderOptions.ensureContentGiven(options)
+
     if options.url
       return new up.Change.FromURL(options).executeAsync()
     else

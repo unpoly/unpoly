@@ -238,7 +238,7 @@ describe 'up.feedback', ->
             expect(@backgroundLinkToLayerURL).not.toHaveClass('up-current')
             expect(@backgroundLinkToOtherURL).not.toHaveClass('up-current')
 
-        it "marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location zzz", asyncSpec (next) ->
+        it "marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", asyncSpec (next) ->
           up.history.replace('/background-url')
 
           fragment = """
