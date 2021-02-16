@@ -13,6 +13,8 @@ up.form = do ->
   u = up.util
   e = up.element
 
+  ATTRIBUTES_SUGGESTING_SUBMIT = ['[up-submit]', '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
+
   ###**
   Sets default options for form submission and validation.
 
@@ -39,7 +41,7 @@ up.form = do ->
   config = new up.Config ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
-    submitSelectors: up.link.combineFollowableSelectors(['form'])
+    submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT)
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
 
@@ -683,9 +685,20 @@ up.form = do ->
   @stable
   ###
   up.on 'submit', fullSubmitSelector, (event, form) ->
+    # Users may configure up.form.config.submitSelectors.push('form')
+    # and then opt out individual forms with [up-submit=false].
+    if e.matches(form, '[up-submit=false]')
+      return
+
     abortScheduledValidate?()
     up.event.halt(event)
     up.log.muteRejection submit(form)
+
+  ###**
+  TODO: Docs
+
+  @selector form[up-submit]
+  ###
 
   ###**
   When a form field with this attribute is changed, the form is validated on the server

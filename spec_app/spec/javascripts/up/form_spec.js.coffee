@@ -364,7 +364,7 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       it 'submits an form that has both an [id] attribute and a field with [name=id] (bugfix)', asyncSpec (next) ->
-        form = fixture('form#form-id[action="/path"][up-follow]')
+        form = fixture('form#form-id[action="/path"][up-submit]')
         e.affix(form, 'input[name="id"][value="value"]')
 
         up.submit(form)
@@ -374,7 +374,7 @@ describe 'up.form', ->
           expect(params['id']).toEqual(['value'])
 
       it 'loads a form with a cross-origin [action] in a new page', asyncSpec (next) ->
-        form = fixture('form#form-id[action="https://external-domain.com/path"][up-follow]')
+        form = fixture('form#form-id[action="https://external-domain.com/path"][up-submit]')
         e.affix(form, 'input[name="field-name"][value="field-value"]')
 
         loadPage = spyOn(up.browser, 'loadPage')
@@ -908,7 +908,7 @@ describe 'up.form', ->
             expect(keys).toEqual(['text-field'])
 
         it "lets submit buttons override the form's action and method with button[formaction] and button[formmethod] attributes", asyncSpec (next) ->
-          $form = $fixture('form[action="/form-path"][method="GET"][up-follow]')
+          $form = $fixture('form[action="/form-path"][method="GET"][up-submit]')
           $submitButton1 = $form.affix('input[type="submit"]')
           $submitButton2 = $form.affix('input[type="submit"][formaction="/button-path"][formmethod="POST"]')
           up.hello($form)
@@ -918,6 +918,34 @@ describe 'up.form', ->
             request = @lastRequest()
             expect(request.url).toMatchURL('/button-path')
             expect(request.method).toBe('POST')
+
+      describe 'handling of up.form.config.submitSelectors', ->
+
+        it 'submits matching forms even without [up-submit] or [up-target]', asyncSpec (next) ->
+          form = fixture('form.form[action="/form-action"]')
+          submitButton = e.affix(form, 'input[type=submit]')
+          submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve())
+
+          up.form.config.submitSelectors.push('.form')
+
+          Trigger.click(submitButton)
+
+          next =>
+            expect(submitSpy).toHaveBeenCalled()
+            expect(form).not.toHaveBeenDefaultSubmitted()
+
+        it 'allows to opt out with [up-submit=false]', asyncSpec (next) ->
+          form = fixture('form.form[action="/form-action"][up-submit="false"]')
+          submitButton = e.affix(form, 'input[type=submit]')
+          submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve())
+
+          up.form.config.submitSelectors.push('.form')
+
+          Trigger.click(submitButton)
+
+          next =>
+            expect(submitSpy).not.toHaveBeenCalled()
+            expect(form).toHaveBeenDefaultSubmitted()
 
     describe 'input[up-autosubmit]', ->
 
@@ -1171,7 +1199,7 @@ describe 'up.form', ->
             expect($labels[1]).toHaveText('Validation message')
 
       it 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', asyncSpec (next) ->
-        form = fixture('form[up-follow][action="/path"]')
+        form = fixture('form[up-submit][action="/path"]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
         submitButton = e.affix(form, 'input[type=submit]')
         textField.value = "foo"

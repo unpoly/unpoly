@@ -1129,6 +1129,30 @@ describe 'up.link', ->
           expect(@followSpy).not.toHaveBeenCalled()
           expect(@$link).toHaveBeenDefaultFollowed()
 
+
+      describe 'handling of up.link.config.followSelectors', ->
+
+        it 'follows matching links even without [up-follow] or [up-target]', asyncSpec (next) ->
+          link = fixture('a[href="/foo"].link')
+          up.link.config.followSelectors.push('.link')
+
+          Trigger.click(link)
+
+          next =>
+            expect(@followSpy).toHaveBeenCalled()
+            expect(link).not.toHaveBeenDefaultFollowed()
+
+        it 'allows to opt out with [up-follow=false]', asyncSpec (next) ->
+          link = fixture('a[href="/foo"][up-follow="false"].link')
+          up.link.config.followSelectors.push('.link')
+
+          Trigger.click(link)
+
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+
       describe 'with [up-instant] modifier', ->
 
         beforeEach ->
@@ -1180,6 +1204,22 @@ describe 'up.link', ->
 
             next =>
               expect(@followSpy).toHaveBeenCalledWith(@$link[0])
+
+        describe 'handling of up.link.config.instantSelectors', ->
+
+          it 'follows matching links without an [up-instant] attribute', asyncSpec (next) ->
+            link = fixture('a[up-follow][href="/foo"].link')
+            up.link.config.instantSelectors.push('.link')
+            Trigger.mousedown(link)
+            next =>
+              expect(@followSpy).toHaveBeenCalled()
+
+          it 'allows individual links to opt out with [up-instant=false]', asyncSpec (next) ->
+            link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
+            up.link.config.instantSelectors.push('.link')
+            Trigger.mousedown(link)
+            next =>
+              expect(@followSpy).not.toHaveBeenCalled()
 
     describe '[up-dash]', ->
 
@@ -1554,6 +1594,31 @@ describe 'up.link', ->
           # Since there isn't anyone who could handle the rejection inside
           # the event handler, our handler mutes the rejection.
           expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+
+
+      describe 'handling of up.link.config.preloadSelectors', ->
+
+        beforeEach ->
+          up.link.config.preloadDelay = 0
+
+        it 'preload matching links without an [up-preload] attribute', asyncSpec (next) ->
+          up.link.config.preloadSelectors.push('.link')
+          link = fixture('a[up-follow][href="/foo"].link')
+          up.hello(link)
+
+          Trigger.hoverSequence(link)
+          next ->
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+        it 'allows individual links to opt out with [up-preload=false]', asyncSpec (next) ->
+          up.link.config.preloadSelectors.push('.link')
+          link = fixture('a[up-follow][href="/foo"][up-preload=false].link')
+          up.hello(link)
+
+          Trigger.hoverSequence(link)
+          next ->
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
 
   describe 'up:click', ->
 

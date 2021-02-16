@@ -2,26 +2,6 @@ u = up.util
 e = up.element
 $ = jQuery
 
-# Make specs fail if a form was submitted without Unpoly.
-# This would otherwise navigate away from the spec runner.
-beforeEach ->
-  window.defaultSubmittedForms = []
-
-  up.on 'submit', (event) ->
-    window.defaultSubmittedForms.push(event.target)
-    event.preventDefault()
-
-  jasmine.addMatchers
-    toHaveBeenDefaultSubmitted: (util, customEqualityTesters) ->
-      compare: (link) ->
-        link = e.get(link)
-        used = !!u.remove(window.defaultSubmittedForms, link)
-        pass: used
-
-afterEach ->
-  if links = u.presence(window.defaultSubmittedForms)
-    up.fail('Unhandled default submit behavior for forms %o', links)
-
 window.safeHistory = new class
   constructor: ->
     @logEnabled = false
@@ -120,27 +100,50 @@ afterEach ->
 # Make specs fail if a link was followed without Unpoly.
 # This would otherwise navigate away from the spec runner.
 beforeEach ->
-  window.defaultClickedLinks = []
+  window.defaultFollowedLinks = []
 
   up.on 'click', 'a[href]', (event) ->
     link = event.target
     browserWouldNavigate = !(u.contains(link.href, '#') && up.history.isLocation(link.href))
 
     if browserWouldNavigate
-      window.defaultClickedLinks.push(link)
+      window.defaultFollowedLinks.push(link)
       event.preventDefault()
 
   jasmine.addMatchers
     toHaveBeenDefaultFollowed: (util, customEqualityTesters) ->
       compare: (link) ->
         link = e.get(link)
-        used = !!u.remove(window.defaultClickedLinks, link)
+        used = !!u.remove(window.defaultFollowedLinks, link)
         pass: used
 
 afterEach ->
-  if links = u.presence(window.defaultClickedLinks)
+  if links = u.presence(window.defaultFollowedLinks)
     up.fail('Unhandled default click behavior for links %o', links)
 
+# Make specs fail if a form was followed without Unpoly.
+# This would otherwise navigate away from the spec runner.
+beforeEach ->
+  window.defaultSubmittedForms = []
+
+  up.on 'submit', 'form', (event) ->
+    form = event.target
+    browserWouldNavigate = !u.contains(form.action, '#')
+
+    if browserWouldNavigate
+      window.defaultSubmittedForms.push(form)
+      event.preventDefault()
+
+  jasmine.addMatchers
+    toHaveBeenDefaultSubmitted: (util, customEqualityTesters) ->
+      compare: (form) ->
+        form = e.get(form)
+        used = !!u.remove(window.defaultSubmittedForms, form)
+        pass: used
+
+afterEach ->
+  if forms = u.presence(window.defaultSubmittedForms)
+    up.fail('Unhandled default click behavior for forms %o', forms)
 
 # Add a .default-fallback container to every layer, so we never
 # end up swapping the <body> element.

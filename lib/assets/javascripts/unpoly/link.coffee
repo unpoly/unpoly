@@ -88,18 +88,18 @@ up.link = do ->
   # Links with remote HTML are followable if there is one additional attribute
   # suggesting "follow me through Unpoly".
   LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  ATTRIBUTES_SUGGESTING_FOLLOW = [e.trueAttributeSelector('up-follow'), '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
+  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
 
-  combineFollowableSelectors = (elementSelectors, attributeSelectors = ATTRIBUTES_SUGGESTING_FOLLOW) ->
+  combineFollowableSelectors = (elementSelectors, attributeSelectors) ->
     return u.flatMap(elementSelectors, (elementSelector) ->
       attributeSelectors.map((attributeSelector) -> elementSelector + attributeSelector)
     )
 
   config = new up.Config ->
     preloadDelay: 90
-    followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML).concat(LINKS_WITH_LOCAL_HTML)
-    instantSelectors: [e.trueAttributeSelector('up-instant')]
-    preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, [e.trueAttributeSelector('up-preload')])
+    followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML)
+    instantSelectors: ['[up-instant]']
+    preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]'])
     clickableSelectors: LINKS_WITH_LOCAL_HTML.concat ['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']
 
   fullFollowSelector = ->
@@ -115,7 +115,10 @@ up.link = do ->
     config.clickableSelectors.join(',')
 
   isInstant = (linkOrDescendant) ->
-    !!e.closest(linkOrDescendant, fullInstantSelector())
+    element = e.closest(linkOrDescendant, fullInstantSelector())
+    # Allow users to configure up.link.config.instantSelectors.push('a')
+    # but opt out individual links with [up-instant=false].
+    return element && !e.matches(element, '[up-instant=false]')
 
   ###**
   @property up.link.config
@@ -433,8 +436,12 @@ up.link = do ->
   up.macro(fullClickableSelector, makeClickable)
 
   shouldFollowEvent = (event, link) ->
-    # We never handle events for the right mouse button, or when Shift/CTRL/Meta/ALT is pressed
-    return false unless up.event.isUnmodified(event)
+    # (1) We never handle events for the right mouse button,
+    #     or when Shift/CTRL/Meta/ALT is pressed
+    # (2) Users may configure up.link.config.followSelectors.push('a')
+    #    and then opt out individual links with [up-follow=false].
+    if !up.event.isUnmodified(event) || e.matches(link, '[up-follow=false]')
+      return false
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
@@ -899,7 +906,8 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    return linkPreloader.observeLink(link)
+    unless e.matches(link, '[up-preload=false]')
+      return linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset
 
