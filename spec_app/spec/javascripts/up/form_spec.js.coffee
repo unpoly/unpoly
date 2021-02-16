@@ -373,6 +373,21 @@ describe 'up.form', ->
           params = @lastRequest().data()
           expect(params['id']).toEqual(['value'])
 
+      it 'loads a form with a cross-origin [action] in a new page', asyncSpec (next) ->
+        form = fixture('form#form-id[action="https://external-domain.com/path"][up-follow]')
+        e.affix(form, 'input[name="field-name"][value="field-value"]')
+
+        loadPage = spyOn(up.browser, 'loadPage')
+
+        up.submit(form)
+
+        next =>
+          expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining(
+            method: 'POST',
+            url: 'https://external-domain.com/path',
+            params: new up.Params('field-name': 'field-value')
+          ))
+
       describe 'content type', ->
 
         it 'defaults to application/x-www-form-urlencoded in a form without file inputs', asyncSpec (next) ->
