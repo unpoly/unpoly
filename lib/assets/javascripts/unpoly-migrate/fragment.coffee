@@ -29,7 +29,7 @@ from a new page fetched from the server.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 ###
-up.fragment.replace = (target, url, options) ->
+up.replace = (target, url, options) ->
   up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
   return up.navigate(u.merge(options, { target, url }))
 
@@ -71,7 +71,7 @@ discarded, since it didn't match the selector.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 ###
-up.fragment.extract = (target, document, options) ->
+up.extract = (target, document, options) ->
   up.migrate.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
   return up.navigate(u.merge(options, { target, document }))
 
