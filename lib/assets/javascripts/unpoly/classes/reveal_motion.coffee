@@ -26,7 +26,8 @@ class up.RevealMotion
     @addPadding(elementRect)
     @substractObstructions(viewportRect)
 
-    if viewportRect.height <= 0
+    # Cards test (topics dropdown) throw an error when we also fail at zero
+    if viewportRect.height < 0
       return up.error.failed.async('Viewport has no visible area')
 
     originalScrollTop = @viewport.scrollTop
