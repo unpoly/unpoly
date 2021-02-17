@@ -1218,6 +1218,7 @@ up.util = do ->
     "<": "&lt;"
     ">": "&gt;"
     '"': '&quot;'
+    "'": '&#x27;'
 
   ###**
   Escapes the given string of HTML by replacing control chars with their HTML entities.
@@ -1228,7 +1229,7 @@ up.util = do ->
   @stable
   ###
   escapeHTML = (string) ->
-    string.replace /[&<>"]/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
+    string.replace /[&<>"']/g, (char) -> ESCAPE_HTML_ENTITY_MAP[char]
 
   ###**
   @function up.util.escapeRegExp

@@ -1653,3 +1653,17 @@ describe 'up.util', ->
       it 'returns undefined if the given prefix is the full given key', ->
         result = up.util.unprefixCamelCase('prefix', 'prefix')
         expect(result).toBeUndefined()
+
+    describe 'up.util.escapeHTML', ->
+
+      it 'escapes double quotes', ->
+        result = up.util.escapeHTML('before"after')
+        expect(result).toEqual('before&quot;after')
+
+      it 'escapes single quotes', ->
+        result = up.util.escapeHTML("before'after")
+        expect(result).toEqual('before&#x27;after')
+
+      it 'escapes angle brackets', ->
+        result = up.util.escapeHTML('before<script>after')
+        expect(result).toEqual('before&lt;script&gt;after')
