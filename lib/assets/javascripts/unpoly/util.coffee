@@ -1744,10 +1744,10 @@ up.util = do ->
       try
         string = JSON.stringify(arg)
       catch error
-        if contains(error.message, 'circular')
+        if error.name == 'TypeError'
           string = '(circular structure)'
         else
-          throw e
+          throw error
 
     if string.length > maxLength
       string = "#{string.substr(0, maxLength)} …"

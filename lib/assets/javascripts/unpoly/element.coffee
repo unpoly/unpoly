@@ -658,7 +658,7 @@ up.element = do ->
     range = document.createRange()
     range.setStart(document.body, 0)
     fragment = range.createContextualFragment(html)
-    return fragment.children[0]
+    return fragment.childNodes[0]
 
   ###**
   @function up.element.root

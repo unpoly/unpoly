@@ -2946,7 +2946,7 @@ describe 'up.fragment', ->
                 expect(window.scriptTagExecuted).toHaveBeenCalled()
                 expect(document).toHaveSelector('.target')
                 expect(document).toHaveSelector('.target script')
-                expect('.target').toHaveVisibleText('new text')
+                expect('.target').toHaveVisibleText(/new text/)
 
             it 'does not execute inline script tags outside the updated fragment', asyncSpec (next) ->
               up.fragment.config.runScripts = true
