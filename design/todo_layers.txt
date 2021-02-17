@@ -2,6 +2,7 @@ Release process
 ===============
 
 - Branch from master to 1.x-maintenance
+- Backport single-quote escaping
 - Release 1.x-maintenance as 1.0.0
 - Hard-reset master to hk/layers
 - Release master as 2.0.0
@@ -26,6 +27,8 @@ Release process
 
 Remaining feature work
 ======================
+
+- Consider booting with canPushState = false like we did in the past
 
 - Can we not focus if a compiler has focused?
 
