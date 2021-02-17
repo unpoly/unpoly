@@ -1498,6 +1498,9 @@ up.fragment = do ->
     body.setAttribute('up-source', up.history.location)
     hello(body)
 
+    unless up.browser.canPushState()
+      up.warn('Cannot push history changes. Next fragment update will load in a new page.')
+
   up.on 'up:framework:reset', reset
 
   u.literal

@@ -133,7 +133,7 @@ up.browser = do ->
   @stable
   ###
   isSupported = ->
-    return canPushState() && canPromise()
+    return canPromise()
 
   callJQuery = (args...) ->
     canJQuery() or up.fail("jQuery must be published as window.jQuery")
@@ -142,6 +142,7 @@ up.browser = do ->
   u.literal
     loadPage: loadPage
     submitForm: submitForm
+    canPushState: canPushState
     canFormatLog: canFormatLog
     canPassiveEventListener: canPassiveEventListener
     canJQuery: canJQuery

@@ -14,11 +14,8 @@ class up.Change.FromURL extends up.Change
     @failOptions = up.RenderOptions.deriveFailOptions(@successOptions)
 
   execute: ->
-    # Rendering content from cross-origin URLs is out of scope for Unpoly.
-    # We still allow users to call up.render() with a cross-origin URL, but
-    # we will then make a full-page request.
-    if u.isCrossOrigin(@options.url)
-      up.puts 'up.render()', 'Loading cross-origin content in new page'
+    if newPageReason = @newPageReason()
+      up.puts 'up.render()', newPageReason
       up.browser.loadPage(@options)
       # Prevent our caller from executing any further code, since we're already
       # navigating away from this JavaScript environment.
@@ -32,6 +29,20 @@ class up.Change.FromURL extends up.Change
       # Use always() since onRequestSettled() will decide whether the promise
       # will be fulfilled or rejected.
       return u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
+
+  newPageReason: ->
+    # Rendering content from cross-origin URLs is out of scope for Unpoly.
+    # We still allow users to call up.render() with a cross-origin URL, but
+    # we will then make a full-page request.
+    if u.isCrossOrigin(@options.url)
+      return 'Loading cross-origin content in new page'
+
+    # Unpoly may have been booted without suppport for history.pushState.
+    # E.g. when the initial page was loaded from a POST response.
+    # In this case we make a full page load in hopes to reboot with
+    # pushState support.
+    unless up.browser.canPushState()
+      return 'Loading content in new page to restore history support'
 
   makeRequest: ->
     successAttrs = @preflightPropsForRenderOptions(@successOptions)

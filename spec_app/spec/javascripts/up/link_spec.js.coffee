@@ -726,6 +726,18 @@ describe 'up.link', ->
           expect(jasmine.Ajax.requests.count()).toBe(0)
           done()
 
+      describeFallback 'canPushState', ->
+
+        it "does not preload a link", (done) ->
+          fixture('.target')
+          link = fixture('a[href="/path"][up-target=".target"]')
+          preloadPromise = up.link.preload(link)
+
+          promiseState(preloadPromise).then (result) ->
+            expect(result.state).toEqual('rejected')
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            done()
+
       it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
         $fixture('.target')
         $link = $fixture('a[href="/path"][up-target=".target"]')

@@ -336,6 +336,9 @@ up.link = do ->
     if u.isCrossOrigin(url)
       return "Won't preload cross-origin content"
 
+    unless up.browser.canPushState()
+      return "Won't preload when we cannot push history state"
+
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
 
