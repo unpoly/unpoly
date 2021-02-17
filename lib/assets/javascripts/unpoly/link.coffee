@@ -118,7 +118,7 @@ up.link = do ->
     element = e.closest(linkOrDescendant, fullInstantSelector())
     # Allow users to configure up.link.config.instantSelectors.push('a')
     # but opt out individual links with [up-instant=false].
-    return element && !e.matches(element, '[up-instant=false]')
+    return element && !e.matches(element, '[up-instant=false], [up-follow=false]')
 
   ###**
   @property up.link.config
@@ -908,7 +908,7 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    unless e.matches(link, '[up-preload=false]')
+    unless e.matches(link, '[up-preload=false], [up-follow=false]')
       return linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset

@@ -1230,6 +1230,13 @@ describe 'up.link', ->
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
 
+          it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
+            link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
+            up.link.config.instantSelectors.push('.link')
+            Trigger.mousedown(link)
+            next =>
+              expect(@followSpy).not.toHaveBeenCalled()
+
     describe '[up-dash]', ->
 
       it "is a shortcut for [up-preload], [up-instant] and [up-target], using [up-dash]'s value as [up-target]", ->
@@ -1622,6 +1629,15 @@ describe 'up.link', ->
         it 'allows individual links to opt out with [up-preload=false]', asyncSpec (next) ->
           up.link.config.preloadSelectors.push('.link')
           link = fixture('a[up-follow][href="/foo"][up-preload=false].link')
+          up.hello(link)
+
+          Trigger.hoverSequence(link)
+          next ->
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+        it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
+          up.link.config.preloadSelectors.push('.link')
+          link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
           up.hello(link)
 
           Trigger.hoverSequence(link)
