@@ -88,6 +88,8 @@ up.fragment = do ->
   @param {boolean} config.runScripts=false
     Whether to execute `<script>` tags in updated fragments.
 
+    Scripts will load asynchronously, with no guarantee of execution order.
+
     If you set this to `true`, mind that a default [main target](/up.fragment.config.mainTargets)
     is the `<body>` element. If you are including your script at the end of your `<body>`
     for performance reasons, swapping the `<body>` will re-execute these scripts.
