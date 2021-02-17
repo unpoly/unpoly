@@ -395,9 +395,11 @@ up.link = do ->
   @stable
   ###
   isFollowable = (link) ->
-    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
-    e.matches(link, fullFollowSelector())
+    return e.matches(link, fullFollowSelector()) && !isFollowDisabled(link)
+
+  isFollowDisabled = (link) ->
+    return e.matches(link, '[up-follow=false]')
 
   ###**
   Makes sure that the given link will be [followed](/up.follow)
@@ -440,14 +442,14 @@ up.link = do ->
     #     or when Shift/CTRL/Meta/ALT is pressed
     # (2) Users may configure up.link.config.followSelectors.push('a')
     #    and then opt out individual links with [up-follow=false].
-    if !up.event.isUnmodified(event) || e.matches(link, '[up-follow=false]')
+    if !up.event.isUnmodified(event)
       return false
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
     betterTargetSelector = "a, [up-href], #{up.form.fieldSelector()}"
     betterTarget = e.closest(event.target, betterTargetSelector)
-    return !betterTarget || betterTarget == link
+    return (!betterTarget || betterTarget == link) && !isFollowDisabled(link)
 
   ###**
   Provide an `up:click` event that improves on standard click

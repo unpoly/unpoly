@@ -52,6 +52,14 @@ describe 'up.rails', ->
             expect($element.attr('data-method')).toBeUndefined()
             expect($element.attr('up-method')).toEqual('put')
 
+          it 'does not transform the link if it matches a custom up.link.config.followSelectors, but also has [up-follow=false] (bugfix)', ->
+            up.link.config.followSelectors.push('.hyperlink')
+            link = fixture('a.hyperlink[data-method="patch"][href="/foo"][up-follow="false"]')
+            up.hello(link)
+
+            expect(link).toHaveAttribute('data-method', 'patch')
+            expect(link).not.toHaveAttribute('up-method')
+
       describe 'on an element without Unpoly attributes', ->
 
         it "is not changed", ->

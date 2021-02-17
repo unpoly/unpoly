@@ -18,7 +18,7 @@ up.rails = do ->
     dataAttribute = "data-#{feature}"
     upAttribute = "up-#{feature}"
 
-    up.macro "[#{dataAttribute}]", (element) ->
-      if isRails() && up.link.isFollowable(element)
-        e.setMissingAttr(element, upAttribute, element.getAttribute(dataAttribute))
-        element.removeAttribute(dataAttribute)
+    up.macro "a[#{dataAttribute}]", (link) ->
+      if isRails() && up.link.isFollowable(link)
+        e.setMissingAttr(link, upAttribute, link.getAttribute(dataAttribute))
+        link.removeAttribute(dataAttribute)

@@ -678,6 +678,15 @@ describe 'up.link', ->
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(false)
 
+      it 'returns true if the given link matches a custom up.link.config.followSelectors', ->
+        link = fixture('a.hyperlink[href="/foo"]')
+        up.link.config.followSelectors.push('.hyperlink')
+        expect(up.link.isFollowable(link)).toBe(true)
+
+      it 'returns true if the given link matches a custom up.link.config.followSelectors, but also has [up-follow=false]', ->
+        link = fixture('a.hyperlink[href="/foo"][up-follow="false"]')
+        up.link.config.followSelectors.push('.hyperlink')
+        expect(up.link.isFollowable(link)).toBe(false)
 
     describe 'up.link.preload', ->
 
