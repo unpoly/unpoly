@@ -1418,3 +1418,17 @@ describe 'up.util', ->
       it 'returns false (and does not crash) for undefined', ->
         value = undefined
         expect(up.util.isJQuery(value)).toBe(false)
+
+    describe 'up.util.escapeHtml', ->
+
+      it 'escapes double quotes', ->
+        result = up.util.escapeHtml('before"after')
+        expect(result).toEqual('before&quot;after')
+
+      it 'escapes single quotes', ->
+        result = up.util.escapeHtml("before'after")
+        expect(result).toEqual('before&#x27;after')
+
+      it 'escapes angle brackets', ->
+        result = up.util.escapeHtml('before<script>after')
+        expect(result).toEqual('before&lt;script&gt;after')
