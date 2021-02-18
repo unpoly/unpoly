@@ -930,7 +930,7 @@ up.form = do ->
       
   Also note that the function must be declared on the `window` object to work, like so:
       
-      window.showSuggestions(selectedValue) {
+      window.showSuggestions = function(selectedValue) {
         console.log(`Called showSuggestions() with ${selectedValue}`);
       }
 
