@@ -8,10 +8,20 @@
     "dist/unpoly.min.js",
     "dist/unpoly.css",
     "dist/unpoly.min.css",
+    "dist/unpoly-migrate.js",
+    "dist/unpoly-migrate.min.js",
     "dist/unpoly-bootstrap3.js",
     "dist/unpoly-bootstrap3.min.js",
     "dist/unpoly-bootstrap3.css",
-    "dist/unpoly-bootstrap3.min.css"
+    "dist/unpoly-bootstrap3.min.css",
+    "dist/unpoly-bootstrap4.js",
+    "dist/unpoly-bootstrap4.min.js",
+    "dist/unpoly-bootstrap4.css",
+    "dist/unpoly-bootstrap4.min.css",
+    "dist/unpoly-bootstrap5.js",
+    "dist/unpoly-bootstrap5.min.js",
+    "dist/unpoly-bootstrap5.css",
+    "dist/unpoly-bootstrap5.min.css"
   ],
   "scripts": {
     "test": "echo \"See https://github.com/unpoly/unpoly for test instructions\" && exit 1"
