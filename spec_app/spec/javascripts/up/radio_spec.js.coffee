@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.radio', ->
@@ -208,6 +209,26 @@ describe 'up.radio', ->
           expect(closeEventHandler).not.toHaveBeenCalled()
           expect($('.inside-text')).toHaveText('new inside')
           expect($('.outside')).toHaveText('old outside')
+
+      it 'does not update an [up-hungry] element if it was contained by the original fragment', asyncSpec (next) ->
+        container = fixture('.container')
+        e.affix(container, '.child[up-hungry]')
+
+        insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
+        up.on('up:fragment:inserted', insertedSpy)
+
+        up.render
+          target: '.container'
+          document: """
+            <div class="container">
+              <div class="child" up-hungry>
+              </div>
+            </div>
+            """
+
+        next ->
+          expect(insertedSpy.calls.count()).toBe(1)
+          expect(insertedSpy.calls.argsFor(0)[0].target).toBe(document.querySelector('.container'))
 
     describe '[up-poll]', ->
 
