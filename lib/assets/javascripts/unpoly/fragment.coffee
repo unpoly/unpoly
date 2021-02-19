@@ -1320,10 +1320,14 @@ up.fragment = do ->
        return e.idSelector(id)
      else if name = element.getAttribute("name")
        return e.elementTagName(element) + e.attributeSelector('name', name)
-     else if goodClass = u.find(element.classList, isGoodClassForTarget)
-       return ".#{goodClass}"
+     else if goodClasses = u.presence(u.filter(element.classList, isGoodClassForTarget))
+      selector = ''
+      for klass in goodClasses
+        selector += ".#{klass}"
+      return selector
      else
        return e.elementTagName(element)
+
 
   ###**
   Sets an unique identifier for this element.

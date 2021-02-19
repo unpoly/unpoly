@@ -4746,9 +4746,9 @@ describe 'up.fragment', ->
         element = fixture('div.fooooo.bar')
         expect(up.fragment.toTarget(element)).toBe(".bar")
 
-      it 'uses the first of multiple classes', ->
+      it 'uses all classes of an element (to match a BEM block that is identified by a modifier)', ->
         element = fixture('div.class1.class2')
-        expect(up.fragment.toTarget(element)).toBe(".class1")
+        expect(up.fragment.toTarget(element)).toBe(".class1.class2")
 
       it "prefers using the element's [name] attribute to only using the element's tag name", ->
         element = fixture('input[name=name-value]')
