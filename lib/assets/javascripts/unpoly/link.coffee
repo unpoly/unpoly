@@ -128,7 +128,12 @@ up.link = do ->
     return e.matches(link, config.noFollowSelectors.join(','))
 
   isPreloadDisabled = (link) ->
-    return e.matches(link, config.noPreloadSelectors.join(','))
+    url = followURL(link)
+    return !url ||
+      e.matches(link, config.noPreloadSelectors.join(',')) ||
+      !isSafe(link) ||
+      u.isCrossOrigin(url) ||
+      !up.browser.canPushState()
 
   isInstantDisabled = (link) ->
     return e.matches(link, config.noInstantSelectors.join(','))
@@ -330,27 +335,8 @@ up.link = do ->
   preload = (link, options) ->
     # If passed a selector, up.fragment.get() will match in the current layer.
     link = up.fragment.get(link)
-
-    if issue = preloadIssue(link)
-      return up.error.failed.async(issue)
-
     guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
     follow(link, u.merge(options, preload: true, { guardEvent }))
-
-  preloadIssue = (link) ->
-    unless isSafe(link)
-      return "Won't preload unsafe link"
-
-    url = followURL(link)
-
-    unless url
-      return "Won't preload link without a URL"
-
-    if u.isCrossOrigin(url)
-      return "Won't preload cross-origin content"
-
-    unless up.browser.canPushState()
-      return "Won't preload when we cannot push history state"
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).

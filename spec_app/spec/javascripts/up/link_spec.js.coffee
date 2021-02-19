@@ -706,38 +706,6 @@ describe 'up.link', ->
             failTarget: 'default-fallback'
           expect(u.isPromise(cachedPromise)).toBe(true)
 
-      it "does not preload a link with an unsafe method", (done) ->
-        $fixture('.target')
-        $link = $fixture('a[href="/path"][up-target=".target"][data-method="post"]')
-        preloadPromise = up.link.preload($link)
-
-        promiseState(preloadPromise).then (result) ->
-          expect(result.state).toEqual('rejected')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-          done()
-
-      it "does not preload a link with cross-origin [href]", (done) ->
-        $fixture('.target')
-        $link = $fixture('a[href="https://other-domain.com/path"][up-target=".target"]')
-        preloadPromise = up.link.preload($link)
-
-        promiseState(preloadPromise).then (result) ->
-          expect(result.state).toEqual('rejected')
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-          done()
-
-      describeFallback 'canPushState', ->
-
-        it "does not preload a link", (done) ->
-          fixture('.target')
-          link = fixture('a[href="/path"][up-target=".target"]')
-          preloadPromise = up.link.preload(link)
-
-          promiseState(preloadPromise).then (result) ->
-            expect(result.state).toEqual('rejected')
-            expect(jasmine.Ajax.requests.count()).toBe(0)
-            done()
-
       it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
         $fixture('.target')
         $link = $fixture('a[href="/path"][up-target=".target"]')
@@ -1623,6 +1591,46 @@ describe 'up.link', ->
           # the event handler, our handler mutes the rejection.
           expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
 
+      describe 'exemptions from preloading', ->
+
+        beforeEach ->
+          up.link.config.preloadDelay = 0
+          $fixture('.target')
+
+        it "never preloads a link with an unsafe method", asyncSpec (next) ->
+          $link = $fixture('a[href="/path"][up-target=".target"][up-preload][data-method="post"]')
+
+          Trigger.hoverSequence($link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        it "never preloads a link with cross-origin [href]", asyncSpec (next) ->
+          $link = $fixture('a[href="https://other-domain.com/path"][up-preload][up-target=".target"]')
+
+          Trigger.hoverSequence($link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        it 'never downloads a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
+          $link = $fixture('a[href="/path"][up-target=".target"][up-preload][rel="download"]')
+
+          Trigger.hoverSequence($link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        describeFallback 'canPushState', ->
+
+          it "does not preload a link", asyncSpec (next) ->
+            fixture('.target')
+            link = fixture('a[href="/path"][up-target=".target"][up-preload]')
+
+            Trigger.hoverSequence(link)
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(0)
 
       describe 'handling of up.link.config.preloadSelectors', ->
 

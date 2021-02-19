@@ -42,6 +42,7 @@ up.form = do ->
     validateTargets: ['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT)
+    noSubmitSelectors: ['[up-submit=false]']
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])']
     observeDelay: 0
 
@@ -551,6 +552,9 @@ up.form = do ->
     if (element = document.activeElement) && e.matches(element, fieldSelector())
       return element
 
+  isSubmitDisabled = (form) ->
+    return e.matches(form, config.noSubmitSelectors.join(','))
+
   ###**
   Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
   instead of triggering a full page reload.
@@ -687,7 +691,7 @@ up.form = do ->
   up.on 'submit', fullSubmitSelector, (event, form) ->
     # Users may configure up.form.config.submitSelectors.push('form')
     # and then opt out individual forms with [up-submit=false].
-    if e.matches(form, '[up-submit=false]')
+    if isSubmitDisabled(form)
       return
 
     abortScheduledValidate?()
