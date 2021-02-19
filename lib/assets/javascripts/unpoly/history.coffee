@@ -34,13 +34,14 @@ up.history = do ->
     enabled: true
     restoreTargets: ['body']
 
-  previousURL = undefined
-  nextPreviousURL = undefined
+  previousLocation = undefined
+  nextPreviousLocation = undefined
 
   reset = ->
     config.reset()
-    previousURL = undefined
-    nextPreviousURL = undefined
+    previousLocation = undefined
+    nextPreviousLocation = undefined
+    trackCurrentLocation()
 
   normalizeURL = (url, normalizeOptions = {}) ->
     normalizeOptions.hash = true
@@ -55,23 +56,35 @@ up.history = do ->
   currentLocation = (normalizeOptions) ->
     normalizeURL(location.href, normalizeOptions)
 
+  ###**
+  Returns a normalized URL for the previous history entry.
+
+  Only history entries pushed by Unpoly will be considered.
+
+  @property up.history.previousLocation
+  @experimental
+  ###
+
+  ###**
+  Remembers the current URL so we can use previousURL on pop.
+
+  @function observeNewURL
+  @internal
+  ###
+  trackCurrentLocation = ->
+    url = currentLocation()
+
+    if nextPreviousLocation != url
+      previousLocation = nextPreviousLocation
+      nextPreviousLocation = url
+
+  trackCurrentLocation()
+
   isCurrentLocation = (url) ->
     # Some web frameworks care about a trailing slash, some consider it optional.
     # Only for the equality test (is this the current URL) we consider it optional.
     normalizeOptions = { stripTrailingSlash: true }
     normalizeURL(url, normalizeOptions) == currentLocation(normalizeOptions)
-
-  ###**
-  Remembers the given URL so we can use previousURL on pop.
-
-  @function observeNewURL
-  @internal
-  ###
-  observeNewURL = (url) ->
-    if nextPreviousURL
-      previousURL = nextPreviousURL
-      nextPreviousURL = undefined
-    nextPreviousURL = url
 
   ###**
   Replaces the current history entry and updates the
@@ -146,7 +159,7 @@ up.history = do ->
     if config.enabled
       state = buildState()
       window.history[method](state, '', url)
-      observeNewURL(currentLocation())
+      trackCurrentLocation()
       return state
 
   buildState = ->
@@ -175,8 +188,8 @@ up.history = do ->
       up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
 
   pop = (event) ->
-    observeNewURL(currentLocation())
-    up.viewport.saveScroll(location: previousURL)
+    trackCurrentLocation()
+    up.viewport.saveScroll(location: previousLocation)
     state = event.state
     restoreStateOnPop(state)
 
@@ -241,9 +254,9 @@ up.history = do ->
   @stable
   ###
   up.macro 'a[up-back], [up-href][up-back]', (link) ->
-    if previousURL
+    if previousLocation
       e.setMissingAttrs link,
-        'up-href': previousURL,
+        'up-href': previousLocation,
         'up-restore-scroll': ''
       link.removeAttribute('up-back')
       up.link.makeFollowable(link)
@@ -255,6 +268,6 @@ up.history = do ->
     push: push
     replace: replace
     get_location: currentLocation
+    get_previousLocation: -> previousLocation
     isLocation: isCurrentLocation
     normalizeURL: normalizeURL
-

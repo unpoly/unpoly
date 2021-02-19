@@ -14,11 +14,14 @@ describe 'up.history', ->
 
     describe 'up.history.location', ->
 
+      it 'returns the current browser location', ->
+        expect(up.history.location).toMatchURL(location.href)
+
       it 'does not strip a trailing slash from the current URL', ->
         history.replaceState?({}, 'title', '/host/path/')
         expect(up.history.location).toMatchURL('/host/path/')
 
-    describe 'up.history.isLocation', ->
+    describe 'up.history.isLocation()', ->
 
       it 'returns true if the given path is the current URL', ->
         history.replaceState?({}, 'title', '/host/path/')
@@ -39,6 +42,24 @@ describe 'up.history', ->
       it 'returns true if the given path is the current URL, but with a trailing slash', ->
         history.replaceState?({}, 'title', '/host/path')
         expect(up.history.isLocation('/host/path/')).toBe(true)
+
+    describe 'up.history.previousLocation', ->
+
+      it 'returns the previous location', ->
+        initialLocation = location.href
+        expect(up.history.previousLocation).toBeMissing()
+
+        up.history.replace('/location2')
+        expect(up.history.previousLocation).toMatchURL(initialLocation)
+
+        up.history.replace('/location3')
+        expect(up.history.previousLocation).toMatchURL('/location2')
+
+      it 'returns the last previous location that is different from the current URL', ->
+        initialLocation = location.href
+        up.history.replace('/double-replaced-location')
+        up.history.replace('/double-replaced-location')
+        expect(up.history.previousLocation).toMatchURL(initialLocation)
 
   describe 'unobtrusive behavior', ->
 
