@@ -6,5 +6,7 @@
 /rdoc
 tmp
 /dist/manifest.json
+/dist/*.js
+/dist/*.css
 /doc
 npm-debug.log
