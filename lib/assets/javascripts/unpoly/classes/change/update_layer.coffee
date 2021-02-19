@@ -38,7 +38,8 @@ class up.Change.UpdateLayer extends up.Change.Addition
     # and the response document.
     @matchPostflight()
 
-    up.puts('up.render()', "Updating \"#{@target}\" in #{@layer}")
+    # Don't log @target since that does not include hungry elements
+    up.puts('up.render()', "Updating \"#{@bestPreflightSelector()}\" in #{@layer}")
 
     @options.title = @improveHistoryValue(@options.title, @responseDoc.getTitle())
 
