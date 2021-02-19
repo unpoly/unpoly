@@ -96,11 +96,21 @@ up.link = do ->
     )
 
   config = new up.Config ->
-    preloadDelay: 90
-    followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML)
-    instantSelectors: ['[up-instant]']
-    preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]'])
-    clickableSelectors: LINKS_WITH_LOCAL_HTML.concat ['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']
+    noFollowSelectors = ['[up-follow=false]', '[rel=download]']
+    return {
+      followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML),
+      noFollowSelectors: noFollowSelectors
+
+      instantSelectors: ['[up-instant]'],
+      noInstantSelectors: ['[up-instant=false]'].concat(noFollowSelectors),
+
+      preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]']),
+      noPreloadSelectors: ['[up-preload=false]'].concat(noFollowSelectors),
+
+      clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
+
+      preloadDelay: 90,
+    }
 
   fullFollowSelector = ->
     config.followSelectors.join(',')
@@ -114,11 +124,14 @@ up.link = do ->
   fullClickableSelector = ->
     config.clickableSelectors.join(',')
 
-  isInstant = (linkOrDescendant) ->
-    element = e.closest(linkOrDescendant, fullInstantSelector())
-    # Allow users to configure up.link.config.instantSelectors.push('a')
-    # but opt out individual links with [up-instant=false].
-    return element && !e.matches(element, '[up-instant=false], [up-follow=false]')
+  isFollowDisabled = (link) ->
+    return e.matches(link, config.noFollowSelectors.join(','))
+
+  isPreloadDisabled = (link) ->
+    return e.matches(link, config.noPreloadSelectors.join(','))
+
+  isInstantDisabled = (link) ->
+    return e.matches(link, config.noInstantSelectors.join(','))
 
   ###**
   @property up.link.config
@@ -401,9 +414,6 @@ up.link = do ->
     link = up.fragment.get(link)
     return e.matches(link, fullFollowSelector()) && !isFollowDisabled(link)
 
-  isFollowDisabled = (link) ->
-    return e.matches(link, '[up-follow=false]')
-
   ###**
   Makes sure that the given link will be [followed](/up.follow)
   by Unpoly instead of making a full page load.
@@ -453,6 +463,12 @@ up.link = do ->
     betterTargetSelector = "a, [up-href], #{up.form.fieldSelector()}"
     betterTarget = e.closest(event.target, betterTargetSelector)
     return (!betterTarget || betterTarget == link) && !isFollowDisabled(link)
+
+  isInstant = (linkOrDescendant) ->
+    element = e.closest(linkOrDescendant, fullInstantSelector())
+    # Allow users to configure up.link.config.instantSelectors.push('a')
+    # but opt out individual links with [up-instant=false].
+    return element && !isInstantDisabled(element)
 
   ###**
   Provide an `up:click` event that improves on standard click
@@ -911,7 +927,7 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    unless e.matches(link, '[up-preload=false], [up-follow=false]')
+    unless isPreloadDisabled(link)
       return linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset
