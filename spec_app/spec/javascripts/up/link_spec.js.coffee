@@ -1593,7 +1593,7 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        it 'never downloads a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
+        it 'never preloads a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
           $link = $fixture('a[href="/path"][up-target=".target"][up-preload][rel="download"]')
 
           Trigger.hoverSequence($link)
