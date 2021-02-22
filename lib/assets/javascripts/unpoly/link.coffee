@@ -437,18 +437,16 @@ up.link = do ->
   up.macro(fullClickableSelector, makeClickable)
 
   shouldFollowEvent = (event, link) ->
-    # (1) We never handle events for the right mouse button,
-    #     or when Shift/CTRL/Meta/ALT is pressed
-    # (2) Users may configure up.link.config.followSelectors.push('a')
-    #    and then opt out individual links with [up-follow=false].
-    if !up.event.isUnmodified(event)
+    # Users may configure up.link.config.followSelectors.push('a')
+    # and then opt out individual links with [up-follow=false].
+    if isFollowDisabled(link)
       return false
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     # we want those other elements handle the click.
     betterTargetSelector = "a, [up-href], #{up.form.fieldSelector()}"
     betterTarget = e.closest(event.target, betterTargetSelector)
-    return (!betterTarget || betterTarget == link) && !isFollowDisabled(link)
+    return !betterTarget || betterTarget == link
 
   isInstant = (linkOrDescendant) ->
     element = e.closest(linkOrDescendant, fullInstantSelector())
@@ -475,10 +473,15 @@ up.link = do ->
   ###
   convertClicks = (layer) ->
     layer.on 'click', (event, element) ->
-      # Instant links should not have a `click` event.
-      # This would trigger the browsers default follow-behavior and possibly activate JS libs.
-      # A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
-      # Keyboard navigation will not necessarily trigger a mousedown event.
+      # We never handle events for the right mouse button,
+      # or when Shift/CTRL/Meta/ALT is pressed
+      unless up.event.isUnmodified(event)
+        return
+
+      # (1) Instant links should not have a `click` event.
+      #     This would trigger the browsers default follow-behavior and possibly activate JS libs.
+      # (2) A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
+      #     Keyboard navigation will not necessarily trigger a mousedown event.
       if isInstant(element) && lastMousedownTarget
         up.event.halt(event)
 
@@ -493,7 +496,12 @@ up.link = do ->
       lastMousedownTarget = null
 
     layer.on 'mousedown', (event, element) ->
-      lastMousedownTarget = element
+      # We never handle events for the right mouse button,
+      # or when Shift/CTRL/Meta/ALT is pressed
+      unless up.event.isUnmodified(event)
+        return
+
+      lastMousedownTarget = event.target
 
       if isInstant(element)
         # A11Y: Keyboard navigation will not necessarily trigger a mousedown event.

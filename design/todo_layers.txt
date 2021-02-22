@@ -31,8 +31,7 @@ Remaining feature work
 - Can we not focus if a compiler has focused?
 - Layer option: Document that we can pass a mode as { layer }
 - Remove up.network.preload(). It's the same as up.request(cache: true).
-- [rel=download] öffnet im gleichen Tab
-- Deck Switcher: Bringt mich auf neuen Tab weil noch [up-popup] dasteht. Ist das nicht in up-migrate.js?
+- "Show Preview" im Edit-Formular tut bei mir nichts mehr
 
 Manual tests
 ------------

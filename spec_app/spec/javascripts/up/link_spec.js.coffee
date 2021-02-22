@@ -584,26 +584,6 @@ describe 'up.link', ->
         event = buildEvent($childInput[0])
         expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
 
-      it 'returns false if the right mouse button is used', ->
-        $link = $fixture('a[href="/foo"]')
-        event = buildEvent($link[0], button: 2)
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
-
-      it 'returns false if shift is pressed during the click', ->
-        $link = $fixture('a[href="/foo"]')
-        event = buildEvent($link[0], shiftKey: 2)
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
-
-      it 'returns false if ctrl is pressed during the click', ->
-        $link = $fixture('a[href="/foo"]')
-        event = buildEvent($link[0], ctrlKey: 2)
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
-
-      it 'returns false if meta is pressed during the click', ->
-        $link = $fixture('a[href="/foo"]')
-        event = buildEvent($link[0], metaKey: 2)
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
-
     describe 'up.link.makeFollowable', ->
 
       it "adds [up-follow] to a link that wouldn't otherwise be handled by Unpoly", ->
@@ -1667,37 +1647,6 @@ describe 'up.link', ->
 
   describe 'up:click', ->
 
-    describe 'on a link that is [up-instant]', ->
-
-      it 'emits on up:click event on mousedown', ->
-        link = fixture('a[href="#"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.mousedown(link)
-        expect(listener).toHaveBeenCalled()
-
-      it 'does not emit an up:click event on click IFF there was an earlier mousedown event', ->
-        link = fixture('a[href="#"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        Trigger.mousedown(link)
-        link.addEventListener('up:click', listener)
-        Trigger.click(link)
-        expect(listener).not.toHaveBeenCalled()
-
-      it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)', ->
-        link = fixture('a[href="#"][up-instant]')
-        listener = jasmine.createSpy('up:click listener')
-        link.addEventListener('up:click', listener)
-        Trigger.click(link)
-        expect(listener).toHaveBeenCalled()
-
-      it 'prevents the mousedown event when the up:click event is prevented', ->
-        mousedownEvent = null
-        link = fixture('a[href="#"][up-instant]')
-        link.addEventListener('mousedown', (event) -> mousedownEvent = event)
-        link.addEventListener('up:click', (event) -> event.preventDefault())
-        Trigger.mousedown(link)
-        expect(mousedownEvent.defaultPrevented).toBe(true)
 
     describe 'on a link that is not [up-instant]', ->
 
@@ -1731,6 +1680,95 @@ describe 'up.link', ->
 
         next ->
           expect(listener).not.toHaveBeenCalled()
+
+      # IE does not call JavaScript and always performs the default action on right clicks
+      unless AgentDetector.isIE() || AgentDetector.isEdge()
+        it 'does not emit an up:click event if the right mouse button is used', asyncSpec (next) ->
+          link = fixture('a[href="#"]')
+          listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+          Trigger.click(link, button: 2)
+          next ->
+            expect(listener).not.toHaveBeenCalled()
+
+      it 'does not emit an up:click event if shift is pressed during the click', asyncSpec (next) ->
+        link = fixture('a[href="#"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link, shiftKey: true)
+        next ->
+          expect(listener).not.toHaveBeenCalled()
+
+      it 'does not emit an up:click event if ctrl is pressed during the click', asyncSpec (next) ->
+        link = fixture('a[href="#"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link, ctrlKey: true)
+        next ->
+          expect(listener).not.toHaveBeenCalled()
+
+      it 'does not emit an up:click event if meta is pressed during the click', asyncSpec (next) ->
+        link = fixture('a[href="#"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link, metaKey: true)
+        next ->
+          expect(listener).not.toHaveBeenCalled()
+
+    describe 'on a link that is [up-instant]', ->
+
+      it 'emits on up:click event on mousedown', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.mousedown(link)
+        expect(listener).toHaveBeenCalled()
+
+      it 'does not emit an up:click event on click if there was an earlier mousedown event that was default-prevented', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        Trigger.mousedown(link)
+        link.addEventListener('up:click', listener)
+        Trigger.click(link)
+        expect(listener).not.toHaveBeenCalled()
+
+      it 'prevents a click event if there was an earlier mousedown event that was converted to an up:click', ->
+        link = fixture('a[href="#"][up-instant]')
+        clickListener = jasmine.createSpy('click listener')
+        link.addEventListener('click', clickListener)
+        Trigger.mousedown(link)
+        Trigger.click(link)
+        expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
+
+      it 'does not emit multiple up:click events in a click sequence', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.clickSequence(link)
+        expect(listener.calls.count()).toBe(1)
+
+      it "does emit an up:click event on click if there was an earlier mousedown event that was not default-prevented (happens when the user CTRL+clicks and Unpoly won't follow)", ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.mousedown(link)
+        Trigger.click(link)
+        expect(listener).toHaveBeenCalled()
+
+      it 'does emit an up:click event if there was a click without mousedown (happens when a link is activated with the Enter key)', ->
+        link = fixture('a[href="#"][up-instant]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link)
+        expect(listener).toHaveBeenCalled()
+
+      it 'prevents the mousedown event when the up:click event is prevented', ->
+        mousedownEvent = null
+        link = fixture('a[href="#"][up-instant]')
+        link.addEventListener('mousedown', (event) -> mousedownEvent = event)
+        link.addEventListener('up:click', (event) -> event.preventDefault())
+        Trigger.mousedown(link)
+        expect(mousedownEvent.defaultPrevented).toBe(true)
 
     describe 'on an non-link element that is [up-instant]', ->
 

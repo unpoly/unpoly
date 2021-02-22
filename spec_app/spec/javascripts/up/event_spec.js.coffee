@@ -650,6 +650,28 @@ describe 'up.event', ->
         next ->
           expect(callback).not.toHaveBeenCalled()
 
+    describe 'up.event.isUnmodified', ->
+
+      it 'returns true for a click event with the left mouse button', ->
+        event = Trigger.createMouseEvent('mousedown', button: 0)
+        expect(up.event.isUnmodified(event)).toBe(true)
+
+      it 'returns false if the right mouse button is used', ->
+        event = Trigger.createMouseEvent('mousedown', button: 2)
+        expect(up.event.isUnmodified(event)).toBe(false)
+
+      it 'returns false if shift is pressed during the click', ->
+        event = Trigger.createMouseEvent('mousedown', shiftKey: 2)
+        expect(up.event.isUnmodified(event)).toBe(false)
+
+      it 'returns false if ctrl is pressed during the click', ->
+        event = Trigger.createMouseEvent('mousedown', ctrlKey: 2)
+        expect(up.event.isUnmodified(event)).toBe(false)
+
+      it 'returns false if meta is pressed during the click', ->
+        event = Trigger.createMouseEvent('mousedown', metaKey: 2)
+        expect(up.event.isUnmodified(event)).toBe(false)
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-emit]', ->
