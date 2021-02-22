@@ -1601,6 +1601,14 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
+        it 'never preloads a link with [href="#"]', asyncSpec (next) ->
+          $link = $fixture('a[href="#"][up-preload]')
+
+          Trigger.hoverSequence($link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
         describeFallback 'canPushState', ->
 
           it "does not preload a link", asyncSpec (next) ->
