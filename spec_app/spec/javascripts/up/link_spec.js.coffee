@@ -553,6 +553,11 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(up.render).not.toHaveBeenCalled()
 
+      it 'parses the link method from a [data-method] attribute so we can replace the Rails UJS adapter with Unpoly', ->
+        link = fixture('a[href="/path"][data-method="patch"]')
+        options = up.link.followOptions(link)
+        expect(options.method).toEqual('PATCH')
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->

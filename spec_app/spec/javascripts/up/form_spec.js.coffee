@@ -688,6 +688,11 @@ describe 'up.form', ->
         options = up.form.submitOptions(form)
         expect(up.render).not.toHaveBeenCalled()
 
+      it 'parses the form method from a [data-method] attribute so we can replace the Rails UJS adapter with Unpoly', ->
+        form = fixture('form[action="/path"][data-method="patch"]')
+        options = up.form.submitOptions(form)
+        expect(options.method).toEqual('PATCH')
+
     describe 'up.validate()', ->
 
       it 'emits an up:form:validate event instead of an up:form:submit event', asyncSpec (next) ->
