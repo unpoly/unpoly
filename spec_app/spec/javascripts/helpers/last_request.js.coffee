@@ -3,44 +3,48 @@ e = up.element
 $ = jQuery
 
 beforeEach ->
-  @lastRequest = ->
-    jasmine.Ajax.requests.mostRecent() or up.fail('There is no last request')
+  @lastRequest = jasmine.lastRequest
+  @respondWith = jasmine.respondWith
+  @respondWithSelector = jasmine.respondWithSelector
 
-  @respondWith = (args...) ->
-    firstArg = args.shift()
-    responseText = undefined
-    options = undefined
-    if u.isString(firstArg)
-      responseText = firstArg
-      options = args[0] || {}
-    else
-      options = firstArg
-      responseText = options.responseText
+jasmine.lastRequest = ->
+  return jasmine.Ajax.requests.mostRecent() or up.fail('There is no last request')
 
-    if u.isMissing(responseText) # don't override ""
-      responseText = 'response-text'
+jasmine.respondWith = (args...) ->
+  firstArg = args.shift()
+  responseText = undefined
+  options = undefined
+  if u.isString(firstArg)
+    responseText = firstArg
+    options = args[0] || {}
+  else
+    options = firstArg
+    responseText = options.responseText
 
-    contentType = options.contentType || 'text/html'
-    headers = options.responseHeaders || {}
-    headers['Content-Type'] ||= contentType
+  if u.isMissing(responseText) # don't override ""
+    responseText = 'response-text'
 
-    requestAttrs =
-      status: options.status || 200
-      contentType: contentType
-      responseHeaders: headers
-      responseText: responseText
-      responseURL: options.responseURL
+  contentType = options.contentType || 'text/html'
+  headers = options.responseHeaders || {}
+  headers['Content-Type'] ||= contentType
 
-    request = options.request || @lastRequest()
-    request.respondWith(requestAttrs)
+  requestAttrs =
+    status: options.status || 200
+    contentType: contentType
+    responseHeaders: headers
+    responseText: responseText
+    responseURL: options.responseURL
 
-  @respondWithSelector = (selector, options = {}) ->
-    respondWithKeys = ['contentType', 'status', 'responseURL', 'responseHeaders']
-    respondWithOptions = u.pick(options, respondWithKeys)
-    affixOptions = u.omit(options, respondWithKeys)
+  request = options.request || jasmine.lastRequest()
+  request.respondWith(requestAttrs)
 
-    element = e.createFromSelector(selector, affixOptions)
-    responseText = element.outerHTML
+jasmine.respondWithSelector = (selector, options = {}) ->
+  respondWithKeys = ['contentType', 'status', 'responseURL', 'responseHeaders']
+  respondWithOptions = u.pick(options, respondWithKeys)
+  affixOptions = u.omit(options, respondWithKeys)
 
-    @respondWith(responseText, respondWithOptions)
+  element = e.createFromSelector(selector, affixOptions)
+  responseText = element.outerHTML
+
+  jasmine.respondWith(responseText, respondWithOptions)
 

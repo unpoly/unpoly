@@ -1314,6 +1314,32 @@ describe 'up.layer', ->
 
   describe 'unobtrusive behavior', ->
 
+    describe 'link with [up-layer=new]', ->
+
+      it 'opens a new overlay loaded from the given [href]', asyncSpec (next) ->
+        link = fixture('a[href="/overlay-path"][up-target=".target"][up-layer="new"]')
+
+        Trigger.clickSequence(link)
+
+        next ->
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          jasmine.respondWithSelector('.target', text: 'overlay text')
+
+        next ->
+          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('overlay text')
+
+      it 'opens a new overlay with content from the given [up-content]', asyncSpec (next) ->
+        link = fixture('a[up-target=".target"][up-layer="new"][up-content="overlay text"]')
+
+        Trigger.clickSequence(link)
+
+        next ->
+          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('overlay text')
+
     describe '[up-accept]', ->
 
       beforeEach ->

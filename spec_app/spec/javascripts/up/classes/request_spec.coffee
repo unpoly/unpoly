@@ -28,6 +28,11 @@ describe 'up.Request', ->
       expect(request.url).toEqual('http://host.com/foo?key=value')
       expect(request.params).toBeBlank()
 
+    it 'is not normalized as to not clutter logs', ->
+      request = new up.Request(url: '/path')
+      expect(request.url).not.toContain('://')
+      expect(request.url).toEqual('/path')
+
   describe '#followState', ->
 
     it 'resolves this request when the given source request is resolved'

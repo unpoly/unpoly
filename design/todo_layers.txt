@@ -35,20 +35,10 @@ Remaining feature work
 Tests
 -----
 
-- Test that requests don't normalize their { url }, which would clog logs
-- Test that up.viewport.saveScroll() only saves scroll positions for the current layer
-- Test that user can target :none
-- Test that pseudo-element targets are removed from target in X-Up-Target header
 - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
 - Test that layer callbacks via option always set the layer as current AND the layer as `this`
 - Test that layer callbacks via UJS attribute set the layer as current AND the origin as `this`
 - Test that { acceptLocation } (JS API) also takes an array of alternatives instead of a space-separated string
-- Test a[up-reveal=top]
-- Test that [up-main] is a default target
-- Preload requests are tentative by default, but tentative can be set to false and the request will then not be aborted by a foreground request
-- When a tentative request is promoted to the foreground, it is no longer tentative
-- Test that we can have serverless popups with inline [up-content]: <a up-layer="popup" up-content="Locking a user will prevent them from using the application">
-- Test that serverless links with inline [up-content] will not explode when they also have a [up-preload] attribute set by accident
 - Test that we can open layers via { content } that do not even know their { location }
   - test that opening such a layer with { history: true } does not break for the initial opening and a fragment update (it might want to render its history to the address bar but has an empty { location })
   - test that closing a child layer of an location-less layer will not break in parentLayer.restoreHistory()
@@ -158,8 +148,6 @@ Tests
 - Test that accepting/dismissing the root layer will just follow the link
 - Test that proxy-events are emitted on their layer, not the document
 - Test that proxy-events are emitted a second time on the document if the layer has been detached
-- Test that proxy-events don't crash when a request has { layer: 'new' }
-- Test that proxy-events don't crash when a request has no { layer }
 - Test and document up.network.abort().
 - Test and document up.network.abort(request)
 - Test and document up.network.abort(conditionsObj)

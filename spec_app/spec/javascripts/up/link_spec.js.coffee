@@ -1614,6 +1614,20 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
+        it 'never preloads a link with local content via [up-content]', asyncSpec (next) ->
+          fixture('.target', text: 'old text')
+          link = $fixture('a[up-preload][up-content="new text"][up-target=".target"]')
+
+          Trigger.hoverSequence(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+            Trigger.clickSequence(link)
+
+          next ->
+            expect('.target').toHaveText('new text')
+
         describeFallback 'canPushState', ->
 
           it "does not preload a link", asyncSpec (next) ->

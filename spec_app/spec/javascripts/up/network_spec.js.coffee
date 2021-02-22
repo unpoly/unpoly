@@ -1091,6 +1091,21 @@ describe 'up.network', ->
             expect(@lastRequest().params).toMatchParams({})
             done()
 
+        describe 'event target', ->
+
+          it 'is emitted on the layer that triggered the event', asyncSpec (next) ->
+            makeLayers(3)
+
+            listener = jasmine.createSpy('event listener')
+            up.on('up:request:load', listener)
+
+            next ->
+              up.request('/path', layer: 1)
+
+            next ->
+              expect(listener.calls.count()).toBe(1)
+              expect(listener.calls.argsFor(0)[0].target).toBe(up.layer.get(1).element)
+
       describe 'up:request:late and up:request:recover events', ->
 
         beforeEach ->
