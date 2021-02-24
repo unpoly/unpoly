@@ -9,11 +9,11 @@ Changing the focus will make a screen reader start reading from the focused posi
 
 \#\#\# Focusing the fragment
 
-Pass `'target`' to always focus the new fragment.
+Pass `'target`' to focus the new fragment.
 
-\#\#\#
+\#\#\# Focusing the current layer
 
-
+Pass `'layer`' to focus the [layer](/up.layer) of the updated fragment.
 
 \#\#\# Focusing another element
 

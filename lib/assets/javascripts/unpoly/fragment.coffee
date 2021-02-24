@@ -302,7 +302,7 @@ up.fragment = do ->
 
     Instead of making a server request, you may also pass an existing HTML string as
     [`{ document }`](#options.document), [`{ fragment }`](#options.fragment) or
-    [`{ content }`] option.
+    [`{ content }`](#options.content) option.
 
   @param {string} [options.method='GET']
     The request's HTTP method to use for the request.

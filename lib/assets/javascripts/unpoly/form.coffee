@@ -601,17 +601,6 @@ up.form = do ->
   [`input[up-validate]`](/input-up-validate) to perform server-side
   validations while the user is completing fields.
 
-  \#\#\# Redirects
-
-  Unpoly requires an additional response header to detect redirects,
-  which are otherwise undetectable for an AJAX client.
-
-  After the form's action performs a redirect, the next response should echo
-  the new request's URL as a response header `X-Up-Location`.
-
-  If you are using Unpoly via the `unpoly-rails` gem, these headers
-  are set automatically for every request.
-
   \#\#\# Giving feedback while the form is processing
 
   The `<form>` element will be assigned a CSS class [`up-active`](/form.up-active) while
