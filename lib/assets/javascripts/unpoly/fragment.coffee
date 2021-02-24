@@ -29,7 +29,7 @@ up.fragment = do ->
 
     When no other render target is given, Unpoly will try to find and replace a main target.
 
-    When [navigating](/up.navigate) to a main target, Unpoly will automatically
+    When [navigating](/navigation) to a main target, Unpoly will automatically
     [reset scroll positions](/scroll-option) and
     [update the browser history](/up.render#options.history).
 
@@ -46,7 +46,7 @@ up.fragment = do ->
     The class names may also be passed as a regular expression.
 
   @param {Object} config.navigateOptions
-    An object of default options to apply when [navigating](/up.navigate).
+    An object of default options to apply when [navigating](/navigation).
 
     See `up.navigate()` for a table of default navigate options and their effects.
 
@@ -295,7 +295,7 @@ up.fragment = do ->
     If set to `false` Unpoly will immediately reject the render promise.
 
   @param {boolean} [options.navigate=false]
-    Whether this fragment is considered [navigation](/up.navigate).
+    Whether this fragment is considered [navigation](/navigation).
 
   @param {string} [options.url]
     The URL to fetch from the server.
@@ -518,53 +518,13 @@ up.fragment = do ->
     return promise
 
   ###**
-  Navigates to the given URL by updating a major fragment in the current page.
+  [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
 
   `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
-  regarding scrolling, focus, request cancelation and many other side effects detailed below.
-  If you only want to update an element without side effects, use `up.render()` instead.
+  regarding scrolling, focus, request cancelation and [many other side effects](/navigation).
 
-  [Following a link](/a-up-target), [submitting a form](/form-up-target) or
-  [opening an overlay](/up.layer.open) is considered navigation.
-  You may opt out of navigation defaults by passing a `{ navigate: false }` option
-  or setting an `[up-navigate=false]` attribute.
-
-  \#\#\# Navigation is rendering with defaults
-
-  When updating a fragment `up.render()`, it will only swap the fragment, but not update
-  the history, scroll, focus, etc. You need to explicitely update into each additional behavior:
-
-  ```js
-  // Will not update history, will not scroll, etc.
-  up.render('.message-count', { url: '/inbox' })
-
-  // Will update history, but not scroll, etc.
-  up.render('.message-count', { url: '/inbox', history: true })
-  ```
-
-  You can opt into defaults suited for user navigation bei either passing `{ navigate: true }`
-  or using `up.navigate()`
-
-  ```js
-  // Will update history, will scroll, etc.
-  up.render('.content', { url: '/users/5', navigate: true })
-  up.navigate('.content', { url: '/inbox' })
-  ```
-
-  Unpoly ships with the following navigation defaults:
-
-  | Option                  | Effect                                       |
-  | ----------------------- | -------------------------------------------- |
-  | `{ history: 'auto' }`   | Update browser location and window title if updating a main target |
-  | `{ scroll: 'auto' }`    | Reset scroll position if updating a main target |
-  | `{ fallback: ':main' }` | Replace a [main target](/up.fragment.config#config.mainTargets) if response doesn't contain target |
-  | `{ cache: true }`       | Cache responses for 5 minutes |
-  | `{ feedback: true }`    | Set [`.up-active`](/a-up-update) on the activated link |
-  | `{ focus: 'auto' }`     | Focus [autofocus] elements in the new fragment |
-  | `{ solo: true }`        | Cancel existing requests |
-  | `{ peel: true }`        | Close overlays when targeting a layer below |
-
-  You can configure your navigation defaults with `up.fragment.config.navigateOptions`.
+  Instead of calling `up.navigate()` you may also call `up.render({ navigate: true }`) option
+  for the same effect.
 
   @function up.navigate
   @param {string|Element|jQuery} [target]
@@ -1214,7 +1174,7 @@ up.fragment = do ->
   ###**
   Replaces the given element with a fresh copy fetched from the server.
 
-  By default, reloading is not considered a [user navigation](/up.navigate) and e.g. will not update
+  By default, reloading is not considered a [user navigation](/navigation) and e.g. will not update
   the browser location. You may change this with `{ navigate: true }`.
 
   \#\#\# Example
@@ -1241,7 +1201,7 @@ up.fragment = do ->
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
   @param {string} [options.navigate=false]
-    Whether the reloading constitutes a [user navigation](/up.navigate).
+    Whether the reloading constitutes a [user navigation](/navigation).
   @stable
   ###
   reload = (args...) ->

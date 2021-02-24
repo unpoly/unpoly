@@ -79,7 +79,7 @@ If the URL has no `#hash`, focus positions will be reset.
 \#\#\# Automatic focus logic
 
 Pass `'auto'` to try a sequence of focus strategies that works for most cases.
-This is the default when [navigating](/up.navigate).
+This is the default when [navigating](/navigation).
 
 - Focus a `#hash` in the URL.
 - Focus an `[autofocus]` element in the new fragment.

@@ -168,7 +168,7 @@ up.layer = do ->
 
   ###**
 
-  Opening a layer is considered [navigation](/up.navigate).
+  Opening a layer is considered [navigation](/navigation).
   You may opt out of [navigation defaults](/up.fragment.config.navigateOptions)
   by passing `{ navigate: false }`.
 

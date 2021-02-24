@@ -66,7 +66,7 @@
   \#\#\# Automatic scrolling logic
 
   Pass `{ scroll: 'auto' }` to try a sequence of scroll strategies that works for most cases.
-  This is the default when [navigating](/up.navigate).
+  This is the default when [navigating](/navigation).
 
   - If the URL has a `#hash`, scroll to the hash.
   - If updating a [main target](/up.fragment.config.mainTargets), reset scroll positions.
