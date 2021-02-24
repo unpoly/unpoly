@@ -31,6 +31,8 @@ Remaining feature work
 - Can we not focus if a compiler has focused?
 - Remove up.network.preload(). It's the same as up.request(cache: true).
 - Initial Hash Reveal ignores obstructions
+- Replace { buttonDismissable, keyDismissable, outsideDismissable } with a variant { dismissable: 'button key outside' }
+
 
 
 Tests

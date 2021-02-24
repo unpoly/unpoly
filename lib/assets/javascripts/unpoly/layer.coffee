@@ -167,16 +167,35 @@ up.layer = do ->
     handlers = u.filter(handlers, 'isDefault')
 
   ###**
-
   Opening a layer is considered [navigation](/navigation).
   You may opt out of [navigation defaults](/up.fragment.config.navigateOptions)
   by passing `{ navigate: false }`.
 
+  TODO: await up.Layer object
+
   @function up.layer.open
-  @stable
   @params-note
     All options from `up.render()` may be used.
 
+    TODO: Defaults to up.layer.config
+  @param {string} [mode]
+  @param {string} [position]
+  @param {string} [align]
+  @param {string} [size]
+  @param {string} [class]
+  @param {boolean} [dismissable]
+  @param {Function(Event)} [onOpened]
+    See `up:layer:opened`.
+  @param {Function(Event)} [onAccepted]
+    See `up:layer:accepted`.
+  @param {Function(Event)} [onDismissed]
+    See `up:layer:dismissed`.
+  @param {string|Array<string>} acceptEvent
+  @param {string|Array<string>} dismissEvent
+  @param {string|Array<string>} acceptLocation
+  @param {string|Array<string>} dismissLocation
+  @return {Promise<up.Layer>}
+  @stable
   ###
   open = (options) ->
     options = u.options(options,
@@ -223,6 +242,39 @@ up.layer = do ->
 
   anySelector = ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
+
+  ###**
+  [Follows](/a-up-follow) this link and opens the result in a new layer.
+
+  TODO: Defaults to up.layer.config
+
+  \#\#\# Example
+
+  ```html
+  <a href="/menu" up-layer="new">Open menu</a>
+  ```
+
+  @selector a[up-layer=new]
+  @params-note
+    All attributes for `a[up-follow]` may also be used.
+  @param {string} [up-fail-layer]
+    @see server-errors
+  @param {string} [up-mode]
+  @param {string} [up-position]
+  @param {string} [up-align]
+  @param {string} [up-size]
+  @param {string} [up-class]
+  @param {string} [up-dismissable]
+  @param {string} [up-on-opened]
+  @param {string} [up-on-accepted]
+  @param {string} [up-on-dismissed]
+  @param {string} [up-accept-event]
+  @param {string} [up-dismiss-event]
+  @param {string} [up-accept-location]
+  @param {string} [up-dismiss-location]
+  @param {string} [up-context]
+  @stable
+  ###
 
   up.on 'up:fragment:destroyed', (event) ->
     stack.sync()
@@ -293,6 +345,7 @@ up.layer = do ->
     'size'
     'origin'
     'affix'
+    'dismissable'
   ], -> stack.current)
 
   return api

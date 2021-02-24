@@ -78,8 +78,6 @@ context             is merged
 
 
 
-
-
 a[up-follow]
 ------------
 
@@ -116,28 +114,28 @@ mode
 position
 align
 size
-origin
 class
-backdrop
-openAnimation
-closeAnimation
-openDuration
-closeDuration
-openEasing
-closeEasing
-backdropOpenAnimation
-backdropCloseAnimation
+
+
+(only config) backdrop
+(only config) openAnimation
+(only config) closeAnimation
+(only config) openDuration
+(only config) closeDuration
+(only config) openEasing
+(only config) closeEasing
+(only config) backdropOpenAnimation
+(only config) backdropCloseAnimation
+
+
 dismissable
-buttonDismissable
-keyDismissable
-outsideDismissable
-dismissLabel
-dismissAriaLabel
+(only config) dismissLabel
+(only config) dismissAriaLabel
 onOpened            see event
 onAccepted          see event
 onDismissed         see event
-acceptEvent         see event
-dismissEvent        see event
+acceptEvent
+dismissEvent
 acceptLocation
 dismissLocation
 context

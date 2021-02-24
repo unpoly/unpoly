@@ -76,8 +76,6 @@ up.link = do ->
   u = up.util
   e = up.element
 
-  preloadDelayTimer = undefined
-  waitingLink = undefined
   linkPreloader = new up.LinkPreloader()
 
   lastMousedownTarget = null
@@ -88,27 +86,32 @@ up.link = do ->
   # Links with remote HTML are followable if there is one additional attribute
   # suggesting "follow me through Unpoly".
   LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
+  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]']
 
   combineFollowableSelectors = (elementSelectors, attributeSelectors) ->
     return u.flatMap(elementSelectors, (elementSelector) ->
       attributeSelectors.map((attributeSelector) -> elementSelector + attributeSelector)
     )
 
+  ###**
+  TODO: Docs
+
+  @property up.link.config
+  @param {number} [config.preloadDelay=75]
+    The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
+    starts preloading.
+  @stable
+  ###
   config = new up.Config ->
     noFollowSelectors = ['[up-follow=false]', '[rel=download]']
     return {
       followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML),
       noFollowSelectors: noFollowSelectors
-
       instantSelectors: ['[up-instant]'],
       noInstantSelectors: ['[up-instant=false]'].concat(noFollowSelectors),
-
       preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]']),
       noPreloadSelectors: ['[up-preload=false]'].concat(noFollowSelectors),
-
       clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
-
       preloadDelay: 90,
     }
 
@@ -138,12 +141,6 @@ up.link = do ->
   isInstantDisabled = (link) ->
     return e.matches(link, config.noInstantSelectors.join(','))
 
-  ###**
-  @property up.link.config
-  @param {number} [config.preloadDelay=75]
-    The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
-    starts preloading.
-  ###
   reset = ->
     lastMousedownTarget = null
     config.reset()
@@ -155,7 +152,7 @@ up.link = do ->
 
   By default the layer's [main element](/up.fragment.config#config.mainTargets)
   will be replaced. Attributes like `a[up-target]`
-  or `a[up-modal]` will be honored.
+  or `a[up-layer]` will be honored.
 
   Emits the event `up:link:follow`.
 
@@ -173,24 +170,9 @@ up.link = do ->
 
   @function up.follow
   @param {Element|jQuery|string} link
-    An element or selector which is either an `<a>` tag or any element with an `[up-href]` attribute.
-  @param {string} [options.target]
-    The selector to replace.
-
-    Defaults to the link's `[up-target]`, `[up-modal]` or `[up-popup]` attribute.
-    If no target is given, the `<body>` element will be replaced.
-  @param {string} [options.url]
-    The URL to navigate to.
-
-    Defaults to the link's `[up-href]` or `[href]` attribute.
-  @param {boolean|string} [options.reveal=true]
-    Whether to [reveal](/up.reveal) the target fragment after it was replaced.
-
-    You can also pass a CSS selector for the element to reveal.
-  @param {boolean|string} [options.failReveal=true]
-    Whether to [reveal](/up.reveal) the target fragment when the server responds with an error.
-
-    You can also pass a CSS selector for the element to reveal.
+    The link to follow.
+  @param {Object} [options]
+    See options for `up.render()`.
   @return {Promise}
     A promise that will be fulfilled when the link destination
     has been loaded and rendered.
@@ -202,16 +184,16 @@ up.link = do ->
 
   ###**
   Parses the `render()` options that would be used to
-  [`follow`](/up.follow) the given link, but does not render.
+  [`follow`](/up.follow) the given link, but does not [render](/up.render).
 
   @param {Element|jQuery|string} link
-    A reference or selector for the link to follow.
+    The link to follow.
   @param {Object} [options]
     Additional options for the form submissions.
 
-    Will override any attribute values set on the given form element.
+    Will override any attribute values set on the given link element.
 
-    See `up.follow()` for detailled documentation of individual option properties.
+    See `up.render()` for detailed documentation of individual option properties.
   @function up.link.followOptions
   @return {Object}
   @stable
@@ -377,7 +359,7 @@ up.link = do ->
   Returns whether the given link will be [followed](/up.follow) by Unpoly
   instead of making a full page load.
 
-  By default Unpoly will follow links and elements with an `[up-href]` attribute if the element has
+  By default Unpoly will follow links if the element has
   one of the following attributes:
 
   - `[up-follow]`
@@ -591,151 +573,13 @@ up.link = do ->
 
       <a href="/posts/5" up-target=".main">Read post</a>
 
-  \#\#\# Updating multiple fragments
+  \#\#\# Advanced fragment changes
 
-  You can update multiple fragments from a single request by separating
-  separators with a comma (like in CSS).
-
-  For instance, if opening a post should
-  also update a bubble showing the number of unread posts, you might
-  do this:
-
-      <a href="/posts/5" up-target=".main, .unread-count">Read post</a>
-
-  \#\#\# Matching in the link's vicinity
-
-  It is often helpful to match elements within the same container as the the
-  link that's being followed.
-
-  Let's say we have two links that replace `.card`:
-
-  ```html
-  <div class="card">
-    Card #1 preview
-    <a href="/cards/1" up-target=".card">Show full card #1</a>
-  </div>
-
-  <div class="card">
-    Card #2 preview
-    <a href="/cards/2" up-target=".card">Show full card #2</a>
-  </div>
-  ```
-
-  When clicking on *"Show full card #2"*, Unpoly will replace the second card.
-  The server should only render a single `.card` element.
-
-  This also works with descendant selectors:
-
-  ```html
-  <div class="card">
-    <a href="/cards/1/links" up-target=".card .card-links">Show card #2 links</a>
-    <div class="card-links"></div>
-  </div>
-
-  <div class="card">
-    <a href="/cards/2/links" up-target=".card .card-links">Show card #2 links</a>
-    <div class="card-links"></div>
-  </div>
-  ```
-
-  When clicking on *"Show full card #2"*, Unpoly will replace the second card.
-  The server should only render a single `.card` element.
-
-  \#\#\# Appending or prepending content
-
-  By default Unpoly will replace the given selector with the same
-  selector from the server response. Instead of replacing you
-  can *append* the loaded content to the existing content by using the
-  `:after` pseudo selector. In the same fashion, you can use `:before`
-  to indicate that you would like the *prepend* the loaded content.
-
-  A practical example would be a paginated list of items. Below the list is
-  a button to load the next page. You can append to the existing list
-  by using `:after` in the `up-target` selector like this:
-
-      <ul class="tasks">
-        <li>Wash car</li>
-        <li>Purchase supplies</li>
-        <li>Fix tent</li>
-      </ul>
-
-      <a href="/page/2" class="next-page" up-target=".tasks:after, .next-page">
-        Load more tasks
-      </a>
-
-  \#\#\# Replacing an element's inner HTML
-
-  If you would like to preserve the target element, but replace all of its child content,
-  use the `:content` pseudo selector:
-
-      <a href="/cards/5" up-target=".card:content">Show card #5</a>
-
-  \#\#\# Following elements that are no links
-
-  You can also use `[up-target]` to turn an arbitrary element into a link.
-  In this case, put the link's destination into the `[up-href]` attribute:
-
-      <button up-target=".main" up-href="/foo/bar">Go</button>
-
-  Note that using any element other than `<a>` will prevent users from
-  opening the destination in a new tab.
+  See [fragment placement](/fragment-placement) for advanced use cases
+  like updating multiple fragments or appending content to an existing element.
 
   @selector a[up-target]
-  @param {string} up-target
-    The CSS selector to replace
-
-    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-method='get']
-    The HTTP method to use for the request.
-  @param {string} [up-transition='none']
-    The [transition](/up.motion) to use for morphing between the old and new elements.
-  @param [up-fail-target='body']
-    The CSS selector to replace if the server responds with an error.
-
-    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-fail-transition='none']
-    The [transition](/up.motion) to use for morphing between the old and new elements
-    when the server responds with an error.
-  @param {string} [up-fallback]
-    The selector to update when the original target was not found in the page.
-  @param {string} [up-href]
-    The destination URL to follow.
-    If omitted, the the link's `href` attribute will be used.
-  @param {string} [up-confirm]
-    A message that will be displayed in a cancelable confirmation dialog
-    before the link is followed.
-  @param {string} [up-reveal='true']
-    Whether to reveal the target element after it was replaced.
-
-    You can also pass a CSS selector for the element to reveal.
-    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-fail-reveal='true']
-    Whether to reveal the target element when the server responds with an error.
-
-    You can also pass a CSS selector for the element to reveal.
-    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-restore-scroll='false']
-    Whether to restore previously known scroll position of all viewports
-    within the target selector.
-  @param {string} [up-cache]
-    Whether to force the use of a cached response (`true`)
-    or never use the cache (`false`)
-    or make an educated guess (default).
-  @param {string} [up-layer='auto']
-    The name of the layer that ought to be updated. Valid values are
-    `'auto'`, `'page'`, `'modal'` and `'popup'`.
-
-    If set to `'auto'` (default), Unpoly will try to find a match in the link's layer.
-    If no match was found in that layer,
-    Unpoly will search in other layers, starting from the topmost layer.
-  @param {string} [up-fail-layer='auto']
-    The name of the layer that ought to be updated if the server sends a
-    non-200 status code.
-  @param [up-history]
-    Whether to push an entry to the browser history when following the link.
-
-    Set this to `'false'` to prevent the URL bar from being updated.
-    Set this to a URL string to update the history with the given URL.
+  @params-note All attributes from `a[up-follow]` may be used.
   @stable
   ###
 
@@ -743,24 +587,18 @@ up.link = do ->
   Fetches this link's `[href]` with JavaScript and [replaces](/up.replace) the
   current `<body>` element with the response's `<body>` element.
 
-  To only update a fragment instead of the entire `<body>`, see `a[up-target]`.
+  To only update a fragment with a given selector, see `a[up-target]`.
 
   \#\#\# Example
 
       <a href="/users" up-follow>User list</a>
 
-  \#\#\# Turn any element into a link
+  \#\#\# Advanced fragment changes
 
-  You can also use `[up-follow]` to turn an arbitrary element into a link.
-  In this case, put the link's destination into the `up-href` attribute:
-
-      <span up-follow up-href="/foo/bar">Go</span>
-
-  Note that using any element other than `<a>` will prevent users from
-  opening the destination in a new tab.
+  See [fragment placement](/fragment-placement) for advanced use cases
+  like updating multiple fragments or appending content to an existing element.
 
   @selector a[up-follow]
-
   @param {string} [up-method='get']
     The HTTP method to use for the request.
   @param [up-fail-target='body']
@@ -769,23 +607,9 @@ up.link = do ->
     The selector to update when the original target was not found in the page.
   @param {string} [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
-  @param {string} [up-fail-transition='none']
-    The [transition](/up.motion) to use for morphing between the old and new elements
-    when the server responds with an error.
-  @param [up-href]
-    The destination URL to follow.
-    If omitted, the the link's `href` attribute will be used.
   @param {string} [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
-  @param {string} [up-history]
-    Whether to push an entry to the browser history when following the link.
-
-    Set this to `'false'` to prevent the URL bar from being updated.
-    Set this to a URL string to update the history with the given URL.
-  @param [up-restore-scroll='false']
-    Whether to restore the scroll position of all viewports
-    within the response.
   @stable
   ###
   up.on 'up:click', fullFollowSelector, (event, link) ->

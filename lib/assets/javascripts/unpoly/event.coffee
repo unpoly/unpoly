@@ -159,8 +159,11 @@ up.event = do ->
     The element on which to register the event listener.
 
     If no element is given, the listener is registered on the `document`.
-  @param {string} types
-    A space-separated list of event types to bind to.
+  @param {string|Array<string>} types
+    The event types to bind to.
+
+    Multiple event types may be passed as either a space-separated string
+    or as an array of types.
   @param {string} [selector]
     The selector of an element on which the event must be triggered.
 

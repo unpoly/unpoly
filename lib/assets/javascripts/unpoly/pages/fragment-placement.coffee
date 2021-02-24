@@ -14,14 +14,29 @@
   All other HTML from the server response is discarded.
 
 
-  \#\#\# How existing fragments are matched
+  \#\#\# Interaction origin is considered
 
-  Unpoly applies some optimizations when matching an existing fragment for a CSS selector.
+  When a link or form updates a fragment, Unpoly will prefer to match fragments
+  in the vicinity of that link or form element.
 
-  For example, when a click link triggers a fragment update, the link's DOM position is considered
-  when matching fragments.
+  For example, assume we have two links that replace `.card`:
 
-  See `up.fragment.get()` for details.
+  ```html
+  <div class="card">
+    Card #1 preview
+    <a href="/cards/1" up-target=".card">Show full card #1</a>
+  </div>
+
+  <div class="card">
+    Card #2 preview
+    <a href="/cards/2" up-target=".card">Show full card #2</a>
+  </div>
+  ```
+
+  When clicking on *"Show full card #2"*, Unpoly will replace the second card.
+  The server should only render a single `.card` element.
+
+  See `up.fragment.get()` for more examples and advanced use cases.
 
 
   \#\#\# Updating multiple fragments

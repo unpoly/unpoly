@@ -176,16 +176,16 @@ describe 'up.event', ->
         up.emit('bar')
         expect(listener.calls.count()).toEqual(2)
 
-#      it 'registers the listener to an array of event names', ->
-#        listener = jasmine.createSpy()
-#
-#        up.on ['foo', 'bar'], listener
-#
-#        up.emit('foo')
-#        expect(listener.calls.count()).toEqual(1)
-#
-#        up.emit('bar')
-#        expect(listener.calls.count()).toEqual(2)
+      it 'registers the listener to an array of event names', ->
+        listener = jasmine.createSpy()
+
+        up.on ['foo', 'bar'], listener
+
+        up.emit('foo')
+        expect(listener.calls.count()).toEqual(1)
+
+        up.emit('bar')
+        expect(listener.calls.count()).toEqual(2)
 
       it 'returns a method that unregisters the event listener when called', asyncSpec (next) ->
         $child = $fixture('.child')

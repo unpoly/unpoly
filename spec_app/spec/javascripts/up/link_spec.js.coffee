@@ -622,11 +622,6 @@ describe 'up.link', ->
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
-      it 'returns true for an [up-mode] link', ->
-        $link = $fixture('a[href="/foo"][up-mode="modal"]')
-        up.hello $link
-        expect(up.link.isFollowable($link)).toBe(true)
-
       it 'returns true for an [up-follow] link', ->
         $link = $fixture('a[href="/foo"][up-follow]')
         up.hello $link

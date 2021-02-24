@@ -13,7 +13,7 @@ up.form = do ->
   u = up.util
   e = up.element
 
-  ATTRIBUTES_SUGGESTING_SUBMIT = ['[up-submit]', '[up-target]', '[up-layer]', '[up-mode]', '[up-transition]']
+  ATTRIBUTES_SUGGESTING_SUBMIT = ['[up-submit]', '[up-target]', '[up-layer]', '[up-transition]']
 
   ###**
   Sets default options for form submission and validation.
@@ -214,16 +214,16 @@ up.form = do ->
 
   ###**
   Parses the `render()` options that would be used to
-  [`submit`](/up.submit) the given form, but does not render.
+  [`submit`](/up.submit) the given form, but does not [render](/up.render).
 
   @param {Element|jQuery|string} form
-    A reference or selector for the form to submit.
+    The form to submit.
   @param {Object} [options]
-    Additional options for the form submissions.
+    Additional options for the form submission.
 
     Will override any attribute values set on the given form element.
 
-    See `up.submit()` for detailled documentation of individual option properties.
+    See `up.render()` for detailed documentation of individual option properties.
   @function up.form.submitOptions
   @return {Object}
   @stable

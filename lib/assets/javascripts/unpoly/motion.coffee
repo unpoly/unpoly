@@ -587,9 +587,53 @@ up.motion = do ->
   registerTransition('move-up', ['move-to-top', 'move-from-bottom'])
   registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
 
+  ###**
+  [Follows](/a-up-follow) this link and swaps in the new fragment
+  with an animated transition.
+
+  \#\#\# Example
+
+  ```html
+  <a href="/page2" up-transition="move-left">Next page</a>
+  ```
+
+  @selector a[up-transition]
+  @params-note
+    All attributes for `a[up-follow]` may also be used.
+  @param {string} [up-transition]
+    The name of a [predefined transition](/up.morph#named-transitions).
+  @param {string} [up-fail-transition]
+    The transition to use when the server responds with an error code.
+
+    @see server-errors
+  ###
+
+  ###**
+  [Submits](/form-up-submit) this form and swaps in the new fragment
+  with an animated transition.
+
+  \#\#\# Example
+
+  ```html
+  <form action="/tasks" up-transition="cross-fade">
+    ...
+  </form>
+  ```
+
+  @selector form[up-transition]
+  @params-note
+    All attributes for `form[up-submit]` may also be used.
+  @param {string} [up-transition]
+    The name of a [predefined transition](/up.morph#named-transitions).
+  @param {string} [up-fail-transition]
+    The transition to use when the server responds with an error code.
+
+    @see server-errors
+  ###
+
   up.on 'up:framework:booted', onBooted
   up.on 'up:framework:reset', reset
-    
+
   morph: morph
   animate: animate
   finish: finish
