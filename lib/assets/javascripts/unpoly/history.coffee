@@ -131,7 +131,7 @@ up.history = do ->
   [`up.submit()`](/up.submit) will automatically update the
   browser's location bar for you.
 
-  Emits events [`up:history:push`](/up:history:push) and [`up:history:pushed`](/up:history:pushed).
+  Emits events [`up:history:pushed`](/up:history:pushed).
 
   @function up.history.push
   @param {string} url
