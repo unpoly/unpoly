@@ -28,20 +28,33 @@ Release process
 Remaining feature work
 ======================
 
-- We don't need to wait one task when booting
-  - Non-async scripts block the DOMContentReady event
-  - Should we run compilers that were added after booting?
-  - up.framework.readyState would be helpful sometimes
-
 - Can we not focus if a compiler has focused?
 - Remove up.network.preload(). It's the same as up.request(cache: true).
+  - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?
+    - Then it would sit next to the other preload options
 - Initial Hash Reveal ignores obstructions
 - Replace { buttonDismissable, keyDismissable, outsideDismissable } with a variant { dismissable: 'button key outside' }
 - We need to log when someone uses the removed events up:history:push and up:history:restore (present tense)
 
+Kill more concurrency
+---------------------
+
+- We don't need to wait one task when booting
+  - Non-async scripts block the DOMContentReady event
+  - Should we run compilers that were added after booting?
+  - up.framework.readyState would be helpful sometimes
+- A link that is already loading should prevent all preload requests
+- A form that is already submitting should prevent all validations
+- Prevent multiple requests from the same origin
+  - When a link is followed, all existing requests (preload or not) from that link should be aborted (even with { solo })
+  - When a form is followed, all existing requests (validation or not) from that form should be aborted (even with { solo })
+- Allow to disable validations globally for tests
+  - up.form.config.validateEnabled
+
+
 
 Tests
------
+=====
 
 - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
 - Test that layer callbacks via option always set the layer as current AND the layer as `this`
@@ -201,7 +214,7 @@ Tests
 - up.Params#has
 
 Docs
-----
+====
 
 - Redirect all proxy methods in .htaccess
 
