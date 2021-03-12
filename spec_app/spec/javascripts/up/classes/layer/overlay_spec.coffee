@@ -172,26 +172,36 @@ describe 'up.Layer.Overlay', ->
       it 'traps focus within the overlay', asyncSpec (next) ->
         makeLayers(2)
 
-        next ->
-          link1 = up.layer.affix('a[href="/one"]', text: 'link1')
-          link2 = up.layer.affix('a[href="/one"]', text: 'link2')
+        next =>
+          @link1 = up.layer.affix('a[href="/one"]', text: 'link1')
+          @link2 = up.layer.affix('a[href="/one"]', text: 'link2')
 
-          dismisser = up.fragment.get('up-modal-dismiss')
+          @dismisser = up.fragment.get('up-modal-dismiss')
 
           expect(up.layer.current).toBeFocused()
 
           Trigger.tabSequence()
-          expect(link1).toBeFocused()
+
+        next =>
+          expect(@link1).toBeFocused()
 
           Trigger.tabSequence()
-          expect(link2).toBeFocused()
+
+        next =>
+          expect(@link2).toBeFocused()
 
           Trigger.tabSequence()
-          expect(dismisser).toBeFocused()
+
+        next =>
+          expect(@dismisser).toBeFocused()
 
           Trigger.tabSequence()
+
+        next =>
           expect(up.layer.current).toBeFocused()
 
           # Focus cycle works reverse, too
           Trigger.tabSequence({ shiftKey: true })
-          expect(dismisser).toBeFocused()
+
+        next =>
+          expect(@dismisser).toBeFocused()
