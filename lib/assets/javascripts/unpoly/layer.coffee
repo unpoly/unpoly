@@ -65,6 +65,7 @@ up.layer = do ->
         position: 'bottom'
         size: 'medium'
         align: 'left'
+        dismissable: 'outside key'
 
     for Class in LAYER_CLASSES
       newConfig[Class.mode].Class = Class

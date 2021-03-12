@@ -438,42 +438,34 @@ describe 'up.layer', ->
 
             it 'sets all other dismissable options to true', (done) ->
               up.layer.open(dismissable: true).then (layer) ->
-                expect(layer.buttonDismissable).toBe(true)
-                expect(layer.keyDismissable).toBe(true)
-                expect(layer.outsideDismissable).toBe(true)
+                expect(layer.dismissable).toMatchList ['button', 'key', 'outside']
                 done()
 
            describe 'with { dismissable: false }', ->
 
             it 'sets all other dismissable options to false if passed { dismissable: false }', (done) ->
               up.layer.open(dismissable: false).then (layer) ->
-                expect(layer.buttonDismissable).toBe(false)
-                expect(layer.keyDismissable).toBe(false)
-                expect(layer.outsideDismissable).toBe(false)
+                expect(layer.dismissable).toEqual []
                 done()
 
-        describe '{ buttonDismissable }', ->
-
-          describe 'with { buttonDismissable: true }', ->
+          describe 'with { dismissable: "button" }', ->
 
             it 'adds a button that dimisses the layer', (done) ->
-              up.layer.open(buttonDismissable: true).then (layer) ->
+              up.layer.open(dismissable: 'button').then (layer) ->
                 expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
                 done()
 
-          describe 'with { buttonDismissable: false }', ->
+          describe 'without { dismissable: "button" }', ->
 
             it 'does not add a button that dimisses the layer', (done) ->
-              up.layer.open(buttonDismissable: false).then (layer) ->
+              up.layer.open(dismissable: false).then (layer) ->
                 expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
                 done()
 
-        describe '{ keyDismissable }', ->
-
-          describe 'with { keyDismissable: true }', ->
+          describe 'with { dismissable: "key" }', ->
 
             it 'lets the user close the layer by pressing escape', asyncSpec (next) ->
-              up.layer.open(keyDismissable: true)
+              up.layer.open(dismissable: "key")
 
               next ->
                 expect(up.layer.isOverlay()).toBe(true)
@@ -483,10 +475,10 @@ describe 'up.layer', ->
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
 
-          describe 'with { keyDismissable: false }', ->
+          describe 'without { dismissable: "key" }', ->
 
             it 'does not let the user close the layer by pressing escape', asyncSpec (next) ->
-              up.layer.open(keyDismissable: false)
+              up.layer.open(dismissable: false)
 
               next ->
                 expect(up.layer.isOverlay()).toBe(true)
@@ -496,43 +488,43 @@ describe 'up.layer', ->
               next ->
                 expect(up.layer.isOverlay()).toBe(true)
 
-        describe '{ outsideDismissable }', ->
+          describe 'with { dismissable: "outside" }', ->
 
-          it 'lets the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
-            up.layer.open(outsideDismissable: true, mode: 'modal')
+            it 'lets the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
+              up.layer.open(dismissable: 'outside', mode: 'modal')
 
-            next ->
-              expect(up.layer.isOverlay()).toBe(true)
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
 
-              Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
+                Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
 
-            next ->
-              expect(up.layer.isOverlay()).toBe(false)
+              next ->
+                expect(up.layer.isOverlay()).toBe(false)
 
-          it 'lets the user close a layer with tether by clicking on its opener', asyncSpec (next) ->
-            opener = fixture('a', text: 'label')
-            up.layer.open(outsideDismissable: true, mode: 'popup', origin: opener)
+            it 'lets the user close a layer with tether by clicking on its opener', asyncSpec (next) ->
+              opener = fixture('a', text: 'label')
+              up.layer.open(dismissable: 'outside', mode: 'popup', origin: opener)
 
-            next ->
-              expect(up.layer.isOverlay()).toBe(true)
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
 
-              Trigger.clickSequence(opener)
+                Trigger.clickSequence(opener)
 
-            next ->
-              expect(up.layer.isOverlay()).toBe(false)
+              next ->
+                expect(up.layer.isOverlay()).toBe(false)
 
-        describe 'with { keyDismissable: false }', ->
+          describe 'without { dismissable: "outside" }', ->
 
-          it 'does not let the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
-            up.layer.open(outsideDismissable: false, mode: 'modal')
+            it 'does not let the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
+              up.layer.open(dismissable: false, mode: 'modal')
 
-            next ->
-              expect(up.layer.isOverlay()).toBe(true)
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
 
-              Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
+                Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
 
-            next ->
-              expect(up.layer.isOverlay()).toBe(true)
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
 
         describe '{ onAccepted }', ->
 

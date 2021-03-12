@@ -32,9 +32,7 @@ class up.Layer.Overlay extends up.Layer
       'closeEasing',
       'backdropOpenAnimation',
       'backdropCloseAnimation',
-      'buttonDismissable',
-      'keyDismissable',
-      'outsideDismissable',
+      'dismissable',
       'dismissLabel',
       'dismissAriaLabel',
       'onOpened',
@@ -49,14 +47,15 @@ class up.Layer.Overlay extends up.Layer
       'opening' # internal flag to know that the layer is being opened
     ]
 
-  defaults: (options) ->
-    u.merge super(options),
-      buttonDismissable: options.dismissable
-      keyDismissable: options.dismissable
-      outsideDismissable: options.dismissable
-
   constructor: (options) ->
     super(options)
+
+    if @dismissable == true
+      @dismissable = ['button', 'key', 'outside']
+    else if @dismissable == false
+      @dismissable = []
+    else
+      @dismissable = u.splitValues(@dismissable)
 
     if @acceptLocation
       @acceptLocation = new up.URLPattern(@acceptLocation)
@@ -123,10 +122,10 @@ class up.Layer.Overlay extends up.Layer
 
     @overlayFocus = new up.OverlayFocus(this)
 
-    if @buttonDismissable
+    if @supportsDismissMethod('button')
       @createDismissElement(@getBoxElement())
 
-    if @outsideDismissable
+    if @supportsDismissMethod('outside')
       @unbindParentClicked = @parent.on 'up:click', (event, element) =>
         # When our origin is clicked again, halt the click event
         # We achieve this by halting the click event.
@@ -141,7 +140,8 @@ class up.Layer.Overlay extends up.Layer
           if event.target == @viewportElement
             @onOutsideClicked(event, true)
 
-    if @keyDismissable
+    if @supportsDismissMethod('key')
+      console.log("*** binding escape")
       @unbindEscapePressed = up.event.onEscape((event) => @onEscapePressed(event))
 
     # <a up-accept="value">OK</a>
@@ -173,7 +173,7 @@ class up.Layer.Overlay extends up.Layer
         # Allow screen reader users to get back to a state where they can dismiss the
         # modal with escape.
         field.blur()
-      else if @keyDismissable
+      else if @supportsDismissMethod('key')
         up.event.halt(event)
         up.log.muteRejection @dismiss(':key')
 
@@ -283,6 +283,9 @@ class up.Layer.Overlay extends up.Layer
 
   dismiss: (value = null, options = {}) ->
     @executeCloseChange('dismiss', value, options)
+
+  supportsDismissMethod: (method) ->
+    u.contains(@dismissable, method)
 
   executeCloseChange: (verb, value, options) ->
     options = u.merge(options, { verb, value, layer: this })
