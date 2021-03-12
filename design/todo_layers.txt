@@ -28,7 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Publish up.destructor()
 - Can we not focus if a compiler has focused?
 - Remove up.network.preload(). It's the same as up.request(cache: true).
   - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?

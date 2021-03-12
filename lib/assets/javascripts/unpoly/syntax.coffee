@@ -53,20 +53,20 @@ up.syntax = do ->
   when [a new fragment is inserted later](/a-up-target).
   It will also organize your JavaScript snippets by selector of affected elements.
 
-
   \#\#\# Example
 
   This jQuery compiler will insert the current time into a
   `<div class='current-time'></div>`:
 
-      up.compiler('.current-time', function(element) {
-        var now = new Date()
-        element.textContent = now.toString()
-      })
+  ```js
+  up.compiler('.current-time', function(element) {
+    var now = new Date()
+    element.textContent = now.toString()
+  })
+  ```
 
   The compiler function will be called once for each matching element when
   the page loads, or when a matching fragment is [inserted](/up.replace) later.
-
 
   \#\#\# Integrating JavaScript libraries
 
@@ -75,14 +75,18 @@ up.syntax = do ->
   on links that should open a lightbox. You decide to
   do this for all links with an `lightbox` class:
 
-      <a href="river.png" class="lightbox">River</a>
-      <a href="ocean.png" class="lightbox">Ocean</a>
+  ```html
+  <a href="river.png" class="lightbox">River</a>
+  <a href="ocean.png" class="lightbox">Ocean</a>
+  ```
 
   This JavaScript will do exactly that:
 
-      up.compiler('a.lightbox', function(element) {
-        lightboxify(element)
-      })
+  ```js
+  up.compiler('a.lightbox', function(element) {
+    lightboxify(element)
+  })
+  ```
 
   \#\#\# Cleaning up after yourself
 
@@ -99,25 +103,18 @@ up.syntax = do ->
   the time every second, and cleans up once it's done. Note how it returns
   a function that calls `clearInterval`:
 
-      up.compiler('.current-time', function(element) {
-
-        function update() {
-          var now = new Date()
-          element.textContent = now.toString()
-        }
-
-        setInterval(update, 1000)
-
-        return function() {
-          clearInterval(update)
-        };
-
-      })
+  ```js
+  up.compiler('.current-time', function(element) {
+    let update = () => element.textContent = new Date().toString()
+    setInterval(update, 1000)
+    return () => clearInterval(update)
+  })
 
   If we didn't clean up after ourselves, we would have many ticking intervals
   operating on detached DOM elements after we have created and removed a couple
   of `<clock>` elements.
 
+  An alternative way to register a destructor function is `up.destructor()`.
 
   \#\#\# Attaching structured data
 
@@ -126,27 +123,30 @@ up.syntax = do ->
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
 
-      <div class='google-map' up-data='[
-        { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
-        { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
-      ]'></div>
+  ```html
+  <div class='google-map' up-data='[
+    { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
+    { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
+  ]'></div>
+  ```
 
   The JSON will be parsed and handed to your compiler as a second argument:
 
-      up.compiler('.google-map', function(element, pins) {
-        var map = new google.maps.Map(element)
+  ```js
+  up.compiler('.google-map', function(element, pins) {
+    var map = new google.maps.Map(element)
 
-        pins.forEach(function(pin) {
-          var position = new google.maps.LatLng(pin.lat, pin.lng)
-          new google.maps.Marker({
-            position: position,
-            map: map,
-            title: pin.title
-          })
-        })
+    pins.forEach(function(pin) {
+      var position = new google.maps.LatLng(pin.lat, pin.lng)
+      new google.maps.Marker({
+        position: position,
+        map: map,
+        title: pin.title
       })
+    })
+  })
+  ```
 
-  
   @function up.compiler
   @param {string} selector
     The selector to match.
@@ -349,14 +349,24 @@ up.syntax = do ->
   Registers a function to be called when the given element
   is [destroyed](/up.destroy).
 
-  The preferred way to register a destructor function is to `return`
-  it from a [compiler function](/up.compiler).
+  \#\#\# Example
+
+  ```js
+  up.compiler('.current-time', function(element) {
+    let update = () => element.textContent = new Date().toString()
+    setInterval(update, 1000)
+    up.destructor(element, () => clearInterval(update))
+  })
+  ```
+
+  An alternative way to register a destructor function is to `return`
+  it from your compiler function.
 
   @function up.destructor
   @param {Element} element
   @param {Function|Array<Function>} destructor
-    One or more destructor functions
-  @internal
+    One or more destructor functions.
+  @stable
   ###
   registerDestructor = (element, destructor) ->
     unless destructors = element.upDestructors
