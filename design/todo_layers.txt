@@ -28,6 +28,7 @@ Release process
 Remaining feature work
 ======================
 
+- Publish up.destructor()
 - Can we not focus if a compiler has focused?
 - Remove up.network.preload(). It's the same as up.request(cache: true).
   - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?
@@ -43,13 +44,8 @@ Kill more concurrency
   - Non-async scripts block the DOMContentReady event
   - Should we run compilers that were added after booting?
   - up.framework.readyState would be helpful sometimes
-- A link that is already loading should prevent all preload requests
-- A form that is already submitting should prevent all validations
-- Prevent multiple requests from the same origin
-  - When a link is followed, all existing requests (preload or not) from that link should be aborted (even with { solo })
-  - When a form is followed, all existing requests (validation or not) from that form should be aborted (even with { solo })
-- Allow to disable validations globally for tests
-  - up.form.config.validateEnabled
+- A link that is already loading should prevent all preload requests for the same link
+- A form that is already submitting should prevent all validation requests for the same form
 
 
 
@@ -428,6 +424,9 @@ Later?
 - When swapping { content } we should *not* change the wrapping element with any attributes it may have.
   - How would we animate this?
   - { placement: 'content' } ?
+- Allow to disable validations globally for tests
+  - up.form.config.validateEnabled
+  - for this it would be nice to distinguish "update dependent field" and "live validations"
 
 
 Decisions
