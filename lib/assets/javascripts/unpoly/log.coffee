@@ -103,7 +103,7 @@ up.log = do ->
       console.log(logo + logInfo)
 
 
-  up.on 'up:framework:booted', printBanner
+  up.on 'up:framework:boot', printBanner
   up.on 'up:framework:reset', reset
 
   setEnabled = (value) ->

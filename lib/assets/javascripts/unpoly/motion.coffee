@@ -511,7 +511,7 @@ up.motion = do ->
   registerAnimation = (name, animation) ->
     namedAnimations[name] = findAnimationFn(animation)
 
-  onBooted = ->
+  onBoot = ->
     # Remember original named animations so we can purge user-defined
     # animtions during reset.
     defaultNamedAnimations = u.copy(namedAnimations)
@@ -631,7 +631,7 @@ up.motion = do ->
     @see server-errors
   ###
 
-  up.on 'up:framework:booted', onBooted
+  up.on 'up:framework:boot', onBoot
   up.on 'up:framework:reset', reset
 
   morph: morph

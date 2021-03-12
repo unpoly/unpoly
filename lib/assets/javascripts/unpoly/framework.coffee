@@ -40,27 +40,29 @@ up.framework = do ->
   @internal
   ###
   boot = ->
+    # This is called synchronously after all Unpoly modules have been parsed
+    # and executed. We cannot delay booting until the DOM is ready, since by then
+    # all user-defined event listeners and compilers will have registered.
+    # Note that any non-async scripts after us will delay DOMContentReady.
     if up.browser.isSupported()
-      # This is called synchronously after all Unpoly modules have been parsed
-      # and executed. We cannot delay booting until the DOM is ready, since by then
-      # all user-defined event listeners and compilers will have registered.
+      # Some Unpoly modules will use the up:framework:boot event to:
+      #
+      # - Snapshot their state before user-defined compilers, handlers, etc. have
+      #   been registered. We need to know this state for when we up.reset() later.
+      # - Run delayed initialization that could not run at load time due to
+      #   circular dependencies.
       up.emit('up:framework:boot', log: false)
-      # Tell everyone to snapshot.
-      up.emit('up:framework:booted', log: false)
       isBooting = false
 
-      # From here on, all event handlers (both Unpoly's and user code) should be able
-      # to work with the DOM, so wait for the DOM to be ready.
+      # From here on, all event handlers (both Unpoly's and user code) want to
+      # work with the DOM, so wait for the DOM to be ready.
       up.event.onReady ->
-        # In case the DOM was already ready when up.event.boot() was called, we still
-        # haven't executed user-provided code. So we wait one more frame until
-        # user-provided compilers, event handlers, etc. have been registered.
-        # This also gives async user-code a chance to run in the next microtask.
-        u.task ->
-          # At this point all user-code has been called.
-          # The following event will cause Unpoly to compile the <body>.
-          up.emit('up:app:boot', log: 'Booting user application')
-          up.emit('up:app:booted', log: 'User application booted')
+        # By now all non-sync <script> tags have been loaded and called, including
+        # those after us. All user-provided compilers, event handlers, etc. have
+        # been registered.
+        #
+        # The following event will cause Unpoly to compile the <body>.
+        up.emit('up:app:boot', log: 'Booting user application')
     else
       console.log?("Unpoly doesn't support this browser. Framework was not booted.")
 

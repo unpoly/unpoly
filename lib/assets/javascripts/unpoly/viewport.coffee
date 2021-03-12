@@ -810,7 +810,7 @@ up.viewport = do ->
       value = value.substr(1)
     return value
 
-  up.on 'up:app:booted', ->
+  up.on 'up:app:boot', ->
     if hash = location.hash
       revealHash(hash)
 
