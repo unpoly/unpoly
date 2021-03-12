@@ -40,10 +40,6 @@ Remaining feature work
 Kill more concurrency
 ---------------------
 
-- We don't need to wait one task when booting
-  - Non-async scripts block the DOMContentReady event
-  - Should we run compilers that were added after booting?
-  - up.framework.readyState would be helpful sometimes
 - A link that is already loading should prevent all preload requests for the same link
 - A form that is already submitting should prevent all validation requests for the same form
 
@@ -541,4 +537,5 @@ up.emit: Do we really need a { base } option, could this just be { layer }?
   - Are all animation options parsed by link.follow?
   => it's just { animation }
 - focus: follow-scroll
+- To support async scripts, should we run compilers that were added after booting?
 
