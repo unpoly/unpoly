@@ -64,8 +64,8 @@ class up.EventListenerGroup extends up.Record
 
     # Event names are given in all arg variants
     eventTypes = u.splitValues(args.shift())
-    if fixType = up.migrate.fixEventType
-      eventTypes = u.map(eventTypes, fixType)
+    if fixTypes = up.migrate.fixEventTypes
+      eventTypes = fixTypes(eventTypes)
 
     options = u.extractOptions(args)
 

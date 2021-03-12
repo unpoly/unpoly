@@ -244,7 +244,7 @@ describe 'up.history', ->
 
     describe 'events', ->
 
-      it 'emits up:history:* events as the user goes forwards and backwards through history', asyncSpec (next) ->
+      it 'emits up:location:changed events as the user goes forwards and backwards through history', asyncSpec (next) ->
         up.network.config.cacheSize = 0
         up.history.config.restoreTargets = ['.viewport']
 
@@ -257,9 +257,8 @@ describe 'up.history', ->
             """
 
         events = []
-        u.each ['up:history:pushed', 'up:history:restored'], (eventType) ->
-          up.on eventType, (event) ->
-            events.push [eventType, event.url]
+        up.on 'up:location:changed', (event) ->
+          events.push [event.reason, event.url]
 
         normalize = up.history.normalizeURL
 
@@ -270,7 +269,7 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
+            ['push', normalize('/foo')]
           ]
 
           up.navigate('.content', url: '/bar', history: true)
@@ -280,8 +279,8 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
-            ['up:history:pushed', normalize('/bar')]
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
           ]
 
           up.navigate('.content', url: '/baz', history: true)
@@ -291,9 +290,9 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
-            ['up:history:pushed', normalize('/bar')]
-            ['up:history:pushed', normalize('/baz')]
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
           ]
 
           history.back()
@@ -303,10 +302,10 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
-            ['up:history:pushed', normalize('/bar')]
-            ['up:history:pushed', normalize('/baz')]
-            ['up:history:restored', normalize('/bar')]
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
           ]
 
           history.back()
@@ -316,11 +315,11 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
-            ['up:history:pushed', normalize('/bar')]
-            ['up:history:pushed', normalize('/baz')]
-            ['up:history:restored', normalize('/bar')]
-            ['up:history:restored', normalize('/foo')]
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/foo')]
           ]
 
           history.forward()
@@ -330,12 +329,12 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
-            ['up:history:pushed', normalize('/bar')]
-            ['up:history:pushed', normalize('/baz')]
-            ['up:history:restored', normalize('/bar')]
-            ['up:history:restored', normalize('/foo')]
-            ['up:history:restored', normalize('/bar')]
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/foo')]
+            ['pop', normalize('/bar')]
           ]
 
           history.forward()
@@ -345,11 +344,11 @@ describe 'up.history', ->
 
         next =>
           expect(events).toEqual [
-            ['up:history:pushed', normalize('/foo')]
-            ['up:history:pushed', normalize('/bar')]
-            ['up:history:pushed', normalize('/baz')]
-            ['up:history:restored', normalize('/bar')]
-            ['up:history:restored', normalize('/foo')]
-            ['up:history:restored', normalize('/bar')]
-            ['up:history:restored', normalize('/baz')]
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/foo')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/baz')]
           ]

@@ -103,55 +103,45 @@ up.history = do ->
   @internal
   ###
   replace = (url, options = {}) ->
-    doLog = options.log ? true
-
-    if manipulate('replaceState', url)
-      emit('up:history:replaced', url: url, log: doLog && "Replaced state for #{u.urlWithoutHost url}")
-
-  ###**
-  This event is [emitted](/up.emit) after a new history entry has been replaced.
-
-  Also see `up:history:pushed` and `up:history:restored`.
-
-  @event up:history:replaced
-  @param {string} event.url
-    The URL for the history entry that has been added.
-  @stable
-  ###
+    if manipulate('replaceState', url) && options.event != false
+      emit('up:location:changed', url: url, reason: 'replace', log: "Replaced state for #{u.urlWithoutHost url}")
 
   ###**
   Adds a new history entry and updates the browser's
   address bar with the given URL.
 
-  When the user navigates to the added history entry at a later time,
-  Unpoly will [`replace`](/up.replace) the document body with
-  the body from that URL.
+  When the user restores the new history entry later,
+  Unpoly will replace the document body with the body from that URL.
 
-  Note that functions like [`up.replace()`](/up.replace) or
-  [`up.submit()`](/up.submit) will automatically update the
+  Note that [fragment navigation](/navigation) will automatically update the
   browser's location bar for you.
 
-  Emits events [`up:history:pushed`](/up:history:pushed).
+  Emits event `up:location:changed`.
 
   @function up.history.push
   @param {string} url
     The URL for the history entry to be added.
   @experimental
   ###
-  push = (url, options = {}) ->
+  push = (url) ->
     url = normalizeURL(url)
-    if (options.force || !isCurrentLocation(url))
-      if manipulate('pushState', url)
-        up.emit('up:history:pushed', url: url, log: "Advanced to location #{u.urlWithoutHost url}")
+    if !isCurrentLocation(url) && manipulate('pushState', url)
+      up.emit('up:location:changed', url: url, reason: 'push', log: "Advanced to location #{u.urlWithoutHost url}")
 
   ###**
-  This event is [emitted](/up.emit) after a new history entry has been added.
+  This event is [emitted](/up.emit) after the browser's address bar was updated with a new URL.
 
-  Also see `up:history:replaced` and `up:history:restored`.
+  Reasons for a changed location are e.g. [fragment navigation](/navigation) or the user pressing the back button.
 
-  @event up:history:pushed
+  Also see `up:layer:location:changed`.
+
+  @event up:location:changed
   @param {string} event.url
-    The URL for the history entry that has been added.
+    The URL for the history entry after the change.
+  @param {string} event.reason
+    The action that caused this change in [history state](https://developer.mozilla.org/en-US/docs/Web/API/History/state).
+
+    The value of this property is either `'push'`, `'pop'` or `'replace'`.
   @stable
   ###
 
@@ -183,7 +173,7 @@ up.history = do ->
         saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
       replaced.then ->
         url = currentLocation()
-        emit('up:history:restored', url: url, log: "Restored location #{url}")
+        emit('up:location:changed', url: url, reason: 'pop', log: "Restored location #{url}")
     else
       up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
 
@@ -197,19 +187,6 @@ up.history = do ->
     historyLayer = u.find(up.layer.stack.reversed(), 'history')
     historyLayer.emit(args...)
 
-  ###**
-  This event is [emitted](/up.emit) after a history entry has been restored.
-
-  History entries are restored when the user uses the *Back* or *Forward* button.
-
-  Also see `up:history:pushed` and `up:history:replaced`.
-
-  @event up:history:restored
-  @param {string} event.url
-    The URL for the history entry that has been restored.
-  @stable
-  ###
-
   up.on 'up:app:boot', ->
     register = ->
       # Supported by all browser except IE:
@@ -217,7 +194,7 @@ up.history = do ->
       window.history.scrollRestoration = 'manual'
       window.addEventListener('popstate', pop)
       # Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      replace(currentLocation(), log: false)
+      replace(currentLocation(), event: false)
 
     if jasmine?
       # Can't delay this in tests.

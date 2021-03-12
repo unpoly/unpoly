@@ -29,11 +29,11 @@ up.migrate = do ->
       warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       u.renameKey(object, oldKey, newKey)
 
-  # Maps old event name to new event name
+  # Maps old event type to new event type
   renamedEvents = {}
 
-  renamedEvent = (oldName, newName) ->
-    renamedEvents[oldName] = newName
+  renamedEvent = (oldType, newType) ->
+    renamedEvents[oldType] = newType
 
   fixEventType = (eventType) ->
     if newEventType = renamedEvents[eventType]
@@ -41,6 +41,11 @@ up.migrate = do ->
       newEventType
     else
       eventType
+
+  fixEventTypes = (eventTypes) ->
+    # Remove duplicates as e.g. up:history:pushed and up:history:replaced
+    # both map to up:location:changed.
+    u.uniq u.map(eventTypes, fixEventType)
 
   renamedPackage = (oldName, newName) ->
     Object.defineProperty up, oldName, get: ->
@@ -68,7 +73,7 @@ up.migrate = do ->
   renamedProperty: renamedProperty
 #  removedProperty: removedProperty
   renamedEvent: renamedEvent
-  fixEventType: fixEventType
+  fixEventTypes: fixEventTypes
   fixKey: fixKey
   warn: warn
   loaded: true

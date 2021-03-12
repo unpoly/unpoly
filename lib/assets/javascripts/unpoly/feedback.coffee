@@ -356,14 +356,14 @@ up.feedback = do ->
     currentLocation = normalizeURL(layer.location)
 
     # A history change might call this function multiple times,
-    # since we listed to up:history:pushed and up:layer:location:changed.
+    # since we listen to both up:location:changed and up:layer:location:changed.
     # For this reason we check whether the current location differs from
     # the last processed location.
     if !processedLocation || processedLocation != currentLocation
       layer.feedbackLocation = currentLocation
       updateLinksWithinNavs(layer.element, { layer })
 
-  onHistoryChanged = ->
+  onBrowserLocationChanged = ->
     frontLayer = up.layer.front
 
     # We allow Unpoly-unaware code to use the pushState API and change the
@@ -372,8 +372,8 @@ up.feedback = do ->
       updateLayerIfLocationChanged(frontLayer)
 
   # Even when the modal or popup does not change history, we consider the URLs of the content it displays.
-  up.on 'up:history:pushed up:history:replaced up:history:restored', (event) -> # take 1 arg to prevent data parsing
-    onHistoryChanged()
+  up.on 'up:location:changed', (event) -> # take 1 arg to prevent data parsing
+    onBrowserLocationChanged()
 
   up.on 'up:fragment:inserted', (event, newFragment) ->
     updateFragment(newFragment, event)
