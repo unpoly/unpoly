@@ -33,7 +33,6 @@ Remaining feature work
   - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?
     - Then it would sit next to the other preload options
 - Initial Hash Reveal ignores obstructions
-- Replace { buttonDismissable, keyDismissable, outsideDismissable } with a single option { dismissable: 'button key outside' }
 
 Kill more concurrency
 ---------------------
