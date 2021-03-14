@@ -33,11 +33,6 @@ Remaining feature work
   - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?
     - Then it would sit next to the other preload options
 - Initial Hash Reveal ignores obstructions
-
-Kill more concurrency
----------------------
-
-- A link that is already loading should prevent all preload requests for the same link
 - A form that is already submitting should prevent all validation requests for the same form
 
 

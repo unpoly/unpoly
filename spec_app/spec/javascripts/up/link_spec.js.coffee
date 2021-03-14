@@ -698,6 +698,18 @@ describe 'up.link', ->
             failTarget: 'default-fallback'
           expect(u.isPromise(cachedPromise)).toBe(true)
 
+      it 'does not dispatch another request for a link that is currently loading', asyncSpec (next) ->
+        link = fixture('a[href="/path"][up-target=".target"]')
+        up.follow(link)
+
+        next ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.link.preload(link)
+
+        next ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
       describe 'for an [up-target] link', ->
 
         it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->
