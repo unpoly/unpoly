@@ -33,7 +33,24 @@ Remaining feature work
   - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?
     - Then it would sit next to the other preload options
 - Initial Hash Reveal ignores obstructions
-- A form that is already submitting should prevent all validation requests for the same form
+
+
+Version 2.1
+-----------
+
+- Concurrency: Replacing removed elements should fail
+  - It may be a better behavior for a fallback-less fragment update to fail if the targeted fragment was detached while the request was in flight
+    - We may even cancel the request?
+  - E.g. when a validation request response and the field was replaced in the meantime, discard the response
+  - How would this play together with fallback targets?
+    - If all fallback targets were removed, the replacement fails
+    - e.g. up.render({ target: '.target' })
+      -
+  - This would also allow us to not process the cascade twice
+  - How would this play together with overlays?
+    - No such thing as an existing element
+  - How would this play together with server-set targets?
+    - This *would* restart the cascade
 
 
 
