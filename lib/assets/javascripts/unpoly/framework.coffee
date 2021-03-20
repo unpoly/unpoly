@@ -43,7 +43,7 @@ up.framework = do ->
     # This is called synchronously after all Unpoly modules have been parsed
     # and executed. We cannot delay booting until the DOM is ready, since by then
     # all user-defined event listeners and compilers will have registered.
-    # Note that any non-async scripts after us will delay DOMContentReady.
+    # Note that any non-async scripts after us will delay DOMContentLoaded.
     if up.browser.isSupported()
       # Some Unpoly modules will use the up:framework:boot event to:
       #
