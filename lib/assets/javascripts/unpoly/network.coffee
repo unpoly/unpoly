@@ -1,8 +1,10 @@
 u = up.util
 
 ###**
-AJAX acceleration
-=================
+Network requests
+================
+
+TODO: Rewrite this page
 
 Unpoly comes with a number of tricks to shorten the latency between browser and server.
 
@@ -60,7 +62,7 @@ up.network = do ->
   @param {number} [config.concurrency=4]
     The maximum number of concurrent active requests.
 
-    Additional requests are queued. [Preload](/up.network.preload) requests are
+    Additional requests are queued. [Preload](/a-up-preload) requests are
     always queued behind non-preload requests.
 
     You might find it useful to set the request concurrency `1` in full-stack
@@ -76,29 +78,16 @@ up.network = do ->
 
     If you disable method wrapping, make sure that your server always redirects with
     with a 303 status code (rather than 302).
-  @param {boolean|string} [config.preloadEnabled='auto']
-    Whether Unpoly will load [preload requests](/up.network.preload).
-
-    With the default setting (`"auto"`) Unpoly will load preload requests
-    unless `up.network.shouldReduceRequests()` detects a poor connection.
-
-    If set to `true`, Unpoly will always load preload requests.
-
-    If set to `false`, Unpoly will automatically [abort](/up.network.abort) all preload requests.
   @param {number} [config.badDownlink=0.6]
     The connection's minimum effective bandwidth estimate required
     to [enable preloading](/up.network.config#config.preloadEnabled).
 
     The value is given in megabits per second.
-
-    This setting is only honored if `up.network.config.preloadEnabled` is set to `'auto'` (the default).
   @param {number} [config.badRTT=0.6]
     The connection's maximum effective round-trip time required
     to [enable preloading](/up.network.config#config.preloadEnabled).
 
     The value is given in milliseconds.
-
-    This setting is only honored if `up.network.config.preloadEnabled` is set to `'auto'` (the default).
   @param {Array<string>|Function(up.Request): Array<string>} [config.requestMetaKeys]
     An array of request property names
     that are sent to the server as [HTTP headers](/up.protocol).
@@ -109,7 +98,7 @@ up.network = do ->
     \#\#\# Cacheability considerations
 
     Two requests with different `requestMetaKeys` are considered cache misses when [caching](/up.request) and
-    [preloading](/up.link.preload). To **improve cacheability**, you may set
+    [preloading](a-up-preload). To **improve cacheability**, you may set
     `up.network.config.requestMetaKeys` to a shorter list of property keys.
 
     \#\#\# Available fields
@@ -153,7 +142,6 @@ up.network = do ->
     cacheExpiry: 1000 * 60 * 5
     concurrency: 4
     wrapMethod: true
-    preloadEnabled: 'auto' # true | false | 'auto'
     # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     badDownlink: 0.6
@@ -511,16 +499,6 @@ up.network = do ->
         (netInfo.rtt      && netInfo.rtt      > config.badRTT) ||
         (netInfo.downlink && netInfo.downlink < config.badDownlink)
 
-  shouldPreload = (request) ->
-    setting = u.evalOption(config.preloadEnabled, request)
-
-    if setting == 'auto'
-      # Since connection.effectiveType might change during a session we need to
-      # re-evaluate the value every time.
-      return !shouldReduceRequests()
-
-    return setting
-
   ###**
   Aborts pending [requests](/up.request).
 
@@ -718,7 +696,6 @@ up.network = do ->
   abort: abortRequests
   registerAliasForRedirect: registerAliasForRedirect
   queue: queue # for testing
-  shouldPreload: shouldPreload
   shouldReduceRequests: shouldReduceRequests
   mimicLocalRequest: mimicLocalRequest
 

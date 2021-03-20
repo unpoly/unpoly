@@ -28,9 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Remove up.network.preload(). It's the same as up.request(cache: true).
-  - Does this mean we would move up.network.config.preloadEnabled to up.link.config.preloadEnabled?
-    - Then it would sit next to the other preload options
 - Initial Hash Reveal ignores obstructions
 
 

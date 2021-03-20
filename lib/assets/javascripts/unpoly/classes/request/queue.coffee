@@ -66,9 +66,7 @@ class up.Request.Queue extends up.Class
     return u.remove(@queuedRequests, request)
 
   sendRequestNow: (request) ->
-    if request.preload && !up.network.shouldPreload(request)
-      request.abort('Preloading is disabled')
-    else if request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
+    if request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented
       request.abort('Prevented by event listener')
     else
       # Since up:request:load listeners may have mutated properties used in

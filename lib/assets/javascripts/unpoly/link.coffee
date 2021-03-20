@@ -100,6 +100,15 @@ up.link = do ->
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
+  @param {boolean|string} [config.preloadEnabled='auto']
+    Whether Unpoly will load [preload requests](/a-up-preload).
+
+    With the default setting (`"auto"`) Unpoly will load preload requests
+    unless `up.network.shouldReduceRequests()` detects a poor connection.
+
+    If set to `true`, Unpoly will always load preload links.
+
+    If set to `false`, Unpoly will never preload links.
   @stable
   ###
   config = new up.Config ->
@@ -113,6 +122,7 @@ up.link = do ->
       noPreloadSelectors: ['[up-preload=false]'].concat(noFollowSelectors),
       clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
       preloadDelay: 90,
+      preloadEnabled: 'auto' # true | false | 'auto'
     }
 
   fullFollowSelector = ->
@@ -314,8 +324,22 @@ up.link = do ->
   preload = (link, options) ->
     # If passed a selector, up.fragment.get() will match in the current layer.
     link = up.fragment.get(link)
+
+    unless shouldPreload()
+      return up.error.failed.async('Link preloading is disabled')
+
     guardEvent = up.event.build('up:link:preload', log: ['Preloading link %o', link])
-    follow(link, u.merge(options, preload: true, { guardEvent }))
+    return follow(link, u.merge(options, preload: true, { guardEvent }))
+
+  shouldPreload = ->
+    setting = config.preloadEnabled
+
+    if setting == 'auto'
+      # Since connection.effectiveType might change during a session we need to
+      # re-evaluate the value every time.
+      return !up.network.shouldReduceRequests()
+
+    return setting
 
   ###**
   This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).

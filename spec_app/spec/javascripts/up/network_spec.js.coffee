@@ -1303,17 +1303,6 @@ describe 'up.network', ->
               'up:request:recover'
             ])
 
-    describe 'up.network.preload', ->
-
-      it 'queues a request with attributes suitable for preloading', ->
-        request = up.network.preload({ url: '/foo' })
-        expect(request.preload).toBe(true)
-        expect(request.cache).toBe(true)
-
-      it 'throws an error when trying to preload an unsafe request', ->
-        preload = -> up.network.preload({ url: '/foo', method: 'put' })
-        expect(preload).toThrowError(/will not preload .*? PUT/i)
-
     if up.migrate.loaded
       describe 'up.ajax', ->
 
