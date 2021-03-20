@@ -14,6 +14,7 @@ class up.EventListenerGroup extends up.Record
       'guard',
       'currentLayer',
       'passive',
+      'once'
     ]
 
   bind: ->

@@ -12,7 +12,8 @@ class up.EventListener extends up.Record
       'jQuery',
       'guard',
       'currentLayer',
-      'passive'
+      'passive',
+      'once'
     ]
 
   constructor: (attributes) ->
@@ -40,6 +41,11 @@ class up.EventListener extends up.Record
     @element.removeEventListener(@addListenerArgs()...)
 
   nativeCallback: (event) =>
+    # Once we drop IE11 support we can forward the { once } option
+    # to Element#addEventListener().
+    if @once
+      @unbind()
+
     # 1. Since we're listing on `document`, event.currentTarget is now `document`.
     # 2. event.target is the element that received an event, which might be a
     #    child of `selector`.

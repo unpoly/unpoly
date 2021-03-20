@@ -27,6 +27,7 @@ Quick wins: Removals
 - ie11 hacks in parseURL
 - viewport.rootSelector can just be document.scrollingElement
 - replace isNativelyFocusable() with element.tabIndex >= 0
+- up.on() options { passive, one } can just be forwarded to Element#addEventListener()
 
 
 More work required

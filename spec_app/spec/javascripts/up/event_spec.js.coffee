@@ -291,6 +291,18 @@ describe 'up.event', ->
 
             expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function))
 
+      describe 'with { once } option', ->
+
+        it 'registers an event listener that will only be called once', ->
+          element = fixture('.element')
+          listener = jasmine.createSpy()
+          up.on(element, 'my:event', { once: true }, listener)
+
+          up.emit(element, 'my:event')
+          up.emit(element, 'my:event')
+
+          expect(listener.calls.count()).toBe(1)
+
       describe 'passing of [up-data]', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a third argument to the listener', asyncSpec (next) ->

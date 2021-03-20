@@ -175,6 +175,11 @@ up.event = do ->
     A passive event listener may not call `event.preventDefault()`.
     This in particular may improve the frame rate when registering
     `touchstart` and `touchmove` events.
+  @param {boolean} [options.once=true]
+    Whether the listener should run at most once.
+
+    If `true` the listener will automatically be removed from the element
+    after the first invocation.
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
