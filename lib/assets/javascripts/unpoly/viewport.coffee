@@ -810,9 +810,23 @@ up.viewport = do ->
       value = value.substr(1)
     return value
 
+  userScrolled = false
+  up.on 'scroll', { once: true }, -> userScrolled = true
+
   up.on 'up:app:boot', ->
     if hash = location.hash
-      revealHash(hash)
+      # The browser is already revealing the #anchor fragment. We want to override
+      # that behavior with our own, so we can honor configured obstructions.
+      # Since we cannot disable the browser behavior we need to run after it.
+      #
+      # In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
+      # However, when we follow a link with an #anchor URL, the browser
+      # behavior happens *after* DOMContentLoaded. Hence we wait one more task.
+      u.task ->
+        # If the user has scrolled while the page was loading, we will
+        # not reset their scroll position by revealing the #anchor fragment.
+        unless userScrolled
+          revealHash(hash)
 
   up.on 'up:framework:reset', reset
 
