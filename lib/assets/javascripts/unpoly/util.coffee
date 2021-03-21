@@ -126,9 +126,14 @@ up.util = do ->
   APP_PROTOCOL = location.protocol
   APP_HOSTNAME = location.hostname
 
-  isCrossOrigin = (targetURL) ->
-    targetURL = parseURL(targetURL)
-    return APP_HOSTNAME != targetURL.hostname || APP_PROTOCOL != targetURL.protocol
+  isCrossOrigin = (urlOrAnchor) ->
+    # If the given URL does not contain a hostname we know it cannot be cross-origin.
+    # In that case we don't need to parse the URL.
+    if isString(urlOrAnchor) && urlOrAnchor.indexOf('//') == -1
+      return false
+
+    parts = parseURL(urlOrAnchor)
+    return APP_HOSTNAME != parts.hostname || APP_PROTOCOL != parts.protocol
 
   ###**
   Parses the given URL into components such as hostname and path.
