@@ -668,6 +668,18 @@ describe 'up.link', ->
         up.link.config.followSelectors.push('.hyperlink')
         expect(up.link.isFollowable(link)).toBe(false)
 
+      it 'returns false for an #anchor link without a path, even if the link has [up-follow]', ->
+        link = fixture('a[up-follow][href="#details"]')
+        expect(up.link.isFollowable(link)).toBe(false)
+
+      it 'returns false for an #anchor link with a path, even if the link has [up-follow]', ->
+        link = fixture('a[up-follow][href="/other/page#details"]')
+        expect(up.link.isFollowable(link)).toBe(true)
+
+      it 'returns false for a link with a "javascript:..." [href] attribute, even if the link has [up-follow]', ->
+        link = fixture('a[up-follow][href="javascript:foo()"]')
+        expect(up.link.isFollowable(link)).toBe(false)
+
     describe 'up.link.preload', ->
 
       beforeEach ->

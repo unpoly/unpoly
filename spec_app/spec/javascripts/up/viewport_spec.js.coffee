@@ -453,29 +453,22 @@ describe 'up.viewport', ->
         revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
         $match = $fixture('div#hash')
         up.viewport.revealHash('#hash')
-        next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
+        next => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
 
       it 'reveals a named anchor matching the given #hash', asyncSpec (next) ->
         revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
         $match = $fixture('a[name="hash"]')
         up.viewport.revealHash('#hash')
-        next => expect(revealSpy).toHaveBeenCalledWith($match[0], top: true)
+        next => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
 
-      it 'does nothing and returns a fulfilled promise if no element or anchor matches the given #hash', (done) ->
+      it 'does not change the scroll position if no element or anchor matches the given #hash', asyncSpec (next) ->
+        fixture('.high', style: { height: '10000px' }) # Ensure we have a vertical scroll bar
         revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-        promise = up.viewport.revealHash('#hash')
-        expect(revealSpy).not.toHaveBeenCalled()
-        promiseState(promise).then (result) ->
-          expect(result.state).toEqual('fulfilled')
-          done()
-
-      it 'does nothing and returns a fulfilled promise if no #hash is given', (done) ->
-        revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-        promise = up.viewport.revealHash('')
-        expect(revealSpy).not.toHaveBeenCalled()
-        promiseState(promise).then (result) ->
-          expect(result.state).toEqual('fulfilled')
-          done()
+        up.viewport.root.scrollTop = 50
+        up.viewport.revealHash('#hash')
+        next =>
+          # Assert that we did not change the scroll position
+          expect(up.viewport.root.scrollTop).toBe(50)
 
     describe 'up.viewport.all', ->
 
@@ -736,3 +729,20 @@ describe 'up.viewport', ->
 
         expect($fixedChild.css('position')).toEqual('absolute')
         expect($fixedSibling.css('position')).toEqual('fixed')
+
+  describe 'unobtrusive behavior', ->
+
+    describe 'on hashchange', ->
+
+      it 'reveals the fragment matching the #hash, honoring configured obstructions', asyncSpec (next) ->
+        # The browser will only fire a hashchange event if the hash actually did change.
+        # In case someone re-runs this spec, reset the hash before we setup our test below.
+        location.hash = ''
+        highElement = fixture('.high', style: { height: '10000px' }) # ensure we can scroll
+        element = fixture('#element', text: 'content', style: { position: 'absolute', top: '5000px' })
+        obstruction = fixture('.obstruction[up-fixed=top]', text: 'obstructions', style: { position: 'fixed', top: '0', height: '30px', backgroundColor: 'blue' })
+        location.hash = "#element"
+        next ->
+          expect(up.viewport.root.scrollTop).toBe(5000 - 30)
+
+      it 'does not reveal when the new #hash is empty'

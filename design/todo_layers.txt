@@ -28,9 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Initial Hash Reveal ignores obstructions
-
-
 
 Tests
 =====
@@ -426,6 +423,7 @@ Later?
   - How would this play together with server-set targets?
     - This *would* restart the cascade
 - Can we not focus if a compiler has focused?
+- When clicking on a #hash link in a history-less overlay we should handle the link and not follow but revealHash()
 
 
 Decisions

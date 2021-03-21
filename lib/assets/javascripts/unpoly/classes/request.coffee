@@ -250,7 +250,7 @@ class up.Request extends up.Record
       # Don't evict properties that may be part of our @cacheKey()!
 
   extractHashFromURL: ->
-    if match = @url.match(/^(.+)(#.+)$/)
+    if match = @url.match(/^([^#]*)(#.+)$/)
       @url = match[1]
       # Remember the #hash for later revealing.
       @hash = match[2]

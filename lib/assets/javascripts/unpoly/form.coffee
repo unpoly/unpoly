@@ -553,6 +553,8 @@ up.form = do ->
       return element
 
   isSubmitDisabled = (form) ->
+    # We also don't want to handle cross-origin forms.
+    # That will be handled in `up.Change.FromURL#newPageReason`.
     return e.matches(form, config.noSubmitSelectors.join(','))
 
   ###**

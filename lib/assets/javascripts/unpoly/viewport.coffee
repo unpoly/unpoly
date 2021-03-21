@@ -312,17 +312,11 @@ up.viewport = do ->
 
   @function up.viewport.revealHash
   @param {string} hash
-
-  @return {Promise}
-    A promise that fulfills when scroll position has changed to match the location hash.
-  @experimental
+  @internal
   ###
-  revealHash = (hash, options) ->
-    if hash && (match = firstHashTarget(hash, options))
+  revealHash = (hash = location.hash, options) ->
+    if match = firstHashTarget(hash, options)
       up.reveal(match, top: true)
-    else
-      up.warn('up.viewort.revealHash', 'Tried to reveal URL hash #%o, but no matching element found', hash)
-      Promise.resolve()
 
   allSelector = ->
     # On Edge the document viewport can be changed from CSS
@@ -806,27 +800,27 @@ up.viewport = do ->
   @internal
   ###
   pureHash = (value) ->
-    if value && value[0] == '#'
-      value = value.substr(1)
-    return value
+    return value?.replace(/^#/, '')
 
   userScrolled = false
   up.on 'scroll', { once: true }, -> userScrolled = true
 
   up.on 'up:app:boot', ->
-    if hash = location.hash
-      # The browser is already revealing the #anchor fragment. We want to override
-      # that behavior with our own, so we can honor configured obstructions.
-      # Since we cannot disable the browser behavior we need to run after it.
-      #
-      # In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
-      # However, when we follow a link with an #anchor URL, the browser
-      # behavior happens *after* DOMContentLoaded. Hence we wait one more task.
-      u.task ->
-        # If the user has scrolled while the page was loading, we will
-        # not reset their scroll position by revealing the #anchor fragment.
-        unless userScrolled
-          revealHash(hash)
+    # When the initial URL contains an #anchor link, the browser will automatically
+    # reveal a matching fragment. We want to override that behavior with our own,
+    # so we can honor configured obstructions. Since we cannot disable the automatic
+    # browser behavior we need to ensure our code runs after it.
+    #
+    # In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
+    # However, when we follow a link with an #anchor URL, the browser
+    # behavior happens *after* DOMContentLoaded. Hence we wait one more task.
+    u.task ->
+      # If the user has scrolled while the page was loading, we will
+      # not reset their scroll position by revealing the #anchor fragment.
+      unless userScrolled
+        revealHash()
+
+  up.on window, 'hashchange', -> revealHash()
 
   up.on 'up:framework:reset', reset
 
@@ -863,5 +857,4 @@ up.viewport = do ->
 up.focus = up.viewport.focus
 up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal
-up.revealHash = up.viewport.revealHash
 

@@ -137,8 +137,20 @@ up.link = do ->
   fullClickableSelector = ->
     config.clickableSelectors.join(',')
 
+  ###**
+  Returns whether the link was explicitly marked up as not followable,
+  e.g. through `[up-follow=false]`.
+
+  This differs from `config.followSelectors` in that we want users to configure
+  simple selectors, but let users make exceptions. We also have a few built-in
+  exceptions of our own, e.g. to never follow an `<a href="javascript:...">` link.
+
+  @function isFollowDisabled
+  @param {Element} link
+  @return {boolean}
+  ###
   isFollowDisabled = (link) ->
-    return e.matches(link, config.noFollowSelectors.join(','))
+    return e.matches(link, config.noFollowSelectors.join(',')) || shouldBrowserHandleLink(link)
 
   isPreloadDisabled = (link) ->
     url = followURL(link)
@@ -190,7 +202,6 @@ up.link = do ->
   ###
   follow = up.mockable (link, options) ->
     return up.render(followOptions(link, options))
-
 
   ###**
   Parses the `render()` options that would be used to
@@ -376,6 +387,22 @@ up.link = do ->
     if url != '#'
       return url
 
+  # (1) We don't want to follow <a href="#anchor"> links without a path. Instead
+  #     we will let the browser change the current location's anchor and reveal
+  #     on hashchange.
+  # (2) We do want to follow links like <a href="#" up-content="...">.
+  #     Many web developers are used to give JavaScript-handled links an [href="#"]
+  #     attribute. Also frameworks like Bootstrap only style links if they have an [href].
+  # (3) We don't want to handle <a href="javascript:foo()"> links.
+  # (4) We also don't want to handle cross-origin links.
+  #     That will be handled in `up.Change.FromURL#newPageReason`, allowing us
+  #     to at least support `[up-instant]` for cross-origin links.
+  shouldBrowserHandleHREF = (href) ->
+    return /^#.|javascript:/.test(href)
+
+  shouldBrowserHandleLink = (link) ->
+    return shouldBrowserHandleHREF(link.getAttribute('href'))
+
   ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly
   instead of making a full page load.
@@ -432,7 +459,6 @@ up.link = do ->
     link.addEventListener 'keydown', (event) ->
       if event.key == 'Enter' || event.key == 'Space'
         forkEventAsUpClick(event)
-
 
   # Support keyboard navigation for elements that behave like links
   # or buttons, but  aren't <a href> or <button> elements..
@@ -766,7 +792,8 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    unless isPreloadDisabled(link)
+    # No need to preload a link that will not be followed by up.follow().
+    unless isPreloadDisabled(link) || isFollowDisabled(link)
       return linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset
