@@ -1,53 +1,41 @@
 up.render()
 -----------
 
-history: 'auto'    Update browser location and window title if updating a main target
+[ok] feedback: true     Set [.up-active](/a-up-update) on the activated link
 
-scroll: 'auto'     Reset scroll position if updating a main target
+[ok] peel: true         Close overlays when targeting a layer below
 
-fallback: ':main'  Replace a [main target](/up.fragment.config#config.mainTargets) if response doesn't contain target
-
-cache: true        Cache responses for 5 minutes
-
-feedback: true     Set [.up-active](/a-up-update) on the activated link
-
-focus: 'auto'      Focus [autofocus] elements in the new fragment
-
-solo: true         Cancel existing requests
-
-peel: true         Close overlays when targeting a layer below
-
-target
+[ok] target
 
 [ok] history
 [ok] title      requires history: true
 [ok] location   requires history: true
 
-navigate
-
+[ok] navigate
 
 [ok] fallback    if false then no fallbacks are used, also no main selectors
 
-layer       if == 'new' then options for up.layer.open() may be used
+[ok] layer       if == 'new' then options for up.layer.open() may be used
 
-confirm
+[ok] confirm
 
 [ok] fail
 
 [ok] saveScroll
 [ok] scroll
-focus
-revealTop
-revealMax
-revealPadding
-revealSnap
-scrollBehavior
+[ok] focus
+
+[ok] revealTop
+[ok] revealMax
+[ok] revealPadding
+[ok] revealSnap
+[ok] scrollBehavior
 
 [ok] keep
 [ok] hungry
 
-cache
-clearCache
+[ok] cache
+[ok] clearCache
 
 currentLayer    internal?
 
@@ -65,7 +53,7 @@ currentLayer    internal?
 [ok] onLoaded            see event
 [ok] onFinished          no event
 
-context             is merged
+[ok] context             is merged
 
 [ok] animation
 [ok] transition
@@ -86,13 +74,31 @@ Adapt from render()
 
 
 
+up.link.follow()
+----------------
+
+Params note: Will be parsed from the link's attribute
+
+### Additional options
+
+contentType
+params            explain that they're added to the link's
+method            explain that they default to the link's [up-nethod] or [data-method]
+url               explain that they default to the link's [href] or [up-href]
+fail
+
+
+
 up.form.submit()
 ----------------
 
+Params note: Will be parsed from the link's attribute
+
+### Additional options
 
 contentType
 params            explain that they're added to the form's
-method            explain that they default to the action, or the pressed submit button's formmethod
+method            explain that they default to the action, [up-nethod] or [data-method], or the pressed submit button's formmethod,
 url               explain that they default to the form's action, or the pressed submit button's formaction
 fail
 

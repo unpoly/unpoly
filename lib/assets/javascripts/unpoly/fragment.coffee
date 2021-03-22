@@ -295,7 +295,7 @@ up.fragment = do ->
     If set to `false` Unpoly will immediately reject the render promise.
 
   @param {boolean} [options.navigate=false]
-    Whether this fragment is considered [navigation](/navigation).
+    Whether this fragment update is considered [navigation](/navigation).
 
   @param {string} [options.url]
     The URL to fetch from the server.
@@ -439,7 +439,7 @@ up.fragment = do ->
     The element that triggered the replacement.
 
     When multiple elements in the current page match the `{ target }`,
-    Unpoly will replace an element in the [origin's vicinity](/a-up-target#matching-in-the-links-vicinity).
+    Unpoly will replace an element in the [origin's vicinity](/fragment-placement).
 
     The origin's selector will be substituted for the `&` shorthand in the target
     selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
@@ -451,6 +451,11 @@ up.fragment = do ->
 
     To open the fragment in a new [overlay](/up.layer), pass `{ layer: 'new' }` or a [layer mode](/up.layer.mode).
     In this case options for `up.layer.open()` may also be used.
+
+  @param {boolean} [options.peel]
+    Whether to close overlays obstructing the updated layer when the fragment is updated.
+
+    This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
 
   @param {Object} [options.context]
     An object that will be merged into the [context](/up.context) of the current layer once the fragment is rendered.
@@ -474,7 +479,20 @@ up.fragment = do ->
   @param {boolean|string|Element|Function} [options.focus]
     What to focus after the new fragment was rendered.
 
-    See [focus option](/scroll-option) for a list of allowed values.
+    See [focus option](/focus-option) for a list of allowed values.
+
+  @param {string} [options.confirm]
+    A confirmation message the user need's to accept before fragments are updated.
+
+    The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
+
+    If the user does not confirm the render promise will reject and no fragments will be updated.
+
+  @param {boolean|Element} [options.feedback]
+    Whether to give the [`{ origin }`](#options.origin) element an `.up-active` class
+    while loading and rendering content.
+
+    May also pass an element which should receive the `.up-active` class.
 
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when when the server responds with new HTML,

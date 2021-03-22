@@ -28,6 +28,10 @@ Release process
 Remaining feature work
 ======================
 
+- Explain unpoly-migrate.js in docs
+  - Also in the changelog
+  - For upgrades > 2.0
+
 
 Tests
 =====
@@ -424,6 +428,7 @@ Later?
     - This *would* restart the cascade
 - Can we not focus if a compiler has focused?
 - When clicking on a #hash link in a history-less overlay we should handle the link and not follow but revealHash()
+- Replace { revealTop } with { revealAim: 'top' | 'center' | 'min-motion' }
 
 
 Decisions
