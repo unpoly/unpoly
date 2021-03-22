@@ -25,10 +25,10 @@ class up.Change.FromURL extends up.Change
 
     if @options.preload
       return promise
-    else
-      # Use always() since onRequestSettled() will decide whether the promise
-      # will be fulfilled or rejected.
-      return u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
+
+    # Use always() since onRequestSettled() will decide whether the promise
+    # will be fulfilled or rejected.
+    return u.always(promise, (responseOrError) => @onRequestSettled(responseOrError))
 
   newPageReason: ->
     # Rendering content from cross-origin URLs is out of scope for Unpoly.

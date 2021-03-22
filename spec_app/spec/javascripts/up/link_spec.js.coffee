@@ -722,6 +722,15 @@ describe 'up.link', ->
         next ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
+      it 'does not update fragments for a link with local content (bugfix)', asyncSpec (next) ->
+        target = fixture('.target', text: 'old text')
+        link = fixture('a[up-content="new text"][up-target=".target"]')
+
+        up.link.preload(link)
+
+        next ->
+          expect('.target').toHaveText('old text')
+
       describe 'for an [up-target] link', ->
 
         it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->

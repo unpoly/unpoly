@@ -54,6 +54,10 @@ class up.Change.FromContent extends up.Change
     return up.fragment.expandTargets(targets, { layer, @mode, @origin })
 
   execute: ->
+    # Preloading from local content is a no-op.
+    if @options.preload
+      return Promise.resolve()
+
     executePlan = (plan) => plan.execute(@getResponseDoc())
     return @seekPlan(executePlan) or @postflightTargetNotApplicable()
 
