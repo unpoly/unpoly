@@ -92,15 +92,22 @@ up.log = do ->
            "\\___/_//_/ .__/\\___/_/\\_. / \n" +
            "        / /            / /\n\n"
 
+    text = ""
+
+    unless up.migrate.loaded
+      text += "Load unpoly-migrate.js to enable deprecated APIs.\n\n"
+
     if config.enabled
-      logInfo = "Call `up.log.disable()` to disable logging for this session."
+      text += "Call `up.log.disable()` to disable logging for this session."
     else
-      logInfo = "Call `up.log.enable()` to enable logging for this session."
+      text += "Call `up.log.enable()` to enable logging for this session."
+
+    color = 'color: #777777'
 
     if up.browser.canFormatLog()
-      console.log('%c' + logo + '%c' + logInfo, 'font-family: monospace', '')
+      console.log('%c' + logo + '%c' + text, 'font-family: monospace;' + color, color)
     else
-      console.log(logo + logInfo)
+      console.log(logo + text)
 
 
   up.on 'up:framework:boot', printBanner
