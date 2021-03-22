@@ -305,7 +305,7 @@ up.fragment = do ->
     [`{ content }`](#options.content) option.
 
   @param {string} [options.method='GET']
-    The request's HTTP method to use for the request.
+    The HTTP method to use for the request.
 
     Common values are `'GET'`, `'POST'`, '`PUT`', '`PATCH`' and `'DELETE`'.  `The value is case insensitive.
 

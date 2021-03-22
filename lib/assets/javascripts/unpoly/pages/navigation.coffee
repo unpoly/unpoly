@@ -35,7 +35,6 @@
   | `up.validate()`      | no                    |
   | `[up-poll]`          | no                    |
 
-
   \#\#\# Navigation defaults
 
   The following default options will be used when navigating:

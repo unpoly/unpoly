@@ -108,7 +108,8 @@ The following will open an overlay that closes once a URL like `/companies/123` 
 </a>
 ```
 
-Placeholders in the [URL pattern](/url-patterns) (`$id`) become the overlay's *acceptance value*.
+Named segments captured by the [URL pattern](/url-patterns) (`$id`) will
+become the overlay's *acceptance value*.
 
 The `[up-on-accepted]` callback is called with an acceptance value.
 

@@ -122,91 +122,34 @@ up.form = do ->
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
 
-  The unobtrusive variant of this is the [`form[up-target]`](/form-up-target) selector.
-  See the documentation for [`form[up-target]`](/form-up-target) for more
-  information on how AJAX form submissions work in Unpoly.
+  The unobtrusive variant of this is the `form[up-submit]` selector.
+  See its documentation to learn how form submissions work in Unpoly.
+
+  Submitting a form is considered [navigation](/navigation).
 
   Emits the event [`up:form:submit`](/up:form:submit).
 
   @function up.submit
-  @params-note
-    All options from `up.render()` may be used.
+
   @param {Element|jQuery|string} form
-    A reference or selector for the form to submit.
+    The form to submit.
+
     If the argument points to an element that is not a form,
-    Unpoly will search its ancestors for the closest form.
-  @param {string} [options.url]
-    The URL where to submit the form.
-    Defaults to the form's `action` attribute, or to the current URL of the browser window.
-  @param {string} [options.method='post']
-    The HTTP method used for the form submission.
-    Defaults to the form's `up-method`, `data-method` or `method` attribute, or to `'post'`
-    if none of these attributes are given.
-  @param {string} [options.target]
-    The CSS selector to update when the form submission succeeds (server responds with status 200).
-    Defaults to the form's `up-target` attribute.
+    Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
-    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [options.failTarget]
-    The CSS selector to update when the form submission fails (server responds with non-200 status).
-    Defaults to the form's `up-fail-target` attribute, or to an auto-generated
-    selector that matches the form itself.
+  @param {Object} [options]
+    [Render options](/up.render) that should be used for submitting the form.
 
-    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [options.fallback]
-    The selector to update when the original target was not found in the page.
-    Defaults to the form's `up-fallback` attribute.
-  @param {boolean|string} [options.history=true]
-    Successful form submissions will add a history entry and change the browser's
-    location bar if the form either uses the `GET` method or the response redirected
-    to another page (this requires the `unpoly-rails` gem).
-    If you want to prevent history changes in any case, set this to `false`.
-    If you pass a string, it is used as the URL for the browser history.
-  @param {string} [options.transition='none']
-    The transition to use when a successful form submission updates the `options.target` selector.
-    Defaults to the form's `up-transition` attribute, or to `'none'`.
-  @param {string} [options.failTransition='none']
-    The transition to use when a failed form submission updates the `options.failTarget` selector.
-    Defaults to the form's `up-fail-transition` attribute, or to `options.transition`, or to `'none'`.
-  @param {number} [options.duration]
-    The duration of the transition. See [`up.morph()`](/up.morph).
-  @param {number} [options.delay]
-    The delay before the transition starts. See [`up.morph()`](/up.morph).
-  @param {string} [options.easing]
-    The timing function that controls the transition's acceleration. [`up.morph()`](/up.morph).
-  @param {Element|string} [options.reveal=true]
-    Whether to reveal the target fragment after it was replaced.
+    Unpoly will parse render options from the given form's attributes
+    like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
+    of supported attributes.
 
-    You can also pass a CSS selector for the element to reveal.
-  @param {boolean|string} [options.failReveal=true]
-    Whether to [reveal](/up.reveal) the target fragment when the server responds with an error.
+    You may pass this additional `options` object to supplement or override
+    options parsed from the form attributes.
 
-    You can also pass a CSS selector for the element to reveal.
-  @param {boolean} [options.restoreScroll]
-    If set to `true`, this will attempt to [`restore scroll positions`](/up.restoreScroll)
-    previously seen on the destination URL.
-  @param {boolean} [options.cache]
-    Whether to force the use of a cached response (`true`)
-    or never use the cache (`false`)
-    or make an educated guess (`undefined`).
-
-    By default only responses to `GET` requests are cached
-    for a few minutes.
-  @param {Object} [options.headers={}]
-    An object of additional header key/value pairs to send along
-    with the request.
-  @param {string} [options.layer='auto']
-    The name of the layer that ought to be updated. Valid values are
-    `'auto'`, `'page'`, `'modal'` and `'popup'`.
-
-    If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
-  @param {string} [options.failLayer='auto']
-    The name of the layer that ought to be updated if the server sends a non-200 status code.
-  @param {Object|FormData|string|Array|up.Params} [options.params]
-    Extra form [parameters](/up.Params) that will be submitted in addition to
-    the parameters from the form.
   @return {Promise}
-    A promise for a successful form submission.
+    A promise that will be fulfilled when the server response was rendered.
+
   @stable
   ###
   submit = up.mockable (form, options) ->
@@ -608,11 +551,7 @@ up.form = do ->
   The `<form>` element will be assigned a CSS class [`up-active`](/form.up-active) while
   the submission is loading.
 
-  You can also [implement a spinner](/up.network/#spinners)
-  by [listening](/up.on) to the [`up:request:late`](/up:request:late)
-  and [`up:request:recover`](/up:request:recover) events.
-
-  @selector form[up-target]
+  @selector form[up-submit]
   @param {string} up-target
     The CSS selector to [replace](/up.replace) if the form submission is successful (200 status code).
 

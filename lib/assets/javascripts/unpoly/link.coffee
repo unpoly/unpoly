@@ -176,6 +176,8 @@ up.link = do ->
   will be replaced. Attributes like `a[up-target]`
   or `a[up-layer]` will be honored.
 
+  Following a link is considered [navigation](/navigation) by default.
+
   Emits the event `up:link:follow`.
 
   \#\#\# Examples
@@ -191,13 +193,24 @@ up.link = do ->
       up.follow(link)
 
   @function up.follow
+
   @param {Element|jQuery|string} link
     The link to follow.
+
   @param {Object} [options]
-    See options for `up.render()`.
+    [Render options](/up.render) that should be used for following the link.
+
+    Unpoly will parse render options from the given link's attributes
+    like `[up-target]` or `[up-transition]`. See `a[up-follow]` for a list
+    of supported attributes.
+
+    You may pass this additional `options` object to supplement or override
+    options parsed from the link attributes.
+
   @return {Promise}
     A promise that will be fulfilled when the link destination
     has been loaded and rendered.
+
   @stable
   ###
   follow = up.mockable (link, options) ->
@@ -644,6 +657,11 @@ up.link = do ->
 
   See [fragment placement](/fragment-placement) for advanced use cases
   like updating multiple fragments or appending content to an existing element.
+
+  \#\#\# Giving feedback while the link is loading
+
+  The link element will be assigned a CSS class [`up-active`](/form.up-active)
+  while the link is loading.
 
   @selector a[up-follow]
   @param {string} [up-method='get']

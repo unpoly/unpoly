@@ -6,8 +6,8 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-Unreleased
-----------
+2.0.0
+-----
 
 - up.network.config.slowDelay is now 800 (up from 300)
 - up.network.config.cacheSize is now 50 (down from 70)
@@ -50,6 +50,12 @@ Unreleased
 - up.on() can passive: true
 - Preloads on touchstart and mousedown
 - Digit groups separators (`60_000`) are a stage 3 ES6 feature and also supported in number attributes.
+
+
+1.0.0
+-----
+
+- TODO
 
 
 
