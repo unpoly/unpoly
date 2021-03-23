@@ -192,77 +192,43 @@ up.layer = do ->
     The default mode is `modal`. You can change this in `up.layer.config.mode`.
 
   @param {string} [options.position]
-    The position of the overlay relative to the `{ origin }` element that opened
+    The position of the popup relative to the `{ origin }` element that opened
     the overlay.
-
-    This option is only supported by the `popup` mode.
 
     Supported values are `'top'`,  `'right'`,  `'bottom'` and  `'left'`.
 
+    See [popup position](/customizing-overlays#popup-position).
+
   @param {string} [options.align]
-    The alignment of the overlay within its `{ position }`.
+    The alignment of the popup within its `{ position }`.
 
-    This option is only supported by the `popup` mode.
+    Supported values are `'top'`,  `'right'`, `'center'`, `'bottom'` and  `'left'`.
 
-    For popups with a `{ position }` of `'left'` or `'right'`, supported `{ align }` values
-    are `'top'`, `'center'` and `'bottom'`.
-
-    For popups with a `{ position }` of `'top'` or `'bottom'`, supported `{ align }` values
-    are `'left'`, `'center'` and `'right'`.
+    See [popup position](/customizing-overlays#popup-position).
 
   @param {string} [options.size]
     The size of the overlay.
 
     Supported values are `'small'`, `'medium'`, `'large'` and `'grow'`:
 
-    | Mode   | small | medium | large  | grow |
-    | -------| -----:| ------:| ------:|-----------------|
-    | `modal`  | `350px` | `650px` | `1000px` | grow with content |
-    | `popup`  | `180px` | `300px` | `550px`  | grow with content |
-    | `drawer` | `150px` | `340px` | `600px`  | grow with content |
-    | `cover`  | `100%`  | `100%`  | `100%`   | `100%` |
-
-    You can customize sizes with CSS:
-
-    ```css
-    up-modal[size=medium] up-modal-box {
-      width: 500px;
-    }
-    ```
-
-    Regardless of size, overlays never grow wider than the screen width.
+    @see customizing-overlays
 
   @param {string} [options.class]
-    An optional HTML class for the overlay.
+    An optional HTML class for the overlay's container element.
 
-    The class will be assigned to the overlay's container element:
-
-    ```html
-    <up-modal class="warning">
-      ...
-    </up-modal>
-    ```
+    @see customizing-overlays
 
   @param {boolean|string|Array<string>} [options.dismissable=true]
     How the overlay may be [dismissed](/closing-overlays) by the user.
 
-    The following values are supported:
+    Supported values are `'key'`, `'outside'` and `'button'`.
+    See [user dismiss controls](/closing-overlays#user-facing-dismiss-controls)
+    for details.
 
-    | Option      | Effect                                           | Dismiss value |
-    | ----------- | ------------------------------------------------ | ------------- |
-    | `'key'`     | Enables dimissing with Escape key                | `:key`        |
-    | `'outside'` | Enables dismissing by clicking on the background | `:outside`    |
-    | `'button'`  | Adds an "X" button to the layer                  | `:button`     |
+    You may enable multiple dismiss controls by passing an array or
+    a space-separated string.
 
-    You may pass multiple dismiss methods as an array (`['key', 'outside']`) or
-    as a space-separated string (`'key outside'`).
-
-    Passing `true` will enable all dismiss methods.
-
-    Passing `false` will disable all dismiss methods.
-
-    Regardless of what is configured here, an overlay may always be dismissed
-    using the `up.layer.dismiss()` method or `a[up-dismiss]` attribute.
+    Passing a boolean value will enable or disable all dismiss controls.
 
   @param {Function(Event)} [options.onOpened]
     A function that is called when the overlay was inserted into the DOM.
