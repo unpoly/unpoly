@@ -216,7 +216,7 @@ up.layer = do ->
     Supported values are `'small'`, `'medium'`, `'large'` and `'grow'`:
 
     | Mode   | small | medium | large  | grow |
-    | ------:| -----:| ------:| ------:|-----------------|
+    | -------| -----:| ------:| ------:|-----------------|
     | `modal`  | `350px` | `650px` | `1000px` | grow with content |
     | `popup`  | `180px` | `300px` | `550px`  | grow with content |
     | `drawer` | `150px` | `340px` | `600px`  | grow with content |
