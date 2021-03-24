@@ -98,8 +98,6 @@
   Named segments captured by the [URL pattern](/url-patterns) (`$id`) will
   become the overlay's *acceptance value*.
 
-  The `[up-on-accepted]` callback is called with an acceptance value.
-
   To *dismiss* an overlay once a given location is reached, use `[up-dismiss-location]` and `[up-on-dismissed]` in the same fashion.
 
 

@@ -626,6 +626,8 @@ up.link = do ->
   [Follows](/up.follow) this link with JavaScript and replaces a CSS selector
   on the current page with a corresponding element from the response.
 
+  Following a link is considered [navigation](/navigation) by default.
+
   \#\#\# Example
 
   This will update the fragment `<div class="main">` with the same element

@@ -56,8 +56,8 @@
   ```
 
 
-  Overlay size
-  ------------
+  Overlay sizes
+  -------------
 
   When opening an overlay you may pass an `[up-size]` attribute or `{ size }` option that give the overlay a width:
 

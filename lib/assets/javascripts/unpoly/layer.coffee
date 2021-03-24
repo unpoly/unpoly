@@ -20,7 +20,14 @@ up.layer = do ->
   OVERLAY_MODES = u.map(OVERLAY_CLASSES, 'mode')
   LAYER_CLASSES = [up.Layer.Root].concat(OVERLAY_CLASSES)
 
-  # TODO: Document up.layer.config
+  ###**
+  TODO: Document up.layer.config
+
+  TODO: Explain inheritance: up.layer.config.all => up.layer.config.overlay => up.layer.config.modal
+
+  @property up.layer.config
+  @stable
+  ###
   config = new up.Config ->
     newConfig =
       mode: 'modal'
@@ -152,10 +159,6 @@ up.layer = do ->
 
     return new Class(options)
 
-#  modeClass = (options = {}) ->
-#    mode = options.mode ? config.mode
-#    config[mode].Class or up.fail("Unknown layer mode: #{mode}")
-
   openCallbackAttr = (link, attr) ->
     return e.callbackAttr(link, attr, ['layer'])
 
@@ -168,55 +171,39 @@ up.layer = do ->
     handlers = u.filter(handlers, 'isDefault')
 
   ###**
+  Opens a new overlay.
+
   Opening a layer is considered [navigation](/navigation) by default.
 
-  TODO: await up.Layer object
+  \#\#\# Example
+
+  ```js
+  let layer = await up.layer.open({ url: '/contacts' })
+  console.log(layer.mode) // logs "modal"
+  ```
 
   @function up.layer.open
 
   @param {Object} [options]
     All [render options](/up.render) may be used.
 
+    You may configure default layer attributes in `up.layer.config`.
+
   @param {string} [options.mode]
     The kind of overlay to open.
 
-    The following mode values are supported:
-
-    | Mode      | Description                           |
-    | --------- | ------------------------------------- |
-    | `modal`   | A modal dialog box                    |
-    | `drawer`  | A drawer sliding in from the side     |
-    | `popup`   | A popup menu anchored to a link       |
-    | `cover`   | An overlay covering the entire screen |
-
-    The default mode is `modal`. You can change this in `up.layer.config.mode`.
-
-  @param {string} [options.position]
-    The position of the popup relative to the `{ origin }` element that opened
-    the overlay.
-
-    Supported values are `'top'`,  `'right'`,  `'bottom'` and  `'left'`.
-
-    See [popup position](/customizing-overlays#popup-position).
-
-  @param {string} [options.align]
-    The alignment of the popup within its `{ position }`.
-
-    Supported values are `'top'`,  `'right'`, `'center'`, `'bottom'` and  `'left'`.
-
-    See [popup position](/customizing-overlays#popup-position).
+    See [available layer modes](/layer-terminology#available-modes).
 
   @param {string} [options.size]
     The size of the overlay.
 
     Supported values are `'small'`, `'medium'`, `'large'` and `'grow'`:
-
-    @see customizing-overlays
+    See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
 
   @param {string} [options.class]
     An optional HTML class for the overlay's container element.
 
-    @see customizing-overlays
+    See [overlay classes](/customizing-overlays#overlay-classes).
 
   @param {boolean|string|Array<string>} [options.dismissable=true]
     How the overlay may be [dismissed](/closing-overlays) by the user.
@@ -228,7 +215,7 @@ up.layer = do ->
     You may enable multiple dismiss controls by passing an array or
     a space-separated string.
 
-    Passing a boolean value will enable or disable all dismiss controls.
+    Passing `true` or `false` will enable or disable all dismiss controls.
 
   @param {Function(Event)} [options.onOpened]
     A function that is called when the overlay was inserted into the DOM.
@@ -256,8 +243,7 @@ up.layer = do ->
     The [overlay result value](/closing-overlays#overlay-result-values)
     is the event object that caused the overlay to close.
 
-    Multiple event types may be passed as either an array of strings or as a
-    space-separated string.
+    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
 
   @param {string|Array<string>} [options.dismissEvent]
     One or more event types that will cause this overlay to automatically be
@@ -266,8 +252,7 @@ up.layer = do ->
     The [overlay result value](/closing-overlays#overlay-result-values)
     is the event object that caused the overlay to close.
 
-    Multiple event types may be passed as either an array of strings or as a
-    space-separated string.
+    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
 
   @param {string|Array<string>} [options.acceptLocation]
     One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
@@ -277,8 +262,7 @@ up.layer = do ->
     is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
     by the URL pattern.
 
-    Multiple URL patterns may be passed as either an array of strings or as a
-    space-separated string.
+    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
 
   @param {string|Array<string>} [options.dismissLocation]
     One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
@@ -288,11 +272,25 @@ up.layer = do ->
     is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
     by the URL pattern.
 
-    Multiple URL patterns may be passed as either an array of strings or as a
-    space-separated string.
+    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
 
   @param {Object} [options.context={}]
-    The initial context object for the new overlay.
+    The initial [context](/up.layer.context) object for the new overlay.
+
+  @param {string} [options.position]
+    The position of the popup relative to the `{ origin }` element that opened
+    the overlay.
+
+    Supported values are `'top'`,  `'right'`,  `'bottom'` and  `'left'`.
+
+    See [popup position](/customizing-overlays#popup-position).
+
+  @param {string} [options.align]
+    The alignment of the popup within its `{ position }`.
+
+    Supported values are `'top'`,  `'right'`, `'center'`, `'bottom'` and  `'left'`.
+
+    See [popup position](/customizing-overlays#popup-position).
 
   @return {Promise<up.Layer>}
     A promise for the `up.Layer` object that models the new overlay.
@@ -330,18 +328,37 @@ up.layer = do ->
   @experimental
   ###
 
-  # TODO: Docs for up.layer.ask()
-  #
-  #  It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-  #  which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
-  #
-  #  Instead of using `up.layer.open()` and passing callbacks, you may use `up.layer.ask()`.
-  #  `up.layer.ask()` returns a promise for the acceptance value, which you can `await`:
-  #
-  #  ```js
-  #  let user = await up.layer.ask({ url: '/users/new' })
-  #  console.log("New user is " + user)
-  #  ```
+  ###**
+  Opens an overlay and returns a promise for its [acceptance](/closing-overlays).
+
+  It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+  which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
+
+  \#\#\# Example
+
+  Instead of using `up.layer.open()` and passing callbacks, you may use `up.layer.ask()`.
+  `up.layer.ask()` returns a promise for the acceptance value, which you can `await`:
+
+  ```js
+  let user = await up.layer.ask({ url: '/users/new' })
+  console.log("New user is " + user)
+  ```
+
+  @see closing-overlays
+
+  @function up.layer.ask
+
+  @param {Object} options
+    See options for `up.layer.open()`.
+
+  @return {Promise}
+    A promise that will settle when the overlay closes.
+
+    When the overlay was accepted, the promise will fulfill with the overlay's acceptance value.
+    When the overlay was dismissed, the promise will reject with the overlay's dismissal value.
+
+  @stable
+  ###
   ask = (options) ->
     return new Promise (resolve, reject) ->
       options = u.merge options,
@@ -355,8 +372,6 @@ up.layer = do ->
   ###**
   [Follows](/a-up-follow) this link and opens the result in a new layer.
 
-  TODO: Defaults to up.layer.config
-
   \#\#\# Example
 
   ```html
@@ -364,24 +379,130 @@ up.layer = do ->
   ```
 
   @selector a[up-layer=new]
+
   @params-note
     All attributes for `a[up-follow]` may also be used.
-  @param [up-fail-layer]
-    @see server-errors
+
+    You may configure default layer attributes in `up.layer.config`.
+
   @param [up-mode]
-  @param [up-position]
-  @param [up-align]
+    The kind of overlay to open.
+
+    See [available layer modes](/layer-terminology#available-modes).
+
   @param [up-size]
+    The size of the overlay.
+
+    Supported values are `small`, `medium`, `large` and `grow`.
+    See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
+
   @param [up-class]
+    An optional HTML class for the overlay's container element.
+
+    See [overlay classes](/customizing-overlays#overlay-classes).
+
   @param [up-dismissable]
+    How the overlay may be [dismissed](/closing-overlays) by the user.
+
+    Supported values are `'key'`, `'outside'` and `'button'`.
+    See [user dismiss controls](/closing-overlays#user-facing-dismiss-controls)
+    for details.
+
+    You may enable multiple dismiss controls by passing a space-separated string.
+
+    Passing `true` or `false` will enable or disable all dismiss controls.
+
   @param [up-on-opened]
+    A JavaScript snippet that is called when the overlay was inserted into the DOM.
+
+    The snippet runs in the following scope:
+
+    | Expression | Value                                    |
+    |------------|------------------------------------------|
+    | `this`     | The link that opened the overlay         |
+    | `layer`    | An `up.Layer` object for the new overlay |
+    | `event`    | An `up:layer:opened` event               |
+
   @param [up-on-accepted]
+    A JavaScript snippet that is called when the overlay was [accepted](/closing-overlays).
+
+    The snippet runs in the following scope:
+
+    | Expression | Value                                         |
+    |------------|-----------------------------------------------|
+    | `this`     | The link that originally opened the overlay   |
+    | `layer`    | An `up.Layer` object for the accepted overlay |
+    | `value`    | The overlay's [acceptance value](/closing-overlays#overlay-result-values) |
+    | `event`    | An `up:layer:accepted` event                  |
+
   @param [up-on-dismissed]
+    A JavaScript snippet that is called when the overlay was [dismissed](/closing-overlays).
+
+    The snippet runs in the following scope:
+
+    | Expression | Value                                          |
+    |------------|------------------------------------------------|
+    | `this`     | The link that originally opened the overlay    |
+    | `layer`    | An `up.Layer` object for the dismissed overlay |
+    | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
+    | `event`    | An `up:layer:dismissed` event                   |
+
   @param [up-accept-event]
+    One or more event types that will cause this overlay to automatically be
+    [accepted](/closing-overlays) when a matching event occurs within the overlay.
+
+    The [overlay result value](/closing-overlays#overlay-result-values)
+    is the event object that caused the overlay to close.
+
+    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
+
   @param [up-dismiss-event]
+    One or more event types that will cause this overlay to automatically be
+    [dismissed](/closing-overlays) when a matching event occurs within the overlay.
+
+    The [overlay result value](/closing-overlays#overlay-result-values)
+    is the event object that caused the overlay to close.
+
+    See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
+
   @param [up-accept-location]
+    One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
+    [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+
+    The [overlay result value](/closing-overlays#overlay-result-values)
+    is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+    by the URL pattern.
+
+    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
+
   @param [up-dismiss-location]
+    One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
+    [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+
+    The [overlay result value](/closing-overlays#overlay-result-values)
+    is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+    by the URL pattern.
+
+    See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
+
   @param [up-context]
+    The new overlay's [context](/up.layer.context) object, encoded as JSON.
+
+  @param [up-position]
+    The position of the popup relative to the `{ origin }` element that opened
+    the overlay.
+
+    Supported values are `top`,  `right`,  `bottom` and  `left`.
+
+    See [popup position](/customizing-overlays#popup-position).
+
+  @param [up-align]
+    The alignment of the popup within its `{ position }`.
+
+    Supported values are `top`,  `right`, `center`, `bottom` and  `left`.
+
+    See [popup position](/customizing-overlays#popup-position).
+
   @stable
   ###
 
@@ -397,7 +518,7 @@ up.layer = do ->
   <a href='/dashboard' up-dismiss>Close</a>
   ```
 
-  \#\#\# Behavior in the root layer
+  \#\#\# Fallback for the root layer
 
   The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event's default action is prevented.
@@ -430,7 +551,7 @@ up.layer = do ->
   <a href='/users/5' up-accept='{ "id": 5 }'>Choose user #5</a>
   ```
 
-  \#\#\# Behavior in the root layer
+  \#\#\# Fallback for the root layer
 
   The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event's default action is prevented.
