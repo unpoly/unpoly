@@ -23,7 +23,30 @@ up.layer = do ->
   ###**
   Configures default attributes for new overlays.
 
-  All options for `up.layer.open()` may be configured.
+  All options for `up.layer.open()` may be configured. The configuration will also
+  be used for `a[up-layer=new]` links.
+
+  Defaults are configured separately for each [layer mode](/layer-terminology):
+
+  | Object                    | Effect                       |
+  |---------------------------|------------------------------|
+  | `up.layer.config.root`    | Defaults for the root layer  |
+  | `up.layer.config.modal`   | Defaults for modal overlays  |
+  | `up.layer.config.drawer`  | Defaults for drawer overlays |
+  | `up.layer.config.popup`   | Defaults for popup overlays  |
+  | `up.layer.config.cover`   | Defaults for cover overlays  |
+
+  For convenience you may configure options that affect all layer modes
+  or all overlay modes:
+
+  | Object                    | Effect                       |
+  |---------------------------|------------------------------|
+  | `up.layer.config.any`     | Defaults for all layers      |
+  | `up.layer.config.overlay` | Defaults for all overlays    |
+
+  Options configured in such a way are inherited.
+  E.g. when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
+  `up.layer.config.overlay` and `up.layer.config.any` will be used (in decreasing priority).
 
   \#\#\# Example
 
@@ -33,14 +56,14 @@ up.layer = do ->
   up.layer.config.modal.openAnimation = 'move-from-top'
   ```
 
+  To configure an additional [main target](/up.fragment.config#config.mainTargets)
+  for overlay of any mode:
+
+  ```js
+  up.layer.config.overlay.mainTargets.unshift('.content')
+  ```
+
   \#\#\# Configuration inheritance
-
-  For convenience you may configure options that affect all layers in `up.layer.config.any`.
-  Options that affect all overlays (but not the root layer) may be configured in `up.layer.config.overlay`.
-
-  Options configured in such a way are inherited.
-  E.g. when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
-  `up.layer.config.overlay` and `up.layer.config.any` will be used (in decreasing priority).
 
   @property up.layer.config
 
@@ -65,7 +88,8 @@ up.layer = do ->
   @param {object} up.layer.config.overlay
     Defaults for all [overlays](/layer-terminology).
 
-    In addition to the options documented here, all options for `up.layer.open()` may also be configured.
+    In addition to the options documented here,
+    all options for `up.layer.open()` may also be configured.
 
     Inherits from `up.layer.config.any`.
 

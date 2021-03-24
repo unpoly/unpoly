@@ -71,7 +71,7 @@ up.fragment = do ->
     The default configuration tries, in this order:
 
     - If the URL has a `#hash`, scroll to the hash.
-    - If updating a [main target](/up.fragment.config.mainTargets), reset scroll positions.
+    - If updating a [main target](/up.fragment.config#config.mainTargets), reset scroll positions.
 
   @param {boolean|string|Function(Element)} config.autoFocus
     How to focus when updating a fragment with `{ focus: 'auto' }`.
@@ -83,14 +83,14 @@ up.fragment = do ->
     - Focus a `#hash` in the URL.
     - Focus an `[autofocus]` element in the new fragment.
     - If focus was lost with the old fragment, focus the new fragment.
-    - If updating a [main target](/up.fragment.config.mainTargets), focus the new fragment.
+    - If updating a [main target](/up.fragment.config#config.mainTargets), focus the new fragment.
 
   @param {boolean} config.runScripts=false
     Whether to execute `<script>` tags in updated fragments.
 
     Scripts will load asynchronously, with no guarantee of execution order.
 
-    If you set this to `true`, mind that a default [main target](/up.fragment.config.mainTargets)
+    If you set this to `true`, mind that a default [main target](/up.fragment.config#config.mainTargets)
     is the `<body>` element. If you are including your script at the end of your `<body>`
     for performance reasons, swapping the `<body>` will re-execute these scripts.
     Consider configuring a different main target that does not include scripts.
@@ -368,7 +368,7 @@ up.fragment = do ->
 
     If set to `'auto'` history will be updated if the `{ target }` matches
     a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/up.fragment.config.mainTargets).
+    [main targets](/up.fragment.config#config.mainTargets).
 
     If set to `false`, the history will remain unchanged.
 
