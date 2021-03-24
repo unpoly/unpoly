@@ -28,9 +28,7 @@ Release process
 Remaining feature work
 ======================
 
-- Explain unpoly-migrate.js in docs
-  - Also in the changelog
-  - For upgrades > 2.0
+- dismissable value: 'button' => 'icon'
 
 
 Tests

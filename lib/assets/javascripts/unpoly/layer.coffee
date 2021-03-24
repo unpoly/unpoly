@@ -21,11 +21,108 @@ up.layer = do ->
   LAYER_CLASSES = [up.Layer.Root].concat(OVERLAY_CLASSES)
 
   ###**
-  TODO: Document up.layer.config
+  Configures default attributes for new overlays.
 
-  TODO: Explain inheritance: up.layer.config.all => up.layer.config.overlay => up.layer.config.modal
+  All options for `up.layer.open()` may be configured.
+
+  \#\#\# Example
+
+  To make all modal overlays move in from beyond the top edge of the screen:
+
+  ```js
+  up.layer.config.modal.openAnimation = 'move-from-top'
+  ```
+
+  \#\#\# Configuration inheritance
+
+  For convenience you may configure options that affect all layers in `up.layer.config.any`.
+  Options that affect all overlays (but not the root layer) may be configured in `up.layer.config.overlay`.
+
+  Options configured in such a way are inherited.
+  E.g. when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
+  `up.layer.config.overlay` and `up.layer.config.any` will be used (in decreasing priority).
 
   @property up.layer.config
+
+  @param {string} up.layer.config.mode='modal'
+    The default mode used when opening a new overlay without a given mode.
+
+  @param {object} up.layer.config.any
+    Attributes for all kinds of layers (root layer and any kind of overlay).
+
+  @param {Array<string>} up.layer.config.any.mainTargets
+    An array of CSS selectors matching default render targets.
+
+    This is an alias for `up.fragment.config.mainTargets`.
+
+  @param {object} up.layer.config.root
+    Attributes for the [root layer](/layer-terminology).
+
+    Inherits from `up.layer.config.any`.
+
+  @param {object} up.layer.config.root.mainTargets
+
+  @param {object} up.layer.config.overlay
+    Defaults for all [overlays](/layer-terminology).
+
+    In addition to the options documented here, all options for `up.layer.open()` may also be configured.
+
+    Inherits from `up.layer.config.any`.
+
+  @param {string|Function} up.layer.config.overlay.openAnimation
+    The opening animation.
+
+  @param {number} up.layer.config.overlay.openDuration
+    The duration of the opening animation.
+
+  @param {string} up.layer.config.overlay.openEasing
+    The easing function for the opening animation.
+
+  @param {string|Function} up.layer.config.overlay.closeAnimation
+    The closing animation.
+
+  @param {number} up.layer.config.overlay.closeDuration
+    The duration of the closing animation.
+
+  @param {string} up.layer.config.overlay.closeEasing
+    The easing function for the opening animation.
+
+  @param {string} up.layer.config.overlay.dismissLabel
+    The symbol for the dismiss icon in the top-right corner.
+
+  @param {string} up.layer.config.overlay.dismissAriaLabel
+    The accessibility label for the dismiss icon in the top-right corner.
+
+  @param {string|boolean} up.layer.config.overlay.history='auto'
+    Whether the layer's location or title will be visible in the browser's
+    address bar and window title.
+
+    If set to `'auto'`, the overlay will render history if its initial fragment
+    is an [auto history target](/up.fragment.config.autoHistory).
+
+    If set to `true`, the overlay will always render history.
+    If set to `false`, the overlay will never render history.
+
+  @param {object} up.layer.config.modal
+    Defaults for [modal overlays](/layer-terminology).
+
+    Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
+
+  @param {object} up.layer.config.cover
+    Defaults for [cover overlays](/layer-terminology).
+
+    Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
+
+  @param {object} up.layer.config.drawer
+    Defaults for [drawer overlays](/layer-terminology).
+
+    Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
+
+  @param {object} up.layer.config.popup
+    Defaults for [popup overlays](/layer-terminology).
+
+    Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
+
   @stable
   ###
   config = new up.Config ->
@@ -216,6 +313,9 @@ up.layer = do ->
     a space-separated string.
 
     Passing `true` or `false` will enable or disable all dismiss controls.
+
+  @param {string|Function} [options.animation]
+    The opening animation.
 
   @param {Function(Event)} [options.onOpened]
     A function that is called when the overlay was inserted into the DOM.
@@ -411,6 +511,9 @@ up.layer = do ->
     You may enable multiple dismiss controls by passing a space-separated string.
 
     Passing `true` or `false` will enable or disable all dismiss controls.
+
+  @param [up-animation]
+    The name of the opening animation.
 
   @param [up-on-opened]
     A JavaScript snippet that is called when the overlay was inserted into the DOM.

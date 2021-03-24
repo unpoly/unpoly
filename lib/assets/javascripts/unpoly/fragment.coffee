@@ -25,7 +25,7 @@ up.fragment = do ->
   @property up.fragment.config
 
   @param {Array<string>} config.mainTargets=['[up-main]', 'main', ':layer']
-    An array of CSS selectors for default targets.
+    An array of CSS selectors matching default render targets.
 
     When no other render target is given, Unpoly will try to find and replace a main target.
 
@@ -39,6 +39,8 @@ up.fragment = do ->
     the topmos swappable element is the `<body>`. For an overlay
     it is the target with which the overlay was opened with.
 
+    This property is aliased as [`up.layer.config.any.mainTargets`](up.layer.config#config.any.mainTargets).
+
   @param {Array<string|RegExp>} config.badTargetClasses
     An array of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
@@ -47,8 +49,6 @@ up.fragment = do ->
 
   @param {Object} config.navigateOptions
     An object of default options to apply when [navigating](/navigation).
-
-    See `up.navigate()` for a table of default navigate options and their effects.
 
   @param {boolean} config.matchAroundOrigin
     Whether to match an existing fragment around the triggered link.

@@ -154,6 +154,19 @@
   available to the user.
 
 
+  Customizing the dismiss icon
+  ----------------------------
+
+  Most overlay modes have an icon in the top-right corner that dismisses the dialog.
+
+  You may change the symbol and accessibility label for that icon:
+
+  ```js
+  up.layer.config.overlay.dismissLabel // => '×'
+  up.layer.config.overlay.dismissAriaLabel // => 'Dismiss dialog'
+  ```
+
+
   Popup position
   --------------
 
