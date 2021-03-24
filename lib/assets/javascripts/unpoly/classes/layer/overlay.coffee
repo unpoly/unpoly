@@ -141,7 +141,6 @@ class up.Layer.Overlay extends up.Layer
             @onOutsideClicked(event, true)
 
     if @supportsDismissMethod('key')
-      console.log("*** binding escape")
       @unbindEscapePressed = up.event.onEscape((event) => @onEscapePressed(event))
 
     # <a up-accept="value">OK</a>
