@@ -600,9 +600,9 @@ up.motion = do ->
   @selector a[up-transition]
   @params-note
     All attributes for `a[up-follow]` may also be used.
-  @param {string} [up-transition]
+  @param [up-transition]
     The name of a [predefined transition](/up.morph#named-transitions).
-  @param {string} [up-fail-transition]
+  @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
     @see server-errors
@@ -623,9 +623,9 @@ up.motion = do ->
   @selector form[up-transition]
   @params-note
     All attributes for `form[up-submit]` may also be used.
-  @param {string} [up-transition]
+  @param [up-transition]
     The name of a [predefined transition](/up.morph#named-transitions).
-  @param {string} [up-fail-transition]
+  @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
     @see server-errors

@@ -658,7 +658,7 @@ up.fragment = do ->
   element will be destroyed and replaced by a fragment from the response.
 
   @selector [up-keep]
-  @param {string} up-on-keep
+  @param up-on-keep
     Code to run before an existing element is kept during a page update.
 
     The code may use the variables `event` (see `up:fragment:keep`),
@@ -1338,7 +1338,7 @@ up.fragment = do ->
       // returns '[up-id="link-to-home"]'
 
   @selector [up-id]
-  @param {string} up-id
+  @param up-id
     A string that uniquely identifies this element.
   @stable
   ###

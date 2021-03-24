@@ -454,7 +454,7 @@ up.syntax = do ->
       })
 
   @selector [up-data]
-  @param {string} up-data
+  @param up-data
     A serialized JSON string
   @stable
   ###

@@ -531,9 +531,9 @@ up.event = do ->
       </script>
 
   @selector a[up-emit]
-  @param {string} up-emit
+  @param up-emit
     The type of the event to be emitted.
-  @param {string} up-emit-props
+  @param up-emit-props
     The event properties, serialized as JSON.
   ###
   executeEmitAttr = (event, element) ->

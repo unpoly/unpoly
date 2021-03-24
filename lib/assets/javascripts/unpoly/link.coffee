@@ -664,15 +664,15 @@ up.link = do ->
   while the link is loading.
 
   @selector a[up-follow]
-  @param {string} [up-method='get']
+  @param [up-method='get']
     The HTTP method to use for the request.
   @param [up-fail-target='body']
     The selector to replace if the server responds with an error.
-  @param {string} [up-fallback]
+  @param [up-fallback]
     The selector to update when the original target was not found in the page.
-  @param {string} [up-transition='none']
+  @param [up-transition='none']
     The [transition](/up.motion) to use for morphing between the old and new elements.
-  @param {string} [up-confirm]
+  @param [up-confirm]
     A message that will be displayed in a cancelable confirmation dialog
     before the link is followed.
   @stable
@@ -729,7 +729,7 @@ up.link = do ->
       <a href="/users" up-target=".main" up-instant up-preload>User list</a>
 
   @selector a[up-dash]
-  @param {string} [up-dash='body']
+  @param [up-dash='body']
     The CSS selector to replace
 
     Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
@@ -777,7 +777,7 @@ up.link = do ->
   [It's OK to put block elements inside an anchor tag](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
 
   @selector [up-expand]
-  @param {string} [up-expand]
+  @param [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
     If omitted, the first link in this element will be expanded.

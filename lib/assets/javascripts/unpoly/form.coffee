@@ -552,11 +552,11 @@ up.form = do ->
   the submission is loading.
 
   @selector form[up-submit]
-  @param {string} up-target
+  @param up-target
     The CSS selector to [replace](/up.replace) if the form submission is successful (200 status code).
 
     Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-fail-target]
+  @param [up-fail-target]
     The CSS selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
 
     Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
@@ -564,9 +564,9 @@ up.form = do ->
     If omitted, Unpoly will replace the `<form>` tag itself, assuming that the server has echoed the form with validation errors.
   @param [up-fallback]
     The selector to replace if the server responds with an error.
-  @param {string} [up-transition]
+  @param [up-transition]
     The animation to use when the form is replaced after a successful submission.
-  @param {string} [up-fail-transition]
+  @param [up-fail-transition]
     The animation to use when the form is replaced after a failed submission.
   @param [up-history]
     Whether to push a browser history entry after a successful form submission.
@@ -576,27 +576,27 @@ up.form = do ->
 
     Set this to `'false'` to prevent the URL bar from being updated.
     Set this to a URL string to update the history with the given URL.
-  @param {string} [up-method]
+  @param [up-method]
     The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
     Alternately you can use an attribute `data-method`
     ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
     or `method` (vanilla HTML) for the same purpose.
-  @param {string} [up-layer='auto']
+  @param [up-layer='auto']
     The name of the layer that ought to be updated. Valid values are
     `'auto'`, `'page'`, `'modal'` and `'popup'`.
 
     If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
     If no match was found in that layer,
     Unpoly will search in other layers, starting from the topmost layer.
-  @param {string} [up-fail-layer='auto']
+  @param [up-fail-layer='auto']
     The name of the layer that ought to be updated if the server sends a
     non-200 status code.
-  @param {string} [up-reveal='true']
+  @param [up-reveal='true']
     Whether to reveal the target element after it was replaced.
 
     You can also pass a CSS selector for the element to reveal.
     Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-fail-reveal='true']
+  @param [up-fail-reveal='true']
     Whether to reveal the target element when the server responds with an error.
 
     You can also pass a CSS selector for the element to reveal. You may use this, for example,
@@ -607,10 +607,10 @@ up.form = do ->
         </form>
 
     Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param {string} [up-restore-scroll='false']
+  @param [up-restore-scroll='false']
     Whether to restore previously known scroll position of all viewports
     within the target selector.
-  @param {string} [up-cache]
+  @param [up-cache]
     Whether to force the use of a cached response (`true`)
     or never use the cache (`false`)
     or make an educated guess (`undefined`).
@@ -773,7 +773,7 @@ up.form = do ->
   `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
 
   @selector input[up-validate]
-  @param {string} up-validate
+  @param up-validate
     The CSS selector to update with the server response.
 
     This defaults to a fieldset or form group around the validating field.
@@ -787,7 +787,7 @@ up.form = do ->
   `up.form.config.validateTargets` array.
 
   @selector form[up-validate]
-  @param {string} up-validate
+  @param up-validate
     The CSS selector to update with the server response.
 
     This defaults to a fieldset or form group around the changing field.
@@ -883,7 +883,7 @@ up.form = do ->
       </div>
 
   @selector input[up-switch]
-  @param {string} up-switch
+  @param up-switch
     A CSS selector for elements whose visibility depends on this field's value.
   @stable
   ###
@@ -894,7 +894,7 @@ up.form = do ->
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
 
   @selector [up-show-for]
-  @param {string} [up-show-for]
+  @param [up-show-for]
     A space-separated list of input values for which this element should be shown.
   @stable
   ###
@@ -905,7 +905,7 @@ up.form = do ->
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
 
   @selector [up-hide-for]
-  @param {string} [up-hide-for]
+  @param [up-hide-for]
     A space-separated list of input values for which this element should be hidden.
   @stable
   ###
@@ -958,9 +958,9 @@ up.form = do ->
       </div>
 
   @selector input[up-observe]
-  @param {string} up-observe
+  @param up-observe
     The code to run when the field's value changes.
-  @param {string} up-delay
+  @param up-delay
     The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
@@ -994,9 +994,9 @@ up.form = do ->
   | `$field` | `jQuery`  | The form field as a jQuery collection |
 
   @selector form[up-observe]
-  @param {string} up-observe
+  @param up-observe
     The code to run when any field's value changes.
-  @param {string} up-delay
+  @param up-delay
     The number of miliseconds to wait after a change before the code is run.
   @stable
   ###
@@ -1034,7 +1034,7 @@ up.form = do ->
       </div>
 
   @selector input[up-autosubmit]
-  @param {string} up-delay
+  @param up-delay
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
@@ -1057,7 +1057,7 @@ up.form = do ->
       </form>
 
   @selector form[up-autosubmit]
-  @param {string} up-delay
+  @param up-delay
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
