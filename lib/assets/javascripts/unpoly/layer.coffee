@@ -366,34 +366,84 @@ up.layer = do ->
   @selector a[up-layer=new]
   @params-note
     All attributes for `a[up-follow]` may also be used.
-  @param {string} [up-fail-layer]
+  @param [up-fail-layer]
     @see server-errors
-  @param {string} [up-mode]
-  @param {string} [up-position]
-  @param {string} [up-align]
-  @param {string} [up-size]
-  @param {string} [up-class]
-  @param {string} [up-dismissable]
-  @param {string} [up-on-opened]
-  @param {string} [up-on-accepted]
-  @param {string} [up-on-dismissed]
-  @param {string} [up-accept-event]
-  @param {string} [up-dismiss-event]
-  @param {string} [up-accept-location]
-  @param {string} [up-dismiss-location]
-  @param {string} [up-context]
+  @param [up-mode]
+  @param [up-position]
+  @param [up-align]
+  @param [up-size]
+  @param [up-class]
+  @param [up-dismissable]
+  @param [up-on-opened]
+  @param [up-on-accepted]
+  @param [up-on-dismissed]
+  @param [up-accept-event]
+  @param [up-dismiss-event]
+  @param [up-accept-location]
+  @param [up-dismiss-location]
+  @param [up-context]
   @stable
   ###
 
   ###**
+  [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
+
+  The JSON value of the `[up-accept]` attribute becomes the overlay's
+  [dismissal value](/closing-overlays#overlay-result-values).
+
+  \#\#\# Example
+
+  ```html
+  <a href='/dashboard' up-dismiss>Close</a>
+  ```
+
+  \#\#\# Behavior in the root layer
+
+  The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
+  In an overlay the `click` event's default action is prevented.
+
+  You can also omit the `[href]` attribute to make a link that only works in overlays.
+
   @selector a[up-dismiss]
   @param [up-dismiss]
+    The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a JSON string.
+  @param [up-animation]
+    The overlay's close animation.
+
+    Defaults to overlay's [preconfigured close animation](/up.layer.config).
+  @param [up-duration]
+    The close animation's duration in milliseconds.
+  @param [up-easing]
+    The close animation's easing function.
   @stable
   ###
 
   ###**
+  [Accepts](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
+
+  The JSON value of the `[up-accept]` attribute becomes the overlay's
+  [acceptance value](/closing-overlays#overlay-result-values).
+
+  \#\#\# Example
+
+  ```html
+  <a href='/users/5' up-accept='{ "id": 5 }'>Choose user #5</a>
+  ```
+
+  \#\#\# Behavior in the root layer
+
+  The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
+  In an overlay the `click` event's default action is prevented.
+
+  You can also omit the `[href]` attribute to make a link that only works in overlays.
+
   @selector a[up-accept]
   @param [up-accept]
+    The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a JSON string.
+  @param [up-duration]
+    The close animation's duration in milliseconds.
+  @param [up-easing]
+    The close animation's easing function.
   @stable
   ###
 
