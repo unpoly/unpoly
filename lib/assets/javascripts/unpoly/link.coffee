@@ -220,15 +220,9 @@ up.link = do ->
   Parses the `render()` options that would be used to
   [`follow`](/up.follow) the given link, but does not [render](/up.render).
 
+  @function up.link.followOptions
   @param {Element|jQuery|string} link
     The link to follow.
-  @param {Object} [options]
-    Additional options for the form submissions.
-
-    Will override any attribute values set on the given link element.
-
-    See `up.render()` for detailed documentation of individual option properties.
-  @function up.link.followOptions
   @return {Object}
   @stable
   ###
@@ -633,50 +627,86 @@ up.link = do ->
   This will update the fragment `<div class="main">` with the same element
   fetched from `/posts/5`:
 
-      <a href="/posts/5" up-target=".main">Read post</a>
+      <a href="/posts/5" up-follow up-target=".main">Read post</a>
 
   \#\#\# Advanced fragment changes
 
   See [fragment placement](/fragment-placement) for advanced use cases
   like updating multiple fragments or appending content to an existing element.
 
-  @selector a[up-target]
-  @params-note All attributes from `a[up-follow]` may be used.
-  @stable
-  ###
+  \#\#\# Short notation
 
-  ###**
-  Fetches this link's `[href]` with JavaScript and [replaces](/up.replace) the
-  current `<body>` element with the response's `<body>` element.
+  You may omit the `[up-follow]` attribute if the link has one of the following attributes:
 
-  To only update a fragment with a given selector, see `a[up-target]`.
+  - `[up-target]`
+  - `[up-layer]`
+  - `[up-transition]`
+  - `[up-content]`
+  - `[up-fragment]`
+  - `[up-document]'
 
-  \#\#\# Example
-
-      <a href="/users" up-follow>User list</a>
-
-  \#\#\# Advanced fragment changes
-
-  See [fragment placement](/fragment-placement) for advanced use cases
-  like updating multiple fragments or appending content to an existing element.
-
-  \#\#\# Giving feedback while the link is loading
-
-  The link element will be assigned a CSS class [`up-active`](/form.up-active)
-  while the link is loading.
+  Such a link will still be followed through Unpoly.
 
   @selector a[up-follow]
-  @param [up-method='get']
-    The HTTP method to use for the request.
-  @param [up-fail-target='body']
-    The selector to replace if the server responds with an error.
+
+  @param [up-target]
+
   @param [up-fallback]
-    The selector to update when the original target was not found in the page.
-  @param [up-transition='none']
-    The [transition](/up.motion) to use for morphing between the old and new elements.
+
+  @param [up-navigate=true]
+
+  @param [up-method]
+
+    data-method works as well
+
+  @param [up-params]
+
+  @param [up-headers]
+
+  @param [up-fragment]
+
+  @param [up-document]
+
+  @param [up-fail]
+
+  @param [up-history]
+
+  @param [up-title]
+
+  @param [up-location]
+
+  @param [up-transition]
+
+  @param [up-animation]
+
+  @param [up-duration]
+
+  @param [up-cache]
+
+  @param [up-clear-cache]
+
+  @param [up-layer]
+
+  @param [up-peel]
+
+  @param [up-peel]
+
+  @param [up-context]
+
+  @param [up-keep]
+
+  @param [up-hungry]
+
+  @param [up-scroll]
+
+  @param [up-focus]
+
   @param [up-confirm]
-    A message that will be displayed in a cancelable confirmation dialog
-    before the link is followed.
+
+  @param [up-on-loaded]
+
+  @param [up-on-finished]
+
   @stable
   ###
   up.on 'up:click', fullFollowSelector, (event, link) ->
@@ -685,6 +715,8 @@ up.link = do ->
       up.log.muteRejection follow(link)
 
   ###**
+  TODO: Explain that this generates an up:click event, works on any elements, can can be used to accelerate links
+
   By adding an `up-instant` attribute to a link, the destination will be
   fetched on `mousedown` instead of `click` (`mouseup`).
 
@@ -700,8 +732,6 @@ up.link = do ->
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  `[up-instant]` will also work for links that open [overlays](/up.layer).
-
   \#\#\# Accessibility
 
   If the user activates an element using their keyboard, the `up:click` event will be emitted
@@ -712,7 +742,7 @@ up.link = do ->
   ###
 
   ###**
-  [Follows](/up.follow) this link *as fast as possible*.
+  [Follows](/up.follow) this link as fast as possible.
 
   This is done by:
 

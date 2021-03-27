@@ -551,71 +551,21 @@ up.form = do ->
   The `<form>` element will be assigned a CSS class [`up-active`](/form.up-active) while
   the submission is loading.
 
+  \#\#\# Short notation
+
+  You may omit the `[up-submit]` attribute if the form has one of the following attributes:
+
+  - `[up-target]`
+  - `[up-layer]`
+  - `[up-transition]`
+
+  Such a form will still be submitted through Unpoly.
+
   @selector form[up-submit]
-  @param up-target
-    The CSS selector to [replace](/up.replace) if the form submission is successful (200 status code).
 
-    Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param [up-fail-target]
-    The CSS selector to [replace](/up.replace) if the form submission is not successful (non-200 status code).
+  @params-note
+    All attributes for `a[up-follow]` may also be used.
 
-    Inside the CSS selector you may refer to this form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-
-    If omitted, Unpoly will replace the `<form>` tag itself, assuming that the server has echoed the form with validation errors.
-  @param [up-fallback]
-    The selector to replace if the server responds with an error.
-  @param [up-transition]
-    The animation to use when the form is replaced after a successful submission.
-  @param [up-fail-transition]
-    The animation to use when the form is replaced after a failed submission.
-  @param [up-history]
-    Whether to push a browser history entry after a successful form submission.
-
-    By default the form's target URL is used. If the form redirects to another URL,
-    the redirect target will be used.
-
-    Set this to `'false'` to prevent the URL bar from being updated.
-    Set this to a URL string to update the history with the given URL.
-  @param [up-method]
-    The HTTP method to be used to submit the form (`get`, `post`, `put`, `delete`, `patch`).
-    Alternately you can use an attribute `data-method`
-    ([Rails UJS](https://github.com/rails/jquery-ujs/wiki/Unobtrusive-scripting-support-for-jQuery))
-    or `method` (vanilla HTML) for the same purpose.
-  @param [up-layer='auto']
-    The name of the layer that ought to be updated. Valid values are
-    `'auto'`, `'page'`, `'modal'` and `'popup'`.
-
-    If set to `'auto'` (default), Unpoly will try to find a match in the form's layer.
-    If no match was found in that layer,
-    Unpoly will search in other layers, starting from the topmost layer.
-  @param [up-fail-layer='auto']
-    The name of the layer that ought to be updated if the server sends a
-    non-200 status code.
-  @param [up-reveal='true']
-    Whether to reveal the target element after it was replaced.
-
-    You can also pass a CSS selector for the element to reveal.
-    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param [up-fail-reveal='true']
-    Whether to reveal the target element when the server responds with an error.
-
-    You can also pass a CSS selector for the element to reveal. You may use this, for example,
-    to reveal the first validation error message:
-
-        <form up-target=".content" up-fail-reveal=".error">
-          ...
-        </form>
-
-    Inside the CSS selector you may refer to the form as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @param [up-restore-scroll='false']
-    Whether to restore previously known scroll position of all viewports
-    within the target selector.
-  @param [up-cache]
-    Whether to force the use of a cached response (`true`)
-    or never use the cache (`false`)
-    or make an educated guess (`undefined`).
-
-    By default only responses to `GET` requests are cached for a few minutes.
   @stable
   ###
   up.on 'submit', fullSubmitSelector, (event, form) ->
