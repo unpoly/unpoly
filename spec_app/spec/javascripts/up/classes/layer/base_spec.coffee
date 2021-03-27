@@ -98,7 +98,7 @@ describe 'up.Layer', ->
       makeLayers(2)
 
       next ->
-        expect(up.layer.stack.length).toBe(2)
+        expect(up.layer.count).toBe(2)
 
         up.layer.front.emit('foo')
         expect(targets).toEqual [up.layer.front.element]
@@ -127,12 +127,12 @@ describe 'up.Layer', ->
       makeLayers(4)
 
       next ->
-        expect(up.layer.stack.length).toBe(4)
+        expect(up.layer.count).toBe(4)
         secondLayer = up.layer.get(1)
         secondLayer.peel()
 
       next ->
-        expect(up.layer.stack.length).toBe(2)
+        expect(up.layer.count).toBe(2)
 
     it 'uses a dismissal value :peel', asyncSpec (next) ->
       listener = jasmine.createSpy('dismiss listener')

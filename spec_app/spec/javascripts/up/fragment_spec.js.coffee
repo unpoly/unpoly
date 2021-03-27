@@ -48,7 +48,7 @@ describe 'up.fragment', ->
           makeLayers [{ target: '.element' }, { target: '.element' }]
 
           next ->
-            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.count).toBe(2)
             result = up.fragment.get('.element', layer: 'root')
 
             expect(up.layer.get(result)).toBe(up.layer.get(0))
@@ -57,7 +57,7 @@ describe 'up.fragment', ->
           makeLayers [{ target: '.element' }, { target: '.element' }]
 
           next ->
-            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.count).toBe(2)
             result = up.fragment.get('.element')
 
             expect(up.layer.get(result)).toBe(up.layer.get(1))

@@ -28,7 +28,44 @@ Release process
 Remaining feature work
 ======================
 
+- up.layer.dismissAll() should stop dismissing when an overlay prevents its closing
+
+- Replace whenEmitted and whenConfirmed with ensureEmitted and ensureConfirmed, which raise an error
+  - This way we can use this in both sync and async functions
+
+- up.render() should have sync side effects when called with local contents
+
+- Support [up-confirm] for [up-accept] ?
+
 - dismissable value: 'button' => 'icon'
+
+- can accept() and dismiss() and dismissAll() and destroy() and peel() be synchronous methods?
+  - yes, they could
+  - they currently do all their work synchronously and then return Promise.resolve(). exceptions are converted to rejected promises.
+  - i don't know why I kept them async. maybe for symmetry with up.render(). and up.render() would need to be sometimes-sync.
+    - up.render() already has a sync effect for local content, but we still convert errors to rejected promises
+    - it would be weird to make exception handling dependent on { url } vs { content }.
+  - maybe we wanted to keep our options open for the future
+    - what could this be?
+    - calling other async functions?
+    - async event handlers?
+    - some future feature that talks to the network?
+  - it would make code shorter!
+
+- How to open an exclusive overlay?
+  - Rename { currentLayer } to { baseLayer }
+  - up.layer.dismissAll(); up.layer.open()
+- Docs: Target options may use &
+- Is there a use case for { layer: 'swap' }?
+  - Either document it or remove it
+- Do we want to keep shortcut [up-layer="drawer"]?
+  - Our deprecation warnings use this
+- Document { preventable } option for dismiss() and accept()
+
+- Test that that all layer methods manipulate the stack in sync (open with local content, dismiss, accept, peel, peeling while opening, peeling while updating)
+  - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
+  - It's OK for animations to run async after that
+
 
 
 Tests
@@ -168,9 +205,6 @@ Tests
 - Test non-standard failOptions:
   - failOptions: mirror
   - failOptions: inherit
-- Test that that all layer methods manipulate the stack in sync (open with local content, dismiss, accept, peel, peeling while opening, peeling while updating)
-  - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
-  - It's OK for animations to run async after that
 - Test that ResetWorld is actually happening
 - Test that up.render({ content: 'foo' }) works when 'foo' is just text, without a wrapping tag
 - Test that we can submit a form into a new layer (success / fail)

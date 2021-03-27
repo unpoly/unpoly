@@ -39,7 +39,7 @@ describe 'up.layer', ->
           up.layer.open(target: '.element', url: '/path')
 
           next =>
-            expect(up.layer.stack.length).toBe(1)
+            expect(up.layer.count).toBe(1)
             expect(@lastRequest().url).toMatchURL('/path')
 
             @respondWith('<div class="element other-class">element text</div>')
@@ -108,7 +108,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.count).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -123,7 +123,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.count).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -138,7 +138,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.count).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -152,7 +152,7 @@ describe 'up.layer', ->
           )
 
           layerPromise.then ->
-            expect(up.layer.stack.length).toBe(2)
+            expect(up.layer.count).toBe(2)
 
             element = document.querySelector('up-modal .element')
             expect(element).toBeGiven()
@@ -847,15 +847,6 @@ describe 'up.layer', ->
               value = { location: u.normalizeURL('/dismissable-location') }
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
-    describe 'up.layer.dismiss()', ->
-
-      it 'closes the current layer', ->
-        dismissSpy = spyOn(up.layer.current, 'dismiss')
-        up.layer.dismiss(option: 'value')
-        expect(dismissSpy).toHaveBeenCalledWith(option: 'value')
-
-      it 'manipulates the layer stack synchronously'
-
     describe 'up.layer.accept()', ->
 
       it 'closes the current layer', ->
@@ -863,7 +854,56 @@ describe 'up.layer', ->
         up.layer.accept(option: 'value')
         expect(acceptSpy).toHaveBeenCalledWith(option: 'value')
 
-      it 'manipulates the layer stack synchronously'
+      # There are more specs for up.Layer.Overlay#accept()
+
+    describe 'up.layer.dismiss()', ->
+
+      it 'closes the current layer', ->
+        dismissSpy = spyOn(up.layer.current, 'dismiss')
+        up.layer.dismiss(option: 'value')
+        expect(dismissSpy).toHaveBeenCalledWith(option: 'value')
+
+    # There are more specs for up.Layer.Overlay#dismiss()
+
+    describe 'up.layer.dismissAll()', ->
+
+      it 'dismisses all overlays', asyncSpec (next) ->
+        makeLayers(3)
+
+        next ->
+          expect(up.layer.count).toBe(3)
+
+          up.layer.dismissAll()
+
+        next ->
+          expect(up.layer.count).toBe(1)
+          expect(up.layer.isRoot()).toBe(true)
+
+      it 'manipulates the layer stack synchronously', asyncSpec (next) ->
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.count).toBe(2)
+
+          up.layer.dismissAll()
+
+          expect(up.layer.count).toBe(1)
+
+      it 'does nothing when no overlay is open', ->
+        dismissAll = -> up.layer.dismissAll()
+        expect(dismissAll).not.toThrowError()
+
+#      it 'stops dismissing overlays when any overlay prevents its dismissal', asyncSpec (next) ->
+#        makeLayers(5)
+#
+#        next ->
+#          # The third layer will prevent its dismissal
+#          up.layer.get(2).on('up:layer:dismiss', (event) -> event.preventDefault())
+#
+#          up.layer.dismissAll()
+#
+#        next ->
+#          expect(up.layer.count).toBe(3)
 
     describe 'up.layer.get()', ->
 
@@ -923,10 +963,21 @@ describe 'up.layer', ->
 
       it 'returns an array-like object of all layers, starting with the root layer, for easy access to the entire stack', (done) ->
         makeLayers(2).then ->
-          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.count).toBe(2)
           expect(up.layer.stack[0]).toBe(up.layer.root)
           expect(up.layer.stack[1]).toBe(up.layer.front)
           done()
+
+    describe 'up.layer.count', ->
+
+      it 'returns 1 if no overlay is open', ->
+        expect(up.layer.count).toBe(1)
+
+      it 'returns 2 if one overlay is open', asyncSpec (next) ->
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.count).toBe(2)
 
     describe 'up.layer.getAll()', ->
 
@@ -1174,7 +1225,7 @@ describe 'up.layer', ->
         expect(up.layer.current).toBe(up.layer.root)
 
         up.layer.open().then ->
-          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.count).toBe(2)
           expect(up.layer.current).toBe(up.layer.get(1))
           done()
 
@@ -1318,7 +1369,7 @@ describe 'up.layer', ->
           jasmine.respondWithSelector('.target', text: 'overlay text')
 
         next ->
-          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.count).toBe(2)
           expect(up.layer.isOverlay()).toBe(true)
           expect(up.layer.current).toHaveText('overlay text')
 
@@ -1328,7 +1379,7 @@ describe 'up.layer', ->
         Trigger.clickSequence(link)
 
         next ->
-          expect(up.layer.stack.length).toBe(2)
+          expect(up.layer.count).toBe(2)
           expect(up.layer.isOverlay()).toBe(true)
           expect(up.layer.current).toHaveText('overlay text')
 

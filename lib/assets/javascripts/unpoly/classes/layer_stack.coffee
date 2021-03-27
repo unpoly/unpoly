@@ -26,8 +26,6 @@ class up.LayerStack extends Array
     dismissDescendant = (descendant) -> descendant.dismiss(':peel', dismissOptions)
     promises = u.map(descendants, dismissDescendant)
 
-    # In case a caller wants to know when all (concurrent) closing animations
-    # have finished, we return a promise.
     Promise.all(promises)
 
   reset: ->
@@ -90,9 +88,18 @@ class up.LayerStack extends Array
   reversed: ->
     u.reverse(this)
 
+  dismissAll: (value = null, options = {}) ->
+    options.dismissable = false
+    overlays = u.reverse(@overlays)
+    promises = u.map overlays, (overlay) -> overlay.dismiss(value, options)
+    return Promise.all(promises)
+
   # Used by up.util.reverse() and specs
   "#{u.copy.key}": ->
     return u.copyArrayLike(this)
+
+  u.getter @prototype, 'count', ->
+    @length
 
   u.getter @prototype, 'root', ->
     @[0]

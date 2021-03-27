@@ -92,7 +92,7 @@ describe 'up.Layer.Overlay', ->
         @respondWithSelector('.element', text: 'text')
 
       next ->
-        expect(up.layer.stack.length).toBe(2)
+        expect(up.layer.count).toBe(2)
         expect(opener).not.toBeFocused()
 
         up.layer.current.accept()
@@ -104,9 +104,9 @@ describe 'up.Layer.Overlay', ->
       makeLayers(2)
 
       next ->
-        expect(up.layer.stack.length).toBe(2)
+        expect(up.layer.count).toBe(2)
         up.layer.current.accept()
-        expect(up.layer.stack.length).toBe(1)
+        expect(up.layer.count).toBe(1)
 
     it "restores the parent layer's location", asyncSpec (next) ->
       up.history.config.enabled = true
@@ -127,6 +127,48 @@ describe 'up.Layer.Overlay', ->
       next =>
         expect(up.layer.isRoot()).toBe(true)
         expect(location.href).toMatchURL(@locationBeforeExample)
+
+    it 'manipulates the layer stack synchronously, to avoid concurrency issues when we need to close layers within another change', asyncSpec (next) ->
+      makeLayers(2)
+
+      next ->
+        expect(up.layer.count).toBe(2)
+
+        up.layer.current.accept()
+
+        expect(up.layer.count).toBe(1)
+
+    describe 'cancelation', ->
+
+      it 'lets an event handler cancel the acceptance', asyncSpec (next) ->
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.count).toBe(2)
+
+          up.layer.current.on 'up:layer:accept', (event) -> event.preventDefault()
+
+          up.layer.current.accept()
+
+        next ->
+          expect(up.layer.count).toBe(2)
+
+      it 'returns a rejected promise if acceptance was prevented', asyncSpec (next) ->
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.count).toBe(2)
+
+          up.layer.current.on 'up:layer:accept', (event) -> event.preventDefault()
+
+          promise = up.layer.current.accept()
+
+          next.await promiseState(promise)
+
+        next (result) ->
+          expect(result.state).toBe('rejected')
+          expect(result.value).toBeAbortError()
+
 
     describe 'events', ->
 

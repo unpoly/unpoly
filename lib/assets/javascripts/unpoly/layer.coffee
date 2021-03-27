@@ -732,6 +732,18 @@ up.layer = do ->
   @param {up.Layer} layer
   @stable
   ###
+
+  ###**
+  Returns the number of layers in the [layer stack](/up.layer.stack).
+
+  The count includes the [root layer](/up.layer.root).
+  Hence a page with a single overlay would return a count of 2.
+
+  @property up.layer.count
+  @param {number} count
+    The number of layers in the stack.
+  @stable
+  ###
   u.delegate(api, [
     'get'
     'getAll'
@@ -740,6 +752,8 @@ up.layer = do ->
     'current'
     'front'
     'sync'
+    'count'
+    'dismissAll'
   ], -> stack)
 
   u.delegate(api, [
