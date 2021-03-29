@@ -369,30 +369,6 @@ up.event = do ->
     return event
 
   ###**
-  [Emits an event](/up.emit) and returns whether no listener
-  has prevented the default action.
-
-  \#\#\# Example
-
-  ```javascript
-  if (up.event.nobodyPrevents('disk:erase')) {
-    Disk.erase()
-  })
-  ```
-
-  @function up.event.nobodyPrevents
-  @param {string} eventType
-  @param {Object} eventProps
-  @param {string|Array} [eventProps.log]
-  @return {boolean}
-    whether no listener has prevented the default action
-  @experimental
-  ###
-  nobodyPrevents = (args...) ->
-    event = emit(args...)
-    not event.defaultPrevented
-
-  ###**
   [Emits](/up.emit) the given event and throws an AbortError if it was prevented.
 
   @function up.event.assertEmitted
@@ -552,7 +528,6 @@ up.event = do ->
   off: unbind # can't name symbols `off` in Coffeescript
   build: build
   emit: emit
-  nobodyPrevents: nobodyPrevents
   assertEmitted: assertEmitted
   onEscape: onEscape
   halt: halt

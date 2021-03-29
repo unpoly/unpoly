@@ -120,7 +120,7 @@ describe 'up.Layer', ->
       makeLayers(4)
       expect(up.layer.count).toBe(4)
       secondLayer = up.layer.get(1)
-      
+
       secondLayer.peel()
 
       expect(up.layer.count).toBe(2)
