@@ -516,24 +516,45 @@ up.fragment = do ->
   @stable
   ###
   render = up.mockable (args...) ->
-    options = parseTargetAndOptions(args)
-    options = up.RenderOptions.preprocess(options)
+    # Convert thrown errors into rejected promises.
+    # Convert non-promise values into a resolved promise.
+    return u.asyncify ->
+      options = parseTargetAndOptions(args)
+      options = up.RenderOptions.preprocess(options)
 
-    promise = up.browser.whenConfirmed(options)
+      up.browser.assertConfirmed(options)
 
-    if guardEvent = u.pluckKey(options, 'guardEvent')
-      # Allow guard event handlers to manipulate render options for the default behavior.
-      #
-      # Note that we have removed { guardEvent } from options to not recursively define
-      # guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
-      # listeners that prevent the default and re-render.
-      guardEvent.renderOptions = options
-      promise = promise.then -> up.event.whenEmitted(guardEvent, { target: options.origin })
+      if guardEvent = u.pluckKey(options, 'guardEvent')
+        # Allow guard event handlers to manipulate render options for the default behavior.
+        #
+        # Note that we have removed { guardEvent } from options to not recursively define
+        # guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
+        # listeners that prevent the default and re-render.
+        guardEvent.renderOptions = options
+        up.event.assertEmitted(guardEvent, { target: options.origin })
 
-    promise = promise.then ->
-      up.feedback.aroundForOptions(options, (-> makeChangeNow(options)))
+      up.RenderOptions.assertContentGiven(options)
 
-    return promise
+      if options.url
+        return renderRemoteContent(options)
+      else
+        return renderLocalContent(options)
+
+  renderRemoteContent = (options) ->
+    # Rendering a remote URL is an async operation.
+    # We give feedback (.up-active) while the fragment is loading.
+    return up.feedback.aroundForOptions options, ->
+      return new up.Change.FromURL(options).execute()
+
+  renderLocalContent = (options) ->
+    # When we have a given { url }, the { solo } option is honored by up.request().
+    # But up.request() is never called when we have local content given as { document },
+    # { content } or { fragment }. Hence we abort here.
+    up.network.mimicLocalRequest(options)
+
+    # (1) No need to give feedback as local changes are sync.
+    # (2) Value will be converted to a fulfilled promise by up.util.asyncify() in render().
+    return new up.Change.FromContent(options).execute()
 
   ###**
   [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
@@ -563,18 +584,6 @@ up.fragment = do ->
   navigate = up.mockable (args...) ->
     options = parseTargetAndOptions(args)
     return render(u.merge(options, navigate: true))
-
-  makeChangeNow = (options) ->
-    up.RenderOptions.ensureContentGiven(options)
-
-    if options.url
-      return new up.Change.FromURL(options).executeAsync()
-    else
-      # When we have a given { url }, the { solo } option is honored by up.request().
-      # But up.request() is never called when we have local content given as { document },
-      # { content } or { fragment }. Hence we abort here.
-      up.network.mimicLocalRequest(options)
-      return new up.Change.FromContent(options).executeAsync()
 
   ###**
   This event is [emitted](/up.emit) when the server responds with the HTML, before
@@ -1127,22 +1136,16 @@ up.fragment = do ->
     The timing function that controls the animation's acceleration. See [`up.animate()`](/up.animate).
   @param {Function} [options.onFinished]
     A callback that is run when any animations are finished and the element was removed from the DOM.
-  @return {Promise}
-    A promise that fulfills when the element has been destroyed.
-
-    If the destruction is animated, the promise will be resolved *before* the element was
-    removed from the DOM tree. The element will be marked with the `.up-destroying` class
-    and removed once the animation finishes. To run code after the element was removed,
-    pass an `{ onFinished }` callback.
+  @return undefined
   @stable
   ###
   destroy = (args...) ->
     options = parseTargetAndOptions(args)
 
     if options.element = getOne(options.target, options)
-      return new up.Change.DestroyFragment(options).executeAsync()
-    else
-      return Promise.resolve()
+      new up.Change.DestroyFragment(options).execute()
+
+    return up.migrate.formerlyAsync?('up.destroy()')
 
   parseTargetAndOptions = (args) ->
     options = u.parseArgIntoOptions(args, 'target')

@@ -231,9 +231,8 @@ describe 'up.feedback', ->
             expect(@layerLinkToLayerURL).toHaveClass('up-current')
             expect(@layerLinkToOtherURL).not.toHaveClass('up-current')
 
-            next.await up.layer.dismiss()
+            up.layer.dismiss()
 
-          next =>
             expect(@backgroundLinkToBackgroundURL).toHaveClass('up-current')
             expect(@backgroundLinkToLayerURL).not.toHaveClass('up-current')
             expect(@backgroundLinkToOtherURL).not.toHaveClass('up-current')
@@ -344,7 +343,7 @@ describe 'up.feedback', ->
 
       it 'removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec (next) ->
         $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
-        spyOn(up.browser, 'whenConfirmed').and.returnValue(Promise.reject('User aborted'))
+        spyOn(up.browser, 'assertConfirmed').and.throwError(up.error.aborted('User aborted'))
 
         Trigger.clickSequence($link)
 

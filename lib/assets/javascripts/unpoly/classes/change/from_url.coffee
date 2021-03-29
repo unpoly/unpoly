@@ -59,6 +59,7 @@ class up.Change.FromURL extends up.Change
     # Callback for callers who need to access the request object.
     @options.onQueued?({ @request })
 
+    # The request is also a promise for its response.
     return @request
 
   preflightPropsForRenderOptions: (renderOptions, requestAttributesOptions) ->
@@ -99,12 +100,13 @@ class up.Change.FromURL extends up.Change
     # page with its own layout, that cannot be loaded as a fragment and must be loaded
     # with a full page load.
     event = @buildEvent('up:fragment:loaded', { renderOptions })
-    @request.whenEmitted(event, { log, callback: @options.onLoaded }).then =>
-      # The response might carry some updates for our change options,
-      # like a server-set location, or server-sent events.
-      @augmentOptionsFromResponse(renderOptions)
+    @request.assertEmitted(event, { log, callback: @options.onLoaded })
 
-      return new up.Change.FromContent(renderOptions).execute()
+    # The response might carry some updates for our change options,
+    # like a server-set location, or server-sent events.
+    @augmentOptionsFromResponse(renderOptions)
+
+    return new up.Change.FromContent(renderOptions).execute()
 
   augmentOptionsFromResponse: (renderOptions) ->
     responseURL = @response.url

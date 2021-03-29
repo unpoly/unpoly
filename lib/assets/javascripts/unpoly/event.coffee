@@ -393,21 +393,16 @@ up.event = do ->
     not event.defaultPrevented
 
   ###**
-  [Emits](/up.emit) the given event and returns a promise
-  that will be fulfilled if no listener has prevented the default action.
+  [Emits](/up.emit) the given event and throws an AbortError if it was prevented.
 
-  If any listener prevented the default listener
-  the returned promise will never be resolved.
-
-  @function up.event.whenEmitted
+  @function up.event.assertEmitted
   @param {string} eventType
   @param {Object} eventProps
   @param {string|Array} [eventProps.message]
-  @return {Promise}
   @internal
   ###
-  whenEmitted = (args...) ->
-    buildEmitter(args).whenEmitted()
+  assertEmitted = (args...) ->
+    buildEmitter(args).assertEmitted()
 
   ###**
   Registers an event listener to be called when the user
@@ -558,7 +553,7 @@ up.event = do ->
   build: build
   emit: emit
   nobodyPrevents: nobodyPrevents
-  whenEmitted: whenEmitted
+  assertEmitted: assertEmitted
   onEscape: onEscape
   halt: halt
   onReady: onReady

@@ -140,35 +140,18 @@ describe 'up.Layer.Overlay', ->
 
     describe 'cancelation', ->
 
-      it 'lets an event handler cancel the acceptance', asyncSpec (next) ->
+      it 'lets an event handler cancel the acceptance and throws an AbortError', ->
         makeLayers(2)
 
-        next ->
-          expect(up.layer.count).toBe(2)
+        expect(up.layer.count).toBe(2)
 
-          up.layer.current.on 'up:layer:accept', (event) -> event.preventDefault()
+        up.layer.current.on 'up:layer:accept', (event) -> event.preventDefault()
 
-          up.layer.current.accept()
+        accept = -> up.layer.current.accept()
 
-        next ->
-          expect(up.layer.count).toBe(2)
+        expect(accept).toAbort()
 
-      it 'returns a rejected promise if acceptance was prevented', asyncSpec (next) ->
-        makeLayers(2)
-
-        next ->
-          expect(up.layer.count).toBe(2)
-
-          up.layer.current.on 'up:layer:accept', (event) -> event.preventDefault()
-
-          promise = up.layer.current.accept()
-
-          next.await promiseState(promise)
-
-        next (result) ->
-          expect(result.state).toBe('rejected')
-          expect(result.value).toBeAbortError()
-
+        expect(up.layer.count).toBe(2)
 
     describe 'events', ->
 

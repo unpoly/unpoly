@@ -229,7 +229,9 @@ up.feedback = do ->
 
   around = (element, fn) ->
     start(element)
-    return u.always(fn(), -> stop(element))
+    result = fn()
+    u.always(result, -> stop(element))
+    return result
 
   aroundForOptions = (options, fn) ->
     if feedbackOpt = options.feedback

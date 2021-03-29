@@ -37,13 +37,9 @@ class up.EventEmitter extends up.Record
 
     @callback?(@event)
 
-  whenEmitted: ->
-    return new Promise (resolve, reject) =>
-      event = @emit()
-      if event.defaultPrevented
-        reject(up.error.aborted("Event #{event.type} was prevented"))
-      else
-        resolve()
+  assertEmitted: ->
+    event = @emit()
+    !event.defaultPrevented or throw up.error.aborted("Event #{event.type} was prevented")
 
 #  createBoundary: ->
 #    if @boundary

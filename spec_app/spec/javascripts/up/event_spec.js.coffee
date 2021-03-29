@@ -573,32 +573,19 @@ describe 'up.event', ->
 
         expect(emittedEvent.target).toEqual(element)
 
-    describe 'up.event.whenEmitted', ->
+    describe 'up.event.assertEmitted', ->
 
-      it 'emits the event and fulfills the returned promise when no listener calls event.preventDefault()', (done) ->
+      it 'emits the event', ->
         eventListener = jasmine.createSpy('event listener')
         up.on('my:event', eventListener)
-        promise = up.event.whenEmitted('my:event', key: 'value')
-        promiseState(promise).then (result) ->
-          expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining(key: 'value'), jasmine.anything(), jasmine.anything())
-          expect(result.state).toEqual('fulfilled')
-          done()
+        up.event.assertEmitted('my:event', key: 'value')
+        expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining(key: 'value'), jasmine.anything(), jasmine.anything())
 
-      it 'emits the event and rejects the returned promise when any listener calls event.preventDefault()', (done) ->
+      it 'throws an AbortError if any listener calls event.preventDefault()', ->
         eventListener = (event) -> event.preventDefault()
         up.on('my:event', eventListener)
-        promise = up.event.whenEmitted('my:event', key: 'value')
-        promiseState(promise).then (result) ->
-          expect(result.state).toEqual('rejected')
-          done()
-
-#      describe '(onEmitted callback)', ->
-#
-#        it 'allows to pass a function that is called sync after the event was emitted'
-#
-#        it 'allows the function to return a promise that will delay the promise returned by whenEmitted'
-#
-#        it 'does not call the function if the event was prevented'
+        fn = -> up.event.assertEmitted('my:event', key: 'value')
+        expect(fn).toAbort()
 
     describe 'up.event.halt', ->
 

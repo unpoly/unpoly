@@ -18,6 +18,7 @@ up.modal = u.literal
   close: (options = {}) ->
     up.migrate.deprecated('up.modal.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
+    return up.migrate.formerlyAsync('up.layer.dismiss()')
 
   url: ->
     up.migrate.deprecated('up.modal.url()', 'up.layer.location')

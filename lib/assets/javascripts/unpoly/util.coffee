@@ -1479,27 +1479,35 @@ up.util = do ->
     nativePromise.promise = -> nativePromise # just return self
     nativePromise
 
-  ###**
-  Calls the given block. If the block throws an exception,
-  a rejected promise is returned instead.
+#  ###**
+#  Calls the given block. If the block throws an exception,
+#  a rejected promise is returned instead.
+#
+#  @function up.util.rejectOnError
+#  @internal
+#  ###
+#  rejectOnError = (block) ->
+#    try
+#      block()
+#    catch error
+#      Promise.reject(error)
 
-  @function up.util.rejectOnError
-  @internal
-  ###
-  rejectOnError = (block) ->
+  asyncify = (block) ->
+    # The side effects of this should be sync, otherwise we could
+    # just do `Promise.resolve().then(block)`.
     try
-      block()
+      return Promise.resolve(block())
     catch error
-      Promise.reject(error)
+      return Promise.reject(error)
 
-  sum = (list, block) ->
-    block = iteratee(block)
-    totalValue = 0
-    for entry in list
-      entryValue = block(entry)
-      if isGiven(entryValue) # ignore undefined/null, like SQL would do
-        totalValue += entryValue
-    totalValue
+#  sum = (list, block) ->
+#    block = iteratee(block)
+#    totalValue = 0
+#    for entry in list
+#      entryValue = block(entry)
+#      if isGiven(entryValue) # ignore undefined/null, like SQL would do
+#        totalValue += entryValue
+#    totalValue
 
   isBasicObjectProperty = (k) ->
     Object.prototype.hasOwnProperty(k)
@@ -1882,7 +1890,8 @@ up.util = do ->
   always: always
   # mutedFinally: mutedFinally
   muteRejection: muteRejection
-  rejectOnError: rejectOnError
+  # rejectOnError: rejectOnError
+  asyncify: asyncify
   isBasicObjectProperty: isBasicObjectProperty
   isCrossOrigin: isCrossOrigin
   task: queueTask
@@ -1891,7 +1900,7 @@ up.util = do ->
   isEqual: isEqual
   splitValues : splitValues
   endsWith: endsWith
-  sum: sum
+  # sum: sum
   # wrapArray: wrapArray
   wrapList: wrapList
   wrapValue: wrapValue

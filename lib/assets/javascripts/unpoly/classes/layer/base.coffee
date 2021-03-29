@@ -497,9 +497,6 @@ class up.Layer extends up.Record
   emit: (args...) ->
     return @buildEventEmitter(args).emit()
 
-  whenEmitted: (args...) ->
-    return @buildEventEmitter(args).whenEmitted()
-
   isDetached: ->
     e.isDetached(@element)
 

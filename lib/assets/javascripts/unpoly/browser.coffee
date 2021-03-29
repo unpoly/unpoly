@@ -108,17 +108,14 @@ up.browser = do ->
     value
 
   ###**
-  @function up,browser.whenConfirmed
   @return {Promise}
+  @function up,browser.ensureConfirmed
   @param {string} options.confirm
   @param {boolean} options.preload
   @internal
   ###
-  whenConfirmed = (options) ->
-    if !options.confirm || window.confirm(options.confirm)
-      return Promise.resolve()
-    else
-      return up.error.aborted.async('User canceled action')
+  assertConfirmed = (options) ->
+    !options.confirm || window.confirm(options.confirm) || throw up.error.aborted('User canceled action')
 
   ###**
   Returns whether Unpoly supports the current browser.
@@ -146,7 +143,7 @@ up.browser = do ->
     canFormatLog: canFormatLog
     canPassiveEventListener: canPassiveEventListener
     canJQuery: canJQuery
-    whenConfirmed: whenConfirmed
+    assertConfirmed: assertConfirmed
     isSupported: isSupported
     popCookie: popCookie
     jQuery: callJQuery

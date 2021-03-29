@@ -12,15 +12,20 @@ class up.Change.DestroyFragment extends up.Change.Removal
     @log = @options.log
 
   execute: ->
+    # Destroying a fragment is a sync function.
+    #
     # A variant of the logic below can also be found in up.Change.UpdateLayer.
     # Updating (swapping) a fragment also involves destroying the old version,
     # but the logic needs to be interwoven with the insertion logic for the new
     # version.
 
-    # Save the parent because we sometimes emit up:fragment:destroyed
+    # Save the parent because we emit up:fragment:destroyed on the parent
     # after removing @element.
     @parent = @element.parentNode
 
+    # The destroying fragment gets an .up-destroying class so we can
+    # recognize elements that are being destroyed but are still playing out their
+    # removal animation.
     up.fragment.markAsDestroying(@element)
 
     if up.motion.willAnimate(@element, @animation, @options)
@@ -30,13 +35,10 @@ class up.Change.DestroyFragment extends up.Change.Removal
       @emitDestroyed()
       @animate().then(=> @wipe()).then(=> @onFinished())
     else
-      # If we're not animating, we can remove the element and then resolve.
+      # If we're not animating, we can remove the element before emitting up:fragment:destroyed.
       @wipe()
       @emitDestroyed()
       @onFinished()
-
-    # Don't wait for the animation to end.
-    return Promise.resolve()
 
   animate: ->
     up.motion.animate(@element, @animation, @options)
@@ -54,4 +56,5 @@ class up.Change.DestroyFragment extends up.Change.Removal
         e.remove(@element)
 
   emitDestroyed: ->
+    # Emits up:fragment:destroyed.
     up.fragment.emitDestroyed(@element, { @parent, @log })

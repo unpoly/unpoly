@@ -1,4 +1,4 @@
-describe 'up.OverlayWithViewport', ->
+describe 'up.Layer.OverlayWithViewport', ->
 
   describe 'preservation of overlays during fragment changes', ->
 
@@ -38,7 +38,7 @@ describe 'up.OverlayWithViewport', ->
         expect(up.layer.count).toBe(2)
         expect(destructor).not.toHaveBeenCalled()
 
-        next.await up.layer.dismiss(animation: false)
+        up.layer.dismiss(animation: false)
 
       next ->
         expect(up.layer.count).toBe(1)

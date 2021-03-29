@@ -54,13 +54,13 @@ class up.Layer.Root extends up.Layer
     @setupHandlers()
 
   accept: ->
-    return @cannotClosePromise()
+    @cannotCloseRoot()
 
   dismiss: ->
-    return @cannotClosePromise()
+    @cannotCloseRoot()
 
-  cannotClosePromise: ->
-    return up.error.failed.async('Cannot close the root layer')
+  cannotCloseRoot: ->
+    throw up.error.failed('Cannot close the root layer')
 
   reset: ->
     u.assign(this, @defaults())

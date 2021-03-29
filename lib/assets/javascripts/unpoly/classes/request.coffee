@@ -454,8 +454,8 @@ class up.Request extends up.Record
   emit: (args...) ->
     return @buildEventEmitter(args).emit()
 
-  whenEmitted: (args...) ->
-    return @buildEventEmitter(args).whenEmitted()
+  assertEmitted: (args...) ->
+    return @buildEventEmitter(args).assertEmitted()
 
   @getter 'description', ->
     @method + ' ' + @url

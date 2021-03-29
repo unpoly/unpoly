@@ -150,41 +150,41 @@ describe 'up.network', ->
         it 'allows to quickly construct a cachable up.Request by passing { layer, failLayer } options', asyncSpec (next) ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
-            { mode: 'popup', context: { popupKey: 'popupValue' }}
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
           ]
 
           next =>
             request = up.request({ url: '/foo', layer: 'root', failLayer: 'front' })
             expect(request.mode).toEqual('root')
-            expect(request.failMode).toEqual('popup')
+            expect(request.failMode).toEqual('drawer')
             expect(request.context).toEqual({ rootKey: 'rootValue' })
-            expect(request.failContext).toEqual({ popupKey: 'popupValue' })
+            expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
         it 'allows to quickly construct a cachable up.Request by passing an { origin } option', asyncSpec (next) ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
-            { mode: 'popup', context: { popupKey: 'popupValue' }}
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
           ]
 
           next =>
             request = up.request({ url: '/foo', origin: up.layer.front.element })
-            expect(request.mode).toEqual('popup')
-            expect(request.failMode).toEqual('popup')
-            expect(request.context).toEqual({ popupKey: 'popupValue' })
-            expect(request.failContext).toEqual({ popupKey: 'popupValue' })
+            expect(request.mode).toEqual('drawer')
+            expect(request.failMode).toEqual('drawer')
+            expect(request.context).toEqual({ drawerKey: 'drawerValue' })
+            expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
         it 'assumes the current layer if neither { layer, failLayer, origin} are given', asyncSpec (next) ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
-            { mode: 'popup', context: { popupKey: 'popupValue' }}
+            { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
           ]
 
           next =>
             request = up.request({ url: '/foo' })
-            expect(request.mode).toEqual('popup')
-            expect(request.failMode).toEqual('popup')
-            expect(request.context).toEqual({ popupKey: 'popupValue' })
-            expect(request.failContext).toEqual({ popupKey: 'popupValue' })
+            expect(request.mode).toEqual('drawer')
+            expect(request.failMode).toEqual('drawer')
+            expect(request.context).toEqual({ drawerKey: 'drawerValue' })
+            expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
       describe 'error handling', ->
 

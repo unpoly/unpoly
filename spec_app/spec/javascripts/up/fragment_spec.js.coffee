@@ -782,6 +782,11 @@ describe 'up.fragment', ->
             expect('.target').toHaveText('new text')
             expect(document.querySelectorAll('up-wrapper').length).toBe(0)
 
+        it 'has a sync effect', ->
+          fixture('.target', text: 'old text')
+          up.render('.target', content: 'new text')
+          expect('.target').toHaveText('new text')
+
       describe 'with { document } option', ->
 
         it 'replaces the given selector with a matching element that has the outer HTML from the given { document } string', asyncSpec (next) ->
@@ -829,6 +834,11 @@ describe 'up.fragment', ->
               expect(result.value).toMatch(/Could not match targets/i)
               done()
 
+        it 'has a sync effect', ->
+          fixture('.target', text: 'old text')
+          up.render('.target', document: '<div class="target">new text</div>')
+          expect('.target').toHaveText('new text')
+
       describe 'with { fragment } option', ->
 
         it 'derives target and outer HTML from the given { fragment } string', asyncSpec (next) ->
@@ -863,6 +873,11 @@ describe 'up.fragment', ->
               expect(result.state).toEqual('rejected')
               expect(result.value).toMatch(/Could not match targets/i)
               done()
+
+        it 'has a sync effect', ->
+          fixture('.target', text: 'old text')
+          up.render('.target', fragment: '<div class="target">new text</div>')
+          expect('.target').toHaveText('new text')
 
       describe 'choice of target', ->
 
@@ -1900,9 +1915,10 @@ describe 'up.fragment', ->
                 expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url' })
 
             it 'is not emitted when the location did not change', asyncSpec (next) ->
-              up.layer.open(target: '.target', location: '/original-layer-url', content: 'old overlay text')
               listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
+
+              up.layer.open(target: '.target', location: '/original-layer-url', content: 'old overlay text')
 
               next =>
                 expect(up.layer.isOverlay()).toBe(true)
@@ -4339,11 +4355,17 @@ describe 'up.fragment', ->
 
     describe 'up.destroy()', ->
 
-      it 'removes the element with the given selector', (done) ->
+      it 'removes the element with the given selector', asyncSpec (next) ->
         $fixture('.element')
-        up.destroy('.element').then ->
+        up.destroy('.element')
+
+        next ->
           expect($('.element')).not.toBeAttached()
-          done()
+
+      it 'has a sync effect', ->
+        fixture('.element')
+        up.destroy('.element')
+        expect('.element').not.toBeAttached()
 
       it 'runs an animation before removal with { animate } option', asyncSpec (next) ->
         $element = $fixture('.element')
@@ -4358,13 +4380,12 @@ describe 'up.fragment', ->
         next.after (100 + 75), ->
           expect($element).toBeDetached()
 
-      it 'calls destructors for custom elements', (done) ->
+      it 'calls destructors for custom elements', ->
         destructor = jasmine.createSpy('destructor')
         up.$compiler('.element', ($element) -> destructor)
         up.hello(fixture('.element'))
-        up.destroy('.element').then ->
-          expect(destructor).toHaveBeenCalled()
-          done()
+        up.destroy('.element')
+        expect(destructor).toHaveBeenCalled()
 
       it 'does not call destructors twice if up.destroy() is called twice on the same fragment', asyncSpec (next) ->
         destructor = jasmine.createSpy('destructor')
@@ -4415,15 +4436,15 @@ describe 'up.fragment', ->
           expect(destructor).toHaveBeenCalledWith('old text')
 
       if up.migrate.loaded
-        it 'allows to pass a new history entry as { history } option (deprecated)', (done) ->
+        it 'allows to pass a new history entry as { history } option (deprecated)', asyncSpec (next) ->
           up.history.config.enabled = true
           warnSpy = spyOn(up.migrate, 'warn')
           $fixture('.element')
-          up.destroy('.element', history: '/new-path').then ->
-            u.timer 100, ->
-              expect(location.href).toMatchURL('/new-path')
-              expect(warnSpy).toHaveBeenCalled()
-              done()
+          up.destroy('.element', history: '/new-path')
+
+          next ->
+            expect(location.href).toMatchURL('/new-path')
+            expect(warnSpy).toHaveBeenCalled()
 
       it 'marks the element as .up-destroying while it is animating', asyncSpec (next) ->
         $element = $fixture('.element')
@@ -4491,14 +4512,13 @@ describe 'up.fragment', ->
           expect(up.layer.stack[0].sync).toHaveBeenCalled()
           expect(up.layer.stack[1].sync).toHaveBeenCalled()
 
-      it 'does not crash and runs destructors when destroying a detached element (bugfix)', (done) ->
+      it 'does not crash and runs destructors when destroying a detached element (bugfix)', ->
         destructor = jasmine.createSpy('destructor')
         up.compiler('.element', (element) -> destructor)
         detachedElement = up.element.createFromSelector('.element')
         up.hello(detachedElement)
-        up.destroy(detachedElement).then ->
-          expect(destructor).toHaveBeenCalled()
-          done()
+        up.destroy(detachedElement)
+        expect(destructor).toHaveBeenCalled()
 
     describe 'up.reload()', ->
 

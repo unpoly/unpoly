@@ -15,6 +15,8 @@ class up.Change.CloseLayer extends up.Change.Removal
     @preventable = options.preventable ? true
 
   execute: ->
+    # Closing a layer is a sync function.
+
     if @origin && u.isUndefined(value)
       value = e.jsonAttr(@origin, "up-#{@verb}")
 
@@ -49,7 +51,7 @@ class up.Change.CloseLayer extends up.Change.Removal
 
     @emitClosedEvent(parent)
 
-    return Promise.resolve()
+    return
 
   emitCloseEvent: ->
     # The close event is emitted on the layer that is about to close.

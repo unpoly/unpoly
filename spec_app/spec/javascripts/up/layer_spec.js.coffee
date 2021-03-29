@@ -11,7 +11,7 @@ describe 'up.layer', ->
 
     describe 'up.layer.open()', ->
 
-      it 'resolves to an up.Layer instance', (done) ->
+      it 'resolves to an up.Layer instance xxx', (done) ->
         up.layer.open().then (value) ->
           expect(value).toEqual(jasmine.any(up.Layer))
           done()
@@ -160,6 +160,12 @@ describe 'up.layer', ->
 
             done()
 
+        it 'has a sync effect', ->
+          expect(up.layer.count).toBe(1)
+
+          up.layer.open(target: '.element', content: '')
+
+          expect(up.layer.count).toBe(2)
 
       describe 'animation', ->
 

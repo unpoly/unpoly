@@ -123,28 +123,19 @@ describe 'up.browser', ->
           $tokenInput = $form.find('input[name="csrf-param"]')
           expect($tokenInput).not.toBeAttached()
 
-    describe 'up.browser.whenConfirmed', ->
+    describe 'up.browser.assertConfirmed', ->
 
-      it 'shows a confirmation dialog with the given message and fulfills when the user presses OK', (done) ->
+      it 'shows a confirmation dialog with the given message', ->
         spyOn(window, 'confirm').and.returnValue(true)
-        promise = up.browser.whenConfirmed(confirm: 'Do action?')
-        promiseState(promise).then (result) ->
-          expect(window.confirm).toHaveBeenCalledWith('Do action?')
-          expect(result.state).toEqual('fulfilled')
-          done()
+        up.browser.assertConfirmed(confirm: 'Do action?')
+        expect(window.confirm).toHaveBeenCalledWith('Do action?')
 
-      it 'emits the event and rejects the returned promise when any listener calls event.preventDefault()', (done) ->
+      it 'throws an AbortError when any listener calls event.preventDefault()', ->
         spyOn(window, 'confirm').and.returnValue(false)
-        promise = up.browser.whenConfirmed(confirm: 'Do action?')
-        promiseState(promise).then (result) ->
-          expect(window.confirm).toHaveBeenCalledWith('Do action?')
-          expect(result.state).toEqual('rejected')
-          done()
+        call = -> up.browser.assertConfirmed(confirm: 'Do action?')
+        expect(call).toAbort()
 
-      it 'does now show a conformation dialog and fulfills if no { confirm } option is given', (done) ->
+      it 'does now show a conformation dialog and fulfills if no { confirm } option is given', ->
         spyOn(window, 'confirm')
-        promise = up.browser.whenConfirmed({})
-        promiseState(promise).then (result) ->
-          expect(window.confirm).not.toHaveBeenCalled()
-          expect(result.state).toEqual('fulfilled')
-          done()
+        up.browser.assertConfirmed({})
+        expect(window.confirm).not.toHaveBeenCalled()

@@ -30,10 +30,17 @@ Remaining feature work
 
 - up.layer.dismissAll() should stop dismissing when an overlay prevents its closing
 
+- Remove up.event.nobodyPrevents (move to up-migrate.js)
+
 - Replace whenEmitted and whenConfirmed with ensureEmitted and ensureConfirmed, which raise an error
   - This way we can use this in both sync and async functions
 
 - up.render() should have sync side effects when called with local contents
+
+- Can up.render() resolve to an up.RenderResult object
+  - result.layer
+  - result.fragments
+  - (result.steps)
 
 - Support [up-confirm] for [up-accept] ?
 

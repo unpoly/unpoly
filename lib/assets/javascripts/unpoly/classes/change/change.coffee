@@ -4,25 +4,14 @@ class up.Change extends up.Class
 
   constructor: (@options) ->
 
-  onFinished: ->
-    @options.onFinished?()
-
   notApplicable: (reason) ->
     return up.error.notApplicable(this, reason)
 
-  ###**
-  The `execute()` method has a somewhat weird signature:
+  execute: ->
+    throw up.error.notImplemented()
 
-  - If it is not applicable, it throws a sync error right away.
-    This makes it practicable for internal calls.
-  - If it IS applicable, it returns a promise (which might succeed or fail)
-
-  For the purposes of our public API we never want an async function to
-  throw a sync error. So we offer this `executeAsync()` methid, which never
-  throws a sync error.
-  ###
-  executeAsync: ->
-    u.rejectOnError => @execute()
+  onFinished: ->
+    @options.onFinished?()
 
   # Values we want to keep:
   # - false (no update)
@@ -34,3 +23,4 @@ class up.Change extends up.Class
       existingValue
     else
       newValue
+

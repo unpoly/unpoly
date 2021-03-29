@@ -84,7 +84,7 @@ up.RenderOptions = do ->
 
     return result
 
-  ensureContentGiven = (options) ->
+  assertContentGiven = (options) ->
     unless u.some(CONTENT_KEYS, (contentKey) -> return u.isGiven(options[contentKey]))
       # up.layer.open() should open an empty layer without a content key.
       if options.defaultToEmptyContent
@@ -110,6 +110,6 @@ up.RenderOptions = do ->
 
   return {
     preprocess,
-    ensureContentGiven,
+    assertContentGiven,
     deriveFailOptions,
   }

@@ -23,10 +23,9 @@ window.makeLayers = (stackPlans) ->
   # Make sure the root layer has an element to change
   fixture(stackPlans[0].target)
 
-  promise = Promise.resolve()
   stackPlans.forEach (stackPlan) ->
     # up.navigate() will either update the root layer with the given props
     # or open a new layer with the given props.
-    promise = promise.then -> up.navigate(stackPlan)
+    up.navigate(stackPlan)
 
-  return promise
+  return Promise.resolve()

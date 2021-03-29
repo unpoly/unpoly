@@ -63,6 +63,14 @@ up.migrate = do ->
   deprecated = (deprecatedExpression, replacementExpression) ->
     warn("#{deprecatedExpression} has been deprecated. Use #{replacementExpression} instead.")
 
+  # Returns a resolved promise that prints a warning when #then() is called.
+  formerlyAsync = (label) ->
+    promise = Promise.resolve()
+    oldThen = promise.then ->
+      warn("#{label} is no longer async")
+      return oldThen.apply(this, arguments)
+    promise
+
   reset = ->
     config.reset()
 
@@ -71,6 +79,7 @@ up.migrate = do ->
   deprecated: deprecated
   renamedPackage: renamedPackage
   renamedProperty: renamedProperty
+  formerlyAsync: formerlyAsync
 #  removedProperty: removedProperty
   renamedEvent: renamedEvent
   fixEventTypes: fixEventTypes

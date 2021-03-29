@@ -2,18 +2,12 @@ describe 'up.Layer.Root', ->
 
   describe '#dismiss()', ->
 
-    it 'returns a rejected promise', (done) ->
-      promise = up.layer.root.dismiss('value')
-      promiseState(promise).then (result) ->
-        expect(result.state).toEqual('rejected')
-        expect(result.value).toMatch(/cannot close/i)
-        done()
+    it 'throws an error', ->
+      dismiss = -> up.layer.root.dismiss('value')
+      expect(dismiss).toThrowError(/cannot close the root layer/i)
 
   describe '#accept()', ->
 
-    it 'returns a rejected promise', (done) ->
-      promise = up.layer.root.accept('value')
-      promiseState(promise).then (result) ->
-        expect(result.state).toEqual('rejected')
-        expect(result.value).toMatch(/cannot close/i)
-        done()
+    it 'returns a rejected promise', ->
+      accept = -> up.layer.root.accept('value')
+      expect(accept).toThrowError(/cannot close the root layer/i)
