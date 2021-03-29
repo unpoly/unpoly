@@ -39,17 +39,18 @@ Remaining feature work
 
 - How to open an exclusive overlay?
   - Rename { currentLayer } to { baseLayer }
+  - In JS we can do dismissAll() + open(), but that doesn't help in HTML. What can we do?
+    - <a up-layer="new" up-base-layer="root">
+      - I think we don't currently parse [up-current-layer]
+    - <a up-layer="swap">
+    - <a up-layer="shatter">
 - Docs: Target options may use &
 - Is there a use case for { layer: 'swap' }?
   - Either document it or remove it
 - Do we want to keep shortcut [up-layer="drawer"]?
   - Our deprecation warnings use this
+  - If we keep it, we need to document it
 - Document { preventable } option for dismiss() and accept()
-
-- Test that that all layer methods manipulate the stack in sync (open with local content, dismiss, accept, peel, peeling while opening, peeling while updating)
-  - E.g. opening the layer twice in a row fails currently: up.layer.open({ content: '<div class="content">foo xxx xxx</div>', target: '.content' }); up.layer.open({ content: '<div class="content">xxx</div>', target: '.content' })
-  - It's OK for animations to run async after that
-
 
 
 Tests
