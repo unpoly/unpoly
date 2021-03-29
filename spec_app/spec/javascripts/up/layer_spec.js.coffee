@@ -899,17 +899,15 @@ describe 'up.layer', ->
         dismissAll = -> up.layer.dismissAll()
         expect(dismissAll).not.toThrowError()
 
-#      it 'stops dismissing overlays when any overlay prevents its dismissal', asyncSpec (next) ->
-#        makeLayers(5)
-#
-#        next ->
-#          # The third layer will prevent its dismissal
-#          up.layer.get(2).on('up:layer:dismiss', (event) -> event.preventDefault())
-#
-#          up.layer.dismissAll()
-#
-#        next ->
-#          expect(up.layer.count).toBe(3)
+      it 'stops dismissing overlays when any overlay prevents its dismissal', ->
+        makeLayers(5)
+        # The third layer will prevent its dismissal
+        up.layer.get(2).on('up:layer:dismiss', (event) -> event.preventDefault())
+
+        dismissAll = -> up.layer.dismissAll()
+        expect(dismissAll).toAbort()
+
+        expect(up.layer.count).toBe(3)
 
     describe 'up.layer.get()', ->
 

@@ -242,7 +242,7 @@ up.viewport = do ->
     # Now that we have looked up the element with an option like { layer: 'any' },
     # the only layer relevant from here on is the element's layer.
     unless options.layer = up.layer.get(element)
-      return up.failed.async('Cannot reveal a detached element')
+      return up.error.failed.async('Cannot reveal a detached element')
 
     options.layer.peel() if options.peel
 

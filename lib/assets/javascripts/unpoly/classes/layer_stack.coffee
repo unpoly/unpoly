@@ -90,9 +90,8 @@ class up.LayerStack extends Array
 
   dismissAll: (value = null, options = {}) ->
     options.dismissable = false
-    overlays = u.reverse(@overlays)
-    promises = u.map overlays, (overlay) -> overlay.dismiss(value, options)
-    return Promise.all(promises)
+    for overlay in u.reverse(@overlays)
+      overlay.dismiss(value, options)
 
   # Used by up.util.reverse() and specs
   "#{u.copy.key}": ->
