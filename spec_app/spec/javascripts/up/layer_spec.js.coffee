@@ -21,17 +21,16 @@ describe 'up.layer', ->
             expect(layer).toHaveText('')
             done()
 
-      it 'closes existing overlays over the { currentLayer }', (done) ->
-        makeLayers(2).then ->
-          [root, oldOverlay] = up.layer.stack
+      it 'closes existing overlays over the { currentLayer }', ->
+        makeLayers(2)
+        [root, oldOverlay] = up.layer.stack
 
-          up.layer.open(currentLayer: 'root').then ->
-            [root, newOverlay] = up.layer.stack
+        up.layer.open(currentLayer: 'root')
 
-            expect(newOverlay).not.toBe(oldOverlay)
-            expect(oldOverlay.isOpen()).toBe(false)
+        [root, newOverlay] = up.layer.stack
 
-            done()
+        expect(newOverlay).not.toBe(oldOverlay)
+        expect(oldOverlay.isOpen()).toBe(false)
 
       describe 'from a remote URL', ->
 
@@ -219,20 +218,17 @@ describe 'up.layer', ->
               { target: '.overlay-element', location: '/modal-location', history: true }
             ]
   
-            next ->
-              expect(up.layer.isOverlay()).toBe(true)
-              expect(location.href).toMatchURL('/modal-location')
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(location.href).toMatchURL('/modal-location')
+
+            up.navigate(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false, history: true)
   
-              up.navigate(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false, history: true)
+            expect(location.href).toMatchURL('/modal-location')
+
+            up.layer.dismiss()
   
-            next ->
-              expect(location.href).toMatchURL('/modal-location')
-  
-              up.layer.dismiss()
-  
-            next ->
-              expect(up.layer.isRoot()).toBe(true)
-              expect(location.href).toMatchURL('/new-root-location')
+            expect(up.layer.isRoot()).toBe(true)
+            expect(location.href).toMatchURL('/new-root-location')
 
         describe 'with { history: false }', ->
         
@@ -811,7 +807,7 @@ describe 'up.layer', ->
               value = { location: u.normalizeURL('/acceptable-location') }
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
-          it 'does not accept the layer when another layer has reached the given location', asyncSpec (next) ->
+          it 'does not accept the layer when another layer has reached the given location', ->
             callback = jasmine.createSpy('onAccepted callback')
 
             makeLayers [
@@ -819,11 +815,9 @@ describe 'up.layer', ->
               { target: '.overlay-content', onAccepted: callback, acceptLocation: '/acceptable-location' }
             ]
 
-            next ->
-              up.navigate('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
+            up.navigate('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            expect(callback).not.toHaveBeenCalled()
 
           it 'immediately accepts a layer that was opened at the given location'
 
@@ -873,27 +867,24 @@ describe 'up.layer', ->
 
     describe 'up.layer.dismissAll()', ->
 
-      it 'dismisses all overlays', asyncSpec (next) ->
+      it 'dismisses all overlays', ->
         makeLayers(3)
 
-        next ->
-          expect(up.layer.count).toBe(3)
+        expect(up.layer.count).toBe(3)
 
-          up.layer.dismissAll()
+        up.layer.dismissAll()
 
-        next ->
-          expect(up.layer.count).toBe(1)
-          expect(up.layer.isRoot()).toBe(true)
+        expect(up.layer.count).toBe(1)
+        expect(up.layer.isRoot()).toBe(true)
 
-      it 'manipulates the layer stack synchronously', asyncSpec (next) ->
+      it 'manipulates the layer stack synchronously', ->
         makeLayers(2)
 
-        next ->
-          expect(up.layer.count).toBe(2)
+        expect(up.layer.count).toBe(2)
 
-          up.layer.dismissAll()
+        up.layer.dismissAll()
 
-          expect(up.layer.count).toBe(1)
+        expect(up.layer.count).toBe(1)
 
       it 'does nothing when no overlay is open', ->
         dismissAll = -> up.layer.dismissAll()
@@ -913,10 +904,9 @@ describe 'up.layer', ->
 
       describe 'for an element', ->
 
-        it "returns the element's layer", (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.get(up.layer.get(1).element)).toBe up.layer.get(1)
-            done()
+        it "returns the element's layer", ->
+          makeLayers(3)
+          expect(up.layer.get(up.layer.get(1).element)).toBe up.layer.get(1)
 
         it 'returns a missing value if the element is detached', ->
           element = e.createFromSelector('.element')
@@ -924,95 +914,84 @@ describe 'up.layer', ->
 
       describe 'for an up.Layer', ->
 
-        it 'returns the given layer', (done) ->
-          makeLayers(3).then ->
-            layer = up.layer.get(1)
-            expect(layer).toEqual jasmine.any(up.Layer)
-            expect(up.layer.get(layer)).toBe(layer)
-            done()
+        it 'returns the given layer', ->
+          makeLayers(3)
+          layer = up.layer.get(1)
+          expect(layer).toEqual jasmine.any(up.Layer)
+          expect(up.layer.get(layer)).toBe(layer)
 
       describe 'for a layer name like "parent"', ->
 
-        it 'returns the layer matching that name', (done) ->
-          makeLayers(2).then ->
-            expect(up.layer.get('parent')).toBe(up.layer.root)
-            done()
+        it 'returns the layer matching that name', ->
+          makeLayers(2)
+          expect(up.layer.get('parent')).toBe(up.layer.root)
 
       describe 'for a number', ->
 
-        it 'returns the layer with the given index', asyncSpec (next) ->
+        it 'returns the layer with the given index', ->
           makeLayers(2)
 
-          next ->
-            [root, overlay] = up.layer.stack
+          [root, overlay] = up.layer.stack
 
-            expect(up.layer.get(0)).toBe(root)
-            expect(up.layer.get(1)).toBe(overlay)
+          expect(up.layer.get(0)).toBe(root)
+          expect(up.layer.get(1)).toBe(overlay)
 
-        it 'returns a missing value if no layer with the given index exists', asyncSpec (next) ->
+        it 'returns a missing value if no layer with the given index exists', ->
           makeLayers(2)
 
-          next ->
-            expect(up.layer.get(2)).toBeMissing()
+          expect(up.layer.get(2)).toBeMissing()
 
       describe 'for undefined', ->
 
-        it 'returns the current layer', asyncSpec (next) ->
+        it 'returns the current layer', ->
           makeLayers(2)
 
-          next ->
-            expect(up.layer.get(undefined)).toBe(up.layer.front)
+          expect(up.layer.get(undefined)).toBe(up.layer.front)
 
     describe 'up.layer.stack', ->
 
-      it 'returns an array-like object of all layers, starting with the root layer, for easy access to the entire stack', (done) ->
-        makeLayers(2).then ->
-          expect(up.layer.count).toBe(2)
-          expect(up.layer.stack[0]).toBe(up.layer.root)
-          expect(up.layer.stack[1]).toBe(up.layer.front)
-          done()
+      it 'returns an array-like object of all layers, starting with the root layer, for easy access to the entire stack', ->
+        makeLayers(2)
+        expect(up.layer.count).toBe(2)
+        expect(up.layer.stack[0]).toBe(up.layer.root)
+        expect(up.layer.stack[1]).toBe(up.layer.front)
 
     describe 'up.layer.count', ->
 
       it 'returns 1 if no overlay is open', ->
         expect(up.layer.count).toBe(1)
 
-      it 'returns 2 if one overlay is open', asyncSpec (next) ->
+      it 'returns 2 if one overlay is open', ->
         makeLayers(2)
 
-        next ->
-          expect(up.layer.count).toBe(2)
+        expect(up.layer.count).toBe(2)
 
     describe 'up.layer.getAll()', ->
 
       describe 'for "any"', ->
 
-        it 'returns a reversed list of all layers', (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('any')).toEqual [up.layer.get(2), up.layer.get(1), up.layer.get(0)]
-            done()
+        it 'returns a reversed list of all layers', ->
+          makeLayers(3)
+          expect(up.layer.getAll('any')).toEqual [up.layer.get(2), up.layer.get(1), up.layer.get(0)]
 
-        it 'returns the current layer first so that is preferred for element lookups', (done) ->
-          makeLayers(3).then ->
-            up.layer.get(1).asCurrent ->
-              expect(up.layer.getAll('any')).toEqual [up.layer.get(1), up.layer.get(2), up.layer.get(0)]
-              done()
+        it 'returns the current layer first so that is preferred for element lookups', ->
+          makeLayers(3)
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('any')).toEqual [up.layer.get(1), up.layer.get(2), up.layer.get(0)]
 
       describe 'for an element', ->
 
-        it "returns an array of the given element's layer", (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll(up.layer.get(1).element)).toEqual [up.layer.get(1)]
-            done()
+        it "returns an array of the given element's layer", ->
+          makeLayers(3)
+          expect(up.layer.getAll(up.layer.get(1).element)).toEqual [up.layer.get(1)]
 
       describe 'for an up.Layer', ->
 
-        it 'returns an array of the given up.Layer', (done) ->
-          makeLayers(3).then ->
-            layer = up.layer.get(1)
-            expect(layer).toEqual jasmine.any(up.Layer)
-            expect(up.layer.getAll(layer)).toEqual [layer]
-            done()
+        it 'returns an array of the given up.Layer', ->
+          makeLayers(3)
+          layer = up.layer.get(1)
+          expect(layer).toEqual jasmine.any(up.Layer)
+          expect(up.layer.getAll(layer)).toEqual [layer]
 
       describe 'for "new"', ->
 
@@ -1021,162 +1000,140 @@ describe 'up.layer', ->
 
       describe 'for "closest"', ->
 
-        it 'returns the current layer and its ancestors', (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('closest')).toEqual [up.layer.get(2), up.layer.get(1), up.layer.get(0)]
-            done()
+        it 'returns the current layer and its ancestors', ->
+          makeLayers(3)
+          expect(up.layer.getAll('closest')).toEqual [up.layer.get(2), up.layer.get(1), up.layer.get(0)]
 
-        it 'honors a temporary current layer', (done) ->
-          makeLayers(3).then ->
-            up.layer.get(1).asCurrent ->
-              expect(up.layer.getAll('closest')).toEqual [up.layer.get(1), up.layer.get(0)]
-              done()
+        it 'honors a temporary current layer', ->
+          makeLayers(3)
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('closest')).toEqual [up.layer.get(1), up.layer.get(0)]
 
       describe 'for "parent"', ->
 
-        it "returns an array of the current layer's parent layer", (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('parent')).toEqual [up.layer.get(1)]
-            done()
+        it "returns an array of the current layer's parent layer", ->
+          makeLayers(3)
+          expect(up.layer.getAll('parent')).toEqual [up.layer.get(1)]
 
         it 'returns an empty array if the current layer is the root layer', ->
           expect(up.layer.getAll('parent')).toEqual []
 
-        it 'honors a temporary current layer', (done) ->
-          makeLayers(3).then ->
-            up.layer.get(1).asCurrent ->
-              expect(up.layer.getAll('parent')).toEqual [up.layer.get(0)]
-              done()
+        it 'honors a temporary current layer', ->
+          makeLayers(3)
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('parent')).toEqual [up.layer.get(0)]
 
       describe 'for "child"', ->
 
-        it "returns an array of the current layer's child layer", (done) ->
-          makeLayers(3).then ->
-            up.layer.root.asCurrent ->
-              expect(up.layer.getAll('child')).toEqual [up.layer.get(1)]
-              done()
+        it "returns an array of the current layer's child layer", ->
+          makeLayers(3)
+          up.layer.root.asCurrent ->
+            expect(up.layer.getAll('child')).toEqual [up.layer.get(1)]
 
         it 'returns an empty array if the current layer is the front layer', ->
           expect(up.layer.getAll('child')).toEqual []
 
       describe 'for "descendant"', ->
 
-        it "returns the current layer's descendant layers", (done) ->
-          makeLayers(3).then ->
-            up.layer.root.asCurrent ->
-              expect(up.layer.getAll('descendant')).toEqual [up.layer.get(1), up.layer.get(2)]
-              done()
+        it "returns the current layer's descendant layers", ->
+          makeLayers(3)
+          up.layer.root.asCurrent ->
+            expect(up.layer.getAll('descendant')).toEqual [up.layer.get(1), up.layer.get(2)]
 
       describe 'for "ancestor"', ->
 
-        it "returns the current layer's ancestor layers", (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('ancestor')).toEqual [up.layer.get(1), up.layer.get(0)]
-            done()
+        it "returns the current layer's ancestor layers", ->
+          makeLayers(3)
+          expect(up.layer.getAll('ancestor')).toEqual [up.layer.get(1), up.layer.get(0)]
 
-        it 'honors a temporary current layer', (done) ->
-          makeLayers(3).then ->
-            up.layer.get(1).asCurrent ->
-              expect(up.layer.getAll('ancestor')).toEqual [up.layer.get(0)]
-              done()
+        it 'honors a temporary current layer', ->
+          makeLayers(3)
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('ancestor')).toEqual [up.layer.get(0)]
 
       describe 'for "root"', ->
 
-        it "returns an array of the root layer", (done) ->
-          makeLayers(2).then ->
-            expect(up.layer.getAll('root')).toEqual [up.layer.root]
-            done()
+        it "returns an array of the root layer", ->
+          makeLayers(2)
+          expect(up.layer.getAll('root')).toEqual [up.layer.root]
 
       if up.migrate.loaded
         describe 'for "page"', ->
 
-          it "returns an array of the root layer, which used to be called 'page' in older Unpoly versions", (done) ->
-            makeLayers(2).then ->
-              expect(up.layer.getAll('page')).toEqual [up.layer.root]
-              done()
+          it "returns an array of the root layer, which used to be called 'page' in older Unpoly versions", ->
+            makeLayers(2)
+            expect(up.layer.getAll('page')).toEqual [up.layer.root]
 
       describe 'for "front"', ->
 
-        it "returns an array of the front layer", (done) ->
-          makeLayers(2).then ->
-            expect(up.layer.getAll('front')).toEqual [up.layer.get(1)]
-            done()
+        it "returns an array of the front layer", ->
+          makeLayers(2)
+          expect(up.layer.getAll('front')).toEqual [up.layer.get(1)]
 
-        it "is not affected by a temporary current layer", (done) ->
-          makeLayers(2).then ->
-            up.layer.root.asCurrent ->
-              expect(up.layer.getAll('front')).toEqual [up.layer.get(1)]
-              done()
+        it "is not affected by a temporary current layer", ->
+          makeLayers(2)
+          up.layer.root.asCurrent ->
+            expect(up.layer.getAll('front')).toEqual [up.layer.get(1)]
 
       describe 'for "origin"', ->
 
-        it "returns an array of the layer of the { origin } element", (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('origin', origin: up.layer.get(1).element)).toEqual [up.layer.get(1)]
-            done()
+        it "returns an array of the layer of the { origin } element", ->
+          makeLayers(3)
+          expect(up.layer.getAll('origin', origin: up.layer.get(1).element)).toEqual [up.layer.get(1)]
 
         it "returns an empty list if if no { origin } was passed", ->
           expect(up.layer.getAll('origin')).toEqual []
 
       describe 'for "current"', ->
 
-        it "returns an array of the front layer", (done) ->
-          makeLayers(2).then ->
-            expect(up.layer.getAll('current')).toEqual [up.layer.get(1)]
-            done()
+        it "returns an array of the front layer", ->
+          makeLayers(2)
+          expect(up.layer.getAll('current')).toEqual [up.layer.get(1)]
 
-        it "returns an array of a { currentLayer } option", (done) ->
-          makeLayers(2).then ->
-            expect(up.layer.getAll('current', currentLayer: up.layer.root)).toEqual [up.layer.root]
-            done()
+        it "returns an array of a { currentLayer } option", ->
+          makeLayers(2)
+          expect(up.layer.getAll('current', currentLayer: up.layer.root)).toEqual [up.layer.root]
 
-        it 'honors a temporary current layer', (done) ->
-          makeLayers(2).then ->
-            up.layer.root.asCurrent ->
-              expect(up.layer.getAll('current')).toEqual [up.layer.root]
-              done()
+        it 'honors a temporary current layer', ->
+          makeLayers(2)
+          up.layer.root.asCurrent ->
+            expect(up.layer.getAll('current')).toEqual [up.layer.root]
 
       describe 'for an options object with { layer } property', ->
 
-        it 'allows to pass the layer value as a { layer } option instead of a first argument', (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll(layer: up.layer.get(1))).toEqual [up.layer.get(1)]
-            done()
+        it 'allows to pass the layer value as a { layer } option instead of a first argument', ->
+          makeLayers(3)
+          expect(up.layer.getAll(layer: up.layer.get(1))).toEqual [up.layer.get(1)]
 
       describe 'for multiple space-separated layer named', ->
 
-        it "returns an array of the matching layers", (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('parent root')).toEqual [up.layer.get(1), up.layer.root]
-            done()
+        it "returns an array of the matching layers", ->
+          makeLayers(3)
+          expect(up.layer.getAll('parent root')).toEqual [up.layer.get(1), up.layer.root]
 
         it 'omits layers that do not exist', ->
           expect(up.layer.getAll('parent root')).toEqual [up.layer.root]
 
       describe 'for an options object without { layer } property', ->
 
-        it 'behaves like "any" and returns a reversed list of all layers', (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('any')).toEqual [up.layer.get(2), up.layer.get(1), up.layer.get(0)]
-            done()
+        it 'behaves like "any" and returns a reversed list of all layers', ->
+          makeLayers(3)
+          expect(up.layer.getAll('any')).toEqual [up.layer.get(2), up.layer.get(1), up.layer.get(0)]
 
-        it 'behaves like "any" and returns the current layer first so that is preferred for element lookups', (done) ->
-          makeLayers(3).then ->
-            up.layer.get(1).asCurrent ->
-              expect(up.layer.getAll('any')).toEqual [up.layer.get(1), up.layer.get(2), up.layer.get(0)]
-              done()
+        it 'behaves like "any" and returns the current layer first so that is preferred for element lookups', ->
+          makeLayers(3)
+          up.layer.get(1).asCurrent ->
+            expect(up.layer.getAll('any')).toEqual [up.layer.get(1), up.layer.get(2), up.layer.get(0)]
 
       describe '{ currentLayer } option', ->
 
-        it 'allows to change the current layer for the purpose of the lookup', (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('parent', currentLayer: up.layer.get(1))).toEqual [up.layer.get(0)]
-            done()
+        it 'allows to change the current layer for the purpose of the lookup', ->
+          makeLayers(3)
+          expect(up.layer.getAll('parent', currentLayer: up.layer.get(1))).toEqual [up.layer.get(0)]
 
-        it 'looks up the { currentLayer } option if it is a string, using the actual current layer as the base for that second lookup', (done) ->
-          makeLayers(3).then ->
-            expect(up.layer.getAll('parent', currentLayer: 'front')).toEqual [up.layer.get(1)]
-            done()
+        it 'looks up the { currentLayer } option if it is a string, using the actual current layer as the base for that second lookup', ->
+          makeLayers(3)
+          expect(up.layer.getAll('parent', currentLayer: 'front')).toEqual [up.layer.get(1)]
 
     describe 'up.layer.ask()', ->
 
@@ -1233,16 +1190,14 @@ describe 'up.layer', ->
           expect(up.layer.current).toBe(up.layer.get(1))
           done()
 
-      it 'may be temporarily changed for the duration of a callback using up.Layer.asCurrent(fn)', (done) ->
-        makeLayers(2).then ->
-          expect(up.layer.current).toBe(up.layer.get(1))
+      it 'may be temporarily changed for the duration of a callback using up.Layer.asCurrent(fn)', ->
+        makeLayers(2)
+        expect(up.layer.current).toBe(up.layer.get(1))
 
-          up.layer.root.asCurrent ->
-            expect(up.layer.current).toBe(up.layer.get(0))
+        up.layer.root.asCurrent ->
+          expect(up.layer.current).toBe(up.layer.get(0))
 
-          expect(up.layer.current).toBe(up.layer.get(1))
-
-          done()
+        expect(up.layer.current).toBe(up.layer.get(1))
 
     describe 'up.layer.normalizeOptions()', ->
 
@@ -1253,13 +1208,12 @@ describe 'up.layer', ->
           up.layer.normalizeOptions(options)
           expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.current)
 
-        it 'does not override an existing { currentLayer } option', asyncSpec (next) ->
+        it 'does not override an existing { currentLayer } option', ->
           makeLayers(3)
 
-          next ->
-            options = { currentLayer: up.layer.get(1) }
-            up.layer.normalizeOptions(options)
-            expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1))
+          options = { currentLayer: up.layer.get(1) }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1))
 
         it 'resolves a given { currentLayer } string to an up.Layer object', ->
           options = { currentLayer: 'root' }
@@ -1316,41 +1270,37 @@ describe 'up.layer', ->
 
       describe 'for { layer: "swap" }', ->
 
-        it 'sets { currentLayer } to the current parent layer and set { layer: "new" }', asyncSpec (next) ->
+        it 'sets { currentLayer } to the current parent layer and set { layer: "new" }', ->
           makeLayers(3)
 
-          next ->
-            options = { layer: 'swap' }
-            up.layer.normalizeOptions(options)
-            expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1), layer: 'new')
+          options = { layer: 'swap' }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1), layer: 'new')
 
       describe 'for an element passed as { target }', ->
 
-        it "sets { layer } to that element's layer object", asyncSpec (next) ->
+        it "sets { layer } to that element's layer object", ->
           makeLayers(3)
 
-          next ->
-            options = { target: up.layer.get(1).element }
-            up.layer.normalizeOptions(options)
-            expect(options).toEqual jasmine.objectContaining(layer: up.layer.get(1))
+          options = { target: up.layer.get(1).element }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(layer: up.layer.get(1))
 
       describe 'for an element passed as { origin }', ->
 
-        it "sets { layer: 'origin' }", asyncSpec (next) ->
+        it "sets { layer: 'origin' }", ->
           makeLayers(3)
 
-          next ->
-            options = { origin: up.layer.get(1).element }
-            up.layer.normalizeOptions(options)
-            expect(options).toEqual jasmine.objectContaining(origin: up.layer.get(1).element, layer: 'origin')
+          options = { origin: up.layer.get(1).element }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(origin: up.layer.get(1).element, layer: 'origin')
 
-        it 'does not change an existing { layer } option', asyncSpec (next) ->
+        it 'does not change an existing { layer } option', ->
           makeLayers(2)
 
-          next ->
-            options = { layer: 'root', origin: up.layer.get(1).element }
-            up.layer.normalizeOptions(options)
-            expect(options).toEqual jasmine.objectContaining(origin: up.layer.get(1).element, layer: 'root')
+          options = { layer: 'root', origin: up.layer.get(1).element }
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(origin: up.layer.get(1).element, layer: 'root')
 
       describe 'if no layer-related option is given', ->
 
@@ -1392,54 +1342,48 @@ describe 'up.layer', ->
       beforeEach ->
         up.motion.config.enabled = false
 
-      it 'accepts an overlay', asyncSpec (next) ->
+      it 'accepts an overlay', ->
         acceptListener = jasmine.createSpy('accept listener')
         up.on('up:layer:accept', acceptListener)
 
         makeLayers(2)
 
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          link = up.layer.affix('a[href="#"]')
-          link.setAttribute('up-accept', '')
-          Trigger.clickSequence(link)
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="#"]')
+        link.setAttribute('up-accept', '')
+        Trigger.clickSequence(link)
 
-        next ->
-          expect(up.layer.isRoot()).toBe(true)
-          expect(acceptListener).toHaveBeenCalled()
+        expect(up.layer.isRoot()).toBe(true)
+        expect(acceptListener).toHaveBeenCalled()
 
-      it 'accepts an overlay with the attribute value as JSON', asyncSpec (next) ->
+      it 'accepts an overlay with the attribute value as JSON', ->
         acceptListener = jasmine.createSpy('accept listener')
         up.on('up:layer:accept', acceptListener)
 
         makeLayers(2)
 
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          link = up.layer.affix('a[href="#"]')
-          link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
-          Trigger.clickSequence(link)
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="#"]')
+        link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
+        Trigger.clickSequence(link)
 
-        next ->
-          expect(up.layer.isRoot()).toBe(true)
-          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
+        expect(up.layer.isRoot()).toBe(true)
+        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
 
-      it 'prevents a link from being followed on an overlay', asyncSpec (next) ->
+      it 'prevents a link from being followed on an overlay', ->
         followListener = jasmine.createSpy('follow listener')
         up.on('up:link:follow', followListener)
 
         makeLayers(2)
 
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          link = up.layer.affix('a[href="/foo"][up-follow]')
-          link.setAttribute('up-accept', '')
-          Trigger.clickSequence(link)
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="/foo"][up-follow]')
+        link.setAttribute('up-accept', '')
+        Trigger.clickSequence(link)
 
-        next ->
-          expect(followListener).not.toHaveBeenCalled()
+        expect(followListener).not.toHaveBeenCalled()
 
-      it 'follows a link on the root layer', asyncSpec (next) ->
+      it 'follows a link on the root layer', ->
         followListener = jasmine.createSpy('follow listener')
         up.on('up:link:follow', followListener)
 
@@ -1447,61 +1391,53 @@ describe 'up.layer', ->
         link.setAttribute('up-accept', '')
         Trigger.clickSequence(link)
 
-        next ->
-          expect(followListener).toHaveBeenCalled()
+        expect(followListener).toHaveBeenCalled()
 
-      it 'may be used on elements that are no links', asyncSpec (next) ->
+      it 'may be used on elements that are no links', ->
         acceptListener = jasmine.createSpy('accept listener')
         up.on('up:layer:accept', acceptListener)
 
         makeLayers(2)
 
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          link = up.layer.affix('span')
-          link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
-          Trigger.clickSequence(link)
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('span')
+        link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
+        Trigger.clickSequence(link)
 
-        next ->
-          expect(up.layer.isRoot()).toBe(true)
-          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
+        expect(up.layer.isRoot()).toBe(true)
+        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
 
-      it 'allows to set attributes that control the closing animation', asyncSpec (next) ->
+      it 'allows to set attributes that control the closing animation', ->
         makeLayers(2)
-        overlay = undefined
+        overlay = up.layer.current
 
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          overlay = up.layer.current
-          spyOn(overlay, 'accept')
-          link = up.layer.affix('a[href="#"]')
-          link.setAttribute('up-accept', '')
-          link.setAttribute('up-animation', 'move-to-right')
-          link.setAttribute('up-duration', '654')
-          Trigger.clickSequence(link)
+        expect(up.layer.isOverlay()).toBe(true)
+        spyOn(overlay, 'accept')
+        link = up.layer.affix('a[href="#"]')
+        link.setAttribute('up-accept', '')
+        link.setAttribute('up-animation', 'move-to-right')
+        link.setAttribute('up-duration', '654')
+        Trigger.clickSequence(link)
 
-        next ->
-          expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining(animation: 'move-to-right', duration: 654))
+        expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining(animation: 'move-to-right', duration: 654))
 
     describe '[up-dismiss]', ->
 
       beforeEach ->
         up.motion.config.enabled = false
 
-      it 'dismisses an overlay with the attribute value as JSON', asyncSpec (next) ->
+      it 'dismisses an overlay with the attribute value as JSON', ->
         dismissListener = jasmine.createSpy('dismiss listener')
         up.on('up:layer:dismiss', dismissListener)
 
         makeLayers(2)
 
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          link = up.layer.affix('a[href="#"]')
-          link.setAttribute('up-dismiss', JSON.stringify(foo: 'bar'))
-          Trigger.clickSequence(link)
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="#"]')
+        link.setAttribute('up-dismiss', JSON.stringify(foo: 'bar'))
+        Trigger.clickSequence(link)
 
-        next ->
-          expect(up.layer.isRoot()).toBe(true)
-          expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', value: { foo: 'bar' })
+        expect(up.layer.isRoot()).toBe(true)
+        expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', value: { foo: 'bar' })
 
       # More specs in example group for "[up-accept]"

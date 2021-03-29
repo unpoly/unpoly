@@ -371,12 +371,10 @@ describe 'up.radio', ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
 
         makeLayers(2)
-
-        next ->
-          expect(up.layer.isOverlay()).toBe(true)
-          element = up.layer.root.affix('.element[up-poll][up-interval=2]')
-          registerFixture(element) # make sure this element is destroyed after the example
-          up.hello(element) # start polling
+        expect(up.layer.isOverlay()).toBe(true)
+        element = up.layer.root.affix('.element[up-poll][up-interval=2]')
+        registerFixture(element) # make sure this element is destroyed after the example
+        up.hello(element) # start polling
 
         next.after 20, ->
           expect(reloadSpy).not.toHaveBeenCalled()

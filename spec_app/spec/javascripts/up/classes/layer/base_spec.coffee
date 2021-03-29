@@ -21,41 +21,38 @@ describe 'up.Layer', ->
 
   describe '#on()', ->
 
-    it 'registers a listener for events on this layer', asyncSpec (next) ->
+    it 'registers a listener for events on this layer', ->
       listener = jasmine.createSpy('event listener')
 
       makeLayers(2)
 
-      next ->
-        up.layer.on('foo', listener)
-        up.emit(up.layer.element, 'foo')
+      up.layer.on('foo', listener)
+      up.emit(up.layer.element, 'foo')
 
-        expect(listener).toHaveBeenCalled()
+      expect(listener).toHaveBeenCalled()
 
-    it "does not call the listener for events on another layer", asyncSpec (next) ->
+    it "does not call the listener for events on another layer", ->
       listener = jasmine.createSpy('event listener')
 
       makeLayers(3)
 
-      next ->
-        up.layer.stack[1].on('foo', listener)
-        up.emit(up.layer.stack[2].element, 'foo')
+      up.layer.stack[1].on('foo', listener)
+      up.emit(up.layer.stack[2].element, 'foo')
 
-        expect(listener).not.toHaveBeenCalled()
+      expect(listener).not.toHaveBeenCalled()
 
-    it "does not call the listener for events on another layer, even if the event target is a DOM child of the layer element", asyncSpec (next) ->
+    it "does not call the listener for events on another layer, even if the event target is a DOM child of the layer element", ->
       listener = jasmine.createSpy('event listener')
       up.layer.root.on('foo', listener)
 
       makeLayers(2)
 
-      next ->
-        # Note that we're using Element#contains(), not up.Layer#contains()
-        expect(up.layer.root.element.contains(up.layer.current.element)).toBe(true)
+      # Note that we're using Element#contains(), not up.Layer#contains()
+      expect(up.layer.root.element.contains(up.layer.current.element)).toBe(true)
 
-        up.emit(up.layer.element, 'foo')
+      up.emit(up.layer.element, 'foo')
 
-        expect(listener).not.toHaveBeenCalled()
+      expect(listener).not.toHaveBeenCalled()
 
     it 'allows to pass a selector for event delegation as second argument', asyncSpec (next) ->
       listener = jasmine.createSpy('event listener')
@@ -73,75 +70,67 @@ describe 'up.Layer', ->
         up.emit(two, 'foo')
         expect(listener).toHaveBeenCalled()
 
-    it 'sets up.layer.current to this layer while the listener is running', asyncSpec (next) ->
+    it 'sets up.layer.current to this layer while the listener is running', ->
       currentSpy = jasmine.createSpy()
 
       makeLayers(3)
 
-      next ->
-        expect(up.layer.current).toEqual(up.layer.get(2))
+      expect(up.layer.current).toEqual(up.layer.get(2))
 
-        up.layer.get(1).on('foo', -> currentSpy(up.layer.current))
+      up.layer.get(1).on('foo', -> currentSpy(up.layer.current))
 
-        up.emit(up.layer.get(1).element, 'foo')
+      up.emit(up.layer.get(1).element, 'foo')
 
-      next ->
-        expect(currentSpy).toHaveBeenCalledWith(up.layer.get(1))
-        expect(up.layer.current).toEqual(up.layer.get(2))
+      expect(currentSpy).toHaveBeenCalledWith(up.layer.get(1))
+      expect(up.layer.current).toEqual(up.layer.get(2))
 
   describe '#emit()', ->
 
-    it "emits an event on this layer's element", asyncSpec (next) ->
+    it "emits an event on this layer's element", ->
       targets = []
       up.on 'foo', (event) -> targets.push(event.target)
 
       makeLayers(2)
 
-      next ->
-        expect(up.layer.count).toBe(2)
+      expect(up.layer.count).toBe(2)
 
-        up.layer.front.emit('foo')
-        expect(targets).toEqual [up.layer.front.element]
+      up.layer.front.emit('foo')
+      expect(targets).toEqual [up.layer.front.element]
 
-        up.layer.root.emit('foo')
-        expect(targets).toEqual [up.layer.front.element, up.layer.root.element]
+      up.layer.root.emit('foo')
+      expect(targets).toEqual [up.layer.front.element, up.layer.root.element]
 
-    it 'sets up.layer.current to this layer while listeners are running', asyncSpec (next) ->
+    it 'sets up.layer.current to this layer while listeners are running', ->
       eventLayer = null
       up.on 'foo', (event) -> eventLayer = up.layer.current
 
       makeLayers(2)
 
-      next ->
-        expect(up.layer.current).not.toBe(up.layer.root)
-        expect(up.layer.current).toBe(up.layer.front)
+      expect(up.layer.current).not.toBe(up.layer.root)
+      expect(up.layer.current).toBe(up.layer.front)
 
-        up.layer.root.emit('foo')
+      up.layer.root.emit('foo')
 
-        expect(eventLayer).not.toBe(up.layer.front)
-        expect(eventLayer).toBe(up.layer.root)
+      expect(eventLayer).not.toBe(up.layer.front)
+      expect(eventLayer).toBe(up.layer.root)
 
   describe '#peel()', ->
 
-    it 'dismisses all descendants', asyncSpec (next) ->
+    it 'dismisses all descendants', ->
       makeLayers(4)
+      expect(up.layer.count).toBe(4)
+      secondLayer = up.layer.get(1)
+      
+      secondLayer.peel()
 
-      next ->
-        expect(up.layer.count).toBe(4)
-        secondLayer = up.layer.get(1)
-        secondLayer.peel()
+      expect(up.layer.count).toBe(2)
 
-      next ->
-        expect(up.layer.count).toBe(2)
-
-    it 'uses a dismissal value :peel', asyncSpec (next) ->
+    it 'uses a dismissal value :peel', ->
       listener = jasmine.createSpy('dismiss listener')
       up.on('up:layer:dismiss', listener)
 
       makeLayers(2)
 
-      next ->
-        up.layer.root.peel()
+      up.layer.root.peel()
 
-      next ->
-        expect(listener.calls.argsFor(0)[0]).toEqual jasmine.objectContaining(value: ':peel')
+      expect(listener.calls.argsFor(0)[0]).toEqual jasmine.objectContaining(value: ':peel')

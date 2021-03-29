@@ -7,34 +7,29 @@ describe 'up.Layer.Overlay', ->
 
   describe '#accept()', ->
 
-    it 'closes this layer', asyncSpec (next) ->
+    it 'closes this layer', ->
       modes = -> u.map(up.layer.stack, 'mode')
 
       makeLayers(2)
+      expect(modes()).toEqual ['root', 'modal']
 
-      next ->
-        expect(modes()).toEqual ['root', 'modal']
+      up.layer.accept(null, animation: false)
 
-        up.layer.accept(null, animation: false)
+      expect(modes()).toEqual ['root']
 
-      next ->
-        expect(modes()).toEqual ['root']
-
-    it 'dismiss descendants before closing this layer', asyncSpec (next) ->
+    it 'dismiss descendants before closing this layer', ->
       listener = jasmine.createSpy('layer close listener')
       up.on 'up:layer:accepted up:layer:dismissed', listener
 
       makeLayers(4)
 
-      next =>
-        @layers = u.copy(up.layer.stack)
-        up.layer.get(1).accept()
+      @layers = u.copy(up.layer.stack)
+      up.layer.get(1).accept()
 
-      next =>
-        expect(listener.calls.count()).toBe(3)
-        expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:dismissed', layer: @layers[3])
-        expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', layer: @layers[2])
-        expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', layer: @layers[1])
+      expect(listener.calls.count()).toBe(3)
+      expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:dismissed', layer: @layers[3])
+      expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', layer: @layers[2])
+      expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', layer: @layers[1])
 
     it 'aborts pending requests for this layer', asyncSpec (next) ->
       abortedURLs = []
@@ -42,8 +37,7 @@ describe 'up.Layer.Overlay', ->
 
       makeLayers(2)
 
-      next ->
-        up.render('.element', url: '/layer-url', layer: 'current')
+      up.render('.element', url: '/layer-url', layer: 'current')
 
       next ->
         up.layer.accept()
@@ -58,8 +52,7 @@ describe 'up.Layer.Overlay', ->
 
       makeLayers(2)
 
-      next ->
-        up.render('.element', url: '/root-url', layer: 'root', peel: false)
+      up.render('.element', url: '/root-url', layer: 'root', peel: false)
 
       next ->
         up.layer.current.accept()
@@ -74,14 +67,11 @@ describe 'up.Layer.Overlay', ->
         { }
         { onAccepted: callback }
       ]
+      expect(callback).not.toHaveBeenCalled()
 
-      next ->
-        expect(callback).not.toHaveBeenCalled()
+      up.layer.current.accept('acceptance value')
 
-        up.layer.current.accept('acceptance value')
-
-      next ->
-        expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
+      expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'acceptance value'))
 
     it 'focuses the link that originally opened the overlay', asyncSpec (next) ->
       opener = fixture('a[up-target=".element"][up-layer="new"][href="/overlay-path"]')
@@ -100,15 +90,14 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(opener).toBeFocused()
 
-    it 'pops this layer from the stack synchronously to prevent race conditions', asyncSpec (next) ->
+    it 'pops this layer from the stack synchronously to prevent race conditions', ->
       makeLayers(2)
 
-      next ->
-        expect(up.layer.count).toBe(2)
-        up.layer.current.accept()
-        expect(up.layer.count).toBe(1)
+      expect(up.layer.count).toBe(2)
+      up.layer.current.accept()
+      expect(up.layer.count).toBe(1)
 
-    it "restores the parent layer's location", asyncSpec (next) ->
+    it "restores the parent layer's location", ->
       up.history.config.enabled = true
 
       up.layer.open(
@@ -118,25 +107,21 @@ describe 'up.Layer.Overlay', ->
         history: true
       )
 
-      next =>
-        expect(up.layer.isOverlay()).toBe(true)
-        expect(location.href).toMatchURL('/path/to/modal')
+      expect(up.layer.isOverlay()).toBe(true)
+      expect(location.href).toMatchURL('/path/to/modal')
 
-        up.layer.current.accept()
+      up.layer.current.accept()
 
-      next =>
-        expect(up.layer.isRoot()).toBe(true)
-        expect(location.href).toMatchURL(@locationBeforeExample)
+      expect(up.layer.isRoot()).toBe(true)
+      expect(location.href).toMatchURL(@locationBeforeExample)
 
-    it 'manipulates the layer stack synchronously, to avoid concurrency issues when we need to close layers within another change', asyncSpec (next) ->
+    it 'manipulates the layer stack synchronously, to avoid concurrency issues when we need to close layers within another change', ->
       makeLayers(2)
+      expect(up.layer.count).toBe(2)
 
-      next ->
-        expect(up.layer.count).toBe(2)
+      up.layer.current.accept()
 
-        up.layer.current.accept()
-
-        expect(up.layer.count).toBe(1)
+      expect(up.layer.count).toBe(1)
 
     describe 'cancelation', ->
 
@@ -159,34 +144,28 @@ describe 'up.Layer.Overlay', ->
 
   describe '#dismiss()', ->
 
-    it 'closes this layer', asyncSpec (next) ->
+    it 'closes this layer', ->
       modes = -> u.map(up.layer.stack, 'mode')
 
       makeLayers(2)
+      expect(modes()).toEqual ['root', 'modal']
 
-      next ->
-        expect(modes()).toEqual ['root', 'modal']
+      up.layer.current.dismiss()
 
-        up.layer.current.dismiss()
+      expect(modes()).toEqual ['root']
 
-      next ->
-        expect(modes()).toEqual ['root']
-
-    it 'takes a dismissal value that is passed to onDismissed handlers', asyncSpec (next) ->
+    it 'takes a dismissal value that is passed to onDismissed handlers', ->
       callback = jasmine.createSpy('onDismissed handler')
 
       makeLayers [
         { }
         { onDismissed: callback }
       ]
+      expect(callback).not.toHaveBeenCalled()
 
-      next ->
-        expect(callback).not.toHaveBeenCalled()
+      up.layer.current.dismiss('dismissal value')
 
-        up.layer.current.dismiss('dismissal value')
-
-      next ->
-        expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'dismissal value'))
+      expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'dismissal value'))
 
     describe 'events', ->
 

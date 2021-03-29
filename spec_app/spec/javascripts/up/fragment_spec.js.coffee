@@ -44,27 +44,25 @@ describe 'up.fragment', ->
 
       describe 'layers', ->
 
-        it 'matches elements in the given { layer }', asyncSpec (next) ->
+        it 'matches elements in the given { layer }', ->
           makeLayers [{ target: '.element' }, { target: '.element' }]
 
-          next ->
-            expect(up.layer.count).toBe(2)
-            result = up.fragment.get('.element', layer: 'root')
+          expect(up.layer.count).toBe(2)
+          result = up.fragment.get('.element', layer: 'root')
 
-            expect(up.layer.get(result)).toBe(up.layer.get(0))
+          expect(up.layer.get(result)).toBe(up.layer.get(0))
 
-        it 'matches elements in the current layer if no { layer } option is given', asyncSpec (next) ->
+        it 'matches elements in the current layer if no { layer } option is given', ->
           makeLayers [{ target: '.element' }, { target: '.element' }]
 
-          next ->
-            expect(up.layer.count).toBe(2)
-            result = up.fragment.get('.element')
+          expect(up.layer.count).toBe(2)
+          result = up.fragment.get('.element')
 
-            expect(up.layer.get(result)).toBe(up.layer.get(1))
+          expect(up.layer.get(result)).toBe(up.layer.get(1))
 
       describe 'matching around the { origin }', ->
 
-        it 'prefers to match an element closest to origin', asyncSpec (next) ->
+        it 'prefers to match an element closest to origin', ->
           root = fixture('.element#root')
           one = e.affix(root, '.element', text: 'old one')
           two = e.affix(root, '.element', text: 'old two')
@@ -75,7 +73,7 @@ describe 'up.fragment', ->
 
           expect(result).toBe(two)
 
-        it 'prefers to match a descendant selector in the vicinity of the origin', asyncSpec (next) ->
+        it 'prefers to match a descendant selector in the vicinity of the origin', ->
           element1 = fixture('.element')
           element1Child1 = e.affix(element1, '.child',         text: 'old element1Child1')
           element1Child2 = e.affix(element1, '.child.sibling', text: 'old element1Child2')
@@ -175,16 +173,15 @@ describe 'up.fragment', ->
           expect(up.fragment.all(parent, '.element')).toEqual [child]
 
 
-        it "only matches descendants in that root's layer", asyncSpec (next) ->
+        it "only matches descendants in that root's layer", ->
           makeLayers [
             { '.element', content: 'element in root layer' }
             { '.element', content: 'element in modal layer' }
           ]
 
-          next ->
-            results = up.fragment.all(document.body, '.element')
-            expect(results.length).toBe(1)
-            expect(up.layer.get(results[0])).toBe(up.layer.root)
+          results = up.fragment.all(document.body, '.element')
+          expect(results.length).toBe(1)
+          expect(up.layer.get(results[0])).toBe(up.layer.root)
 
         it 'supports the custom :has() selector', ->
           container = fixture('.container')
@@ -260,13 +257,12 @@ describe 'up.fragment', ->
         result = up.fragment.closest($element[0], '.match')
         expect(result).toBeMissing()
 
-      it 'returns missing if an ancestor matches, but is in another layer', asyncSpec (next) ->
+      it 'returns missing if an ancestor matches, but is in another layer', ->
         makeLayers(2)
 
-        next ->
-          start = up.layer.element
-          result = up.fragment.closest(start, 'body')
-          expect(result).toBeMissing()
+        start = up.layer.element
+        result = up.fragment.closest(start, 'body')
+        expect(result).toBeMissing()
 
     describe 'up.render()', ->
 
@@ -1697,18 +1693,16 @@ describe 'up.fragment', ->
 
       describe 'choice of layer', ->
 
-        it 'updates the layer given as { layer } option', asyncSpec (next) ->
+        it 'updates the layer given as { layer } option', ->
           makeLayers [
             { target: '.element', content: 'old text in root' }
             { target: '.element', content: 'old text in modal' }
           ]
 
-          next ->
-            up.render('.element', content: 'new text', layer: 'root', peel: false)
+          up.render('.element', content: 'new text', layer: 'root', peel: false)
 
-          next ->
-            expect(up.layer.get(0)).toHaveText(/new text/)
-            expect(up.layer.get(1)).toHaveText(/old text in modal/)
+          expect(up.layer.get(0)).toHaveText(/new text/)
+          expect(up.layer.get(1)).toHaveText(/old text in modal/)
 
         it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
 
@@ -1720,32 +1714,30 @@ describe 'up.fragment', ->
 
         describe 'if nothing else is specified', ->
 
-          it 'updates the current layer', asyncSpec (next) ->
+          it 'updates the current layer', ->
             makeLayers [
               { target: '.element', content: 'old text in root' }
               { target: '.element', content: 'old text in modal' }
             ]
 
-            next ->
-              up.render('.element', content: 'new text', peel: false)
+            up.render('.element', content: 'new text', peel: false)
 
-            next ->
-              expect(up.layer.get(0)).toHaveText(/old text in root/)
-              expect(up.layer.get(1)).toHaveText(/new text/)
+            expect(up.layer.get(0)).toHaveText(/old text in root/)
+            expect(up.layer.get(1)).toHaveText(/new text/)
 
-          it 'rejects if the current layer does not match', (done) ->
+          it 'rejects if the current layer does not match', asyncSpec (next) ->
             makeLayers [
               { target: '.element', content: 'old text in root' }
               { target: '.other', content: 'old text in modal1' }
             ]
 
-            u.task ->
-              promise = up.render('.element', content: 'new text')
+            promise = up.render('.element', content: 'new text')
 
-              u.task ->
-                promiseState(promise).then (result) ->
-                  expect(result.state).toBe('rejected')
-                  done()
+            next ->
+              next.await promiseState(promise)
+
+            next (result) ->
+              expect(result.state).toBe('rejected')
 
         describe 'if the given layer does not exist', ->
 
@@ -2175,9 +2167,8 @@ describe 'up.fragment', ->
             { target: '.target', context: { overlayKey: 'overlayValue' }}
           ]
 
-          next ->
-            expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
-            expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue' })
+          expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+          expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue' })
 
           next ->
             up.render('.target', layer: up.layer.get(0), url: '/path1')
@@ -2198,8 +2189,7 @@ describe 'up.fragment', ->
             { target: '.target', context: { overlayKey: 'overlayValue' }}
           ]
 
-          next ->
-            up.render(target: '.target', failTarget: '.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
+          up.render(target: '.target', failTarget: '.target', layer: up.layer.get(0), failLayer: up.layer.get(1), url: '/path1')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)

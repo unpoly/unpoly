@@ -107,14 +107,13 @@ describe 'up.network', ->
         it 'submits information about the fragment update as HTTP headers, so the server may choose to optimize its responses', asyncSpec (next) ->
           makeLayers(2)
 
-          next =>
-            up.request(
-              url: '/foo',
-              target: '.target',
-              layer: 'overlay',
-              failTarget: '.fail-target',
-              failLayer: 'root'
-            )
+          up.request(
+            url: '/foo',
+            target: '.target',
+            layer: 'overlay',
+            failTarget: '.fail-target',
+            failLayer: 'root'
+          )
 
           next =>
             request = @lastRequest()
@@ -128,14 +127,13 @@ describe 'up.network', ->
 
           up.network.config.requestMetaKeys = ['target']
 
-          next =>
-            up.request(
-              url: '/foo',
-              target: '.target',
-              layer: 'overlay',
-              failTarget: '.fail-target',
-              failLayer: 'root'
-            )
+          up.request(
+            url: '/foo',
+            target: '.target',
+            layer: 'overlay',
+            failTarget: '.fail-target',
+            failLayer: 'root'
+          )
 
           next =>
             request = @lastRequest()
@@ -147,44 +145,41 @@ describe 'up.network', ->
 
       describe 'setting meta attributes', ->
 
-        it 'allows to quickly construct a cachable up.Request by passing { layer, failLayer } options', asyncSpec (next) ->
+        it 'allows to quickly construct a cachable up.Request by passing { layer, failLayer } options', ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
             { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
           ]
 
-          next =>
-            request = up.request({ url: '/foo', layer: 'root', failLayer: 'front' })
-            expect(request.mode).toEqual('root')
-            expect(request.failMode).toEqual('drawer')
-            expect(request.context).toEqual({ rootKey: 'rootValue' })
-            expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
+          request = up.request({ url: '/foo', layer: 'root', failLayer: 'front' })
+          expect(request.mode).toEqual('root')
+          expect(request.failMode).toEqual('drawer')
+          expect(request.context).toEqual({ rootKey: 'rootValue' })
+          expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
-        it 'allows to quickly construct a cachable up.Request by passing an { origin } option', asyncSpec (next) ->
+        it 'allows to quickly construct a cachable up.Request by passing an { origin } option', ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
             { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
           ]
 
-          next =>
-            request = up.request({ url: '/foo', origin: up.layer.front.element })
-            expect(request.mode).toEqual('drawer')
-            expect(request.failMode).toEqual('drawer')
-            expect(request.context).toEqual({ drawerKey: 'drawerValue' })
-            expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
+          request = up.request({ url: '/foo', origin: up.layer.front.element })
+          expect(request.mode).toEqual('drawer')
+          expect(request.failMode).toEqual('drawer')
+          expect(request.context).toEqual({ drawerKey: 'drawerValue' })
+          expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
-        it 'assumes the current layer if neither { layer, failLayer, origin} are given', asyncSpec (next) ->
+        it 'assumes the current layer if neither { layer, failLayer, origin} are given', ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
             { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
           ]
 
-          next =>
-            request = up.request({ url: '/foo' })
-            expect(request.mode).toEqual('drawer')
-            expect(request.failMode).toEqual('drawer')
-            expect(request.context).toEqual({ drawerKey: 'drawerValue' })
-            expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
+          request = up.request({ url: '/foo' })
+          expect(request.mode).toEqual('drawer')
+          expect(request.failMode).toEqual('drawer')
+          expect(request.context).toEqual({ drawerKey: 'drawerValue' })
+          expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
       describe 'error handling', ->
 

@@ -29,3 +29,4 @@ window.makeLayers = (stackPlans) ->
     up.navigate(stackPlan)
 
   return Promise.resolve()
+  # return up.layer.stack
