@@ -50,7 +50,6 @@ Remaining feature work
 - Do we want to keep shortcut [up-layer="drawer"]?
   - Our deprecation warnings use this
   - If we keep it, we need to document it
-- Document { preventable } option for dismiss() and accept()
 
 
 Tests

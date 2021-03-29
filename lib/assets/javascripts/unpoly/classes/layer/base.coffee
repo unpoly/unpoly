@@ -131,20 +131,30 @@ class up.Layer extends up.Record
     # no-op so users can blindly sync without knowing the current mode
 
   ###**
-  Closes this overlay with an accepting intent, e.g. when a change was confirmed or when a value was selected.
+  [Closes this overlay](/closing-overlays) with an accepting intent,
+  e.g. when a change was confirmed or when a value was selected.
 
   To dismiss a layer without an accepting intent, use `up.Layer#dismiss()` instead.
 
   @function up.Layer#accept
-  @param {any} value
+  @param {any} [value]
     The acceptance value that will be passed to `{ onAccepted }` callbacks.
-  @param {string|Function(Element, Object)} options.animation
+
+    If there isn't an acceptance value, omit this argument.
+    If you need to pass options without an acceptance value, pass `null`:
+
+    ```js
+    up.layer.accept(null, { animation: 'move-to-bottom' })
+    ```
+  @param {boolean} [options.preventable=true]
+    Whether the closing can be prevented by an event listener.
+  @param {string|Function(Element, Object)} [options.animation]
     The [animation](/up.animate) to use for closing this layer.
 
     Defaults to the close animation configured for this layer mode.
-  @param {number} options.duration
+  @param {number} [options.duration]
     The duration for the close animation in milliseconds.
-  @param {number} options.easing
+  @param {number} [options.easing]
     The [timing function]((http://www.w3.org/TR/css3-transitions/#transition-timing-function))
     that controls the acceleration of the close animation.
   @param {Function} [options.onFinished]
@@ -161,14 +171,22 @@ class up.Layer extends up.Record
     throw up.error.notImplemented()
 
   ###**
-  Closes this overlay without an accepting intent, e.g. when a "Cancel" button was clicked.
+  [Closes this overlay](/closing-overlays) without an accepting intent,
+  e.g. when a "Cancel" button was clicked.
 
   To close an overlay with an accepting intent, use `up.Layer#accept()` instead.
 
   @function up.Layer#dismiss
-  @param {any} value
-    The acceptance value that will be passed to `{ onDismissed }` callbacks.
-  @param {Object} options
+  @param {any} [value]
+    The dismissal value that will be passed to `{ onDismissed }` callbacks.
+
+    If there isn't an acceptance value, omit this argument.
+    If you need to pass options without a dismissal value, pass `null`:
+
+    ```js
+    up.layer.dismiss(null, { animation: 'move-to-bottom' })
+    ```
+  @param {Object} [options]
     See options for `up.Layer#accept()`.
   @return {Promise}
     A promise that fulfills when this layer was removed from the [layer stack](/up.layer.stack).
@@ -185,6 +203,7 @@ class up.Layer extends up.Record
 
   Descendant overlays will be dismissed with value `':peel'`.
 
+  @function up.Layer#peel
   @param {Object} options
     See options for `up.Layer#accept()`.
   @return {Promise}
@@ -241,7 +260,7 @@ class up.Layer extends up.Record
   Returns whether this layer is still part of the [layer stack](/up.layer.stack).
 
   A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
-  or [accepted](/up.Layer.prototype.dismiss) If the closing is animated, a layer may be considered "closed" while
+  or [accepted](/up.Layer.prototype.dismiss). If the closing is animated, a layer may be considered "closed" while
   closing animation is still playing.
 
   @function up.Layer#isOpen
@@ -255,7 +274,7 @@ class up.Layer extends up.Record
   Returns whether this layer is no longer part of the [layer stack](/up.layer.stack).
 
   A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
-  or [accepted](/up.Layer.prototype.dismiss) If the closing is animated, a layer may be considered "closed" while
+  or [accepted](/up.Layer.prototype.dismiss). If the closing is animated, a layer may be considered "closed" while
   closing animation is still playing.
 
   @function up.Layer#isClosed
