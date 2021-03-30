@@ -66,8 +66,9 @@ up.migrate = do ->
   # Returns a resolved promise that prints a warning when #then() is called.
   formerlyAsync = (label) ->
     promise = Promise.resolve()
-    oldThen = promise.then ->
-      warn("#{label} is no longer async")
+    oldThen = promise.then
+    promise.then = ->
+      warn("#{label} is now a sync function")
       return oldThen.apply(this, arguments)
     promise
 
