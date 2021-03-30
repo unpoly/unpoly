@@ -82,7 +82,10 @@ class up.Change.UpdateLayer extends up.Change.Addition
       @onFinished()
 
     # Don't wait for animations to finish.
-    return {}
+    return new up.RenderResult(
+      layer: @layer,
+      fragments: u.map(@steps, 'newElement')
+    )
 
   executeStep: (step) =>
     # Remember where the element came from to support up.reload(element).

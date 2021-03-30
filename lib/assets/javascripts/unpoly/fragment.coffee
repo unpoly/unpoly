@@ -505,13 +505,16 @@ up.fragment = do ->
     A callback that will be run when all animations have concluded and
     elements were removed from the DOM tree.
 
-  @return {Promise}
+  @return {Promise<up.RenderResult>}
     A promise that fulfills when the page has been updated.
 
     If the update is animated, the promise will be resolved *before* the existing element was
     removed from the DOM tree. The old element will be marked with the `.up-destroying` class
     and removed once the animation finishes. To run code after the old element was removed,
     pass an `{ onFinished }` callback.
+
+    The promise will fulfill with an `up.RenderResult` that contains
+    references to the updated fragments and layer.
 
   @stable
   ###

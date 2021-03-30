@@ -79,10 +79,9 @@ class up.Change.FromURL extends up.Change
       return @updateContentFromResponse(['Loaded fragment from successful response to %s', @request.description], @successOptions)
     else
       log = ['Loaded fragment from failed response to %s (HTTP %d)', @request.description, @response.status]
-      @updateContentFromResponse(log, @failOptions)
+      throw @updateContentFromResponse(log, @failOptions)
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
-      throw @response
 
   isSuccessfulResponse: ->
     @successOptions.fail == false || @response.ok

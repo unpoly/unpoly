@@ -119,7 +119,10 @@ class up.Change.OpenLayer extends up.Change.Addition
     #     layer = await up.layer.open(...)
     #
     # Don't wait to animations to finish:
-    return @layer
+    return new up.RenderResult(
+      layer: @layer,
+      fragments: [@content]
+    )
 
   buildLayer: ->
     # We build the layer with the default { history } setting from config.mode.history.

@@ -438,7 +438,7 @@ up.layer = do ->
 
     # Even if we are given { content } we need to pipe this through up.render()
     # since a lot of options processing is happening there.
-    return up.render(options)
+    return up.render(options).then (result) -> return result.layer
 
   ###**
   @event up:layer:opened

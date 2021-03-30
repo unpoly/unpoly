@@ -269,6 +269,22 @@ describe 'up.fragment', ->
       beforeEach ->
         up.motion.config.enabled = false
 
+      it 'returns a promise with an up.RenderResult that contains information about the updated fragments and layer', (done) ->
+        fixture('.one', text: 'old one')
+        fixture('.two', text: 'old two')
+        fixture('.three', text: 'old three')
+
+        promise = up.render('.one, .three', document: """
+          <div class="one">new one</div>
+          <div class="two">new two</div>
+          <div class="three">new three</div>
+        """)
+
+        promise.then (result) ->
+          expect(result.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
+          expect(result.layer).toBe(up.layer.root)
+          done()
+
       describe 'with { url } option', ->
 
         it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
@@ -1726,6 +1742,15 @@ describe 'up.fragment', ->
 
             expect(up.layer.count).toBe(2)
             expect(up.layer.current).toHaveText('new text')
+
+          it 'returns a promise with an up.RenderResult that contains information about the updated fragments and layer', (done) ->
+            promise = up.render('.overlay-element', content: 'new text', layer: 'new')
+
+            promise.then (result) ->
+              expect(up.layer.count).toBe(2)
+              expect(result.fragments).toEqual([up.fragment.get('.overlay-element')])
+              expect(result.layer).toBe(up.layer.current)
+              done()
 
           it 'allows to pass the mode for the new layer as { layer } (as a shortcut)', ->
             up.render('.element', content: 'new text', layer: 'drawer')
