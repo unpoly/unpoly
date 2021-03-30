@@ -28,11 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Can up.render() resolve to an up.RenderResult object
-  - result.layer
-  - result.fragments
-  - (result.steps)
-
 - Support [up-confirm] for [up-accept] ?
 
 - Docs: Target options may use &
