@@ -35,14 +35,7 @@ Remaining feature work
 
 - Support [up-confirm] for [up-accept] ?
 
-- dismissable value: 'button' => 'icon'
-
 - Docs: Target options may use &
-- Is there a use case for { layer: 'swap' }?
-  - Either document it or remove it
-- Do we want to keep shortcut [up-layer="drawer"]?
-  - Our deprecation warnings use this
-  - If we keep it, we need to document it
 
 
 Tests
