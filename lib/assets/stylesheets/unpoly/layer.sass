@@ -106,6 +106,14 @@ up-focus-trap
 
   overflow-x: hidden
 
+%overlay-content
+  // Custom elements are display: inline by default, which is not a good container
+  // for content. It will cause children not to take up availabile space.
+  // We can make %overlay-content display: block without it taking up 100% width
+  // because our container %overlay-box is already display: inline-block, limiting
+  // children to their intrinsic width.
+  display: block
+
 %overlay-with-tether
   z-index: $overlay-with-tether-z-index
 
@@ -156,6 +164,9 @@ up-modal-box
   up-modal[size=large] &
     width: 1000px
 
+up-modal-content
+  @extend %overlay-content
+
 up-modal-dismiss
   @extend %overlay-dismiss
 
@@ -193,6 +204,9 @@ up-drawer-box
   up-drawer[size=large] &
     width: 600px
 
+up-drawer-content
+  @extend %overlay-content
+
 up-drawer-dismiss
   @extend %overlay-dismiss
 
@@ -215,6 +229,9 @@ up-cover-box
   // into a cover overlay. That layout will either want to touch the screen
   // edges, so we remove all padding.
   padding: 0
+
+up-cover-content
+  @extend %overlay-content
 
 up-cover-dismiss
   @extend %overlay-dismiss
@@ -241,6 +258,9 @@ up-popup
 
   &[size=large]
     width: 550px
+
+up-popup-content
+  @extend %overlay-content
 
 up-popup-dismiss
   @extend %overlay-dismiss
