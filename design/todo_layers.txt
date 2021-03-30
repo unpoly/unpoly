@@ -28,6 +28,17 @@ Release process
 Remaining feature work
 ======================
 
+- This is a confusing message when we're targeting the wrong layer:
+  - Could not match targets in old and new content (tried selectors [...])
+
+- Document [up-base-layer] and { baseLayer }
+  - In up.render()
+  - In a[up-follow]
+  - In up.submit()
+  - In form[up-submit]
+
+- Document and test that up.submit() also returns an up.RenderResult
+
 - Support [up-confirm] for [up-accept] ?
 
 - Docs: Target options may use &
