@@ -7,7 +7,7 @@ class up.EventEmitter extends up.Record
     [
       'target',
       'event',
-      'currentLayer',
+      'baseLayer',
       'callback',
       'log',
       'ensureBubbles'
@@ -18,8 +18,8 @@ class up.EventEmitter extends up.Record
     @logEmission()
     # destroyBoundary = @createBoundary()
 
-    if @currentLayer
-      @currentLayer.asCurrent(=> @dispatchEvent())
+    if @baseLayer
+      @baseLayer.asCurrent(=> @dispatchEvent())
     else
       @dispatchEvent()
 #    if destroyBoundary
@@ -99,13 +99,13 @@ class up.EventEmitter extends up.Record
     if options.layer
       layer = up.layer.get(options.layer)
       options.target ?= layer.element
-      options.currentLayer ?= layer
+      options.baseLayer ?= layer
 
-    # Setting { currentLayer } will fix up.layer.current to that layer during emission.
+    # Setting { baseLayer } will fix up.layer.current to that layer during emission.
     # In case we get a layer name like 'root' (instead of an up.Layer object) we look
     # up the actual up.Layer object.
-    if options.currentLayer
-      options.currentLayer = up.layer.get(options.currentLayer)
+    if options.baseLayer
+      options.baseLayer = up.layer.get(options.baseLayer)
 
     if u.isString(options.target)
       options.target = up.fragment.get(options.target, layer: options.layer)
@@ -121,7 +121,7 @@ class up.EventEmitter extends up.Record
     else if u.isString(args[0])
       # In this branch we receive an Event type and props object.
       # The props object may also include options for the emission, such as
-      # { layer }, { target }, { currentLayer } or { log }.
+      # { layer }, { target }, { baseLayer } or { log }.
       # up.emit([target], eventType, [eventPropsAndEmitOptions])
       options.event = up.event.build(args[0], options)
     else

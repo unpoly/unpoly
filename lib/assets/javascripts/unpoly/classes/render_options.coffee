@@ -30,7 +30,7 @@ up.RenderOptions = do ->
     'confirm',
     'feedback',
     'origin',
-    'currentLayer',
+    'baseLayer',
     'fail',
   ]
 

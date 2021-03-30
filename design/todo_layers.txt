@@ -37,13 +37,6 @@ Remaining feature work
 
 - dismissable value: 'button' => 'icon'
 
-- How to open an exclusive overlay?
-  - Rename { currentLayer } to { baseLayer }
-  - In JS we can do dismissAll() + open(), but that doesn't help in HTML. What can we do?
-    - <a up-layer="new" up-base-layer="root">
-      - I think we don't currently parse [up-current-layer]
-    - <a up-layer="swap">
-    - <a up-layer="shatter">
 - Docs: Target options may use &
 - Is there a use case for { layer: 'swap' }?
   - Either document it or remove it

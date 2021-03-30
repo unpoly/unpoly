@@ -228,10 +228,10 @@ up.layer = do ->
       if options.layer == 'swap'
         options.layer = 'new'
         if up.layer.isOverlay()
-          options.currentLayer = 'parent'
+          options.baseLayer = 'parent'
       else if options.layer == 'shatter'
         options.layer = 'new'
-        options.currentLayer = 'root'
+        options.baseLayer = 'root'
 
       if options.layer == 'new'
         # If the user wants to open a new layer, but does not pass a { mode },
@@ -265,10 +265,10 @@ up.layer = do ->
 
     # Remember the layer that was current when the request was made,
     # so changes with `{ layer: 'new' }` will know what to stack on.
-    # Note if options.currentLayer is given, up.layer.get('current', options) will
+    # Note if options.baseLayer is given, up.layer.get('current', options) will
     # return the resolved version of that.
     # TODO: Test this
-    options.currentLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
+    options.baseLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
 
   build = (options) ->
     mode = options.mode

@@ -38,7 +38,7 @@ describe 'up.EventEmitter', ->
           emitter = up.EventEmitter.fromEmitArgs([layer, 'my:event'])
           expect(emitter.event).toBeEvent('my:event', layer: layer) # has { layer } property for event listeners
           expect(emitter.target).toBe(layer.element)
-          expect(emitter.currentLayer).toBe(layer) # this will set up.layer.current during event emission
+          expect(emitter.baseLayer).toBe(layer) # this will set up.layer.current during event emission
           done()
 
     describe 'with ([Element, String, Object])', ->

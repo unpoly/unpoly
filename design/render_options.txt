@@ -37,7 +37,7 @@ up.render()
 [ok] cache
 [ok] clearCache
 
-currentLayer    internal?
+baseLayer    internal?
 
 [ok] url
 [ok] method

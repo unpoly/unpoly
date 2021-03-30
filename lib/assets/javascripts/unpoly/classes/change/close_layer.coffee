@@ -75,7 +75,7 @@ class up.Change.CloseLayer extends up.Change.Removal
       @buildEvent("up:layer:#{verbPast}"),
       # Set up.layer.current to the parent of the closed layer, which is now likely
       # to be the front layer.
-      currentLayer: formerParent,
+      baseLayer: formerParent,
       callback: @layer.callback("on#{verbPastUpperCaseFirst}"),
       ensureBubbles: true,
       log: "#{verbPastUpperCaseFirst} #{@layer}"

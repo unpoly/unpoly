@@ -21,11 +21,11 @@ describe 'up.layer', ->
             expect(layer).toHaveText('')
             done()
 
-      it 'closes existing overlays over the { currentLayer }', ->
+      it 'closes existing overlays over the { baseLayer }', ->
         makeLayers(2)
         [root, oldOverlay] = up.layer.stack
 
-        up.layer.open(currentLayer: 'root')
+        up.layer.open(baseLayer: 'root')
 
         [root, newOverlay] = up.layer.stack
 
@@ -559,16 +559,16 @@ describe 'up.layer', ->
 
           it 'sets up.layer.current to the layer that opened the overlay', asyncSpec (next) ->
             rootLayer = up.layer.root
-            currentLayerSpy = jasmine.createSpy('current layer spy')
+            baseLayerSpy = jasmine.createSpy('current layer spy')
 
-            up.layer.open({ onAccepted: -> currentLayerSpy(up.layer.current) })
+            up.layer.open({ onAccepted: -> baseLayerSpy(up.layer.current) })
 
             next ->
               expect(up.layer.current.mode).toEqual('modal')
               up.layer.accept()
 
             next ->
-              expect(currentLayerSpy).toHaveBeenCalledWith(rootLayer)
+              expect(baseLayerSpy).toHaveBeenCalledWith(rootLayer)
 
         describe '{ onDismissed }', ->
 
@@ -601,16 +601,16 @@ describe 'up.layer', ->
 
           it 'sets up.layer.current to the layer that opened the overlay', asyncSpec (next) ->
             rootLayer = up.layer.root
-            currentLayerSpy = jasmine.createSpy('current layer spy')
+            baseLayerSpy = jasmine.createSpy('current layer spy')
 
-            up.layer.open({ onDismissed: -> currentLayerSpy(up.layer.current) })
+            up.layer.open({ onDismissed: -> baseLayerSpy(up.layer.current) })
 
             next ->
               expect(up.layer.current.mode).toEqual('modal')
               up.layer.dismiss()
 
             next ->
-              expect(currentLayerSpy).toHaveBeenCalledWith(rootLayer)
+              expect(baseLayerSpy).toHaveBeenCalledWith(rootLayer)
 
         describe '{ acceptEvent }', ->
 
@@ -1090,9 +1090,9 @@ describe 'up.layer', ->
           makeLayers(2)
           expect(up.layer.getAll('current')).toEqual [up.layer.get(1)]
 
-        it "returns an array of a { currentLayer } option", ->
+        it "returns an array of a { baseLayer } option", ->
           makeLayers(2)
-          expect(up.layer.getAll('current', currentLayer: up.layer.root)).toEqual [up.layer.root]
+          expect(up.layer.getAll('current', baseLayer: up.layer.root)).toEqual [up.layer.root]
 
         it 'honors a temporary current layer', ->
           makeLayers(2)
@@ -1125,15 +1125,15 @@ describe 'up.layer', ->
           up.layer.get(1).asCurrent ->
             expect(up.layer.getAll('any')).toEqual [up.layer.get(1), up.layer.get(2), up.layer.get(0)]
 
-      describe '{ currentLayer } option', ->
+      describe '{ baseLayer } option', ->
 
         it 'allows to change the current layer for the purpose of the lookup', ->
           makeLayers(3)
-          expect(up.layer.getAll('parent', currentLayer: up.layer.get(1))).toEqual [up.layer.get(0)]
+          expect(up.layer.getAll('parent', baseLayer: up.layer.get(1))).toEqual [up.layer.get(0)]
 
-        it 'looks up the { currentLayer } option if it is a string, using the actual current layer as the base for that second lookup', ->
+        it 'looks up the { baseLayer } option if it is a string, using the actual current layer as the base for that second lookup', ->
           makeLayers(3)
-          expect(up.layer.getAll('parent', currentLayer: 'front')).toEqual [up.layer.get(1)]
+          expect(up.layer.getAll('parent', baseLayer: 'front')).toEqual [up.layer.get(1)]
 
     describe 'up.layer.ask()', ->
 
@@ -1203,22 +1203,22 @@ describe 'up.layer', ->
 
       describe 'snapshotting the current layer', ->
 
-        it 'saves the current layer instance to { currentLayer }', ->
+        it 'saves the current layer instance to { baseLayer }', ->
           options = {}
           up.layer.normalizeOptions(options)
-          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.current)
+          expect(options).toEqual jasmine.objectContaining(baseLayer: up.layer.current)
 
-        it 'does not override an existing { currentLayer } option', ->
+        it 'does not override an existing { baseLayer } option', ->
           makeLayers(3)
 
-          options = { currentLayer: up.layer.get(1) }
+          options = { baseLayer: up.layer.get(1) }
           up.layer.normalizeOptions(options)
-          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1))
+          expect(options).toEqual jasmine.objectContaining(baseLayer: up.layer.get(1))
 
-        it 'resolves a given { currentLayer } string to an up.Layer object', ->
-          options = { currentLayer: 'root' }
+        it 'resolves a given { baseLayer } string to an up.Layer object', ->
+          options = { baseLayer: 'root' }
           up.layer.normalizeOptions(options)
-          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.root)
+          expect(options).toEqual jasmine.objectContaining(baseLayer: up.layer.root)
 
       describe 'for a { layer } string', ->
 
@@ -1270,12 +1270,12 @@ describe 'up.layer', ->
 
       describe 'for { layer: "swap" }', ->
 
-        it 'sets { currentLayer } to the current parent layer and set { layer: "new" }', ->
+        it 'sets { baseLayer } to the current parent layer and set { layer: "new" }', ->
           makeLayers(3)
 
           options = { layer: 'swap' }
           up.layer.normalizeOptions(options)
-          expect(options).toEqual jasmine.objectContaining(currentLayer: up.layer.get(1), layer: 'new')
+          expect(options).toEqual jasmine.objectContaining(baseLayer: up.layer.get(1), layer: 'new')
 
       describe 'for an element passed as { target }', ->
 

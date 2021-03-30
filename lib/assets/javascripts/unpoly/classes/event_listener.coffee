@@ -11,7 +11,7 @@ class up.EventListener extends up.Record
       'callback',
       'jQuery',
       'guard',
-      'currentLayer',
+      'baseLayer',
       'passive',
       'once'
     ]
@@ -72,12 +72,12 @@ class up.EventListener extends up.Record
 
       applyCallback = => @callback.apply(element, args)
 
-      if @currentLayer
+      if @baseLayer
         # Unpoly will usually set up.layer.current when emitting an event.
         # But Unpoly-unaware code will not set up.layer.current when emitting events.
 
         # Hence layerInstance.on('click') will use this to set layer.current to layerInstance.
-        @currentLayer.asCurrent(applyCallback)
+        @baseLayer.asCurrent(applyCallback)
       else
         applyCallback()
 

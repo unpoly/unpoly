@@ -263,7 +263,7 @@ up.link = do ->
     # Layer options
     parser.boolean('peel')
     parser.string('layer')
-    parser.string('currentLayer')
+    parser.string('baseLayer')
     parser.json('context')
 
     up.migrate.parseFollowOptions?(parser)

@@ -12,7 +12,7 @@ class up.EventListenerGroup extends up.Record
       'callback',
       'jQuery',
       'guard',
-      'currentLayer',
+      'baseLayer',
       'passive',
       'once'
     ]

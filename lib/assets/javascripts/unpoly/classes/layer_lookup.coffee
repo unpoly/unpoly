@@ -8,7 +8,7 @@ class up.LayerLookup
 
     # Options normalization might change `options` relevant to the lookup:
     # (1) It will default { layer } to 'origin' if an { origin } element is given.
-    # (2) It will also lookup a string { currentLayer }.
+    # (2) It will also lookup a string { baseLayer }.
     # (3) It will set the default layer to 'current' if nothing matches.
     if options.normalizeLayerOptions != false
       up.layer.normalizeOptions(options)
@@ -16,14 +16,14 @@ class up.LayerLookup
     @values = u.splitValues(options.layer)
 
     @origin = options.origin
-    @currentLayer = options.currentLayer || @stack.current
+    @baseLayer = options.baseLayer || @stack.current
 
-    if u.isString(@currentLayer)
-      # The { currentLayer } option may itself be a string like "parent".
+    if u.isString(@baseLayer)
+      # The { baseLayer } option may itself be a string like "parent".
       # In this case we look it up using a new up.LayerLookup instance, using
-      # up.layer.current as the { currentLayer } for that second lookup.
-      recursiveOptions = u.merge(options, currentLayer: @stack.current, normalizeLayerOptions: false)
-      @currentLayer = new @constructor(@stack, @currentLayer, recursiveOptions).first()
+      # up.layer.current as the { baseLayer } for that second lookup.
+      recursiveOptions = u.merge(options, baseLayer: @stack.current, normalizeLayerOptions: false)
+      @baseLayer = new @constructor(@stack, @baseLayer, recursiveOptions).first()
 
   originLayer: ->
     if @origin
@@ -62,19 +62,19 @@ class up.LayerLookup
       when 'any'
         # Return all layers, but prefer a layer that's either the current
         # layer, or closer to the front.
-        [@currentLayer, @stack.reversed()...]
+        [@baseLayer, @stack.reversed()...]
       when 'current'
-        @currentLayer
+        @baseLayer
       when 'closest'
-        @stack.selfAndAncestorsOf(@currentLayer)
+        @stack.selfAndAncestorsOf(@baseLayer)
       when 'parent'
-        @currentLayer.parent
+        @baseLayer.parent
       when 'ancestor', 'ancestors'
-        @currentLayer.ancestors
+        @baseLayer.ancestors
       when 'child'
-        @currentLayer.child
+        @baseLayer.child
       when 'descendant', 'descendants'
-        @currentLayer.descendants
+        @baseLayer.descendants
       when 'new'
         'new' # pass-through
       when 'root'

@@ -462,7 +462,7 @@ class up.Layer extends up.Record
     return up.EventListenerGroup.fromBindArgs(args,
       guard: @containsEventTarget,
       elements: [@element],
-      currentLayer: this
+      baseLayer: this
     )
 
   containsEventTarget: (event) =>

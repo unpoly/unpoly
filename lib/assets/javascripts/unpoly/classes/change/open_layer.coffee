@@ -9,7 +9,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @target = options.target
     @mode = options.mode
     @origin = options.origin
-    @currentLayer = options.currentLayer
+    @baseLayer = options.baseLayer
     @source = options.source
     @focus = options.focus
     @scroll = options.scroll
@@ -22,7 +22,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     return {
       # We associate this request to our current layer so up:request events
       # may be emitted on something more specific than the document.
-      layer: @currentLayer
+      layer: @baseLayer
       mode: @mode,
       context: @buildLayer().context
       # The target will always exist in the current page, since
@@ -43,7 +43,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     else
       @content = responseDoc.select(@target)
 
-    if !@content || @currentLayer.isClosed()
+    if !@content || @baseLayer.isClosed()
       throw @notApplicable()
 
     up.puts('up.render()', "Opening element \"#{@target}\" in new layer")
@@ -57,10 +57,10 @@ class up.Change.OpenLayer extends up.Change.Addition
       # because the layer is not even in the stack yet.
       throw up.error.aborted('Open event was prevented')
 
-    # Make sure that the currentLayer layer doesn't already have a child layer.
+    # Make sure that the baseLayer layer doesn't already have a child layer.
     # Note that this cannot be prevented with { peel: false }!
     # We don't wait for the peeling to finish.
-    @currentLayer.peel()
+    @baseLayer.peel()
 
     # Change the stack sync. Don't wait for peeling to finish.
     up.layer.stack.push(@layer)
@@ -166,7 +166,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer.updateHistory(u.merge(@options, history: true))
 
   handleFocus: ->
-    @currentLayer.overlayFocus?.moveToBack()
+    @baseLayer.overlayFocus?.moveToBack()
     @layer.overlayFocus.moveToFront()
 
     fragmentFocus = new up.FragmentFocus(
@@ -201,7 +201,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     # There is no @layer.onOpen() handler to accompany the DOM event.
     return up.emit(
       @buildEvent('up:layer:open'),
-      currentLayer: @layer.parent, # sets up.layer.current
+      baseLayer: @layer.parent, # sets up.layer.current
       log: "Opening new #{@layer}"
     )
 
