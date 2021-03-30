@@ -1704,13 +1704,84 @@ describe 'up.fragment', ->
           expect(up.layer.get(0)).toHaveText(/new text/)
           expect(up.layer.get(1)).toHaveText(/old text in modal/)
 
-        it 'updates the layer of the given target, if the target is given as an element (and not a selector)'
+        it 'updates the layer of the given target, if the target is given as an element (and not a selector)', ->
+          makeLayers [
+            { target: '.element', content: 'old text in root' }
+            { target: '.element', content: 'old text in overlay 1' }
+            { target: '.element', content: 'old text in overlay 2' }
+          ]
 
-        it 'opens a new layer when given { layer: "new" }'
+          up.render(up.layer.get(1), content: 'new text in overlay 1')
 
-        it 'allows to pass the mode for the new layer as { layer } (as a shortcut)'
+          expect(up.layer.get(0)).toHaveText(/old text in root/)
+          expect(up.layer.get(1)).toHaveText('old text in overlay 1')
+          expect(up.layer.get(2)).toHaveText('old text in overlay 2')
 
-        it 'opens a new layer if given a { mode } but no { layer }'
+        describe 'stacking a new overlay', ->
+
+          it 'opens a new layer when given { layer: "new" }', ->
+            up.render('.element', content: 'new text', layer: 'new')
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current).toHaveText('new text')
+
+          it 'allows to pass the mode for the new layer as { layer } (as a shortcut)', ->
+            up.render('.element', content: 'new text', layer: 'drawer')
+
+            expect(up.layer.current.mode).toEqual('drawer')
+
+          it 'opens a new layer if given a { mode } but no { layer }', ->
+            up.render('.element', content: 'new text', mode: 'drawer')
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current.mode).toEqual('drawer')
+            expect(up.layer.current).toHaveText('new text')
+
+        describe 'with { layer: "swap" }', ->
+
+          it 'replaces the current overlay with the new overlay', ->
+            makeLayers(2)
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current.mode).toEqual('modal')
+
+            up.render('.element', content: 'new text', layer: 'swap', mode: 'drawer')
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current.mode).toEqual('drawer')
+            expect(up.layer.current).toHaveText('new text')
+
+          it 'opens a new overlay if no overlay is open', ->
+            expect(up.layer.count).toBe(1)
+
+            up.render('.element', content: 'new text', layer: 'swap', mode: 'drawer')
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current.mode).toEqual('drawer')
+            expect(up.layer.current).toHaveText('new text')
+
+        describe 'with { layer: "shatter" }', ->
+
+          it 'replaces all existing overlays with the new overlay', ->
+            makeLayers(3)
+
+            expect(up.layer.count).toBe(3)
+            expect(up.layer.current.mode).toEqual('modal')
+
+            up.render('.element', content: 'new text', layer: 'shatter', mode: 'drawer')
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current.mode).toEqual('drawer')
+            expect(up.layer.current).toHaveText('new text')
+
+          it 'opens a new overlay if no overlay is open', ->
+            expect(up.layer.count).toBe(1)
+
+            up.render('.element', content: 'new text', layer: 'shatter', mode: 'drawer')
+
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.current.mode).toEqual('drawer')
+            expect(up.layer.current).toHaveText('new text')
 
         describe 'if nothing else is specified', ->
 

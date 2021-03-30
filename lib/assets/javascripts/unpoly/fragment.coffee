@@ -449,7 +449,7 @@ up.fragment = do ->
 
     See [layer option](/layer-option) for a list of allowed values.
 
-    To open the fragment in a new [overlay](/up.layer), pass `{ layer: 'new' }` or a [layer mode](/up.layer.mode).
+    To [open the fragment in a new overlay](/opening-overlays), pass `{ layer: 'new' }`.
     In this case options for `up.layer.open()` may also be used.
 
   @param {boolean} [options.peel]

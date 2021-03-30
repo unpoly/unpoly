@@ -263,6 +263,7 @@ up.link = do ->
     # Layer options
     parser.boolean('peel')
     parser.string('layer')
+    parser.string('currentLayer')
     parser.json('context')
 
     up.migrate.parseFollowOptions?(parser)
@@ -686,6 +687,12 @@ up.link = do ->
   @param [up-clear-cache]
 
   @param [up-layer]
+    The [layer](/up.layer) in which to match and render the fragment.
+
+    See [layer option](/layer-option) for a list of allowed values.
+
+    To [open the fragment in a new overlay](/opening-overlays), pass `[up-layer=new]`.
+    In this case attributes for `a[up-layer=new]` may also be used.
 
   @param [up-peel]
 

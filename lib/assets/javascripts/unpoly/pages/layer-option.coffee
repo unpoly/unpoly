@@ -22,6 +22,14 @@
 
   To disable layer isolation and match elements in *any* layer, pass `{ layer: 'any' }`.
 
+  \#\#\# Opening new layers
+
+
+
+  When opening an overlay, you may define a *condition* when the overlay interaction ends.
+  When the condition occurs, the overlay is automatically closed and a callback is run.
+  See [closing overlays](/closing-overlays) for details.
+
   \#\#\# Matching the root layer
 
   To match within the [root layer](/up.layer.root), pass `{ layer: 'root' }`.
@@ -32,7 +40,8 @@
 
   \#\#\# Matching the current or frontmost layer
 
-  To match within the *current* layer, pass `{ layer: 'current' }`.
+  To match within the [current layer](/up.layer.current),
+  either omit the `{ layer }` option or explictely pass `{ layer: 'current' }`.
 
   You may also explicitely target the [frontmost layer](/up.layer.front) by passing `{ layer: 'front' }`.
 

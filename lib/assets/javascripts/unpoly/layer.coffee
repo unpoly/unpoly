@@ -226,11 +226,12 @@ up.layer = do ->
 
     if u.isGiven(options.layer) # might be the number 0, which is falsy
       if options.layer == 'swap'
-        if up.layer.isRoot()
-          options.layer = 'root'
-        else
-          options.layer = 'new'
+        options.layer = 'new'
+        if up.layer.isOverlay()
           options.currentLayer = 'parent'
+      else if options.layer == 'shatter'
+        options.layer = 'new'
+        options.currentLayer = 'root'
 
       if options.layer == 'new'
         # If the user wants to open a new layer, but does not pass a { mode },
@@ -292,7 +293,7 @@ up.layer = do ->
     handlers = u.filter(handlers, 'isDefault')
 
   ###**
-  Opens a new overlay.
+  [Opens a new overlay](/opening-overlays).
 
   Opening a layer is considered [navigation](/navigation) by default.
 
@@ -309,6 +310,11 @@ up.layer = do ->
     All [render options](/up.render) may be used.
 
     You may configure default layer attributes in `up.layer.config`.
+
+  @param {string} [options.layer="new"]
+    Whether to stack the new overlay or replace existing overlays.
+
+    See [replacing existing overlays](/opening-layers#replacing-existing-overlays).
 
   @param {string} [options.mode]
     The kind of overlay to open.
@@ -509,6 +515,11 @@ up.layer = do ->
 
     You may configure default layer attributes in `up.layer.config`.
 
+  @param {string} [up-layer="new"]
+    Whether to stack the new overlay onto the current layer or replace existing overlays.
+
+    See [replacing existing overlays](/opening-layers#replacing-existing-overlays).
+
   @param [up-mode]
     The kind of overlay to open.
 
@@ -517,7 +528,6 @@ up.layer = do ->
   @param [up-size]
     The size of the overlay.
 
-    Supported values are `small`, `medium`, `large` and `grow`.
     See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
 
   @param [up-class]
@@ -528,7 +538,6 @@ up.layer = do ->
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.
 
-    Supported values are `'key'`, `'outside'` and `'button'`.
     See [user dismiss controls](/closing-overlays#user-facing-dismiss-controls)
     for details.
 
