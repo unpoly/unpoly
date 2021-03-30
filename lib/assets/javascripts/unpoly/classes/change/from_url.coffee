@@ -70,22 +70,19 @@ class up.Change.FromURL extends up.Change
     return preview.preflightProps(requestAttributesOptions)
 
   onRequestSettled: (@response) ->
-    # Wrap @response in Promise.reject() so it always causes our return value to reject.
-    rejectWithFailedResponse = => Promise.reject(@response)
-
     if !(@response instanceof up.Response)
       # value is up.error.aborted() or another fatal error that can never
       # be used as a fragment update. At this point up:request:aborted or up:request:fatal
       # have already been emitted by up.Request.
-      return rejectWithFailedResponse()
+      throw @response
     else if @isSuccessfulResponse()
       return @updateContentFromResponse(['Loaded fragment from successful response to %s', @request.description], @successOptions)
     else
       log = ['Loaded fragment from failed response to %s (HTTP %d)', @request.description, @response.status]
-      contentUpdated = @updateContentFromResponse(log, @failOptions)
+      @updateContentFromResponse(log, @failOptions)
       # Although processResponse() will fulfill with a successful replacement of options.failTarget,
       # we still want to reject the promise that's returned to our API client.
-      return u.always(contentUpdated, rejectWithFailedResponse)
+      throw @response
 
   isSuccessfulResponse: ->
     @successOptions.fail == false || @response.ok

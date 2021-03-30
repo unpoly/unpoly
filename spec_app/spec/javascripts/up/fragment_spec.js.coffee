@@ -295,6 +295,7 @@ describe 'up.fragment', ->
 
           resolution = jasmine.createSpy()
           promise = up.render('.target', url: '/path')
+
           promise.then(resolution)
 
           next =>
@@ -302,6 +303,7 @@ describe 'up.fragment', ->
             @respondWithSelector('.target', text: 'new-text')
 
           next =>
+            console.log(promise)
             expect(resolution).toHaveBeenCalled()
             expect($('.target')).toHaveText('new-text')
 

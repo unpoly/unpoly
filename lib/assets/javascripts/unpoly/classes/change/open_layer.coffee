@@ -119,7 +119,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     #     layer = await up.layer.open(...)
     #
     # Don't wait to animations to finish:
-    return Promise.resolve(@layer)
+    return @layer
 
   buildLayer: ->
     # We build the layer with the default { history } setting from config.mode.history.

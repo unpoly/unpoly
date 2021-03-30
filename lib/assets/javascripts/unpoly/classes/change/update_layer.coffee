@@ -82,7 +82,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
       @onFinished()
 
     # Don't wait for animations to finish.
-    return Promise.resolve()
+    return {}
 
   executeStep: (step) =>
     # Remember where the element came from to support up.reload(element).
