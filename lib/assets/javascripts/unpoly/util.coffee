@@ -620,7 +620,7 @@ up.util = do ->
     else
       copyArrayLike(value)
 
-  ###***
+  ###**
   Returns whether the given argument is an array-like value.
 
   Return true for `Array`, a
