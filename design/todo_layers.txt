@@ -41,6 +41,10 @@ Remaining feature work
 
 - Support [up-confirm] for [up-accept] ?
 
+- Document layer sizes:
+  - grow
+  - full
+
 - Docs: Target options may use &
 
 
@@ -413,27 +417,24 @@ Later?
   - up-dismiss-after
   - up-dismiss-with-result
     - aber was ist dann das ergebnis? ich könnte hier nur ein leeres ergebnis geben
-- When swapping { content } we should *not* change the wrapping element with any attributes it may have.
-  - How would we animate this?
-  - { placement: 'content' } ?
 - Allow to disable validations globally for tests
   - up.form.config.validateEnabled
   - for this it would be nice to distinguish "update dependent field" and "live validations"
 - focus: follow-scroll
 - To support async scripts, should we run compilers that were added after booting?
-- Concurrency: Replacing removed elements should fail
+- Replacing removed elements should fail
   - It may be a better behavior for a fallback-less fragment update to fail if the targeted fragment was detached while the request was in flight
     - We may even cancel the request?
   - E.g. when a validation request response and the field was replaced in the meantime, discard the response
   - How would this play together with fallback targets?
     - If all fallback targets were removed, the replacement fails
     - e.g. up.render({ target: '.target' })
-      -
   - This would also allow us to not process the cascade twice
+    - Except when the server changes the target
   - How would this play together with overlays?
     - No such thing as an existing element
-  - How would this play together with server-set targets?
-    - This *would* restart the cascade
+    - We would need to stop other requests that open a new overlay
+- Cancel the request when its { origin } has been detached?
 - Can we not focus if a compiler has focused?
 - When clicking on a #hash link in a history-less overlay we should handle the link and not follow but revealHash()
 - Replace { revealTop } with { revealAim: 'top' | 'center' | 'min-motion' }
