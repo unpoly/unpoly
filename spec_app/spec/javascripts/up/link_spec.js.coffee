@@ -152,6 +152,47 @@ describe 'up.link', ->
           expect(location.pathname).toEqual('/two')
           expect(document.title).toEqual('restored title from two')
 
+      it 'renders history when the user clicks on a link, goes back and then clicks on the same link (bugfix)', asyncSpec (next) ->
+        up.history.config.enabled = true
+        up.history.config.restoreTargets = ['.target']
+        waitForBrowser = 300
+
+        linkHTML = """
+          <a href="/next" up-target=".target" up-history="false">label</a>
+        """
+        target = fixture('.target', text: 'old text')
+        link = fixture('a[href="/next"][up-target=".target"][up-history=true]')
+        up.history.replace('/original')
+
+        next ->
+          expect(up.history.location).toMatchURL('/original')
+          expect('.target').toHaveText('old text')
+
+          Trigger.clickSequence(link)
+
+        next ->
+          jasmine.respondWithSelector('.target', text: 'new text')
+
+        next ->
+          expect(up.history.location).toMatchURL('/next')
+          expect('.target').toHaveText('new text')
+
+          history.back()
+
+        next.after waitForBrowser, ->
+          jasmine.respondWithSelector('.target', text: 'old text')
+
+        next ->
+          expect(up.history.location).toMatchURL('/original')
+          expect('.target').toHaveText('old text')
+
+          Trigger.clickSequence(link)
+
+        next ->
+          # Response was already cached
+          expect(up.history.location).toMatchURL('/next')
+          expect('.target').toHaveText('new text')
+
       it 'does not add additional history entries when linking to the current URL', asyncSpec (next) ->
         up.history.config.enabled = true
 

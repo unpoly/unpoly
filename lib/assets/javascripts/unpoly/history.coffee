@@ -157,20 +157,29 @@ up.history = do ->
 
   restoreStateOnPop = (state) ->
     if state?.up
+      # The earlier URL has now been restored by the browser. This cannot be prevented.
       url = currentLocation()
 
       replaced = up.render
         url: url
         history: true
-        location: false,    # don't push a new state. the browser will automatically set the URL from the popped state.
-        layer: 'root'        # Don't replace elements in a modal that might still be open
+        # (1) While the browser has already restored the earlier URL, we must still
+        #     pass it to render() so the current layer can track the new URL.
+        # (2) Since we're passing the current URL, up.history.push() will not add another state.
+        # (2) Pass the current URL to ensure that this exact URL is being rendered
+        #     and not something derived from the up.Response.
+        location: url,
+        # Don't replace elements in a modal that might still be open
+        # We will close all overlays and update the root layer.
+        peel: true
+        layer: 'root'
         target: config.restoreTargets,
         fallback: true
         cache: true
-        peel: true           # Close all overlays
         keep: false
         scroll: 'restore'
-        saveScroll: false   # since the URL was already changed by the browser, don't save scroll state
+        # Since the URL was already changed by the browser, don't save scroll state.
+        saveScroll: false
       replaced.then ->
         url = currentLocation()
         emit('up:location:changed', url: url, reason: 'pop', log: "Restored location #{url}")
