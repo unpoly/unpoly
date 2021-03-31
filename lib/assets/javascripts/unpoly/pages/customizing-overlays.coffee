@@ -65,19 +65,20 @@
   <a href="/path" up-layer="new" up-size="small">open small modal</a>
   <a href="/path" up-layer="new" up-size="medium">open medium modal</a>
   <a href="/path" up-layer="new" up-size="large">open large modal</a>
-  <a href="/path" up-layer="new" up-size="auto">open growing modal</a>
+  <a href="/path" up-layer="new" up-size="grow">open growing modal</a>
+  <a href="/path" up-layer="new" up-size="full">open full-width modal</a>
   ```
 
   If you don't pass a size you get a `medium` overlay.
 
   Sizes set a maximum width for the overlay's box element (e.g. `<up-modal-box>`). The default widths are:
 
-  | Mode   | small | medium | large  | grow |
-  | -------| -----:| ------:| ------:|-----------------|
-  | `modal`  | `350px` | `650px` | `1000px` | grow with content |
-  | `popup`  | `180px` | `300px` | `550px`  | grow with content |
-  | `drawer` | `150px` | `340px` | `600px`  | grow with content |
-  | `cover`  | `100%`  | `100%`  | `100%`   | `100%` |
+  | Mode     | small   | medium  | large     | full   | grow              |
+  |----------|--------:|--------:|----------:|-------:|-------------------|
+  | `modal`  | `350px` | `650px` | `1000px`  | `100%` | grow with content |
+  | `popup`  | `180px` | `300px` | `550px`   | `100%` | grow with content |
+  | `drawer` | `150px` | `340px` | `600px`   | `100%` | grow with content |
+  | `cover`  | -       | -       | -         | `100%` | -                 |
 
   You can customize sizes with CSS:
 

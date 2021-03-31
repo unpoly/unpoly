@@ -166,6 +166,12 @@ up-modal-box
   up-modal[size=large] &
     width: 1000px
 
+  up-modal[size=grow] &
+    width: auto // This is also the default value, but be explicit
+
+  up-modal[size=full] &
+    width: 100%
+
 up-modal-content
   @extend %overlay-content
 
@@ -205,6 +211,12 @@ up-drawer-box
 
   up-drawer[size=large] &
     width: 600px
+
+  up-drawer[size=grow] &
+    width: auto // This is also the default value, but be explicit
+
+  up-drawer[size=full] &
+    width: 100%
 
 up-drawer-content
   @extend %overlay-content
@@ -260,6 +272,12 @@ up-popup
 
   &[size=large]
     width: 550px
+
+  &[size=grow] &
+    width: auto // This is also the default value, but be explicit
+
+  &[size=full] &
+    width: 100%
 
 up-popup-content
   @extend %overlay-content
