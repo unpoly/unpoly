@@ -28,6 +28,49 @@ Release process
 Remaining feature work
 ======================
 
+- This configuration always opens overlays with history:
+  - Config:
+    - up.fragment.config.navigateOptions.history = true
+    - up.layer.config.overlay.history = false
+  - This does not happen with this config:
+    - up.fragment.config.navigateOptions.history = 'auto' (the default)
+    - up.fragment.config.autoHistory = true
+    - up.layer.config.overlay.history = false
+  - If this surprises me, how about other Unpoly users?
+    - How about this:
+      - There is [up-history] and [up-history-visible]
+      - By default [up-history] only affects the *change*.
+
+    | options.historyVisible | config.mode.historyVisible | layer renders history?                     |
+    |------------------------|----------------------------|--------------------------------------------|
+    | auto                   | auto                       | iff initial content is auto-history target |
+    | auto                   | true                       | yes                                        |
+    | auto                   | false                      | no                                         |
+    | true                   | *                          | yes                                        |
+    | false                  | *                          | no                                         |
+
+    We now must resolve { history: 'auto' } to decide whether the overlay has an initial location:
+
+    | options.history | initial URL             |
+    |-----------------|-------------------------|
+    | auto            | options.location IFF initial content is auto-history target |
+    | true            | options.location        |
+    | false           | null                    |
+
+    => It's not nice!
+    => What about up.layer.open({ history: false })?
+       => This would only mute history for the initial fragment
+    => The original idea was that I can re-use the { history } option for the layer,
+       since the layer should always open on its initial fragment URL
+    => The problem with navigateOptions is, they are set before I even know that we're opening a layer
+       Was that the whole idea with auto?
+  - Decision
+    - Separate layer history and fragment history into { historyVisible, history }
+    - Also parse [up-history-visible]
+    - May simplify history option handling in OpenLayer
+    - OpenLayer must now also resolve { history: 'auto' } to decide whether the overlay
+      should receive in *initial* location.
+
 - This is a confusing message when we're targeting the wrong layer:
   - Could not match targets in old and new content (tried selectors [...])
 
