@@ -69,7 +69,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @layer.setupHandlers()
 
     # Change history before compilation, so new fragments see the new location.
-    @handleHistory() # location event soll hier nicht mehr automatuisch fliegen
+    @handleHistory()
 
     # Remember where the element came from to support up.reload(element).
     @setSource({ newElement: @content, @source })
