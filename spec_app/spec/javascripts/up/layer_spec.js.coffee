@@ -198,24 +198,24 @@ describe 'up.layer', ->
         beforeEach ->
           up.history.config.enabled = true
           
-        describe 'with { history: true }', ->
+        describe 'with { historyVisible: true }', ->
 
           it 'updates the browser location when the overlay opens', asyncSpec (next) ->
             up.layer.open(
               location: '/modal-location'
               fragment: '<div class="element">element text</div>'
-              history: true
+              historyVisible: true
             )
   
             next ->
               expect(up.layer.isOverlay()).toBe(true)
-              expect(up.layer.history).toBe(true)
+              expect(up.layer.historyVisible).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
   
           it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
             makeLayers [
               { target: '.root-element' },
-              { target: '.overlay-element', location: '/modal-location', history: true }
+              { target: '.overlay-element', location: '/modal-location', historyVisible: true }
             ]
   
             expect(up.layer.isOverlay()).toBe(true)
@@ -230,14 +230,14 @@ describe 'up.layer', ->
             expect(up.layer.isRoot()).toBe(true)
             expect(location.href).toMatchURL('/new-root-location')
 
-        describe 'with { history: false }', ->
-        
+        describe 'with { historyVisible: false }', ->
+
           it 'does not update the browser location ', asyncSpec (next) ->
             originalLocation = location.href
   
             up.layer.open(
               target: '.element',
-              history: false,
+              historyVisible: false,
               location: '/modal-url'
             )
   
@@ -253,7 +253,7 @@ describe 'up.layer', ->
   
             up.layer.open(
               target: '.element',
-              history: false,
+              historyVisible: false,
               location: '/overlay1',
             )
   
@@ -263,50 +263,34 @@ describe 'up.layer', ->
   
               up.layer.open(
                 target: '.element',
-                history: true,
+                historyVisible: true,
                 location: '/overlay2',
               )
   
             next ->
               expect(location.href).toMatchURL(originalLocation)
             
-        describe 'with { history: "auto" }', ->
+        describe 'with { historyVisible: "auto" }', ->
         
-          it 'gives the layer history if config.mode.history is true', asyncSpec (next) ->
-            up.layer.config.modal.history = true
-            up.layer.open(mode: 'modal', history: 'auto')
-            
-            next ->
-              expect(up.layer.mode).toEqual('modal')
-              expect(up.layer.history).toBe(true)
-              
-          it 'does not give the layer history if config.mode.history is false', asyncSpec (next) ->
-            up.layer.config.modal.history = false
-            up.layer.open(mode: 'modal', history: 'auto')
-              
-            next ->
-              expect(up.layer.mode).toEqual('modal')
-              expect(up.layer.history).toBe(false)
-          
-          it 'gives the layer history if config.mode.history is "auto" and the initial overlay content is a main selector', asyncSpec (next) ->
-            up.layer.config.modal.history = 'auto'
+          it 'gives the layer history if the initial overlay content is a main selector', asyncSpec (next) ->
+            up.layer.config.modal.historyVisible = 'auto'
             up.fragment.config.mainTargets = ['.main']
 
             up.layer.open(mode: 'modal', history: 'auto', target: '.main')
 
             next ->
               expect(up.layer.mode).toEqual('modal')
-              expect(up.layer.history).toBe(true)
+              expect(up.layer.historyVisible).toBe(true)
 
-          it 'does not give the layer history if config.mode.history is "auto" and the initial overlay content is not a main selector', asyncSpec (next) ->
-            up.layer.config.modal.history = 'auto'
+          it 'does not give the layer history if initial overlay content is not a main selector', asyncSpec (next) ->
+            up.layer.config.modal.historyVisible = 'auto'
             up.fragment.config.mainTargets = ['.main']
 
-            up.layer.open(mode: 'modal', history: 'auto', target: '.other')
+            up.layer.open(mode: 'modal', historyVisible: 'auto', target: '.other')
 
             next ->
               expect(up.layer.mode).toEqual('modal')
-              expect(up.layer.history).toBe(false)
+              expect(up.layer.historyVisible).toBe(false)
 
       describe 'context', ->
 

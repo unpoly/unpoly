@@ -265,9 +265,6 @@ up.link = do ->
     parser.string('layer')
     parser.string('baseLayer')
     parser.json('context')
-
-    up.migrate.parseFollowOptions?(parser)
-
     parser.string('mode')
     parser.string('align')
     parser.string('position')
@@ -281,6 +278,7 @@ up.link = do ->
     parser.string('dismissEvent')
     parser.string('acceptLocation')
     parser.string('dismissLocation')
+    parser.booleanOrString('historyVisible')
 
     # Viewport options
     parser.booleanOrString('focus')
@@ -304,6 +302,8 @@ up.link = do ->
     parser.booleanOrString('transition')
     parser.string('easing')
     parser.number('duration')
+
+    up.migrate.parseFollowOptions?(parser)
 
     # This is the event that may be prevented to stop the follow.
     # up.form.submit() changes this to be up:form:submit instead.

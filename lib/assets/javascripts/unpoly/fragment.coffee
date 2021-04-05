@@ -373,7 +373,7 @@ up.fragment = do ->
     If set to `false`, the history will remain unchanged.
 
     [Overlays](/up.layer) will only change the browser URL and window title if the overlay
-    has [enabled history](/up.layer.history), even with `{ history: true }`.
+    has [visible history](/up.layer.historyVisible), even with `{ history: true }`.
 
   @param {string} [options.title]
     An explicit document title to use after rendering.
@@ -385,7 +385,7 @@ up.fragment = do ->
     pass a [`{ history }`](#options.history) option.
 
     [Overlays](/up.layer) will only change the window title if the overlay
-    has [enabled history](/up.layer.history).
+    has [visible history](/up.layer.historyVisible).
 
   @param {string} [options.location]
     An explicit URL to use after rendering.
@@ -397,7 +397,7 @@ up.fragment = do ->
     pass a [`{ history }`](#options.history) option.
 
     [Overlays](/up.layer) will only change the browser's URL if the overlay
-    has [enabled history](/up.layer.history).
+    has [visible history](/up.layer.historyVisible).
 
   @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
@@ -1423,6 +1423,11 @@ up.fragment = do ->
 
     return new up.Selector(expandedTargets, filters)
 
+  hasAutoHistory = (fragment) ->
+    unless result = u.evalOption(config.autoHistory, fragment)
+      up.puts('up.render()', "Will not auto-update history because up.fragment.config.autoHistory(fragment) returned false")
+    result
+
   ###**
   Your [target selectors](/a-up-target) may use this pseudo-selector
   to replace the layer's [main element](/up.fragment.config#config.mainTargets).
@@ -1516,6 +1521,7 @@ up.fragment = do ->
     toTarget: toTarget
     matches: matches
     isMain: isMain
+    hasAutoHistory: hasAutoHistory
 
 up.replace = up.fragment.replace
 up.extract = up.fragment.extract

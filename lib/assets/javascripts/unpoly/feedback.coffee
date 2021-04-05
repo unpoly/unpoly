@@ -370,7 +370,7 @@ up.feedback = do ->
 
     # We allow Unpoly-unaware code to use the pushState API and change the
     # front layer in the process. See up.Layer.Base#location setter.
-    if frontLayer.hasLiveHistory()
+    if frontLayer.showsLiveHistory()
       updateLayerIfLocationChanged(frontLayer)
 
   # Even when the modal or popup does not change history, we consider the URLs of the content it displays.

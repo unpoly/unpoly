@@ -117,7 +117,7 @@ up.layer = do ->
   @param {string} up.layer.config.overlay.dismissAriaLabel
     The accessibility label for the dismiss icon in the top-right corner.
 
-  @param {string|boolean} up.layer.config.overlay.history='auto'
+  @param {string|boolean} up.layer.config.overlay.historyVisible='auto'
     Whether the layer's location or title will be visible in the browser's
     address bar and window title.
 
@@ -160,7 +160,7 @@ up.layer = do ->
         ],
       root:
         mainTargets: ['[up-main~=root]']
-        history: true
+        historyVisible: true
       overlay:
         mainTargets: ['[up-main~=overlay]']
         openAnimation: 'fade-in'
@@ -168,7 +168,7 @@ up.layer = do ->
         dismissLabel: '×'
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
-        history: 'auto'
+        historyVisible: 'auto'
       cover:
         mainTargets: ['[up-main~=cover]']
       drawer:
@@ -343,6 +343,14 @@ up.layer = do ->
     a space-separated string.
 
     Passing `true` or `false` will enable or disable all dismiss controls.
+
+  @param {boolean|string} [options.historyVisible]
+    Whether history of the overlay content is visible.
+
+    If set to `true` the overlay location and title will be shown in browser UI.
+
+    If set to `'auto'` history will be visible if the initial overlay
+    content matches a [main target](/up.fragment.config#config.mainTargets).
 
   @param {string|Function} [options.animation]
     The opening animation.
@@ -534,6 +542,14 @@ up.layer = do ->
     An optional HTML class for the overlay's container element.
 
     See [overlay classes](/customizing-overlays#overlay-classes).
+
+  @param [up-history-visible]
+    Whether history of the overlay content is visible.
+
+    If set to `true` the overlay location and title will be shown in browser UI.
+
+    If set to `'auto'` history will be visible if the initial overlay
+    content matches a [main target](/up.fragment.config#config.mainTargets).
 
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.
@@ -777,7 +793,7 @@ up.layer = do ->
     'child'
     'ancestor'
     'descendants'
-    'history'
+    'historyVisible'
     'location'
     'title'
     'mode'

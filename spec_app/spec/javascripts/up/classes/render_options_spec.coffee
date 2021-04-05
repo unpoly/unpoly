@@ -49,11 +49,11 @@ describe 'up.RenderOptions', ->
         expect(options.cache).toBeUndefined()
         expect(options.scroll).toBeUndefined()
 
-      it 'sets { history: false } to not update { title, location } props, even in history-less layers', ->
+      it 'does not set a truthy { history } to not update { title, location } props, even in history-less layers', ->
         givenOptions = { navigate: false }
         options = up.RenderOptions.preprocess(givenOptions)
 
-        expect(options.history).toBe(false)
+        expect(options.history).toBeFalsy()
 
     it 'overrides defaults with given options', ->
       givenOptions = { navigate: false, hungry: false, source: '/other-source' }
@@ -133,7 +133,7 @@ describe 'up.RenderOptions', ->
         givenOptions = { navigate: false }
         options = preprocessAndDerive(givenOptions)
 
-        expect(options.history).toBe(false)
+        expect(options.history).toBeFalsy()
         expect(options.cache).toBe(undefined)
 
     it 'inherits shared keys from success options', ->

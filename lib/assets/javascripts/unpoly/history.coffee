@@ -193,7 +193,7 @@ up.history = do ->
     restoreStateOnPop(state)
 
   emit = (args...) ->
-    historyLayer = u.find(up.layer.stack.reversed(), 'history')
+    historyLayer = u.find(up.layer.stack.reversed(), 'historyVisible')
     historyLayer.emit(args...)
 
   up.on 'up:app:boot', ->

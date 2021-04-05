@@ -104,7 +104,7 @@ describe 'up.Layer.Overlay', ->
         target: '.element',
         location: '/path/to/modal'
         content: 'element text'
-        history: true
+        historyVisible: true
       )
 
       expect(up.layer.isOverlay()).toBe(true)

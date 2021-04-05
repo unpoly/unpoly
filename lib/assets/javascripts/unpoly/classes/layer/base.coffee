@@ -48,7 +48,7 @@ class up.Layer extends up.Record
   ###**
   Whether fragment updates within this layer will affect browser history and window title.
 
-  @property up.Layer#history
+  @property up.Layer#historyVisible
   @return {boolean}
   ###
 
@@ -91,7 +91,7 @@ class up.Layer extends up.Record
     [
       'element'
       'stack',
-      'history',
+      'historyVisible',
       'mode',
       'context',
       'lastScrollTops'
@@ -520,7 +520,7 @@ class up.Layer extends up.Record
     e.isDetached(@element)
 
   saveHistory: ->
-    return unless @hasHistory()
+    return unless @isHistoryVisible()
 
     @savedTitle = document.title
     @savedLocation = up.history.location
@@ -552,11 +552,9 @@ class up.Layer extends up.Record
     @stack.asCurrent(this, fn)
 
   updateHistory: (options) ->
-    # When the layer is opened, the { history } option defines whether the
-    # layer enables handling of location and title in general.
-    # When updating history, accept { history: false } as a shortcut to
-    # neither change { title } nor { location }.
-    return if options.history == false
+    # The { title, location } options are strings extracted from the response.
+    # We will only merge them into this layer if { history: true } is also passed.
+    return unless options.history
     
     if u.isString(options.title)
       @title = options.title
@@ -579,7 +577,7 @@ class up.Layer extends up.Record
   ###
   @accessor 'title',
     get: ->
-      if @hasLiveHistory()
+      if @showsLiveHistory()
         # Allow Unpoly-unaware code to set the document title directly.
         # This will implicitey change the front layer's title.
         document.title
@@ -589,7 +587,7 @@ class up.Layer extends up.Record
     set: (title) ->
       @savedTitle = title
 
-      if @hasLiveHistory()
+      if @showsLiveHistory()
         document.title = title
 
 
@@ -608,7 +606,7 @@ class up.Layer extends up.Record
   ###
   @accessor 'location',
     get: ->
-      if @hasLiveHistory()
+      if @showsLiveHistory()
         # Allow Unpoly-unaware code to use the pushState API directly.
         # This will implicitly change the front layer's location.
         up.history.location
@@ -623,21 +621,16 @@ class up.Layer extends up.Record
         @savedLocation = location
         @emit('up:layer:location:changed', { location, log: false })
 
-        if @hasLiveHistory()
+        if @showsLiveHistory()
           up.history.push(location)
 
-  hasHistory: ->
-    history = @history
+  isHistoryVisible: ->
+    # If an ancestor layer was opened with the wish to not affect history, this
+    # child layer must not affect it either, regardless of its @historyVisible setting.
+    return @historyVisible && (@isRoot() || @parent.isHistoryVisible())
 
-    # If an ancestor layer was opened with the wish to not affect history,
-    # this child layer must not affect it either.
-    if parent = @parent
-      history &= parent.hasHistory()
-
-    history
-
-  hasLiveHistory: ->
-    @hasHistory() && @isFront() && (up.history.config.enabled || @isRoot())
+  showsLiveHistory: ->
+    @isHistoryVisible() && @isFront() && (up.history.config.enabled || @isRoot())
 
   selector: (part) ->
     @constructor.selector(part)

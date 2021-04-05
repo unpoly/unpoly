@@ -57,7 +57,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
     u.assign(@layer.context, @context)
 
     if (@options.history == 'auto')
-      @options.history = @shouldAutoHistory()
+      @options.history = @hasAutoHistory()
 
     # Change history before compilation, so new fragments see the new location.
     @layer.updateHistory(u.pick(@options, ['history', 'location', 'title'])) # layer location changed event soll hier nicht mehr fliegen
@@ -355,8 +355,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
     }))
     return scrolling.process(step.scroll)
 
-  shouldAutoHistory: ->
-    newFragment = @steps[0].oldElement
-    unless autoHistory = u.evalOption(up.fragment.config.autoHistory, newFragment)
-      up.puts('up.render()', "Will not auto-update history because up.fragment.config.autoHistory(fragment) returned false")
-      return autoHistory
+  hasAutoHistory: ->
+    primaryFragment = @steps[0].oldElement
+    return up.fragment.hasAutoHistory(primaryFragment)

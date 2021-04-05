@@ -1675,6 +1675,12 @@ up.util = do ->
 #      unprefixed[key] = value
 #    unprefixed
 
+#  replaceValue = (value, matchValue, replaceValueFn) ->
+#    if value == matchValue
+#      return replaceValueFn()
+#    else
+#      return value
+
   renameKeys = (object, renameKeyFn) ->
     renamed = {}
     for key, value of object

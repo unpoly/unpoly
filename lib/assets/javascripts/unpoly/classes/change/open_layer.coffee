@@ -13,7 +13,6 @@ class up.Change.OpenLayer extends up.Change.Addition
     @source = options.source
     @focus = options.focus
     @scroll = options.scroll
-    @history = options.history
 
   preflightProps: ->
     # We assume that the server will respond with our target.
@@ -125,48 +124,19 @@ class up.Change.OpenLayer extends up.Change.Addition
     )
 
   buildLayer: ->
-    # We build the layer with the default { history } setting from config.mode.history.
-    # Both this change's options and the layer mode defaults can set { history: 'auto' } and
-    # must be resolved to a boolean. This is done in @resolveAutoHistoryForLayer().
-    return up.layer.build(u.merge(@options, history: undefined, opening: true))
-
-  resolveAutoHistoryForLayer: ->
-    # Both this change's options and the layer mode defaults can set { history: 'auto' }.
-    # We use the table below to resolve this to either true or false:
-    #
-    # | options.history | config.mode.history | layer has history?                         |
-    # |-----------------|---------------------|--------------------------------------------|
-    # | auto            | auto                | iff initial content is auto-history target |
-    # | auto            | true                | yes                                        |
-    # | auto            | false               | no                                         |
-    # | true            | *                   | yes                                        |
-    # | false           | *                   | no                                         |
-    changeHistory = @history
-    defaultHistory = @layer.history
-
-    if u.isBoolean(changeHistory)
-      # If up.layer.open() was called with a boolean { history } option,
-      # we will use that option regardless of the mode default.
-      @layer.history = changeHistory
-
-    else if changeHistory == 'auto' && defaultHistory == 'auto'
-      # Enable history IFF @content matches an auto-history target.
-      unless @layer.history = u.evalOption(up.fragment.config.autoHistory, @content)
-        up.puts('up.layer.open()', "Opening layer without history as up.fragment.config.autoHistory(fragment) returned false")
-
-    else
-      # Keep the boolean value already in layer.history (set by config.mode.history).
-      # This empty else-branch will be removed by the minifier.
+    return up.layer.build(u.merge(@options, opening: true))
 
   handleHistory: ->
-    @resolveAutoHistoryForLayer()
+    if @layer.historyVisible == 'auto'
+      @layer.historyVisible = up.fragment.hasAutoHistory(@content)
 
     @layer.parent.saveHistory()
 
-    # options.history dictates whether or not the overlay renders history to the address bar.
-    # Even if the layer has a { history: false } property we want to set the initial
-    # layer.location to the fragment to support .up-current.
-    @layer.updateHistory(u.merge(@options, history: true))
+    # Even if the layer has a { historyVisible: false } property we want to set the
+    # initial layer.location so every layer has a #location.
+    @options.history = true
+
+    @layer.updateHistory(@options)
 
   handleFocus: ->
     @baseLayer.overlayFocus?.moveToBack()
