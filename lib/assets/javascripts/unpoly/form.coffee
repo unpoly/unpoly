@@ -147,7 +147,7 @@ up.form = do ->
     You may pass this additional `options` object to supplement or override
     options parsed from the form attributes.
 
-  @return {Promise}
+  @return {Promise<up.RenderResult>}
     A promise that will be fulfilled when the server response was rendered.
 
   @stable

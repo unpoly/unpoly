@@ -28,8 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Document and test that up.submit() also returns an up.RenderResult
-
 - Docs: Target options may use &
 
 

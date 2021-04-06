@@ -64,6 +64,30 @@ describe 'up.link', ->
         next => @respondWith '<div id="second">second-div</div>'
         next => expect($container.text()).toBe('first-linksecond-div')
 
+      it 'returns a promise with an up.RenderResult that contains information about the updated fragments and layer', asyncSpec (next) ->
+        fixture('.one', text: 'old one')
+        fixture('.two', text: 'old two')
+        fixture('.three', text: 'old three')
+
+        link = fixture('a[up-target=".one, .three"][href="/path"]')
+
+        promise = up.follow(link)
+
+        next =>
+          @respondWith """
+            <div class="one">new one</div>
+            <div class="two">new two</div>
+            <div class="three">new three</div>
+          """
+
+        next =>
+          next.await promiseState(promise)
+
+        next (result) =>
+          expect(result.state).toBe('fulfilled')
+          expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
+          expect(result.value.layer).toBe(up.layer.root)
+
       describe 'history', ->
 
         it 'adds history entries and allows the user to use the back and forward buttons', asyncSpec (next) ->

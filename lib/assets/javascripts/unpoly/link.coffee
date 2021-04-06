@@ -207,7 +207,7 @@ up.link = do ->
     You may pass this additional `options` object to supplement or override
     options parsed from the link attributes.
 
-  @return {Promise}
+  @return {Promise<up.RenderResult>}
     A promise that will be fulfilled when the link destination
     has been loaded and rendered.
 

@@ -388,6 +388,30 @@ describe 'up.form', ->
             params: new up.Params('field-name': 'field-value')
           ))
 
+      it 'returns a promise with an up.RenderResult that contains information about the updated fragments and layer', asyncSpec (next) ->
+        fixture('.one', text: 'old one')
+        fixture('.two', text: 'old two')
+        fixture('.three', text: 'old three')
+
+        form = fixture('form[up-target=".one, .three"][action="/path"]')
+
+        promise = up.submit(form)
+
+        next =>
+          @respondWith """
+            <div class="one">new one</div>
+            <div class="two">new two</div>
+            <div class="three">new three</div>
+          """
+
+        next =>
+          next.await promiseState(promise)
+
+        next (result) =>
+          expect(result.state).toBe('fulfilled')
+          expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
+          expect(result.value.layer).toBe(up.layer.root)
+
       describe 'content type', ->
 
         it 'defaults to application/x-www-form-urlencoded in a form without file inputs', asyncSpec (next) ->
