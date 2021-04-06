@@ -4915,6 +4915,13 @@ describe 'up.fragment', ->
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
         expect(expanded).toEqual ['.before', '#foo', '.after']
 
+      it "it expands ':origin' to a selector for { origin }", ->
+        targets = ['.before', ':origin .child', '.after']
+        origin = fixture('#foo')
+        up.layer.config.root.mainTargets = [':layer']
+        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
+        expect(expanded).toEqual ['.before', '#foo .child', '.after']
+
       it "it expands '&' to a selector for { origin }", ->
         targets = ['.before', '& .child', '.after']
         origin = fixture('#foo')

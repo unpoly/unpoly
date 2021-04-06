@@ -436,13 +436,12 @@ up.fragment = do ->
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
   @param {Element|jQuery} [options.origin]
-    The element that triggered the replacement.
+    The element that triggered the change.
 
     When multiple elements in the current page match the `{ target }`,
     Unpoly will replace an element in the [origin's vicinity](/fragment-placement).
 
-    The origin's selector will be substituted for the `&` shorthand in the target
-    selector ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+    The origin's selector will be substituted for `:origin` in a target selector.
 
   @param {string|up.Layer|Element} [options.layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.
@@ -1360,11 +1359,11 @@ up.fragment = do ->
   resolveOriginReference = (target, options = {}) ->
     origin = options.origin
 
-    return target.replace '&', (match) ->
+    return target.replace /&|:origin\b/, (match) ->
       if origin
         return toTarget(origin)
       else
-        up.fail("Missing origin for origin reference (%s) (found in %os)", match, target)
+        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
 
   ###**
   @internal
@@ -1443,7 +1442,28 @@ up.fragment = do ->
   ###
 
   ###**
-  Your [target selectors](/a-up-target) may use this pseudo-selector
+  Your target selectors may use this pseudo-selector
+  to reference the element that triggered the change.
+
+  The origin element is automatically set to a link that is being [followed](/a-up-follow)
+  or form that is being [submitted](/form-up-submit). When updating fragments
+  programmatically through `up.render()` you may pass an origin element as an `{ origin }` option.
+
+  Even without using an `:origin` reference, the
+  [origin is considered](/fragment-placement#interaction-origin-is-considered)
+  when matching fragments in the current page.
+
+  \#\#\# Shorthand
+
+  Instead of `:origin` you may also use `&`
+  ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+
+  @selector :origin
+  @experimental
+  ###
+
+  ###**
+  Your target selectors may use this pseudo-selector
   to replace the layer's topmost swappable element.
 
   The topmost swappable element is the first child of the layer's container element.

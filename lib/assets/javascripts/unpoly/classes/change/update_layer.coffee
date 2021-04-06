@@ -248,7 +248,7 @@ class up.Change.UpdateLayer extends up.Change.Addition
   parseSteps: ->
     @steps = []
 
-    # resolveSelector was already called by up.Change.FromContent
+    # up.fragment.expandTargets() was already called by up.Change.FromContent
     for simpleTarget in u.splitValues(@target, ',')
       unless simpleTarget == ':none'
         expressionParts = simpleTarget.match(/^(.+?)(?:\:(before|after))?$/) or

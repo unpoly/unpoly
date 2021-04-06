@@ -34,7 +34,10 @@
   ```
 
   When clicking on *"Show full card #2"*, Unpoly will replace the second card.
-  The server should only render a single `.card` element.
+
+  The interaction origin can only be considered in the current page, but not
+  in the server response. In the example above the server is expected to only
+  render a single `.card` element.
 
   See `up.fragment.get()` for more examples and advanced use cases.
 

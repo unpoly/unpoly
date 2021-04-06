@@ -28,7 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Docs: Target options may use &
 
 
 Tests
@@ -430,6 +429,8 @@ Later?
 Decisions
 ---------
 
+- Do validation targets still need to use :origin (former "&"), now that we consider origin?
+  => Yes, because a <fieldset> may occur multiple times in the response document and we cannot consider origin there
 - Entscheiden ob ich die [up-modal], [up-drawer], etc. Shortcuts behalten möchte
   - Für Docs?
   - Verwirrend dass es mehrere Möglichkeiten gibt, das gleiche zu machen?

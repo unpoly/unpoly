@@ -4,7 +4,7 @@ up.feedback.config.currentClasses.push('active')
 
 up.feedback.config.navSelectors.push('.nav', '.navbar')
 
-up.form.config.validateTargets.unshift('.form-group:has(&)')
+up.form.config.validateTargets.unshift('.form-group:has(:origin)')
 
 up.viewport.config.fixedTop.push('.navbar.fixed-top')
 up.viewport.config.fixedBottom.push('.navbar.fixed-bottom')
