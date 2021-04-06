@@ -30,8 +30,6 @@ Remaining feature work
 
 - Document and test that up.submit() also returns an up.RenderResult
 
-- Support [up-confirm] for [up-accept] ?
-
 - Docs: Target options may use &
 
 

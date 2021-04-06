@@ -190,6 +190,7 @@ class up.Layer.Overlay extends up.Layer
       parser.booleanOrString('animation')
       parser.string('easing')
       parser.number('duration')
+      parser.string('confirm')
 
       up.log.muteRejection closeFn(value, closeOptions)
 

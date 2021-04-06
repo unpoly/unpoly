@@ -28,5 +28,4 @@ window.makeLayers = (stackPlans) ->
     # or open a new layer with the given props.
     up.navigate(stackPlan)
 
-  return Promise.resolve()
-  # return up.layer.stack
+  return up.layer.stack

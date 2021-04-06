@@ -146,6 +146,8 @@ class up.Layer extends up.Record
     ```js
     up.layer.accept(null, { animation: 'move-to-bottom' })
     ```
+  @param {string} [options.confirm]
+    A message the user needs to confirm before the overlay is closed.
   @param {boolean} [options.preventable=true]
     Whether the closing can be prevented by an event listener.
   @param {string|Function(Element, Object)} [options.animation]

@@ -482,7 +482,7 @@ up.fragment = do ->
     See [focus option](/focus-option) for a list of allowed values.
 
   @param {string} [options.confirm]
-    A confirmation message the user need's to accept before fragments are updated.
+    A message the user needs to confirm before fragments are updated.
 
     The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
 

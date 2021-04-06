@@ -11,5 +11,8 @@ window.allowGlobalErrors = ->
     @globalErrorHandler = jasmine.createSpy('spy on window.onerror')
     window.onerror = @globalErrorHandler
 
-  afterEach ->
+afterEach ->
+  if @oldGlobalErrorHandler
     window.onerror = @oldGlobalErrorHandler
+    @oldGlobalErrorHandler = undefined
+    @globalErrorHandler = undefined

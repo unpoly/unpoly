@@ -113,6 +113,7 @@ describe 'up.syntax', ->
       it "sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer"
 
       describe 'when a compiler throws an error', ->
+
         allowGlobalErrors()
 
         it 'does not prevent other compilers from running', ->
@@ -325,6 +326,7 @@ describe 'up.syntax', ->
         expect(clean).not.toThrowError()
 
       describe 'when a destructor throws an error', ->
+
         allowGlobalErrors()
 
         it 'does not prevent other destructors from running', ->

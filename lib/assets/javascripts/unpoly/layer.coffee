@@ -686,6 +686,8 @@ up.layer = do ->
   @selector a[up-dismiss]
   @param [up-dismiss]
     The overlay's [dismissal value](/closing-overlays#overlay-result-values) as a JSON string.
+  @param [up-confirm]
+    A message the user needs to confirm before the layer is closed.
   @param [up-animation]
     The overlay's close animation.
 
@@ -719,6 +721,8 @@ up.layer = do ->
   @selector a[up-accept]
   @param [up-accept]
     The overlay's [acceptance value](/closing-overlays#overlay-result-values) as a JSON string.
+  @param [up-confirm]
+    A message the user needs to confirm before the layer is closed.
   @param [up-duration]
     The close animation's duration in milliseconds.
   @param [up-easing]

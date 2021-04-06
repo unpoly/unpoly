@@ -1405,6 +1405,32 @@ describe 'up.layer', ->
 
         expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining(animation: 'move-to-right', duration: 654))
 
+      describe 'with [up-confirm]', ->
+
+        allowGlobalErrors()
+
+        it 'shows a confirm message before accepting the overlay', ->
+          [root, overlay] = makeLayers(2)
+          link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
+          confirmSpy = spyOn(up.browser, 'assertConfirmed')
+
+          Trigger.clickSequence(link)
+
+          expect(confirmSpy).toHaveBeenCalledWith(jasmine.objectContaining(confirm: 'Are you sure?'))
+          expect(overlay).toBeClosed()
+
+        it 'does not accept the overlay if the message is not confirmed', ->
+          [root, overlay] = makeLayers(2)
+          confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake (options) ->
+            if options.confirm
+              throw up.error.aborted('User aborted')
+          link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
+
+          Trigger.clickSequence(link)
+
+          expect(confirmSpy).toHaveBeenCalled()
+          expect(overlay).not.toBeClosed()
+
     describe '[up-dismiss]', ->
 
       beforeEach ->

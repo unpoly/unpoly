@@ -23,6 +23,8 @@ class up.Change.CloseLayer extends up.Change.Removal
     unless @layer.isOpen()
       return Promise.resolve()
 
+    up.browser.assertConfirmed(@options)
+
     # Abort all pending requests targeting the layer we're now closing.
     up.network.abort (request) => request.layer == @layer
 
