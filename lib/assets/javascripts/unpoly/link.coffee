@@ -585,12 +585,12 @@ up.link = do ->
   \#\#\# Cancelation is forwarded
 
   If the user cancels an `up:click` event using `event.preventDefault()`,
-  the underlying `click` or `mousedown` will also be canceled.
+  the underlying `click` or `mousedown` event will also be canceled.
 
   \#\#\# Accessibility
 
   If the user activates an element using their keyboard, the `up:click` event will be emitted
-  on `click`, even if the element has an `[up-instant]` attribute.
+  when the key is pressed even if the element has an `[up-instant]` attribute.
 
   @event up:click
   @param {Element} event.target
