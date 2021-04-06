@@ -64,3 +64,6 @@ class up.Layer.Root extends up.Layer
 
   reset: ->
     u.assign(this, @defaults())
+
+  toString: ->
+    "root layer"

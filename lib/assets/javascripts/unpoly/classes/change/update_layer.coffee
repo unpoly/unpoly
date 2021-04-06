@@ -30,9 +30,6 @@ class up.Change.UpdateLayer extends up.Change.Addition
 
     u.map(@steps, 'selector').join(', ') || ':none'
 
-  toString: ->
-    "Update \"#{@target}\" in #{@layer}"
-
   execute: (@responseDoc) ->
     # For each step, find a step.alternative that matches in both the current page
     # and the response document.

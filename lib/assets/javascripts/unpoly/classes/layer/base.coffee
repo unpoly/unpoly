@@ -639,7 +639,7 @@ class up.Layer extends up.Record
     throw up.error.notImplemented()
 
   toString: ->
-    "#{@mode} layer"
+    throw up.error.notImplemented()
 
   affix: (args...) ->
     e.affix(@getFirstSwappableElement(), args...)

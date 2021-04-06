@@ -507,6 +507,12 @@ up.layer = do ->
   anySelector = ->
     u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
 
+  optionToString = (option) ->
+    if u.isString(option)
+      return "layer \"#{option}\""
+    else
+      return option.toString()
+
   ###**
   [Follows](/a-up-follow) this link and opens the result in a new layer.
 
@@ -738,6 +744,7 @@ up.layer = do ->
     openCallbackAttr
     closeCallbackAttr
     anySelector
+    optionToString
     get_stack: -> stack
   })
 

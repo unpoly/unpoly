@@ -292,3 +292,6 @@ class up.Layer.Overlay extends up.Layer
 
   getFirstSwappableElement: ->
     @getContentElement().children[0]
+
+  toString: ->
+    "#{@mode} overlay"

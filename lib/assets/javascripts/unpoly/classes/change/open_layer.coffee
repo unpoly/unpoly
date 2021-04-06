@@ -33,9 +33,6 @@ class up.Change.OpenLayer extends up.Change.Addition
     # We assume that the server will respond with our target.
     return @target
 
-  toString: ->
-    "Open \"#{@target}\" in new layer"
-
   execute: (responseDoc) ->
     if @target == ':none'
       @content = document.createElement('up-none')
@@ -45,7 +42,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     if !@content || @baseLayer.isClosed()
       throw @notApplicable()
 
-    up.puts('up.render()', "Opening element \"#{@target}\" in new layer")
+    up.puts('up.render()', "Opening element \"#{@target}\" in new overlay")
 
     @options.title = @improveHistoryValue(@options.title, responseDoc.getTitle())
 

@@ -92,28 +92,20 @@ class up.Change.FromContent extends up.Change
     @seekPlan(getPlanProps) or opts.optional or @preflightTargetNotApplicable()
 
   preflightTargetNotApplicable: ->
-    if @hasPlans()
-      up.fail("Could not find target in current page (tried selectors %o)", @planTargets())
-    else
-      @failFromEmptyPlans()
+    @targetNotApplicable('Could not find target in current page')
 
   postflightTargetNotApplicable: ->
-    if @hasPlans()
-      up.fail("Could not match targets in old and new content (tried selectors %o)", @planTargets())
-    else
-      @failFromEmptyPlans()
+    @targetNotApplicable('Could not find common target in current page and response')
 
-  hasPlans: ->
-    return @getPlans().length
-
-  failFromEmptyPlans: ->
-    if @layers.length
-      up.fail('No target for change %o', @options)
+  targetNotApplicable: (reason) ->
+    if @getPlans().length
+      planTargets = u.uniq(u.map(@getPlans(), 'target'))
+      humanizedLayerOption = up.layer.optionToString(@options.layer)
+      up.fail(reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption)
+    else if @layers.length
+      up.fail('No target selector given')
     else
       up.fail('Layer %o does not exist', @options.layer)
-
-  planTargets: ->
-    return u.uniq(u.map(@getPlans(), 'target'))
 
   seekPlan: (fn) ->
     for plan in @getPlans()
