@@ -12,14 +12,6 @@ up.element = do ->
 
   u = up.util
 
-  ###**
-  Returns a null-object that mostly behaves like an `Element`.
-
-  @function up.element.none()
-  @internal
-  ###
-  NONE = { getAttribute: -> undefined }
-
   MATCH_FN_NAME = if up.browser.isIE11() then 'msMatchesSelector' else 'matches'
 
   ###**
@@ -1053,33 +1045,6 @@ up.element = do ->
       obj
 
   ###**
-  Resolves the given CSS selector (which might contain `&` references)
-  to a full CSS selector without ampersands.
-
-  If passed an `Element` or `jQuery` element, returns a CSS selector string
-  for that element.
-
-  @function up.element.resolveSelector
-  @param {string|Element|jQuery} target
-  @param {string|Element|jQuery} origin
-    The element that this selector resolution is relative to.
-    That element's selector will be substituted for `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @return {string}
-  @internal
-  ###
-  resolveSelector = (target, origin) ->
-    if u.isString(target)
-      if u.contains(target, '&')
-        if u.isPresent(origin) # isPresent returns false for empty jQuery collection
-          originSelector = toSelector(origin)
-          target = target.replace(/\&/, originSelector)
-        else
-          up.fail("Found origin reference (%s) in selector %s, but no origin was given", '&', target)
-    else
-      target = toSelector(target)
-    return target
-
-  ###**
   Returns whether the given element is currently visible.
 
   An element is considered visible if it consumes space in the document.
@@ -1161,8 +1126,6 @@ up.element = do ->
     styleNumber: computedStyleNumber # practical.
     inlineStyle: inlineStyle # internal
     setStyle: setInlineStyle # practical.
-    resolveSelector: resolveSelector # internal
-    none: -> NONE # internal
     isVisible: isVisible # practical
     upAttrs: upAttrs
     toggleAttr: toggleAttr
