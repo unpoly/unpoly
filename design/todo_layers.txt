@@ -191,25 +191,7 @@ Docs
 ====
 
 - Redirect all proxy methods in .htaccess
-
-- Move a[up-target] docs to a[up-follow]
-  - [up-target] is then a modifying option
-- Move form[up-target] docs to form[up-follow]
-  - [up-target] is then a modifying option
-- Remove unused link options in followOptions
-- Document URL patterns
-  - *
-  - :foo
-  - $foo
-  - minus-prefixed exclude patterns
-  - Capture groups
 - Document that up:click is available on all elements, not just Unpoly links
-- Document new selectors
-  - Ampersand (&) (do :origin?)
-  - :none
-  - :main
-  - :layer
-  - :closest
 - Log is prettier and less noisy
 - Async errors from event handlers are now printed to the console if the log is enabled
 - Layer lookup options

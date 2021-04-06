@@ -84,11 +84,19 @@
   If you would like to preserve the target element, but replace all of its child content,
   use the `:content` pseudo selector:
 
-  ```
+  ```html
   <a href="/cards/5" up-target=".card:content">Show card #5</a>
   ```
 
   For more advanced cases of preserving elements, see `[up-keep]`.
+
+  \#\#\# Rendering nothing
+
+  To make a server request without changing a fragment, use the `:none` selector:
+
+  ```html
+  <a href="/ping" up-target=":none">Ping server</a>
+  ```
 
   @page fragment-placement
   ###

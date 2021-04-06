@@ -1442,6 +1442,19 @@ up.fragment = do ->
   ###
 
   ###**
+  To make a server request without changing a fragment, use the `:none` selector.
+
+  \#\#\# Example
+
+  ```html
+  <a href="/ping" up-target=":none">Ping server</a>
+  ```
+
+  @selector :none
+  @experimental
+  ###
+
+  ###**
   Your target selectors may use this pseudo-selector
   to reference the element that triggered the change.
 
