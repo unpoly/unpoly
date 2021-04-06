@@ -222,6 +222,11 @@ up.form = do ->
   @event up:form:submit
   @param {Element} event.target
     The `<form>` element that will be submitted.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render) for the fragment update
+    that will show the validation results.
+
+    Listeners may inspect and modify these options.
   @param event.preventDefault()
     Event listeners may call this method to prevent the form from being submitted.
   @stable
@@ -396,6 +401,20 @@ up.form = do ->
     options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')
 
     return submit(field, options)
+
+  ###**
+  This event is emitted before a form or field is being [validated](/input-up-validate).
+
+  @event up:form:validate
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render) for the fragment update
+    that will show the validation results.
+
+    Listeners may inspect and modify these options.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the validation request
+    being sent to the server.
+  ###
 
   switcherValues = (field) ->
     value = undefined

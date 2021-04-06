@@ -320,6 +320,10 @@ up.link = do ->
   @event up:link:follow
   @param {Element} event.target
     The link element that will be followed.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render) for the coming fragment update.
+
+    Listeners may inspect and modify these options.
   @param event.preventDefault()
     Event listeners may call this method to prevent the link from being followed.
   @stable

@@ -190,17 +190,20 @@ Tests
 Docs
 ====
 
+CHANGELOG
+---------
+
 - Redirect all proxy methods in .htaccess
-- Document that up:click is available on all elements, not just Unpoly links
 - Log is prettier and less noisy
 - Async errors from event handlers are now printed to the console if the log is enabled
-- Layer lookup options
-  - Also "parent root"
+- No longer autofocuses on load (already done by browser)
+
+Doc comments
+------------
+
 - Docs: up.Request is also a promise for its response. Show example.
 - up.syntax.data() is now up.data()
-- [up-content], [up-content=overlay], [up-content=(mode)]
-- No longer autofocuses on load (already done by browser)
-- { layer: 'swap' }
+- [up-main], [up-main=overlay], [up-main=(mode)]
 - up:form:validate
 - Document request queue changes
   - Preload limits
