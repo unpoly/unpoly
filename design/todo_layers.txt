@@ -32,10 +32,6 @@ Remaining feature work
 
 - Support [up-confirm] for [up-accept] ?
 
-- Document layer sizes:
-  - grow
-  - full
-
 - Docs: Target options may use &
 
 
