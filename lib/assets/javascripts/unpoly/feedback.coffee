@@ -183,7 +183,7 @@ up.feedback = do ->
   ###
 
   ###**
-  Forms that are currently [loading through Unpoly](/a-up-target)
+  Forms that are currently [loading through Unpoly](/form-up-submit)
   are assigned the `up-active` class automatically.
   Style `.up-active` in your CSS to improve the perceived responsiveness
   of your user interface.

@@ -12,7 +12,7 @@
 
   \#\#\# Navigating features
 
-  [Following a link](/a-up-target), [submitting a form](/form-up-target) or
+  [Following a link](/a-up-follow), [submitting a form](/form-up-submit) or
   [opening an overlay](/up.layer.open) is considered navigation by default.
   You may opt *out of* navigation defaults by passing a `{ navigate: false }` option
   or setting an `[up-navigate=false]` attribute.

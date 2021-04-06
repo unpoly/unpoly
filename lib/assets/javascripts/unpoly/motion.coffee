@@ -4,8 +4,8 @@ Animation
   
 When you [update a page fragment](/up.link) you can animate the change.
 
-Let's say you are using an [`up-target`](/a-up-target) link to update an element
-with content from the server. You can add an attribute [`up-transition`](/a-up-target#up-transition)
+Let's say you are using an [`up-follow`](/a-up-follow) link to update an element
+with content from the server. You can add an attribute [`up-transition`](/a-up-follow#up-transition)
 to smoothly fade out the old element while fading in the new element:
 
     <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>

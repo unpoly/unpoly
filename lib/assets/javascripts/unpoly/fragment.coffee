@@ -209,7 +209,7 @@ up.fragment = do ->
   The selector is either given as `{ target }` option,
   or a [main target](/up.fragment.config#config.mainTargets) is used as default.
 
-  See the [`a[up-target]`](/a-up-target) selector for many examples for how you can target content.
+  See the [fragment placement](/fragment-placement) selector for many examples for how you can target content.
 
   This function has many options to enable scrolling, focus, request cancelation and other side
   effects. These options are all disabled by default and must be opted into one-by-one. To enable
@@ -625,7 +625,7 @@ up.fragment = do ->
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
-  [fragment updates](/a-up-target).
+  [fragment updates](/up.fragment).
 
   For example:
 
@@ -1031,7 +1031,7 @@ up.fragment = do ->
     return selector.descendants(root || document)
 
   ###**
-  Your [target selectors](/a-up-target) may use this pseudo-selector
+  Your target selectors may use this pseudo-selector
   to replace an element with an descendant matching the given selector.
 
   \#\#\# Example
@@ -1429,7 +1429,7 @@ up.fragment = do ->
     result
 
   ###**
-  Your [target selectors](/a-up-target) may use this pseudo-selector
+  Your target selectors may use this pseudo-selector
   to replace the layer's [main element](/up.fragment.config#config.mainTargets).
 
   \#\#\# Example
@@ -1472,7 +1472,7 @@ up.fragment = do ->
   @param {string|up.Layer} options.layer
     The layer for which to match.
 
-    Pseudo-selectors like :main may expand to different selectors
+    Pseudo-selectors like `:main` may expand to different selectors
     in different layers.
   @param {string|up.Layer} options.mode
     Required if `{ layer: 'new' }` is passed.

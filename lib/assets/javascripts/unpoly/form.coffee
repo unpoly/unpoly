@@ -2,7 +2,7 @@
 Forms
 =====
   
-Unpoly comes with functionality to [submit](/form-up-target) and [validate](/input-up-validate)
+Unpoly comes with functionality to [submit](/form-up-submit) and [validate](/input-up-validate)
 forms without leaving the current page. This means you can replace page fragments,
 open dialogs with sub-forms, etc. all without losing form state.
 

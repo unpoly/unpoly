@@ -21,7 +21,7 @@ This makes for an unfriendly experience:
 - The user sees a "flash" as the browser loads and renders the new page,
   even if large portions of the old and new page are the same (navigation, layout, etc.).
 
-Unpoly fixes this by letting you annotate links with an [`up-target`](/a-up-target)
+Unpoly fixes this by letting you annotate links with an [`up-target`](/a-up-follow#up-target)
 attribute. The value of this attribute is a CSS selector that indicates which page
 fragment to update. The server **still renders full HTML pages**, but we only use
 the targeted fragments and discard the rest:
@@ -64,7 +64,7 @@ with an `up-target` attribute:
 
 Note that instead of `article` you can use any other CSS selector like `#main .article`.
 
-With these [`up-target`](/a-up-target) annotations Unpoly only updates the targeted part of the screen.
+With these [`up-target`](/a-up-follow#up-target) annotations Unpoly only updates the targeted part of the screen.
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
@@ -753,7 +753,7 @@ up.link = do ->
 
   This is done by:
 
-  - [Following the link through AJAX](/a-up-target) instead of a full page load
+  - [Following the link through AJAX](/a-up-follow) instead of a full page load
   - [Preloading the link's destination URL](/a-up-preload)
   - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
 

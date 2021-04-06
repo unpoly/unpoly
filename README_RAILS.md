@@ -359,8 +359,6 @@ update) will be preserved for the action you redirect to.
 `unpoly-rails` installs a [`before_action`](https://api.rubyonrails.org/classes/AbstractController/Callbacks/ClassMethods.html#method-i-before_action) into all controllers which echoes the request's URL as a response header `X-Up-Location` and the request's
 HTTP method as `X-Up-Method`.
 
-The Unpoly frontend [requires these headers to detect redirects](https://unpoly.com/form-up-target#redirects), which are otherwise undetectable for an AJAX client.
-
 
 ### Automatic method detection for initial page load
 
@@ -376,7 +374,7 @@ What you still need to do manually
 
 ### Failed form submissions must return a non-200 status code
 
-Unpoly lets you submit forms via AJAX by using the [`form[up-target]`](https://unpoly.com/form-up-target) selector or [`up.submit()`](https://unpoly.com/up.submit) function.
+Unpoly lets you submit forms via AJAX by using the [`form[up-follow]`](https://unpoly.com/form-up-submit) selector or [`up.submit()`](https://unpoly.com/up.submit) function.
 
 For Unpoly to be able to detect a failed form submission,
 the form must be re-rendered with a non-200 HTTP status code.

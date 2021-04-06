@@ -50,7 +50,7 @@ up.syntax = do ->
 
   You should migrate your [`DOMContentLoaded`](https://api.jquery.com/ready/)
   callbacks to compilers. This will make sure they run both at page load and
-  when [a new fragment is inserted later](/a-up-target).
+  when a new fragment is inserted later.
   It will also organize your JavaScript snippets by selector of affected elements.
 
   \#\#\# Example
@@ -160,7 +160,7 @@ up.syntax = do ->
     with a jQuery collection containing all matching elements. 
   @param {boolean} [options.keep=false]
     If set to `true` compiled fragment will be [persisted](/up-keep) during
-    [page updates](/a-up-target).
+    fragment updates.
 
     This has the same effect as setting an `up-keep` attribute on the element.
   @param {Function(element, data)} compiler

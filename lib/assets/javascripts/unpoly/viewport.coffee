@@ -10,7 +10,7 @@ define additional viewports by giving the CSS property `{ overflow-y: scroll }` 
 
 \#\#\# Revealing new content
 
-When following a [link to a fragment](/a-up-target) Unpoly will automatically
+When following a [link to a fragment](/a-up-follow) Unpoly will automatically
 scroll the document's viewport to [reveal](/up.viewport) the updated content.
 
 You should [make Unpoly aware](/up.viewport.config#config.fixedTop) of fixed elements in your
@@ -707,7 +707,7 @@ up.viewport = do ->
   Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
-  When [following a fragment link](/a-up-target), the viewport is scrolled
+  When [following a fragment link](/a-up-follow), the viewport is scrolled
   so the targeted element becomes visible. By using this attribute you can make
   Unpoly aware of fixed elements that are obstructing the viewport contents.
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
@@ -727,7 +727,7 @@ up.viewport = do ->
   Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
-  When [following a fragment link](/a-up-target), the viewport is scrolled
+  When [following a fragment link](/a-up-follow), the viewport is scrolled
   so the targeted element becomes visible. By using this attribute you can make
   Unpoly aware of fixed elements that are obstructing the viewport contents.
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
