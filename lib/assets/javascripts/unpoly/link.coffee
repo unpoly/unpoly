@@ -468,9 +468,16 @@ up.link = do ->
       if event.key == 'Enter' || event.key == 'Space'
         forkEventAsUpClick(event)
 
-  # Support keyboard navigation for elements that behave like links
-  # or buttons, but  aren't <a href> or <button> elements..
-  # TODO: Document [up-clickable]
+  ###**
+  Enables keyboard interaction for elements that should behave like links or buttons.
+
+  The element will be focusable and screen readers will announce it as a link.
+
+  Also see [`up.link.config.clickableSelectors`](/up.link.config#config.clickableSelectors).
+
+  @selector [up-clickable]
+  @experimental
+  ###
   up.macro(fullClickableSelector, makeClickable)
 
   shouldFollowEvent = (event, link) ->
