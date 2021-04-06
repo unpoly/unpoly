@@ -64,282 +64,284 @@ describe 'up.link', ->
         next => @respondWith '<div id="second">second-div</div>'
         next => expect($container.text()).toBe('first-linksecond-div')
 
-      it 'adds history entries and allows the user to use the back and forward buttons', asyncSpec (next) ->
-        up.history.config.enabled = true
+      describe 'history', ->
 
-        waitForBrowser = 300
+        it 'adds history entries and allows the user to use the back and forward buttons', asyncSpec (next) ->
+          up.history.config.enabled = true
 
-        # By default, up.history will replace the <body> tag when
-        # the user presses the back-button. We reconfigure this
-        # so we don't lose the Jasmine runner interface.
-        up.history.config.restoreTargets = ['.container']
+          waitForBrowser = 300
 
-        respondWith = (html, title) =>
-          @respondWith
-            status: 200
-            contentType: 'text/html'
-            responseText: "<div class='container'><div class='target'>#{html}</div></div>"
-            responseHeaders: { 'X-Up-Title': title }
+          # By default, up.history will replace the <body> tag when
+          # the user presses the back-button. We reconfigure this
+          # so we don't lose the Jasmine runner interface.
+          up.history.config.restoreTargets = ['.container']
 
-#          followAndRespond = ($link, html, title) ->
-#            promise = up.follow($link)
-#            respondWith(html, title)
-#            promise
+          respondWith = (html, title) =>
+            @respondWith
+              status: 200
+              contentType: 'text/html'
+              responseText: "<div class='container'><div class='target'>#{html}</div></div>"
+              responseHeaders: { 'X-Up-Title': title }
 
-        up.fragment.config.autoHistory = true
+  #          followAndRespond = ($link, html, title) ->
+  #            promise = up.follow($link)
+  #            respondWith(html, title)
+  #            promise
 
-        $link1 = $fixture('a[href="/one"][up-target=".target"]')
-        $link2 = $fixture('a[href="/two"][up-target=".target"]')
-        $link3 = $fixture('a[href="/three"][up-target=".target"]')
-        $container = $fixture('.container')
-        $target = $fixture('.target').appendTo($container).text('original text')
+          up.fragment.config.autoHistory = true
 
-        up.follow($link1)
+          $link1 = $fixture('a[href="/one"][up-target=".target"]')
+          $link2 = $fixture('a[href="/two"][up-target=".target"]')
+          $link3 = $fixture('a[href="/three"][up-target=".target"]')
+          $container = $fixture('.container')
+          $target = $fixture('.target').appendTo($container).text('original text')
 
-        next =>
-          respondWith('text from one', 'title from one')
+          up.follow($link1)
 
-        next =>
-          expect($('.target')).toHaveText('text from one')
-          expect(location.pathname).toEqual('/one')
-          expect(document.title).toEqual('title from one')
+          next =>
+            respondWith('text from one', 'title from one')
 
-          up.follow($link2)
+          next =>
+            expect($('.target')).toHaveText('text from one')
+            expect(location.pathname).toEqual('/one')
+            expect(document.title).toEqual('title from one')
 
-        next =>
-          respondWith('text from two', 'title from two')
+            up.follow($link2)
 
-        next =>
-          expect($('.target')).toHaveText('text from two')
-          expect(location.pathname).toEqual('/two')
-          expect(document.title).toEqual('title from two')
+          next =>
+            respondWith('text from two', 'title from two')
 
-          up.follow($link3)
+          next =>
+            expect($('.target')).toHaveText('text from two')
+            expect(location.pathname).toEqual('/two')
+            expect(document.title).toEqual('title from two')
 
-        next =>
-          respondWith('text from three', 'title from three')
+            up.follow($link3)
 
-        next =>
-          expect($('.target')).toHaveText('text from three')
-          expect(location.pathname).toEqual('/three')
-          expect(document.title).toEqual('title from three')
+          next =>
+            respondWith('text from three', 'title from three')
 
-          history.back()
+          next =>
+            expect($('.target')).toHaveText('text from three')
+            expect(location.pathname).toEqual('/three')
+            expect(document.title).toEqual('title from three')
 
-        next.after waitForBrowser, =>
-          respondWith('restored text from two', 'restored title from two')
+            history.back()
 
-        next =>
-          expect($('.target')).toHaveText('restored text from two')
-          expect(location.pathname).toEqual('/two')
-          expect(document.title).toEqual('restored title from two')
+          next.after waitForBrowser, =>
+            respondWith('restored text from two', 'restored title from two')
 
-          history.back()
+          next =>
+            expect($('.target')).toHaveText('restored text from two')
+            expect(location.pathname).toEqual('/two')
+            expect(document.title).toEqual('restored title from two')
 
-        next.after waitForBrowser, =>
-          respondWith('restored text from one', 'restored title from one')
+            history.back()
 
-        next =>
-          expect($('.target')).toHaveText('restored text from one')
-          expect(location.pathname).toEqual('/one')
-          expect(document.title).toEqual('restored title from one')
+          next.after waitForBrowser, =>
+            respondWith('restored text from one', 'restored title from one')
 
-          history.forward()
+          next =>
+            expect($('.target')).toHaveText('restored text from one')
+            expect(location.pathname).toEqual('/one')
+            expect(document.title).toEqual('restored title from one')
 
-        next.after waitForBrowser, =>
-          # Since the response is cached, we don't have to respond
-          expect($('.target')).toHaveText('restored text from two')
-          expect(location.pathname).toEqual('/two')
-          expect(document.title).toEqual('restored title from two')
+            history.forward()
 
-      it 'renders history when the user clicks on a link, goes back and then clicks on the same link (bugfix)', asyncSpec (next) ->
-        up.history.config.enabled = true
-        up.history.config.restoreTargets = ['.target']
-        waitForBrowser = 300
+          next.after waitForBrowser, =>
+            # Since the response is cached, we don't have to respond
+            expect($('.target')).toHaveText('restored text from two')
+            expect(location.pathname).toEqual('/two')
+            expect(document.title).toEqual('restored title from two')
 
-        linkHTML = """
-          <a href="/next" up-target=".target" up-history="false">label</a>
-        """
-        target = fixture('.target', text: 'old text')
-        link = fixture('a[href="/next"][up-target=".target"][up-history=true]')
-        up.history.replace('/original')
+        it 'renders history when the user clicks on a link, goes back and then clicks on the same link (bugfix)', asyncSpec (next) ->
+          up.history.config.enabled = true
+          up.history.config.restoreTargets = ['.target']
+          waitForBrowser = 300
 
-        next ->
-          expect(up.history.location).toMatchURL('/original')
-          expect('.target').toHaveText('old text')
-
-          Trigger.clickSequence(link)
-
-        next ->
-          jasmine.respondWithSelector('.target', text: 'new text')
-
-        next ->
-          expect(up.history.location).toMatchURL('/next')
-          expect('.target').toHaveText('new text')
-
-          history.back()
-
-        next.after waitForBrowser, ->
-          jasmine.respondWithSelector('.target', text: 'old text')
-
-        next ->
-          expect(up.history.location).toMatchURL('/original')
-          expect('.target').toHaveText('old text')
-
-          Trigger.clickSequence(link)
-
-        next ->
-          # Response was already cached
-          expect(up.history.location).toMatchURL('/next')
-          expect('.target').toHaveText('new text')
-
-      it 'does not add additional history entries when linking to the current URL', asyncSpec (next) ->
-        up.history.config.enabled = true
-
-        # By default, up.history will replace the <body> tag when
-        # the user presses the back-button. We reconfigure this
-        # so we don't lose the Jasmine runner interface.
-        up.history.config.restoreTargets = ['.container']
-
-        up.fragment.config.autoHistory = true
-
-        up.network.config.cacheExpiry = 0
-
-        waitForBrowser = 150
-
-        respondWith = (text) =>
-          @respondWith """
-            <div class="container">
-              <div class='target'>#{text}</div>
-            </div>
+          linkHTML = """
+            <a href="/next" up-target=".target" up-history="false">label</a>
           """
+          target = fixture('.target', text: 'old text')
+          link = fixture('a[href="/next"][up-target=".target"][up-history=true]')
+          up.history.replace('/original')
 
-        $link1 = $fixture('a[href="/one"][up-target=".target"]')
-        $link2 = $fixture('a[href="/two"][up-target=".target"]')
-        $container = $fixture('.container')
-        $target = $fixture('.target').appendTo($container).text('original text')
+          next ->
+            expect(up.history.location).toMatchURL('/original')
+            expect('.target').toHaveText('old text')
 
-        up.follow($link1)
+            Trigger.clickSequence(link)
 
-        next =>
-          respondWith('text from one')
+          next ->
+            jasmine.respondWithSelector('.target', text: 'new text')
 
-        next =>
-          expect($('.target')).toHaveText('text from one')
-          expect(location.pathname).toEqual('/one')
+          next ->
+            expect(up.history.location).toMatchURL('/next')
+            expect('.target').toHaveText('new text')
 
-          up.follow($link2)
+            history.back()
 
-        next =>
-          respondWith('text from two')
+          next.after waitForBrowser, ->
+            jasmine.respondWithSelector('.target', text: 'old text')
 
-        next =>
-          expect($('.target')).toHaveText('text from two')
-          expect(location.pathname).toEqual('/two')
+          next ->
+            expect(up.history.location).toMatchURL('/original')
+            expect('.target').toHaveText('old text')
 
-          up.follow($link2)
+            Trigger.clickSequence(link)
 
-        next =>
-          respondWith('text from two')
+          next ->
+            # Response was already cached
+            expect(up.history.location).toMatchURL('/next')
+            expect('.target').toHaveText('new text')
 
-        next =>
-          expect($('.target')).toHaveText('text from two')
-          expect(location.pathname).toEqual('/two')
+        it 'does not add additional history entries when linking to the current URL', asyncSpec (next) ->
+          up.history.config.enabled = true
 
-          history.back()
+          # By default, up.history will replace the <body> tag when
+          # the user presses the back-button. We reconfigure this
+          # so we don't lose the Jasmine runner interface.
+          up.history.config.restoreTargets = ['.container']
 
-        next.after waitForBrowser, =>
-          respondWith('restored text from one')
+          up.fragment.config.autoHistory = true
 
-        next =>
-          expect($('.target')).toHaveText('restored text from one')
-          expect(location.pathname).toEqual('/one')
+          up.network.config.cacheExpiry = 0
 
-          history.forward()
+          waitForBrowser = 150
 
-        next.after waitForBrowser, =>
-          respondWith('restored text from two')
+          respondWith = (text) =>
+            @respondWith """
+              <div class="container">
+                <div class='target'>#{text}</div>
+              </div>
+            """
 
-        next =>
-          expect($('.target')).toHaveText('restored text from two')
-          expect(location.pathname).toEqual('/two')
+          $link1 = $fixture('a[href="/one"][up-target=".target"]')
+          $link2 = $fixture('a[href="/two"][up-target=".target"]')
+          $container = $fixture('.container')
+          $target = $fixture('.target').appendTo($container).text('original text')
 
-      it 'does add additional history entries when linking to the current URL, but with a different hash', asyncSpec (next) ->
-        up.history.config.enabled = true
+          up.follow($link1)
 
-        # By default, up.history will replace the <body> tag when
-        # the user presses the back-button. We reconfigure this
-        # so we don't lose the Jasmine runner interface.
-        up.history.config.restoreTargets = ['.container']
+          next =>
+            respondWith('text from one')
 
-        up.fragment.config.autoHistory = true
+          next =>
+            expect($('.target')).toHaveText('text from one')
+            expect(location.pathname).toEqual('/one')
 
-        up.network.config.cacheExpiry = 0
+            up.follow($link2)
 
-        waitForBrowser = 150
+          next =>
+            respondWith('text from two')
 
-        respondWith = (text) =>
-          @respondWith """
-            <div class="container">
-              <div class='target'>#{text}</div>
-            </div>
-          """
+          next =>
+            expect($('.target')).toHaveText('text from two')
+            expect(location.pathname).toEqual('/two')
 
-        $link1 = $fixture('a[href="/one"][up-target=".target"]')
-        $link2 = $fixture('a[href="/two"][up-target=".target"]')
-        $link2WithHash = $fixture('a[href="/two#hash"][up-target=".target"]')
-        $container = $fixture('.container')
-        $target = $fixture('.target').appendTo($container).text('original text')
+            up.follow($link2)
 
-        up.follow($link1)
+          next =>
+            respondWith('text from two')
 
-        next =>
-          respondWith('text from one')
+          next =>
+            expect($('.target')).toHaveText('text from two')
+            expect(location.pathname).toEqual('/two')
 
-        next =>
-          expect($('.target')).toHaveText('text from one')
-          expect(location.pathname).toEqual('/one')
-          expect(location.hash).toEqual('')
+            history.back()
 
-          up.follow($link2)
+          next.after waitForBrowser, =>
+            respondWith('restored text from one')
 
-        next =>
-          respondWith('text from two')
+          next =>
+            expect($('.target')).toHaveText('restored text from one')
+            expect(location.pathname).toEqual('/one')
 
-        next =>
-          expect($('.target')).toHaveText('text from two')
-          expect(location.pathname).toEqual('/two')
-          expect(location.hash).toEqual('')
+            history.forward()
 
-          up.follow($link2WithHash)
+          next.after waitForBrowser, =>
+            respondWith('restored text from two')
 
-        next =>
-          respondWith('text from two with hash')
+          next =>
+            expect($('.target')).toHaveText('restored text from two')
+            expect(location.pathname).toEqual('/two')
 
-        next =>
-          expect($('.target')).toHaveText('text from two with hash')
-          expect(location.pathname).toEqual('/two')
-          expect(location.hash).toEqual('#hash')
+        it 'does add additional history entries when linking to the current URL, but with a different hash', asyncSpec (next) ->
+          up.history.config.enabled = true
 
-          history.back()
+          # By default, up.history will replace the <body> tag when
+          # the user presses the back-button. We reconfigure this
+          # so we don't lose the Jasmine runner interface.
+          up.history.config.restoreTargets = ['.container']
 
-        next.after waitForBrowser, =>
-          respondWith('restored text from two')
+          up.fragment.config.autoHistory = true
 
-        next =>
-          expect($('.target')).toHaveText('restored text from two')
-          expect(location.pathname).toEqual('/two')
-          expect(location.hash).toEqual('')
+          up.network.config.cacheExpiry = 0
 
-          history.forward()
+          waitForBrowser = 150
 
-        next.after waitForBrowser, =>
-          respondWith('restored text from two with hash')
+          respondWith = (text) =>
+            @respondWith """
+              <div class="container">
+                <div class='target'>#{text}</div>
+              </div>
+            """
 
-        next =>
-          expect($('.target')).toHaveText('restored text from two with hash')
-          expect(location.pathname).toEqual('/two')
-          expect(location.hash).toEqual('#hash')
+          $link1 = $fixture('a[href="/one"][up-target=".target"]')
+          $link2 = $fixture('a[href="/two"][up-target=".target"]')
+          $link2WithHash = $fixture('a[href="/two#hash"][up-target=".target"]')
+          $container = $fixture('.container')
+          $target = $fixture('.target').appendTo($container).text('original text')
+
+          up.follow($link1)
+
+          next =>
+            respondWith('text from one')
+
+          next =>
+            expect($('.target')).toHaveText('text from one')
+            expect(location.pathname).toEqual('/one')
+            expect(location.hash).toEqual('')
+
+            up.follow($link2)
+
+          next =>
+            respondWith('text from two')
+
+          next =>
+            expect($('.target')).toHaveText('text from two')
+            expect(location.pathname).toEqual('/two')
+            expect(location.hash).toEqual('')
+
+            up.follow($link2WithHash)
+
+          next =>
+            respondWith('text from two with hash')
+
+          next =>
+            expect($('.target')).toHaveText('text from two with hash')
+            expect(location.pathname).toEqual('/two')
+            expect(location.hash).toEqual('#hash')
+
+            history.back()
+
+          next.after waitForBrowser, =>
+            respondWith('restored text from two')
+
+          next =>
+            expect($('.target')).toHaveText('restored text from two')
+            expect(location.pathname).toEqual('/two')
+            expect(location.hash).toEqual('')
+
+            history.forward()
+
+          next.after waitForBrowser, =>
+            respondWith('restored text from two with hash')
+
+          next =>
+            expect($('.target')).toHaveText('restored text from two with hash')
+            expect(location.pathname).toEqual('/two')
+            expect(location.hash).toEqual('#hash')
 
       describe 'scrolling', ->
 
