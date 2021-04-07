@@ -23,7 +23,7 @@ from a new page fetched from the server.
 @param {string} url
   The URL to fetch from the server.
 @param {Object} [options]
-  See `options` for `up.render()
+  See `options` for `up.render()`.
 @return {Promise}
   A promise that fulfills when the page has been updated.
 @deprecated
@@ -67,7 +67,7 @@ discarded, since it didn't match the selector.
 @param {Object} [options]
   See options for [`up.render()`](/up.render).
 @return {Promise}
-  A promise that will be fulfilled then the selector was updated.
+  A promise that will be fulfilled when the selector was updated.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 ###
@@ -75,9 +75,37 @@ up.extract = (target, document, options) ->
   up.migrate.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
   return up.navigate(u.merge(options, { target, document }))
 
-up.first = (args...) ->
-  up.migrate.deprecated('up.first()', 'up.fragment.get()')
+###**
+Returns the first element matching the given selector, but
+ignores elements that are being [destroyed](/up.destroy) or that are being
+removed by a [transition](/up.morph).
+
+Returns `undefined` if no element matches these conditions.
+
+@function up.fragment.first
+@param {Element|jQuery} [root=document]
+  The root element for the search. Only the root's children will be matched.
+
+  May be omitted to search through all elements in the `document`.
+@param {string} selector
+  The selector to match
+@param {string} [options.layer='current']
+  The the layer in which to find the element.
+
+  @see layer-option
+@param {string|Element|jQuery} [options.origin]
+  An second element or selector that can be referenced as `:origin` in the first selector:
+@return {Element|undefined}
+  The first element that is neither a ghost or being destroyed,
+  or `undefined` if no such element was found.
+@deprecated
+  Use `up.fragment.get()` instead.
+###
+up.fragment.first = (args...) ->
+  up.migrate.deprecated('up.fragment.first()', 'up.fragment.get()')
   up.fragment.get(args...)
+
+up.first = up.fragment.first
 
 up.migrate.handleScrollOptions = (options) ->
   if u.isUndefined(options.scroll)

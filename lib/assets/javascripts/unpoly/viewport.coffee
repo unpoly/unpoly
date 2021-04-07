@@ -328,7 +328,7 @@ up.viewport = do ->
   Returns the [document's scrolling element](/up.viewport.root)
   if no closer viewport exists.
 
-  @function up.viewport.closest
+  @function up.viewport.get
   @param {string|Element|jQuery} target
   @return {Element}
   @experimental

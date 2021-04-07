@@ -811,7 +811,7 @@ up.util = do ->
 #  Creates a new object by recursively merging together the properties from the given objects.
 #
 #  @function up.util.deepMerge
-#  @param {Array<Object>} sources...
+#  @param {Array<Object>} ...sources
 #  @return Object
 #
 #  @internal
@@ -821,7 +821,7 @@ up.util = do ->
 #
 #  ###**
 #  @function up.util.deepAssign
-#  @param {Array<Object>} sources...
+#  @param {Array<Object>} ...sources
 #  @return Object
 #  ###
 #  deepAssign = (target, sources...) ->

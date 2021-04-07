@@ -8,12 +8,12 @@ the given keys.
 
 @function up.util.only
 @param {Object} object
-@param {Array} keys...
+@param {Array} ...keys
 @deprecated
   Use `up.util.pick()` instead.
 ###
 up.util.only = (object, keys...) ->
-  up.migrate.deprecated('up.util.only(object, keys...)', 'up.util.pick(object, keys)')
+  up.migrate.deprecated('up.util.only(object, ...keys)', 'up.util.pick(object, keys)')
   return up.util.pick(object, keys)
 
 ###**
@@ -22,12 +22,12 @@ the given keys.
 
 @function up.util.except
 @param {Object} object
-@param {Array} keys...
+@param {Array} ...keys
 @deprecated
-  Use `up.util.omit()` instead.
+  Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.object(...keys)` (with rest arguments).
 ###
 up.util.except = (object, keys...) ->
-  up.migrate.deprecated('up.util.except(object, keys...)', 'up.util.omit(object, keys)')
+  up.migrate.deprecated('up.util.except(object, ...keys)', 'up.util.omit(object, keys)')
   return up.util.omit(object, keys)
 
 up.util.parseUrl = (args...) ->

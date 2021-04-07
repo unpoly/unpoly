@@ -63,6 +63,13 @@ up.ajax = (args...) ->
   pickResponseText = (response) -> return response.text
   up.request(args...).then(pickResponseText)
 
+###**
+Removes all cache entries.
+
+@function up.proxy.clear
+@deprecated
+  Use `up.cache.clear()` instead.
+###
 up.network.clear = ->
   up.migrate.deprecated('up.proxy.clear()', 'up.cache.clear()')
   return up.cache.clear()

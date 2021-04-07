@@ -19,10 +19,10 @@ if (up.event.nobodyPrevents('disk:erase')) {
 @function up.event.nobodyPrevents
 @param {string} eventType
 @param {Object} eventProps
-@param {string|Array} [eventProps.log]
 @return {boolean}
   whether no listener has prevented the default action
 @deprecated
+  Use `!up.emit(type).defaultPrevented` instead.
 ###
 up.event.nobodyPrevents = (args...) ->
   up.migrate.deprecated('up.event.nobodyPrevents(type)', '!up.emit(type).defaultPrevented')

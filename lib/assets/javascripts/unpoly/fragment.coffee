@@ -1251,7 +1251,7 @@ up.fragment = do ->
   @param {string} url
     The URL to visit.
   @param {Object} [options]
-    See options for `up.render()`
+    See options for `up.render()`.
   @param {up.Layer|string|number} [options.layer='current']
   @stable
   ###
