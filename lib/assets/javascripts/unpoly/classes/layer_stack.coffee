@@ -88,7 +88,7 @@ class up.LayerStack extends Array
   reversed: ->
     u.reverse(this)
 
-  dismissAll: (value = null, options = {}) ->
+  dismissOverlays: (value = null, options = {}) ->
     options.dismissable = false
     for overlay in u.reverse(@overlays)
       overlay.dismiss(value, options)

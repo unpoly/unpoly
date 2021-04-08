@@ -849,14 +849,14 @@ describe 'up.layer', ->
 
     # There are more specs for up.Layer.Overlay#dismiss()
 
-    describe 'up.layer.dismissAll()', ->
+    describe 'up.layer.dismissOverlays()', ->
 
       it 'dismisses all overlays', ->
         makeLayers(3)
 
         expect(up.layer.count).toBe(3)
 
-        up.layer.dismissAll()
+        up.layer.dismissOverlays()
 
         expect(up.layer.count).toBe(1)
         expect(up.layer.isRoot()).toBe(true)
@@ -866,21 +866,21 @@ describe 'up.layer', ->
 
         expect(up.layer.count).toBe(2)
 
-        up.layer.dismissAll()
+        up.layer.dismissOverlays()
 
         expect(up.layer.count).toBe(1)
 
       it 'does nothing when no overlay is open', ->
-        dismissAll = -> up.layer.dismissAll()
-        expect(dismissAll).not.toThrowError()
+        dismissOverlays = -> up.layer.dismissOverlays()
+        expect(dismissOverlays).not.toThrowError()
 
       it 'stops dismissing overlays when any overlay prevents its dismissal', ->
         makeLayers(5)
         # The third layer will prevent its dismissal
         up.layer.get(2).on('up:layer:dismiss', (event) -> event.preventDefault())
 
-        dismissAll = -> up.layer.dismissAll()
-        expect(dismissAll).toAbort()
+        dismissOverlays = -> up.layer.dismissOverlays()
+        expect(dismissOverlays).toAbort()
 
         expect(up.layer.count).toBe(3)
 

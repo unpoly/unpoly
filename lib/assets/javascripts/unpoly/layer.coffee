@@ -816,16 +816,29 @@ up.layer = do ->
   ###
 
   ###**
-  TODO: Docs
+  Returns the frontmost layer in the [layer stack](/up.layer.stack).
 
-  @function up.layer.front
+  The frontmost layer is the layer directly facing the user. If an overlay is
+  stacked on top of the frontmost layer, that overlay becomes the new frontmost layer.
+
+  In most cases you don't want to refer to the frontmost layer,
+  but to the [current layer](/up.layer.current) instead.
+
+  @property up.layer.front
+  @param {up.Layer} layer
   @stable
   ###
 
   ###**
-  TODO: Docs
+  [Dismisses](/up.layer.dismiss) all overlays.
 
-  @function up.layer.dismissAll
+  Afterwards the only remaining layer will be the [root layer](/up.layer.root).
+
+  @function up.layer.dismissOverlays
+  @param {any} value
+    The dismissal value.
+  @param {Object} options
+    See options for `up.layer.dismiss()`.
   @stable
   ###
   u.delegate(api, [
@@ -837,7 +850,7 @@ up.layer = do ->
     'front'
     'sync'
     'count'
-    'dismissAll'
+    'dismissOverlays'
   ], -> stack)
 
   u.delegate(api, [
@@ -849,18 +862,18 @@ up.layer = do ->
     'off' # yes
     'emit' # yes
     'parent' # yes
-    'child' # ?
-    'ancestors' # ?
-    'descendants' # ?
-    'historyVisible' # ?
+    'historyVisible' # yes
     'location' # yes
-    'title' # ?
+    'child' # no
+    'ancestors' # no
+    'descendants' # no
+    'title' # no
+    'origin' # no
     'mode' # yes
     'context' # yes
     'element' # yes
     'contains' # yes
     'size' # yes
-    'origin' # no
     'affix' # yes
     'dismissable' # no
   ], -> stack.current)
