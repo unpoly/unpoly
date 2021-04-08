@@ -455,7 +455,22 @@ up.layer = do ->
     return up.render(options).then (result) -> return result.layer
 
   ###**
+  TODO: Docs
+  TODO: Document that listeners may manipulate options
+  TODO: Document that it's emitted on the document
+
+  @event up:layer:open
+  @param {Object} event.layerOptions
+  @param {Element} event.origin
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
   @event up:layer:opened
+  @param {Element} event.origin
+  @param {up.Layer} event.layer
   @stable
   ###
 

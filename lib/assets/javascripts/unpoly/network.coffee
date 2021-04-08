@@ -46,6 +46,8 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 ###
 up.network = do ->
   ###**
+  TODO: Docs for up.network.config.clearCache
+
   @property up.network.config
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)

@@ -7,12 +7,10 @@ class up.Change.OpenLayer extends up.Change.Addition
   constructor: (options) ->
     super(options)
     @target = options.target
-    @mode = options.mode
     @origin = options.origin
     @baseLayer = options.baseLayer
-    @source = options.source
-    @focus = options.focus
-    @scroll = options.scroll
+    # Don't extract too many @properties from @options, since listeners
+    # to up:layer:open may modify layer options.
 
   preflightProps: ->
     # We assume that the server will respond with our target.
@@ -22,7 +20,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       # We associate this request to our current layer so up:request events
       # may be emitted on something more specific than the document.
       layer: @baseLayer
-      mode: @mode,
+      mode: @options.mode,
       context: @buildLayer().context
       # The target will always exist in the current page, since
       # we're opening a new layer that will match the target.
@@ -46,8 +44,6 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @options.title = @improveHistoryValue(@options.title, responseDoc.getTitle())
 
-    @layer = @buildLayer()
-
     if @emitOpenEvent().defaultPrevented
       # We cannot use @abortWhenLayerClosed() here,
       # because the layer is not even in the stack yet.
@@ -59,6 +55,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @baseLayer.peel()
 
     # Change the stack sync. Don't wait for peeling to finish.
+    @layer = @buildLayer()
     up.layer.stack.push(@layer)
 
     @layer.createElements(@content)
@@ -68,7 +65,7 @@ class up.Change.OpenLayer extends up.Change.Addition
     @handleHistory()
 
     # Remember where the element came from to support up.reload(element).
-    @setSource({ newElement: @content, @source })
+    @setSource({ newElement: @content, source: @options.source })
 
     # Unwrap <noscript> tags
     responseDoc.finalizeElement(@content)
@@ -148,7 +145,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       layer: @layer,
       autoMeans: ['autofocus', 'layer'],
     )
-    fragmentFocus.process(@focus)
+    fragmentFocus.process(@options.focus)
 
   handleScroll: ->
     scrollingOptions = u.merge(@options, {
@@ -157,14 +154,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       autoMeans: ['hash', 'layer']
     })
     scrolling = new up.FragmentScrolling(scrollingOptions)
-    return scrolling.process(@scroll)
-
-  buildEvent: (name) =>
-    return up.event.build(name,
-      layer: @layer
-      origin: @origin
-      log: true
-    )
+    return scrolling.process(@options.scroll)
 
   emitOpenEvent: ->
     # The initial up:layer:open event is emitted on the document, since the layer
@@ -173,15 +163,16 @@ class up.Change.OpenLayer extends up.Change.Addition
     # might confuse this with the event for @layer.parent itself opening.
     #
     # There is no @layer.onOpen() handler to accompany the DOM event.
-    return up.emit(
-      @buildEvent('up:layer:open'),
-      baseLayer: @layer.parent, # sets up.layer.current
+    return up.emit('up:layer:open',
+      origin: @origin,
+      baseLayer: @baseLayer, # sets up.layer.current
+      layerOptions: @options,
       log: "Opening new #{@layer}"
     )
 
   emitOpenedEvent: ->
-    return @layer.emit(
-      @buildEvent('up:layer:opened'),
+    return @layer.emit('up:layer:opened',
+      origin: @origin,
       callback: @layer.callback('onOpened'),
       log: "Opened new #{@layer}"
     )

@@ -170,6 +170,41 @@ describe 'up.layer', ->
 
         it 'should have examples'
 
+      describe 'events', ->
+
+        it 'emits an up:layer:open event on the document before the new overlay opens', (done) ->
+          expect(up.layer.count).toBe(1)
+
+          up.on 'up:layer:open', (event) ->
+            expect(up.layer.count).toBe(1)
+            expect(event.target).toBe(document)
+            expect(up.layer.current).toBe(up.layer.root)
+            done()
+
+          up.layer.open()
+          expect(up.layer.count).toBe(2)
+
+        it 'allows up:layer:open listeners to observe and manipulate layer options', ->
+          up.on 'up:layer:open', (event) ->
+            expect(event.layerOptions.mode).toBe('modal')
+            event.layerOptions.mode = 'drawer'
+
+          up.layer.open()
+          expect(up.layer.count).toBe(2)
+          expect(up.layer.mode).toBe('drawer')
+
+        it 'emits an up:layer:opened event when the layer has opened', (done) ->
+          expect(up.layer.count).toBe(1)
+
+          up.on 'up:layer:opened', (event) ->
+            expect(up.layer.count).toBe(2)
+            expect(event.layer).toBe(up.layer.front)
+            expect(event.target).toBe(up.layer.front.element)
+            expect(up.layer.current).toBe(up.layer.front)
+            done()
+
+          up.layer.open()
+
       describe 'focus', ->
 
         it "focuses the new overlay's element", (done) ->

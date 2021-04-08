@@ -317,6 +317,8 @@ up.link = do ->
 
   The event is emitted on the `<a>` element that is being followed.
 
+  TODO: Document that listeners may manipulate options
+
   @event up:link:follow
   @param {Element} event.target
     The link element that will be followed.
