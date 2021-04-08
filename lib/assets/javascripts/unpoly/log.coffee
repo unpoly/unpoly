@@ -37,12 +37,15 @@ up.log = do ->
     prints to the developer console.
   @param {string} [options.prefix='[UP] ']
     A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
+  @param {boolean} [options.banner=true]
+    Whether to show the unpoly banner in the console.
   @stable
   ###
   config = new up.Config
     prefix: '[UP] '
     enabled: sessionStore.get('enabled')
     collapse: false
+    banner: true
 
   reset = ->
     config.reset()
@@ -200,7 +203,9 @@ up.log = do ->
       banner += "Call `up.log.enable()` to enable logging for this session."
     console.log(banner)
 
-  up.on 'up:framework:booted', printBanner
+  if config.banner
+    up.on 'up:framework:booted', printBanner
+  
   up.on 'up:framework:reset', reset
 
   setEnabled = (value) ->
