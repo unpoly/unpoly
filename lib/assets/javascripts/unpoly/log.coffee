@@ -28,10 +28,13 @@ up.log = do ->
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @internal
+  @param {boolean} [options.banner=true]
+    Whether to show the unpoly banner in the console.
+  @stable
   ###
   config = new up.Config ->
     enabled: sessionStore.get('enabled')
+    banner: true
 
   reset = ->
     config.reset()
@@ -86,6 +89,8 @@ up.log = do ->
       console[stream](message, args...)
 
   printBanner = ->
+    return unless config.banner
+
     # The ASCII art looks broken in code since we need to escape backslashes
     logo = " __ _____  ___  ___  / /_ __\n" +
            "/ // / _ \\/ _ \\/ _ \\/ / // /  #{up.version}\n" +
@@ -111,6 +116,7 @@ up.log = do ->
 
 
   up.on 'up:framework:boot', printBanner
+
   up.on 'up:framework:reset', reset
 
   setEnabled = (value) ->
