@@ -398,14 +398,16 @@ up.form = do ->
     options.headers[up.protocol.headerize('validate')] = field.getAttribute('name') || ':unknown'
 
     # The guardEvent will also be assigned a { renderOptions } attribute in up.render()
-    options.guardEvent = up.event.build('up:form:validate', log: 'Validating form')
+    options.guardEvent = up.event.build('up:form:validate', { field, log: 'Validating form' })
 
     return submit(field, options)
 
   ###**
-  This event is emitted before a form or field is being [validated](/input-up-validate).
+  This event is emitted before a field is being [validated](/input-up-validate).
 
   @event up:form:validate
+  @param {Element} event.field
+    The form field that has been changed and caused the validated request.
   @param {Object} event.renderOptions
     An object with [render options](/up.render) for the fragment update
     that will show the validation results.

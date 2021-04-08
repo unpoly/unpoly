@@ -732,6 +732,7 @@ describe 'up.form', ->
         next ->
           expect(submitListener).not.toHaveBeenCalled()
           expect(validateListener).toHaveBeenCalled()
+          expect(validateListener.calls.argsFor(0)[0]).toBeEvent('up:form:validate', field: input)
 
       it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
         form = fixture('form[action=/path] input[name=foo]')
