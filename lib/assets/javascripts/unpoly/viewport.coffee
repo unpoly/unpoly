@@ -341,11 +341,12 @@ up.viewport = do ->
     e.closest(element, allSelector())
 
   ###**
-  Returns a jQuery collection of all the viewports contained within the
+  Returns a list of all the viewports contained within the
   given selector or element.
 
   @function up.viewport.subtree
   @param {string|Element|jQuery} target
+  @param {Object} options
   @return List<Element>
   @internal
   ###
@@ -353,6 +354,19 @@ up.viewport = do ->
     element = f.get(element, options)
     e.subtree(element, allSelector())
 
+  ###**
+  Returns a list of all viewports that are either contained within
+  the given element or that are ancestors of the given element.
+
+  This is relevant when updating a fragment with `{ scroll: 'restore' | 'reset' }`.
+  In tht case we restore / reset the scroll tops of all viewports around the fragment.
+
+  @function up.viewport.around
+  @param {string|Element|jQuery} element
+  @param {Object} options
+  @return List<Element>
+  @internal
+  ###
   getAround = (element, options = {}) ->
     element = f.get(element, options)
     e.around(element, allSelector())
@@ -574,8 +588,8 @@ up.viewport = do ->
     if args[0]
       viewports = [closest(args[0], options)]
     else if options.around
-      # This is relevant for up.history. When we go back for replace <body>
-      # and then restore the scroll tops of all viewports in <body>.
+      # This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
+      # In tht case we restore / reset the scroll tops of all viewports around the fragment.
       viewports = getAround(options.around, options)
     else
       viewports = getAll(options)
