@@ -29,7 +29,7 @@ up.log = do ->
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [options.banner=true]
-    Whether to show the unpoly banner in the console.
+    Print the Unpoly banner to the developer console.
   @stable
   ###
   config = new up.Config ->
