@@ -38,7 +38,7 @@ up.log = do ->
   @param {string} [options.prefix='[UP] ']
     A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
   @param {boolean} [options.banner=true]
-    Whether to show the unpoly banner in the console.
+    Print the Unpoly banner to the developer console.
   @stable
   ###
   config = new up.Config
@@ -250,4 +250,3 @@ up.log = do ->
 
 up.puts = up.log.puts
 up.warn = up.log.warn
-
