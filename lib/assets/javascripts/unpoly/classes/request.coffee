@@ -420,7 +420,7 @@ class up.Request extends up.Record
 
     return new up.Response(responseAttrs)
 
-  isCachable: ->
+  isCacheable: ->
     @isSafe() && !@params.hasBinaryValues()
 
   cacheKey: ->

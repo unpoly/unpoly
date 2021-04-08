@@ -28,6 +28,18 @@ Release process
 Remaining feature work
 ======================
 
+- up.network.config.cacheable (cacheable?)
+  - Should be honored by up.Request.isCacheable (if we need this method)
+  - Should be honored by up.network.isPreloadDisabled() (here we don't have a request object yet!)
+    - Do we build a request just to check it here?
+  - Should be honored by the logic that writes to the cache
+  - Where should the default check (isSafe(), !hasBinaryValues()) live?
+    - I feel that the default could be  config.cacheable = (request) -> request.isSafe()
+    - We *could* add hasBinaryValues() to that
+    - Or we just leave that be since safe requests never have binaryValues, and even unsafe requests would just omit that entry from the request
+- Replace up.config.noInstantSelectors (and friends) with up.config.noInstant: Function
+- Should up.network.config.clearCache just take a Request argument like requestMetaKeys ?
+  => No, it actually takes { request, response }
 
 
 Tests
@@ -259,8 +271,8 @@ Later?
   - Automatically sets X-Up-Target: :none
   - Resolve the promise
 - Die { cache }-Option aufteilen
-  - { readCache: 'auto' }    auto oder true: wenn cachable
-  - { writeCache: 'auto' }   auto oder true: wenn cachable
+  - { readCache: 'auto' }    auto oder true: wenn cacheable
+  - { writeCache: 'auto' }   auto oder true: wenn cacheable
   - { clearCache: 'auto' }   auto: clearCacheScope wird immer angewendet, außer Server schickt X-Up-Clear-Cache
   - { clearCache } ist immer auf auto
   - { cache: true } setzt { readCache: true, writeCache: true }
@@ -269,7 +281,7 @@ Later?
     - { writeCache: true } speichert keine unsafen requests
     - { writeCache: true } speichert keine requests mit target: ':none'
     - { writeCache: true } speichert keine failed requests
-    - evtl. auch konfigurierbar machen mit config.isCachable: (request) -> ...
+    - evtl. auch konfigurierbar machen mit config.isCacheable: (request) -> ...
   - wir brauchen dann [up-read-cache], [up-write-cache], [up-clear-cache]
   - { clearCache } müsste per default an sein, auch ohne { navigate }
   - If we make a request without caching, should we remove a matching cache entry?

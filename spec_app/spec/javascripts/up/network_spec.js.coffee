@@ -145,7 +145,7 @@ describe 'up.network', ->
 
       describe 'setting meta attributes', ->
 
-        it 'allows to quickly construct a cachable up.Request by passing { layer, failLayer } options', ->
+        it 'allows to quickly construct a cacheable up.Request by passing { layer, failLayer } options', ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
             { mode: 'drawer', context: { drawerKey: 'drawerValue' }}
@@ -157,7 +157,7 @@ describe 'up.network', ->
           expect(request.context).toEqual({ rootKey: 'rootValue' })
           expect(request.failContext).toEqual({ drawerKey: 'drawerValue' })
 
-        it 'allows to quickly construct a cachable up.Request by passing an { origin } option', ->
+        it 'allows to quickly construct a cacheable up.Request by passing an { origin } option', ->
           makeLayers [
             { mode: 'root', context: { rootKey: 'rootValue' }}
             { mode: 'drawer', context: { drawerKey: 'drawerValue' }}

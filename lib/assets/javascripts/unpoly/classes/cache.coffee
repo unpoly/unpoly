@@ -19,10 +19,10 @@ class up.Cache
   @param {Function(entry): string} [config.key]
     A function that takes an argument and returns a string key
     for storage. If omitted, `toString()` is called on the argument.
-  @param {Function(entry): boolean} [config.cachable]
+  @param {Function(entry): boolean} [config.cacheable]
     A function that takes a potential cache entry and returns whether
     this entry  can be stored in the hash. If omitted, all entries are considered
-    cachable.
+    cacheable.
   ###
   constructor: (@config = {}) ->
     @store = @config.store || new up.store.Memory()
@@ -45,9 +45,9 @@ class up.Cache
   isEnabled: ->
     @maxSize() isnt 0 && @expiryMillis() isnt 0
 
-  isCachable: (key) ->
-    if @config.cachable
-      @config.cachable(key)
+  isCacheable: (key) ->
+    if @config.cacheable
+      @config.cacheable(key)
     else
       true
 
@@ -94,7 +94,7 @@ class up.Cache
     (new Date()).valueOf()
 
   set: (key, value) =>
-    if @isEnabled() && @isCachable(key)
+    if @isEnabled() && @isCacheable(key)
       @makeRoomForAnotherEntry()
       storeKey = @normalizeStoreKey(key)
       entry =
@@ -103,7 +103,7 @@ class up.Cache
       @store.set(storeKey, entry)
 
   remove: (key) =>
-    if @isCachable(key)
+    if @isCacheable(key)
       storeKey = @normalizeStoreKey(key)
       @store.remove(storeKey)
 
@@ -117,7 +117,7 @@ class up.Cache
 
   get: (key, options = {}) =>
     storeKey = @normalizeStoreKey(key)
-    if @isCachable(key) && (entry = @store.get(storeKey))
+    if @isCacheable(key) && (entry = @store.get(storeKey))
       if @isFresh(entry)
         @log("Cache hit for '%s'", key) unless options.silent
         entry.value

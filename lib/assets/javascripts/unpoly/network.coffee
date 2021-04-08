@@ -331,7 +331,7 @@ up.network = do ->
 
     With `{ cache: false }` (the default) Unpoly will always make a network request.
 
-    Only cache GET requests are cachable.
+    Only cache GET requests are cacheable.
 
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
