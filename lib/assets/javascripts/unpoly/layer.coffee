@@ -56,7 +56,7 @@ up.layer = do ->
   up.layer.config.modal.openAnimation = 'move-from-top'
   ```
 
-  To configure an additional [main target](/up.fragment.config#config.mainTargets)
+  To configure an additional [main target](/main)
   for overlay of any mode:
 
   ```js
@@ -67,25 +67,25 @@ up.layer = do ->
 
   @property up.layer.config
 
-  @param {string} up.layer.config.mode='modal'
+  @param {string} config.mode='modal'
     The default mode used when opening a new overlay without a given mode.
 
-  @param {object} up.layer.config.any
+  @param {object} config.any
     Attributes for all kinds of layers (root layer and any kind of overlay).
 
-  @param {Array<string>} up.layer.config.any.mainTargets
+  @param {Array<string>} config.any.mainTargets
     An array of CSS selectors matching default render targets.
 
     This is an alias for `up.fragment.config.mainTargets`.
 
-  @param {object} up.layer.config.root
+  @param {object} config.root
     Attributes for the [root layer](/layer-terminology).
 
     Inherits from `up.layer.config.any`.
 
-  @param {object} up.layer.config.root.mainTargets
+  @param {object} config.root.mainTargets
 
-  @param {object} up.layer.config.overlay
+  @param {object} config.overlay
     Defaults for all [overlays](/layer-terminology).
 
     In addition to the options documented here,
@@ -93,31 +93,31 @@ up.layer = do ->
 
     Inherits from `up.layer.config.any`.
 
-  @param {string|Function} up.layer.config.overlay.openAnimation
+  @param {string|Function} config.overlay.openAnimation
     The opening animation.
 
-  @param {number} up.layer.config.overlay.openDuration
+  @param {number} config.overlay.openDuration
     The duration of the opening animation.
 
-  @param {string} up.layer.config.overlay.openEasing
+  @param {string} config.overlay.openEasing
     The easing function for the opening animation.
 
-  @param {string|Function} up.layer.config.overlay.closeAnimation
+  @param {string|Function} config.overlay.closeAnimation
     The closing animation.
 
-  @param {number} up.layer.config.overlay.closeDuration
+  @param {number} config.overlay.closeDuration
     The duration of the closing animation.
 
-  @param {string} up.layer.config.overlay.closeEasing
+  @param {string} config.overlay.closeEasing
     The easing function for the opening animation.
 
-  @param {string} up.layer.config.overlay.dismissLabel
+  @param {string} config.overlay.dismissLabel
     The symbol for the dismiss icon in the top-right corner.
 
-  @param {string} up.layer.config.overlay.dismissAriaLabel
+  @param {string} config.overlay.dismissAriaLabel
     The accessibility label for the dismiss icon in the top-right corner.
 
-  @param {string|boolean} up.layer.config.overlay.historyVisible='auto'
+  @param {string|boolean} config.overlay.historyVisible='auto'
     Whether the layer's location or title will be visible in the browser's
     address bar and window title.
 
@@ -127,22 +127,22 @@ up.layer = do ->
     If set to `true`, the overlay will always render history.
     If set to `false`, the overlay will never render history.
 
-  @param {object} up.layer.config.modal
+  @param {object} config.modal
     Defaults for [modal overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
-  @param {object} up.layer.config.cover
+  @param {object} config.cover
     Defaults for [cover overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
-  @param {object} up.layer.config.drawer
+  @param {object} config.drawer
     Defaults for [drawer overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
-  @param {object} up.layer.config.popup
+  @param {object} config.popup
     Defaults for [popup overlays](/layer-terminology).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
@@ -350,7 +350,7 @@ up.layer = do ->
     If set to `true` the overlay location and title will be shown in browser UI.
 
     If set to `'auto'` history will be visible if the initial overlay
-    content matches a [main target](/up.fragment.config#config.mainTargets).
+    content matches a [main target](/main).
 
   @param {string|Function} [options.animation]
     The opening animation.
@@ -555,7 +555,7 @@ up.layer = do ->
     If set to `true` the overlay location and title will be shown in browser UI.
 
     If set to `'auto'` history will be visible if the initial overlay
-    content matches a [main target](/up.fragment.config#config.mainTargets).
+    content matches a [main target](/main).
 
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.

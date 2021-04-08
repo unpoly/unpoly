@@ -24,7 +24,7 @@ up.fragment = do ->
 
   @property up.fragment.config
 
-  @param {Array<string>} config.mainTargets=['[up-main]', 'main', ':layer']
+  @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
     An array of CSS selectors matching default render targets.
 
     When no other render target is given, Unpoly will try to find and replace a main target.
@@ -33,37 +33,31 @@ up.fragment = do ->
     [reset scroll positions](/scroll-option) and
     [update the browser history](/up.render#options.history).
 
-    The default main targets are the HTML5 [`<main>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main),
-    any element with an `[up-main]` attribute and the current layer's
-    [topmost swappable element](/main). For the [root layer](/up.layer.root)
-    the topmos swappable element is the `<body>`. For an overlay
-    it is the target with which the overlay was opened with.
-
     This property is aliased as [`up.layer.config.any.mainTargets`](up.layer.config#config.any.mainTargets).
 
-  @param {Array<string|RegExp>} config.badTargetClasses
+  @param {Array<string|RegExp>} [config.badTargetClasses]
     An array of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
 
     The class names may also be passed as a regular expression.
 
-  @param {Object} config.navigateOptions
+  @param {Object} [config.navigateOptions]
     An object of default options to apply when [navigating](/navigation).
 
-  @param {boolean} config.matchAroundOrigin
+  @param {boolean} [config.matchAroundOrigin]
     Whether to match an existing fragment around the triggered link.
 
     If set to `false` Unpoly will replace the first fragment
     matching the given target selector in the link's [layer](/up.layer).
 
-  @param {boolean|Function(Element)} config.autoHistory
+  @param {boolean|Function(Element)} [config.autoHistory]
     Whether update history with `{ history: 'auto' }`.
 
     By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
 
     You may also configure a function that accepts the new fragment and return a boolean value.
 
-  @param {boolean|string|Function(Element)} config.autoScroll
+  @param {boolean|string|Function(Element)} [config.autoScroll]
     How to scroll after updating a fragment with `{ scroll: 'auto' }`.
 
     See [scroll option](/scroll-option) for a list of allowed values.
@@ -71,9 +65,9 @@ up.fragment = do ->
     The default configuration tries, in this order:
 
     - If the URL has a `#hash`, scroll to the hash.
-    - If updating a [main target](/up.fragment.config#config.mainTargets), reset scroll positions.
+    - If updating a [main target](/main), reset scroll positions.
 
-  @param {boolean|string|Function(Element)} config.autoFocus
+  @param {boolean|string|Function(Element)} [config.autoFocus]
     How to focus when updating a fragment with `{ focus: 'auto' }`.
 
     See [focus option](/focus-option) for a list of allowed values.
@@ -83,14 +77,14 @@ up.fragment = do ->
     - Focus a `#hash` in the URL.
     - Focus an `[autofocus]` element in the new fragment.
     - If focus was lost with the old fragment, focus the new fragment.
-    - If updating a [main target](/up.fragment.config#config.mainTargets), focus the new fragment.
+    - If updating a [main target](/main), focus the new fragment.
 
-  @param {boolean} config.runScripts=false
+  @param {boolean} [config.runScripts=false]
     Whether to execute `<script>` tags in updated fragments.
 
     Scripts will load asynchronously, with no guarantee of execution order.
 
-    If you set this to `true`, mind that a default [main target](/up.fragment.config#config.mainTargets)
+    If you set this to `true`, mind that a default [main target](/main)
     is the `<body>` element. If you are including your script at the end of your `<body>`
     for performance reasons, swapping the `<body>` will re-execute these scripts.
     Consider configuring a different main target that does not include scripts.
@@ -207,7 +201,7 @@ up.fragment = do ->
 
   The current and new elements must both match the same CSS selector.
   The selector is either given as `{ target }` option,
-  or a [main target](/up.fragment.config#config.mainTargets) is used as default.
+  or a [main target](/main) is used as default.
 
   See the [fragment placement](/fragment-placement) selector for many examples for how you can target content.
 
@@ -271,7 +265,7 @@ up.fragment = do ->
   @param {string|Element|jQuery} [target]
     The CSS selector to update.
 
-    If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
+    If omitted a [main target](/main) will be rendered.
 
     You can also pass a DOM element or jQuery element here, in which case a selector
     will be [inferred from the element attributes](/up.fragment.toTarget). The given element
@@ -283,14 +277,14 @@ up.fragment = do ->
   @param {string|Element|jQuery} [options.target]
     The CSS selector to update.
 
-    If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
+    If omitted a [main target](/main) will be rendered.
 
   @param {string|boolean} [options.fallback=false]
     Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
 
     If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
 
-    If set to `true` Unpoly will attempt to replace a [main target](/up.fragment.config#config.mainTargets) instead.
+    If set to `true` Unpoly will attempt to replace a [main target](/main) instead.
 
     If set to `false` Unpoly will immediately reject the render promise.
 
@@ -304,13 +298,15 @@ up.fragment = do ->
     [`{ document }`](#options.document), [`{ fragment }`](#options.fragment) or
     [`{ content }`](#options.content) option.
 
-  @param {string} [options.method='GET']
+  @param {string} [options.method='get']
     The HTTP method to use for the request.
 
-    Common values are `'GET'`, `'POST'`, '`PUT`', '`PATCH`' and `'DELETE`'.  `The value is case insensitive.
+    Common values are `'get'`, `'post'`, `'put'`, `'patch'` and `'delete`'.
+    The value is case insensitive.
 
   @param {Object|FormData|string|Array} [options.params]
-    Additional [parameters](/up.Params) that should be sent as the request's [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+    Additional [parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
     When making a `GET` request to a URL with a query string, the given `{ params }` will be added
     to the query parameters.
@@ -323,7 +319,7 @@ up.fragment = do ->
     See `up.protocol` and `up.network.config.metaKeys` for details.
 
   @param {string|Element} [options.fragment]
-    A string of HTML comprising only the new fragment.
+    A string of HTML comprising *only* the new fragment.
 
     The `{ target }` selector will be derived from the root element in the given
     HTML:
@@ -334,7 +330,7 @@ up.fragment = do ->
     ```
 
     If your HTML string contains other fragments that will not be rendered, use
-    the [`{ document }`](#options.document) option instead of `{ fragment }`.
+    the [`{ document }`](#options.document) option instead.
 
     If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
     consider the [`{ content }`](#options.content) option.
@@ -347,7 +343,7 @@ up.fragment = do ->
     Other elements will be discarded.
 
     If your HTML string comprises only the new fragment, consider the [`{ fragment }`](#options.fragment)
-    option instead of `{ document }`. With `{ fragment }` you don't need to pass a `{ target }`, since
+    option instead. With `{ fragment }` you don't need to pass a `{ target }`, since
     Unpoly can derive it from the root element in the given HTML.
 
     If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
@@ -358,9 +354,9 @@ up.fragment = do ->
 
     Any HTTP status code other than 2xx is considered an error code.
 
-    For details see [handling server errors](/server-errors).
+    See [handling server errors](/server-errors) for details.
 
-  @param {boolean|string} [options.history=false]
+  @param {boolean|string} [options.history]
     Whether the browser URL and window title will be updated.
 
     If set to `true`, the history will always be updated, using the title and URL from
@@ -368,7 +364,7 @@ up.fragment = do ->
 
     If set to `'auto'` history will be updated if the `{ target }` matches
     a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/up.fragment.config#config.mainTargets).
+    [main targets](/main).
 
     If set to `false`, the history will remain unchanged.
 
@@ -384,9 +380,6 @@ up.fragment = do ->
     Note that the browser's window title will only be updated it you also
     pass a [`{ history }`](#options.history) option.
 
-    [Overlays](/up.layer) will only change the window title if the overlay
-    has [visible history](/up.layer.historyVisible).
-
   @param {string} [options.location]
     An explicit URL to use after rendering.
 
@@ -396,29 +389,28 @@ up.fragment = do ->
     Note that the browser's URL will only be updated it you also
     pass a [`{ history }`](#options.history) option.
 
-    [Overlays](/up.layer) will only change the browser's URL if the overlay
-    has [visible history](/up.layer.historyVisible).
-
   @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 
-    If you are prepending or appending content, use the `{ animate }` option instead.
+    If you are [prepending or appending content](/fragment-placement#appending-or-prepending-content),
+    use the `{ animation }` option instead.
 
   @param {string} [options.animation]
-    The name of an [animation](/up.motion) to reveal a new fragment when prepending or appending content.
+    The name of an [animation](/up.motion) to reveal a new fragment when
+    [prepending or appending content](/fragment-placement#appending-or-prepending-content).
 
     If you are replacing content (the default), use the `{ transition }` option instead.
 
   @param {number} [options.duration]
     The duration of the transition or animation (in millisconds).
 
-  @param {string} [options.easing='ease']
+  @param {string} [options.easing]
     The timing function that accelerates the transition or animation.
 
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
-    for a list of pre-defined timing functions.
+    for a list of available timing functions.
 
-  @param {boolean} [options.cache=false]
+  @param {boolean} [options.cache]
     Whether to read from and write to the [cache](/up.cache).
 
     With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
@@ -460,10 +452,10 @@ up.fragment = do ->
     An object that will be merged into the [context](/up.context) of the current layer once the fragment is rendered.
 
   @param {boolean} [options.keep=true]
-    Whether this replacement will preserve [`[up-keep]`](/up-keep) elements.
+    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
 
   @param {boolean} [options.hungry=true]
-    Whether this replacement will update [`[up-hungry]`](/up-hungry) elements.
+    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
 
   @param {boolean|string|Element|Function} [options.scroll]
     How to scroll after the new fragment was rendered.
@@ -498,7 +490,6 @@ up.fragment = do ->
     but before the HTML is rendered.
 
     The callback argument is a preventable `up:fragment:loaded` event.
-    See its documentation for details.
 
   @param {Function()} [options.onFinished]
     A callback that will be run when all animations have concluded and
@@ -571,7 +562,7 @@ up.fragment = do ->
   @param {string|Element|jQuery} [target]
     The CSS selector to update.
 
-    If omitted a [main target](/up.fragment.config#config.mainTargets) will be rendered.
+    If omitted a [main target](/main) will be rendered.
 
     You can also pass a DOM element or jQuery element here, in which case a selector
     will be [inferred from the element attributes](/up.fragment.target). The given element
@@ -905,7 +896,7 @@ up.fragment = do ->
 
   - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
   - The [`up.element.get()`](/up.element.get) function simply returns the first element matching a selector
-    without further filtering.
+    without filtering by layer or destruction state.
 
   @function up.fragment.get
   @param {Element|jQuery} [root=document]
@@ -1428,8 +1419,16 @@ up.fragment = do ->
     result
 
   ###**
-  Your target selectors may use this pseudo-selector
-  to replace the layer's [main element](/up.fragment.config#config.mainTargets).
+  A pseudo-selector that matches the layer's main target.
+
+  Main targets are default render targets.
+  When no other render target is given, Unpoly will try to find and replace a main target.
+
+  In most app layouts the main target should match the primary content area.
+  The default main targets are the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element,
+  any element with an `[up-main]` attribute and the current layer's
+  [topmost swappable element](/main). You may configure main target selectors
+  in `up.fragment.config.mainTargets`.
 
   \#\#\# Example
 
@@ -1483,7 +1482,7 @@ up.fragment = do ->
   For the [root layer](/up.layer.root) it is the `<body>` element. For an overlay
   it is the target with which the overlay was opened with.
 
-  In canonical usage the topmost swappable element is often a [main element](/up.fragment.config#config.mainTargets).
+  In canonical usage the topmost swappable element is often a [main element](/main).
 
   \#\#\# Example
 

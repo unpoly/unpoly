@@ -172,7 +172,7 @@ up.link = do ->
   Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the
   [current layer](/up.layer.current) with HTML from the response.
 
-  By default the layer's [main element](/up.fragment.config#config.mainTargets)
+  By default the layer's [main element](/main)
   will be replaced. Attributes like `a[up-target]`
   or `a[up-layer]` will be honored.
 
@@ -661,43 +661,160 @@ up.link = do ->
 
   @selector a[up-follow]
 
+  @param [href]
+    The URL to fetch from the server.
+
+    Instead of making a server request, you may also pass an existing HTML string as
+    `[up-document]` or `[up-content]` attribute.
+
   @param [up-target]
+    The CSS selector to update.
+
+    If omitted a [main target](/main) will be rendered.
 
   @param [up-fallback]
+    Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
 
-  @param [up-navigate=true]
+    If set to a CSS selector, Unpoly will attempt to replace that selector instead.
 
-  @param [up-method]
+    If set to `true` Unpoly will attempt to replace a [main target](/main) instead.
 
-    data-method works as well
+    If set to `false` Unpoly will immediately reject the render promise.
+
+  @param [up-navigate='true']
+    Whether this fragment update is considered [navigation](/navigation).
+
+  @param [up-method='get']
+    The HTTP method to use for the request.
+
+    Common values are `get`, `post`, `put`, `patch` and `delete`.  `The value is case insensitive.
+
+    The HTTP method may also be passed as an `[data-method]` attribute.
 
   @param [up-params]
+    A JSON object with additional [parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
 
   @param [up-headers]
+    A JSON object with additional request headers.
+
+    Note that Unpoly will by default send a number of custom request headers.
+    E.g. the `X-Up-Target` header includes the targeted CSS selector.
+    See `up.protocol` and `up.network.config.metaKeys` for details.
 
   @param [up-fragment]
+    A string of HTML comprising *only* the new fragment. No server request will be sent.
+
+    The `[up-target]` selector will be derived from the root element in the given
+    HTML:
+
+    ```html
+    <!-- This will update .foo -->
+    <a up-fragment='&lt;div class=".foo"&gt;inner&lt;/div&gt;'>Click me</a>
+    ```
+
+    If your HTML string contains other fragments that will not be rendered, use
+    the `[up-document]` attribute instead.
+
+    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
+    consider the `[up-content]` attribute instead.
 
   @param [up-document]
+    A string of HTML containing the new fragment.
 
-  @param [up-fail]
+    The string may contain other HTML, but only the element matching the
+    `[up-target]` selector will be extracted and placed into the page.
+    Other elements will be discarded.
+
+    If your HTML string comprises only the new fragment, consider the `[up-fragment]` attribute
+    instead. With `[up-fragment]` you don't need to pass a `[up-target]`, since
+    Unpoly can derive it from the root element in the given HTML.
+
+    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
+    consider the `[up-content]` attribute.
+
+  @param [up-fail='auto']
+    How to render a server response with an error code.
+
+    Any HTTP status code other than 2xx is considered an error code.
+
+    See [handling server errors](/server-errors) for details.
 
   @param [up-history]
+    Whether the browser URL and window title will be updated.
+
+    If set to `true`, the history will always be updated, using the title and URL from
+    the server response, or from given `[up-title]` and `[up-location]` attributes.
+
+    If set to `auto` history will be updated if the `[up-target]` matches
+    a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
+    [main targets](/main).
+
+    If set to `false`, the history will remain unchanged.
+
+    [Overlays](/up.layer) will only change the browser URL and window title if the overlay
+    has [visible history](/up.layer.historyVisible), even with `{ history: true }`.
 
   @param [up-title]
+    An explicit document title to use after rendering.
+
+    By default the title is extracted from the response's `<title>` tag.
+    You may also set `[up-title=false]` to explicitly prevent the title from being updated.
+
+    Note that the browser's window title will only be updated it you also
+    set an `[up-history]` attribute.
 
   @param [up-location]
+    An explicit URL to use after rendering.
+
+    By default Unpoly will use the link's `[href]` or the final URL after the server redirected.
+    You may also set `[up-location=false]` to explicitly prevent the URL from being updated.
+
+    Note that the browser's URL will only be updated it you also
+    set an `[up-history]` attribute.
 
   @param [up-transition]
+    The name of an [transition](/up.motion) to morph between the old and few fragment.
+
+    If you are [prepending or appending content](/fragment-placement#appending-or-prepending-content),
+    use the `[up-animation]` attribute instead.
 
   @param [up-animation]
+    The name of an [animation](/up.motion) to reveal a new fragment when
+    [prepending or appending content](/fragment-placement#appending-or-prepending-content).
+
+    If you are replacing content (the default), use the `[up-transition]` attribute instead.
 
   @param [up-duration]
+    The duration of the transition or animation (in millisconds).
+
+  @param [up-easing]
+    The timing function that accelerates the transition or animation.
+
+    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    for a list of available timing functions.
 
   @param [up-cache]
+    Whether to read from and write to the [cache](/up.cache).
+
+    With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
+    to the network. If no cached response exists, Unpoly will make a request and cache
+    the server response.
+
+    Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param [up-clear-cache]
+    Whether existing [cache](/up.cache) entries will be cleared with this request.
 
-  @param [up-layer]
+    By default a non-GET request will clear the entire cache.
+    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
+
+    Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
+
+  @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.
 
     See [layer option](/layer-option) for a list of allowed values.
@@ -706,24 +823,55 @@ up.link = do ->
     In this case attributes for `a[up-layer=new]` may also be used.
 
   @param [up-peel]
+    Whether to close overlays obstructing the updated layer when the fragment is updated.
 
-  @param [up-peel]
+    This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
 
   @param [up-context]
+    A JSON object that will be merged into the [context](/up.context)
+    of the current layer once the fragment is rendered.
 
-  @param [up-keep]
+  @param [up-keep='true']
+    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
 
-  @param [up-hungry]
+  @param [up-hungry='true']
+    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
 
   @param [up-scroll]
+    How to scroll after the new fragment was rendered.
+
+    See [scroll option](/scroll-option) for a list of allowed values.
+
+  @param [up-save-scroll]
+    Whether to save scroll positions before updating the fragment.
+
+    Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scroll-option#restoring-scroll-options).
 
   @param [up-focus]
+    What to focus after the new fragment was rendered.
+
+    See [focus option](/focus-option) for a list of allowed values.
 
   @param [up-confirm]
+    A message the user needs to confirm before fragments are updated.
+
+    The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
+
+    If the user does not confirm the render promise will reject and no fragments will be updated.
+
+  @param [up-feedback]
+    Whether to give the link an `.up-active` class
+    while loading and rendering content.
 
   @param [up-on-loaded]
+    A JavaScript snippet that is called when when the server responds with new HTML,
+    but before the HTML is rendered.
+
+    The callback argument is a preventable `up:fragment:loaded` event.
 
   @param [up-on-finished]
+    A JavaScript snippet that is called when all animations have concluded and
+    elements were removed from the DOM tree.
 
   @stable
   ###

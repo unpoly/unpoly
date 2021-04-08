@@ -48,7 +48,7 @@ Pass `'hash'` to focus the element matching the `#hash` in the URL.
 
 \#\#\# Revealing the main element
 
-Pass `'main'` to reveal the updated layer's [main element](/up.fragment.config#config.mainTargets).
+Pass `'main'` to reveal the updated layer's [main element](/main).
 
 \#\#\# Don't focus
 
@@ -56,7 +56,7 @@ Pass `false` to keep all focus positions.
 
 \#\#\# Conditional focusing
 
-To only focus when a [main target](/up.fragment.config#config.mainTargets) is updated,
+To only focus when a [main target](/main) is updated,
 you may append `-if-main` to any of the string options in this list.
 
 E.g. `'reset-if-main'` will reset focus positions, but only if a main target is updated.
@@ -84,7 +84,7 @@ This is the default when [navigating](/navigation).
 - Focus a `#hash` in the URL.
 - Focus an `[autofocus]` element in the new fragment.
 - If focus was lost with the old fragment, focus the new fragment.
-- If updating a [main target](/up.fragment.config#config.mainTargets), focus the new fragment.
+- If updating a [main target](/main), focus the new fragment.
 
 You may configure this logic in `up.fragment.config.autoFocus`.
 
