@@ -68,10 +68,10 @@ up.layer = do ->
   @property up.layer.config
 
   @param {string} config.mode='modal'
-    The default mode used when opening a new overlay without a given mode.
+    The default [mode](/layer-terminology) used when opening a new overlay.
 
   @param {object} config.any
-    Attributes for all kinds of layers (root layer and any kind of overlay).
+    Defaults for all layer modes.
 
   @param {Array<string>} config.any.mainTargets
     An array of CSS selectors matching default render targets.
@@ -79,7 +79,7 @@ up.layer = do ->
     This is an alias for `up.fragment.config.mainTargets`.
 
   @param {object} config.root
-    Attributes for the [root layer](/layer-terminology).
+    Defaults for the [root layer](/layer-terminology).
 
     Inherits from `up.layer.config.any`.
 
