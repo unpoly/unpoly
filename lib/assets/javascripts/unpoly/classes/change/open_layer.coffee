@@ -120,8 +120,8 @@ class up.Change.OpenLayer extends up.Change.Addition
   buildLayer: ->
     # We need to mark the layer as { opening: true } so its topmost swappable element
     # does not resolve from the :layer pseudo-selector. Since :layer is a part of
-    # up.fragment.config.mainTargets, this would otherwise make *any* element match
-    # :main.
+    # up.fragment.config.mainTargets and :main is matches by.fragment.config.autoHistory(fragment),
+    # this would otherwise cause auto-history for *every* overlay regardless of initial target.
     return up.layer.build(u.merge(@options, opening: true))
 
   handleHistory: ->
