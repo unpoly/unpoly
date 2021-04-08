@@ -23,8 +23,8 @@ up.layer = do ->
   ###**
   Configures default attributes for new overlays.
 
-  All options for `up.layer.open()` may be configured. The configuration will also
-  be used for `a[up-layer=new]` links.
+  All options for `up.layer.open()` may be configured.
+  The configuration will also be used for `a[up-layer=new]` links.
 
   Defaults are configured separately for each [layer mode](/layer-terminology):
 
@@ -200,6 +200,12 @@ up.layer = do ->
 
     return newConfig
 
+  ###**
+  TODO: Docs
+
+  @function up.layer.stack
+  @stable
+  ###
   stack = null
 
   handlers = []
@@ -780,6 +786,48 @@ up.layer = do ->
     The number of layers in the stack.
   @stable
   ###
+
+  ###**
+  TODO: Docs
+
+  @function up.layer.get
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @function up.layer.getAll
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @function up.layer.root
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @function up.layer.overlays
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @function up.layer.front
+  @stable
+  ###
+
+  ###**
+  TODO: Docs
+
+  @function up.layer.dismissAll
+  @stable
+  ###
   u.delegate(api, [
     'get'
     'getAll'
@@ -793,28 +841,28 @@ up.layer = do ->
   ], -> stack)
 
   u.delegate(api, [
-    'accept'
-    'dismiss'
-    'isRoot'
-    'isOverlay'
-    'on'
-    'off'
-    'emit'
-    'parent'
-    'child'
-    'ancestor'
-    'descendants'
-    'historyVisible'
-    'location'
-    'title'
-    'mode'
-    'context'
-    'element'
-    'contains'
-    'size'
-    'origin'
-    'affix'
-    'dismissable'
+    'accept' # yes
+    'dismiss' # yes
+    'isRoot' # yes
+    'isOverlay' # yes
+    'on' # yes
+    'off' # yes
+    'emit' # yes
+    'parent' # yes
+    'child' # ?
+    'ancestors' # ?
+    'descendants' # ?
+    'historyVisible' # ?
+    'location' # yes
+    'title' # ?
+    'mode' # yes
+    'context' # yes
+    'element' # yes
+    'contains' # yes
+    'size' # yes
+    'origin' # no
+    'affix' # yes
+    'dismissable' # no
   ], -> stack.current)
 
   return api

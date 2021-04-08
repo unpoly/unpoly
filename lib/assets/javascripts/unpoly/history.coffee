@@ -34,6 +34,14 @@ up.history = do ->
     enabled: true
     restoreTargets: ['body']
 
+  ###**
+  Returns a normalized URL for the previous history entry.
+
+  Only history entries pushed by Unpoly will be considered.
+
+  @property up.history.previousLocation
+  @experimental
+  ###
   previousLocation = undefined
   nextPreviousLocation = undefined
 
@@ -55,15 +63,6 @@ up.history = do ->
   ###
   currentLocation = (normalizeOptions) ->
     normalizeURL(location.href, normalizeOptions)
-
-  ###**
-  Returns a normalized URL for the previous history entry.
-
-  Only history entries pushed by Unpoly will be considered.
-
-  @property up.history.previousLocation
-  @experimental
-  ###
 
   ###**
   Remembers the current URL so we can use previousURL on pop.
