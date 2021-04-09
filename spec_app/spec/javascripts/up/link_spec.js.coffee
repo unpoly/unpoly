@@ -1174,47 +1174,67 @@ describe 'up.link', ->
           expect(@followSpy).toHaveBeenCalledWith(@$link[0])
           expect(@$link).not.toHaveBeenDefaultFollowed()
 
-      # IE does not call JavaScript and always performs the default action on right clicks
-      unless AgentDetector.isIE() || AgentDetector.isEdge()
-        it 'does nothing if the right mouse button is used', asyncSpec (next) ->
-          Trigger.click(@$link, button: 2)
+      describe 'exemptions from following', ->
+
+        it 'never follows a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
+          link = up.hello fixture('a[href="/path"][up-target=".target"][rel="download"]')
+
+          Trigger.click(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'never preloads a link with a [target] attribute (which updates a frame or opens a tab)', asyncSpec (next) ->
+          link = up.hello fixture('a[href="/path"][up-target=".target"][target="_blank"]')
+
+          Trigger.click(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(link).toHaveBeenDefaultFollowed()
+
+        # IE does not call JavaScript and always performs the default action on right clicks
+        unless AgentDetector.isIE() || AgentDetector.isEdge()
+          it 'does nothing if the right mouse button is used', asyncSpec (next) ->
+            Trigger.click(@$link, button: 2)
+            next =>
+              expect(@followSpy).not.toHaveBeenCalled()
+              expect(@$link).toHaveBeenDefaultFollowed()
+
+        it 'does nothing if shift is pressed during the click', asyncSpec (next) ->
+          Trigger.click(@$link, shiftKey: true)
           next =>
             expect(@followSpy).not.toHaveBeenCalled()
             expect(@$link).toHaveBeenDefaultFollowed()
 
-      it 'does nothing if shift is pressed during the click', asyncSpec (next) ->
-        Trigger.click(@$link, shiftKey: true)
-        next =>
-          expect(@followSpy).not.toHaveBeenCalled()
-          expect(@$link).toHaveBeenDefaultFollowed()
+        it 'does nothing if ctrl is pressed during the click', asyncSpec (next) ->
+          Trigger.click(@$link, ctrlKey: true)
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).toHaveBeenDefaultFollowed()
 
-      it 'does nothing if ctrl is pressed during the click', asyncSpec (next) ->
-        Trigger.click(@$link, ctrlKey: true)
-        next =>
-          expect(@followSpy).not.toHaveBeenCalled()
-          expect(@$link).toHaveBeenDefaultFollowed()
+        it 'does nothing if meta is pressed during the click', asyncSpec (next) ->
+          Trigger.click(@$link, metaKey: true)
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).toHaveBeenDefaultFollowed()
 
-      it 'does nothing if meta is pressed during the click', asyncSpec (next) ->
-        Trigger.click(@$link, metaKey: true)
-        next =>
-          expect(@followSpy).not.toHaveBeenCalled()
-          expect(@$link).toHaveBeenDefaultFollowed()
+        it 'does nothing if a listener prevents the up:click event on the link', asyncSpec (next) ->
+          up.on(@$link, 'up:click', (event) -> event.preventDefault())
+          Trigger.click(@$link)
 
-      it 'does nothing if a listener prevents the up:click event on the link', asyncSpec (next) ->
-        up.on(@$link, 'up:click', (event) -> event.preventDefault())
-        Trigger.click(@$link)
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).not.toHaveBeenDefaultFollowed()
 
-        next =>
-          expect(@followSpy).not.toHaveBeenCalled()
-          expect(@$link).not.toHaveBeenDefaultFollowed()
+        it 'does nothing if a listener prevents the click event on the link', asyncSpec (next) ->
+          up.on(@$link, 'click', (event) -> event.preventDefault())
+          Trigger.click(@$link)
 
-      it 'does nothing if a listener prevents the click event on the link', asyncSpec (next) ->
-        up.on(@$link, 'click', (event) -> event.preventDefault())
-        Trigger.click(@$link)
-
-        next =>
-          expect(@followSpy).not.toHaveBeenCalled()
-          expect(@$link).not.toHaveBeenDefaultFollowed()
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).not.toHaveBeenDefaultFollowed()
 
       describe 'handling of up.link.config.followSelectors', ->
 
@@ -1237,7 +1257,6 @@ describe 'up.link', ->
           next =>
             expect(@followSpy).not.toHaveBeenCalled()
             expect(link).toHaveBeenDefaultFollowed()
-
 
       describe 'with [up-instant] modifier', ->
 
@@ -1749,6 +1768,14 @@ describe 'up.link', ->
 
         it 'never preloads a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
           link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload][rel="download"]')
+
+          Trigger.hoverSequence(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        it 'never preloads a link with a [target] attribute (which updates a frame or opens a tab)', asyncSpec (next) ->
+          link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload][target="_blank"]')
 
           Trigger.hoverSequence(link)
 

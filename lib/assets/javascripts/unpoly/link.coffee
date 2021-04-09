@@ -112,7 +112,7 @@ up.link = do ->
   @stable
   ###
   config = new up.Config ->
-    noFollowSelectors = ['[up-follow=false]', '[rel=download]']
+    noFollowSelectors = ['[up-follow=false]', '[rel=download]', '[target]']
     return {
       followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML),
       noFollowSelectors: noFollowSelectors

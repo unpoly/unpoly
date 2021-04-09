@@ -808,6 +808,18 @@ describe 'up.form', ->
         next =>
           expect(jasmine.Ajax.requests.count()).toBe(0)
 
+      it 'does not handle a form with a [target] attribute', asyncSpec (next) ->
+        fixture('.response', text: 'old text')
+        form = fixture('form[action="/form-target"][method="put"][up-submit][target="_blank"]')
+        submitButton = e.affix(form, 'input[type="submit"]')
+        up.hello(form)
+
+        Trigger.clickSequence(submitButton)
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect(form).toHaveBeenDefaultSubmitted()
+
       describe 'when the server responds with an error code', ->
 
         it 'replaces the form instead of the [up-target] selector', asyncSpec (next) ->
