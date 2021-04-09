@@ -982,6 +982,45 @@ describe 'up.network', ->
             expect(url: '/foo/2').not.toBeCached()
             expect(url: '/bar/1').toBeCached()
 
+        it 'defaults to a rule in up.network.config.clearCache() if neither request nor server set a { clearCache } option', asyncSpec (next) ->
+          up.network.config.clearCache = (request, response) ->
+            expect(request).toEqual(jasmine.any(up.Request))
+            expect(response).toEqual(jasmine.any(up.Response))
+
+            if request.testURL('/baz')
+              return '/foo'
+
+          up.request(url: '/foo', cache: true)
+          up.request(url: '/bar', cache: true)
+          up.request(url: '/baz', cache: true)
+
+          expect(url: '/foo').toBeCached()
+          expect(url: '/bar').toBeCached()
+          expect(url: '/baz').toBeCached()
+
+          next ->
+            jasmine.Ajax.requests.at(0).respondWith(status: 200, responseText: 'foo response')
+
+          next ->
+            expect(url: '/foo').toBeCached()
+            expect(url: '/bar').toBeCached()
+            expect(url: '/baz').toBeCached()
+
+            jasmine.Ajax.requests.at(1).respondWith(status: 200, responseText: 'bar response')
+
+          next ->
+            expect(url: '/foo').toBeCached()
+            expect(url: '/bar').toBeCached()
+            expect(url: '/baz').toBeCached()
+
+            jasmine.Ajax.requests.at(2).respondWith(status: 200, responseText: 'bar response')
+
+          next ->
+            # Only the URL pattern returned by config.clearCache() is cleared
+            expect(url: '/foo').not.toBeCached()
+            expect(url: '/bar').toBeCached()
+            expect(url: '/baz').toBeCached()
+
       describe 'method wrapping', ->
 
         u.each ['GET', 'POST', 'HEAD', 'OPTIONS'], (method) ->

@@ -149,7 +149,7 @@ up.network = do ->
     badDownlink: 0.6
     badRTT: 750
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
-    clearCache: ({ request }) -> !request.isSafe()
+    clearCache: (request, _response) -> !request.isSafe()
 
   queue = new up.Request.Queue()
 
@@ -378,6 +378,9 @@ up.network = do ->
   mimicLocalRequest = (options) ->
     if solo = options.solo
       abortRequests(solo)
+
+    # We cannot consult config.clearCache since there is no up.Request
+    # for a local update.
     if clearCache = options.clearCache
       cache.clear(clearCache)
 
@@ -442,8 +445,7 @@ up.network = do ->
       # (1) The server via X-Up-Clear-Cache header, found in response.clearCache
       # (2) The interaction via { clearCache } option, found in request.clearCache
       # (3) The default in up.network.config.clearCache({ request, response })
-
-      if clearCache = (response.clearCache ? request.clearCache ? config.clearCache({ request, response }))
+      if clearCache = (response.clearCache ? request.clearCache ? config.clearCache(request, response))
         cache.clear(clearCache)
 
       # (1) Re-cache a cacheable request in case we cleared the cache above
