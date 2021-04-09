@@ -28,19 +28,19 @@ Release process
 Remaining feature work
 ======================
 
-- up.network.config.cacheable (cacheable?)
+- { cache: 'auto' }
+  - This asks up.network.config.autoCache = (request) -> ...
   - Should be honored by up.Request.isCacheable (if we need this method)
-  - Should be honored by up.network.isPreloadDisabled() (here we don't have a request object yet!)
+  - Request#isCacheable() should be honored by up.network.isPreloadDisabled() (here we don't have a request object yet!)
     - Do we build a request just to check it here?
   - Should be honored by the logic that writes to the cache
   - Where should the default check (isSafe(), !hasBinaryValues()) live?
     - I feel that the default could be  config.cacheable = (request) -> request.isSafe()
     - We *could* add hasBinaryValues() to that
     - Or we just leave that be since safe requests never have binaryValues, and even unsafe requests would just omit that entry from the request
-- Replace up.config.noInstantSelectors (and friends) with up.config.noInstant: Function
-- Should up.network.config.clearCache just take a Request argument like requestMetaKeys ?
-  => No, it actually takes { request, response }
-
+- What should we do when we get a request with !up.Request.cache und we have a cached request?
+  - Update the cache?
+- Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
 Tests
 =====
