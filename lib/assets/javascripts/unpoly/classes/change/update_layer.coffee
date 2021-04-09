@@ -353,5 +353,5 @@ class up.Change.UpdateLayer extends up.Change.Addition
     return scrolling.process(step.scroll)
 
   hasAutoHistory: ->
-    primaryFragment = @steps[0].oldElement
-    return up.fragment.hasAutoHistory(primaryFragment)
+    oldFragments = u.map(@steps, 'oldElement')
+    return u.some oldFragments, (oldFragment) -> up.fragment.hasAutoHistory(oldFragment)

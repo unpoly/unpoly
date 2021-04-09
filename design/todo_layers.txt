@@ -30,12 +30,8 @@ Remaining feature work
 
 - Request should copy context and cacheKey once queued
 
-- Do we still need the isCacheable concept anywhere?
-
 - { cache: 'auto' }
   - Document [up-cache] and [options.cache]
-  - Do we still need isCacheable as a concept?
-  - Can we remove hasBinaryValues()?
 
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 

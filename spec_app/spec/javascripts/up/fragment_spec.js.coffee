@@ -1960,6 +1960,23 @@ describe 'up.fragment', ->
               next =>
                 expect(location.href).toMatchURL(@locationBeforeExample)
 
+            it 'adds a history when at least fragment of a multi-fragment update is a main target', asyncSpec (next) ->
+              up.fragment.config.mainTargets = ['.bar']
+              fixture('.foo')
+              fixture('.bar')
+              fixture('.baz')
+              promise = up.render('.foo, .bar, .baz', url: '/path4', history: 'auto')
+
+              next =>
+                @respondWith """
+                  <div class='foo'></div>
+                  <div class='bar'></div>
+                  <div class='baz'></div>
+                """
+                next.await(promise)
+              next =>
+                expect(location.href).toMatchURL('/path4')
+
           describe 'when a string is passed as { location } option', ->
 
             it 'uses that URL as the new location after a GET request', asyncSpec (next) ->
