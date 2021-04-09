@@ -500,7 +500,7 @@ up.link = do ->
   shouldFollowEvent = (event, link) ->
     # Users may configure up.link.config.followSelectors.push('a')
     # and then opt out individual links with [up-follow=false].
-    if isFollowDisabled(link)
+    if event.defaultPrevented || isFollowDisabled(link)
       return false
 
     # If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]

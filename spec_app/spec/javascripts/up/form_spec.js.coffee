@@ -795,6 +795,19 @@ describe 'up.form', ->
         next =>
           expect('.my-form').toHaveText('new form text')
 
+      it 'does not submit the form if a listener has prevented the submit event', asyncSpec (next) ->
+        fixture('.response', text: 'old text')
+        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+        submitButton = e.affix(form, 'input[type="submit"]')
+        up.hello(form)
+
+        form.addEventListener('submit', (event) -> event.preventDefault())
+
+        Trigger.clickSequence(submitButton)
+
+        next =>
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
       describe 'when the server responds with an error code', ->
 
         it 'replaces the form instead of the [up-target] selector', asyncSpec (next) ->

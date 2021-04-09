@@ -104,7 +104,7 @@ beforeEach ->
 
   up.on 'click', 'a[href]', (event) ->
     link = event.target
-    browserWouldNavigate = !(u.contains(link.href, '#') && up.history.isLocation(link.href))
+    browserWouldNavigate = !(u.contains(link.href, '#') && up.history.isLocation(link.href)) && !event.defaultPrevented
 
     if browserWouldNavigate
       window.defaultFollowedLinks.push(link)
@@ -128,7 +128,7 @@ beforeEach ->
 
   up.on 'submit', 'form', (event) ->
     form = event.target
-    browserWouldNavigate = !u.contains(form.action, '#')
+    browserWouldNavigate = !u.contains(form.action, '#') && !event.defaultPrevented
 
     if browserWouldNavigate
       window.defaultSubmittedForms.push(form)

@@ -35,6 +35,15 @@ Remaining feature work
 
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
+- Should auto-options also activate if the new fragment *contains* a main target?
+
+- Do we need up.Request#testURL() or would any developer just use a regular expression on request.url ?
+
+- An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
+
+- TODO: Document that preventing up:click also prevents the default behavior of the original event
+
+
 Tests
 =====
 

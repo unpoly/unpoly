@@ -9,24 +9,6 @@ describe 'up.link', ->
   
     describe 'up.follow', ->
 
-      it 'emits a preventable up:link:follow event', asyncSpec (next) ->
-        $link = $fixture('a[href="/destination"][up-target=".response"]')
-
-        listener = jasmine.createSpy('follow listener').and.callFake (event) ->
-          event.preventDefault()
-
-        $link.on('up:link:follow', listener)
-
-        up.follow($link)
-
-        next =>
-          expect(listener).toHaveBeenCalled()
-          event = listener.calls.mostRecent().args[0]
-          expect(event.target).toEqual($link[0])
-
-          # No request should be made because we prevented the event
-          expect(jasmine.Ajax.requests.count()).toEqual(0)
-
       it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->
         $fixture('.before').text('old-before')
         $fixture('.middle').text('old-middle')
@@ -87,6 +69,26 @@ describe 'up.link', ->
           expect(result.state).toBe('fulfilled')
           expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
           expect(result.value.layer).toBe(up.layer.root)
+
+      describe 'events', ->
+
+        it 'emits a preventable up:link:follow event', asyncSpec (next) ->
+          $link = $fixture('a[href="/destination"][up-target=".response"]')
+
+          listener = jasmine.createSpy('follow listener').and.callFake (event) ->
+            event.preventDefault()
+
+          $link.on('up:link:follow', listener)
+
+          up.follow($link)
+
+          next =>
+            expect(listener).toHaveBeenCalled()
+            event = listener.calls.mostRecent().args[0]
+            expect(event.target).toEqual($link[0])
+
+            # No request should be made because we prevented the event
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       describe 'history', ->
 
@@ -1198,6 +1200,21 @@ describe 'up.link', ->
           expect(@followSpy).not.toHaveBeenCalled()
           expect(@$link).toHaveBeenDefaultFollowed()
 
+      it 'does nothing if a listener prevents the up:click event on the link', asyncSpec (next) ->
+        up.on(@$link, 'up:click', (event) -> event.preventDefault())
+        Trigger.click(@$link)
+
+        next =>
+          expect(@followSpy).not.toHaveBeenCalled()
+          expect(@$link).not.toHaveBeenDefaultFollowed()
+
+      it 'does nothing if a listener prevents the click event on the link', asyncSpec (next) ->
+        up.on(@$link, 'click', (event) -> event.preventDefault())
+        Trigger.click(@$link)
+
+        next =>
+          expect(@followSpy).not.toHaveBeenCalled()
+          expect(@$link).not.toHaveBeenDefaultFollowed()
 
       describe 'handling of up.link.config.followSelectors', ->
 
@@ -1261,6 +1278,23 @@ describe 'up.link', ->
         it 'does nothing if meta is pressed during mousedown', asyncSpec (next) ->
           Trigger.mousedown(@$link, metaKey: true)
           next => expect(@followSpy).not.toHaveBeenCalled()
+
+        it 'does nothing if a listener prevents the up:click event on the link', asyncSpec (next) ->
+          up.on(@$link, 'up:click', (event) -> event.preventDefault())
+          Trigger.mousedown(@$link)
+
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).not.toHaveBeenDefaultFollowed()
+
+        it 'does nothing if a listener prevents the mousedown event on the link', asyncSpec (next) ->
+          up.on(@$link, 'mousedown', (event) -> event.preventDefault())
+          Trigger.mousedown(@$link)
+
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).not.toHaveBeenDefaultFollowed()
+
 
         describe 'for a cross-origin link', ->
 
@@ -1789,7 +1823,6 @@ describe 'up.link', ->
 
   describe 'up:click', ->
 
-
     describe 'on a link that is not [up-instant]', ->
 
       it 'emits an up:click event on click', ->
@@ -1856,6 +1889,15 @@ describe 'up.link', ->
         Trigger.click(link, metaKey: true)
         next ->
           expect(listener).not.toHaveBeenCalled()
+
+      it 'emits a prevented up:click event if the click was already prevented', asyncSpec (next) ->
+        link = fixture('a[href="#"]')
+        link.addEventListener('click', (event) -> event.preventDefault())
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link)
+        expect(listener).toHaveBeenCalled()
+        expect(listener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
 
     describe 'on a link that is [up-instant]', ->
 

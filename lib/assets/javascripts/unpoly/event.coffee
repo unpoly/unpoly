@@ -480,6 +480,9 @@ up.event = do ->
         originalEvent[key]()
         return originalMethod.call(newEvent)
 
+    if originalEvent.defaultPrevented
+      newEvent.preventDefault()
+
     return newEvent
 
   ###**
