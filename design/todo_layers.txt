@@ -38,8 +38,6 @@ Remaining feature work
     - I feel that the default could be  config.cacheable = (request) -> request.isSafe()
     - We *could* add hasBinaryValues() to that
     - Or we just leave that be since safe requests never have binaryValues, and even unsafe requests would just omit that entry from the request
-- What should we do when we get a request with !up.Request.cache und we have a cached request?
-  - Update the cache?
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
 Tests
