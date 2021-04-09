@@ -45,12 +45,6 @@ class up.Cache
   isEnabled: ->
     @maxSize() isnt 0 && @expiryMillis() isnt 0
 
-  isCacheable: (key) ->
-    if @config.cacheable
-      @config.cacheable(key)
-    else
-      true
-
   clear: ->
     @store.clear()
 
@@ -94,7 +88,7 @@ class up.Cache
     (new Date()).valueOf()
 
   set: (key, value) =>
-    if @isEnabled() && @isCacheable(key)
+    if @isEnabled()
       @makeRoomForAnotherEntry()
       storeKey = @normalizeStoreKey(key)
       entry =
@@ -103,9 +97,8 @@ class up.Cache
       @store.set(storeKey, entry)
 
   remove: (key) =>
-    if @isCacheable(key)
-      storeKey = @normalizeStoreKey(key)
-      @store.remove(storeKey)
+    storeKey = @normalizeStoreKey(key)
+    @store.remove(storeKey)
 
   isFresh: (entry) =>
     millis = @expiryMillis()
@@ -117,7 +110,7 @@ class up.Cache
 
   get: (key, options = {}) =>
     storeKey = @normalizeStoreKey(key)
-    if @isCacheable(key) && (entry = @store.get(storeKey))
+    if entry = @store.get(storeKey)
       if @isFresh(entry)
         @log("Cache hit for '%s'", key) unless options.silent
         entry.value

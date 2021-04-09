@@ -28,16 +28,15 @@ Release process
 Remaining feature work
 ======================
 
+- Request should copy context and cacheKey once queued
+
+- Do we still need the isCacheable concept anywhere?
+
 - { cache: 'auto' }
-  - This asks up.network.config.autoCache = (request) -> ...
-  - Should be honored by up.Request.isCacheable (if we need this method)
-  - Request#isCacheable() should be honored by up.network.isPreloadDisabled() (here we don't have a request object yet!)
-    - Do we build a request just to check it here?
-  - Should be honored by the logic that writes to the cache
-  - Where should the default check (isSafe(), !hasBinaryValues()) live?
-    - I feel that the default could be  config.cacheable = (request) -> request.isSafe()
-    - We *could* add hasBinaryValues() to that
-    - Or we just leave that be since safe requests never have binaryValues, and even unsafe requests would just omit that entry from the request
+  - Document [up-cache] and [options.cache]
+  - Do we still need isCacheable as a concept?
+  - Can we remove hasBinaryValues()?
+
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
 Tests

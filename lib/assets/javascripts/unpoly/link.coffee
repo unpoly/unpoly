@@ -86,7 +86,7 @@ up.link = do ->
   # Links with remote HTML are followable if there is one additional attribute
   # suggesting "follow me through Unpoly".
   LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]']
+  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]']
 
   combineFollowableSelectors = (elementSelectors, attributeSelectors) ->
     return u.flatMap(elementSelectors, (elementSelector) ->
@@ -150,15 +150,23 @@ up.link = do ->
   @return {boolean}
   ###
   isFollowDisabled = (link) ->
-    return e.matches(link, config.noFollowSelectors.join(',')) || shouldBrowserHandleLink(link)
+    return e.matches(link, config.noFollowSelectors.join(',')) ||
+      shouldBrowserHandleLink(link)
 
   isPreloadDisabled = (link) ->
-    url = followURL(link)
-    return !url ||
+    return !up.browser.canPushState() ||
       e.matches(link, config.noPreloadSelectors.join(',')) ||
-      !isSafe(link) ||
-      u.isCrossOrigin(url) ||
-      !up.browser.canPushState()
+      isFollowDisabled(link) ||
+      !willCache(link)
+
+  willCache = (link) ->
+    # Instantiate a lightweight request with basic link attributes needed for the cache-check.
+    options = parseRequestOptions(link)
+    if options.url
+      options.cache ?= 'auto'
+      options.basic = true #
+      request = new up.Request(options)
+      return request.willCache()
 
   isInstantDisabled = (link) ->
     return e.matches(link, config.noInstantSelectors.join(','))
@@ -216,6 +224,21 @@ up.link = do ->
   follow = up.mockable (link, options) ->
     return up.render(followOptions(link, options))
 
+  parseRequestOptions = (link, options) ->
+    options = u.options(options)
+    parser = new up.OptionsParser(options, link) # { fail: false }
+
+    options.url = followURL(link, options)
+    options.method = followMethod(link, options)
+    parser.json('headers')
+    parser.json('params')
+    parser.booleanOrString('cache')
+    parser.booleanOrString('clearCache')
+    parser.boolean('solo')
+    parser.string('contentType', attr: ['enctype', 'up-content-type'])
+
+    return options
+
   ###**
   Parses the `render()` options that would be used to
   [`follow`](/up.follow) the given link, but does not [render](/up.render).
@@ -229,19 +252,9 @@ up.link = do ->
   followOptions = (link, options) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
-    options = u.options(options)
+    options = parseRequestOptions(link, options)
 
-    # TODO: Document new follow options like onOpened, [up-on-opened], ...
     parser = new up.OptionsParser(options, link, fail: true)
-
-    # Request options
-    options.url = followURL(link, options)
-    options.method = followMethod(link, options)
-    parser.json('headers')
-    parser.json('params')
-    parser.booleanOrString('cache')
-    parser.booleanOrString('clearCache')
-    parser.boolean('solo')
 
     # Feedback options
     parser.boolean('feedback')
@@ -257,8 +270,6 @@ up.link = do ->
     parser.string('content')
     parser.string('fragment')
     parser.string('document')
-
-    parser.string('contentType', attr: ['enctype', 'up-content-type'])
 
     # Layer options
     parser.boolean('peel')
@@ -392,7 +403,7 @@ up.link = do ->
     u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
 
   followURL = (link, options = {}) ->
-    url = options.url || link.getAttribute('up-href') || link.getAttribute('href')
+    url = options.url || link.getAttribute('href') || link.getAttribute('up-href')
 
     # Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
     # link behavior (keyboard navigation). However, we don't want to consider this
@@ -1010,8 +1021,7 @@ up.link = do ->
   @stable
   ###
   up.compiler fullPreloadSelector, (link) ->
-    # No need to preload a link that will not be followed by up.follow().
-    unless isPreloadDisabled(link) || isFollowDisabled(link)
+    unless isPreloadDisabled(link)
       return linkPreloader.observeLink(link)
 
   up.on 'up:framework:reset', reset

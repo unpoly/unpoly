@@ -21,7 +21,7 @@ describe 'up.RenderOptions', ->
         expect(options.fallback).toBe(true)
         expect(options.history).toBe('auto')
         expect(options.peel).toBe(true)
-        expect(options.cache).toBe(true)
+        expect(options.cache).toBe('auto')
         expect(options.scroll).toBe('auto')
 
       it 'allows to configure defaults using up.fragment.config.navigateOptions', ->
@@ -125,7 +125,7 @@ describe 'up.RenderOptions', ->
         expect(options.history).toBe('auto')
         expect(options.peel).toBe(true)
         expect(options.scroll).toBe('auto')
-        expect(options.cache).toBe(true)
+        expect(options.cache).toBe('auto')
 
     describe 'with { navigate: false }', ->
 

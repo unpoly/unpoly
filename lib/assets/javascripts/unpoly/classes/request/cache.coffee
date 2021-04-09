@@ -13,9 +13,6 @@ class up.Request.Cache extends up.Cache
   normalizeStoreKey: (request) ->
     up.Request.wrap(request).cacheKey()
 
-  isCacheable: (request) ->
-    up.Request.wrap(request).isCacheable()
-
 #  get: (request) ->
 #    request = up.Request.wrap(request)
 #    candidates = [request]

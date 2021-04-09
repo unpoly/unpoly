@@ -193,7 +193,6 @@ class up.Request extends up.Record
     super(options)
 
     @params = new up.Params(@params) # copies, which we want
-    @state = 'new' # new | loading | loaded | aborted
     @headers ||= {}
 
     if @preload
@@ -202,21 +201,22 @@ class up.Request extends up.Record
 
     @wrapMethod ?= up.network.config.wrapMethod
 
-    # Help users programmatically build a request that will match an existing cache key.
-    @layer = up.layer.get(@layer || @origin) # If @layer and @origin is undefined, this will choose the current layer.
-    @failLayer = up.layer.get(@failLayer || @layer)
-    @context ||= @layer.context || {} # @layer might be "new", so we default to {}
-    @failContext ||= @failLayer.context || {} # @failLayer might be "new", so we default to {}
-    @mode ||= @layer.mode
-    @failMode ||= @failLayer.mode
-
     # Normalize a first time to get a normalized cache key.
     @normalizeForCaching()
 
-    # This up.Request object is also promise for its up.Response.
-    # We delegate all promise-related methods (then, catch, finally) to an internal
-    # deferred object.
-    @deferred = u.newDeferred()
+    unless options.basic
+      @layer = up.layer.get(@layer) # If @layer and @origin is undefined, this will choose the current layer.
+      @failLayer = up.layer.get(@failLayer || @layer)
+      @context ||= @layer.context || {} # @layer might be "new", so we default to {}
+      @failContext ||= @failLayer.context || {} # @failLayer might be "new", so we default to {}
+      @mode ||= @layer.mode
+      @failMode ||= @failLayer.mode
+
+      # This up.Request object is also promise for its up.Response.
+      # We delegate all promise-related methods (then, catch, finally) to an internal
+      # deferred object.
+      @deferred = u.newDeferred()
+      @state = 'new' # new | loading | loaded | aborted
 
   @delegate ['then', 'catch', 'finally'], 'deferred'
 
@@ -226,8 +226,7 @@ class up.Request extends up.Record
   normalizeForCaching: ->
     @method = u.normalizeMethod(@method)
     @extractHashFromURL()
-    unless @allowsPayload()
-      @transferParamsToURL()
+    @transferParamsToURL()
 
   evictExpensiveAttrs: ->
     # We want to allow up:request:loaded events etc. to still access the properties that
@@ -250,17 +249,19 @@ class up.Request extends up.Record
       # Don't evict properties that may be part of our @cacheKey()!
 
   extractHashFromURL: ->
-    if match = @url.match(/^([^#]*)(#.+)$/)
+    if match = @url?.match(/^([^#]*)(#.+)$/)
       @url = match[1]
       # Remember the #hash for later revealing.
       @hash = match[2]
 
   transferParamsToURL: ->
-    unless u.isBlank(@params)
-      # GET methods are not allowed to have a payload, so we transfer { params } params to the URL.
-      @url = @params.toURL(@url)
-      # Now that we have transfered the params into the URL, we delete them from the { params } option.
-      @params.clear()
+    if !@url || @allowsPayload() || u.isBlank(@params)
+      return
+
+    # GET methods are not allowed to have a payload, so we transfer { params } params to the URL.
+    @url = @params.toURL(@url)
+    # Now that we have transfered the params into the URL, we delete them from the { params } option.
+    @params.clear()
 
   isSafe: ->
     up.network.isSafeMethod(@method)
@@ -271,9 +272,16 @@ class up.Request extends up.Record
   will302RedirectWithGET: ->
     @isSafe() || @method == 'POST'
 
-  willQueue: ->
-    u.always(this, => @evictExpensiveAttrs())
+  willCache: ->
+    if @isCrossOrigin()
+      return false
+    else if @cache == 'auto'
+      return up.network.config.autoCache(this)
+    else
+      return @cache
 
+  onQueued: ->
+    u.always(this, => @evictExpensiveAttrs())
     # @signal?.addEventListener('abort', => @abort())
 
   load: ->
@@ -344,7 +352,7 @@ class up.Request extends up.Record
 
   request.abort()
   ```
-  
+
   @function up.Request#abort
   @experimental
   ###
@@ -419,9 +427,6 @@ class up.Request extends up.Record
       responseAttrs.method = methodFromResponse
 
     return new up.Response(responseAttrs)
-
-  isCacheable: ->
-    @isSafe() && !@params.hasBinaryValues()
 
   cacheKey: ->
     JSON.stringify [

@@ -1678,40 +1678,60 @@ describe 'up.link', ->
           $fixture('.target')
 
         it "never preloads a link with an unsafe method", asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-preload][data-method="post"]')
+          link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload][data-method="post"]')
 
-          Trigger.hoverSequence($link)
+          Trigger.hoverSequence(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        it 'never preloads a link that has been marked with [up-cache=false]', asyncSpec (next) ->
+          link = up.hello fixture('a[href="/no-auto-caching-path"][up-cache=false]')
+
+          Trigger.hoverSequence(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        it 'never preloads a link that does not auto-cache', asyncSpec (next) ->
+          up.network.config.autoCache = (request) ->
+            expect(request).toEqual jasmine.any(up.Request)
+            return request.url != '/no-auto-caching-path'
+
+          link = up.hello fixture('a[href="/no-auto-caching-path"][up-preload][up-target=".target"]')
+
+          Trigger.hoverSequence(link)
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
         it "never preloads a link with cross-origin [href]", asyncSpec (next) ->
-          $link = $fixture('a[href="https://other-domain.com/path"][up-preload][up-target=".target"]')
+          link = up.hello fixture('a[href="https://other-domain.com/path"][up-preload][up-target=".target"]')
 
-          Trigger.hoverSequence($link)
+          Trigger.hoverSequence(link)
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
         it 'never preloads a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-preload][rel="download"]')
+          link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload][rel="download"]')
 
-          Trigger.hoverSequence($link)
+          Trigger.hoverSequence(link)
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
         it 'never preloads a link with [href="#"]', asyncSpec (next) ->
-          $link = $fixture('a[href="#"][up-preload]')
+          link = up.hello fixture('a[href="#"][up-preload]')
 
-          Trigger.hoverSequence($link)
+          Trigger.hoverSequence(link)
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
         it 'never preloads a link with local content via [up-content]', asyncSpec (next) ->
           fixture('.target', text: 'old text')
-          link = $fixture('a[up-preload][up-content="new text"][up-target=".target"]')
+          link = up.hello fixture('a[up-preload][up-content="new text"][up-target=".target"]')
 
           Trigger.hoverSequence(link)
 
@@ -1727,7 +1747,7 @@ describe 'up.link', ->
 
           it "does not preload a link", asyncSpec (next) ->
             fixture('.target')
-            link = fixture('a[href="/path"][up-target=".target"][up-preload]')
+            link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload]')
 
             Trigger.hoverSequence(link)
 

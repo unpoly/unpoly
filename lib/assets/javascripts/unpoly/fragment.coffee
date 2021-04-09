@@ -103,7 +103,7 @@ up.fragment = do ->
       fallback: true
       history: 'auto'
       peel: true
-      cache: true
+      cache: 'auto'
     }
 
     matchAroundOrigin: true

@@ -419,7 +419,7 @@ describe 'up.network', ->
               expect(jasmine.Ajax.requests.count()).toEqual(1)
 
           it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
-            up.request('/foo', method: 'post', cache: true) # POST requests are not cached
+            up.request('/foo', cache: false) # POST requests are not cached
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -543,8 +543,8 @@ describe 'up.network', ->
               # See that the cached alias is used and no additional requests are made
               expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          it 'does not considers a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
-            up.request('/foo', method: 'post', cache: true) # POST requests are not cached
+          it 'does not consider a redirection URL an alias for the requested URL if the original request was never cached', asyncSpec (next) ->
+            up.request('/foo', cache: false)
 
             next =>
               expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -558,7 +558,7 @@ describe 'up.network', ->
               # See that an additional request was made
               expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-          it 'does not considers a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
+          it 'does not consider a redirection URL an alias for the requested URL if the response returned a non-200 status code', asyncSpec (next) ->
             up.request('/foo', cache: true)
 
             next =>
@@ -745,24 +745,44 @@ describe 'up.network', ->
           next => up.request(url: '/bar', cache: true)
           next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
-        u.each ['GET', 'HEAD', 'OPTIONS'], (safeMethod) ->
+        describe 'with { cache: "auto" }', ->
 
-          it "caches #{safeMethod} requests", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: safeMethod, cache: true)
-            next => up.request(url: '/foo', method: safeMethod, cache: true)
-            next => expect(jasmine.Ajax.requests.count()).toEqual(1)
+          describe 'default autoCache behavior', ->
 
-          it "does not cache #{safeMethod} requests with { cache: false }", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: safeMethod, cache: false)
-            next => up.request(url: '/foo', method: safeMethod, cache: false)
-            next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+            u.each ['GET', 'HEAD', 'OPTIONS'], (safeMethod) ->
 
-        u.each ['POST', 'PUT', 'DELETE'], (unsafeMethod) ->
+              it "caches #{safeMethod} requests", asyncSpec (next) ->
+                next => up.request(url: '/foo', method: safeMethod, cache: 'auto')
+                next => up.request(url: '/foo', method: safeMethod, cache: 'auto')
+                next => expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          it "does not cache #{unsafeMethod} requests, even with { cache: true }", asyncSpec (next) ->
-            next => up.request(url: '/foo', method: unsafeMethod, cache: true)
-            next => up.request(url: '/foo', method: unsafeMethod, cache: true)
-            next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+              it "does not cache #{safeMethod} requests with { cache: false }", asyncSpec (next) ->
+                next => up.request(url: '/foo', method: safeMethod, cache: false)
+                next => up.request(url: '/foo', method: safeMethod, cache: false)
+                next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+            u.each ['POST', 'PUT', 'DELETE'], (unsafeMethod) ->
+
+              it "does not cache #{unsafeMethod} requests", asyncSpec (next) ->
+                next => up.request(url: '/foo', method: unsafeMethod, cache: 'auto')
+                next => up.request(url: '/foo', method: unsafeMethod, cache: 'auto')
+                next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          it 'caches the request if up.network.config.autoCache(request) returns true', ->
+            up.network.config.autoCache = (request) ->
+              return request.url == '/yes'
+
+            up.request(url: '/yes', cache: 'auto')
+
+            expect(url: '/yes').toBeCached()
+
+          it 'does not cache the request if up.network.config.autoCache(request) returns false', ->
+            up.network.config.autoCache = (request) ->
+              return request.url == '/yes'
+
+            up.request(url: '/no', cache: 'auto')
+
+            expect(url: '/no').not.toBeCached()
 
       describe 'when there is an existing cache entry and a new request has { cache: false }', ->
 

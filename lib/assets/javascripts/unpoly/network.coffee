@@ -149,6 +149,7 @@ up.network = do ->
     badDownlink: 0.6
     badRTT: 750
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+    autoCache: (request) -> request.isSafe()
     clearCache: (request, _response) -> !request.isSafe()
 
   queue = new up.Request.Queue()
@@ -401,7 +402,7 @@ up.network = do ->
   useCachedRequest = (request) ->
     # If we have an existing promise matching this new request,
     # we use it unless `request.cache` is explicitly set to `false`.
-    if request.cache && (cachedRequest = cache.get(request))
+    if request.willCache() && (cachedRequest = cache.get(request))
       up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
 
       # Check if we need to upgrade a cached background request to a foreground request.
@@ -435,7 +436,7 @@ up.network = do ->
     queue.asap(request)
 
   handleCaching = (request) ->
-    if request.cache
+    if request.willCache()
       # Cache the request for calls for calls with the same URL, method, params
       # and target. See up.Request#cacheKey().
       cache.set(request, request)
@@ -452,7 +453,7 @@ up.network = do ->
       # (2) An un-cacheable request should still update an existing cache entry
       #     (written by a earlier, cacheable request with the same cache key)
       #     since the later response will be fresher.
-      if request.cache || cache.get(request)
+      if request.willCache() || cache.get(request)
         cache.set(request, request)
 
       unless response.ok

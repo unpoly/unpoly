@@ -9,6 +9,22 @@ describe 'up.Request', ->
       request = new up.Request(url: '/foo', preload: true, cache: false)
       expect(request.cache).toBe(true)
 
+    describe '{ layer } option', ->
+
+      it 'sets the { context } from that layer'
+
+      it 'uses the current layer if no { layer } is given'
+
+      describe 'with { basic: true }', ->
+
+        it 'builds a basic request that does not auto-set a { layer } or { context }', ->
+          request = new up.Request({ method: 'get', url: '/path', basic: true })
+          expect(request).toEqual(jasmine.any(up.Request))
+          expect(request.method).toEqual('GET')
+          expect(request.url).toEqual('/path')
+          expect(request.layer).toBeMissing()
+          expect(request.context).toBeMissing()
+
   describe '#url', ->
 
     it 'returns the given URL', ->
