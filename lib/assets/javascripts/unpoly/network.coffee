@@ -445,9 +445,13 @@ up.network = do ->
 
       if clearCache = (response.clearCache ? request.clearCache ? config.clearCache({ request, response }))
         cache.clear(clearCache)
-        # Re-cache the request in case we just threw it out.
-        if request.cache
-          cache.set(request, request)
+
+      # (1) Re-cache a cacheable request in case we cleared the cache above
+      # (2) An un-cacheable request should still update an existing cache entry
+      #     (written by a earlier, cacheable request with the same cache key)
+      #     since the later response will be fresher.
+      if request.cache || cache.get(request)
+        cache.set(request, request)
 
       unless response.ok
         # Uncache failed requests. We have no control over the server,
@@ -703,5 +707,5 @@ up.network = do ->
 
 up.request = up.network.request
 
-# TODO: Docs for up.cache.clear
+# TODO: Docs for up.cache.clear (patterns and all)
 up.cache = up.network.cache

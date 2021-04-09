@@ -764,6 +764,57 @@ describe 'up.network', ->
             next => up.request(url: '/foo', method: unsafeMethod, cache: true)
             next => expect(jasmine.Ajax.requests.count()).toEqual(2)
 
+      describe 'when there is an existing cache entry and a new request has { cache: false }', ->
+
+        it 'keeps the existing response in the cache while the new request is loading', asyncSpec (next) ->
+          response = null
+
+          next ->
+            up.request(url: '/cache-me', cache: true)
+
+          next ->
+            expect(up.network.queue.allRequests.length).toBe(1)
+            jasmine.respondWith('response text')
+
+          next ->
+            expect(up.network.queue.allRequests.length).toBe(0)
+            up.request(url: '/cache-me', cache: false)
+
+          next ->
+            expect(up.network.queue.allRequests.length).toBe(1)
+            up.request(url: '/cache-me', cache: true).then (cachedResponse) ->
+              response = cachedResponse
+
+          next ->
+            expect(response).toBeGiven()
+            expect(response.text).toEqual('response text')
+
+        it "updates an existing cache entry with the newer response", asyncSpec (next) ->
+          response = null
+
+          next ->
+            up.request(url: '/cache-me', cache: true)
+
+          next ->
+            expect(up.network.queue.allRequests.length).toBe(1)
+            jasmine.respondWith('old response text')
+
+          next ->
+            expect(up.network.queue.allRequests.length).toBe(0)
+            up.request(url: '/cache-me', cache: false)
+
+          next ->
+            expect(up.network.queue.allRequests.length).toBe(1)
+            jasmine.respondWith('new response text')
+
+          next ->
+            up.request(url: '/cache-me', cache: true).then (cachedResponse) ->
+              response = cachedResponse
+
+          next ->
+            expect(response).toBeGiven()
+            expect(response.text).toEqual('new response text')
+
       describe 'cache clearing', ->
 
         it 'clears the cache when passed { clearCache: true }', asyncSpec (next) ->
