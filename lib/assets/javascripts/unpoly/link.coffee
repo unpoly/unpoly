@@ -150,8 +150,11 @@ up.link = do ->
   @return {boolean}
   ###
   isFollowDisabled = (link) ->
+    # We also don't want to handle cross-origin links.
+    # That will be handled in `up.Change.FromURL#newPageReason`, allowing us
+    # to at least support `[up-instant]` for cross-origin links.
     return e.matches(link, config.noFollowSelectors.join(',')) ||
-      shouldBrowserHandleLink(link)
+      !linkReferencesRenderableContent(link)
 
   isPreloadDisabled = (link) ->
     return !up.browser.canPushState() ||
@@ -409,24 +412,22 @@ up.link = do ->
     # link behavior (keyboard navigation). However, we don't want to consider this
     # a link with remote content, and rather honor [up-content], [up-document] and
     # [up-fragment] attributes.
-    if url != '#'
+    if url && !/^#|javascript:/.test(url)
       return url
 
   # (1) We don't want to follow <a href="#anchor"> links without a path. Instead
-  #     we will let the browser change the current location's anchor and reveal
-  #     on hashchange.
-  # (2) We do want to follow links like <a href="#" up-content="...">.
+  #     we will let the browser change the current location's anchor and up.reveal()
+  #     on hashchange to scroll past obstructions.
+  # (2) We want to follow links with [href=#] only if they have a local source of HTML
+  #     through [up-content], [up-fragment] or [up-document].
   #     Many web developers are used to give JavaScript-handled links an [href="#"]
   #     attribute. Also frameworks like Bootstrap only style links if they have an [href].
   # (3) We don't want to handle <a href="javascript:foo()"> links.
-  # (4) We also don't want to handle cross-origin links.
-  #     That will be handled in `up.Change.FromURL#newPageReason`, allowing us
-  #     to at least support `[up-instant]` for cross-origin links.
-  shouldBrowserHandleHREF = (href) ->
-    return /^#.|javascript:/.test(href)
+  linkReferencesRenderableContent = (link) ->
+    followURL(link) || hasLocalHTML(link)
 
-  shouldBrowserHandleLink = (link) ->
-    return shouldBrowserHandleHREF(link.getAttribute('href'))
+  hasLocalHTML = (link) ->
+    e.matches(link, LINKS_WITH_LOCAL_HTML.join(','))
 
   ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly

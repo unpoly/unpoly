@@ -1164,12 +1164,12 @@ describe 'up.link', ->
 
     describe 'a[up-follow]', ->
 
-      beforeEach ->
+      it "calls up.follow with the clicked link", asyncSpec (next) ->
         @$link = $fixture('a[href="/follow-path"][up-follow]')
         @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
-      it "calls up.follow with the clicked link", asyncSpec (next) ->
         Trigger.click(@$link)
+
         next =>
           expect(@followSpy).toHaveBeenCalledWith(@$link[0])
           expect(@$link).not.toHaveBeenDefaultFollowed()
@@ -1194,34 +1194,76 @@ describe 'up.link', ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
             expect(link).toHaveBeenDefaultFollowed()
 
+        it 'never follows an a[href="#"]', asyncSpec (next) ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          link = up.hello fixture('a[href="#"][up-target=".target"]')
+          clickListener = jasmine.createSpy('click listener')
+          up.on('click', clickListener)
+
+          Trigger.click(link)
+
+          next ->
+            expect(followSpy).not.toHaveBeenCalled()
+            expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(false)
+
+        it 'does follow an a[href="#"] if the link also has local content via an [up-content], [up-fragment] or [up-document] attribute', asyncSpec (next) ->
+          target = fixture('.target', text: 'old text')
+          link = up.hello fixture('a[href="#"][up-target=".target"][up-content="new text"]')
+
+          Trigger.clickSequence(link)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(link).not.toHaveBeenDefaultFollowed()
+            expect('.target').toHaveText('new text')
+
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()
           it 'does nothing if the right mouse button is used', asyncSpec (next) ->
+            @$link = $fixture('a[href="/follow-path"][up-follow]')
+            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
             Trigger.click(@$link, button: 2)
+
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
               expect(@$link).toHaveBeenDefaultFollowed()
 
         it 'does nothing if shift is pressed during the click', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.click(@$link, shiftKey: true)
+
           next =>
             expect(@followSpy).not.toHaveBeenCalled()
             expect(@$link).toHaveBeenDefaultFollowed()
 
         it 'does nothing if ctrl is pressed during the click', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.click(@$link, ctrlKey: true)
+
           next =>
             expect(@followSpy).not.toHaveBeenCalled()
             expect(@$link).toHaveBeenDefaultFollowed()
 
         it 'does nothing if meta is pressed during the click', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.click(@$link, metaKey: true)
+
           next =>
             expect(@followSpy).not.toHaveBeenCalled()
             expect(@$link).toHaveBeenDefaultFollowed()
 
         it 'does nothing if a listener prevents the up:click event on the link', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.on(@$link, 'up:click', (event) -> event.preventDefault())
+
           Trigger.click(@$link)
 
           next =>
@@ -1229,7 +1271,10 @@ describe 'up.link', ->
             expect(@$link).not.toHaveBeenDefaultFollowed()
 
         it 'does nothing if a listener prevents the click event on the link', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.on(@$link, 'click', (event) -> event.preventDefault())
+
           Trigger.click(@$link)
 
           next =>
@@ -1239,6 +1284,7 @@ describe 'up.link', ->
       describe 'handling of up.link.config.followSelectors', ->
 
         it 'follows matching links even without [up-follow] or [up-target]', asyncSpec (next) ->
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           link = fixture('a[href="/foo"].link')
           up.link.config.followSelectors.push('.link')
 
@@ -1249,6 +1295,7 @@ describe 'up.link', ->
             expect(link).not.toHaveBeenDefaultFollowed()
 
         it 'allows to opt out with [up-follow=false]', asyncSpec (next) ->
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           link = fixture('a[href="/foo"][up-follow="false"].link')
           up.link.config.followSelectors.push('.link')
 
@@ -1260,46 +1307,78 @@ describe 'up.link', ->
 
       describe 'with [up-instant] modifier', ->
 
-        beforeEach ->
-          @$link.attr('up-instant', '')
-
         it 'follows a link on mousedown (instead of on click)', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.mousedown(@$link)
+
           next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
         it 'does nothing on mouseup', asyncSpec (next)->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.mouseup(@$link)
+
           next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing on click if there was an earlier mousedown event', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.mousedown(@$link)
           Trigger.click(@$link)
+
           next => expect(@followSpy.calls.count()).toBe(1)
 
         it 'does follow a link on click if there was never a mousedown event (e.g. if the user pressed enter)', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.click(@$link)
+
           next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
         # IE does not call JavaScript and always performs the default action on right clicks
         unless AgentDetector.isIE() || AgentDetector.isEdge()
           it 'does nothing if the right mouse button is pressed down', asyncSpec (next) ->
+            @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
             Trigger.mousedown(@$link, button: 2)
+
             next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if shift is pressed during mousedown', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.mousedown(@$link, shiftKey: true)
+
           next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if ctrl is pressed during mousedown', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.mousedown(@$link, ctrlKey: true)
+
           next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if meta is pressed during mousedown', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
           Trigger.mousedown(@$link, metaKey: true)
+
           next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if a listener prevents the up:click event on the link', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.on(@$link, 'up:click', (event) -> event.preventDefault())
+
           Trigger.mousedown(@$link)
 
           next =>
@@ -1307,7 +1386,10 @@ describe 'up.link', ->
             expect(@$link).not.toHaveBeenDefaultFollowed()
 
         it 'does nothing if a listener prevents the mousedown event on the link', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           up.on(@$link, 'mousedown', (event) -> event.preventDefault())
+
           Trigger.mousedown(@$link)
 
           next =>
@@ -1317,10 +1399,10 @@ describe 'up.link', ->
 
         describe 'for a cross-origin link', ->
 
-          beforeEach ->
-            @$link.attr('href', 'http://external-domain.com/path')
-
           it 'loads the external content as a new page page on mousedown', asyncSpec (next) ->
+            @$link = $fixture('a[href="http://external-domain.com/path"][up-follow][up-instant]')
+            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
             loadPage = spyOn(up.browser, 'loadPage')
             Trigger.mousedown(@$link)
 
@@ -1330,23 +1412,32 @@ describe 'up.link', ->
         describe 'handling of up.link.config.instantSelectors', ->
 
           it 'follows matching links without an [up-instant] attribute', asyncSpec (next) ->
+            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = fixture('a[up-follow][href="/foo"].link')
             up.link.config.instantSelectors.push('.link')
+
             Trigger.mousedown(link)
+
             next =>
               expect(@followSpy).toHaveBeenCalled()
 
           it 'allows individual links to opt out with [up-instant=false]', asyncSpec (next) ->
+            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
             up.link.config.instantSelectors.push('.link')
+
             Trigger.mousedown(link)
+
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
 
           it 'allows individual links to opt out of all Unpoly link handling with [up-follow=false]', asyncSpec (next) ->
+            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
             link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
             up.link.config.instantSelectors.push('.link')
+
             Trigger.mousedown(link)
+
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
 
