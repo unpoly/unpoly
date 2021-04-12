@@ -977,7 +977,7 @@ describe 'up.form', ->
       describe 'handling of up.form.config.submitSelectors', ->
 
         it 'submits matching forms even without [up-submit] or [up-target]', asyncSpec (next) ->
-          form = fixture('form.form[action="/form-action"]')
+          form = fixture('form.form[action="/form-action2"]')
           submitButton = e.affix(form, 'input[type=submit]')
           submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve())
 
@@ -990,7 +990,7 @@ describe 'up.form', ->
             expect(form).not.toHaveBeenDefaultSubmitted()
 
         it 'allows to opt out with [up-submit=false]', asyncSpec (next) ->
-          form = fixture('form.form[action="/form-action"][up-submit="false"]')
+          form = fixture('form.form[action="/form-action3"][up-submit="false"]')
           submitButton = e.affix(form, 'input[type=submit]')
           submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve())
 

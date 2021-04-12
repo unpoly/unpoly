@@ -95,6 +95,7 @@ up.link = do ->
 
   ###**
   TODO: Docs
+  TODO: docment that noInstantSelectors and noPreloadSelectors inherit from noFollowSelectors
 
   @property up.link.config
   @param {number} [config.preloadDelay=75]
@@ -112,14 +113,21 @@ up.link = do ->
   @stable
   ###
   config = new up.Config ->
-    noFollowSelectors = ['[up-follow=false]', '[rel=download]', '[target]']
     return {
       followSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ATTRIBUTES_SUGGESTING_FOLLOW).concat(LINKS_WITH_LOCAL_HTML),
-      noFollowSelectors: noFollowSelectors
+      # (1) We don't want to follow <a href="#anchor"> links without a path. Instead
+      #     we will let the browser change the current location's anchor and up.reveal()
+      #     on hashchange to scroll past obstructions.
+      # (2) We want to follow links with [href=#] only if they have a local source of HTML
+      #     through [up-content], [up-fragment] or [up-document].
+      #     Many web developers are used to give JavaScript-handled links an [href="#"]
+      #     attribute. Also frameworks like Bootstrap only style links if they have an [href].
+      # (3) We don't want to handle <a href="javascript:foo()"> links.
+      noFollowSelectors: ['[up-follow=false]', 'a[rel=download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]']
       instantSelectors: ['[up-instant]'],
-      noInstantSelectors: ['[up-instant=false]'].concat(noFollowSelectors),
+      noInstantSelectors: ['[up-instant=false]'],
       preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]']),
-      noPreloadSelectors: ['[up-preload=false]'].concat(noFollowSelectors),
+      noPreloadSelectors: ['[up-preload=false]'],
       clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
       preloadDelay: 90,
       preloadEnabled: 'auto' # true | false | 'auto'
@@ -153,8 +161,7 @@ up.link = do ->
     # We also don't want to handle cross-origin links.
     # That will be handled in `up.Change.FromURL#newPageReason`, allowing us
     # to at least support `[up-instant]` for cross-origin links.
-    return e.matches(link, config.noFollowSelectors.join(',')) ||
-      !linkReferencesRenderableContent(link)
+    return e.matches(link, config.noFollowSelectors.join(','))
 
   isPreloadDisabled = (link) ->
     return !up.browser.canPushState() ||
@@ -172,7 +179,7 @@ up.link = do ->
       return request.willCache()
 
   isInstantDisabled = (link) ->
-    return e.matches(link, config.noInstantSelectors.join(','))
+    return e.matches(link, config.noInstantSelectors.join(',')) || isFollowDisabled(link)
 
   reset = ->
     lastMousedownTarget = null
@@ -409,25 +416,11 @@ up.link = do ->
     url = options.url || link.getAttribute('href') || link.getAttribute('up-href')
 
     # Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
-    # link behavior (keyboard navigation). However, we don't want to consider this
-    # a link with remote content, and rather honor [up-content], [up-document] and
-    # [up-fragment] attributes.
-    if url && !/^#|javascript:/.test(url)
+    # link behavior (like keyboard navigation or default styles). However, we don't want to
+    # consider this  a link with remote content, and rather honor [up-content], [up-document]
+    # and [up-fragment] attributes.
+    if url != '#'
       return url
-
-  # (1) We don't want to follow <a href="#anchor"> links without a path. Instead
-  #     we will let the browser change the current location's anchor and up.reveal()
-  #     on hashchange to scroll past obstructions.
-  # (2) We want to follow links with [href=#] only if they have a local source of HTML
-  #     through [up-content], [up-fragment] or [up-document].
-  #     Many web developers are used to give JavaScript-handled links an [href="#"]
-  #     attribute. Also frameworks like Bootstrap only style links if they have an [href].
-  # (3) We don't want to handle <a href="javascript:foo()"> links.
-  linkReferencesRenderableContent = (link) ->
-    followURL(link) || hasLocalHTML(link)
-
-  hasLocalHTML = (link) ->
-    e.matches(link, LINKS_WITH_LOCAL_HTML.join(','))
 
   ###**
   Returns whether the given link will be [followed](/up.follow) by Unpoly

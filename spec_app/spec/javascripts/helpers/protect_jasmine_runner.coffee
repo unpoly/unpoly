@@ -97,6 +97,14 @@ window.addEventListener('popstate', (event) -> safeHistory.onPopState(event))
 afterEach ->
   safeHistory.afterEach()
 
+willScrollWithinPage = (link) ->
+  verbatimHREF = link.getAttribute('href')
+
+  # There is up.history.isLocation(), but that considers different hashes to be a different location.
+  linkURL = u.normalizeURL(verbatimHREF, hash: false)
+  currentURL = u.normalizeURL(up.history.location, hash: false)
+  return linkURL == currentURL
+
 # Make specs fail if a link was followed without Unpoly.
 # This would otherwise navigate away from the spec runner.
 beforeEach ->
@@ -104,11 +112,15 @@ beforeEach ->
 
   up.on 'click', 'a[href]', (event) ->
     link = event.target
-    browserWouldNavigate = !(u.contains(link.href, '#') && up.history.isLocation(link.href)) && !event.defaultPrevented
+
+    browserWouldNavigate = !event.defaultPrevented &&
+      !link.getAttribute('href').match(/^javascript:/) &&
+      !willScrollWithinPage(link)
 
     if browserWouldNavigate
+      console.debug('Preventing browser navigation to preserve test runner (caused by click on link %o)', link)
       window.defaultFollowedLinks.push(link)
-      event.preventDefault()
+      event.preventDefault() # prevent browsers from leaving the test runner
 
   jasmine.addMatchers
     toHaveBeenDefaultFollowed: (util, customEqualityTesters) ->
@@ -128,9 +140,11 @@ beforeEach ->
 
   up.on 'submit', 'form', (event) ->
     form = event.target
+
     browserWouldNavigate = !u.contains(form.action, '#') && !event.defaultPrevented
 
     if browserWouldNavigate
+      console.debug('Preventing browser navigation to preserve test runner (caused by submission of form %o)', form)
       window.defaultSubmittedForms.push(form)
       event.preventDefault()
 

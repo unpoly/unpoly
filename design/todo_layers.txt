@@ -43,6 +43,7 @@ Remaining feature work
 
 - TODO: Document that preventing up:click also prevents the default behavior of the original event
 
+- Consider whether we really want to publish config.clickableSelectors
 
 
 Tests
