@@ -1466,17 +1466,23 @@ describe 'up.link', ->
             expect(clickListener).toHaveBeenCalled()
             expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(false)
 
-        describe 'for a cross-origin link', ->
+        it 'fires a click event on a cross-origin link that will be handled by thebrowser', asyncSpec (next) ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          # In reality the user will have configured an overly greedy selector like
+          # up.fragment.config.instantSelectors.push('a[href]') and we want to help them
+          # not break all their "javascript:" links.
+          link = up.hello fixture('a[href="http://other-site.tld/path"][up-instant]')
 
-          it 'loads the external content as a new page page on mousedown', asyncSpec (next) ->
-            @$link = $fixture('a[href="http://external-domain.com/path"][up-follow][up-instant]')
-            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          clickListener = jasmine.createSpy('click listener')
+          up.on('click', clickListener)
 
-            loadPage = spyOn(up.browser, 'loadPage')
-            Trigger.mousedown(@$link)
+          Trigger.clickSequence(link)
 
-            next =>
-              expect(@followSpy).toHaveBeenCalledWith(@$link[0])
+          next ->
+            expect(followSpy).not.toHaveBeenCalled()
+
+            expect(clickListener).toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
 
         describe 'handling of up.link.config.instantSelectors', ->
 

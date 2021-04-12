@@ -273,9 +273,7 @@ class up.Request extends up.Record
     @isSafe() || @method == 'POST'
 
   willCache: ->
-    if @isCrossOrigin()
-      return false
-    else if @cache == 'auto'
+    if @cache == 'auto'
       return up.network.config.autoCache(this)
     else
       return @cache

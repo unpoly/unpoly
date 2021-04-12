@@ -28,20 +28,32 @@ Release process
 Remaining feature work
 ======================
 
+- up.fragment.config.autoHistory should also activate if the new fragment *contains* a main target
+  - For this we need up.fragment.contains()
+  - Our parser cannot do this:   :main, .other
+  - We could support up.fragment.contains([':main', 'other'])
+
+- Why is it config.autoHistory (Function) instead of autoHistoryTargets ?
+  - More power?
+  - Symmetry to power of autoScroll and autoFocus?
+  - For the user its worse that way, even if symmetrical
+
 - Request should copy context and cacheKey once queued
+
+- up-layer="modal" => up-layer="new modal"
 
 - { cache: 'auto' }
   - Document [up-cache] and [options.cache]
 
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
-- Should auto-options also activate if the new fragment *contains* a main target?
-
 - Do we need up.Request#testURL() or would any developer just use a regular expression on request.url ?
 
 - An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
 
-- TODO: Document that preventing up:click also prevents the default behavior of the original event
+- up:click
+  - TODO: Document that preventing up:click also prevents the default behavior of the original event
+  - TODO: Document that it only fires for unmodified events
 
 - Consider whether we really want to publish config.clickableSelectors
 

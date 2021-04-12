@@ -158,10 +158,7 @@ up.link = do ->
   @return {boolean}
   ###
   isFollowDisabled = (link) ->
-    # We also don't want to handle cross-origin links.
-    # That will be handled in `up.Change.FromURL#newPageReason`, allowing us
-    # to at least support `[up-instant]` for cross-origin links.
-    return e.matches(link, config.noFollowSelectors.join(','))
+    return e.matches(link, config.noFollowSelectors.join(',')) || u.isCrossOrigin(link)
 
   isPreloadDisabled = (link) ->
     return !up.browser.canPushState() ||
@@ -517,6 +514,8 @@ up.link = do ->
   - It is not emitted if the element has disappeared (or was overshadowed)
     between mousedown and click. This can happen if mousedown creates a layer
     over the element, or if a mousedown handler removes a handler.
+
+  TODO Docs: Is not emitted for modified clicks
 
   Stopping an up:click event will also stop the underlying event.
 
