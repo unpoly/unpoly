@@ -28,25 +28,14 @@ Release process
 Remaining feature work
 ======================
 
-- Why is it config.autoHistory (Function) instead of autoHistoryTargets ?
-  - More power?
-  - Symmetry to power of autoScroll and autoFocus?
-  - For the user its worse that way, even if symmetrical
-
 - Request should copy context and cacheKey once queued
+  - Then we can clean up context and failContext
 
 - up-layer="modal" => up-layer="new modal"
-
-- { cache: 'auto' }
-  - Document [up-cache] and [options.cache]
 
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
 - An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
-
-- up:click
-  - TODO: Document that preventing up:click also prevents the default behavior of the original event
-  - TODO: Document that it only fires for unmodified events
 
 - Consider whether we really want to publish config.clickableSelectors
 
@@ -54,6 +43,11 @@ Remaining feature work
 Tests
 =====
 
+- { cache: 'auto' }
+  - Document behavior in [up-cache] and [options.cache]
+- Document up:click
+  - TODO: Document that preventing up:click also prevents the default behavior of the original event
+  - TODO: Document that it only fires for unmodified events
 - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
 - Test that layer callbacks via option always set the layer as current AND the layer as `this`
 - Test that layer callbacks via UJS attribute set the layer as current AND the origin as `this`
