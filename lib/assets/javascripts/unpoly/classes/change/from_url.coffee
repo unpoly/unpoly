@@ -56,9 +56,6 @@ class up.Change.FromURL extends up.Change
 
     @request = up.request(requestAttrs)
 
-    # Callback for callers who need to access the request object.
-    @options.onQueued?({ @request })
-
     # The request is also a promise for its response.
     return @request
 

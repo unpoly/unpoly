@@ -54,6 +54,6 @@ class up.LinkPreloader
     @timer = u.timer(delay, => @preloadNow(link))
 
   preloadNow: (link) ->
-    onQueued = ({ request }) => @currentRequest = request
+    onQueued = (request) => @currentRequest = request
     up.log.muteRejection up.link.preload(link, { onQueued })
     @queued = true

@@ -85,7 +85,7 @@ up.radio = do ->
     stopped = false
 
     lastRequest = null
-    options.onQueued = ({ request }) -> lastRequest = request
+    options.onQueued = (request) -> lastRequest = request
 
     doReload = ->
       # The setTimeout(doReload) callback might already be scheduled

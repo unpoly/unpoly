@@ -171,7 +171,8 @@ class up.Request extends up.Record
       'queueTime',
       'wrapMethod',
       'contentType',
-      'payload'
+      'payload',
+      'onQueued'
     ]
 
   ###**
@@ -278,8 +279,10 @@ class up.Request extends up.Record
     else
       return @cache
 
-  onQueued: ->
+  runQueuedCallbacks: ->
     u.always(this, => @evictExpensiveAttrs())
+
+    @onQueued?(this)
     # @signal?.addEventListener('abort', => @abort())
 
   load: ->

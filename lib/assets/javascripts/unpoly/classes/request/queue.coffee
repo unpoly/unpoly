@@ -19,7 +19,7 @@ class up.Request.Queue extends up.Class
     return @currentRequests.concat(@queuedRequests)
 
   asap: (request) ->
-    request.onQueued()
+    request.runQueuedCallbacks()
     u.always request, (responseOrError) => @onRequestSettled(request, responseOrError)
 
     # When considering whether a request is "slow", we're measing the duration between { queueTime }
