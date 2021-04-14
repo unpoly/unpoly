@@ -224,6 +224,11 @@ CHANGELOG
 Doc comments
 ------------
 
+- Doc when follow is disabled by default
+- Doc when instant is disabled by default
+- Doc when preloading is disabled by default
+  - Also when cache is disabled by default! up.network.config.autoCache!
+- Doc when submit is disabled by default
 - Docs: up.Request is also a promise for its response. Show example.
 - up.syntax.data() is now up.data()
 - [up-main], [up-main=overlay], [up-main=(mode)]

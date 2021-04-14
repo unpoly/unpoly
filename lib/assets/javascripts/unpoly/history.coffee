@@ -20,7 +20,7 @@ up.history = do ->
   @param {Array} [config.restoreTargets=[]]
     A list of possible CSS selectors to [replace](/up.render) when the user goes back in history.
 
-    If this array is empty, the [root layer's default targets](/up.layer.config.root) will be replaced.
+    By default the [root layer's main target](/up.fragment.config.mainTargets).
   @param {boolean} [config.enabled=true]
     Defines whether [fragment updates](/up.render) will update the browser's current URL.
 
@@ -32,7 +32,7 @@ up.history = do ->
   ###
   config = new up.Config ->
     enabled: true
-    restoreTargets: ['body']
+    restoreTargets: [':main']
 
   ###**
   Returns a normalized URL for the previous history entry.
@@ -173,7 +173,6 @@ up.history = do ->
         peel: true
         layer: 'root'
         target: config.restoreTargets,
-        fallback: true
         cache: true
         keep: false
         scroll: 'restore'
