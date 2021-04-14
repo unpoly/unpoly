@@ -1949,6 +1949,18 @@ describe 'up.fragment', ->
               next =>
                 expect(location.href).toMatchURL('/path3')
 
+            it 'adds an history entry when updating a fragment that contains a main target', asyncSpec (next) ->
+              up.fragment.config.mainTargets = ['.target']
+              container = fixture('.container')
+              e.affix(container, '.target')
+              promise = up.render('.container', url: '/path3-1', history: 'auto')
+
+              next =>
+                @respondWithSelector('.container .target')
+                next.await(promise)
+              next =>
+                expect(location.href).toMatchURL('/path3-1')
+
             it 'does not add an history entry when updating a non-main targets', asyncSpec (next) ->
               up.fragment.config.mainTargets = ['.other']
               fixture('.target')
@@ -3590,12 +3602,29 @@ describe 'up.fragment', ->
           it 'focuses a main target', asyncSpec (next) ->
             fixture('.foo-bar')
 
-            up.fragment.config.mainTargets.push('.foo-bar')
+            up.fragment.config.mainTargets.unshift('.foo-bar')
 
             up.render focus: 'auto', fragment: """
               <form class='foo-bar'>
                 <input>
               </form>
+            """
+
+            next =>
+              expect('.foo-bar').toBeFocused()
+
+          it 'focuses a main target within the updated container', asyncSpec (next) ->
+            container = fixture('.container')
+            e.affix(container, '.foo-bar')
+
+            up.fragment.config.mainTargets.push('.foo-bar')
+
+            up.render focus: 'auto', fragment: """
+              <div class='container'>
+                <form class='foo-bar'>
+                  <input>
+                </form>
+              </div>
             """
 
             next =>

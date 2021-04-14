@@ -34,7 +34,7 @@ class up.FragmentProcessor extends up.Record
 
   resolveCondition: (condition) ->
     if condition == 'main'
-      return up.fragment.isMain(@fragment)
+      return up.fragment.contains(@fragment, ':main')
 
   findSelector: (selector) ->
     lookupOpts = { @layer, @origin }

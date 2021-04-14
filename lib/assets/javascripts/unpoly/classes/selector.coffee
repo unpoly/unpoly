@@ -21,6 +21,13 @@ class up.Selector
     return u.every @filters, (filter) -> filter(element)
 
   descendants: (root) ->
+    # There's a requirement that prior selectors must match first.
+    # The background here is that up.fragment.config.mainTargets may match multiple
+    # elements in a layer (like .container and body), but up.fragment.get(':main') should
+    # prefer to match .container.
+    #
+    # To respect this priority we do not join @selectors into a single, comma-separated
+    # CSS selector, but rather make one query per selector and concatenate the results.
     results = u.flatMap(@selectors, (selector) -> e.all(root, selector))
     return u.filter results, (element) => @passesFilter(element)
 

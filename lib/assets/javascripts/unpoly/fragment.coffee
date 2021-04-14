@@ -111,9 +111,9 @@ up.fragment = do ->
     runScripts: false
 
     autoHistory: (fragment) ->
-      return isMain(fragment)
+      return contains(fragment, ':main')
 
-    autoFocus: ['hash', 'autofocus', 'target-if-main', 'target-if-lost']
+    autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost']
 
     autoScroll: ['hash', 'layer-if-main']
 
@@ -1061,7 +1061,7 @@ up.fragment = do ->
   @param {string} selector
     The CSS selector to match.
   @param {up.Layer|string|Element}
-    options.layer
+    [options.layer]
   @return {NodeList<Element>|Array<Element>}
     A list of all matching elements.
   @experimental
@@ -1069,6 +1069,9 @@ up.fragment = do ->
   getSubtree = (element, selector, options = {}) ->
     selector = parseSelector(selector, element, options)
     return selector.subtree(element)
+
+  contains = (element, selector) ->
+    getSubtree(element, selector).length > 0
 
   ###**
   Returns the first element that matches the selector by testing the element itself
@@ -1515,9 +1518,6 @@ up.fragment = do ->
     selector = parseSelector(selector, element, options)
     return selector.matches(element)
 
-  isMain = (element) ->
-    return matches(element, ':main')
-
   up.on 'up:app:boot', ->
     body = document.body
     body.setAttribute('up-source', up.history.location)
@@ -1538,6 +1538,7 @@ up.fragment = do ->
     get: getOne
     all: getAll
     subtree: getSubtree
+    contains: contains
     closest: closest
     source: sourceOf
     hello: hello
@@ -1552,7 +1553,6 @@ up.fragment = do ->
     expandTargets: expandTargets
     toTarget: toTarget
     matches: matches
-    isMain: isMain
     hasAutoHistory: hasAutoHistory
 
 up.replace = up.fragment.replace
