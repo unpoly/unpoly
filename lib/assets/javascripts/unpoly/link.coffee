@@ -110,6 +110,10 @@ up.link = do ->
     If set to `true`, Unpoly will always load preload links.
 
     If set to `false`, Unpoly will never preload links.
+  @param {Array<string>} [config.cickableSelectors]
+    A list of CSS selectors matching elements that should behave like links or buttons.
+
+    @see [up-clickable]
   @stable
   ###
   config = new up.Config ->

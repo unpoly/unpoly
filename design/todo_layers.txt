@@ -28,16 +28,9 @@ Release process
 Remaining feature work
 ======================
 
-- Request should copy context and cacheKey once queued
-  - Then we can clean up context and failContext
-
 - up-layer="modal" => up-layer="new modal"
 
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
-
-- An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
-
-- Consider whether we really want to publish config.clickableSelectors
 
 
 Tests
@@ -270,6 +263,7 @@ Doc comments
 Later?
 ------
 
+- An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
 - Publish [up-base-layer] and { baseLayer }
   - In up.render()
   - In a[up-follow]
@@ -429,7 +423,9 @@ Later?
 - Can we not focus if a compiler has focused?
 - When clicking on a #hash link in a history-less overlay we should handle the link and not follow but revealHash()
 - Replace { revealTop } with { revealAim: 'top' | 'center' | 'min-motion' }
-
+- Request should copy context and cacheKey once queued
+  - Then we can clean up context and failContext
+- Allow to configure browsers that will not load Unpoly
 
 Decisions
 ---------
