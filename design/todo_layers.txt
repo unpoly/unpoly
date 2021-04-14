@@ -42,8 +42,6 @@ Remaining feature work
 
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
-- Do we need up.Request#testURL() or would any developer just use a regular expression on request.url ?
-
 - An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
 
 - up:click

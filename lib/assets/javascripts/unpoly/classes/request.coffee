@@ -462,22 +462,3 @@ class up.Request extends up.Record
 
   @getter 'description', ->
     @method + ' ' + @url
-
-  ###**
-  Returns whether the given URL pattern matches this request's URL.
-
-  \#\#\# Example
-
-  ````javascript
-  let request = up.request({ url: '/foo/123' })
-  request.testURL('/foo/*') // returns true
-  request.testURL('/bar/*') // returns false
-  ```
-
-  @property up.Request#testURL
-  @param {string} pattern
-  @return {boolean}
-  @experimental
-  ###
-  testURL: (pattern) ->
-    return new up.URLPattern(pattern).test(@url)

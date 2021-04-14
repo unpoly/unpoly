@@ -1007,7 +1007,7 @@ describe 'up.network', ->
             expect(request).toEqual(jasmine.any(up.Request))
             expect(response).toEqual(jasmine.any(up.Response))
 
-            if request.testURL('/baz')
+            if request.url == '/baz'
               return '/foo'
 
           up.request(url: '/foo', cache: true)
