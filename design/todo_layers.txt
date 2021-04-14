@@ -28,11 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- up.fragment.config.autoHistory should also activate if the new fragment *contains* a main target
-  - For this we need up.fragment.contains()
-  - Our parser cannot do this:   :main, .other
-  - We could support up.fragment.contains([':main', 'other'])
-
 - Why is it config.autoHistory (Function) instead of autoHistoryTargets ?
   - More power?
   - Symmetry to power of autoScroll and autoFocus?
