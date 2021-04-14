@@ -1949,6 +1949,19 @@ describe 'up.fragment', ->
               next =>
                 expect(location.href).toMatchURL('/path3')
 
+            it 'allows to configure auto-history targets that are not a main target', asyncSpec (next) ->
+              up.fragment.config.autoHistoryTargets = ['.target']
+              expect(up.fragment.config.mainTargets).not.toContain('.target')
+
+              fixture('.target')
+              promise = up.render('.target', url: '/path3-2', history: 'auto')
+
+              next =>
+                @respondWithSelector('.target')
+                next.await(promise)
+              next =>
+                expect(location.href).toMatchURL('/path3-2')
+
             it 'adds an history entry when updating a fragment that contains a main target', asyncSpec (next) ->
               up.fragment.config.mainTargets = ['.target']
               container = fixture('.container')

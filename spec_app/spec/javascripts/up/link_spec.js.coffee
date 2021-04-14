@@ -114,7 +114,7 @@ describe 'up.link', ->
   #            respondWith(html, title)
   #            promise
 
-          up.fragment.config.autoHistory = true
+          up.fragment.config.navigateOptions.history = true
 
           $link1 = $fixture('a[href="/one"][up-target=".target"]')
           $link2 = $fixture('a[href="/two"][up-target=".target"]')
@@ -229,7 +229,7 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
-          up.fragment.config.autoHistory = true
+          up.fragment.config.navigateOptions.history = true
 
           up.network.config.cacheExpiry = 0
 
@@ -300,7 +300,7 @@ describe 'up.link', ->
           # so we don't lose the Jasmine runner interface.
           up.history.config.restoreTargets = ['.container']
 
-          up.fragment.config.autoHistory = true
+          up.fragment.config.navigateOptions.history = true
 
           up.network.config.cacheExpiry = 0
 
@@ -915,7 +915,7 @@ describe 'up.link', ->
 
       it 'adds a history entry', asyncSpec (next) ->
         up.history.config.enabled = true
-        up.fragment.config.autoHistory = true
+        up.fragment.config.navigateOptions.history = true
 
         $fixture('.target')
         $link = $fixture('a[href="/new-path"][up-target=".target"]')

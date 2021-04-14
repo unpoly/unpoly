@@ -50,12 +50,10 @@ up.fragment = do ->
     If set to `false` Unpoly will replace the first fragment
     matching the given target selector in the link's [layer](/up.layer).
 
-  @param {boolean|Function(Element)} [config.autoHistory]
-    Whether update history with `{ history: 'auto' }`.
+  @param {Array<string>} [config.autoHistoryTargets]
+    When an updated fragments contain an element matching one of the given CSS selectors, history will be updated with `{ history: 'auto' }`.
 
     By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
-
-    You may also configure a function that accepts the new fragment and return a boolean value.
 
   @param {boolean|string|Function(Element)} [config.autoScroll]
     How to scroll after updating a fragment with `{ scroll: 'auto' }`.
@@ -110,8 +108,7 @@ up.fragment = do ->
 
     runScripts: false
 
-    autoHistory: (fragment) ->
-      return contains(fragment, ':main')
+    autoHistoryTargets: [':main']
 
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost']
 
@@ -1417,9 +1414,11 @@ up.fragment = do ->
     return new up.Selector(expandedTargets, filters)
 
   hasAutoHistory = (fragment) ->
-    unless result = u.evalOption(config.autoHistory, fragment)
-      up.puts('up.render()', "Will not auto-update history because up.fragment.config.autoHistory(fragment) returned false")
-    result
+    if contains(fragment, config.autoHistoryTargets)
+      true
+    else
+      up.puts('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets")
+      false
 
   ###**
   A pseudo-selector that matches the layer's main target.

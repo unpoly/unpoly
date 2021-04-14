@@ -122,7 +122,7 @@ up.layer = do ->
     address bar and window title.
 
     If set to `'auto'`, the overlay will render history if its initial fragment
-    is an [auto history target](/up.fragment.config.autoHistory).
+    is an [auto history target](/up.fragment.config.autoHistoryTargets).
 
     If set to `true`, the overlay will always render history.
     If set to `false`, the overlay will never render history.
