@@ -18,8 +18,12 @@ up.migrate.handleLayerOptions = (options) ->
     up.migrate.warn('Layer option { template } has been removed. Use { class } or modify the layer HTML on up:layer:open.')
 
   if options.layer == 'page'
-    up.migrate.warn('Layer "page" has been renamed to "root"')
+    up.migrate.warn("Option { layer: 'page' } has been renamed to { layer: 'root' }.")
     options.layer = 'root'
+
+  if options.layer == 'modal' || options.layer == 'popup'
+    up.migrate.warn("Option { layer: '#{options.layer}' } has been removed. Did you mean { layer: 'overlay' }?")
+    options.layer = 'overlay'
 
 up.migrate.handleTetherOptions = (options) ->
   [position, align] = options.position.split('-')
