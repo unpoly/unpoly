@@ -153,7 +153,7 @@ up.fragment = do ->
   @experimental
   ###
   sourceOf = (element, options = {}) ->
-    element = getOne(element, options)
+    element = getSmart(element, options)
     return e.closestAttr(element, 'up-source')
 
   ###**
@@ -730,7 +730,7 @@ up.fragment = do ->
   ###
   hello = (element, options = {}) ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    element = getOne(element)
+    element = getSmart(element)
 
     # Callers may pass descriptions of child elements that were [kept](/up-keep)
     # as { options.keepPlans }. For these elements up.hello() emits an event
@@ -915,7 +915,7 @@ up.fragment = do ->
     The first matching element, or `undefined` if no such element matched.
   @stable
   ###
-  getOne = (args...) ->
+  getSmart = (args...) ->
     options = u.extractOptions(args)
     selector = args.pop()
     root = args[0]
@@ -928,7 +928,7 @@ up.fragment = do ->
 
     if root
       # We don't match around { origin } if we're given a root for the search.
-      return getFirst(root, selector, options)
+      return getDumb(root, selector, options)
 
     # If we don't have a root element we will use a context-sensitive lookup strategy
     # that tries to match elements in the vicinity of { origin } before going through
@@ -940,7 +940,7 @@ up.fragment = do ->
     )
     return finder.find()
 
-  getFirst = (args...) ->
+  getDumb = (args...) ->
     return getAll(args...)[0]
 
   CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
@@ -1116,7 +1116,7 @@ up.fragment = do ->
   functions for fragment lookup:
 
   - `up.fragment.all()`
-  - `up.fragment.first()`
+  - `up.fragment.get()`
   - `up.fragment.closest()`
 
   @function up.destroy
@@ -1135,7 +1135,7 @@ up.fragment = do ->
   destroy = (args...) ->
     options = parseTargetAndOptions(args)
 
-    if options.element = getOne(options.target, options)
+    if options.element = getSmart(options.target, options)
       new up.Change.DestroyFragment(options).execute()
 
     return up.migrate.formerlyAsync?('up.destroy()')
@@ -1157,7 +1157,7 @@ up.fragment = do ->
   functions for fragment lookup:
 
   - `up.fragment.all()`
-  - `up.fragment.first()`
+  - `up.fragment.get()`
   - `up.fragment.closest()`
 
   @selector .up-destroying
@@ -1221,7 +1221,7 @@ up.fragment = do ->
   reload = (args...) ->
     options = parseTargetAndOptions(args)
     options.target ||= ':main'
-    element = getOne(options.target, options)
+    element = getSmart(options.target, options)
     options.url ?= sourceOf(element)
     options.headers ||= {}
     options.headers[up.protocol.headerize('reloadFromTime')] = timeOf(element)
@@ -1533,8 +1533,8 @@ up.fragment = do ->
     destroy: destroy
     render: render
     navigate: navigate
-    first: getFirst
-    get: getOne
+    get: getSmart
+    getDumb: getDumb
     all: getAll
     subtree: getSubtree
     contains: contains

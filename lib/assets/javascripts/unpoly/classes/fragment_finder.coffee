@@ -20,7 +20,7 @@ class up.FragmentFinder
   findInVicinity: ->
     if (parts = @selector.match(DESCENDANT_SELECTOR))
       if parent = up.fragment.closest(@origin, parts[1], @options)
-        return up.fragment.first(parent, parts[2])
+        return up.fragment.getDumb(parent, parts[2])
 
   findInLayer: ->
-    return up.fragment.first(@selector, @options)
+    return up.fragment.getDumb(@selector, @options)
