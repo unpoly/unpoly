@@ -28,8 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- up-layer="modal" => up-layer="new modal"
-
 - Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 
 

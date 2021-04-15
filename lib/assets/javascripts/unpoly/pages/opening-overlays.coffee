@@ -22,10 +22,10 @@
 
   You can change the default layer mode in `up.layer.config.mode`.
 
-  As a **shorthand** you may also pass the layer mode directly as `[up-layer]` attribute:
+  As a **shorthand** you may also append the layer mode to the `[up-layer=new]` attribute:
 
   ```html
-  <a href="/users/new/" up-layer="drawer">
+  <a href="/users/new/" up-layer="new drawer">
   ```
 
   Close conditions

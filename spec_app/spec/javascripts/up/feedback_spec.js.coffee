@@ -360,7 +360,7 @@ describe 'up.feedback', ->
         next => expect($link).not.toHaveClass('up-active')
 
       it 'removes .up-active from a clicked modal opener if the target is already preloaded (bugfix)', asyncSpec (next) ->
-        $link = $fixture('a[href="/foo"][up-target=".main"][up-layer=modal]')
+        $link = $fixture('a[href="/foo"][up-target=".main"][up-layer="new modal"]')
         up.hello($link)
         up.link.preload($link)
 

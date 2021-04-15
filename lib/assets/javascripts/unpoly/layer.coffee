@@ -231,23 +231,27 @@ up.layer = do ->
     up.migrate.handleLayerOptions?(options)
 
     if u.isGiven(options.layer) # might be the number 0, which is falsy
-      if options.layer == 'swap'
-        options.layer = 'new'
-        if up.layer.isOverlay()
-          options.baseLayer = 'parent'
-      else if options.layer == 'shatter'
-        options.layer = 'new'
-        options.baseLayer = 'root'
 
-      if options.layer == 'new'
-        # If the user wants to open a new layer, but does not pass a { mode },
-        # we assume the default mode from up.layer.config.mode.
-        options.mode ||= config.mode
-      else if isOverlayMode(options.layer)
-        # We allow passing an overlay mode in { layer }, which will
-        # open a new layer with that mode.
-        options.mode = options.layer
+      if match = String(options.layer).match(/^(new|shatter|swap)( (\w+))?/)
         options.layer = 'new'
+
+        openMethod = match[1]
+        shorthandMode = match[3]
+
+        # The mode may come from one of these sources:
+        # (1) As { mode } option
+        # (2) As a { layer } short hand like { layer: 'new popup' }
+        # (3) As the default in config.mode
+        options.mode ||= shorthandMode || config.mode
+
+        if openMethod == 'swap'
+          # If an overlay is already open, we replace that with a new overlay.
+          # If we're on the root layer, we open an overlay.
+          if up.layer.isOverlay()
+            options.baseLayer = 'parent'
+        else if openMethod == 'shatter'
+          # Dismiss all overlays and open a new overlay.
+          options.baseLayer = 'root'
     else
       # If no options.layer is given we still want to avoid updating "any" layer.
       # Other options might have a hint for a more appropriate layer.
@@ -273,7 +277,6 @@ up.layer = do ->
     # so changes with `{ layer: 'new' }` will know what to stack on.
     # Note if options.baseLayer is given, up.layer.get('current', options) will
     # return the resolved version of that.
-    # TODO: Test this
     options.baseLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
 
   build = (options) ->

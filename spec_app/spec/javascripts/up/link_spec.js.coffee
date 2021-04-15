@@ -881,7 +881,7 @@ describe 'up.link', ->
         it 'calls up.request() with a { preload: true } option', asyncSpec (next) ->
           requestSpy = spyOn(up, 'request')
 
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
           up.link.preload($link)
 

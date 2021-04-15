@@ -1246,10 +1246,10 @@ describe 'up.layer', ->
           up.layer.normalizeOptions(options)
           expect(options).toEqual jasmine.objectContaining(layer: 'any')
 
-      describe 'for an mode passed as { layer } option', ->
+      describe 'for an mode passed as the { layer: "new $MODE" } shorthand option', ->
 
         it 'transfers the mode to the { mode } option and sets { layer: "new" }', ->
-          options = { layer: 'cover' }
+          options = { layer: 'new cover' }
           up.layer.normalizeOptions(options)
           expect(options).toEqual jasmine.objectContaining(layer: 'new', mode: 'cover')
 

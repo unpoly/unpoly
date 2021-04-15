@@ -1752,8 +1752,8 @@ describe 'up.fragment', ->
               expect(result.layer).toBe(up.layer.current)
               done()
 
-          it 'allows to pass the mode for the new layer as { layer } (as a shortcut)', ->
-            up.render('.element', content: 'new text', layer: 'drawer')
+          it 'allows to pass the mode for the new layer as { layer: "new $MODE" } (as a shortcut)', ->
+            up.render('.element', content: 'new text', layer: 'new drawer')
 
             expect(up.layer.current.mode).toEqual('drawer')
 
