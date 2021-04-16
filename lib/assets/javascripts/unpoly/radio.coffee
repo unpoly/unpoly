@@ -95,11 +95,10 @@ up.radio = do ->
       return if stopped
 
       if shouldPoll(fragment)
-        up.emit(fragment, 'up:poll:reload', 'Reloading fragment')
         u.always(up.reload(fragment, options), doSchedule)
       else
+        up.puts '[up-poll]', 'Polling is disabled'
         # Reconsider after 10 seconds at most
-        up.emit(fragment, 'up:poll:disabled', 'Polling is disabled')
         doSchedule(Math.min(10 * 1000, interval))
 
     doSchedule = (delay = interval) ->
@@ -119,26 +118,6 @@ up.radio = do ->
     doSchedule()
 
     return destructor
-
-  ###**
-  This event is emitted before a [polling fragment](/up-poll) is being reloaded.
-
-  @event up:poll:reload
-  @param {event.target}
-    The polling fragment.
-  @experimental
-  ###
-
-  ###**
-  This event is emitted when a [polling fragment](/up-poll) is *not* reloaded due to polling being disabled.
-
-  Use `up.radio.config.pollEnabled` to enable or disable polling.
-
-  @event up:poll:disabled
-  @param {event.target}
-    The polling fragment.
-  @experimental
-  ###
 
   ###**
   Stops [polling](/up-poll) the given element.
