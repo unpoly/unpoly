@@ -28,8 +28,6 @@ Release process
 Remaining feature work
 ======================
 
-- Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
-
 
 Tests
 =====
@@ -261,6 +259,7 @@ Doc comments
 Later?
 ------
 
+- Support up-poll=true, up-poll=auto, startPolling({ enabled = true })
 - An up:app:booted event (now removed) would be useful for something like DeviceClasses, which is only available after the initial compilation
 - Publish [up-base-layer] and { baseLayer }
   - In up.render()
