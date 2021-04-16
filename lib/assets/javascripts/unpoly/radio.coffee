@@ -23,7 +23,7 @@ up.radio = do ->
     By default this contains the [`[up-hungry]`](/up-hungry) attribute.
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll] interval in milliseconds.
-  @param {boolean|string} [config.pollEnabled='auto']
+  @param {boolean|string|Function<Element>} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
     When set to `'auto'` Unpoly will poll if one of the following applies:
@@ -35,6 +35,8 @@ up.radio = do ->
     When set to `true`, Unpoly will always allow polling.
 
     When set to `false`, Unpoly will never allow polling.
+
+    You may also pass a function that accepts the polling fragment and returns `true`, `false` or `'auto'`.
   @stable
   ###
   config = new up.Config ->
@@ -93,9 +95,11 @@ up.radio = do ->
       return if stopped
 
       if shouldPoll(fragment)
+        up.emit(fragment, 'up:poll:reload', 'Reloading fragment')
         u.always(up.reload(fragment, options), doSchedule)
       else
         # Reconsider after 10 seconds at most
+        up.emit(fragment, 'up:poll:disabled', 'Polling is disabled')
         doSchedule(Math.min(10 * 1000, interval))
 
     doSchedule = (delay = interval) ->
@@ -115,6 +119,26 @@ up.radio = do ->
     doSchedule()
 
     return destructor
+
+  ###**
+  This event is emitted before a [polling fragment](/up-poll) is being reloaded.
+
+  @event up:poll:reload
+  @param {event.target}
+    The polling fragment.
+  @experimental
+  ###
+
+  ###**
+  This event is emitted when a [polling fragment](/up-poll) is *not* reloaded due to polling being disabled.
+
+  Use `up.radio.config.pollEnabled` to enable or disable polling.
+
+  @event up:poll:disabled
+  @param {event.target}
+    The polling fragment.
+  @experimental
+  ###
 
   ###**
   Stops [polling](/up-poll) the given element.

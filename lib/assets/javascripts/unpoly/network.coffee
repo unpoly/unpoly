@@ -490,7 +490,7 @@ up.network = do ->
   - The connection's effective round-trip time is longer than `up.network.config.badRTT`.
   - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
 
-  By default Unpoly will disable [preloading](/up-preload) or [polling](/up-poll) if requests
+  By default Unpoly will disable [preloading](/up-preload) and [polling](/up-poll) if requests
   should be avoided.
 
   @function up.network.shouldReduceRequests
