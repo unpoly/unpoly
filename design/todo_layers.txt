@@ -23,6 +23,10 @@ Release process
 - Announce on makandra cards
 - Close fixed issues.
 - Update https://makandracards.com/makandra/54158-html-forms-with-multiple-submit-buttons
+- Update better_errors card
+  - should use up:fragment:loaded
+  - should use request.loadPage() instead of request.navigate()
+
 
 
 Remaining feature work
@@ -32,9 +36,6 @@ Remaining feature work
 Tests
 =====
 
-- Document up:click
-  - TODO: Document that preventing up:click also prevents the default behavior of the original event
-  - TODO: Document that it only fires for unmodified events
 - Test that we can pass multiple targets as an array: up.render({ target: [ ... ]})
 - Test that layer callbacks via option always set the layer as current AND the layer as `this`
 - Test that layer callbacks via UJS attribute set the layer as current AND the origin as `this`
@@ -203,6 +204,9 @@ CHANGELOG
 Doc comments
 ------------
 
+- Document up:click
+  - TODO: Document that preventing up:click also prevents the default behavior of the original event
+  - TODO: Document that it only fires for unmodified events
 - Doc when follow is disabled by default
 - Doc when instant is disabled by default
 - Doc when preloading is disabled by default
@@ -212,37 +216,19 @@ Doc comments
 - up.syntax.data() is now up.data()
 - [up-main], [up-main=overlay], [up-main=(mode)]
 - up:form:validate
-- Document request queue changes
-  - Preload limits
-  - New options
-  - It's LIFO now
 - up:fragment:loaded
 - [up-content], [up-content=overlay], ...
-- Update better_errors card
-  - should use up:fragment:loaded
-  - should use request.loadPage() instead of request.navigate()
-- Don't document each option a second time as failVariant. Instead explain in the method doc and { failOptions } what to do here.
-- [up-follow] vs. [up-target] vs. [up-layer] vs. [up-modal] etc.
-  - Move all fragment update docs to a[up-follow] and form[up-follow]
-  - There are separate doc entries for a[up-target] and form[up-target]
-  - There are separate doc entries for a[up-layer] and form[up-layer]
-    - These have all the layer-specific options
 - We now have unpoly-bootstrap3 and unpoly-bootstrap4
 - Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
-- All layer-related options should be moved to a[up-layer] or form[up-layer] or both
-- Document changes in options { history } (now boolean) and { location } (now a string) changes
 - Document new emit options { layer, base }
 - up.preload() can now fail if preloading is disabled
 - Docs: up:form:submit event now has { options } to manipulate
 - Docs: up:link:follow event now has { options } to manipulate
 - Expose up.fragment.all() as experimental API
 - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
-- { navigate }
 - Document that up.on selector can be a function
 - I think the slow/recover events changed
-- { failOptions }
 - up.link.config
-- New up.Request properties (at least { origin }, { layer })
 - Publish up.Request#loadPage()
 - Document that { target } can be an array
 - Document up.network.abort().
@@ -250,7 +236,9 @@ Doc comments
 - Document up.network.abort(conditionsObj)
 - Document up:request:aborted
 - More Documentation from Diff
-- CHANGELOG from diff
+- CHANGELOG:
+  - Fix unpoly2 slides
+  - Link to unpoly2 slides
 
 
 
