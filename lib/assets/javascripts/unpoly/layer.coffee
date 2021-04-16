@@ -876,6 +876,7 @@ up.layer = do ->
     'dismiss' # yes
     'isRoot' # yes
     'isOverlay' # yes
+    'isFront', # yes
     'on' # yes
     'off' # yes
     'emit' # yes
