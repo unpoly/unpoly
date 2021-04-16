@@ -23,7 +23,7 @@ up.radio = do ->
     By default this contains the [`[up-hungry]`](/up-hungry) attribute.
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll] interval in milliseconds.
-  @param {boolean|string|Function<Element>} [config.pollEnabled=true]
+  @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
     When set to `'auto'` Unpoly will poll if one of the following applies:

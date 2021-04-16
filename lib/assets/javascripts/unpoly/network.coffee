@@ -49,20 +49,9 @@ up.network = do ->
   TODO: Docs for up.network.config.clearCache
 
   @property up.network.config
-  @param {number} [config.preloadDelay=75]
-    The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
-    starts preloading.
-  @param {number} [config.cacheSize=50]
-    The maximum number of responses to cache.
-    If the size is exceeded, the oldest items will be dropped from the cache.
-  @param {number} [config.cacheExpiry=300000]
-    The number of milliseconds until a cache entry expires.
-    Defaults to 5 minutes.
-  @param {number} [config.badResponseTime=300]
-    How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
-    Use this to prevent flickering of spinners.
+
   @param {number} [config.concurrency=4]
-    The maximum number of concurrent active requests.
+    The maximum number of concurrently loading requests.
 
     Additional requests are queued. [Preload](/a-up-preload) requests are
     always queued behind non-preload requests.
@@ -72,6 +61,7 @@ up.network = do ->
 
     Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
     regardless of what you configure here.
+
   @param {boolean} [config.wrapMethod]
     Whether to wrap non-standard HTTP methods in a POST request.
 
@@ -80,16 +70,52 @@ up.network = do ->
 
     If you disable method wrapping, make sure that your server always redirects with
     with a 303 status code (rather than 302).
-  @param {number} [config.badDownlink=0.6]
-    The connection's minimum effective bandwidth estimate required
-    to [enable preloading](/up.network.config#config.preloadEnabled).
 
-    The value is given in megabits per second.
-  @param {number} [config.badRTT=0.6]
-    The connection's maximum effective round-trip time required
-    to [enable preloading](/up.network.config#config.preloadEnabled).
+  @param {number} [config.cacheSize=70]
+    The maximum number of responses to cache.
+
+    If the size is exceeded, the oldest responses will be dropped from the cache.
+
+  @param {number} [config.cacheExpiry=300000]
+    The number of milliseconds until a cached response expires.
+
+    Defaults to 5 minutes.
+
+  @param {number} [config.badResponseTime=300]
+    How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
 
     The value is given in milliseconds.
+
+  @param {number} [config.badDownlink=0.6]
+    The connection's minimum effective bandwidth estimate required
+    to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
+
+    The value is given in megabits per second. Higher is better.
+
+  @param {number} [config.badRTT=0.6]
+    The connection's maximum effective round-trip time required
+    to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
+
+    The value is given in milliseconds. Lower is better.
+
+  @param {number} [config.badResponseTime=800]
+    The time to wait for a response before `up:request:late` is emitted.
+
+    This metric is *not* considered for the decision to
+    [reduce requests](/up.network.shouldReduceRequests).
+
+    The value is given in milliseconds.
+
+  @param {Function(up.Request): boolean} config.autoCache
+    Whether to cache the given request with `{ cache: 'auto' }`.
+
+    By default Unpoly will auto-cache requests with safe HTTP methods.
+
+  @param {Function(up.Request, up.Response)} config.clearCache
+    Whether to [clear the cache](/up.cache.clear) after the given request and response.
+
+    By default Unpoly will clear the entire cache after a request with an unsafe HTTP method.
+
   @param {Array<string>|Function(up.Request): Array<string>} [config.requestMetaKeys]
     An array of request property names
     that are sent to the server as [HTTP headers](/up.protocol).
@@ -139,18 +165,18 @@ up.network = do ->
   @stable
   ###
   config = new up.Config ->
-    badResponseTime: 800
-    cacheSize: 70
-    cacheExpiry: 1000 * 60 * 5
     concurrency: 4
     wrapMethod: true
-    # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
-    # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
+    cacheSize: 70
+    cacheExpiry: 1000 * 60 * 5
     badDownlink: 0.6
     badRTT: 750
-    requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+    badResponseTime: 800
+    # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
+    # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     autoCache: (request) -> request.isSafe()
     clearCache: (request, _response) -> !request.isSafe()
+    requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
 
   queue = new up.Request.Queue()
 
@@ -290,39 +316,35 @@ up.network = do ->
         }
       }
 
-
   \#\#\# Caching
 
-  When an `{ cache: true }` option is given, responses are cached.
+  You may cache responses by passing a `{ cache }` option. Responses for a cached
+  request will resolve instantly.
 
-  If requesting a URL with a non-`GET` method, the response will
-  not be cached and the entire cache will be cleared.
+  By default the cache cleared after making a request with an unsafe HTTP method.
 
   You can configure caching with the [`up.network.config`](/up.network.config) property.
 
-  \#\#\# Events
-
-  Multiple events may be emitted throughout the lifecycle of a request:
-
-  - If a network connection is attempted,
-    an `up:request:load` event is emitted.
-  - When a response is received,
-    an `up:request:loaded` event is emitted.
-  - When the request fails from a fatal error like a timeout or loss of network connectivity,
-    an `up:request:fatal` event is emitted.
-  - When a request is [aborted](/up.network.abort),
-    an `up:request:aborted` event is emitted.
-
   @function up.request
+
   @param {string} [url]
     The URL for the request.
 
     Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
+
   @param {string} [options.url]
-    You can omit the first string argument and pass the URL as
-    a `request` property instead.
+    The URL for the request.
+
   @param {string} [options.method='GET']
-    The HTTP method for the options.
+    The HTTP method for the request.
+
+  @param {Object|up.Params|string|Array} [options.params={}]
+    [Parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
+
   @param {boolean} [options.cache=false]
     Whether to read from and write to the [cache](/up.cache).
 
@@ -330,25 +352,51 @@ up.network = do ->
     to the network. If no cached response exists, Unpoly will make a request and cache
     the server response.
 
+    With `{ cache: 'auto' }` Unpoly will use the cache only if `up.network.config.autoCache`
+    returns `true` for this request.
+
     With `{ cache: false }` (the default) Unpoly will always make a network request.
 
-    Only cache GET requests are cacheable.
+  @param {boolean} [options.clearCache]
+    Whether to clear the cache after this request.
+
+    Defaults to the result of `up.network.config.clearCache`.
 
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
-  @param {Object|FormData|string|Array} [options.params={}]
-    [Parameters](/up.Params) that should be sent as the request's payload.
+
+    Note that Unpoly will by default send a number of custom request headers.
+    See `up.protocol` and `up.network.config.metaKeys` for details.
+
+  @param {boolean} [options.wrapMethod]
+    Whether to wrap non-standard HTTP methods in a POST request.
+
+    If this is set, methods other than GET and POST will be converted to a `POST` request
+    and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
+
+    Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
+
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
     If `up.network.config.maxRequests` is set, the timeout
     will not include the time spent waiting in the queue.
+
   @param {string} [options.target='body']
     The CSS selector that will be sent as an `X-Up-Target` header.
+
+  @param {string} [options.layer='current']
+    The [layer](/up.layer) this request is associated with.
+
   @param {string} [options.failTarget='body']
     The CSS selector that will be sent as an `X-Up-Fail-Target` header.
+
+  @param {string} [options.layer='current']
+    The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/server-errors).
+
   @param {Element} [options.origin]
     The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
+
   @param {Element} [options.contentType]
     The format in which to encode the request params.
 
@@ -357,10 +405,23 @@ up.network = do ->
 
     If this option is omitted Unpoly will prefer `application/x-www-form-urlencoded`,
     unless request params contains binary data.
+
+  @param {string} [options.payload]
+    A custom payload for this request.
+
+    By default Unpoly will build a payload from the given `{ params }` option.
+    Therefore this option is not required when making a standard link or form request to a server
+    that renders HTML.
+
+    A use case for this option is talking to a JSON API that expects requests with a `application/json` payload.
+
+    If a `{ payload }` option is given you must also pass a `{ contentType }`.
+
   @return {up.Request}
     An object with information about the request.
 
     The request object is also a promise for its `up.Response`.
+
   @stable
   ###
   makeRequest = (args...) ->

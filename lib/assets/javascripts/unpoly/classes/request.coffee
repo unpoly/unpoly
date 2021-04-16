@@ -63,6 +63,9 @@ class up.Request extends up.Record
   ###**
   An object of additional HTTP headers.
 
+  Note that Unpoly will by default send a number of custom request headers.
+  See `up.protocol` and `up.network.config.metaKeys` for details.
+
   @property up.Request#headers
   @param {Object} headers
   @stable

@@ -814,6 +814,9 @@ up.link = do ->
     to the network. If no cached response exists, Unpoly will make a request and cache
     the server response.
 
+    With `[up-cache=auto]` Unpoly will use the cache only if `up.network.config.autoCache`
+    returns `true` for the request.
+
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param [up-clear-cache]

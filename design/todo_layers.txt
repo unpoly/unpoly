@@ -32,8 +32,6 @@ Remaining feature work
 Tests
 =====
 
-- { cache: 'auto' }
-  - Document behavior in [up-cache] and [options.cache]
 - Document up:click
   - TODO: Document that preventing up:click also prevents the default behavior of the original event
   - TODO: Document that it only fires for unmodified events
