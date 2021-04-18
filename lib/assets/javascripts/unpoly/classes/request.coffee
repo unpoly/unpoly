@@ -91,7 +91,7 @@ class up.Request extends up.Record
   Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
 
   @property up.Request#wrapMethod
-  @param {boolean} enabled
+  @param {boolean} wrapMethod
   @stable
   ###
 
@@ -107,7 +107,7 @@ class up.Request extends up.Record
   TODO: Docs
 
   @property up.Request#failContext
-  @param {Object} context
+  @param {Object} failContext
   @stable
   ###
 
@@ -123,7 +123,7 @@ class up.Request extends up.Record
   TODO: Docs
 
   @property up.Request#failMode
-  @param {string} mode
+  @param {string} failMode
   @stable
   ###
 

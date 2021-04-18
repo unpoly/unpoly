@@ -40,6 +40,7 @@ up.history = do ->
   Only history entries pushed by Unpoly will be considered.
 
   @property up.history.previousLocation
+  @param {string} previousLocation
   @experimental
   ###
   previousLocation = undefined
@@ -59,6 +60,7 @@ up.history = do ->
   Returns a normalized URL for the current history entry.
 
   @property up.history.location
+  @param {string} location
   @experimental
   ###
   currentLocation = (normalizeOptions) ->

@@ -789,7 +789,7 @@ up.layer = do ->
   To temporarily change the current layer from your own code, use `up.Layer#asCurrent()`.
 
   @property up.layer.current
-  @param {up.Layer} layer
+  @param {up.Layer} current
   @stable
   ###
 
@@ -806,30 +806,43 @@ up.layer = do ->
   ###
 
   ###**
-  TODO: Docs
+  Returns an `up.Layer` object for the given [layer option](/layer-option).
 
   @function up.layer.get
+  @param {string|up.Layer|number} [layer='current']
+    The [layer option](/layer-open) to look up.
+  @return {up.Layer|undefined}
+    The layer matching the given option.
+
+    If no layer matches, `undefined` is returned.
   @stable
   ###
 
   ###**
-  TODO: Docs
+  Returns an array of `up.Layer` objects matching the given [layer option](/layer-option).
 
   @function up.layer.getAll
+  @param {string|up.Layer|number} [layer='current']
+    The [layer option](/layer-open) to look up.
+  @return {Array<up.Layer>}
+  @experimental
+  ###
+
+  ###**
+  Returns the [root layer](/layer-terminology).
+
+  @property up.layer.root
+  @param {up.Layer} root
   @stable
   ###
 
   ###**
-  TODO: Docs
+  Returns an array of all [overlays](/layer-terminology).
 
-  @function up.layer.root
-  @stable
-  ###
-
-  ###**
-  TODO: Docs
+  If no overlay is open, an empty array is returned.
 
   @function up.layer.overlays
+  @param {Array<up.Layer>} overlays
   @stable
   ###
 
@@ -843,7 +856,7 @@ up.layer = do ->
   but to the [current layer](/up.layer.current) instead.
 
   @property up.layer.front
-  @param {up.Layer} layer
+  @param {up.Layer} front
   @stable
   ###
 
@@ -871,30 +884,35 @@ up.layer = do ->
     'dismissOverlays'
   ], -> stack)
 
+  ###**
+  Dismisses the [current layer](up.layer.current).
+
+  This is a shortcut for `up.layer.current.dismiss()`.
+  See documentation for `up.Layer#dismiss()`.
+
+  @function up.layer.dismiss
+  @param {any} [value]
+  @param {Object} [options]
+  @return
+  ###
   u.delegate(api, [
-    'accept' # yes
-    'dismiss' # yes
-    'isRoot' # yes
-    'isOverlay' # yes
-    'isFront', # yes
-    'on' # yes
-    'off' # yes
-    'emit' # yes
-    'parent' # yes
-    'historyVisible' # yes
-    'location' # yes
-    'child' # no
-    'ancestors' # no
-    'descendants' # no
-    'title' # no
-    'origin' # no
-    'mode' # yes
-    'context' # yes
-    'element' # yes
-    'contains' # yes
-    'size' # yes
-    'affix' # yes
-    'dismissable' # no
+    'accept'
+    'dismiss'
+    'isRoot'
+    'isOverlay'
+    'isFront'
+    'on'
+    'off'
+    'emit'
+    'parent'
+    'historyVisible'
+    'location'
+    'mode'
+    'context'
+    'element'
+    'contains'
+    'size'
+    'affix'
   ], -> stack.current)
 
   return api

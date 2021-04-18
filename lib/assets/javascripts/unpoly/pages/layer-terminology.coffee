@@ -7,6 +7,7 @@
 
   The kind of layer (e.g. a modal dialog vs. a popup box) is called *mode*.
 
+  The initial page is called the *root layer*.
   An *overlay* is any layer that is not the root layer.
 
   Available modes

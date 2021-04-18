@@ -22,14 +22,6 @@
 
   To disable layer isolation and match elements in *any* layer, pass `{ layer: 'any' }`.
 
-  \#\#\# Opening new layers
-
-
-
-  When opening an overlay, you may define a *condition* when the overlay interaction ends.
-  When the condition occurs, the overlay is automatically closed and a callback is run.
-  See [closing overlays](/closing-overlays) for details.
-
   \#\#\# Matching the root layer
 
   To match within the [root layer](/up.layer.root), pass `{ layer: 'root' }`.
@@ -110,6 +102,18 @@
   If layers in the given list don't exist they will be ignored. For example, `'parent root'` would try
   to match within a parent layer. If there is no parent layer (because we're already in the root layer),
   Unpoly will match within the root layer.
+
+
+  \#\#\# Opening new layers
+
+  You may render a fragment in a new overly by passing `{ layer: 'new' }`.
+
+  The layer's [mode](/layer-terminology) may be passed as a `{ mode }`
+  option or in shorthand form like `{ layer: 'new popup' }`.
+
+  When opening an overlay, you may define a *condition* when the overlay interaction ends.
+  When the condition occurs, the overlay is automatically closed and a callback is run.
+  See [closing overlays](/closing-overlays) for details.
 
   @page layer-option
   ###

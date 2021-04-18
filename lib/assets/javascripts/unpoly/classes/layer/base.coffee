@@ -25,7 +25,7 @@ class up.Layer extends up.Record
       overlay.element   // returns <up-modal>
 
   @property up.Layer#element
-  @return {Element}
+  @param {Element} element
   @stable
   ###
 
@@ -41,7 +41,7 @@ class up.Layer extends up.Record
   - `'cover'`
 
   @property up.Layer#mode
-  @return {string}
+  @param {string} mode
   @stable
   ###
 
@@ -49,7 +49,7 @@ class up.Layer extends up.Record
   Whether fragment updates within this layer will affect browser history and window title.
 
   @property up.Layer#historyVisible
-  @return {boolean}
+  @return {boolean} historyVisible
   ###
 
   ###**
@@ -73,7 +73,7 @@ class up.Layer extends up.Record
   layer's context by including an `X-Up-Context` header in its response.
 
   @property up.Layer#context
-  @return {Object}
+  @param {Object} context
   @stable
   ###
 
@@ -83,7 +83,7 @@ class up.Layer extends up.Record
   If a layer does not affect history, its desendant layers cannot affect history either.
 
   @property up.Layer#history
-  @return {boolean}
+  @param {boolean} history
   @stable
   ###
 
@@ -122,7 +122,7 @@ class up.Layer extends up.Record
   For instance, a popup overlay will re-calculate its position arounds its anchoring element.
 
   You only need to call this method after DOM changes unknown to Unpoly have brought
-  overlays out of alignment with the resr of the page.
+  overlays out of alignment with the rest of the page.
 
   @function up.Layer#sync
   @experimental
@@ -163,10 +163,6 @@ class up.Layer extends up.Record
     A callback that will run when the elements have been removed from the DOM.
 
     If the layer has a close animation, the callback will run after the animation has finished.
-  @return {Promise}
-    A promise that fulfills when this layer was removed from the [layer stack](/up.layer.stack).
-
-    If the layer has a close animation, the animation will play out *after* the promise fulfills.
   @stable
   ###
   accept: ->
@@ -190,10 +186,6 @@ class up.Layer extends up.Record
     ```
   @param {Object} [options]
     See options for `up.Layer#accept()`.
-  @return {Promise}
-    A promise that fulfills when this layer was removed from the [layer stack](/up.layer.stack).
-
-    If the closing is animated, the animation will play out *after* the promise fulfills.
   @stable
   ###
   dismiss: ->
@@ -208,8 +200,6 @@ class up.Layer extends up.Record
   @function up.Layer#peel
   @param {Object} options
     See options for `up.Layer#accept()`.
-  @return {Promise}
-    A promise that fulfills when descendant overlays were dismissed.
   @stable
   ###
   peel: (options) ->
@@ -294,7 +284,7 @@ class up.Layer extends up.Record
   Returns `undefined` for the [root layer](/up.layer.root).
 
   @property up.Layer#parent
-  @return {boolean}
+  @param {up.Element} parent
   @stable
   ###
   @getter 'parent', ->
@@ -311,7 +301,7 @@ class up.Layer extends up.Record
   first dismiss the existing child before replacing it with the new child.
 
   @property up.Layer#child
-  @return {boolean}
+  @return {up.Layer} child
   @stable
   ###
   @getter 'child', ->
@@ -321,7 +311,7 @@ class up.Layer extends up.Record
   Returns an array of this layer's ancestor layers.
 
   @property up.Layer#ancestors
-  @return {boolean}
+  @return {Array<up.Layer>} ancestors
   @stable
   ###
   @getter 'ancestors', ->
@@ -333,7 +323,7 @@ class up.Layer extends up.Record
   Descendant layers are all layers that visually overlay this layer.
 
   @property up.Layer#descendants
-  @return {boolean}
+  @return {Array<up.Layer>} descendants
   @stable
   ###
   @getter 'descendants', ->
@@ -345,7 +335,7 @@ class up.Layer extends up.Record
   The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
 
   @property up.Layer#index
-  @return {boolean}
+  @return {number} index
   @stable
   ###
   @getter 'index', ->
@@ -602,8 +592,8 @@ class up.Layer extends up.Record
   When this layer opens a child layer with history, the browser URL will change to the child
   layer's location. When the child layer is closed, this layer's laytion will be restored.
 
-  @property up.Layer#title
-  @param {string} title
+  @property up.Layer#location
+  @param {string} location
   @experimental
   ###
   @accessor 'location',

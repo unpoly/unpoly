@@ -12,7 +12,7 @@ class up.Layer.Overlay extends up.Layer
   The link or form element that opened this overlay.
 
   @property up.Layer#origin
-  @return {Element}
+  @param {Element} origin
   @stable
   ###
 
