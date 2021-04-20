@@ -193,7 +193,7 @@ up.form = do ->
     params.addAll(options.params)
     options.params = params
 
-    parser.string('url', attr: ['up-action', 'action'], default: up.fragment.source(form))
+    parser.string('url', attr: 'action', default: up.fragment.source(form))
     parser.string('method', attr: ['up-method', 'data-method', 'method'], default: 'POST', normalize: u.normalizeMethod)
     if options.method == 'GET'
       # Only for GET forms, browsers discard all query params from the form's [action] URL.
