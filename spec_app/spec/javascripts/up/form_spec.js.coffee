@@ -364,7 +364,7 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       it 'submits an form that has both an [id] attribute and a field with [name=id] (bugfix)', asyncSpec (next) ->
-        form = fixture('form#form-id[action="/path"][up-submit]')
+        form = fixture('form#form-id[action="/path"][up-submit][method=post]')
         e.affix(form, 'input[name="id"][value="value"]')
 
         up.submit(form)
@@ -374,7 +374,7 @@ describe 'up.form', ->
           expect(params['id']).toEqual(['value'])
 
       it 'loads a form with a cross-origin [action] in a new page', asyncSpec (next) ->
-        form = fixture('form#form-id[action="https://external-domain.com/path"][up-submit]')
+        form = fixture('form#form-id[action="https://external-domain.com/path"][up-submit][method=post]')
         e.affix(form, 'input[name="field-name"][value="field-value"]')
 
         loadPage = spyOn(up.browser, 'loadPage')
@@ -415,7 +415,7 @@ describe 'up.form', ->
       describe 'content type', ->
 
         it 'defaults to application/x-www-form-urlencoded in a form without file inputs', asyncSpec (next) ->
-          form = fixture('form[action="/path"]')
+          form = fixture('form[action="/path"][method=post]')
 
           up.submit(form)
 
@@ -423,7 +423,7 @@ describe 'up.form', ->
             expect(@lastRequest().requestHeaders['Content-Type']).toEqual('application/x-www-form-urlencoded')
 
         it 'defaults to multipart/form-data in a form with file inputs', asyncSpec (next) ->
-          form = fixture('form[action="/path"]')
+          form = fixture('form[action="/path"][method=post]')
 
           # Since this test cannot programmatically append an <input type="file"> with
           # a value, we pass a binary param with the { params } option.
@@ -717,6 +717,11 @@ describe 'up.form', ->
         options = up.form.submitOptions(form)
         expect(options.method).toEqual('PATCH')
 
+      it 'assumes the default method GET', ->
+        form = fixture('form[action="/path"]')
+        options = up.form.submitOptions(form)
+        expect(options.method).toEqual('GET')
+
     describe 'up.validate()', ->
 
       it 'emits an up:form:validate event instead of an up:form:submit event', asyncSpec (next) ->
@@ -910,7 +915,7 @@ describe 'up.form', ->
       describe 'submit buttons', ->
 
         it 'includes the clicked submit button in the params', asyncSpec (next) ->
-          $form = $fixture('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton = $form.affix('input[type="submit"][name="submit-button"][value="submit-button-value"]')
           up.hello($form)
@@ -922,7 +927,7 @@ describe 'up.form', ->
             expect(params['submit-button']).toEqual(['submit-button-value'])
 
         it 'excludes an unused submit button in the params', asyncSpec (next) ->
-          $form = $fixture('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
@@ -936,7 +941,7 @@ describe 'up.form', ->
             expect(params['submit-button-2']).toEqual(['submit-button-2-value'])
 
         it 'assumes the first submit button if the form was submitted with enter', asyncSpec (next) ->
-          $form = $fixture('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           $submitButton1 = $form.affix('input[type="submit"][name="submit-button-1"][value="submit-button-1-value"]')
           $submitButton2 = $form.affix('input[type="submit"][name="submit-button-2"][value="submit-button-2-value"]')
@@ -951,7 +956,7 @@ describe 'up.form', ->
             expect(params['submit-button-2']).toBeUndefined()
 
         it 'does not explode if the form has no submit buttons', asyncSpec (next) ->
-          $form = $fixture('form[action="/action"][up-target=".target"]')
+          $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
           up.hello($form)
 
