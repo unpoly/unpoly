@@ -13,6 +13,7 @@ namespace :gem do
   require "bundler/gem_tasks"
 
   task :explain_frozen_shell do
+    raise "fooo"
     puts 'Publishing to rubygems.org. If this seems to freeze, enter your 2FA token.'
   end
 
