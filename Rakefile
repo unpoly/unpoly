@@ -160,8 +160,8 @@ namespace :npm do
     # Copy files in dist folder while following symbolic links
     Unpoly::Tasks.run("cp --recursive --dereference --force dist/* #{staging_dir}")
     Dir.chdir(staging_dir) do
-      Unpoly::Tasks.run("npm pack")
-      # Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
+      # Unpoly::Tasks.run("npm pack")
+      Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
     end
   end
 
