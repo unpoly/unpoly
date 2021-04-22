@@ -4,6 +4,9 @@
   "description": "Unobtrusive JavaScript framework",
   "main": "dist/unpoly.js",
   "files": [
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
     "dist/unpoly.js",
     "dist/unpoly.min.js",
     "dist/unpoly.css",
@@ -33,6 +36,7 @@
   "keywords": [
     "progressive enhancement",
     "unobtrusive javascript",
+    "html over the wire",
     "ujs",
     "server-side",
     "ssr"

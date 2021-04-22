@@ -1,109 +1,110 @@
-require "bundler/gem_tasks"
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 require 'sass/util'
 require 'sass/script'
 require 'sprockets/standalone'
 require 'unpoly/rails/version'
+require 'unpoly/tasks'
 require 'json'
+require 'fileutils'
 
-module Unpoly
-  module Tasks
-    SPROCKETS_MANIFESTS = %w(
-      unpoly.js
-      unpoly.css
-      unpoly-migrate.js
-      unpoly-bootstrap3.js
-      unpoly-bootstrap3.css
-      unpoly-bootstrap4.js
-      unpoly-bootstrap4.css
-      unpoly-bootstrap5.js
-      unpoly-bootstrap5.css
-    )
-    SPROCKETS_SOURCES = %w(lib/assets/javascripts lib/assets/stylesheets)
-    SPROCKETS_OUTPUT_FOLDER = 'dist'
-    NPM_MANIFEST = 'package.json'
-    VISIBLE_TASKS = %w(publish:build publish:commit publish:release publish:all)
-  end
-end
+namespace :gem do
+  require "bundler/gem_tasks"
 
-Sprockets::Standalone::RakeTask.new(:source_assets) do |task, sprockets|
-  task.assets   = Unpoly::Tasks::SPROCKETS_MANIFESTS
-  task.sources  = Unpoly::Tasks::SPROCKETS_SOURCES
-  task.output   = Unpoly::Tasks::SPROCKETS_OUTPUT_FOLDER
-  task.compress = false
-  task.digest   = false
-  sprockets.js_compressor  = nil
-  sprockets.css_compressor = nil
-end
-
-Sprockets::Standalone::RakeTask.new(:minified_assets) do |task, sprockets|
-  task.assets   = Unpoly::Tasks::SPROCKETS_MANIFESTS
-  task.sources  = Unpoly::Tasks::SPROCKETS_SOURCES
-  task.output   = Unpoly::Tasks::SPROCKETS_OUTPUT_FOLDER
-  task.compress = false
-  task.digest   = false
-  sprockets.js_compressor  = :uglifier
-  sprockets.css_compressor = :sass
-end
-
-namespace :publish do
-  task :confirm do
-    puts "Before publishing new Unpoly version:"
-    puts "- Bump the version in version.rb"
-    puts "- Update the CHANGELOG"
-    puts "Ready to publish to all release channels? [y/N] "
-    reply = STDIN.gets.strip.downcase
-    unless reply == 'y'
-      puts "Aborted"
-      exit
-    end
+  task :explain_frozen_shell do
+    puts 'Publishing to rubygems.org. If this seems to freeze, enter your 2FA token.'
   end
 
-  desc 'Build release artifacts'
-  task :build do
-    Rake::Task['minified_assets:compile'].invoke
+  Rake::Task['gem:build'].enhance ['assets:build']
+
+  Rake::Task['gem:release'].enhance [:explain_frozen_shell]
+end
+
+namespace :sprockets do
+  Sprockets::Standalone::RakeTask.new(:source_assets) do |task, sprockets|
+    task.assets   = Unpoly::Tasks::SPROCKETS_MANIFESTS
+    task.sources  = Unpoly::Tasks::SPROCKETS_SOURCES
+    task.output   = Unpoly::Tasks::SPROCKETS_OUTPUT_FOLDER
+    task.compress = false
+    task.digest   = false
+    sprockets.js_compressor  = nil
+    sprockets.css_compressor = nil
+  end
+
+  Sprockets::Standalone::RakeTask.new(:minified_assets) do |task, sprockets|
+    task.assets   = Unpoly::Tasks::SPROCKETS_MANIFESTS
+    task.sources  = Unpoly::Tasks::SPROCKETS_SOURCES
+    task.output   = Unpoly::Tasks::SPROCKETS_OUTPUT_FOLDER
+    task.compress = false
+    task.digest   = false
+    sprockets.js_compressor  = :uglifier
+    sprockets.css_compressor = :sass
+  end
+
+  Rake::Task['sprockets:minified_assets:compile'].enhance do
+    # Remove any fingerprints from build files and add a ".min" infix.
     Unpoly::Tasks::SPROCKETS_MANIFESTS.each do |manifest|
       source = "dist/#{manifest}"
       target = "dist/#{manifest.sub(/\.([^\.]+)$/, '.min.\\1')}"
       File.rename(source, target)
     end
-    Rake::Task['source_assets:compile'].invoke
-    Rake::Task['publish:validate_dist'].invoke
-    Rake::Task['npm:bump_version'].invoke
+  end
+end
+
+namespace :assets do
+
+  desc 'Clean unpoly assets'
+  task :clean do
+    FileUtils.rm Unpoly::Tasks.dist_paths
+  end
+
+  desc 'Build unpoly assets into dist dfolder'
+  task :build => :clean do
+    Rake::Task['sprockets:minified_assets:compile'].invoke
+    Rake::Task['sprockets:source_assets:compile'].invoke
+
+    # Since we're calling Sprockets twice and rename files the
+    # manifest.json doesn't contain useful mappings anymore.
+    FileUtils.rm 'dist/manifest.json'
+
+    Rake::Task['assets:validate'].invoke
   end
 
   desc 'Validate build files in dist folder'
-  task :validate_dist do
-    script_paths = Dir['dist/*.js']
-    script_paths.each do |script_path|
-      content = File.read(script_path)
+  task :validate do
+    Unpoly::Tasks.dist_paths.each do |dist_path|
+      unless File.exists?(dist_path)
+        raise "Expected build file to exist: #{dist_path}"
+      end
+
+      content = File.read(dist_path)
 
       if content.size == 0
-        raise "Zero-byte build file: #{script_path}"
+        raise "Zero-byte build file: #{dist_path}"
       end
 
       if content =~ /\beval\b/
-        raise "`eval` found in build file: #{script_path}"
+        raise "`eval` found in build file: #{dist_path}"
       end
     end
   end
+end
 
-  desc 'Commit and push build release artifacts'
-  task :commit do
-    commands = [
-      "git add #{Unpoly::Tasks::SPROCKETS_OUTPUT_FOLDER}",
-      "git add #{Unpoly::Tasks::NPM_MANIFEST}",
-      "git commit -m 'Release artifacts for version #{Unpoly::Rails::VERSION}'",
-      "git push"
-    ]
-    commands.each do |command|
-      system(command) or raise "Error running command: #{command}"
+namespace :release do
+
+  desc "Prompt user to confirm that they're ready"
+  task :confirm do
+    puts "You are about to release Unpoly version #{Unpol::Rails::VERSION}"
+    puts "Before publishing new Unpoly version:"
+    puts "- Bump the version in version.rb"
+    puts "- Update the CHANGELOG"
+    puts "Ready to publish? [y/N] "
+    reply = STDIN.gets.strip.downcase
+    unless reply == 'y'
+      puts "Aborted"
+      exit
     end
-  end
-
-  desc 'Release new version to all package managers'
-  task :release do
-    Rake::Task['rubygems:publish'].invoke
-    Rake::Task['npm:publish'].invoke
   end
 
   desc 'Remind user to update unpoly.com'
@@ -115,43 +116,43 @@ namespace :publish do
   end
 
   desc 'Build artifacts, push to git and release to package managers'
-  task :all => [:confirm, :build, :commit, :release, :remind_to_update_site] do
-  end
-
-end
-
-namespace :rubygems do
-
-  task :publish do
-    puts 'Publishing to rubygems.org. If this seems to hang, enter your 2FA token.'
-    Rake::Task['release'].invoke
+  task :all => [:confirm, 'rubygems:release', 'npm:release', :remind_to_update_site] do
   end
 
 end
 
 namespace :npm do
 
-  task :bump_version do
+  desc 'Ensure that package.json contains the correct { version }'
+  task :sync_package_json do
     data = File.read(Unpoly::Tasks::NPM_MANIFEST)
     json = JSON.load(data)
+
     # Sanity-check the parsed JSON
-    json['version'] or raise 'No "version" key found in package.json'
-    json['version'] = Unpoly::Rails::VERSION
-    data = JSON.pretty_generate(json)
-    File.open(Unpoly::Tasks::NPM_MANIFEST, 'w') do |file|
-      file.write data
+    json['version'] or raise 'No { version } property found in package.json'
+
+    version_changed = json['version'] != Unpoly::Rails::VERSION
+
+    if version_changed
+      json['version'] = Unpoly::Rails::VERSION
+      data = JSON.pretty_generate(json)
+      File.write(Unpoly::Tasks::NPM_MANIFEST, data)
+
+      Unpoly::Tasks.run("git add #{Unpoly::Tasks::NPM_MANIFEST}")
+      Unpoly::Tasks.run("Update package.json with version #{Unpoly::Rails::VERSION}'")
+      Unpoly::Tasks.run("git push")
     end
   end
 
-  task :publish do
-    system('npm publish') or raise 'Could not publish npm module'
+  desc 'Publish package to NPM'
+  task :publish => ['assets:build', :sync_package_json] do
+    if Unpoly::Tasks.pre_release?
+      puts 'Publishing a PRE-release'
+      npm_tag = 'next'
+    else
+      npm_tag = 'latest'
+    end
+    Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
   end
 
-end
-
-# Clean up task list in `rake -T`
-Rake::Task.tasks.each do |task|
-  unless Unpoly::Tasks::VISIBLE_TASKS.include?(task.name)
-    task.clear_comments
-  end
 end

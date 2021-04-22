@@ -1,7 +1,7 @@
-# coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'unpoly/rails/version'
+require 'unpoly/tasks'
 
 Gem::Specification.new do |spec|
   spec.name          = "unpoly-rails"
@@ -10,13 +10,12 @@ Gem::Specification.new do |spec|
   spec.email         = ["henning.koch@makandra.de"]
   spec.description   = 'Rails bindings for Unpoly, the unobtrusive JavaScript framework'
   spec.summary       = spec.description
-  spec.homepage      = ""
+  spec.homepage      = "https://unpoly.com"
   spec.license       = "MIT"
-
-  spec.files         = `git ls-files`.split($/)
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  spec.files         = Dir['lib/**/*.rb'] + %w[LICENSE README.md README_RAILS.md CHANGELOG.md .yardopts] + Unpoly::Tasks.dist_paths
+  spec.executables   = []
+  spec.test_files    = []
+  spec.require_paths = %w[lib dist]
 
   spec.add_dependency 'rails', '>= 3.2'
   spec.add_dependency 'memoized'
