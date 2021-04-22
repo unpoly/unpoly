@@ -13,13 +13,12 @@ namespace :gem do
   require "bundler/gem_tasks"
 
   task :explain_frozen_shell do
-    raise "fooo"
     puts 'Publishing to rubygems.org. If this seems to freeze, enter your 2FA token.'
   end
 
   Rake::Task['gem:build'].enhance ['assets:build']
 
-  Rake::Task['gem:release'].enhance ['gem:explain_frozen_shell']
+  Rake::Task['gem:release:rubygem_push'].enhance ['gem:explain_frozen_shell']
 end
 
 namespace :sprockets do
