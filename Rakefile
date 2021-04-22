@@ -96,7 +96,7 @@ namespace :release do
 
   desc "Prompt user to confirm that they're ready"
   task :confirm do
-    puts "You are about to release Unpoly version #{Unpol::Rails::VERSION}"
+    puts "You are about to release Unpoly version #{Unpoly::Rails::VERSION}"
     puts "Before publishing new Unpoly version:"
     puts "- Bump the version in version.rb"
     puts "- Update the CHANGELOG"
@@ -117,7 +117,7 @@ namespace :release do
   end
 
   desc 'Build artifacts, push to git and release to package managers'
-  task :all => [:confirm, 'rubygems:release', 'npm:release', :remind_to_update_site] do
+  task :all => [:confirm, 'gem:release', 'npm:release', :remind_to_update_site] do
   end
 
 end
