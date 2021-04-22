@@ -139,19 +139,20 @@ namespace :npm do
       File.write(Unpoly::Tasks::NPM_MANIFEST, data)
 
       Unpoly::Tasks.run("git add #{Unpoly::Tasks::NPM_MANIFEST}")
-      Unpoly::Tasks.run("Update package.json with version #{Unpoly::Rails::VERSION}'")
+      Unpoly::Tasks.run("git commit -m 'Update package.json with version #{Unpoly::Rails::VERSION}'")
       Unpoly::Tasks.run("git push")
     end
   end
 
   desc 'Publish package to NPM'
-  task :publish => ['assets:build', :sync_package_json] do
+  task :release => ['assets:build', :sync_package_json] do
     if Unpoly::Tasks.pre_release?
       puts 'Publishing a PRE-release'
       npm_tag = 'next'
     else
       npm_tag = 'latest'
     end
+
     Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
   end
 
