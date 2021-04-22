@@ -2,29 +2,14 @@
   "name": "unpoly",
   "version": "2.0.0-rc2",
   "description": "Unobtrusive JavaScript framework",
-  "main": "dist/unpoly.js",
+  "main": "unpoly.js",
+  "style": "unpoly.css",
   "files": [
     "LICENSE",
     "README.md",
     "CHANGELOG.md",
-    "dist/unpoly.js",
-    "dist/unpoly.min.js",
-    "dist/unpoly.css",
-    "dist/unpoly.min.css",
-    "dist/unpoly-migrate.js",
-    "dist/unpoly-migrate.min.js",
-    "dist/unpoly-bootstrap3.js",
-    "dist/unpoly-bootstrap3.min.js",
-    "dist/unpoly-bootstrap3.css",
-    "dist/unpoly-bootstrap3.min.css",
-    "dist/unpoly-bootstrap4.js",
-    "dist/unpoly-bootstrap4.min.js",
-    "dist/unpoly-bootstrap4.css",
-    "dist/unpoly-bootstrap4.min.css",
-    "dist/unpoly-bootstrap5.js",
-    "dist/unpoly-bootstrap5.min.js",
-    "dist/unpoly-bootstrap5.css",
-    "dist/unpoly-bootstrap5.min.css"
+    "unpoly*.js",
+    "unpoly*.css"
   ],
   "scripts": {
     "test": "echo \"See https://github.com/unpoly/unpoly for test instructions\" && exit 1"

@@ -4,9 +4,10 @@
 /.idea
 /coverage
 /rdoc
-tmp
 /dist/manifest.json
 /dist/*.js
 /dist/*.css
+/dist/*.tgz
 /doc
 npm-debug.log
+/tmp

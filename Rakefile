@@ -8,6 +8,7 @@ require 'unpoly/rails/version'
 require 'unpoly/tasks'
 require 'json'
 require 'fileutils'
+require 'tmpdir'
 
 namespace :gem do
   require "bundler/gem_tasks"
@@ -153,7 +154,15 @@ namespace :npm do
       npm_tag = 'latest'
     end
 
-    Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
+    staging_dir = 'tmp/npm-staging'
+    FileUtils.mkpath(staging_dir)
+    puts "Building NPM package in #{staging_dir}"
+    # Copy files in dist folder while following symbolic links
+    Unpoly::Tasks.run("cp --recursive --dereference --force dist/* #{staging_dir}")
+    Dir.chdir(staging_dir) do
+      Unpoly::Tasks.run("npm pack")
+      # Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
+    end
   end
 
 end
