@@ -18,7 +18,7 @@ namespace :gem do
 
   Rake::Task['gem:build'].enhance ['assets:build']
 
-  Rake::Task['gem:release'].enhance [:explain_frozen_shell]
+  Rake::Task['gem:release'].enhance ['gem:explain_frozen_shell']
 end
 
 namespace :sprockets do
