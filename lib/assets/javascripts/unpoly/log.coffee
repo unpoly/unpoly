@@ -170,32 +170,29 @@ up.log = do ->
     throw up.error.failed(args)
 
   ###**
-  # Registers an empty rejection handler with the given promise.
+  # Registers an empty rejection handler in case the given promise
+  # rejects with an AbortError or a failed up.Response.
+  #
   # This prevents browsers from printing "Uncaught (in promise)" to the error
   # console when the promise is rejected.
   #
   # This is helpful for event handlers where it is clear that no rejection
   # handler will be registered:
   #
-  #     up.on('submit', 'form[up-target]', (event, $form) => {
-  #       promise = up.submit($form)
+  #     up.on('submit', 'form[up-target]', (event, form) => {
+  #       promise = up.submit(form)
   #       up.util.muteRejection(promise)
   #     })
   #
-  # Does nothing if passed a missing value.
-  #
-  # Does nothing if the log is [enabled](/up.log.enable).
-  #
-  # @function up.log.muteRejection
-  # @param {Promise|undefined|null} promise
+  # @function up.log.muteUncriticalRejection
+  # @param {Promise} promise
   # @return {Promise}
   # @internal
   ###
-  muteRejection = (promise) ->
-    if config.enabled
-      return promise
-    else
-      return u.muteRejection(promise)
+  muteUncriticalRejection = (promise) ->
+    return promise.catch (error) ->
+      unless (typeof error == 'object') && (error.name == 'AbortError' || error instanceof up.RenderResult || error instanceof up.Response)
+        throw error
 
   puts: printToStandard
   # debug: printToDebug
@@ -205,7 +202,7 @@ up.log = do ->
   enable: enable
   disable: disable
   fail: fail
-  muteRejection: muteRejection
+  muteUncriticalRejection: muteUncriticalRejection
   isEnabled: -> config.enabled
 
 up.puts = up.log.puts

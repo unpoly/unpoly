@@ -597,7 +597,7 @@ up.form = do ->
 
     abortScheduledValidate?()
     up.event.halt(event)
-    up.log.muteRejection submit(form)
+    up.log.muteUncriticalRejection submit(form)
 
   ###**
   TODO: Docs
@@ -782,7 +782,7 @@ up.form = do ->
     # event is about to fire, we delay the validation to the next microtask.
     # In case we receive a submit event after this, we can cancel the validation.
     abortScheduledValidate = u.abortableMicrotask ->
-      up.log.muteRejection validate(field)
+      up.log.muteUncriticalRejection validate(field)
 
   ###**
   Show or hide elements when a `<select>` or `<input>` has a given value.

@@ -160,7 +160,7 @@ class up.Layer.Overlay extends up.Layer
   onOutsideClicked: (event, halt) ->
     if halt
       up.event.halt(event)
-    up.log.muteRejection @dismiss(':outside')
+    @dismiss(':outside')
 
   onEscapePressed: (event) ->
     # All overlays listen to the Escape key being pressed, but only the front layer
@@ -174,7 +174,7 @@ class up.Layer.Overlay extends up.Layer
         field.blur()
       else if @supportsDismissMethod('key')
         up.event.halt(event)
-        up.log.muteRejection @dismiss(':key')
+        @dismiss(':key')
 
   registerClickCloser: (attribute, closeFn) ->
     # Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
@@ -192,7 +192,7 @@ class up.Layer.Overlay extends up.Layer
       parser.number('duration')
       parser.string('confirm')
 
-      up.log.muteRejection closeFn(value, closeOptions)
+      closeFn(value, closeOptions)
 
   registerEventCloser: (eventTypes, closeFn) ->
     return unless eventTypes

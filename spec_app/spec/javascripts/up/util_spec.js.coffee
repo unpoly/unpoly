@@ -656,6 +656,22 @@ describe 'up.util', ->
             expect(result.state).toEqual('fulfilled')
             done()
 
+      it 'does not leave an unhandled rejection when the given promise rejects', (done) ->
+        rejectGivenPromise = null
+        givenPromise = new Promise (resolve, reject) ->
+          rejectGivenPromise = reject
+
+        mutedPromise = up.util.muteRejection(givenPromise)
+
+        u.task ->
+          rejectGivenPromise()
+
+          u.task ->
+            promiseState(mutedPromise).then (result) ->
+              expect(result.state).toEqual('fulfilled')
+              expect(window).not.toHaveUnhandledRejections()
+              done()
+
     describe 'up.util.simpleEase', ->
 
       it 'returns 0 for 0', ->

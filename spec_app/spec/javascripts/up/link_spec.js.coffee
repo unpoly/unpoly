@@ -560,7 +560,7 @@ describe 'up.link', ->
             expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
 
         it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
-          spyOn(up, 'render')
+          spyOn(up, 'render').and.returnValue(Promise.resolve())
           spyOn(window, 'confirm')
           $link = $fixture('a[href="/danger"][up-target=".middle"]')
           up.follow($link, confirm: '')
@@ -570,7 +570,7 @@ describe 'up.link', ->
             expect(up.render).toHaveBeenCalled()
 
         it 'does not show a confirmation dialog when preloading', asyncSpec (next) ->
-          spyOn(up, 'render')
+          spyOn(up, 'render').and.returnValue(Promise.resolve())
           spyOn(window, 'confirm')
           $link = $fixture('a[href="/danger"][up-target=".middle"]')
           up.follow($link, confirm: 'Are you sure?', preload: true)
@@ -617,7 +617,7 @@ describe 'up.link', ->
         expect(options.layer).toEqual('new')
 
       it 'does not render', ->
-        spyOn(up, 'render')
+        spyOn(up, 'render').and.returnValue(Promise.resolve())
         link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
         options = up.link.followOptions(link)
         expect(up.render).not.toHaveBeenCalled()
@@ -1599,7 +1599,7 @@ describe 'up.link', ->
       it 'can be used to enlarge the click area of a link', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"]')
         up.hello($area)
-        spyOn(up, 'render')
+        spyOn(up, 'render').and.returnValue(Promise.resolve())
         Trigger.clickSequence($area)
         next =>
           expect(up.render).toHaveBeenCalled()
@@ -1628,7 +1628,7 @@ describe 'up.link', ->
       it 'does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
-        spyOn(up, 'render')
+        spyOn(up, 'render').and.returnValue(Promise.resolve())
         Trigger.clickSequence($area)
         next =>
           expect(up.render.calls.count()).toEqual(1)

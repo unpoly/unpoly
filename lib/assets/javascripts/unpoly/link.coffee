@@ -891,7 +891,7 @@ up.link = do ->
   up.on 'up:click', fullFollowSelector, (event, link) ->
     if shouldFollowEvent(event, link)
       up.event.halt(event)
-      up.log.muteRejection follow(link)
+      up.log.muteUncriticalRejection follow(link)
 
   ###**
   TODO: Explain that this generates an up:click event, works on any elements, can can be used to accelerate links

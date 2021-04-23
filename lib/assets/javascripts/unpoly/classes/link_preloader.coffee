@@ -55,5 +55,5 @@ class up.LinkPreloader
 
   preloadNow: (link) ->
     onQueued = (request) => @currentRequest = request
-    up.log.muteRejection up.link.preload(link, { onQueued })
+    up.log.muteUncriticalRejection up.link.preload(link, { onQueued })
     @queued = true

@@ -1,9 +1,9 @@
 UNHANDLED_REJECTIONS = []
-# In Firefox promise events are disabled by default.
-# We need to enable them in about:config.
-window.REJECTION_EVENTS_SUPPORTED = ("onunhandledrejection" in window)
 
 beforeAll ->
+  # IE11 does not support this event.
+  window.REJECTION_EVENTS_SUPPORTED = ("onunhandledrejection" of window)
+
   window.addEventListener 'unhandledrejection', (event) ->
     UNHANDLED_REJECTIONS.push(event)
 
@@ -14,5 +14,5 @@ beforeEach ->
     toHaveUnhandledRejections: (util, customEqualityTesters) ->
       compare: (actual) ->
         # It doesn't really matter what's in actual.
-        # A good way to call this is e.g. `expect(window).not.toHaveUnhandledRejections()
+        # A good way to call this is e.g. `expect(window).not.toHaveUnhandledRejections()`
         pass: UNHANDLED_REJECTIONS.length > 0

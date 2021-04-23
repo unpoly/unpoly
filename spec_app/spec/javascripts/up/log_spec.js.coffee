@@ -45,3 +45,60 @@ describe 'up.log', ->
         expect(console.error.calls.argsFor(0)).toMatch(/message1/)
         expect(console.error.calls.argsFor(1)).toMatch(/message2/)
 
+
+  describe 'up.log.muteUncriticalRejection', ->
+
+    it 'does not mute a fulfilled promise', (done) ->
+      value = 'fulfillment value'
+      promise = Promise.resolve(value)
+      mutedPromise = up.log.muteUncriticalRejection(promise)
+
+      u.task ->
+        promiseState(mutedPromise).then (result) ->
+          expect(result.state).toBe('fulfilled')
+          expect(result.value).toBe(value)
+          done()
+
+    it 'mutes a rejected promise if the rejection value is an up.Response', (done) ->
+      response = new up.Response()
+      promise = Promise.reject(response)
+      mutedPromise = up.log.muteUncriticalRejection(promise)
+
+      u.task ->
+        promiseState(mutedPromise).then (result) ->
+          expect(result.state).toBe('fulfilled')
+          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+          done()
+
+    it 'mutes a rejected promise if the rejection value is an up.RenderResult', (done) ->
+      renderResult = new up.RenderResult()
+      promise = Promise.reject(renderResult)
+      mutedPromise = up.log.muteUncriticalRejection(promise)
+
+      u.task ->
+        promiseState(mutedPromise).then (result) ->
+          expect(result.state).toBe('fulfilled')
+          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+          done()
+
+    it 'mutes a rejected promise if the rejection value is an AbortError', (done) ->
+      abortError = up.error.aborted('User aborted')
+      promise = Promise.reject(abortError)
+      mutedPromise = up.log.muteUncriticalRejection(promise)
+
+      u.task ->
+        promiseState(mutedPromise).then (result) ->
+          expect(result.state).toBe('fulfilled')
+          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+          done()
+
+    it 'does not mute a rejected promise with another rejection value', (done) ->
+      error = new Error('other error')
+      promise = Promise.reject(error)
+      mutedPromise = up.log.muteUncriticalRejection(promise)
+
+      u.task ->
+        promiseState(mutedPromise).then (result) ->
+          expect(result.state).toBe('rejected')
+          expect(result.value).toBe(error)
+          done()

@@ -491,7 +491,7 @@ describe 'up.form', ->
             expect('.after').not.toHaveText('old-after')
 
         it "places the response into the form and doesn't update the browser URL if the submission returns a 5xx status code", asyncSpec (next) ->
-          up.submit(@$form)
+          submitPromise = up.submit(@$form)
 
           next =>
             @respondWith
@@ -520,7 +520,10 @@ describe 'up.form', ->
             expect('.before').not.toHaveText('old-before')
             expect('.after').not.toHaveText('old-after')
 
-            expect(window).toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+            next.await promiseState(submitPromise )
+
+          next (result) ->
+            expect(result.state).toBe('rejected')
 
 
         it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', asyncSpec (next) ->
