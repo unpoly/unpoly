@@ -18,3 +18,6 @@ beforeEach ->
   # Store original URL and title so specs may use it
   @locationBeforeExample = location.href
   @titleBeforeExample = document.title
+
+afterEach ->
+  up.viewport.root.scrollTop = 0
