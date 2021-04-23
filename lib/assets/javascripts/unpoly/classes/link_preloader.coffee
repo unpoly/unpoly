@@ -54,6 +54,11 @@ class up.LinkPreloader
     @timer = u.timer(delay, => @preloadNow(link))
 
   preloadNow: (link) ->
+    # Don't preload if the link was removed from the DOM while we were waiting for the timer.
+    if e.isDetached(link)
+      @reset()
+      return
+
     onQueued = (request) => @currentRequest = request
     up.log.muteUncriticalRejection up.link.preload(link, { onQueued })
     @queued = true

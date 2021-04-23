@@ -1730,6 +1730,26 @@ describe 'up.link', ->
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
 
+      it 'does not send a request if the link was detached before the delay is over', asyncSpec (next) ->
+        up.link.config.preloadDelay = 100
+
+        $fixture('.target').text('old text')
+
+        $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello($link)
+
+        Trigger.hoverSequence($link)
+
+        next.after 40, =>
+          # It's still too early
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          $link.remove()
+
+        next.after 90, =>
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+
       it 'aborts a preload request if the user stops hovering before the response was received', asyncSpec (next) ->
         up.link.config.preloadDelay = 10
         $fixture('.target').text('old text')
