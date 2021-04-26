@@ -885,16 +885,133 @@ up.layer = do ->
   ], -> stack)
 
   ###**
-  Dismisses the [current layer](up.layer.current).
+  [Accepts](/closing-overlays) the [current layer](up.layer.current).
 
   This is a shortcut for `up.layer.current.dismiss()`.
-  See documentation for `up.Layer#dismiss()`.
+  See `up.Layer#dismiss()` for more documentation.
 
   @function up.layer.dismiss
   @param {any} [value]
   @param {Object} [options]
   @return
   ###
+
+  ###**
+  [Dismisses](/closing-overlays) the [current layer](up.layer.current).
+
+  This is a shortcut for `up.layer.current.dismiss()`.
+  See `up.Layer#dismiss()` for more documentation.
+
+  @function up.layer.dismiss
+  @param {any} [value]
+  @param {Object} [options]
+  @return
+  ###
+
+  ###**
+  Returns whether the [current layer](/up.layer.current) is the [root layer](/up.layer.root).
+
+  This is a shortcut for `up.layer.current.isRoot()`.
+  See `up.Layer#isRoot()` for more documentation..
+
+  @function up.layer.isFront
+  @return {boolean}
+  @stable
+  ###
+
+  ###**
+  Returns whether the [current layer](/up.layer.current) is *not* the [root layer](/up.layer.root).
+
+  This is a shortcut for `up.layer.current.isOverlay()`.
+  See `up.Layer#isOverlay()` for more documentation.
+
+  @function up.layer.isOverlay
+  @return {boolean}
+  @stable
+  ###
+
+  ###**
+  Returns whether the [current layer](/up.layer.current) is the [frontmost layer](/up.layer.front).
+
+  This is a shortcut for `up.layer.current.isFront()`.
+  See `up.Layer#isFront()` for more documentation.
+
+  @function up.layer.isFront
+  @return {boolean}
+  @stable
+  ###
+
+  ###**
+  Listens to a ([DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
+  that originated on an element [contained](/up.Layer.prototype.contains) by the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.on()`.
+  See `up.Layer#on()` for more documentation.
+
+  @function up.layer.on
+  @param {string} types
+    A space-separated list of event types to bind to.
+  @param {string} [selector]
+    The selector of an element on which the event must be triggered.
+  @param {Object} [options]
+  @param {Function(event, [element], [data])} listener
+    The listener function that should be called.
+  @return {Function()}
+    A function that unbinds the event listeners when called.
+  @stable
+  ###
+
+  ###**
+  Unbinds an event listener previously bound to the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.off()`.
+  See `up.Layer#off()` for more documentation.
+
+  @function up.layer.off
+  @param {Element|jQuery} [element=document]
+  @param {string} events
+  @param {string} [selector]
+  @param {Function(event, [element], [data])} listener
+    The listener function to unbind.
+  @stable
+  ###
+
+  ###**
+  [Emits](/up.emit) an event on the [current layer](/up.layer.current)'s [element](/up.layer.element).
+
+  This is a shortcut for `up.layer.current.emit()`.
+  See `up.Layer#emit()` for more documentation.
+
+  @function up.layer.emit
+  @param {Element|jQuery} [target=up.layer.element]
+  @param {string} eventType
+  @param {Object} [props={}]
+  @stable
+  ###
+
+  ###**
+  Returns the parent layer of the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.parent`.
+  See `up.Layer#parent` for more documentation.
+
+  @property up.layer.parent
+  @param {up.Layer} parent
+  @stable
+  ###
+
+  ###**
+  Whether fragment updates within the [current layer](/up.layer.current)
+  can affect browser history and window title.
+
+  This is a shortcut for `up.layer.current.historyVisible`.
+  See `up.Layer#historyVisible` for more documentation.
+
+  @property up.layer.historyVisible
+  @param {boolean} historyVisible
+  @stable
+  ###
+
   u.delegate(api, [
     'accept'
     'dismiss'
@@ -917,4 +1034,9 @@ up.layer = do ->
 
   return api
 
+###**
+TODO: Docs
+@property up.context
+@pram {Object} context
+###
 u.getter up, 'context', -> up.layer.context

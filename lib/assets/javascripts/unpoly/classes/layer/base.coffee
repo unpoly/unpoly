@@ -46,10 +46,10 @@ class up.Layer extends up.Record
   ###
 
   ###**
-  Whether fragment updates within this layer will affect browser history and window title.
+  Whether fragment updates within this layer can affect browser history and window title.
 
   @property up.Layer#historyVisible
-  @return {boolean} historyVisible
+  @param {boolean} historyVisible
   ###
 
   ###**
@@ -241,7 +241,7 @@ class up.Layer extends up.Record
   ###**
   Returns whether this layer is *not* the [root layer](/up.layer.root).
 
-  @function up.Layer#isRoot
+  @function up.Layer#isOverlay
   @return {boolean}
   @stable
   ###
@@ -284,7 +284,7 @@ class up.Layer extends up.Record
   Returns `undefined` for the [root layer](/up.layer.root).
 
   @property up.Layer#parent
-  @param {up.Element} parent
+  @param {up.Layer} parent
   @stable
   ###
   @getter 'parent', ->
