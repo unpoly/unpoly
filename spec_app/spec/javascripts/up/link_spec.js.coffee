@@ -1411,6 +1411,20 @@ describe 'up.link', ->
             expect(clickListener).toHaveBeenCalled()
             expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(false)
 
+        it 'follows a[onclick] links on click instead of mousedown', asyncSpec (next) ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          link = up.hello fixture('a[href="/foo"][onclick="console.log(\'clicked\')"][up-instant][up-target=".target"]')
+
+          Trigger.mousedown(link)
+
+          next ->
+            expect(followSpy).not.toHaveBeenCalled()
+
+            Trigger.click(link)
+
+          next ->
+            expect(followSpy).toHaveBeenCalled()
+
         it 'does not fire a click event on an a[href="#"] link that also has local HTML in [up-content], [up-fragment] or [up-document]', asyncSpec (next) ->
           followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           # In reality the user will have configured an overly greedy selector like

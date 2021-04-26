@@ -129,7 +129,7 @@ up.link = do ->
       # (3) We don't want to handle <a href="javascript:foo()"> links.
       noFollowSelectors: ['[up-follow=false]', 'a[rel=download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]']
       instantSelectors: ['[up-instant]'],
-      noInstantSelectors: ['[up-instant=false]'],
+      noInstantSelectors: ['[up-instant=false]', '[onclick]'],
       preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]']),
       noPreloadSelectors: ['[up-preload=false]'],
       clickableSelectors: LINKS_WITH_LOCAL_HTML.concat(['[up-emit]', '[up-accept]', '[up-dismiss]', '[up-clickable]']),
