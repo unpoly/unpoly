@@ -19,23 +19,44 @@ up.form = do ->
   Sets default options for form submission and validation.
 
   @property up.form.config
+
   @param {number} [config.observeDelay=0]
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes. Use this to limit how often the callback
     will be invoked for a fast typist.
-  @param {Array<string>} [config.submitSelectors=['form[up-target]', 'form[up-follow]']]
-    An array of CSS selectors matching forms that will be [submitted by Unpoly](/up.submit).
+
+  @param {Array<string>} [config.submitSelectors]
+    An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-follow).
+
+    You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
+
+    ```js
+    up.form.config.submitSelectors.push('form']
+    ```
+
+    Individual forms may opt out with an `[up-submit=follow]` attribute.
+    You may configure additional exceptions in `config.noSubmitSelectors`.
+
+  @param {Array<string>} [config.noSubmitSelectors]
+    Exceptions to `config.submitSelectors`.
+
+    Matching forms will *not* be [submitted through Unpoly](/form-up-submit), even if they match `config.submitSelectors`.
+
   @param {Array<string>} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
     An array of CSS selectors that are searched around a form field
-    that wants to [validate](/up.validate). The first matching selector
-    will be updated with the validation messages from the server.
+    that wants to [validate](/up.validate).
+
+    The first matching selector will be updated with the validation messages from the server.
 
     By default this looks for a `<fieldset>`, `<label>` or `<form>`
     around the validating input field.
+
   @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
+
   @param {string} [config.submitButtonSelectors]
     An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
+
   @stable
   ###
   config = new up.Config ->
@@ -582,6 +603,12 @@ up.form = do ->
 
   Such a form will still be submitted through Unpoly.
 
+  \#\#\# Handling all forms automatically
+
+  You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute.
+
+  See [Handling all links and forms](/handling-everything).
+
   @selector form[up-submit]
 
   @params-note
@@ -598,12 +625,6 @@ up.form = do ->
     abortScheduledValidate?()
     up.event.halt(event)
     up.log.muteUncriticalRejection submit(form)
-
-  ###**
-  TODO: Docs
-
-  @selector form[up-submit]
-  ###
 
   ###**
   When a form field with this attribute is changed, the form is validated on the server

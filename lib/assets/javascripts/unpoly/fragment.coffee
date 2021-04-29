@@ -82,10 +82,12 @@ up.fragment = do ->
 
     Scripts will load asynchronously, with no guarantee of execution order.
 
-    If you set this to `true`, mind that a default [main target](/main)
-    is the `<body>` element. If you are including your script at the end of your `<body>`
+    If you set this to `true`, mind that the `<body>` element is a default
+    [main target](/main). If you are including your global application scripts
+    at the end of your `<body>`
     for performance reasons, swapping the `<body>` will re-execute these scripts.
-    Consider configuring a different main target that does not include scripts.
+    In that case you must configure a different main target that does not include
+    your application scripts.
 
   @stable
   ###

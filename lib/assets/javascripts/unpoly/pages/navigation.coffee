@@ -10,7 +10,7 @@
   When an Unpoly feature does *not* navigate, it only renders a new fragment,
   without affecting scroll positions, browser, history, etc.
 
-  \#\#\# Navigating features
+  \#\# Navigating features
 
   [Following a link](/a-up-follow), [submitting a form](/form-up-submit) or
   [opening an overlay](/up.layer.open) is considered navigation by default.
@@ -35,7 +35,7 @@
   | `up.validate()`      | no                    |
   | `[up-poll]`          | no                    |
 
-  \#\#\# Navigation defaults
+  \#\# Navigation defaults
 
   The following default options will be used when navigating:
 
@@ -50,7 +50,32 @@
   | `{ solo: true }`        | Cancel existing requests |
   | `{ peel: true }`        | Close overlays when targeting a layer below |
 
-  You can customize your navigation defaults with `up.fragment.config.navigateOptions`.
+
+  \#\#\# Customizing defaults
+
+  You can customize your navigation defaults with `up.fragment.config.navigateOptions`:
+
+  ```js
+  up.fragment.config.navigateOptions.transition = 'cross-fade'
+  ```
+
+  \#\#\# Defaults that depend on the origin
+
+  Sometimes you need to configure defaults that depend on the link or form that was activated.
+
+  Events like `up:link:follow` or `up:form:submit` have a `{ renderOptions }` property
+  that lets you change render options for the coming fragment update.
+
+  The code below will open all form-contained links in an overlay, as to not
+  lose the user's form data:
+
+  ```js
+  up.on('up:link:follow', function(event, link) {
+    if (link.closest('form')) {
+      event.renderOptions.layer = 'new'
+    }
+  })
+  ```
 
   @page navigation
   ###

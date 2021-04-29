@@ -147,6 +147,8 @@ up.syntax = do ->
   })
   ```
 
+  @see legacy-scripts
+
   @function up.compiler
   @param {string} selector
     The selector to match.

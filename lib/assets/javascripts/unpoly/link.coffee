@@ -95,12 +95,70 @@ up.link = do ->
 
   ###**
   TODO: Docs
-  TODO: docment that noInstantSelectors and noPreloadSelectors inherit from noFollowSelectors
+  TODO: Doucment that noInstantSelectors and noPreloadSelectors inherit from noFollowSelectors
+  TODO: Document that noFollowSelectors already excludes cross-origin, rel=download, [target], [href^=#], javascript: hrefs
 
   @property up.link.config
+
+  @param {Array<string>} config.followSelectors
+    An array of CSS selectors matching links that will be [followed through Unpoly](/a-up-follow).
+
+    You can customize this property to automatically follow *all* links on a page without requiring an `[up-follow]` attribute.
+    See [Handling all links and forms](/handling-everything).
+
+  @param {Array<string>} config.noFollowSelectors
+    Exceptions to `config.followSelectors`.
+
+    Matching links will *not* be [followed through Unpoly](/a-up-follow), even if they match `config.followSelectors`.
+
+    By default Unpoly excludes:
+
+    - Links with an `[up-follow=false]` attribute.
+    - Links with a cross-origin `[href]`.
+    - Links with a `[target]` attribute (to target an iframe or open new browser tab).
+    - Links with a `[rel=download]` attribute.
+    - Links with an `[href]` attribute starting with `javascript:`.
+    - Links with an `[href="#"]` attribute that don't also have local HTML
+      in an `[up-document]`, `[up-fragment]` or `[up-content]` attribute.
+
+  @param {Array<string>} config.instantSelectors
+    An array of CSS selectors matching links that are [followed on `mousedown`](/a-up-instant)
+    instead of on `click`.
+
+    You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
+    See [Handling all links and forms](/handling-everything).
+
+  @param {Array<string>} config.noInstantSelectors
+    Exceptions to `config.followSelectors`.
+
+    Matching links will *not* be [followed through Unpoly](/a-up-follow), even if they match `config.followSelectors`.
+
+    By default Unpoly excludes:
+
+    - Links with an `[up-instant=false]` attribute.
+    - Links that are [not followable](#config.noFollowSelectors).
+
+  @param {Array<string>} config.preloadSelectors
+    An array of CSS selectors matching links that are [preloaded on hover](/a-up-preload).
+
+    You can customize this property to preload *all* links on `mousedown` without requiring an `[up-preload]` attribute.
+    See [Handling all links and forms](/handling-everything).
+
+  @param {Array<string>} config.noPreloadSelectors
+    Exceptions to `config.preloadSelectors`.
+
+    Matching links will *not* be [preloaded on hover](/a-up-preload), even if they match `config.preloadSelectors`.
+
+    By default Unpoly excludes:
+
+    - Links with an `[up-preload=false]` attribute.
+    - Links that are [not followable](#config.noFollowSelectors).
+    - When the link destination [cannot be cached](/up.network.config#config.autoCache).
+
   @param {number} [config.preloadDelay=75]
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
+
   @param {boolean|string} [config.preloadEnabled='auto']
     Whether Unpoly will load [preload requests](/a-up-preload).
 
@@ -110,6 +168,7 @@ up.link = do ->
     If set to `true`, Unpoly will always load preload links.
 
     If set to `false`, Unpoly will never preload links.
+
   @param {Array<string>} [config.cickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
 
@@ -646,10 +705,14 @@ up.link = do ->
 
   \#\#\# Example
 
-  This will update the fragment `<div class="main">` with the same element
+  This will update the fragment `<div class="content">` with the same element
   fetched from `/posts/5`:
 
-      <a href="/posts/5" up-follow up-target=".main">Read post</a>
+  ```html
+  <a href="/posts/5" up-follow up-target=".content">Read post</a>
+  ```
+
+  If no `[up-target]` attribute is set, the [main target](/main) is updated.
 
   \#\#\# Advanced fragment changes
 
@@ -668,6 +731,12 @@ up.link = do ->
   - `[up-document]'
 
   Such a link will still be followed through Unpoly.
+
+  \#\#\# Following all links automatically
+
+  You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
+
+  See [Handling all links and forms](/handling-everything).
 
   @selector a[up-follow]
 
