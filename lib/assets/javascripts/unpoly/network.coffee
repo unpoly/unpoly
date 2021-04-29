@@ -81,11 +81,6 @@ up.network = do ->
 
     Defaults to 5 minutes.
 
-  @param {number} [config.badResponseTime=300]
-    How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
-
-    The value is given in milliseconds.
-
   @param {number} [config.badDownlink=0.6]
     The connection's minimum effective bandwidth estimate required
     to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
@@ -98,8 +93,8 @@ up.network = do ->
 
     The value is given in milliseconds. Lower is better.
 
-  @param {number} [config.badResponseTime=800]
-    The time to wait for a response before `up:request:late` is emitted.
+  @param {number} [config.badResponseTime=400]
+    How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
 
     This metric is *not* considered for the decision to
     [reduce requests](/up.network.shouldReduceRequests).
@@ -171,7 +166,7 @@ up.network = do ->
     cacheExpiry: 1000 * 60 * 5
     badDownlink: 0.6
     badRTT: 750
-    badResponseTime: 800
+    badResponseTime: 400
     # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     autoCache: (request) -> request.isSafe()
