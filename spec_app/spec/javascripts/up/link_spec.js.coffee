@@ -70,6 +70,29 @@ describe 'up.link', ->
           expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
           expect(result.value.layer).toBe(up.layer.root)
 
+      it 'still renders if the link was removed while the request was in flight (e.g. when the user clicked a link in a custom overlay that closes on mouseout)', asyncSpec (next) ->
+        fixture('.target', text: 'old text')
+
+        link = fixture('a[up-target=".target"][href="/foo"]')
+
+        promise = up.follow(link)
+
+        next ->
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          up.element.remove(link)
+
+        next ->
+          jasmine.respondWithSelector('.target', text: 'new text')
+
+        next ->
+          expect('.target').toHaveText('new text')
+          next.await promiseState(promise)
+
+        next (result) ->
+          expect(result.state).toBe('fulfilled')
+          expect(window).not.toHaveUnhandledRejections()
+
       describe 'events', ->
 
         it 'emits a preventable up:link:follow event', asyncSpec (next) ->

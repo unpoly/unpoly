@@ -1012,6 +1012,13 @@ describe 'up.layer', ->
           expect(layer).toEqual jasmine.any(up.Layer)
           expect(up.layer.getAll(layer)).toEqual [layer]
 
+      describe 'for an array of up.Layer objects', ->
+
+        it 'returns an array with the same objects', ->
+          makeLayers(3)
+          array = [up.layer.get(1), up.layer.get(2)]
+          expect(up.layer.getAll(array)).toEqual [up.layer.get(1), up.layer.get(2)]
+
       describe 'for "new"', ->
 
         it 'returns ["new"], which is useful for passing through the { layer } option when opening a new layer', ->

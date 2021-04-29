@@ -7,6 +7,16 @@ class up.Change.FromURL extends up.Change
   constructor: (@options) ->
     super(@options)
 
+    # Look up layers *before* we make the request.
+    # In case of { layer: 'origin' } (default for navigation) the { origin }
+    # element may get removed while the request was in flight, making
+    # up.Change.FromContent#execute() fail with "layer { origin } does not exist".
+    @options.layer = up.layer.getAll(@options)
+
+    # Since up.layer.getAll() already normalizes layer options,
+    # we don't need to normalize again in up.Change.FromContent.
+    @options.normalizeLayerOptions = false
+
     # We keep all failKeys in our successOptions, nothing will use them.
     @successOptions = @options
 

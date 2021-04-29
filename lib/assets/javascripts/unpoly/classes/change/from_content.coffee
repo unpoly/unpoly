@@ -6,12 +6,22 @@ e = up.element
 class up.Change.FromContent extends up.Change
 
   constructor: (options) ->
+    super(options)
+
+    # If we're rendering a fragment from a { url }, options.layer will already
+    # be an array of up.Layer objects, set by up.Change.FromURL. It looks up the
+    # layer eagerly because in case of { layer: 'origin' } (default for navigation)
+    # the { origin } element may get removed while the request was in flight.
+    # From that given array we need to remove layers that have been closed while
+    # the request was in flight.
+    #
+    # If we're rendering a framgent from local content ({ document, fragment, content }),
+    # options.layer will be a layer name like "current" and needs to be looked up.
+    @layers = u.filter(up.layer.getAll(@options), @isRenderableLayer)
+
     # Only extract options required for step building, since #execute() will be called with an
     # postflightOptions argument once the response is received and has provided refined
     # options.
-    super(options)
-    up.layer.normalizeOptions(@options)
-    @layers = up.layer.getAll(@options)
     @origin = @options.origin
     @preview = @options.preview
     @mode = @options.mode
@@ -21,6 +31,9 @@ class up.Change.FromContent extends up.Change
     # entire layer (where it might match unrelated elements).
     if @origin
       @originLayer = up.layer.get(@origin)
+
+  isRenderableLayer: (layer) ->
+    layer == 'new' || layer.isOpen()
 
   getPlans: ->
     unless @plans
