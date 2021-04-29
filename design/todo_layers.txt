@@ -32,7 +32,21 @@ Release process
 Remaining feature work
 ======================
 
+- Home for context
+  - Move up.layer.context to up.context in up.fragment
+  - Document context in up.context
+  - Remove up.layer.context
 
+- Profiling in NR
+
+- When we are already on #hash and we click on another link to #hash
+  - there is no #hashchange event
+  - hence revealHash() is not run
+  - hence we don't fix the browser's scroll position to scroll past obstructions
+
+- Support link[rel="foo"] for up.fragment.toTarget()
+
+- Profile: Warum macht das CompilePass, dann handleFocus, dann CompilePass 2?
 
 Tests
 =====
