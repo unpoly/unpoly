@@ -1229,6 +1229,28 @@ describe 'up.link', ->
             expect(followSpy).not.toHaveBeenCalled()
             expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(false)
 
+        it 'never follows a link with a "mailto:..." [href] attribute', asyncSpec (next) ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          up.link.config.followSelectors.push('a[href]')
+          link = up.hello fixture('a[href="mailto:foo@bar.com"]')
+
+          Trigger.click(link)
+
+          next ->
+            expect(followSpy).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
+        it 'never follows a link with a "whatsapp://..." attribute', asyncSpec (next) ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          up.link.config.followSelectors.push('a[href]')
+          link = up.hello fixture('a[href="whatsapp://send?text=Hello"]')
+
+          Trigger.click(link)
+
+          next ->
+            expect(followSpy).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+
         it 'does follow an a[href="#"] if the link also has local content via an [up-content], [up-fragment] or [up-document] attribute', asyncSpec (next) ->
           target = fixture('.target', text: 'old text')
           link = up.hello fixture('a[href="#"][up-target=".target"][up-content="new text"]')
