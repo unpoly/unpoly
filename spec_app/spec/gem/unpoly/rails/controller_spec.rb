@@ -323,7 +323,7 @@ describe Unpoly::Rails::Controller, type: :request do
 
     it 'returns true if testing "head", and Unpoly requests "html"' do
       result = controller_eval( headers: { 'X-Up-Target': 'html' }) do
-        up.target?('header')
+        up.target?('head')
       end
       expect(result).to eq(true)
     end
