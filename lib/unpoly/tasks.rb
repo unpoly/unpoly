@@ -34,6 +34,14 @@ module Unpoly
       Unpoly::Rails::VERSION =~ /rc|beta|pre|alpha/
     end
 
+    def gem_version
+      version = Unpoly::Rails::VERSION
+      if pre_release?
+        version = version.sub(/-/, '.pre.')
+      end
+      version
+    end
+
     def dist_paths
       Dir["#{SPROCKETS_OUTPUT_FOLDER}/**/*.{js,css}"]
     end
@@ -41,5 +49,7 @@ module Unpoly
     def run(command)
       system(command) or raise "Error running command: #{command}"
     end
+
+    extend self
   end
 end
