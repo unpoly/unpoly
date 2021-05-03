@@ -180,15 +180,17 @@ $ = jQuery
   # Can't use the new MouseEvent constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E
   createMouseEvent = (type, options = {}) ->
+    rect = options.element?.getBoundingClientRect()
+
     defaults =
       view: window,
       cancelable: true,
       bubbles: true,
       detail: 0,
-      screenX: 0,
-      screenY: 0,
-      clientX: 0,
-      clientY: 0,
+      screenX: 0, # from browser viewport origin, even within an iframe
+      screenY: 0, # from browser viewport origin, even within an iframe
+      clientX: rect?.x,
+      clientY: rect?.y,
       ctrlKey: false,
       altKey: false,
       shiftKey: false,
