@@ -9,6 +9,13 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 2.0.0
 -----
 
+[See Unpoly 2 slides](http://triskweline.de/unpoly2-slides/)
+
+TODO
+----
+
+This list is **far** from complete.
+
 - up.network.config.slowDelay is now 800 (up from 300)
 - up.network.config.cacheSize is now 50 (down from 70)
 - up.network.isBusy() / isIdle() takes preload events into account
