@@ -32,6 +32,12 @@ Release process
 Remaining feature work
 ======================
 
+- Print a warning when someone configures { history } on a layer config
+  - maybe in up.layer.build ?
+
+- Docs:
+  - Explain default cascade: globals => link => options
+
 - Home for context
   - Move up.layer.context to up.context in up.fragment
   - Document context in up.context

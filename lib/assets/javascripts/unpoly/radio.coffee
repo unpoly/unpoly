@@ -170,6 +170,10 @@ up.radio = do ->
         2 new messages
       </div>
 
+  \#\#\# Skipping updates when nothing changed
+
+  TODO: Document [up-time] and X-Up-Reload-From-Time (currently both documented in `X-Up-Reload-From-Time`).
+
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.

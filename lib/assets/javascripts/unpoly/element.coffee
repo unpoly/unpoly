@@ -79,6 +79,13 @@ up.element = do ->
 
     return results
 
+  ###**
+  Returns whether the given element is either the given root element
+  or its descendants.
+
+  @function isInSubtree
+  @internal
+  ###
   isInSubtree = (root, selectorOrElement) ->
     element = getOne(selectorOrElement)
     return root.contains(element)
@@ -389,6 +396,8 @@ up.element = do ->
   Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
   or use `up.element.affix()` to create an attached element.
 
+  Use `up.hello()` to activate JavaScript behavior within the created element.
+
   \#\#\# Examples
 
   To create an element with a given tag name:
@@ -519,14 +528,17 @@ up.element = do ->
   ###**
   Creates an element matching the given CSS selector and attaches it to the given parent element.
 
-  To create a detached element from a selector,
-  see `up.element.createFromSelector()`.
+  To create a detached element from a selector, see `up.element.createFromSelector()`.
+
+  Use `up.hello()` to activate JavaScript behavior within the created element.
 
   \#\#\# Example
 
-      element = up.element.affix(document.body, '.klass')
-      element.parentElement // returns document.body
-      element.className // returns 'klass'
+  ```js
+  element = up.element.affix(document.body, '.klass')
+  element.parentElement // returns document.body
+  element.className // returns 'klass'
+  ```
 
   @function up.element.affix
   @param {Element} parent
@@ -629,12 +641,16 @@ up.element = do ->
   ###**
   Creates an element from the given HTML fragment.
 
+  Use `up.hello()` to activate JavaScript behavior within the created element.
+
   \#\#\# Example
 
-      element = up.element.createFromHTML('<div class="foo"><span>text</span></div>')
-      element.className // returns 'foo'
-      element.children[0] // returns <span> element
-      element.children[0].textContent // returns 'text'
+  ```js
+  element = up.element.createFromHTML('<div class="foo"><span>text</span></div>')
+  element.className // returns 'foo'
+  element.children[0] // returns <span> element
+  element.children[0].textContent // returns 'text'
+  ```
 
   @function up.element.createFromHTML
   @stable
@@ -1055,6 +1071,7 @@ up.element = do ->
   @function up.element.isVisible
   @param {Element} element
     The element to check.
+  @return {boolean}
   @stable
   ###
   isVisible = (element) ->
@@ -1070,6 +1087,14 @@ up.element = do ->
         attrs[name] = attribute.value
     attrs
 
+  ###**
+  Returns whether the given element has been removed from the DOM tree.
+
+  up.element.isDetached
+  @param {Element} element
+  @return {boolean}
+  @stable
+  ###
   isDetached = (element) ->
     element != document && !getRoot().contains(element)
 

@@ -152,14 +152,14 @@ up.fragment = do ->
   @param {Element|string} element
     The element or CSS selector for which to look up the source URL.
   @return {string|undefined}
-  @experimental
+  @stable
   ###
   sourceOf = (element, options = {}) ->
     element = getSmart(element, options)
     return e.closestAttr(element, 'up-source')
 
   ###**
-  Returns a timestamp for the  the given element was retrieved from.
+  Returns a timestamp for the last modification of the content in the given element.
 
   @function up.fragment.time
   @param {Element} element
@@ -601,6 +601,7 @@ up.fragment = do ->
   Instead of preventing the update, listeners may also access the `event.renderOptions` object
   to mutate options to the `up.render()` call that will process the server response.
 
+  @event up:fragment:loaded
   @param event.preventDefault()
     Event listeners may call this method to prevent the fragment change.
   @param {up.Request} event.request
@@ -609,21 +610,26 @@ up.fragment = do ->
     The server response.
   @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
-  @event up:fragment:loaded
   ###
 
   ###**
   Elements with an `up-keep` attribute will be persisted during
   [fragment updates](/up.fragment).
 
-  For example:
-
-      <audio up-keep src="song.mp3"></audio>
-
-  The element you're keeping should have an umambiguous class name, ID or `up-id`
+  The element you're keeping should have an umambiguous class name, ID or `[up-id]`
   attribute so Unpoly can find its new position within the page update.
 
   Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
+
+  \#\#\# Example
+
+  The following `<audio>` element will be persisted through fragment
+  updates as long as the responses contain an element matching `#player`:
+
+
+  ```html
+  <audio id="player" up-keep src="song.mp3"></audio>
+  ```
 
   \#\#\# Controlling if an element will be kept
 
@@ -716,9 +722,11 @@ up.fragment = do ->
   the `innerHTML` property or calling jQuery methods like
   `html`, `insertAfter` or `appendTo`:
 
-      element = document.createElement('div')
-      element.innerHTML = '... HTML that needs to be activated ...'
-      up.hello(element)
+  ```html
+  element = document.createElement('div')
+  element.innerHTML = '... HTML that needs to be activated ...'
+  up.hello(element)
+  ```
 
   This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
   event.
@@ -1204,6 +1212,10 @@ up.fragment = do ->
 
   To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
   on the element or its ancestors.
+
+  \#\#\# Skipping updates when nothing changed
+
+  TODO: Document [up-time] and X-Up-Reload-From-Time (currently both documented in `X-Up-Reload-From-Time`).
 
   @function up.reload
   @param {string|Element|jQuery} [target]
