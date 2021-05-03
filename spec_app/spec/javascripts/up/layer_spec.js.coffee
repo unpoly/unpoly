@@ -1363,6 +1363,56 @@ describe 'up.layer', ->
           expect(up.layer.isOverlay()).toBe(true)
           expect(up.layer.current).toHaveText('overlay text')
 
+      describe 'history', ->
+
+        beforeEach ->
+          up.history.config.enabled = true
+
+        it 'opens a layer with visible history when the mode config has { historyVisible: true }', asyncSpec (next) ->
+          fixture('.target')
+          up.layer.config.drawer.historyVisible = true
+          link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path5"]')
+
+          Trigger.clickSequence(link)
+
+          next ->
+            jasmine.respondWithSelector('.target')
+
+          next ->
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.historyVisible).toBe(true)
+            expect(up.history.location).toMatchURL('/path5')
+
+        it 'opens a layer without visible history when the mode config has { historyVisible: false }', asyncSpec (next) ->
+          fixture('.target')
+          up.layer.config.drawer.historyVisible = false
+          link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path6"]')
+
+          Trigger.clickSequence(link)
+
+          next ->
+            jasmine.respondWithSelector('.target')
+
+          next =>
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.historyVisible).toBe(false)
+            expect(up.history.location).toMatchURL(@locationBeforeExample)
+
+        it 'lets the link override the mode config with an [up-history-visible] attribute', asyncSpec (next) ->
+          fixture('.target')
+          up.layer.config.drawer.historyVisible = true
+          link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path7"][up-history-visible="false"]')
+
+          Trigger.clickSequence(link)
+
+          next ->
+            jasmine.respondWithSelector('.target')
+
+          next =>
+            expect(up.layer.count).toBe(2)
+            expect(up.layer.historyVisible).toBe(false)
+            expect(up.history.location).toMatchURL(@locationBeforeExample)
+
     describe '[up-accept]', ->
 
       beforeEach ->
