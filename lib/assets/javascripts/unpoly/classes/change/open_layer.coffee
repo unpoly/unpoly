@@ -167,7 +167,7 @@ class up.Change.OpenLayer extends up.Change.Addition
       origin: @origin,
       baseLayer: @baseLayer, # sets up.layer.current
       layerOptions: @options,
-      log: "Opening new #{@layer}"
+      log: "Opening new overlay"
     )
 
   emitOpenedEvent: ->
