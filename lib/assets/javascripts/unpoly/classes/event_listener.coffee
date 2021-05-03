@@ -19,7 +19,7 @@ class up.EventListener extends up.Record
   constructor: (attributes) ->
     super(attributes)
     @key = @constructor.buildKey(attributes)
-    @isDefault = up.framework.isBooting()
+    @isDefault = up.framework.booting
 
   bind: ->
     map = (@element.upEventListeners ||= {})

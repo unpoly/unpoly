@@ -17,12 +17,12 @@ css_dir: "app/assets/stylesheets"
 # list of file expressions to include as source files
 # relative path from src_dir
 src_files:
- - "jasmine_specs.{js.coffee,js,coffee}"
+ - "jasmine_extensions.{js.coffee,js,coffee}"
 
 # list of file expressions to include as css files
 # relative path from css_dir
 css_files:
- - "jasmine_specs.{css.sass,css,sass}"
+ - "jasmine_style_mods.{css.sass,css,sass}"
 
 # path to parent directory of spec_files
 # relative path from Rails.root

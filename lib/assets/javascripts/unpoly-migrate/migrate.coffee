@@ -89,4 +89,3 @@ up.migrate = do ->
   loaded: true
   config: config
 
-

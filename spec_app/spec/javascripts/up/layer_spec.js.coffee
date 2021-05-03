@@ -866,6 +866,19 @@ describe 'up.layer', ->
               value = { location: u.normalizeURL('/dismissable-location') }
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
+    describe 'up.layer.build()', ->
+
+      it 'merges all applicable layer configs'
+
+      it 'prioritizes the config for a particular mode over the config for all overlays or any modes'
+
+      if up.migrate.loaded
+        it 'prints a deprecation warning if the user configured { history } (which is now { historyVisible })', ->
+          up.layer.config.overlay.history = false
+          warnSpy = spyOn(up.log, 'warn')
+          up.layer.build(mode: 'drawer')
+          expect(warnSpy).toHaveBeenCalled()
+
     describe 'up.layer.accept()', ->
 
       it 'closes the current layer', ->

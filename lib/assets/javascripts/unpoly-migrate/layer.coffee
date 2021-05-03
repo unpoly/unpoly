@@ -52,3 +52,6 @@ up.migrate.registerLayerCloser = (layer) ->
   layer.registerClickCloser 'up-close', (value, closeOptions) =>
     up.migrate.deprecated('[up-close]', '[up-dismiss]')
     layer.dismiss(value, closeOptions)
+
+up.migrate.handleLayerConfig = (config) ->
+  up.migrate.fixKey(config, 'history', 'historyVisible')

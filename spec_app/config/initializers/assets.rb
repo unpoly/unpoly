@@ -7,8 +7,8 @@ Rails.application.config.assets.version = '1.0'
 Rails.application.config.assets.paths += Dir["#{Rails.root}/vendor/asset-libs/*"].sort_by { |dir| -dir.size }
 
 # Precompile additional assets.
-Rails.application.config.assets.precompile += %w( application.js application.css )
-Rails.application.config.assets.precompile += %w( jasmine_specs.js jasmine_specs.css )
+Rails.application.config.assets.precompile += %w( minimal_unpoly.js jasmine_extensions.js )
+Rails.application.config.assets.precompile += %w( jasmine_style_mods.css )
 Rails.application.config.assets.precompile += %w( integration_test.js integration_test.css )
 
 # Precompile jQuery versions from jquery-rails individually, so we can include them as individual <script> tags

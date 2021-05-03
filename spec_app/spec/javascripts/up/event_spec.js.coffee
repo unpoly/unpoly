@@ -356,7 +356,7 @@ describe 'up.event', ->
         it 'allows to bind and unbind events by their old, deprecated name', ->
           up.migrate.renamedEvent('up:spec:old', 'up:spec:new')
 
-          warnSpy = spyOn(up, 'warn')
+          warnSpy = spyOn(up.log, 'warn')
           listener = jasmine.createSpy('listener')
 
           # Reister listener for the old event name

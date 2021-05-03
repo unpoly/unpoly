@@ -37,9 +37,7 @@ up.motion = do ->
   e = up.element
 
   namedAnimations = {}
-  defaultNamedAnimations = {}
   namedTransitions = {}
-  defaultNamedTransitions = {}
 
   motionController = new up.MotionController('motion')
 
@@ -66,10 +64,13 @@ up.motion = do ->
     easing: 'ease'
     enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 
+  pickDefault = (registry) ->
+    return u.pickBy registry, (value) -> value.isDefault
+
   reset = ->
     motionController.reset()
-    namedAnimations = u.copy(defaultNamedAnimations)
-    namedTransitions = u.copy(defaultNamedTransitions)
+    namedAnimations = pickDefault(namedAnimations)
+    namedTransitions = pickDefault(namedTransitions)
     config.reset()
 
   ###**
@@ -474,7 +475,9 @@ up.motion = do ->
   @stable
   ###
   registerTransition = (name, transition) ->
-    namedTransitions[name] = findTransitionFn(transition)
+    fn = findTransitionFn(transition)
+    fn.isDefault = up.framework.booting
+    namedTransitions[name] = fn
 
   ###**
   Defines a named animation.
@@ -509,14 +512,11 @@ up.motion = do ->
   @stable
   ###
   registerAnimation = (name, animation) ->
-    namedAnimations[name] = findAnimationFn(animation)
+    fn = findAnimationFn(animation)
+    fn.isDefault = up.framework.booting
+    namedAnimations[name] = fn
 
-  onBoot = ->
-    # Remember original named animations so we can purge user-defined
-    # animtions during reset.
-    defaultNamedAnimations = u.copy(namedAnimations)
-    defaultNamedTransitions = u.copy(namedTransitions)
-
+  warnIfDisabled = ->
     # Explain to the user why animations aren't working.
     # E.g. the user might have disabled animations in her OS.
     unless isEnabled()
@@ -631,7 +631,7 @@ up.motion = do ->
     @see server-errors
   ###
 
-  up.on 'up:framework:boot', onBoot
+  up.on 'up:framework:boot', warnIfDisabled
   up.on 'up:framework:reset', reset
 
   morph: morph

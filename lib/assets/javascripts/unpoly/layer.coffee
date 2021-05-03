@@ -286,6 +286,10 @@ up.layer = do ->
     # modeConfigs() returns the most specific options first,
     # but in merge() below later args override keys from earlier args.
     configs = u.reverse(modeConfigs(mode))
+
+    if handleDeprecatedConfig = up.migrate.handleLayerConfig
+      configs.forEach(handleDeprecatedConfig)
+
     options = u.mergeDefined(configs..., { mode, stack }, options)
 
     return new Class(options)

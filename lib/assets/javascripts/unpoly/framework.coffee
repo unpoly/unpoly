@@ -3,10 +3,9 @@
 ###
 
 up.framework = do ->
-
   u = up.util
 
-  isBooting = true
+  booting = true
 
   ###**
   Resets Unpoly to the state when it was booted.
@@ -52,7 +51,7 @@ up.framework = do ->
       # - Run delayed initialization that could not run at load time due to
       #   circular dependencies.
       up.emit('up:framework:boot', log: false)
-      isBooting = false
+      booting = false
 
       # From here on, all event handlers (both Unpoly's and user code) want to
       # work with the DOM, so wait for the DOM to be ready.
@@ -66,6 +65,16 @@ up.framework = do ->
     else
       console.log?("Unpoly doesn't support this browser. Framework was not booted.")
 
-  reset: emitReset
-  boot: boot
-  isBooting: -> isBooting
+  startExtension = ->
+    booting = true
+
+  stopExtension = ->
+    booting = false
+
+  u.literal {
+    boot,
+    startExtension,
+    stopExtension
+    reset: emitReset
+    get_booting: -> booting
+  }

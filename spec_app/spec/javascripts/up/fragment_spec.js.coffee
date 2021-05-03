@@ -4582,17 +4582,6 @@ describe 'up.fragment', ->
         next.after 200, ->
           expect(destructor).toHaveBeenCalledWith('old text')
 
-      if up.migrate.loaded
-        it 'allows to pass a new history entry as { history } option (deprecated)', asyncSpec (next) ->
-          up.history.config.enabled = true
-          warnSpy = spyOn(up.migrate, 'warn')
-          $fixture('.element')
-          up.destroy('.element', history: '/new-path')
-
-          next ->
-            expect(location.href).toMatchURL('/new-path')
-            expect(warnSpy).toHaveBeenCalled()
-
       it 'marks the element as .up-destroying while it is animating', asyncSpec (next) ->
         $element = $fixture('.element')
         up.destroy($element, animation: 'fade-out', duration: 80, easing: 'linear')

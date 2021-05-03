@@ -263,7 +263,8 @@ up.syntax = do ->
   ###
   registerMacro = (args...) ->
     macro = buildCompiler(args)
-    if up.framework.isBooting()
+
+    if up.framework.booting
       macro.priority = detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
     return insertCompiler(macros, macro)
@@ -318,7 +319,7 @@ up.syntax = do ->
     [selector, options, callback] = parseCompilerArgs(args)
     options = u.options(options,
       selector: selector,
-      isDefault: up.framework.isBooting(),
+      isDefault: up.framework.booting,
       priority: 0,
       batch: false
       keep: false,
