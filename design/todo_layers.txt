@@ -37,8 +37,6 @@ Remaining feature work
   - Document context in up.context
   - Remove up.layer.context
 
-- Profiling in NR
-
 - When we are already on #hash and we click on another link to #hash
   - there is no #hashchange event
   - hence revealHash() is not run
