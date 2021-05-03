@@ -42,8 +42,6 @@ Remaining feature work
   - hence revealHash() is not run
   - hence we don't fix the browser's scroll position to scroll past obstructions
 
-- Support link[rel="foo"] for up.fragment.toTarget()
-
 - Profile: Warum macht das CompilePass, dann handleFocus, dann CompilePass 2?
 
 Tests
