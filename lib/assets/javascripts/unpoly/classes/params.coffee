@@ -5,8 +5,8 @@ e = up.element
 The `up.Params` class offers a consistent API to read and manipulate request parameters
 independent of their type.
 
-Request parameters are used in [form submissions](/up.Params#fromForm) and
-[URLs](/up.Params#fromURL). Methods like `up.submit()` or `up.replace()` accept
+Request parameters are used in [form submissions](/up.Params.prototype.fromForm) and
+[URLs](/up.Params.prototype.fromURL). Methods like `up.submit()` or `up.replace()` accept
 request parameters as a `{ params }` option.
 
 \#\#\# Supported parameter types
@@ -288,7 +288,7 @@ class up.Params extends up.Class
   Sets the `value` for the entry with given `name`.
 
   An `up.Params` instance can hold multiple entries with the same name.
-  All existing entries with the given `name` are [deleted](/up.Params#delete) before the
+  All existing entries with the given `name` are [deleted](/up.Params.prototype.delete) before the
   new entry is set. To add a new entry even if the `name` is taken, use `up.Params#add()`.
 
   @function up.Params#set

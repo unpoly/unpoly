@@ -1514,6 +1514,11 @@ up.fragment = do ->
   ###
 
   ###**
+  Returns whether the given element matches the given CSS selector.
+
+  Other than `up.element.matches()` this function supports non-standard selectors
+  like `:main` or `:layer`.
+
   @function up.fragment.matches
   @param {Element} fragment
   @param {string|Array<string>} selectorOrSelectors
@@ -1525,6 +1530,7 @@ up.fragment = do ->
   @param {string|up.Layer} options.mode
     Required if `{ layer: 'new' }` is passed.
   @return {boolean}
+  @experimental
   ###
   matches = (element, selector, options = {}) ->
     element = e.get(element)

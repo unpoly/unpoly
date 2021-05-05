@@ -57,7 +57,11 @@ up.history = do ->
     u.normalizeURL(url, normalizeOptions)
 
   ###**
-  Returns a normalized URL for the current history entry.
+  Returns a normalized URL for the current browser location.
+
+  Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.historyVisible),
+  the browser's address bar will show the location of an ancestor layer.
+  To get the location of the current layer, use `up.layer.location`.
 
   @property up.history.location
   @param {string} location
@@ -132,9 +136,15 @@ up.history = do ->
   ###**
   This event is [emitted](/up.emit) after the browser's address bar was updated with a new URL.
 
-  Reasons for a changed location are e.g. [fragment navigation](/navigation) or the user pressing the back button.
+  There may be several reasons why the browser location was changed:
 
-  Also see `up:layer:location:changed`.
+  - A fragment update changes history through [navigation](/navigation) or rendering with `{ history: true }`.
+  - The user uses the back or forward buttons in their browser UI.
+  - Programmatic calls to `up.history.push()`.
+
+  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.historyVisible), following a link
+  will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
+  There will however be an `up:layer:location:changed` event be emitted.
 
   @event up:location:changed
   @param {string} event.url
@@ -218,7 +228,7 @@ up.history = do ->
   Changes the link's destination so it points to the previous URL.
 
   Note that this will *not* call `location.back()`, but will set
-  the link's `up-href` attribute to the actual, previous URL.
+  the link's `[up-href]` attribute to the actual, previous URL.
 
   If no previous URL is known, the link will not be changed.
 
@@ -226,15 +236,19 @@ up.history = do ->
 
   This link ...
 
-      <a href="/default" up-back>
-        Go back
-      </a>
+  ```html
+  <a href="/default" up-back>
+    Go back
+  </a>
+  ```
 
   ... will be transformed to:
 
-      <a href="/default" up-href="/previous-page" up-restore-scroll up-follow>
-        Go back
-      </a>
+  ```html
+  <a href="/default" up-href="/previous-page" up-scroll="restore" up-follow>
+    Go back
+  </a>
+  ```
 
   @selector a[up-back]
   @stable

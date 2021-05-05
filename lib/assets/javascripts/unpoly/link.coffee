@@ -646,14 +646,18 @@ up.link = do ->
 
   Assume we have two links, one of which is `[up-instant]`:
 
-      <a href="/one">Link 1</a>
-      <a href="/two" up-instant>Link 2</a>
+  ```html
+  <a href="/one">Link 1</a>
+  <a href="/two" up-instant>Link 2</a>
+  ```
 
   The following event listener will be called when *either* link is activated:
 
-      document.addEventListener('up:click', function(event) {
-        ...
-      })
+  ```js
+  document.addEventListener('up:click', function(event) {
+    ...
+  })
+  ```
 
   \#\#\# Cancelation is forwarded
 

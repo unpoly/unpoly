@@ -40,6 +40,9 @@
   - Links that are not [followable](#following-all-links).
   - You have configured additional exceptions in `up.link.config.noInstantSelectors`.
 
+  Note that if you have event listeners bound to `click` on accelerated links, they will
+  no longer be called. You need to bind these listeners to `mousedown` or, better, `up:click` instead.
+
   \#\#\# Preloading all links
 
   To preload *all* links on when hovering over them, without requiring an [`[up-preload]`](/a-up-preload) attribute:

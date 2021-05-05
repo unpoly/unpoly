@@ -62,9 +62,11 @@ class up.Layer extends up.Record
 
   \#\#\# Example
 
-      let layer = up.layer.current
-      layer.context.message = 'Please select a contact'
-      console.log(layer.context) // logs "{ message: 'Please select a contact' }"
+  ```js
+  let layer = up.layer.current
+  layer.context.message = 'Please select a contact'
+  console.log(layer.context) // logs "{ message: 'Please select a contact' }"
+  ```
 
   \#\#\# Accessing the context from the server
 
@@ -80,10 +82,10 @@ class up.Layer extends up.Record
   ###**
   Whether fragment updates within this layer will affect [browser history](/up.history).
 
-  If a layer does not affect history, its desendant layers cannot affect history either.
+  If a layer does not have visible history, its desendant layers cannot have history either.
 
-  @property up.Layer#history
-  @param {boolean} history
+  @property up.Layer#historyVisible
+  @param {boolean} historyVisible
   @stable
   ###
 
@@ -192,7 +194,7 @@ class up.Layer extends up.Record
     throw up.error.notImplemented()
 
   ###**
-  [Dismisses](/up.Layer#dismiss) all descendant overlays,
+  [Dismisses](/up.Layer.prototype.dismiss) all descendant overlays,
   making this layer the [frontmost layer](/up.layer.front) in the [layer stack](/up.layer.stack).
 
   Descendant overlays will be dismissed with value `':peel'`.
@@ -471,7 +473,7 @@ class up.Layer extends up.Record
     return up.EventEmitter.fromEmitArgs(args, layer: this)
 
   ###**
-  [Emits](/up.emit) an event on [this layer's element](/up.Layer#element).
+  [Emits](/up.emit) an event on [this layer's element](/up.Layer.prototype.element).
 
   The value of [up.layer.current](/up.layer.current) will be set to the this layer
   while event listeners are running.
@@ -490,7 +492,7 @@ class up.Layer extends up.Record
   @param {Element|jQuery} [target=this.element]
     The element on which the event is triggered.
 
-    If omitted, the event will be emitted on the [this layer's element](/up.Layer#element).
+    If omitted, the event will be emitted on the [this layer's element](/up.Layer.prototype.element).
   @param {string} eventType
     The event type, e.g. `my:event`.
   @param {Object} [props={}]
@@ -557,10 +559,14 @@ class up.Layer extends up.Record
   ###**
   This layer's window title.
 
-  If this layer does not [affect browser history](/up.Layer#history), this property will
-  still return the string the layer would otherwise use.
+  If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.historyVisible),
+  the browser window will show the title of an ancestor layer.
+  This property will return the title the layer would use if it had visible history.
 
-  When this layer opens a child layer with history, the browser window will change to the child
+  If this layer does not [affect browser history](/up.Layer.prototype.historyVisible), this property will
+  still return the title the layer would otherwise use.
+
+  When this layer opens a child layer with visible history, the browser window will change to the child
   layer's title. When the child layer is closed, this layer's title will be restored.
 
   @property up.Layer#title
@@ -584,13 +590,14 @@ class up.Layer extends up.Record
 
 
   ###**
-  This layer's URL for the browser's address bar.
+  This layer's location URL.
 
-  If this layer does not [affect browser history](/up.Layer#history), this property will
-  still return the URL the layer would otherwise use.
+  If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.historyVisible),
+  the browser's address bar will show the location of an ancestor layer.
+  This property will return the URL the layer would use if it had visible history.
 
-  When this layer opens a child layer with history, the browser URL will change to the child
-  layer's location. When the child layer is closed, this layer's laytion will be restored.
+  When this layer opens a child layer with visible history, the browser URL will change to the child
+  layer's location. When the child layer is closed, this layer's location will be restored.
 
   @property up.Layer#location
   @param {string} location

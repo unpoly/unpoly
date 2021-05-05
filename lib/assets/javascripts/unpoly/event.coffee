@@ -61,9 +61,6 @@ up.event = do ->
   - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
     to observed elements. If an `[up-data]` attribute is set, its value will automatically be
     parsed as JSON and passed as a third argument.
-  - Event listeners on [unsupported browsers](/up.browser.isSupported) are silently discarded,
-    leaving you with an application without JavaScript. This is typically preferable to
-    a soup of randomly broken JavaScript in ancient browsers.
 
   \#\#\# Basic example
 
@@ -155,39 +152,47 @@ up.event = do ->
   ```
 
   @function up.on
+
   @param {Element|jQuery} [element=document]
     The element on which to register the event listener.
 
     If no element is given, the listener is registered on the `document`.
+
   @param {string|Array<string>} types
     The event types to bind to.
 
     Multiple event types may be passed as either a space-separated string
     or as an array of types.
+
   @param {string} [selector]
     The selector of an element on which the event must be triggered.
 
     Omit the selector to listen to all events of the given type, regardless
     of the event target.
+
   @param {boolean} [options.passive=false]
     Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).
 
     A passive event listener may not call `event.preventDefault()`.
     This in particular may improve the frame rate when registering
     `touchstart` and `touchmove` events.
+
   @param {boolean} [options.once=true]
     Whether the listener should run at most once.
 
     If `true` the listener will automatically be removed from the element
     after the first invocation.
+
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
     The function takes the affected element as a second argument.
     If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
     and passed as a third argument.
+
   @return {Function()}
     A function that unbinds the event listeners when called.
+
   @stable
   ###
   bind = (args...) ->
@@ -303,7 +308,7 @@ up.event = do ->
   @param {up.Layer|string|number} [props.layer]
     The [layer](/up.layer) on which to emit this event.
 
-    If this property is set, the event will be emitted on the [layer's outmost element](/up.Layer#element).
+    If this property is set, the event will be emitted on the [layer's outmost element](/up.Layer.prototype.element).
     Also [up.layer.current](/up.layer.current) will be set to the given layer while event listeners
     are running.
   @param {string|Array} [props.log]
@@ -369,7 +374,7 @@ up.event = do ->
     return event
 
   ###**
-  [Emits](/up.emit) the given event and throws an AbortError if it was prevented.
+  [Emits](/up.emit) the given event and throws an `AbortError` if it was prevented.
 
   @function up.event.assertEmitted
   @param {string} eventType
@@ -399,18 +404,18 @@ up.event = do ->
   ###
   onEscape = (listener) ->
     return bind('keydown', (event) ->
-      if escapePressed(event)
+      if wasEscapePressed(event)
         listener(event)
     )
 
   ###**
   Returns whether the given keyboard event involved the ESC key.
 
-  @function up.util.escapePressed
+  @function up.util.wasEscapePressed
   @param {Event} event
   @internal
   ###
-  escapePressed = (event) ->
+  wasEscapePressed = (event) ->
     key = event.key
     # IE/Edge use 'Esc', other browsers use 'Escape'
     key == 'Escape' || key == 'Esc'
@@ -495,19 +500,23 @@ up.event = do ->
 
   \#\#\# Example
 
-      <a href='/users/5" up-emit='user:select' up-emit-props='{ "id": 5, "firstName": "Alice" }'>Alice</a>
+  This hyperlink will emit an `user:select` event when clicked:
 
-      <script>
-        up.on('a', 'user:select', function(event) {
-          console.log(event.firstName) // logs "Alice"
-          event.preventDefault()       // will prevent the link from being followed
-        })
-      </script>
+  ```
+  <a href='/users/5" up-emit='user:select' up-emit-props='{ "id": 5, "firstName": "Alice" }'>Alice</a>
+
+  <script>
+    up.on('a', 'user:select', function(event) {
+      console.log(event.firstName) // logs "Alice"
+      event.preventDefault()       // will prevent the link from being followed
+    })
+  </script>
+  ```
 
   @selector a[up-emit]
   @param up-emit
     The type of the event to be emitted.
-  @param up-emit-props
+  @param [up-emit-props='{}']
     The event properties, serialized as JSON.
   ###
   executeEmitAttr = (event, element) ->

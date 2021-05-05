@@ -50,13 +50,16 @@ up.feedback = do ->
   e = up.element
 
   ###**
-  Sets default options for this module.
+  Sets default options for this package.
 
   @property up.feedback.config
+
   @param {Array<string>} [config.currentClasses]
     An array of classes to set on [links that point the current location](/a.up-current).
+
   @param {Array<string>} [config.navSelectors]
     An array of CSS selectors that match [navigation components](/up-nav).
+
   @stable
   ###
   config = new up.Config ->
@@ -155,28 +158,34 @@ up.feedback = do ->
 
   ###**
   Links that are currently [loading through Unpoly](/a-up-follow)
-  are assigned the `up-active` class automatically.
+  are assigned the `.up-active` class automatically.
 
   Style `.up-active` in your CSS to improve the perceived responsiveness
   of your user interface.
 
-  The `up-active` class will be removed when the link is done loading.
+  The `.up-active` class will be removed when the link is done loading.
 
   \#\#\# Example
 
   We have a link:
 
-      <a href="/foo" up-follow>Foo</a>
+  ```html
+  <a href="/foo" up-follow>Foo</a>
+  ```
 
   The user clicks on the link. While the request is loading,
   the link has the `up-active` class:
 
-      <a href="/foo" up-follow class="up-active">Foo</a>
+  ```html
+  <a href="/foo" up-follow class="up-active">Foo</a>
+  ```
 
-  Once the link destination has loaded and rendered, the `up-active` class
-  is removed and the [`up-current`](/a.up-current) class is added:
+  Once the link destination has loaded and rendered, the `.up-active` class
+  is removed and the [`.up-current`](/a.up-current) class is added:
 
-      <a href="/foo" up-follow class="up-current">Foo</a>
+  ```html
+  <a href="/foo" up-follow class="up-current">Foo</a>
+  ```
 
   @selector a.up-active
   @stable
@@ -184,29 +193,33 @@ up.feedback = do ->
 
   ###**
   Forms that are currently [loading through Unpoly](/form-up-submit)
-  are assigned the `up-active` class automatically.
+  are assigned the `.up-active` class automatically.
   Style `.up-active` in your CSS to improve the perceived responsiveness
   of your user interface.
 
-  The `up-active` class will be removed as soon as the response to the
+  The `.up-active` class will be removed as soon as the response to the
   form submission has been received.
 
   \#\#\# Example
 
   We have a form:
 
-      <form up-target=".foo">
-        <button type="submit">Submit</button>
-      </form>
+  ```html
+  <form up-target=".foo">
+    <button type="submit">Submit</button>
+  </form>
+  ```
 
   The user clicks on the submit button. While the form is being submitted
   and waiting for the server to respond, the form has the `up-active` class:
 
-      <form up-target=".foo" class="up-active">
-        <button type="submit">Submit</button>
-      </form>
+  ```html
+  <form up-target=".foo" class="up-active">
+    <button type="submit">Submit</button>
+  </form>
+  ```
 
-  Once the link destination has loaded and rendered, the `up-active` class
+  Once the link destination has loaded and rendered, the `.up-active` class
   is removed.
 
   @selector form.up-active
@@ -214,7 +227,7 @@ up.feedback = do ->
   ###
 
   ###**
-  Marks the given element as no longer loading, by removing the CSS class [`up-active`](/a.up-active).
+  Marks the given element as no longer loading, by removing the CSS class [`.up-active`](/a.up-active).
 
   This happens automatically when network requests initiated by the Unpoly API have completed.
   Use this function if you make custom network calls from your own JavaScript code.
@@ -253,46 +266,51 @@ up.feedback = do ->
   ###**
   Marks this element as a navigation component, such as a menu or navigation bar.
 
-  When a link within an `[up-nav]` element points to the current location, it is assigned the [`.up-current`](/a.up-current) class. When the browser navigates to another location, the class is removed automatically.
+  When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
+  it is assigned the [`.up-current`](/a.up-current) class. When the browser navigates to another location, the class is removed automatically.
 
   You may also assign `[up-nav]` to an individual link instead of an navigational container.
 
-  If you don't want to manually add this attribute to every navigational element, you can configure selectors to automatically match your navigation components in `up.feedback.config.navs`.
+  If you don't want to manually add this attribute to every navigational element,
+  you can configure selectors to automatically match your navigation components in `up.feedback.config.navs`.
 
 
   \#\#\# Example
 
   Let's take a simple menu with two links. The menu has been marked with the `[up-nav]` attribute:
 
-      <div up-nav>
-        <a href="/foo">Foo</a>
-        <a href="/bar">Bar</a>
-      </div>
+  ```html
+  <div up-nav>
+    <a href="/foo">Foo</a>
+    <a href="/bar">Bar</a>
+  </div>
+  ```
 
   If the browser location changes to `/foo`, the first link is marked as `.up-current`:
 
-      <div up-nav>
-        <a href="/foo" class="up-current">Foo</a>
-        <a href="/bar">Bar</a>
-      </div>
+  ```html
+  <div up-nav>
+    <a href="/foo" class="up-current">Foo</a>
+    <a href="/bar">Bar</a>
+  </div>
+  ```
 
   If the browser location changes to `/bar`, the first link automatically loses its `.up-current` class. Now the second link is marked as `.up-current`:
 
-      <div up-nav>
-        <a href="/foo">Foo</a>
-        <a href="/bar" class="up-current">Bar</a>
-      </div>
+  ```html
+  <div up-nav>
+    <a href="/foo">Foo</a>
+    <a href="/bar" class="up-current">Bar</a>
+  </div>
+  ```
 
 
-  \#\#\# What is considered to be "current"?
+  \#\#\# When is a link "current"?
 
-  The current location is considered to be either:
-
-  - the URL displayed in the browser window's location bar
-  - the source URL of a [modal dialog](/up.modal)
-  - the URL of the page behind a [modal dialog](/up.modal)
-  - the source URL of a [popup overlay](/up.popup)
-  - the URL of the content behind a [popup overlay](/up.popup)
+  When no [overlay](/up.layer) is open, the current location is the URL displayed
+  in the browser's address bar. When the link in question is placed in an overlay,
+  the current location is the location of that overlay, even if that
+  overlay doesn't have [visible history](/up.Layer.prototype.historyVisible).
 
   A link matches the current location (and is marked as `.up-current`) if it matches either:
 
@@ -305,41 +323,24 @@ up.feedback = do ->
   ###
 
   ###**
-  Links within `[up-nav]` may use the `[up-alias]` attribute to pass an URL pattern for which they
+  Links within `[up-nav]` may use the `[up-alias]` attribute to pass an [URL pattern](/url-patterns) for which they
   should also be highlighted as [`.up-current`](a.up-current).
 
-  \#\#\# Examples
+  \#\#\# Example
 
   The link below will be highlighted with `.up-current` at both `/profile` and `/profile/edit` locations:
 
-      <nav up-nav>
-        <a href="/profile" up-alias="/profile/edit">Profile</a>
-      </nav>
+  ```html
+  <div up-nav>
+    <a href="/profile" up-alias="/profile/edit">Profile</a>
+  </div>
+  ```
 
-  To pass more than one alternative URLs, separate them by a space character:
-
-      <nav up-nav>
-        <a href="/profile" up-alias="/profile/new /profile/edit">Profile</a>
-      </nav>
-
-  Often you would like to mark a link as `.up-current` whenever the current URL matches a prefix or suffix.
-  To do so, include an asterisk (`*`) in the `[up-alias]` attribute. For instance, the first link in the
-  below will be highlighted for both `/users` and `/users/123`:
-
-      <nav up-nav>
-        <a href="/users" up-alias="/users/*">Users</a>
-        <a href="/reports" up-alias="/reports/*">Reports</a>
-      </div>
-
-  You may pass multiple patterns separated by a space character:
-
-      <nav up-nav>
-        <a href="/users" up-alias="/users/* /profile/*">Users</a>
-      </nav>
+  To pass more than one alternative URLs, use an [URL pattern](/url-patterns).
 
   @selector a[up-alias]
   @param up-alias
-    A space-separated list of alternative URLs or URL patterns.
+    A [URL pattern](/url-patterns) with alternative URLs.
   @stable
   ###
 

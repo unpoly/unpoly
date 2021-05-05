@@ -482,10 +482,10 @@ up.layer = do ->
   ###
 
   ###**
-  This event is emitted after a layer's [location property](/up.Layer#location)
+  This event is emitted after a layer's [location property](/up.Layer.prototype.location)
   has changed value.
 
-  This event is also emitted when a layer [without history](/up.Layer#history)
+  This event is also emitted when a layer [without history](/up.Layer.prototype.historyVisible)
   has reached a new location.
 
   @param {string} event.location
@@ -1013,6 +1013,17 @@ up.layer = do ->
 
   @property up.layer.historyVisible
   @param {boolean} historyVisible
+  @stable
+  ###
+
+  ###**
+  The location of the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.location`.
+  See `up.Layer#location` for more documentation.
+
+  @property up.layer.location
+  @param {string} location
   @stable
   ###
 

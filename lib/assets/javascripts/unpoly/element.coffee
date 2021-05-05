@@ -117,6 +117,9 @@ up.element = do ->
   ###**
   Returns whether the given element matches the given CSS selector.
 
+  To match against a non-standard selector like `:main`,
+  use `up.fragment.matches()` instead.
+
   @function up.element.matches
   @param {Element} element
     The element to check.
