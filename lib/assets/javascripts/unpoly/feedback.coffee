@@ -61,7 +61,7 @@ up.feedback = do ->
   ###
   config = new up.Config ->
     currentClasses: ['up-current']
-    navSelectors: ['[up-nav]']
+    navSelectors: ['[up-nav]', 'nav']
 
   reset = ->
     config.reset()
