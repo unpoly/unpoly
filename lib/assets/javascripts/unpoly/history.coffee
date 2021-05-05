@@ -243,7 +243,7 @@ up.history = do ->
     if previousLocation
       e.setMissingAttrs link,
         'up-href': previousLocation,
-        'up-restore-scroll': ''
+        'up-scroll': 'restore'
       link.removeAttribute('up-back')
       up.link.makeFollowable(link)
 
