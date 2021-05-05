@@ -42,7 +42,7 @@ Other Unpoly modules contain even more tricks to outsmart network latency:
 - [Instantaneous feedback for links that are currently loading](/a.up-active)
 - [Follow links on `mousedown` instead of `click`](/a-up-instant)
 
-@module up.request
+@module up.network
 ###
 up.network = do ->
   ###**
