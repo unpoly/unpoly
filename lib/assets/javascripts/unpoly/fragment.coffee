@@ -1483,8 +1483,10 @@ up.fragment = do ->
 
   \#\#\# Shorthand
 
-  Instead of `:origin` you may also use `&`
-  ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+  Instead of `:origin` you may also use the ampersand character (`&`).
+
+  You may be familiar with the ampersand from the [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)
+  CSS preprocessor.
 
   @selector :origin
   @experimental
