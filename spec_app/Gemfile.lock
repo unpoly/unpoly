@@ -12,7 +12,7 @@ GIT
 PATH
   remote: ..
   specs:
-    unpoly-rails (2.0.0.pre.rc5)
+    unpoly-rails (2.0.0.pre.rc7)
       memoized
       rails (>= 3.2)
 
