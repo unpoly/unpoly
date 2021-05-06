@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "0.62.1"
+    version: "1.0.0"
   };
 
 }).call(this);
@@ -1305,7 +1305,8 @@ to not include another library in your asset bundle.
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
-      '"': '&quot;'
+      '"': '&quot;',
+      "'": '&#x27;'
     };
 
     /***
@@ -1317,7 +1318,7 @@ to not include another library in your asset bundle.
     @stable
      */
     escapeHtml = function(string) {
-      return string.replace(/[&<>"]/g, function(char) {
+      return string.replace(/[&<>"']/g, function(char) {
         return ESCAPE_HTML_ENTITY_MAP[char];
       });
     };
@@ -2557,12 +2558,12 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     @function up.element.toggleClass
     @param {Element} element
       The element for which to add or remove the class.
-     @param {String} className
-     The class which should be added or removed.
-     @param {Boolean} [newPresent]
-     Pass `true` to add the class to the element or `false` to remove it.
-
-     If omitted, the class will be added if missing and removed if present.
+    @param {String} className
+      The class which should be added or removed.
+    @param {Boolean} [newPresent]
+      Pass `true` to add the class to the element or `false` to remove it.
+    
+      If omitted, the class will be added if missing and removed if present.
     @experimental
      */
     toggleClass = function(element, klass, newPresent) {
@@ -6833,13 +6834,11 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
         });
         isBooting = false;
         return up.event.onReady(function() {
-          return u.task(function() {
-            up.emit('up:app:boot', {
-              log: 'Booting user application'
-            });
-            return up.emit('up:app:booted', {
-              log: 'User application booted'
-            });
+          up.emit('up:app:boot', {
+            log: 'Booting user application'
+          });
+          return up.emit('up:app:booted', {
+            log: 'User application booted'
           });
         });
       } else {
@@ -7703,12 +7702,15 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       prints to the developer console.
     @param {string} [options.prefix='[UP] ']
       A string to prepend to Unpoly's logging messages so you can distinguish it from your own messages.
+    @param {boolean} [options.banner=true]
+      Print the Unpoly banner to the developer console.
     @stable
      */
     config = new up.Config({
       prefix: '[UP] ',
       enabled: sessionStore.get('enabled'),
-      collapse: false
+      collapse: false,
+      banner: true
     });
     reset = function() {
       return config.reset();
@@ -7902,7 +7904,9 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       }
       return console.log(banner);
     };
-    up.on('up:framework:booted', printBanner);
+    if (config.banner) {
+      up.on('up:framework:booted', printBanner);
+    }
     up.on('up:framework:reset', reset);
     setEnabled = function(value) {
       sessionStore.set('enabled', value);
@@ -13830,6 +13834,15 @@ open dialogs with sub-forms, etc. all without losing form state.
     whenever the `<input>` changes:
     
         <input name="query" up-observe="showSuggestions(value)">
+    
+    Note that the parameter name in the markup must be called `value` or it will not work.
+    The parameter name can be called whatever you want in the JavaScript, however.
+        
+    Also note that the function must be declared on the `window` object to work, like so:
+        
+        window.showSuggestions = function(selectedValue) {
+          console.log(`Called showSuggestions() with ${selectedValue}`);
+        }
     
     \#\#\# Callback context
     
