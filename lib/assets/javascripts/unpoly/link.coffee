@@ -732,7 +732,7 @@ up.link = do ->
   - `[up-transition]`
   - `[up-content]`
   - `[up-fragment]`
-  - `[up-document]'
+  - `[up-document]`
 
   Such a link will still be followed through Unpoly.
 
