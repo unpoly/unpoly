@@ -85,33 +85,51 @@ up.feedback = do ->
     # so we cache the results in a link property
     return link.upFeedbackURLs ||= new up.LinkFeedbackURLs(link)
 
-  updateFragment = (fragment, options) ->
-    if e.closest(fragment, navSelector())
+  updateFragment = (fragment) ->
+    layerOption = { layer: up.layer.get(fragment) }
+
+    if up.fragment.closest(fragment, navSelector(), layerOption)
       # If the new fragment is an [up-nav], or if the new fragment is a child of an [up-nav],
       # all links in the new fragment are considered links that we need to update.
+      #
       # Note that:
+      #
       # - The [up-nav] element might not be part of this update.
       #   It might already be in the DOM, and only a child was updated.
-      # - The fragment might be a link itself
+      # - The fragment might be a link itself.
       # - We do not need to update sibling links of fragment that have been processed before.
-      links = e.subtree(fragment, SELECTOR_LINK)
-      updateLinks(links, options)
+      # - The fragment may be the <body> element which contains all other overlays.
+      #   But we only want to update the <body>.
+      links = up.fragment.subtree(fragment, SELECTOR_LINK, layerOption)
+      updateLinks(links, layerOption)
     else
-      updateLinksWithinNavs(fragment, options)
+      updateLinksWithinNavs(fragment, layerOption)
 
   updateLinksWithinNavs = (fragment, options) ->
-    navs = e.subtree(fragment, navSelector())
+    navs = up.fragment.subtree(fragment, navSelector(), options)
     links = u.flatMap navs, (nav) -> e.subtree(nav, SELECTOR_LINK)
     updateLinks(links, options)
+
+  getLayerLocation = (layer) ->
+    # We store the last processed location in layer.feedbackLocation,
+    # so multiple calls for the same layer won't unnecessarily reprocess links.
+    # We update the property on up:layer:location:changed.
+    #
+    # The { feedbackLocation } property may be nil if:
+    # (1) The layer was opened without a location, e.g. if it was created from local HTML.
+    # (2) The layer is the root layer and the location was never changed.
+    #     The initial page load does not emit an up:layer:location:changed event for
+    #     the root layer to be consistent with up:location:changed.
+    return layer.feedbackLocation || layer.location
 
   updateLinks = (links, options = {}) ->
     return unless links.length
 
     layer = options.layer || up.layer.get(links[0])
 
-    # A layer might not have a { location } property, e.g. if it was created
+    # An overlay might not have a { location } property, e.g. if it was created
     # from local { content }. In this case we do not set .up-current.
-    if layerLocation = layer.feedbackLocation
+    if layerLocation = getLayerLocation(layer)
       u.each links, (link) ->
         isCurrent = linkURLs(link).isCurrent(layerLocation)
         for currentClass in config.currentClasses
@@ -375,11 +393,11 @@ up.feedback = do ->
       updateLayerIfLocationChanged(frontLayer)
 
   # Even when the modal or popup does not change history, we consider the URLs of the content it displays.
-  up.on 'up:location:changed', (event) -> # take 1 arg to prevent data parsing
+  up.on 'up:location:changed', (_event) -> # take 1 arg to prevent data parsing
     onBrowserLocationChanged()
 
-  up.on 'up:fragment:inserted', (event, newFragment) ->
-    updateFragment(newFragment, event)
+  up.on 'up:fragment:inserted', (_event, newFragment) ->
+    updateFragment(newFragment)
 
   up.on 'up:layer:location:changed', (event) ->
     updateLayerIfLocationChanged(event.layer)
