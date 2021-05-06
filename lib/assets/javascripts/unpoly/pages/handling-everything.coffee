@@ -23,7 +23,7 @@
 
   - Links with an `[up-follow=false]` attribute.
   - Links that cannot be followed through JavaScript,
-    like links with an `[rel=download]` attribute or with a cross-origin `[href]`.
+    like links with an `[download]` attribute or with a cross-origin `[href]`.
   - You have configured additional exceptions in `up.link.config.noFollowSelectors`.
 
   \#\#\# Following all links on `mousedown`

@@ -186,7 +186,7 @@ up.link = do ->
       #     Many web developers are used to give JavaScript-handled links an [href="#"]
       #     attribute. Also frameworks like Bootstrap only style links if they have an [href].
       # (3) We don't want to handle <a href="javascript:foo()"> links.
-      noFollowSelectors: ['[up-follow=false]', 'a[rel=download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]']
+      noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="#"]:not([up-content]):not([up-fragment]):not([up-document])', 'a[href^="javascript:"]']
       instantSelectors: ['[up-instant]'],
       noInstantSelectors: ['[up-instant=false]', '[onclick]'],
       preloadSelectors: combineFollowableSelectors(LINKS_WITH_REMOTE_HTML, ['[up-preload]']),

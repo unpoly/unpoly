@@ -1199,8 +1199,8 @@ describe 'up.link', ->
 
       describe 'exemptions from following', ->
 
-        it 'never follows a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
-          link = up.hello fixture('a[href="/path"][up-target=".target"][rel="download"]')
+        it 'never follows a link with [download] (which opens a save-as-dialog)', asyncSpec (next) ->
+          link = up.hello fixture('a[href="/path"][up-target=".target"][download]')
 
           Trigger.click(link)
 
@@ -2011,8 +2011,8 @@ describe 'up.link', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        it 'never preloads a link with [rel=download] (which opens a save-as-dialog)', asyncSpec (next) ->
-          link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload][rel="download"]')
+        it 'never preloads a link with [download] (which opens a save-as-dialog)', asyncSpec (next) ->
+          link = up.hello fixture('a[href="/path"][up-target=".target"][up-preload][download]')
 
           Trigger.hoverSequence(link)
 
