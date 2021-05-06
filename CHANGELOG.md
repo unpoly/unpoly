@@ -13,7 +13,7 @@ For six years Unpoly has been released under a 0.x version number. To establish 
 
 There are only three changes from 0.62.1:
 
-- Fix a bug where `up.util.escapeHTML()`` would not escape single quotes.
+- Fix a bug where `up.util.escapeHTML()` would not escape single quotes.
 - Unpoly will no longer wait a JavaScript execution task to boot after `DOMContentLoaded`. This may improve the stability of test suites that previously interacted with the page too soon.
 - You may now disable the Unpoly banner in the development console with `up.log.config.banner = false`. (change by @hfjallemark).
 
