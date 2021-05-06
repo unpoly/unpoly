@@ -6,6 +6,22 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+1.0.0
+-----
+
+For six years Unpoly has been released under a 0.x version number. To establish the maturity and stability of the project, we're releasing today's version as 1.0.0.
+
+There are only three changes from 0.62.1:
+
+- Fix a bug where `up.util.escapeHTML()`` would not escape single quotes.
+- Unpoly will no longer wait a JavaScript execution task to boot after `DOMContentLoaded`. This may improve the stability of test suites that previously interacted with the page too soon.
+- You may now disable the Unpoly banner in the development console with `up.log.config.banner = false`. (change by @hfjallemark).
+
+This is the last release of the 0.x API line. We're tracking its code in the [`1.x-stable`](https://github.com/unpoly/unpoly/tree/1.x-stable), but expect little to no changes in the future.
+
+The next release will be [Unpoly 2](https://triskweline.de/unpoly2-slides). It will include major (but mostly backwards compatible) renovations to its API, unlocking many use cases that were not possible with Unpoly 1.
+
+
 0.62.1
 ------
 
