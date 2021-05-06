@@ -1,0 +1,7 @@
+{
+  "ssl": true,
+  "ssl_port": 3001,
+  "ssl_certificate": "config/passenger-standalone-ssl/server.crt",
+  "ssl_certificate_key": "config/passenger-standalone-ssl/server.key"
+}
+
