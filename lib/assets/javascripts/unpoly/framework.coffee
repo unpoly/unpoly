@@ -50,15 +50,13 @@ up.framework = do ->
       # From here on, all event handlers (both Unpoly's and user code) should be able
       # to work with the DOM, so wait for the DOM to be ready.
       up.event.onReady ->
-        # In case the DOM was already ready when up.event.boot() was called, we still
-        # haven't executed user-provided code. So we wait one more frame until
-        # user-provided compilers, event handlers, etc. have been registered.
-        # This also gives async user-code a chance to run in the next microtask.
-        u.task ->
-          # At this point all user-code has been called.
-          # The following event will cause Unpoly to compile the <body>.
-          up.emit('up:app:boot', log: 'Booting user application')
-          up.emit('up:app:booted', log: 'User application booted')
+        # By now all non-sync <script> tags have been loaded and called, including
+        # those after us. All user-provided compilers, event handlers, etc. have
+        # been registered.
+        #
+        # The following event will cause Unpoly to compile the <body>.
+        up.emit('up:app:boot', log: 'Booting user application')
+        up.emit('up:app:booted', log: 'User application booted')
     else
       console.log?("Unpoly doesn't support this browser. Framework was not booted.")
 
