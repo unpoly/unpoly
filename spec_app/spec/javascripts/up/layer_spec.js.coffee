@@ -168,7 +168,19 @@ describe 'up.layer', ->
 
       describe 'animation', ->
 
-        it 'should have examples'
+        it 'uses the configured open animation', asyncSpec (next) ->
+          up.motion.config.enabled = true
+          up.layer.config.modal.openAnimation = 'fade-in'
+          up.layer.config.modal.openDuration = 600
+
+          up.layer.open({ mode: 'modal' })
+
+          next.after 300, ->
+            expect(document).toHaveSelector('up-modal')
+            expect('up-modal-box').toHaveOpacity(0.5, 0.4)
+
+          next.after 600, ->
+            expect('up-modal-box').toHaveOpacity(1.0)
 
       describe 'events', ->
 

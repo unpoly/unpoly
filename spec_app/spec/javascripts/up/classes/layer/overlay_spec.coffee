@@ -123,6 +123,24 @@ describe 'up.Layer.Overlay', ->
 
       expect(up.layer.count).toBe(1)
 
+    it 'uses the configured close animation', asyncSpec (next) ->
+      up.motion.config.enabled = true
+      up.layer.config.modal.openAnimation = 'none'
+      up.layer.config.modal.closeAnimation = 'fade-out'
+      up.layer.config.modal.closeDuration = 600
+
+      up.layer.open({ mode: 'modal' })
+
+      next ->
+        up.layer.current.accept()
+
+      next.after 300, ->
+        expect(document).toHaveSelector('up-modal')
+        expect('up-modal-box').toHaveOpacity(0.5, 0.4)
+
+      next.after 600, ->
+        expect(document).not.toHaveSelector('up-modal')
+
     describe 'cancelation', ->
 
       it 'lets an event handler cancel the acceptance and throws an AbortError', ->

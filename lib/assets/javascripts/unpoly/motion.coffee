@@ -161,9 +161,10 @@ up.motion = do ->
     # If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
     options = u.options(options)
-    applyConfig(options)
 
     animationFn = findAnimationFn(animation)
+
+    # willAnimate() also sets a default { duration } and { easing }.
     willRun = willAnimate(element, animation, options)
 
     if willRun
@@ -174,6 +175,7 @@ up.motion = do ->
       skipAnimate(element, animation)
 
   willAnimate = (element, animationOrTransition, options) ->
+    applyConfig(options)
     isEnabled() && !isNone(animationOrTransition) && options.duration > 0 && !e.isSingleton(element)
 
   skipAnimate = (element, animation) ->
@@ -183,8 +185,6 @@ up.motion = do ->
       e.setStyle(element, animation)
     # Signal that the animation is already done.
     Promise.resolve()
-
-  animCount = 0
 
   ###**
   Animates the given element's CSS properties using CSS transitions.
