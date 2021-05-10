@@ -32,8 +32,6 @@ Release process
 Remaining feature work
 ======================
 
-- Merge config.banner
-
 - Home for context
   - Move up.layer.context to up.context in up.fragment
   - Document context in own page context
