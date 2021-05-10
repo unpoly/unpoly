@@ -1,3 +1,6 @@
+u = up.util
+e = up.element
+
 ###**
 Fragment update API
 ===================
@@ -15,9 +18,6 @@ is built from `up.fragment` functions. You may use them to extend Unpoly from yo
 @module up.fragment
 ###
 up.fragment = do ->
-  
-  u = up.util
-  e = up.element
 
   ###**
   Configures defaults for fragment updates.
@@ -445,7 +445,7 @@ up.fragment = do ->
     This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
 
   @param {Object} [options.context]
-    An object that will be merged into the [context](/up.context) of the current layer once the fragment is rendered.
+    An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.
 
   @param {boolean} [options.keep=true]
     Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
@@ -1581,3 +1581,17 @@ up.render = up.fragment.render
 up.navigate = up.fragment.navigate
 up.hello = up.fragment.hello
 up.visit = up.fragment.visit
+
+###**
+Returns the current [context](/context).
+
+This is aliased as `up.layer.context`.
+
+@property up.context
+@param {Object} context
+  The context object.
+
+  If no context has been set an empty object is returned.
+@experimental
+###
+u.delegate up, 'context', -> up.layer.current

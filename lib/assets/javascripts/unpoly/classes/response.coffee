@@ -100,6 +100,14 @@ class up.Response extends up.Record
   @param {string} [target]
   @experimental
   ###
+
+  ###**
+  Changes to the current [context](/context) as [set by the server](/X-Up-Context).
+
+  @property up.Response#context
+  @experimental
+  ###
+
   keys: ->
     [
       'method',

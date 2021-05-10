@@ -11,7 +11,7 @@
   An *overlay* is any layer that is not the root layer.
 
   Available modes
-  --------------
+  ---------------
 
   | Mode      | Description                           | Overlay? |
   | --------- | ------------------------------------- |----------|

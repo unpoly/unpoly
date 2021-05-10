@@ -37,6 +37,22 @@ class up.Request extends up.Record
   ###
 
   ###**
+  The [hash component](https://en.wikipedia.org/wiki/URI_fragment) of this request's URL.
+
+  The `{ hash }` property is automatically extracted from the given URL:
+
+  ```js
+  let request = up.request({ url: '/path#section' })
+  request.url // => '/path'
+  request.hash // => '#section'
+  ```
+
+  @property up.Request#hash
+  @param {string} hash
+  @stable
+  ###
+
+  ###**
   [Parameters](/up.Params) that should be sent as the request's payload.
 
   @property up.Request#params
@@ -45,7 +61,9 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The CSS selector that will be sent as an `X-Up-Target` header.
+  The CSS selector targeted by this request.
+
+  The selector will be sent as an `X-Up-Target` header.
 
   @property up.Request#target
   @param {string} target
@@ -53,7 +71,10 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The CSS selector that will be sent as an `X-Up-Fail-Target` header.
+  The CSS selector targeted by this request in case the server responds
+  with an [error code](/server-errors).
+
+  The selector will be sent as an `X-Up-Fail-Target` header.
 
   @property up.Request#failTarget
   @param {string} failTarget
@@ -63,7 +84,7 @@ class up.Request extends up.Record
   ###**
   An object of additional HTTP headers.
 
-  Note that Unpoly will by default send a number of custom request headers.
+  Unpoly will by default send a number of custom request headers.
   See `up.protocol` and `up.network.config.metaKeys` for details.
 
   @property up.Request#headers
@@ -96,23 +117,62 @@ class up.Request extends up.Record
   ###
 
   ###**
-  TODO: Docs
+  The [context](/contact) of the layer targeted by this request.
+
+  The context object will be sent as an `X-Up-Context` header.
 
   @property up.Request#context
   @param {Object} context
-  @stable
+  @experimental
   ###
 
   ###**
-  TODO: Docs
+  The [context](/contact) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
+
+  The context object will be sent as an `X-Up-Fail-Context` header.
 
   @property up.Request#failContext
   @param {Object} failContext
-  @stable
+  @experimental
   ###
 
   ###**
-  TODO: Docs
+  The [layer](/up.layer) targeted by this request.
+
+  To prevent memory leaks, this property is removed shortly after the response is received.
+
+  @property up.Request#layer
+  @param {up.Layer} layer
+  @experimental
+  ###
+
+  ###**
+  The [layer](/up.layer) targeted by this request in case the server responds with an [error code](/server-errors).
+
+  To prevent memory leaks, this property is removed shortly after the response is received.
+
+  @property up.Request#failLayer
+  @param {up.Layer} layer
+  @experimental
+  ###
+
+  ###**
+  The element that triggered the request.
+
+  For example, when this request was triggered by a click on a link, the lonk
+  element is set as the `{ origin }`.
+
+  To prevent memory leaks, this property is removed shortly after the response is received.
+
+  @property up.Request#origin
+  @param {Element} origin
+  @experimental
+  ###
+
+  ###**
+  The [mode](/up.Layer.prototype.mode) of the layer targeted by this request.
+
+  The value will be sent as an `X-Up-Mode` header.
 
   @property up.Request#mode
   @param {string} mode
@@ -120,7 +180,9 @@ class up.Request extends up.Record
   ###
 
   ###**
-  TODO: Docs
+  The [mode](/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
+
+  The value will be sent as an `X-Up-Fail-Mode` header.
 
   @property up.Request#failMode
   @param {string} failMode
@@ -128,7 +190,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  TODO: Docs
+  The format in which the [request params](/up.Layer.prototype.params) will be encoded.
 
   @property up.Request#contentType
   @param {string} contentType
@@ -136,11 +198,19 @@ class up.Request extends up.Record
   ###
 
   ###**
-  TODO: Docs
+  The payload that the request will encode into its body.
+
+  By default Unpoly will build a payload from the given `{ params }` option.
 
   @property up.Request#payload
   @param {string} payload
   @stable
+  ###
+
+  ###**
+  @property up.Request#preload
+  @param {boolean} preload
+  @experimental
   ###
 
   keys: ->

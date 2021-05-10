@@ -4992,3 +4992,13 @@ describe 'up.fragment', ->
       it 'sets up.layer.config.any.mainTargets', ->
         up.fragment.config.mainTargets = ['.new-target']
         expect(up.layer.config.any.mainTargets).toEqual ['.new-target']
+
+    describe 'up.context', ->
+
+      it 'gets up.layer.current.context', ->
+        up.layer.current.context = { key: 'value' }
+        expect(up.context).toEqual { key: 'value' }
+
+      it 'sets up.layer.current.context', ->
+        up.context = { key: 'newValue' }
+        expect(up.layer.current.context).toEqual { key: 'newValue' }

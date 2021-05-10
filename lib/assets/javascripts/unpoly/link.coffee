@@ -914,7 +914,7 @@ up.link = do ->
     This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
 
   @param [up-context]
-    A JSON object that will be merged into the [context](/up.context)
+    A JSON object that will be merged into the [context](/context)
     of the current layer once the fragment is rendered.
 
   @param [up-keep='true']

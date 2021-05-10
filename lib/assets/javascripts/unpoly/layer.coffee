@@ -1027,6 +1027,29 @@ up.layer = do ->
   @stable
   ###
 
+  ###**
+  The [current layer](/up.layer.current)'s mode which governs its appearance and behavior.
+
+  @see layer-terminology
+
+  @property up.layer.mode
+  @param {string} mode
+  @stable
+  ###
+
+  ###**
+  The [context](/context) of the [current layer](/up.layer.current).
+
+  This is aliased as `up.context`.
+
+  @property up.layer.context
+  @param {string} context
+    The context object.
+
+    If no context has been set an empty object is returned.
+  @experimental
+  ###
+
   u.delegate(api, [
     'accept'
     'dismiss'
@@ -1048,10 +1071,3 @@ up.layer = do ->
   ], -> stack.current)
 
   return api
-
-###**
-TODO: Docs
-@property up.context
-@pram {Object} context
-###
-u.getter up, 'context', -> up.layer.context

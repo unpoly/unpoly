@@ -30,15 +30,18 @@ class up.Layer extends up.Record
   ###
 
   ###**
+  Whether fragment updates within this layer can affect browser history and window title.
+
+  If a layer does not have visible history, its desendant layers cannot have history either.
+
+  @property up.Layer#historyVisible
+  @param {boolean} historyVisible
+  ###
+
+  ###**
   This layer's mode which governs its appearance and behavior.
 
-  Available layer modes are:
-
-  - `'root'`
-  - `'modal'`
-  - `'popup'`
-  - `'drawer'`
-  - `'cover'`
+  @see layer-terminology
 
   @property up.Layer#mode
   @param {string} mode
@@ -46,21 +49,11 @@ class up.Layer extends up.Record
   ###
 
   ###**
-  Whether fragment updates within this layer can affect browser history and window title.
-
-  @property up.Layer#historyVisible
-  @param {boolean} historyVisible
-  ###
-
-  ###**
-  This layer's context object.
-
-  Think of *context* as [session storage](/https://makandracards.com/makandra/32865), but specific to a [layer](/up.layer)
-  rather than specific to an entire browser tab.
-
-  You may access the context object's properties like a regular JavaScript object.
+  This layer's [context](/context).
 
   \#\#\# Example
+
+  You may access the context properties like a regular JavaScript object.
 
   ```js
   let layer = up.layer.current
@@ -68,25 +61,12 @@ class up.Layer extends up.Record
   console.log(layer.context) // logs "{ message: 'Please select a contact' }"
   ```
 
-  \#\#\# Accessing the context from the server
-
-  The context is is sent as an `X-Up-Context` header along with every
-  [request](/up.request) to the server. The server may also update the updating
-  layer's context by including an `X-Up-Context` header in its response.
-
   @property up.Layer#context
   @param {Object} context
-  @stable
-  ###
+    The context object.
 
-  ###**
-  Whether fragment updates within this layer will affect [browser history](/up.history).
-
-  If a layer does not have visible history, its desendant layers cannot have history either.
-
-  @property up.Layer#historyVisible
-  @param {boolean} historyVisible
-  @stable
+    If no context has been set an empty object is returned.
+  @experimental
   ###
 
   keys: ->
