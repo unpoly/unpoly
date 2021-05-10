@@ -79,7 +79,7 @@ namespace :assets do
         raise "Expected build file to exist: #{dist_path}"
       end
 
-      content = File.read(dist_path)
+      content = File.read(dist_path, encoding: "utf-8")
 
       if content.size == 0
         raise "Zero-byte build file: #{dist_path}"
