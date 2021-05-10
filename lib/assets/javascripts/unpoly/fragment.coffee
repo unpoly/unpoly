@@ -118,10 +118,7 @@ up.fragment = do ->
 
   # Users who are not using layers will prefer settings default targets
   # as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-  Object.defineProperty(config, 'mainTargets'
-    get: -> up.layer.config.any.mainTargets
-    set: (value) -> up.layer.config.any.mainTargets = value
-  )
+  u.delegate config, 'mainTargets', -> up.layer.config.any
 
   reset = ->
     config.reset()
