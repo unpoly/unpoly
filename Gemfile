@@ -1,7 +1,9 @@
 source 'https://rubygems.org'
 
 gem 'rack'
-gem 'therubyracer'
+install_if -> { RUBY_PLATFORM !~ /aarch64/ } do
+  gem 'therubyracer'
+end
 gem 'sass'
 gem 'uglifier'
 gem 'coffee-script'
