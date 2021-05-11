@@ -2,9 +2,15 @@
   Closing overlays
   ================
 
+  This page explains the many different ways to close an [overlay](/up.layer) in Unpoly.
 
-  Positive vs. negative close intent
-  ----------------------------------
+  In addition to making the overlay disappear, you may also communicate a result value back
+  to the parent layer. This is useful to branch off a complex user interaction into an overlay,
+  then resume the original scenario when you're done.
+
+
+  Distinguishing close intents
+  ----------------------------
 
   When closing an [overlay](/up.layer), Unpoly distinguishes between two kinds close intents:
 
@@ -127,7 +133,7 @@
   |----------------------|-------------------------|
   | `up.emit()`          | JavaScript function to emit an event on any element |
   | `up.layer.emit()`    | JavaScript function to emit an event on the [current layer](/up.layer.current) |
-  | `[up-emit]`          | HTML attribute to emit an event on click |
+  | `a[up-emit]`         | HTML attribute to emit an event on click |
   | `X-Up-Events`        | HTTP header sent from the server |
   | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 

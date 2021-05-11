@@ -503,7 +503,11 @@ up.event = do ->
   This hyperlink will emit an `user:select` event when clicked:
 
   ```
-  <a href='/users/5" up-emit='user:select' up-emit-props='{ "id": 5, "firstName": "Alice" }'>Alice</a>
+  <a href='/users/5'
+    up-emit='user:select'
+    up-emit-props='{ "id": 5, "firstName": "Alice" }'>
+    Alice
+  </a>
 
   <script>
     up.on('a', 'user:select', function(event) {
@@ -518,6 +522,7 @@ up.event = do ->
     The type of the event to be emitted.
   @param [up-emit-props='{}']
     The event properties, serialized as JSON.
+  @stable
   ###
   executeEmitAttr = (event, element) ->
     return unless isUnmodified(event)
