@@ -349,7 +349,7 @@ up.layer = do ->
     How the overlay may be [dismissed](/closing-overlays) by the user.
 
     Supported values are `'key'`, `'outside'` and `'button'`.
-    See [user dismiss controls](/closing-overlays#user-facing-dismiss-controls)
+    See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
     for details.
 
     You may enable multiple dismiss controls by passing an array or
@@ -588,7 +588,7 @@ up.layer = do ->
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.
 
-    See [user dismiss controls](/closing-overlays#user-facing-dismiss-controls)
+    See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
     for details.
 
     You may enable multiple dismiss controls by passing a space-separated string.

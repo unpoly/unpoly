@@ -57,7 +57,7 @@
   | `child`          | The child layer of the current layer                         |
   | `descendant`     | Any descendant of the current layer                          |
 
-  \#\#\# Use the layer of a given element
+  \#\#\# Matching the layer of a given element
 
   When a DOM element is passed as `{ target }` or `{ origin }` option,
   Unpoly will use that element's layer.
@@ -65,14 +65,14 @@
   Clicking an Unpoly-enabled [link](/a[up-follow]) or
   [form](/form[up-follow]) will automatically set that link or form as the `{ origin }`.
 
-  \#\#\# Use a layer by index
+  \#\#\# Matching a layer by index
 
   Pass a number to match within a layer with that index.
 
   Layers are counted from the root layer upwards. Therefore `{ layer: 0 }` matches
   within the root layer. `{ layer: 1 }` would match within the first overlay.
 
-  \#\#\# Use a layer reference
+  \#\#\# Using a layer reference
 
   Functions like `up.layer.get()` or `up.layer.current` return an `up.Layer` instance
   that you can later pass as a `{ layer }` option.
@@ -92,7 +92,7 @@
   }, 10000)
   ```
 
-  \#\#\# Match in multiple layers
+  \#\#\# Matching in multiple layers
 
   You can pass more than one layer reference as an array of options.
   Alternatively you may pass a a space-separated string of layer names.
@@ -106,14 +106,19 @@
 
   \#\#\# Opening new layers
 
-  You may render a fragment in a new overly by passing `{ layer: 'new' }`.
+  You may render a fragment in a new overlay by passing `{ layer: 'new' }`.
 
-  The layer's [mode](/layer-terminology) may be passed as a `{ mode }`
-  option or in shorthand form like `{ layer: 'new popup' }`.
+  See [opening overlays](/opening-overlays) for details.
 
-  When opening an overlay, you may define a *condition* when the overlay interaction ends.
-  When the condition occurs, the overlay is automatically closed and a callback is run.
-  See [closing overlays](/closing-overlays) for details.
+
+  \#\#\# Targeting another layer for server errors
+
+  Like most render options, `{ layer }` and `[up-layer]` indicate which layer
+  to update in case of a successful server response.
+
+  To set the layer when the [server responds with an error code](/server-errors),
+  use `{ failLayer }` or `[up-fail-layer]`.
+
 
   @page layer-option
   ###

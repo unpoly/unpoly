@@ -9,9 +9,9 @@
   When closing an [overlay](/up.layer), Unpoly distinguishes between two kinds close intents:
 
   1. **Accepting** an overlay (user picks a value, confirms with "OK", etc.), optionally with a value
-  2. **Dismissing** an oeverlay (user clicks "Cancel", "X", presses `ESC`, clicks on the background)
+  2. **Dismissing** an overlay (user clicks "Cancel", "X", presses `ESC`, clicks on the background)
 
-  ![Different ways to close a modal overlay](/images/api/close-intent.png){:width=500}
+  ![Different ways to close a modal overlay](/images/api/close-intent.png){:width='600'}
 
   Accepting an overlay will usually continue a larger interaction in the parent layer.
   Dismissal usually means cancelation. When you're waiting for a [subinteraction](/subinteractions)
@@ -44,7 +44,7 @@
   Overlay result values
   ---------------------
 
-  Overlays in Unpoly may be closed with a *result value*.
+  Overlays in Unpoly may be closed with an optional *result value*.
 
   E.g. if the user selects a value, creates a record or confirms an action,
   we consider the overlay to be **accepted with that value**.
@@ -169,7 +169,9 @@
   Use an `[up-accept]` or `[up-dismiss]` attribute to close the [current layer](/up.layer.current)
   when the link is clicked:
 
-      <a href="/fallback" up-accept>...</a>
+  ```html
+  <a href="/fallback" up-accept>...</a>
+  ```
 
   If an overlay was closed, the `click` event's [default action is prevented](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
   and the link will not be followed. Only when this link is clicked in the
@@ -178,8 +180,28 @@
   To *dismiss* an overlay once an element clicked, use the `[up-dismiss]` attribute in the same fashion.
 
 
-  User dismiss controls
-  ---------------------
+  Closing by targeting the parent layer
+  -------------------------------------
+
+  When a link or form targets a parent layer, the current layer will close when the parent layer is updated.
+  This behavior is called *peeling*.
+
+  The example below uses an [`[up-layer]` attribute](/layer-option) to update the parent layer
+  after a successful form submission. This will automatically close the form's own overlay:
+
+  ```html
+  <form method="post" action="/users" up-layer="parent">
+    <input type="text" name="email">
+    <button type="submit">Create user</button>
+  </form>
+  ```
+
+  Note that the form will still update its own layer when the [server responds with an error code](/server-errors)
+  due to a validation error. To target another layer in this case, set an `[up-fail-layer]` attribute.
+
+
+  Customizing dismiss controls
+  ----------------------------
 
   By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
   or by pressing an "X" icon in the top-right corner.

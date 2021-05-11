@@ -151,7 +151,7 @@
   By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
   or by pressing an "X" icon in the top-right corner.
 
-  You may [customize the dismiss controls](/closing-overlays#user-dismiss-controls)
+  You may [customize the dismiss controls](/closing-overlays#customizing-dismiss-controls)
   available to the user.
 
 

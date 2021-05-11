@@ -32,13 +32,11 @@ Release process
 Remaining feature work
 ======================
 
-- Home for context
-  - Move up.layer.context to up.context in up.fragment
-  - Document context in own page context
-  - Remove up.layer.context
-  - Note that there is already docs in up.Layer#context
+It is not possible to progressively enhance an [target=_blank] with [up-layer=new]:
+- Unpoly won't follow an [target=_blank]
+- Users could install a macro that removes [target=_blank] when there is also [up-layer=new]
+- Users could remove a[target] from link.config.noFollowSelectors
 
-- Profile: Warum macht das CompilePass, dann handleFocus, dann CompilePass 2?
 
 Tests
 =====
