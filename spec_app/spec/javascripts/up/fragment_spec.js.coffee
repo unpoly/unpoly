@@ -4906,6 +4906,11 @@ describe 'up.fragment', ->
         element = fixture('div.class1.class2')
         expect(up.fragment.toTarget(element)).toBe(".class1.class2")
 
+      it 'escapes colons in class names', ->
+        element = fixture('div')
+        element.classList.add('block', 'sm:hidden')
+        expect(up.fragment.toTarget(element)).toBe(".block.sm\\:hidden")
+
       it "prefers using the element's [name] attribute to only using the element's tag name", ->
         element = fixture('input[name=name-value]')
         expect(up.fragment.toTarget(element)).toBe('input[name="name-value"]')
