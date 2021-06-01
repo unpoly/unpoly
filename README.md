@@ -33,6 +33,7 @@ Install dependencies for tests:
 
 - Install Ruby 2.3.8
 - Install Bundler by running `gem install bundler`
+- Install Node.js (required for building the library)
 - `cd` into `spec_app`
 - Install dependencies by running `bundle install`
 
