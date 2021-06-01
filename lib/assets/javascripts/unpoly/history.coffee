@@ -212,8 +212,13 @@ up.history = do ->
       # https://developer.mozilla.org/en-US/docs/Web/API/History/scrollRestoration
       window.history.scrollRestoration = 'manual'
       window.addEventListener('popstate', pop)
-      # Replace the vanilla state of the initial page load with an Unpoly-enabled state
-      replace(currentLocation(), event: false)
+
+      # Unpoly replaces the initial page state so it can later restore it when the user
+      # goes back to that initial URL. However, if the initial request was a POST,
+      # Unpoly will wrongly assume that it can restore the state by reloading with GET.
+      if up.protocol.initialRequestMethod() == 'GET'
+        # Replace the vanilla state of the initial page load with an Unpoly-enabled state
+        replace(currentLocation(), event: false)
 
     if jasmine?
       # Can't delay this in tests.
