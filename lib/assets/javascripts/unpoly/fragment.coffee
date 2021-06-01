@@ -1285,7 +1285,7 @@ up.fragment = do ->
       element.className = 'klass'
       selector = up.fragment.toTarget(element) // returns '.klass'
 
-  @function up.element.toTarget
+  @function up.fragment.toTarget
   @param {string|Element|jQuery}
     The element for which to create a selector.
   @stable
