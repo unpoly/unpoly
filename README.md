@@ -53,11 +53,9 @@ To run RSpec tests for the `unpoly-rails` gem:
 
 ### Making a new release
 
-We are currently feeding four release channels:
+We are currently feeding two release channels:
 
-- Manual download from GitHub
 - npm
-- Bower (which is based on Git and version tags)
 - Rubygems (as the `unpoly-rails` gem)
 
 We always release to all channel simultaneously.
