@@ -109,7 +109,6 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (1.8.6)
-    libv8 (7.3.492.27.1)
     loofah (2.4.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -118,8 +117,6 @@ GEM
     memoized (1.0.2)
     mime-types (2.99)
     mini_portile2 (2.4.0)
-    mini_racer (0.2.15)
-      libv8 (> 7.3)
     minitest (5.14.0)
     nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
@@ -223,7 +220,6 @@ DEPENDENCIES
   jasmine-core (< 3)
   jasmine-rails!
   jquery-rails
-  mini_racer
   rails (= 4.2.0)
   rake (< 11)
   rspec-rails
