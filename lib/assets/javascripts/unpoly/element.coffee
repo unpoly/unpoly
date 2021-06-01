@@ -272,12 +272,8 @@ up.element = do ->
   [this WHATWG mailing list post](http://lists.w3.org/Archives/Public/public-whatwg-archive/2014Apr/0094.html).
 
   @function up.element.show
-<<<<<<< HEAD:lib/assets/javascripts/unpoly/element.coffee
-  @stable
-=======
   @param {Element} element
-  @experimental
->>>>>>> 0d20e224... Adjust docs:lib/assets/javascripts/unpoly/element.coffee.erb
+  @stable
   ###
   show = (element) ->
     element.style.display = ''
