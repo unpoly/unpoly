@@ -638,7 +638,7 @@ up.element = do ->
   @internal
   ###
   classSelector = (klass) ->
-    klass = klass.replace(/:/, '\\:')
+    klass = klass.replace(/:/g, '\\:')
     ".#{klass}"
 
   ###**
