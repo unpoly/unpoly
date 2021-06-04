@@ -32,11 +32,6 @@ Release process
 Remaining feature work
 ======================
 
-It is not possible to progressively enhance an [target=_blank] with [up-layer=new]:
-- Unpoly won't follow an [target=_blank]
-- Users could install a macro that removes [target=_blank] when there is also [up-layer=new]
-- Users could remove a[target] from link.config.noFollowSelectors
-
 
 Tests
 =====
@@ -411,9 +406,14 @@ Later?
   - Then we can clean up context and failContext
 - Allow to configure browsers that will not load Unpoly
 
+
 Decisions
 ---------
 
+- It is not possible to progressively enhance an [target=_blank] with [up-layer=new]
+  - Because Unpoly won't follow an [target=_blank]
+  - Alternative: Users could install a macro that removes [target=_blank] when there is also [up-layer=new]
+  - Alternative: Users could remove a[target] from link.config.noFollowSelectors
 - Do validation targets still need to use :origin (former "&"), now that we consider origin?
   => Yes, because a <fieldset> may occur multiple times in the response document and we cannot consider origin there
 - Entscheiden ob ich die [up-modal], [up-drawer], etc. Shortcuts behalten möchte
