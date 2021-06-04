@@ -965,3 +965,9 @@ describe 'up.element', ->
     it 'returns false for an attached element with { display: none }', ->
       element = fixture('.element', text: 'content', style: { display: 'none' })
       expect(up.element.isVisible(element)).toBe(false)
+
+  describe 'up.element.classSelector', ->
+    it 'escapes all colons', ->
+      element = fixture('div')
+      element.classList.add('print:sm:hidden')
+      expect(up.element.classSelector('print:sm:hidden')).toBe('.print\\:sm\\:hidden')
