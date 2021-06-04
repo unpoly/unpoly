@@ -1308,9 +1308,7 @@ up.fragment = do ->
      else if goodClasses = u.presence(u.filter(element.classList, isGoodClassForTarget))
       selector = ''
       for klass in goodClasses
-        # Escape colons in klass to satisfy querySelector
-        klass = klass.replace(/:/, '\\:')
-        selector += ".#{klass}"
+        selector += e.classSelector(klass)
       return selector
      else
        return e.elementTagName(element)

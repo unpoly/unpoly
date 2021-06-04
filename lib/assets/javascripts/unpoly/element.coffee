@@ -634,6 +634,14 @@ up.element = do ->
       return attributeSelector('id', id)
 
   ###**
+  @function up.element.classSelector
+  @internal
+  ###
+  classSelector = (klass) ->
+    klass = klass.replace(/:/, '\\:')
+    ".#{klass}"
+
+  ###**
   Always creates a full document with a <html> root, even if the given `html`
   is only a fragment.
 
@@ -1129,6 +1137,7 @@ up.element = do ->
     affix: affix # practical for element creation
     toSelector: toSelector # practical
     idSelector: idSelector
+    classSelector: classSelector
     isSingleton: isSingleton # internal
     isSingletonSelector: isSingletonSelector
     attributeSelector: attributeSelector # internal
