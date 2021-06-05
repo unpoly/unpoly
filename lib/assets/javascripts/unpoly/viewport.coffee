@@ -2,30 +2,12 @@
 Scrolling viewports
 ===================
 
-The `up.viewport` module controls the scroll position of scrollable containers ("viewports").
+The `up.viewport` module controls the scroll position and focus within scrollable containers ("viewports").
 
 The default viewport for any web application is the main document. An application may
 define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
 
-
-\#\#\# Revealing new content
-
-When following a [link to a fragment](/a-up-follow) Unpoly will automatically
-scroll the document's viewport to [reveal](/up.viewport) the updated content.
-
-You should [make Unpoly aware](/up.viewport.config#config.fixedTop) of fixed elements in your
-layout, such as navigation bars or headers. Unpoly will respect these sticky
-elements when [revealing updated fragments](/up.reveal).
-
-You should also [tell Unpoly](/up.viewport.config#config.viewportSelectors) when your application has more than one viewport,
-so Unpoly can pick the right viewport to scroll for each fragment update.
-
-
-\#\#\# Bootstrap integration
-
-When using Bootstrap integration (`unpoly-bootstrap3.js` and `unpoly-bootstrap3.css`)
-Unpoly will automatically be aware of sticky Bootstrap components such as
-[fixed navbar](https://getbootstrap.com/examples/navbar-fixed-top/).
+Also see documentation for the [scroll option](/scroll-option) and [focus option](focus-option).
 
 @module up.viewport
 ###
@@ -36,23 +18,25 @@ up.viewport = do ->
   f = up.fragment
 
   ###**
-  Configures the application layout.
+  Configures defaults for scrolling.
 
   @property up.viewport.config
   @param {Array} [config.viewportSelectors]
-    An array of CSS selectors that find viewports
-    (containers that scroll their contents).
+    An array of CSS selectors that match viewports.
   @param {Array} [config.fixedTop]
     An array of CSS selectors that find elements fixed to the
     top edge of the screen (using `position: fixed`).
+
     See [`[up-fixed="top"]`](/up-fixed-top) for details.
   @param {Array} [config.fixedBottom]
-    An array of CSS selectors that find elements fixed to the
+    An array of CSS selectors that match elements fixed to the
     bottom edge of the screen (using `position: fixed`).
+
     See [`[up-fixed="bottom"]`](/up-fixed-bottom) for details.
   @param {Array} [config.anchoredRight]
     An array of CSS selectors that find elements anchored to the
     right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
+
     See [`[up-anchored="right"]`](/up-anchored-right) for details.
   @param {number} [config.revealSnap]
     When [revealing](/up.reveal) elements, Unpoly will scroll an viewport
@@ -153,18 +137,8 @@ up.viewport = do ->
     f.all(selector, { layer: 'root' })
 
   ###**
-  Scroll's the given element's viewport so the first rows of the
+  Scrolls the given element's viewport so the first rows of the
   element are visible for the user.
-
-  \#\#\# How Unpoly finds the viewport
-
-  The viewport (the container that is going to be scrolled)
-  is the closest parent of the element that is either:
-
-  - the currently open [modal](/up.modal)
-  - an element with the attribute `[up-viewport]`
-  - the `<body>` element
-  - an element matching the selector you have configured using `up.viewport.config.viewportSelectors.push('my-custom-selector')`
 
   \#\#\# Fixed elements obstructing the viewport
 
@@ -173,14 +147,16 @@ up.viewport = do ->
 
   You can make `up.reveal()` aware of these fixed elements
   so it can scroll the viewport far enough so the revealed element is fully visible.
-  To make `up.reveal()` aware fixed elements you can either:
+  To make `up.reveal()` aware of fixed elements you can either:
 
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
   - [configure default options](/up.viewport.config) for `fixedTop` or `fixedBottom`
 
   @function up.reveal
+
   @param {string|Element|jQuery} element
     The element to reveal.
+
   @param {number} [options.scrollSpeed=1]
     The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
 
@@ -188,6 +164,7 @@ up.viewport = do ->
     [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
 
     Defaults to `up.viewport.config.scrollSpeed`.
+
   @param {string} [options.revealSnap]
     When the the revealed element would be closer to the viewport's top edge
     than this value, Unpoly will scroll the viewport to the top.
@@ -195,35 +172,43 @@ up.viewport = do ->
     Set to `0` to disable snapping.
 
     Defaults to `up.viewport.config.revealSnap`.
+
   @param {string|Element|jQuery} [options.viewport]
     The scrolling element to scroll.
 
     Defaults to the [given element's viewport](/up.viewport.closest).
+
   @param {boolean} [options.top]
     Whether to scroll the viewport so that the first element row aligns
     with the top edge of the viewport.
 
     Defaults to `up.viewport.config.revealTop`.
+
   @param {string}[options.behavior='auto']
     When set to `'auto'`, this will immediately scroll to the new position.
 
     When set to `'smooth'`, this will scroll smoothly to the new position.
+
   @param {number}[options.speed]
     The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
 
     Defaults to `up.viewport.config.scrollSpeed`.
+
   @param {number} [options.padding]
     The desired padding between the revealed element and the
     closest [viewport](/up.viewport) edge (in pixels).
 
     Defaults to `up.viewport.config.revealPadding`.
+
   @param {number|boolean} [options.snap]
     Whether to snap to the top of the viewport if the new scroll position
     after revealing the element is close to the top edge.
 
     Defaults to `up.viewport.config.revealSnap`.
+
   @param {boolean} [options.peel=true]
     Whether to close overlays obscuring the layer of `element`.
+
   @return {Promise}
     A promise that fulfills when the element is revealed.
 
@@ -250,12 +235,25 @@ up.viewport = do ->
     return scrollingController.startMotion(element, motion, options)
 
   ###**
-  TODO: Docs
+  Focuses the given element.
+
+  Focusing an element will also [reveal](/up.reveal) it, unless `{ preventScroll: true }` is passed.
+
+  @function up.focus
+
+  @param {string|Element|jQuery} element
+    The element to focus.
+
+  @param {[options.preventScroll=false]}
+    Whether to prevent changes to the acroll position.
+
+  @experimental
   ###
   doFocus = (element, options = {}) ->
     # First focus without scrolling, since we're going to use our custom scrolling
     # logic below.
     if up.browser.isIE11()
+      # IE11 does not support the { preventScroll } option for Element#focus().
       viewport = closest(element)
       oldScrollTop = viewport.scrollTop
       element.focus()
@@ -271,11 +269,6 @@ up.viewport = do ->
   tryFocus = (element, options) ->
     doFocus(element, options)
     return element == document.activeElement
-
-  autofocus = (element, options) ->
-    if autofocusElement = e.subtree(element, '[autofocus]')[0]
-      doDocus(autofocusElement, options)
-      return true
 
   isNativelyFocusable = (element) ->
     # IE11: In modern browsers we can check if element.tabIndex >= 0.
@@ -343,6 +336,9 @@ up.viewport = do ->
   ###**
   Returns a list of all the viewports contained within the
   given selector or element.
+
+  If the given element is itself a viewport, the element is included
+  in the returned list.
 
   @function up.viewport.subtree
   @param {string|Element|jQuery} target
@@ -515,30 +511,11 @@ up.viewport = do ->
 
   The scroll positions will be associated with the current URL.
   They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
-  at the same URL, or by following a link with an [`[up-restore-scroll]`](/a-up-follow#up-restore-scroll)
+  at the same URL, or by following a link with an [`[scroll="restore"]`](/a-up-follow#up-restore-scroll)
   attribute.
 
-  Unpoly automatically saves scroll positions before a [fragment update](/up.replace)
-  you will rarely need to call this function yourself.
-
-  \#\#\# Examples
-
-  Should you need to save the current scroll positions outside of a [fragment update](/up.replace),
-  you may call:
-
-      up.viewport.saveScroll()
-
-  Instead of saving the current scroll positions for the current URL, you may also pass another
-  url or vertical scroll positionsfor each viewport:
-
-      up.viewport.saveScroll({
-        url: '/inbox',
-        tops: {
-          'body': 0,
-          '.sidebar', 100,
-          '.main', 320
-        }
-      })
+  Unpoly automatically saves scroll positions before [navigating](/navigation).
+  You will rarely need to call this function yourself.
 
   @function up.viewport.saveScroll
   @param {string} [options.location]
@@ -865,7 +842,6 @@ up.viewport = do ->
     absolutize: absolutize
     focus: doFocus
     tryFocus: tryFocus
-    autofocus: autofocus
     makeFocusable: makeFocusable
 
 up.focus = up.viewport.focus

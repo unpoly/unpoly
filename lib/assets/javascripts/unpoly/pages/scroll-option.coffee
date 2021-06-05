@@ -5,6 +5,9 @@
   When updating a fragment you may control how Unpoly scrolls the page by passing
   a `{ scroll }` option or `[up-scroll]` attribute.
 
+  When [navigating](/navigation) Unpoly will default to
+  [`{ scroll: 'auto' }`](#automatic-scrolling-logic).
+
   \#\#\# Revealing the fragment
 
   To [reveal](/up.reveal) the new fragment, pass `{ scroll: 'target' }`.

@@ -2,10 +2,13 @@
 Focus option
 =============
 
-When updating a fragment you may control how Unpoly focuss the page by passing
+When updating a fragment you may control how Unpoly moves focus by passing
 a `{ focus }` option or `[up-focus]` attribute.
 
 Changing the focus will make a screen reader start reading from the focused position.
+
+When [navigating](/navigation) Unpoly will default to
+[`{ focus: 'auto' }`](#automatic-focus-logic).
 
 \#\#\# Focusing the fragment
 
@@ -20,6 +23,8 @@ Pass `'layer`' to focus the [layer](/up.layer) of the updated fragment.
 Pass a CSS selector string to focus a matching element.
 
 From JavaScript you may also pass the `Element` object that should be focused.
+
+If the element isn't already focusable, Unpoly will give it an `[tabindex=-1]` attribute.
 
 \#\#\# Preserving focus
 

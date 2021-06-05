@@ -496,7 +496,7 @@ up.motion = do ->
   If you choose to *not* use `up.animate()` and roll your own
   animation code instead, your code must honor the following contract:
 
-  1. It must honor the options `{ duration, easing }` if given
+  1. It must honor the options `{ duration, easing }`, if given.
   2. It must *not* remove any of the given elements from the DOM.
   3. It returns a promise that is fulfilled when the transition has ended
   4. If during the animation an event `up:motion:finish` is emitted on
