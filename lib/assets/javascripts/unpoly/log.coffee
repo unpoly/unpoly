@@ -10,6 +10,17 @@ Unpoly can print debugging information to the developer console, e.g.:
 
 You can activate logging by calling [`up.log.enable()`](/up.log.enable).
 
+\#\#\# Disabling banner
+
+Set `up.config.banner` before loading Unpoly to disable.
+
+  <script>
+    var up = {
+      config: {
+        banner: false
+      }
+    }
+  </script>
 @module up.log
 ###
 up.log = do ->
@@ -34,7 +45,10 @@ up.log = do ->
   ###
   config = new up.Config ->
     enabled: sessionStore.get('enabled')
-    banner: true
+    banner: if u.isBoolean(up.originalUp?.config?.banner)
+              up.originalUp.config.banner
+            else
+              true
 
   reset = ->
     config.reset()
