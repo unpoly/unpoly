@@ -67,20 +67,21 @@ up.util = do ->
   }
 
   ###**
-  Normalizes relative paths and absolute paths to a full URL
-  that can be checked for equality with other normalized URLs.
-  
-  By default hashes are ignored, search queries are included.
-  
+  Normalizes the given URL or path.
+
   @function up.util.normalizeURL
   @param {boolean} [options.host='cross-domain']
     Whether to include protocol, hostname and port in the normalized URL.
+
+    By default the host is only included if it differ's from the page's hostname.
   @param {boolean} [options.hash=false]
     Whether to include an `#hash` anchor in the normalized URL
   @param {boolean} [options.search=true]
     Whether to include a `?query` string in the normalized URL
   @param {boolean} [options.stripTrailingSlash=false]
     Whether to strip a trailing slash from the pathname
+  @return {string}
+    The normalized URL.
   @internal
   ###
   normalizeURL = (urlOrAnchor, options) ->
@@ -140,6 +141,15 @@ up.util = do ->
 
   If the given URL is not fully qualified, it is assumed to be relative
   to the current page.
+
+  \#\#\# Example
+
+  ```js
+  let parsed = up.util.parseURL('/path?foo=value')
+  parsed.pathname // => '/path'
+  parsed.search // => '/?foo=value'
+  parsed.hash // => ''
+  ```
 
   @function up.util.parseURL
   @return {Object}
@@ -633,7 +643,7 @@ up.util = do ->
   @function up.util.isList
   @param value
   @return {boolean}
-  @experimental
+  @stable
   ###
   isList = (value) ->
     isArray(value) ||
@@ -676,9 +686,20 @@ up.util = do ->
       return value
 
   ###**
+  Returns the given value if it is [array-like](/up.util.isList), otherwise
+  returns an array with the given value as its only element.
+
+  \#\#\# Example
+
+  ```js
+  up.util.wrapList([1, 2, 3]) // => [1, 2, 3]
+  up.util.wrapList('foo') // => ['foo']
+  ```
+
   @function up.util.wrapList
+  @param {any} value
   @return {Array|NodeList|jQuery}
-  @internal
+  @experimental
   ###
   wrapList = (value) ->
     if isList(value)
@@ -1147,6 +1168,7 @@ up.util = do ->
   @function up.util.pick
   @param {Object} object
   @param {Array} keys
+  @return {Object}
   @stable
   ###
   pick = (object, keys) ->
@@ -1156,6 +1178,19 @@ up.util = do ->
         filtered[key] = object[key]
     filtered
 
+  ###**
+  Returns a copy of the given object that only contains
+  properties that pass the given tester function.
+
+  @function up.util.pickBy
+  @param {Object} object
+  @param {Function<string, string, object>} tester
+    A function that will be called with each property.
+
+    The arguments are the property value, key and the entire object.
+  @return {Object}
+  @experimental
+  ###
   pickBy = (object, tester) ->
     tester = iteratee(tester)
     filtered = {}
@@ -1210,7 +1245,9 @@ up.util = do ->
   Otherwise it just returns `value`.
 
   @function up.util.evalOption
-  @internal
+  @param {any}
+  @return {any}
+  @experimental
   ###
   evalOption = (value, args...) ->
     if isFunction(value)
@@ -1230,7 +1267,7 @@ up.util = do ->
 
   @function up.util.escapeHTML
   @param {string} string
-    The text that should be escaped
+    The text that should be escaped.
   @stable
   ###
   escapeHTML = (string) ->
@@ -1244,6 +1281,16 @@ up.util = do ->
     # From https://github.com/benjamingr/RegExp.escape
     string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 
+  ###**
+  Deletes the property with the given key from the given object
+  and returns its value.
+
+  @function up.util.pluckKey
+  @param {Object} object
+  @param {string} key
+  @return {any}
+  @experimental
+  ###
   pluckKey = (object, key) ->
     value = object[key]
     delete object[key]
@@ -1330,7 +1377,6 @@ up.util = do ->
   @param {Array<Function()>} functions
   @return {Function()}
     A function that will call all `functions` if called.
-
   @internal
   ###
   sequence = (functions) ->
@@ -1366,7 +1412,13 @@ up.util = do ->
 #      'right'
 
   ###**
-  Flattens the given `array` a single level deep.
+  Flattens the given `array` a single depth level.
+
+  \#\#\# Example
+
+  ```js
+  let nested = [1, [2, 3], [4]]
+  up.util.flatten(nested) // => [1, 2, 3, 4]
 
   @function up.util.flatten
   @param {Array} array
@@ -1392,7 +1444,7 @@ up.util = do ->
 
   ###**
   Maps each element using a mapping function,
-  then flattens the result into a new array.
+  then [flattens](/up.util.flatten) the result into a new array.
 
   @function up.util.flatMap
   @param {Array} array
@@ -1801,7 +1853,8 @@ up.util = do ->
       i += 1
       arg
 
-  # Remove with IE11
+  # Remove with IE11.
+  # When removed we can also remove muteRejection(), as this is the only caller.
   allSettled = (promises) ->
     return Promise.all(map(promises, muteRejection))
 
