@@ -648,10 +648,12 @@ up.protocol = do ->
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config
+
   @param {string} [config.csrfHeader='X-CSRF-Token']
     The name of the HTTP header that will include the
     [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
     for AJAX requests.
+
   @param {string|Function(): string} [config.csrfParam]
     The `name` of the hidden `<input>` used for sending a
     [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
@@ -663,7 +665,10 @@ up.protocol = do ->
 
     Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
 
-        <meta name="csrf-param" content="authenticity_token" />
+    ```html
+    <meta name="csrf-param" content="authenticity_token" />
+    ```
+
   @param {string|Function(): string} [config.csrfToken]
     The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
     to send for unsafe requests. The token will be sent as either a HTTP header (for AJAX requests)
@@ -674,7 +679,10 @@ up.protocol = do ->
 
     Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
 
-        <meta name='csrf-token' content='secret12345'>
+    ```
+    <meta name='csrf-token' content='secret12345'>
+    ```
+
   @param {string} [config.methodParam='_method']
     The name of request parameter containing the original request method when Unpoly needs to wrap
     the method.
