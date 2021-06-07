@@ -310,7 +310,7 @@ up.element = do ->
   @function up.element.toggleClass
   @param {Element} element
     The element for which to add or remove the class.
-  @param {String} className
+  @param {string} className
     The class which should be added or removed.
   @param {Boolean} [newPresent]
     Pass `true` to add the class to the element or `false` to remove it.

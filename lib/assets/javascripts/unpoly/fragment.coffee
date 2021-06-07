@@ -167,6 +167,74 @@ up.fragment = do ->
     return e.closestAttr(element, 'up-time') || '0'
 
   ###**
+  Sets the time when the fragment's underlying data was last changed.
+
+  This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
+  a fragment. This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
+  request/response exchange to **~1 KB**.
+
+  \#\# Example
+
+  Let's say we display a list of recent messages.
+  We use the `[up-poll]` attribute to reload the `.messages` fragment every 30 seconds:
+
+  ```html
+  <div class="messages" up-poll>
+    ...
+  </div>
+  ```
+
+  The list is now always up to date. But most of the time there will not be new messages,
+  and we waste resources sending the same unchanged HTML from the server.
+
+  We can improve this by setting an `[up-time]` attribute and the message list.
+  The attribute value is the time of the most recent message.
+
+  The time is encoded as the number of seconds since [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
+  When, for instance, the last message in a list was received from December 24th, 1:51:46 PM UTC,
+  we use the following HTML:
+
+  ```html
+  <div class="messages" up-time="1608730818" up-poll>
+    ...
+  </div>
+  ```
+
+  When reloading Unpoly will echo the `[up-time]` timestamp in an `X-Up-Reload-From-Time` header:
+
+  ```http
+  X-Up-Reload-From-Time: 1608730818
+  ```
+
+  The server can compare the time from the request with the time of the last data update.
+  If no more recent data is available, the server can render nothing and respond with
+  an [`X-Up-Target: :none`](/X-Up-Target) header.
+
+  Here is an example with [unpoly-rails](https://unpoly.com/install/rails):
+
+  ```ruby
+  class MessagesController < ApplicationController
+
+    def index
+      if up.reload_from_time == current_user.last_message_at
+        up.render_nothing
+      else
+        @messages = current_user.messages.order(time: :desc).to_a
+        render 'index'
+      end
+    end
+
+  end
+  ```
+
+  @selector [up-time]
+  @param {string} up-time
+    The number of seconds between the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
+    and the time when the element's underlying data was last changed.
+  @experimental
+  ###
+
+  ###**
   Sets this element's source URL for [reloading](/up.reload) and [polling](/up-poll)
 
   When an element is reloaded, Unpoly will make a request from the URL
@@ -187,7 +255,7 @@ up.fragment = do ->
       </div>
 
   @selector [up-source]
-  @param {String} up-source
+  @param {string} up-source
     The URL from which to reload this element.
   @stable
   ###
@@ -1212,7 +1280,8 @@ up.fragment = do ->
 
   \#\#\# Skipping updates when nothing changed
 
-  TODO: Document [up-time] and X-Up-Reload-From-Time (currently both documented in `X-Up-Reload-From-Time`).
+  You may use the `[up-time]` attribute to avoid rendering unchanged HTML when reloading
+  a fragment. See `[up-time]` for a detailed example.
 
   @function up.reload
   @param {string|Element|jQuery} [target]

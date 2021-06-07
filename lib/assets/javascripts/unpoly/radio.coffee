@@ -147,21 +147,27 @@ up.radio = do ->
   Assume an application layout with an unread message counter.
   You can use `[up-poll]` to refresh the counter every 30 seconds:
 
-      <div class="unread-count" up-poll>
-        2 new messages
-      </div>
+  ```html
+  <div class="unread-count" up-poll>
+    2 new messages
+  </div>
+  ```
 
   \#\#\# Controlling the reload interval
 
   You may set an optional `[up-interval]` attribute to set the reload interval in milliseconds:
 
-      <div class="unread-count" up-poll up-interval="10000">
-        2 new messages
-      </div>
+  ```html
+  <div class="unread-count" up-poll up-interval="10000">
+    2 new messages
+  </div>
+  ```
 
   If the value is omitted, a global default is used. You may configure the default like this:
 
-      up.radio.config.pollInterval = 10000
+  ```js
+  up.radio.config.pollInterval = 10000
+  ```
 
   \#\#\# Controlling the source URL
 
@@ -169,13 +175,20 @@ up.radio = do ->
 
   To reload from another URL, set an `[up-source]` attribute on the polling element:
 
-      <div class="unread-count" up-poll up-source="/unread-count">
-        2 new messages
-      </div>
+  ```html
+  <div class="unread-count" up-poll up-source="/unread-count">
+    2 new messages
+  </div>
+  ```
 
   \#\#\# Skipping updates when nothing changed
 
-  TODO: Document [up-time] and X-Up-Reload-From-Time (currently both documented in `X-Up-Reload-From-Time`).
+  When polling a fragment periodically we want to avoid rendering unchanged content.
+  This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
+  request/response exchange to **~1 KB**.
+
+  To achieve this we timestamp your fragments with an `[up-time]` attribute to indicate
+  when the underlying data was last changed. See `[up-time]` for a detailed example.
 
   @selector [up-poll]
   @param [up-interval]

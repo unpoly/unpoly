@@ -214,6 +214,7 @@ up.viewport = do ->
 
     When the scrolling is not animated, the promise will fulfill
     in the next [microtask](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
+
   @stable
   ###
   reveal = (element, options) ->

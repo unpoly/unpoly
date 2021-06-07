@@ -235,53 +235,20 @@ up.protocol = do ->
   The timestamp must be explicitely set by the user as an `[up-time]` attribute on the fragment.
   It should indicate the time when the fragment's underlying data was last changed.
 
-  Its value is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
+  See `[up-time]` for a detailed example.
 
-  If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Time: 0`).
+  \#\#\# Format
 
-  \#\#\# Example
+  The time is encoded is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
 
-  You may timestamp your fragments with an `[up-time]` attribute to indicate when the underlying data
-  was last changed. For instance, when the last message in a list was received from December 24th, 1:51:46 PM UTC:
-
-  ```html
-  <div class="messages" up-time="1608730818">
-    ...
-  </div>
-  ```
-
-  When reloading the `.messages` fragment, Unpoly will echo that timestamp in an `X-Up-Reload-From-Time` header:
+  For instance, a modification date of December 24th, 1:51:46 PM UTC would produce the following header:
 
   ```http
+  X-Up-Target: .unread-count
   X-Up-Reload-From-Time: 1608730818
   ```
 
-  \#\# Cheap polling responses
-
-  A use case for the `X-Up-Reload-From-Time` header is to avoid rendering unchanged content
-  while [polling](/up-poll).
-
-  The server can compare the time from the request with the time of the last data update.
-  If no more recent data is available, the server can [render nothing](/X-Up-Target):
-
-  ```ruby
-  class MessagesController < ApplicationController
-
-    def index
-      if up.reload_from_time == current_user.last_message_at
-        up.render_nothing
-      else
-        @messages = current_user.messages.order(time: :desc).to_a
-        render 'index'
-      end
-    end
-
-  end
-  ```
-
-  Only rendering when needed saves <b>CPU time</b> on your server, which spends most of its response time rendering HTML.
-
-  This also reduces the <b>bandwidth cost</b> for a request/response exchange to **~1 KB**.
+  If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Time: 0`).
 
   @header X-Up-Reload-From-Time
   @stable
