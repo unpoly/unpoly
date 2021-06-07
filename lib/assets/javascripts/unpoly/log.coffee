@@ -115,7 +115,7 @@ up.log = do ->
       console.log(logo + text)
 
 
-  up.on 'up:framework:boot', printBanner
+  up.on 'up:app:boot', printBanner
 
   up.on 'up:framework:reset', reset
 
