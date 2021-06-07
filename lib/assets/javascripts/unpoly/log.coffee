@@ -191,6 +191,8 @@ up.log = do ->
       console.error(prefix(message), args...)
 
   printBanner = ->
+    return unless config.banner
+
     # The ASCII art looks broken in code since we need to escape backslashes
     banner = " __ _____  ___  ___  / /_ __\n" +
              "/ // / _ \\/ _ \\/ _ \\/ / // /  #{up.version}\n" +
@@ -203,8 +205,7 @@ up.log = do ->
       banner += "Call `up.log.enable()` to enable logging for this session."
     console.log(banner)
 
-  if config.banner
-    up.on 'up:framework:booted', printBanner
+  up.on 'up:app:boot', printBanner
   
   up.on 'up:framework:reset', reset
 
