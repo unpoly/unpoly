@@ -10,9 +10,11 @@ Unpoly lets you organize your JavaScript snippets using [compilers](/up.compiler
 For instance, to activate the [Masonry](http://masonry.desandro.com/) library for every element
 with a `grid` class, use this compiler:
 
-    up.compiler('.grid', function(element) {
-      new Masonry(element, { itemSelector: '.grid--item' })
-    })
+```js
+up.compiler('.grid', function(element) {
+  new Masonry(element, { itemSelector: '.grid--item' })
+})
+```
 
 The compiler function will be called on matching elements when the page loads
 or when a matching fragment is [inserted via AJAX](/up.link) later.
@@ -48,14 +50,17 @@ up.syntax = do ->
   Use compilers to activate your custom Javascript behavior on matching
   elements.
 
-  You should migrate your [`DOMContentLoaded`](https://api.jquery.com/ready/)
+  You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
   callbacks to compilers. This will make sure they run both at page load and
   when a new fragment is inserted later.
-  It will also organize your JavaScript snippets by selector of affected elements.
+  See [Making JavaScripts work with fragment updates](/legacy-scripts) for advice
+  on migrating legacy scripts.
+
+  It will also organize your JavaScript snippets by selector.
 
   \#\#\# Example
 
-  This jQuery compiler will insert the current time into a
+  This compiler will insert the current time into a
   `<div class='current-time'></div>`:
 
   ```js
@@ -116,55 +121,34 @@ up.syntax = do ->
 
   An alternative way to register a destructor function is `up.destructor()`.
 
-  \#\#\# Attaching structured data
+  \#\#\# Passing parameters to a compiler
 
-  In case you want to attach structured data to the event you're observing,
-  you can serialize the data to JSON and put it into an `[up-data]` attribute.
-  For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
-  might attach the location and names of its marker pins:
+  Use the `[up-data]` attribute to attach structured data to a DOM element.
+  The data will be parsed and passed to your compiler function.
 
-  ```html
-  <div class='google-map' up-data='[
-    { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
-    { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
-  ]'></div>
-  ```
+  Alternatively your compiler may access attributes for the compiled element
+  via the standard [`Element#getAttribute()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute)
+  method.
 
-  The JSON will be parsed and handed to your compiler as a second argument:
+  Unpoly also provides utility functions to read an element attribute and
+  cast it to a given type:
 
-  ```js
-  up.compiler('.google-map', function(element, pins) {
-    var map = new google.maps.Map(element)
-
-    pins.forEach(function(pin) {
-      var position = new google.maps.LatLng(pin.lat, pin.lng)
-      new google.maps.Marker({
-        position: position,
-        map: map,
-        title: pin.title
-      })
-    })
-  })
-  ```
-
-  @see legacy-scripts
+  - `up.element.booleanAttr(element, attr)`
+  - `up.element.numberAttr(element, attr)`
+  - `up.element.jsonAttr(element, attr)`
 
   @function up.compiler
   @param {string} selector
     The selector to match.
   @param {number} [options.priority=0]
     The priority of this compiler.
+
     Compilers with a higher priority are run first.
     Two compilers with the same priority are run in the order they were registered.
   @param {boolean} [options.batch=false]
     If set to `true` and a fragment insertion contains multiple
-    elements matching the selector, `compiler` is only called once
-    with a jQuery collection containing all matching elements. 
-  @param {boolean} [options.keep=false]
-    If set to `true` compiled fragment will be [persisted](/up-keep) during
-    fragment updates.
-
-    This has the same effect as setting an `up-keep` attribute on the element.
+    elements matching `selector`, the `compiler` function is only called once
+    with all these elements.
   @param {Function(element, data)} compiler
     The function to call when a matching element is inserted.
 
@@ -198,10 +182,12 @@ up.syntax = do ->
   This jQuery compiler will insert the current time into a
   `<div class='current-time'></div>`:
 
-      up.$compiler('.current-time', function($element) {
-        var now = new Date()
-        $element.text(now.toString())
-      })
+  ```js
+  up.$compiler('.current-time', function($element) {
+    var now = new Date()
+    $element.text(now.toString())
+  })
+  ```
 
   @function up.$compiler
   @param {string} selector
@@ -222,33 +208,40 @@ up.syntax = do ->
   ###**
   Registers a [compiler](/up.compiler) that is run before all other compilers.
 
-  Use `up.macro()` to register a compiler that sets multiple Unpoly attributes.
+  A macro lets you set UJS attributes that will be compiled afterwards.
+
+  If you want default attributes for *every* link and form, consider customizing your
+  [navigation options](/navigation).
 
   \#\#\# Example
 
   You will sometimes find yourself setting the same combination of UJS attributes again and again:
 
-      <a href="/page1" up-target=".content" up-transition="cross-fade" up-duration="300">Page 1</a>
-      <a href="/page2" up-target=".content" up-transition="cross-fade" up-duration="300">Page 2</a>
-      <a href="/page3" up-target=".content" up-transition="cross-fade" up-duration="300">Page 3</a>
+  ```html
+  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
+  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
+  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
+  ```
 
-  We would much rather define a new `[content-link]` attribute that let's us
+  We would much rather define a new `[smooth-link]` attribute that let's us
   write the same links like this:
 
-      <a href="/page1" content-link>Page 1</a>
-      <a href="/page2" content-link>Page 2</a>
-      <a href="/page3" content-link>Page 3</a>
+  ```html
+  <a href="/page1" smooth-link>Page 1</a>
+  <a href="/page2" smooth-link>Page 2</a>
+  <a href="/page3" smooth-link>Page 3</a>
+  ```
 
   We can define the `[content-link]` attribute by registering a macro that
   sets the `[up-target]`, `[up-transition]` and `[up-duration]` attributes for us:
 
-      up.macro('[content-link]', function(link) {
-        link.setAttribute('up-target', '.content')
-        link.setAttribute('up-transition', 'cross-fade')
-        link.setAttribute('up-duration', '300')
-      })
-
-  Examples for built-in macros are [`a[up-dash]`](/a-up-dash) and [`[up-expand]`](/up-expand).
+  ```
+  up.macro('[smooth-link]', function(link) {
+    link.setAttribute('up-target', '.content')
+    link.setAttribute('up-transition', 'cross-fade')
+    link.setAttribute('up-duration', '300')
+  })
+  ```
 
   @function up.macro
   @param {string} selector
@@ -279,13 +272,15 @@ up.syntax = do ->
 
   \#\#\# Example
 
-      up.$macro('[content-link]', function($link) {
-        $link.attr(
-          'up-target': '.content',
-          'up-transition': 'cross-fade',
-          'up-duration':'300'
-        )
-      })
+  ```js
+  up.$macro('[content-link]', function($link) {
+    $link.attr(
+      'up-target': '.content',
+      'up-transition': 'cross-fade',
+      'up-duration':'300'
+    )
+  })
+  ```
 
   @function up.$macro
   @param {string} selector
@@ -336,6 +331,7 @@ up.syntax = do ->
 
   ###**
   Applies all compilers on the given element and its descendants.
+
   Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
 
   @function up.syntax.compile
@@ -362,8 +358,8 @@ up.syntax = do ->
   })
   ```
 
-  An alternative way to register a destructor function is to `return`
-  it from your compiler function.
+  An alternative way to register a destructor function is to
+  [`return` it from your compiler function](/up.compiler#cleaning-up-after-yourself).
 
   @function up.destructor
   @param {Element} element
@@ -383,6 +379,7 @@ up.syntax = do ->
 
   ###**
   Runs any destructor on the given fragment and its descendants in the same layer.
+
   Unlike [`up.destroy()`](/up.destroy), this does not emit any events
   and does not remove the element from the DOM.
 
@@ -405,11 +402,15 @@ up.syntax = do ->
 
   You have an element with JSON data serialized into an `up-data` attribute:
 
-      <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+  ```html
+  <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+  ```
 
   Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
 
-      up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
+  ```js
+  up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
+  ```
 
   @function up.data
   @param {string|Element|jQuery} element
@@ -422,39 +423,49 @@ up.syntax = do ->
   ###
 
   ###**
-  If an element with an `up-data` attribute enters the DOM,
+  Attaches structured data for a compiler.
+
+  If an element with an `[up-data]` attribute enters the DOM,
   Unpoly will parse the JSON and pass the resulting object to any matching
-  [`up.compiler()`](/up.compiler) handlers.
+  [`up.compiler()`](/up.compiler) functions.
+
+  \#\#\# Example
 
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
 
-      <div class='google-map' up-data='[
-        { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
-        { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
-      ]'></div>
+  ```html
+  <div class='google-map' up-data='[
+    { "lat": 48.36, "lng": 10.99, "title": "Friedberg" },
+    { "lat": 48.75, "lng": 11.45, "title": "Ingolstadt" }
+  ]'></div>
+  ```
 
   The JSON will be parsed and handed to your compiler as a second argument:
 
-      up.compiler('.google-map', function(element, pins) {
-        var map = new google.maps.Map(element)
-        pins.forEach(function(pin) {
-          var position = new google.maps.LatLng(pin.lat, pin.lng)
-          new google.maps.Marker({
-            position: position,
-            map: map,
-            title: pin.title
-          })
-        })
+  ```js
+  up.compiler('.google-map', function(element, pins) {
+    var map = new google.maps.Map(element)
+    pins.forEach(function(pin) {
+      var position = new google.maps.LatLng(pin.lat, pin.lng)
+      new google.maps.Marker({
+        position: position,
+        map: map,
+        title: pin.title
       })
+    })
+  })
+  ```
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
   [`up.on()`](/up.on) handlers.
 
-      up.on('click', '.google-map', function(event, element, pins) {
-        console.log("There are %d pins on the clicked map", pins.length)
-      })
+  ```js
+  up.on('click', '.google-map', function(event, element, pins) {
+    console.log("There are %d pins on the clicked map", pins.length)
+  })
+  ```
 
   @selector [up-data]
   @param up-data

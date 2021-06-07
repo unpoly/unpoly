@@ -212,24 +212,25 @@ describe 'up.syntax', ->
           compile = -> up.hello($container)
           expect(compile).toThrowError(/cannot return destructor/i)
 
-      describe 'with { keep } option', ->
+      if up.migrate.loaded
+        describe 'with { keep } option', ->
 
-        it 'adds an up-keep attribute to the fragment during compilation', ->
+          it 'adds an up-keep attribute to the fragment during compilation', ->
 
-          up.compiler '.foo', { keep: true }, ->
-          up.compiler '.bar', { }, ->
-          up.compiler '.bar', { keep: false }, ->
-          up.compiler '.bam', { keep: '.partner' }, ->
+            up.compiler '.foo', { keep: true }, ->
+            up.compiler '.bar', { }, ->
+            up.compiler '.bar', { keep: false }, ->
+            up.compiler '.bam', { keep: '.partner' }, ->
 
-          $foo = $ up.hello(fixture('.foo'))
-          $bar = $ up.hello(fixture('.bar'))
-          $baz = $ up.hello(fixture('.baz'))
-          $bam = $ up.hello(fixture('.bam'))
+            $foo = $ up.hello(fixture('.foo'))
+            $bar = $ up.hello(fixture('.bar'))
+            $baz = $ up.hello(fixture('.baz'))
+            $bam = $ up.hello(fixture('.bam'))
 
-          expect($foo.attr('up-keep')).toEqual('')
-          expect($bar.attr('up-keep')).toBeMissing()
-          expect($baz.attr('up-keep')).toBeMissing()
-          expect($bam.attr('up-keep')).toEqual('.partner')
+            expect($foo.attr('up-keep')).toEqual('')
+            expect($bar.attr('up-keep')).toBeMissing()
+            expect($baz.attr('up-keep')).toBeMissing()
+            expect($bam.attr('up-keep')).toEqual('.partner')
 
       describe 'with { priority } option', ->
 

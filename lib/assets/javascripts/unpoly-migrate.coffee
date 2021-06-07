@@ -14,5 +14,6 @@
 #= require ./unpoly-migrate/tooltip
 #= require ./unpoly-migrate/network
 #= require ./unpoly-migrate/radio
+#= require ./unpoly-migrate/syntax
 #= require ./unpoly-migrate/viewport
 #= require ./unpoly-migrate/_stop_extension

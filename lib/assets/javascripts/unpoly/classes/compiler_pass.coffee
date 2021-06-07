@@ -42,12 +42,7 @@ class up.CompilerPass
       for match in matches
         @compileOneElement(compiler, match)
 
-    # up.compiler() has a legacy { keep } option that will automatically
-    # set [up-keep] on the elements it compiles
-    if keepValue = compiler.keep
-      value = if u.isString(keepValue) then keepValue else ''
-      for match in matches
-        match.setAttribute('up-keep', value)
+    up.migrate.postCompile?(matches, compiler)
 
   compileOneElement: (compiler, element) ->
     elementArg = if compiler.jQuery then up.browser.jQuery(element) else element
