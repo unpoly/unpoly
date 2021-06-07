@@ -206,9 +206,6 @@ up.viewport = do ->
 
     Defaults to `up.viewport.config.revealSnap`.
 
-  @param {boolean} [options.peel=true]
-    Whether to close overlays obscuring the layer of `element`.
-
   @return {Promise}
     A promise that fulfills when the element is revealed.
 
@@ -220,8 +217,8 @@ up.viewport = do ->
   @stable
   ###
   reveal = (element, options) ->
-    # copy options, since we will mutate it below
-    options = u.options(options, peel: true)
+    # copy options, since we will mutate it below (options.layer = ...).
+    options = u.options(options)
     element = f.get(element, options)
 
     # Now that we have looked up the element with an option like { layer: 'any' },

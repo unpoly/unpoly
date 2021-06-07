@@ -2,8 +2,7 @@
 Passive updates
 ===============
 
-This work-in-progress package will contain functionality to
-passively receive updates from the server.
+This package contains functionality to passively receive updates from the server.
 
 @module up.radio
 ###
@@ -16,13 +15,16 @@ up.radio = do ->
   Configures defaults for passive updates.
 
   @property up.radio.config
+
   @param {Array<string>} [config.hungrySelectors]
     An array of CSS selectors that is replaced whenever a matching element is found in a response.
     These elements are replaced even when they were not targeted directly.
 
     By default this contains the [`[up-hungry]`](/up-hungry) attribute.
+
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll] interval in milliseconds.
+
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
@@ -37,6 +39,7 @@ up.radio = do ->
     When set to `false`, Unpoly will never allow polling.
 
     You may also pass a function that accepts the polling fragment and returns `true`, `false` or `'auto'`.
+
   @stable
   ###
   config = new up.Config ->
