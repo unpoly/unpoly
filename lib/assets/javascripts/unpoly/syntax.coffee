@@ -2,22 +2,11 @@
 Custom JavaScript
 =================
 
-Every app needs a way to pair JavaScript snippets with certain HTML elements,
-in order to integrate libraries or implement custom behavior.
+The `up.syntax` package lets you pair HTML elements with JavaScript behavior.
 
-Unpoly lets you organize your JavaScript snippets using [compilers](/up.compiler).
-
-For instance, to activate the [Masonry](http://masonry.desandro.com/) library for every element
-with a `grid` class, use this compiler:
-
-```js
-up.compiler('.grid', function(element) {
-  new Masonry(element, { itemSelector: '.grid--item' })
-})
-```
-
-The compiler function will be called on matching elements when the page loads
-or when a matching fragment is [inserted via AJAX](/up.link) later.
+@see up.compiler
+@see [up-data]
+@see up.macro
 
 @module up.syntax
 ###
@@ -393,10 +382,9 @@ up.syntax = do ->
     pass.run()
 
   ###**
-  Checks if the given element has an [`up-data`](/up-data) attribute.
-  If yes, parses the attribute value as JSON and returns the parsed object.
+  Returns the given element's `[up-data]`, parsed as a JavaScript object.
 
-  Returns `undefined` if the element has no `up-data` attribute.
+  Returns `undefined` if the element has no `[up-data]` attribute.
 
   \#\#\# Example
 
@@ -423,7 +411,7 @@ up.syntax = do ->
   ###
 
   ###**
-  Attaches structured data for a compiler.
+  Attaches structured data to an element, to be consumed by a compiler.
 
   If an element with an `[up-data]` attribute enters the DOM,
   Unpoly will parse the JSON and pass the resulting object to any matching

@@ -4,6 +4,9 @@ Passive updates
 
 This package contains functionality to passively receive updates from the server.
 
+@see [up-hungry]
+@see [up-poll]
+
 @module up.radio
 ###
 up.radio = do ->
@@ -58,9 +61,8 @@ up.radio = do ->
     config.hungrySelectors.join(',')
 
   ###**
-  Elements with an `[up-hungry]` attribute are [updated](/up.replace) whenever there is a
-  matching element found in a successful response. The element is replaced even
-  when it isn't targeted directly.
+  Elements with an `[up-hungry]` attribute are updated whenever the server
+  sends a matching element, even if the element isn't targeted.
 
   Use cases for this are unread message counters or notification flashes.
   Such elements often live in the layout, outside of the content area that is

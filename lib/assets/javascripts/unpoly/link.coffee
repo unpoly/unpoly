@@ -68,6 +68,11 @@ With these [`up-target`](/a-up-follow#up-target) annotations Unpoly only updates
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
+@see a[up-follow]
+@see a[up-instant]
+@see a[up-preload]
+@see up.follow
+
 @module up.link
 ###
 
@@ -247,8 +252,7 @@ up.link = do ->
     linkPreloader.reset()
 
   ###**
-  Fetches the given link's `[href]` with JavaScript and [replaces](/up.replace) the
-  [current layer](/up.layer.current) with HTML from the response.
+  Follows the given link with JavaScript and updates a fragment with the server response.
 
   By default the layer's [main element](/main)
   will be replaced. Attributes like `a[up-target]`
@@ -702,8 +706,7 @@ up.link = do ->
       callback?()
 
   ###**
-  [Follows](/up.follow) this link with JavaScript and replaces a CSS selector
-  on the current page with a corresponding element from the response.
+  [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
 
   Following a link is considered [navigation](/navigation) by default.
 
@@ -967,12 +970,7 @@ up.link = do ->
       up.log.muteUncriticalRejection follow(link)
 
   ###**
-  TODO: Explain that this generates an up:click event, works on any elements, can can be used to accelerate links
-
-  By adding an `up-instant` attribute to a link, the destination will be
-  fetched on `mousedown` instead of `click` (`mouseup`).
-
-      <a href="/users" up-follow up-instant>User list</a>
+  Follows this link on `mousedown` instead of `click`.
 
   This will save precious milliseconds that otherwise spent
   on waiting for the user to release the mouse button. Since an
@@ -983,6 +981,10 @@ up.link = do ->
   click by moving the mouse away from the link. However, for
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
+
+  \#\#\# Example
+
+      <a href="/users" up-follow up-instant>User list</a>
 
   \#\#\# Accessibility
 
@@ -1077,11 +1079,9 @@ up.link = do ->
       makeFollowable(area)
 
   ###**
-  Links with an `up-preload` attribute will silently fetch their target
-  when the user hovers over the click area, or when the user puts her
-  mouse/finger down (before releasing).
+  Preloads this link when the user hovers over it.
 
-  When the link is clicked later, the response will already be cached,
+  When the link is clicked later the response will already be cached,
   making the interaction feel instant.
 
   @selector a[up-preload]

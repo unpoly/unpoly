@@ -4,7 +4,7 @@ u = up.util
 e = up.element
 
 ###**
-Instances of `up.Request` normalizes properties of an [`AJAX request`](/up.request)
+Instances of `up.Request` normalizes properties of an [AJAX request](/up.request)
 such as the requested URL, form parameters and HTTP method.
 
 You can queue a request using the `up.request()` method:

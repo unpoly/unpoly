@@ -5,7 +5,17 @@ e = up.element
 Layers
 ======
 
-TODO
+Unpoly lets you use overlays to break up a complex screen into [subinteractions](/subinteractions).
+
+Subinteractions take place in overlays and may span one or many pages. The original screen remains open in the background.
+Once the subinteraction is *done*, the overlay is closed and a result value is communicated back to the parent layer.
+
+Layers are isolated and can be stacked infinitely.
+
+@see a[up-layer=new]
+@see up.layer.current
+@see up.layer.on
+@see up.layer.ask
 
 @module up.layer
 ###
@@ -845,7 +855,7 @@ up.layer = do ->
 
   If no overlay is open, an empty array is returned.
 
-  @function up.layer.overlays
+  @property up.layer.overlays
   @param {Array<up.Layer>} overlays
   @stable
   ###
@@ -870,9 +880,9 @@ up.layer = do ->
   Afterwards the only remaining layer will be the [root layer](/up.layer.root).
 
   @function up.layer.dismissOverlays
-  @param {any} value
+  @param {any} [value]
     The dismissal value.
-  @param {Object} options
+  @param {Object} [options]
     See options for `up.layer.dismiss()`.
   @stable
   ###
@@ -946,7 +956,7 @@ up.layer = do ->
   ###
 
   ###**
-  Listens to a ([DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
+  Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
   that originated on an element [contained](/up.Layer.prototype.contains) by the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.on()`.

@@ -29,6 +29,11 @@ and [predefined animations](/up.animate#named-animations).
 You can define custom animations using `up.transition()` and
 `up.animation()`.
 
+@see up.animation
+@see up.animate
+@see up.transition
+@see up.morph
+
 @module up.motion
 ###
 up.motion = do ->

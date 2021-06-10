@@ -9,6 +9,9 @@ define additional viewports by giving the CSS property `{ overflow-y: scroll }` 
 
 Also see documentation for the [scroll option](/scroll-option) and [focus option](focus-option).
 
+@see up.reveal
+@see [up-fixed=top]
+
 @module up.viewport
 ###
 up.viewport = do ->

@@ -352,7 +352,7 @@ class up.Layer extends up.Record
     e.closest(element, up.layer.anySelector()) == @element
 
   ###**
-  Listens to a ([DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events) that originated
+  Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events) that originated
   on an element [contained](/up.Layer.prototype.contains) by this layer.
 
   This will ignore events emitted on elements in [descendant](/up.Layer.prototype.descendants) overlays,

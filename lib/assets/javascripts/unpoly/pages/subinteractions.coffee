@@ -19,7 +19,7 @@
 
   The application could look like this:
 
-  ![Screenshot of a CRUD interface](/images/api/crud-companies-projects.png){:width=400}
+  ![Screenshot of a CRUD interface](/images/api/crud-companies-projects.png){:width='500'}
 
   The follow case illustrates the problems with a sequential screen flow:
 
@@ -41,7 +41,7 @@
 
   The diagram illustrates the difference between the two control flows:
 
-  ![Differences between sequential screen flow and subinteractions](/images/api/subinteraction-flow.svg){:width=500}
+  ![Differences between sequential screen flow and subinteractions](/images/api/subinteraction-flow.svg){:width='500'}
 
 
   Starting a subinteraction
@@ -107,5 +107,5 @@
 
 
 
-  @page sub-interactions
+  @page subinteractions
   ###

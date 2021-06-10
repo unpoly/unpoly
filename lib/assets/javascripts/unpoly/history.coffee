@@ -6,6 +6,9 @@ In an Unpoly app, every page has an URL.
 
 [Fragment updates](/up.link) automatically update the URL.
 
+@see up.history.location
+@see up:location:changed
+
 @module up.history
 ###
 up.history = do ->

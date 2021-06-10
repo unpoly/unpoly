@@ -9,11 +9,14 @@ The `up.fragment` module exposes a high-level Javascript API to [update](/up.rep
 [destroy](/up.destroy) page fragments.
 
 Fragments are [compiled](/up.compiler) elements that can be updated from a server URL.
-They also exist on a layer (page, modal, popup).
+They also exist on a [layer](/up.layer).
 
-Most of Unpoly's functionality (like [fragment links](/up.link) or [modals](/up.modal))
-is built from `up.fragment` functions. You may use them to extend Unpoly from your
-[custom Javascript](/up.syntax).
+@see up.render
+@see up.navigate
+@see up.destroy
+@see up.reload
+@see up.fragment.get
+@see up.hello
 
 @module up.fragment
 ###
@@ -1052,7 +1055,7 @@ up.fragment = do ->
   - The [`up.element.all()`](/up.element.get) function simply returns the all elements matching a selector
     without further filtering.
 
-  @function up.fragment.get
+  @function up.fragment.all
 
   @param {Element|jQuery} [root=document]
     The root element for the search. Only the root's children will be matched.

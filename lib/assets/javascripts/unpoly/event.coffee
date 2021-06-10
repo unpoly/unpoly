@@ -34,6 +34,9 @@ document.addEventListener('up:modal:open', (event) => {
 })
 ```
 
+@see up.on
+@see up.emit
+
 @module up.event
 ###
 up.event = do ->

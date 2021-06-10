@@ -2,9 +2,12 @@
 Forms
 =====
   
-Unpoly comes with functionality to [submit](/form-up-submit) and [validate](/input-up-validate)
-forms without leaving the current page. This means you can replace page fragments,
-open dialogs with sub-forms, etc. all without losing form state.
+The `up.form` module helps you work with non-trivial forms.
+
+@see form[up-submit]
+@see form[up-validate]
+@see input[up-switch]
+@see form[up-autosubmit]
 
 @module up.form
 ###
@@ -543,17 +546,20 @@ up.form = do ->
     return e.matches(form, config.noSubmitSelectors.join(','))
 
   ###**
-  Forms with an `up-target` attribute are [submitted via AJAX](/up.submit)
-  instead of triggering a full page reload.
-
-      <form method="post" action="/users" up-target=".main">
-        ...
-      </form>
+  Submits this form via JavaScript and updates a fragment with the server response.
 
   The server response is searched for the selector given in `up-target`.
   The selector content is then [replaced](/up.replace) in the current page.
 
   The programmatic variant of this is the [`up.submit()`](/up.submit) function.
+
+  \#\#\# Example
+
+  ```html
+  <form method="post" action="/users" up-submit>
+    ...
+  </form>
+  ```
 
   \#\#\# Failed submission
 
@@ -773,10 +779,12 @@ up.form = do ->
   ###
 
   ###**
-  Performs [server-side validation](/input-up-validate) when any fieldset within this form changes.
+  Validates this form on the server when any field changes and shows validation errors.
 
   You can configure what Unpoly considers a fieldset by adding CSS selectors to the
   `up.form.config.validateTargets` array.
+
+  See `input[up-validate]` for detailed documentation.
 
   @selector form[up-validate]
   @param up-validate
@@ -806,7 +814,7 @@ up.form = do ->
       up.log.muteUncriticalRejection validate(field)
 
   ###**
-  Show or hide elements when a `<select>` or `<input>` has a given value.
+  Show or hide elements when a form field is set to a given value.
 
   \#\#\# Example: Select options
 
@@ -1041,7 +1049,7 @@ up.form = do ->
   ###
 
   ###**
-  Submits the form when *any* field changes.
+  Submits the form when any field changes.
 
   Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
   while the autosubmitted form is loading.

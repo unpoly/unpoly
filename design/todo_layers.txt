@@ -1,21 +1,14 @@
 Release process
 ===============
 
-- Branch from master to 1.x-maintenance
-- Backport single-quote escaping
-- Release 1.x-maintenance as 1.0.0
-- Hard-reset master to hk/layers
 - Release master as 2.0.0
 - CHANGELOG 2 is the "Objectives" slide from the Unpoly 2 presentation, links to slides for details
 - unpoly.com
-  - Merge master into hk/layers
-  - Fix hk/layers
-    - Simplify content-link, modal-link, drawer-link
-    - up_modal.sass
-  - New primary color
+  - up.Params is not listed in "All features"
   - New logo (rising glyph, 2 suffix)
   - New favicon (rising glyph)
   - Deploy
+  - Fix USP links on the homepage
 - Reach out to server-integration libs (make issues?) with the new changes
 - Announce on Twitter as @unpolyjs
   - Retweet from private account

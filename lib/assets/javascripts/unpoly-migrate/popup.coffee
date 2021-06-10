@@ -1,3 +1,7 @@
+###**
+@module up.layer
+###
+
 u = up.util
 e = up.element
 
