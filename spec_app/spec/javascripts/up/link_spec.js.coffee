@@ -1168,8 +1168,9 @@ describe 'up.link', ->
           next ->
             expect(document.querySelector('.target').innerHTML).toBe('')
 
-      it 'does not add a history entry when an up-history attribute is set to "false"', asyncSpec (next) ->
+      it 'does not add a history entry when replacing a main target but the up-history attribute is set to "false"', asyncSpec (next) ->
         up.history.config.enabled = true
+        up.layer.config.any.mainTargets = ['.target']
 
         oldPathname = location.pathname
         $fixture('.target')
