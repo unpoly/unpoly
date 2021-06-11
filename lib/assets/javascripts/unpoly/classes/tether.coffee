@@ -33,14 +33,14 @@ class up.Tether
     up[fn](window, 'resize', @scheduleSync)
     up[fn](@viewport, 'scroll', @scheduleSync) if @syncOnScroll
 
-  scheduleSync: ->
+  scheduleSync: =>
     clearTimeout(@syncTimer)
     @syncTimer = u.task(@sync)
 
   isDetached: ->
     e.isDetached(@parent) || e.isDetached(@anchor)
 
-  sync: ->
+  sync: =>
     elementBox = @element.getBoundingClientRect()
     anchorBox = @anchor.getBoundingClientRect()
 
