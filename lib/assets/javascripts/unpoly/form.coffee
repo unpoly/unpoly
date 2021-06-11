@@ -248,7 +248,6 @@ up.form = do ->
     The `<form>` element that will be submitted.
   @param {Object} event.renderOptions
     An object with [render options](/up.render) for the fragment update
-    that will show the validation results.
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()

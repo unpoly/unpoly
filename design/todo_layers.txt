@@ -9,6 +9,7 @@ Release process
   - New favicon (rising glyph)
   - Deploy
   - Fix USP links on the homepage
+  - redirect v2.unpoly.com to unpoly.com (per .htaccess so we can later re-use v2. when we release 3)
 - Reach out to server-integration libs (make issues?) with the new changes
 - Announce on Twitter as @unpolyjs
   - Retweet from private account
@@ -22,9 +23,16 @@ Release process
 
 
 
+
 Remaining feature work
 ======================
 
+- [up-history=false] is ignored for the version switcher
+  - New layer *always* get history with [up-history=false]!
+      # Even if the layer has a { historyVisible: false } property we want to set the
+      # initial layer.location so every layer has a #location.
+      @options.history = true
+- do we sync layers on resize?
 
 Tests
 =====

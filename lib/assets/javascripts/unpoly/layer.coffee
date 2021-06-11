@@ -211,17 +211,18 @@ up.layer = do ->
     return newConfig
 
   ###**
-  TODO: Docs
+  A list of layers that are currently open.
 
-  @function up.layer.stack
+  The first element in the list is the [root layer](/up.layer.root).
+  The last element is the [frontmost layer](/up.layer.front).
+
+  @property up.layer.stack
+  @param {List<up.Layer>} stack
   @stable
   ###
   stack = null
 
   handlers = []
-
-  isOverlayMode = (mode) ->
-    return u.contains(OVERLAY_MODES, mode)
 
   mainTargets = (mode) ->
     return u.flatMap(modeConfigs(mode), 'mainTargets')
@@ -472,13 +473,38 @@ up.layer = do ->
     return up.render(options).then (result) -> return result.layer
 
   ###**
-  TODO: Docs
-  TODO: Document that listeners may manipulate options
-  TODO: Document that it's emitted on the document
+  This event is emitted before an overlay is opened.
+
+  The overlay is not yet part of the [layer stack](/up.layer.stack) and has not yet been placed
+  in the DOM. Listeners may prevent this event to prevent the overlay from opening.
+
+  The event is emitted on the `document`.
+
+  \#\#\# Changing layer options
+
+  Listeners may inspect and manipulate options for the overlay that is about to open.
+
+  For example, to give overlays the CSS class `.warning` if the initial URL contains
+  the word `"confirm"`:
+
+  ```js
+  up.on('up:layer:open', function(event) {
+    if (event.layerOptions.url.includes('confirm')) {
+      event.layerOptions.class = 'warning'
+    }
+  })
+  ```
 
   @event up:layer:open
   @param {Object} event.layerOptions
+    Options for the overlay that is about to open.
+
+    Listeners may inspect and change the options.
+    All options for `up.layer.open()` may be used.
   @param {Element} event.origin
+    The link element that is opening the overlay.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the overlay from opening.
   @stable
   ###
 

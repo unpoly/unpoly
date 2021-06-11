@@ -1244,8 +1244,18 @@ up.util = do ->
   If the given `value` is a function, calls the function with the given `args`.
   Otherwise it just returns `value`.
 
+  \#\#\# Example
+
+  ```js
+  up.util.evalOption(5) // => 5
+
+  let fn = () => 1 + 2
+  up.util.evalOption(fn) // => 3
+  ```
+
   @function up.util.evalOption
-  @param {any}
+  @param {any} value
+  @param {Array} ...args
   @return {any}
   @experimental
   ###

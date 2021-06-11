@@ -402,7 +402,20 @@ up.link = do ->
 
   The event is emitted on the `<a>` element that is being followed.
 
-  TODO: Document that listeners may manipulate options
+  \#\#\# Changing render options
+
+  Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
+
+  The code below will open all form-contained links in an overlay, as to not
+  lose the user's form data:
+
+  ```js
+  up.on('up:link:follow', function(event, link) {
+    if (link.closest('form')) {
+      event.renderOptions.layer = 'new'
+    }
+  })
+  ```
 
   @event up:link:follow
   @param {Element} event.target
