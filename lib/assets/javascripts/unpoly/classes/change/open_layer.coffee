@@ -130,8 +130,15 @@ class up.Change.OpenLayer extends up.Change.Addition
 
     @layer.parent.saveHistory()
 
-    # Even if the layer has a { historyVisible: false } property we want to set the
-    # initial layer.location so every layer has a #location.
+    # We ignore the given { history } option (not { historyVisible }) for the initial
+    # fragment update in the new overlay. There are pros and cons to this decision,
+    # but here are the pros:
+    #
+    # - Even if the layer has a { historyVisible: false } property we want to set the
+    #   initial layer.location so every layer has a #location.
+    # - When the user sets { historyVisible: true } they probably expect to see the
+    #   location bar updated regardless of the initial target. We don't want to require
+    #   them to also set { history: true }.
     @options.history = true
 
     @layer.updateHistory(@options)
