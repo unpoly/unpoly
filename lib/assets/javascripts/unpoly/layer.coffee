@@ -12,7 +12,7 @@ such as modal dialogs, popup overlays or drawers. You may [customize their appea
 
 Layers are isolated, meaning a screen in one layer will not accidentally see elements
 or events from another layer. For instance, [fragment links](/up.link) will only update elements from the [current layer](/up.layer.current)
-unless you [explicitly target another layer](/up.layer).
+unless you [explicitly target another layer](/layer-option).
 
 Overlays allow you to break up a complex screen into [subinteractions](/subinteractions).
 Subinteractions take place in overlays and may span one or many pages. The original screen remains open in the background.

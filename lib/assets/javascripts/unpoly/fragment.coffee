@@ -2,14 +2,26 @@ u = up.util
 e = up.element
 
 ###**
-Fragment update API
-===================
-  
-The `up.fragment` module exposes a high-level Javascript API to [update](/up.replace) or
-[destroy](/up.destroy) page fragments.
+Fragment API
+===========
 
-Fragments are [compiled](/up.compiler) elements that can be updated from a server URL.
-They also exist on a [layer](/up.layer).
+The `up.fragment` module offers a high-level JavaScript API to work with DOM elements.
+
+A fragment is an element with some additional properties that are useful in the context of
+a server-rendered web application:
+
+- Fragments are [identified by a CSS selector](/up.fragment.toTarget), like a `.class` or `#id`.
+- Fragments are usually updated by a [link](/a-up-follow) for [form](/form-up-submits) that targets their selector.
+  When the server renders HTML with a matching element, the fragment is swapped with a new version.
+- As fragments enter the page they are automatically [compiled](/up.compiler) to activate JavaScript behavior.
+- Fragment changes may be [animated](/up.motion).
+- Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
+  Unpoly functions will only see or change fragments from the [current layer](/up.layer.current)
+  unless you [explicitly target another layer](/layer-option).
+- Fragments [know the URL from where they were loaded](/up.source).
+  They can be [reloaded](/up.reload) or [polled periodically](/up-polled).
+
+For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see up.render
 @see up.navigate
