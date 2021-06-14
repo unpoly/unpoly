@@ -2,13 +2,14 @@
 Logging
 =======
 
-Unpoly can print debugging information to the developer console, e.g.:
+Unpoly can print debugging information to the [browser console](https://developer.chrome.com/docs/devtools/console/), e.g.:
 
 - Which [events](/up.event) are called
 - When we're [making requests to the network](/up.request)
 - Which [compilers](/up.syntax) are applied to which elements
 
-You can activate logging by calling [`up.log.enable()`](/up.log.enable).
+@see up.log.enable
+@see up.log.disable
 
 @module up.log
 ###
@@ -124,7 +125,7 @@ up.log = do ->
     config.enabled = value
 
   ###**
-  Makes future Unpoly events print vast amounts of debugging information to the developer console.
+  Starts printing debugging information to the developer console.
 
   Debugging information includes which elements are being [compiled](/up.syntax)
   and which [events](/up.event) are being emitted.
@@ -138,7 +139,7 @@ up.log = do ->
     setEnabled(true)
 
   ###**
-  Prevents future Unpoly events from printing vast amounts of debugging information to the developer console.
+  Stops printing debugging information to the developer console.
 
   Errors will still be printed, even with logging disabled.
 
