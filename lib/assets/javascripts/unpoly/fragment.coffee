@@ -499,10 +499,11 @@ up.fragment = do ->
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param {boolean|string} [options.clearCache]
-    Whether existing [cache](/up.cache) entries will be cleared with this request.
+    Whether existing [cache](/up.cache) entries will be [cleared](/up.cache.clear) with this request.
+
+    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
 
     By default a non-GET request will clear the entire cache.
-    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
 
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 

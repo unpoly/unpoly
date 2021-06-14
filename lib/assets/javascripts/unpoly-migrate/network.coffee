@@ -35,11 +35,13 @@ The function returns a promise that fulfills with the response text.
 
 \#\#\# Example
 
-    up.request('/search', { params: { query: 'sunshine' } }).then(function(text) {
-      console.log('The response text is %o', text)
-    }).catch(function() {
-      console.error('The request failed')
-    })
+```
+up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {
+  console.log('The response text is %o', text)
+}).catch(function() {
+  console.error('The request failed')
+})
+```
 
 @function up.ajax
 @param {string} [url]

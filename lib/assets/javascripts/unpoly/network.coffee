@@ -4,47 +4,25 @@ u = up.util
 Network requests
 ================
 
-TODO: Rewrite this page
+Unpoly ships with an optimized HTTP client for fast and effective
+communication with your server-side app.
 
-Unpoly comes with a number of tricks to shorten the latency between browser and server.
+While you can use the browser's native `fetch()` function,
+Unpoly's `up.request()` has a number of convenience features:
 
-\#\#\# Server responses are cached by default
-
-Unpoly caches server responses for a few minutes,
-making requests to these URLs return instantly.
-All Unpoly functions and selectors go through this cache, unless
-you explicitly pass a `{ cache: false }` option or set an `up-cache="false"` attribute.
-
-The cache holds up to 50 responses for 5 minutes. You can configure the cache size and expiry using
-[`up.network.config`](/up.network.config), or clear the cache manually using [`up.cache.clear()`](/up.cache.clear).
-
-Also the entire cache is cleared with every non-`GET` request (like `POST` or `PUT`).
-
-If you need to make cache-aware requests from your [custom JavaScript](/up.syntax),
-use [`up.request()`](/up.request).
-
-\#\#\# Preloading links
-
-Unpoly also lets you speed up reaction times by [preloading
-links](/a-up-preload) when the user hovers over the click area (or puts the mouse/finger
-down). This way the response will already be cached when
-the user releases the mouse/finger.
-
-\#\#\# Spinners
-
-You can listen to the [`up:request:late`](/up:request:late) event to implement a spinner
-that appears during a long-running request.
-
-\#\#\# More acceleration
-
-Other Unpoly modules contain even more tricks to outsmart network latency:
-
-- [Instantaneous feedback for links that are currently loading](/a.up-active)
-- [Follow links on `mousedown` instead of `click`](/a-up-instant)
+- Requests may be [cached](/up.request#options.cache) to reuse responses and enable [preloading](/a-up-preload).
+- Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
+  For example, when updating a [fragment](/up.fragment), the fragment's selector is automatically sent
+  as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
+- Useful events like `up:request:loaded` or `up:request:late` are emitted throughout the request/response
+  lifecycle.
+- When too many requests are sent concurrently, excessive requests are [queued](/up.network.config#config.concurrency).
+  This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
+- A very concise API requiring zero boilerplate code.
 
 @see up.request
-@see up.Request
 @see up.Response
+@see up:request:late
 
 @module up.network
 ###
@@ -60,8 +38,8 @@ up.network = do ->
     Additional requests are queued. [Preload](/a-up-preload) requests are
     always queued behind non-preload requests.
 
-    You might find it useful to set the request concurrency `1` in full-stack
-    integration tests (e.g. Selenium) to prevent race conditions.
+    You might find it useful to set the request concurrency `1` in end-to-end tests
+    to prevent race conditions.
 
     Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
     regardless of what you configure here.
@@ -281,39 +259,45 @@ up.network = do ->
   Makes an AJAX request to the given URL.
 
   Returns an `up.Request` object which contains information about the request.
-  The request object is also a promise for its `up.Response`.
+  This request object is also a promise for an `up.Response` that contains
+  the response text, headers, etc.
 
   \#\#\# Example
 
-      let request = up.request('/search', { params: { query: 'sunshine' } })
-      console.log('We made a request to', request.url)
+  ```js
+  let request = up.request('/search', { params: { query: 'sunshine' } })
+  console.log('We made a request to', request.url)
 
-      let response = await request
-      console.log('The response text is', response.text)
+  let response = await request
+  console.log('The response text is', response.text)
+  ```
 
   \#\#\# Error handling
 
   The returned promise will fulfill with an `up.Response` when the server
   responds with an HTTP status of 2xx (like `200`).
 
-  When the server responds with an error code (like `422` or `500`), the promise
+  When the server responds with an HTTP error code (like `422` or `500`), the promise
   will *reject* with `up.Response`.
 
   When the request fails from a fatal error (like a timeout or loss of connectivity),
   the promise will reject with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) object.
 
-  Here is an example for a complete control flow that also handles errors:
+  Here is an example for a complete control flow that handles both HTTP error codes
+  and fatal errors:
 
-      try {
-        let response = await up.request('/search', { params: { query: 'sunshine' } })
-        console.log('Successful response with text:', response.text)
-      } catch (e) {
-        if (e instanceof up.Response) {
-          console.log('Server responded with HTTP status %s and text %s', e.status, e.text)
-        } else {
-          console.log('Fatal error during request:', e.message)
-        }
-      }
+  ```js
+  try {
+    let response = await up.request('/search', { params: { query: 'sunshine' } })
+    console.log('Successful response with text:', response.text)
+  } catch (e) {
+    if (e instanceof up.Response) {
+      console.log('Server responded with HTTP status %s and text %s', e.status, e.text)
+    } else {
+      console.log('Fatal error during request:', e.message)
+    }
+  }
+  ```
 
   \#\#\# Caching
 
@@ -356,10 +340,13 @@ up.network = do ->
 
     With `{ cache: false }` (the default) Unpoly will always make a network request.
 
-  @param {boolean} [options.clearCache]
-    Whether to clear the cache after this request.
+  @param {boolean|string} [options.clearCache]
+    Whether to [clear](/up.cache.clear) the [cache](/up.cache.get) after this request.
 
-    Defaults to the result of `up.network.config.clearCache`.
+    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
+
+    Defaults to the result of `up.network.config.clearCache`, which
+    defaults to clearing the entire cache after a non-GET request.
 
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
@@ -384,13 +371,13 @@ up.network = do ->
   @param {string} [options.target='body']
     The CSS selector that will be sent as an `X-Up-Target` header.
 
-  @param {string} [options.layer='current']
-    The [layer](/up.layer) this request is associated with.
-
   @param {string} [options.failTarget='body']
     The CSS selector that will be sent as an `X-Up-Fail-Target` header.
 
   @param {string} [options.layer='current']
+    The [layer](/up.layer) this request is associated with.
+
+  @param {string} [options.failLayer='current']
     The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/server-errors).
 
   @param {Element} [options.origin]

@@ -2033,7 +2033,7 @@ describe 'up.fragment', ->
 
           describe 'up:layer:location:changed event', ->
 
-            it 'is emited when the location changed', asyncSpec (next) ->
+            it 'is emitted when the location changed', asyncSpec (next) ->
               history.replaceState?({}, 'original title', '/original-url')
               fixture('.target')
 

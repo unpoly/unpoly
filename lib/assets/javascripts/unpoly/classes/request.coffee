@@ -4,17 +4,18 @@ u = up.util
 e = up.element
 
 ###**
-Instances of `up.Request` normalizes properties of an [AJAX request](/up.request)
-such as the requested URL, form parameters and HTTP method.
+A normalized description of an [HTTP request](`up.request()`).
 
 You can queue a request using the `up.request()` method:
 
-    let request = up.request('/foo')
-    console.log(request.url)
+```js
+let request = up.request('/foo')
+console.log(request.url)
 
-    // A request object is also a promise for its response
-    let response = await request
-    console.log(response.text)
+// A request object is also a promise for its response
+let response = await request
+console.log(response.text)
+```
 
 @class up.Request
 ###
@@ -139,6 +140,8 @@ class up.Request extends up.Record
   ###**
   The [layer](/up.layer) targeted by this request.
 
+  Setting the `{ layer }` property will automatically derive `{ context }` and `{ mode }` properties.
+
   To prevent memory leaks, this property is removed shortly after the response is received.
 
   @property up.Request#layer
@@ -148,6 +151,8 @@ class up.Request extends up.Record
 
   ###**
   The [layer](/up.layer) targeted by this request in case the server responds with an [error code](/server-errors).
+
+  Setting the `{ failLayer }` property will automatically derive `{ failContext }` and `{ failMode }` properties.
 
   To prevent memory leaks, this property is removed shortly after the response is received.
 

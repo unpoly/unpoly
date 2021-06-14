@@ -3,7 +3,7 @@
 u = up.util
 
 ###**
-Instances of `up.Response` describe the server response to an [AJAX request](/up.request).
+A response to an [HTTP request](`up.request()`).
 
 \#\#\# Example
 
