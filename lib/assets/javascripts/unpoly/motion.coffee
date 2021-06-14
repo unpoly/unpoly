@@ -4,11 +4,17 @@ Animation
   
 When you [update a page fragment](/up.link) you can animate the change.
 
-Let's say you are using an [`up-follow`](/a-up-follow) link to update an element
-with content from the server. You can add an attribute [`up-transition`](/a-up-follow#up-transition)
+Let's say you are using a [fragment link](/up.link)
+to update an element with new content from the server. You can add an attribute [`[up-transition]`](/a-up-follow#up-transition)
 to smoothly fade out the old element while fading in the new element:
 
-    <a href="/users" up-target=".list" up-transition="cross-fade">Show users</a>
+```html
+<a href="/users"
+  up-target=".list"
+  up-transition="cross-fade">
+  Show users
+</a>
+```
 
 \#\#\# Transitions vs. animations
 
@@ -16,10 +22,17 @@ When we morph between an old and a new element, we call it a *transition*.
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
-An example for an animation is opening a new dialog. We can animate the appearance
-of the dialog by adding an [`[up-animation]`](/a-up-modal#up-animation) attribute to the opening link:
+An example for an animation is opening a new overlay. We can animate the appearance
+of the dialog by adding an [`[up-animation]`](/a-up-layer-new#up-animation) attribute to the opening link:
 
-    <a href="/users" up-modal=".list" up-animation="move-from-top">Show users</a>
+```html
+<a href="/users"
+  up-target=".list"
+  up-layer="new"
+  up-animation="move-from-top">
+  Show users
+</a>
+```
 
 \#\#\# Which animations are available?
 
@@ -95,15 +108,19 @@ up.motion = do ->
 
   \#\#\# Example
 
-      up.animate('.warning', 'fade-in')
+  ```js
+  up.animate('.warning', 'fade-in')
+  ```
 
   You can pass additional options:
 
-      up.animate('.warning', 'fade-in', {
-        delay: 1000,
-        duration: 250,
-        easing: 'linear'
-      })
+  ```
+  up.animate('.warning', 'fade-in', {
+    delay: 1000,
+    duration: 250,
+    easing: 'linear'
+  })
+  ```
 
   \#\#\# Named animations
 
@@ -128,9 +145,11 @@ up.motion = do ->
   By passing an object instead of an animation name, you can animate
   the CSS properties of the given element:
 
-      var warning = document.querySelector('.warning')
-      warning.style.opacity = 0
-      up.animate(warning, { opacity: 1 })
+  ```
+  var warning = document.querySelector('.warning')
+  warning.style.opacity = 0
+  up.animate(warning, { opacity: 1 })
+  ```
 
   CSS properties must be given in `kebab-case`, not `camelCase`.
 
@@ -235,7 +254,7 @@ up.motion = do ->
   Animations are completed by jumping to the last animation frame instantly.
   Promises returned by animation and transition functions instantly settle.
 
-  Emits the `up:motion:finish` event that is already handled by `up.animate()`.
+  Emits the `up:motion:finish` event that is handled by `up.animate()`.
 
   Does nothing if there are no animation to complete.
   
@@ -445,18 +464,20 @@ up.motion = do ->
      e.replace(oldElement, newElement)
 
   ###**
-  Defines a named transition that [morphs](/up.element) from one element to another.
+  Defines a named transition that [morphs](/up.morph) from one element to another.
 
   \#\#\# Example
 
   Here is the definition of the pre-defined `cross-fade` animation:
 
-      up.transition('cross-fade', (oldElement, newElement, options) ->
-        Promise.all([
-          up.animate(oldElement, 'fade-out', options),
-          up.animate(newElement, 'fade-in', options)
-        ])
-      )
+  ```js
+  up.transition('cross-fade', (oldElement, newElement, options) ->
+    Promise.all([
+      up.animate(oldElement, 'fade-out', options),
+      up.animate(newElement, 'fade-in', options)
+    ])
+  )
+  ```
 
   It is recommended that your transitions use [`up.animate()`](/up.animate),
   passing along the `options` that were passed to you.
@@ -489,10 +510,12 @@ up.motion = do ->
 
   Here is the definition of the pre-defined `fade-in` animation:
 
-      up.animation('fade-in', function(element, options) {
-        element.style.opacity = 0
-        up.animate(element, { opacity: 1 }, options)
-      })
+  ```js
+  up.animation('fade-in', function(element, options) {
+    element.style.opacity = 0
+    up.animate(element, { opacity: 1 }, options)
+  })
+  ```
 
   It is recommended that your definitions always end by calling
   calling [`up.animate()`](/up.animate) with an object argument, passing along
@@ -555,7 +578,7 @@ up.motion = do ->
     e.setStyle(element, translateCSS(0, 0))
     return element.getBoundingClientRect()
 
-  registerMoveMotions = (direction, boxToTransform) ->
+  registerMoveAnimations = (direction, boxToTransform) ->
     animationToName = "move-to-#{direction}"
     animationFromName = "move-from-#{direction}"
 
@@ -570,19 +593,19 @@ up.motion = do ->
       e.setStyle(element, transform)
       return animateNow(element, translateCSS(0, 0), options)
 
-  registerMoveMotions 'top', (box) ->
+  registerMoveAnimations 'top', (box) ->
     travelDistance = box.top + box.height
     return translateCSS(0, -travelDistance)
 
-  registerMoveMotions 'bottom', (box) ->
+  registerMoveAnimations 'bottom', (box) ->
     travelDistance = up.viewport.rootHeight() - box.top
     return translateCSS(0, travelDistance)
 
-  registerMoveMotions 'left', (box) ->
+  registerMoveAnimations 'left', (box) ->
     travelDistance = box.left + box.width
     return translateCSS(-travelDistance, 0)
 
-  registerMoveMotions 'right', (box) ->
+  registerMoveAnimations 'right', (box) ->
     travelDistance = up.viewport.rootWidth() - box.left
     return translateCSS(travelDistance, 0)
 
