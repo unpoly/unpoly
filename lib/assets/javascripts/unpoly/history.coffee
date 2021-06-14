@@ -2,9 +2,7 @@
 History
 ========
 
-In an Unpoly app, every page has an URL.
-
-[Fragment updates](/up.link) automatically update the URL.
+The `up.history` module helps you work with the browser history.
 
 @see up.history.location
 @see up:location:changed
@@ -28,7 +26,7 @@ up.history = do ->
     Defines whether [fragment updates](/up.render) will update the browser's current URL.
 
     If set to `false` Unpoly will never change the browser URL.
-  @param {boolean} [config.restoreScroll=true]
+  @param {boolean} [config.enabled=true]
     Whether to restore the known scroll positions
     when the user goes back or forward in history.
   @stable
@@ -119,7 +117,7 @@ up.history = do ->
   address bar with the given URL.
 
   When the user restores the new history entry later,
-  Unpoly will replace the document body with the body from that URL.
+  Unpoly will replace a selector from `up.history.config.restoreTargets` with the body from that URL.
 
   Note that [fragment navigation](/navigation) will automatically update the
   browser's location bar for you.
@@ -147,7 +145,7 @@ up.history = do ->
 
   When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.historyVisible), following a link
   will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
-  There will however be an `up:layer:location:changed` event be emitted.
+  However, a `up:layer:location:changed` will be emitted even if the address bar did not change.
 
   @event up:location:changed
   @param {string} event.url

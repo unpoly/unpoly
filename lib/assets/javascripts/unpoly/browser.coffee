@@ -8,10 +8,12 @@ Chrome, Firefox, Edge, Safari
 : Full support
 
 Internet Explorer 11
-: Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).
+: Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).\
+  Support may be removed when Microsoft retires IE11 in [June 2022](https://blogs.windows.com/windowsexperience/2021/05/19/the-future-of-internet-explorer-on-windows-10-is-in-microsoft-edge/).
 
 Internet Explorer 10 or lower
-: Unpoly prevents itself from booting itself, leaving you with a classic server-side application.
+: Unpoly will not boot or [run compilers](/up.compiler),
+  leaving you with a classic server-side application.
 
 @module up.browser
 ###
@@ -20,7 +22,7 @@ up.browser = do ->
   u = up.util
 
   ###**
-  Makes a full page request, replacing the entire JavaScript environment with a new page from the server response.
+  Makes a full page request, replacing the entire browser environment with a new page from the server response.
 
   @function up.browser.loadPage
   @param {string} options.url
@@ -30,7 +32,7 @@ up.browser = do ->
 
     Methods other than GET or POST will be [wrapped](/up.protocol.config#config.methodParam) in a POST request.
   @param {Object|Array|FormData|string} [options.params]
-  @external
+  @experimental
   ###
   loadPage = (requestsAttrs) ->
     new up.Request(requestsAttrs).loadPage()
