@@ -25,11 +25,6 @@ Object.defineProperty up.network.config, 'preloadDelay',
 up.migrate.renamedProperty(up.network.config, 'maxRequests', 'concurrency')
 up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
 
-up.migrate.handleNetworkPreloadArgs = (args...) ->
-  if u.isElementish(args[0])
-    up.migrate.warn('up.proxy.preload(link) has been renamed to up.link.preload(link)')
-    return up.link.preload(args...)
-
 up.migrate.handleRequestOptions = (options) ->
   up.migrate.fixKey(options, 'data', 'params')
 
@@ -73,6 +68,10 @@ Removes all cache entries.
 up.network.clear = ->
   up.migrate.deprecated('up.proxy.clear()', 'up.cache.clear()')
   return up.cache.clear()
+
+up.network.preload = (args...) ->
+  up.migrate.deprecated('up.proxy.preload(link)', 'up.link.preload(link)')
+  return up.link.preload(args...)
 
 ###**
 @class up.Request

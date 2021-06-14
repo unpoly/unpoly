@@ -445,14 +445,6 @@ up.network = do ->
     if clearCache = options.clearCache
       cache.clear(clearCache)
 
-  preload = (args...) ->
-    up.migrate.handleNetworkPreloadArgs?(args...)
-
-    options = parseRequestOptions(args)
-    options.preload = true
-    # The constructor of up.Request will set { cache: true } when passed { preload: true }
-    makeRequest(options)
-
   parseRequestOptions = (args) ->
     options = u.extractOptions(args)
     options.url ||= args[0]
@@ -756,7 +748,6 @@ up.network = do ->
   up.on 'up:framework:reset', reset
 
   request: makeRequest
-  preload: preload
   cache: cache
   isIdle: isIdle
   isBusy: isBusy
