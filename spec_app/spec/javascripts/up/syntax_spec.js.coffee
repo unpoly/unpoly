@@ -71,14 +71,15 @@ describe 'up.syntax', ->
         expect($element.attr('up-target')).toEqual('.target')
         expect($element.attr('up-href')).toEqual('/foo')
 
-      it 'allows users to use the built-in [up-dash] from their own macros', ->
-        up.macro '.element', (element) ->
-          element.setAttribute('up-dash', '.target')
-        $element = $fixture('a.element[href="/foo"]')
-        up.hello($element)
-        expect($element.attr('up-target')).toEqual('.target')
-        expect($element.attr('up-preload')).toEqual('')
-        expect($element.attr('up-instant')).toEqual('')
+      if up.migrate.loaded
+        it 'allows users to use the built-in [up-dash] from their own macros', ->
+          up.macro '.element', (element) ->
+            element.setAttribute('up-dash', '.target')
+          $element = $fixture('a.element[href="/foo"]')
+          up.hello($element)
+          expect($element.attr('up-target')).toEqual('.target')
+          expect($element.attr('up-preload')).toEqual('')
+          expect($element.attr('up-instant')).toEqual('')
 
     describe 'up.$macro', ->
 

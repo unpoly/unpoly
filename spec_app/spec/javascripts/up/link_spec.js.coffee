@@ -1576,54 +1576,56 @@ describe 'up.link', ->
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
 
-    describe '[up-dash]', ->
+    if up.migrate.loaded
 
-      it "is a shortcut for [up-preload], [up-instant] and [up-target], using [up-dash]'s value as [up-target]", ->
-        $link = $fixture('a[href="/path"][up-dash=".target"]').text('label')
-        up.hello($link)
-        expect($link.attr('up-preload')).toEqual('')
-        expect($link.attr('up-instant')).toEqual('')
-        expect($link.attr('up-target')).toEqual('.target')
+      describe '[up-dash]', ->
 
-      it 'sets [up-follow] instead of [up-target] if no target is given (bugfix)', ->
-        link = fixture('a[href="/path"][up-dash]', text: 'label')
-        up.hello(link)
+        it "is a shortcut for [up-preload], [up-instant] and [up-target], using [up-dash]'s value as [up-target]", ->
+          $link = $fixture('a[href="/path"][up-dash=".target"]').text('label')
+          up.hello($link)
+          expect($link.attr('up-preload')).toEqual('')
+          expect($link.attr('up-instant')).toEqual('')
+          expect($link.attr('up-target')).toEqual('.target')
 
-        expect(link).not.toHaveAttribute('up-target')
-        expect(link).toHaveAttribute('up-follow')
+        it 'sets [up-follow] instead of [up-target] if no target is given (bugfix)', ->
+          link = fixture('a[href="/path"][up-dash]', text: 'label')
+          up.hello(link)
 
-#      it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
-#        $link = $fixture('a[href="/path"][up-dash="true"]').text('label')
-#        up.hello($link)
-#        expect($link.attr('up-follow')).toEqual('')
-#
-#      it "adds [up-follow] attribute if [up-dash] is present, but has no value", ->
-#        $link = $fixture('a[href="/path"][up-dash]').text('label')
-#        up.hello($link)
-#        expect($link.attr('up-follow')).toEqual('')
-#
-#      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-target] is present", ->
-#        $link = $fixture('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
-#        up.hello($link)
-#        expect($link.attr('up-follow')).toBeMissing()
-#        expect($link.attr('up-target')).toEqual('.target')
-#
-#      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-modal] is present", ->
-#        $link = $fixture('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
-#        up.hello($link)
-#        expect($link.attr('up-follow')).toBeMissing()
-#        expect($link.attr('up-modal')).toEqual('.target')
-#
-#      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-popup] is present", ->
-#        $link = $fixture('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
-#        up.hello($link)
-#        expect($link.attr('up-follow')).toBeMissing()
-#        expect($link.attr('up-popup')).toEqual('.target')
+          expect(link).not.toHaveAttribute('up-target')
+          expect(link).toHaveAttribute('up-follow')
 
-      it "removes the [up-dash] attribute when it's done", ->
-        $link = $fixture('a[href="/path"]').text('label')
-        up.hello($link)
-        expect($link.attr('up-dash')).toBeMissing()
+  #      it "adds [up-follow] attribute if [up-dash]'s value is 'true'", ->
+  #        $link = $fixture('a[href="/path"][up-dash="true"]').text('label')
+  #        up.hello($link)
+  #        expect($link.attr('up-follow')).toEqual('')
+  #
+  #      it "adds [up-follow] attribute if [up-dash] is present, but has no value", ->
+  #        $link = $fixture('a[href="/path"][up-dash]').text('label')
+  #        up.hello($link)
+  #        expect($link.attr('up-follow')).toEqual('')
+  #
+  #      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-target] is present", ->
+  #        $link = $fixture('a[href="/path"][up-dash="true"][up-target=".target"]').text('label')
+  #        up.hello($link)
+  #        expect($link.attr('up-follow')).toBeMissing()
+  #        expect($link.attr('up-target')).toEqual('.target')
+  #
+  #      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-modal] is present", ->
+  #        $link = $fixture('a[href="/path"][up-dash="true"][up-modal=".target"]').text('label')
+  #        up.hello($link)
+  #        expect($link.attr('up-follow')).toBeMissing()
+  #        expect($link.attr('up-modal')).toEqual('.target')
+  #
+  #      it "does not add an [up-follow] attribute if [up-dash] is 'true', but [up-popup] is present", ->
+  #        $link = $fixture('a[href="/path"][up-dash="true"][up-popup=".target"]').text('label')
+  #        up.hello($link)
+  #        expect($link.attr('up-follow')).toBeMissing()
+  #        expect($link.attr('up-popup')).toEqual('.target')
+
+        it "removes the [up-dash] attribute when it's done", ->
+          $link = $fixture('a[href="/path"]').text('label')
+          up.hello($link)
+          expect($link.attr('up-dash')).toBeMissing()
 
     describe '[up-expand]', ->
 
@@ -1693,16 +1695,17 @@ describe 'up.link', ->
         next =>
           expect(up.render.calls.count()).toEqual(1)
 
-      it 'makes the expanded area followable if the expanded link is [up-dash] with a selector (bugfix)', ->
-        $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')
-        up.hello($area)
-        expect($area).toBeFollowable()
-        expect($area.attr('up-target')).toEqual('.element')
+      if up.migrate.loaded
+        it 'makes the expanded area followable if the expanded link is [up-dash] with a selector (bugfix)', ->
+          $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')
+          up.hello($area)
+          expect($area).toBeFollowable()
+          expect($area.attr('up-target')).toEqual('.element')
 
-      it 'makes the expanded area followable if the expanded link is [up-dash] without a selector (bugfix)', ->
-        $area = $fixture('div[up-expand] a[href="/path"][up-dash]')
-        up.hello($area)
-        expect($area).toBeFollowable()
+        it 'makes the expanded area followable if the expanded link is [up-dash] without a selector (bugfix)', ->
+          $area = $fixture('div[up-expand] a[href="/path"][up-dash]')
+          up.hello($area)
+          expect($area).toBeFollowable()
 
       describe 'with a CSS selector in the property value', ->
 

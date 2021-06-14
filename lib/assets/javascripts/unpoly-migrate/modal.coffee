@@ -159,7 +159,7 @@ the given selector in a modal overlay.
 @deprecated
   Use `a[up-layer=modal]` instead.
 ###
-up.link.targetMacro('up-modal', { 'up-layer': 'new modal' }, -> up.migrate.deprecated('a[up-modal]', 'a[up-layer="new modal"]'))
+up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, -> up.migrate.deprecated('a[up-modal]', 'a[up-layer="new modal"]'))
 
 ###**
 Clicking this link will load the destination via AJAX and open
@@ -173,4 +173,4 @@ the given selector in a modal drawer that slides in from the edge of the screen.
 @deprecated
   Use `a[up-layer=drawer]` instead.
 ###
-up.link.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, -> up.migrate.deprecated('a[up-drawer]', 'a[up-layer="new drawer"]'))
+up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, -> up.migrate.deprecated('a[up-drawer]', 'a[up-layer="new drawer"]'))

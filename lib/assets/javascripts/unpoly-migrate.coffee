@@ -3,6 +3,7 @@
 #= require ./unpoly-migrate/util
 #= require ./unpoly-migrate/element
 #= require ./unpoly-migrate/event
+#= require ./unpoly-migrate/syntax
 #= require ./unpoly-migrate/form
 #= require ./unpoly-migrate/fragment
 #= require ./unpoly-migrate/history
@@ -14,6 +15,5 @@
 #= require ./unpoly-migrate/tooltip
 #= require ./unpoly-migrate/network
 #= require ./unpoly-migrate/radio
-#= require ./unpoly-migrate/syntax
 #= require ./unpoly-migrate/viewport
 #= require ./unpoly-migrate/_stop_extension

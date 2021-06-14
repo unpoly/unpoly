@@ -707,17 +707,6 @@ up.link = do ->
     method = followMethod(link)
     up.network.isSafeMethod(method)
 
-  targetMacro = (queryAttr, fixedResultAttrs, callback) ->
-    up.macro "[#{queryAttr}]", (link) ->
-      resultAttrs = u.copy(fixedResultAttrs)
-      if optionalTarget = link.getAttribute(queryAttr)
-        resultAttrs['up-target'] = optionalTarget
-      else
-        resultAttrs['up-follow'] = ''
-      e.setMissingAttrs(link, resultAttrs)
-      link.removeAttribute(queryAttr)
-      callback?()
-
   ###**
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
 
@@ -1009,34 +998,6 @@ up.link = do ->
   ###
 
   ###**
-  [Follows](/up.follow) this link as fast as possible.
-
-  This is done by:
-
-  - [Following the link through AJAX](/a-up-follow) instead of a full page load
-  - [Preloading the link's destination URL](/a-up-preload)
-  - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
-
-  \#\#\# Example
-
-  Use `[up-dash]` like this:
-
-      <a href="/users" up-dash=".main">User list</a>
-
-  This is shorthand for:
-
-      <a href="/users" up-target=".main" up-instant up-preload>User list</a>
-
-  @selector a[up-dash]
-  @param [up-dash='body']
-    The CSS selector to replace
-
-    Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
-  @stable
-  ###
-  targetMacro 'up-dash', { 'up-preload': '', 'up-instant': '' }
-
-  ###**
   Add an `[up-expand]` attribute to any element to enlarge the click area of a
   descendant link.
 
@@ -1121,7 +1082,6 @@ up.link = do ->
   isFollowable: isFollowable
   shouldFollowEvent: shouldFollowEvent
   followMethod: followMethod
-  targetMacro: targetMacro
   convertClicks: convertClicks
   config: config
   combineFollowableSelectors: combineFollowableSelectors
