@@ -2,37 +2,23 @@
 Events
 ======
 
-This module contains functions to [build](/up.event.build), [dispatch](/up.emit) and [listen to](/up.on) DOM events.
+This module contains functions to [emit](/up.emit) and [observe](/up.on) DOM events.
 
-While the browser also ships with functions like [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent)
-and [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) to
-work with DOM events, you will find the functions in this module to be more convenient and feature-rich.
+While the browser also has built-in functions to work with events,
+you will find Unpoly's functions to be very concise and feature-rich.
 
 ## Events emitted by Unpoly
 
-Most Unpoly interactions emit DOM events that are prefixed with `up:`.
+Most Unpoly features emit events that are prefixed with `up:`.
 
-```javascript
-document.addEventListener('up:modal:opened', (event) => {
-  console.log('A new modal has just opened!')
-})
-```
+Unpoly's own events are documented in their respective modules, for example:
 
-Events often have both present and past forms. For example, `up:layer:open` is emitted before an overlay starts to open.
-`up:layer:opened` is emitted when the overlay has appeared in the DOM tree.
-
-\#\#\# Preventing events
-
-You can prevent most present form events by calling `preventDefault()`:
-
-```javascript
-document.addEventListener('up:modal:open', (event) => {
-  if (event.url == '/evil') {
-    // Prevent the modal from opening
-    event.preventDefault()
-  }
-})
-```
+| Event                 | Module             |
+|-----------------------|--------------------|
+| `up:link:follow`      | `up.link`          |
+| `up:form:submit`      | `up.form`          |
+| `up:layer:open`       | `up.layer`         |
+| `up:request:late`     | `up.network`       |
 
 @see up.on
 @see up.emit
@@ -505,7 +491,7 @@ up.event = do ->
 
   This hyperlink will emit an `user:select` event when clicked:
 
-  ```
+  ```html
   <a href='/users/5'
     up-emit='user:select'
     up-emit-props='{ "id": 5, "firstName": "Alice" }'>

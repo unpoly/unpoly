@@ -4,9 +4,8 @@ Animation
   
 When you [update a page fragment](/up.link) you can animate the change.
 
-Let's say you are using a [fragment link](/up.link)
-to update an element with new content from the server. You can add an attribute [`[up-transition]`](/a-up-follow#up-transition)
-to smoothly fade out the old element while fading in the new element:
+You can add an attribute [`[up-transition]`](/a-up-transition) to your
+links or forms to smoothly fade out the old element while fading in the new element:
 
 ```html
 <a href="/users"
@@ -23,7 +22,7 @@ In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
 An example for an animation is opening a new overlay. We can animate the appearance
-of the dialog by adding an [`[up-animation]`](/a-up-layer-new#up-animation) attribute to the opening link:
+of the dialog by adding an [`[up-animation]`](/a-up-animation) attribute to the opening link:
 
 ```html
 <a href="/users"
@@ -42,10 +41,9 @@ and [predefined animations](/up.animate#named-animations).
 You can define custom animations using `up.transition()` and
 `up.animation()`.
 
+@see a[up-transition]
 @see up.animation
-@see up.animate
 @see up.transition
-@see up.morph
 
 @module up.motion
 ###
@@ -619,10 +617,17 @@ up.motion = do ->
   [Follows](/a-up-follow) this link and swaps in the new fragment
   with an animated transition.
 
+  Note that transitions are not possible when replacing the `body`
+  element.
+
   \#\#\# Example
 
   ```html
-  <a href="/page2" up-transition="move-left">Next page</a>
+  <a href="/page2"
+    up-target=".story"
+    up-transition="move-left">
+    Next page
+  </a>
   ```
 
   @selector a[up-transition]
@@ -634,6 +639,7 @@ up.motion = do ->
     The transition to use when the server responds with an error code.
 
     @see server-errors
+  @stable
   ###
 
   ###**
@@ -643,7 +649,9 @@ up.motion = do ->
   \#\#\# Example
 
   ```html
-  <form action="/tasks" up-transition="cross-fade">
+  <form action="/tasks"
+    up-target=".content"
+    up-transition="cross-fade">
     ...
   </form>
   ```
@@ -657,6 +665,7 @@ up.motion = do ->
     The transition to use when the server responds with an error code.
 
     @see server-errors
+  @stable
   ###
 
   up.on 'up:framework:boot', warnIfDisabled
