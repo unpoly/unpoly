@@ -5,12 +5,18 @@ e = up.element
 Layers
 ======
 
-Unpoly lets you use overlays to break up a complex screen into [subinteractions](/subinteractions).
+Unpoly allows you to [open page fragments in an overlay](/opening-overlays). Overlays may be stacked infinitely.
 
+A variety of [overlay modes](/layer-terminology) are supported,
+such as modal dialogs, popup overlays or drawers. You may [customize their appearance and behavior](/customizing-overlays).
+
+Layers are isolated, meaning a screen in one layer will not accidentally see elements
+or events from another layer. For instance, [fragment links](/up.link) will only update elements from the [current layer](/up.layer.current)
+unless you [explicitly target another layer](/up.layer).
+
+Overlays allow you to break up a complex screen into [subinteractions](/subinteractions).
 Subinteractions take place in overlays and may span one or many pages. The original screen remains open in the background.
 Once the subinteraction is *done*, the overlay is closed and a result value is communicated back to the parent layer.
-
-Layers are isolated and can be stacked infinitely.
 
 @see a[up-layer=new]
 @see up.layer.current
@@ -27,7 +33,6 @@ up.layer = do ->
     up.Layer.Drawer
     up.Layer.Cover
   ]
-  OVERLAY_MODES = u.map(OVERLAY_CLASSES, 'mode')
   LAYER_CLASSES = [up.Layer.Root].concat(OVERLAY_CLASSES)
 
   ###**
