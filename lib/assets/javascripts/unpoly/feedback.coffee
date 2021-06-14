@@ -3,43 +3,53 @@ Navigation feedback
 ===================
 
 The `up.feedback` module adds useful CSS classes to links while they are loading,
-or when they point to the current URL. By styling these classes you may
-provide instant feedback to user interactions. This improves the perceived speed of your interface.
+or when they point to the current URL.
+
+By styling these classes you may provide instant feedback to user interactions,
+improving the perceived speed of your interface.
 
 
 \#\#\# Example
 
 Let's say we have an `<nav>` element with two links, pointing to `/foo` and `/bar` respectively:
 
-    <nav>
-      <a href="/foo" up-follow>Foo</a>
-      <a href="/bar" up-follow>Bar</a>
-    </nav>
+```html
+<nav>
+  <a href="/foo" up-follow>Foo</a>
+  <a href="/bar" up-follow>Bar</a>
+</nav>
+```
 
 By giving the navigation bar the `[up-nav]` attribute, links pointing to the current browser address are highlighted
 as we navigate through the site.
 
 If the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class:
 
-    <nav up-nav>
-      <a href="/foo" up-follow class="up-current">Foo</a>
-      <a href="/bar" up-follow>Bar</a>
-    </nav>
+```html
+<nav up-nav>
+  <a href="/foo" up-follow class="up-current">Foo</a>
+  <a href="/bar" up-follow>Bar</a>
+</nav>
+```
 
 When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
 for the server to respond:
 
-    <nav up-nav>
-      <a href="/foo" up-follow class="up-current">Foo</a>
-      <a href="/bar" up-follow class="up-active">Bar</a>
-    </div>
+```
+<nav up-nav>
+  <a href="/foo" up-follow class="up-current">Foo</a>
+  <a href="/bar" up-follow class="up-active">Bar</a>
+</div>
+```
 
 Once the response is received the URL will change to `/bar` and the `up-active` class is removed:
 
-    <nav up-nav>
-      <a href="/foo" up-follow>Foo</a>
-      <a href="/bar" up-follow class="up-current">Bar</a>
-    </nav>
+```html
+<nav up-nav>
+  <a href="/foo" up-follow>Foo</a>
+  <a href="/bar" up-follow class="up-current">Bar</a>
+</nav>
+```
 
 @see [up-nav]
 @see a.up-current
