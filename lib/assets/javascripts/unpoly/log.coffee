@@ -177,24 +177,26 @@ up.log = do ->
     throw up.error.failed(args)
 
   ###**
-  # Registers an empty rejection handler in case the given promise
-  # rejects with an AbortError or a failed up.Response.
-  #
-  # This prevents browsers from printing "Uncaught (in promise)" to the error
-  # console when the promise is rejected.
-  #
-  # This is helpful for event handlers where it is clear that no rejection
-  # handler will be registered:
-  #
-  #     up.on('submit', 'form[up-target]', (event, form) => {
-  #       promise = up.submit(form)
-  #       up.util.muteRejection(promise)
-  #     })
-  #
-  # @function up.log.muteUncriticalRejection
-  # @param {Promise} promise
-  # @return {Promise}
-  # @internal
+  Registers an empty rejection handler in case the given promise
+  rejects with an AbortError or a failed up.Response.
+
+  This prevents browsers from printing "Uncaught (in promise)" to the error
+  console when the promise is rejected.
+
+  This is helpful for event handlers where it is clear that no rejection
+  handler will be registered:
+
+  ```js
+  up.on('submit', 'form[up-target]', (event, form) => {
+    promise = up.submit(form)
+    up.util.muteRejection(promise)
+  })
+  ```
+
+  @function up.log.muteUncriticalRejection
+  @param {Promise} promise
+  @return {Promise}
+  @internal
   ###
   muteUncriticalRejection = (promise) ->
     return promise.catch (error) ->

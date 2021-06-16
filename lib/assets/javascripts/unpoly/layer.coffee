@@ -562,6 +562,7 @@ up.layer = do ->
     A promise that will settle when the overlay closes.
 
     When the overlay was accepted, the promise will fulfill with the overlay's acceptance value.
+
     When the overlay was dismissed, the promise will reject with the overlay's dismissal value.
 
   @stable
@@ -935,10 +936,10 @@ up.layer = do ->
   This is a shortcut for `up.layer.current.dismiss()`.
   See `up.Layer#dismiss()` for more documentation.
 
-  @function up.layer.dismiss
+  @function up.layer.accept
   @param {any} [value]
   @param {Object} [options]
-  @return
+  @stable
   ###
 
   ###**
@@ -950,7 +951,7 @@ up.layer = do ->
   @function up.layer.dismiss
   @param {any} [value]
   @param {Object} [options]
-  @return
+  @stable
   ###
 
   ###**

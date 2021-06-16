@@ -567,18 +567,24 @@ up.network = do ->
 
   Without arguments, this will abort all pending requests:
 
-      up.network.abort()
+  ```js
+  up.network.abort()
+  ```
 
   To abort a given `up.Request` object, pass it as the first argument:
 
-      let request = up.request('/path')
-      up.network.abort(request)
+  ```js
+  let request = up.request('/path')
+  up.network.abort(request)
+  ```
 
   To abort all requests matching a condition, pass a function that takes a request
   and returns a boolean value. Unpoly will abort all request for which the given
   function returns `true`. E.g. to abort all requests with a HTTP method as `GET`:
 
-      up.network.abort((request) => request.method == 'GET')
+  ```js
+  up.network.abort((request) => request.method == 'GET')
+  ```
 
   @function up.network.abort
   @param {up.Request|boolean|Function(up.Request): boolean} [matcher=true]
@@ -748,5 +754,4 @@ up.network = do ->
 
 up.request = up.network.request
 
-# TODO: Docs for up.cache.clear (patterns and all)
 up.cache = up.network.cache

@@ -36,6 +36,7 @@ class up.Layer extends up.Record
 
   @property up.Layer#historyVisible
   @param {boolean} historyVisible
+  @stable
   ###
 
   ###**

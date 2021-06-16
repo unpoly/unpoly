@@ -153,11 +153,15 @@ up.event = do ->
     Multiple event types may be passed as either a space-separated string
     or as an array of types.
 
-  @param {string} [selector]
+  @param {string|Function():string} [selector]
     The selector of an element on which the event must be triggered.
 
     Omit the selector to listen to all events of the given type, regardless
     of the event target.
+
+    If the selector is not known in advance you may also pass a function
+    that returns the selector. The function is evaluated every time
+    an event with the given type is observed.
 
   @param {boolean} [options.passive=false]
     Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).

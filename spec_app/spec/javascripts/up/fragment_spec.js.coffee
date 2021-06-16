@@ -895,7 +895,23 @@ describe 'up.fragment', ->
 
       describe 'choice of target', ->
 
-        it 'uses a selector given as { target } option'
+        it 'uses a selector given as { target } option', ->
+          one = fixture('.one', text: 'old one')
+          two = fixture('.two', text: 'old two')
+
+          up.render({ target: '.two', content: 'new two' })
+
+          expect('.one').toHaveText('old one')
+          expect('.two').toHaveText('new two')
+
+        it 'accepts an array of selector alternatives as { target } option', ->
+          one = fixture('.one', text: 'old one')
+          two = fixture('.two', text: 'old two')
+
+          up.render({ target: ['.four', '.three', '.two', '.one'], document: '<div class="two">new two</div>' })
+
+          expect('.one').toHaveText('old one')
+          expect('.two').toHaveText('new two')
 
         it 'uses a selector given as first argument'
 

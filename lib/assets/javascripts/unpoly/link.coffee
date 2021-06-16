@@ -99,9 +99,10 @@ up.link = do ->
     )
 
   ###**
-  TODO: Docs
-  TODO: Doucment that noInstantSelectors and noPreloadSelectors inherit from noFollowSelectors
-  TODO: Document that noFollowSelectors already excludes cross-origin, rel=download, [target], [href^=#], javascript: hrefs
+  Configures defaults for link handling.
+
+  In particular you can configure Unpoly to handle [all links on the page](/handling-everything)
+  without requiring developers to set `[up-...]` attributes.
 
   @property up.link.config
 
@@ -174,7 +175,7 @@ up.link = do ->
 
     If set to `false`, Unpoly will never preload links.
 
-  @param {Array<string>} [config.cickableSelectors]
+  @param {Array<string>} [config.clickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
 
     @see [up-clickable]
@@ -314,8 +315,24 @@ up.link = do ->
     return options
 
   ###**
-  Parses the `render()` options that would be used to
-  [`follow`](/up.follow) the given link, but does not [render](/up.render).
+  Parses the [render](/up.render) options that would be used to
+  [`follow`](/up.follow) the given link, but does not render.
+
+  \#\#\# Example
+
+  Given a link with some `[up-...]` attributes:
+
+  ```html
+  <a href="/foo" up-target=".content" up-layer="new">...</a>
+  ```
+
+  We can parse the link's render options like this:
+
+  ```js
+  let link = document.querySelector('a[href="/foo"]')
+  let options = up.link.followOptions(link)
+  // => { url: '/foo', method: 'GET', target: '.content', layer: 'new', ... }
+  ```
 
   @function up.link.followOptions
   @param {Element|jQuery|string} link
@@ -441,7 +458,10 @@ up.link = do ->
   @param {Object} options
     See options for `up.follow()`.
   @return {Promise}
-    A promise that will be fulfilled when the request was loaded and cached
+    A promise that will be fulfilled when the request was loaded and cached.
+
+    When preloading is [disabled](/up.link.config#config.preloadEnabled) the promise
+    rejects with an `AbortError`.
   @stable
   ###
   preload = (link, options) ->
@@ -536,13 +556,12 @@ up.link = do ->
   @function up.link.makeFollowable
   @param {Element|jQuery|string} link
     The element or selector for the link to make followable.
-  @stable
+  @experimental
   ###
   makeFollowable = (link) ->
     unless isFollowable(link)
       link.setAttribute('up-follow', '')
 
-  # TODO: Document up.link.makeClickable
   makeClickable = (link) ->
     if e.matches(link, 'a[href], button')
       return
@@ -685,6 +704,13 @@ up.link = do ->
 
   If the user activates an element using their keyboard, the `up:click` event will be emitted
   when the key is pressed even if the element has an `[up-instant]` attribute.
+
+  \#\#\# Only unmodified clicks are considered
+
+  To prevent overriding native browser behavior, the `up:click` is only emitted for unmodified clicks.
+
+  In particular, it is not emitted when the user holds `Shift`, `CTRL` or `Meta` while clicking.
+  Neither it is emitted when the user clicks with a secondary mouse button.
 
   @event up:click
   @param {Element} event.target

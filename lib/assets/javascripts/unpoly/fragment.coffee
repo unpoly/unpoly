@@ -341,22 +341,25 @@ up.fragment = do ->
 
   @function up.render
 
-  @param {string|Element|jQuery} [target]
+  @param {string|Element|jQuery|Array<string>} [target]
     The CSS selector to update.
 
     If omitted a [main target](/main) will be rendered.
 
-    You can also pass a DOM element or jQuery element here, in which case a selector
+    You may also pass a DOM element or jQuery element here, in which case a selector
     will be [inferred from the element attributes](/up.fragment.toTarget). The given element
     will also be used as [`{ origin }`](#options.origin) for the fragment update.
+
+    You may also pass an array of selector alternatives. The first selector
+    matching in both old and new content will be used.
 
     Instead of passing the target as the first argument, you may also pass it as
     a [´{ target }`](#options.target) option..
 
-  @param {string|Element|jQuery} [options.target]
+  @param {string|Element|jQuery|Array<string>} [options.target]
     The CSS selector to update.
 
-    If omitted a [main target](/main) will be rendered.
+    See documentation for the [`target`](#target) parameter.
 
   @param {string|boolean} [options.fallback=false]
     Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
@@ -667,17 +670,19 @@ up.fragment = do ->
   an entirely different page layout (like a maintenance page or fatal server error)
   which should be open with a full page load:
 
-      up.on('up:fragment:loaded', (event) => {
-        let isMaintenancePage = event.response.getHeader('X-Maintenance')
+  ```js
+  up.on('up:fragment:loaded', (event) => {
+    let isMaintenancePage = event.response.getHeader('X-Maintenance')
 
-        if (isMaintenancePage) {
-          // Prevent the fragment update and don't update browser history
-          event.preventDefault()
+    if (isMaintenancePage) {
+      // Prevent the fragment update and don't update browser history
+      event.preventDefault()
 
-          // Make a full page load for the same request.
-          event.request.loadPage()
-        }
-      })
+      // Make a full page load for the same request.
+      event.request.loadPage()
+    }
+  })
+  ```
 
   Instead of preventing the update, listeners may also access the `event.renderOptions` object
   to mutate options to the `up.render()` call that will process the server response.
@@ -691,6 +696,7 @@ up.fragment = do ->
     The server response.
   @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
+  @stable
   ###
 
   ###**
@@ -1536,6 +1542,86 @@ up.fragment = do ->
 
   @selector :main
   @experimental
+  ###
+
+  ###**
+  Updates this element when no other render target is given.
+
+  \#\#\# Example
+
+  Many links simply replace the main content element in your application layout.
+
+  Unpoly lets you mark this elements as a default target using the `[up-main]` attribute:
+
+  ```html
+  <body>
+    <div class="layout">
+      <div class="layout--side">
+        ...
+      </div>
+      <div class="layout--content" up-main>
+        ...
+      </div>
+    </div>
+  </body>
+  ```
+
+  Once a main target is configured, you no longer need `[up-target]` in a link.\
+  Use `[up-follow]` and the `[up-main]` element will be replaced:
+
+  ```html
+  <a href="/foo" up-follow>...</a>
+  ```
+
+  If you want to update something more specific, you can still use `[up-target]`:
+
+  ```html
+  <a href="/foo" up-target=".profile">...</a>
+  ```
+
+  Instead of assigning `[up-main]` you may also configure an existing selector in `up.fragment.config.mainTargets`:
+
+  ```js
+  up.fragment.config.mainTargets.push('.layout--content')
+  ```
+
+  Overlays can use different main targets
+  ---------------------------------------
+
+  Overlays often use a different default selector, e.g. to exclude a navigation bar.
+
+  To define a different main target for an overlay, set the [layer mode](/layer-terminology) as the
+  value of the `[up-main]` attribute:
+
+  ```html
+  <body>
+    <div class="layout" up-main="root">
+      <div class="layout--side">
+        ...
+      </div>
+      <div class="layout--content" up-main="modal">
+        ...
+      </div>
+    </div>
+  </body>
+  ```
+
+  Instead of assigning `[up-main]` you may also configure layer-specific targets in `up.layer.config`:
+
+  ```js
+  up.layer.config.popup.mainTargets.push('.menu')              // for popup overlays
+  up.layer.config.drawer.mainTargets.push('.menu')             // for drawer overlays
+  up.layer.config.overlay.mainTargets.push('.layout--content') // for all overlay modes
+  ```
+
+  @selector [up-main]
+  @param [up-main]
+    A space-separated list of [layer modes](/layer-terminology) for which to use this main target.
+
+    Omit the attribute value to define a main target for *all* layer modes.
+
+    To use a different main target for all overlays (but not the root layer), set `[up-main=overlay]`.
+  @stable
   ###
 
   ###**

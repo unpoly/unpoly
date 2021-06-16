@@ -377,7 +377,35 @@ class up.Request extends up.Record
       onabort:   => @onXHRAbort()
     )
 
-  # TODO: Document API
+  ###**
+  Loads this request object as a full-page request, replacing the entire browser environment
+  with a new page from the server response.
+
+  The full-page request will be loaded with the [URL](/up.Request.prototype.url),
+  [method](/up.Request.prototype.method) and [params](/up.Request.prototype.params)
+  from this request object.
+  Properties that are not possible in a full-page request (such as custom HTTP headers)
+  will be ignored.
+
+  \#\#\# Example
+
+  ```javascript
+  let request = await up.request('/path')
+
+  try {
+    let response = await request('/path')
+  } catch (result) {
+    if (result.name === 'AbortError') {
+      console.log('Request was aborted.')
+    }
+  }
+
+  request.abort()
+  ```
+
+  @function up.Request#loadPage
+  @experimental
+  ###
   loadPage: ->
     # This method works independently of @state, since it is often
     # a fallback for a request that cannot be processed as a fragment update

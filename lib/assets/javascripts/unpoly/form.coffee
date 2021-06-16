@@ -180,8 +180,26 @@ up.form = do ->
     return up.render(submitOptions(form, options))
 
   ###**
-  Parses the `render()` options that would be used to
-  [`submit`](/up.submit) the given form, but does not [render](/up.render).
+  Parses the [render](/up.render) options that would be used to
+  [`submit`](/up.submit) the given form, but does not render.
+
+  \#\#\# Example
+
+  Given a form element:
+
+  ```html
+  <form action="/foo" method="post" up-target=".content">
+    ...
+  </form>
+  ```
+
+  We can parse the link's render options like this:
+
+  ```js
+  let form = document.querySelector('form')
+  let options = up.form.submitOptions(form)
+  // => { url: '/foo', method: 'POST', target: '.content', ... }
+  ```
 
   @param {Element|jQuery|string} form
     The form to submit.
@@ -241,7 +259,23 @@ up.form = do ->
   ###**
   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
-  The event is emitted on the`<form>` element.
+  The event is emitted on the `<form>` element.
+
+  When the form is being [validated](/input-up-validate), this event is not emitted.
+  Instead an `up:form:validate` event is emitted.
+
+  \#\#\# Changing render options
+
+  Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
+
+  The code below will use a custom [transition](/up-transition)
+  when a form submission [fails](/server-errors):
+
+  ```js
+  up.on('up:form:submit', function(event, form) {
+    event.renderOptions.failTransition = 'shake'
+  })
+  ```
 
   @event up:form:submit
   @param {Element} event.target
@@ -259,7 +293,11 @@ up.form = do ->
   # That means that submittingButton() cannot rely on document.activeElement.
   # See https://github.com/unpoly/unpoly/issues/103
   up.on 'up:click', submitButtonSelector, (event, button) ->
-    button.focus()
+    # Don't mess with focus unless we know that we're going to handle the form.
+    # https://groups.google.com/g/unpoly/c/wsiATxepVZk
+    form = e.closest(button, 'form')
+    if form && isSubmittable(form)
+      button.focus()
 
   ###**
   Observes form fields and runs a callback when a value changes.
@@ -336,10 +374,10 @@ up.form = do ->
   ###**
   [Observes](/up.observe) a field or form and submits the form when a value changes.
 
-  Both the form and the changed field will be assigned a CSS class [`form-up-active`](/form-up-active)
+  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form-up-active)
   while the autosubmitted form is processing.
 
-  The unobtrusive variant of this is the [`up-autosubmit`](/form-up-autosubmit) attribute.
+  The unobtrusive variant of this is the [`[up-autosubmit]`](/form-up-autosubmit) attribute.
 
   @function up.autosubmit
   @param {string|Element|jQuery} target
@@ -388,7 +426,9 @@ up.form = do ->
 
   \#\#\# Example
 
-      up.validate('input[name=email]', { target: '.email-errors' })
+  ```js
+  up.validate('input[name=email]', { target: '.email-errors' })
+  ```
 
   @function up.validate
   @param {string|Element|jQuery} field
@@ -439,6 +479,7 @@ up.form = do ->
   @param event.preventDefault()
     Event listeners may call this method to prevent the validation request
     being sent to the server.
+  @stable
   ###
 
   switcherValues = (field) ->
@@ -539,6 +580,29 @@ up.form = do ->
     if (element = document.activeElement) && e.matches(element, fieldSelector())
       return element
 
+  ###**
+  Returns whether the given form will be [submitted](/up.follow) through Unpoly
+  instead of making a full page load.
+
+  By default Unpoly will follow forms if the element has
+  one of the following attributes:
+
+  - `[up-submit]`
+  - `[up-target]`
+  - `[up-layer]`
+  - `[up-transition]`
+
+  To consider other selectors to be submittable, see `up.form.config.submitSelectors`.
+
+  @function up.form.isSubmittable
+  @param {Element|jQuery|string} form
+    The form to check.
+  @stable
+  ###
+  isSubmittable = (form) ->
+    form = up.fragment.get(form)
+    return e.matches(form, fullSubmitSelector()) && !isSubmitDisabled(form)
+
   isSubmitDisabled = (form) ->
     # We also don't want to handle cross-origin forms.
     # That will be handled in `up.Change.FromURL#newPageReason`.
@@ -560,7 +624,7 @@ up.form = do ->
   </form>
   ```
 
-  \#\#\# Failed submission
+  \#\#\# Handling validation errors
 
   When the server was unable to save the form due to invalid params,
   it will usually re-render an updated copy of the form with
@@ -575,19 +639,35 @@ up.form = do ->
   [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option)
   for this:
 
-      class UsersController < ApplicationController
+  ```ruby
+  class UsersController < ApplicationController
 
-        def create
-          user_params = params[:user].permit(:email, :password)
-          @user = User.new(user_params)
-          if @user.save?
-            sign_in @user
-          else
-            render 'form', status: :bad_request
-          end
-        end
-
+    def create
+      user_params = params[:user].permit(:email, :password)
+      @user = User.new(user_params)
+      if @user.save?
+        sign_in @user
+      else
+        render 'form', status: :bad_request
       end
+    end
+
+  end
+  ```
+
+  You may define different option for the failure case by infixing an attribute with `fail`:
+
+  ```html
+  <form method="post" action="/action"
+    up-target=".content"
+    up-fail-target="form"
+    up-scroll="auto"
+    up-fail-scroll=".errors">
+    ...
+  </form>
+  ```
+
+  See [handling server errors](/server-errors) for details.
 
   Note that you can also use
   [`input[up-validate]`](/input-up-validate) to perform server-side
@@ -595,7 +675,7 @@ up.form = do ->
 
   \#\#\# Giving feedback while the form is processing
 
-  The `<form>` element will be assigned a CSS class [`up-active`](/form.up-active) while
+  The `<form>` element will be assigned a CSS class [`.up-active`](/form.up-active) while
   the submission is loading.
 
   \#\#\# Short notation
@@ -1013,7 +1093,7 @@ up.form = do ->
   ###**
   Submits this field's form when this field changes its values.
 
-  Both the form and the changed field will be assigned a CSS class [`up-active`](/form-up-active)
+  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form-up-active)
   while the autosubmitted form is loading.
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
@@ -1042,7 +1122,7 @@ up.form = do ->
       </div>
 
   @selector input[up-autosubmit]
-  @param up-delay
+  @param [up-delay]
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
@@ -1050,7 +1130,7 @@ up.form = do ->
   ###**
   Submits the form when any field changes.
 
-  Both the form and the field will be assigned a CSS class [`up-active`](/form-up-active)
+  Both the form and the field will be assigned a CSS class [`.up-active`](/form-up-active)
   while the autosubmitted form is loading.
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
@@ -1065,7 +1145,7 @@ up.form = do ->
       </form>
 
   @selector form[up-autosubmit]
-  @param up-delay
+  @param [up-delay]
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   ###
@@ -1076,6 +1156,7 @@ up.form = do ->
   config: config
   submit: submit
   submitOptions: submitOptions
+  isSubmittable: isSubmittable
   observe: observe
   validate: validate
   autosubmit: autosubmit

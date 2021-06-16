@@ -361,6 +361,7 @@ class up.Params extends up.Class
   @param {string} name
   @return {any}
     The value of the param with the given name.
+  @internal
   ###
   getFirst: (name) ->
     entry = u.find(@entries, @matchEntryFn(name))
@@ -375,6 +376,7 @@ class up.Params extends up.Class
   @param {string} name
   @return {Array}
     An array of all values with the given name.
+  @internal
   ###
   getAll: (name) ->
     if @isArrayKey(name)

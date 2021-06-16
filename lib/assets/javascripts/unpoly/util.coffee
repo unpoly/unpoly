@@ -1129,6 +1129,7 @@ up.util = do ->
   @function up.util.last
   @param {Array<T>} array
   @return {T}
+  @stable
   ###
   last = (array) ->
     array[array.length - 1]
@@ -1504,24 +1505,24 @@ up.util = do ->
 #    return promise
 
   ###**
-  # Registers an empty rejection handler with the given promise.
-  # This prevents browsers from printing "Uncaught (in promise)" to the error
-  # console when the promise is rejected.
-  #
-  # This is helpful for event handlers where it is clear that no rejection
-  # handler will be registered:
-  #
-  #     up.on('submit', 'form[up-target]', (event, $form) => {
-  #       promise = up.submit($form)
-  #       up.util.muteRejection(promise)
-  #     })
-  #
-  # Does nothing if passed a missing value.
-  #
-  # @function up.util.muteRejection
-  # @param {Promise|undefined|null} promise
-  # @return {Promise}
-  # @internal
+  Registers an empty rejection handler with the given promise.
+  This prevents browsers from printing "Uncaught (in promise)" to the error
+  console when the promise is rejected.
+
+  This is helpful for event handlers where it is clear that no rejection
+  handler will be registered:
+
+      up.on('submit', 'form[up-target]', (event, $form) => {
+        promise = up.submit($form)
+        up.util.muteRejection(promise)
+      })
+
+  Does nothing if passed a missing value.
+
+  @function up.util.muteRejection
+  @param {Promise|undefined|null} promise
+  @return {Promise}
+  @internal
   ###
   muteRejection = (promise) ->
     return promise?.catch(noop)

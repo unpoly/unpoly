@@ -15,25 +15,29 @@
   To use a different [render option](/up.render) for a failed server response,
   prefix the option with `fail`:
 
-      up.render({
-        url: '/action',
-        method: 'post',
-        target: '.content',   // when submission succeeds update '.content'
-        failTarget: 'form',   // when submission fails update the form
-        scroll: 'auto',       // when submission succeeds use default scroll behavior
-        failScroll: '.errors' // when submission falis scroll to the error messages
-      })
+  ```js
+  up.render({
+    url: '/action',
+    method: 'post',
+    target: '.content',   // when submission succeeds update '.content'
+    failTarget: 'form',   // when submission fails update the form
+    scroll: 'auto',       // when submission succeeds use default scroll behavior
+    failScroll: '.errors' // when submission falis scroll to the error messages
+  })
+  ```
 
   When using Unpoly's HTML attributes with [links](/up.link) or [forms](/up.form)
   you may infix an attribute with `fail`:
 
-      <form method="post" action="/action"
-        up-target=".content"
-        up-fail-target="form"
-        up-scroll="auto"
-        up-fail-scroll=".errors">
-        ...
-      </form>
+  ```html
+  <form method="post" action="/action"
+    up-target=".content"
+    up-fail-target="form"
+    up-scroll="auto"
+    up-fail-scroll=".errors">
+    ...
+  </form>
+  ```
 
   Options that are used before the request is made (like `{ url, method, confirm }`) do not
   have a `fail`-prefixed variant. Some options (like `{ history, fallback }`) are used for both

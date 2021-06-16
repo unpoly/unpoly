@@ -22,7 +22,9 @@ up.browser = do ->
   u = up.util
 
   ###**
-  Makes a full page request, replacing the entire browser environment with a new page from the server response.
+  Makes a full-page request, replacing the entire browser environment with a new page from the server response.
+
+  Also see `up.Request#loadPage()`.
 
   @function up.browser.loadPage
   @param {string} options.url

@@ -157,7 +157,7 @@ the given selector in a modal overlay.
 @param {string} up-modal
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated
-  Use `a[up-layer=modal]` instead.
+  Use `a[up-layer="new modal"]` instead.
 ###
 up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, -> up.migrate.deprecated('a[up-modal]', 'a[up-layer="new modal"]'))
 
@@ -171,6 +171,6 @@ the given selector in a modal drawer that slides in from the edge of the screen.
 @param {string} up-drawer
   The CSS selector that will be extracted from the response and displayed in a modal dialog.
 @deprecated
-  Use `a[up-layer=drawer]` instead.
+  Use `a[up-layer="new drawer"]` instead.
 ###
 up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, -> up.migrate.deprecated('a[up-drawer]', 'a[up-layer="new drawer"]'))

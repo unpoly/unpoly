@@ -232,7 +232,7 @@ class up.Layer.Overlay extends up.Layer
     If the destruction is animated, the callback will run after the animation has finished.
   @return {Promise}
     A resolved promise.
-  @private
+  @internal
   ###
   destroyElements: (options) ->
     animation = =>
