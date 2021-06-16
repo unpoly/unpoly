@@ -1529,10 +1529,13 @@ up.fragment = do ->
   When no other render target is given, Unpoly will try to find and replace a main target.
 
   In most app layouts the main target should match the primary content area.
-  The default main targets are the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element,
-  any element with an `[up-main]` attribute and the current layer's
-  [topmost swappable element](/main). You may configure main target selectors
-  in `up.fragment.config.mainTargets`.
+  The default main targets are:
+
+  - the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element
+  - any element with an `[up-main]` attribute
+  - the current layer's   [topmost swappable element](/main)
+
+  You may configure main target selectors in `up.fragment.config.mainTargets`.
 
   \#\#\# Example
 

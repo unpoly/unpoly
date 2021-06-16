@@ -514,11 +514,25 @@ up.layer = do ->
   ###
 
   ###**
-  TODO: Docs
+  This event is emitted after a new overlay has been placed into the DOM.
+
+  The event is emitted right before the opening animation starts. Because the overlay
+  has not been rendered by the browser, this makes it a good occasion to
+  [customize overlay elements](/customizing-overlays#customizing-overlay-elements):
+
+  ```js
+  up.on('up:layer:opened', function(event) {
+    if (isChristmas()) {
+      up.element.affix(event.layer.element, '.santa-hat', text: 'Merry Christmas!')
+    }
+  })
+  ```
 
   @event up:layer:opened
   @param {Element} event.origin
+    The link element that is opening the overlay.
   @param {up.Layer} event.layer
+    The [layer object](/up.Layer) that is opening.
   @stable
   ###
 
@@ -526,7 +540,7 @@ up.layer = do ->
   This event is emitted after a layer's [location property](/up.Layer.prototype.location)
   has changed value.
 
-  This event is also emitted when a layer [without history](/up.Layer.prototype.historyVisible)
+  This event is also emitted when a layer [without visible history](/up.Layer.prototype.historyVisible)
   has reached a new location.
 
   @param {string} event.location
@@ -584,7 +598,7 @@ up.layer = do ->
       return option.toString()
 
   ###**
-  [Follows](/a-up-follow) this link and opens the result in a new layer.
+  [Follows](/a-up-follow) this link and opens the result in a new overlay.
 
   \#\#\# Example
 
@@ -828,9 +842,9 @@ up.layer = do ->
   The *current* layer is usually the [frontmost layer](/up.layer.front).
   There are however some cases where the current layer is a layer in the background:
 
-  - While an element in a background layer is [compiled](/up.compiler).
+  - While an element in a background layer is being [compiled](/up.compiler).
   - While an Unpoly event like `up:request:loaded` is being triggered from a background layer.
-  - While a running event listener was bound to a background layer using `up.Layer#on()`.
+  - While an event listener bound to a background layer using `up.Layer#on()` is being called.
 
   To temporarily change the current layer from your own code, use `up.Layer#asCurrent()`.
 
@@ -877,6 +891,9 @@ up.layer = do ->
   ###**
   Returns the [root layer](/layer-terminology).
 
+  The root layer represents the initial page before any overlay was [opened](/opening-overlays).
+  The root layer always exists and cannot be closed.
+
   @property up.layer.root
   @param {up.Layer} root
   @stable
@@ -886,6 +903,9 @@ up.layer = do ->
   Returns an array of all [overlays](/layer-terminology).
 
   If no overlay is open, an empty array is returned.
+
+  To get an array of *all* layers including the [root layer](/up.layer.root),
+  use `up.layer.stack`.
 
   @property up.layer.overlays
   @param {Array<up.Layer>} overlays
@@ -933,8 +953,8 @@ up.layer = do ->
   ###**
   [Accepts](/closing-overlays) the [current layer](up.layer.current).
 
-  This is a shortcut for `up.layer.current.dismiss()`.
-  See `up.Layer#dismiss()` for more documentation.
+  This is a shortcut for `up.layer.current.accept()`.
+  See `up.Layer#accept()` for more documentation.
 
   @function up.layer.accept
   @param {any} [value]
@@ -960,7 +980,7 @@ up.layer = do ->
   This is a shortcut for `up.layer.current.isRoot()`.
   See `up.Layer#isRoot()` for more documentation..
 
-  @function up.layer.isFront
+  @function up.layer.isRoot
   @return {boolean}
   @stable
   ###
@@ -997,7 +1017,7 @@ up.layer = do ->
   @function up.layer.on
   @param {string} types
     A space-separated list of event types to bind to.
-  @param {string} [selector]
+  @param {string|Function(): string} [selector]
     The selector of an element on which the event must be triggered.
   @param {Object} [options]
   @param {Function(event, [element], [data])} listener
@@ -1014,9 +1034,8 @@ up.layer = do ->
   See `up.Layer#off()` for more documentation.
 
   @function up.layer.off
-  @param {Element|jQuery} [element=document]
   @param {string} events
-  @param {string} [selector]
+  @param {string|Function(): string} [selector]
   @param {Function(event, [element], [data])} listener
     The listener function to unbind.
   @stable
@@ -1029,7 +1048,6 @@ up.layer = do ->
   See `up.Layer#emit()` for more documentation.
 
   @function up.layer.emit
-  @param {Element|jQuery} [target=up.layer.element]
   @param {string} eventType
   @param {Object} [props={}]
   @stable
@@ -1059,7 +1077,7 @@ up.layer = do ->
   ###
 
   ###**
-  The location of the [current layer](/up.layer.current).
+  The location URL of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.location`.
   See `up.Layer#location` for more documentation.
@@ -1070,9 +1088,8 @@ up.layer = do ->
   ###
 
   ###**
-  The [current layer](/up.layer.current)'s mode which governs its appearance and behavior.
-
-  @see layer-terminology
+  The [current layer](/up.layer.current)'s [mode](/up.layer.mode)
+  which governs its appearance and behavior.
 
   @property up.layer.mode
   @param {string} mode

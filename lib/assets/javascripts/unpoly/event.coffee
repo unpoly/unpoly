@@ -173,7 +173,7 @@ up.event = do ->
   @param {boolean} [options.once=true]
     Whether the listener should run at most once.
 
-    If `true` the listener will automatically be removed from the element
+    If `true` the listener will automatically be unbound
     after the first invocation.
 
   @param {Function(event, [element], [data])} listener
@@ -256,12 +256,12 @@ up.event = do ->
 
   @function up.off
   @param {Element|jQuery} [element=document]
-  @param {string} events
+  @param {string|Function(): string} events
   @param {string} [selector]
   @param {Function(event, [element], [data])} listener
     The listener function to unbind.
 
-    Note that you must pass a reference to the exact same listener function
+    Note that you must pass a reference to the same function reference
     that was passed to `up.on()` earlier.
   @stable
   ###

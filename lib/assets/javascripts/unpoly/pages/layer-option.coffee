@@ -40,9 +40,9 @@
   Most of the time, the *current* and *frontmost* layer both refer to the last layer
   in the layer stack. There are however some cases where the current layer is a layer in the background:
 
-  - While an element in a background layer is [compiled](/up.compiler).
+  - While an element in a background layer is being [compiled](/up.compiler).
   - While an Unpoly event like `up:request:loaded` is being triggered from a background layer.
-  - While a running event listener was bound to a background layer using `up.Layer#on()`.
+  - While an event listener bound to a background layer using `up.Layer#on()` is being called.
 
   \#\#\# Matching relative to the current layer
 

@@ -117,7 +117,7 @@ class up.Layer extends up.Record
   [Closes this overlay](/closing-overlays) with an accepting intent,
   e.g. when a change was confirmed or when a value was selected.
 
-  To dismiss a layer without an accepting intent, use `up.Layer#dismiss()` instead.
+  To dismiss a layer *without* an accepting intent, use `up.Layer#dismiss()` instead.
 
   @function up.Layer#accept
   @param {any} [value]
@@ -152,7 +152,7 @@ class up.Layer extends up.Record
     throw up.error.notImplemented()
 
   ###**
-  [Closes this overlay](/closing-overlays) without an accepting intent,
+  [Closes this overlay](/closing-overlays) *without* an accepting intent,
   e.g. when a "Cancel" button was clicked.
 
   To close an overlay with an accepting intent, use `up.Layer#accept()` instead.
@@ -214,7 +214,7 @@ class up.Layer extends up.Record
   ###**
   Returns whether this layer is the [root layer](/up.layer.root).
 
-  @function up.Layer#isFront
+  @function up.Layer#isRoot
   @return {boolean}
   @stable
   ###
@@ -280,7 +280,7 @@ class up.Layer extends up.Record
 
   Returns `undefined` if this layer has not opened a child layer.
 
-  A layer can have at most one child layer. Opening an overlay on a layer with an exiisting child will
+  A layer can have at most one child layer. Opening an overlay on a layer with an existing child will
   first dismiss the existing child before replacing it with the new child.
 
   @property up.Layer#child
@@ -293,6 +293,10 @@ class up.Layer extends up.Record
   ###**
   Returns an array of this layer's ancestor layers.
 
+  The array elements are ordered by distance to this layer.
+  The first element is this layer's direct parent. The last element
+  is the [root layer](/up.layer.root).
+
   @property up.Layer#ancestors
   @return {Array<up.Layer>} ancestors
   @stable
@@ -304,6 +308,10 @@ class up.Layer extends up.Record
   Returns an array of this layer's descendant layers, with the closest descendants listed first.
 
   Descendant layers are all layers that visually overlay this layer.
+
+  The array elements are ordered by distance to this layer.
+  The first element is this layer's direct child. The last element
+  is the [frontmost layer](/up.layer.front).
 
   @property up.Layer#descendants
   @return {Array<up.Layer>} descendants
@@ -390,27 +398,43 @@ class up.Layer extends up.Record
       up.follow(overlayLink) // listener is not called
 
   @function up.Layer#on
+
   @param {string} types
     A space-separated list of event types to bind to.
-  @param {string} [selector]
+
+  @param {string|Function(): string} [selector]
     The selector of an element on which the event must be triggered.
 
     Omit the selector to listen to all events of the given type, regardless
     of the event target.
+
+    If the selector is not known in advance you may also pass a function
+    that returns the selector. The function is evaluated every time
+    an event with the given type is observed.
+
   @param {boolean} [options.passive=false]
     Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).
 
     A passive event listener may not call `event.preventDefault()`.
     This in particular may improve the frame rate when registering
     `touchstart` and `touchmove` events.
+
+  @param {boolean} [options.once=true]
+    Whether the listener should run at most once.
+
+    If `true` the listener will automatically be unbound
+    after the first invocation.
+
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
     The function takes the affected element as the second argument.
     If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
     and passed as a third argument.
+
   @return {Function()}
     A function that unbinds the event listeners when called.
+
   @stable
   ###
   on: (args...) ->
@@ -420,13 +444,12 @@ class up.Layer extends up.Record
   Unbinds an event listener previously bound with `up.Layer#on()`.
 
   @function up.Layer#off
-  @param {Element|jQuery} [element=document]
   @param {string} events
-  @param {string} [selector]
+  @param {string|Function(): string} [selector]
   @param {Function(event, [element], [data])} listener
     The listener function to unbind.
 
-    Note that you must pass a reference to the exact same listener function
+    Note that you must pass a reference to the same function reference
     that was passed to `up.Layer#on()` earlier.
   @stable
   ###
@@ -573,9 +596,9 @@ class up.Layer extends up.Record
   ###**
   This layer's location URL.
 
-  If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.historyVisible),
+  If the layer has [no visible history](/up.Layer.prototype.historyVisible), this property
+  still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
-  This property will return the URL the layer would use if it had visible history.
 
   When this layer opens a child layer with visible history, the browser URL will change to the child
   layer's location. When the child layer is closed, this layer's location will be restored.

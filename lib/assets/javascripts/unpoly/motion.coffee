@@ -68,8 +68,11 @@ up.motion = do ->
 
     See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
     for a list of pre-defined timing functions.
-  @param {boolean} [config.enabled=true]
+  @param {boolean} [config.enabled]
     Whether animation is enabled.
+
+    By default animations are enabled, unless the user has configured their
+    system to [minimize non-essential motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
 
     Set this to `false` to disable animation globally.
     This can be useful in full-stack integration tests.

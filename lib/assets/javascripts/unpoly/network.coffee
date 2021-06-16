@@ -195,13 +195,24 @@ up.network = do ->
   ###**
   Removes all [cache](/up.cache.get) entries.
 
-  Unpoly also automatically clears the cache whenever it processes
-  a request with an [unsafe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
-  HTTP method like `POST`.
+  To only remove some cache entries, pass a [URL pattern](/url-patterns):
+
+  ```js
+  up.cache.clear('/users/*')
+  ```
+
+  \#\#\# Other reasons the cache may clear
+
+  By default Unpoly automatically clears the entire cache whenever it processes
+  a request with an non-GET HTTP method. To customize this rule, use `up.network.config.clearCache`.
 
   The server may also clear the cache by sending an [`X-Up-Cache: clear`](/X-Up-Cache) header.
 
   @function up.cache.clear
+  @param {string} [pattern]
+    A [URL pattern](/url-patterns) matching cache entries that should be cleared.
+
+    If omitted, the entire cache is cleared.
   @stable
   ###
 

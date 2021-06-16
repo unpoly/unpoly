@@ -354,7 +354,7 @@ up.feedback = do ->
   ###
 
   ###**
-  Links within `[up-nav]` may use the `[up-alias]` attribute to pass an [URL pattern](/url-patterns) for which they
+  Links within `[up-nav]` may use the `[up-alias]` attribute to pass a [URL pattern](/url-patterns) for which they
   should also be highlighted as [`.up-current`](a.up-current).
 
   \#\#\# Example
@@ -367,7 +367,7 @@ up.feedback = do ->
   </div>
   ```
 
-  To pass more than one alternative URLs, use an [URL pattern](/url-patterns).
+  To pass more than one alternative URLs, use a [URL pattern](/url-patterns).
 
   @selector a[up-alias]
   @param up-alias
