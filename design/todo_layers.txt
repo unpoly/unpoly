@@ -20,12 +20,25 @@ Release process
 - Update better_errors card
   - should use up:fragment:loaded
   - should use request.loadPage() instead of request.navigate()
-
+- Have a bar above v1.unpoly.com saying that these are docs for an old version.
+- Close all "fixed-in-2.0" issues
 
 
 
 Remaining feature work
 ======================
+
+
+Doc comments
+------------
+
+- Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
+- Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
+- Docs for up.cache.clear (patterns and all)
+
+- CHANGELOG:
+  - Fix unpoly2 slides
+  - Link to unpoly2 slides
 
 
 
@@ -188,45 +201,6 @@ Tests
 
 Docs
 ====
-
-Doc comments
-------------
-
-- Document up:click
-  - TODO: Document that preventing up:click also prevents the default behavior of the original event
-  - TODO: Document that it only fires for unmodified events
-- Doc when follow is disabled by default
-- Doc when instant is disabled by default
-- Doc when preloading is disabled by default
-  - Also when cache is disabled by default! up.network.config.autoCache!
-- Doc when submit is disabled by default
-- Docs: up.Request is also a promise for its response. Show example.
-- up.syntax.data() is now up.data()
-- [up-main], [up-main=overlay], [up-main=(mode)]
-- up:form:validate
-- up:fragment:loaded
-- [up-content], [up-content=overlay], ...
-- We now have unpoly-bootstrap3 and unpoly-bootstrap4
-- Fix unpoly-guide; The fullscreen-mode should just be up-mode="cover"
-- Document new emit options { layer, base }
-- up.preload() can now fail if preloading is disabled
-- Docs: up:form:submit event now has { options } to manipulate
-- Docs: up:link:follow event now has { options } to manipulate
-- Expose up.fragment.all() as experimental API
-- Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
-- Document that up.on selector can be a function
-- I think the slow/recover events changed
-- up.link.config
-- Publish up.Request#loadPage()
-- Document that { target } can be an array
-- Document up.network.abort().
-- Document up.network.abort(request)
-- Document up.network.abort(conditionsObj)
-- Document up:request:aborted
-- More Documentation from Diff
-- CHANGELOG:
-  - Fix unpoly2 slides
-  - Link to unpoly2 slides
 
 
 
