@@ -25,7 +25,9 @@ Release process
   - should use up:fragment:loaded
   - should use request.loadPage() instead of request.navigate()
 - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
-
+- Make a 1.0.1 release
+  - With Adam's backports
+  - With the X-Up-Version header
 
 
 Remaining feature work
