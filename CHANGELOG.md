@@ -3,60 +3,116 @@ Changelog
 
 Changes to this project will be documented in this file.
 
+If you're upgrading from an older Unpoly version you should load [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to enable deprecated APIs.
+
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
 2.0.0
 -----
 
-[See Unpoly 2 slides](http://triskweline.de/unpoly2-slides/)
+Unpoly 2 ships with many new features and API improvements, unlocking many use cases that were not possible with Unpoly 1.
 
-TODO
-----
+For an in-depth guide to all changes, see our [Unpoly 2 presentation](http://triskweline.de/unpoly2-slides/) (150 slides).
 
-This list is **far** from complete.
+If you're upgrading from an older Unpoly version you should load [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to enable deprecated APIs. Also see below for an [overview of breaking changes](#overview-of-breaking-changes).
 
-- up.network.config.slowDelay is now 800 (up from 300)
-- up.network.config.cacheSize is now 50 (down from 70)
-- up.network.isBusy() / isIdle() takes preload events into account
--  up.observe() callback may return a promise that will prevent callback calls while running
-- `[aria-label]` attributes are no longer used to build a target selector
-- Options removed form modals: up-width, up-max-width, up-height. Use up-size or up-class.
-- Failed responses now change the URL
-- TODO ...
-- up.history.config.restoreScroll has been removed.
-- Feedback works when a layer has no history
-- Layer A11Y
-  - inert
-  - aria-hidden
-  - focus new
-  - focus return on close
-- up.nav sets [aria-current]
-- up.history.config.enabled
-- Requests sent by Unpoly no longer have a `X-Requested-With: XMLHttpRequest` header.
-  If you need that old behavior: up.on('up:request:load', function(event) { event.request.headers['X-Requested-With'] = 'XMLHttpRequest' })
-- up.network.config.requestMetaKeys
-- up:link:follow is no longer sent when preloading, up:link:preload still is
-- Preserve focus when validating forms; Add { focus } option for fragment update
-- up.Request.prototype.isFatalError() has been removed without replacement. Network errors now reject with an error, and not a response.
-- [up-main], [up-main=overlay], [up-main=modal]
-- parseSelector can parse attribute selectors with prefix, infix, suffix, space-separated, dash-separated
-- up.validate() may now be called with a form element
-- validating emits up:form:validate instead of up:form:submit
-- When a compiler throws an error, other compilers will now run anyway
-- When a destructor throws an error, other destructors will now run anyway
-- Bootstrap integration
-  - Minimal: active, nav, navbar
-  - Bootstrap modal styles are no longer used for Unpoly modals
-  - Now supports three major Bootstrap versions:
-    - unpoly-bootstrap3.js
-    - unpoly-bootstrap4.js
-    - unpoly-bootstrap5.js
-- Hungry elements no longer get the transition by default. You need to set [up-transition] on the hungry element.
-- Rejections are now shown if the log is enabled
-- up.on() can passive: true
-- Preloads on touchstart and mousedown
-- Digit groups separators (`60_000`) are a stage 3 ES6 feature and also supported in number attributes.
+### Change overview
+
+#### Less need for boilerplate configuration
+
+- Fragment links often replace the primary content element of your application layout. For this purpose you can now define [default targets](/up-main) that are automatically updated when no target selector is given.
+- Unpoly can be configured to [handle all links and forms](/handling-everything), without any `[up-...]` attributes.
+- We have examined many real-world Unpoly apps for repetitive configuration and made these options the new default.
+
+#### New Layer API
+
+- A new [layer API](/up.layer) replaces modals and popups.
+- Layers can be stacked infinitely.
+- Layers are fully isolated, meaning a screen in one layer will not accidentally see elements or events from another layer. For instance, [fragment links](/up.link) will only update elements from the [current layer](/up.layer.current) unless you [explicitly target another layer](/layer-option).
+- A variety of [overlay modes](/layer-terminology) are supported, such as modal dialogs, popup overlays or drawers. You may [customize their appearance and behavior](/customizing-overlays).
+
+#### Subinteractions
+
+- Overlays allow you to break up a complex screen into [subinteractions](/subinteractions).
+- Subinteractions take place in overlays and may span one or many pages. The original screen remains open in the background.
+- Once the subinteraction is *done*, the overlay is [closed](/closing-overlays) and a result value is communicated back to the parent layer.
+
+#### Navigation intent
+
+- You can now define whether a framgent update constitutes a user navigation. Switching screens needs other defaults than updating a tiny box.
+- User navigation aborts earlier requests, fixing race conditions on slow connections.
+
+#### Accessibility
+
+- New overlays are focused automatically and trap focus in a cycle. Closing the overlay re-focuses the link that opened it.
+- Focus is automatically managed when rendering major new content. A new [`[up-focus]` attribute](/focus-option) allows
+  you to explicitely move the user's focus as you update fragments.
+- Keyboard navigation is supported everywhere.
+- Focus, selection and scroll positions are preserved within an updated fragment.
+
+#### Reworked Bootstrap integration
+
+- The Bootstrap integration is now minimal and as unopinionated as possible. Little to no Bootstrap CSS is overridden.
+- Bootstrap versions 3, 4 and 5 are now supported.
+
+#### Quality of live improvements
+
+- Unpoly now ships with a bandwidth-friendly [polling implementation](/up-poll) that handles many edge cases.
+- The position of a clicked link is considered when deciding which element to replace. If possible, Unpoly will update an selector in the vicinity of the link that triggered the fragment update. This helps with multiple self-contained components (with the same selector) on the same page.
+- The [log](/up.log) output is more much more compact and has a calmer formatting.
+- New fragments are no longer revealed by default. Instead Unpoly scrolls to the top when the [main target](/up-main) has changed, but does not scroll otherwise.
+- History is no longer changed by default. Instead Unpoly updates history only when a [main target](/up-main) has changed.
+- All scroll-related options have been unified in a single [`[up-scroll]` attribute](/scroll-option).
+- Many optimizations have been made to preserve bandwidth on slow connections. For example, Unpoly stops [preloading](/up-preload) and [polling](/up-poll) whenthe connection has high latency or low throughput.
+- The client-side cache can be carefully managed by both the client and server.
+- Unpoly 1 had many functions for updating fragments (`up.replace()`, `up.extract()`, `up.modal.extract()`, etc.). Unpoly 2 has unified these into a single function `up.render()`.
+- Event handlers to `up:link:follow`, `up:form:submit` etc. may change the render options for the coming fragment update.
+- Added more options to handle [unexpected server responses](/server-errors), including the new `up:fragment:loaded` event.
+
+#### Extended server protocol
+
+The optional server protocol has been extended with additional headers that the server may use to interact with the frontend. For example:
+
+- The server may [emit events on the frontend](/X-Up-Events).
+- The server may [close overlays](/X-Up-Accept).
+- The server may [change the render target](/X-Up-Target) for a fragment update.
+
+See `up.protocol` for a full list of features.
+
+If you are using Unpoly with Ruby on Rails, the new protocol is already fully implemented by the `unpoly-rails` gem.
+
+
+### Overview of breaking changes
+
+Please use [`unpoly-migrate.js`](/changes/upgrading) for a very smooth upgrade process from Unpoly 0.x or 1.x to Unpoly 2.0.
+
+By loading <code>unpoly-migrate.js</code>, calls to most old APIs will be forwarded to the new version. A deprecation notice will be logged to your browser console. This way you can upgrade Unpoly, revive your application with a few changes, then replace deprecated API calls under green tests.
+
+There's a short list of changes that we cannot fix with aliases.
+
+#### Overlays (modals, popups) have different HTML
+
+But it's similar. E.g. `<div class="modal">` becomes `<up-modal>`.
+
+#### Unpoly only sees the current layer
+
+You can target other layers with `{ layer: 'any' }`.
+
+#### Async functions no longer wait for animations
+
+You might or might not notice. In cases where you absolutely do need to wait, an `{ onFinished }` callback can be used.
+
+#### Tooltips are no longer built-in
+
+But there are a million better libraries.
+
+
+### Unpoly 1 maintenance
+
+With the release of Unpoly we're ending maintenance of Unpoly 1. Expect little to no changes to Unpoly 1 in the future. GitHub issues that have been fixed in Unpoly 2 will be closed.
+
+The legacy documentation for Unpoly 1.x has been archived to <https://v1.unpoly.com>.
 
 
 
@@ -74,7 +130,6 @@ There are only three changes from 0.62.1:
 This is the last release of the 0.x API line. We're tracking its code in the [`1.x-stable`](https://github.com/unpoly/unpoly/tree/1.x-stable), but expect little to no changes in the future.
 
 The next release will be [Unpoly 2](https://triskweline.de/unpoly2-slides). It will include major (but mostly backwards compatible) renovations to its API, unlocking many use cases that were not possible with Unpoly 1.
->>>>>>> 8bb70ba6... Version 1.0.0
 
 
 0.62.1
