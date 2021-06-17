@@ -50,11 +50,9 @@ To run RSpec tests for the `unpoly-rails` gem:
 
 ### Making a new release
 
-We are currently feeding four release channels:
+We are currently feeding the following release channels:
 
-- Manual download from GitHub
 - npm
-- Bower (which is based on Git and version tags)
 - Rubygems (as the `unpoly-rails` gem)
 
 We always release to all channel simultaneously.
@@ -64,6 +62,7 @@ To prepare a new version:
 1. Edit `lib/unpoly/rails/version.rb` and bump the version number. Use [semantic versioning](http://semver.org/).
 2. Add an entry to `CHANGELOG.md`
 3. Commit and push the version bump and `CHANGELOG.md`
+4. Merge the relevant `CHANGEOG.md` entries to the `master` branch (since [unpoly.com](https://unpoly.com) builds from there)
 
 Now we can release a new version. **This requires your to be logged into Rubygems and npm**:
 
@@ -78,8 +77,9 @@ If you have done this process a few times and know what you're doing, you can ca
 
 After you have published all release channels, remember to:
 
-1. Update [unpoly.com](https://unpoly.com/) so users see the new version, CDN link and CHANGELOG.
-2. Send a message to the [E-mail group](https://groups.google.com/group/unpoly) with the title "Unpoly X.Y.Z released". You can copy the relevant CHANGELOG part from [here](http://localhost:4567/changes_google_groups).
+1. Deploy to [unpoly.com](https://unpoly.com/)
+2. Deploy to [v1.unpoly.com](https://unpoly.com/)
+3. Send a message to the [E-mail group](https://groups.google.com/group/unpoly) with the title "Unpoly X.Y.Z released". You can copy the relevant CHANGELOG part from [here](http://localhost:4567/changes_google_groups).
 
 
 Credits
