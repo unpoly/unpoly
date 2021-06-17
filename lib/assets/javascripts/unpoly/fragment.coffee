@@ -1372,9 +1372,10 @@ up.fragment = do ->
 
   \#\#\# Example
 
-      element = document.createElement('span')
-      element.className = 'klass'
-      selector = up.fragment.toTarget(element) // returns '.klass'
+  ```js
+  element = up.element.createFromHTML('<span class="klass">...</span>')
+  selector = up.fragment.toTarget(element) // returns '.klass'
+  ```
 
   @function up.fragment.toTarget
   @param {string|Element|jQuery}

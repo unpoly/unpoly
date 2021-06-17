@@ -848,6 +848,27 @@ up.layer = do ->
 
   To temporarily change the current layer from your own code, use `up.Layer#asCurrent()`.
 
+  \#\#\# Remembering the current layer
+
+  Most functions in the `up.layer` package affect the current layer. E.g. `up.layer.dismiss()`
+  is shorthand for `up.layer.current.dismiss()`.
+
+  As described above `up.layer.current` is set to the right layer in compilers and most events,
+  even if that layer is not the frontmost layer.
+
+  If you have async code, the current layer may change when your callback is called.
+  To address this you may retrieve the current layer for later reference:
+
+  ```js
+  function dismissCurrentLayerIn(seconds) {
+    let savedLayer = up.layer.current // returns an up.Layer object
+    let dismiss = () => savedLayer.dismiss()
+    setTimeout(dismiss, seconds * 1000)
+  }
+
+  dismissCurrentLayerIn(10) //
+  ```
+
   @property up.layer.current
   @param {up.Layer} current
   @stable

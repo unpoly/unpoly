@@ -6,8 +6,12 @@ u = up.util
 ###**
 Each layer has an `up.Layer` instance.
 
-Most functions in the `up.layer` (lowercase) package interact with the [current layer](/up.layer.current).
-E.g. `up.layer.dismiss()` is a shortcut for `up.layer.current.dismiss()`.
+Most functions in the `up.layer` package interact with the [current layer](/up.layer.current).
+For example, `up.layer.dismiss()` is a shortcut for `up.layer.current.dismiss()`.
+
+`up.layer.current` is set to the right layer in compilers and most events,
+even if that layer is not the frontmost layer. E.g. if you're compiling a fragment for a background layer, `up.layer.current` will be
+the background layer during compilation.
 
 @class up.Layer
 ###
