@@ -1,7 +1,6 @@
 Release process
 ===============
 
-- Fix unpoly-guide; The fullscreen-mode should just be up-layer="new cover"
 - Release master as 2.0.0
 - unpoly.com
   - Deploy latest
