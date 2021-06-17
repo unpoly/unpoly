@@ -483,7 +483,7 @@ up.protocol = do ->
   the response's HTML content.
 
   The header value is the acceptance value serialized as a JSON object.
-  To accept an overlay without value, set the header value to `null`.
+  To accept an overlay without value, set the header value to the string `null`.
 
   \#\#\# Example
 
@@ -531,7 +531,7 @@ up.protocol = do ->
   the response's HTML content.
 
   The header value is the dismissal value serialized as a JSON object.
-  To accept an overlay without value, set the header value to `null`.
+  To accept an overlay without value, set the header value to the string `null`.
 
   \#\#\# Example
 
