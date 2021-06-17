@@ -241,7 +241,7 @@ up.protocol = do ->
 
   The time is encoded is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
 
-  For instance, a modification date of December 24th, 1:51:46 PM UTC would produce the following header:
+  For instance, a modification date of December 23th, 1:40:18 PM UTC would produce the following header:
 
   ```http
   X-Up-Target: .unread-count
