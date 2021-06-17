@@ -80,7 +80,9 @@ The optional server protocol has been extended with additional headers that the 
 
 See `up.protocol` for a full list of features.
 
-If you are using Unpoly with Ruby on Rails, the new protocol is already fully implemented by the `unpoly-rails` gem.
+If you are using Ruby on Rails, the new protocol is already implemented by the [`unpoly-rails`](https://rubygems.org/gems/unpoly-rails) gem.
+
+If you are using Elixir / Phoenix, the new protocol is already implemented by the [`ex_unpoly`](https://hex.pm/packages/ex_unpoly) package.
 
 
 ### Overview of breaking changes
