@@ -4,8 +4,9 @@ Release process
 - Fix unpoly-guide; The fullscreen-mode should just be up-layer="new cover"
 - Release master as 2.0.0
 - unpoly.com
-  - Deploy
-  - redirect v2.unpoly.com to unpoly.com (per .htaccess so we can later re-use v2. when we release 3)
+  - Deploy latest
+  - Deploy v2
+- Test that v2.unpoly.com to unpoly.com (per .htaccess so we can later re-use v2. when we release 3)
 - Announce on Twitter as @unpolyjs
   - Retweet from private account
 - Announce on mailing list
