@@ -162,7 +162,16 @@ $ = jQuery
         # Even though we're swapping out defaultPrevented() with our own implementation,
         # we still need to call the original method to trigger the forwarding of up:click.
         originalPreventDefault.call(event)
-        u.getter(event, 'defaultPrevented', -> true)
+        try
+          u.getter(event, 'defaultPrevented', -> true)
+        catch
+          # Sometimes (but not always!) IE11 throws an error when redefining the { defaultPrevented }
+          # property. We're just ignoring the issue because that only affects specs where the flag
+          # does not matter and IE11 finally dies in June 2022. This browser has been the scourge
+          # of my life and my entire industry.
+          console.error('IE11 prevented reconfiguration of { defaultPrevented } property')
+          # Try something else. Doesn't usually work. Whatever, I don't even care at this point.
+          event.defaultPrevented = true
 
     return event
 

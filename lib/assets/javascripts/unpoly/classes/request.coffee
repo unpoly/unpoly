@@ -307,6 +307,9 @@ class up.Request extends up.Record
     @extractHashFromURL()
     @transferParamsToURL()
 
+    # This consistently strips the hostname from same-origin requests.
+    @url = u.normalizeURL(@url)
+
   evictExpensiveAttrs: ->
     # We want to allow up:request:loaded events etc. to still access the properties that
     # we are about to evict, so we wait for one more frame. It shouldn't matter for GC.

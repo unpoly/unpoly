@@ -4924,7 +4924,8 @@ describe 'up.fragment', ->
 
       it 'escapes colons in class names', ->
         element = fixture('div')
-        element.classList.add('block', 'sm:hidden')
+        element.classList.add('block')
+        element.classList.add('sm:hidden')
         expect(up.fragment.toTarget(element)).toBe(".block.sm\\:hidden")
 
       it "prefers using the element's [name] attribute to only using the element's tag name", ->
