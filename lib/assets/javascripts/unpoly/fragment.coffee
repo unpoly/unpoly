@@ -16,7 +16,7 @@ a server-rendered web application:
 - As fragments enter the page they are automatically [compiled](/up.compiler) to activate JavaScript behavior.
 - Fragment changes may be [animated](/up.motion).
 - Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
-  Unpoly functions will only see or change fragments from the [current layer](/up.layer.current)
+  Unpoly features will only see or change fragments from the [current layer](/up.layer.current)
   unless you [explicitly target another layer](/layer-option).
 - Fragments [know the URL from where they were loaded](/up.source).
   They can be [reloaded](/up.reload) or [polled periodically](/up-polled).
@@ -78,7 +78,7 @@ up.fragment = do ->
     The default configuration tries, in this order:
 
     - If the URL has a `#hash`, scroll to the hash.
-    - If updating a [main target](/main), reset scroll positions.
+    - If updating a [main target](/up-main), reset scroll positions.
 
   @param {boolean|string|Function(Element)} [config.autoFocus]
     How to focus when updating a fragment with `{ focus: 'auto' }`.
@@ -90,7 +90,7 @@ up.fragment = do ->
     - Focus a `#hash` in the URL.
     - Focus an `[autofocus]` element in the new fragment.
     - If focus was lost with the old fragment, focus the new fragment.
-    - If updating a [main target](/main), focus the new fragment.
+    - If updating a [main target](/up-main), focus the new fragment.
 
   @param {boolean} [config.runScripts=false]
     Whether to execute `<script>` tags in updated fragments.
@@ -98,7 +98,7 @@ up.fragment = do ->
     Scripts will load asynchronously, with no guarantee of execution order.
 
     If you set this to `true`, mind that the `<body>` element is a default
-    [main target](/main). If you are including your global application scripts
+    [main target](/up-main). If you are including your global application scripts
     at the end of your `<body>`
     for performance reasons, swapping the `<body>` will re-execute these scripts.
     In that case you must configure a different main target that does not include
@@ -280,7 +280,7 @@ up.fragment = do ->
 
   The current and new elements must both match the same CSS selector.
   The selector is either given as `{ target }` option,
-  or a [main target](/main) is used as default.
+  or a [main target](/up-main) is used as default.
 
   See the [fragment placement](/fragment-placement) selector for many examples for how you can target content.
 
@@ -344,7 +344,7 @@ up.fragment = do ->
   @param {string|Element|jQuery|Array<string>} [target]
     The CSS selector to update.
 
-    If omitted a [main target](/main) will be rendered.
+    If omitted a [main target](/up-main) will be rendered.
 
     You may also pass a DOM element or jQuery element here, in which case a selector
     will be [inferred from the element attributes](/up.fragment.toTarget). The given element
@@ -366,7 +366,7 @@ up.fragment = do ->
 
     If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
 
-    If set to `true` Unpoly will attempt to replace a [main target](/main) instead.
+    If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
 
     If set to `false` Unpoly will immediately reject the render promise.
 
@@ -446,7 +446,7 @@ up.fragment = do ->
 
     If set to `'auto'` history will be updated if the `{ target }` matches
     a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/main).
+    [main targets](/up-main).
 
     If set to `false`, the history will remain unchanged.
 
@@ -645,7 +645,7 @@ up.fragment = do ->
   @param {string|Element|jQuery} [target]
     The CSS selector to update.
 
-    If omitted a [main target](/main) will be rendered.
+    If omitted a [main target](/up-main) will be rendered.
 
     You can also pass a DOM element or jQuery element here, in which case a selector
     will be [inferred from the element attributes](/up.fragment.target). The given element
@@ -1532,9 +1532,9 @@ up.fragment = do ->
   In most app layouts the main target should match the primary content area.
   The default main targets are:
 
-  - the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element
   - any element with an `[up-main]` attribute
-  - the current layer's   [topmost swappable element](/main)
+  - the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element
+  - the current layer's [topmost swappable element](/layer)
 
   You may configure main target selectors in `up.fragment.config.mainTargets`.
 
@@ -1672,7 +1672,7 @@ up.fragment = do ->
   For the [root layer](/up.layer.root) it is the `<body>` element. For an overlay
   it is the target with which the overlay was opened with.
 
-  In canonical usage the topmost swappable element is often a [main element](/main).
+  In canonical usage the topmost swappable element is often a [main element](/up-main).
 
   \#\#\# Example
 

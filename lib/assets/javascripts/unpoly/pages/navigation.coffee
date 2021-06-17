@@ -43,7 +43,7 @@
   | ----------------------- | -------------------------------------------- |
   | `{ history: 'auto' }`   | Update browser location and window title if updating a main target |
   | `{ scroll: 'auto' }`    | Reset scroll position if updating a main target |
-  | `{ fallback: ':main' }` | Replace a [main target](/main) if response doesn't contain target |
+  | `{ fallback: ':main' }` | Replace a [main target](/up-main) if response doesn't contain target |
   | `{ cache: true }`       | Cache responses for 5 minutes |
   | `{ feedback: true }`    | Set [`.up-active`](/a-up-update) on the activated link |
   | `{ focus: 'auto' }`     | Focus [autofocus] elements in the new fragment |

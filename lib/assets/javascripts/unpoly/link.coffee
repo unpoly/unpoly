@@ -255,7 +255,7 @@ up.link = do ->
   ###**
   Follows the given link with JavaScript and updates a fragment with the server response.
 
-  By default the layer's [main element](/main)
+  By default the layer's [main element](/up-main)
   will be replaced. Attributes like `a[up-target]`
   or `a[up-layer]` will be honored.
 
@@ -747,7 +747,7 @@ up.link = do ->
   <a href="/posts/5" up-follow up-target=".content">Read post</a>
   ```
 
-  If no `[up-target]` attribute is set, the [main target](/main) is updated.
+  If no `[up-target]` attribute is set, the [main target](/up-main) is updated.
 
   \#\#\# Advanced fragment changes
 
@@ -784,14 +784,14 @@ up.link = do ->
   @param [up-target]
     The CSS selector to update.
 
-    If omitted a [main target](/main) will be rendered.
+    If omitted a [main target](/up-main) will be rendered.
 
   @param [up-fallback]
     Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
 
     If set to a CSS selector, Unpoly will attempt to replace that selector instead.
 
-    If set to `true` Unpoly will attempt to replace a [main target](/main) instead.
+    If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
 
     If set to `false` Unpoly will immediately reject the render promise.
 
@@ -865,7 +865,7 @@ up.link = do ->
 
     If set to `auto` history will be updated if the `[up-target]` matches
     a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/main).
+    [main targets](/up-main).
 
     If set to `false`, the history will remain unchanged.
 

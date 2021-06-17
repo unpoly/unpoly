@@ -28,7 +28,7 @@
 
   \#\#\# Revealing the main element
 
-  Pass `{ scroll: 'main' }` to reveal the updated layer's [main element](/main).
+  Pass `{ scroll: 'main' }` to reveal the updated layer's [main element](/up-main).
 
   \#\#\# Don't scroll
 
@@ -52,7 +52,7 @@
 
   \#\#\# Conditional scrolling
 
-  To only scroll when a [main target](/main) is updated,
+  To only scroll when a [main target](/up-main) is updated,
   you may append `-if-main` to any of the string options in this list.
 
   E.g. `{ scroll: 'reset-if-main' }` will reset scroll positions, but only if a main target is updated.
@@ -72,7 +72,7 @@
   This is the default when [navigating](/navigation).
 
   - If the URL has a `#hash`, scroll to the hash.
-  - If updating a [main target](/main), reset scroll positions.
+  - If updating a [main target](/up-main), reset scroll positions.
     The assumption is that we navigated to a new screen.
   - Otherwise don't scroll.
 

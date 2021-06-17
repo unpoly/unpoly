@@ -71,7 +71,7 @@ up.layer = do ->
   up.layer.config.modal.openAnimation = 'move-from-top'
   ```
 
-  To configure an additional [main target](/main)
+  To configure an additional [main target](/up-main)
   for overlay of any mode:
 
   ```js
@@ -379,7 +379,7 @@ up.layer = do ->
     If set to `true` the overlay location and title will be shown in browser UI.
 
     If set to `'auto'` history will be visible if the initial overlay
-    content matches a [main target](/main).
+    content matches a [main target](/up-main).
 
   @param {string|Function} [options.animation]
     The opening animation.
@@ -639,7 +639,7 @@ up.layer = do ->
     If set to `true` the overlay location and title will be shown in browser UI.
 
     If set to `'auto'` history will be visible if the initial overlay
-    content matches a [main target](/main).
+    content matches a [main target](/up-main).
 
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.

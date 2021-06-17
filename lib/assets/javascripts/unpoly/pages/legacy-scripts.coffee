@@ -72,7 +72,7 @@
   up.fragment.config.runScripts = true
   ```
 
-  If you do this, mind that the `<body>` element is a default [main target](/main). If you are including your global application scripts
+  If you do this, mind that the `<body>` element is a default [main target](/up-main). If you are including your global application scripts
   at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute these scripts.
   In that case you must configure a different main target that does not include
   your application scripts.
