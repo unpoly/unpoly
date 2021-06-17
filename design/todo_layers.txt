@@ -2,14 +2,10 @@ Release process
 ===============
 
 - Fix unpoly-guide; The fullscreen-mode should just be up-layer="new cover"
-- Fix unpoly2 slides
-- CHANGELOG 2 is the "Objectives" slide from the Unpoly 2 presentation, links to slides for details
 - Release master as 2.0.0
 - unpoly.com
   - Deploy
-  - Fix USP links on the homepage
   - redirect v2.unpoly.com to unpoly.com (per .htaccess so we can later re-use v2. when we release 3)
-- Reach out to server-integration libs (make issues?) with the new changes
 - Announce on Twitter as @unpolyjs
   - Retweet from private account
 - Announce on mailing list
@@ -21,10 +17,13 @@ Release process
 - Close fixed issues.
   - Close all "fixed-in-2.0" issues
 - Update https://makandracards.com/makandra/54158-html-forms-with-multiple-submit-buttons
+  - Update Card
 - Update better_errors card
   - should use up:fragment:loaded
   - should use request.loadPage() instead of request.navigate()
+  - Update card
 - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
+  - Update card
 - Make a 1.0.1 release
   - With Adam's backports
   - With the X-Up-Version header
