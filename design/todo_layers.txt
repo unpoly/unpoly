@@ -18,6 +18,7 @@ Release process
 Remaining feature work
 ======================
 
+- Still says up.link.targetMacro here: https://github.com/unpoly/unpoly/issues/189
 - Following a drawer link on unpoly.com renders an error: guide-36f06c62.js:8 Uncaught (in promise) up.Failed: Viewport has no visible area
 - Tansition issue in Github
 - Doc Pages without Features are collapsed

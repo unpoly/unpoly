@@ -42,47 +42,82 @@ class up.Tether
 
   sync: =>
     elementBox = @element.getBoundingClientRect()
+
+    elementMargin =
+      top:    e.styleNumber(@element, 'marginTop')
+      right:  e.styleNumber(@element, 'marginRight')
+      bottom: e.styleNumber(@element, 'marginBottom')
+      left:   e.styleNumber(@element, 'marginLeft')
+
     anchorBox = @anchor.getBoundingClientRect()
 
     left = undefined
     top = undefined
 
     switch @alignAxis
-      when 'horizontal'
+      when 'horizontal' # position is 'top' or 'bottom'
         top = switch @position
           when 'top'
-            anchorBox.top - elementBox.height
+            anchorBox.top - elementMargin.bottom - elementBox.height
+            # element
+            # -------
+            # margin
+            # -------
+            # anchor
           when 'bottom'
-            anchorBox.top + anchorBox.height
-
+            anchorBox.top + anchorBox.height + elementMargin.top
+            # anchor
+            # ------
+            # margin
+            # ------
+            # element
         left = switch @align
           when 'left'
             # anchored to anchor's left, grows to the right
-            anchorBox.left
+            anchorBox.left + elementMargin.left
+            # mg | element
+            # ------------
+            # anchor
           when 'center'
             # anchored to anchor's horizontal center, grows equally to left/right
             anchorBox.left + 0.5 * (anchorBox.width - elementBox.width)
+            # e l e m e n t
+            # -------------
+            #    anchor
           when 'right'
             # anchored to anchor's right, grows to the left
-            anchorBox.left + anchorBox.width - elementBox.width
+            anchorBox.left + anchorBox.width - elementBox.width - elementMargin.right
+            # element | mg
+            # ------------
+            #       anchor
 
-      when 'vertical'
+      when 'vertical' # position is 'left' or 'right'
         top = switch @align
           when 'top'
             # anchored to the top, grows to the bottom
-            anchorBox.top
+            anchorBox.top + elementMargin.top
+            #  margin | anchor
+            # --------|
+            # element |
           when 'center'
             # anchored to anchor's vertical center, grows equally to left/right
             anchorBox.top + 0.5 * (anchorBox.height - elementBox.height)
+            #  ele |
+            #  men | anchor
+            #    t |
           when 'bottom'
             # anchored to the bottom, grows to the top
-            anchorBox.top + anchorBox.height - elementBox.height
-
+            anchorBox.top + anchorBox.height - elementBox.height - elementMargin.bottom
+            # element |
+            # ------- |
+            #  margin | anchor
         left = switch @position
           when 'left'
-            anchorBox.left - elementBox.width
+            anchorBox.left - elementMargin.right - elementBox.width
+            # element | margin | anchor
           when 'right'
-            anchorBox.left + anchorBox.width
+            anchorBox.left + anchorBox.width + elementMargin.left
+           # anchor | margin | element
 
     if u.isDefined(left) || u.isDefined(top)
       @moveTo(left, top)
