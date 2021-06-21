@@ -1,21 +1,7 @@
 Release process
 ===============
 
-- Release master as 2.0.0
-- unpoly.com
-  - Deploy latest
-  - Deploy v2
-- Test that v2.unpoly.com to unpoly.com (per .htaccess so we can later re-use v2. when we release 3)
-- Announce on Twitter as @unpolyjs
-  - Retweet from private account
-- Announce on mailing list
-  - Thank Adam
-  - Thank people who tried the RCs
-  - Thank my employer makandra who is sponsoring some of time that went into this project
-- Announce in makandra slack
 - Announce on makandra cards
-- Close fixed issues.
-  - Close all "fixed-in-2.0" issues
 - Update https://makandracards.com/makandra/54158-html-forms-with-multiple-submit-buttons
   - Update Card
 - Update better_errors card
@@ -31,6 +17,13 @@ Release process
 
 Remaining feature work
 ======================
+
+- Following a drawer link on unpoly.com renders an error: guide-36f06c62.js:8 Uncaught (in promise) up.Failed: Viewport has no visible area
+- Tansition issue in Github
+- Doc Pages without Features are collapsed
+- Popups: For styling it would be nice to set [up-origin=target-of-origin]
+- Popups: It is not possible to define a spacing. Because we always measure the rendered box, then place it right next to the anchor.
+  => Take margin into account!
 
 
 Doc comments
