@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 up.migrate.postCompile = (elements, compiler) ->
   # up.compiler() has a legacy { keep } option that will automatically

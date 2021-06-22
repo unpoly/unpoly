@@ -107,4 +107,4 @@ up.migrate.renamedEvent('up:popup:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:popup:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:popup:closed', 'up:layer:dismissed')
 
-up.link.targetMacro('up-popup', { 'up-layer': 'new popup' }, -> up.migrate.deprecated('[up-popup]', '[up-layer="new popup"]'))
+up.migrate.targetMacro('up-popup', { 'up-layer': 'new popup' }, -> up.migrate.deprecated('[up-popup]', '[up-layer="new popup"]'))
