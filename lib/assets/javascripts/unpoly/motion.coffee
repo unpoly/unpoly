@@ -388,8 +388,10 @@ up.motion = do ->
           afterInsert()
 
       trackable = ->
-        # Scroll newElement into position before we start the enter animation.
-        promise = scrollNew()
+        # (1) Scroll newElement into position before we start the enter animation.
+        # (2) The return value of scrollNew() may or may not be a promise, so we convert
+        #     it to a promise by wrapping it in Promise.resolve().
+        promise = Promise.resolve(scrollNew())
 
         promise = promise.then ->
           # Since we have scrolled the viewport (containing both oldElement and newElement),

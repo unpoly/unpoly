@@ -1107,6 +1107,26 @@ describe 'up.link', ->
             expect(@$oldGhost).toHaveOpacity(0.5, 0.15)
             expect(@$newGhost).toHaveOpacity(0.5, 0.15)
 
+        it 'does not crash when updating a main element (fix for issue #187)', asyncSpec (next) ->
+          fixture('main.target.old')
+          link = fixture('a[href="/path"][up-target="main"][up-transition="cross-fade"][up-duration="600"]')
+          Trigger.clickSequence(link)
+
+          next ->
+            jasmine.respondWith '<main class="target new">new text</main>'
+
+          next.after 300, ->
+            oldGhost = document.querySelector('main.target.old')
+            newGhost = document.querySelector('main.target.new')
+            expect(oldGhost).toBeAttached()
+            expect(newGhost).toBeAttached()
+            expect(oldGhost).toHaveOpacity(0.5, 0.45)
+            expect(newGhost).toHaveOpacity(0.5, 0.45)
+
+          next.after 600, ->
+            expect(document).toHaveSelector('main.target.new')
+            expect(document).not.toHaveSelector('main.target.old')
+
       describe 'wih a CSS selector in the [up-fallback] attribute', ->
 
         it 'uses the fallback selector if the [up-target] CSS does not exist on the page', asyncSpec (next) ->
