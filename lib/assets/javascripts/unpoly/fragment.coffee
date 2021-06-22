@@ -1298,7 +1298,7 @@ up.fragment = do ->
   so you don't usually need to pass a URL when reloading.
 
   To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
-  on the element or its ancestors.
+  on the element being reloaded or its ancestors.
 
   \#\#\# Skipping updates when nothing changed
 
