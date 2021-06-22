@@ -164,7 +164,7 @@ class up.Request extends up.Record
   ###**
   The element that triggered the request.
 
-  For example, when this request was triggered by a click on a link, the lonk
+  For example, when this request was triggered by a click on a link, the link
   element is set as the `{ origin }`.
 
   To prevent memory leaks, this property is removed shortly after the response is received.
