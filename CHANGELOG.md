@@ -8,6 +8,16 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.0.1
+-----
+
+This bugfix release addresses some issues user reported when upgrading to Unpoly 2:
+
+- Fix a bug where [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) would crash when loaded.
+- Fix a bug where transitions would crash when some { scroll } options were also used (#187)
+- Users can now now change the spacing between a popup overlay and the opening link by giving `<up-popup>` a CSS margin.
+
+
 2.0.0
 -----
 
