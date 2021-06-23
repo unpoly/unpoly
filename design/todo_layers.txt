@@ -18,13 +18,6 @@ Release process
 Remaining feature work
 ======================
 
-- Following a drawer link on unpoly.com renders an error: guide-36f06c62.js:8 Uncaught (in promise) up.Failed: Viewport has no visible area
-- Tansition issue in Github
-- Doc Pages without Features are collapsed
-- Popups: For styling it would be nice to set [up-origin=target-of-origin]
-- Popups: It is not possible to define a spacing. Because we always measure the rendered box, then place it right next to the anchor.
-  => Take margin into account!
-
 
 Doc comments
 ------------

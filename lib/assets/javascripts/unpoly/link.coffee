@@ -28,8 +28,8 @@ the targeted fragments and discard the rest:
 
 ![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture has_border is_sepia has_padding"}
 
-With this model, following links feels smooth. All transient DOM changes outside the updated fragment are preserved.
-Pages also load much faster since the DOM, CSS and Javascript environments do not need to be
+With this model, following links feels smooth. All DOM state outside the updated fragment is preserved.
+Pages also load much faster since the DOM, CSS and JavaScript environments do not need to be
 destroyed and recreated for every request.
 
 
