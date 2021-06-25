@@ -14,7 +14,8 @@ If you're looking for the code of Unpoly 0.x or 1.0, use the [`1.x-stable`](http
 Getting started
 ---------------
 
-- See [unpoly.com](https://unpoly.com) for more information and JavaScript API documentation.
+- See [unpoly.com](https://unpoly.com) for guides and documentation.
+- See [installation instructions](https://unpoly.com/install) for many different package managers and languages.
 - See [`CHANGELOG.md`](https://github.com/unpoly/unpoly/blob/master/CHANGELOG.md) for notable changes.
 - See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md) documentation of the Rails bindings.
 
