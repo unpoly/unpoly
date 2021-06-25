@@ -18,6 +18,11 @@ Release process
 Remaining feature work
 ======================
 
+- This is a dead link: <a up-instant href="foo">
+  - Because it activates on mousedown, but is not handled by Unpoly
+  - Maybe only do [up-instant] if followable (instead of followDisabled?)
+
+
 
 Doc comments
 ------------
