@@ -424,6 +424,9 @@ up.form = do ->
   See the documentation for [`input[up-validate]`](/input-up-validate) for more information
   on how server-side validation works in Unpoly.
 
+  `up.validate()` uses `up.submit()` to perform the form submission, enabling many of the
+  [render options](/up.render) accepted by [`up.submit()`](/up.submit) to be used here.
+
   \#\#\# Example
 
   ```js
