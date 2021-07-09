@@ -433,8 +433,17 @@ up.form = do ->
   @function up.validate
   @param {string|Element|jQuery} field
     The form field to validate.
+  @param {Object} [options]
+    Additional [submit options](/up.submit#options) that should be used for
+    submitting the form for validation.
+
+    You may pass this `options` object to supplement or override the defaults
+    from `up.submit()`.
   @param {string|Element|jQuery} [options.target]
     The element that will be [updated](/up.render) with the validation results.
+
+    By default the closest [validate target](/up.form.config#config.validateTargets)
+    around the given `field` is updated.
   @return {Promise}
     A promise that fulfills when the server-side
     validation is received and the form was updated.

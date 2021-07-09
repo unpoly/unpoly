@@ -403,6 +403,11 @@ up.protocol = do ->
   See the documentation for [`input[up-validate]`](/input-up-validate) for more information
   on how server-side validation works in Unpoly.
 
+  The server is free to respond with any HTTP status code, regardless of the validation result.
+  Unpoly will always consider a validation request to be successful, even if the
+  server responds with a non-200 status code. This is in contrast to [regular form submissions](/form-up-submit),
+  [where a non-200 status code will often update a different element](/server-errors).
+
   \#\#\# Example
 
   Assume we have an auto-validating form field:
