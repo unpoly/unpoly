@@ -20,7 +20,8 @@ Remaining feature work
 
 - This is a dead link: <a up-instant href="foo">
   - Because it activates on mousedown, but is not handled by Unpoly
-  - Maybe only do [up-instant] if followable (instead of followDisabled?)
+  - Maybe only do [up-instant] and [up-preload] if followable (instead of not followDisabled?)
+  - Or make [up-instant] / [up-preload] followable by default?
 
 - in SMH up.on(window, revealHash) crashes because up.on wants to provide the element
   - which goes through up.fragment.get
