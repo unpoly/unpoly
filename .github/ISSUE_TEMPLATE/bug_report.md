@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report defective behavior of the Unpoly library.
 title: ''
 labels: ''
 assignees: ''
