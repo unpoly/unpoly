@@ -23,17 +23,6 @@ Remaining feature work
   - Maybe only do [up-instant] and [up-preload] if followable (instead of not followDisabled?)
   - Or make [up-instant] / [up-preload] followable by default?
 
-- in SMH up.on(window, revealHash) crashes because up.on wants to provide the element
-  - which goes through up.fragment.get
-  - which goes through up.element.get
-  - which thinks up.util.isJQuery(window) === true because the app defines window.jquery
-  - Since up.browser.canJQuery already expects window.jQuery to be defined we could do the check below better, no?
-    isJQuery = (object) ->
-      # We cannot do `object instanceof jQuery` since window.jQuery might not be set
-      !!object?.jquery
-
-
-
 
 Doc comments
 ------------
