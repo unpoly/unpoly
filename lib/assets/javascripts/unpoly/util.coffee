@@ -568,7 +568,7 @@ up.util = do ->
   ###
   isJQuery = (object) ->
     # We cannot do `object instanceof jQuery` since window.jQuery might not be set
-    !!object?.jquery
+    up.browser.canJQuery() && object instanceof jQuery
 
   ###**
   @function up.util.isElementish

@@ -1529,6 +1529,20 @@ describe 'up.util', ->
         value = undefined
         expect(up.util.isJQuery(value)).toBe(false)
 
+      it 'returns false for the window object', ->
+        value = window
+        expect(up.util.isJQuery(value)).toBe(false)
+
+      it 'returns false for the window object if window.jquery (lowercase) is defined (bugfix)', ->
+        window.jquery = '3.0.0'
+        value = window
+        expect(up.util.isJQuery(value)).toBe(false)
+        delete window.jquery
+
+      it 'returns false for the document object', ->
+        value = document
+        expect(up.util.isJQuery(value)).toBe(false)
+
     describe 'up.util.isPromise', ->
 
       it 'returns true for a Promise', ->

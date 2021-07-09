@@ -111,6 +111,10 @@ up.browser = do ->
       document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
     value
 
+  getJQuery = ->
+    canJQuery() or up.fail("jQuery must be published as window.jQuery")
+    return jQuery
+
   ###**
   @return {Promise}
   @function up,browser.ensureConfirmed
@@ -136,10 +140,6 @@ up.browser = do ->
   isSupported = ->
     return canPromise()
 
-  callJQuery = (args...) ->
-    canJQuery() or up.fail("jQuery must be published as window.jQuery")
-    return jQuery(args...)
-
   u.literal
     loadPage: loadPage
     submitForm: submitForm
@@ -150,5 +150,5 @@ up.browser = do ->
     assertConfirmed: assertConfirmed
     isSupported: isSupported
     popCookie: popCookie
-    jQuery: callJQuery
+    get_jQuery: getJQuery
     isIE11: isIE11
