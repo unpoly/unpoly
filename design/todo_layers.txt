@@ -2,8 +2,6 @@ Release process
 ===============
 
 - Announce on makandra cards
-- Update https://makandracards.com/makandra/54158-html-forms-with-multiple-submit-buttons
-  - Update Card
 - Update better_errors card
   - should use up:fragment:loaded
   - should use request.loadPage() instead of request.navigate()
