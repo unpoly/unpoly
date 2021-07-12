@@ -1748,8 +1748,6 @@ up.fragment = do ->
     matches: matches
     hasAutoHistory: hasAutoHistory
 
-up.replace = up.fragment.replace
-up.extract = up.fragment.extract
 up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
 up.render = up.fragment.render
