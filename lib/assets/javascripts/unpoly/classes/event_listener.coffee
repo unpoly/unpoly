@@ -97,10 +97,9 @@ class up.EventListener extends up.Record
       attributes.callback.upUid
     ].join('|')
 
-  @unbindNonDefault: (element) ->
-    if map = element.upEventListeners
+  @allNonDefault: (element) ->
+    if map = element.upEventListeners || {}
       listeners = u.values(map)
-      for listener in listeners
-        unless listener.isDefault
-          # Calling unbind() also removes the listener from element.upEventListeners
-          listener.unbind()
+      u.reject(listeners, 'isDefault')
+    else
+      []

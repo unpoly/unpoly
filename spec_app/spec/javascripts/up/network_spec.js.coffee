@@ -1479,3 +1479,84 @@ describe 'up.network', ->
         expect(url: '/foo/1').not.toBeCached()
         expect(url: '/foo/2').not.toBeCached()
         expect(url: '/bar/1').toBeCached()
+
+  describe 'unobtrusive behavior', ->
+
+    describe 'progress bar', ->
+
+      it 'shows an animated progress when requests are late', asyncSpec (next) ->
+        up.network.config.badResponseTime = 200
+        lastWidth = null
+
+        up.request('/slow')
+
+        next.after 100, ->
+          expect(document).not.toHaveSelector('up-progress-bar')
+
+        next.after 200, ->
+          expect(document).toHaveSelector('up-progress-bar')
+          bar = document.querySelector('up-progress-bar')
+          lastWidth = parseFloat(getComputedStyle(bar).width)
+
+        next.after 500, ->
+          expect(document).toHaveSelector('up-progress-bar')
+          bar = document.querySelector('up-progress-bar')
+          newWidth = parseFloat(getComputedStyle(bar).width)
+          expect(newWidth).toBeGreaterThan(lastWidth)
+
+          jasmine.respondWith('response')
+
+        next.after 500, ->
+          expect(document).not.toHaveSelector('up-progress-bar')
+
+      it 'shows no progress bar when requests finish fast enough', asyncSpec (next) ->
+        up.network.config.badResponseTime = 300
+
+        up.request('/slow')
+
+        next.after 100, ->
+          expect(document).not.toHaveSelector('up-progress-bar')
+          jasmine.respondWith('response')
+
+        next.after 300, ->
+          expect(document).not.toHaveSelector('up-progress-bar')
+
+      it 'delays removal of the progress bar as more pending requests become late'
+
+      it 'does not show a progress bar with up.network.config.progressBar = false', asyncSpec (next) ->
+        up.network.config.badResponseTime = 10
+        up.network.config.progressBar = false
+        up.request('/slow')
+
+        next.after 100, ->
+          expect(document).not.toHaveSelector('up-progress-bar')
+
+      if up.migrate.loaded
+
+        it 'does not show a progress bar when an up:request:late listener is registered', asyncSpec (next) ->
+          up.network.config.badResponseTime = 30
+          up.on 'up:request:late', -> console.log("custom loading indicator")
+          up.request('/slow')
+
+          next.after 100, ->
+            expect(document).not.toHaveSelector('up-progress-bar')
+
+        it 'shows a progress bar when no up:request:late listener is registered', asyncSpec (next) ->
+          up.network.config.badResponseTime = 10
+          up.request('/slow')
+
+          next.after 100, ->
+            expect(document).toHaveSelector('up-progress-bar')
+
+      else
+
+        it 'shows a progress bar even when an up:request:late listener is registered', asyncSpec (next) ->
+          up.network.config.badResponseTime = 10
+          up.request('/slow')
+
+          up.on 'up:request:late', -> console.log("custom loading indicator")
+
+          next.after 100, ->
+            expect(document).toHaveSelector('up-progress-bar')
+
+

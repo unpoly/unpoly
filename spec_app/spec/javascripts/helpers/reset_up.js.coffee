@@ -35,5 +35,8 @@ afterEach (done) ->
         if overlays.length > 0
           console.error("Overlays survived reset!", overlays)
 
+        if document.querySelector('up-progress-bar')
+          console.error('Progress bar survived reset!')
+
         up.puts("Framework was reset")
         done()

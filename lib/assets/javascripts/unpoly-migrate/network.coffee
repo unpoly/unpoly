@@ -110,3 +110,21 @@ Returns whether the response was not [successful](/up.Response.prototype.ok).
 up.Response.prototype.isError = ->
   up.migrate.deprecated('up.Response#isError()', '!up.Response#ok')
   return !@ok
+
+mayHaveCustomIndicator = ->
+  listeners = up.EventListener.allNonDefault(document)
+  u.find listeners, (listener) -> listener.eventType == 'up:request:late'
+
+progressBarDefault = up.network.config.progressBar
+
+disableProgressBarIfCustomIndicator = ->
+  up.network.config.progressBar = ->
+    if mayHaveCustomIndicator()
+      up.migrate.warn('Disabled the default progress bar as may have built a custom loading indicator with your up:request:late listener. Please set up.network.config.progressBar to true or false.')
+      false
+    else
+      progressBarDefault
+
+disableProgressBarIfCustomIndicator()
+up.on 'up:framework:reset', disableProgressBarIfCustomIndicator
+

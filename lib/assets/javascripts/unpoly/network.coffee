@@ -28,7 +28,7 @@ Unpoly's `up.request()` has a number of convenience features:
 ###
 up.network = do ->
   ###**
-  TODO: Docs for up.network.config.clearCache
+  Sets default options for this package.
 
   @property up.network.config
 
@@ -77,6 +77,9 @@ up.network = do ->
 
   @param {number} [config.badResponseTime=400]
     How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
+
+    Requests exceeding this response time will also cause a [progress bar](/up.network.config#config.progressBar)
+    to appear at the top edge of the screen.
 
     This metric is *not* considered for the decision to
     [reduce requests](/up.network.shouldReduceRequests).
@@ -139,6 +142,22 @@ up.network = do ->
       }
     }
 
+  @param {boolean|Function(): boolean} [config.progressBar]
+    Whether to show a progress bar for [late requests](/up:request:late).
+
+    The progress bar is implemented as a single `<up-progress-bar>` element.
+    Unpoly will automatically insert and remove this element as requests
+    are [late](/up:request:late) or [recovered](/up:request:recover).
+
+    The default appearance is a simple blue bar at the top edge of the screen.
+    You may customize the style using CSS:
+
+    ```css
+    up-progress-bar {
+      background-color: red;
+    }
+    ```
+
   @stable
   ###
   config = new up.Config ->
@@ -154,10 +173,13 @@ up.network = do ->
     autoCache: (request) -> request.isSafe()
     clearCache: (request, _response) -> !request.isSafe()
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+    progressBar: true
 
   queue = new up.Request.Queue()
 
   cache = new up.Request.Cache()
+
+  progressBar = null
 
   ###**
   Returns an earlier request [matching](/up.network.config#config.requestMetaKeys) the given request options.
@@ -265,6 +287,8 @@ up.network = do ->
     queue.reset()
     config.reset()
     cache.clear()
+    progressBar?.destroy()
+    progressBar = null
 
   ###**
   Makes an AJAX request to the given URL.
@@ -624,10 +648,12 @@ up.network = do ->
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish.
 
-  By default Unpoly will wait 800 ms for an AJAX request to finish
-  before emitting `up:request:late`. You can configure this time like this:
+  By default Unpoly will wait 400 ms for an AJAX request to finish
+  before emitting `up:request:late`. You may configure this delay like this:
 
-      up.network.config.badResponseTime = 400;
+  ```js
+  up.network.config.badResponseTime = 1000 // milliseconds
+  ```
 
   Once all responses have been received, an [`up:request:recover`](/up:request:recover)
   will be emitted.
@@ -635,34 +661,40 @@ up.network = do ->
   Note that if additional requests are made while Unpoly is already busy
   waiting, **no** additional `up:request:late` events will be triggered.
 
-  \#\#\# Spinners
+  \#\#\# Loading indicators
 
-  You can [listen](/up.on) to the `up:request:late`
-  and [`up:request:recover`](/up:request:recover) events to implement a spinner
-  that appears during a long-running request,
-  and disappears once the response has been received:
+  By default the `up:request:late` event will cause a [progress bar](/up.network.config#config.progressBar)
+  to appear at the top edge of the screen.
 
-      <div class="spinner">Please wait!</div>
+  If you don't like the default progress bar, you can [listen](/up.on) to the `up:request:late`
+  and [`up:request:recover`](/up:request:recover) events to implement a custom
+  loading indicator that appears during long-running requests.
 
-  Here is the JavaScript to make it alive:
+  To build a custom loading indicator, please an element like this in your application layout:
 
-      up.compiler('.spinner', function(element) {
-        show = () => { up.element.show(element) }
-        hide = () => { up.element.hide(element) }
+  ```html
+  <loading-indicator>Please wait!</loading-indicator>
+  ```
 
-        hide()
+  Now add a [compiler](/up.compiler) that hides the `<loading-indicator>` element
+  while there are no long-running requests:
 
-        return [
-          up.on('up:request:late', show),
-          up.on('up:request:recover', hide)
-        ]
-      })
+  ```js
+  // Disable the default progress bar
+  up.network.config.progressBar = false
 
-  The `up:request:late` event will be emitted after a delay
-  to prevent the spinner from flickering on and off.
-  You can change (or remove) this delay like this:
+  up.compiler('loading-indicator', function(indicator) {
+    function show() { up.element.show(indicator) }
+    function hide() { up.element.hide(indicator) }
 
-      up.network.config.badResponseTime = 400;
+    hide()
+
+    return [
+      up.on('up:request:late', show),
+      up.on('up:request:recover', hide)
+    ]
+  })
+  ```
 
   @event up:request:late
   @stable
@@ -749,6 +781,15 @@ up.network = do ->
   isSafeMethod = (method) ->
     u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method))
 
+  onLate = ->
+    if u.evalOption(config.progressBar)
+      progressBar = new up.ProgressBar()
+
+  onRecover = ->
+    progressBar?.conclude()
+
+  up.on 'up:request:late', onLate
+  up.on 'up:request:recover', onRecover
   up.on 'up:framework:reset', reset
 
   request: makeRequest

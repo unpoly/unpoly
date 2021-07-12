@@ -34,7 +34,8 @@ up.event = do ->
     # Resets the list of registered event listeners to the
     # moment when the framework was booted.
     for element in [window, document, e.root, document.body]
-      up.EventListener.unbindNonDefault(element)
+      for listener in up.EventListener.allNonDefault(element)
+        listener.unbind()
 
   ###**
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)

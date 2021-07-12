@@ -58,7 +58,7 @@ up.migrate = do ->
     formattedMessage = u.sprintf(message, args...)
     unless warnedMessages[formattedMessage]
       warnedMessages[formattedMessage] = true
-      up.log[config.logLevel]('DEPRECATION', message, args...)
+      up.log[config.logLevel]('unpoly-migrate', message, args...)
 
   deprecated = (deprecatedExpression, replacementExpression) ->
     warn("#{deprecatedExpression} has been deprecated. Use #{replacementExpression} instead.")
