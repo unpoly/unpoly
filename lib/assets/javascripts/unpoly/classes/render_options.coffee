@@ -25,6 +25,8 @@ up.RenderOptions = do ->
     'headers',
     'params',
     'cache',
+    'clearCache',
+    'fallback',  # this may produce a different X-Up-Target request header if { target } is missing on page
     'solo',
     'confirm',
     'feedback',
@@ -57,7 +59,6 @@ up.RenderOptions = do ->
     'history',      # Note that regardless of setting, we only set history for reloadable responses (GET).
     'source',       # No strong opinions about that one. Wouldn't one always have a source? Might as well not be an option.
     'saveScroll',   # No strong opinions about that one. Wouldn't one always want to saveScroll? Might as wellnot be an option.
-    'fallback',     # If I always want to see the server response, I also want to see it for the fail case
     'navigate'      # Also set navigate defaults for fail options
   ])
 
