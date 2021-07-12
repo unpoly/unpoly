@@ -13,10 +13,13 @@ afterEach (done) ->
   # the timeout below will actually happen.
   jasmine.clock().uninstall()
 
-  # Most pending promises will wait for an animation to finish.
-  promise = up.motion.finish()
+  # Abort all requests so any cancel handlers can run and do async things.
+  up.network.abort()
 
-  u.always promise, ->
+  # Most pending promises will wait for an animation to finish.
+  whenMotionsDone = up.motion.finish()
+
+  u.always whenMotionsDone, ->
 
     # Wait one more frame so pending callbacks have a chance to run.
     # Pending callbacks might change the URL or cause errors that bleed into
