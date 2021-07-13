@@ -1,16 +1,8 @@
 Release process
 ===============
 
-- Announce on makandra cards
-- Update better_errors card
-  - should use up:fragment:loaded
-  - should use request.loadPage() instead of request.navigate()
-  - Update card
 - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
   - Update card
-- Make a 1.0.1 release
-  - With Adam's backports
-  - With the X-Up-Version header
 
 
 Remaining feature work
@@ -21,43 +13,15 @@ Remaining feature work
   - Maybe only do [up-instant] and [up-preload] if followable (instead of not followDisabled?)
   - Or make [up-instant] / [up-preload] followable by default?
 
+- Make a 1.0.1 release
+  - Fix Unpoly site
+  - With Adam's backports
+  - With the X-Up-Version header
 
 - 1.1.0
-  - Can we get rid of { location, title } is only set when { history } is also true?
   - Changelog
   - Announcement on GitHub
   - Card
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Aktuell ist es so:
-
-    layerOptions < globalOptions < navigateOptions < userOptions
-
-Es müsste aber so sein:
-
-    globalOptions < navigateOptions < layerOptions < userOptions
-
-Was wäre wenn up.RenderOptions.preprocess(options) so ein Objekt erzeugt:
-
-   backgroundOptions   inherits to    (userOptions modified by overrides)
-
-   => jetzt könnten sich die layerOptions auf die backgroundOptions setzen
-   => wir bräuchten dann aber separate methoden zum mergen, denn u.merge sieht keine eltern-objekte!
-   => wie funktioniert das dann bei deriveFailOptions?
-    => Separat background und foreground options processen
-      =>
 
 
 
