@@ -19,22 +19,36 @@ describe 'up.RenderOptions', ->
         expect(options.solo).toBe(true)
         expect(options.feedback).toBe(true)
         expect(options.fallback).toBe(true)
-        expect(options.history).toBe('auto')
         expect(options.peel).toBe(true)
         expect(options.cache).toBe('auto')
-        expect(options.scroll).toBe('auto')
 
       it 'allows to configure defaults using up.fragment.config.navigateOptions', ->
         up.fragment.config.navigateOptions.feedback = false
-        up.fragment.config.navigateOptions.scroll = 'target'
         up.fragment.config.navigateOptions.transition = 'move-left'
 
         givenOptions = { navigate: true }
         options = up.RenderOptions.preprocess(givenOptions)
 
         expect(options.feedback).toBe(false)
-        expect(options.scroll).toBe('target')
         expect(options.transition).toBe('move-left')
+
+      it 'lets the given options override the defaults from up.fragment.config.navigateOptions', ->
+        up.fragment.config.navigateOptions.feedback = false
+        givenOptions = { navigate: true, feedback: true }
+        options = up.RenderOptions.preprocess(givenOptions)
+
+        expect(options.feedback).toBe(true)
+
+      it 'omits navigate options that may later be overridden by a layer config', ->
+        up.fragment.config.navigateOptions.focus = 'auto'
+        up.fragment.config.navigateOptions.scroll = 'auto'
+        up.fragment.config.navigateOptions.history = 'auto'
+
+        givenOptions = { navigate: true }
+        options = up.RenderOptions.preprocess(givenOptions)
+        expect(options.focus).toBeUndefined()
+        expect(options.scroll).toBeUndefined()
+        expect(options.history).toBeUndefined()
 
     describe 'with { navigate: false }', ->
 

@@ -6,6 +6,7 @@ e = up.element
 class up.Change.UpdateLayer extends up.Change.Addition
 
   constructor: (options) ->
+    options = up.RenderOptions.finalize(options)
     super(options)
     @layer = options.layer
     @target = options.target

@@ -138,7 +138,7 @@ up.migrate.handleHistoryOption = (options) ->
     # where it would be expanded to { failLocation }.
     options.history = 'auto'
 
-up.migrate.handleRenderOptions = (options) ->
+up.migrate.preprocessRenderOptions = (options) ->
   up.migrate.handleHistoryOption(options)
 
   for prop in ['target', 'origin']

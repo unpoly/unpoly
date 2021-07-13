@@ -295,7 +295,7 @@ up.layer = do ->
     # return the resolved version of that.
     options.baseLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
 
-  build = (options) ->
+  build = (options, beforeNew) ->
     mode = options.mode
     Class = config[mode].Class
 
@@ -307,6 +307,9 @@ up.layer = do ->
       configs.forEach(handleDeprecatedConfig)
 
     options = u.mergeDefined(configs..., { mode, stack }, options)
+
+    if beforeNew
+      options = beforeNew(options)
 
     return new Class(options)
 

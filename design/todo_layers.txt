@@ -22,6 +22,27 @@ Remaining feature work
   - Or make [up-instant] / [up-preload] followable by default?
 
 
+Aktuell ist es so:
+
+    layerOptions < globalOptions < navigateOptions < userOptions
+
+Es müsste aber so sein:
+
+    globalOptions < navigateOptions < layerOptions < userOptions
+
+Was wäre wenn up.RenderOptions.preprocess(options) so ein Objekt erzeugt:
+
+   backgroundOptions   inherits to    (userOptions modified by overrides)
+
+   => jetzt könnten sich die layerOptions auf die backgroundOptions setzen
+   => wir bräuchten dann aber separate methoden zum mergen, denn u.merge sieht keine eltern-objekte!
+   => wie funktioniert das dann bei deriveFailOptions?
+    => Separat background und foreground options processen
+      =>
+
+
+
+
 Doc comments
 ------------
 

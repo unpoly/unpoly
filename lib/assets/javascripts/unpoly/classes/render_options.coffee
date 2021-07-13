@@ -62,7 +62,21 @@ up.RenderOptions = do ->
     'navigate'      # Also set navigate defaults for fail options
   ])
 
-  CONTENT_KEYS = ['url', 'content', 'fragment', 'document']
+  CONTENT_KEYS = [
+    'url',
+    'content',
+    'fragment',
+    'document'
+  ]
+
+  # preprocess() will leave out properties for which there may be a better default
+  # later, in particular from the layer config in up.Change.OpenLayer.
+  LATE_KEYS = [
+    'history',
+    'historyVisible',
+    'focus',
+    'scroll'
+  ]
 
   navigateDefaults = (options) ->
     if options.navigate
@@ -73,16 +87,33 @@ up.RenderOptions = do ->
       PRELOAD_OVERRIDES
 
   preprocess = (options) ->
-    up.migrate.handleRenderOptions?(options)
+    up.migrate.preprocessRenderOptions?(options)
 
-    result = u.merge(
+    defaults = u.merge(
       GLOBAL_DEFAULTS,
-      navigateDefaults(options),
+      navigateDefaults(options)
+    )
+
+    return u.merge(
+      # Leave out properties for which there may be a better default later, in particular
+      # from the layer config in up.Change.OpenLayer. If we merged it now we could
+      # not distinguish a user option (which always has highest priority) with a
+      # default that may be overridden by the layer config. If there is no better default
+      # later, the original defaults will be applied in finalize().
+      u.omit(defaults, LATE_KEYS),
+      # Remember the defaults in a { default } prop so we can re-use it
+      # later in deriveFailOptions() and finalize().
+      { defaults },
       options,
       preloadOverrides(options)
     )
 
-    return result
+  finalize = (preprocessedOptions, lateDefaults) ->
+    return u.merge(
+      preprocessedOptions.defaults,
+      lateDefaults,
+      preprocessedOptions
+    )
 
   assertContentGiven = (options) ->
     unless u.some(CONTENT_KEYS, (contentKey) -> return u.isGiven(options[contentKey]))
@@ -102,14 +133,15 @@ up.RenderOptions = do ->
     overrides
 
   deriveFailOptions = (preprocessedOptions) ->
-    result = u.merge(
+    return u.merge(
+      preprocessedOptions.defaults,
       u.pick(preprocessedOptions, SHARED_KEYS),
       failOverrides(preprocessedOptions)
     )
-    return preprocess(result)
 
   return {
     preprocess,
+    finalize,
     assertContentGiven,
     deriveFailOptions,
   }

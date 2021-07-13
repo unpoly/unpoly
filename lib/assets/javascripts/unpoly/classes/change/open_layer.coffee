@@ -122,7 +122,12 @@ class up.Change.OpenLayer extends up.Change.Addition
     # does not resolve from the :layer pseudo-selector. Since :layer is a part of
     # up.fragment.config.mainTargets and :main is a part of fragment.config.autoHistoryTargets,
     # this would otherwise cause auto-history for *every* overlay regardless of initial target.
-    return up.layer.build(u.merge(@options, opening: true))
+    buildOptions = u.merge(@options, opening: true)
+
+    beforeNew = (optionsWithLayerDefaults) =>
+      return @options = up.RenderOptions.finalize(optionsWithLayerDefaults)
+
+    return up.layer.build(buildOptions, beforeNew)
 
   handleHistory: ->
     if @layer.historyVisible == 'auto'

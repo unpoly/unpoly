@@ -111,14 +111,14 @@ up.fragment = do ->
     # These defaults will be set to both success and fail options
     # if { navigate: true } is given.
     navigateOptions: {
-      focus: 'auto'
-      scroll: 'auto'
       solo: true      # preflight
       feedback: true  # preflight
-      fallback: true
-      history: 'auto'
-      peel: true
-      cache: 'auto'
+      cache: 'auto'   # preflight
+      fallback: true  # FromContent
+      focus: 'auto'   # UpdateLayer/OpenLayer
+      scroll: 'auto'  # UpdateLayer/OpenLayer
+      history: 'auto' # UpdateLayer/OpenLayer
+      peel: true      # UpdateLayer/OpenLayer
     }
 
     matchAroundOrigin: true
