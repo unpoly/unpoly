@@ -104,6 +104,14 @@ describe 'up.network', ->
 
       describe 'transfer of meta attributes', ->
 
+        it "sends Unpoly's version as an X-Up-Version request header", asyncSpec (next) ->
+          up.request(url: '/foo')
+
+          next =>
+            versionHeader = @lastRequest().requestHeaders['X-Up-Version']
+            expect(versionHeader).toBePresent()
+            expect(versionHeader).toEqual(up.version)
+
         it 'submits information about the fragment update as HTTP headers, so the server may choose to optimize its responses', asyncSpec (next) ->
           makeLayers(2)
 
