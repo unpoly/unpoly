@@ -8,6 +8,15 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.1.0
+-----
+
+- Unpoly now shows a [progress bar](/up.network.config#config.progressBar) that appears for [late requests](/up:request:late).
+- For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
+- [Layer configuration](/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/scroll-option) and [`{ focus }`](/focus-option). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/up.fragment.config#config.navigateOptions).
+- Links with an [`[up-instant]`](/a-up-instant) attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/a-up-follow) attribute.
+
+
 2.0.1
 -----
 
