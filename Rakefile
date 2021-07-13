@@ -141,7 +141,7 @@ namespace :npm do
   end
 
   task :publish do
-    system('npm publish') or raise 'Could not publish npm module'
+    system('npm publish --tag 1.x-stable') or raise 'Could not publish npm module'
   end
 
 end
