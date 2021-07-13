@@ -38,6 +38,14 @@ describe 'up.proxy', ->
           expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
           expect(request.requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
 
+      it "sends Unpoly's version as an X-Up-Version request header", asyncSpec (next) ->
+        up.request(url: '/foo')
+
+        next =>
+          versionHeader = @lastRequest().requestHeaders['X-Up-Version']
+          expect(versionHeader).toBePresent()
+          expect(versionHeader).toEqual(up.version)
+
       it 'resolves to a Response object that contains information about the response and request', (done) ->
         promise = up.request(
           url: '/url'

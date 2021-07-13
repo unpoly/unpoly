@@ -222,6 +222,7 @@ up.protocol = do ->
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config
+  @param {String} [config.versionHeader='X-Up-Version']
   @param {String} [config.targetHeader='X-Up-Target']
   @param {String} [config.failTargetHeader='X-Up-Fail-Target']
   @param {String} [config.locationHeader='X-Up-Location']
@@ -265,6 +266,7 @@ up.protocol = do ->
   @experimental
   ###
   config = new up.Config
+    versionHeader: 'X-Up-Version'
     targetHeader: 'X-Up-Target'
     failTargetHeader: 'X-Up-Fail-Target'
     locationHeader: 'X-Up-Location'

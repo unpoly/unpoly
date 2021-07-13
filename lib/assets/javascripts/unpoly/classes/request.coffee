@@ -151,6 +151,7 @@ class up.Request extends up.Record
         xhrPayload = xhrParams.toFormData()
 
       pc = up.protocol.config
+      xhrHeaders[pc.versionHeader] = up.version
       xhrHeaders[pc.targetHeader] = @target if @target
       xhrHeaders[pc.failTargetHeader] = @failTarget if @failTarget
       xhrHeaders['X-Requested-With'] ||= 'XMLHttpRequest' unless @isCrossDomain()
