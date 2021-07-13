@@ -5,6 +5,14 @@ Changes to this project will be documented in this file.
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
+1.0.1
+-----
+
+This is a maintenance release for Unpoly 1. Expect little to no additional changes for this legacy version. New features will only be added to Unpoly 2.
+
+- `up.request()` will now send Unpoly's version number as an `X-Up-Version` request header. Since `X-Up-Target` is optional in Unpoly 2, server-side integration libraries can look for `X-Up-Version` to reliably detect a fragment update for both Unpoly 1 and 2.
+- Fix a bug where the Unpoly banner would still be printed to the development console when `up.log.config.banner = false` is set. (fix by @adam12)
+
 
 1.0.0
 -----
