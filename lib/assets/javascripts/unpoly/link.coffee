@@ -91,7 +91,7 @@ up.link = do ->
   # Links with remote HTML are followable if there is one additional attribute
   # suggesting "follow me through Unpoly".
   LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]']
+  ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]']
 
   combineFollowableSelectors = (elementSelectors, attributeSelectors) ->
     return u.flatMap(elementSelectors, (elementSelector) ->

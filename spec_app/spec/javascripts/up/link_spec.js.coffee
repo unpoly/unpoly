@@ -719,6 +719,16 @@ describe 'up.link', ->
         up.hello $link
         expect(up.link.isFollowable($link)).toBe(true)
 
+      it 'returns true for an [up-preload] link', ->
+        $link = $fixture('a[href="/foo"][up-preload]')
+        up.hello $link
+        expect(up.link.isFollowable($link)).toBe(true)
+
+      it 'returns true for an [up-instant] link', ->
+        $link = $fixture('a[href="/foo"][up-instant]')
+        up.hello $link
+        expect(up.link.isFollowable($link)).toBe(true)
+
       if up.migrate.loaded
         it 'returns true for an [up-modal] link', ->
           $link = $fixture('a[href="/foo"][up-modal=".target"]')
@@ -2247,7 +2257,6 @@ describe 'up.link', ->
         link.addEventListener('up:click', listener)
         Trigger.click(link)
         expect(listener).toHaveBeenCalled()
-        expect(link).toHaveBeenDefaultFollowed()
 
       it 'prevents the mousedown event when the up:click event is prevented', ->
         mousedownEvent = null
