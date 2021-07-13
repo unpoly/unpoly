@@ -380,7 +380,7 @@ up.link = do ->
     parser.string('dismissEvent')
     parser.string('acceptLocation')
     parser.string('dismissLocation')
-    parser.booleanOrString('historyVisible')
+    parser.booleanOrString('history')
 
     # Viewport options
     parser.booleanOrString('focus')
@@ -871,9 +871,6 @@ up.link = do ->
     [main targets](/up-main).
 
     If set to `false`, the history will remain unchanged.
-
-    [Overlays](/up.layer) will only change the browser URL and window title if the overlay
-    has [visible history](/up.layer.historyVisible), even when `[up-history=true]` is set.
 
   @param [up-title]
     An explicit document title to use after rendering.

@@ -244,25 +244,39 @@ describe 'up.layer', ->
 
         beforeEach ->
           up.history.config.enabled = true
-          
-        describe 'with { historyVisible: true }', ->
+
+        it "prioritizes the mode's { history } config over up.fragment.config.navigateOptions.history (bugfix)", ->
+          up.fragment.config.navigateOptions.history = false
+          up.layer.config.modal.history = true
+
+          up.layer.open(
+            location: '/modal-location'
+            fragment: '<div class="element">element text</div>'
+            navigate: true # up.layer.open() is navigation by default, but let's be explicit here
+          )
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.history).toBe(true)
+          expect(location.href).toMatchURL('/modal-location')
+
+        describe 'with { history: true }', ->
 
           it 'updates the browser location when the overlay opens', asyncSpec (next) ->
             up.layer.open(
               location: '/modal-location'
               fragment: '<div class="element">element text</div>'
-              historyVisible: true
+              history: true
             )
   
             next ->
               expect(up.layer.isOverlay()).toBe(true)
-              expect(up.layer.historyVisible).toBe(true)
+              expect(up.layer.history).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
   
           it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
             makeLayers [
               { target: '.root-element' },
-              { target: '.overlay-element', location: '/modal-location', historyVisible: true }
+              { target: '.overlay-element', location: '/modal-location', history: true }
             ]
   
             expect(up.layer.isOverlay()).toBe(true)
@@ -277,14 +291,14 @@ describe 'up.layer', ->
             expect(up.layer.isRoot()).toBe(true)
             expect(location.href).toMatchURL('/new-root-location')
 
-        describe 'with { historyVisible: false }', ->
+        describe 'with { history: false }', ->
 
           it 'does not update the browser location ', asyncSpec (next) ->
             originalLocation = location.href
   
             up.layer.open(
               target: '.element',
-              historyVisible: false,
+              history: false,
               location: '/modal-url'
             )
   
@@ -300,7 +314,7 @@ describe 'up.layer', ->
   
             up.layer.open(
               target: '.element',
-              historyVisible: false,
+              history: false,
               location: '/overlay1',
             )
   
@@ -310,34 +324,34 @@ describe 'up.layer', ->
   
               up.layer.open(
                 target: '.element',
-                historyVisible: true,
+                history: true,
                 location: '/overlay2',
               )
   
             next ->
               expect(location.href).toMatchURL(originalLocation)
             
-        describe 'with { historyVisible: "auto" }', ->
+        describe 'with { history: "auto" }', ->
         
           it 'gives the layer history if the initial overlay content is a main selector', asyncSpec (next) ->
-            up.layer.config.modal.historyVisible = 'auto'
+            up.layer.config.modal.history = 'auto'
             up.fragment.config.mainTargets = ['.main']
 
             up.layer.open(mode: 'modal', history: 'auto', target: '.main')
 
             next ->
               expect(up.layer.mode).toEqual('modal')
-              expect(up.layer.historyVisible).toBe(true)
+              expect(up.layer.history).toBe(true)
 
           it 'does not give the layer history if initial overlay content is not a main selector', asyncSpec (next) ->
-            up.layer.config.modal.historyVisible = 'auto'
+            up.layer.config.modal.history = 'auto'
             up.fragment.config.mainTargets = ['.main']
 
-            up.layer.open(mode: 'modal', historyVisible: 'auto', target: '.other')
+            up.layer.open(mode: 'modal', history: 'auto', target: '.other')
 
             next ->
               expect(up.layer.mode).toEqual('modal')
-              expect(up.layer.historyVisible).toBe(false)
+              expect(up.layer.history).toBe(false)
 
       describe 'context', ->
 
@@ -885,8 +899,8 @@ describe 'up.layer', ->
       it 'prioritizes the config for a particular mode over the config for all overlays or any modes'
 
       if up.migrate.loaded
-        it 'prints a deprecation warning if the user configured { history } (which is now { historyVisible })', ->
-          up.layer.config.overlay.history = false
+        it 'prints a deprecation warning if the user configured { historyHistory } (which is now { history })', ->
+          up.layer.config.overlay.historyHistory = false
           warnSpy = spyOn(up.log, 'warn')
           up.layer.build(mode: 'drawer')
           expect(warnSpy).toHaveBeenCalled()
@@ -1393,9 +1407,9 @@ describe 'up.layer', ->
         beforeEach ->
           up.history.config.enabled = true
 
-        it 'opens a layer with visible history when the mode config has { historyVisible: true }', asyncSpec (next) ->
+        it 'opens a layer with visible history when the mode config has { history: true }', asyncSpec (next) ->
           fixture('.target')
-          up.layer.config.drawer.historyVisible = true
+          up.layer.config.drawer.history = true
           link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path5"]')
 
           Trigger.clickSequence(link)
@@ -1405,12 +1419,12 @@ describe 'up.layer', ->
 
           next ->
             expect(up.layer.count).toBe(2)
-            expect(up.layer.historyVisible).toBe(true)
+            expect(up.layer.history).toBe(true)
             expect(up.history.location).toMatchURL('/path5')
 
-        it 'opens a layer without visible history when the mode config has { historyVisible: false }', asyncSpec (next) ->
+        it 'opens a layer without visible history when the mode config has { history: false }', asyncSpec (next) ->
           fixture('.target')
-          up.layer.config.drawer.historyVisible = false
+          up.layer.config.drawer.history = false
           link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path6"]')
 
           Trigger.clickSequence(link)
@@ -1420,13 +1434,13 @@ describe 'up.layer', ->
 
           next =>
             expect(up.layer.count).toBe(2)
-            expect(up.layer.historyVisible).toBe(false)
+            expect(up.layer.history).toBe(false)
             expect(up.history.location).toMatchURL(@locationBeforeExample)
 
-        it 'lets the link override the mode config with an [up-history-visible] attribute', asyncSpec (next) ->
+        it 'lets the link override the mode config with an [up-history] attribute', asyncSpec (next) ->
           fixture('.target')
-          up.layer.config.drawer.historyVisible = true
-          link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path7"][up-history-visible="false"]')
+          up.layer.config.drawer.history = true
+          link = fixture('a[up-target=".target"][up-layer="new drawer"][href="/path7"][up-history="false"]')
 
           Trigger.clickSequence(link)
 
@@ -1435,7 +1449,7 @@ describe 'up.layer', ->
 
           next =>
             expect(up.layer.count).toBe(2)
-            expect(up.layer.historyVisible).toBe(false)
+            expect(up.layer.history).toBe(false)
             expect(up.history.location).toMatchURL(@locationBeforeExample)
 
     describe '[up-accept]', ->

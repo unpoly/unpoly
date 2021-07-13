@@ -341,7 +341,7 @@ up.feedback = do ->
   When no [overlay](/up.layer) is open, the current location is the URL displayed
   in the browser's address bar. When the link in question is placed in an overlay,
   the current location is the location of that overlay, even if that
-  overlay doesn't have [visible history](/up.Layer.prototype.historyVisible).
+  overlay doesn't have [visible history](/up.Layer.prototype.history).
 
   A link matches the current location (and is marked as `.up-current`) if it matches either:
 

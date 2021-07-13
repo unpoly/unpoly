@@ -130,22 +130,14 @@ class up.Change.OpenLayer extends up.Change.Addition
     return up.layer.build(buildOptions, beforeNew)
 
   handleHistory: ->
-    if @layer.historyVisible == 'auto'
-      @layer.historyVisible = up.fragment.hasAutoHistory(@content)
+    if @layer.history == 'auto'
+      @layer.history = up.fragment.hasAutoHistory(@content)
 
     @layer.parent.saveHistory()
 
-    # We ignore the given { history } option (not { historyVisible }) for the initial
-    # fragment update in the new overlay. There are pros and cons to this decision,
-    # but here are the pros:
-    #
-    # - Even if the layer has a { historyVisible: false } property we want to set the
-    #   initial layer.location so every layer has a #location.
-    # - When the user sets { historyVisible: true } they probably expect to see the
-    #   location bar updated regardless of the initial target. We don't want to require
-    #   them to also set { history: true }.
-    @options.history = true
-
+    # For the initial fragment insertion we always update history, even if the layer
+    # does not have visible history ({ history } attribute). This ensures that a
+    # layer always has a #location.
     @layer.updateHistory(@options)
 
   handleFocus: ->

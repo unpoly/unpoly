@@ -60,7 +60,7 @@ up.history = do ->
   ###**
   Returns a normalized URL for the current browser location.
 
-  Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.historyVisible),
+  Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
   the browser's address bar will show the location of an ancestor layer.
   To get the location of the current layer, use `up.layer.location`.
 
@@ -143,7 +143,7 @@ up.history = do ->
   - The user uses the back or forward buttons in their browser UI.
   - Programmatic calls to `up.history.push()`.
 
-  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.historyVisible), following a link
+  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.history), following a link
   will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
   However, a `up:layer:location:changed` will be emitted even if the address bar did not change.
 
@@ -204,7 +204,7 @@ up.history = do ->
     restoreStateOnPop(state)
 
   emit = (args...) ->
-    historyLayer = u.find(up.layer.stack.reversed(), 'historyVisible')
+    historyLayer = u.find(up.layer.stack.reversed(), 'history')
     historyLayer.emit(args...)
 
   up.on 'up:app:boot', ->

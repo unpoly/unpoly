@@ -22,6 +22,25 @@ Remaining feature work
   - Or make [up-instant] / [up-preload] followable by default?
 
 
+- 1.1.0
+  - Can we get rid of { location, title } is only set when { history } is also true?
+  - Changelog
+  - Announcement on GitHub
+  - Card
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Aktuell ist es so:
 
     layerOptions < globalOptions < navigateOptions < userOptions

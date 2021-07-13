@@ -73,7 +73,6 @@ up.RenderOptions = do ->
   # later, in particular from the layer config in up.Change.OpenLayer.
   LATE_KEYS = [
     'history',
-    'historyVisible',
     'focus',
     'scroll'
   ]

@@ -54,4 +54,8 @@ up.migrate.registerLayerCloser = (layer) ->
     layer.dismiss(value, closeOptions)
 
 up.migrate.handleLayerConfig = (config) ->
-  up.migrate.fixKey(config, 'history', 'historyVisible')
+  up.migrate.fixKey(config, 'historyVisible', 'history')
+
+up.util.getter up.Layer.prototype, 'historyVisible', ->
+  up.migrate.deprecated('up.Layer#historyVisible', 'up.Layer#history')
+  return @history

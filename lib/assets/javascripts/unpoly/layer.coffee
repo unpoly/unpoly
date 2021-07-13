@@ -132,7 +132,7 @@ up.layer = do ->
   @param {string} config.overlay.dismissAriaLabel
     The accessibility label for the dismiss icon in the top-right corner.
 
-  @param {string|boolean} config.overlay.historyVisible='auto'
+  @param {string|boolean} config.overlay.history='auto'
     Whether the layer's location or title will be visible in the browser's
     address bar and window title.
 
@@ -175,7 +175,7 @@ up.layer = do ->
         ],
       root:
         mainTargets: ['[up-main~=root]']
-        historyVisible: true
+        history: true
       overlay:
         mainTargets: ['[up-main~=overlay]']
         openAnimation: 'fade-in'
@@ -183,7 +183,7 @@ up.layer = do ->
         dismissLabel: '×'
         dismissAriaLabel: 'Dismiss dialog'
         dismissable: true
-        historyVisible: 'auto'
+        history: 'auto'
       cover:
         mainTargets: ['[up-main~=cover]']
       drawer:
@@ -376,7 +376,7 @@ up.layer = do ->
 
     Passing `true` or `false` will enable or disable all dismiss controls.
 
-  @param {boolean|string} [options.historyVisible]
+  @param {boolean|string} [options.history]
     Whether history of the overlay content is visible.
 
     If set to `true` the overlay location and title will be shown in browser UI.
@@ -543,7 +543,7 @@ up.layer = do ->
   This event is emitted after a layer's [location property](/up.Layer.prototype.location)
   has changed value.
 
-  This event is also emitted when a layer [without visible history](/up.Layer.prototype.historyVisible)
+  This event is also emitted when a layer [without visible history](/up.Layer.prototype.history)
   has reached a new location.
 
   @param {string} event.location
@@ -636,7 +636,7 @@ up.layer = do ->
 
     See [overlay classes](/customizing-overlays#overlay-classes).
 
-  @param [up-history-visible]
+  @param [up-history]
     Whether history of the overlay content is visible.
 
     If set to `true` the overlay location and title will be shown in browser UI.
@@ -1092,11 +1092,11 @@ up.layer = do ->
   Whether fragment updates within the [current layer](/up.layer.current)
   can affect browser history and window title.
 
-  This is a shortcut for `up.layer.current.historyVisible`.
-  See `up.Layer#historyVisible` for more documentation.
+  This is a shortcut for `up.layer.current.history`.
+  See `up.Layer#history` for more documentation.
 
-  @property up.layer.historyVisible
-  @param {boolean} historyVisible
+  @property up.layer.history
+  @param {boolean} history
   @stable
   ###
 
@@ -1143,7 +1143,7 @@ up.layer = do ->
     'off'
     'emit'
     'parent'
-    'historyVisible'
+    'history'
     'location'
     'mode'
     'context'

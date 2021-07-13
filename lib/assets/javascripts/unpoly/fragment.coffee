@@ -450,9 +450,6 @@ up.fragment = do ->
 
     If set to `false`, the history will remain unchanged.
 
-    [Overlays](/up.layer) will only change the browser URL and window title if the overlay
-    has [visible history](/up.layer.historyVisible), even when `{ history: true }` is passed.
-
   @param {string} [options.title]
     An explicit document title to use after rendering.
 

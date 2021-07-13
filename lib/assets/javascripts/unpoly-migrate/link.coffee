@@ -10,6 +10,7 @@ up.migrate.parseFollowOptions = (parser) ->
   parser.booleanOrString('reveal') # legacy option for { scroll: 'target' }
   parser.boolean('resetScroll') # legacy option for { scroll: 'top' }
   parser.boolean('restoreScroll') # legacy option for { scroll: 'restore' }
+  parser.booleanOrString('historyVisible') # short-lived legacy option for { history }
 
 ###**
 [Follows](/up.follow) this link as fast as possible.

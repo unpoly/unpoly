@@ -38,8 +38,8 @@ class up.Layer extends up.Record
 
   If a layer does not have visible history, its desendant layers cannot have history either.
 
-  @property up.Layer#historyVisible
-  @param {boolean} historyVisible
+  @property up.Layer#history
+  @param {boolean} history
   @stable
   ###
 
@@ -78,7 +78,7 @@ class up.Layer extends up.Record
     [
       'element'
       'stack',
-      'historyVisible',
+      'history',
       'mode',
       'context',
       'lastScrollTops'
@@ -554,10 +554,6 @@ class up.Layer extends up.Record
     @stack.asCurrent(this, fn)
 
   updateHistory: (options) ->
-    # The { title, location } options are strings extracted from the response.
-    # We will only merge them into this layer if { history: true } is also passed.
-    return unless options.history
-    
     if u.isString(options.title)
       @title = options.title
 
@@ -567,11 +563,11 @@ class up.Layer extends up.Record
   ###**
   This layer's window title.
 
-  If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.historyVisible),
+  If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.history),
   the browser window will show the title of an ancestor layer.
   This property will return the title the layer would use if it had visible history.
 
-  If this layer does not [affect browser history](/up.Layer.prototype.historyVisible), this property will
+  If this layer does not [affect browser history](/up.Layer.prototype.history), this property will
   still return the title the layer would otherwise use.
 
   When this layer opens a child layer with visible history, the browser window will change to the child
@@ -600,7 +596,7 @@ class up.Layer extends up.Record
   ###**
   This layer's location URL.
 
-  If the layer has [no visible history](/up.Layer.prototype.historyVisible), this property
+  If the layer has [no visible history](/up.Layer.prototype.history), this property
   still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
 
@@ -633,8 +629,8 @@ class up.Layer extends up.Record
 
   isHistoryVisible: ->
     # If an ancestor layer was opened with the wish to not affect history, this
-    # child layer must not affect it either, regardless of its @historyVisible setting.
-    return @historyVisible && (@isRoot() || @parent.isHistoryVisible())
+    # child layer must not affect it either, regardless of its @history setting.
+    return @history && (@isRoot() || @parent.isHistoryVisible())
 
   showsLiveHistory: ->
     @isHistoryVisible() && @isFront() && (up.history.config.enabled || @isRoot())
