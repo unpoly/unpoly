@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "1.0.0"
+    version: "1.0.1"
   };
 
 }).call(this);
@@ -5972,6 +5972,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
             xhrPayload = xhrParams.toFormData();
           }
           pc = up.protocol.config;
+          xhrHeaders[pc.versionHeader] = up.version;
           if (_this.target) {
             xhrHeaders[pc.targetHeader] = _this.target;
           }
@@ -7577,6 +7578,7 @@ an existing cookie should be deleted.
     Configures strings used in the optional [server protocol](/up.protocol).
     
     @property up.protocol.config
+    @param {String} [config.versionHeader='X-Up-Version']
     @param {String} [config.targetHeader='X-Up-Target']
     @param {String} [config.failTargetHeader='X-Up-Fail-Target']
     @param {String} [config.locationHeader='X-Up-Location']
@@ -7620,6 +7622,7 @@ an existing cookie should be deleted.
     @experimental
      */
     config = new up.Config({
+      versionHeader: 'X-Up-Version',
       targetHeader: 'X-Up-Target',
       failTargetHeader: 'X-Up-Fail-Target',
       locationHeader: 'X-Up-Location',
@@ -7896,6 +7899,9 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
     };
     printBanner = function() {
       var banner;
+      if (!config.banner) {
+        return;
+      }
       banner = " __ _____  ___  ___  / /_ __\n" + ("/ // / _ \\/ _ \\/ _ \\/ / // /  " + up.version + "\n") + "\\___/_//_/ .__/\\___/_/\\_. / \n" + "        / /            / /\n" + "\n";
       if (config.enabled) {
         banner += "Call `up.log.disable()` to disable logging for this session.";
@@ -7904,9 +7910,7 @@ The output can be configured using the [`up.log.config`](/up.log.config) propert
       }
       return console.log(banner);
     };
-    if (config.banner) {
-      up.on('up:framework:booted', printBanner);
-    }
+    up.on('up:app:boot', printBanner);
     up.on('up:framework:reset', reset);
     setEnabled = function(value) {
       sessionStore.set('enabled', value);
