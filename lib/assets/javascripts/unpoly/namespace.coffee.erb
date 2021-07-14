@@ -2,4 +2,7 @@
 @module up
 ###
 window.up =
-  version: <%= Unpoly::Rails::VERSION.to_json %>
+  version: '<%=
+    require 'json'
+    JSON.parse(File.read('package.json')).fetch('version')
+  %>'
