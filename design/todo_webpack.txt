@@ -1,0 +1,137 @@
+- Module build
+- Also compile and minify CSS
+- Remove redundant sprockets requires (we now import it all in unpoly.js)
+- Style Pipeline for production files
+- upgrade to node 14 (lts/fermium)
+- Remove JS_KNIFE env
+- upgrade typescript
+
+
+
+Final folder structure
+======================
+
+- Webpack should WATCH instead of boot a dev server!
+- Or be both with writeToDisk: true
+- Maybe have a separate watch task
+- Maybe don't have separate development and build configs
+
+
+
+Why compile down to ES5?
+========================
+Every app has an ES5 pipeline.
+
+=> But Sprockets / Uglifier cannot do destructuring, even with { harmony: true }
+
+
+
+Structure
+=========
+
+
+/unpoly
+  Rakefile // publish scripts are still here, eventually move to package.json; Must update VERSION in package.json or throw if differs
+
+  package.json // must rename contents from dist/ to build/
+
+  VERSION
+
+  build/
+    <output folder for webpack>
+    specs.html -> ../test/specs.html
+    unpoly.esnext.js                  // in .gitignore
+    unpoly.esnext.min.js              // in .gitignore
+    unpoly.es5.js              // in .gitignore
+    unpoly.es5.min.js          // in .gitignore
+
+    specs.js                   // in .gitignore
+    jasmine.js                 // in .gitignore
+
+    unpoly-bootstrap3.js       // in .gitignore
+    unpoly-bootstrap3.min.js   // in .gitignore
+    unpoly-bootstrap4.css      // in .gitignore
+    unpoly-bootstrap4.min.css  // in .gitignore
+    ...
+    unpoly-migrate.js          // in .gitignore
+
+  src/
+    unpoly.js
+    unpoly-bootstrap3.js
+    unpoly-bootstrap4.js
+    unpoly-bootstrap5.js
+    unpoly-migrate.js
+    not needed anymore: unpoly.css (the manifest is in unpoly.js)
+
+    unpoly/
+      fragment.coffee
+      fragment.sass
+      protocol.coffee
+      form.coffee
+      form.sass
+
+  test/
+    helpers/
+      to_match_url.coffee
+      to_have_text.coffee
+    unpoly/
+      fragment_spec.coffee
+      protocol_spec.coffee
+    jasmine.js
+    specs.js
+    specs.css
+    specs.html
+      <script type="module" src="unpoly.esnext.js">
+      <script type="nomodule" src="unpoly.es5.js">
+
+
+/unpoly-rails
+
+  unpoly-rails.gemspec
+
+  lib/
+    unpoly-rails.rb
+    unpoly/
+      rails/
+        engine.rb
+        ...
+    assets/
+      javascripts/
+        unpoly.es5.js     # .gitignore, will be copied into gem before release OR check what the gem build task does with a symlink
+        unpoly.esnext.js  # .gitignore, will be copied into gem before release
+      stylesheets/
+        unpoly.css ->     # .gitignore, will be copied into gem before release
+
+  spec
+
+
+  Rakefile
+    release-task:
+    - copies assets from local unpoly-repo into assets/
+    - macht version.rb aus package.json
+
+
+/unpoly-human-test
+  app/...
+
+  Gemfile uses unpoly-rails from ../unpoly-rails
+
+
+
+  vendor/
+    unpoly-local/
+      unpoly.es5.js  -> ../../../unpoly/build/unpoly.es5.js
+      unpoly.css     -> ../../../unpoly/build/unpoly.css
+
+
+
+  WOHER KOMMEN DIE ASSETS?
+
+
+/unpoly-site
+  app/...
+
+  vendor
+    unpoly-local
+      unpoly.es5.js  -> ../../../unpoly/build/unpoly.es5.js
+      unpoly.css     -> ../../../unpoly/build/unpoly.css
