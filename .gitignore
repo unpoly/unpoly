@@ -11,3 +11,4 @@
 /doc
 npm-debug.log
 /tmp
+/node_modules
