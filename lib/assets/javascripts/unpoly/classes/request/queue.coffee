@@ -3,6 +3,7 @@ u = up.util
 class up.Request.Queue extends up.Class
 
   constructor: (options = {}) ->
+    super()
     @concurrency = options.concurrency ? -> up.network.config.concurrency
     @badResponseTime = options.badResponseTime ? -> up.network.config.badResponseTime
     @reset()

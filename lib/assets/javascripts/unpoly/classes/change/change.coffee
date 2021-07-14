@@ -2,7 +2,9 @@ u = up.util
 
 class up.Change extends up.Class
 
-  constructor: (@options) ->
+  constructor: (options) ->
+    super()
+    @options = options
 
   notApplicable: (reason) ->
     return up.error.notApplicable(this, reason)
