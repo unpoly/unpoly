@@ -1,5 +1,3 @@
-#= require ./event_listener
-
 u = up.util
 
 class up.EventListenerGroup extends up.Record

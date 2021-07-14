@@ -1,5 +1,3 @@
-#= require ./fragment_processor
-
 u = up.util
 e = up.element
 

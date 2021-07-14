@@ -1,5 +1,3 @@
-#= require ./cache
-
 u = up.util
 
 class up.Request.Cache extends up.Cache

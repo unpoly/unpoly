@@ -1,6 +1,3 @@
-#= require ./base
-#= require ./overlay
-
 e = up.element
 
 class up.Layer.OverlayWithViewport extends up.Layer.Overlay

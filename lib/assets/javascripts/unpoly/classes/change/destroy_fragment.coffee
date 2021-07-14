@@ -1,5 +1,3 @@
-#= require ./removal
-
 e = up.element
 
 class up.Change.DestroyFragment extends up.Change.Removal

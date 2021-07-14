@@ -1,5 +1,3 @@
-#= require ./addition
-
 u = up.util
 
 class up.Change.OpenLayer extends up.Change.Addition

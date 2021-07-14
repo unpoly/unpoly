@@ -1,5 +1,3 @@
-#= require ./removal
-
 u = up.util
 e = up.element
 

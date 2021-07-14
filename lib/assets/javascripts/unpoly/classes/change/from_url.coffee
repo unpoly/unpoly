@@ -1,5 +1,3 @@
-#= require ./change
-
 u = up.util
 
 class up.Change.FromURL extends up.Change

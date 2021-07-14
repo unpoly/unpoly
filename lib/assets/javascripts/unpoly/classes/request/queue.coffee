@@ -1,5 +1,3 @@
-#= require ../request
-
 u = up.util
 
 class up.Request.Queue extends up.Class

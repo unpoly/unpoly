@@ -1,5 +1,3 @@
-#= require ./change
-
 u = up.util
 e = up.element
 
