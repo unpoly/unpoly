@@ -9,6 +9,7 @@ class up.Record extends up.Class
     {}
 
   constructor: (options) ->
+    super()
     u.assign(this, @defaults(options), @attributes(options))
 
   attributes: (source = @) ->

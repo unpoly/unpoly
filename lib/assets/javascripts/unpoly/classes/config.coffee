@@ -2,7 +2,9 @@ u = up.util
 
 class up.Config extends up.Class
 
-  constructor: (@blueprintFn = (-> {})) ->
+  constructor: (blueprintFn = (-> {})) ->
+    super()
+    @blueprintFn = blueprintFn
     @reset()
 
   reset: ->

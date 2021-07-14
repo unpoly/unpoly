@@ -35,6 +35,7 @@ class up.Params extends up.Class
   @experimental
   ###
   constructor: (raw) ->
+    super()
     @clear()
     @addAll(raw)
 

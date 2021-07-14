@@ -2,8 +2,8 @@ u = up.util
 
 class up.Change.FromURL extends up.Change
 
-  constructor: (@options) ->
-    super(@options)
+  constructor: (options) ->
+    super(options)
 
     # Look up layers *before* we make the request.
     # In case of { layer: 'origin' } (default for navigation) the { origin }

@@ -25,6 +25,7 @@ u = up.util
 class up.store.Session extends up.store.Memory
 
   constructor: (rootKey) ->
+    super()
     @rootKey = rootKey
     @loadFromSessionStorage()
 
