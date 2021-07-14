@@ -1,5 +1,3 @@
-#= require ./base
-
 u = up.util
 e = up.element
 

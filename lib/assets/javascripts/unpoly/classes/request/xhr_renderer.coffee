@@ -1,5 +1,3 @@
-#= require ../request
-
 CONTENT_TYPE_URL_ENCODED = 'application/x-www-form-urlencoded'
 CONTENT_TYPE_FORM_DATA = 'multipart/form-data'
 

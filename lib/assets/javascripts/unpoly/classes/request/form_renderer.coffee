@@ -1,5 +1,3 @@
-#= require ../request
-
 u = up.util
 e = up.element
 

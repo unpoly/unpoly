@@ -1,5 +1,3 @@
-#= require ./record
-
 u = up.util
 e = up.element
 
