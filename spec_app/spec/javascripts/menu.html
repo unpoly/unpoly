@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jasmine Specs</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h2>Unpoly specs</h2>
+
+  <form method="get" action="/specs">
+    <p>
+      <button type="submit" autofocus>Run specs</button>
+    </p>
+    <p>
+      <label><input type="checkbox" name="jquery" value="1" checked> Load jQuery</label>
+    </p>
+    <p>
+      <label><input type="checkbox" name="migrate" value="1"> Load unpoly-migrate.js</label>
+    </p>
+    <p>
+      <label><input type="radio" name="es" value="next" checked> ESNext</label>
+      <label><input type="radio" name="es" value="5"> ES5</label>
+    </p>
+    <p>
+      <label><input type="checkbox" name="catch" value="false"> Raise exceptions</label>
+    </p>
+    <p>
+      <label><input type="checkbox" name="random" value="true"> Random test order</label>
+    </p>
+    <p>
+      <label><input type="radio" name="spec" value="" checked> All specs</label><br>
+      <label><input type="radio" name="spec" value="up.browser"> up.browser</label><br>
+      <label><input type="radio" name="spec" value="up.error"> up.error</label><br>
+      <label><input type="radio" name="spec" value="up.event"> up.event</label><br>
+      <label><input type="radio" name="spec" value="up.feedback"> up.feedback</label><br>
+      <label><input type="radio" name="spec" value="up.form"> up.form</label><br>
+      <label><input type="radio" name="spec" value="up.fragment"> up.fragment</label><br>
+      <label><input type="radio" name="spec" value="up.layer"> up.layer</label><br>
+      <label><input type="radio" name="spec" value="up.history"> up.history</label><br>
+      <label><input type="radio" name="spec" value="up.migrate"> up.migrate</label><br>
+      <label><input type="radio" name="spec" value="up.link"> up.link</label><br>
+      <label><input type="radio" name="spec" value="up.log"> up.log</label><br>
+      <label><input type="radio" name="spec" value="up.motion"> up.motion</label><br>
+      <label><input type="radio" name="spec" value="up.protocol"> up.protocol</label><br>
+      <label><input type="radio" name="spec" value="up.network"> up.network</label><br>
+      <label><input type="radio" name="spec" value="up.radio"> up.radio</label><br>
+      <label><input type="radio" name="spec" value="up.rails"> up.rails</label><br>
+      <label><input type="radio" name="spec" value="up.syntax"> up.syntax</label><br>
+      <label><input type="radio" name="spec" value="up.tooltip"> up.tooltip</label><br>
+      <label><input type="radio" name="spec" value="up.util"> up.util</label><br>
+      <label><input type="radio" name="spec" value="up.viewport"> up.viewport</label>
+    </p>
+  </form>
+</body>
+</html>

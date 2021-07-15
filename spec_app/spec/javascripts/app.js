@@ -18,5 +18,9 @@ app.listen(3000, function(){
 });
 
 app.get('/', function(req, res){
+  res.sendFile(cwd + '/spec/menu.html');
+});
+
+app.get('/specs', function(req, res){
   res.sendFile(cwd + '/spec/runner.html');
 });
