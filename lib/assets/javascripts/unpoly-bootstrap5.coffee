@@ -17,3 +17,5 @@ up.fragment.config.badTargetClasses.push(
   /^col(-xs|-sm|-md|-lg|-xl|-xxl)?(-\d+)?$/,
   /^[mp][tbsexy]?-\d+$/
 )
+
+require('../stylesheets/unpoly-bootstrap5.sass')
