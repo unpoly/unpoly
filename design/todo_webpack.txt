@@ -40,8 +40,8 @@ Structure
   build/
     <output folder for webpack>
     specs.html -> ../test/specs.html
-    unpoly.esnext.js                  // in .gitignore
-    unpoly.esnext.min.js              // in .gitignore
+    unpoly.js                  // in .gitignore
+    unpoly.min.js              // in .gitignore
     unpoly.es5.js              // in .gitignore
     unpoly.es5.min.js          // in .gitignore
 
@@ -81,7 +81,7 @@ Structure
     specs.js
     specs.css
     specs.html
-      <script type="module" src="unpoly.esnext.js">
+      <script type="module" src="unpoly.js">
       <script type="nomodule" src="unpoly.es5.js">
 
 
@@ -98,7 +98,7 @@ Structure
     assets/
       javascripts/
         unpoly.es5.js     # .gitignore, will be copied into gem before release OR check what the gem build task does with a symlink
-        unpoly.esnext.js  # .gitignore, will be copied into gem before release
+        unpoly.js         # .gitignore, will be copied into gem before release
       stylesheets/
         unpoly.css ->     # .gitignore, will be copied into gem before release
 
