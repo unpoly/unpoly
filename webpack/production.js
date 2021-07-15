@@ -1,20 +1,16 @@
-let { file, scriptPipeline, minify } = require('./shared.js')
+const { unpoly, unpolyMigrate, unpolyBootstrap } = require('./entries.js')
 
 module.exports = [
-  { ...file('./lib/assets/javascripts/unpoly.coffee', 'unpoly.es5.js'),
-    ...scriptPipeline('ES5'),
-    ...minify(false),
-  },
-  { ...file('./lib/assets/javascripts/unpoly.coffee', 'unpoly.js'),
-    ...scriptPipeline('ESNext'),
-    ...minify(false),
-  },
-  { ...file('./lib/assets/javascripts/unpoly.coffee', 'unpoly.es5.min.js'),
-    ...scriptPipeline('ES5'),
-    ...minify(true),
-  },
-  { ...file('./lib/assets/javascripts/unpoly.coffee', 'unpoly.min.js'),
-    ...scriptPipeline('ESNext'),
-    ...minify(true),
-  },
+  unpoly({ es: 'ESNext', min: false }),
+  unpoly({ es: 'ESNext', min: true }),
+  unpoly({ es: 'ES5', min: false }),
+  unpoly({ es: 'ES5', min: true }),
+  unpolyMigrate({ min: false }),
+  unpolyMigrate({ min: true }),
+  unpolyBootstrap({ version: 3, min: false }),
+  unpolyBootstrap({ version: 3, min: true }),
+  unpolyBootstrap({ version: 4, min: false }),
+  unpolyBootstrap({ version: 4, min: true }),
+  unpolyBootstrap({ version: 5, min: false }),
+  unpolyBootstrap({ version: 5, min: true }),
 ]

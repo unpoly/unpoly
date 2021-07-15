@@ -1,10 +1,9 @@
-- Module build
-- Also compile and minify CSS
-- Remove redundant sprockets requires (we now import it all in unpoly.js)
+TODOs
+====
+
 - Style Pipeline for production files
-- upgrade to node 14 (lts/fermium)
-- Remove JS_KNIFE env
-- upgrade typescript
+- package.json must include more files
+- update release scripts
 
 
 
@@ -96,11 +95,9 @@ Structure
         engine.rb
         ...
     assets/
-      javascripts/
-        unpoly.es5.js     # .gitignore, will be copied into gem before release OR check what the gem build task does with a symlink
-        unpoly.js         # .gitignore, will be copied into gem before release
-      stylesheets/
-        unpoly.css ->     # .gitignore, will be copied into gem before release
+      unpoly.es5.js     # .gitignore, will be copied into gem before release OR check what the gem build task does with a symlink
+      unpoly.js         # .gitignore, will be copied into gem before release
+      unpoly.css ->     # .gitignore, will be copied into gem before release
 
   spec
 

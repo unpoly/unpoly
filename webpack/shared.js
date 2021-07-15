@@ -98,6 +98,10 @@ function merge(...configs) {
   }
 
   for (let config of configs) {
+    if (!config) {
+      // Skip null configs
+      continue
+    }
 
     // First set all the config keys that never existed in merged
     for (let key in config) {
