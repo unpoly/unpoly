@@ -18,7 +18,7 @@
       insertScript('/dist/jasmine.js')
 
       let canModernJS = ('noModule' in document.createElement('script'))
-      let useModernJS = canModernJS && !/(\?|&)es5=1($|\?|&)/.test(location.search)
+      let useModernJS = canModernJS && !/(\?|&)es=5($|\?|&)/.test(location.search)
 
       insertScript(useModernJS ? 'dist/unpoly.js' : 'dist/unpoly.es5.js')
 
