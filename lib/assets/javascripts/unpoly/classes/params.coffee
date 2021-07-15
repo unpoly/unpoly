@@ -497,7 +497,7 @@ class up.Params extends up.Class
         @add(name, field.value)
 
   "#{u.isEqual.key}": (other) ->
-    other && (@constructor == other.constructor) && u.isEqual(@entries, other.entries)
+    @constructor == other.constructor && u.isEqual(@entries, other.entries)
 
   ###**
   Constructs a new `up.Params` instance from the given URL's
