@@ -644,3 +644,6 @@ class up.Layer extends up.Record
 
   affix: (args...) ->
     e.affix(@getFirstSwappableElement(), args...)
+
+  "#{u.isEqual.key}": (other) ->
+    @constructor == other.constructor && @element == other.element
