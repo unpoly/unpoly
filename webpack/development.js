@@ -13,6 +13,7 @@ module.exports = [
   merge(
     file('./lib/assets/javascripts/unpoly.coffee', 'unpoly.es5.js'),
     scriptPipeline('ES5'),
+    discardStyles(),
     minify(false)
   ),
   merge(
@@ -29,6 +30,7 @@ module.exports = [
   merge(
     file('./spec/specs.js', 'specs.es5.js'), // specs defines classes and ES5 prototypes cannot extend native classes!
     scriptPipeline('ES5'),
+    discardStyles(),
     minify(false)
   ),
   merge(
