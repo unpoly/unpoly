@@ -12,7 +12,7 @@
     "unpoly*.css"
   ],
   "scripts": {
-    "test": "echo \"Open specs/runner.html in a browser to run tests\" && exit 1",
+    "test": "node spec/app.js",
     "build": "webpack --config ./webpack/production.js",
     "watch": "webpack --watch --config ./webpack/development.js",
     "build-dev": "webpack --config ./webpack/development.js"
@@ -49,6 +49,9 @@
     "jquery": "^3.5.1",
     "mini-css-extract-plugin": "^0.8.2",
     "node-sass": "^4.14.1",
+    "null-loader": "^4.0.1",
+    "opn": "^6.0.0",
+    "process-exists": "^4.1.0",
     "rails-erb-loader": "^5.5.2",
     "sass": "^1.32.4",
     "sass-loader": "^8.0.2",

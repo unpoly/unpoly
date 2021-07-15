@@ -121,6 +121,13 @@ function merge(...configs) {
   return merged
 }
 
+let extractCssLoader = {
+  loader: MiniCssExtractPlugin.loader,
+  options: {
+    hmr: false
+  }
+}
+
 stylePipeline = function(filename = "[name.css]") {
   return {
     plugins: [
@@ -135,21 +142,35 @@ stylePipeline = function(filename = "[name.css]") {
     module: {
       rules: [
         {
-          test: /\.(css|sass|scss)$/,
-          use: [
-            {
-              loader: MiniCssExtractPlugin.loader,
-              options: {
-                hmr: false
-              },
-            },
-            'css-loader',
-            'sass-loader',
-          ],
+          test: /\.(css)$/,
+          use: [extractCssLoader, 'css-loader']
+        },
+        {
+          test: /\.(sass|scss)$/,
+          use: [extractCssLoader, 'css-loader', 'sass-loader']
         },
       ],
     },
+    resolve: {
+      extensions: ['.css', '.sass', '.scss']
+    }
   }
 }
 
-module.exports = { merge, file, scriptPipeline, stylePipeline, minify }
+discardStyles = function() {
+  return {
+    module: {
+      rules: [
+        {
+          test: /\.(css|sass|scss)$/,
+          use: 'null-loader'
+        },
+      ],
+    },
+    resolve: {
+      extensions: ['.css', '.sass', '.scss']
+    }
+  }
+}
+
+module.exports = { merge, file, scriptPipeline, stylePipeline, discardStyles, minify }
