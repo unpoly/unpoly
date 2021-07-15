@@ -693,7 +693,7 @@ up.layer = do ->
     | `event`    | An `up:layer:dismissed` event                   |
 
   @param [up-accept-event]
-    One or more event types that will cause this overlay to automatically be
+    One or more space-separated event types that will cause this overlay to automatically be
     [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
     The [overlay result value](/closing-overlays#overlay-result-values)
@@ -702,7 +702,7 @@ up.layer = do ->
     See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
 
   @param [up-dismiss-event]
-    One or more event types that will cause this overlay to automatically be
+    One or more space-separated event types that will cause this overlay to automatically be
     [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
     The [overlay result value](/closing-overlays#overlay-result-values)
@@ -711,7 +711,7 @@ up.layer = do ->
     See [Closing when an event is emitted](/closing-overlays#closing-when-an-event-is-emitted).
 
   @param [up-accept-location]
-    One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
+    One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
     [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
     The [overlay result value](/closing-overlays#overlay-result-values)
@@ -721,7 +721,7 @@ up.layer = do ->
     See [Closing when a location is reached](/closing-overlays#closing-when-a-location-is-reached).
 
   @param [up-dismiss-location]
-    One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
+    One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
     [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
     The [overlay result value](/closing-overlays#overlay-result-values)
