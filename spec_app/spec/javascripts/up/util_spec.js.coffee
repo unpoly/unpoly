@@ -1609,7 +1609,7 @@ describe 'up.util', ->
 
         it 'serializes the function code', ->
           formatted = up.util.sprintf('before %o after', `function foo() {}`)
-          expect(formatted).toEqual('before function foo() {} after')
+          expect(formatted).toEqual('before function foo() { } after')
 
       describe 'with array argument', ->
 

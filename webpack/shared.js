@@ -5,23 +5,25 @@ function minify(doMinify) {
   return { mode: doMinify ? 'production' : 'none' }
 }
 
-function file(srcPath, outputFilename) {
-  let entryName = path.parse(outputFilename).name
+function file(srcPath, output) {
+  let parsedOutput = path.parse(output)
+  let entryName = parsedOutput.name // foo.js => foo
+  let outputFilename = parsedOutput.base
+  let outputFolder = parsedOutput.dir || (__dirname + '/../dist')
 
   return {
     entry: {
       [entryName]: srcPath
     },
     output: {
-      path: __dirname + '/../dist',
-      // publicPath: '/',
+      path: outputFolder,
       filename: outputFilename,
     },
     devServer: {
       contentBase: './dist',
       writeToDisk: true,
-      // contentBasePublicPath: '/dist'
-    }
+    },
+    cache: true
   }
 }
 
@@ -119,13 +121,13 @@ function merge(...configs) {
   return merged
 }
 
-stylePipeline = function() {
+stylePipeline = function(filename = "[name.css]") {
   return {
     plugins: [
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // all options are optional
-        filename: '[name].css',
+        filename,
         chunkFilename: '[id].css',
         ignoreOrder: false, // Enable to remove warnings about conflicting order
       })

@@ -2,7 +2,7 @@ u = up.util
 e = up.element
 $ = jQuery
 
-@Trigger = (->
+window.Trigger = (->
 
   mouseover = (element, options) ->
     element = e.get(element)

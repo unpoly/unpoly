@@ -3137,7 +3137,7 @@ describe 'up.fragment', ->
 
           beforeEach ->
             # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
-            @linkedScriptPath = "/linked_script.js?cache-buster=#{Math.random().toString()}"
+            @linkedScriptPath = "/spec/files/linked_script.js?cache-buster=#{Math.random().toString()}"
 
           it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
             fixture('.target')
@@ -4853,8 +4853,9 @@ describe 'up.fragment', ->
           up.hello(overlayElement)
 
           expect(layerSpy.calls.count()).toBe(2)
-          expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.get(0)]
-          expect(layerSpy.calls.argsFor(1)).toEqual [up.layer.get(1)]
+
+          expect(layerSpy.calls.argsFor(0)[0]).toBe up.layer.get(0)
+          expect(layerSpy.calls.argsFor(1)[0]).toBe up.layer.get(1)
 
       it 'keeps up.layer.current and does not crash when compiling a detached element (bugfix)', asyncSpec (next) ->
         layerSpy = jasmine.createSpy('layer spy')
@@ -4868,7 +4869,7 @@ describe 'up.fragment', ->
           compileFn = -> up.hello(element)
 
           expect(compileFn).not.toThrowError()
-          expect(layerSpy.calls.argsFor(0)).toEqual [up.layer.current]
+          expect(layerSpy.calls.argsFor(0)[0]).toBe up.layer.current
 
     describe 'up.fragment.toTarget', ->
   

@@ -1,7 +1,7 @@
 u = up.util
 $ = jQuery
 
-@AgentDetector = do ->
+window.AgentDetector = do ->
 
   match = (regexp) ->
     navigator.userAgent.match(regexp)
