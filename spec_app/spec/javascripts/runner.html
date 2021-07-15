@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Jasmine Specs</title>
+
+    <link rel="stylesheet" href="/dist/jasmine.css">
+    <link rel="stylesheet" href="/dist/specs.css">
+    <link rel="stylesheet" href="/dist/unpoly.css">
+
+    <script>
+      function insertScript(src) {
+        let script = document.createElement('script')
+        script.src = src
+        document.head.appendChild(script)
+      }
+
+      insertScript('/dist/jasmine.js')
+
+      let canModernJS = ('noModule' in document.createElement('script'))
+      let useModernJS = canModernJS && !/(\?|&)es5=1($|\?|&)/.test(location.search)
+
+      insertScript(useModernJS ? 'dist/unpoly.js' : 'dist/unpoly.es5.js')
+
+      if (/(\?|&)jquery=1($|\?|&)/.test(location.search)) {
+        insertScript('https://code.jquery.com/jquery-3.6.0.js')
+      }
+
+      if (/(\?|&)migrate=1($|\?|&)/.test(location.search)) {
+        insertScript('/dist/unpoly-migrate.js')
+      }
+
+      insertScript(useModernJS ? 'dist/specs.js' : 'dist/specs.es5.js')
+    </script>
+
+<!--    <script>-->
+<!--      if (/(\?|&)jquery=1($|\?|&)/.test(location.search)) {-->
+<!--        document.write('<script src="https://code.jquery.com/jquery-3.6.0.js">\u003C/script\u003E')-->
+<!--      }-->
+<!--      if (/(\?|&)migrate=1($|\?|&)/.test(location.search)) {-->
+<!--        document.write('<script src="/unpoly-migrate.js">\u003C/script\u003E')-->
+<!--      }-->
+<!--    </script>-->
+
+    <!-- <script src="/specs.js"></script> -->
+
+  </head>
+  <body>
+  </body>
+</html>
