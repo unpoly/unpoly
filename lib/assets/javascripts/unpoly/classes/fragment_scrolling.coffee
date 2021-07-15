@@ -3,15 +3,16 @@ e = up.element
 
 class up.FragmentScrolling extends up.FragmentProcessor
 
-  keys: -> super.concat [
-    'hash'
-    'mode'
-    'revealTop'
-    'revealMax'
-    'revealSnap'
-    'scrollBehavior'
-    'scrollSpeed'
-  ]
+  keys: ->
+    super().concat [
+      'hash'
+      'mode'
+      'revealTop'
+      'revealMax'
+      'revealSnap'
+      'scrollBehavior'
+      'scrollSpeed'
+    ]
 
   constructor: (options) ->
     up.migrate.handleScrollOptions?(options)
