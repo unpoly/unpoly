@@ -1,24 +1,12 @@
 u = up.util
 e = up.element
 
-class up.LayerStack extends Array
+up.LayerStack = ->
+  super()
+  @currentOverrides = []
+  @push(@buildRoot())
 
-  constructor: ->
-    super()
-    # When TypeScript transpiles to ES5, there is an issue with this constructor always creating
-    # a `this` of type `Array` instead of `LayerStack`. The transpiled code looks like this:
-    #
-    #     function LayerStack() {
-    #       let this = Array.call(this) || this
-    #     }
-    #
-    # And since Array() returns a value, this returns the new this.
-    # The official TypeScript recommendation is to use setProtoTypeOf() after calling super:
-    # https://github.com/Microsoft/TypeScript/wiki/FAQ#why-doesnt-extending-built-ins-like-error-array-and-map-work
-    Object.setPrototypeOf(this, up.LayerStack.prototype)
-    @currentOverrides = []
-    @push(@buildRoot())
-
+LayerStackMethods =
   buildRoot: ->
     return up.layer.build(mode: 'root', stack: this)
 
@@ -108,19 +96,21 @@ class up.LayerStack extends Array
   "#{u.copy.key}": ->
     return u.copyArrayLike(this)
 
-  u.getter @prototype, 'count', ->
-    @length
+u.getter LayerStackMethods, 'count', ->
+  @length
 
-  u.getter @prototype, 'root', ->
-    @[0]
+u.getter LayerStackMethods, 'root', ->
+  @[0]
 
-  u.getter @prototype, 'overlays', ->
-    @root.descendants
+u.getter LayerStackMethods, 'overlays', ->
+  @root.descendants
 
-  u.getter @prototype, 'current', ->
-    # Event listeners and compilers will push into @currentOverrides
-    # to temporarily set up.layer.current to the layer they operate in.
-    u.last(@currentOverrides) || @front
+u.getter LayerStackMethods, 'current', ->
+# Event listeners and compilers will push into @currentOverrides
+# to temporarily set up.layer.current to the layer they operate in.
+  u.last(@currentOverrides) || @front
 
-  u.getter @prototype, 'front', ->
-    u.last(@)
+u.getter LayerStackMethods, 'front', ->
+  u.last(@)
+
+up.LayerStack.prototype = Object.create(Array.prototype, LayerStackMethods)
