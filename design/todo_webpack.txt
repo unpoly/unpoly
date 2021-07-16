@@ -108,7 +108,7 @@ Structure
     - macht version.rb aus package.json
 
 
-/unpoly-human-test
+/unpoly-manual-tests
   app/...
 
   Gemfile uses unpoly-rails from ../unpoly-rails
