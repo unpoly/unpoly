@@ -68,4 +68,6 @@
   ```
 
   Choose a different layer mode by passing a `{ mode }` option.
+
+  @page opening-overlays
   ###
