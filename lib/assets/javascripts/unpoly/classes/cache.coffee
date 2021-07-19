@@ -7,7 +7,7 @@ u = up.util
 class up.Cache
 
   ###**
-  @constructor
+  @constructor up.Cache
   @param {number|Function(): number} [config.size]
     Maximum number of cache entries.
     Set to `undefined` to not limit the cache size.
@@ -23,6 +23,7 @@ class up.Cache
     A function that takes a potential cache entry and returns whether
     this entry  can be stored in the hash. If omitted, all entries are considered
     cacheable.
+  @internal
   ###
   constructor: (@config = {}) ->
     @store = @config.store || new up.store.Memory()

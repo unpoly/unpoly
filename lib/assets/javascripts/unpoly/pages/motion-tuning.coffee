@@ -21,7 +21,7 @@
 
   To control the acceleration of an animation, pass an `{ easing }` option.
 
-  See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+  See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
   for a list of pre-defined timing functions.
 
   The default is `{ easing: 'ease' }`. You may change this with `up.motion.config.easing`.

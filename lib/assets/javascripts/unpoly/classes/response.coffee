@@ -1,7 +1,7 @@
 u = up.util
 
 ###**
-A response to an [HTTP request](`up.request()`).
+A response to an [HTTP request](/up.request).
 
 \#\#\# Example
 

@@ -28,7 +28,7 @@
 
   \#\#\# Following all links on `mousedown`
 
-  To follow all links on `mousedown` instead of `click` without an [`[up-instant]`](/aup-instant) attribute:
+  To follow all links on `mousedown` instead of `click` without an [`[up-instant]`](/a-up-instant) attribute:
 
   ```js
   up.link.config.instantSelectors.push('a[href]')
@@ -81,7 +81,7 @@
   user interacts with the page. When you configure Unpoly to handle all interaction,
   there will not be additional page loads as the user clicks a link or submits a form.
 
-  See [Making JavaScripts work with fragment updates](/legacy-sripts).
+  See [Making JavaScripts work with fragment updates](/legacy-scripts).
 
 
   \#\# Customizing navigation defaults

@@ -303,7 +303,7 @@ up.feedback = do ->
   You may also assign `[up-nav]` to an individual link instead of an navigational container.
 
   If you don't want to manually add this attribute to every navigational element,
-  you can configure selectors to automatically match your navigation components in `up.feedback.config.navs`.
+  you can configure selectors to automatically match your navigation components in `up.feedback.config.navSelectors`.
 
 
   \#\#\# Example
@@ -355,7 +355,7 @@ up.feedback = do ->
 
   ###**
   Links within `[up-nav]` may use the `[up-alias]` attribute to pass a [URL pattern](/url-patterns) for which they
-  should also be highlighted as [`.up-current`](a.up-current).
+  should also be highlighted as [`.up-current`](/a.up-current).
 
   \#\#\# Example
 

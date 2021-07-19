@@ -7,7 +7,7 @@ The `up.viewport` module controls the scroll position and focus within scrollabl
 The default viewport for any web application is the main document. An application may
 define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
 
-Also see documentation for the [scroll option](/scroll-option) and [focus option](focus-option).
+Also see documentation for the [scroll option](/scroll-option) and [focus option](/focus-option).
 
 @see up.reveal
 @see [up-fixed=top]
@@ -64,7 +64,7 @@ up.viewport = do ->
 
     By default Unpoly will scroll as little as possible to make the element visible.
   @param {number} [config.scrollSpeed=1]
-    The speed of the scrolling motion when [scrolling](/up.scroll) with `{ behavior: 'smooth' }`.
+    The speed of the scrolling motion when [scrolling](/up.reveal) with `{ behavior: 'smooth' }`.
 
     The default value (`1`) roughly corresponds to the speed of Chrome's
     [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
@@ -152,7 +152,7 @@ up.viewport = do ->
   so it can scroll the viewport far enough so the revealed element is fully visible.
   To make `up.reveal()` aware of fixed elements you can either:
 
-  - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](up-fixed-bottom)
+  - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](/up-fixed-bottom)
   - [configure default options](/up.viewport.config) for `fixedTop` or `fixedBottom`
 
   @function up.reveal
@@ -179,7 +179,7 @@ up.viewport = do ->
   @param {string|Element|jQuery} [options.viewport]
     The scrolling element to scroll.
 
-    Defaults to the [given element's viewport](/up.viewport.closest).
+    Defaults to the [given element's viewport](/up.viewport.get).
 
   @param {boolean} [options.top]
     Whether to scroll the viewport so that the first element row aligns
@@ -512,7 +512,7 @@ up.viewport = do ->
 
   The scroll positions will be associated with the current URL.
   They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
-  at the same URL, or by following a link with an [`[scroll="restore"]`](/a-up-follow#up-restore-scroll)
+  at the same URL, or by following a link with an [`[scroll="restore"]`](/scroll-option#restoring-scroll-positions)
   attribute.
 
   Unpoly automatically saves scroll positions before [navigating](/navigation).
@@ -584,9 +584,6 @@ up.viewport = do ->
       scroll(viewport, scrollTop, duration: 0)
     return Promise.all(allScrollPromises)
 
-  ###**
-  @internal
-  ###
   absolutize = (element, options = {}) ->
     viewport = closest(element)
 
@@ -740,7 +737,7 @@ up.viewport = do ->
   Marks this element as being anchored to the right edge of the screen,
   typically fixed navigation bars.
 
-  Since [modal dialogs](/up.modal) hide the document scroll bar,
+  Since [overlays](/up.layer) hide the document scroll bar,
   elements anchored to the right appear to jump when the dialog opens or
   closes. Applying this attribute to anchored elements will make Unpoly
   aware of the issue and adjust the `right` property accordingly.
@@ -763,7 +760,7 @@ up.viewport = do ->
        }
 
   By adding an `up-anchored="right"` attribute to the element, we can prevent the
-  `right` edge from jumping when a [modal dialog](/up.modal) opens or closes:
+  `right` edge from jumping when an [overlay](/up.layer) opens or closes:
 
       <div class="top-nav" up-anchored="right">...</div>
 

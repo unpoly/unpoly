@@ -465,11 +465,9 @@ up.syntax = do ->
     element = up.fragment.get(element)
     e.jsonAttr(element, 'up-data') || {}
 
-  ###**
+  ###
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
-  
-  @internal
   ###
   reset = ->
     compilers = u.filter(compilers, 'isDefault')

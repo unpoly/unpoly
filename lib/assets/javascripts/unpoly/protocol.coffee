@@ -20,7 +20,7 @@ You should be able to implement the protocol in a very short time.
 
 There are existing implementations for various web frameworks:
 
-- [Ruby on Rails](/install/rails)
+- [Ruby on Rails](/install/ruby)
 - [Roda](https://github.com/adam12/roda-unpoly)
 - [Rack](https://github.com/adam12/rack-unpoly) (Sinatra, Padrino, Hanami, Cuba, ...)
 - [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
@@ -227,6 +227,7 @@ up.protocol = do ->
   @header X-Up-Cache
   @param value
     The string `"clear"`.
+  @stable
   ###
 
   ###**
@@ -381,7 +382,7 @@ up.protocol = do ->
 
   Without this header Unpoly will extract the `<title>` from the server response.
 
-  This header is useful when you [optimize your response](X-Up-Target) to not render
+  This header is useful when you [optimize your response](/X-Up-Target) to not render
   the application layout unless targeted. Since your optimized response
   no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
 
@@ -433,7 +434,7 @@ up.protocol = do ->
 
   ###**
   The server may set this response header to [emit events](/up.emit) with the
-  requested [fragment update](a-up-target).
+  requested [fragment update](/a-up-follow).
 
   The header value is a [JSON](https://en.wikipedia.org/wiki/JSON) array.
   Each element in the array is a JSON object representing an event to be emitted
@@ -721,9 +722,6 @@ up.protocol = do ->
   csrfToken = ->
     u.evalOption(config.csrfToken)
 
-  ###**
-  @internal
-  ###
   wrapMethod = (method, params) ->
     params.add(config.methodParam, method)
     return 'POST'

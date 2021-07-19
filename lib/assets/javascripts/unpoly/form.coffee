@@ -29,7 +29,7 @@ up.form = do ->
     will be invoked for a fast typist.
 
   @param {Array<string>} [config.submitSelectors]
-    An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-follow).
+    An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
 
     You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
@@ -268,7 +268,7 @@ up.form = do ->
 
   Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
 
-  The code below will use a custom [transition](/up-transition)
+  The code below will use a custom [transition](/a-up-transition)
   when a form submission [fails](/server-errors):
 
   ```js
@@ -304,7 +304,7 @@ up.form = do ->
 
   This is useful for observing text fields while the user is typing.
 
-  The unobtrusive variant of this is the [`[up-observe]`](/up-observe) attribute.
+  The unobtrusive variant of this is the [`[up-observe]`](/input-up-observe) attribute.
 
   \#\#\# Example
 
@@ -374,7 +374,7 @@ up.form = do ->
   ###**
   [Observes](/up.observe) a field or form and submits the form when a value changes.
 
-  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form-up-active)
+  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
   while the autosubmitted form is processing.
 
   The unobtrusive variant of this is the [`[up-autosubmit]`](/form-up-autosubmit) attribute.
@@ -548,9 +548,6 @@ up.form = do ->
     u.each e.all(form, targetSelector), (target) ->
       switchTarget(target, fieldValues)
 
-  ###**
-  @internal
-  ###
   switchTarget = up.mockable (target, fieldValues) ->
     fieldValues ||= switcherValues(findSwitcherForTarget(target))
 
@@ -570,9 +567,6 @@ up.form = do ->
     e.toggle(target, show)
     target.classList.add('up-switched')
 
-  ###**
-  @internal
-  ###
   findSwitcherForTarget = (target) ->
     form = getContainer(target)
     switchers = e.all(form, '[up-switch]')
@@ -1102,7 +1096,7 @@ up.form = do ->
   ###**
   Submits this field's form when this field changes its values.
 
-  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form-up-active)
+  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
   while the autosubmitted form is loading.
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
@@ -1139,7 +1133,7 @@ up.form = do ->
   ###**
   Submits the form when any field changes.
 
-  Both the form and the field will be assigned a CSS class [`.up-active`](/form-up-active)
+  Both the form and the field will be assigned a CSS class [`.up-active`](/form.up-active)
   while the autosubmitted form is loading.
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.

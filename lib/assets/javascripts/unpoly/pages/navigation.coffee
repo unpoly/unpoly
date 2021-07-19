@@ -45,7 +45,7 @@
   | `{ scroll: 'auto' }`    | Reset scroll position if updating a main target |
   | `{ fallback: ':main' }` | Replace a [main target](/up-main) if response doesn't contain target |
   | `{ cache: true }`       | Cache responses for 5 minutes |
-  | `{ feedback: true }`    | Set [`.up-active`](/a-up-update) on the activated link |
+  | `{ feedback: true }`    | Set [`.up-active`](/a.up-active) on the activated link |
   | `{ focus: 'auto' }`     | Focus [autofocus] elements in the new fragment |
   | `{ solo: true }`        | Cancel existing requests |
   | `{ peel: true }`        | Close overlays when targeting a layer below |

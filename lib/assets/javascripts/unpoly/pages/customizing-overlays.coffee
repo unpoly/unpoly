@@ -193,4 +193,5 @@
   | `right`        | `bottom`    | Popup sits right to the origin. Bottom edges align.     |
   | `right`        | `center`    | Popup sits right to the origin. Vertical centers align. |
 
+  @page customizing-overlays
   ###

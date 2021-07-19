@@ -22,7 +22,7 @@ In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
 An example for an animation is opening a new overlay. We can animate the appearance
-of the dialog by adding an [`[up-animation]`](/a-up-animation) attribute to the opening link:
+of the dialog by adding an [`[up-animation]`](/a-up-layer-new#up-animation) attribute to the opening link:
 
 ```html
 <a href="/users"
@@ -66,7 +66,7 @@ up.motion = do ->
   @param {string} [config.easing='ease']
     The default timing function that controls the acceleration of animations and transitions.
 
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of pre-defined timing functions.
   @param {boolean} [config.enabled]
     Whether animation is enabled.
@@ -176,7 +176,7 @@ up.motion = do ->
   @param {string} [options.easing='ease']
     The timing function that controls the animation's acceleration.
 
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of pre-defined timing functions.
   @return {Promise}
     A promise for the animation's end.
@@ -227,7 +227,7 @@ up.motion = do ->
     The duration of the animation, in milliseconds.
   @param {string} [options.easing='ease']
     The timing function that controls the animation's acceleration.
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of pre-defined timing functions.
   @return {Promise}
     A promise that fulfills when the animation ends.
@@ -270,10 +270,11 @@ up.motion = do ->
     motionController.finish(element)
 
   ###**
-  This event is emitted on an [animating](/up.animating) element by `up.motion.finish()` to
+  This event is emitted on an animating element by `up.motion.finish()` to
   request the animation to instantly finish and skip to the last frame.
 
-  Promises returned by now-finished animation functions are expected to settle.
+  Promises returned by animation and transition functions are expected
+  to settle.
 
   Animations started by `up.animate()` already handle this event.
 
@@ -308,7 +309,7 @@ up.motion = do ->
 
   You can define additional named transitions using [`up.transition()`](/up.transition).
   
-  You can also compose a transition from two [named animations](/named-animations).
+  You can also compose a transition from two [named animations](/up.animation).
   separated by a slash character (`/`):
   
   - `move-to-bottom/fade-in`
@@ -341,7 +342,7 @@ up.motion = do ->
   @param {string} [options.easing='ease']
     The timing function that controls the transition's acceleration.
 
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of pre-defined timing functions.
   @param {boolean} [options.reveal=false]
     Whether to reveal the new element by scrolling its parent viewport.

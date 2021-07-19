@@ -153,7 +153,7 @@ up.log = do ->
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
-  The message will also be printed to the [error log](/up.log.error). Also a notification will be shown at the bottom of the screen.
+  The message will also be printed to the error log. Also a notification will be shown at the bottom of the screen.
 
   The message may contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions).
 

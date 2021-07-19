@@ -449,7 +449,7 @@ up.link = do ->
   ###**
   Preloads the given link.
 
-  When the link is clicked later, the response will already be [cached](/up.cache),
+  When the link is clicked later, the response will already be [cached](/up.request#caching),
   making the interaction feel instant.
 
   @function up.link.preload
@@ -485,7 +485,7 @@ up.link = do ->
     return setting
 
   ###**
-  This event is [emitted](/up.emit) before a link is [preloaded](/up.preload).
+  This event is [emitted](/up.emit) before a link is [preloaded](/a-up-preload).
 
   @event up:link:preload
   @param {Element} event.target
@@ -820,7 +820,7 @@ up.link = do ->
 
     Note that Unpoly will by default send a number of custom request headers.
     E.g. the `X-Up-Target` header includes the targeted CSS selector.
-    See `up.protocol` and `up.network.config.metaKeys` for details.
+    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
   @param [up-fragment]
     A string of HTML comprising *only* the new fragment. No server request will be sent.
@@ -908,11 +908,11 @@ up.link = do ->
   @param [up-easing]
     The timing function that accelerates the transition or animation.
 
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of available timing functions.
 
   @param [up-cache]
-    Whether to read from and write to the [cache](/up.cache).
+    Whether to read from and write to the [cache](/up.request#caching).
 
     With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
     to the network. If no cached response exists, Unpoly will make a request and cache
@@ -924,7 +924,7 @@ up.link = do ->
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param [up-clear-cache]
-    Whether existing [cache](/up.cache) entries will be cleared with this request.
+    Whether existing [cache](/up.request#caching) entries will be cleared with this request.
 
     By default a non-GET request will clear the entire cache.
     You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
@@ -962,7 +962,7 @@ up.link = do ->
   @param [up-save-scroll]
     Whether to save scroll positions before updating the fragment.
 
-    Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scroll-option#restoring-scroll-options).
+    Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scroll-option#restoring-scroll-positions).
 
   @param [up-focus]
     What to focus after the new fragment was rendered.
@@ -1029,7 +1029,6 @@ up.link = do ->
 
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
   `a[up-target]`, `a[up-instant]` or `a[up-preload]`.
-  It also expands links that open [modals](/up.modal) or [popups](/up.popup).
 
   \#\#\# Example
 
