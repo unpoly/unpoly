@@ -41,7 +41,7 @@ up.network = do ->
     You might find it useful to set the request concurrency `1` in end-to-end tests
     to prevent race conditions.
 
-    Note that your browser might [impose its own request limit](http://www.browserscope.org/?category=network)
+    Note that your browser might impose its own request limit
     regardless of what you configure here.
 
   @param {boolean} [config.wrapMethod]
@@ -86,7 +86,7 @@ up.network = do ->
 
     The value is given in milliseconds.
 
-  @param {Function(up.Request): boolean} config.autoCache
+  @param {Function(up.Request): boolean} [config.autoCache]
     Whether to cache the given request with `{ cache: 'auto' }`.
 
     By default Unpoly will auto-cache requests with safe HTTP methods.
@@ -106,7 +106,7 @@ up.network = do ->
     \#\#\# Cacheability considerations
 
     Two requests with different `requestMetaKeys` are considered cache misses when [caching](/up.request) and
-    [preloading](a-up-preload). To **improve cacheability**, you may set
+    [preloading](/a-up-preload). To **improve cacheability**, you may set
     `up.network.config.requestMetaKeys` to a shorter list of property keys.
 
     \#\#\# Available fields
@@ -215,7 +215,7 @@ up.network = do ->
   ###
 
   ###**
-  Removes all [cache](/up.cache.get) entries.
+  Removes all [cache](/up.request#caching) entries.
 
   To only remove some cache entries, pass a [URL pattern](/url-patterns):
 
@@ -364,7 +364,7 @@ up.network = do ->
     to the query parameters.
 
   @param {boolean} [options.cache=false]
-    Whether to read from and write to the [cache](/up.cache).
+    Whether to read from and write to the [cache](/up.request#caching).
 
     With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
     to the network. If no cached response exists, Unpoly will make a request and cache
@@ -387,7 +387,7 @@ up.network = do ->
     An object of additional HTTP headers.
 
     Note that Unpoly will by default send a number of custom request headers.
-    See `up.protocol` and `up.network.config.metaKeys` for details.
+    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
   @param {boolean} [options.wrapMethod]
     Whether to wrap non-standard HTTP methods in a POST request.
@@ -400,8 +400,8 @@ up.network = do ->
   @param {string} [options.timeout]
     A timeout in milliseconds.
 
-    If `up.network.config.maxRequests` is set, the timeout
-    will not include the time spent waiting in the queue.
+    If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
+    the timeout will not include the time spent waiting in the queue.
 
   @param {string} [options.target='body']
     The CSS selector that will be sent as an `X-Up-Target` header.
@@ -564,7 +564,7 @@ up.network = do ->
   - The connection's effective round-trip time is longer than `up.network.config.badRTT`.
   - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
 
-  By default Unpoly will disable [preloading](/up-preload) and [polling](/up-poll) if requests
+  By default Unpoly will disable [preloading](/a-up-preload) and [polling](/up-poll) if requests
   should be avoided.
 
   @function up.network.shouldReduceRequests
@@ -631,7 +631,7 @@ up.network = do ->
 
   ###**
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  was [aborted](/up.network.abort()).
+  was [aborted](/up.network.abort).
 
   The event is emitted on the layer that caused the request.
 
@@ -775,9 +775,6 @@ up.network = do ->
   @stable
   ###
 
-  ###**
-  @internal
-  ###
   isSafeMethod = (method) ->
     u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method))
 

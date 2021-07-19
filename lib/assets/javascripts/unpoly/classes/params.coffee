@@ -5,8 +5,8 @@ e = up.element
 The `up.Params` class offers a consistent API to read and manipulate request parameters
 independent of their type.
 
-Request parameters are used in [form submissions](/up.Params.prototype.fromForm) and
-[URLs](/up.Params.prototype.fromURL). Methods like `up.submit()` or `up.replace()` accept
+Request parameters are used in [form submissions](/up.Params.fromForm) and
+[URLs](/up.Params.fromURL). Methods like `up.submit()` or `up.replace()` accept
 request parameters as a `{ params }` option.
 
 \#\#\# Supported parameter types
@@ -191,14 +191,14 @@ class up.Params extends up.Class
 
   ###**
   Builds an URL string from the given base URL and
-  this `up.Params` instance as a [query string](/up.Params.toString).
+  this `up.Params` instance as a [query string](https://en.wikipedia.org/wiki/Query_string).
 
   The base URL may or may not already contain a query string. The
   additional query string will be joined with an `&` or `?` character accordingly.
 
   @function up.Params#toURL
   @param {string} base
-    The base URL that will be prepended to this `up.Params` object as a [query string](/up.Params.toString).
+    The base URL that will be prepended to this `up.Params` object as a query string.
   @return {string}
     The built URL.
   @experimental

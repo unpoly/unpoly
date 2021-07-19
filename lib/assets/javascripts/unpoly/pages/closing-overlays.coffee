@@ -74,7 +74,7 @@
   </a>
   ```
 
-  Result values are useful to branch out a complex screen into a [subinteraction](/subinteraction).
+  Result values are useful to branch out a complex screen into a [subinteraction](/subinteractions).
 
 
   Close conditions

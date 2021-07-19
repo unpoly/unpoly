@@ -862,6 +862,11 @@ up.element = do ->
 
   If the attribute value cannot be cast, returns the attribute value unchanged.
 
+  @function up.element.booleanOrStringAttr
+  @param {Element} element
+    The element from which to retrieve the attribute value.
+  @param {string} attribute
+    The attribute name.
   @internal
   ###
   booleanOrStringAttr = (element, attribute) ->
@@ -1104,7 +1109,7 @@ up.element = do ->
   ###**
   Returns whether the given element has been removed from the DOM tree.
 
-  up.element.isDetached
+  @function up.element.isDetached
   @param {Element} element
   @return {boolean}
   @stable

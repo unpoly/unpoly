@@ -4,7 +4,7 @@ u = up.util
 e = up.element
 
 ###**
-A normalized description of an [HTTP request](`up.request()`).
+A normalized description of an [HTTP request](/up.request).
 
 You can queue a request using the `up.request()` method:
 
@@ -86,7 +86,7 @@ class up.Request extends up.Record
   An object of additional HTTP headers.
 
   Unpoly will by default send a number of custom request headers.
-  See `up.protocol` and `up.network.config.metaKeys` for details.
+  See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
   @property up.Request#headers
   @param {Object} headers
@@ -96,7 +96,7 @@ class up.Request extends up.Record
   ###**
   A timeout in milliseconds.
 
-  If `up.network.config.maxRequests` is set,
+  If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request#timeout
@@ -118,7 +118,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The [context](/contact) of the layer targeted by this request.
+  The [context](/context) of the layer targeted by this request.
 
   The context object will be sent as an `X-Up-Context` header.
 
@@ -128,7 +128,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The [context](/contact) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
+  The [context](/context) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
 
   The context object will be sent as an `X-Up-Fail-Context` header.
 
@@ -195,7 +195,7 @@ class up.Request extends up.Record
   ###
 
   ###**
-  The format in which the [request params](/up.Layer.prototype.params) will be encoded.
+  The format in which the [request params](/up.Request.prototype.params) will be encoded.
 
   @property up.Request#contentType
   @param {string} contentType

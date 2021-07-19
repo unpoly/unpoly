@@ -11,15 +11,15 @@ A fragment is an element with some additional properties that are useful in the 
 a server-rendered web application:
 
 - Fragments are [identified by a CSS selector](/up.fragment.toTarget), like a `.class` or `#id`.
-- Fragments are usually updated by a [link](/a-up-follow) for [form](/form-up-submits) that targets their selector.
+- Fragments are usually updated by a [link](/a-up-follow) for [form](/form-up-submit) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
 - As fragments enter the page they are automatically [compiled](/up.compiler) to activate JavaScript behavior.
 - Fragment changes may be [animated](/up.motion).
 - Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
   Unpoly features will only see or change fragments from the [current layer](/up.layer.current)
   unless you [explicitly target another layer](/layer-option).
-- Fragments [know the URL from where they were loaded](/up.source).
-  They can be [reloaded](/up.reload) or [polled periodically](/up-polled).
+- Fragments [know the URL from where they were loaded](/up.fragment.source).
+  They can be [reloaded](/up.reload) or [polled periodically](/up-poll).
 
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
@@ -48,7 +48,7 @@ up.fragment = do ->
     [reset scroll positions](/scroll-option) and
     [update the browser history](/up.render#options.history).
 
-    This property is aliased as [`up.layer.config.any.mainTargets`](up.layer.config#config.any.mainTargets).
+    This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
   @param {Array<string|RegExp>} [config.badTargetClasses]
     An array of class names that should be ignored when
@@ -225,7 +225,7 @@ up.fragment = do ->
   If no more recent data is available, the server can render nothing and respond with
   an [`X-Up-Target: :none`](/X-Up-Target) header.
 
-  Here is an example with [unpoly-rails](https://unpoly.com/install/rails):
+  Here is an example with [unpoly-rails](https://unpoly.com/install/ruby):
 
   ```ruby
   class MessagesController < ApplicationController
@@ -296,7 +296,7 @@ up.fragment = do ->
   - [`{ url }`](#options.url) fetches and renders content from the server
   - [`{ document }`](#options.document) renders content from a given HTML document string or partial document
   - [`{ fragment }`](#options.fragment) renders content from a given HTML string that only contains the new fragment
-  - [`{ content }`](#options-content) replaces the targeted fragment's inner HTML with the given HTML string
+  - [`{ content }`](#options.content) replaces the targeted fragment's inner HTML with the given HTML string
 
   \#\#\# Example
 
@@ -398,7 +398,11 @@ up.fragment = do ->
 
     Note that Unpoly will by default send a number of custom request headers.
     E.g. the `X-Up-Target` header includes the targeted CSS selector.
-    See `up.protocol` and `up.network.config.metaKeys` for details.
+    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+
+  @param {string|Element} [options.content]
+    The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
+    for the fragment.
 
   @param {string|Element} [options.fragment]
     A string of HTML comprising *only* the new fragment.
@@ -486,11 +490,11 @@ up.fragment = do ->
   @param {string} [options.easing]
     The timing function that accelerates the transition or animation.
 
-    See [W3C documentation](http://www.w3.org/TR/css3-transitions/#transition-timing-function)
+    See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of available timing functions.
 
   @param {boolean} [options.cache]
-    Whether to read from and write to the [cache](/up.cache).
+    Whether to read from and write to the [cache](/up.request#caching).
 
     With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
     to the network. If no cached response exists, Unpoly will make a request and cache
@@ -499,7 +503,7 @@ up.fragment = do ->
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param {boolean|string} [options.clearCache]
-    Whether existing [cache](/up.cache) entries will be [cleared](/up.cache.clear) with this request.
+    Whether existing [cache](/up.request#caching) entries will be [cleared](/up.cache.clear) with this request.
 
     You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
 
@@ -545,7 +549,7 @@ up.fragment = do ->
   @param {boolean} [options.saveScroll=true]
     Whether to save scroll positions before updating the fragment.
 
-    Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scroll-option#restoring-scroll-options).
+    Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scroll-option#restoring-scroll-positions).
 
   @param {boolean|string|Element|Function} [options.focus]
     What to focus after the new fragment was rendered.
@@ -645,11 +649,11 @@ up.fragment = do ->
     If omitted a [main target](/up-main) will be rendered.
 
     You can also pass a DOM element or jQuery element here, in which case a selector
-    will be [inferred from the element attributes](/up.fragment.target). The given element
+    will be [inferred from the element attributes](/up.fragment.toTarget). The given element
     will also be set as the `{ origin }` option.
 
     Instead of passing the target as the first argument, you may also pass it as
-    [´{ target }` option](/up.fragment.render#options.target).
+    [´{ target }` option](/up.render#options.target).
   @param {Object} [options]
     See options for `up.render()`.
   @stable
@@ -1328,7 +1332,7 @@ up.fragment = do ->
 
   ###**
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
-  [current layer](/up.layer.current)'s [main element](/up.fragment.config#config.mainSelectors)
+  [current layer](/up.layer.current)'s [main element](/up.fragment.config#config.mainTargets)
   with a matching fragment from the server response.
 
   \#\#\# Example
@@ -1456,9 +1460,6 @@ up.fragment = do ->
       else
         up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
 
-  ###**
-  @internal
-  ###
   expandTargets = (targets, options = {}) ->
     layer = options.layer
     unless layer == 'new' || (layer instanceof up.Layer)

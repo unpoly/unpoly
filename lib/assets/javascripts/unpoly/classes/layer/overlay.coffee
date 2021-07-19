@@ -16,6 +16,36 @@ class up.Layer.Overlay extends up.Layer
   @stable
   ###
 
+  ###**
+  The [size](/customizing-overlays#overlay-sizes) of this overlay.
+
+  Returns a string like `'medium'` or `'large'`.
+
+  @property up.Layer#size
+  @param {Element} size
+  @stable
+  ###
+
+  ###**
+  The [position](/customizing-overlays#popup-position) of this popup overlay.
+
+  Returns a string like `'top'` or `'left'`.
+
+  @property up.Layer#position
+  @param {Element} align
+  @stable
+  ###
+
+  ###**
+  The [alignment](/customizing-overlays#popup-position) of this popup overlay.
+
+  Returns a string like `'left'` or `'right'`.
+
+  @property up.Layer#align
+  @param {Element} align
+  @stable
+  ###
+
   keys: ->
     super().concat [
       'position',

@@ -13,7 +13,7 @@ Returns the scrolling container for the given element.
 Returns the [document's scrolling element](/up.viewport.root)
 if no closer viewport exists.
 
-@function up.viewport.get
+@function up.viewport.closest
 @param {string|Element|jQuery} target
 @return {Element}
 @deprecated

@@ -22,11 +22,13 @@ class up.Layer extends up.Record
 
   \#\#\# Example
 
-      let rootLayer = up.layer.root
-      let overlay = await up.layer.open()
+  ```js
+  let rootLayer = up.layer.root
+  let overlay = await up.layer.open()
 
-      rootLayer.element // returns <body>
-      overlay.element   // returns <up-modal>
+  rootLayer.element // returns <body>
+  overlay.element   // returns <up-modal>
+  ```
 
   @property up.Layer#element
   @param {Element} element
@@ -144,7 +146,7 @@ class up.Layer extends up.Record
   @param {number} [options.duration]
     The duration for the close animation in milliseconds.
   @param {number} [options.easing]
-    The [timing function]((http://www.w3.org/TR/css3-transitions/#transition-timing-function))
+    The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     that controls the acceleration of the close animation.
   @param {Function} [options.onFinished]
     A callback that will run when the elements have been removed from the DOM.
@@ -644,5 +646,34 @@ class up.Layer extends up.Record
   toString: ->
     throw up.error.notImplemented()
 
+  ###**
+  Creates an element with the given `selector` and appends it to this layer's
+  [outmost element](/up.Layer.prototype.element).
+
+  Also see `up.element.affix()`.
+
+  \#\#\# Example
+
+  ```js
+  layer = up.layer.open()
+  element = layer.affix(.klass')
+  element.parentElement // returns 'main'
+  element.className // returns 'klass'
+  ```
+
+  @function up.Layer#affix
+  @param {string} selector
+    The CSS selector from which to create an element.
+  @param {Object} attrs
+    An object of attributes to set on the created element.
+  @param {Object} attrs.text
+    The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
+  @param {Object} attrs.style
+    An object of CSS properties that will be set as the inline style
+    of the created element.
+
+    The given object may use kebab-case or camelCase keys.
+  @experimental
+  ###
   affix: (args...) ->
     e.affix(@getFirstSwappableElement(), args...)

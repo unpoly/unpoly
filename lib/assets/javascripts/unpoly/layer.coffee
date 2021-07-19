@@ -82,7 +82,7 @@ up.layer = do ->
 
   @property up.layer.config
 
-  @param {string} config.mode='modal'
+  @param {string} [config.mode='modal']
     The default [mode](/layer-terminology) used when opening a new overlay.
 
   @param {object} config.any
@@ -137,7 +137,7 @@ up.layer = do ->
     address bar and window title.
 
     If set to `'auto'`, the overlay will render history if its initial fragment
-    is an [auto history target](/up.fragment.config.autoHistoryTargets).
+    is an [auto history target](/up.fragment.config#config.autoHistoryTargets).
 
     If set to `true`, the overlay will always render history.
     If set to `false`, the overlay will never render history.
@@ -232,7 +232,7 @@ up.layer = do ->
   mainTargets = (mode) ->
     return u.flatMap(modeConfigs(mode), 'mainTargets')
 
-  ###**
+  ###
   Returns an array of config objects that apply to the given mode name.
 
   The config objects are in descending order of specificity.
@@ -346,7 +346,7 @@ up.layer = do ->
   @param {string} [options.layer="new"]
     Whether to stack the new overlay or replace existing overlays.
 
-    See [replacing existing overlays](/opening-layers#replacing-existing-overlays).
+    See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
 
   @param {string} [options.mode]
     The kind of overlay to open.
@@ -619,7 +619,7 @@ up.layer = do ->
   @param {string} [up-layer="new"]
     Whether to stack the new overlay onto the current layer or replace existing overlays.
 
-    See [replacing existing overlays](/opening-layers#replacing-existing-overlays).
+    See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
 
   @param [up-mode]
     The kind of overlay to open.
@@ -894,7 +894,7 @@ up.layer = do ->
 
   @function up.layer.get
   @param {string|up.Layer|number} [layer='current']
-    The [layer option](/layer-open) to look up.
+    The [layer option](/layer-option) to look up.
   @return {up.Layer|undefined}
     The layer matching the given option.
 
@@ -907,7 +907,7 @@ up.layer = do ->
 
   @function up.layer.getAll
   @param {string|up.Layer|number} [layer='current']
-    The [layer option](/layer-open) to look up.
+    The [layer option](/layer-option) to look up.
   @return {Array<up.Layer>}
   @experimental
   ###
@@ -975,7 +975,7 @@ up.layer = do ->
   ], -> stack)
 
   ###**
-  [Accepts](/closing-overlays) the [current layer](up.layer.current).
+  [Accepts](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.accept()`.
   See `up.Layer#accept()` for more documentation.
@@ -987,7 +987,7 @@ up.layer = do ->
   ###
 
   ###**
-  [Dismisses](/closing-overlays) the [current layer](up.layer.current).
+  [Dismisses](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.dismiss()`.
   See `up.Layer#dismiss()` for more documentation.
@@ -1130,6 +1130,65 @@ up.layer = do ->
     The context object.
 
     If no context has been set an empty object is returned.
+  @experimental
+  ###
+
+  ###**
+  The outmost element of the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.element`.
+  See `up.Layer#element` for more documentation.
+
+  @property up.layer.element
+  @param {Element} element
+  @stable
+  ###
+
+  ###**
+  The outmost element of the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.element`.
+  See `up.Layer#element` for more documentation.
+
+  @property up.layer.element
+  @param {Element} element
+  @stable
+  ###
+
+  ###**
+  Returns whether the given `element` is contained by the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.contains(element)`.
+  See `up.Layer#contains` for more documentation.
+
+  @function up.layer.contains
+  @param {Element} element
+  @stable
+  ###
+
+
+  ###**
+  The [size](/customizing-overlays#overlay-sizes) of the [current layer](/up.layer.current).
+
+  This is a shortcut for `up.layer.current.size`.
+  See `up.Layer#size` for more documentation.
+
+  @property up.layer.size
+  @param {string} size
+  @stable
+  ###
+
+  ###**
+  Creates an element with the given `selector` and appends it to the [current layer's](/up.layer.current)
+  [outmost element](/up.Layer.prototype.element).
+
+  This is a shortcut for `up.layer.current.affix(selector)`.
+  See `up.Layer#affix` for more documentation.
+
+  @function up.layer.affix
+  @param {Element} element
+  @param {string} selector
+  @param {Object} attrs
   @experimental
   ###
 

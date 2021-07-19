@@ -1,7 +1,7 @@
 up.render()
 -----------
 
-[ok] feedback: true     Set [.up-active](/a-up-update) on the activated link
+[ok] feedback: true     Set [.up-active](/a.up-active) on the activated link
 
 [ok] peel: true         Close overlays when targeting a layer below
 

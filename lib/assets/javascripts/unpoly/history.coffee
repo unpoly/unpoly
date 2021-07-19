@@ -21,7 +21,7 @@ up.history = do ->
   @param {Array} [config.restoreTargets=[]]
     A list of possible CSS selectors to [replace](/up.render) when the user goes back in history.
 
-    By default the [root layer's main target](/up.fragment.config.mainTargets).
+    By default the [root layer's main target](/up.fragment.config#config.mainTargets).
   @param {boolean} [config.enabled=true]
     Defines whether [fragment updates](/up.render) will update the browser's current URL.
 

@@ -128,7 +128,7 @@ up.browser = do ->
   ###**
   Returns whether Unpoly supports the current browser.
 
-  If this returns `false` Unpoly will prevent itself from [booting](/up.boot)
+  If this returns `false` Unpoly will prevent itself from booting
   and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
   This leaves you with a classic server-side application.
   This is usually a better fallback than loading incompatible Javascript and causing
