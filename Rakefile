@@ -1,6 +1,7 @@
 require 'json'
 require 'fileutils'
 require 'tmpdir'
+require "active_support/all"
 
 module Unpoly
   class Release
@@ -15,6 +16,10 @@ module Unpoly
       def pre_release?
         version =~ /rc|beta|pre|alpha/
       end
+
+      def run(command)
+        system(command) or raise "Error running command: #{command}"
+      end
     end
   end
 end
@@ -23,6 +28,7 @@ namespace :release do
 
   desc 'Make a fresh production build'
   task :build do
+    puts "Compiling a fresh build..."
     system 'npm run build' or raise "Could not build"
   end
 
@@ -76,9 +82,9 @@ namespace :release do
     # (2) reference the dist folder as a local npm package during development.
 
     # Copy files in dist folder while following symbolic links
-    Unpoly::Tasks.run("cp --recursive --dereference --force dist/* #{staging_dir}")
+    Unpoly::Release.run("cp --recursive --dereference --force dist/* #{staging_dir}")
     Dir.chdir(staging_dir) do
-      Unpoly::Tasks.run("npm publish --tag #{npm_tag}")
+      Unpoly::Release.run("npm publish --tag #{npm_tag}")
     end
   end
 
