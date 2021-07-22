@@ -88,10 +88,10 @@ require './unpoly/feedback'
 require './unpoly/radio'
 require './unpoly/rails'
 
-require('../stylesheets/unpoly/fragment.sass')
-require('../stylesheets/unpoly/layer.sass')
-require('../stylesheets/unpoly/link.sass')
-require('../stylesheets/unpoly/network.sass')
-require('../stylesheets/unpoly/viewport.sass')
+#require('../stylesheets/unpoly/fragment.sass')
+#require('../stylesheets/unpoly/layer.sass')
+#require('../stylesheets/unpoly/link.sass')
+#require('../stylesheets/unpoly/network.sass')
+#require('../stylesheets/unpoly/viewport.sass')
 
 up.framework.boot()

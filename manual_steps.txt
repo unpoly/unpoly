@@ -1,0 +1,4 @@
+- Decaffeinate
+- node_modules/.bin/tsc --outFile dist/direct.es5.js lib/assets/javascripts/unpoly.js --allowJs --module system --target es5
+- node_modules/.bin/terser dist/direct.es5.js --compress --mangle --output dist/direct.es5.min.js --ecma 5
+
