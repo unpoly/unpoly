@@ -9,6 +9,7 @@
 /dist/*.css
 /dist/*.tgz
 /dist/*.gz
+/dist/*.js.LICENSE.txt
 /doc
 npm-debug.log
 /tmp
