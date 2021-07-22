@@ -5,3 +5,4 @@ require('jasmine-core/lib/jasmine-core/jasmine.css')
 require('jasmine-ajax')
 
 window.jQuery = require('jquery')
+window.jQuery.noConflict()
