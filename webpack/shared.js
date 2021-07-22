@@ -44,6 +44,7 @@ function scriptPipeline(target, options = {}) {
       compilerOptions: {
         allowJs: true,
         checkJs: true,
+        importHelpers: true,
         // module: "ESNext",
         target: target
       }
