@@ -53,14 +53,14 @@ dist/jasmine.js
 dist/specs.js
 ```
 
-There is also a task `npm run build` to only build the Unpoly library without files for testing.
+There is also a task `npm run build` for a production build. This does not build files for testing, but also outputs minified versions.
 
 ### Watching files for changes
 
 During development it is impractical to make a full build after every change. Instead it is recommend to watch the project:
 
 ```
-npm run watch
+npm run watch-dev
 ```
 
 This will make a fresh build and then watch the project for changes to the source files. When a source changes, affected build files are automatically recompiled. The incremental recompilation is much faster than a full build.
