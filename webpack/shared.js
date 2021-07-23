@@ -27,7 +27,11 @@ function file(srcPath, output) {
   }
 }
 
-function scriptPipeline(target, options = {}) {
+function scriptPipeline(target) {
+  if (target === 'modern') {
+    target = 'es2020'
+  }
+
   let erbLoader = {
     loader: 'rails-erb-loader',
     options: {
@@ -45,7 +49,7 @@ function scriptPipeline(target, options = {}) {
         allowJs: true,
         checkJs: true,
         // importHelpers: true,
-        // module: "ESNext",
+        // module: "ES2020",
         target: target
       }
 
@@ -178,4 +182,11 @@ discardStyles = function() {
   }
 }
 
-module.exports = { merge, file, scriptPipeline, stylePipeline, discardStyles, minify }
+module.exports = {
+  merge,
+  file,
+  scriptPipeline,
+  stylePipeline,
+  discardStyles,
+  minify
+}
