@@ -1,9 +1,10 @@
 TODOs
 ====
 
-- Style Pipeline for production files
-- package.json must include more files
-- update release scripts
+- Refactor expressions like u.merge(options, key: true) to { ...options, key: true }
+- Remove up.util.literal
+- Remove up.util.getter?
+- Remove up.Class.getter/setter
 
 
 
