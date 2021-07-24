@@ -1,3 +1,0 @@
-class CompilerTestController < ApplicationController
-
-end

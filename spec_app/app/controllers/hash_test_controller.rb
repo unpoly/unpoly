@@ -1,3 +1,0 @@
-class HashTestController < ApplicationController
-
-end

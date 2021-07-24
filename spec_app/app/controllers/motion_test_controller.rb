@@ -1,3 +1,0 @@
-class MotionTestController < ApplicationController
-
-end
