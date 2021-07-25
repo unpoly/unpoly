@@ -1,4 +1,4 @@
-###**
+/***
 Passive updates
 ===============
 
@@ -8,13 +8,13 @@ This package contains functionality to passively receive updates from the server
 @see [up-poll]
 
 @module up.radio
-###
-up.radio = do ->
+*/
+up.radio = (function() {
 
-  u = up.util
-  e = up.element
+  const u = up.util
+  const e = up.element
 
-  ###**
+  /***
   Configures defaults for passive updates.
 
   @property up.radio.config
@@ -44,23 +44,26 @@ up.radio = do ->
     You may also pass a function that accepts the polling fragment and returns `true`, `false` or `'auto'`.
 
   @stable
-  ###
-  config = new up.Config ->
-    hungrySelectors: ['[up-hungry]']
-    pollInterval: 30000
+  */
+  const config = new up.Config(() => ({
+    hungrySelectors: ['[up-hungry]'],
+    pollInterval: 30000,
     pollEnabled: 'auto'
+  }))
 
-  reset = ->
+  function reset() {
     config.reset()
+  }
 
-  ###**
+  /***
   @function up.radio.hungrySelector
   @internal
-  ###
-  hungrySelector = ->
-    config.hungrySelectors.join(',')
+  */
+  function hungrySelector() {
+    return config.hungrySelectors.join(',')
+  }
 
-  ###**
+  /***
   Elements with an `[up-hungry]` attribute are updated whenever the server
   sends a matching element, even if the element isn't targeted.
 
@@ -72,9 +75,9 @@ up.radio = do ->
   @param [up-transition]
     The transition to use when this element is updated.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Starts [polling](/up-poll) the given element.
 
   @function up.radio.startPolling
@@ -85,63 +88,71 @@ up.radio = do ->
 
     Defaults to `up.radio.config.pollInterval`.
   @stable
-  ###
-  startPolling = (fragment, options = {}) ->
-    interval = options.interval ? e.numberAttr(fragment, 'up-interval') ? config.pollInterval
+  */
+  function startPolling(fragment, options = {}) {
+    const interval = (options.interval ?? e.numberAttr(fragment, 'up-interval')) ?? config.pollInterval
 
-    stopped = false
+    let stopped = false
 
-    lastRequest = null
-    options.onQueued = (request) -> lastRequest = request
+    let lastRequest = null
+    options.onQueued = request => lastRequest = request
 
-    doReload = ->
-      # The setTimeout(doReload) callback might already be scheduled
-      # before the polling stopped.
-      return if stopped
+    function doReload() {
+      // The setTimeout(doReload) callback might already be scheduled
+      // before the polling stopped.
+      if (stopped) { return; }
 
-      if shouldPoll(fragment)
+      if (shouldPoll(fragment)) {
         u.always(up.reload(fragment, options), doSchedule)
-      else
-        up.puts '[up-poll]', 'Polling is disabled'
-        # Reconsider after 10 seconds at most
+      } else {
+        up.puts('[up-poll]', 'Polling is disabled')
+        // Reconsider after 10 seconds at most
         doSchedule(Math.min(10 * 1000, interval))
+      }
+    }
 
-    doSchedule = (delay = interval) ->
-      # The up.reload().then(doSchedule) callback might already be
-      # registered before the polling stopped.
-      return if stopped
+    function doSchedule(delay = interval) {
+      // The up.reload().then(doSchedule) callback might already be
+      // registered before the polling stopped.
+      if (stopped) { return; }
 
       setTimeout(doReload, delay)
+    }
 
-    destructor = ->
-      stopped = true       # Don't execute already-scheduled callbacks
-      lastRequest?.abort() # Abort any pending request
+    function destructor() {
+      stopped = true;       // Don't execute already-scheduled callbacks
+      lastRequest?.abort(); // Abort any pending request
+    }
 
-    # up.radio.stopPolling() will emit up:poll:stop to signal cancelation.
+    // up.radio.stopPolling() will emit up:poll:stop to signal cancelation.
     up.on(fragment, 'up:poll:stop', destructor)
 
     doSchedule()
 
     return destructor
+  }
 
-  ###**
+  /***
   Stops [polling](/up-poll) the given element.
 
   @function up.radio.stopPolling
   @param {Element|jQuery|string} fragment
     The fragment to stop reloading.
   @stable
-  ###
-  stopPolling = (element) ->
+  */
+  function stopPolling(element) {
     up.emit(element, 'up:poll:stop')
+  }
 
-  shouldPoll = (fragment) ->
-    setting = u.evalOption(config.pollEnabled, fragment)
-    if setting == 'auto'
-      return !document.hidden && !up.network.shouldReduceRequests() && up.layer.get(fragment)?.isFront?()
+  function shouldPoll(fragment) {
+    const setting = u.evalOption(config.pollEnabled, fragment)
+    if (setting === 'auto') {
+      return !document.hidden && !up.network.shouldReduceRequests() && up.layer.get(fragment)?.isFront?.()
+    }
     return setting
+  }
 
-  ###**
+  /***
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
 
   \#\#\# Example
@@ -198,12 +209,15 @@ up.radio = do ->
 
     Defaults to `up.radio.config.pollInterval`.
   @stable
-  ###
-  up.compiler '[up-poll]', startPolling
+  */
+  up.compiler('[up-poll]', startPolling)
 
-  up.on 'up:framework:reset', reset
+  up.on('up:framework:reset', reset)
 
-  config: config
-  hungrySelector: hungrySelector
-  startPolling: startPolling
-  stopPolling: stopPolling
+  return {
+    config,
+    hungrySelector,
+    startPolling,
+    stopPolling
+  }
+})()
