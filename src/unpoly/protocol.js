@@ -1,4 +1,4 @@
-###**
+/***
 Server protocol
 ===============
 
@@ -14,7 +14,7 @@ While the protocol can help you optimize performance and handle some edge cases,
 implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
 that uses Unpoly on the frontend and doesn't even have an active server component.
 
-## Existing implementations
+*# Existing implementations
 
 You should be able to implement the protocol in a very short time.
 
@@ -27,21 +27,25 @@ There are existing implementations for various web frameworks:
 - [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
 
 @module up.protocol
-###
-up.protocol = do ->
+*/
+up.protocol = (function() {
 
-  u = up.util
-  e = up.element
+  const u = up.util
+  const e = up.element
 
-  headerize = (camel) ->
-    header = camel.replace /(^.|[A-Z])/g, (char) -> '-' + char.toUpperCase()
+  const headerize = function(camel) {
+    const header = camel.replace(/(^.|[A-Z])/g, char => '-' + char.toUpperCase())
     return 'X-Up' + header
+  }
 
-  extractHeader = (xhr, shortHeader, parseFn = u.identity) ->
-    if value = xhr.getResponseHeader(headerize(shortHeader))
+  const extractHeader = function(xhr, shortHeader, parseFn = u.identity) {
+    let value = xhr.getResponseHeader(headerize(shortHeader))
+    if (value) {
       return parseFn(value)
+    }
+  }
 
-  ###**
+  /***
   This request header contains the current Unpoly version to mark this request as a fragment update.
 
   Server-side code may check for the presence of an `X-Up-Version` header to
@@ -57,9 +61,9 @@ up.protocol = do ->
 
   @header X-Up-Version
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This request header contains the CSS selector targeted for a successful fragment update.
 
   Server-side code is free to optimize its response by only rendering HTML
@@ -106,9 +110,9 @@ up.protocol = do ->
 
   @header X-Up-Target
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This request header contains the CSS selector targeted for a failed fragment update.
 
   A fragment update is considered *failed* if the server responds with a status code other than 2xx,
@@ -158,9 +162,9 @@ up.protocol = do ->
 
   @header X-Up-Fail-Target
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This request header contains the targeted layer's [mode](/up.layer.mode).
 
   Server-side code is free to render different HTML for different modes.
@@ -177,9 +181,9 @@ up.protocol = do ->
 
   @header X-Up-Mode
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This request header contains the [mode](/up.layer.mode) of the layer
   targeted for a failed fragment update.
 
@@ -201,21 +205,24 @@ up.protocol = do ->
 
   @header X-Up-Fail-Mode
   @stable
-  ###
+  */
 
-  clearCacheFromXHR = (xhr) ->
-    parseValue = (value) ->
-      switch value
-        when 'true'
-          true
-        when 'false'
-          false
-        else
-          value
+  function parseClearCacheValue(value) {
+    switch (value) {
+      case 'true':
+        return true
+      case 'false':
+        return false
+      default:
+        return value
+    }
+  }
 
-    extractHeader(xhr, 'clearCache', parseValue)
+  function clearCacheFromXHR(xhr) {
+    return extractHeader(xhr, 'clearCache', parseClearCacheValue)
+  }
 
-  ###**
+  /***
   The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
 
   \#\#\# Example
@@ -228,9 +235,9 @@ up.protocol = do ->
   @param value
     The string `"clear"`.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This request header contains a timestamp of an existing fragment that is being [reloaded](/up.reload).
 
   The timestamp must be explicitely set by the user as an `[up-time]` attribute on the fragment.
@@ -253,12 +260,13 @@ up.protocol = do ->
 
   @header X-Up-Reload-From-Time
   @stable
-  ###
+  */
 
-  contextFromXHR = (xhr) ->
-    extractHeader(xhr, 'context', JSON.parse)
+  function contextFromXHR(xhr) {
+    return extractHeader(xhr, 'context', JSON.parse)
+  }
 
-  ###**
+  /***
   This request header contains the targeted layer's [context](/context), serialized as JSON.
 
   The user may choose to not send this header by configuring
@@ -301,9 +309,9 @@ up.protocol = do ->
 
   @header X-Up-Context
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   This request header contains the [context](/context) of the layer
   targeted for a failed fragment update, serialized as JSON.
 
@@ -324,16 +332,17 @@ up.protocol = do ->
 
   @header X-Up-Fail-Context
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   @function up.protocol.methodFromXHR
   @internal
-  ###
-  methodFromXHR = (xhr) ->
-    extractHeader(xhr, 'method', u.normalizeMethod)
+  */
+  function methodFromXHR(xhr) {
+    return extractHeader(xhr, 'method', u.normalizeMethod)
+  }
 
-  ###**
+  /***
   The server may set this optional response header to change the browser location after a fragment update.
 
   Without this header Unpoly will set the browser location to the response URL, which is usually sufficient.
@@ -359,9 +368,9 @@ up.protocol = do ->
 
   @header X-Up-Location
   @stable
-  ###
+  */
 
-  ###**
+  /***
   The server may set this optional response header to change the HTTP method after a fragment update.
 
   Without this header Unpoly will assume a `GET` method if the response's URL changed from the request's URL,
@@ -375,9 +384,9 @@ up.protocol = do ->
 
   @header X-Up-Method
   @stable
-  ###
+  */
 
-  ###**
+  /***
   The server may set this optional response header to change the document title after a fragment update.
 
   Without this header Unpoly will extract the `<title>` from the server response.
@@ -394,9 +403,9 @@ up.protocol = do ->
 
   @header X-Up-Title
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This request header contains the `[name]` of a [form field being validated](/input-up-validate).
 
   When seeing this header, the server is expected to validate (but not save)
@@ -427,12 +436,13 @@ up.protocol = do ->
 
   @header X-Up-Validate
   @stable
-  ###
+  */
 
-  eventPlansFromXHR = (xhr) ->
-    extractHeader(xhr, 'events', JSON.parse)
+  function eventPlansFromXHR(xhr) {
+    return extractHeader(xhr, 'events', JSON.parse)
+  }
 
-  ###**
+  /***
   The server may set this response header to [emit events](/up.emit) with the
   requested [fragment update](/a-up-follow).
 
@@ -473,14 +483,15 @@ up.protocol = do ->
 
   @header X-Up-Events
   @stable
-  ###
+  */
 
-  acceptLayerFromXHR = (xhr) ->
-    # Even if acceptance has no value, the server will send
-    # X-Up-Accept-Layer: null
-    extractHeader(xhr, 'acceptLayer', JSON.parse)
+  function acceptLayerFromXHR(xhr) {
+    // Even if acceptance has no value, the server will send
+    // X-Up-Accept-Layer: null
+    return extractHeader(xhr, 'acceptLayer', JSON.parse)
+  }
 
-  ###**
+  /***
   The server may set this response header to [accept](/up.layer.accept) the targeted overlay
   in response to a fragment update.
 
@@ -521,14 +532,15 @@ up.protocol = do ->
 
   @header X-Up-Accept-Layer
   @stable
-  ###
+  */
 
-  dismissLayerFromXHR = (xhr) ->
-    # Even if dismissal has no value, the server will send
-    # X-Up-Dismiss-Layer: null
-    extractHeader(xhr, 'dismissLayer', JSON.parse)
+  function dismissLayerFromXHR(xhr) {
+    // Even if dismissal has no value, the server will send
+    // X-Up-Dismiss-Layer: null
+    return extractHeader(xhr, 'dismissLayer', JSON.parse)
+  }
 
-  ###**
+  /***
   The server may set this response header to [dismiss](/up.layer.dismiss) the targeted overlay
   in response to a fragment update.
 
@@ -571,20 +583,21 @@ up.protocol = do ->
 
   @header X-Up-Dismiss-Layer
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Server-side companion libraries like unpoly-rails set this cookie so we
   have a way to detect the request method of the initial page load.
   There is no JavaScript API for this.
 
   @function up.protocol.initialRequestMethod
   @internal
-  ###
-  initialRequestMethod = u.memoize ->
+  */
+  const initialRequestMethod = u.memoize(function() {
     return u.normalizeMethod(up.browser.popCookie('_up_method'))
+  })
 
-  ###**
+  /***
   The server may set this optional cookie to echo the HTTP method of the initial request.
 
   If the initial page was loaded with a non-`GET` HTTP method, Unpoly prefers to make a full
@@ -618,39 +631,42 @@ up.protocol = do ->
 
   @cookie _up_method
   @stable
-  ###
+  */
 
-  ###**
+  /***
   @function up.protocol.locationFromXHR
   @internal
-  ###
-  locationFromXHR = (xhr) ->
-    # We prefer the X-Up-Location header to xhr.responseURL.
-    # If the server redirected to a new location, Unpoly-related headers
-    # will be encoded in the request's query params like this:
-    #
-    #     /redirect-target?_up[target]=.foo
-    #
-    # To prevent these these `_up` params from showing up in the browser URL,
-    # the X-Up-Location header will omit these params while `xhr.responseURL`
-    # will still contain them.
-    extractHeader(xhr, 'location') || xhr.responseURL
+  */
+  function locationFromXHR(xhr) {
+    // We prefer the X-Up-Location header to xhr.responseURL.
+    // If the server redirected to a new location, Unpoly-related headers
+    // will be encoded in the request's query params like this:
+    //
+    //     /redirect-target?_up[target]=.foo
+    //
+    // To prevent these these `_up` params from showing up in the browser URL,
+    // the X-Up-Location header will omit these params while `xhr.responseURL`
+    // will still contain them.
+    return extractHeader(xhr, 'location') || xhr.responseURL
+  }
 
-  ###**
+  /***
   @function up.protocol.titleFromXHR
   @internal
-  ###
-  titleFromXHR = (xhr) ->
-    extractHeader(xhr, 'title')
+  */
+  function titleFromXHR(xhr) {
+    return extractHeader(xhr, 'title')
+  }
 
-  ###**
+  /***
   @function up.protocol.targetFromXHR
   @internal
-  ###
-  targetFromXHR = (xhr) ->
-    extractHeader(xhr, 'target')
+  */
+  function targetFromXHR(xhr) {
+    return extractHeader(xhr, 'target')
+  }
 
-  ###**
+  /***
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config
@@ -706,45 +722,54 @@ up.protocol = do ->
     _method=PUT
     ```
   @stable
-  ###
-  config = new up.Config ->
-    methodParam: '_method'                     # up.network.config.methodParam
-    csrfParam: -> e.metaContent('csrf-param')  # das muss echt configurierbar sein, evtl. up.network.config.csrfParam
-    csrfToken: -> e.metaContent('csrf-token')  # das muss echt configurierbar sein, evtl. up.network.config.csrfToken
-    csrfHeader: 'X-CSRF-Token'                 # MUSS KONFIGURIERBAR BLEIBEN, andere frameworks nutzen X-XSRF-Token
+  */
+  const config = new up.Config(() => ({
+    methodParam: '_method',
+    csrfParam() { return e.metaContent('csrf-param'); },
+    csrfToken() { return e.metaContent('csrf-token'); },
+    csrfHeader: 'X-CSRF-Token' // Used by Rails. Other frameworks use different headers.
+  }));
 
-  csrfHeader = ->
-    u.evalOption(config.csrfHeader)
+  function csrfHeader() {
+    return u.evalOption(config.csrfHeader)
+  }
 
-  csrfParam = ->
-    u.evalOption(config.csrfParam)
+  function csrfParam() {
+    return u.evalOption(config.csrfParam)
+  }
 
-  csrfToken = ->
-    u.evalOption(config.csrfToken)
+  function csrfToken() {
+    return u.evalOption(config.csrfToken)
+  }
 
-  wrapMethod = (method, params) ->
+  function wrapMethod(method, params) {
     params.add(config.methodParam, method)
     return 'POST'
+  }
 
-  reset = ->
+  function reset() {
     config.reset()
+  }
 
-  up.on 'up:framework:reset', reset
+  up.on('up:framework:reset', reset)
 
-  config: config
-  reset: reset
-  locationFromXHR: locationFromXHR
-  titleFromXHR: titleFromXHR
-  targetFromXHR: targetFromXHR
-  methodFromXHR: methodFromXHR
-  acceptLayerFromXHR: acceptLayerFromXHR
-  contextFromXHR: contextFromXHR
-  dismissLayerFromXHR: dismissLayerFromXHR
-  eventPlansFromXHR: eventPlansFromXHR
-  clearCacheFromXHR: clearCacheFromXHR
-  csrfHeader: csrfHeader
-  csrfParam: csrfParam
-  csrfToken: csrfToken
-  initialRequestMethod: initialRequestMethod
-  headerize: headerize
-  wrapMethod: wrapMethod
+  return {
+    config,
+    reset,
+    locationFromXHR,
+    titleFromXHR,
+    targetFromXHR,
+    methodFromXHR,
+    acceptLayerFromXHR,
+    contextFromXHR,
+    dismissLayerFromXHR,
+    eventPlansFromXHR,
+    clearCacheFromXHR,
+    csrfHeader,
+    csrfParam,
+    csrfToken,
+    initialRequestMethod,
+    headerize,
+    wrapMethod
+  }
+})()
