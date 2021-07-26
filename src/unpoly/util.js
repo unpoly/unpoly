@@ -29,7 +29,7 @@ up.util = (function() {
   @internal
   */
   function asyncNoop(){
-    return Promise.resolve();
+    return Promise.resolve()
   }
 
   /***
@@ -46,13 +46,13 @@ up.util = (function() {
     let cachedValue, cached
     return function(...args) {
       if (cached) {
-        return cachedValue;
+        return cachedValue
       } else {
-        cached = true;
-        return cachedValue = func.apply(this, args);
+        cached = true
+        return cachedValue = func.apply(this, args)
       }
-    };
-  };
+    }
+  }
 
   /***
   Returns if the given port is the default port for the given protocol.
@@ -61,16 +61,16 @@ up.util = (function() {
   @internal
   */  
   function isStandardPort(protocol, port) {
-    port = port.toString();
+    port = port.toString()
     return (((port === "") || (port === "80")) && (protocol === 'http:')) || ((port === "443") && (protocol === 'https:'))
-  };
+  }
 
   const NORMALIZE_URL_DEFAULTS = {
     host: 'cross-domain',
     stripTrailingSlash: false,
     search: true,
     hash: false
-  };
+  }
 
   /***
   Normalizes the given URL or path.
@@ -91,69 +91,69 @@ up.util = (function() {
   @internal
   */
   function normalizeURL(urlOrAnchor, options) {
-    options = newOptions(options, NORMALIZE_URL_DEFAULTS);
+    options = newOptions(options, NORMALIZE_URL_DEFAULTS)
 
-    const parts = parseURL(urlOrAnchor);
-    let normalized = '';
+    const parts = parseURL(urlOrAnchor)
+    let normalized = ''
 
     if (options.host === 'cross-domain') {
-      options.host = isCrossOrigin(parts);
+      options.host = isCrossOrigin(parts)
     }
 
     if (options.host) {
-      normalized += parts.protocol + "//" + parts.hostname;
+      normalized += parts.protocol + "//" + parts.hostname
       // Once we drop IE11 we can just use { host }, which contains port and hostname
       // and also handles standard ports.
       // See https://developer.mozilla.org/en-US/docs/Web/API/URL/host
       if (!isStandardPort(parts.protocol, parts.port)) {
-        normalized += `:${parts.port}`;
+        normalized += `:${parts.port}`
       }
     }
 
     let {
       pathname
-    } = parts;
+    } = parts
     if (options.stripTrailingSlash) {
-      pathname = pathname.replace(/\/$/, '');
+      pathname = pathname.replace(/\/$/, '')
     }
-    normalized += pathname;
+    normalized += pathname
 
     if (options.search) {
-      normalized += parts.search;
+      normalized += parts.search
     }
 
     if (options.hash) {
-      normalized += parts.hash;
+      normalized += parts.hash
     }
 
-    return normalized;
-  };
+    return normalized
+  }
 
   function urlWithoutHost(url) {
-    return normalizeURL(url, {host: false});
+    return normalizeURL(url, {host: false})
   }
 
   function matchURLs(leftURL, rightURL) {
-    return normalizeURL(leftURL) === normalizeURL(rightURL);
+    return normalizeURL(leftURL) === normalizeURL(rightURL)
   }
 
   // We're calling isCrossOrigin() a lot.
   // Accessing location.protocol and location.hostname every time
   // is much slower than comparing cached strings.
   // https://jsben.ch/kBATt
-  const APP_PROTOCOL = location.protocol;
-  const APP_HOSTNAME = location.hostname;
+  const APP_PROTOCOL = location.protocol
+  const APP_HOSTNAME = location.hostname
 
   function isCrossOrigin(urlOrAnchor) {
     // If the given URL does not contain a hostname we know it cannot be cross-origin.
     // In that case we don't need to parse the URL.
     if (isString(urlOrAnchor) && (urlOrAnchor.indexOf('//') === -1)) {
-      return false;
+      return false
     }
 
-    const parts = parseURL(urlOrAnchor);
-    return (APP_HOSTNAME !== parts.hostname) || (APP_PROTOCOL !== parts.protocol);
-  };
+    const parts = parseURL(urlOrAnchor)
+    return (APP_HOSTNAME !== parts.hostname) || (APP_PROTOCOL !== parts.protocol)
+  }
 
   /***
   Parses the given URL into components such as hostname and path.
@@ -178,22 +178,22 @@ up.util = (function() {
   @stable
   */
   function parseURL(urlOrLink) {
-    let link;
+    let link
     if (isJQuery(urlOrLink)) {
       // In case someone passed us a $link, unwrap it
-      link = up.element.get(urlOrLink);
+      link = up.element.get(urlOrLink)
     } else if (urlOrLink.pathname) {
       // If we are handed a parsed URL, just return it
-      link = urlOrLink;
+      link = urlOrLink
     } else {
-      link = document.createElement('a');
-      link.href = urlOrLink;
+      link = document.createElement('a')
+      link.href = urlOrLink
     }
 
     // In IE11 the #hostname and #port properties of unqualified URLs are empty strings.
     // We can fix this by setting the link's { href } on the link itself.
     if (!link.hostname) {
-      link.href = link.href;
+      link.href = link.href
     }
 
     // Some IEs don't include a leading slash in the #pathname property.
@@ -201,12 +201,12 @@ up.util = (function() {
     if (link.pathname[0] !== '/') {
       // Only copy the link into an object when we need to (to change a property).
       // Note that we're parsing a lot of URLs for [up-active].
-      link = pick(link, ['protocol', 'hostname', 'port', 'pathname', 'search', 'hash']);
-      link.pathname = '/' + link.pathname;
+      link = pick(link, ['protocol', 'hostname', 'port', 'pathname', 'search', 'hash'])
+      link.pathname = '/' + link.pathname
     }
 
-    return link;
-  };
+    return link
+  }
 
   /***
   @function up.util.normalizeMethod
@@ -214,7 +214,7 @@ up.util = (function() {
   */
   function normalizeMethod(method) {
     return method ? method.toUpperCase() : 'GET'
-  };
+  }
 
   /***
   @function up.util.methodAllowsPayload
@@ -231,8 +231,8 @@ up.util = (function() {
         target[key] = source[key]
       }
     }
-    return target;
-  };
+    return target
+  }
 
   /***
   Merge the own properties of one or more `sources` into the `target` object.
@@ -242,7 +242,7 @@ up.util = (function() {
   @param {Array<Object>} sources...
   @stable
   */
-  const assign = Object.assign || assignPolyfill;
+  const assign = Object.assign || assignPolyfill
 
   // Remove with IE11
   function valuesPolyfill(object) {
@@ -257,15 +257,15 @@ up.util = (function() {
   @return {Array<string>}
   @stable
   */
-  const objectValues = Object.values || valuesPolyfill;
+  const objectValues = Object.values || valuesPolyfill
 
   function iteratee(block) {
     if (isString(block)) {
-      return item => item[block];
+      return item => item[block]
     } else {
-      return block;
+      return block
     }
-  };
+  }
 
   /***
   Translate all items in an array to new array of items.
@@ -283,14 +283,14 @@ up.util = (function() {
   */
   function map(array, block) {
     if (array.length === 0) { return []; }
-    block = iteratee(block);
+    block = iteratee(block)
     let mapped = []
     for (let i = 0; i < array.length; i++) {
       let element = array[i]
       mapped.push(block(element, i))
     }
     return mapped
-  };
+  }
 
   /***
   @function up.util.mapObject
@@ -298,11 +298,11 @@ up.util = (function() {
   */
   function mapObject(array, pairer) {
     const merger = function(object, pair) {
-      object[pair[0]] = pair[1];
-      return object;
-    };
-    return map(array, pairer).reduce(merger, {});
-  };
+      object[pair[0]] = pair[1]
+      return object
+    }
+    return map(array, pairer).reduce(merger, {})
+  }
 
   /***
   Calls the given function for each element (and, optional, index)
@@ -322,9 +322,9 @@ up.util = (function() {
   }
 
   function eachIterator(iterator, callback) {
-    let entry;
+    let entry
     while ((entry = iterator.next()) && !entry.done) {
-      callback(entry.value);
+      callback(entry.value)
     }
   }
 
@@ -351,7 +351,7 @@ up.util = (function() {
   function isUndefined(object) {
     return object === undefined
   }
-  ;
+  
 
   /***
   Returns whether the given argument is not `undefined`.
@@ -376,7 +376,7 @@ up.util = (function() {
   @stable
   */
   function isMissing(object) {
-    return isUndefined(object) || isNull(object);
+    return isUndefined(object) || isNull(object)
   }
 
   /***
@@ -421,19 +421,19 @@ up.util = (function() {
   */
   function isBlank(value) {
     if (isMissing(value)) {
-      return true;
+      return true
     }
     if (isObject(value) && value[isBlank.key]) {
-      return value[isBlank.key]();
+      return value[isBlank.key]()
     }
     if (isString(value) || isList(value)) {
-      return value.length === 0;
+      return value.length === 0
     }
     if (isOptions(value)) {
-      return Object.keys(value).length === 0;
+      return Object.keys(value).length === 0
     }
-    return false;
-  };
+    return false
+  }
 
   /***
   This property contains the name of a method that user-defined classes
@@ -474,7 +474,7 @@ up.util = (function() {
   @property up.util.isBlank.key
   @experimental
   */
-  isBlank.key = 'up.util.isBlank';
+  isBlank.key = 'up.util.isBlank'
 
   /***
   Returns the given argument if the argument is [present](/up.util.isPresent),
@@ -491,7 +491,7 @@ up.util = (function() {
     if (tester(value)) {
       return value
     }
-  };
+  }
 
   /***
   Returns whether the given argument is not [blank](/up.util.isBlank).
@@ -536,7 +536,7 @@ up.util = (function() {
   @stable
   */
   function isBoolean(object) {
-    return (typeof(object) === 'boolean') || object instanceof Boolean;
+    return (typeof(object) === 'boolean') || object instanceof Boolean
   }
 
   /***
@@ -580,9 +580,9 @@ up.util = (function() {
   @stable
   */
   function isObject(object) {
-    const typeOfResult = typeof(object);
-    return ((typeOfResult === 'object') && !isNull(object)) || (typeOfResult === 'function');
-  };
+    const typeOfResult = typeof(object)
+    return ((typeOfResult === 'object') && !isNull(object)) || (typeOfResult === 'function')
+  }
 
   /***
   Returns whether the given argument is a [DOM element](https://developer.mozilla.org/de/docs/Web/API/Element).
@@ -593,7 +593,7 @@ up.util = (function() {
   @stable
   */
   function isElement(object) {
-    return object instanceof Element;
+    return object instanceof Element
   }
 
   /***
@@ -605,7 +605,7 @@ up.util = (function() {
   @internal
   */
   function isRegExp(object) {
-    return object instanceof RegExp;
+    return object instanceof RegExp
   }
 
   /***
@@ -617,7 +617,7 @@ up.util = (function() {
   @stable
   */
   function isJQuery(object) {
-    return up.browser.canJQuery() && object instanceof jQuery;
+    return up.browser.canJQuery() && object instanceof jQuery
   }
 
   /***
@@ -627,7 +627,7 @@ up.util = (function() {
   @internal
   */
   function isElementish(object) {
-    return !!(object && (object.addEventListener || object[0]?.addEventListener));
+    return !!(object && (object.addEventListener || object[0]?.addEventListener))
   }
 
   /***
@@ -639,7 +639,7 @@ up.util = (function() {
   @stable
   */
   function isPromise(object) {
-    return isObject(object) && isFunction(object.then);
+    return isObject(object) && isFunction(object.then)
   }
 
   /***
@@ -651,7 +651,7 @@ up.util = (function() {
   @stable
   */
   // https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-  const { isArray } = Array;
+  const { isArray } = Array
 
   /***
   Returns whether the given argument is a `FormData` instance.
@@ -664,7 +664,7 @@ up.util = (function() {
   @internal
   */
   function isFormData(object) {
-    return object instanceof FormData;
+    return object instanceof FormData
   }
 
   /***
@@ -679,7 +679,7 @@ up.util = (function() {
   */
   function toArray(value) {
     return isArray(value) ? value : copyArrayLike(value)
-  };
+  }
 
   /***
   Returns whether the given argument is an array-like value.
@@ -701,7 +701,7 @@ up.util = (function() {
       isNodeList(value) ||
       isArguments(value) ||
       isJQuery(value) ||
-      isHTMLCollection(value);
+      isHTMLCollection(value)
   }
 
   /***
@@ -731,14 +731,14 @@ up.util = (function() {
   @internal
   */
   function isArguments(value) {
-    return Object.prototype.toString.call(value) === '[object Arguments]';
+    return Object.prototype.toString.call(value) === '[object Arguments]'
   }
 
   function nullToUndefined(value) {
     if (!isNull(value)) {
-      return value;
+      return value
     }
-  };
+  }
 
   /***
   Returns the given value if it is [array-like](/up.util.isList), otherwise
@@ -758,13 +758,13 @@ up.util = (function() {
   */
   function wrapList(value) {
     if (isList(value)) {
-      return value;
+      return value
     } else if (isMissing(value)) {
-      return [];
+      return []
     } else {
-      return [value];
+      return [value]
     }
-  };
+  }
 
   /***
   Returns a shallow copy of the given value.
@@ -786,17 +786,17 @@ up.util = (function() {
   */
   function copy(value)  {
     if (isObject(value) && value[copy.key]) {
-      value = value[copy.key]();
+      value = value[copy.key]()
     } else if (isList(value)) {
-      value = copyArrayLike(value);
+      value = copyArrayLike(value)
     } else if (isOptions(value)) {
-      value = assign({}, value);
+      value = assign({}, value)
     }
-    return value;
-  };
+    return value
+  }
 
   function copyArrayLike(arrayLike) {
-    return Array.prototype.slice.call(arrayLike);
+    return Array.prototype.slice.call(arrayLike)
   }
 
   /***
@@ -841,10 +841,10 @@ up.util = (function() {
   @param {string} key
   @experimental
   */
-  copy.key = 'up.util.copy';
+  copy.key = 'up.util.copy'
 
   // Implement up.util.copy protocol for Date
-  Date.prototype[copy.key] = function() { return new Date(+this); };
+  Date.prototype[copy.key] = function() { return new Date(+this); }
 
 //  ###**
 //  Returns a deep copy of the given array or object.
@@ -866,7 +866,7 @@ up.util = (function() {
   @stable
   */
   function merge(...sources) {
-    return assign({}, ...sources);
+    return assign({}, ...sources)
   }
 
   /***
@@ -876,19 +876,19 @@ up.util = (function() {
   @internal
   */
   function mergeDefined(...sources) {
-    const result = {};
+    const result = {}
     for (let source of sources) {
       if (source) {
         for (let key in source) {
-          const value = source[key];
+          const value = source[key]
           if (isDefined(value)) {
-            result[key] = value;
+            result[key] = value
           }
         }
       }
     }
-    return result;
-  };
+    return result
+  }
 
   /***
   Creates an options hash from the given argument and some defaults.
@@ -904,22 +904,22 @@ up.util = (function() {
   */
   function newOptions(object, defaults) {
     if (defaults) {
-      return merge(defaults, object);
+      return merge(defaults, object)
     } else if (object) {
-      return copy(object);
+      return copy(object)
     } else {
-      return {};
+      return {}
     }
-  };
+  }
 
   function parseArgIntoOptions(args, argKey) {
-    let options = extractOptions(args);
+    let options = extractOptions(args)
     if (isDefined(args[0])) {
-      options = copy(options);
-      options[argKey] = args[0];
+      options = copy(options)
+      options[argKey] = args[0]
     }
-    return options;
-  };
+    return options
+  }
 
   /***
   Passes each element in the given [array-like value](/up.util.isList) to the given function.
@@ -934,16 +934,16 @@ up.util = (function() {
   @stable
   */
   function findInList(list, tester) {
-    tester = iteratee(tester);
-    let match;
+    tester = iteratee(tester)
+    let match
     for (let element of list) {
       if (tester(element)) {
-        match = element;
-        break;
+        match = element
+        break
       }
     }
-    return match;
-  };
+    return match
+  }
 
   /***
   Returns whether the given function returns a truthy value
@@ -959,7 +959,7 @@ up.util = (function() {
   */
   function some(list, tester) {
     return !!findResult(list, tester)
-  };
+  }
 
   /***
   Consecutively calls the given function which each element
@@ -977,14 +977,14 @@ up.util = (function() {
   @experimental
   */
   function findResult(array, tester) {
-    tester = iteratee(tester);
+    tester = iteratee(tester)
     for (let i = 0; i < array.length; i++) {
       const result = tester(array[i], i)
       if (result) {
-        return result;
+        return result
       }
     }
-  };
+  }
 
   /***
   Returns whether the given function returns a truthy value
@@ -999,16 +999,16 @@ up.util = (function() {
   @experimental
   */
   function every(list, tester) {
-    tester = iteratee(tester);
-    let match = true;
+    tester = iteratee(tester)
+    let match = true
     for (let i = 0; i < list.length; i++) {
       if (!tester(list[i], i)) {
-        match = false;
-        break;
+        match = false
+        break
       }
     }
-    return match;
-  };
+    return match
+  }
 
   /***
   Returns all elements from the given array that are
@@ -1020,11 +1020,11 @@ up.util = (function() {
   @stable
   */
   function compact(array) {
-    return filterList(array, isGiven);
+    return filterList(array, isGiven)
   }
 
   function compactObject(object) {
-    return pickBy(object, isGiven);
+    return pickBy(object, isGiven)
   }
 
   /***
@@ -1037,8 +1037,8 @@ up.util = (function() {
   */
   function uniq(array) {
     if (array.length < 2) { return array; }
-    return setToArray(arrayToSet(array));
-  };
+    return setToArray(arrayToSet(array))
+  }
 
   /***
   This function is like [`uniq`](/up.util.uniq), accept that
@@ -1053,38 +1053,38 @@ up.util = (function() {
   */
   function uniqBy(array, mapper) {
     if (array.length < 2) { return array; }
-    mapper = iteratee(mapper);
-    const seenElements = new Set();
+    mapper = iteratee(mapper)
+    const seenElements = new Set()
     return filterList(array, function(elem, index) {
-      const mapped = mapper(elem, index);
+      const mapped = mapper(elem, index)
       if (seenElements.has(mapped)) {
-        return false;
+        return false
       } else {
-        seenElements.add(mapped);
-        return true;
+        seenElements.add(mapped)
+        return true
       }
-    });
-  };
+    })
+  }
 
   /***
   @function up.util.setToArray
   @internal
   */
   function setToArray(set) {
-    const array = [];
-    set.forEach(elem => array.push(elem));
-    return array;
-  };
+    const array = []
+    set.forEach(elem => array.push(elem))
+    return array
+  }
 
   /***
   @function up.util.arrayToSet
   @internal
   */
   function arrayToSet(array) {
-    const set = new Set();
-    array.forEach(elem => set.add(elem));
-    return set;
-  };
+    const set = new Set()
+    array.forEach(elem => set.add(elem))
+    return set
+  }
 
   /***
   Returns all elements from the given [array-like value](/up.util.isList) that return
@@ -1097,15 +1097,15 @@ up.util = (function() {
   @stable
   */
   function filterList(list, tester) {
-    tester = iteratee(tester);
-    const matches = [];
+    tester = iteratee(tester)
+    const matches = []
     each(list, function(element, index) {
       if (tester(element, index)) {
-        return matches.push(element);
+        return matches.push(element)
       }
-    });
-    return matches;
-  };
+    })
+    return matches
+  }
 
   /***
   Returns all elements from the given [array-like value](/up.util.isList) that do not return
@@ -1118,9 +1118,9 @@ up.util = (function() {
   @stable
   */
   function reject(list, tester) {
-    tester = negate(iteratee(tester));
-    return filterList(list, tester);
-  };
+    tester = negate(iteratee(tester))
+    return filterList(list, tester)
+  }
 
   /***
   Returns the intersection of the given two arrays.
@@ -1131,7 +1131,7 @@ up.util = (function() {
   @internal
   */
   function intersect(array1, array2) {
-    return filterList(array1, element => contains(array2, element));
+    return filterList(array1, element => contains(array2, element))
   }
 
   /***
@@ -1149,7 +1149,7 @@ up.util = (function() {
   @stable
   */
   function scheduleTimer(millis, callback) {
-    return setTimeout(callback, millis);
+    return setTimeout(callback, millis)
   }
 
   /***
@@ -1183,10 +1183,10 @@ up.util = (function() {
   }
 
   function abortableMicrotask (task) {
-    let aborted = false;
-    queueMicrotask(function() { if (!aborted) { return task(); } });
-    return () => aborted = true;
-  };
+    let aborted = false
+    queueMicrotask(function() { if (!aborted) { return task(); } })
+    return () => aborted = true
+  }
 
   /***
   Returns the last element of the given array.
@@ -1213,7 +1213,7 @@ up.util = (function() {
   @stable
   */
   function contains(value, subValue) {
-    return value.indexOf(subValue) >= 0;
+    return value.indexOf(subValue) >= 0
   }
 
   /***
@@ -1226,9 +1226,9 @@ up.util = (function() {
   @internal
   */
   function objectContains(object, subObject) {
-    const reducedValue = pick(object, Object.keys(subObject));
-    return isEqual(subObject, reducedValue);
-  };
+    const reducedValue = pick(object, Object.keys(subObject))
+    return isEqual(subObject, reducedValue)
+  }
 
   /***
   Returns a copy of the given object that only contains
@@ -1241,14 +1241,14 @@ up.util = (function() {
   @stable
   */
   function pick(object, keys) {
-    const filtered = {};
+    const filtered = {}
     for (let key of keys) {
       if (key in object) {
-        filtered[key] = object[key];
+        filtered[key] = object[key]
       }
     }
-    return filtered;
-  };
+    return filtered
+  }
 
   /***
   Returns a copy of the given object that only contains
@@ -1264,16 +1264,16 @@ up.util = (function() {
   @experimental
   */
   function pickBy(object, tester) {
-    tester = iteratee(tester);
-    const filtered = {};
+    tester = iteratee(tester)
+    const filtered = {}
     for (let key in object) {
-      const value = object[key];
+      const value = object[key]
       if (tester(value, key, object)) {
-        filtered[key] = object[key];
+        filtered[key] = object[key]
       }
     }
-    return filtered;
-  };
+    return filtered
+  }
 
   /***
   Returns a copy of the given object that contains all except
@@ -1285,7 +1285,7 @@ up.util = (function() {
   @stable
   */
   function omit(object, keys) {
-    return pickBy(object, (_value, key) => !contains(keys, key));
+    return pickBy(object, (_value, key) => !contains(keys, key))
   }
 
   /***
@@ -1295,7 +1295,7 @@ up.util = (function() {
   @internal
   */
   function unresolvablePromise() {
-    return new Promise(noop);
+    return new Promise(noop)
   }
 
   /***
@@ -1313,12 +1313,12 @@ up.util = (function() {
   @stable
   */
   function remove(array, element) {
-    const index = array.indexOf(element);
+    const index = array.indexOf(element)
     if (index >= 0) {
-      array.splice(index, 1);
-      return element;
+      array.splice(index, 1)
+      return element
     }
-  };
+  }
 
   /***
   If the given `value` is a function, calls the function with the given `args`.
@@ -1341,7 +1341,7 @@ up.util = (function() {
   */
   function evalOption(value, ...args) {
     return isFunction(value) ? value(...args) : value
-  };
+  }
 
   const ESCAPE_HTML_ENTITY_MAP = {
     "&": "&amp;",
@@ -1349,7 +1349,7 @@ up.util = (function() {
     ">": "&gt;",
     '"': '&quot;',
     "'": '&#x27;'
-  };
+  }
 
   /***
   Escapes the given string of HTML by replacing control chars with their HTML entities.
@@ -1360,7 +1360,7 @@ up.util = (function() {
   @stable
   */
   function escapeHTML(string) {
-    return string.replace(/[&<>"']/g, char => ESCAPE_HTML_ENTITY_MAP[char]);
+    return string.replace(/[&<>"']/g, char => ESCAPE_HTML_ENTITY_MAP[char])
   }
 
   /***
@@ -1369,7 +1369,7 @@ up.util = (function() {
   */
   function escapeRegExp(string) {
     // From https://github.com/benjamingr/RegExp.escape
-    return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+    return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
   }
 
   /***
@@ -1383,20 +1383,20 @@ up.util = (function() {
   @experimental
   */
   function pluckKey(object, key) {
-    const value = object[key];
-    delete object[key];
-    return value;
-  };
+    const value = object[key]
+    delete object[key]
+    return value
+  }
 
   function renameKey(object, oldKey, newKey) {
-    return object[newKey] = pluckKey(object, oldKey);
+    return object[newKey] = pluckKey(object, oldKey)
   }
 
   function extractLastArg(args, tester) {
     if (tester(last(args))) {
-      return args.pop();
+      return args.pop()
     }
-  };
+  }
 
 //  extractFirstArg = (args, tester) ->
 //    firstArg = args[0]
@@ -1404,11 +1404,11 @@ up.util = (function() {
 //      return args.shift()
 
   function extractCallback(args) {
-    return extractLastArg(args, isFunction);
+    return extractLastArg(args, isFunction)
   }
 
   function extractOptions(args) {
-    return extractLastArg(args, isOptions) || {};
+    return extractLastArg(args, isOptions) || {}
   }
 
 //  partial = (fn, fixedArgs...) ->
@@ -1480,10 +1480,10 @@ up.util = (function() {
   function sequence(functions) {
     // No need for an expensive map() if we're passed a single function.
     if (functions.length === 1) {
-      return functions[0];
+      return functions[0]
     }
-    return () => map(functions, fn => fn());
-  };
+    return () => map(functions, fn => fn())
+  }
 
 //  ###**
 //  @function up.util.race
@@ -1528,16 +1528,16 @@ up.util = (function() {
   @experimental
   */
   function flatten(array) {
-    const flattened = [];
+    const flattened = []
     for (let object of array) {
       if (isList(object)) {
-        flattened.push(...object);
+        flattened.push(...object)
       } else {
-        flattened.push(object);
+        flattened.push(object)
       }
     }
-    return flattened;
-  };
+    return flattened
+  }
 
 //  flattenObject = (object) ->
 //    result = {}
@@ -1566,7 +1566,7 @@ up.util = (function() {
   @internal
   */
   function isTruthy(object) {
-    return !!object;
+    return !!object
   }
 
   /***
@@ -1620,7 +1620,7 @@ up.util = (function() {
   @internal
   */
   function muteRejection(promise) {
-    return promise?.catch(noop);
+    return promise?.catch(noop)
   }
 
   /***
@@ -1631,14 +1631,14 @@ up.util = (function() {
     let resolveFn
     let rejectFn
     const nativePromise = new Promise(function(givenResolve, givenReject) {
-      resolveFn = givenResolve;
-      rejectFn = givenReject;
-    });
-    nativePromise.resolve = resolveFn;
-    nativePromise.reject = rejectFn;
+      resolveFn = givenResolve
+      rejectFn = givenReject
+    })
+    nativePromise.resolve = resolveFn
+    nativePromise.reject = rejectFn
     nativePromise.promise = () => nativePromise; // just return self
-    return nativePromise;
-  };
+    return nativePromise
+  }
 
 //  ###**
 //  Calls the given block. If the block throws an exception,
@@ -1657,11 +1657,11 @@ up.util = (function() {
     // The side effects of this should be sync, otherwise we could
     // just do `Promise.resolve().then(block)`.
     try {
-      return Promise.resolve(block());
+      return Promise.resolve(block())
     } catch (error) {
-      return Promise.reject(error);
+      return Promise.reject(error)
     }
-  };
+  }
 
 //  sum = (list, block) ->
 //    block = iteratee(block)
@@ -1673,7 +1673,7 @@ up.util = (function() {
 //    totalValue
 
   function isBasicObjectProperty(k) {
-    return Object.prototype.hasOwnProperty(k);
+    return Object.prototype.hasOwnProperty(k)
   }
 
   /***
@@ -1699,23 +1699,23 @@ up.util = (function() {
     if (a?.valueOf) { a = a.valueOf(); } // Date, String objects, Number objects
     if (b?.valueOf) { b = b.valueOf(); } // Date, String objects, Number objects
     if (typeof(a) !== typeof(b)) {
-      return false;
+      return false
     } else if (isList(a) && isList(b)) {
-      return isEqualList(a, b);
+      return isEqualList(a, b)
     } else if (isObject(a) && a[isEqual.key]) {
-      return a[isEqual.key](b);
+      return a[isEqual.key](b)
     } else if (isOptions(a) && isOptions(b)) {
-      const aKeys = Object.keys(a);
-      const bKeys = Object.keys(b);
+      const aKeys = Object.keys(a)
+      const bKeys = Object.keys(b)
       if (isEqualList(aKeys, bKeys)) {
-        return every(aKeys, aKey => isEqual(a[aKey], b[aKey]));
+        return every(aKeys, aKey => isEqual(a[aKey], b[aKey]))
       } else {
-        return false;
+        return false
       }
     } else {
-      return a === b;
+      return a === b
     }
-  };
+  }
 
   /***
   This property contains the name of a method that user-defined classes
@@ -1732,7 +1732,7 @@ up.util = (function() {
     }
 
     [up.util.isEqual.key](other) {
-      return this.email === other.email;
+      return this.email === other.email
     }
   }
   ```
@@ -1761,26 +1761,26 @@ up.util = (function() {
   @param {string} key
   @experimental
   */
-  isEqual.key = 'up.util.isEqual';
+  isEqual.key = 'up.util.isEqual'
 
   function isEqualList(a, b) {
-    return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]));
+    return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
   }
 
   function splitValues(value, separator = ' ') {
     if (isString(value)) {
-      value = value.split(separator);
-      value = map(value, v => v.trim());
-      value = filterList(value, isPresent);
-      return value;
+      value = value.split(separator)
+      value = map(value, v => v.trim())
+      value = filterList(value, isPresent)
+      return value
     } else {
-      return wrapList(value);
+      return wrapList(value)
     }
-  };
+  }
 
   function endsWith(string, search) {
-    return string.substring(string.length - search.length) === search;
-  };
+    return string.substring(string.length - search.length) === search
+  }
 
   function simpleEase(x) {
     // easing: http://fooplot.com/?lang=de#W3sidHlwZSI6MCwiZXEiOiJ4PDAuNT8yKngqeDp4Kig0LXgqMiktMSIsImNvbG9yIjoiIzEzRjIxNyJ9LHsidHlwZSI6MCwiZXEiOiJzaW4oKHheMC43LTAuNSkqcGkpKjAuNSswLjUiLCJjb2xvciI6IiMxQTUyRUQifSx7InR5cGUiOjEwMDAsIndpbmRvdyI6WyItMS40NyIsIjEuNzgiLCItMC41NSIsIjEuNDUiXX1d
@@ -1789,11 +1789,11 @@ up.util = (function() {
     // https://jsperf.com/easings/1
     // Math.sin((Math.pow(x, 0.7) - 0.5) * Math.PI) * 0.5 + 0.5
     return x < 0.5 ? 2*x*x : (x*(4 - (x*2)))-1
-  };
+  }
 
   function wrapValue(constructor, ...args) {
     return (args[0] instanceof constructor) ? args[0] : new constructor(...args)
-  };
+  }
 
 //  wrapArray = (objOrArray) ->
 //    if isUndefined(objOrArray)
@@ -1803,10 +1803,10 @@ up.util = (function() {
 //    else
 //      [objOrArray]
 
-  let nextUid = 0;
+  let nextUid = 0
 
   function uid() {
-    return nextUid++;
+    return nextUid++
   }
 
   /***
@@ -1818,7 +1818,7 @@ up.util = (function() {
   @internal
   */
   function reverse(list) {
-    return copy(list).reverse();
+    return copy(list).reverse()
   }
 
 //  ###**
@@ -1847,133 +1847,133 @@ up.util = (function() {
 //      return value
 
   function renameKeys(object, renameKeyFn) {
-    const renamed = {};
+    const renamed = {}
     for (let key in object) {
-      renamed[renameKeyFn(key)] = object[key];
+      renamed[renameKeyFn(key)] = object[key]
     }
-    return renamed;
-  };
+    return renamed
+  }
 
   function camelToKebabCase(str) {
-    return str.replace(/[A-Z]/g, char => '-' + char.toLowerCase());
+    return str.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
   }
 
   function prefixCamelCase(str, prefix) {
-    return prefix + upperCaseFirst(str);
+    return prefix + upperCaseFirst(str)
   }
 
   function unprefixCamelCase(str, prefix) {
-    const pattern = new RegExp('^' + prefix + '(.+)$');
+    const pattern = new RegExp('^' + prefix + '(.+)$')
     let match = str.match(pattern)
     if (match) {
-      return lowerCaseFirst(match[1]);
+      return lowerCaseFirst(match[1])
     }
-  };
+  }
 
   function lowerCaseFirst(str) {
-    return str[0].toLowerCase() + str.slice(1);
+    return str[0].toLowerCase() + str.slice(1)
   }
 
   function upperCaseFirst(str) {
-    return str[0].toUpperCase() + str.slice(1);
+    return str[0].toUpperCase() + str.slice(1)
   }
 
   function defineGetter(object, prop, get) {
-    Object.defineProperty(object, prop, { get });
+    Object.defineProperty(object, prop, { get })
   }
 
   function defineDelegates(object, props, targetProvider) {
     wrapList(props).forEach(function(prop) {
       Object.defineProperty(object, prop, {
         get() {
-          const target = targetProvider.call(this);
-          let value = target[prop];
+          const target = targetProvider.call(this)
+          let value = target[prop]
           if (isFunction(value)) {
-            value = value.bind(target);
+            value = value.bind(target)
           }
-          return value;
+          return value
         },
         set(newValue) {
-          const target = targetProvider.call(this);
-          target[prop] = newValue;
+          const target = targetProvider.call(this)
+          target[prop] = newValue
         }
-      });
-    });
+      })
+    })
     console.log(props)
   }
 
   function literal(obj) {
-    const result = {};
+    const result = {}
     for (let key in obj) {
-      const value = obj[key];
+      const value = obj[key]
       let unprefixedKey = unprefixCamelCase(key, 'get_')
       if (unprefixedKey) {
-        defineGetter(result, unprefixedKey, value);
+        defineGetter(result, unprefixedKey, value)
       } else {
-        result[key] = value;
+        result[key] = value
       }
     }
-    return result;
-  };
+    return result
+  }
 
   function stringifyArg(arg) {
-    let string;
-    const maxLength = 200;
-    let closer = '';
+    let string
+    const maxLength = 200
+    let closer = ''
 
     if (isString(arg)) {
-      string = arg.replace(/[\n\r\t ]+/g, ' ');
-      string = string.replace(/^[\n\r\t ]+/, '');
-      string = string.replace(/[\n\r\t ]$/, '');
+      string = arg.replace(/[\n\r\t ]+/g, ' ')
+      string = string.replace(/^[\n\r\t ]+/, '')
+      string = string.replace(/[\n\r\t ]$/, '')
       // string = "\"#{string}\""
       // closer = '"'
     } else if (isUndefined(arg)) {
       // JSON.stringify(undefined) is actually undefined
-      string = 'undefined';
+      string = 'undefined'
     } else if (isNumber(arg) || isFunction(arg)) {
-      string = arg.toString();
+      string = arg.toString()
     } else if (isArray(arg)) {
-      string = `[${map(arg, stringifyArg).join(', ')}]`;
-      closer = ']';
+      string = `[${map(arg, stringifyArg).join(', ')}]`
+      closer = ']'
     } else if (isJQuery(arg)) {
       debugger
-      string = `$(${map(arg, stringifyArg).join(', ')})`;
-      closer = ')';
+      string = `$(${map(arg, stringifyArg).join(', ')})`
+      closer = ')'
     } else if (isElement(arg)) {
-      string = `<${arg.tagName.toLowerCase()}`;
+      string = `<${arg.tagName.toLowerCase()}`
       for (let attr of ['id', 'name', 'class']) {
         let value = arg.getAttribute(attr)
         if (value) {
-          string += ` ${attr}=\"${value}\"`;
+          string += ` ${attr}=\"${value}\"`
         }
       }
-      string += ">";
-      closer = '>';
+      string += ">"
+      closer = '>'
     } else if (isRegExp(arg)) {
-      string = arg.toString();
+      string = arg.toString()
     } else { // object, array
       try {
-        string = JSON.stringify(arg);
+        string = JSON.stringify(arg)
       } catch (error) {
         if (error.name === 'TypeError') {
-          string = '(circular structure)';
+          string = '(circular structure)'
         } else {
-          throw error;
+          throw error
         }
       }
     }
 
     if (string.length > maxLength) {
-      string = `${string.substr(0, maxLength)} …`;
-      string += closer;
+      string = `${string.substr(0, maxLength)} …`
+      string += closer
     }
-    return string;
-  };
+    return string
+  }
 
-  const SPRINTF_PLACEHOLDERS = /\%[oOdisf]/g;
+  const SPRINTF_PLACEHOLDERS = /\%[oOdisf]/g
 
   function secondsSinceEpoch() {
-    return Math.floor(Date.now() * 0.001);
+    return Math.floor(Date.now() * 0.001)
   }
 
   /***
@@ -1983,7 +1983,7 @@ up.util = (function() {
   @internal
   */
   function sprintf(message, ...args) {
-    return sprintfWithFormattedArgs(identity, message, ...args);
+    return sprintfWithFormattedArgs(identity, message, ...args)
   }
 
   /***
@@ -1993,19 +1993,19 @@ up.util = (function() {
   function sprintfWithFormattedArgs(formatter, message, ...args) {
     if (!message) { return ''; }
 
-    let i = 0;
+    let i = 0
     return message.replace(SPRINTF_PLACEHOLDERS, function() {
-      let arg = args[i];
-      arg = formatter(stringifyArg(arg));
-      i += 1;
-      return arg;
-    });
-  };
+      let arg = args[i]
+      arg = formatter(stringifyArg(arg))
+      i += 1
+      return arg
+    })
+  }
 
   // Remove with IE11.
   // When removed we can also remove muteRejection(), as this is the only caller.
   function allSettled(promises) {
-    return Promise.all(map(promises, muteRejection));
+    return Promise.all(map(promises, muteRejection))
   }
 
   function negate(fn) {
@@ -2128,5 +2128,5 @@ up.util = (function() {
     timestamp: secondsSinceEpoch,
     allSettled,
     negate
-  };
+  }
 })();
