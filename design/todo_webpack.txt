@@ -5,6 +5,10 @@ TODOs
 - Remove up.util.literal
 - Remove up.util.getter?
 - Remove up.Class.getter/setter
+- Use a different Doccomment fence since RubyMine keeps parsing our custom Docs as JSDoc type information
+- Convert `let x = undefined` to just `let x`
+- Remove `return undefined` at the end of functions
+- Grep if any Array.from is left
 
 
 

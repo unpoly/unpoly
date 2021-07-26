@@ -912,9 +912,7 @@ up.fragment = (function() {
     return !!e.closest(element, '.up-destroying')
   }
 
-  function isNotDestroying(element) {
-    return !isDestroying(element)
-  }
+  const isNotDestroying = u.negate(isDestroying)
 
   /***
    Returns the first fragment matching the given selector.
@@ -1031,8 +1029,6 @@ up.fragment = (function() {
    @stable
    */
   function getSmart(...args) {
-    console.log("getSmart(%o)", u.copy(args))
-
     const options = u.extractOptions(args);
     const selector = args.pop();
     const root = args[0];

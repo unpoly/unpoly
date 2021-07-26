@@ -18,6 +18,7 @@ Internet Explorer 10 or lower
 @module up.browser
 */
 up.browser = (function() {
+  const u = up.util
 
   /***
   Makes a full-page request, replacing the entire browser environment with a new page from the server response.
@@ -99,13 +100,9 @@ up.browser = (function() {
     return !!window.Promise
   }
 
-  function canFormatLog() {
-    return !isIE11()
-  }
+  const canFormatLog = u.negate(isIE11)
 
-  function canPassiveEventListener() {
-    return !isIE11()
-  }
+  const canPassiveEventListener = u.negate(isIE11)
 
   // Don't memoize so a build may publish window.jQuery after Unpoly was loaded
   function canJQuery() {

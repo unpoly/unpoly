@@ -65,3 +65,17 @@ up.util.selectorForElement = (args...) ->
 up.util.nextFrame = (args...) ->
   up.migrate.warn('up.util.nextFrame() has been renamed to up.util.task()')
   return up.util.task(args...)
+
+###**
+Calls the given function for the given number of times.
+
+@function up.util.times
+@param {number} count
+@param {Function()} block
+@deprecated
+  Use a `for` loop instead.
+###
+up.util.times = (count, block) ->
+  for iteration in [0..(count - 1)]
+    block(iteration)
+

@@ -501,6 +501,22 @@ describe 'up.util', ->
         mapped = up.util.map(array, (element, i) -> i)
         expect(mapped).toEqual [0, 1, 2]
 
+      it 'maps over a NodeList collection', ->
+        one = fixture('.qwertz[data-value=one]')
+        two = fixture('.qwertz[data-value=two]')
+        collection = document.querySelectorAll('.qwertz')
+
+        result = up.util.map(collection, (elem) -> elem.dataset.value)
+        expect(result).toEqual ['one', 'two']
+
+      it 'maps over a jQuery collection', ->
+        one = fixture('.one')
+        two = fixture('.two')
+        collection = jQuery([one, two])
+
+        result = up.util.map(collection, 'className')
+        expect(result).toEqual ['one', 'two']
+
     describe 'up.util.mapObject', ->
 
       it 'creates an object from the given array and pairer', ->
@@ -525,10 +541,20 @@ describe 'up.util', ->
         up.util.each array, (item, index) -> args.push(index)
         expect(args).toEqual [0, 1, 2]
 
-      it 'iterates over an array-like value', ->
+      it 'iterates over a NodeList', ->
         one = fixture('.qwertz')
         two = fixture('.qwertz')
         nodeList = document.querySelectorAll('.qwertz')
+
+        callback = jasmine.createSpy()
+
+        up.util.each nodeList, callback
+        expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
+
+      it 'iterates over a jQuery collection', ->
+        one = fixture('.qwertz')
+        two = fixture('.qwertz')
+        nodeList = jQuery([one, two])
 
         callback = jasmine.createSpy()
 

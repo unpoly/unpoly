@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Unreleased
+----------
+
+- Function `up.util.times()` has been deprecated. Use a `for` loop instead.
+
+
 2.1.0
 -----
 

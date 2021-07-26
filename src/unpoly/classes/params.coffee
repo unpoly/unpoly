@@ -282,6 +282,7 @@ class up.Params extends up.Class
         @add(name, value)
 
   addAllFromFormData: (formData) ->
+    # IE11: Remove eachIterator and just use for .. of
     u.eachIterator formData.entries(), (value) =>
       @add(value...)
 

@@ -67,7 +67,8 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($input, callback)
               $input.val('new-value')
-              u.times 2, -> Trigger[eventType]($input)
+              Trigger[eventType]($input)
+              Trigger[eventType]($input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
                 expect(callback.calls.count()).toEqual(1)
@@ -284,7 +285,8 @@ describe 'up.form', ->
               callback = jasmine.createSpy('change callback')
               up.observe($form, callback)
               $input.val('new-value')
-              u.times 2, -> Trigger[eventType]($input)
+              Trigger[eventType]($input)
+              Trigger[eventType]($input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
                 expect(callback.calls.count()).toEqual(1)
