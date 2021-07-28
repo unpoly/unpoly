@@ -1,4 +1,3 @@
-###**
 Focus option
 =============
 
@@ -108,4 +107,3 @@ The function is expected to either:
 - Do nothing
 
 @page focus-option
-###
