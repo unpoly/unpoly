@@ -14,7 +14,6 @@ require('./unpoly/classes/config')
 require('./unpoly/classes/cache')
 require('./unpoly/classes/rect')
 
-require('./unpoly/classes/abort_controller')
 require('./unpoly/classes/body_shifter')
 require('./unpoly/classes/change/change')
 require('./unpoly/classes/change/addition')
