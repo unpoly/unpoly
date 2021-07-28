@@ -1,8 +1,9 @@
-###**
+/***
 @module up
-###
-window.up =
+*/
+window.up = {
   version: '<%=
     require 'json'
     JSON.parse(File.read('package.json')).fetch('version')
   %>'
+}
