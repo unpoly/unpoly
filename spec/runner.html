@@ -9,28 +9,8 @@
     <link rel="stylesheet" href="/dist/unpoly.css">
 
     <script>
-      var pendingScriptURLs = []
-      var loadingScriptURL = null
-
-      function poke() {
-        if (!loadingScriptURL) {
-          var nextScriptURL = pendingScriptURLs.shift()
-          if (nextScriptURL) {
-            loadingScriptURL = nextScriptURL
-            let scriptElement = document.createElement('script')
-            scriptElement.src = nextScriptURL
-            scriptElement.onload = function() {
-              loadingScriptURL = null
-              poke()
-            }
-            document.head.appendChild(scriptElement)
-          }
-        }
-      }
-
       function insertScript(src) {
-        pendingScriptURLs.push(src)
-        poke()
+        document.write('<script src="' + src + '"><' + '/script>')
       }
 
       insertScript('/dist/jasmine.js')
