@@ -899,8 +899,8 @@ describe 'up.layer', ->
       it 'prioritizes the config for a particular mode over the config for all overlays or any modes'
 
       if up.migrate.loaded
-        it 'prints a deprecation warning if the user configured { historyHistory } (which is now { history })', ->
-          up.layer.config.overlay.historyHistory = false
+        it 'prints a deprecation warning if the user configured { historyVisible } (which is now { history })', ->
+          up.layer.config.overlay.historyVisible = false
           warnSpy = spyOn(up.log, 'warn')
           up.layer.build(mode: 'drawer')
           expect(warnSpy).toHaveBeenCalled()

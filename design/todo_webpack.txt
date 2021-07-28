@@ -26,7 +26,6 @@ TODOs
 
 
 
-
 Final folder structure
 ======================
 
