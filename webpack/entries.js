@@ -3,7 +3,7 @@ const { merge, file, scriptPipeline, stylePipeline, minify } = require('./shared
 
 function unpoly({ es, min }) {
   return merge(
-    file('./src/unpoly.coffee', `unpoly${es == 'es5' ? '.es5' : ''}${min ? '.min' : ''}.js`),
+    file('./src/unpoly.js', `unpoly${es == 'es5' ? '.es5' : ''}${min ? '.min' : ''}.js`),
     scriptPipeline(es),
     es === 'es5' ? discardStyles(): stylePipeline('unpoly.css'),
     minify(min),
@@ -12,7 +12,7 @@ function unpoly({ es, min }) {
 
 function unpolyMigrate({ min }) {
   return merge(
-    file('./src/unpoly-migrate.coffee', `unpoly-migrate${min ? '.min' : ''}.js`),
+    file('./src/unpoly-migrate.js', `unpoly-migrate${min ? '.min' : ''}.js`),
     // Always transpile to ES5. I don't want multiple versions of this trivial file.
     scriptPipeline('es5'),
     minify(min),
@@ -21,7 +21,7 @@ function unpolyMigrate({ min }) {
 
 function unpolyBootstrap({ version, min }) {
   return merge(
-    file(`./src/unpoly-bootstrap${version}.coffee`, `unpoly-bootstrap${version}${min ? '.min' : ''}.js`),
+    file(`./src/unpoly-bootstrap${version}.js`, `unpoly-bootstrap${version}${min ? '.min' : ''}.js`),
     scriptPipeline('es5'),
     // Always transpile to ES5. I don't want multiple versions of this trivial file.
     stylePipeline(`unpoly-bootstrap${version}.css`),
