@@ -1,8 +1,8 @@
-require('./network.sass')
+require('./network.sass');
 
-u = up.util
+const u = up.util;
 
-###**
+/***
 Network requests
 ================
 
@@ -27,9 +27,9 @@ Unpoly's `up.request()` has a number of convenience features:
 @see up:request:late
 
 @module up.network
-###
-up.network = do ->
-  ###**
+*/
+up.network = (function() {
+  /***
   Sets default options for this package.
 
   @property up.network.config
@@ -161,29 +161,32 @@ up.network = do ->
     ```
 
   @stable
-  ###
-  config = new up.Config ->
-    concurrency: 4
-    wrapMethod: true
-    cacheSize: 70
-    cacheExpiry: 1000 * 60 * 5
-    badDownlink: 0.6
-    badRTT: 750
-    badResponseTime: 400
-    # 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
-    # 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
-    autoCache: (request) -> request.isSafe()
-    clearCache: (request, _response) -> !request.isSafe()
-    requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']
+  */
+  const config = new up.Config(() => ({
+    concurrency: 4,
+    wrapMethod: true,
+    cacheSize: 70,
+    cacheExpiry: 1000 * 60 * 5,
+    badDownlink: 0.6,
+    badRTT: 750,
+    badResponseTime: 400,
+
+    // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
+    // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
+    autoCache(request) { return request.isSafe(); },
+
+    clearCache(request, _response) { return !request.isSafe(); },
+    requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true
+  }));
 
-  queue = new up.Request.Queue()
+  const queue = new up.Request.Queue();
 
-  cache = new up.Request.Cache()
+  const cache = new up.Request.Cache();
 
-  progressBar = null
+  let progressBar = null;
 
-  ###**
+  /***
   Returns an earlier request [matching](/up.network.config#config.requestMetaKeys) the given request options.
 
   Returns `undefined` if the given request is not currently cached.
@@ -214,9 +217,9 @@ up.network = do ->
   @return {up.Request|undefined}
     The cached request.
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   Removes all [cache](/up.request#caching) entries.
 
   To only remove some cache entries, pass a [URL pattern](/url-patterns):
@@ -238,9 +241,9 @@ up.network = do ->
 
     If omitted, the entire cache is cleared.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Makes the cache assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
@@ -253,9 +256,9 @@ up.network = do ->
   @param {Object} newRequest
     The new [request options](/up.request).
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   Manually stores a request in the cache.
 
   Future calls to `up.request()` will try to re-use this request before
@@ -268,9 +271,9 @@ up.network = do ->
   @param {up.Request} request
     The request to cache. The cache is also a promise for the response.
   @internal
-  ###
+  */
 
-  ###**
+  /***
   Manually removes the given request from the cache.
 
   You can also [configure](/up.network.config) when
@@ -282,17 +285,18 @@ up.network = do ->
 
     See `options` for `up.request()` for documentation.
   @experimental
-  ###
+  */
 
-  reset = ->
-    abortRequests()
-    queue.reset()
-    config.reset()
-    cache.clear()
-    progressBar?.destroy()
-    progressBar = null
+  function reset() {
+    abortRequests();
+    queue.reset();
+    config.reset();
+    cache.clear();
+    progressBar?.destroy();
+    progressBar = null;
+  };
 
-  ###**
+  /***
   Makes an AJAX request to the given URL.
 
   Returns an `up.Request` object which contains information about the request.
@@ -446,118 +450,140 @@ up.network = do ->
     The request object is also a promise for its `up.Response`.
 
   @stable
-  ###
-  makeRequest = (args...) ->
-    request = new up.Request(parseRequestOptions(args))
+  */
+  function makeRequest(...args) {
+    const request = new up.Request(parseRequestOptions(args));
 
-    useCachedRequest(request) || queueRequest(request)
+    useCachedRequest(request) || queueRequest(request);
 
-    if solo = request.solo
-      # The { solo } option may also contain a function.
-      # This way users can excempt some requests from being solo-aborted
-      # by configuring up.fragment.config.navigateOptions.
-      queue.abortExcept(request, solo)
+    let solo = request.solo
+    if (solo) {
+      // The { solo } option may also contain a function.
+      // This way users can excempt some requests from being solo-aborted
+      // by configuring up.fragment.config.navigateOptions.
+      queue.abortExcept(request, solo);
+    }
 
-    return request
+    return request;
+  };
 
-  mimicLocalRequest = (options) ->
-    if solo = options.solo
-      abortRequests(solo)
+  function mimicLocalRequest(options) {
+    let solo = options.solo
+    if (solo) {
+      abortRequests(solo);
+    }
 
-    # We cannot consult config.clearCache since there is no up.Request
-    # for a local update.
-    if clearCache = options.clearCache
-      cache.clear(clearCache)
+    // We cannot consult config.clearCache since there is no up.Request
+    // for a local update.
+    let clearCache = options.clearCache
+    if (clearCache) {
+      cache.clear(clearCache);
+    }
+  };
 
-  parseRequestOptions = (args) ->
-    options = u.extractOptions(args)
-    options.url ||= args[0]
-    up.migrate.handleRequestOptions?(options)
-    options
+  function parseRequestOptions(args) {
+    const options = u.extractOptions(args);
+    if (!options.url) { options.url = args[0]; }
+    up.migrate.handleRequestOptions?.(options);
+    return options;
+  };
 
-  useCachedRequest = (request) ->
-    # If we have an existing promise matching this new request,
-    # we use it unless `request.cache` is explicitly set to `false`.
-    if request.willCache() && (cachedRequest = cache.get(request))
-      up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
+  function useCachedRequest(request) {
+    // If we have an existing promise matching this new request,
+    // we use it unless `request.cache` is explicitly set to `false`.
+    let cachedRequest;
+    if (request.willCache() && (cachedRequest = cache.get(request))) {
+      up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url);
 
-      # Check if we need to upgrade a cached background request to a foreground request.
-      # This might affect whether we're going to emit an up:request:late event further
-      # down. Consider this case:
-      #
-      # - User preloads a request (1). We have a cache miss and connect to the network.
-      #   This will never trigger `up:request:late`, because we only track foreground requests.
-      # - User loads the same request (2) in the foreground (no preloading).
-      #   We have a cache hit and receive the earlier request that is still preloading.
-      #   Now we *should* trigger `up:request:late`.
-      # - The request (1) finishes. This triggers `up:request:recover`.
-      unless request.preload
-        queue.promoteToForeground(cachedRequest)
+      // Check if we need to upgrade a cached background request to a foreground request.
+      // This might affect whether we're going to emit an up:request:late event further
+      // down. Consider this case:
+      //
+      // - User preloads a request (1). We have a cache miss and connect to the network.
+      //   This will never trigger `up:request:late`, because we only track foreground requests.
+      // - User loads the same request (2) in the foreground (no preloading).
+      //   We have a cache hit and receive the earlier request that is still preloading.
+      //   Now we *should* trigger `up:request:late`.
+      // - The request (1) finishes. This triggers `up:request:recover`.
+      if (!request.preload) {
+        queue.promoteToForeground(cachedRequest);
+      }
 
-      # We cannot simply return `cachedRequest`, since that might have a different #hash property.
-      # While two requests with a different #hash have the same cache key, they are
-      # not the same object.
-      #
-      # What we do instead is have `request` follow the state of `cachedRequest`'s exchange.
-      request.followState(cachedRequest)
-      return true
+      // We cannot simply return `cachedRequest`, since that might have a different #hash property.
+      // While two requests with a different #hash have the same cache key, they are
+      // not the same object.
+      //
+      // What we do instead is have `request` follow the state of `cachedRequest`'s exchange.
+      request.followState(cachedRequest);
+      return true;
+    }
+  };
 
-  # If no existing promise is available, we queue a network request.
-  queueRequest = (request) ->
-    if request.preload && !request.isSafe()
-      up.fail('Will not preload request to %s', request.description)
+  // If no existing promise is available, we queue a network request.
+  function queueRequest(request) {
+    if (request.preload && !request.isSafe()) {
+      up.fail('Will not preload request to %s', request.description);
+    }
 
-    handleCaching(request)
+    handleCaching(request);
 
-    queue.asap(request)
+    return queue.asap(request);
+  };
 
-  handleCaching = (request) ->
-    if request.willCache()
-      # Cache the request for calls for calls with the same URL, method, params
-      # and target. See up.Request#cacheKey().
-      cache.set(request, request)
+  function handleCaching(request) {
+    if (request.willCache()) {
+      // Cache the request for calls for calls with the same URL, method, params
+      // and target. See up.Request#cacheKey().
+      cache.set(request, request);
+    }
 
-    u.always request, (response) ->
-      # Three places can request the cache to be cleared or kept:
-      # (1) The server via X-Up-Clear-Cache header, found in response.clearCache
-      # (2) The interaction via { clearCache } option, found in request.clearCache
-      # (3) The default in up.network.config.clearCache({ request, response })
-      if clearCache = (response.clearCache ? request.clearCache ? config.clearCache(request, response))
-        cache.clear(clearCache)
+    return u.always(request, function(response) {
+      // Three places can request the cache to be cleared or kept:
+      // (1) The server via X-Up-Clear-Cache header, found in response.clearCache
+      // (2) The interaction via { clearCache } option, found in request.clearCache
+      // (3) The default in up.network.config.clearCache({ request, response })
+      let clearCache = response.clearCache ?? request.clearCache ?? config.clearCache(request, response)
+      if (clearCache) {
+        cache.clear(clearCache);
+      }
 
-      # (1) Re-cache a cacheable request in case we cleared the cache above
-      # (2) An un-cacheable request should still update an existing cache entry
-      #     (written by a earlier, cacheable request with the same cache key)
-      #     since the later response will be fresher.
-      if request.willCache() || cache.get(request)
-        cache.set(request, request)
+      // (1) Re-cache a cacheable request in case we cleared the cache above
+      // (2) An un-cacheable request should still update an existing cache entry
+      //     (written by a earlier, cacheable request with the same cache key)
+      //     since the later response will be fresher.
+      if (request.willCache() || cache.get(request)) {
+        cache.set(request, request);
+      }
 
-      unless response.ok
-        # Uncache failed requests. We have no control over the server,
-        # and another request with the same properties might succeed.
-        cache.remove(request)
+      if (!response.ok) {
+        // Uncache failed requests. We have no control over the server,
+        // and another request with the same properties might succeed.
+        cache.remove(request);
+      }
+    });
+  };
 
-  ###**
-  Returns whether Unpoly is not currently waiting for a [request](/up.request) to finish.
-
-  @function up.network.isIdle
-  @return {boolean}
-  @stable
-  ###
-  isIdle = ->
-    not isBusy()
-
-  ###**
+  /***
   Returns whether Unpoly is currently waiting for a [request](/up.request) to finish.
 
   @function up.network.isBusy
   @return {boolean}
   @stable
-  ###
-  isBusy = ->
-    queue.isBusy()
+  */
+  function isBusy() {
+    return queue.isBusy();
+  }
 
-  ###**
+  /***
+   Returns whether Unpoly is *not* currently waiting for a [request](/up.request) to finish.
+
+   @function up.network.isIdle
+   @return {boolean}
+   @stable
+   */
+  const isIdle = u.negate(isBusy)
+
+  /***
   Returns whether optional requests should be avoided where possible.
 
   We assume the user wants to avoid requests if either of following applies:
@@ -573,18 +599,21 @@ up.network = do ->
   @return {boolean}
     Whether requests should be avoided where possible.
   @experimental
-  ###
-  shouldReduceRequests = ->
-    # Browser support for navigator.connection: https://caniuse.com/?search=networkinformation
-    if netInfo = navigator.connection
-      # API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
-      # API for NetworkInformation#rtt:      https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
-      # API for NetworkInformation#saveData: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
+  */
+  function shouldReduceRequests() {
+    // Browser support for navigator.connection: https://caniuse.com/?search=networkinformation
+    let netInfo = navigator.connection
+    if (netInfo) {
+      // API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
+      // API for NetworkInformation#rtt:      https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
+      // API for NetworkInformation#saveData: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
       return netInfo.saveData ||
-        (netInfo.rtt      && netInfo.rtt      > config.badRTT) ||
-        (netInfo.downlink && netInfo.downlink < config.badDownlink)
+        (netInfo.rtt      && (netInfo.rtt      > config.badRTT)) ||
+        (netInfo.downlink && (netInfo.downlink < config.badDownlink));
+    }
+  };
 
-  ###**
+  /***
   Aborts pending [requests](/up.request).
 
   The event `up:request:aborted` will be emitted.
@@ -627,11 +656,12 @@ up.network = do ->
   @param {up.Request|boolean|Function(up.Request): boolean} [matcher=true]
     If this argument is omitted, all pending requests are aborted.
   @stable
-  ###
-  abortRequests = (args...) ->
-    queue.abort(args...)
+  */
+  function abortRequests(...args) {
+    queue.abort(...args);
+  }
 
-  ###**
+  /***
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   was [aborted](/up.network.abort).
 
@@ -644,9 +674,9 @@ up.network = do ->
     The [layer](/up.layer) that caused the request.
   @param event.preventDefault()
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish.
 
@@ -700,9 +730,9 @@ up.network = do ->
 
   @event up:request:late
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:request:late), but have finished now.
 
@@ -712,9 +742,9 @@ up.network = do ->
 
   @event up:request:recover
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
 
@@ -728,17 +758,19 @@ up.network = do ->
   @param event.preventDefault()
     Event listeners may call this method to prevent the request from being sent.
   @stable
-  ###
+  */
 
-  registerAliasForRedirect = (request, response) ->
-    if request.cache && response.url && request.url != response.url
-      newRequest = request.variant(
-        method: response.method
+  function registerAliasForRedirect(request, response) {
+    if (request.cache && response.url && request.url !== response.url) {
+      const newRequest = request.variant({
+        method: response.method,
         url: response.url
-      )
-      cache.alias(request, newRequest)
+      });
+      cache.alias(request, newRequest);
+    }
+  };
 
-  ###**
+  /***
   This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
   has been received.
 
@@ -757,9 +789,9 @@ up.network = do ->
   @param {up.Layer} [event.layer]
     The [layer](/up.layer) that caused the request.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters fatal error like a timeout or loss of network connectivity.
 
@@ -775,34 +807,41 @@ up.network = do ->
   @param {up.Layer} [event.layer]
     The [layer](/up.layer) that caused the request.
   @stable
-  ###
+  */
 
-  isSafeMethod = (method) ->
-    u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method))
+  function isSafeMethod(method) {
+    return u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method));
+  }
 
-  onLate = ->
-    if u.evalOption(config.progressBar)
-      progressBar = new up.ProgressBar()
+  function onLate() {
+    if (u.evalOption(config.progressBar)) {
+      progressBar = new up.ProgressBar();
+    }
+  };
 
-  onRecover = ->
-    progressBar?.conclude()
+  function onRecover() {
+    progressBar?.conclude();
+  }
 
-  up.on 'up:request:late', onLate
-  up.on 'up:request:recover', onRecover
-  up.on 'up:framework:reset', reset
+  up.on('up:request:late', onLate);
+  up.on('up:request:recover', onRecover);
+  up.on('up:framework:reset', reset);
 
-  request: makeRequest
-  cache: cache
-  isIdle: isIdle
-  isBusy: isBusy
-  isSafeMethod: isSafeMethod
-  config: config
-  abort: abortRequests
-  registerAliasForRedirect: registerAliasForRedirect
-  queue: queue # for testing
-  shouldReduceRequests: shouldReduceRequests
-  mimicLocalRequest: mimicLocalRequest
+  return {
+    request: makeRequest,
+    cache,
+    isIdle,
+    isBusy,
+    isSafeMethod,
+    config,
+    abort: abortRequests,
+    registerAliasForRedirect,
+    queue, // for testing
+    shouldReduceRequests,
+    mimicLocalRequest
+  };
+})();
 
-up.request = up.network.request
+up.request = up.network.request;
 
-up.cache = up.network.cache
+up.cache = up.network.cache;
