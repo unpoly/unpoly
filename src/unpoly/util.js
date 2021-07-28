@@ -1899,7 +1899,6 @@ up.util = (function() {
         }
       })
     })
-    console.log(props)
   }
 
   function literal(obj) {
@@ -1936,7 +1935,6 @@ up.util = (function() {
       string = `[${map(arg, stringifyArg).join(', ')}]`
       closer = ']'
     } else if (isJQuery(arg)) {
-      debugger
       string = `$(${map(arg, stringifyArg).join(', ')})`
       closer = ')'
     } else if (isElement(arg)) {
