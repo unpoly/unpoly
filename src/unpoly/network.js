@@ -527,7 +527,8 @@ up.network = (function() {
 
     handleCaching(request)
 
-    return queue.asap(request)
+    queue.asap(request)
+    return true
   }
 
   function handleCaching(request) {
