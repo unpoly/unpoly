@@ -1,6 +1,6 @@
 require('./viewport.sass')
 
-###**
+/***
 Scrolling viewports
 ===================
 
@@ -15,14 +15,14 @@ Also see documentation for the [scroll option](/scroll-option) and [focus option
 @see [up-fixed=top]
 
 @module up.viewport
-###
-up.viewport = do ->
+*/
+up.viewport = (function() {
 
-  u = up.util
-  e = up.element
-  f = up.fragment
+  const u = up.util
+  const e = up.element
+  const f = up.fragment
 
-  ###**
+  /***
   Configures defaults for scrolling.
 
   @property up.viewport.config
@@ -71,25 +71,27 @@ up.viewport = do ->
     The default value (`1`) roughly corresponds to the speed of Chrome's
     [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
   @stable
-  ###
-  config = new up.Config ->
-    viewportSelectors: ['[up-viewport]', '[up-fixed]']
-    fixedTop: ['[up-fixed~=top]']
-    fixedBottom: ['[up-fixed~=bottom]']
-    anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]']
-    revealSnap: 200
+  */
+  const config = new up.Config(() => ({
+    viewportSelectors: ['[up-viewport]', '[up-fixed]'],
+    fixedTop: ['[up-fixed~=top]'],
+    fixedBottom: ['[up-fixed~=bottom]'],
+    anchoredRight: ['[up-anchored~=right]', '[up-fixed~=top]', '[up-fixed~=bottom]', '[up-fixed~=right]'],
+    revealSnap: 200,
     revealPadding: 0,
     revealTop: false,
-    revealMax: -> 0.5 * window.innerHeight
+    revealMax() { return 0.5 * window.innerHeight; },
     scrollSpeed: 1
+  }))
 
-  scrollingController = new up.MotionController('scrolling')
+  const scrollingController = new up.MotionController('scrolling')
 
-  reset = ->
+  function reset() {
     config.reset()
     scrollingController.reset()
+  }
 
-  ###**
+  /***
   Scrolls the given viewport to the given Y-position.
 
   A "viewport" is an element that has scrollbars, e.g. `<body>` or
@@ -127,21 +129,23 @@ up.viewport = do ->
   @return {Promise}
     A promise that will be fulfilled when the scrolling ends.
   @internal
-  ###
-  scroll = (viewport, scrollTop, options = {}) ->
+  */
+  function scroll(viewport, scrollTop, options = {}) {
     viewport = f.get(viewport, options)
-    motion = new up.ScrollMotion(viewport, scrollTop, options)
+    const motion = new up.ScrollMotion(viewport, scrollTop, options)
     scrollingController.startMotion(viewport, motion, options)
+  }
 
-  ###**
+  /***
   @function up.viewport.anchoredRight
   @internal
-  ###
-  anchoredRight = ->
-    selector = config.anchoredRight.join(',')
-    f.all(selector, { layer: 'root' })
+  */
+  function anchoredRight() {
+    const selector = config.anchoredRight.join(',')
+    return f.all(selector, { layer: 'root' })
+  }
 
-  ###**
+  /***
   Scrolls the given element's viewport so the first rows of the
   element are visible for the user.
 
@@ -221,23 +225,25 @@ up.viewport = do ->
     in the next [microtask](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
 
   @stable
-  ###
-  reveal = (element, options) ->
-    # copy options, since we will mutate it below (options.layer = ...).
+  */
+  function reveal(element, options) {
+    // copy options, since we will mutate it below (options.layer = ...).
     options = u.options(options)
     element = f.get(element, options)
 
-    # Now that we have looked up the element with an option like { layer: 'any' },
-    # the only layer relevant from here on is the element's layer.
-    unless options.layer = up.layer.get(element)
+    // Now that we have looked up the element with an option like { layer: 'any' },
+    // the only layer relevant from here on is the element's layer.
+    if (!(options.layer = up.layer.get(element))) {
       return up.error.failed.async('Cannot reveal a detached element')
+    }
 
-    options.layer.peel() if options.peel
+    if (options.peel) { options.layer.peel(); }
 
-    motion = new up.RevealMotion(element, options)
+    const motion = new up.RevealMotion(element, options)
     return scrollingController.startMotion(element, motion, options)
+  }
 
-  ###**
+  /***
   Focuses the given element.
 
   Focusing an element will also [reveal](/up.reveal) it, unless `{ preventScroll: true }` is passed.
@@ -251,46 +257,53 @@ up.viewport = do ->
     Whether to prevent changes to the acroll position.
 
   @experimental
-  ###
-  doFocus = (element, options = {}) ->
-    # First focus without scrolling, since we're going to use our custom scrolling
-    # logic below.
-    if up.browser.isIE11()
-      # IE11 does not support the { preventScroll } option for Element#focus().
-      viewport = closest(element)
-      oldScrollTop = viewport.scrollTop
+  */
+  function doFocus(element, options = {}) {
+    // First focus without scrolling, since we're going to use our custom scrolling
+    // logic below.
+    if (up.browser.isIE11()) {
+      // IE11 does not support the { preventScroll } option for Element#focus().
+      const viewport = closest(element)
+      const oldScrollTop = viewport.scrollTop
       element.focus()
       viewport.scrollTop = oldScrollTop
-    else
+    } else {
       element.focus({ preventScroll: true })
+    }
 
-    unless options.preventScroll
-      # Use up.reveal() which scrolls far enough to ignore fixed nav bars
-      # obstructing the focused element.
-      reveal(element)
+    if (!options.preventScroll) {
+      // Use up.reveal() which scrolls far enough to ignore fixed nav bars
+      // obstructing the focused element.
+      return reveal(element)
+    }
+  }
 
-  tryFocus = (element, options) ->
+  function tryFocus(element, options) {
     doFocus(element, options)
-    return element == document.activeElement
+    return element === document.activeElement
+  }
 
-  isNativelyFocusable = (element) ->
-    # IE11: In modern browsers we can check if element.tabIndex >= 0.
-    # But IE11 returns 0 for all elements, including <div> etc.
-    e.matches(element, 'a[href], button, textarea, input, select')
+  function isNativelyFocusable(element) {
+    // IE11: In modern browsers we can check if element.tabIndex >= 0.
+    // But IE11 returns 0 for all elements, including <div> etc.
+    return e.matches(element, 'a[href], button, textarea, input, select')
+  }
 
-  makeFocusable = (element) ->
-    # (1) Element#tabIndex is -1 for all non-interactive elements,
-    #     whether or not the element has an [tabindex=-1] attribute.
-    # (2) Element#tabIndex is 0 for interactive elements, like links,
-    #     inputs or buttons. [up-clickable] elements also get a [tabindex=0].
-    #     to participate in the regular tab order.
-    unless element.hasAttribute('tabindex') || isNativelyFocusable(element)
+  function makeFocusable(element) {
+    // (1) Element#tabIndex is -1 for all non-interactive elements,
+    //     whether or not the element has an [tabindex=-1] attribute.
+    // (2) Element#tabIndex is 0 for interactive elements, like links,
+    //     inputs or buttons. [up-clickable] elements also get a [tabindex=0].
+    //     to participate in the regular tab order.
+    if (!element.hasAttribute('tabindex') && !isNativelyFocusable(element)) {
       element.setAttribute('tabindex', '-1')
 
-      # A11Y: OK to hide the focus ring of a non-interactive element.
+      // A11Y: OK to hide the focus ring of a non-interactive element.
       element.classList.add('up-focusable-content')
+    }
+  }
 
-  ###**
+  /***
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
 
   Other than the default behavior found in browsers, `up.revealHash` works with
@@ -309,16 +322,20 @@ up.viewport = do ->
   @function up.viewport.revealHash
   @param {string} hash
   @internal
-  ###
-  revealHash = (hash = location.hash, options) ->
-    if match = firstHashTarget(hash, options)
-      up.reveal(match, top: true)
+  */
+  function revealHash(hash = location.hash, options) {
+    let match = firstHashTarget(hash, options)
+    if (match) {
+      return up.reveal(match, { top: true })
+    }
+  }
 
-  allSelector = ->
-    # On Edge the document viewport can be changed from CSS
-    [rootSelector(), config.viewportSelectors...].join(',')
+  function allSelector() {
+    // On Edge the document viewport can be changed from CSS
+    return [rootSelector(), ...config.viewportSelectors].join(',')
+  }
 
-  ###**
+  /***
   Returns the scrolling container for the given element.
 
   Returns the [document's scrolling element](/up.viewport.root)
@@ -328,15 +345,16 @@ up.viewport = do ->
   @param {string|Element|jQuery} target
   @return {Element}
   @experimental
-  ###
-  closest = (target, options = {}) ->
-    element = f.get(target, options)
-    # Use up.element.closest() which searches across layer boundaries.
-    # It is OK to find a viewport in a parent layer. Layers without its
-    # own viewport (like popups) are scrolled by the parent layer's viewport.
-    e.closest(element, allSelector())
+  */
+  function closest(target, options = {}) {
+    const element = f.get(target, options)
+    // Use up.element.closest() which searches across layer boundaries.
+    // It is OK to find a viewport in a parent layer. Layers without its
+    // own viewport (like popups) are scrolled by the parent layer's viewport.
+    return e.closest(element, allSelector())
+  }
 
-  ###**
+  /***
   Returns a list of all the viewports contained within the
   given selector or element.
 
@@ -348,12 +366,13 @@ up.viewport = do ->
   @param {Object} options
   @return List<Element>
   @internal
-  ###
-  getSubtree = (element, options = {}) ->
+  */
+  function getSubtree(element, options = {}) {
     element = f.get(element, options)
-    e.subtree(element, allSelector())
+    return e.subtree(element, allSelector())
+  }
 
-  ###**
+  /***
   Returns a list of all viewports that are either contained within
   the given element or that are ancestors of the given element.
 
@@ -365,54 +384,63 @@ up.viewport = do ->
   @param {Object} options
   @return List<Element>
   @internal
-  ###
-  getAround = (element, options = {}) ->
+  */
+  function getAround(element, options = {}) {
     element = f.get(element, options)
-    e.around(element, allSelector())
+    return e.around(element, allSelector())
+  }
 
-  ###**
+  /***
   Returns a list of all the viewports on the current layer.
 
   @function up.viewport.all
   @internal
-  ###
-  getAll = (options = {}) ->
-    f.all(allSelector(), options)
+  */
+  function getAll(options = {}) {
+    return f.all(allSelector(), options)
+  }
 
-  rootSelector = ->
-    # The spec says this should be <html> in standards mode
-    # and <body> in quirks mode. However, it is currently (2018-07)
-    # always <body> in Webkit browsers (not Blink). Luckily Webkit
-    # also supports document.scrollingElement.
-    if element = document.scrollingElement
-      element.tagName
-    else
-      # IE11
-      'html'
+  function rootSelector() {
+    // The spec says this should be <html> in standards mode
+    // and <body> in quirks mode. However, it is currently (2018-07)
+    // always <body> in Webkit browsers (not Blink). Luckily Webkit
+    // also supports document.scrollingElement.
+    let element
+    if ((element = document.scrollingElement)) {
+      return element.tagName
+    } else {
+      // IE11
+      return 'html'
+    }
+  }
 
-  ###**
+  /***
   Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
 
   @function up.viewport.root
   @return {Element}
   @experimental
-  ###
-  getRoot = ->
-    document.querySelector(rootSelector())
+  */
+  function getRoot() {
+    return document.querySelector(rootSelector())
+  }
 
-  rootWidth = ->
-    # This should happen on the <html> element, regardless of document.scrollingElement
-    e.root.clientWidth
+  function rootWidth() {
+    // This should happen on the <html> element, regardless of document.scrollingElement
+    return e.root.clientWidth
+  }
 
-  rootHeight = ->
-  # This should happen on the <html> element, regardless of document.scrollingElement
-    e.root.clientHeight
+  function rootHeight() {
+    // This should happen on the <html> element, regardless of document.scrollingElement
+    return e.root.clientHeight
+  }
 
-  isRoot = (element) ->
-    e.matches(element, rootSelector())
+  function isRoot(element) {
+    return e.matches(element, rootSelector())
+  }
 
-  ###**
+  /***
   Returns whether the root viewport is currently showing a vertical scrollbar.
 
   Note that this returns `false` if the root viewport scrolls vertically but the browser
@@ -421,29 +449,31 @@ up.viewport = do ->
 
   @function up.viewport.rootHasReducedWidthFromScrollbar
   @internal
-  ###
-  rootHasReducedWidthFromScrollbar = ->
-    # We could also check if scrollHeight > offsetHeight for the document viewport.
-    # However, we would also need to check overflow-y for that element.
-    # Also we have no control whether developers set the property on <body> or <html>.
-    # https://tylercipriani.com/blog/2014/07/12/crossbrowser-javascript-scrollbar-detection/
-    window.innerWidth > document.documentElement.offsetWidth
+  */
+  function rootHasReducedWidthFromScrollbar() {
+    // We could also check if scrollHeight > offsetHeight for the document viewport.
+    // However, we would also need to check overflow-y for that element.
+    // Also we have no control whether developers set the property on <body> or <html>.
+    // https://tylercipriani.com/blog/2014/07/12/crossbrowser-javascript-scrollbar-detection/
+    return window.innerWidth > document.documentElement.offsetWidth
+  }
 
-  ###**
+  /***
   Returns the element that controls the `overflow-y` behavior for the
   [document viewport](/up.viewport.root()).
 
   @function up.viewport.rootOverflowElement
   @internal
-  ###
-  rootOverflowElement = ->
-    body = document.body
-    html = document.documentElement
+  */
+  function rootOverflowElement() {
+    const { body } = document
+    const html = document.documentElement
 
-    element = u.find([html, body], wasChosenAsOverflowingElement)
-    element || getRoot()
+    const element = u.find([html, body], wasChosenAsOverflowingElement)
+    return element || getRoot()
+  }
 
-  ###**
+  /***
   Returns whether the given element was chosen as the overflowing
   element by the developer.
 
@@ -453,38 +483,42 @@ up.viewport = do ->
 
   @function wasChosenAsOverflowingElement
   @internal
-  ###
-  wasChosenAsOverflowingElement = (element) ->
-    overflowY = e.style(element, 'overflow-y')
-    overflowY == 'auto' || overflowY == 'scroll'
+  */
+  function wasChosenAsOverflowingElement(element) {
+    const overflowY = e.style(element, 'overflow-y')
+    return overflowY === 'auto' || overflowY === 'scroll'
+  }
 
-  ###**
+  /***
   Returns the width of a scrollbar.
 
   This only runs once per page load.
 
   @function up.viewport.scrollbarWidth
   @internal
-  ###
-  scrollbarWidth = u.memoize ->
-    # This is how Bootstrap does it also:
-    # https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
-    outerStyle =
-      position:  'absolute'
-      top:       '0'
-      left:      '0'
-      width:     '100px'
-      height:    '100px' # Firefox needs at least 100px to show a scrollbar
+  */
+  const scrollbarWidth = u.memoize(function() {
+    // This is how Bootstrap does it also:
+    // https://github.com/twbs/bootstrap/blob/c591227602996c542b9fd0cb65cff3cc9519bdd5/dist/js/bootstrap.js#L1187
+    const outerStyle = {
+      position:  'absolute',
+      top:       '0',
+      left:      '0',
+      width:     '100px',
+      height:    '100px', // Firefox needs at least 100px to show a scrollbar
       overflowY: 'scroll'
-    outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
-    width = outer.offsetWidth - outer.clientWidth
+    }
+    const outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
+    const width = outer.offsetWidth - outer.clientWidth
     up.element.remove(outer)
-    width
+    return width
+  })
 
-  scrollTopKey = (viewport) ->
-    up.fragment.toTarget(viewport)
+  function scrollTopKey(viewport) {
+    return up.fragment.toTarget(viewport)
+  }
 
-  ###**
+  /***
   Returns a hash with scroll positions.
 
   Each key in the hash is a viewport selector. The corresponding
@@ -496,20 +530,21 @@ up.viewport = do ->
   @function up.viewport.scrollTops
   @return Object<string, number>
   @internal
-  ###
-  scrollTops = (options = {}) ->
-    u.mapObject getAll(options), (viewport) ->
-      [scrollTopKey(viewport), viewport.scrollTop]
+  */
+  function scrollTops(options = {}) {
+    return u.mapObject(getAll(options), viewport => [scrollTopKey(viewport), viewport.scrollTop])
+  }
 
-  ###**
+  /***
   @function up.viewport.fixedElements
   @internal
-  ###
-  fixedElements = (root = document) ->
-    queryParts = ['[up-fixed]'].concat(config.fixedTop).concat(config.fixedBottom)
-    root.querySelectorAll(queryParts.join(','))
+  */
+  function fixedElements(root = document) {
+    const queryParts = ['[up-fixed]'].concat(config.fixedTop).concat(config.fixedBottom)
+    return root.querySelectorAll(queryParts.join(','))
+  }
 
-  ###**
+  /***
   Saves the top scroll positions of all viewports in the current layer.
 
   The scroll positions will be associated with the current URL.
@@ -530,17 +565,21 @@ up.viewport = do ->
   @param {Object<string, number>} [options.tops]
     An object mapping viewport selectors to vertical scroll positions in pixels.
   @experimental
-  ###
-  saveScroll = (args...) ->
-    [viewports, options] = parseOptions(args)
-    if url = (options.location || options.layer.location)
-      tops = options.tops ? getScrollTops(viewports)
+  */
+  function saveScroll(...args) {
+    const [viewports, options] = parseOptions(args)
+    const url = options.location || options.layer.location
+    if (url) {
+      const tops = options.tops ?? getScrollTops(viewports)
       options.layer.lastScrollTops.set(url, tops)
+    }
+  }
 
-  getScrollTops = (viewports) ->
-    u.mapObject viewports, (viewport) -> [scrollTopKey(viewport), viewport.scrollTop]
+  function getScrollTops(viewports) {
+    return u.mapObject(viewports, viewport => [scrollTopKey(viewport), viewport.scrollTop])
+  }
 
-  ###**
+  /***
   Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
   viewports configured in `up.viewport.config.viewportSelectors`.
 
@@ -554,94 +593,108 @@ up.viewport = do ->
   @return {Promise}
     A promise that will be fulfilled once scroll positions have been restored.
   @experimental
-  ###
-  restoreScroll = (args...) ->
-    [viewports, options] = parseOptions(args)
-    url = options.layer.location
-    scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
-    up.puts 'up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL
+  */
+  function restoreScroll(...args) {
+    const [viewports, options] = parseOptions(args)
+    const url = options.layer.location
+    const scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
+    up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL)
     return setScrollTops(viewports, scrollTopsForURL)
+  }
 
-  parseOptions = (args) ->
-    options = u.copy(u.extractOptions(args))
+  function parseOptions(args) {
+    const options = u.copy(u.extractOptions(args))
     options.layer = up.layer.get(options)
-    if args[0]
+    let viewports
+    if (args[0]) {
       viewports = [closest(args[0], options)]
-    else if options.around
-      # This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
-      # In tht case we restore / reset the scroll tops of all viewports around the fragment.
+    } else if (options.around) {
+      // This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
+      // In tht case we restore / reset the scroll tops of all viewports around the fragment.
       viewports = getAround(options.around, options)
-    else
+    } else {
       viewports = getAll(options)
+    }
     return [viewports, options]
+  }
 
-  resetScroll = (args...) ->
-    [viewports, options] = parseOptions(args)
+  function resetScroll(...args) {
+    const [viewports, options] = parseOptions(args)
     return setScrollTops(viewports, {})
+  }
 
-  setScrollTops = (viewports, tops) ->
-    allScrollPromises = u.map viewports, (viewport) ->
-      key = scrollTopKey(viewport)
-      scrollTop = tops[key] || 0
-      scroll(viewport, scrollTop, duration: 0)
+  function setScrollTops(viewports, tops) {
+    const allScrollPromises = u.map(viewports, function(viewport) {
+      const key = scrollTopKey(viewport)
+      const scrollTop = tops[key] || 0
+      return scroll(viewport, scrollTop, { duration: 0 })
+    })
     return Promise.all(allScrollPromises)
+  }
 
-  absolutize = (element, options = {}) ->
-    viewport = closest(element)
+  function absolutize(element, options = {}) {
+    const viewport = closest(element)
 
-    viewportRect = viewport.getBoundingClientRect()
-    originalRect = element.getBoundingClientRect()
+    const viewportRect = viewport.getBoundingClientRect()
+    const originalRect = element.getBoundingClientRect()
 
-    boundsRect = new up.Rect
-      left: originalRect.left - viewportRect.left
-      top: originalRect.top - viewportRect.top
-      width: originalRect.width
+    const boundsRect = new up.Rect({
+      left: originalRect.left - viewportRect.left,
+      top: originalRect.top - viewportRect.top,
+      width: originalRect.width,
       height: originalRect.height
+    })
 
-    # Allow the caller to run code before we start shifting elements around.
-    options.afterMeasure?()
+    // Allow the caller to run code before we start shifting elements around.
+    options.afterMeasure?.()
 
-    e.setStyle element,
-      # If the element had a layout context before, make sure the
-      # ghost will have layout context as well (and vice versa).
-      position: if element.style.position == 'static' then 'static' else 'relative'
-      top:    'auto' # CSS default
-      right:  'auto' # CSS default
-      bottom: 'auto' # CSS default
-      left:   'auto' # CSS default
-      width:  '100%' # stretch to the <up-bounds> width we set below
-      height: '100%' # stretch to the <up-bounds> height we set below
+    e.setStyle(element, {
+      // If the element had a layout context before, make sure the
+      // ghost will have layout context as well (and vice versa).
+      position: element.style.position === 'static' ? 'static' : 'relative',
+      top:    'auto', // CSS default
+      right:  'auto', // CSS default
+      bottom: 'auto', // CSS default
+      left:   'auto', // CSS default
+      width:  '100%', // stretch to the <up-bounds> width we set below
+      height: '100%'
+    }
+    ); // stretch to the <up-bounds> height we set below
 
-    # Wrap the ghost in another container so its margin can expand
-    # freely. If we would position the element directly (old implementation),
-    # it would gain a layout context which cannot be crossed by margins.
-    bounds = e.createFromSelector('up-bounds')
-    # Insert the bounds object before our element, then move element into it.
+    // Wrap the ghost in another container so its margin can expand
+    // freely. If we would position the element directly (old implementation),
+    // it would gain a layout context which cannot be crossed by margins.
+    const bounds = e.createFromSelector('up-bounds')
+    // Insert the bounds object before our element, then move element into it.
     e.insertBefore(element, bounds)
     bounds.appendChild(element)
 
-    moveBounds = (diffX, diffY) ->
+    const moveBounds = function(diffX, diffY) {
       boundsRect.left += diffX
       boundsRect.top += diffY
-      e.setStyle(bounds, boundsRect)
+      return e.setStyle(bounds, boundsRect)
+    }
 
-    # Position the bounds initially
+    // Position the bounds initially
     moveBounds(0, 0)
 
-    # In theory, element should not have moved visually. However, element
-    # (or a child of element) might collapse its margin against a previous
-    # sibling element, and now that it is absolute it does not have the
-    # same sibling. So we manually correct element's top position so it aligns
-    # with the previous top position.
-    newElementRect = element.getBoundingClientRect()
+    // In theory, element should not have moved visually. However, element
+    // (or a child of element) might collapse its margin against a previous
+    // sibling element, and now that it is absolute it does not have the
+    // same sibling. So we manually correct element's top position so it aligns
+    // with the previous top position.
+    const newElementRect = element.getBoundingClientRect()
     moveBounds(originalRect.left - newElementRect.left, originalRect.top - newElementRect.top)
 
     u.each(fixedElements(element), e.fixedToAbsolute)
 
-    bounds: bounds
-    moveBounds: moveBounds
+    return {
+      bounds,
+      moveBounds
+    }
+  }
 
-  ###**
+  /***
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
@@ -657,21 +710,21 @@ up.viewport = do ->
   on the left side and the e-mail text on the right side:
 
       .side {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 100px;
-        overflow-y: scroll;
+        position: fixed
+        top: 0
+        bottom: 0
+        left: 0
+        width: 100px
+        overflow-y: scroll
       }
 
       .main {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 100px;
-        right: 0;
-        overflow-y: scroll;
+        position: fixed
+        top: 0
+        bottom: 0
+        left: 100px
+        right: 0
+        overflow-y: scroll
       }
 
   This would be the HTML (notice the `up-viewport` attribute):
@@ -692,9 +745,9 @@ up.viewport = do ->
 
   @selector [up-viewport]
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
@@ -712,9 +765,9 @@ up.viewport = do ->
 
   @selector [up-fixed=top]
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
@@ -732,10 +785,10 @@ up.viewport = do ->
 
   @selector [up-fixed=bottom]
   @stable
-  ###
+  */
 
 
-  ###**
+  /***
   Marks this element as being anchored to the right edge of the screen,
   typically fixed navigation bars.
 
@@ -755,10 +808,10 @@ up.viewport = do ->
   Here is the CSS for a navigation bar that is anchored to the top edge of the screen:
 
       .top-nav {
-         position: fixed;
-         top: 0;
-         left: 0;
-         right: 0;
+         position: fixed
+         top: 0
+         left: 0
+         right: 0
        }
 
   By adding an `up-anchored="right"` attribute to the element, we can prevent the
@@ -768,83 +821,88 @@ up.viewport = do ->
 
   @selector [up-anchored=right]
   @stable
-  ###
+  */
 
-  ###**
+  /***
   @function up.viewport.firstHashTarget
   @internal
-  ###
-  firstHashTarget = (hash, options = {}) ->
-    if hash = pureHash(hash)
-      selector = [
-        # Match an <* id="hash">
+  */
+  function firstHashTarget(hash, options = {}) {
+    if (hash = pureHash(hash)) {
+      const selector = [
+        // Match an <* id="hash">
         e.attributeSelector('id', hash),
-        # Match an <a name="hash">
+        // Match an <a name="hash">
         'a' + e.attributeSelector('name', hash)
       ].join(',')
-      f.get(selector, options)
+      return f.get(selector, options)
+    }
+  }
 
-  ###**
+  /***
   Returns `'foo'` if the hash is `'#foo'`.
 
   @function pureHash
   @internal
-  ###
-  pureHash = (value) ->
+  */
+  function pureHash(value) {
     return value?.replace(/^#/, '')
+  }
 
-  userScrolled = false
-  up.on 'scroll', { once: true }, -> userScrolled = true
+  let userScrolled = false
+  up.on('scroll', { once: true }, () => userScrolled = true)
 
-  up.on 'up:app:boot', ->
-    # When the initial URL contains an #anchor link, the browser will automatically
-    # reveal a matching fragment. We want to override that behavior with our own,
-    # so we can honor configured obstructions. Since we cannot disable the automatic
-    # browser behavior we need to ensure our code runs after it.
-    #
-    # In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
-    # However, when we follow a link with an #anchor URL, the browser
-    # behavior happens *after* DOMContentLoaded. Hence we wait one more task.
-    u.task ->
-      # If the user has scrolled while the page was loading, we will
-      # not reset their scroll position by revealing the #anchor fragment.
-      unless userScrolled
-        revealHash()
+  up.on('up:app:boot', () => // When the initial URL contains an #anchor link, the browser will automatically
+  // reveal a matching fragment. We want to override that behavior with our own,
+  // so we can honor configured obstructions. Since we cannot disable the automatic
+  // browser behavior we need to ensure our code runs after it.
+  //
+  // In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
+  // However, when we follow a link with an #anchor URL, the browser
+  // behavior happens *after* DOMContentLoaded. Hence we wait one more task.
+  u.task(function() {
+    // If the user has scrolled while the page was loading, we will
+    // not reset their scroll position by revealing the #anchor fragment.
+    if (!userScrolled) {
+      return revealHash()
+    }
+  }))
 
-  up.on window, 'hashchange', -> revealHash()
+  up.on(window, 'hashchange', () => revealHash())
 
-  up.on 'up:framework:reset', reset
+  up.on('up:framework:reset', reset)
 
-  u.literal
-    reveal: reveal
-    revealHash: revealHash
-    firstHashTarget: firstHashTarget
-    scroll: scroll
-    config: config
-    get: closest
-    subtree: getSubtree
-    around: getAround
-    all: getAll
-    rootSelector: rootSelector
-    get_root: getRoot
-    rootWidth: rootWidth
-    rootHeight: rootHeight
-    rootHasReducedWidthFromScrollbar: rootHasReducedWidthFromScrollbar
-    rootOverflowElement: rootOverflowElement
-    isRoot: isRoot
-    scrollbarWidth: scrollbarWidth
-    scrollTops: scrollTops
-    saveScroll: saveScroll
-    restoreScroll: restoreScroll
-    resetScroll: resetScroll
-    anchoredRight: anchoredRight
-    fixedElements: fixedElements
-    absolutize: absolutize
-    focus: doFocus
-    tryFocus: tryFocus
-    makeFocusable: makeFocusable
+  return {
+    reveal,
+    revealHash,
+    firstHashTarget,
+    scroll,
+    config,
+    get: closest,
+    subtree: getSubtree,
+    around: getAround,
+    all: getAll,
+    rootSelector,
+    get root() { return getRoot() },
+    rootWidth,
+    rootHeight,
+    rootHasReducedWidthFromScrollbar,
+    rootOverflowElement,
+    isRoot,
+    scrollbarWidth,
+    scrollTops,
+    saveScroll,
+    restoreScroll,
+    resetScroll,
+    anchoredRight,
+    fixedElements,
+    absolutize,
+    focus: doFocus,
+    tryFocus,
+    makeFocusable
+  }
+})()
 
 up.focus = up.viewport.focus
 up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal
-

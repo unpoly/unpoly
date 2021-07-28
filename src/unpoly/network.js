@@ -1,6 +1,6 @@
-require('./network.sass');
+require('./network.sass')
 
-const u = up.util;
+const u = up.util
 
 /***
 Network requests
@@ -156,7 +156,7 @@ up.network = (function() {
 
     ```css
     up-progress-bar {
-      background-color: red;
+      background-color: red
     }
     ```
 
@@ -178,13 +178,13 @@ up.network = (function() {
     clearCache(request, _response) { return !request.isSafe(); },
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true
-  }));
+  }))
 
-  const queue = new up.Request.Queue();
+  const queue = new up.Request.Queue()
 
-  const cache = new up.Request.Cache();
+  const cache = new up.Request.Cache()
 
-  let progressBar = null;
+  let progressBar = null
 
   /***
   Returns an earlier request [matching](/up.network.config#config.requestMetaKeys) the given request options.
@@ -288,13 +288,13 @@ up.network = (function() {
   */
 
   function reset() {
-    abortRequests();
-    queue.reset();
-    config.reset();
-    cache.clear();
-    progressBar?.destroy();
-    progressBar = null;
-  };
+    abortRequests()
+    queue.reset()
+    config.reset()
+    cache.clear()
+    progressBar?.destroy()
+    progressBar = null
+  }
 
   /***
   Makes an AJAX request to the given URL.
@@ -452,48 +452,48 @@ up.network = (function() {
   @stable
   */
   function makeRequest(...args) {
-    const request = new up.Request(parseRequestOptions(args));
+    const request = new up.Request(parseRequestOptions(args))
 
-    useCachedRequest(request) || queueRequest(request);
+    useCachedRequest(request) || queueRequest(request)
 
     let solo = request.solo
     if (solo) {
       // The { solo } option may also contain a function.
       // This way users can excempt some requests from being solo-aborted
       // by configuring up.fragment.config.navigateOptions.
-      queue.abortExcept(request, solo);
+      queue.abortExcept(request, solo)
     }
 
-    return request;
-  };
+    return request
+  }
 
   function mimicLocalRequest(options) {
     let solo = options.solo
     if (solo) {
-      abortRequests(solo);
+      abortRequests(solo)
     }
 
     // We cannot consult config.clearCache since there is no up.Request
     // for a local update.
     let clearCache = options.clearCache
     if (clearCache) {
-      cache.clear(clearCache);
+      cache.clear(clearCache)
     }
-  };
+  }
 
   function parseRequestOptions(args) {
-    const options = u.extractOptions(args);
+    const options = u.extractOptions(args)
     if (!options.url) { options.url = args[0]; }
-    up.migrate.handleRequestOptions?.(options);
-    return options;
-  };
+    up.migrate.handleRequestOptions?.(options)
+    return options
+  }
 
   function useCachedRequest(request) {
     // If we have an existing promise matching this new request,
     // we use it unless `request.cache` is explicitly set to `false`.
-    let cachedRequest;
+    let cachedRequest
     if (request.willCache() && (cachedRequest = cache.get(request))) {
-      up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url);
+      up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
 
       // Check if we need to upgrade a cached background request to a foreground request.
       // This might affect whether we're going to emit an up:request:late event further
@@ -506,7 +506,7 @@ up.network = (function() {
       //   Now we *should* trigger `up:request:late`.
       // - The request (1) finishes. This triggers `up:request:recover`.
       if (!request.preload) {
-        queue.promoteToForeground(cachedRequest);
+        queue.promoteToForeground(cachedRequest)
       }
 
       // We cannot simply return `cachedRequest`, since that might have a different #hash property.
@@ -514,27 +514,27 @@ up.network = (function() {
       // not the same object.
       //
       // What we do instead is have `request` follow the state of `cachedRequest`'s exchange.
-      request.followState(cachedRequest);
-      return true;
+      request.followState(cachedRequest)
+      return true
     }
-  };
+  }
 
   // If no existing promise is available, we queue a network request.
   function queueRequest(request) {
     if (request.preload && !request.isSafe()) {
-      up.fail('Will not preload request to %s', request.description);
+      up.fail('Will not preload request to %s', request.description)
     }
 
-    handleCaching(request);
+    handleCaching(request)
 
-    return queue.asap(request);
-  };
+    return queue.asap(request)
+  }
 
   function handleCaching(request) {
     if (request.willCache()) {
       // Cache the request for calls for calls with the same URL, method, params
       // and target. See up.Request#cacheKey().
-      cache.set(request, request);
+      cache.set(request, request)
     }
 
     return u.always(request, function(response) {
@@ -544,7 +544,7 @@ up.network = (function() {
       // (3) The default in up.network.config.clearCache({ request, response })
       let clearCache = response.clearCache ?? request.clearCache ?? config.clearCache(request, response)
       if (clearCache) {
-        cache.clear(clearCache);
+        cache.clear(clearCache)
       }
 
       // (1) Re-cache a cacheable request in case we cleared the cache above
@@ -552,16 +552,16 @@ up.network = (function() {
       //     (written by a earlier, cacheable request with the same cache key)
       //     since the later response will be fresher.
       if (request.willCache() || cache.get(request)) {
-        cache.set(request, request);
+        cache.set(request, request)
       }
 
       if (!response.ok) {
         // Uncache failed requests. We have no control over the server,
         // and another request with the same properties might succeed.
-        cache.remove(request);
+        cache.remove(request)
       }
-    });
-  };
+    })
+  }
 
   /***
   Returns whether Unpoly is currently waiting for a [request](/up.request) to finish.
@@ -571,7 +571,7 @@ up.network = (function() {
   @stable
   */
   function isBusy() {
-    return queue.isBusy();
+    return queue.isBusy()
   }
 
   /***
@@ -609,9 +609,9 @@ up.network = (function() {
       // API for NetworkInformation#saveData: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
       return netInfo.saveData ||
         (netInfo.rtt      && (netInfo.rtt      > config.badRTT)) ||
-        (netInfo.downlink && (netInfo.downlink < config.badDownlink));
+        (netInfo.downlink && (netInfo.downlink < config.badDownlink))
     }
-  };
+  }
 
   /***
   Aborts pending [requests](/up.request).
@@ -658,7 +658,7 @@ up.network = (function() {
   @stable
   */
   function abortRequests(...args) {
-    queue.abort(...args);
+    queue.abort(...args)
   }
 
   /***
@@ -765,10 +765,10 @@ up.network = (function() {
       const newRequest = request.variant({
         method: response.method,
         url: response.url
-      });
-      cache.alias(request, newRequest);
+      })
+      cache.alias(request, newRequest)
     }
-  };
+  }
 
   /***
   This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
@@ -810,22 +810,22 @@ up.network = (function() {
   */
 
   function isSafeMethod(method) {
-    return u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method));
+    return u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method))
   }
 
   function onLate() {
     if (u.evalOption(config.progressBar)) {
-      progressBar = new up.ProgressBar();
+      progressBar = new up.ProgressBar()
     }
-  };
-
-  function onRecover() {
-    progressBar?.conclude();
   }
 
-  up.on('up:request:late', onLate);
-  up.on('up:request:recover', onRecover);
-  up.on('up:framework:reset', reset);
+  function onRecover() {
+    progressBar?.conclude()
+  }
+
+  up.on('up:request:late', onLate)
+  up.on('up:request:recover', onRecover)
+  up.on('up:framework:reset', reset)
 
   return {
     request: makeRequest,
@@ -839,9 +839,9 @@ up.network = (function() {
     queue, // for testing
     shouldReduceRequests,
     mimicLocalRequest
-  };
-})();
+  }
+})()
 
-up.request = up.network.request;
+up.request = up.network.request
 
-up.cache = up.network.cache;
+up.cache = up.network.cache
