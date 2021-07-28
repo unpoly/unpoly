@@ -1,4 +1,11 @@
-###**
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+/***
 History
 ========
 
@@ -8,13 +15,13 @@ The `up.history` module helps you work with the browser history.
 @see up:location:changed
 
 @module up.history
-###
-up.history = do ->
+*/
+up.history = (function() {
   
-  u = up.util
-  e = up.element
+  const u = up.util
+  const e = up.element
 
-  ###**
+  /***
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
@@ -30,12 +37,13 @@ up.history = do ->
     Whether to restore the known scroll positions
     when the user goes back or forward in history.
   @stable
-  ###
-  config = new up.Config ->
-    enabled: true
+  */
+  const config = new up.Config(() => ({
+    enabled: true,
     restoreTargets: [':main']
+  }))
 
-  ###**
+  /***
   Returns a normalized URL for the previous history entry.
 
   Only history entries pushed by Unpoly will be considered.
@@ -43,21 +51,23 @@ up.history = do ->
   @property up.history.previousLocation
   @param {string} previousLocation
   @experimental
-  ###
-  previousLocation = undefined
-  nextPreviousLocation = undefined
+  */
+  let previousLocation
+  let nextPreviousLocation
 
-  reset = ->
+  function reset() {
     config.reset()
     previousLocation = undefined
     nextPreviousLocation = undefined
     trackCurrentLocation()
+  }
 
-  normalizeURL = (url, normalizeOptions = {}) ->
+  function normalizeURL(url, normalizeOptions = {}) {
     normalizeOptions.hash = true
-    u.normalizeURL(url, normalizeOptions)
+    return u.normalizeURL(url, normalizeOptions)
+  }
 
-  ###**
+  /***
   Returns a normalized URL for the current browser location.
 
   Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
@@ -67,32 +77,36 @@ up.history = do ->
   @property up.history.location
   @param {string} location
   @experimental
-  ###
-  currentLocation = (normalizeOptions) ->
-    normalizeURL(location.href, normalizeOptions)
+  */
+  function currentLocation(normalizeOptions) {
+    return normalizeURL(location.href, normalizeOptions)
+  }
 
-  ###**
+  /***
   Remembers the current URL so we can use previousURL on pop.
 
   @function observeNewURL
   @internal
-  ###
-  trackCurrentLocation = ->
-    url = currentLocation()
+  */
+  function trackCurrentLocation() {
+    const url = currentLocation()
 
-    if nextPreviousLocation != url
+    if (nextPreviousLocation !== url) {
       previousLocation = nextPreviousLocation
       nextPreviousLocation = url
+    }
+  }
 
   trackCurrentLocation()
 
-  isCurrentLocation = (url) ->
-    # Some web frameworks care about a trailing slash, some consider it optional.
-    # Only for the equality test (is this the current URL) we consider it optional.
-    normalizeOptions = { stripTrailingSlash: true }
-    normalizeURL(url, normalizeOptions) == currentLocation(normalizeOptions)
+  function isCurrentLocation(url) {
+    // Some web frameworks care about a trailing slash, some consider it optional.
+    // Only for the equality test (is this the current URL) we consider it optional.
+    const normalizeOptions = { stripTrailingSlash: true }
+    return normalizeURL(url, normalizeOptions) === currentLocation(normalizeOptions)
+  }
 
-  ###**
+  /***
   Replaces the current history entry and updates the
   browser's location bar with the given URL.
 
@@ -107,12 +121,14 @@ up.history = do ->
   @function up.history.replace
   @param {string} url
   @internal
-  ###
-  replace = (url, options = {}) ->
-    if manipulate('replaceState', url) && options.event != false
-      emit('up:location:changed', url: url, reason: 'replace', log: "Replaced state for #{u.urlWithoutHost url}")
+  */
+  function replace(url, options = {}) {
+    if (manipulate('replaceState', url) && (options.event !== false)) {
+      emit('up:location:changed', {url, reason: 'replace', log: `Replaced state for ${u.urlWithoutHost(url)}`})
+    }
+  }
 
-  ###**
+  /***
   Adds a new history entry and updates the browser's
   address bar with the given URL.
 
@@ -128,13 +144,15 @@ up.history = do ->
   @param {string} url
     The URL for the history entry to be added.
   @experimental
-  ###
-  push = (url) ->
+  */
+  function push(url) {
     url = normalizeURL(url)
-    if !isCurrentLocation(url) && manipulate('pushState', url)
-      up.emit('up:location:changed', url: url, reason: 'push', log: "Advanced to location #{u.urlWithoutHost url}")
+    if (!isCurrentLocation(url) && manipulate('pushState', url)) {
+      up.emit('up:location:changed', {url, reason: 'push', log: `Advanced to location ${u.urlWithoutHost(url)}`})
+    }
+  }
 
-  ###**
+  /***
   This event is [emitted](/up.emit) after the browser's address bar was updated with a new URL.
 
   There may be several reasons why the browser location was changed:
@@ -155,82 +173,96 @@ up.history = do ->
 
     The value of this property is either `'push'`, `'pop'` or `'replace'`.
   @stable
-  ###
+  */
 
-  manipulate = (method, url) ->
-    if config.enabled
-      state = buildState()
+  function manipulate(method, url) {
+    if (config.enabled) {
+      const state = buildState()
       window.history[method](state, '', url)
       trackCurrentLocation()
-      return state
+      // Signal that manipulation was successful
+      return true
+    }
+  }
 
-  buildState = ->
-    up: {}
+  function buildState() {
+    return { up: {} }
+  }
 
-  restoreStateOnPop = (state) ->
-    if state?.up
-      # The earlier URL has now been restored by the browser. This cannot be prevented.
-      url = currentLocation()
+  function restoreStateOnPop(state) {
+    if (state?.up) {
+      // The earlier URL has now been restored by the browser. This cannot be prevented.
+      let url = currentLocation()
 
-      replaced = up.render
-        url: url
-        history: true
-        # (1) While the browser has already restored the earlier URL, we must still
-        #     pass it to render() so the current layer can track the new URL.
-        # (2) Since we're passing the current URL, up.history.push() will not add another state.
-        # (2) Pass the current URL to ensure that this exact URL is being rendered
-        #     and not something derived from the up.Response.
+      const replaced = up.render({
+        url,
+        history: true,
+        // (1) While the browser has already restored the earlier URL, we must still
+        //     pass it to render() so the current layer can track the new URL.
+        // (2) Since we're passing the current URL, up.history.push() will not add another state.
+        // (2) Pass the current URL to ensure that this exact URL is being rendered
+        //     and not something derived from the up.Response.
         location: url,
-        # Don't replace elements in a modal that might still be open
-        # We will close all overlays and update the root layer.
-        peel: true
-        layer: 'root'
+        // Don't replace elements in a modal that might still be open
+        // We will close all overlays and update the root layer.
+        peel: true,
+        layer: 'root',
         target: config.restoreTargets,
-        cache: true
-        keep: false
-        scroll: 'restore'
-        # Since the URL was already changed by the browser, don't save scroll state.
+        cache: true,
+        keep: false,
+        scroll: 'restore',
+        // Since the URL was already changed by the browser, don't save scroll state.
         saveScroll: false
-      replaced.then ->
+      })
+      replaced.then(function() {
         url = currentLocation()
-        emit('up:location:changed', url: url, reason: 'pop', log: "Restored location #{url}")
-    else
+        emit('up:location:changed', {url, reason: 'pop', log: `Restored location ${url}`})
+      })
+    } else {
       up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
+    }
+  }
 
-  pop = (event) ->
+  function pop(event) {
     trackCurrentLocation()
-    up.viewport.saveScroll(location: previousLocation)
-    state = event.state
+    up.viewport.saveScroll({location: previousLocation})
+    const { state } = event
     restoreStateOnPop(state)
+  }
 
-  emit = (args...) ->
-    historyLayer = u.find(up.layer.stack.reversed(), 'history')
-    historyLayer.emit(args...)
+  function emit(...args) {
+    const historyLayer = u.find(up.layer.stack.reversed(), 'history')
+    return historyLayer.emit(...args)
+  }
 
-  up.on 'up:app:boot', ->
-    register = ->
-      # Supported by all browser except IE:
-      # https://developer.mozilla.org/en-US/docs/Web/API/History/scrollRestoration
-      window.history.scrollRestoration = 'manual'
-      window.addEventListener('popstate', pop)
+  function register() {
+    // Supported by all browser except IE:
+    // https://developer.mozilla.org/en-US/docs/Web/API/History/scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    window.addEventListener('popstate', pop)
 
-      # Unpoly replaces the initial page state so it can later restore it when the user
-      # goes back to that initial URL. However, if the initial request was a POST,
-      # Unpoly will wrongly assume that it can restore the state by reloading with GET.
-      if up.protocol.initialRequestMethod() == 'GET'
-        # Replace the vanilla state of the initial page load with an Unpoly-enabled state
-        replace(currentLocation(), event: false)
+    // Unpoly replaces the initial page state so it can later restore it when the user
+    // goes back to that initial URL. However, if the initial request was a POST,
+    // Unpoly will wrongly assume that it can restore the state by reloading with GET.
+    if (up.protocol.initialRequestMethod() === 'GET') {
+      // Replace the vanilla state of the initial page load with an Unpoly-enabled state
+      replace(currentLocation(), {event: false})
+    }
+  }
 
-    if jasmine?
-      # Can't delay this in tests.
+  up.on('up:app:boot', function() {
+    if ('jasmine' in window) {
+      // Can't delay this in tests.
       register()
-    else
-      # Defeat an unnecessary popstate that some browsers trigger
-      # on pageload (Safari, Chrome < 34).
-      # We should check in 2023 if we can remove this.
+    } else {
+      // Defeat an unnecessary popstate that some browsers trigger
+      // on pageload (Safari, Chrome < 34).
+      // We should check in 2023 if we can remove this.
       setTimeout(register, 100)
+    }
+  })
 
-  ###**
+  /***
   Changes the link's destination so it points to the previous URL.
 
   Note that this will *not* call `location.back()`, but will set
@@ -258,22 +290,27 @@ up.history = do ->
 
   @selector a[up-back]
   @stable
-  ###
-  up.macro 'a[up-back], [up-href][up-back]', (link) ->
-    if previousLocation
-      e.setMissingAttrs link,
+  */
+  up.macro('a[up-back], [up-href][up-back]', function(link) {
+    if (previousLocation) {
+      e.setMissingAttrs(link, {
         'up-href': previousLocation,
         'up-scroll': 'restore'
+      })
       link.removeAttribute('up-back')
       up.link.makeFollowable(link)
+    }
+  })
 
-  up.on 'up:framework:reset', reset
+  up.on('up:framework:reset', reset)
 
-  u.literal
-    config: config
-    push: push
-    replace: replace
-    get_location: currentLocation
-    get_previousLocation: -> previousLocation
-    isLocation: isCurrentLocation
-    normalizeURL: normalizeURL
+  return {
+    config,
+    push,
+    replace,
+    get location() { return currentLocation() },
+    get previousLocation() { return previousLocation },
+    isLocation: isCurrentLocation,
+    normalizeURL
+  }
+})()

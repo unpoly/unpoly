@@ -1,9 +1,9 @@
 require('./layer.sass')
 
-u = up.util
-e = up.element
+const u = up.util
+const e = up.element
 
-###**
+/***
 Layers
 ======
 
@@ -26,18 +26,18 @@ Once the subinteraction is *done*, the overlay is closed and a result value is c
 @see up.layer.ask
 
 @module up.layer
-###
-up.layer = do ->
+*/
+up.layer = (function() {
 
-  OVERLAY_CLASSES = [
-    up.Layer.Modal
-    up.Layer.Popup
-    up.Layer.Drawer
+  const LAYER_CLASSES = [
+    up.Layer.Root,
+    up.Layer.Modal,
+    up.Layer.Popup,
+    up.Layer.Drawer,
     up.Layer.Cover
   ]
-  LAYER_CLASSES = [up.Layer.Root].concat(OVERLAY_CLASSES)
 
-  ###**
+  /***
   Configures default attributes for new overlays.
 
   All options for `up.layer.open()` may be configured.
@@ -165,59 +165,73 @@ up.layer = do ->
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @stable
-  ###
-  config = new up.Config ->
-    newConfig =
-      mode: 'modal'
-      any:
+  */
+  const config = new up.Config(function() {
+    const newConfig = {
+      mode: 'modal',
+      any: {
         mainTargets: [
           "[up-main='']",
           'main',
-          ':layer' # this is <body> for the root layer
-        ],
-      root:
-        mainTargets: ['[up-main~=root]']
+          ':layer' // this is <body> for the root layer
+        ]
+      },
+      root: {
+        mainTargets: ['[up-main~=root]'],
         history: true
-      overlay:
-        mainTargets: ['[up-main~=overlay]']
-        openAnimation: 'fade-in'
-        closeAnimation: 'fade-out'
-        dismissLabel: '×'
-        dismissAriaLabel: 'Dismiss dialog'
-        dismissable: true
+      },
+      overlay: {
+        mainTargets: ['[up-main~=overlay]'],
+        openAnimation: 'fade-in',
+        closeAnimation: 'fade-out',
+        dismissLabel: '×',
+        dismissAriaLabel: 'Dismiss dialog',
+        dismissable: true,
         history: 'auto'
-      cover:
+      },
+      cover: {
         mainTargets: ['[up-main~=cover]']
-      drawer:
-        mainTargets: ['[up-main~=drawer]']
-        backdrop: true
-        position: 'left'
+      },
+      drawer: {
+        mainTargets: ['[up-main~=drawer]'],
+        backdrop: true,
+        position: 'left',
+        size: 'medium',
+        openAnimation(layer) {
+          switch (layer.position) {
+            case 'left': return 'move-from-left'
+            case 'right': return 'move-from-right'
+          }
+        },
+        closeAnimation(layer) {
+          switch (layer.position) {
+            case 'left': return 'move-to-left'
+            case 'right': return 'move-to-right'
+          }
+        }
+      },
+      modal: {
+        mainTargets: ['[up-main~=modal]'],
+        backdrop: true,
         size: 'medium'
-        openAnimation: (layer) ->
-          switch layer.position
-            when 'left' then 'move-from-left'
-            when 'right' then 'move-from-right'
-        closeAnimation: (layer) ->
-          switch layer.position
-            when 'left' then 'move-to-left'
-            when 'right' then 'move-to-right'
-      modal:
-        mainTargets: ['[up-main~=modal]']
-        backdrop: true
-        size: 'medium'
-      popup:
-        mainTargets: ['[up-main~=popup]']
-        position: 'bottom'
-        size: 'medium'
-        align: 'left'
+      },
+      popup: {
+        mainTargets: ['[up-main~=popup]'],
+        position: 'bottom',
+        size: 'medium',
+        align: 'left',
         dismissable: 'outside key'
+      }
+    }
 
-    for Class in LAYER_CLASSES
+    for (let Class of LAYER_CLASSES) {
       newConfig[Class.mode].Class = Class
+    }
 
     return newConfig
+  })
 
-  ###**
+  /***
   A list of layers that are currently open.
 
   The first element in the list is the [root layer](/up.layer.root).
@@ -226,107 +240,123 @@ up.layer = do ->
   @property up.layer.stack
   @param {List<up.Layer>} stack
   @stable
-  ###
-  stack = null
+  */
+  let stack = null
 
-  handlers = []
+  let handlers = []
 
-  mainTargets = (mode) ->
+  function mainTargets(mode) {
     return u.flatMap(modeConfigs(mode), 'mainTargets')
+  }
 
-  ###
+  /*
   Returns an array of config objects that apply to the given mode name.
 
   The config objects are in descending order of specificity.
-  ###
-  modeConfigs = (mode) ->
-    if mode == 'root'
+  */
+  function modeConfigs(mode) {
+    if (mode === 'root') {
       return [config.root, config.any]
-    else
+    } else {
       return [config[mode], config.overlay, config.any]
+    }
+  }
       
-  normalizeOptions = (options) ->
-    up.migrate.handleLayerOptions?(options)
+  function normalizeOptions(options) {
+    up.migrate.handleLayerOptions?.(options)
 
-    if u.isGiven(options.layer) # might be the number 0, which is falsy
-
-      if match = String(options.layer).match(/^(new|shatter|swap)( (\w+))?/)
+    if (u.isGiven(options.layer)) { // might be the number 0, which is falsy
+      let match = String(options.layer).match(/^(new|shatter|swap)( (\w+))?/)
+      if (match) {
         options.layer = 'new'
 
-        openMethod = match[1]
-        shorthandMode = match[3]
+        const openMethod = match[1]
+        const shorthandMode = match[3]
 
-        # The mode may come from one of these sources:
-        # (1) As { mode } option
-        # (2) As a { layer } short hand like { layer: 'new popup' }
-        # (3) As the default in config.mode
+        // The mode may come from one of these sources:
+        // (1) As { mode } option
+        // (2) As a { layer } short hand like { layer: 'new popup' }
+        // (3) As the default in config.mode
         options.mode ||= shorthandMode || config.mode
 
-        if openMethod == 'swap'
-          # If an overlay is already open, we replace that with a new overlay.
-          # If we're on the root layer, we open an overlay.
-          if up.layer.isOverlay()
+        if (openMethod === 'swap') {
+          // If an overlay is already open, we replace that with a new overlay.
+          // If we're on the root layer, we open an overlay.
+          if (up.layer.isOverlay()) {
             options.baseLayer = 'parent'
-        else if openMethod == 'shatter'
-          # Dismiss all overlays and open a new overlay.
+          }
+        } else if (openMethod === 'shatter') {
+          // Dismiss all overlays and open a new overlay.
           options.baseLayer = 'root'
-    else
-      # If no options.layer is given we still want to avoid updating "any" layer.
-      # Other options might have a hint for a more appropriate layer.
+        }
+      }
+    } else {
+      // If no options.layer is given we still want to avoid updating "any" layer.
+      // Other options might have a hint for a more appropriate layer.
 
-      if options.mode
-        # If user passes a { mode } option without a { layer } option
-        # we assume they want to open a new layer.
+      if (options.mode) {
+        // If user passes a { mode } option without a { layer } option
+        // we assume they want to open a new layer.
         options.layer = 'new'
-      else if u.isElementish(options.target)
-        # If we are targeting an actual Element or jQuery collection (and not
-        # a selector string) we operate in that element's layer.
-        options.layer = stack.get(options.target, normalizeLayerOptions: false)
-      else if options.origin
-        # Links update their own layer by default.
+      } else if (u.isElementish(options.target)) {
+        // If we are targeting an actual Element or jQuery collection (and not
+        // a selector string) we operate in that element's layer.
+        options.layer = stack.get(options.target, { normalizeLayerOptions: false })
+      } else if (options.origin) {
+        // Links update their own layer by default.
         options.layer = 'origin'
-      else
-        # If nothing is given, we assume the current layer
+      } else {
+        // If nothing is given, we assume the current layer
         options.layer = 'current'
+      }
+    }
 
-    options.context ||= {}
+    if (!options.context) { options.context = {}; }
 
-    # Remember the layer that was current when the request was made,
-    # so changes with `{ layer: 'new' }` will know what to stack on.
-    # Note if options.baseLayer is given, up.layer.get('current', options) will
-    # return the resolved version of that.
-    options.baseLayer = stack.get('current', u.merge(options, normalizeLayerOptions: false))
+    // Remember the layer that was current when the request was made,
+    // so changes with `{ layer: 'new' }` will know what to stack on.
+    // Note if options.baseLayer is given, up.layer.get('current', options) will
+    // return the resolved version of that.
+    options.baseLayer = stack.get('current', { ...options, normalizeLayerOptions: false })
+  }
 
-  build = (options, beforeNew) ->
-    mode = options.mode
-    Class = config[mode].Class
+  function build(options, beforeNew) {
+    const { mode } = options
+    const { Class } = config[mode]
 
-    # modeConfigs() returns the most specific options first,
-    # but in merge() below later args override keys from earlier args.
-    configs = u.reverse(modeConfigs(mode))
+    // modeConfigs() returns the most specific options first,
+    // but in merge() below later args override keys from earlier args.
+    const configs = u.reverse(modeConfigs(mode))
 
-    if handleDeprecatedConfig = up.migrate.handleLayerConfig
+    let handleDeprecatedConfig = up.migrate.handleLayerConfig
+    if (handleDeprecatedConfig) {
       configs.forEach(handleDeprecatedConfig)
+    }
 
-    options = u.mergeDefined(configs..., { mode, stack }, options)
+    options = u.mergeDefined(...configs, { mode, stack }, options)
 
-    if beforeNew
+    if (beforeNew) {
       options = beforeNew(options)
+    }
 
     return new Class(options)
+  }
 
-  openCallbackAttr = (link, attr) ->
+  function openCallbackAttr(link, attr) {
     return e.callbackAttr(link, attr, ['layer'])
+  }
 
-  closeCallbackAttr = (link, attr) ->
+  function closeCallbackAttr(link, attr) {
     return e.callbackAttr(link, attr, ['layer', 'value'])
+  }
 
-  reset = ->
+  function reset() {
     config.reset()
     stack.reset()
     handlers = u.filter(handlers, 'isDefault')
+  }
 
-  ###**
+  /***
   [Opens a new overlay](/opening-overlays).
 
   Opening a layer is considered [navigation](/navigation) by default.
@@ -470,19 +500,20 @@ up.layer = do ->
     The promise will be resolved once the overlay was placed into the DOM.
 
   @stable
-  ###
-  open = (options) ->
-    options = u.options(options,
+  */
+  function open(options) {
+    options = u.options(options, {
       layer: 'new',
       defaultToEmptyContent: true,
       navigate: true
-    )
+    })
 
-    # Even if we are given { content } we need to pipe this through up.render()
-    # since a lot of options processing is happening there.
-    return up.render(options).then (result) -> return result.layer
+    // Even if we are given { content } we need to pipe this through up.render()
+    // since a lot of options processing is happening there.
+    return up.render(options).then(result => result.layer)
+  }
 
-  ###**
+  /***
   This event is emitted before an overlay is opened.
 
   The overlay is not yet part of the [layer stack](/up.layer.stack) and has not yet been placed
@@ -516,9 +547,9 @@ up.layer = do ->
   @param event.preventDefault()
     Event listeners may call this method to prevent the overlay from opening.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This event is emitted after a new overlay has been placed into the DOM.
 
   The event is emitted right before the opening animation starts. Because the overlay
@@ -539,9 +570,9 @@ up.layer = do ->
   @param {up.Layer} event.layer
     The [layer object](/up.Layer) that is opening.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This event is emitted after a layer's [location property](/up.Layer.prototype.location)
   has changed value.
 
@@ -552,9 +583,9 @@ up.layer = do ->
     The new location URL.
   @event up:layer:location:changed
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   Opens an overlay and returns a promise for its [acceptance](/closing-overlays).
 
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
@@ -585,24 +616,31 @@ up.layer = do ->
     When the overlay was dismissed, the promise will reject with the overlay's dismissal value.
 
   @stable
-  ###
-  ask = (options) ->
-    return new Promise (resolve, reject) ->
-      options = u.merge options,
-        onAccepted: (event) -> resolve(event.value)
-        onDismissed: (event) -> reject(event.value)
-      open(options)
+  */
+  function ask(options) {
+    return new Promise(function (resolve, reject) {
+      options = {
+        ...options,
+        onAccepted: (event) => resolve(event.value),
+        onDismissed: (event) => reject(event.value)
+      }
+      return open(options)
+    })
+  }
 
-  anySelector = ->
-    u.map(LAYER_CLASSES, (Class) -> Class.selector()).join(',')
+  function anySelector() {
+    return u.map(LAYER_CLASSES, Class => Class.selector()).join(',')
+  }
 
-  optionToString = (option) ->
-    if u.isString(option)
-      return "layer \"#{option}\""
-    else
+  function optionToString(option) {
+    if (u.isString(option)) {
+      return `layer \"${option}\"`
+    } else {
       return option.toString()
+    }
+  }
 
-  ###**
+  /***
   [Follows](/a-up-follow) this link and opens the result in a new overlay.
 
   \#\#\# Example
@@ -751,9 +789,9 @@ up.layer = do ->
     See [popup position](/customizing-overlays#popup-position).
 
   @stable
-  ###
+  */
 
-  ###**
+  /***
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
 
   The JSON value of the `[up-accept]` attribute becomes the overlay's
@@ -786,9 +824,9 @@ up.layer = do ->
   @param [up-easing]
     The close animation's easing function.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   [Accepts](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
 
   The JSON value of the `[up-accept]` attribute becomes the overlay's
@@ -817,31 +855,33 @@ up.layer = do ->
   @param [up-easing]
     The close animation's easing function.
   @stable
-  ###
+  */
 
-  up.on 'up:fragment:destroyed', (event) ->
+  up.on('up:fragment:destroyed', function() {
     stack.sync()
-
-  up.on 'up:framework:boot', ->
-    stack = new up.LayerStack()
-
-  up.on 'up:framework:reset', reset
-
-  api = u.literal({
-    config
-    mainTargets
-    open
-    build
-    ask
-    normalizeOptions
-    openCallbackAttr
-    closeCallbackAttr
-    anySelector
-    optionToString
-    get_stack: -> stack
   })
 
-  ###**
+  up.on('up:framework:boot', function() {
+    stack = new up.LayerStack()
+  })
+
+  up.on('up:framework:reset', reset)
+
+  const api = {
+    config,
+    mainTargets,
+    open,
+    build,
+    ask,
+    normalizeOptions,
+    openCallbackAttr,
+    closeCallbackAttr,
+    anySelector,
+    optionToString,
+    get stack() { return stack }
+  }
+
+  /***
   Returns the current layer in the [layer stack](/up.layer.stack).
 
   The *current* layer is usually the [frontmost layer](/up.layer.front).
@@ -877,9 +917,9 @@ up.layer = do ->
   @property up.layer.current
   @param {up.Layer} current
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns the number of layers in the [layer stack](/up.layer.stack).
 
   The count includes the [root layer](/up.layer.root).
@@ -889,9 +929,9 @@ up.layer = do ->
   @param {number} count
     The number of layers in the stack.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns an `up.Layer` object for the given [layer option](/layer-option).
 
   @function up.layer.get
@@ -902,9 +942,9 @@ up.layer = do ->
 
     If no layer matches, `undefined` is returned.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns an array of `up.Layer` objects matching the given [layer option](/layer-option).
 
   @function up.layer.getAll
@@ -912,9 +952,9 @@ up.layer = do ->
     The [layer option](/layer-option) to look up.
   @return {Array<up.Layer>}
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   Returns the [root layer](/layer-terminology).
 
   The root layer represents the initial page before any overlay was [opened](/opening-overlays).
@@ -923,9 +963,9 @@ up.layer = do ->
   @property up.layer.root
   @param {up.Layer} root
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns an array of all [overlays](/layer-terminology).
 
   If no overlay is open, an empty array is returned.
@@ -936,9 +976,9 @@ up.layer = do ->
   @property up.layer.overlays
   @param {Array<up.Layer>} overlays
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns the frontmost layer in the [layer stack](/up.layer.stack).
 
   The frontmost layer is the layer directly facing the user. If an overlay is
@@ -950,9 +990,9 @@ up.layer = do ->
   @property up.layer.front
   @param {up.Layer} front
   @stable
-  ###
+  */
 
-  ###**
+  /***
   [Dismisses](/up.layer.dismiss) all overlays.
 
   Afterwards the only remaining layer will be the [root layer](/up.layer.root).
@@ -963,20 +1003,20 @@ up.layer = do ->
   @param {Object} [options]
     See options for `up.layer.dismiss()`.
   @stable
-  ###
+  */
   u.delegate(api, [
-    'get'
-    'getAll'
-    'root'
-    'overlays'
-    'current'
-    'front'
-    'sync'
-    'count'
+    'get',
+    'getAll',
+    'root',
+    'overlays',
+    'current',
+    'front',
+    'sync',
+    'count',
     'dismissOverlays'
-  ], -> stack)
+  ], () => stack)
 
-  ###**
+  /***
   [Accepts](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.accept()`.
@@ -986,9 +1026,9 @@ up.layer = do ->
   @param {any} [value]
   @param {Object} [options]
   @stable
-  ###
+  */
 
-  ###**
+  /***
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.dismiss()`.
@@ -998,9 +1038,9 @@ up.layer = do ->
   @param {any} [value]
   @param {Object} [options]
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns whether the [current layer](/up.layer.current) is the [root layer](/up.layer.root).
 
   This is a shortcut for `up.layer.current.isRoot()`.
@@ -1009,9 +1049,9 @@ up.layer = do ->
   @function up.layer.isRoot
   @return {boolean}
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns whether the [current layer](/up.layer.current) is *not* the [root layer](/up.layer.root).
 
   This is a shortcut for `up.layer.current.isOverlay()`.
@@ -1020,9 +1060,9 @@ up.layer = do ->
   @function up.layer.isOverlay
   @return {boolean}
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns whether the [current layer](/up.layer.current) is the [frontmost layer](/up.layer.front).
 
   This is a shortcut for `up.layer.current.isFront()`.
@@ -1031,9 +1071,9 @@ up.layer = do ->
   @function up.layer.isFront
   @return {boolean}
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
   that originated on an element [contained](/up.Layer.prototype.contains) by the [current layer](/up.layer.current).
 
@@ -1051,9 +1091,9 @@ up.layer = do ->
   @return {Function()}
     A function that unbinds the event listeners when called.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Unbinds an event listener previously bound to the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.off()`.
@@ -1065,9 +1105,9 @@ up.layer = do ->
   @param {Function(event, [element], [data])} listener
     The listener function to unbind.
   @stable
-  ###
+  */
 
-  ###**
+  /***
   [Emits](/up.emit) an event on the [current layer](/up.layer.current)'s [element](/up.layer.element).
 
   This is a shortcut for `up.layer.current.emit()`.
@@ -1077,9 +1117,9 @@ up.layer = do ->
   @param {string} eventType
   @param {Object} [props={}]
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns the parent layer of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.parent`.
@@ -1088,9 +1128,9 @@ up.layer = do ->
   @property up.layer.parent
   @param {up.Layer} parent
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Whether fragment updates within the [current layer](/up.layer.current)
   can affect browser history and window title.
 
@@ -1100,9 +1140,9 @@ up.layer = do ->
   @property up.layer.history
   @param {boolean} history
   @stable
-  ###
+  */
 
-  ###**
+  /***
   The location URL of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.location`.
@@ -1111,18 +1151,18 @@ up.layer = do ->
   @property up.layer.location
   @param {string} location
   @stable
-  ###
+  */
 
-  ###**
+  /***
   The [current layer](/up.layer.current)'s [mode](/up.layer.mode)
   which governs its appearance and behavior.
 
   @property up.layer.mode
   @param {string} mode
   @stable
-  ###
+  */
 
-  ###**
+  /***
   The [context](/context) of the [current layer](/up.layer.current).
 
   This is aliased as `up.context`.
@@ -1133,9 +1173,9 @@ up.layer = do ->
 
     If no context has been set an empty object is returned.
   @experimental
-  ###
+  */
 
-  ###**
+  /***
   The outmost element of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.element`.
@@ -1144,9 +1184,9 @@ up.layer = do ->
   @property up.layer.element
   @param {Element} element
   @stable
-  ###
+  */
 
-  ###**
+  /***
   The outmost element of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.element`.
@@ -1155,9 +1195,9 @@ up.layer = do ->
   @property up.layer.element
   @param {Element} element
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Returns whether the given `element` is contained by the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.contains(element)`.
@@ -1166,10 +1206,10 @@ up.layer = do ->
   @function up.layer.contains
   @param {Element} element
   @stable
-  ###
+  */
 
 
-  ###**
+  /***
   The [size](/customizing-overlays#overlay-sizes) of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.size`.
@@ -1178,9 +1218,9 @@ up.layer = do ->
   @property up.layer.size
   @param {string} size
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Creates an element with the given `selector` and appends it to the [current layer's](/up.layer.current)
   [outmost element](/up.Layer.prototype.element).
 
@@ -1192,26 +1232,27 @@ up.layer = do ->
   @param {string} selector
   @param {Object} attrs
   @experimental
-  ###
+  */
 
   u.delegate(api, [
-    'accept'
-    'dismiss'
-    'isRoot'
-    'isOverlay'
-    'isFront'
-    'on'
-    'off'
-    'emit'
-    'parent'
-    'history'
-    'location'
-    'mode'
-    'context'
-    'element'
-    'contains'
-    'size'
+    'accept',
+    'dismiss',
+    'isRoot',
+    'isOverlay',
+    'isFront',
+    'on',
+    'off',
+    'emit',
+    'parent',
+    'history',
+    'location',
+    'mode',
+    'context',
+    'element',
+    'contains',
+    'size',
     'affix'
-  ], -> stack.current)
+  ], () => stack.current)
 
   return api
+})()
