@@ -34,10 +34,9 @@ class up.LayerStack extends Array
     # Because of this we will dismiss alle descendants sync rather than waiting
     # for each descendant to finish its closing animation.
     dismissOptions = u.merge(options, preventable: false)
-    dismissDescendant = (descendant) -> descendant.dismiss(':peel', dismissOptions)
-    promises = u.map(descendants, dismissDescendant)
 
-    Promise.all(promises)
+    for descendant in descendants
+      descendant.dismiss(':peel', dismissOptions)
 
   reset: ->
     @peel(@root, animation: false)

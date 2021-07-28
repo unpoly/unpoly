@@ -1,7 +1,7 @@
-e = up.element
-u = up.util
+const e = up.element
+const u = up.util
 
-###**
+/***
 Each layer has an `up.Layer` instance.
 
 Most functions in the `up.layer` package interact with the [current layer](/up.layer.current).
@@ -12,10 +12,10 @@ even if that layer is not the frontmost layer. E.g. if you're compiling a fragme
 the background layer during compilation.
 
 @class up.Layer
-###
-class up.Layer extends up.Record
+*/
+up.Layer = class Layer extends up.Record {
 
-  ###**
+  /***
   This layer's outmost element.
 
   \#\#\# Example
@@ -31,9 +31,9 @@ class up.Layer extends up.Record
   @property up.Layer#element
   @param {Element} element
   @stable
-  ###
+  */
 
-  ###**
+  /***
   Whether fragment updates within this layer can affect browser history and window title.
 
   If a layer does not have visible history, its desendant layers cannot have history either.
@@ -41,9 +41,9 @@ class up.Layer extends up.Record
   @property up.Layer#history
   @param {boolean} history
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This layer's mode which governs its appearance and behavior.
 
   @see layer-terminology
@@ -51,9 +51,9 @@ class up.Layer extends up.Record
   @property up.Layer#mode
   @param {string} mode
   @stable
-  ###
+  */
 
-  ###**
+  /***
   This layer's [context](/context).
 
   \#\#\# Example
@@ -72,38 +72,46 @@ class up.Layer extends up.Record
 
     If no context has been set an empty object is returned.
   @experimental
-  ###
+  */
 
-  keys: ->
-    [
-      'element'
+  keys() {
+    return [
+      'element',
       'stack',
       'history',
       'mode',
       'context',
       'lastScrollTops'
     ]
+  }
 
-  defaults: ->
-    context: {} # To reset root
-    lastScrollTops: new up.Cache(size: 30, key: up.history.normalizeURL)
+  defaults() {
+    return {
+      context: {}, // To reset root
+      lastScrollTops: new up.Cache({size: 30, key: up.history.normalizeURL})
+    }
+  }
 
-  constructor: (options = {}) ->
+  constructor(options = {}) {
     super(options)
 
-    unless @mode
+    if (!this.mode) {
       throw "missing { mode } option"
+    }
+  }
 
-  setupHandlers: ->
+  setupHandlers() {
     up.link.convertClicks(this)
+  }
 
-  teardownHandlers: ->
-    # no-op for overriding
+  teardownHandlers() {}
+    // no-op for overriding
 
-  mainTargets: ->
-    up.layer.mainTargets(@mode)
+  mainTargets() {
+    return up.layer.mainTargets(this.mode)
+  }
 
-  ###**
+  /***
   Synchronizes this layer with the rest of the page.
 
   For instance, a popup overlay will re-calculate its position arounds its anchoring element.
@@ -113,11 +121,12 @@ class up.Layer extends up.Record
 
   @function up.Layer#sync
   @experimental
-  ###
-  sync: ->
-    # no-op so users can blindly sync without knowing the current mode
+  */
+  sync() {
+    // no-op so users can blindly sync without knowing the current mode
+  }
 
-  ###**
+  /***
   [Closes this overlay](/closing-overlays) with an accepting intent,
   e.g. when a change was confirmed or when a value was selected.
 
@@ -151,11 +160,12 @@ class up.Layer extends up.Record
 
     If the layer has a close animation, the callback will run after the animation has finished.
   @stable
-  ###
-  accept: ->
+  */
+  accept() {
     throw up.error.notImplemented()
+  }
 
-  ###**
+  /***
   [Closes this overlay](/closing-overlays) *without* an accepting intent,
   e.g. when a "Cancel" button was clicked.
 
@@ -174,11 +184,12 @@ class up.Layer extends up.Record
   @param {Object} [options]
     See options for `up.Layer#accept()`.
   @stable
-  ###
-  dismiss: ->
+  */
+  dismiss() {
     throw up.error.notImplemented()
+  }
 
-  ###**
+  /***
   [Dismisses](/up.Layer.prototype.dismiss) all descendant overlays,
   making this layer the [frontmost layer](/up.layer.front) in the [layer stack](/up.layer.stack).
 
@@ -188,54 +199,60 @@ class up.Layer extends up.Record
   @param {Object} options
     See options for `up.Layer#accept()`.
   @stable
-  ###
-  peel: (options) ->
-    @stack.peel(this, options)
+  */
+  peel(options) {
+    this.stack.peel(this, options)
+  }
 
-  evalOption: (option) ->
-    u.evalOption(option, this)
+  evalOption(option) {
+    return u.evalOption(option, this)
+  }
 
-  ###**
+  /***
   Returns whether this layer is the [current layer](/up.layer.current).
 
   @function up.Layer#isCurrent
   @return {boolean}
   @stable
-  ###
-  isCurrent: ->
-    @stack.isCurrent(this)
+  */
+  isCurrent() {
+    return this.stack.isCurrent(this)
+  }
 
-  ###**
+  /***
   Returns whether this layer is the [frontmost layer](/up.layer.front).
 
   @function up.Layer#isFront
   @return {boolean}
   @stable
-  ###
-  isFront: ->
-    @stack.isFront(this)
+  */
+  isFront() {
+    return this.stack.isFront(this)
+  }
 
-  ###**
+  /***
   Returns whether this layer is the [root layer](/up.layer.root).
 
   @function up.Layer#isRoot
   @return {boolean}
   @stable
-  ###
-  isRoot: ->
-    @stack.isRoot(this)
+  */
+  isRoot() {
+    return this.stack.isRoot(this)
+  }
 
-  ###**
+  /***
   Returns whether this layer is *not* the [root layer](/up.layer.root).
 
   @function up.Layer#isOverlay
   @return {boolean}
   @stable
-  ###
-  isOverlay: ->
-    @stack.isOverlay(this)
+  */
+  isOverlay() {
+    return this.stack.isOverlay(this)
+  }
 
-  ###**
+  /***
   Returns whether this layer is still part of the [layer stack](/up.layer.stack).
 
   A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
@@ -245,11 +262,12 @@ class up.Layer extends up.Record
   @function up.Layer#isOpen
   @return {boolean}
   @stable
-  ###
-  isOpen: ->
-    @stack.isOpen(this)
+  */
+  isOpen() {
+    return this.stack.isOpen(this)
+  }
 
-  ###**
+  /***
   Returns whether this layer is no longer part of the [layer stack](/up.layer.stack).
 
   A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
@@ -259,11 +277,12 @@ class up.Layer extends up.Record
   @function up.Layer#isClosed
   @return {boolean}
   @stable
-  ###
-  isClosed: ->
-    @stack.isClosed(this)
+  */
+  isClosed() {
+    return this.stack.isClosed(this)
+  }
 
-  ###**
+  /***
   Returns this layer's parent layer.
 
   The parent layer is the layer that opened this layer. It is visually in the background of this layer.
@@ -273,11 +292,12 @@ class up.Layer extends up.Record
   @property up.Layer#parent
   @param {up.Layer} parent
   @stable
-  ###
-  @getter 'parent', ->
-    @stack.parentOf(this)
+  */
+  get parent() {
+    return this.stack.parentOf(this)
+  }
 
-  ###**
+  /***
   Returns this layer's child layer.
 
   The child layer is the layer that was opened on top of this layer. It visually overlays this layer.
@@ -290,11 +310,12 @@ class up.Layer extends up.Record
   @property up.Layer#child
   @return {up.Layer} child
   @stable
-  ###
-  @getter 'child', ->
-    @stack.childOf(this)
+  */
+  get child() {
+    return this.stack.childOf(this)
+  }
 
-  ###**
+  /***
   Returns an array of this layer's ancestor layers.
 
   The array elements are ordered by distance to this layer.
@@ -304,11 +325,12 @@ class up.Layer extends up.Record
   @property up.Layer#ancestors
   @return {Array<up.Layer>} ancestors
   @stable
-  ###
-  @getter 'ancestors', ->
-    @stack.ancestorsOf(this)
+  */
+  get ancestors() {
+    return this.stack.ancestorsOf(this)
+  }
 
-  ###**
+  /***
   Returns an array of this layer's descendant layers, with the closest descendants listed first.
 
   Descendant layers are all layers that visually overlay this layer.
@@ -320,11 +342,12 @@ class up.Layer extends up.Record
   @property up.Layer#descendants
   @return {Array<up.Layer>} descendants
   @stable
-  ###
-  @getter 'descendants', ->
-    @stack.descendantsOf(this)
+  */
+  get descendants() {
+    return this.stack.descendantsOf(this)
+  }
 
-  ###**
+  /***
   Returns the zero-based position of this layer in the [layer stack](/up.layer.stack).
 
   The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
@@ -332,23 +355,28 @@ class up.Layer extends up.Record
   @property up.Layer#index
   @return {number} index
   @stable
-  ###
-  @getter 'index', ->
-    @stack.indexOf(this)
+  */
+  get index() {
+    return this.stack.indexOf(this)
+  }
 
-  getContentElement: ->
-    @contentElement || @element
+  getContentElement() {
+    return this.contentElement || this.element
+  }
 
-  getBoxElement: ->
-    @boxElement || @element
+  getBoxElement() {
+    return this.boxElement || this.element
+  }
 
-  getFocusElement: ->
-    @getBoxElement()
+  getFocusElement() {
+    return this.getBoxElement()
+  }
 
-  getFirstSwappableElement: ->
+  getFirstSwappableElement() {
     throw up.error.notImplemented()
+  }
 
-  ###**
+  /***
   Returns whether the given `element` is contained by this layer.
 
   Note that this will always return `false` for elements in [descendant](/up.Layer.prototype.descendants) overlays,
@@ -358,13 +386,14 @@ class up.Layer extends up.Record
   @param {Element} element
   @return {boolean}
   @stable
-  ###
-  contains: (element) =>
-    # Test that the closest parent is the element and not another layer with elements nested
-    # into this layer's element.
-    e.closest(element, up.layer.anySelector()) == @element
+  */
+  contains(element) {
+    // Test that the closest parent is the element and not another layer with elements nested
+    // into this layer's element.
+    return e.closest(element, up.layer.anySelector()) === this.element
+  }
 
-  ###**
+  /***
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events) that originated
   on an element [contained](/up.Layer.prototype.contains) by this layer.
 
@@ -440,11 +469,12 @@ class up.Layer extends up.Record
     A function that unbinds the event listeners when called.
 
   @stable
-  ###
-  on: (args...) ->
-    return @buildEventListenerGroup(args).bind()
+  */
+  on(...args) {
+    return this.buildEventListenerGroup(args).bind()
+  }
 
-  ###**
+  /***
   Unbinds an event listener previously bound with `up.Layer#on()`.
 
   @function up.Layer#off
@@ -456,31 +486,36 @@ class up.Layer extends up.Record
     Note that you must pass a reference to the same function reference
     that was passed to `up.Layer#on()` earlier.
   @stable
-  ###
-  off: (args...) ->
-    return @buildEventListenerGroup(args).unbind()
+  */
+  off(...args) {
+    return this.buildEventListenerGroup(args).unbind()
+  }
 
-  buildEventListenerGroup: (args) ->
-    return up.EventListenerGroup.fromBindArgs(args,
-      guard: @containsEventTarget,
-      elements: [@element],
+  buildEventListenerGroup(args) {
+    return up.EventListenerGroup.fromBindArgs(args, {
+      guard: (event) => this.containsEventTarget(event),
+      elements: [this.element],
       baseLayer: this
-    )
+    })
+  }
 
-  containsEventTarget: (event) =>
-    # Since the root layer will receive events emitted on descendant layers
-    # we need to manually check whether the event target is contained
-    # by this layer.
-    @contains(event.target)
+  containsEventTarget(event) {
+    // Since the root layer will receive events emitted on descendant layers
+    // we need to manually check whether the event target is contained
+    // by this layer.
+    return this.contains(event.target)
+  }
 
-  wasHitByMouseEvent: (event) ->
-    hittableElement = document.elementFromPoint(event.clientX, event.clientY)
-    return !hittableElement || @contains(hittableElement)
+  wasHitByMouseEvent(event) {
+    const hittableElement = document.elementFromPoint(event.clientX, event.clientY)
+    return !hittableElement || this.contains(hittableElement)
+  }
 
-  buildEventEmitter: (args) ->
-    return up.EventEmitter.fromEmitArgs(args, layer: this)
+  buildEventEmitter(args) {
+    return up.EventEmitter.fromEmitArgs(args, { layer: this })
+  }
 
-  ###**
+  /***
   [Emits](/up.emit) an event on [this layer's element](/up.Layer.prototype.element).
 
   The value of [up.layer.current](/up.layer.current) will be set to the this layer
@@ -514,29 +549,35 @@ class up.Layer extends up.Record
 
     Alternatively the target element may be passed as the first argument.
   @stable
-  ###
-  emit: (args...) ->
-    return @buildEventEmitter(args).emit()
+  */
+  emit(...args) {
+    return this.buildEventEmitter(args).emit()
+  }
 
-  isDetached: ->
-    e.isDetached(@element)
+  isDetached() {
+    return e.isDetached(this.element)
+  }
 
-  saveHistory: ->
-    return unless @isHistoryVisible()
+  saveHistory() {
+    if (this.isHistoryVisible()) {
+      this.savedTitle = document.title
+      this.savedLocation = up.history.location
+    }
+  }
 
-    @savedTitle = document.title
-    @savedLocation = up.history.location
+  restoreHistory() {
+    if (this.savedLocation) {
+      up.history.push(this.savedLocation)
+      this.savedLocation = null
+    }
 
-  restoreHistory: ->
-    if @savedLocation
-      up.history.push(@savedLocation)
-      @savedLocation = null
+    if (this.savedTitle) {
+      document.title = this.savedTitle
+      this.savedTitle = null
+    }
+  }
 
-    if @savedTitle
-      document.title = @savedTitle
-      @savedTitle = null
-
-  ###**
+  /***
   Temporarily changes the [current layer](/up.layer.current) while the given
   function is running.
 
@@ -549,18 +590,32 @@ class up.Layer extends up.Record
     Async functions are not supported.
   @function up.Layer#asCurrent
   @experimental
-  ###
-  asCurrent: (fn) ->
-    @stack.asCurrent(this, fn)
+  */
+  asCurrent(fn) {
+    return this.stack.asCurrent(this, fn)
+  }
 
-  updateHistory: (options) ->
-    if u.isString(options.title)
-      @title = options.title
+  updateHistory(options) {
+    if (u.isString(options.title)) {
+      this.title = options.title
+    }
 
-    if u.isString(options.location)
-      @location = options.location
+    if (u.isString(options.location)) {
+      this.location = options.location
+    }
+  }
 
-  ###**
+  isHistoryVisible() {
+    // If an ancestor layer was opened with the wish to not affect history, this
+    // child layer must not affect it either, regardless of its @history setting.
+    return this.history && (this.isRoot() || this.parent.isHistoryVisible())
+  }
+
+  showsLiveHistory() {
+    return this.isHistoryVisible() && this.isFront() && (up.history.config.enabled || this.isRoot())
+  }
+
+  /***
   This layer's window title.
 
   If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.history),
@@ -576,24 +631,26 @@ class up.Layer extends up.Record
   @property up.Layer#title
   @param {string} title
   @experimental
-  ###
-  @accessor 'title',
-    get: ->
-      if @showsLiveHistory()
-        # Allow Unpoly-unaware code to set the document title directly.
-        # This will implicitey change the front layer's title.
-        document.title
-      else
-        @savedTitle
+  */
+  get title() {
+    if (this.showsLiveHistory()) {
+      // Allow Unpoly-unaware code to set the document title directly.
+      // This will implicitey change the front layer's title.
+      return document.title
+    } else {
+      return this.savedTitle
+    }
+  }
 
-    set: (title) ->
-      @savedTitle = title
+  set title(title) {
+    this.savedTitle = title
 
-      if @showsLiveHistory()
-        document.title = title
+    if (this.showsLiveHistory()) {
+      document.title = title
+    }
+  }
 
-
-  ###**
+  /***
   This layer's location URL.
 
   If the layer has [no visible history](/up.Layer.prototype.history), this property
@@ -606,45 +663,44 @@ class up.Layer extends up.Record
   @property up.Layer#location
   @param {string} location
   @experimental
-  ###
-  @accessor 'location',
-    get: ->
-      if @showsLiveHistory()
-        # Allow Unpoly-unaware code to use the pushState API directly.
-        # This will implicitly change the front layer's location.
-        up.history.location
-      else
-        @savedLocation
+  */
+  get location() {
+    if (this.showsLiveHistory()) {
+      // Allow Unpoly-unaware code to use the pushState API directly.
+      // This will implicitly change the front layer's location.
+      return up.history.location
+    } else {
+      return this.savedLocation
+    }
+  }
 
-    set: (location) ->
-      previousLocation = @savedLocation
-      location = up.history.normalizeURL(location)
+  set location(location) {
+    const previousLocation = this.savedLocation
+    location = up.history.normalizeURL(location)
 
-      if previousLocation != location
-        @savedLocation = location
-        @emit('up:layer:location:changed', { location, log: false })
+    if (previousLocation !== location) {
+      this.savedLocation = location
+      this.emit('up:layer:location:changed', { location, log: false })
 
-        if @showsLiveHistory()
-          up.history.push(location)
+      if (this.showsLiveHistory()) {
+        up.history.push(location)
+      }
+    }
+  }
 
-  isHistoryVisible: ->
-    # If an ancestor layer was opened with the wish to not affect history, this
-    # child layer must not affect it either, regardless of its @history setting.
-    return @history && (@isRoot() || @parent.isHistoryVisible())
+  selector(part) {
+    return this.constructor.selector(part)
+  }
 
-  showsLiveHistory: ->
-    @isHistoryVisible() && @isFront() && (up.history.config.enabled || @isRoot())
-
-  selector: (part) ->
-    @constructor.selector(part)
-
-  @selector: (part) ->
+  static selector(part) {
     throw up.error.notImplemented()
+  }
 
-  toString: ->
+  toString() {
     throw up.error.notImplemented()
+  }
 
-  ###**
+  /***
   Creates an element with the given `selector` and appends it to this layer's
   [outmost element](/up.Layer.prototype.element).
 
@@ -672,9 +728,13 @@ class up.Layer extends up.Record
 
     The given object may use kebab-case or camelCase keys.
   @experimental
-  ###
-  affix: (args...) ->
-    e.affix(@getFirstSwappableElement(), args...)
+  */
+  affix(...args) {
+    return e.affix(this.getFirstSwappableElement(), ...Array.from(args))
+  }
 
-  "#{u.isEqual.key}": (other) ->
-    @constructor == other.constructor && @element == other.element
+  [u.isEqual.key](other) {
+    return (this.constructor === other.constructor) && (this.element === other.element)
+  }
+}
+
