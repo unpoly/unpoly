@@ -1,4 +1,4 @@
-###**
+/***
 Logging
 =======
 
@@ -12,14 +12,12 @@ Unpoly can print debugging information to the [browser console](https://develope
 @see up.log.disable
 
 @module up.log
-###
-up.log = do ->
+*/
+up.log = (function() {
 
-  u = up.util
+  const sessionStore = new up.store.Session('up.log')
 
-  sessionStore = new up.store.Session('up.log')
-
-  ###**
+  /***
   Configures the logging output on the developer console.
 
   @property up.log.config
@@ -32,99 +30,110 @@ up.log = do ->
   @param {boolean} [options.banner=true]
     Print the Unpoly banner to the developer console.
   @stable
-  ###
-  config = new up.Config ->
-    enabled: sessionStore.get('enabled')
+  */
+  const config = new up.Config(() => ({
+    enabled: sessionStore.get('enabled'),
     banner: true
+  }))
 
-  reset = ->
+  function reset() {
     config.reset()
+  }
 
-#  ###**
-#  Prints a debugging message to the browser console.
-#
-#  @function up.log.debug
-#  @param {string} message
-#  @param {Array} ...args
-#  @internal
-#  ###
-#  printToDebug = (message, args...) ->
-#    if config.enabled && message
-#      console.debug(prefix(message), args...)
+//  ###**
+//  Prints a debugging message to the browser console.
+//
+//  @function up.log.debug
+//  @param {string} message
+//  @param {Array} ...args
+//  @internal
+//  ###
+//  printToDebug = (message, args...) ->
+//    if config.enabled && message
+//      console.debug(prefix(message), args...)
 
-  ###**
+  /***
   Prints a logging message to the browser console.
 
   @function up.puts
   @param {string} message
   @param {Array} ...args
   @internal
-  ###
-  printToStandard = (args...) ->
-    if config.enabled
-      printToStream('log', args...)
+  */
+  function printToStandard(...args) {
+    if (config.enabled) {
+      printToStream('log', ...args)
+    }
+  }
 
-  ###**
+  /***
   @function up.warn
   @internal
-  ###
-  printToWarn = (args...) ->
-    printToStream('warn', args...)
+  */
+  const printToWarn = (...args) => printToStream('warn', ...Array.from(args))
 
-  ###**
+  /***
   @function up.log.error
   @internal
-  ###
-  printToError = (args...) ->
-    printToStream('error', args...)
+  */
+  const printToError = (...args) => printToStream('error', ...Array.from(args))
 
-  printToStream = (stream, trace, message, args...) ->
-    if message
-      if up.browser.canFormatLog()
-        args.unshift('') # Reset
+  function printToStream(stream, trace, message, ...args) {
+    if (message) {
+      if (up.browser.canFormatLog()) {
+        args.unshift(''); // Reset
         args.unshift('color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block')
-        message = "%c#{trace}%c #{message}"
-      else
-        message = "[#{trace}] #{message}"
+        message = `%c${trace}%c ${message}`
+      } else {
+        message = `[${trace}] ${message}`
+      }
 
-      console[stream](message, args...)
+      console[stream](message, ...args)
+    }
+  }
 
-  printBanner = ->
-    return unless config.banner
+  const printBanner = function() {
+    if (!config.banner) { return; }
 
-    # The ASCII art looks broken in code since we need to escape backslashes
-    logo = " __ _____  ___  ___  / /_ __\n" +
-           "/ // / _ \\/ _ \\/ _ \\/ / // /  #{up.version}\n" +
-           "\\___/_//_/ .__/\\___/_/\\_. / \n" +
-           "        / /            / /\n\n"
+    // The ASCII art looks broken in code since we need to escape backslashes
+    const logo =
+      " __ _____  ___  ___  / /_ __\n" +
+      `/ // / _ \\/ _ \\/ _ \\/ / // /  ${up.version}\n` +
+      "\\___/_//_/ .__/\\___/_/\\_. / \n" +
+      "        / /            / /\n\n"
 
-    text = ""
+    let text = ""
 
-    unless up.migrate.loaded
+    if (!up.migrate.loaded) {
       text += "Load unpoly-migrate.js to enable deprecated APIs.\n\n"
+    }
 
-    if config.enabled
+    if (config.enabled) {
       text += "Call `up.log.disable()` to disable logging for this session."
-    else
+    } else {
       text += "Call `up.log.enable()` to enable logging for this session."
+    }
 
-    color = 'color: #777777'
+    const color = 'color: #777777'
 
-    if up.browser.canFormatLog()
+    if (up.browser.canFormatLog()) {
       console.log('%c' + logo + '%c' + text, 'font-family: monospace;' + color, color)
-    else
+    } else {
       console.log(logo + text)
+    }
+  }
 
 
-  up.on 'up:app:boot', printBanner
+  up.on('up:app:boot', printBanner)
 
-  up.on 'up:framework:reset', reset
+  up.on('up:framework:reset', reset)
 
-  setEnabled = (value) ->
+  function setEnabled(value) {
     sessionStore.set('enabled', value)
     config.enabled = value
+  }
 
-  ###**
+  /***
   Starts printing debugging information to the developer console.
 
   Debugging information includes which elements are being [compiled](/up.syntax)
@@ -134,22 +143,24 @@ up.log = do ->
 
   @function up.log.enable
   @stable
-  ###
-  enable = ->
+  */
+  function enable() {
     setEnabled(true)
+  }
 
-  ###**
+  /***
   Stops printing debugging information to the developer console.
 
   Errors will still be printed, even with logging disabled.
 
   @function up.log.disable
   @stable
-  ###
-  disable = ->
+  */
+  function disable() {
     setEnabled(false)
+  }
 
-  ###**
+  /***
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
@@ -171,12 +182,13 @@ up.log = do ->
   @param {Array<string>} vars...
     A list of variables to replace any substitution marks in the error message.
   @experimental
-  ###
-  fail = (args...) ->
-    printToError('error', args...)
+  */
+  function fail(...args) {
+    printToError('error', ...args)
     throw up.error.failed(args)
+  }
 
-  ###**
+  /***
   Registers an empty rejection handler in case the given promise
   rejects with an AbortError or a failed up.Response.
 
@@ -197,22 +209,27 @@ up.log = do ->
   @param {Promise} promise
   @return {Promise}
   @internal
-  ###
-  muteUncriticalRejection = (promise) ->
-    return promise.catch (error) ->
-      unless (typeof error == 'object') && (error.name == 'AbortError' || error instanceof up.RenderResult || error instanceof up.Response)
+  */
+  function muteUncriticalRejection(promise) {
+    return promise.catch(function(error) {
+      if ((typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))) {
         throw error
+      }
+    })
+  }
 
-  puts: printToStandard
-  # debug: printToDebug
-  error: printToError
-  warn: printToWarn
-  config: config
-  enable: enable
-  disable: disable
-  fail: fail
-  muteUncriticalRejection: muteUncriticalRejection
-  isEnabled: -> config.enabled
+  return {
+    puts: printToStandard,
+    error: printToError,
+    warn: printToWarn,
+    config,
+    enable,
+    disable,
+    fail,
+    muteUncriticalRejection,
+    isEnabled() { return config.enabled; }
+  }
+})()
 
 up.puts = up.log.puts
 up.warn = up.log.warn

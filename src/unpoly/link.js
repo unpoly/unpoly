@@ -1,4 +1,4 @@
-require('./link.sass');
+require('./link.sass')
 
 /***
 Linking to fragments
@@ -80,23 +80,23 @@ new page is loading.
 
 up.link = (function() {
 
-  const u = up.util;
-  const e = up.element;
+  const u = up.util
+  const e = up.element
 
-  const linkPreloader = new up.LinkPreloader();
+  const linkPreloader = new up.LinkPreloader()
 
-  let lastMousedownTarget = null;
+  let lastMousedownTarget = null
 
   // Links with attribute-provided HTML are always followable.
-  const LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]'];
+  const LINKS_WITH_LOCAL_HTML = ['a[up-content]', 'a[up-fragment]', 'a[up-document]']
 
   // Links with remote HTML are followable if there is one additional attribute
   // suggesting "follow me through Unpoly".
-  const LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]'];
-  const ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]'];
+  const LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
+  const ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]']
 
   function combineFollowableSelectors(elementSelectors, attributeSelectors) {
-    return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attributeSelector => elementSelector + attributeSelector));
+    return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attributeSelector => elementSelector + attributeSelector))
   }
 
   /***
@@ -204,22 +204,22 @@ up.link = (function() {
 
     // true | false | 'auto'
     preloadEnabled: 'auto'
-  }));
+  }))
 
   function fullFollowSelector() {
-    return config.followSelectors.join(',');
+    return config.followSelectors.join(',')
   }
 
   function fullPreloadSelector() {
-    return config.preloadSelectors.join(',');
+    return config.preloadSelectors.join(',')
   }
 
   function fullInstantSelector() {
-    return config.instantSelectors.join(',');
+    return config.instantSelectors.join(',')
   }
 
   function fullClickableSelector() {
-    return config.clickableSelectors.join(',');
+    return config.clickableSelectors.join(',')
   }
 
   /***
@@ -235,36 +235,36 @@ up.link = (function() {
   @return {boolean}
   */
   function isFollowDisabled(link) {
-    return e.matches(link, config.noFollowSelectors.join(',')) || u.isCrossOrigin(link);
+    return e.matches(link, config.noFollowSelectors.join(',')) || u.isCrossOrigin(link)
   }
 
   function isPreloadDisabled(link) {
     return !up.browser.canPushState() ||
       e.matches(link, config.noPreloadSelectors.join(',')) ||
       isFollowDisabled(link) ||
-      !willCache(link);
+      !willCache(link)
   }
 
   function willCache(link) {
     // Instantiate a lightweight request with basic link attributes needed for the cache-check.
-    const options = parseRequestOptions(link);
+    const options = parseRequestOptions(link)
     if (options.url) {
       if (options.cache == null) { options.cache = 'auto'; }
       options.basic = true; //
-      const request = new up.Request(options);
-      return request.willCache();
+      const request = new up.Request(options)
+      return request.willCache()
     }
-  };
+  }
 
   function isInstantDisabled(link) {
-    return e.matches(link, config.noInstantSelectors.join(',')) || isFollowDisabled(link);
+    return e.matches(link, config.noInstantSelectors.join(',')) || isFollowDisabled(link)
   }
 
   function reset() {
-    lastMousedownTarget = null;
-    config.reset();
-    linkPreloader.reset();
-  };
+    lastMousedownTarget = null
+    config.reset()
+    linkPreloader.reset()
+  }
 
   /***
   Follows the given link with JavaScript and updates a fragment with the server response.
@@ -312,23 +312,23 @@ up.link = (function() {
   */
   const follow = up.mockable(function(link, options) {
     return up.render(followOptions(link, options))
-  });
+  })
 
   function parseRequestOptions(link, options) {
-    options = u.options(options);
+    options = u.options(options)
     const parser = new up.OptionsParser(options, link)
 
-    options.url = followURL(link, options);
-    options.method = followMethod(link, options);
-    parser.json('headers');
-    parser.json('params');
-    parser.booleanOrString('cache');
-    parser.booleanOrString('clearCache');
-    parser.boolean('solo');
-    parser.string('contentType', {attr: ['enctype', 'up-content-type']});
+    options.url = followURL(link, options)
+    options.method = followMethod(link, options)
+    parser.json('headers')
+    parser.json('params')
+    parser.booleanOrString('cache')
+    parser.booleanOrString('clearCache')
+    parser.boolean('solo')
+    parser.string('contentType', {attr: ['enctype', 'up-content-type']})
 
-    return options;
-  };
+    return options
+  }
 
   /***
   Parses the [render](/up.render) options that would be used to
@@ -358,78 +358,78 @@ up.link = (function() {
   */
   function followOptions(link, options) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    link = up.fragment.get(link);
-    options = parseRequestOptions(link, options);
+    link = up.fragment.get(link)
+    options = parseRequestOptions(link, options)
 
-    const parser = new up.OptionsParser(options, link, {fail: true});
+    const parser = new up.OptionsParser(options, link, {fail: true})
 
     // Feedback options
-    parser.boolean('feedback');
+    parser.boolean('feedback')
 
     // Fragment options
-    parser.boolean('fail');
+    parser.boolean('fail')
     if (parser.options.origin == null) { parser.options.origin = link; }
-    parser.boolean('navigate', {default: true});
-    parser.string('confirm');
-    parser.string('target');
-    parser.booleanOrString('fallback');
+    parser.boolean('navigate', {default: true})
+    parser.string('confirm')
+    parser.string('target')
+    parser.booleanOrString('fallback')
     parser.parse(((link, attrName) => e.callbackAttr(link, attrName, ['request', 'response', 'renderOptions'])), 'onLoaded'); // same
-    parser.string('content');
-    parser.string('fragment');
-    parser.string('document');
+    parser.string('content')
+    parser.string('fragment')
+    parser.string('document')
 
     // Layer options
-    parser.boolean('peel');
-    parser.string('layer');
-    parser.string('baseLayer');
-    parser.json('context');
-    parser.string('mode');
-    parser.string('align');
-    parser.string('position');
-    parser.string('class');
-    parser.string('size');
-    parser.booleanOrString('dismissable');
-    parser.parse(up.layer.openCallbackAttr, 'onOpened');
-    parser.parse(up.layer.closeCallbackAttr, 'onAccepted');
-    parser.parse(up.layer.closeCallbackAttr, 'onDismissed');
-    parser.string('acceptEvent');
-    parser.string('dismissEvent');
-    parser.string('acceptLocation');
-    parser.string('dismissLocation');
-    parser.booleanOrString('history');
+    parser.boolean('peel')
+    parser.string('layer')
+    parser.string('baseLayer')
+    parser.json('context')
+    parser.string('mode')
+    parser.string('align')
+    parser.string('position')
+    parser.string('class')
+    parser.string('size')
+    parser.booleanOrString('dismissable')
+    parser.parse(up.layer.openCallbackAttr, 'onOpened')
+    parser.parse(up.layer.closeCallbackAttr, 'onAccepted')
+    parser.parse(up.layer.closeCallbackAttr, 'onDismissed')
+    parser.string('acceptEvent')
+    parser.string('dismissEvent')
+    parser.string('acceptLocation')
+    parser.string('dismissLocation')
+    parser.booleanOrString('history')
 
     // Viewport options
-    parser.booleanOrString('focus');
-    parser.boolean('saveScroll');
-    parser.booleanOrString('scroll');
-    parser.boolean('revealTop');
-    parser.number('revealMax');
-    parser.number('revealPadding');
-    parser.number('revealSnap');
-    parser.string('scrollBehavior');
+    parser.booleanOrString('focus')
+    parser.boolean('saveScroll')
+    parser.booleanOrString('scroll')
+    parser.boolean('revealTop')
+    parser.number('revealMax')
+    parser.number('revealPadding')
+    parser.number('revealSnap')
+    parser.string('scrollBehavior')
 
     // History options
     // { history } is actually a boolean, but we keep the deprecated string
     // variant which should now be passed as { location }.
-    parser.booleanOrString('history');
-    parser.booleanOrString('location');
-    parser.booleanOrString('title');
+    parser.booleanOrString('history')
+    parser.booleanOrString('location')
+    parser.booleanOrString('title')
 
     // Motion options
-    parser.booleanOrString('animation');
-    parser.booleanOrString('transition');
-    parser.string('easing');
-    parser.number('duration');
+    parser.booleanOrString('animation')
+    parser.booleanOrString('transition')
+    parser.string('easing')
+    parser.number('duration')
 
-    up.migrate.parseFollowOptions?.(parser);
+    up.migrate.parseFollowOptions?.(parser)
 
     // This is the event that may be prevented to stop the follow.
     // up.form.submit() changes this to be up:form:submit instead.
     // The guardEvent will also be assigned a { renderOptions } property in up.render()
     if (!options.guardEvent) { options.guardEvent = up.event.build('up:link:follow', {log: 'Following link'}); }
 
-    return options;
-  };
+    return options
+  }
 
   /***
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
@@ -483,27 +483,27 @@ up.link = (function() {
   */
   function preload(link, options) {
     // If passed a selector, up.fragment.get() will match in the current layer.
-    link = up.fragment.get(link);
+    link = up.fragment.get(link)
 
     if (!shouldPreload()) {
-      return up.error.failed.async('Link preloading is disabled');
+      return up.error.failed.async('Link preloading is disabled')
     }
 
-    const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]});
+    const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})
     return follow(link, { ...options, guardEvent, preload: true })
-  };
+  }
 
   function shouldPreload() {
-    const setting = config.preloadEnabled;
+    const setting = config.preloadEnabled
 
     if (setting === 'auto') {
       // Since connection.effectiveType might change during a session we need to
       // re-evaluate the value every time.
-      return !up.network.shouldReduceRequests();
+      return !up.network.shouldReduceRequests()
     }
 
-    return setting;
-  };
+    return setting
+  }
 
   /***
   This event is [emitted](/up.emit) before a link is [preloaded](/a-up-preload).
@@ -528,20 +528,20 @@ up.link = (function() {
   @internal
   */
   function followMethod(link, options = {}) {
-    return u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'));
+    return u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
   }
 
   function followURL(link, options = {}) {
-    const url = options.url || link.getAttribute('href') || link.getAttribute('up-href');
+    const url = options.url || link.getAttribute('href') || link.getAttribute('up-href')
 
     // Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
     // link behavior (like keyboard navigation or default styles). However, we don't want to
     // consider this  a link with remote content, and rather honor [up-content], [up-document]
     // and [up-fragment] attributes.
     if (url !== '#') {
-      return url;
+      return url
     }
-  };
+  }
 
   /***
   Returns whether the given link will be [followed](/up.follow) by Unpoly
@@ -567,9 +567,9 @@ up.link = (function() {
   @stable
   */
   function isFollowable(link) {
-    link = up.fragment.get(link);
-    return e.matches(link, fullFollowSelector()) && !isFollowDisabled(link);
-  };
+    link = up.fragment.get(link)
+    return e.matches(link, fullFollowSelector()) && !isFollowDisabled(link)
+  }
 
   /***
   Makes sure that the given link will be [followed](/up.follow)
@@ -585,26 +585,26 @@ up.link = (function() {
   */
   function makeFollowable(link) {
     if (!isFollowable(link)) {
-      link.setAttribute('up-follow', '');
+      link.setAttribute('up-follow', '')
     }
-  };
+  }
 
   function makeClickable(link) {
     if (e.matches(link, 'a[href], button')) {
-      return;
+      return
     }
 
     e.setMissingAttrs(link, {
       tabindex: '0', // Make them part of the natural tab order
       role: 'link'  // Make screen readers pronounce "link"
-    });
+    })
 
     link.addEventListener('keydown', function(event) {
       if ((event.key === 'Enter') || (event.key === 'Space')) {
-        return forkEventAsUpClick(event);
+        return forkEventAsUpClick(event)
       }
-    });
-  };
+    })
+  }
 
   /***
   Enables keyboard interaction for elements that should behave like links or buttons.
@@ -616,28 +616,28 @@ up.link = (function() {
   @selector [up-clickable]
   @experimental
   */
-  up.macro(fullClickableSelector, makeClickable);
+  up.macro(fullClickableSelector, makeClickable)
 
   function shouldFollowEvent(event, link) {
     // Users may configure up.link.config.followSelectors.push('a')
     // and then opt out individual links with [up-follow=false].
     if (event.defaultPrevented || isFollowDisabled(link)) {
-      return false;
+      return false
     }
 
     // If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     // we want those other elements handle the click.
-    const betterTargetSelector = `a, [up-href], ${up.form.fieldSelector()}`;
-    const betterTarget = e.closest(event.target, betterTargetSelector);
-    return !betterTarget || (betterTarget === link);
-  };
+    const betterTargetSelector = `a, [up-href], ${up.form.fieldSelector()}`
+    const betterTarget = e.closest(event.target, betterTargetSelector)
+    return !betterTarget || (betterTarget === link)
+  }
 
   function isInstant(linkOrDescendant) {
-    const element = e.closest(linkOrDescendant, fullInstantSelector());
+    const element = e.closest(linkOrDescendant, fullInstantSelector())
     // Allow users to configure up.link.config.instantSelectors.push('a')
     // but opt out individual links with [up-instant=false].
-    return element && !isInstantDisabled(element);
-  };
+    return element && !isInstantDisabled(element)
+  }
 
   /***
   Provide an `up:click` event that improves on standard click
@@ -661,7 +661,7 @@ up.link = (function() {
       // We never handle events for the right mouse button,
       // or when Shift/CTRL/Meta/ALT is pressed
       if (!up.event.isUnmodified(event)) {
-        return;
+        return
       }
 
       // (1) Instant links should not have a `click` event.
@@ -669,47 +669,47 @@ up.link = (function() {
       // (2) A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
       //     Keyboard navigation will not necessarily trigger a mousedown event.
       if (isInstant(element) && lastMousedownTarget) {
-        up.event.halt(event);
+        up.event.halt(event)
 
       // In case mousedown has created a layer over the click coordinates,
       // Chrome will emit an event with { target: document.body } on click.
       // Ignore that event and only process if we would still hit the
       // expect layers at the click coordinates.
       } else if (layer.wasHitByMouseEvent(event) && !didUserDragAway(event)) {
-        forkEventAsUpClick(event);
+        forkEventAsUpClick(event)
       }
 
       // In case the user switches input modes.
-      return lastMousedownTarget = null;
-    });
+      return lastMousedownTarget = null
+    })
 
     layer.on('mousedown', function(event, element) {
       // We never handle events for the right mouse button,
       // or when Shift/CTRL/Meta/ALT is pressed
       if (!up.event.isUnmodified(event)) {
-        return;
+        return
       }
 
-      lastMousedownTarget = event.target;
+      lastMousedownTarget = event.target
 
       if (isInstant(element)) {
         // A11Y: Keyboard navigation will not necessarily trigger a mousedown event.
         // We also don't want to listen to the enter key, since some screen readers
         // use the enter key for something else.
-        forkEventAsUpClick(event);
+        forkEventAsUpClick(event)
       }
-    });
-  };
+    })
+  }
 
   function didUserDragAway(clickEvent) {
-    return lastMousedownTarget && (lastMousedownTarget !== clickEvent.target);
+    return lastMousedownTarget && (lastMousedownTarget !== clickEvent.target)
   }
 
   function forkEventAsUpClick(originalEvent) {
     let forwardedProps = ['clientX', 'clientY', 'button', ...up.event.keyModifiers]
-    const newEvent = up.event.fork(originalEvent, 'up:click', forwardedProps);
-    up.emit(originalEvent.target, newEvent, { log: false });
-  };
+    const newEvent = up.event.fork(originalEvent, 'up:click', forwardedProps)
+    up.emit(originalEvent.target, newEvent, { log: false })
+  }
 
   /***
   A `click` event that honors the [`[up-instant]`](/a-up-instant) attribute.
@@ -772,9 +772,9 @@ up.link = (function() {
   @stable
   */
   function isSafe(link) {
-    const method = followMethod(link);
-    return up.network.isSafeMethod(method);
-  };
+    const method = followMethod(link)
+    return up.network.isSafeMethod(method)
+  }
 
   /***
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
@@ -1037,10 +1037,10 @@ up.link = (function() {
   */
   up.on('up:click', fullFollowSelector, function(event, link) {
     if (shouldFollowEvent(event, link)) {
-      up.event.halt(event);
-      up.log.muteUncriticalRejection(follow(link));
+      up.event.halt(event)
+      up.log.muteUncriticalRejection(follow(link))
     }
-  });
+  })
 
   /***
   Follows this link on `mousedown` instead of `click`.
@@ -1114,16 +1114,16 @@ up.link = (function() {
   @stable
   */
   up.macro('[up-expand]', function(area) {
-    const selector = area.getAttribute('up-expand') || 'a, [up-href]';
+    const selector = area.getAttribute('up-expand') || 'a, [up-href]'
 
     let childLink = e.get(area, selector)
     if (childLink) {
-      const areaAttrs = e.upAttrs(childLink);
+      const areaAttrs = e.upAttrs(childLink)
       if (!areaAttrs['up-href']) { areaAttrs['up-href'] = childLink.getAttribute('href'); }
-      e.setMissingAttrs(area, areaAttrs);
-      makeFollowable(area);
+      e.setMissingAttrs(area, areaAttrs)
+      makeFollowable(area)
     }
-  });
+  })
 
   /***
   Preloads this link when the user hovers over it.
@@ -1142,11 +1142,11 @@ up.link = (function() {
   */
   up.compiler(fullPreloadSelector, function(link) {
     if (!isPreloadDisabled(link)) {
-      linkPreloader.observeLink(link);
+      linkPreloader.observeLink(link)
     }
-  });
+  })
 
-  up.on('up:framework:reset', reset);
+  up.on('up:framework:reset', reset)
 
   return {
     follow,
@@ -1161,7 +1161,7 @@ up.link = (function() {
     convertClicks,
     config,
     combineFollowableSelectors
-  };
-})();
+  }
+})()
 
-up.follow = up.link.follow;
+up.follow = up.link.follow
