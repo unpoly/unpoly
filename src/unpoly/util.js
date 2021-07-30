@@ -1901,20 +1901,6 @@ up.util = (function() {
     })
   }
 
-  function literal(obj) {
-    const result = {}
-    for (let key in obj) {
-      const value = obj[key]
-      let unprefixedKey = unprefixCamelCase(key, 'get_')
-      if (unprefixedKey) {
-        defineGetter(result, unprefixedKey, value)
-      } else {
-        result[key] = value
-      }
-    }
-    return result
-  }
-
   function stringifyArg(arg) {
     let string
     const maxLength = 200
@@ -2114,7 +2100,6 @@ up.util = (function() {
     lowerCaseFirst,
     getter: defineGetter,
     delegate: defineDelegates,
-    literal,
     reverse,
     prefixCamelCase,
     unprefixCamelCase,
