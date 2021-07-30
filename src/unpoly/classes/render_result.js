@@ -1,4 +1,4 @@
-/***
+/*-
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 
 It is returned by functions like `up.render()` or `up.navigate()`:
@@ -13,7 +13,7 @@ console.log(result.layer)     // => up.Layer.Root
 */
 up.RenderResult = class RenderResult extends up.Record {
 
-  /***
+  /*-
   An array of fragments that were inserted.
 
   @property up.RenderResult#fragments
@@ -21,7 +21,7 @@ up.RenderResult = class RenderResult extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The updated [layer](/up.layer).
 
   @property up.RenderResult#layer

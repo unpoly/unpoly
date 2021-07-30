@@ -1,4 +1,4 @@
-/***
+/*-
 Browser support
 ===============
 
@@ -20,7 +20,7 @@ Internet Explorer 10 or lower
 up.browser = (function() {
   const u = up.util
 
-  /***
+  /*-
   Makes a full-page request, replacing the entire browser environment with a new page from the server response.
 
   Also see `up.Request#loadPage()`.
@@ -39,7 +39,7 @@ up.browser = (function() {
     new up.Request(requestsAttrs).loadPage()
   }
 
-  /***
+  /*-
   Submits the given form with a full page load.
   
   For mocking in specs.
@@ -55,7 +55,7 @@ up.browser = (function() {
     return 'ActiveXObject' in window // this is undefined, but the key is set
   }
 
-  /***
+  /*-
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
@@ -89,7 +89,7 @@ up.browser = (function() {
     return history.pushState && up.protocol.initialRequestMethod() === 'GET'
   }
 
-  /***
+  /*-
   Returns whether this browser supports promises.
 
   @function up.browser.canPromise
@@ -125,7 +125,7 @@ up.browser = (function() {
     return jQuery
   }
 
-  /***
+  /*-
   @return {boolean}
   @function up,browser.ensureConfirmed
   @param {string} options.confirm
@@ -140,7 +140,7 @@ up.browser = (function() {
     return true
   }
 
-  /***
+  /*-
   Returns whether Unpoly supports the current browser.
 
   If this returns `false` Unpoly will prevent itself from booting

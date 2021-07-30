@@ -1,7 +1,7 @@
 const e = up.element
 const u = up.util
 
-/***
+/*-
 Each layer has an `up.Layer` instance.
 
 Most functions in the `up.layer` package interact with the [current layer](/up.layer.current).
@@ -15,7 +15,7 @@ the background layer during compilation.
 */
 up.Layer = class Layer extends up.Record {
 
-  /***
+  /*-
   This layer's outmost element.
 
   \#\#\# Example
@@ -33,7 +33,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   Whether fragment updates within this layer can affect browser history and window title.
 
   If a layer does not have visible history, its desendant layers cannot have history either.
@@ -43,7 +43,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   This layer's mode which governs its appearance and behavior.
 
   @see layer-terminology
@@ -53,7 +53,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   This layer's [context](/context).
 
   \#\#\# Example
@@ -111,7 +111,7 @@ up.Layer = class Layer extends up.Record {
     return up.layer.mainTargets(this.mode)
   }
 
-  /***
+  /*-
   Synchronizes this layer with the rest of the page.
 
   For instance, a popup overlay will re-calculate its position arounds its anchoring element.
@@ -126,7 +126,7 @@ up.Layer = class Layer extends up.Record {
     // no-op so users can blindly sync without knowing the current mode
   }
 
-  /***
+  /*-
   [Closes this overlay](/closing-overlays) with an accepting intent,
   e.g. when a change was confirmed or when a value was selected.
 
@@ -165,7 +165,7 @@ up.Layer = class Layer extends up.Record {
     throw up.error.notImplemented()
   }
 
-  /***
+  /*-
   [Closes this overlay](/closing-overlays) *without* an accepting intent,
   e.g. when a "Cancel" button was clicked.
 
@@ -189,7 +189,7 @@ up.Layer = class Layer extends up.Record {
     throw up.error.notImplemented()
   }
 
-  /***
+  /*-
   [Dismisses](/up.Layer.prototype.dismiss) all descendant overlays,
   making this layer the [frontmost layer](/up.layer.front) in the [layer stack](/up.layer.stack).
 
@@ -208,7 +208,7 @@ up.Layer = class Layer extends up.Record {
     return u.evalOption(option, this)
   }
 
-  /***
+  /*-
   Returns whether this layer is the [current layer](/up.layer.current).
 
   @function up.Layer#isCurrent
@@ -219,7 +219,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.isCurrent(this)
   }
 
-  /***
+  /*-
   Returns whether this layer is the [frontmost layer](/up.layer.front).
 
   @function up.Layer#isFront
@@ -230,7 +230,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.isFront(this)
   }
 
-  /***
+  /*-
   Returns whether this layer is the [root layer](/up.layer.root).
 
   @function up.Layer#isRoot
@@ -241,7 +241,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.isRoot(this)
   }
 
-  /***
+  /*-
   Returns whether this layer is *not* the [root layer](/up.layer.root).
 
   @function up.Layer#isOverlay
@@ -252,7 +252,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.isOverlay(this)
   }
 
-  /***
+  /*-
   Returns whether this layer is still part of the [layer stack](/up.layer.stack).
 
   A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
@@ -267,7 +267,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.isOpen(this)
   }
 
-  /***
+  /*-
   Returns whether this layer is no longer part of the [layer stack](/up.layer.stack).
 
   A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
@@ -282,7 +282,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.isClosed(this)
   }
 
-  /***
+  /*-
   Returns this layer's parent layer.
 
   The parent layer is the layer that opened this layer. It is visually in the background of this layer.
@@ -297,7 +297,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.parentOf(this)
   }
 
-  /***
+  /*-
   Returns this layer's child layer.
 
   The child layer is the layer that was opened on top of this layer. It visually overlays this layer.
@@ -315,7 +315,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.childOf(this)
   }
 
-  /***
+  /*-
   Returns an array of this layer's ancestor layers.
 
   The array elements are ordered by distance to this layer.
@@ -330,7 +330,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.ancestorsOf(this)
   }
 
-  /***
+  /*-
   Returns an array of this layer's descendant layers, with the closest descendants listed first.
 
   Descendant layers are all layers that visually overlay this layer.
@@ -347,7 +347,7 @@ up.Layer = class Layer extends up.Record {
     return this.stack.descendantsOf(this)
   }
 
-  /***
+  /*-
   Returns the zero-based position of this layer in the [layer stack](/up.layer.stack).
 
   The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
@@ -376,7 +376,7 @@ up.Layer = class Layer extends up.Record {
     throw up.error.notImplemented()
   }
 
-  /***
+  /*-
   Returns whether the given `element` is contained by this layer.
 
   Note that this will always return `false` for elements in [descendant](/up.Layer.prototype.descendants) overlays,
@@ -393,7 +393,7 @@ up.Layer = class Layer extends up.Record {
     return e.closest(element, up.layer.anySelector()) === this.element
   }
 
-  /***
+  /*-
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events) that originated
   on an element [contained](/up.Layer.prototype.contains) by this layer.
 
@@ -474,7 +474,7 @@ up.Layer = class Layer extends up.Record {
     return this.buildEventListenerGroup(args).bind()
   }
 
-  /***
+  /*-
   Unbinds an event listener previously bound with `up.Layer#on()`.
 
   @function up.Layer#off
@@ -515,7 +515,7 @@ up.Layer = class Layer extends up.Record {
     return up.EventEmitter.fromEmitArgs(args, { layer: this })
   }
 
-  /***
+  /*-
   [Emits](/up.emit) an event on [this layer's element](/up.Layer.prototype.element).
 
   The value of [up.layer.current](/up.layer.current) will be set to the this layer
@@ -577,7 +577,7 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  /***
+  /*-
   Temporarily changes the [current layer](/up.layer.current) while the given
   function is running.
 
@@ -615,7 +615,7 @@ up.Layer = class Layer extends up.Record {
     return this.isHistoryVisible() && this.isFront() && (up.history.config.enabled || this.isRoot())
   }
 
-  /***
+  /*-
   This layer's window title.
 
   If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.history),
@@ -650,7 +650,7 @@ up.Layer = class Layer extends up.Record {
     }
   }
 
-  /***
+  /*-
   This layer's location URL.
 
   If the layer has [no visible history](/up.Layer.prototype.history), this property
@@ -700,7 +700,7 @@ up.Layer = class Layer extends up.Record {
     throw up.error.notImplemented()
   }
 
-  /***
+  /*-
   Creates an element with the given `selector` and appends it to this layer's
   [outmost element](/up.Layer.prototype.element).
 

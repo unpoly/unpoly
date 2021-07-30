@@ -12,7 +12,7 @@ up.MotionController = class MotionController {
     this.clusterCount = 0
   }
 
-  /***
+  /*-
   Finishes all animations in the given elements' ancestors and
   descendants, then calls the given function.
 
@@ -63,7 +63,7 @@ up.MotionController = class MotionController {
     }
   }
 
-  /***
+  /*-
   Finishes all animations in the given elements' ancestors and
   descendants, then calls `motion.start()`.
 
@@ -84,7 +84,7 @@ up.MotionController = class MotionController {
     return promise
   }
 
-  /***
+  /*-
   @function finish
   @param {List<Element>} [elements]
     If no element is given, finishes all animations in the documnet.

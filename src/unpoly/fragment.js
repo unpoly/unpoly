@@ -3,7 +3,7 @@ require('./fragment.sass')
 const u = up.util
 const e = up.element
 
-/***
+/*-
 Fragment API
 ===========
 
@@ -36,7 +36,7 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 */
 up.fragment = (function() {
 
-  /***
+  /*-
    Configures defaults for fragment updates.
 
    @property up.fragment.config
@@ -139,7 +139,7 @@ up.fragment = (function() {
     config.reset()
   }
 
-  /***
+  /*-
    Returns the URL the given element was retrieved from.
 
    If the given element was never directly updated, but part of a larger fragment update,
@@ -172,7 +172,7 @@ up.fragment = (function() {
     return e.closestAttr(element, 'up-source')
   }
 
-  /***
+  /*-
    Returns a timestamp for the last modification of the content in the given element.
 
    @function up.fragment.time
@@ -184,7 +184,7 @@ up.fragment = (function() {
     return e.closestAttr(element, 'up-time') || '0'
   }
 
-  /***
+  /*-
    Sets the time when the fragment's underlying data was last changed.
 
    This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
@@ -252,7 +252,7 @@ up.fragment = (function() {
    @experimental
    */
 
-  /***
+  /*-
    Sets this element's source URL for [reloading](/up.reload) and [polling](/up-poll)
 
    When an element is reloaded, Unpoly will make a request from the URL
@@ -278,7 +278,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    Replaces elements on the current page with matching elements from a server response or HTML string.
 
    The current and new elements must both match the same CSS selector.
@@ -639,7 +639,7 @@ up.fragment = (function() {
     return new up.Change.FromContent(options).execute()
   }
 
-  /***
+  /*-
    [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
 
    `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
@@ -669,7 +669,7 @@ up.fragment = (function() {
     return render({...options, navigate: true})
   })
 
-  /***
+  /*-
    This event is [emitted](/up.emit) when the server responds with the HTML, before
    the HTML is used to [change a fragment](/up.render).
 
@@ -707,7 +707,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    Elements with an `up-keep` attribute will be persisted during
    [fragment updates](/up.fragment).
 
@@ -768,7 +768,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    This event is [emitted](/up.emit) before an existing element is [kept](/up-keep) during
    a page update.
 
@@ -789,7 +789,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
    during a page update.
 
@@ -807,7 +807,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    Compiles a page fragment that has been inserted into the DOM
    by external code.
 
@@ -855,7 +855,7 @@ up.fragment = (function() {
     return element
   }
 
-  /***
+  /*-
    When any page fragment has been [inserted or updated](/up.replace),
    this event is [emitted](/up.emit) on the fragment.
 
@@ -914,7 +914,7 @@ up.fragment = (function() {
 
   const isNotDestroying = u.negate(isDestroying)
 
-  /***
+  /*-
    Returns the first fragment matching the given selector.
 
    This function differs from `document.querySelector()` and `up.element.get()`:
@@ -1061,7 +1061,7 @@ up.fragment = (function() {
 
   const CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
 
-  /***
+  /*-
    Returns all elements matching the given selector, but
    ignores elements that are being [destroyed](/up.destroy) or that are being
    removed by a [transition](/up.morph).
@@ -1134,7 +1134,7 @@ up.fragment = (function() {
     return selector.descendants(root || document)
   }
 
-  /***
+  /*-
    Your target selectors may use this pseudo-selector
    to replace an element with an descendant matching the given selector.
 
@@ -1165,7 +1165,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    Returns a list of the given parent's descendants matching the given selector.
    The list will also include the parent element if it matches the selector itself.
 
@@ -1189,7 +1189,7 @@ up.fragment = (function() {
     return getSubtree(element, selector).length > 0
   }
 
-  /***
+  /*-
    Returns the first element that matches the selector by testing the element itself
    and traversing up through ancestors in element's layers.
 
@@ -1213,7 +1213,7 @@ up.fragment = (function() {
     return selector.closest(element)
   }
 
-  /***
+  /*-
    Destroys the given element or selector.
 
    All [`up.compiler()`](/up.compiler) destructors, if any, are called.
@@ -1270,7 +1270,7 @@ up.fragment = (function() {
     return options
   }
 
-  /***
+  /*-
    Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
    or while they are being removed by a [transition](/up.morph).
 
@@ -1293,7 +1293,7 @@ up.fragment = (function() {
     element.setAttribute('aria-hidden', 'true')
   }
 
-  /***
+  /*-
    This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
 
    If the destruction is animated, this event is emitted after the animation has ended.
@@ -1310,7 +1310,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    Replaces the given element with a fresh copy fetched from the server.
 
    By default, reloading is not considered a [user navigation](/navigation) and e.g. will not update
@@ -1358,7 +1358,7 @@ up.fragment = (function() {
     return render(options)
   }
 
-  /***
+  /*-
    Fetches this given URL with JavaScript and [replaces](/up.replace) the
    [current layer](/up.layer.current)'s [main element](/up.fragment.config#config.mainTargets)
    with a matching fragment from the server response.
@@ -1391,7 +1391,7 @@ up.fragment = (function() {
     }
   }
 
-  /***
+  /*-
    Returns a CSS selector that matches the given element as good as possible.
 
    To build the selector, the following element properties are used in decreasing
@@ -1444,7 +1444,7 @@ up.fragment = (function() {
   }
 
 
-  /***
+  /*-
    Sets an unique identifier for this element.
 
    This identifier is used by `up.fragment.toSelector()`
@@ -1576,7 +1576,7 @@ up.fragment = (function() {
     }
   }
 
-  /***
+  /*-
    A pseudo-selector that matches the layer's main target.
 
    Main targets are default render targets.
@@ -1601,7 +1601,7 @@ up.fragment = (function() {
    @experimental
    */
 
-  /***
+  /*-
    Updates this element when no other render target is given.
 
    \#\#\# Example
@@ -1681,7 +1681,7 @@ up.fragment = (function() {
    @stable
    */
 
-  /***
+  /*-
    To make a server request without changing a fragment, use the `:none` selector.
 
    \#\#\# Example
@@ -1694,7 +1694,7 @@ up.fragment = (function() {
    @experimental
    */
 
-  /***
+  /*-
    Your target selectors may use this pseudo-selector
    to reference the element that triggered the change.
 
@@ -1717,7 +1717,7 @@ up.fragment = (function() {
    @experimental
    */
 
-  /***
+  /*-
    Your target selectors may use this pseudo-selector
    to replace the layer's topmost swappable element.
 
@@ -1740,7 +1740,7 @@ up.fragment = (function() {
    @experimental
    */
 
-  /***
+  /*-
    Returns whether the given element matches the given CSS selector.
 
    Other than `up.element.matches()` this function supports non-standard selectors
@@ -1813,7 +1813,7 @@ up.navigate = up.fragment.navigate
 up.hello = up.fragment.hello
 up.visit = up.fragment.visit
 
-/***
+/*-
 Returns the current [context](/context).
 
 This is aliased as `up.layer.context`.

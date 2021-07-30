@@ -1,4 +1,4 @@
-/***
+/*-
 Utility functions
 =================
 
@@ -13,7 +13,7 @@ to not include another library in your asset bundle.
 */
 up.util = (function() {
 
-  /***
+  /*-
   A function that does nothing.
 
   @function up.util.noop
@@ -22,7 +22,7 @@ up.util = (function() {
   function noop() {
   }
 
-  /***
+  /*-
   A function that returns a resolved promise.
 
   @function up.util.asyncNoop
@@ -32,7 +32,7 @@ up.util = (function() {
     return Promise.resolve()
   }
 
-  /***
+  /*-
   Ensures that the given function can only be called a single time.
   Subsequent calls will return the return value of the first call.
 
@@ -54,7 +54,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Returns if the given port is the default port for the given protocol.
 
   @function up.util.isStandardPort
@@ -72,7 +72,7 @@ up.util = (function() {
     hash: false
   }
 
-  /***
+  /*-
   Normalizes the given URL or path.
 
   @function up.util.normalizeURL
@@ -155,7 +155,7 @@ up.util = (function() {
     return (APP_HOSTNAME !== parts.hostname) || (APP_PROTOCOL !== parts.protocol)
   }
 
-  /***
+  /*-
   Parses the given URL into components such as hostname and path.
 
   If the given URL is not fully qualified, it is assumed to be relative
@@ -208,7 +208,7 @@ up.util = (function() {
     return link
   }
 
-  /***
+  /*-
   @function up.util.normalizeMethod
   @internal
   */
@@ -216,7 +216,7 @@ up.util = (function() {
     return method ? method.toUpperCase() : 'GET'
   }
 
-  /***
+  /*-
   @function up.util.methodAllowsPayload
   @internal
   */
@@ -234,7 +234,7 @@ up.util = (function() {
     return target
   }
 
-  /***
+  /*-
   Merge the own properties of one or more `sources` into the `target` object.
 
   @function up.util.assign
@@ -249,7 +249,7 @@ up.util = (function() {
     return Object.keys(object).map((key) => object[key])
   }
 
-  /***
+  /*-
   Returns an array of values of the given object.
 
   @function up.util.values
@@ -267,7 +267,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Translate all items in an array to new array of items.
 
   @function up.util.map
@@ -292,7 +292,7 @@ up.util = (function() {
     return mapped
   }
 
-  /***
+  /*-
   @function up.util.mapObject
   @internal
   */
@@ -304,7 +304,7 @@ up.util = (function() {
     return map(array, pairer).reduce(merger, {})
   }
 
-  /***
+  /*-
   Calls the given function for each element (and, optional, index)
   of the given array.
 
@@ -328,7 +328,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given argument is `null`.
 
   @function up.util.isNull
@@ -340,7 +340,7 @@ up.util = (function() {
     return object === null
   }
 
-  /***
+  /*-
   Returns whether the given argument is `undefined`.
 
   @function up.util.isUndefined
@@ -353,7 +353,7 @@ up.util = (function() {
   }
   
 
-  /***
+  /*-
   Returns whether the given argument is not `undefined`.
 
   @function up.util.isDefined
@@ -363,7 +363,7 @@ up.util = (function() {
   */
   const isDefined = negate(isUndefined)
 
-  /***
+  /*-
   Returns whether the given argument is either `undefined` or `null`.
 
   Note that empty strings or zero are *not* considered to be "missing".
@@ -379,7 +379,7 @@ up.util = (function() {
     return isUndefined(object) || isNull(object)
   }
 
-  /***
+  /*-
   Returns whether the given argument is neither `undefined` nor `null`.
 
   Note that empty strings or zero *are* considered to be "given".
@@ -396,7 +396,7 @@ up.util = (function() {
   // isNan = (object) ->
   //   isNumber(value) && value != +value
 
-  /***
+  /*-
   Return whether the given argument is considered to be blank.
 
   By default, this function returns `true` for:
@@ -435,7 +435,7 @@ up.util = (function() {
     return false
   }
 
-  /***
+  /*-
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.isBlank()` protocol.
 
@@ -476,7 +476,7 @@ up.util = (function() {
   */
   isBlank.key = 'up.util.isBlank'
 
-  /***
+  /*-
   Returns the given argument if the argument is [present](/up.util.isPresent),
   otherwise returns `undefined`.
 
@@ -493,7 +493,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given argument is not [blank](/up.util.isBlank).
 
   @function up.util.isPresent
@@ -503,7 +503,7 @@ up.util = (function() {
   */
   const isPresent = negate(isBlank)
 
-  /***
+  /*-
   Returns whether the given argument is a function.
 
   @function up.util.isFunction
@@ -515,7 +515,7 @@ up.util = (function() {
     return typeof(object) === 'function'
   }
 
-  /***
+  /*-
   Returns whether the given argument is a string.
 
   @function up.util.isString
@@ -527,7 +527,7 @@ up.util = (function() {
     return (typeof(object) === 'string') || object instanceof String
   }
 
-  /***
+  /*-
   Returns whether the given argument is a boolean value.
 
   @function up.util.isBoolean
@@ -539,7 +539,7 @@ up.util = (function() {
     return (typeof(object) === 'boolean') || object instanceof Boolean
   }
 
-  /***
+  /*-
   Returns whether the given argument is a number.
 
   Note that this will check the argument's *type*.
@@ -554,7 +554,7 @@ up.util = (function() {
     return (typeof(object) === 'number') || object instanceof Number
   }
 
-  /***
+  /*-
   Returns whether the given argument is an options hash,
 
   Differently from [`up.util.isObject()`], this returns false for
@@ -569,7 +569,7 @@ up.util = (function() {
     return (typeof(object) === 'object') && !isNull(object) && (isUndefined(object.constructor) || (object.constructor === Object))
   }
 
-  /***
+  /*-
   Returns whether the given argument is an object.
 
   This also returns `true` for functions, which may behave like objects in JavaScript.
@@ -584,7 +584,7 @@ up.util = (function() {
     return ((typeOfResult === 'object') && !isNull(object)) || (typeOfResult === 'function')
   }
 
-  /***
+  /*-
   Returns whether the given argument is a [DOM element](https://developer.mozilla.org/de/docs/Web/API/Element).
 
   @function up.util.isElement
@@ -596,7 +596,7 @@ up.util = (function() {
     return object instanceof Element
   }
 
-  /***
+  /*-
   Returns whether the given argument is a [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp).
 
   @function up.util.isRegExp
@@ -608,7 +608,7 @@ up.util = (function() {
     return object instanceof RegExp
   }
 
-  /***
+  /*-
   Returns whether the given argument is a [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
 
   @function up.util.isJQuery
@@ -620,7 +620,7 @@ up.util = (function() {
     return up.browser.canJQuery() && object instanceof jQuery
   }
 
-  /***
+  /*-
   @function up.util.isElementish
   @param object
   @return {boolean}
@@ -630,7 +630,7 @@ up.util = (function() {
     return !!(object && (object.addEventListener || object[0]?.addEventListener))
   }
 
-  /***
+  /*-
   Returns whether the given argument is an object with a `then` method.
 
   @function up.util.isPromise
@@ -642,7 +642,7 @@ up.util = (function() {
     return isObject(object) && isFunction(object.then)
   }
 
-  /***
+  /*-
   Returns whether the given argument is an array.
 
   @function up.util.isArray
@@ -653,7 +653,7 @@ up.util = (function() {
   // https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
   const { isArray } = Array
 
-  /***
+  /*-
   Returns whether the given argument is a `FormData` instance.
 
   Always returns `false` in browsers that don't support `FormData`.
@@ -667,7 +667,7 @@ up.util = (function() {
     return object instanceof FormData
   }
 
-  /***
+  /*-
   Converts the given [array-like value](/up.util.isList) into an array.
 
   If the given value is already an array, it is returned unchanged.
@@ -681,7 +681,7 @@ up.util = (function() {
     return isArray(value) ? value : copyArrayLike(value)
   }
 
-  /***
+  /*-
   Returns whether the given argument is an array-like value.
 
   Return true for `Array`, a
@@ -704,7 +704,7 @@ up.util = (function() {
       isHTMLCollection(value)
   }
 
-  /***
+  /*-
   Returns whether the given value is a [`NodeList`](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 
   `NodeLists` are array-like objects returned by [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
@@ -722,7 +722,7 @@ up.util = (function() {
     return value instanceof HTMLCollection
   }
 
-  /***
+  /*-
   Returns whether the given value is an [arguments object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/arguments).
 
   @function up.util.isArguments
@@ -740,7 +740,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Returns the given value if it is [array-like](/up.util.isList), otherwise
   returns an array with the given value as its only element.
 
@@ -766,7 +766,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Returns a shallow copy of the given value.
 
   \#\#\# Copying protocol
@@ -799,7 +799,7 @@ up.util = (function() {
     return Array.prototype.slice.call(arrayLike)
   }
 
-  /***
+  /*-
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.copy()` protocol.
 
@@ -857,7 +857,7 @@ up.util = (function() {
 //  deepCopy = (object) ->
 //    copy(object, true)
 
-  /***
+  /*-
   Creates a new object by merging together the properties from the given objects.
 
   @function up.util.merge
@@ -869,7 +869,7 @@ up.util = (function() {
     return assign({}, ...sources)
   }
 
-  /***
+  /*-
   @function up.util.mergeDefined
   @param {Array<Object>} sources...
   @return Object
@@ -890,7 +890,7 @@ up.util = (function() {
     return result
   }
 
-  /***
+  /*-
   Creates an options hash from the given argument and some defaults.
 
   The semantics of this function are confusing.
@@ -921,7 +921,7 @@ up.util = (function() {
     return options
   }
 
-  /***
+  /*-
   Passes each element in the given [array-like value](/up.util.isList) to the given function.
   Returns the first element for which the function returns a truthy value.
 
@@ -945,7 +945,7 @@ up.util = (function() {
     return match
   }
 
-  /***
+  /*-
   Returns whether the given function returns a truthy value
   for any element in the given [array-like value](/up.util.isList).
 
@@ -961,7 +961,7 @@ up.util = (function() {
     return !!findResult(list, tester)
   }
 
-  /***
+  /*-
   Consecutively calls the given function which each element
   in the given array. Returns the first truthy return value.
 
@@ -986,7 +986,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given function returns a truthy value
   for all elements in the given [array-like value](/up.util.isList).
 
@@ -1010,7 +1010,7 @@ up.util = (function() {
     return match
   }
 
-  /***
+  /*-
   Returns all elements from the given array that are
   neither `null` or `undefined`.
 
@@ -1027,7 +1027,7 @@ up.util = (function() {
     return pickBy(object, isGiven)
   }
 
-  /***
+  /*-
   Returns the given array without duplicates.
 
   @function up.util.uniq
@@ -1040,7 +1040,7 @@ up.util = (function() {
     return setToArray(arrayToSet(array))
   }
 
-  /***
+  /*-
   This function is like [`uniq`](/up.util.uniq), accept that
   the given function is invoked for each element to generate the value
   for which uniquness is computed.
@@ -1066,7 +1066,7 @@ up.util = (function() {
     })
   }
 
-  /***
+  /*-
   @function up.util.setToArray
   @internal
   */
@@ -1076,7 +1076,7 @@ up.util = (function() {
     return array
   }
 
-  /***
+  /*-
   @function up.util.arrayToSet
   @internal
   */
@@ -1086,7 +1086,7 @@ up.util = (function() {
     return set
   }
 
-  /***
+  /*-
   Returns all elements from the given [array-like value](/up.util.isList) that return
   a truthy value when passed to the given function.
 
@@ -1107,7 +1107,7 @@ up.util = (function() {
     return matches
   }
 
-  /***
+  /*-
   Returns all elements from the given [array-like value](/up.util.isList) that do not return
   a truthy value when passed to the given function.
 
@@ -1122,7 +1122,7 @@ up.util = (function() {
     return filterList(list, tester)
   }
 
-  /***
+  /*-
   Returns the intersection of the given two arrays.
 
   Implementation is not optimized. Don't use it for large arrays.
@@ -1134,7 +1134,7 @@ up.util = (function() {
     return filterList(array1, element => contains(array2, element))
   }
 
-  /***
+  /*-
   Waits for the given number of milliseconds, the runs the given callback.
 
   Instead of `up.util.timer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
@@ -1152,7 +1152,7 @@ up.util = (function() {
     return setTimeout(callback, millis)
   }
 
-  /***
+  /*-
   Pushes the given function to the [JavaScript task queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) (also "macrotask queue").
 
   Equivalent to calling `setTimeout(fn, 0)`.
@@ -1167,7 +1167,7 @@ up.util = (function() {
     return setTimeout(task)
   }
 
-  /***
+  /*-
   Pushes the given function to the [JavaScript microtask queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
 
   @function up.util.microtask
@@ -1188,7 +1188,7 @@ up.util = (function() {
     return () => aborted = true
   }
 
-  /***
+  /*-
   Returns the last element of the given array.
 
   @function up.util.last
@@ -1200,7 +1200,7 @@ up.util = (function() {
     return array[array.length - 1]
   }
 
-  /***
+  /*-
   Returns whether the given value contains another value.
 
   If `value` is a string, this returns whether `subValue` is a sub-string of `value`.
@@ -1216,7 +1216,7 @@ up.util = (function() {
     return value.indexOf(subValue) >= 0
   }
 
-  /***
+  /*-
   Returns whether `object`'s entries are a superset
   of `subObject`'s entries.
 
@@ -1230,7 +1230,7 @@ up.util = (function() {
     return isEqual(subObject, reducedValue)
   }
 
-  /***
+  /*-
   Returns a copy of the given object that only contains
   the given keys.
 
@@ -1250,7 +1250,7 @@ up.util = (function() {
     return filtered
   }
 
-  /***
+  /*-
   Returns a copy of the given object that only contains
   properties that pass the given tester function.
 
@@ -1275,7 +1275,7 @@ up.util = (function() {
     return filtered
   }
 
-  /***
+  /*-
   Returns a copy of the given object that contains all except
   the given keys.
 
@@ -1288,7 +1288,7 @@ up.util = (function() {
     return pickBy(object, (_value, key) => !contains(keys, key))
   }
 
-  /***
+  /*-
   Returns a promise that will never be resolved.
 
   @function up.util.unresolvablePromise
@@ -1298,7 +1298,7 @@ up.util = (function() {
     return new Promise(noop)
   }
 
-  /***
+  /*-
   Removes the given element from the given array.
 
   This changes the given array.
@@ -1320,7 +1320,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   If the given `value` is a function, calls the function with the given `args`.
   Otherwise it just returns `value`.
 
@@ -1351,7 +1351,7 @@ up.util = (function() {
     "'": '&#x27;'
   }
 
-  /***
+  /*-
   Escapes the given string of HTML by replacing control chars with their HTML entities.
 
   @function up.util.escapeHTML
@@ -1363,7 +1363,7 @@ up.util = (function() {
     return string.replace(/[&<>"']/g, char => ESCAPE_HTML_ENTITY_MAP[char])
   }
 
-  /***
+  /*-
   @function up.util.escapeRegExp
   @internal
   */
@@ -1372,7 +1372,7 @@ up.util = (function() {
     return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
   }
 
-  /***
+  /*-
   Deletes the property with the given key from the given object
   and returns its value.
 
@@ -1470,7 +1470,7 @@ up.util = (function() {
 //    preview.promise = deferred.promise()
 //    preview
 
-  /***
+  /*-
   @function up.util.sequence
   @param {Array<Function()>} functions
   @return {Function()}
@@ -1511,7 +1511,7 @@ up.util = (function() {
 //    else
 //      'right'
 
-  /***
+  /*-
   Flattens the given `array` a single depth level.
 
   \#\#\# Example
@@ -1545,7 +1545,7 @@ up.util = (function() {
 //      result[key] = value
 //    result
 
-  /***
+  /*-
   Maps each element using a mapping function,
   then [flattens](/up.util.flatten) the result into a new array.
 
@@ -1559,7 +1559,7 @@ up.util = (function() {
     return flatten(map(array, block))
   }
 
-  /***
+  /*-
   Returns whether the given value is truthy.
 
   @function up.util.isTruthy
@@ -1569,7 +1569,7 @@ up.util = (function() {
     return !!object
   }
 
-  /***
+  /*-
   Sets the given callback as both fulfillment and rejection handler for the given promise.
 
   [Unlike `promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
@@ -1599,7 +1599,7 @@ up.util = (function() {
 //    # Return the original promise and *not* finally's return value.
 //    return promise
 
-  /***
+  /*-
   Registers an empty rejection handler with the given promise.
   This prevents browsers from printing "Uncaught (in promise)" to the error
   console when the promise is rejected.
@@ -1623,7 +1623,7 @@ up.util = (function() {
     return promise?.catch(noop)
   }
 
-  /***
+  /*-
   @function up.util.newDeferred
   @internal
   */
@@ -1676,7 +1676,7 @@ up.util = (function() {
     return Object.prototype.hasOwnProperty(k)
   }
 
-  /***
+  /*-
   Returns whether the two arguments are equal by value.
 
   \#\#\# Comparison protocol
@@ -1717,7 +1717,7 @@ up.util = (function() {
     }
   }
 
-  /***
+  /*-
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.isEqual()` protocol.
 
@@ -1809,7 +1809,7 @@ up.util = (function() {
     return nextUid++
   }
 
-  /***
+  /*-
   Returns a copy of the given list, in reversed order.
 
   @function up.util.reverse
@@ -1960,7 +1960,7 @@ up.util = (function() {
     return Math.floor(Date.now() * 0.001)
   }
 
-  /***
+  /*-
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
 
   @function up.util.sprintf
@@ -1970,7 +1970,7 @@ up.util = (function() {
     return sprintfWithFormattedArgs(identity, message, ...args)
   }
 
-  /***
+  /*-
   @function up.util.sprintfWithFormattedArgs
   @internal
   */

@@ -1,8 +1,8 @@
-/***
+/*-
 @module up.element
 */
 
-/***
+/*-
 Returns the first descendant element matching the given selector.
 
 @function up.element.first

@@ -1,4 +1,4 @@
-/***
+/*-
 Events
 ======
 
@@ -40,7 +40,7 @@ up.event = (function() {
     }
   }
 
-  /***
+  /*-
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
   on `document` or a given element.
 
@@ -196,7 +196,7 @@ up.event = (function() {
     return buildListenerGroup(args).bind()
   }
 
-  /***
+  /*-
   Listens to an event on `document` or a given element.
   The event handler is called with the event target as a
   [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
@@ -243,7 +243,7 @@ up.event = (function() {
     return buildListenerGroup(args, { jQuery: true }).bind()
   }
 
-  /***
+  /*-
   Unbinds an event listener previously bound with `up.on()`.
 
   \#\#\# Example
@@ -280,7 +280,7 @@ up.event = (function() {
     return up.EventEmitter.fromEmitArgs(args)
   }
 
-  /***
+  /*-
   Emits a event with the given name and properties.
 
   The event will be triggered as an event on `document` or on the given element.
@@ -329,7 +329,7 @@ up.event = (function() {
     return buildEmitter(args).emit()
   }
 
-  /***
+  /*-
   Builds an event with the given type and properties.
 
   The returned event is not [emitted](/up.emit).
@@ -381,7 +381,7 @@ up.event = (function() {
     return event
   }
 
-  /***
+  /*-
   [Emits](/up.emit) the given event and throws an `AbortError` if it was prevented.
 
   @function up.event.assertEmitted
@@ -395,7 +395,7 @@ up.event = (function() {
     return buildEmitter(args).assertEmitted()
   }
 
-  /***
+  /*-
   Registers an event listener to be called when the user
   presses the `Escape` key.
 
@@ -420,7 +420,7 @@ up.event = (function() {
     })
   }
 
-  /***
+  /*-
   Returns whether the given keyboard event involved the ESC key.
 
   @function up.util.wasEscapePressed
@@ -433,7 +433,7 @@ up.event = (function() {
     return (key === 'Escape') || (key === 'Esc')
   }
 
-  /***
+  /*-
   Prevents the event from being processed further.
 
   In detail:
@@ -457,7 +457,7 @@ up.event = (function() {
     event.preventDefault()
   }
 
-  /***
+  /*-
   Runs the given callback when the the initial HTML document has been completely loaded.
 
   The callback is guaranteed to see the fully parsed DOM tree.
@@ -483,7 +483,7 @@ up.event = (function() {
 
   const keyModifiers = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
-  /***
+  /*-
   @function up.event.isUnmodified
   @internal
   */
@@ -513,7 +513,7 @@ up.event = (function() {
     return newEvent
   }
 
-  /***
+  /*-
   Emits the given event when this link is clicked.
 
   When the emitted event's default' is prevented, the original `click` event's default is also prevented.

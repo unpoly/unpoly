@@ -1,6 +1,6 @@
 require('./link.sass')
 
-/***
+/*-
 Linking to fragments
 ====================
 
@@ -99,7 +99,7 @@ up.link = (function() {
     return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attributeSelector => elementSelector + attributeSelector))
   }
 
-  /***
+  /*-
   Configures defaults for link handling.
 
   In particular you can configure Unpoly to handle [all links on the page](/handling-everything)
@@ -222,7 +222,7 @@ up.link = (function() {
     return config.clickableSelectors.join(',')
   }
 
-  /***
+  /*-
   Returns whether the link was explicitly marked up as not followable,
   e.g. through `[up-follow=false]`.
 
@@ -266,7 +266,7 @@ up.link = (function() {
     linkPreloader.reset()
   }
 
-  /***
+  /*-
   Follows the given link with JavaScript and updates a fragment with the server response.
 
   By default the layer's [main element](/up-main)
@@ -330,7 +330,7 @@ up.link = (function() {
     return options
   }
 
-  /***
+  /*-
   Parses the [render](/up.render) options that would be used to
   [`follow`](/up.follow) the given link, but does not render.
 
@@ -431,7 +431,7 @@ up.link = (function() {
     return options
   }
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
 
   The event is emitted on the `<a>` element that is being followed.
@@ -463,7 +463,7 @@ up.link = (function() {
   @stable
   */
 
-  /***
+  /*-
   Preloads the given link.
 
   When the link is clicked later, the response will already be [cached](/up.request#caching),
@@ -505,7 +505,7 @@ up.link = (function() {
     return setting
   }
 
-  /***
+  /*-
   This event is [emitted](/up.emit) before a link is [preloaded](/a-up-preload).
 
   @event up:link:preload
@@ -516,7 +516,7 @@ up.link = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns the HTTP method that should be used when following the given link.
 
   Looks at the link's `up-method` or `data-method` attribute.
@@ -543,7 +543,7 @@ up.link = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given link will be [followed](/up.follow) by Unpoly
   instead of making a full page load.
 
@@ -571,7 +571,7 @@ up.link = (function() {
     return e.matches(link, fullFollowSelector()) && !isFollowDisabled(link)
   }
 
-  /***
+  /*-
   Makes sure that the given link will be [followed](/up.follow)
   by Unpoly instead of making a full page load.
 
@@ -606,7 +606,7 @@ up.link = (function() {
     })
   }
 
-  /***
+  /*-
   Enables keyboard interaction for elements that should behave like links or buttons.
 
   The element will be focusable and screen readers will announce it as a link.
@@ -639,7 +639,7 @@ up.link = (function() {
     return element && !isInstantDisabled(element)
   }
 
-  /***
+  /*-
   Provide an `up:click` event that improves on standard click
   in several ways:
 
@@ -711,7 +711,7 @@ up.link = (function() {
     up.emit(originalEvent.target, newEvent, { log: false })
   }
 
-  /***
+  /*-
   A `click` event that honors the [`[up-instant]`](/a-up-instant) attribute.
 
   This event is generally emitted when an element is clicked. However, for elements
@@ -762,7 +762,7 @@ up.link = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `GET`.
 
@@ -776,7 +776,7 @@ up.link = (function() {
     return up.network.isSafeMethod(method)
   }
 
-  /***
+  /*-
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
 
   Following a link is considered [navigation](/navigation) by default.
@@ -1042,7 +1042,7 @@ up.link = (function() {
     }
   })
 
-  /***
+  /*-
   Follows this link on `mousedown` instead of `click`.
 
   This will save precious milliseconds that otherwise spent
@@ -1068,7 +1068,7 @@ up.link = (function() {
   @stable
   */
 
-  /***
+  /*-
   Add an `[up-expand]` attribute to any element to enlarge the click area of a
   descendant link.
 
@@ -1125,7 +1125,7 @@ up.link = (function() {
     }
   })
 
-  /***
+  /*-
   Preloads this link when the user hovers over it.
 
   When the link is clicked later the response will already be cached,

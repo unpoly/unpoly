@@ -1,12 +1,12 @@
 const e = up.element
 const u = up.util
 
-/***
+/*-
 @class up.Layer
 */
 up.Layer.Overlay = class Overlay extends up.Layer {
 
-  /***
+  /*-
   The link or form element that opened this overlay.
 
   @property up.Layer#origin
@@ -14,7 +14,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @stable
   */
 
-  /***
+  /*-
   The [size](/customizing-overlays#overlay-sizes) of this overlay.
 
   Returns a string like `'medium'` or `'large'`.
@@ -24,7 +24,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @stable
   */
 
-  /***
+  /*-
   The [position](/customizing-overlays#popup-position) of this popup overlay.
 
   Returns a string like `'top'` or `'left'`.
@@ -34,7 +34,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   @stable
   */
 
-  /***
+  /*-
   The [alignment](/customizing-overlays#popup-position) of this popup overlay.
 
   Returns a string like `'left'` or `'right'`.
@@ -293,7 +293,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     this.overlayFocus.teardown()
   }
 
-  /***
+  /*-
   Destroys the elements that make up this overlay.
 
   @function up.Layer.prototype.destroyElements

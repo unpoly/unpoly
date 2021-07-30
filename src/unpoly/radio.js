@@ -1,4 +1,4 @@
-/***
+/*-
 Passive updates
 ===============
 
@@ -14,7 +14,7 @@ up.radio = (function() {
   const u = up.util
   const e = up.element
 
-  /***
+  /*-
   Configures defaults for passive updates.
 
   @property up.radio.config
@@ -55,7 +55,7 @@ up.radio = (function() {
     config.reset()
   }
 
-  /***
+  /*-
   @function up.radio.hungrySelector
   @internal
   */
@@ -63,7 +63,7 @@ up.radio = (function() {
     return config.hungrySelectors.join(',')
   }
 
-  /***
+  /*-
   Elements with an `[up-hungry]` attribute are updated whenever the server
   sends a matching element, even if the element isn't targeted.
 
@@ -77,7 +77,7 @@ up.radio = (function() {
   @stable
   */
 
-  /***
+  /*-
   Starts [polling](/up-poll) the given element.
 
   @function up.radio.startPolling
@@ -132,7 +132,7 @@ up.radio = (function() {
     return destructor
   }
 
-  /***
+  /*-
   Stops [polling](/up-poll) the given element.
 
   @function up.radio.stopPolling
@@ -152,7 +152,7 @@ up.radio = (function() {
     return setting
   }
 
-  /***
+  /*-
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
 
   \#\#\# Example

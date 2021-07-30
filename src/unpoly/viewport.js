@@ -1,6 +1,6 @@
 require('./viewport.sass')
 
-/***
+/*-
 Scrolling viewports
 ===================
 
@@ -22,7 +22,7 @@ up.viewport = (function() {
   const e = up.element
   const f = up.fragment
 
-  /***
+  /*-
   Configures defaults for scrolling.
 
   @property up.viewport.config
@@ -91,7 +91,7 @@ up.viewport = (function() {
     scrollingController.reset()
   }
 
-  /***
+  /*-
   Scrolls the given viewport to the given Y-position.
 
   A "viewport" is an element that has scrollbars, e.g. `<body>` or
@@ -136,7 +136,7 @@ up.viewport = (function() {
     scrollingController.startMotion(viewport, motion, options)
   }
 
-  /***
+  /*-
   @function up.viewport.anchoredRight
   @internal
   */
@@ -145,7 +145,7 @@ up.viewport = (function() {
     return f.all(selector, { layer: 'root' })
   }
 
-  /***
+  /*-
   Scrolls the given element's viewport so the first rows of the
   element are visible for the user.
 
@@ -243,7 +243,7 @@ up.viewport = (function() {
     return scrollingController.startMotion(element, motion, options)
   }
 
-  /***
+  /*-
   Focuses the given element.
 
   Focusing an element will also [reveal](/up.reveal) it, unless `{ preventScroll: true }` is passed.
@@ -303,7 +303,7 @@ up.viewport = (function() {
     }
   }
 
-  /***
+  /*-
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
 
   Other than the default behavior found in browsers, `up.revealHash` works with
@@ -335,7 +335,7 @@ up.viewport = (function() {
     return [rootSelector(), ...config.viewportSelectors].join(',')
   }
 
-  /***
+  /*-
   Returns the scrolling container for the given element.
 
   Returns the [document's scrolling element](/up.viewport.root)
@@ -354,7 +354,7 @@ up.viewport = (function() {
     return e.closest(element, allSelector())
   }
 
-  /***
+  /*-
   Returns a list of all the viewports contained within the
   given selector or element.
 
@@ -372,7 +372,7 @@ up.viewport = (function() {
     return e.subtree(element, allSelector())
   }
 
-  /***
+  /*-
   Returns a list of all viewports that are either contained within
   the given element or that are ancestors of the given element.
 
@@ -390,7 +390,7 @@ up.viewport = (function() {
     return e.around(element, allSelector())
   }
 
-  /***
+  /*-
   Returns a list of all the viewports on the current layer.
 
   @function up.viewport.all
@@ -414,7 +414,7 @@ up.viewport = (function() {
     }
   }
 
-  /***
+  /*-
   Return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
 
@@ -440,7 +440,7 @@ up.viewport = (function() {
     return e.matches(element, rootSelector())
   }
 
-  /***
+  /*-
   Returns whether the root viewport is currently showing a vertical scrollbar.
 
   Note that this returns `false` if the root viewport scrolls vertically but the browser
@@ -458,7 +458,7 @@ up.viewport = (function() {
     return window.innerWidth > document.documentElement.offsetWidth
   }
 
-  /***
+  /*-
   Returns the element that controls the `overflow-y` behavior for the
   [document viewport](/up.viewport.root()).
 
@@ -473,7 +473,7 @@ up.viewport = (function() {
     return element || getRoot()
   }
 
-  /***
+  /*-
   Returns whether the given element was chosen as the overflowing
   element by the developer.
 
@@ -489,7 +489,7 @@ up.viewport = (function() {
     return overflowY === 'auto' || overflowY === 'scroll'
   }
 
-  /***
+  /*-
   Returns the width of a scrollbar.
 
   This only runs once per page load.
@@ -518,7 +518,7 @@ up.viewport = (function() {
     return up.fragment.toTarget(viewport)
   }
 
-  /***
+  /*-
   Returns a hash with scroll positions.
 
   Each key in the hash is a viewport selector. The corresponding
@@ -535,7 +535,7 @@ up.viewport = (function() {
     return u.mapObject(getAll(options), viewport => [scrollTopKey(viewport), viewport.scrollTop])
   }
 
-  /***
+  /*-
   @function up.viewport.fixedElements
   @internal
   */
@@ -544,7 +544,7 @@ up.viewport = (function() {
     return root.querySelectorAll(queryParts.join(','))
   }
 
-  /***
+  /*-
   Saves the top scroll positions of all viewports in the current layer.
 
   The scroll positions will be associated with the current URL.
@@ -579,7 +579,7 @@ up.viewport = (function() {
     return u.mapObject(viewports, viewport => [scrollTopKey(viewport), viewport.scrollTop])
   }
 
-  /***
+  /*-
   Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
   viewports configured in `up.viewport.config.viewportSelectors`.
 
@@ -694,7 +694,7 @@ up.viewport = (function() {
     }
   }
 
-  /***
+  /*-
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
@@ -747,7 +747,7 @@ up.viewport = (function() {
   @stable
   */
 
-  /***
+  /*-
   Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
@@ -767,7 +767,7 @@ up.viewport = (function() {
   @stable
   */
 
-  /***
+  /*-
   Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
@@ -788,7 +788,7 @@ up.viewport = (function() {
   */
 
 
-  /***
+  /*-
   Marks this element as being anchored to the right edge of the screen,
   typically fixed navigation bars.
 
@@ -823,7 +823,7 @@ up.viewport = (function() {
   @stable
   */
 
-  /***
+  /*-
   @function up.viewport.firstHashTarget
   @internal
   */
@@ -839,7 +839,7 @@ up.viewport = (function() {
     }
   }
 
-  /***
+  /*-
   Returns `'foo'` if the hash is `'#foo'`.
 
   @function pureHash

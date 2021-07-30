@@ -1,6 +1,6 @@
 const u = up.util
 
-/***
+/*-
 @module up.fragment
 */
 
@@ -11,7 +11,7 @@ up.migrate.renamedProperty(up.fragment.config, 'fallbacks', 'mainTargets')
 
 up.migrate.handleResponseDocOptions = docOptions => up.migrate.fixKey(docOptions, 'html', 'document')
 
-/***
+/*-
 Replaces elements on the current page with corresponding elements
 from a new page fetched from the server.
 
@@ -33,7 +33,7 @@ up.replace = function(target, url, options) {
   return up.navigate({ ...options, target, url })
 }
 
-/***
+/*-
 Updates a selector on the current page with the
 same selector from the given HTML string.
 
@@ -76,7 +76,7 @@ up.extract = function(target, document, options) {
   return up.navigate({ ...options, target, document })
 }
 
-/***
+/*-
 Returns the first element matching the given selector, but
 ignores elements that are being [destroyed](/up.destroy) or that are being
 removed by a [transition](/up.morph).

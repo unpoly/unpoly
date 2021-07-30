@@ -1,7 +1,7 @@
 const u = up.util
 const e = up.element
 
-/***
+/*-
 A normalized description of an [HTTP request](/up.request).
 
 You can queue a request using the `up.request()` method:
@@ -19,7 +19,7 @@ console.log(response.text)
 */
 up.Request = class Request extends up.Record {
 
-  /***
+  /*-
   The HTTP method for the request.
 
   @property up.Request#method
@@ -27,7 +27,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The URL for the request.
 
   @property up.Request#url
@@ -35,7 +35,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The [hash component](https://en.wikipedia.org/wiki/URI_fragment) of this request's URL.
 
   The `{ hash }` property is automatically extracted from the given URL:
@@ -51,7 +51,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   [Parameters](/up.Params) that should be sent as the request's payload.
 
   @property up.Request#params
@@ -59,7 +59,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The CSS selector targeted by this request.
 
   The selector will be sent as an `X-Up-Target` header.
@@ -69,7 +69,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The CSS selector targeted by this request in case the server responds
   with an [error code](/server-errors).
 
@@ -80,7 +80,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   An object of additional HTTP headers.
 
   Unpoly will by default send a number of custom request headers.
@@ -91,7 +91,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   A timeout in milliseconds.
 
   If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
@@ -102,7 +102,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   Whether to wrap non-standard HTTP methods in a POST request.
 
   If this is set, methods other than GET and POST will be converted to a `POST` request
@@ -115,7 +115,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The [context](/context) of the layer targeted by this request.
 
   The context object will be sent as an `X-Up-Context` header.
@@ -125,7 +125,7 @@ up.Request = class Request extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   The [context](/context) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
 
   The context object will be sent as an `X-Up-Fail-Context` header.
@@ -135,7 +135,7 @@ up.Request = class Request extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   The [layer](/up.layer) targeted by this request.
 
   Setting the `{ layer }` property will automatically derive `{ context }` and `{ mode }` properties.
@@ -147,7 +147,7 @@ up.Request = class Request extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   The [layer](/up.layer) targeted by this request in case the server responds with an [error code](/server-errors).
 
   Setting the `{ failLayer }` property will automatically derive `{ failContext }` and `{ failMode }` properties.
@@ -159,7 +159,7 @@ up.Request = class Request extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   The element that triggered the request.
 
   For example, when this request was triggered by a click on a link, the link
@@ -172,7 +172,7 @@ up.Request = class Request extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   The [mode](/up.Layer.prototype.mode) of the layer targeted by this request.
 
   The value will be sent as an `X-Up-Mode` header.
@@ -182,7 +182,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The [mode](/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
 
   The value will be sent as an `X-Up-Fail-Mode` header.
@@ -192,7 +192,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The format in which the [request params](/up.Request.prototype.params) will be encoded.
 
   @property up.Request#contentType
@@ -200,7 +200,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The payload that the request will encode into its body.
 
   By default Unpoly will build a payload from the given `{ params }` option.
@@ -210,7 +210,7 @@ up.Request = class Request extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   @property up.Request#preload
   @param {boolean} preload
   @experimental
@@ -252,7 +252,7 @@ up.Request = class Request extends up.Record {
     ]
   }
 
-  /***
+  /*-
   Creates a new `up.Request` object.
 
   This will not actually send the request over the network. For that use `up.request()`.
@@ -396,7 +396,7 @@ up.Request = class Request extends up.Record {
     })
   }
 
-  /***
+  /*-
   Loads this request object as a full-page request, replacing the entire browser environment
   with a new page from the server response.
 
@@ -463,7 +463,7 @@ up.Request = class Request extends up.Record {
     this.setAbortedState()
   }
 
-  /***
+  /*-
   Aborts this request.
 
   The request's promise will reject with an error object that has `{ name: 'AbortError' }`.

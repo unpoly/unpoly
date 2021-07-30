@@ -1,12 +1,12 @@
 const u = up.util
 
-/***
+/*-
 @class up.Cache
 @internal
 */
 up.Cache = class Cache {
 
-  /***
+  /*-
   @constructor up.Cache
   @param {number|Function(): number} [config.size]
     Maximum number of cache entries.

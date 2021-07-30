@@ -1,4 +1,4 @@
-/***
+/*-
 Animation
 =========
   
@@ -57,7 +57,7 @@ up.motion = (function() {
 
   const motionController = new up.MotionController('motion')
 
-  /***
+  /*-
    Sets default options for animations and transitions.
 
    @property up.motion.config
@@ -95,7 +95,7 @@ up.motion = (function() {
     config.reset()
   }
 
-  /***
+  /*-
    Returns whether Unpoly will perform animations.
 
    Set [`up.motion.config.enabled = false`](/up.motion.config#config.enabled) in order to disable animations globally.
@@ -108,7 +108,7 @@ up.motion = (function() {
     return config.enabled
   }
 
-  /***
+  /*-
    Applies the given animation to the given element.
 
    \#\#\# Example
@@ -220,7 +220,7 @@ up.motion = (function() {
     return Promise.resolve()
   }
 
-  /***
+  /*-
    Animates the given element's CSS properties using CSS transitions.
 
    Does not track the animation, nor does it finishes existing animations
@@ -257,7 +257,7 @@ up.motion = (function() {
     return namedAnimations[name] || up.fail("Unknown animation %o", name)
   }
 
-  /***
+  /*-
    Completes [animations](/up.animate) and [transitions](/up.morph).
 
    If called without arguments, all animations on the screen are completed.
@@ -282,7 +282,7 @@ up.motion = (function() {
     return motionController.finish(element)
   }
 
-  /***
+  /*-
   This event is emitted on an animating element by `up.motion.finish()` to
   request the animation to instantly finish and skip to the last frame.
 
@@ -297,7 +297,7 @@ up.motion = (function() {
   @stable
   */
 
-  /***
+  /*-
   Performs an animated transition between the `source` and `target` elements.
 
   Transitions are implement by performing two animations in parallel,
@@ -487,7 +487,7 @@ up.motion = (function() {
     e.replace(oldElement, newElement)
   })
 
-  /***
+  /*-
   Defines a named transition that [morphs](/up.morph) from one element to another.
 
   \#\#\# Example
@@ -530,7 +530,7 @@ up.motion = (function() {
     namedTransitions[name] = fn
   }
 
-  /***
+  /*-
   Defines a named animation.
 
   Here is the definition of the pre-defined `fade-in` animation:
@@ -578,7 +578,7 @@ up.motion = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given animation option will cause the animation
   to be skipped.
 
@@ -654,7 +654,7 @@ up.motion = (function() {
   registerTransition('move-up', ['move-to-top', 'move-from-bottom'])
   registerTransition('move-down', ['move-to-bottom', 'move-from-top'])
 
-  /***
+  /*-
   [Follows](/a-up-follow) this link and swaps in the new fragment
   with an animated transition.
 
@@ -683,7 +683,7 @@ up.motion = (function() {
   @stable
   */
 
-  /***
+  /*-
   [Submits](/form-up-submit) this form and swaps in the new fragment
   with an animated transition.
 

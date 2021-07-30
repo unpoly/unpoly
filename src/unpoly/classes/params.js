@@ -1,7 +1,7 @@
 const u = up.util
 const e = up.element
 
-/***
+/*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
 independent of their type.
 
@@ -23,7 +23,7 @@ The following types of parameter representation are supported:
 */
 up.Params = class Params {
 
-  /***
+  /*-
   Constructs a new `up.Params` instance.
 
   @constructor up.Params
@@ -39,7 +39,7 @@ up.Params = class Params {
     this.addAll(raw)
   }
 
-  /***
+  /*-
   Removes all params from this object.
 
   @function up.Params#clear
@@ -53,7 +53,7 @@ up.Params = class Params {
     return new up.Params(this)
   }
 
-  /***
+  /*-
   Returns an object representation of this `up.Params` instance.
 
   The returned value is a simple JavaScript object with properties
@@ -89,7 +89,7 @@ up.Params = class Params {
     return obj
   }
 
-  /***
+  /*-
   Returns an array representation of this `up.Params` instance.
 
   The returned value is a JavaScript array with elements that are objects with
@@ -113,7 +113,7 @@ up.Params = class Params {
     return this.entries
   }
 
-  /***
+  /*-
   Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation
   of this `up.Params` instance.
 
@@ -142,7 +142,7 @@ up.Params = class Params {
     return formData
   }
 
-  /***
+  /*-
   Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance.
 
   The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
@@ -188,7 +188,7 @@ up.Params = class Params {
     return query
   }
 
-  /***
+  /*-
   Returns whether the given value cannot be encoded into a query string.
 
   We will have `File` values in our params when we serialize a form with a file input.
@@ -206,7 +206,7 @@ up.Params = class Params {
     return u.some(values, this.isBinaryValue)
   }
 
-  /***
+  /*-
   Builds an URL string from the given base URL and
   this `up.Params` instance as a [query string](https://en.wikipedia.org/wiki/Query_string).
 
@@ -227,7 +227,7 @@ up.Params = class Params {
     return parts.join(separator)
   }
 
-  /***
+  /*-
   Adds a new entry with the given `name` and `value`.
 
   An `up.Params` instance can hold multiple entries with the same name.
@@ -252,7 +252,7 @@ up.Params = class Params {
     this.entries.push({ name, value })
   }
 
-  /***
+  /*-
   Adds all entries from the given list of params.
 
   The given params value may be of any [supported type](/up.Params).
@@ -316,7 +316,7 @@ up.Params = class Params {
     })
   }
 
-  /***
+  /*-
   Sets the `value` for the entry with given `name`.
 
   An `up.Params` instance can hold multiple entries with the same name.
@@ -335,7 +335,7 @@ up.Params = class Params {
     this.add(name, value)
   }
 
-  /***
+  /*-
   Deletes all entries with the given `name`.
 
   @function up.Params#delete
@@ -350,7 +350,7 @@ up.Params = class Params {
     return entry => entry.name === name
   }
 
-  /***
+  /*-
   Returns the first param value with the given `name` from the given `params`.
 
   Returns `undefined` if no param value with that name is set.
@@ -389,7 +389,7 @@ up.Params = class Params {
     }
   }
 
-  /***
+  /*-
   Returns the first param value with the given `name`.
 
   Returns `undefined` if no param value with that name is set.
@@ -405,7 +405,7 @@ up.Params = class Params {
     return entry?.value
   }
 
-  /***
+  /*-
   Returns an array of all param values with the given `name`.
 
   Returns an empty array if no param value with that name is set.
@@ -433,7 +433,7 @@ up.Params = class Params {
     return this.entries.length === 0
   }
 
-  /***
+  /*-
   Constructs a new `up.Params` instance from the given `<form>`.
 
   The returned params may be passed as `{ params }` option to
@@ -480,7 +480,7 @@ up.Params = class Params {
     return this.fromFields(up.form.fields(form))
   }
 
-  /***
+  /*-
   Constructs a new `up.Params` instance from one or more
   [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
 
@@ -503,7 +503,7 @@ up.Params = class Params {
     return params
   }
 
-  /***
+  /*-
   Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
 
   The added params will include exactly those form values that would be
@@ -551,7 +551,7 @@ up.Params = class Params {
     return (this.constructor === other.constructor) && u.isEqual(this.entries, other.entries)
   }
 
-  /***
+  /*-
   Constructs a new `up.Params` instance from the given URL's
   [query string](https://en.wikipedia.org/wiki/Query_string).
 
@@ -581,7 +581,7 @@ up.Params = class Params {
     return params
   }
 
-  /***
+  /*-
   Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
 
   \#\#\# Example

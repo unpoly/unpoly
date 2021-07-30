@@ -1,4 +1,4 @@
-/***
+/*-
 DOM helpers
 ===========
 
@@ -14,7 +14,7 @@ up.element = (function() {
 
   const MATCH_FN_NAME = up.browser.isIE11() ? 'msMatchesSelector' : 'matches'
 
-  /***
+  /*-
   Returns the first descendant element matching the given selector.
 
   @function first
@@ -36,7 +36,7 @@ up.element = (function() {
     return root.querySelector(selector)
   }
 
-  /***
+  /*-
   Returns all descendant elements matching the given selector.
 
   @function up.element.all
@@ -58,7 +58,7 @@ up.element = (function() {
     return root.querySelectorAll(selector)
   }
 
-  /***
+  /*-
   Returns a list of the given parent's descendants matching the given selector.
   The list will also include the parent element if it matches the selector itself.
 
@@ -83,7 +83,7 @@ up.element = (function() {
     return results
   }
 
-  /***
+  /*-
   Returns whether the given element is either the given root element
   or its descendants.
 
@@ -95,7 +95,7 @@ up.element = (function() {
     return root.contains(element)
   }
 
-  /***
+  /*-
   Returns the first element that matches the selector by testing the element itself
   and traversing up through its ancestors in the DOM tree.
 
@@ -121,7 +121,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given element matches the given CSS selector.
 
   To match against a non-standard selector like `:main`,
@@ -140,7 +140,7 @@ up.element = (function() {
     return element[MATCH_FN_NAME]?.(selector)
   }
 
-  /***
+  /*-
   @function up.element.ancestor
   @internal
   */
@@ -159,7 +159,7 @@ up.element = (function() {
     return getList(closest(element, selector), subtree(element, selector))
   }
 
-  /***
+  /*-
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
   \#\#\# Casting rules
@@ -199,7 +199,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Composes a list of elements from the given arguments.
 
   \#\#\# Casting rules
@@ -240,7 +240,7 @@ up.element = (function() {
 //    unless u.isElement(element)
 //      up.fail('Not an element: %o', element)
 
-  /***
+  /*-
   Removes the given element from the DOM tree.
 
   If you don't need IE11 support you may also use the built-in
@@ -259,7 +259,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Hides the given element.
 
   The element is hidden by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
@@ -275,7 +275,7 @@ up.element = (function() {
     element.style.display = 'none'
   }
 
-  /***
+  /*-
   Shows the given element.
 
   Also see `up.element.hide()`.
@@ -300,7 +300,7 @@ up.element = (function() {
     element.style.display = ''
   }
 
-  /***
+  /*-
   Display or hide the given element, depending on its current visibility.
 
   @function up.element.toggle
@@ -321,7 +321,7 @@ up.element = (function() {
 //      console.debug("Calling %o with %o", fn, args)
 //      fn(args...)
 
-  /***
+  /*-
   Adds or removes the given class from the given element.
 
   If you don't need IE11 support you may also use the built-in
@@ -357,7 +357,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Sets all key/values from the given object as attributes on the given element.
 
   \#\#\# Example
@@ -391,7 +391,7 @@ up.element = (function() {
     return () => setAttrs(element, oldAttrs)
   }
 
-  /***
+  /*-
   @function up.element.metaContent
   @internal
   */
@@ -400,7 +400,7 @@ up.element = (function() {
     return first(selector)?.getAttribute('content')
   }
 
-  /***
+  /*-
   @function up.element.insertBefore
   @internal
   */
@@ -411,7 +411,7 @@ up.element = (function() {
 //  insertAfter = (existingElement, newElement) ->
 //    existingElement.insertAdjacentElement('afterend', newElement)
 
-  /***
+  /*-
   Replaces the given old element with the given new element.
 
   The old element will be removed from the DOM tree.
@@ -428,7 +428,7 @@ up.element = (function() {
     oldElement.parentElement.replaceChild(newElement, oldElement)
   }
 
-  /***
+  /*-
   Creates an element matching the given CSS selector.
 
   The created element will not yet be attached to the DOM tree.
@@ -580,7 +580,7 @@ up.element = (function() {
     return rootElement
   }
 
-  /***
+  /*-
   Creates an element matching the given CSS selector and attaches it to the given parent element.
 
   To create a detached element from a selector, see `up.element.createFromSelector()`.
@@ -639,7 +639,7 @@ up.element = (function() {
     return element
   }
 
-  /***
+  /*-
   Returns a CSS selector that matches the given element as good as possible.
 
   Alias for `up.fragment.toTarget()`.
@@ -656,7 +656,7 @@ up.element = (function() {
   const SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
   const SINGLETON_PATTERN = new RegExp('\\b(' + SINGLETON_TAG_NAMES.join('|') + ')\\b', 'i')
 
-  /***
+  /*-
   @function up.element.isSingleton
   @internal
   */
@@ -670,7 +670,7 @@ up.element = (function() {
     return element.tagName.toLowerCase()
   }
 
-  /***
+  /*-
   @function up.element.attributeSelector
   @internal
   */
@@ -691,7 +691,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   @function up.element.classSelector
   @internal
   */
@@ -700,7 +700,7 @@ up.element = (function() {
     return `.${klass}`
   }
 
-  /***
+  /*-
   Always creates a full document with a <html> root, even if the given `html`
   is only a fragment.
 
@@ -711,7 +711,7 @@ up.element = (function() {
     return new DOMParser().parseFromString(html, 'text/html')
   }
 
-  /***
+  /*-
   Creates an element from the given HTML fragment.
 
   Use `up.hello()` to activate JavaScript behavior within the created element.
@@ -742,7 +742,7 @@ up.element = (function() {
     return fragment.childNodes[0]
   }
 
-  /***
+  /*-
   @function up.element.root
   @internal
   */
@@ -750,7 +750,7 @@ up.element = (function() {
     return document.documentElement
   }
 
-  /***
+  /*-
   Forces the browser to paint the given element now.
 
   @function up.element.paint
@@ -760,7 +760,7 @@ up.element = (function() {
     element.offsetHeight
   }
 
-  /***
+  /*-
   @function up.element.concludeCSSTransition
   @internal
   */
@@ -773,7 +773,7 @@ up.element = (function() {
     return undo
   }
 
-  /***
+  /*-
   Returns whether the given element has a CSS transition set.
 
   @function up.element.hasCSSTransition
@@ -796,7 +796,7 @@ up.element = (function() {
     return !noTransition
   }
 
-  /***
+  /*-
   @function up.element.fixedToAbsolute
   @internal
   */
@@ -816,7 +816,7 @@ up.element = (function() {
     })
   }
 
-  /***
+  /*-
   On the given element, set attributes that are still missing.
 
   @function up.element.setMissingAttrs
@@ -834,7 +834,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   @function up.element.unwrap
   @internal
   */
@@ -873,7 +873,7 @@ up.element = (function() {
 //    value = element.getAttribute(attribute)
 //    u.presence(value)
 
-  /***
+  /*-
   Returns the given `attribute` value for the given `element`.
 
   If the element does not have the given attribute, it returns `undefined`.
@@ -888,7 +888,7 @@ up.element = (function() {
     return u.nullToUndefined(element.getAttribute(attribute))
   }
 
-  /***
+  /*-
   Returns the value of the given attribute on the given element, cast as a boolean value.
 
   If the attribute value cannot be cast to `true` or `false`, `undefined` is returned.
@@ -935,7 +935,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Returns the given attribute value cast as boolean.
 
   If the attribute value cannot be cast, returns the attribute value unchanged.
@@ -951,7 +951,7 @@ up.element = (function() {
     return booleanAttr(element, attribute, true)
   }
 
-  /***
+  /*-
   Returns the value of the given attribute on the given element, cast to a number.
 
   If the attribute value cannot be cast to a number, `undefined` is returned.
@@ -975,7 +975,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Reads the given attribute from the element, parsed as [JSON](https://www.json.org/).
 
   Returns `undefined` if the attribute value is [blank](/up.util.isBlank).
@@ -1017,7 +1017,7 @@ up.element = (function() {
     return closest(element, '[' + attr + ']')?.getAttribute(attr)
   }
 
-  /***
+  /*-
   Temporarily sets the inline CSS styles on the given element.
 
   Returns a function that restores the original inline styles when called.
@@ -1045,7 +1045,7 @@ up.element = (function() {
     return () => setInlineStyle(element, oldStyles)
   }
 
-  /***
+  /*-
   Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element.
 
@@ -1073,7 +1073,7 @@ up.element = (function() {
     return extractFromStyleObject(style, props)
   }
 
-  /***
+  /*-
   Receives a [computed CSS property value](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element, casted as a number.
 
@@ -1107,7 +1107,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Gets the given inline style(s) from the given element's `[style]` attribute.
 
   @function up.element.inlineStyle
@@ -1130,7 +1130,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Sets the given CSS properties as inline styles on the given element.
 
   @function up.element.setStyle
@@ -1168,7 +1168,7 @@ up.element = (function() {
     'minwidth', 'minheight',
   ])
 
-  /***
+  /*-
   Converts the given value to a CSS length value, adding a `px` unit if required.
 
   @function cssLength
@@ -1182,7 +1182,7 @@ up.element = (function() {
     }
   }
 
-  /***
+  /*-
   Returns whether the given element is currently visible.
 
   An element is considered visible if it consumes space in the document.
@@ -1213,7 +1213,7 @@ up.element = (function() {
     return attrs
   }
 
-  /***
+  /*-
   Returns whether the given element has been removed from the DOM tree.
 
   @function up.element.isDetached

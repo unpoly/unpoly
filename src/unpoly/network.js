@@ -2,7 +2,7 @@ require('./network.sass')
 
 const u = up.util
 
-/***
+/*-
 Network requests
 ================
 
@@ -29,7 +29,7 @@ Unpoly's `up.request()` has a number of convenience features:
 @module up.network
 */
 up.network = (function() {
-  /***
+  /*-
   Sets default options for this package.
 
   @property up.network.config
@@ -186,7 +186,7 @@ up.network = (function() {
 
   let progressBar = null
 
-  /***
+  /*-
   Returns an earlier request [matching](/up.network.config#config.requestMetaKeys) the given request options.
 
   Returns `undefined` if the given request is not currently cached.
@@ -219,7 +219,7 @@ up.network = (function() {
   @experimental
   */
 
-  /***
+  /*-
   Removes all [cache](/up.request#caching) entries.
 
   To only remove some cache entries, pass a [URL pattern](/url-patterns):
@@ -243,7 +243,7 @@ up.network = (function() {
   @stable
   */
 
-  /***
+  /*-
   Makes the cache assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
@@ -258,7 +258,7 @@ up.network = (function() {
   @experimental
   */
 
-  /***
+  /*-
   Manually stores a request in the cache.
 
   Future calls to `up.request()` will try to re-use this request before
@@ -273,7 +273,7 @@ up.network = (function() {
   @internal
   */
 
-  /***
+  /*-
   Manually removes the given request from the cache.
 
   You can also [configure](/up.network.config) when
@@ -296,7 +296,7 @@ up.network = (function() {
     progressBar = null
   }
 
-  /***
+  /*-
   Makes an AJAX request to the given URL.
 
   Returns an `up.Request` object which contains information about the request.
@@ -564,7 +564,7 @@ up.network = (function() {
     })
   }
 
-  /***
+  /*-
   Returns whether Unpoly is currently waiting for a [request](/up.request) to finish.
 
   @function up.network.isBusy
@@ -575,7 +575,7 @@ up.network = (function() {
     return queue.isBusy()
   }
 
-  /***
+  /*-
    Returns whether Unpoly is *not* currently waiting for a [request](/up.request) to finish.
 
    @function up.network.isIdle
@@ -584,7 +584,7 @@ up.network = (function() {
    */
   const isIdle = u.negate(isBusy)
 
-  /***
+  /*-
   Returns whether optional requests should be avoided where possible.
 
   We assume the user wants to avoid requests if either of following applies:
@@ -614,7 +614,7 @@ up.network = (function() {
     }
   }
 
-  /***
+  /*-
   Aborts pending [requests](/up.request).
 
   The event `up:request:aborted` will be emitted.
@@ -662,7 +662,7 @@ up.network = (function() {
     queue.abort(...args)
   }
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   was [aborted](/up.network.abort).
 
@@ -677,7 +677,7 @@ up.network = (function() {
   @experimental
   */
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish.
 
@@ -733,7 +733,7 @@ up.network = (function() {
   @stable
   */
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:request:late), but have finished now.
 
@@ -745,7 +745,7 @@ up.network = (function() {
   @stable
   */
 
-  /***
+  /*-
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
 
@@ -771,7 +771,7 @@ up.network = (function() {
     }
   }
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
   has been received.
 
@@ -792,7 +792,7 @@ up.network = (function() {
   @stable
   */
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters fatal error like a timeout or loss of network connectivity.
 

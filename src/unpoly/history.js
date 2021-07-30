@@ -1,4 +1,4 @@
-/***
+/*-
 History
 ========
 
@@ -14,7 +14,7 @@ up.history = (function() {
   const u = up.util
   const e = up.element
 
-  /***
+  /*-
   Configures behavior when the user goes back or forward in browser history.
 
   @property up.history.config
@@ -36,7 +36,7 @@ up.history = (function() {
     restoreTargets: [':main']
   }))
 
-  /***
+  /*-
   Returns a normalized URL for the previous history entry.
 
   Only history entries pushed by Unpoly will be considered.
@@ -60,7 +60,7 @@ up.history = (function() {
     return u.normalizeURL(url, normalizeOptions)
   }
 
-  /***
+  /*-
   Returns a normalized URL for the current browser location.
 
   Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
@@ -75,7 +75,7 @@ up.history = (function() {
     return normalizeURL(location.href, normalizeOptions)
   }
 
-  /***
+  /*-
   Remembers the current URL so we can use previousURL on pop.
 
   @function observeNewURL
@@ -99,7 +99,7 @@ up.history = (function() {
     return normalizeURL(url, normalizeOptions) === currentLocation(normalizeOptions)
   }
 
-  /***
+  /*-
   Replaces the current history entry and updates the
   browser's location bar with the given URL.
 
@@ -121,7 +121,7 @@ up.history = (function() {
     }
   }
 
-  /***
+  /*-
   Adds a new history entry and updates the browser's
   address bar with the given URL.
 
@@ -145,7 +145,7 @@ up.history = (function() {
     }
   }
 
-  /***
+  /*-
   This event is [emitted](/up.emit) after the browser's address bar was updated with a new URL.
 
   There may be several reasons why the browser location was changed:
@@ -253,7 +253,7 @@ up.history = (function() {
     }
   })
 
-  /***
+  /*-
   Changes the link's destination so it points to the previous URL.
 
   Note that this will *not* call `location.back()`, but will set

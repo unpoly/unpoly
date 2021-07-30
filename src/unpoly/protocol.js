@@ -1,4 +1,4 @@
-/***
+/*-
 Server protocol
 ===============
 
@@ -45,7 +45,7 @@ up.protocol = (function() {
     }
   }
 
-  /***
+  /*-
   This request header contains the current Unpoly version to mark this request as a fragment update.
 
   Server-side code may check for the presence of an `X-Up-Version` header to
@@ -63,7 +63,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   This request header contains the CSS selector targeted for a successful fragment update.
 
   Server-side code is free to optimize its response by only rendering HTML
@@ -112,7 +112,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   This request header contains the CSS selector targeted for a failed fragment update.
 
   A fragment update is considered *failed* if the server responds with a status code other than 2xx,
@@ -164,7 +164,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   This request header contains the targeted layer's [mode](/up.layer.mode).
 
   Server-side code is free to render different HTML for different modes.
@@ -183,7 +183,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   This request header contains the [mode](/up.layer.mode) of the layer
   targeted for a failed fragment update.
 
@@ -222,7 +222,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'clearCache', parseClearCacheValue)
   }
 
-  /***
+  /*-
   The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
 
   \#\#\# Example
@@ -237,7 +237,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   This request header contains a timestamp of an existing fragment that is being [reloaded](/up.reload).
 
   The timestamp must be explicitely set by the user as an `[up-time]` attribute on the fragment.
@@ -266,7 +266,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'context', JSON.parse)
   }
 
-  /***
+  /*-
   This request header contains the targeted layer's [context](/context), serialized as JSON.
 
   The user may choose to not send this header by configuring
@@ -311,7 +311,7 @@ up.protocol = (function() {
   @experimental
   */
 
-  /***
+  /*-
   This request header contains the [context](/context) of the layer
   targeted for a failed fragment update, serialized as JSON.
 
@@ -334,7 +334,7 @@ up.protocol = (function() {
   @experimental
   */
 
-  /***
+  /*-
   @function up.protocol.methodFromXHR
   @internal
   */
@@ -342,7 +342,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'method', u.normalizeMethod)
   }
 
-  /***
+  /*-
   The server may set this optional response header to change the browser location after a fragment update.
 
   Without this header Unpoly will set the browser location to the response URL, which is usually sufficient.
@@ -370,7 +370,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   The server may set this optional response header to change the HTTP method after a fragment update.
 
   Without this header Unpoly will assume a `GET` method if the response's URL changed from the request's URL,
@@ -386,7 +386,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   The server may set this optional response header to change the document title after a fragment update.
 
   Without this header Unpoly will extract the `<title>` from the server response.
@@ -405,7 +405,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   This request header contains the `[name]` of a [form field being validated](/input-up-validate).
 
   When seeing this header, the server is expected to validate (but not save)
@@ -442,7 +442,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'events', JSON.parse)
   }
 
-  /***
+  /*-
   The server may set this response header to [emit events](/up.emit) with the
   requested [fragment update](/a-up-follow).
 
@@ -491,7 +491,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'acceptLayer', JSON.parse)
   }
 
-  /***
+  /*-
   The server may set this response header to [accept](/up.layer.accept) the targeted overlay
   in response to a fragment update.
 
@@ -540,7 +540,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'dismissLayer', JSON.parse)
   }
 
-  /***
+  /*-
   The server may set this response header to [dismiss](/up.layer.dismiss) the targeted overlay
   in response to a fragment update.
 
@@ -585,7 +585,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   Server-side companion libraries like unpoly-rails set this cookie so we
   have a way to detect the request method of the initial page load.
   There is no JavaScript API for this.
@@ -597,7 +597,7 @@ up.protocol = (function() {
     return u.normalizeMethod(up.browser.popCookie('_up_method'))
   })
 
-  /***
+  /*-
   The server may set this optional cookie to echo the HTTP method of the initial request.
 
   If the initial page was loaded with a non-`GET` HTTP method, Unpoly prefers to make a full
@@ -633,7 +633,7 @@ up.protocol = (function() {
   @stable
   */
 
-  /***
+  /*-
   @function up.protocol.locationFromXHR
   @internal
   */
@@ -650,7 +650,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'location') || xhr.responseURL
   }
 
-  /***
+  /*-
   @function up.protocol.titleFromXHR
   @internal
   */
@@ -658,7 +658,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'title')
   }
 
-  /***
+  /*-
   @function up.protocol.targetFromXHR
   @internal
   */
@@ -666,7 +666,7 @@ up.protocol = (function() {
     return extractHeader(xhr, 'target')
   }
 
-  /***
+  /*-
   Configures strings used in the optional [server protocol](/up.protocol).
 
   @property up.protocol.config

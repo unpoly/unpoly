@@ -1,10 +1,10 @@
-/***
+/*-
 @module up.history
 */
 
 up.migrate.renamedProperty(up.history.config, 'popTargets', 'restoreTargets')
 
-/***
+/*-
 Returns a normalized URL for the current history entry.
 
 @function up.history.url

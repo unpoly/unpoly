@@ -1,11 +1,11 @@
-/***
+/*-
 @module up.framework
 */
 
 up.framework = (function() {
   let booting = true
 
-  /***
+  /*-
   Resets Unpoly to the state when it was booted.
   All custom event handlers, animations, etc. that have been registered
   will be discarded.
@@ -19,14 +19,14 @@ up.framework = (function() {
     up.emit('up:framework:reset', {log: false})
   }
 
-  /***
+  /*-
   This event is [emitted](/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
 
   @event up:framework:reset
   @internal
   */
 
-  /***
+  /*-
   Boots the Unpoly framework.
 
   **This is called automatically** by including the Unpoly JavaScript files.

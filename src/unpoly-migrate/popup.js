@@ -1,4 +1,4 @@
-/***
+/*-
 @module up.layer
 */
 
@@ -6,7 +6,7 @@ const u = up.util
 const e = up.element
 
 up.popup = {
-  /***
+  /*-
   Attaches a popup overlay to the given element or selector.
 
   @function up.popup.attach
@@ -24,7 +24,7 @@ up.popup = {
     return up.layer.open({ ...options, origin, layer: 'popup' })
   },
 
-  /***
+  /*-
   Closes a currently open overlay.
 
   @function up.popup.close
@@ -39,7 +39,7 @@ up.popup = {
     return up.migrate.formerlyAsync('up.layer.dismiss()')
   },
 
-  /***
+  /*-
   Returns the location URL of the fragment displayed in the current overlay.
 
   @function up.popup.url
@@ -52,7 +52,7 @@ up.popup = {
     return up.layer.location
   },
 
-  /***
+  /*-
   Returns the location URL of the layer behind the current overlay.
 
   @function up.popup.coveredUrl
@@ -65,7 +65,7 @@ up.popup = {
     return up.layer.parent?.location
   },
 
-  /***
+  /*-
   Sets default options for future popup overlays.
 
   @property up.popup.config
@@ -77,7 +77,7 @@ up.popup = {
     return up.layer.config.popup
   },
 
-  /***
+  /*-
   Returns whether the given element or selector is contained
   within the current layer.
 
@@ -93,7 +93,7 @@ up.popup = {
     return up.layer.contains(element)
   },
 
-  /***
+  /*-
   Returns whether an overlay is currently open.
 
   @function up.popup.isOpen

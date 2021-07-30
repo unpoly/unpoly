@@ -1,4 +1,4 @@
-/***
+/*-
 @module up.link
 */
 
@@ -13,7 +13,7 @@ up.migrate.parseFollowOptions = function(parser) {
   parser.booleanOrString('historyVisible'); // short-lived legacy option for { history }
 }
 
-/***
+/*-
 [Follows](/up.follow) this link as fast as possible.
 
 This is done by:

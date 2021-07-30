@@ -1,4 +1,4 @@
-/***
+/*-
 Custom JavaScript
 =================
 
@@ -32,7 +32,7 @@ up.syntax = (function() {
   let compilers = []
   let macros = []
 
-  /***
+  /*-
   Registers a function to be called when an element with
   the given selector is inserted into the DOM.
 
@@ -158,7 +158,7 @@ up.syntax = (function() {
     return insertCompiler(compilers, compiler)
   }
 
-  /***
+  /*-
   Registers a function to be called when an element with
   the given selector is inserted into the DOM. The function is called
   with each matching element as a
@@ -195,7 +195,7 @@ up.syntax = (function() {
     compiler.jQuery = true
   }
 
-  /***
+  /*-
   Registers a [compiler](/up.compiler) that is run before all other compilers.
 
   A macro lets you set UJS attributes that will be compiled afterwards.
@@ -254,7 +254,7 @@ up.syntax = (function() {
     return insertCompiler(macros, macro)
   }
 
-  /***
+  /*-
   Registers a [compiler](/up.compiler) that is run before all other compilers.
   The compiler function is called with each matching element as a
   [jQuery object](https://learn.jquery.com/using-jquery-core/jquery-object/).
@@ -332,7 +332,7 @@ up.syntax = (function() {
     return newCompiler
   }
 
-  /***
+  /*-
   Applies all compilers on the given element and its descendants.
 
   Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
@@ -348,7 +348,7 @@ up.syntax = (function() {
     pass.run()
   }
 
-  /***
+  /*-
   Registers a function to be called when the given element
   is [destroyed](/up.destroy).
 
@@ -385,7 +385,7 @@ up.syntax = (function() {
     }
   }
 
-  /***
+  /*-
   Runs any destructor on the given fragment and its descendants in the same layer.
 
   Unlike [`up.destroy()`](/up.destroy), this does not emit any events
@@ -400,7 +400,7 @@ up.syntax = (function() {
     new up.DestructorPass(fragment, options).run()
   }
 
-  /***
+  /*-
   Returns the given element's `[up-data]`, parsed as a JavaScript object.
 
   Returns `undefined` if the element has no `[up-data]` attribute.
@@ -429,7 +429,7 @@ up.syntax = (function() {
   @stable
   */
 
-  /***
+  /*-
   Attaches structured data to an element, to be consumed by a compiler.
 
   If an element with an `[up-data]` attribute enters the DOM,

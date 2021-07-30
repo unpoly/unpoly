@@ -1,7 +1,6 @@
 TODOs
 ====
 
-- Remove semicolons: \ *;\ *\n => \n
 - Use a different Doccomment fence since RubyMine keeps parsing our custom Docs as JSDoc type information
 
 

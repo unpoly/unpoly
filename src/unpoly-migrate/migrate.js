@@ -1,6 +1,6 @@
 const u = up.util
 
-/***
+/*-
 @module up.migrate
 */
 up.migrate = (function() {

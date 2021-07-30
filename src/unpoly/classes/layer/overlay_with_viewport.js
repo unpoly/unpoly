@@ -11,7 +11,7 @@ up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overla
     return document.body
   }
 
-  /***
+  /*-
   @function up.Layer.OverlayWithViewport#openNow
   @param {Element} options.content
   @internal

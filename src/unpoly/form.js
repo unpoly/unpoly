@@ -1,4 +1,4 @@
-/***
+/*-
 Forms
 =====
   
@@ -18,7 +18,7 @@ up.form = (function() {
 
   const ATTRIBUTES_SUGGESTING_SUBMIT = ['[up-submit]', '[up-target]', '[up-layer]', '[up-transition]']
 
-  /***
+  /*-
    Sets default options for form submission and validation.
 
    @property up.form.config
@@ -81,7 +81,7 @@ up.form = (function() {
     config.reset()
   }
 
-  /***
+  /*-
    @function up.form.fieldSelector
    @internal
    */
@@ -89,7 +89,7 @@ up.form = (function() {
     return config.fieldSelectors.map(field => field + suffix).join(',')
   }
 
-  /***
+  /*-
    Returns a list of form fields within the given element.
 
    You can configure what Unpoly considers a form field by adding CSS selectors to the
@@ -122,7 +122,7 @@ up.form = (function() {
     return fields
   }
 
-  /***
+  /*-
    @function up.form.submittingButton
    @param {Element} form
    @internal
@@ -138,7 +138,7 @@ up.form = (function() {
     }
   }
 
-  /***
+  /*-
    @function up.form.submitButtonSelector
    @internal
    */
@@ -146,7 +146,7 @@ up.form = (function() {
     return config.submitButtonSelectors.join(',')
   }
 
-  /***
+  /*-
    Submits a form via AJAX and updates a page fragment with the response.
 
    up.submit('form.new-user', { target: '.main' })
@@ -189,7 +189,7 @@ up.form = (function() {
     return up.render(submitOptions(form, options))
   })
 
-  /***
+  /*-
    Parses the [render](/up.render) options that would be used to
    [`submit`](/up.submit) the given form, but does not render.
 
@@ -274,7 +274,7 @@ up.form = (function() {
     return options
   }
 
-  /***
+  /*-
    This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
    The event is emitted on the `<form>` element.
@@ -319,7 +319,7 @@ up.form = (function() {
     }
   })
 
-  /***
+  /*-
    Observes form fields and runs a callback when a value changes.
 
    This is useful for observing text fields while the user is typing.
@@ -395,7 +395,7 @@ up.form = (function() {
     }
   }
 
-  /***
+  /*-
    [Observes](/up.observe) a field or form and submits the form when a value changes.
 
    Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
@@ -444,7 +444,7 @@ up.form = (function() {
     })
   }
 
-  /***
+  /*-
   Performs a server-side validation of a form field.
 
   `up.validate()` submits the given field's form with an additional `X-Up-Validate`
@@ -506,7 +506,7 @@ up.form = (function() {
     return submit(field, options)
   }
 
-  /***
+  /*-
   This event is emitted before a field is being [validated](/input-up-validate).
 
   @event up:form:validate
@@ -561,7 +561,7 @@ up.form = (function() {
     return values
   }
 
-  /***
+  /*-
   Shows or hides a target selector depending on the value.
 
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
@@ -632,7 +632,7 @@ up.form = (function() {
     return u.presence(document.activeElement, isField)
   }
 
-  /***
+  /*-
   Returns whether the given form will be [submitted](/up.follow) through Unpoly
   instead of making a full page load.
 
@@ -662,7 +662,7 @@ up.form = (function() {
     return e.matches(form, config.noSubmitSelectors.join(','))
   }
 
-  /***
+  /*-
   Submits this form via JavaScript and updates a fragment with the server response.
 
   The server response is searched for the selector given in `up-target`.
@@ -767,7 +767,7 @@ up.form = (function() {
     up.log.muteUncriticalRejection(submit(form))
   })
 
-  /***
+  /*-
   When a form field with this attribute is changed, the form is validated on the server
   and is updated with validation messages.
 
@@ -913,7 +913,7 @@ up.form = (function() {
   @stable
   */
 
-  /***
+  /*-
   Validates this form on the server when any field changes and shows validation errors.
 
   You can configure what Unpoly considers a fieldset by adding CSS selectors to the
@@ -950,7 +950,7 @@ up.form = (function() {
     })
   })
 
-  /***
+  /*-
   Show or hide elements when a form field is set to a given value.
 
   \#\#\# Example: Select options
@@ -1025,7 +1025,7 @@ up.form = (function() {
   @stable
   */
 
-  /***
+  /*-
   Only shows this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
 
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
@@ -1036,7 +1036,7 @@ up.form = (function() {
   @stable
   */
 
-  /***
+  /*-
   Hides this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
 
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
@@ -1058,7 +1058,7 @@ up.form = (function() {
     switchTarget(element)
   })
 
-  /***
+  /*-
   Observes this field and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
@@ -1114,7 +1114,7 @@ up.form = (function() {
   @stable
   */
 
-  /***
+  /*-
   Observes this form and runs a callback when any field changes.
 
   This is useful for observing text fields while the user is typing.
@@ -1151,7 +1151,7 @@ up.form = (function() {
   */
   up.compiler('[up-observe]', (formOrField) => observe(formOrField))
 
-  /***
+  /*-
   Submits this field's form when this field changes its values.
 
   Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
@@ -1188,7 +1188,7 @@ up.form = (function() {
   @stable
   */
 
-  /***
+  /*-
   Submits the form when any field changes.
 
   Both the form and the field will be assigned a CSS class [`.up-active`](/form.up-active)

@@ -1,8 +1,8 @@
-/***
+/*-
 @module up.util
 */
 
-/***
+/*-
 Returns a copy of the given object that only contains
 the given keys.
 
@@ -17,7 +17,7 @@ up.util.only = function(object, ...keys) {
   return up.util.pick(object, keys)
 }
 
-/***
+/*-
 Returns a copy of the given object that contains all except
 the given keys.
 
@@ -77,7 +77,7 @@ up.util.nextFrame = function(...args) {
   return up.util.task(...args)
 }
 
-/***
+/*-
 Calls the given function for the given number of times.
 
 @function up.util.times

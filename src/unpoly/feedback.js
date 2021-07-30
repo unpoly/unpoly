@@ -1,4 +1,4 @@
-/***
+/*-
 Navigation feedback
 ===================
 
@@ -62,7 +62,7 @@ up.feedback = (function() {
   const u = up.util
   const e = up.element
 
-  /***
+  /*-
   Sets default options for this package.
 
   @property up.feedback.config
@@ -162,7 +162,7 @@ up.feedback = (function() {
     }
   }
 
-  /***
+  /*-
   @function findActivatableArea
   @param {string|Element|jQuery} element
   @internal
@@ -173,7 +173,7 @@ up.feedback = (function() {
     return e.ancestor(element, SELECTOR_LINK) || element
   }
 
-  /***
+  /*-
   Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
 
   This happens automatically when following links or submitting forms through the Unpoly API.
@@ -202,7 +202,7 @@ up.feedback = (function() {
     findActivatableArea(element).classList.add(CLASS_ACTIVE)
   }
 
-  /***
+  /*-
   Links that are currently [loading through Unpoly](/a-up-follow)
   are assigned the `.up-active` class automatically.
 
@@ -237,7 +237,7 @@ up.feedback = (function() {
   @stable
   */
 
-  /***
+  /*-
   Forms that are currently [loading through Unpoly](/form-up-submit)
   are assigned the `.up-active` class automatically.
   Style `.up-active` in your CSS to improve the perceived responsiveness
@@ -272,7 +272,7 @@ up.feedback = (function() {
   @stable
   */
 
-  /***
+  /*-
   Marks the given element as no longer loading, by removing the CSS class [`.up-active`](/a.up-active).
 
   This happens automatically when network requests initiated by the Unpoly API have completed.
@@ -318,7 +318,7 @@ up.feedback = (function() {
     }
   }
 
-  /***
+  /*-
   Marks this element as a navigation component, such as a menu or navigation bar.
 
   When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
@@ -377,7 +377,7 @@ up.feedback = (function() {
   @stable
   */
 
-  /***
+  /*-
   Links within `[up-nav]` may use the `[up-alias]` attribute to pass a [URL pattern](/url-patterns) for which they
   should also be highlighted as [`.up-current`](/a.up-current).
 
@@ -399,7 +399,7 @@ up.feedback = (function() {
   @stable
   */
 
-  /***
+  /*-
   When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class.
 
   See [`[up-nav]`](/up-nav) for more documentation and examples.

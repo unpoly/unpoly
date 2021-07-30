@@ -1,4 +1,4 @@
-/***
+/*-
 @module up.layer
 */
 
@@ -42,7 +42,7 @@ up.migrate.handleTetherOptions = function(options) {
   }
 }
 
-/***
+/*-
 When this element is clicked, closes a currently open overlay.
 
 Does nothing if no overlay is currently open.

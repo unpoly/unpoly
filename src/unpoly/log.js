@@ -1,4 +1,4 @@
-/***
+/*-
 Logging
 =======
 
@@ -17,7 +17,7 @@ up.log = (function() {
 
   const sessionStore = new up.store.Session('up.log')
 
-  /***
+  /*-
   Configures the logging output on the developer console.
 
   @property up.log.config
@@ -52,7 +52,7 @@ up.log = (function() {
 //    if config.enabled && message
 //      console.debug(prefix(message), args...)
 
-  /***
+  /*-
   Prints a logging message to the browser console.
 
   @function up.puts
@@ -66,13 +66,13 @@ up.log = (function() {
     }
   }
 
-  /***
+  /*-
   @function up.warn
   @internal
   */
   const printToWarn = (...args) => printToStream('warn', ...args)
 
-  /***
+  /*-
   @function up.log.error
   @internal
   */
@@ -133,7 +133,7 @@ up.log = (function() {
     config.enabled = value
   }
 
-  /***
+  /*-
   Starts printing debugging information to the developer console.
 
   Debugging information includes which elements are being [compiled](/up.syntax)
@@ -148,7 +148,7 @@ up.log = (function() {
     setEnabled(true)
   }
 
-  /***
+  /*-
   Stops printing debugging information to the developer console.
 
   Errors will still be printed, even with logging disabled.
@@ -160,7 +160,7 @@ up.log = (function() {
     setEnabled(false)
   }
 
-  /***
+  /*-
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
 
@@ -188,7 +188,7 @@ up.log = (function() {
     throw up.error.failed(args)
   }
 
-  /***
+  /*-
   Registers an empty rejection handler in case the given promise
   rejects with an AbortError or a failed up.Response.
 

@@ -1,4 +1,4 @@
-/***
+/*-
 @module up.layer
 */
 
@@ -8,7 +8,7 @@ const FLAVORS_ERROR = new Error('up.modal.flavors has been removed without direc
 
 up.modal = {
 
-  /***
+  /*-
   Opens a modal overlay for the given URL.
 
   @function up.modal.visit
@@ -24,7 +24,7 @@ up.modal = {
     return up.layer.open({ ...options, url, mode: 'modal' })
   },
 
-  /***
+  /*-
   Opens the given link's destination in a modal overlay.
 
   @function up.modal.follow
@@ -42,7 +42,7 @@ up.modal = {
     return up.follow(link, { ...options, layer: 'modal' })
   },
 
-  /***
+  /*-
   [Extracts](/up.extract) the given CSS selector from the given HTML string and
   opens the results in a modal overlay.
 
@@ -63,7 +63,7 @@ up.modal = {
     return up.layer.open({ ...options, target, html, layer: 'modal' })
   },
 
-  /***
+  /*-
   Closes a currently open overlay.
 
   @function up.modal.close
@@ -78,7 +78,7 @@ up.modal = {
     return up.migrate.formerlyAsync('up.layer.dismiss()')
   },
 
-  /***
+  /*-
   Returns the location URL of the fragment displayed in the current overlay.
 
   @function up.modal.url
@@ -91,7 +91,7 @@ up.modal = {
     return up.layer.location
   },
 
-  /***
+  /*-
   Returns the location URL of the layer behind the current overlay.
 
   @function up.modal.coveredUrl
@@ -104,7 +104,7 @@ up.modal = {
     return up.layer.parent?.location
   },
 
-  /***
+  /*-
   Sets default options for future modal overlays.
 
   @property up.modal.config
@@ -116,7 +116,7 @@ up.modal = {
     return up.layer.config.modal
   },
 
-  /***
+  /*-
   Returns whether the given element or selector is contained
   within the current layer.
 
@@ -132,7 +132,7 @@ up.modal = {
     return up.layer.contains(element)
   },
 
-  /***
+  /*-
   Returns whether an overlay is currently open.
 
   @function up.modal.isOpen
@@ -159,7 +159,7 @@ up.migrate.renamedEvent('up:modal:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:modal:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:modal:closed', 'up:layer:dismissed')
 
-/***
+/*-
 Clicking this link will load the destination via AJAX and open
 the given selector in a modal overlay.
 
@@ -173,7 +173,7 @@ the given selector in a modal overlay.
 */
 up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, () => up.migrate.deprecated('a[up-modal]', 'a[up-layer="new modal"]'))
 
-/***
+/*-
 Clicking this link will load the destination via AJAX and open
 the given selector in a modal drawer that slides in from the edge of the screen.
 

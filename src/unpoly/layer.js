@@ -3,7 +3,7 @@ require('./layer.sass')
 const u = up.util
 const e = up.element
 
-/***
+/*-
 Layers
 ======
 
@@ -37,7 +37,7 @@ up.layer = (function() {
     up.Layer.Cover
   ]
 
-  /***
+  /*-
   Configures default attributes for new overlays.
 
   All options for `up.layer.open()` may be configured.
@@ -231,7 +231,7 @@ up.layer = (function() {
     return newConfig
   })
 
-  /***
+  /*-
   A list of layers that are currently open.
 
   The first element in the list is the [root layer](/up.layer.root).
@@ -356,7 +356,7 @@ up.layer = (function() {
     handlers = u.filter(handlers, 'isDefault')
   }
 
-  /***
+  /*-
   [Opens a new overlay](/opening-overlays).
 
   Opening a layer is considered [navigation](/navigation) by default.
@@ -514,7 +514,7 @@ up.layer = (function() {
     return result.layer
   }
 
-  /***
+  /*-
   This event is emitted before an overlay is opened.
 
   The overlay is not yet part of the [layer stack](/up.layer.stack) and has not yet been placed
@@ -550,7 +550,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   This event is emitted after a new overlay has been placed into the DOM.
 
   The event is emitted right before the opening animation starts. Because the overlay
@@ -573,7 +573,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   This event is emitted after a layer's [location property](/up.Layer.prototype.location)
   has changed value.
 
@@ -586,7 +586,7 @@ up.layer = (function() {
   @experimental
   */
 
-  /***
+  /*-
   Opens an overlay and returns a promise for its [acceptance](/closing-overlays).
 
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
@@ -641,7 +641,7 @@ up.layer = (function() {
     }
   }
 
-  /***
+  /*-
   [Follows](/a-up-follow) this link and opens the result in a new overlay.
 
   \#\#\# Example
@@ -792,7 +792,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
 
   The JSON value of the `[up-accept]` attribute becomes the overlay's
@@ -827,7 +827,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   [Accepts](/closing-overlays) the [current layer](/up.layer.current) when the link is clicked.
 
   The JSON value of the `[up-accept]` attribute becomes the overlay's
@@ -882,7 +882,7 @@ up.layer = (function() {
     get stack() { return stack }
   }
 
-  /***
+  /*-
   Returns the current layer in the [layer stack](/up.layer.stack).
 
   The *current* layer is usually the [frontmost layer](/up.layer.front).
@@ -920,7 +920,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns the number of layers in the [layer stack](/up.layer.stack).
 
   The count includes the [root layer](/up.layer.root).
@@ -932,7 +932,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns an `up.Layer` object for the given [layer option](/layer-option).
 
   @function up.layer.get
@@ -945,7 +945,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns an array of `up.Layer` objects matching the given [layer option](/layer-option).
 
   @function up.layer.getAll
@@ -955,7 +955,7 @@ up.layer = (function() {
   @experimental
   */
 
-  /***
+  /*-
   Returns the [root layer](/layer-terminology).
 
   The root layer represents the initial page before any overlay was [opened](/opening-overlays).
@@ -966,7 +966,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns an array of all [overlays](/layer-terminology).
 
   If no overlay is open, an empty array is returned.
@@ -979,7 +979,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns the frontmost layer in the [layer stack](/up.layer.stack).
 
   The frontmost layer is the layer directly facing the user. If an overlay is
@@ -993,7 +993,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   [Dismisses](/up.layer.dismiss) all overlays.
 
   Afterwards the only remaining layer will be the [root layer](/up.layer.root).
@@ -1017,7 +1017,7 @@ up.layer = (function() {
     'dismissOverlays'
   ], () => stack)
 
-  /***
+  /*-
   [Accepts](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.accept()`.
@@ -1029,7 +1029,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.dismiss()`.
@@ -1041,7 +1041,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns whether the [current layer](/up.layer.current) is the [root layer](/up.layer.root).
 
   This is a shortcut for `up.layer.current.isRoot()`.
@@ -1052,7 +1052,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns whether the [current layer](/up.layer.current) is *not* the [root layer](/up.layer.root).
 
   This is a shortcut for `up.layer.current.isOverlay()`.
@@ -1063,7 +1063,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns whether the [current layer](/up.layer.current) is the [frontmost layer](/up.layer.front).
 
   This is a shortcut for `up.layer.current.isFront()`.
@@ -1074,7 +1074,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
   that originated on an element [contained](/up.Layer.prototype.contains) by the [current layer](/up.layer.current).
 
@@ -1094,7 +1094,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Unbinds an event listener previously bound to the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.off()`.
@@ -1108,7 +1108,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   [Emits](/up.emit) an event on the [current layer](/up.layer.current)'s [element](/up.layer.element).
 
   This is a shortcut for `up.layer.current.emit()`.
@@ -1120,7 +1120,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns the parent layer of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.parent`.
@@ -1131,7 +1131,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Whether fragment updates within the [current layer](/up.layer.current)
   can affect browser history and window title.
 
@@ -1143,7 +1143,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   The location URL of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.location`.
@@ -1154,7 +1154,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   The [current layer](/up.layer.current)'s [mode](/up.layer.mode)
   which governs its appearance and behavior.
 
@@ -1163,7 +1163,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   The [context](/context) of the [current layer](/up.layer.current).
 
   This is aliased as `up.context`.
@@ -1176,7 +1176,7 @@ up.layer = (function() {
   @experimental
   */
 
-  /***
+  /*-
   The outmost element of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.element`.
@@ -1187,7 +1187,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   The outmost element of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.element`.
@@ -1198,7 +1198,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Returns whether the given `element` is contained by the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.contains(element)`.
@@ -1210,7 +1210,7 @@ up.layer = (function() {
   */
 
 
-  /***
+  /*-
   The [size](/customizing-overlays#overlay-sizes) of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.size`.
@@ -1221,7 +1221,7 @@ up.layer = (function() {
   @stable
   */
 
-  /***
+  /*-
   Creates an element with the given `selector` and appends it to the [current layer's](/up.layer.current)
   [outmost element](/up.Layer.prototype.element).
 

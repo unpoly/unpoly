@@ -1,4 +1,4 @@
-/***
+/*-
 A response to an [HTTP request](/up.request).
 
 \#\#\# Example
@@ -12,7 +12,7 @@ A response to an [HTTP request](/up.request).
 */
 up.Response = class Response extends up.Record {
 
-  /***
+  /*-
   The HTTP method used for the request that produced this response.
 
   This is usually the HTTP method used by the initial request, but if the server
@@ -28,7 +28,7 @@ up.Response = class Response extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The URL used for the response.
 
   This is usually the requested URL, or the final URL after the server redirected.
@@ -40,7 +40,7 @@ up.Response = class Response extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The response body as a `string`.
 
   @property up.Response#text
@@ -48,7 +48,7 @@ up.Response = class Response extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The response's
   [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
   as a `number`.
@@ -60,7 +60,7 @@ up.Response = class Response extends up.Record {
   @stable
   */
 
-  /***
+  /*-
   The original [request](/up.Request) that triggered this response.
 
   @property up.Response#request
@@ -68,7 +68,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   The [`XMLHttpRequest`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest)
   object that was used to create this response.
 
@@ -77,7 +77,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   A [document title pushed by the server](/X-Up-Title).
 
   If the server pushed no title via HTTP header, this will be `undefined`.
@@ -87,7 +87,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   A [render target pushed by the server](/X-Up-Target).
 
   If the server pushed no title via HTTP header, this will be `undefined`.
@@ -97,7 +97,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
 
-  /***
+  /*-
   Changes to the current [context](/context) as [set by the server](/X-Up-Context).
 
   @property up.Response#context
@@ -127,7 +127,7 @@ up.Response = class Response extends up.Record {
     return {headers: {}}
   }
 
-  /***
+  /*-
   Returns whether the server responded with a 2xx HTTP status.
 
   @property up.Response#ok
@@ -139,7 +139,7 @@ up.Response = class Response extends up.Record {
     return this.status && ((this.status >= 200) && (this.status <= 299))
   }
   
-  /***
+  /*-
   Returns the HTTP header value with the given name.
 
   The search for the header name is case-insensitive.
@@ -156,7 +156,7 @@ up.Response = class Response extends up.Record {
   }
 
 
-  /***
+  /*-
   The response's [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
 
   @property up.Response#contentType
@@ -167,7 +167,7 @@ up.Response = class Response extends up.Record {
     return this.getHeader('Content-Type')
   }
 
-  /***
+  /*-
   The response body parsed as a JSON string.
 
   The parsed JSON object is cached with the response object,

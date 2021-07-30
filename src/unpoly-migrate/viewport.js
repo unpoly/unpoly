@@ -1,4 +1,4 @@
-/***
+/*-
 @module up.viewport
 */
 
@@ -7,7 +7,7 @@ up.migrate.renamedPackage('layout', 'viewport')
 up.migrate.renamedProperty(up.viewport.config, 'viewports', 'viewportSelectors')
 up.migrate.renamedProperty(up.viewport.config, 'snap', 'revealSnap')
 
-/***
+/*-
 Returns the scrolling container for the given element.
 
 Returns the [document's scrolling element](/up.viewport.root)

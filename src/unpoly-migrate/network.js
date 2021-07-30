@@ -1,6 +1,6 @@
 const u = up.util
 
-/***
+/*-
 @module up.network
 */
 
@@ -30,7 +30,7 @@ up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
 
 up.migrate.handleRequestOptions = options => up.migrate.fixKey(options, 'data', 'params')
 
-/***
+/*-
 Makes an AJAX request to the given URL and caches the response.
 
 The function returns a promise that fulfills with the response text.
@@ -63,7 +63,7 @@ up.ajax = function(...args) {
   return up.request(...args).then(pickResponseText)
 }
 
-/***
+/*-
 Removes all cache entries.
 
 @function up.proxy.clear
@@ -80,7 +80,7 @@ up.network.preload = function(...args) {
   return up.link.preload(...args)
 }
 
-/***
+/*-
 @class up.Request
 */
 
@@ -89,11 +89,11 @@ up.Request.prototype.navigate = function() {
   this.loadPage()
 }
 
-/***
+/*-
 @class up.Response
 */
 
-/***
+/*-
 Returns whether the server responded with a 2xx HTTP status.
 
 @function up.Response#isSuccess
@@ -106,7 +106,7 @@ up.Response.prototype.isSuccess = function() {
   return this.ok
 }
 
-/***
+/*-
 Returns whether the response was not [successful](/up.Response.prototype.ok).
 
 @function up.Response#isError
