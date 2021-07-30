@@ -27,7 +27,7 @@ up.syntax = (function() {
     '[up-expand]': -300,      // distributes [up-*] attributes to parents
     '[data-method]': -400,   // converts [data-method] to [up-method] only if link has followable [up-*] attributes
     '[data-confirm]': -400,  // converts [data-conform] to [up-confirm] only if link has followable [up-*] attributes
-  };
+  }
 
   let compilers = []
   let macros = []
@@ -289,10 +289,10 @@ up.syntax = (function() {
     const macro = registerMacro(...args)
     macro.jQuery = true
     return macro
-  };
+  }
 
   function detectSystemMacroPriority(macroSelector) {
-    macroSelector = u.evalOption(macroSelector);
+    macroSelector = u.evalOption(macroSelector)
     for (let substr in SYSTEM_MACRO_PRIORITIES) {
       const priority = SYSTEM_MACRO_PRIORITIES[substr]
       if (macroSelector.indexOf(substr) >= 0) {
@@ -319,14 +319,14 @@ up.syntax = (function() {
       jQuery: false
     }
     )
-    return u.assign(callback, options);
-  };
+    return u.assign(callback, options)
+  }
 
   function insertCompiler(queue, newCompiler) {
     let existingCompiler
     let index = 0
     while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
-      index += 1;
+      index += 1
     }
     queue.splice(index, 0, newCompiler)
     return newCompiler
@@ -379,9 +379,9 @@ up.syntax = (function() {
       element.classList.add('up-can-clean')
     }
     if (u.isArray(destructor)) {
-      destructors.push(...destructor);
+      destructors.push(...destructor)
     } else {
-      destructors.push(destructor);
+      destructors.push(destructor)
     }
   }
 
@@ -483,7 +483,7 @@ up.syntax = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
     return e.jsonAttr(element, 'up-data') || {}
-  };
+  }
 
   /*
   Resets the list of registered compiler directives to the
@@ -508,9 +508,9 @@ up.syntax = (function() {
   }
 })()
 
-up.compiler = up.syntax.compiler;
-up.$compiler = up.syntax.$compiler;
-up.destructor = up.syntax.destructor;
-up.macro = up.syntax.macro;
-up.$macro = up.syntax.$macro;
-up.data = up.syntax.data;
+up.compiler = up.syntax.compiler
+up.$compiler = up.syntax.$compiler
+up.destructor = up.syntax.destructor
+up.macro = up.syntax.macro
+up.$macro = up.syntax.$macro
+up.data = up.syntax.data

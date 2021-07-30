@@ -1,7 +1,7 @@
 require('./fragment.sass')
 
-const u = up.util;
-const e = up.element;
+const u = up.util
+const e = up.element
 
 /***
 Fragment API
@@ -129,14 +129,14 @@ up.fragment = (function() {
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main']
-  }));
+  }))
 
   // Users who are not using layers will prefer settings default targets
   // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-  u.delegate(config, 'mainTargets', () => up.layer.config.any);
+  u.delegate(config, 'mainTargets', () => up.layer.config.any)
 
   function reset() {
-    config.reset();
+    config.reset()
   }
 
   /***
@@ -168,9 +168,9 @@ up.fragment = (function() {
    @stable
    */
   function sourceOf(element, options = {}) {
-    element = getSmart(element, options);
-    return e.closestAttr(element, 'up-source');
-  };
+    element = getSmart(element, options)
+    return e.closestAttr(element, 'up-source')
+  }
 
   /***
    Returns a timestamp for the last modification of the content in the given element.
@@ -599,10 +599,10 @@ up.fragment = (function() {
     // Convert thrown errors into rejected promises.
     // Convert non-promise values into a resolved promise.
     return u.asyncify(function () {
-      let options = parseTargetAndOptions(args);
-      options = up.RenderOptions.preprocess(options);
+      let options = parseTargetAndOptions(args)
+      options = up.RenderOptions.preprocess(options)
 
-      up.browser.assertConfirmed(options);
+      up.browser.assertConfirmed(options)
 
       let guardEvent = u.pluckKey(options, 'guardEvent')
       if (guardEvent) {
@@ -611,32 +611,32 @@ up.fragment = (function() {
         // Note that we have removed { guardEvent } from options to not recursively define
         // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
         // listeners that prevent the default and re-render.
-        guardEvent.renderOptions = options;
-        up.event.assertEmitted(guardEvent, {target: options.origin});
+        guardEvent.renderOptions = options
+        up.event.assertEmitted(guardEvent, {target: options.origin})
       }
 
-      up.RenderOptions.assertContentGiven(options);
+      up.RenderOptions.assertContentGiven(options)
 
       return (options.url ? renderRemoteContent : renderLocalContent)(options)
     })
-  });
+  })
 
   function renderRemoteContent(options) {
     // Rendering a remote URL is an async operation.
     // We give feedback (.up-active) while the fragment is loading.
     let execute = () => new up.Change.FromURL(options).execute()
-    return up.feedback.aroundForOptions(options, execute);
+    return up.feedback.aroundForOptions(options, execute)
   }
 
   function renderLocalContent(options) {
     // When we have a given { url }, the { solo } option is honored by up.request().
     // But up.request() is never called when we have local content given as { document },
     // { content } or { fragment }. Hence we abort here.
-    up.network.mimicLocalRequest(options);
+    up.network.mimicLocalRequest(options)
 
     // (1) No need to give feedback as local changes are sync.
     // (2) Value will be converted to a fulfilled promise by up.util.asyncify() in render().
-    return new up.Change.FromContent(options).execute();
+    return new up.Change.FromContent(options).execute()
   }
 
   /***
@@ -665,9 +665,9 @@ up.fragment = (function() {
    @stable
    */
   const navigate = up.mockable((...args) => {
-    const options = parseTargetAndOptions(args);
-    return render({...options, navigate: true});
-  });
+    const options = parseTargetAndOptions(args)
+    return render({...options, navigate: true})
+  })
 
   /***
    This event is [emitted](/up.emit) when the server responds with the HTML, before
@@ -835,7 +835,7 @@ up.fragment = (function() {
    */
   function hello(element, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    element = getSmart(element);
+    element = getSmart(element)
 
     // Callers may pass descriptions of child elements that were [kept](/up-keep)
     // as { options.keepPlans }. For these elements up.hello() emits an event
@@ -843,17 +843,17 @@ up.fragment = (function() {
     //
     // We will also pass an array of kept child elements to up.hello() as { skip }
     // so they won't be compiled a second time.
-    const keepPlans = options.keepPlans || [];
+    const keepPlans = options.keepPlans || []
     const skip = keepPlans.map(function (plan) {
-      emitFragmentKept(plan);
-      return plan.oldElement;
-    });
+      emitFragmentKept(plan)
+      return plan.oldElement
+    })
 
-    up.syntax.compile(element, {skip, layer: options.layer});
-    emitFragmentInserted(element, options);
+    up.syntax.compile(element, {skip, layer: options.layer})
+    emitFragmentInserted(element, options)
 
-    return element;
-  };
+    return element
+  }
 
   /***
    When any page fragment has been [inserted or updated](/up.replace),
@@ -877,36 +877,36 @@ up.fragment = (function() {
     return up.emit(element, 'up:fragment:inserted', {
       log: ['Inserted fragment %o', element],
       origin: options.origin
-    });
+    })
   }
 
   function emitFragmentKeep(keepPlan) {
-    const log = ['Keeping fragment %o', keepPlan.oldElement];
-    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', ['newFragment', 'newData']);
-    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', {log, callback});
+    const log = ['Keeping fragment %o', keepPlan.oldElement]
+    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', ['newFragment', 'newData'])
+    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', {log, callback})
   }
 
   function emitFragmentKept(keepPlan) {
-    const log = ['Kept fragment %o', keepPlan.oldElement];
-    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', {log});
+    const log = ['Kept fragment %o', keepPlan.oldElement]
+    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', {log})
   }
 
   function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
-    const keepable = keepPlan.oldElement;
+    const keepable = keepPlan.oldElement
 
     const event = up.event.build(eventType, {
       newFragment: keepPlan.newElement,
       newData: keepPlan.newData
-    });
+    })
 
-    return up.emit(keepable, event, emitDetails);
-  };
+    return up.emit(keepable, event, emitDetails)
+  }
 
   function emitFragmentDestroyed(fragment, options) {
-    const log = options.log ?? ['Destroyed fragment %o', fragment];
-    const parent = options.parent || document;
-    return up.emit(parent, 'up:fragment:destroyed', {fragment, parent, log});
-  };
+    const log = options.log ?? ['Destroyed fragment %o', fragment]
+    const parent = options.parent || document
+    return up.emit(parent, 'up:fragment:destroyed', {fragment, parent, log})
+  }
 
   function isDestroying(element) {
     return !!e.closest(element, '.up-destroying')
@@ -1029,20 +1029,20 @@ up.fragment = (function() {
    @stable
    */
   function getSmart(...args) {
-    const options = u.extractOptions(args);
-    const selector = args.pop();
-    const root = args[0];
+    const options = u.extractOptions(args)
+    const selector = args.pop()
+    const root = args[0]
 
     if (u.isElementish(selector)) {
       // up.fragment.get(root: Element, element: Element, [options]) should just return element.
       // The given root and options are ignored. We also don't check if it's destroying.
       // We do use e.get() to unwrap a jQuery collection.
-      return e.get(selector);
+      return e.get(selector)
     }
 
     if (root) {
       // We don't match around { origin } if we're given a root for the search.
-      return getDumb(root, selector, options);
+      return getDumb(root, selector, options)
     }
 
     // If we don't have a root element we will use a context-sensitive lookup strategy
@@ -1052,14 +1052,14 @@ up.fragment = (function() {
       selector,
       origin: options.origin,
       layer: options.layer
-    }).find();
-  };
-
-  function getDumb(...args) {
-    return getAll(...args)[0];
+    }).find()
   }
 
-  const CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/;
+  function getDumb(...args) {
+    return getAll(...args)[0]
+  }
+
+  const CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
 
   /***
    Returns all elements matching the given selector, but
@@ -1122,17 +1122,17 @@ up.fragment = (function() {
    @stable
    */
   function getAll(...args) {
-    const options = u.extractOptions(args);
-    let selector = args.pop();
-    const root = args[0];
+    const options = u.extractOptions(args)
+    let selector = args.pop()
+    const root = args[0]
 
     // (1) up.fragment.all(rootElement, selector) should find selector within
     //     the descendants of rootElement.
     // (2) up.fragment.all(selector) should find selector within the current layer.
     // (3) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
-    selector = parseSelector(selector, root, options);
-    return selector.descendants(root || document);
-  };
+    selector = parseSelector(selector, root, options)
+    return selector.descendants(root || document)
+  }
 
   /***
    Your target selectors may use this pseudo-selector
@@ -1181,12 +1181,12 @@ up.fragment = (function() {
    @experimental
    */
   function getSubtree(element, selector, options = {}) {
-    selector = parseSelector(selector, element, options);
-    return selector.subtree(element);
-  };
+    selector = parseSelector(selector, element, options)
+    return selector.subtree(element)
+  }
 
   function contains(element, selector) {
-    return getSubtree(element, selector).length > 0;
+    return getSubtree(element, selector).length > 0
   }
 
   /***
@@ -1208,10 +1208,10 @@ up.fragment = (function() {
    @experimental
    */
   function closest(element, selector, options) {
-    element = e.get(element);
-    selector = parseSelector(selector, element, options);
-    return selector.closest(element);
-  };
+    element = e.get(element)
+    selector = parseSelector(selector, element, options)
+    return selector.closest(element)
+  }
 
   /***
    Destroys the given element or selector.
@@ -1253,22 +1253,22 @@ up.fragment = (function() {
    @stable
    */
   function destroy(...args) {
-    const options = parseTargetAndOptions(args);
+    const options = parseTargetAndOptions(args)
 
     if (options.element = getSmart(options.target, options)) {
-      new up.Change.DestroyFragment(options).execute();
+      new up.Change.DestroyFragment(options).execute()
     }
 
-    return up.migrate.formerlyAsync?.('up.destroy()');
-  };
+    return up.migrate.formerlyAsync?.('up.destroy()')
+  }
 
   function parseTargetAndOptions(args) {
-    const options = u.parseArgIntoOptions(args, 'target');
+    const options = u.parseArgIntoOptions(args, 'target')
     if (u.isElement(options.target)) {
-      options.origin ||= options.target;
+      options.origin ||= options.target
     }
-    return options;
-  };
+    return options
+  }
 
   /***
    Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
@@ -1289,9 +1289,9 @@ up.fragment = (function() {
    */
 
   function markFragmentAsDestroying(element) {
-    element.classList.add('up-destroying');
-    element.setAttribute('aria-hidden', 'true');
-  };
+    element.classList.add('up-destroying')
+    element.setAttribute('aria-hidden', 'true')
+  }
 
   /***
    This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
@@ -1349,14 +1349,14 @@ up.fragment = (function() {
    @stable
    */
   function reload(...args) {
-    const options = parseTargetAndOptions(args);
-    options.target ||= ':main';
-    const element = getSmart(options.target, options);
-    options.url ||= sourceOf(element);
+    const options = parseTargetAndOptions(args)
+    options.target ||= ':main'
+    const element = getSmart(options.target, options)
+    options.url ||= sourceOf(element)
     options.headers ||= {}
-    options.headers[up.protocol.headerize('reloadFromTime')] = timeOf(element);
-    return render(options);
-  };
+    options.headers[up.protocol.headerize('reloadFromTime')] = timeOf(element)
+    return render(options)
+  }
 
   /***
    Fetches this given URL with JavaScript and [replaces](/up.replace) the
@@ -1382,14 +1382,14 @@ up.fragment = (function() {
   }
 
   function successKey(key) {
-    return u.unprefixCamelCase(key, 'fail');
+    return u.unprefixCamelCase(key, 'fail')
   }
 
   function failKey(key) {
     if (!key.match(/^fail[A-Z]/)) {
-      return u.prefixCamelCase(key, 'fail');
+      return u.prefixCamelCase(key, 'fail')
     }
-  };
+  }
 
   /***
    Returns a CSS selector that matches the given element as good as possible.
@@ -1417,31 +1417,31 @@ up.fragment = (function() {
    */
   function toTarget(element) {
     if (u.isString(element)) {
-      return element;
+      return element
     }
 
     // In case we're called called with a jQuery collection
-    element = e.get(element);
+    element = e.get(element)
 
     let value
     if (e.isSingleton(element)) {
-      return e.tagName(element);
+      return e.tagName(element)
     } else if (value = element.getAttribute("up-id")) {
-      return e.attributeSelector('up-id', value);
+      return e.attributeSelector('up-id', value)
     } else if (value = element.getAttribute("id")) {
-      return e.idSelector(value);
+      return e.idSelector(value)
     } else if (value = element.getAttribute("name")) {
-      return e.tagName(element) + e.attributeSelector('name', value);
+      return e.tagName(element) + e.attributeSelector('name', value)
     } else if (value = u.presence(u.filter(element.classList, isGoodClassForTarget))) {
-      let selector = '';
+      let selector = ''
       for (let goodClass of value) {
-        selector += e.classSelector(goodClass);
+        selector += e.classSelector(goodClass)
       }
-      return selector;
+      return selector
     } else {
-      return e.tagName(element);
+      return e.tagName(element)
     }
-  };
+  }
 
 
   /***
@@ -1483,98 +1483,98 @@ up.fragment = (function() {
   function isGoodClassForTarget(klass) {
     function matchesPattern(pattern) {
       if (u.isRegExp(pattern)) {
-        return pattern.test(klass);
+        return pattern.test(klass)
       } else {
-        return pattern === klass;
+        return pattern === klass
       }
-    };
-    return !u.some(config.badTargetClasses, matchesPattern);
-  };
+    }
+    return !u.some(config.badTargetClasses, matchesPattern)
+  }
 
   function resolveOriginReference(target, options = {}) {
-    const {origin} = options;
+    const {origin} = options
 
     return target.replace(/&|:origin\b/, function (match) {
       if (origin) {
-        return toTarget(origin);
+        return toTarget(origin)
       } else {
-        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target);
+        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
       }
-    });
-  };
+    })
+  }
 
   function expandTargets(targets, options = {}) {
-    const {layer} = options;
+    const {layer} = options
     if (layer !== 'new' && !(layer instanceof up.Layer)) {
-      up.fail('Must pass an up.Layer as { layer } option, but got %o', layer);
+      up.fail('Must pass an up.Layer as { layer } option, but got %o', layer)
     }
 
     // Copy the list since targets might be a jQuery collection, and this does not support shift or push.
-    targets = u.copy(u.wrapList(targets));
+    targets = u.copy(u.wrapList(targets))
 
-    const expanded = [];
+    const expanded = []
 
     while (targets.length) {
-      const target = targets.shift();
+      const target = targets.shift()
 
       if (target === ':main' || target === true) {
-        const mode = layer === 'new' ? options.mode : layer.mode;
-        targets.unshift(...up.layer.mainTargets(mode));
+        const mode = layer === 'new' ? options.mode : layer.mode
+        targets.unshift(...up.layer.mainTargets(mode))
       } else if (target === ':layer') {
         // Discard this target for new layers, which don't have a first-swappable-element.
         // Also don't && the layer check into the `else if` condition above, or it will
         // be returned as a verbatim string below.
         if (layer !== 'new' && !layer.opening) {
-          targets.unshift(layer.getFirstSwappableElement());
+          targets.unshift(layer.getFirstSwappableElement())
         }
       } else if (u.isElementish(target)) {
-        expanded.push(toTarget(target));
+        expanded.push(toTarget(target))
       } else if (u.isString(target)) {
-        expanded.push(resolveOriginReference(target, options));
+        expanded.push(resolveOriginReference(target, options))
       } else {
         // @buildPlans() might call us with { target: false } or { target: nil }
         // In that case we don't add a plan.
       }
     }
 
-    return u.uniq(expanded);
-  };
+    return u.uniq(expanded)
+  }
 
   function parseSelector(selector, element, options = {}) {
-    const filters = [];
+    const filters = []
 
     if (!options.destroying) {
-      filters.push(isNotDestroying);
+      filters.push(isNotDestroying)
     }
 
     // Some up.fragment function center around an element, like closest() or matches().
     options.layer ||= element
-    const layers = up.layer.getAll(options);
+    const layers = up.layer.getAll(options)
     if (options.layer !== 'any' && !(element && e.isDetached(element))) {
-      filters.push(match => u.some(layers, layer => layer.contains(match)));
+      filters.push(match => u.some(layers, layer => layer.contains(match)))
     }
 
-    let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: layers[0]});
+    let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: layers[0]})
 
     expandedTargets = expandedTargets.map(function (target) {
       target = target.replace(CSS_HAS_SUFFIX_PATTERN, function (match, descendantSelector) {
-        filters.push(element => element.querySelector(descendantSelector));
-        return '';
-      });
-      return target || '*';
-    });
+        filters.push(element => element.querySelector(descendantSelector))
+        return ''
+      })
+      return target || '*'
+    })
 
-    return new up.Selector(expandedTargets, filters);
-  };
+    return new up.Selector(expandedTargets, filters)
+  }
 
   function hasAutoHistory(fragment) {
     if (contains(fragment, config.autoHistoryTargets)) {
-      return true;
+      return true
     } else {
-      up.puts('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets");
-      return false;
+      up.puts('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets")
+      return false
     }
-  };
+  }
 
   /***
    A pseudo-selector that matches the layer's main target.
@@ -1760,22 +1760,22 @@ up.fragment = (function() {
    @experimental
    */
   function matches(element, selector, options = {}) {
-    element = e.get(element);
-    selector = parseSelector(selector, element, options);
-    return selector.matches(element);
-  };
+    element = e.get(element)
+    selector = parseSelector(selector, element, options)
+    return selector.matches(element)
+  }
 
   up.on('up:app:boot', function () {
-    const {body} = document;
-    body.setAttribute('up-source', up.history.location);
-    hello(body);
+    const {body} = document
+    body.setAttribute('up-source', up.history.location)
+    hello(body)
 
     if (!up.browser.canPushState()) {
-      return up.warn('Cannot push history changes. Next fragment update will load in a new page.');
+      return up.warn('Cannot push history changes. Next fragment update will load in a new page.')
     }
-  });
+  })
 
-  up.on('up:framework:reset', reset);
+  up.on('up:framework:reset', reset)
 
   return {
     config,
@@ -1806,12 +1806,12 @@ up.fragment = (function() {
   }
 })()
 
-up.reload = up.fragment.reload;
-up.destroy = up.fragment.destroy;
-up.render = up.fragment.render;
-up.navigate = up.fragment.navigate;
-up.hello = up.fragment.hello;
-up.visit = up.fragment.visit;
+up.reload = up.fragment.reload
+up.destroy = up.fragment.destroy
+up.render = up.fragment.render
+up.navigate = up.fragment.navigate
+up.hello = up.fragment.hello
+up.visit = up.fragment.visit
 
 /***
 Returns the current [context](/context).
@@ -1825,4 +1825,4 @@ This is aliased as `up.layer.context`.
   If no context has been set an empty object is returned.
 @experimental
 */
-u.delegate(up, 'context', () => up.layer.current);
+u.delegate(up, 'context', () => up.layer.current)

@@ -728,7 +728,7 @@ up.protocol = (function() {
     csrfParam() { return e.metaContent('csrf-param'); },
     csrfToken() { return e.metaContent('csrf-token'); },
     csrfHeader: 'X-CSRF-Token' // Used by Rails. Other frameworks use different headers.
-  }));
+  }))
 
   function csrfHeader() {
     return u.evalOption(config.csrfHeader)

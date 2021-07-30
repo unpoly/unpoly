@@ -112,7 +112,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   createElement(parentElement) {
-    this.nesting ||= this.suggestVisualNesting();
+    this.nesting ||= this.suggestVisualNesting()
     const elementAttrs = u.compactObject(u.pick(this, ['align', 'position', 'size', 'class', 'nesting']))
     this.element = this.affixPart(parentElement, null, elementAttrs)
   }
