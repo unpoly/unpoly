@@ -404,29 +404,23 @@ up.motion = (function() {
         }
       })
 
-      const trackable = function() {
+      const trackable = async function() {
         // (1) Scroll newElement into position before we start the enter animation.
         // (2) The return value of scrollNew() may or may not be a promise, so we convert
         //     it to a promise by wrapping it in Promise.resolve().
-        let promise = Promise.resolve(scrollNew())
+        await scrollNew()
 
-        promise = promise.then(function() {
-          // Since we have scrolled the viewport (containing both oldElement and newElement),
-          // we must shift the old copy so it looks like it it is still sitting
-          // in the same position.
-          const scrollTopAfterReveal = viewport.scrollTop
-          oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeReveal)
+        // Since we have scrolled the viewport (containing both oldElement and newElement),
+        // we must shift the old copy so it looks like it it is still sitting
+        // in the same position.
+        const scrollTopAfterReveal = viewport.scrollTop
+        oldRemote.moveBounds(0, scrollTopAfterReveal - scrollTopBeforeReveal)
 
-          return transitionFn(oldElement, newElement, options)
-        })
+        await transitionFn(oldElement, newElement, options)
 
-        promise = promise.then(function() {
-          beforeDetach()
-          e.remove(oldRemote.bounds)
-          afterDetach()
-        })
-
-        return promise
+        beforeDetach()
+        e.remove(oldRemote.bounds)
+        afterDetach()
       }
 
       return motionController.startFunction([oldElement, newElement], trackable, options)
@@ -438,8 +432,7 @@ up.motion = (function() {
       swapElementsDirectly(oldElement, newElement)
       afterInsert()
       afterDetach()
-      const promise = scrollNew()
-      return promise
+      return scrollNew()
     }
   }
 

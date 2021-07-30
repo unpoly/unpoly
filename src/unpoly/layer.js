@@ -501,7 +501,7 @@ up.layer = (function() {
 
   @stable
   */
-  function open(options) {
+  async function open(options) {
     options = u.options(options, {
       layer: 'new',
       defaultToEmptyContent: true,
@@ -510,7 +510,8 @@ up.layer = (function() {
 
     // Even if we are given { content } we need to pipe this through up.render()
     // since a lot of options processing is happening there.
-    return up.render(options).then(result => result.layer)
+    let result = await up.render(options)
+    return result.layer
   }
 
   /***
@@ -624,7 +625,7 @@ up.layer = (function() {
         onAccepted: (event) => resolve(event.value),
         onDismissed: (event) => reject(event.value)
       }
-      return open(options)
+      open(options)
     })
   }
 

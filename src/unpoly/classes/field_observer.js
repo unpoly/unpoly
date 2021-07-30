@@ -49,7 +49,7 @@ up.FieldObserver = class FieldObserver {
     return !u.isEqual(values, this.processedValues) && !u.isEqual(this.scheduledValues, values)
   }
 
-  requestCallback() {
+  async requestCallback() {
     if ((this.scheduledValues !== null) && !this.currentTimer && !this.callbackRunning) {
       const diff = this.changedValues(this.processedValues, this.scheduledValues)
       this.processedValues = this.scheduledValues
@@ -66,12 +66,9 @@ up.FieldObserver = class FieldObserver {
         }
       }
 
-      const callbacksDone = u.allSettled(callbackReturnValues)
-
-      callbacksDone.then(() => {
-        this.callbackRunning = false
-        this.requestCallback()
-      })
+      await u.allSettled(callbackReturnValues)
+      this.callbackRunning = false
+      this.requestCallback()
     }
   }
 

@@ -182,12 +182,12 @@ up.history = (function() {
     return { up: {} }
   }
 
-  function restoreStateOnPop(state) {
+  async function restoreStateOnPop(state) {
     if (state?.up) {
       // The earlier URL has now been restored by the browser. This cannot be prevented.
       let url = currentLocation()
 
-      const replaced = up.render({
+      await up.render({
         url,
         history: true,
         // (1) While the browser has already restored the earlier URL, we must still
@@ -207,16 +207,14 @@ up.history = (function() {
         // Since the URL was already changed by the browser, don't save scroll state.
         saveScroll: false
       })
-      replaced.then(function() {
-        url = currentLocation()
-        emit('up:location:changed', {url, reason: 'pop', log: `Restored location ${url}`})
-      })
+      url = currentLocation()
+      emit('up:location:changed', {url, reason: 'pop', log: `Restored location ${url}`})
     } else {
       up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
     }
   }
 
-  function pop(event) {
+  function onPop(event) {
     trackCurrentLocation()
     up.viewport.saveScroll({location: previousLocation})
     const { state } = event
@@ -232,7 +230,7 @@ up.history = (function() {
     // Supported by all browser except IE:
     // https://developer.mozilla.org/en-US/docs/Web/API/History/scrollRestoration
     window.history.scrollRestoration = 'manual'
-    window.addEventListener('popstate', pop)
+    window.addEventListener('popstate', onPop)
 
     // Unpoly replaces the initial page state so it can later restore it when the user
     // goes back to that initial URL. However, if the initial request was a POST,

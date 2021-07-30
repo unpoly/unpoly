@@ -292,7 +292,7 @@ up.feedback = (function() {
     const result = fn()
     u.always(result, () => stop(element))
     // Return the original promise returned by fn(), not the
-    // new promose from u.always(), which cannot reject.
+    // new promise from u.always(), which cannot reject.
     return result
   }
 

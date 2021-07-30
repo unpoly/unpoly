@@ -32,7 +32,7 @@ up.MotionController = class MotionController {
   @return {Promise}
     A promise that fulfills when the animation ends.
   */
-  startFunction(cluster, startMotion, memory = {}) {
+  async startFunction(cluster, startMotion, memory = {}) {
     cluster = e.list(cluster)
 
     // Some motions might reject after starting. E.g. a scrolling animation
@@ -50,16 +50,16 @@ up.MotionController = class MotionController {
       // Since we don't want recursive tracking or finishing, we could run
       // the animator() now. However, since the else branch is async, we push
       // the animator into the microtask queue to be async as well.
-      return u.microtask(mutedAnimator)
+      await u.microtask(mutedAnimator)
     } else {
       memory.trackMotion = false
-      return this.finish(cluster).then(() => {
-        let promise = this.whileForwardingFinishEvent(cluster, mutedAnimator)
-        promise = promise.then(() => this.unmarkCluster(cluster))
-        // Attach the modified promise to the cluster's elements
-        this.markCluster(cluster, promise)
-        return promise
-      })
+      await this.finish(cluster)
+      let promise = this.whileForwardingFinishEvent(cluster, mutedAnimator)
+      // Attach the modified promise to the cluster's elements
+      this.markCluster(cluster, promise)
+      promise = promise.then(() => this.unmarkCluster(cluster))
+      // Return the original promise that is still running
+      return await promise
     }
   }
 
@@ -171,10 +171,9 @@ up.MotionController = class MotionController {
     return fn().then(unbindFinish)
   }
 
-  reset() {
-    this.finish().then(() => {
-      this.finishCount = 0
-      this.clusterCount = 0
-    })
+  async reset() {
+    await this.finish()
+    this.finishCount = 0
+    this.clusterCount = 0
   }
 }

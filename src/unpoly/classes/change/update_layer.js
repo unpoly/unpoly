@@ -95,7 +95,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     })
   }
 
-  executeStep(step) {
+  async executeStep(step) {
     let promise
 
     // Remember where the element came from to support up.reload(element).
@@ -112,7 +112,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           this.handleFocus(step.oldElement, step)
 
           // Our caller expects a promise
-          return this.handleScroll(step.oldElement, step)
+          await this.handleScroll(step.oldElement, step)
 
         } else {
           // This needs to happen before up.syntax.clean() below.
@@ -144,13 +144,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             }
           }
 
-          return up.morph(
+          await up.morph(
             step.oldElement,
             step.newElement,
             step.transition,
             morphOptions
           )
         }
+        break
 
       case 'content':
         let oldWrapper = e.wrapChildren(step.oldElement)
@@ -164,15 +165,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           newElement: newWrapper,
           focus: false
         }
-        promise = this.executeStep(wrapperStep)
+        await this.executeStep(wrapperStep)
 
-        promise = promise.then(() => {
-          e.unwrap(newWrapper)
-          // Unwrapping will destroy focus, so we need to handle it again.
-          return this.handleFocus(step.oldElement, step)
-        })
+        e.unwrap(newWrapper)
+        // Unwrapping will destroy focus, so we need to handle it again.
+        await this.handleFocus(step.oldElement, step)
 
-        return promise
+        break
 
       case 'before':
       case 'after':
@@ -196,19 +195,19 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         // Reveal element that was being prepended/appended.
         // Since we will animate (not morph) it's OK to allow animation of scrolling
         // if options.scrollBehavior is given.
-        promise = this.handleScroll(wrapper, step)
+        await this.handleScroll(wrapper, step)
 
         // Since we're adding content instead of replacing, we'll only
         // animate newElement instead of morphing between oldElement and newElement
-        promise = promise.then(() => up.animate(wrapper, step.transition, step))
+        await up.animate(wrapper, step.transition, step)
 
         // Remove the wrapper now that is has served it purpose
-        promise = promise.then(() => e.unwrap(wrapper))
+        await e.unwrap(wrapper)
 
-        return promise
+        break
 
       default:
-        return up.fail('Unknown placement: %o', step.placement)
+        up.fail('Unknown placement: %o', step.placement)
     }
   }
 

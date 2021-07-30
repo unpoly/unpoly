@@ -10,7 +10,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     this.log = this.options.log
   }
 
-  execute() {
+  async execute() {
     // Destroying a fragment is a sync function.
     //
     // A variant of the logic below can also be found in up.Change.UpdateLayer.
@@ -32,7 +32,9 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
       // The destroy animation will then play out, but the destroying
       // element is ignored by all up.fragment.* functions.
       this.emitDestroyed()
-      this.animate().then(() => this.wipe()).then(() => this.onFinished())
+      await this.animate()
+      this.wipe()
+      this.onFinished()
     } else {
       // If we're not animating, we can remove the element before emitting up:fragment:destroyed.
       this.wipe()
