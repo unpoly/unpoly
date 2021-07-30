@@ -1,7 +1,10 @@
 TODOs
 ====
 
-- Use a different Doccomment fence since RubyMine keeps parsing our custom Docs as JSDoc type information
+- Fix doc comments everywhere
+- Document up.RenderResult
+  - Show that it returns from up.render and up.navigate
+  - Make sure that it appears in the doc sidebar
 
 
 
