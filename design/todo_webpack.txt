@@ -2,9 +2,6 @@ TODOs
 ====
 
 - Fix doc comments everywhere
-- Document up.RenderResult
-  - Show that it returns from up.render and up.navigate
-  - Make sure that it appears in the doc sidebar
 
 
 

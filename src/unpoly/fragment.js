@@ -584,7 +584,7 @@ up.fragment = (function() {
     A callback that will be run when all animations have concluded and
     elements were removed from the DOM tree.
 
-    @return {Promise<up.RenderResult>}
+  @return {Promise<up.RenderResult>}
     A promise that fulfills when the page has been updated.
 
     If the update is animated, the promise will be resolved *before* the existing element was
@@ -664,6 +664,10 @@ up.fragment = (function() {
     [´{ target }` option](/up.render#options.target).
   @param {Object} [options]
     See options for `up.render()`.
+  @return {Promise<up.RenderResult>}
+    A promise that fulfills when the page has been updated.
+
+    For details, see return value for `up.render()`.
   @stable
   */
   const navigate = up.mockable((...args) => {
