@@ -1,7 +1,7 @@
-u = up.util
-e = up.element
+const u = up.util
+const e = up.element
 
-###**
+/***
 The `up.Params` class offers a consistent API to read and manipulate request parameters
 independent of their type.
 
@@ -20,10 +20,10 @@ The following types of parameter representation are supported:
    On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
 
 @class up.Params
-###
-class up.Params extends up.Class
+*/
+up.Params = class Params extends up.Class {
 
-  ###**
+  /***
   Constructs a new `up.Params` instance.
 
   @constructor up.Params
@@ -33,25 +33,28 @@ class up.Params extends up.Class
     The given params value may be of any [supported type](/up.Params).
   @return {up.Params}
   @experimental
-  ###
-  constructor: (raw) ->
+  */
+  constructor(raw) {
     super()
-    @clear()
-    @addAll(raw)
+    this.clear()
+    this.addAll(raw)
+  }
 
-  ###**
+  /***
   Removes all params from this object.
 
   @function up.Params#clear
   @experimental
-  ###
-  clear: ->
-    @entries = []
+  */
+  clear() {
+    this.entries = []
+  }
 
-  "#{u.copy.key}": ->
-    new up.Params(@)
+  [u.copy.key]() {
+    return new up.Params(this)
+  }
 
-  ###**
+  /***
   Returns an object representation of this `up.Params` instance.
 
   The returned value is a simple JavaScript object with properties
@@ -70,20 +73,24 @@ class up.Params extends up.Class
   @function up.Params#toObject
   @return {Object}
   @experimental
-  ###
-  toObject: ->
-    obj = {}
-    for entry in @entries
-      { name, value } = entry
-      unless u.isBasicObjectProperty(name)
-        if @isArrayKey(name)
+  */
+  toObject() {
+    const obj = {}
+    for (let entry of this.entries) {
+      const { name, value } = entry
+      if (!u.isBasicObjectProperty(name)) {
+        if (this.isArrayKey(name)) {
           obj[name] ||= []
           obj[name].push(value)
-        else
+        } else {
           obj[name] = value
-    obj
+        }
+      }
+    }
+    return obj
+  }
 
-  ###**
+  /***
   Returns an array representation of this `up.Params` instance.
 
   The returned value is a JavaScript array with elements that are objects with
@@ -102,11 +109,12 @@ class up.Params extends up.Class
   @function up.Params#toArray
   @return {Array}
   @experimental
-  ###
-  toArray: ->
-    @entries
+  */
+  toArray() {
+    return this.entries
+  }
 
-  ###**
+  /***
   Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation
   of this `up.Params` instance.
 
@@ -121,18 +129,21 @@ class up.Params extends up.Class
   @function up.Params#toFormData
   @return {FormData}
   @experimental
-  ###
-  toFormData: ->
-    formData = new FormData()
-    for entry in @entries
+  */
+  toFormData() {
+    const formData = new FormData()
+    for (let entry of this.entries) {
       formData.append(entry.name, entry.value)
-    unless formData.entries
-      # If this browser cannot inspect FormData with the #entries()
-      # iterator, assign the original array for inspection by specs.
-      formData.originalArray = @entries
-    formData
+    }
+    if (!formData.entries) {
+      // If this browser cannot inspect FormData with the #entries()
+      // iterator, assign the original array for inspection by specs.
+      formData.originalArray = this.entries
+    }
+    return formData
+  }
 
-  ###**
+  /***
   Returns an [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance.
 
   The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
@@ -152,29 +163,33 @@ class up.Params extends up.Class
   @return {string}
     a query string built from the given params
   @experimental
-  ###
-  toQuery: ->
-    parts = u.map(@entries, @arrayEntryToQuery)
+  */
+  toQuery() {
+    let parts = u.map(this.entries, this.arrayEntryToQuery.bind(this))
     parts = u.compact(parts)
-    parts.join('&')
+    return parts.join('&')
+  }
 
-  arrayEntryToQuery: (entry) =>
-    value = entry.value
+  arrayEntryToQuery(entry) {
+    const { value } = entry
 
-    # We cannot transpot a binary value in a query string.
-    if @isBinaryValue(value)
-      return undefined
+    // We cannot transpot a binary value in a query string.
+    if (this.isBinaryValue(value)) {
+      return
+    }
 
-    query = encodeURIComponent(entry.name)
-    # There is a subtle difference when encoding blank values:
-    # 1. An undefined or null value is encoded to `key` with no equals sign
-    # 2. An empty string value is encoded to `key=` with an equals sign but no value
-    if u.isGiven(value)
+    let query = encodeURIComponent(entry.name)
+    // There is a subtle difference when encoding blank values:
+    // 1. An undefined or null value is encoded to `key` with no equals sign
+    // 2. An empty string value is encoded to `key=` with an equals sign but no value
+    if (u.isGiven(value)) {
       query += "="
       query += encodeURIComponent(value)
-    query
+    }
+    return query
+  }
 
-  ###**
+  /***
   Returns whether the given value cannot be encoded into a query string.
 
   We will have `File` values in our params when we serialize a form with a file input.
@@ -182,15 +197,17 @@ class up.Params extends up.Class
 
   @function up.Params#isBinaryValue
   @internal
-  ###
-  isBinaryValue: (value) ->
-    value instanceof Blob
+  */
+  isBinaryValue(value) {
+    return value instanceof Blob
+  }
 
-  hasBinaryValues: ->
-    values = u.map(@entries, 'value')
-    return u.some(values, @isBinaryValue)
+  hasBinaryValues() {
+    const values = u.map(this.entries, 'value')
+    return u.some(values, this.isBinaryValue)
+  }
 
-  ###**
+  /***
   Builds an URL string from the given base URL and
   this `up.Params` instance as a [query string](https://en.wikipedia.org/wiki/Query_string).
 
@@ -203,14 +220,15 @@ class up.Params extends up.Class
   @return {string}
     The built URL.
   @experimental
-  ###
-  toURL: (base) ->
-    parts = [base, @toQuery()]
+  */
+  toURL(base) {
+    let parts = [base, this.toQuery()]
     parts = u.filter(parts, u.isPresent)
-    separator = if u.contains(base, '?') then '&' else '?'
-    parts.join(separator)
+    const separator = u.contains(base, '?') ? '&' : '?'
+    return parts.join(separator)
+  }
 
-  ###**
+  /***
   Adds a new entry with the given `name` and `value`.
 
   An `up.Params` instance can hold multiple entries with the same name.
@@ -230,11 +248,12 @@ class up.Params extends up.Class
   @param {any} value
     The value of the new entry.
   @experimental
-  ###
-  add: (name, value) ->
-    @entries.push({name, value})
+  */
+  add(name, value) {
+    this.entries.push({ name, value })
+  }
 
-  ###**
+  /***
   Adds all entries from the given list of params.
 
   The given params value may be of any [supported type](/up.Params).
@@ -242,51 +261,63 @@ class up.Params extends up.Class
   @function up.Params#addAll
   @param {Object|Array|string|up.Params|undefined} params
   @experimental
-  ###
-  addAll: (raw) ->
-    if u.isMissing(raw)
-      # nothing to do
-    else if raw instanceof @constructor
-      @entries.push(raw.entries...)
-    else if u.isArray(raw)
-      # internal use for copying
-      @entries.push(raw...)
-    else if u.isString(raw)
-      @addAllFromQuery(raw)
-    else if u.isFormData(raw)
-      @addAllFromFormData(raw)
-    else if u.isObject(raw)
-      @addAllFromObject(raw)
-    else
+  */
+  addAll(raw) {
+    if (u.isMissing(raw)) {
+      // nothing to do
+    } else if (raw instanceof this.constructor) {
+      this.entries.push(...raw.entries)
+    } else if (u.isArray(raw)) {
+      // internal use for copying
+      this.entries.push(...raw)
+    } else if (u.isString(raw)) {
+      this.addAllFromQuery(raw)
+    } else if (u.isFormData(raw)) {
+      this.addAllFromFormData(raw)
+    } else if (u.isObject(raw)) {
+      this.addAllFromObject(raw)
+    } else {
       up.fail("Unsupport params type: %o", raw)
+    }
+  }
 
-  addAllFromObject: (object) ->
-    for key, value of object
-      valueElements = if u.isArray(value) then value else [value]
-      for valueElement in valueElements
-        @add(key, valueElement)
+  addAllFromObject(object) {
+    for (let key in object) {
+      const value = object[key]
+      const valueElements = u.isArray(value) ? value : [value]
+      for (let valueElement of valueElements) {
+        this.add(key, valueElement)
+      }
+    }
+  }
 
-  addAllFromQuery: (query) ->
-    for part in query.split('&')
-      if part
-        [name, value] = part.split('=')
+  addAllFromQuery(query) {
+    for (let part of query.split('&')) {
+      if (part) {
+        let [name, value] = part.split('=')
         name = decodeURIComponent(name)
-        # There are three forms we need to handle:
-        # (1) foo=bar should become { name: 'foo', bar: 'bar' }
-        # (2) foo=    should become { name: 'foo', bar: '' }
-        # (3) foo     should become { name: 'foo', bar: null }
-        if u.isGiven(value)
+        // There are three forms we need to handle:
+        // (1) foo=bar should become { name: 'foo', bar: 'bar' }
+        // (2) foo=    should become { name: 'foo', bar: '' }
+        // (3) foo     should become { name: 'foo', bar: null }
+        if (u.isGiven(value)) {
           value = decodeURIComponent(value)
-        else
+        } else {
           value = null
-        @add(name, value)
+        }
+        this.add(name, value)
+      }
+    }
+  }
 
-  addAllFromFormData: (formData) ->
-    # IE11: Remove eachIterator and just use for .. of
-    u.eachIterator formData.entries(), (value) =>
-      @add(value...)
+  addAllFromFormData(formData) {
+    // IE11: Remove eachIterator and just use for .. of
+    u.eachIterator(formData.entries(), value => {
+      this.add(...Array.from(value || []))
+    })
+  }
 
-  ###**
+  /***
   Sets the `value` for the entry with given `name`.
 
   An `up.Params` instance can hold multiple entries with the same name.
@@ -299,25 +330,28 @@ class up.Params extends up.Class
   @param {any} value
     The new value of the entry.
   @experimental
-  ###
-  set: (name, value) ->
-    @delete(name)
-    @add(name, value)
+  */
+  set(name, value) {
+    this.delete(name)
+    this.add(name, value)
+  }
 
-  ###**
+  /***
   Deletes all entries with the given `name`.
 
   @function up.Params#delete
   @param {string} name
   @experimental
-  ###
-  delete: (name) ->
-    @entries = u.reject(@entries, @matchEntryFn(name))
+  */
+  delete(name) {
+    this.entries = u.reject(this.entries, this.matchEntryFn(name))
+  }
 
-  matchEntryFn: (name) ->
-    (entry) -> entry.name == name
+  matchEntryFn(name) {
+    return entry => entry.name === name
+  }
 
-  ###**
+  /***
   Returns the first param value with the given `name` from the given `params`.
 
   Returns `undefined` if no param value with that name is set.
@@ -347,14 +381,16 @@ class up.Params extends up.Class
   @function up.Params#get
   @param {string} name
   @experimental
-  ###
-  get: (name) ->
-    if @isArrayKey(name)
-      @getAll(name)
-    else
-      @getFirst(name)
+  */
+  get(name) {
+    if (this.isArrayKey(name)) {
+      return this.getAll(name)
+    } else {
+      return this.getFirst(name)
+    }
+  }
 
-  ###**
+  /***
   Returns the first param value with the given `name`.
 
   Returns `undefined` if no param value with that name is set.
@@ -364,12 +400,13 @@ class up.Params extends up.Class
   @return {any}
     The value of the param with the given name.
   @internal
-  ###
-  getFirst: (name) ->
-    entry = u.find(@entries, @matchEntryFn(name))
-    entry?.value
+  */
+  getFirst(name) {
+    const entry = u.find(this.entries, this.matchEntryFn(name))
+    return entry?.value
+  }
 
-  ###**
+  /***
   Returns an array of all param values with the given `name`.
 
   Returns an empty array if no param value with that name is set.
@@ -379,21 +416,25 @@ class up.Params extends up.Class
   @return {Array}
     An array of all values with the given name.
   @internal
-  ###
-  getAll: (name) ->
-    if @isArrayKey(name)
-      @getAll(name)
-    else
-      entries = u.map(@entries, @matchEntryFn(name))
-      u.map(entries, 'value')
+  */
+  getAll(name) {
+    if (this.isArrayKey(name)) {
+      return this.getAll(name)
+    } else {
+      const entries = u.map(this.entries, this.matchEntryFn(name))
+      return u.map(entries, 'value')
+    }
+  }
 
-  isArrayKey: (key) ->
-    u.endsWith(key, '[]')
+  isArrayKey(key) {
+    return u.endsWith(key, '[]')
+  }
 
-  "#{u.isBlank.key}": ->
-    @entries.length == 0
+  [u.isBlank.key]() {
+    return this.entries.length === 0
+  }
 
-  ###**
+  /***
   Constructs a new `up.Params` instance from the given `<form>`.
 
   The returned params may be passed as `{ params }` option to
@@ -433,13 +474,14 @@ class up.Params extends up.Class
   @return {up.Params}
     A new `up.Params` instance with values from the given form.
   @experimental
-  ###
-  @fromForm: (form) ->
-    # If passed a selector, up.fragment.get() will prefer a match on the current layer.
+  */
+  static fromForm(form) {
+    // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     form = up.fragment.get(form)
-    @fromFields(up.form.fields(form))
+    return this.fromFields(up.form.fields(form))
+  }
 
-  ###**
+  /***
   Constructs a new `up.Params` instance from one or more
   [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
 
@@ -453,14 +495,16 @@ class up.Params extends up.Class
   @param {Element|List<Element>|jQuery} fields
   @return {up.Params}
   @experimental
-  ###
-  @fromFields: (fields) ->
-    params = new @()
-    for field in u.wrapList(fields)
+  */
+  static fromFields(fields) {
+    const params = new (this)()
+    for (let field of u.wrapList(fields)) {
       params.addField(field)
-    params
+    }
+    return params
+  }
 
-  ###**
+  /***
   Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
 
   The added params will include exactly those form values that would be
@@ -472,35 +516,43 @@ class up.Params extends up.Class
   @function up.Params#addField
   @param {Element|jQuery} field
   @experimental
-  ###
-  addField: (field) ->
-    params = new @constructor()
-    field = e.get(field) # unwrap jQuery
+  */
+  addField(field) {
+    field = e.get(field); // unwrap jQuery
 
-    # Input fields are excluded from form submissions if they have no [name]
-    # or when they are [disabled].
-    if (name = field.name) && (!field.disabled)
-      tagName = field.tagName
-      type = field.type
-      if tagName == 'SELECT'
-        for option in field.querySelectorAll('option')
-          if option.selected
-            @add(name, option.value)
-      else if type == 'checkbox' || type == 'radio'
-        if field.checked
-          @add(name, field.value)
-      else if type == 'file'
-        # The value of an input[type=file] is the local path displayed in the form.
-        # The actual File objects are in the #files property.
-        for file in field.files
-          @add(name, file)
-      else
-        @add(name, field.value)
+    // Input fields are excluded from form submissions if they have no [name]
+    // or when they are [disabled].
+    let name = field.name
+    if (name && !field.disabled) {
+      const { tagName } = field
+      const { type } = field
+      if (tagName === 'SELECT') {
+        for (let option of field.querySelectorAll('option')) {
+          if (option.selected) {
+            this.add(name, option.value)
+          }
+        }
+      } else if ((type === 'checkbox') || (type === 'radio')) {
+        if (field.checked) {
+          this.add(name, field.value)
+        }
+      } else if (type === 'file') {
+        // The value of an input[type=file] is the local path displayed in the form.
+        // The actual File objects are in the #files property.
+        for (let file of field.files) {
+          this.add(name, file)
+        }
+      } else {
+        return this.add(name, field.value)
+      }
+    }
+  }
 
-  "#{u.isEqual.key}": (other) ->
-    @constructor == other.constructor && u.isEqual(@entries, other.entries)
+  [u.isEqual.key](other) {
+    return (this.constructor === other.constructor) && u.isEqual(this.entries, other.entries)
+  }
 
-  ###**
+  /***
   Constructs a new `up.Params` instance from the given URL's
   [query string](https://en.wikipedia.org/wiki/Query_string).
 
@@ -518,16 +570,19 @@ class up.Params extends up.Class
   @return {string|undefined}
     The given URL's query string, or `undefined` if the URL has no query component.
   @experimental
-  ###
-  @fromURL: (url) ->
-    params = new @()
-    urlParts = u.parseURL(url)
-    if query = urlParts.search
+  */
+  static fromURL(url) {
+    const params = new (this)()
+    const urlParts = u.parseURL(url)
+    let query = urlParts.search
+    if (query) {
       query = query.replace(/^\?/, '')
       params.addAll(query)
-    params
+    }
+    return params
+  }
 
-  ###**
+  /***
   Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
 
   \#\#\# Example
@@ -541,11 +596,12 @@ class up.Params extends up.Class
   @return {string}
     The given URL without its query string.
   @experimental
-  ###
-  @stripURL: (url) ->
-    return u.normalizeURL(url, search: false)
+  */
+  static stripURL(url) {
+    return u.normalizeURL(url, { search: false })
+  }
 
-  ###**
+  /***
   If passed an `up.Params` instance, it is returned unchanged.
   Otherwise constructs an `up.Params` instance from the given value.
 
@@ -556,4 +612,5 @@ class up.Params extends up.Class
   @param {Object|Array|string|up.Params|undefined} params
   @return {up.Params}
   @experimental
-  ###
+  */
+}
