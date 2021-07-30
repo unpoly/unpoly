@@ -1,5 +1,3 @@
-console.log("!!! loaded unpoly.js")
-
 require('./unpoly/namespace')
 require('./unpoly/mockable')
 require('./unpoly/util')

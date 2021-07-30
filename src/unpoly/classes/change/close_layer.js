@@ -96,7 +96,6 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     this.layer.overlayFocus.teardown()
     // A11Y: Start trapping focus in the parent layer that is being promoted to front.
 
-    console.log("FormerParent is %o, its { overlayFocus } is %o", formerParent, formerParent.overlayFocus)
     formerParent.overlayFocus?.moveToFront()
     // A11Y: Focus the element that originally opened this layer.
     let newFocusElement = this.layer.origin || formerParent.element
