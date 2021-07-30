@@ -109,10 +109,11 @@ up.browser = (function() {
     return !!window.jQuery
   }
 
+  // IE11: Use the browser.cookies API instead.
   function popCookie(name) {
     let value = document.cookie.match(new RegExp(name+"=(\\w+)"))?.[1]
     if (value) {
-      document.cookie = name + '= expires=Thu, 01-Jan-70 00:00:01 GMT path=/'
+      document.cookie = name + '=;Max-Age=0;Path=/'
       return value
     }
   }

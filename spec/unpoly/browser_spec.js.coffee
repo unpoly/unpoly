@@ -139,3 +139,14 @@ describe 'up.browser', ->
         spyOn(window, 'confirm')
         up.browser.assertConfirmed({})
         expect(window.confirm).not.toHaveBeenCalled()
+
+    describe 'up.browser.popCookie', ->
+
+      it 'returns the value of the given cookie', ->
+        document.cookie = 'key=value'
+        expect(up.browser.popCookie('key')).toEqual('value')
+
+      it 'deletes the given cookie', ->
+        document.cookie = 'key=value'
+        up.browser.popCookie('key')
+        expect(document.cookie).not.toContain('key=Value')
