@@ -4,8 +4,6 @@ TODOs
 - Remove semicolons: \ *;\ *\n => \n
 - Refactor expressions like u.merge(options, key: true) to { ...options, key: true }
 - Use a different Doccomment fence since RubyMine keeps parsing our custom Docs as JSDoc type information
-- Remove `return undefined` at the end of functions
-- Grep if any Array.from is left
 - Check what calls to .then() .catch() .always() can be replaced with async/await
   - This may blow up the size of the ES5 transpilation
   - This may require us to go back to tslib

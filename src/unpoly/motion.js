@@ -449,11 +449,11 @@ up.motion = (function() {
     } else if (u.isFunction(object)) {
       return object
     } else if (u.isArray(object)) {
-      return composeTransitionFn(...Array.from(object || []))
+      return composeTransitionFn(...object)
     } else if (u.isString(object)) {
       let namedTransition
       if (object.indexOf('/') >= 0) { // Compose a transition from two animation names
-        return composeTransitionFn(...Array.from(object.split('/') || []))
+        return composeTransitionFn(...object.split('/'))
       } else if (namedTransition = namedTransitions[object]) {
         return findTransitionFn(namedTransition)
       }

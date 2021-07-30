@@ -309,7 +309,7 @@ up.syntax = (function() {
   }
 
   function buildCompiler(args) {
-    let [selector, options, callback] = Array.from(parseCompilerArgs(args));
+    let [selector, options, callback] = parseCompilerArgs(args)
     options = u.options(options, {
       selector,
       isDefault: up.framework.booting,

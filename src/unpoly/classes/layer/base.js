@@ -730,7 +730,7 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   affix(...args) {
-    return e.affix(this.getFirstSwappableElement(), ...Array.from(args))
+    return e.affix(this.getFirstSwappableElement(), ...args)
   }
 
   [u.isEqual.key](other) {

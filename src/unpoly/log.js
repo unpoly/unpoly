@@ -70,13 +70,13 @@ up.log = (function() {
   @function up.warn
   @internal
   */
-  const printToWarn = (...args) => printToStream('warn', ...Array.from(args))
+  const printToWarn = (...args) => printToStream('warn', ...args)
 
   /***
   @function up.log.error
   @internal
   */
-  const printToError = (...args) => printToStream('error', ...Array.from(args))
+  const printToError = (...args) => printToStream('error', ...args)
 
   function printToStream(stream, trace, message, ...args) {
     if (message) {

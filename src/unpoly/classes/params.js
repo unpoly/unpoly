@@ -312,7 +312,7 @@ up.Params = class Params {
   addAllFromFormData(formData) {
     // IE11: Remove eachIterator and just use for .. of
     u.eachIterator(formData.entries(), value => {
-      this.add(...Array.from(value || []))
+      this.add(...value)
     })
   }
 

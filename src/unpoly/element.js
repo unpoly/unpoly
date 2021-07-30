@@ -187,7 +187,7 @@ up.element = (function() {
     if (u.isElement(value)) { // Return an element before we run any other expensive checks
       return value
     } else if (u.isString(value)) {
-      return first(...Array.from(args), value)
+      return first(...args, value)
     } else if (u.isList(value)) {
       if (value.length > 1) {
         up.fail('up.element.get(): Cannot cast multiple elements (%o) to a single element', value)

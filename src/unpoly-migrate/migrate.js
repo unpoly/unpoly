@@ -66,10 +66,10 @@ up.migrate = (function() {
   const warnedMessages = {}
 
   function warn(message, ...args) {
-    const formattedMessage = u.sprintf(message, ...Array.from(args))
+    const formattedMessage = u.sprintf(message, ...args)
     if (!warnedMessages[formattedMessage]) {
       warnedMessages[formattedMessage] = true
-      up.log[config.logLevel]('unpoly-migrate', message, ...Array.from(args))
+      up.log[config.logLevel]('unpoly-migrate', message, ...args)
     }
   }
 
