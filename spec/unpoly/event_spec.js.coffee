@@ -191,6 +191,7 @@ describe 'up.event', ->
         $child = $fixture('.child')
         clickSpy = jasmine.createSpy()
         unsubscribe = up.on 'click', '.child', clickSpy
+
         Trigger.click($('.child'))
 
         next =>
