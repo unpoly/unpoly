@@ -129,7 +129,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // does not resolve from the :layer pseudo-selector. Since :layer is a part of
     // up.fragment.config.mainTargets and :main is a part of fragment.config.autoHistoryTargets,
     // this would otherwise cause auto-history for *every* overlay regardless of initial target.
-    const buildOptions = u.merge(this.options, { opening: true })
+    const buildOptions = { ...this.options, opening: true }
 
     const beforeNew = optionsWithLayerDefaults => {
       return this.options = up.RenderOptions.finalize(optionsWithLayerDefaults)
@@ -164,11 +164,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   handleScroll() {
-    const scrollingOptions = u.merge(this.options, {
+    const scrollingOptions = {
+      ...this.options,
       fragment: this.content,
       layer: this.layer,
       autoMeans: ['hash', 'layer']
-    })
+    }
     const scrolling = new up.FragmentScrolling(scrollingOptions)
     scrolling.process(this.options.scroll)
   }

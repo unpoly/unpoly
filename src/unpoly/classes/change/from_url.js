@@ -77,7 +77,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   preflightPropsForRenderOptions(renderOptions, requestAttributesOptions) {
-    const preview = new up.Change.FromContent(u.merge(renderOptions, { preview: true }))
+    const preview = new up.Change.FromContent({ ...renderOptions, preview: true })
     // #preflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
     // This might change postflight if the response does not contain the desired target.

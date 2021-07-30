@@ -24,7 +24,7 @@ up.LayerLookup = class LayerLookup {
       // The { baseLayer } option may itself be a string like "parent".
       // In this case we look it up using a new up.LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
-      const recursiveOptions = u.merge(options, {baseLayer: this.stack.current, normalizeLayerOptions: false})
+      const recursiveOptions = { ...options, baseLayer: this.stack.current, normalizeLayerOptions: false }
       this.baseLayer = new this.constructor(this.stack, this.baseLayer, recursiveOptions).first()
     }
   }

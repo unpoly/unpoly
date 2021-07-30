@@ -36,7 +36,7 @@ up.LayerStack = class LayerStack extends Array {
     // Callers expect the effects of peel() to manipulate the layer stack sync.
     // Because of this we will dismiss alle descendants sync rather than waiting
     // for each descendant to finish its closing animation.
-    const dismissOptions = u.merge(options, {preventable: false})
+    const dismissOptions = { ...options, preventable: false }
 
     for (let descendant of descendants) {
       descendant.dismiss(':peel', dismissOptions)

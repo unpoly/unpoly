@@ -7,15 +7,6 @@ TODOs
 - Check what calls to .then() .catch() .always() can be replaced with async/await
   - This may blow up the size of the ES5 transpilation
   - This may require us to go back to tslib
-- Consider renaming private class properties with `_` and mangle these props using these Terser options:
-  { mangle: {
-    properties: {
-      regex: /^_/
-    }
-  },
-  - This may be super time-intensive to do for all classes
-  - Also what about up.Record behavior
-  - Unfortunately only the most recent Safari understands private class properties
   - Replace `options = u.options(options, { default: 'value' })` with `options = { ...options, default: 'value' }`
 
 

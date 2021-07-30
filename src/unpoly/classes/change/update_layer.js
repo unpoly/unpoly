@@ -121,7 +121,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
           const parent = step.oldElement.parentNode
 
-          const morphOptions = u.merge(step, {
+          const morphOptions = {
+            ...step,
             beforeStart() {
               up.fragment.markAsDestroying(step.oldElement)
             },
@@ -142,7 +143,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
               return this.handleScroll(step.newElement, step)
             }
           }
-          )
 
           return up.morph(
             step.oldElement,

@@ -243,7 +243,7 @@ up.motion = (function() {
    @internal
    */
   function animateNow(element, lastFrame, options) {
-    options = u.merge(options, {finishEvent: motionController.finishEvent})
+    options = { ...options, finishEvent: motionController.finishEvent }
     const cssTransition = new up.CSSTransition(element, lastFrame, options)
     return cssTransition.start()
   }
