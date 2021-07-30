@@ -514,12 +514,12 @@ up.element = (function() {
     })
 
     const depths = selectorWithoutAttrValues.split(/[ >]+/)
-    let rootElement = undefined
-    let depthElement = undefined
-    let previousElement = undefined
+    let rootElement
+    let depthElement
+    let previousElement
 
     for (let depthSelector of depths) {
-      let tagName = undefined
+      let tagName
 
       depthSelector = depthSelector.replace(/^[\w-]+/, function(match) {
         tagName = match

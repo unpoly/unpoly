@@ -524,8 +524,8 @@ up.form = (function() {
   */
 
   function switcherValues(field) {
-    let value = undefined
-    let meta = undefined
+    let value
+    let meta
 
     if (e.matches(field, 'input[type=checkbox]')) {
       if (field.checked) {

@@ -81,8 +81,8 @@ up.Cache = class Cache {
       return
     }
 
-    let oldestKey = undefined
-    let oldestTimestamp = undefined
+    let oldestKey
+    let oldestTimestamp
     this.each(function(key, request, timestamp) {
       if (!oldestTimestamp || (oldestTimestamp > timestamp)) {
         oldestKey = key

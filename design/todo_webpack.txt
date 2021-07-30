@@ -3,10 +3,7 @@ TODOs
 
 - Remove semicolons: \ *;\ *\n => \n
 - Refactor expressions like u.merge(options, key: true) to { ...options, key: true }
-- Remove up.util.literal
-- Remove up.util.getter?
 - Use a different Doccomment fence since RubyMine keeps parsing our custom Docs as JSDoc type information
-- Convert `let x = undefined` to just `let x`
 - Remove `return undefined` at the end of functions
 - Grep if any Array.from is left
 - Check what calls to .then() .catch() .always() can be replaced with async/await
