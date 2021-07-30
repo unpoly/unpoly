@@ -1,9 +1,8 @@
 const u = up.util
 
-up.Config = class Config extends up.Class {
+up.Config = class Config {
 
   constructor(blueprintFn = (() => ({}))) {
-    super()
     this.blueprintFn = blueprintFn
     this.reset()
   }

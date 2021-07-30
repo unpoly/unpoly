@@ -1,9 +1,8 @@
 const u = up.util
 
-up.Request.Queue = class Queue extends up.Class {
+up.Request.Queue = class Queue {
 
   constructor(options = {}) {
-    super()
     this.concurrency = options.concurrency ?? (() => up.network.config.concurrency)
     this.badResponseTime = options.badResponseTime ?? (() => up.network.config.badResponseTime)
     this.reset()

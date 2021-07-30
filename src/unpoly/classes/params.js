@@ -21,7 +21,7 @@ The following types of parameter representation are supported:
 
 @class up.Params
 */
-up.Params = class Params extends up.Class {
+up.Params = class Params {
 
   /***
   Constructs a new `up.Params` instance.
@@ -35,7 +35,6 @@ up.Params = class Params extends up.Class {
   @experimental
   */
   constructor(raw) {
-    super()
     this.clear()
     this.addAll(raw)
   }
@@ -601,16 +600,5 @@ up.Params = class Params extends up.Class {
     return u.normalizeURL(url, { search: false })
   }
 
-  /***
-  If passed an `up.Params` instance, it is returned unchanged.
-  Otherwise constructs an `up.Params` instance from the given value.
-
-  The given params value may be of any [supported type](/up.Params)
-  The return value is always an `up.Params` instance.
-
-  @function up.Params.wrap
-  @param {Object|Array|string|up.Params|undefined} params
-  @return {up.Params}
-  @experimental
-  */
 }
+

@@ -1,6 +1,6 @@
 const u = up.util
 
-up.Record = class Record extends up.Class {
+up.Record = class Record {
 
   keys() {
     throw 'Return an array of keys'
@@ -11,7 +11,6 @@ up.Record = class Record extends up.Class {
   }
 
   constructor(options) {
-    super()
     u.assign(this, this.defaults(options), this.attributes(options))
   }
 

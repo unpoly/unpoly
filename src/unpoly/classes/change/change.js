@@ -1,9 +1,8 @@
 const u = up.util
 
-up.Change = class Change extends up.Class {
+up.Change = class Change {
 
   constructor(options) {
-    super()
     this.options = options
   }
 

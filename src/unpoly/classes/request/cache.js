@@ -1,3 +1,5 @@
+let u = up.util
+
 up.Request.Cache = class Cache extends up.Cache {
 
   maxSize() {
@@ -9,7 +11,7 @@ up.Request.Cache = class Cache extends up.Cache {
   }
 
   normalizeStoreKey(request) {
-    return up.Request.wrap(request).cacheKey()
+    return u.wrapValue(up.Request, request).cacheKey()
   }
 
 //  get: (request) ->

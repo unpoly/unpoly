@@ -6,7 +6,6 @@ require('./unpoly/migrate_stub')
 require('./unpoly/browser')
 require('./unpoly/element')
 
-require('./unpoly/classes/class')
 require('./unpoly/classes/record')
 require('./unpoly/classes/config')
 require('./unpoly/classes/cache')
