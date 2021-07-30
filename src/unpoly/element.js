@@ -162,7 +162,7 @@ up.element = (function() {
   /*-
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
-  \#\#\# Casting rules
+  ### Casting rules
 
   - If given an element, returns that element.
   - If given a CSS selector string, returns the first element matching that selector.
@@ -202,12 +202,12 @@ up.element = (function() {
   /*-
   Composes a list of elements from the given arguments.
 
-  \#\#\# Casting rules
+  ### Casting rules
 
   - If given a string, returns the all elements matching that string.
   - If given any other argument, returns the argument [wrapped as a list](/up.util.wrapList).
 
-  \#\#\# Example
+  ### Example
 
   ```javascript
   $jquery = $('.jquery')                          // returns jQuery (2) [div.jquery, div.jquery]
@@ -280,7 +280,7 @@ up.element = (function() {
 
   Also see `up.element.hide()`.
 
-  \#\#\# Limitations
+  ### Limitations
 
   The element is shown by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
   of `{ display: '' }`.
@@ -360,7 +360,7 @@ up.element = (function() {
   /*-
   Sets all key/values from the given object as attributes on the given element.
 
-  \#\#\# Example
+  ### Example
 
       up.element.setAttrs(element, { title: 'Tooltip', tabindex: 1 })
 
@@ -437,7 +437,7 @@ up.element = (function() {
 
   Use `up.hello()` to activate JavaScript behavior within the created element.
 
-  \#\#\# Examples
+  ### Examples
 
   To create an element with a given tag name:
 
@@ -587,7 +587,7 @@ up.element = (function() {
 
   Use `up.hello()` to activate JavaScript behavior within the created element.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   element = up.element.affix(document.body, '.klass')
@@ -716,7 +716,7 @@ up.element = (function() {
 
   Use `up.hello()` to activate JavaScript behavior within the created element.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   element = up.element.createFromHTML('<div class="foo"><span>text</span></div>')
@@ -893,7 +893,7 @@ up.element = (function() {
 
   If the attribute value cannot be cast to `true` or `false`, `undefined` is returned.
 
-  \#\#\# Casting rules
+  ### Casting rules
 
   This function deviates from the
   [HTML Standard for boolean attributes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes)
@@ -1022,7 +1022,7 @@ up.element = (function() {
 
   Returns a function that restores the original inline styles when called.
 
-  \#\#\# Example
+  ### Example
 
       element = document.querySelector('div')
       unhide = up.element.setTemporaryStyle(element, { 'visibility': 'hidden' })
@@ -1049,7 +1049,7 @@ up.element = (function() {
   Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element.
 
-  \#\#\# Examples
+  ### Examples
 
   When requesting a single CSS property, its value will be returned as a string:
 
@@ -1083,7 +1083,7 @@ up.element = (function() {
   Returns `undefined` if the property value is missing, or if it cannot
   be parsed as a number.
 
-  \#\#\# Examples
+  ### Examples
 
   When requesting a single CSS property, its value will be returned as a string:
 

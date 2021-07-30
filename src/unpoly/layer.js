@@ -65,7 +65,7 @@ up.layer = (function() {
   E.g. when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
   `up.layer.config.overlay` and `up.layer.config.any` will be used (in decreasing priority).
 
-  \#\#\# Example
+  ### Example
 
   To make all modal overlays move in from beyond the top edge of the screen:
 
@@ -80,7 +80,7 @@ up.layer = (function() {
   up.layer.config.overlay.mainTargets.unshift('.content')
   ```
 
-  \#\#\# Configuration inheritance
+  ### Configuration inheritance
 
   @property up.layer.config
 
@@ -361,7 +361,7 @@ up.layer = (function() {
 
   Opening a layer is considered [navigation](/navigation) by default.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   let layer = await up.layer.open({ url: '/contacts' })
@@ -522,7 +522,7 @@ up.layer = (function() {
 
   The event is emitted on the `document`.
 
-  \#\#\# Changing layer options
+  ### Changing layer options
 
   Listeners may inspect and manipulate options for the overlay that is about to open.
 
@@ -592,7 +592,7 @@ up.layer = (function() {
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
   which may either be **fulfilled (accepted)** or **rejected (dismissed)**.
 
-  \#\#\# Example
+  ### Example
 
   Instead of using `up.layer.open()` and passing callbacks, you may use `up.layer.ask()`.
   `up.layer.ask()` returns a promise for the acceptance value, which you can `await`:
@@ -644,7 +644,7 @@ up.layer = (function() {
   /*-
   [Follows](/a-up-follow) this link and opens the result in a new overlay.
 
-  \#\#\# Example
+  ### Example
 
   ```html
   <a href="/menu" up-layer="new">Open menu</a>
@@ -798,13 +798,13 @@ up.layer = (function() {
   The JSON value of the `[up-accept]` attribute becomes the overlay's
   [dismissal value](/closing-overlays#overlay-result-values).
 
-  \#\#\# Example
+  ### Example
 
   ```html
   <a href='/dashboard' up-dismiss>Close</a>
   ```
 
-  \#\#\# Fallback for the root layer
+  ### Fallback for the root layer
 
   The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event's default action is prevented.
@@ -833,13 +833,13 @@ up.layer = (function() {
   The JSON value of the `[up-accept]` attribute becomes the overlay's
   [acceptance value](/closing-overlays#overlay-result-values).
 
-  \#\#\# Example
+  ### Example
 
   ```html
   <a href='/users/5' up-accept='{ "id": 5 }'>Choose user #5</a>
   ```
 
-  \#\#\# Fallback for the root layer
+  ### Fallback for the root layer
 
   The link's `[href]` will only be followed when this link is clicked in the [root layer](/up.layer).
   In an overlay the `click` event's default action is prevented.
@@ -894,7 +894,7 @@ up.layer = (function() {
 
   To temporarily change the current layer from your own code, use `up.Layer#asCurrent()`.
 
-  \#\#\# Remembering the current layer
+  ### Remembering the current layer
 
   Most functions in the `up.layer` package affect the current layer. E.g. `up.layer.dismiss()`
   is shorthand for `up.layer.current.dismiss()`.

@@ -55,7 +55,7 @@ up.event = (function() {
     to observed elements. If an `[up-data]` attribute is set, its value will automatically be
     parsed as JSON and passed as a third argument.
 
-  \#\#\# Basic example
+  ### Basic example
 
   The code below will call the listener when a `<a>` is clicked
   anywhere in the `document`:
@@ -71,7 +71,7 @@ up.event = (function() {
         console.log("Click within %o", form)
       })
 
-  \#\#\# Event delegation
+  ### Event delegation
 
   You may pass both an element and a selector
   for [event delegation](https://davidwalsh.name/event-delegate).
@@ -84,7 +84,7 @@ up.event = (function() {
         console.log("Click on select %o within %o", select, form)
       })
 
-  \#\#\# Attaching structured data
+  ### Attaching structured data
 
   In case you want to attach structured data to the event you're observing,
   you can serialize the data to JSON and put it into an `[up-data]` attribute:
@@ -98,7 +98,7 @@ up.event = (function() {
         console.log("This is %o who is %o years old", data.name, data.age)
       })
 
-  \#\#\# Unbinding an event listener
+  ### Unbinding an event listener
 
   `up.on()` returns a function that unbinds the event listeners when called:
 
@@ -122,7 +122,7 @@ up.event = (function() {
       // Unbind the listener
       up.off('click', listener)
 
-  \#\#\# Binding to multiple elements
+  ### Binding to multiple elements
 
   You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements:
 
@@ -133,7 +133,7 @@ up.event = (function() {
   })
   ```
 
-  \#\#\# Binding to multiple event types
+  ### Binding to multiple event types
 
   You may register a listener to multiple event types by passing a space-separated list of event types:
 
@@ -204,7 +204,7 @@ up.event = (function() {
   If you're not using jQuery, use `up.on()` instead, which calls
   event handlers with a native element.
 
-  \#\#\# Example
+  ### Example
 
   ```
   up.$on('click', 'a', function(event, $link) {
@@ -246,7 +246,7 @@ up.event = (function() {
   /*-
   Unbinds an event listener previously bound with `up.on()`.
 
-  \#\#\# Example
+  ### Example
 
   Let's say you are listing to clicks on `.button` elements:
 
@@ -289,7 +289,7 @@ up.event = (function() {
   [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
   or [`up.on()`](/up.on).
 
-  \#\#\# Example
+  ### Example
 
       up.on('my:event', function(event) {
         console.log(event.foo)
@@ -334,7 +334,7 @@ up.event = (function() {
 
   The returned event is not [emitted](/up.emit).
 
-  \#\#\# Example
+  ### Example
 
       let event = up.event.build('my:event', { foo: 'bar' })
       console.log(event.type)              // logs "my:event"
@@ -399,7 +399,7 @@ up.event = (function() {
   Registers an event listener to be called when the user
   presses the `Escape` key.
 
-  \#\#\# Example
+  ### Example
 
   ```javascript
   up.event.onEscape(function(event) {
@@ -442,7 +442,7 @@ up.event = (function() {
   - It prevents other event handlers bound on the same element.
   - It prevents the event's default action.
 
-  \#\#\# Example
+  ### Example
 
       up.on('click', 'link.disabled', function(event) {
         up.event.halt(event)
@@ -521,7 +521,7 @@ up.event = (function() {
   You may use this attribute to emit events when clicking on areas that are no hyperlinks,
   by setting it on an `<a>` element without a `[href]` attribute.
 
-  \#\#\# Example
+  ### Example
 
   This hyperlink will emit an `user:select` event when clicked:
 

@@ -161,7 +161,7 @@ up.util = (function() {
   If the given URL is not fully qualified, it is assumed to be relative
   to the current page.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   let parsed = up.util.parseURL('/path?foo=value')
@@ -439,7 +439,7 @@ up.util = (function() {
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.isBlank()` protocol.
 
-  \#\#\# Example
+  ### Example
 
   We have a user-defined `Account` class that we want to use with `up.util.isBlank()`:
 
@@ -744,7 +744,7 @@ up.util = (function() {
   Returns the given value if it is [array-like](/up.util.isList), otherwise
   returns an array with the given value as its only element.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   up.util.wrapList([1, 2, 3]) // => [1, 2, 3]
@@ -769,7 +769,7 @@ up.util = (function() {
   /*-
   Returns a shallow copy of the given value.
 
-  \#\#\# Copying protocol
+  ### Copying protocol
 
   - By default `up.util.copy()` can copy [array-like values](/up.util.isList),
     plain objects and `Date` instances.
@@ -803,7 +803,7 @@ up.util = (function() {
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.copy()` protocol.
 
-  \#\#\# Example
+  ### Example
 
   We have a user-defined `Account` class that we want to use with `up.util.copy()`:
 
@@ -1324,7 +1324,7 @@ up.util = (function() {
   If the given `value` is a function, calls the function with the given `args`.
   Otherwise it just returns `value`.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   up.util.evalOption(5) // => 5
@@ -1514,7 +1514,7 @@ up.util = (function() {
   /*-
   Flattens the given `array` a single depth level.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   let nested = [1, [2, 3], [4]]
@@ -1679,7 +1679,7 @@ up.util = (function() {
   /*-
   Returns whether the two arguments are equal by value.
 
-  \#\#\# Comparison protocol
+  ### Comparison protocol
 
   - By default `up.util.isEqual()` can compare strings, numbers,
     [array-like values](/up.util.isList), plain objects and `Date` objects.
@@ -1721,7 +1721,7 @@ up.util = (function() {
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.isEqual()` protocol.
 
-  \#\#\# Example
+  ### Example
 
   We have a user-defined `Account` class that we want to use with `up.util.isEqual()`:
 

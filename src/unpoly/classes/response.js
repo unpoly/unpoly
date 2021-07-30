@@ -1,7 +1,7 @@
 /*-
 A response to an [HTTP request](/up.request).
 
-\#\#\# Example
+### Example
 
     up.request('/foo').then(function(response) {
       console.log(response.status) // 200
@@ -173,7 +173,7 @@ up.Response = class Response extends up.Record {
   The parsed JSON object is cached with the response object,
   so multiple accesses will call `JSON.parse()` only once.
 
-  \#\#\# Example
+  ### Example
 
       response = await up.request('/profile.json')
       console.log("User name is " + response.json.name)

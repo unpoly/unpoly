@@ -155,7 +155,7 @@ up.radio = (function() {
   /*-
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
 
-  \#\#\# Example
+  ### Example
 
   Assume an application layout with an unread message counter.
   You can use `[up-poll]` to refresh the counter every 30 seconds:
@@ -166,7 +166,7 @@ up.radio = (function() {
   </div>
   ```
 
-  \#\#\# Controlling the reload interval
+  ### Controlling the reload interval
 
   You may set an optional `[up-interval]` attribute to set the reload interval in milliseconds:
 
@@ -182,7 +182,7 @@ up.radio = (function() {
   up.radio.config.pollInterval = 10000
   ```
 
-  \#\#\# Controlling the source URL
+  ### Controlling the source URL
 
   The element will be reloaded from the URL from which it was originally loaded.
 
@@ -194,7 +194,7 @@ up.radio = (function() {
   </div>
   ```
 
-  \#\#\# Skipping updates when nothing changed
+  ### Skipping updates when nothing changed
 
   When polling a fragment periodically we want to avoid rendering unchanged content.
   This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a

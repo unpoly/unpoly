@@ -9,7 +9,7 @@ By styling these classes you may provide instant feedback to user interactions,
 improving the perceived speed of your interface.
 
 
-\#\#\# Example
+### Example
 
 Let's say we have an `<nav>` element with two links, pointing to `/foo` and `/bar` respectively:
 
@@ -182,7 +182,7 @@ up.feedback = (function() {
   If the given element is a link within an [expanded click area](/up-expand),
   the class will be assigned to the expanded area.
 
-  \#\#\# Example
+  ### Example
 
       var button = document.querySelector('button')
 
@@ -211,7 +211,7 @@ up.feedback = (function() {
 
   The `.up-active` class will be removed when the link is done loading.
 
-  \#\#\# Example
+  ### Example
 
   We have a link:
 
@@ -246,7 +246,7 @@ up.feedback = (function() {
   The `.up-active` class will be removed as soon as the response to the
   form submission has been received.
 
-  \#\#\# Example
+  ### Example
 
   We have a form:
 
@@ -330,7 +330,7 @@ up.feedback = (function() {
   you can configure selectors to automatically match your navigation components in `up.feedback.config.navSelectors`.
 
 
-  \#\#\# Example
+  ### Example
 
   Let's take a simple menu with two links. The menu has been marked with the `[up-nav]` attribute:
 
@@ -360,7 +360,7 @@ up.feedback = (function() {
   ```
 
 
-  \#\#\# When is a link "current"?
+  ### When is a link "current"?
 
   When no [overlay](/up.layer) is open, the current location is the URL displayed
   in the browser's address bar. When the link in question is placed in an overlay,
@@ -381,7 +381,7 @@ up.feedback = (function() {
   Links within `[up-nav]` may use the `[up-alias]` attribute to pass a [URL pattern](/url-patterns) for which they
   should also be highlighted as [`.up-current`](/a.up-current).
 
-  \#\#\# Example
+  ### Example
 
   The link below will be highlighted with `.up-current` at both `/profile` and `/profile/edit` locations:
 

@@ -105,13 +105,13 @@ up.network = (function() {
     The server may return an optimized response based on these properties,
     e.g. by omitting a navigation bar that is not targeted.
 
-    \#\#\# Cacheability considerations
+    ### Cacheability considerations
 
     Two requests with different `requestMetaKeys` are considered cache misses when [caching](/up.request) and
     [preloading](/a-up-preload). To **improve cacheability**, you may set
     `up.network.config.requestMetaKeys` to a shorter list of property keys.
 
-    \#\#\# Available fields
+    ### Available fields
 
     The default configuration is `['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']`.
     This means the following properties are sent to the server:
@@ -125,7 +125,7 @@ up.network = (function() {
     | `up.Request#mode`        | `X-Up-Mode`         |
     | `up.Request#failMode`    | `X-Up-Fail-Mode`    |
 
-    \#\#\# Per-route configuration
+    ### Per-route configuration
 
     You may also configure a function that accepts an [`up.Request`](/up.Request) and returns
     an array of request property names that are sent to the server.
@@ -193,7 +193,7 @@ up.network = (function() {
 
   Note that `up.request()` will only write to the cache with `{ cache: true }`.
 
-  \#\#\# Example
+  ### Example
 
   ```
   let request = up.cache.get({ url: '/foo' })
@@ -228,7 +228,7 @@ up.network = (function() {
   up.cache.clear('/users/*')
   ```
 
-  \#\#\# Other reasons the cache may clear
+  ### Other reasons the cache may clear
 
   By default Unpoly automatically clears the entire cache whenever it processes
   a request with an non-GET HTTP method. To customize this rule, use `up.network.config.clearCache`.
@@ -303,7 +303,7 @@ up.network = (function() {
   This request object is also a promise for an `up.Response` that contains
   the response text, headers, etc.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   let request = up.request('/search', { params: { query: 'sunshine' } })
@@ -313,7 +313,7 @@ up.network = (function() {
   console.log('The response text is', response.text)
   ```
 
-  \#\#\# Error handling
+  ### Error handling
 
   The returned promise will fulfill with an `up.Response` when the server
   responds with an HTTP status of 2xx (like `200`).
@@ -340,7 +340,7 @@ up.network = (function() {
   }
   ```
 
-  \#\#\# Caching
+  ### Caching
 
   You may cache responses by passing a `{ cache }` option. Responses for a cached
   request will resolve instantly.
@@ -630,7 +630,7 @@ up.network = (function() {
         }
       }
 
-  \#\#\# Examples
+  ### Examples
 
   Without arguments, this will abort all pending requests:
 
@@ -694,7 +694,7 @@ up.network = (function() {
   Note that if additional requests are made while Unpoly is already busy
   waiting, **no** additional `up:request:late` events will be triggered.
 
-  \#\#\# Loading indicators
+  ### Loading indicators
 
   By default the `up:request:late` event will cause a [progress bar](/up.network.config#config.progressBar)
   to appear at the top edge of the screen.

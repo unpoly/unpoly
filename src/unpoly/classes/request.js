@@ -406,7 +406,7 @@ up.Request = class Request extends up.Record {
   Properties that are not possible in a full-page request (such as custom HTTP headers)
   will be ignored.
 
-  \#\#\# Example
+  ### Example
 
   ```javascript
   let request = await up.request('/path')
@@ -468,7 +468,7 @@ up.Request = class Request extends up.Record {
 
   The request's promise will reject with an error object that has `{ name: 'AbortError' }`.
 
-  \#\#\# Example
+  ### Example
 
   ```javascript
   let request = await up.request('/path')

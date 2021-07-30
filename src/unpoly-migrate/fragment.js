@@ -37,7 +37,7 @@ up.replace = function(target, url, options) {
 Updates a selector on the current page with the
 same selector from the given HTML string.
 
-\#\#\# Example
+### Example
 
 Let's say your current HTML looks like this:
 

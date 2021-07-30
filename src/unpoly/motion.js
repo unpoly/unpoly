@@ -15,7 +15,7 @@ links or forms to smoothly fade out the old element while fading in the new elem
 </a>
 ```
 
-\#\#\# Transitions vs. animations
+### Transitions vs. animations
 
 When we morph between an old and a new element, we call it a *transition*.
 In contrast, when we animate a new element without simultaneously removing an
@@ -33,7 +33,7 @@ of the dialog by adding an [`[up-animation]`](/a-up-layer-new#up-animation) attr
 </a>
 ```
 
-\#\#\# Which animations are available?
+### Which animations are available?
 
 Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
 and [predefined animations](/up.animate#named-animations).
@@ -111,7 +111,7 @@ up.motion = (function() {
   /*-
    Applies the given animation to the given element.
 
-   \#\#\# Example
+   ### Example
 
    ```js
    up.animate('.warning', 'fade-in')
@@ -127,7 +127,7 @@ up.motion = (function() {
   })
    ```
 
-   \#\#\# Named animations
+   ### Named animations
 
    The following animations are pre-defined:
 
@@ -145,7 +145,7 @@ up.motion = (function() {
 
    You can define additional named animations using [`up.animation()`](/up.animation).
 
-   \#\#\# Animating CSS properties directly
+   ### Animating CSS properties directly
 
    By passing an object instead of an animation name, you can animate
    the CSS properties of the given element:
@@ -158,7 +158,7 @@ up.motion = (function() {
 
    CSS properties must be given in `kebab-case`, not `camelCase`.
 
-   \#\#\# Multiple animations on the same element
+   ### Multiple animations on the same element
 
    Unpoly doesn't allow more than one concurrent animation on the same element.
 
@@ -309,7 +309,7 @@ up.motion = (function() {
   - Both `source` and `target` are animated in parallel
   - `source` is removed from the DOM
 
-  \#\#\# Named transitions
+  ### Named transitions
 
   The following transitions are pre-defined:
 
@@ -328,7 +328,7 @@ up.motion = (function() {
   - `move-to-bottom/fade-in`
   - `move-to-left/move-from-top`
 
-  \#\#\# Implementation details
+  ### Implementation details
 
   During a transition both the old and new element occupy
   the same position on the screen.
@@ -490,7 +490,7 @@ up.motion = (function() {
   /*-
   Defines a named transition that [morphs](/up.morph) from one element to another.
 
-  \#\#\# Example
+  ### Example
 
   Here is the definition of the pre-defined `cross-fade` animation:
 
@@ -661,7 +661,7 @@ up.motion = (function() {
   Note that transitions are not possible when replacing the `body`
   element.
 
-  \#\#\# Example
+  ### Example
 
   ```html
   <a href="/page2"
@@ -687,7 +687,7 @@ up.motion = (function() {
   [Submits](/form-up-submit) this form and swaps in the new fragment
   with an animated transition.
 
-  \#\#\# Example
+  ### Example
 
   ```html
   <form action="/tasks"

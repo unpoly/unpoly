@@ -168,7 +168,7 @@ up.log = (function() {
 
   The message may contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions).
 
-  \#\#\# Examples
+  ### Examples
 
       up.fail('Division by zero')
       up.fail('Unexpected result %o', result)

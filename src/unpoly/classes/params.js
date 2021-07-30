@@ -9,7 +9,7 @@ Request parameters are used in [form submissions](/up.Params.fromForm) and
 [URLs](/up.Params.fromURL). Methods like `up.submit()` or `up.replace()` accept
 request parameters as a `{ params }` option.
 
-\#\#\# Supported parameter types
+### Supported parameter types
 
 The following types of parameter representation are supported:
 
@@ -59,7 +59,7 @@ up.Params = class Params {
   The returned value is a simple JavaScript object with properties
   that correspond to the key/values in the given `params`.
 
-  \#\#\# Example
+  ### Example
 
       var params = new up.Params('foo=bar&baz=bam')
       var object = params.toObject()
@@ -95,7 +95,7 @@ up.Params = class Params {
   The returned value is a JavaScript array with elements that are objects with
   `{ key }` and `{ value }` properties.
 
-  \#\#\# Example
+  ### Example
 
       var params = new up.Params('foo=bar&baz=bam')
       var array = params.toArray()
@@ -117,7 +117,7 @@ up.Params = class Params {
   Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation
   of this `up.Params` instance.
 
-  \#\#\# Example
+  ### Example
 
       var params = new up.Params('foo=bar&baz=bam')
       var formData = params.toFormData()
@@ -149,7 +149,7 @@ up.Params = class Params {
   Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) will be omitted from
   the retuned query string.
 
-  \#\#\# Example
+  ### Example
 
       var params = new up.Params({ foo: 'bar', baz: 'bam' })
       var query = params.toQuery()
@@ -233,7 +233,7 @@ up.Params = class Params {
   An `up.Params` instance can hold multiple entries with the same name.
   To overwrite all existing entries with the given `name`, use `up.Params#set()` instead.
 
-  \#\#\# Example
+  ### Example
 
       var params = new up.Params()
       params.add('foo', 'fooValue')
@@ -362,7 +362,7 @@ up.Params = class Params {
   To always return a single value use `up.Params#getFirst()` instead.
   To always return an array of values use `up.Params#getAll()` instead.
 
-  \#\#\# Example
+  ### Example
 
       var params = new up.Params({ foo: 'fooValue', bar: 'barValue' })
       var params = new up.Params([
@@ -452,7 +452,7 @@ up.Params = class Params {
   - Fields that are `[disabled]` are ignored
   - Fields without a `[name]` attribute are ignored.
 
-  \#\#\# Example
+  ### Example
 
   Given this HTML form:
 
@@ -557,7 +557,7 @@ up.Params = class Params {
 
   Constructs an empty `up.Params` instance if the given URL has no query string.
 
-  \#\#\# Example
+  ### Example
 
       var params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
       var foo = params.get('foo')
@@ -584,7 +584,7 @@ up.Params = class Params {
   /*-
   Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
 
-  \#\#\# Example
+  ### Example
 
       var url = up.Params.stripURL('http://foo.com?key=value')
       // url is now: 'http://foo.com'

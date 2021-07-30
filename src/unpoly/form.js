@@ -147,44 +147,46 @@ up.form = (function() {
   }
 
   /*-
-   Submits a form via AJAX and updates a page fragment with the response.
+  Submits a form via AJAX and updates a page fragment with the response.
 
-   up.submit('form.new-user', { target: '.main' })
+  Instead of loading a new page, the form is submitted via AJAX.
+  The response is parsed for a CSS selector and the matching elements will
+  replace corresponding elements on the current page.
 
-   Instead of loading a new page, the form is submitted via AJAX.
-   The response is parsed for a CSS selector and the matching elements will
-   replace corresponding elements on the current page.
+  The unobtrusive variant of this is the `form[up-submit]` selector.
+  See its documentation to learn how form submissions work in Unpoly.
 
-   The unobtrusive variant of this is the `form[up-submit]` selector.
-   See its documentation to learn how form submissions work in Unpoly.
+  Submitting a form is considered [navigation](/navigation).
 
-   Submitting a form is considered [navigation](/navigation).
+  Emits the event [`up:form:submit`](/up:form:submit).
 
-   Emits the event [`up:form:submit`](/up:form:submit).
+  ### Example
 
-   @function up.submit
+  up.submit('form.new-user', { target: '.main' })
 
-   @param {Element|jQuery|string} form
-   The form to submit.
+  @function up.submit
 
-   If the argument points to an element that is not a form,
-   Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
+  @param {Element|jQuery|string} form
+  The form to submit.
 
-   @param {Object} [options]
-   [Render options](/up.render) that should be used for submitting the form.
+  If the argument points to an element that is not a form,
+  Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
-   Unpoly will parse render options from the given form's attributes
-   like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
-   of supported attributes.
+  @param {Object} [options]
+  [Render options](/up.render) that should be used for submitting the form.
 
-   You may pass this additional `options` object to supplement or override
-   options parsed from the form attributes.
+  Unpoly will parse render options from the given form's attributes
+  like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
+  of supported attributes.
 
-   @return {Promise<up.RenderResult>}
-   A promise that will be fulfilled when the server response was rendered.
+  You may pass this additional `options` object to supplement or override
+  options parsed from the form attributes.
 
-   @stable
-   */
+  @return {Promise<up.RenderResult>}
+  A promise that will be fulfilled when the server response was rendered.
+
+  @stable
+  */
   const submit = up.mockable((form, options) => {
     return up.render(submitOptions(form, options))
   })
@@ -193,7 +195,7 @@ up.form = (function() {
    Parses the [render](/up.render) options that would be used to
    [`submit`](/up.submit) the given form, but does not render.
 
-   \#\#\# Example
+   ### Example
 
    Given a form element:
 
@@ -282,7 +284,7 @@ up.form = (function() {
    When the form is being [validated](/input-up-validate), this event is not emitted.
    Instead an `up:form:validate` event is emitted.
 
-   \#\#\# Changing render options
+   ### Changing render options
 
    Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
 

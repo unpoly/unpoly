@@ -35,7 +35,7 @@ Makes an AJAX request to the given URL and caches the response.
 
 The function returns a promise that fulfills with the response text.
 
-\#\#\# Example
+### Example
 
 ```
 up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {

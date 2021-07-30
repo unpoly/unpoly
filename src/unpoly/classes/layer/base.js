@@ -18,7 +18,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   This layer's outmost element.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   let rootLayer = up.layer.root
@@ -56,7 +56,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   This layer's [context](/context).
 
-  \#\#\# Example
+  ### Example
 
   You may access the context properties like a regular JavaScript object.
 
@@ -402,7 +402,7 @@ up.Layer = class Layer extends up.Record {
 
   The arguments for this function are the same as for `up.on()`.
 
-  \#\#\# Example
+  ### Example
 
       let rootLayer = up.layer.root
       let overlay = await up.layer.open()
@@ -412,7 +412,7 @@ up.Layer = class Layer extends up.Record {
       rootLayer.emit('foo') // logs "Listener called"
       overlay.emit('foo')   // listener is not called
 
-  \#\#\# Most Unpoly events have a layer reference
+  ### Most Unpoly events have a layer reference
 
   Whenever possible Unpoly will emit its events on associated layers instead of `document`.
   This way you can listen to events on one layer without receiving events from other layers.
@@ -521,7 +521,7 @@ up.Layer = class Layer extends up.Record {
   The value of [up.layer.current](/up.layer.current) will be set to the this layer
   while event listeners are running.
 
-  \#\#\# Example
+  ### Example
 
       let rootLayer = up.layer.root
       let overlay = await up.layer.open()
@@ -706,7 +706,7 @@ up.Layer = class Layer extends up.Record {
 
   Also see `up.element.affix()`.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   layer = up.layer.open()

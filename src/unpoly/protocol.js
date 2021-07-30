@@ -53,7 +53,7 @@ up.protocol = (function() {
 
   The `X-Up-Version` header is guaranteed to be set for all [requests made through Unpoly](/up.request).
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Version: 1.0.0
@@ -76,14 +76,14 @@ up.protocol = (function() {
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Target: .menu
   X-Up-Fail-Target: body
   ```
 
-  \#\#\# Changing the render target from the server
+  ### Changing the render target from the server
 
   The server may change the render target context by including a CSS selector as an `X-Up-Target` header
   in its response.
@@ -125,14 +125,14 @@ up.protocol = (function() {
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Target: .menu
   X-Up-Fail-Target: body
   ```
 
-  \#\#\# Signaling failed form submissions
+  ### Signaling failed form submissions
 
   When [submitting a form via AJAX](/form-up-submit)
   Unpoly needs to know whether the form submission has failed (to update the form with
@@ -173,7 +173,7 @@ up.protocol = (function() {
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Mode: drawer
@@ -196,7 +196,7 @@ up.protocol = (function() {
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Mode: drawer
@@ -225,7 +225,7 @@ up.protocol = (function() {
   /*-
   The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Cache: clear
@@ -245,7 +245,7 @@ up.protocol = (function() {
 
   See `[up-time]` for a detailed example.
 
-  \#\#\# Format
+  ### Format
 
   The time is encoded is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
 
@@ -272,13 +272,13 @@ up.protocol = (function() {
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Context: { "lives": 3 }
   ```
 
-  \#\#\# Updating context from the server
+  ### Updating context from the server
 
   The server may update the layer context by sending a `X-Up-Context` response header with
   changed key/value pairs:
@@ -324,7 +324,7 @@ up.protocol = (function() {
   The user may choose to not send this header by configuring
   `up.network.config.requestMetaKeys`.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Fail-Context: { "context": "Choose a company contact" }
@@ -351,7 +351,7 @@ up.protocol = (function() {
   and the response's URL changed from the request's URL, Unpoly will assume a redirect and set the
   method to `GET`.
 
-  \#\#\# Internet Explorer 11
+  ### Internet Explorer 11
 
   There is an edge case on Internet Explorer 11, where Unpoly cannot detect the final URL after a redirect.
   You can fix this edge case by delivering `X-Up-Location` and `X-Up-Method` headers with the *last* response
@@ -359,7 +359,7 @@ up.protocol = (function() {
 
   The **simplest implementation** is to set these headers for every request.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Location: /current-url
@@ -375,7 +375,7 @@ up.protocol = (function() {
 
   Without this header Unpoly will assume a `GET` method if the response's URL changed from the request's URL,
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Location: /current-url
@@ -395,7 +395,7 @@ up.protocol = (function() {
   the application layout unless targeted. Since your optimized response
   no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   X-Up-Title: Playlist browser
@@ -418,7 +418,7 @@ up.protocol = (function() {
   server responds with a non-200 status code. This is in contrast to [regular form submissions](/form-up-submit),
   [where a non-200 status code will often update a different element](/server-errors).
 
-  \#\#\# Example
+  ### Example
 
   Assume we have an auto-validating form field:
 
@@ -453,7 +453,7 @@ up.protocol = (function() {
   The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted
   event object.
 
-  \#\#\# Example
+  ### Example
 
   ```http
   Content-Type: text/html
@@ -465,7 +465,7 @@ up.protocol = (function() {
   </html>
   ```
 
-  \#\#\# Emitting an event on a layer
+  ### Emitting an event on a layer
 
   Instead of emitting an event on the `document`, the server may also choose to
   [emit the event on the layer being updated](/up.layer.emit). To do so, add a property
@@ -502,7 +502,7 @@ up.protocol = (function() {
   The header value is the acceptance value serialized as a JSON object.
   To accept an overlay without value, set the header value to the string `null`.
 
-  \#\#\# Example
+  ### Example
 
   The response below will accept the targeted overlay with the value `{user_id: 1012 }`:
 
@@ -515,7 +515,7 @@ up.protocol = (function() {
   </html>
   ```
 
-  \#\#\# Rendering content
+  ### Rendering content
 
   The response may contain `text/html` content. If the root layer is targeted,
   the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
@@ -551,7 +551,7 @@ up.protocol = (function() {
   The header value is the dismissal value serialized as a JSON object.
   To accept an overlay without value, set the header value to the string `null`.
 
-  \#\#\# Example
+  ### Example
 
   The response below will dismiss the targeted overlay without a dismissal value:
 
@@ -565,7 +565,7 @@ up.protocol = (function() {
   </html>
   ```
 
-  \#\#\# Rendering content
+  ### Rendering content
 
   The response may contain `text/html` content. If the root layer is targeted,
   the `X-Up-Accept-Layer` header is ignored and the fragment is updated with

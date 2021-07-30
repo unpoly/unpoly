@@ -47,7 +47,7 @@ up.syntax = (function() {
 
   It will also organize your JavaScript snippets by selector.
 
-  \#\#\# Example
+  ### Example
 
   This compiler will insert the current time into a
   `<div class='current-time'></div>`:
@@ -62,7 +62,7 @@ up.syntax = (function() {
   The compiler function will be called once for each matching element when
   the page loads, or when a matching fragment is [inserted](/up.replace) later.
 
-  \#\#\# Integrating JavaScript libraries
+  ### Integrating JavaScript libraries
 
   `up.compiler()` is a great way to integrate JavaScript libraries.
   Let's say your JavaScript plugin wants you to call `lightboxify()`
@@ -82,7 +82,7 @@ up.syntax = (function() {
   })
   ```
 
-  \#\#\# Cleaning up after yourself
+  ### Cleaning up after yourself
 
   If your compiler returns a function, Unpoly will use this as a *destructor* to
   clean up if the element leaves the DOM. Note that in Unpoly the same DOM and JavaScript environment
@@ -110,7 +110,7 @@ up.syntax = (function() {
 
   An alternative way to register a destructor function is `up.destructor()`.
 
-  \#\#\# Passing parameters to a compiler
+  ### Passing parameters to a compiler
 
   Use the `[up-data]` attribute to attach structured data to a DOM element.
   The data will be parsed and passed to your compiler function.
@@ -167,7 +167,7 @@ up.syntax = (function() {
   If you're not using jQuery, use `up.compiler()` instead, which calls
   the compiler function with a native element.
 
-  \#\#\# Example
+  ### Example
 
   This jQuery compiler will insert the current time into a
   `<div class='current-time'></div>`:
@@ -203,7 +203,7 @@ up.syntax = (function() {
   If you want default attributes for *every* link and form, consider customizing your
   [navigation options](/navigation).
 
-  \#\#\# Example
+  ### Example
 
   You will sometimes find yourself setting the same combination of UJS attributes again and again:
 
@@ -262,7 +262,7 @@ up.syntax = (function() {
   If you're not using jQuery, use `up.macro()` instead, which calls
   the macro function with a native element.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   up.$macro('[content-link]', function($link) {
@@ -352,7 +352,7 @@ up.syntax = (function() {
   Registers a function to be called when the given element
   is [destroyed](/up.destroy).
 
-  \#\#\# Example
+  ### Example
 
   ```js
   up.compiler('.current-time', function(element) {
@@ -405,7 +405,7 @@ up.syntax = (function() {
 
   Returns `undefined` if the element has no `[up-data]` attribute.
 
-  \#\#\# Example
+  ### Example
 
   You have an element with JSON data serialized into an `up-data` attribute:
 
@@ -436,7 +436,7 @@ up.syntax = (function() {
   Unpoly will parse the JSON and pass the resulting object to any matching
   [`up.compiler()`](/up.compiler) functions.
 
-  \#\#\# Example
+  ### Example
 
   For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:

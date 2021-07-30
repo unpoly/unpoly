@@ -261,7 +261,7 @@ up.history = (function() {
 
   If no previous URL is known, the link will not be changed.
 
-  \#\#\# Example
+  ### Example
 
   This link ...
 

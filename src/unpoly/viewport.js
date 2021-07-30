@@ -97,13 +97,13 @@ up.viewport = (function() {
   A "viewport" is an element that has scrollbars, e.g. `<body>` or
   a container with `overflow-x: scroll`.
 
-  \#\#\# Example
+  ### Example
 
   This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
 
       up.scroll('.main', 100)
 
-  \#\#\# Animating the scrolling motion
+  ### Animating the scrolling motion
 
   The scrolling can (optionally) be animated.
 
@@ -149,7 +149,7 @@ up.viewport = (function() {
   Scrolls the given element's viewport so the first rows of the
   element are visible for the user.
 
-  \#\#\# Fixed elements obstructing the viewport
+  ### Fixed elements obstructing the viewport
 
   Many applications have a navigation bar fixed to the top or bottom,
   obstructing the view on an element.
@@ -315,7 +315,7 @@ up.viewport = (function() {
 
   If no element matches the given `#hash` anchor, a resolved promise is returned.
 
-  \#\#\# Example
+  ### Example
 
       up.revealHash('#chapter2')
 
@@ -704,7 +704,7 @@ up.viewport = (function() {
   [`up.reveal()`](/up.reveal) will always try to scroll the viewport closest
   to the element that is being revealed. By default this is the `<body>` element.
 
-  \#\#\# Example
+  ### Example
 
   Here is an example for a layout for an e-mail client, showing a list of e-mails
   on the left side and the e-mail text on the right side:
@@ -759,7 +759,7 @@ up.viewport = (function() {
   Instead of using this attribute,
   you can also configure a selector in `up.viewport.config.fixedTop`.
 
-  \#\#\# Example
+  ### Example
 
       <div class="top-nav" up-fixed="top">...</div>
 
@@ -779,7 +779,7 @@ up.viewport = (function() {
   Instead of using this attribute,
   you can also configure a selector in `up.viewport.config.fixedBottom`.
 
-  \#\#\# Example
+  ### Example
 
       <div class="bottom-nav" up-fixed="bottom">...</div>
 
@@ -803,7 +803,7 @@ up.viewport = (function() {
   Instead of giving this attribute to any affected element,
   you can also configure a selector in `up.viewport.config.anchoredRight`.
 
-  \#\#\# Example
+  ### Example
 
   Here is the CSS for a navigation bar that is anchored to the top edge of the screen:
 

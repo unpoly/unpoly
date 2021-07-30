@@ -8,7 +8,7 @@ up.migrate.renamedPackage('bus', 'event')
 [Emits an event](/up.emit) and returns whether no listener
 has prevented the default action.
 
-\#\#\# Example
+### Example
 
 ```javascript
 if (up.event.nobodyPrevents('disk:erase')) {

@@ -22,7 +22,7 @@ This is done by:
 - [Preloading the link's destination URL](/a-up-preload)
 - [Triggering the link on `mousedown`](/a-up-instant) instead of on `click`
 
-\#\#\# Example
+### Example
 
 Use `[up-dash]` like this:
 

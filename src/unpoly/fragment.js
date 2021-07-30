@@ -145,7 +145,7 @@ up.fragment = (function() {
    If the given element was never directly updated, but part of a larger fragment update,
    the closest known source of an ancestor element is returned.
 
-   \#\#\# Example
+   ### Example
 
    In the HTML below, the element `#one` was loaded from the URL `/foo`:
 
@@ -259,7 +259,7 @@ up.fragment = (function() {
    that originally brought the element into the DOM. You may use `[up-source]` to
    use another URL instead.
 
-   \#\#\# Example
+   ### Example
 
    Assume an application layout with an unread message counter.
    You use `[up-poll]` to refresh the counter every 30 seconds.
@@ -292,7 +292,7 @@ up.fragment = (function() {
    defaults that a user would expects for navigation (like clicking a link),
    pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
 
-   \#\#\# Passing the new fragment
+   ### Passing the new fragment
 
    The new fragment content can be passed as one of the following options:
 
@@ -301,7 +301,7 @@ up.fragment = (function() {
    - [`{ fragment }`](#options.fragment) renders content from a given HTML string that only contains the new fragment
    - [`{ content }`](#options.content) replaces the targeted fragment's inner HTML with the given HTML string
 
-   \#\#\# Example
+   ### Example
 
    Let's say your current HTML looks like this:
 
@@ -334,7 +334,7 @@ up.fragment = (function() {
    Note how only `.two` has changed. The update for `.one` was
    discarded, since it didn't match the selector.
 
-   \#\#\# Events
+   ### Events
 
    Unpoly will emit events at various stages of the rendering process:
 
@@ -716,7 +716,7 @@ up.fragment = (function() {
 
    Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
 
-   \#\#\# Example
+   ### Example
 
    The following `<audio>` element will be persisted through fragment
    updates as long as the responses contain an element matching `#player`:
@@ -726,7 +726,7 @@ up.fragment = (function() {
    <audio id="player" up-keep src="song.mp3"></audio>
    ```
 
-   \#\#\# Controlling if an element will be kept
+   ### Controlling if an element will be kept
 
    Unpoly will **only** keep an existing element if:
 
@@ -862,7 +862,7 @@ up.fragment = (function() {
    If you're looking to run code when a new fragment matches
    a selector, use `up.compiler()` instead.
 
-   \#\#\# Example
+   ### Example
 
    up.on('up:fragment:inserted', function(event, fragment) {
         console.log("Looks like we have a new %o!", fragment)
@@ -928,7 +928,7 @@ up.fragment = (function() {
 
    If no element matches these conditions, `undefined` is returned.
 
-   \#\#\# Example: Matching a selector in a layer
+   ### Example: Matching a selector in a layer
 
    To select the first element with the selector `.foo` on the [current layer](/up.layer.current):
 
@@ -938,14 +938,14 @@ up.fragment = (function() {
 
    let foo = up.fragment.get('.foo', { layer: 'any' })
 
-   \#\#\# Example: Matching the descendant of an element
+   ### Example: Matching the descendant of an element
 
    To only select in the descendants of an element, pass a root element as the first argument:
 
    let container = up.fragment.get('.container')
    let fooInContainer = up.fragment.get(container, '.foo')
 
-   \#\#\# Example: Matching around an origin element
+   ### Example: Matching around an origin element
 
    When processing a user interaction, it is often helpful to match elements around the link
    that's being clicked or the form field that's being changed. In this case you may pass
@@ -972,7 +972,7 @@ up.fragment = (function() {
    When the link's does not have an ancestor matching `.element`,
    Unpoly will search the entire layer for `.element`.
 
-   \#\#\# Example: Matching an origin sibling
+   ### Example: Matching an origin sibling
 
    When processing a user interaction, it is often helpful to match elements
    within the same container as the the link that's being clicked or the form field that's
@@ -1002,7 +1002,7 @@ up.fragment = (function() {
    Note that when the link's `.element` container does not have a child `.inner`,
    Unpoly will search the entire layer for `.element .inner`.
 
-   \#\#\# Similar features
+   ### Similar features
 
    - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
    - The [`up.element.get()`](/up.element.get) function simply returns the first element matching a selector
@@ -1072,7 +1072,7 @@ up.fragment = (function() {
 
    Returns an empty list if no element matches these conditions.
 
-   \#\#\# Example
+   ### Example
 
    To select all elements with the selector `.foo` on the [current layer](/up.layer.current):
 
@@ -1087,7 +1087,7 @@ up.fragment = (function() {
    var container = up.fragment.get('.container')
    var foosInContainer = up.fragment.all(container, '.foo')
 
-   \#\#\# Similar features
+   ### Similar features
 
    - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
    - The [`up.element.all()`](/up.element.get) function simply returns the all elements matching a selector
@@ -1138,7 +1138,7 @@ up.fragment = (function() {
    Your target selectors may use this pseudo-selector
    to replace an element with an descendant matching the given selector.
 
-   \#\#\# Example
+   ### Example
 
    `up.render('div:has(span)', { url: '...' })`  replaces the first `<div>` elements with at least one `<span>` among its descendants:
 
@@ -1151,7 +1151,7 @@ up.fragment = (function() {
    </div>
    ```
 
-   \#\#\# Compatibility
+   ### Compatibility
 
    `:has()` is supported by target selectors like `a[up-target]` and `up.render({ target })`.
 
@@ -1221,7 +1221,7 @@ up.fragment = (function() {
 
    Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
 
-   \#\#\# Animating the removal
+   ### Animating the removal
 
    You may animate the element's removal by passing an option like `{ animate: 'fade-out' }`.
    Unpoly ships with a number of [predefined animations](/up.animate#named-animations) and
@@ -1316,11 +1316,11 @@ up.fragment = (function() {
    By default, reloading is not considered a [user navigation](/navigation) and e.g. will not update
    the browser location. You may change this with `{ navigate: true }`.
 
-   \#\#\# Example
+   ### Example
 
    up.on('new-mail', function() { up.reload('.inbox') })
 
-   \#\#\# Controlling the URL that is reloaded
+   ### Controlling the URL that is reloaded
 
    Unpoly remembers [the URL from which a fragment was loaded](/up.fragment.source),
    so you don't usually need to pass a URL when reloading.
@@ -1328,7 +1328,7 @@ up.fragment = (function() {
    To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
    on the element being reloaded or its ancestors.
 
-   \#\#\# Skipping updates when nothing changed
+   ### Skipping updates when nothing changed
 
    You may use the `[up-time]` attribute to avoid rendering unchanged HTML when reloading
    a fragment. See `[up-time]` for a detailed example.
@@ -1363,7 +1363,7 @@ up.fragment = (function() {
    [current layer](/up.layer.current)'s [main element](/up.fragment.config#config.mainTargets)
    with a matching fragment from the server response.
 
-   \#\#\# Example
+   ### Example
 
    This would replace the current page with the response for `/users`:
 
@@ -1403,7 +1403,7 @@ up.fragment = (function() {
    - The element's `[class]` names, ignoring `up.fragment.config.badTargetClasses`.
    - The element's tag name
 
-   \#\#\# Example
+   ### Example
 
    ```js
    element = up.element.createFromHTML('<span class="klass">...</span>')
@@ -1454,7 +1454,7 @@ up.fragment = (function() {
    like a good `[id]` or `[class]` attribute, it is not necessary to
    also set `[up-id]`.
 
-   \#\#\# Example
+   ### Example
 
    Take this element:
 
@@ -1591,7 +1591,7 @@ up.fragment = (function() {
 
    You may configure main target selectors in `up.fragment.config.mainTargets`.
 
-   \#\#\# Example
+   ### Example
 
    ```js
    up.render(':main', { url: '/page2' })
@@ -1604,7 +1604,7 @@ up.fragment = (function() {
   /*-
    Updates this element when no other render target is given.
 
-   \#\#\# Example
+   ### Example
 
    Many links simply replace the main content element in your application layout.
 
@@ -1684,7 +1684,7 @@ up.fragment = (function() {
   /*-
    To make a server request without changing a fragment, use the `:none` selector.
 
-   \#\#\# Example
+   ### Example
 
    ```html
    <a href="/ping" up-target=":none">Ping server</a>
@@ -1706,7 +1706,7 @@ up.fragment = (function() {
    [origin is considered](/fragment-placement#interaction-origin-is-considered)
    when matching fragments in the current page.
 
-   \#\#\# Shorthand
+   ### Shorthand
 
    Instead of `:origin` you may also use the ampersand character (`&`).
 
@@ -1727,7 +1727,7 @@ up.fragment = (function() {
 
    In canonical usage the topmost swappable element is often a [main element](/up-main).
 
-   \#\#\# Example
+   ### Example
 
    The following will replace the `<body>` element in the root layer,
    and the topmost swappable element in an overlay:

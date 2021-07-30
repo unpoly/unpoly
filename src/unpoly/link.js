@@ -6,7 +6,7 @@ Linking to fragments
 
 The `up.link` module lets you build links that update fragments instead of entire pages.
 
-\#\#\# Motivation
+### Motivation
 
 In a traditional web application, the entire page is destroyed and re-created when the
 user follows a link:
@@ -35,7 +35,7 @@ Pages also load much faster since the DOM, CSS and JavaScript environments do no
 destroyed and recreated for every request.
 
 
-\#\#\# Example
+### Example
 
 Let's say we are rendering three pages with a tabbed navigation to switch between screens:
 
@@ -277,7 +277,7 @@ up.link = (function() {
 
   Emits the event `up:link:follow`.
 
-  \#\#\# Examples
+  ### Examples
 
   Assume we have a link with an `a[up-target]` attribute:
 
@@ -334,7 +334,7 @@ up.link = (function() {
   Parses the [render](/up.render) options that would be used to
   [`follow`](/up.follow) the given link, but does not render.
 
-  \#\#\# Example
+  ### Example
 
   Given a link with some `[up-...]` attributes:
 
@@ -436,7 +436,7 @@ up.link = (function() {
 
   The event is emitted on the `<a>` element that is being followed.
 
-  \#\#\# Changing render options
+  ### Changing render options
 
   Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
 
@@ -720,7 +720,7 @@ up.link = (function() {
   This is useful to listen to links being activated, without needing to know whether
   a link is `[up-instant]`.
 
-  \#\#\# Example
+  ### Example
 
   Assume we have two links, one of which is `[up-instant]`:
 
@@ -737,17 +737,17 @@ up.link = (function() {
   })
   ```
 
-  \#\#\# Cancelation is forwarded
+  ### Cancelation is forwarded
 
   If the user cancels an `up:click` event using `event.preventDefault()`,
   the underlying `click` or `mousedown` event will also be canceled.
 
-  \#\#\# Accessibility
+  ### Accessibility
 
   If the user activates an element using their keyboard, the `up:click` event will be emitted
   when the key is pressed even if the element has an `[up-instant]` attribute.
 
-  \#\#\# Only unmodified clicks are considered
+  ### Only unmodified clicks are considered
 
   To prevent overriding native browser behavior, the `up:click` is only emitted for unmodified clicks.
 
@@ -781,7 +781,7 @@ up.link = (function() {
 
   Following a link is considered [navigation](/navigation) by default.
 
-  \#\#\# Example
+  ### Example
 
   This will update the fragment `<div class="content">` with the same element
   fetched from `/posts/5`:
@@ -792,12 +792,12 @@ up.link = (function() {
 
   If no `[up-target]` attribute is set, the [main target](/up-main) is updated.
 
-  \#\#\# Advanced fragment changes
+  ### Advanced fragment changes
 
   See [fragment placement](/fragment-placement) for advanced use cases
   like updating multiple fragments or appending content to an existing element.
 
-  \#\#\# Short notation
+  ### Short notation
 
   You may omit the `[up-follow]` attribute if the link has one of the following attributes:
 
@@ -810,7 +810,7 @@ up.link = (function() {
 
   Such a link will still be followed through Unpoly.
 
-  \#\#\# Following all links automatically
+  ### Following all links automatically
 
   You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
 
@@ -1055,11 +1055,11 @@ up.link = (function() {
   navigation actions this isn't needed. E.g. popular operation
   systems switch tabs on `mousedown` instead of `click`.
 
-  \#\#\# Example
+  ### Example
 
       <a href="/users" up-follow up-instant>User list</a>
 
-  \#\#\# Accessibility
+  ### Accessibility
 
   If the user activates an element using their keyboard, the `up:click` event will be emitted
   on `click`, even if the element has an `[up-instant]` attribute.
@@ -1075,7 +1075,7 @@ up.link = (function() {
   `[up-expand]` honors all the Unppoly attributes in expanded links, like
   `a[up-target]`, `a[up-instant]` or `a[up-preload]`.
 
-  \#\#\# Example
+  ### Example
 
       <div class="notification" up-expand>
         Record was saved!
@@ -1085,7 +1085,7 @@ up.link = (function() {
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
 
-  \#\#\# Elements with multiple contained links
+  ### Elements with multiple contained links
 
   If a container contains more than one link, you can set the value of the
   `up-expand` attribute to a CSS selector to define which link should be expanded:
@@ -1096,7 +1096,7 @@ up.link = (function() {
         <a class="close" href="/records">Close</a>
       </div>
 
-  \#\#\# Limitations
+  ### Limitations
 
   `[up-expand]` has some limitations for advanced browser users:
 
