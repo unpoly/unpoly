@@ -1007,7 +1007,7 @@ up.form = (function() {
         only shown when checkbox is checked
       </div>
 
-      <div class="target" up-show-for=":cunhecked">
+      <div class="target" up-show-for=":unchecked">
         only shown when checkbox is unchecked
       </div>
 
