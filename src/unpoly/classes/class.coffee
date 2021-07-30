@@ -8,8 +8,8 @@ class up.Class
   @accessor: (prop, descriptor) ->
     Object.defineProperty(@prototype, prop, descriptor)
 
-  @delegate: (props, targetProp) ->
-    u.delegate(@prototype, props, -> this[targetProp])
+#  @delegate: (props, targetProp) ->
+#    u.delegate(@prototype, props, -> this[targetProp])
 
 #  @include: (mixin) ->
 #    for key in Object.keys(mixin.prototype)
