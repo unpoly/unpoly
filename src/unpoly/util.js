@@ -443,7 +443,7 @@ up.util = (function() {
 
   We have a user-defined `Account` class that we want to use with `up.util.isBlank()`:
 
-  ```
+  ```js
   class Account {
     constructor(email) {
       this.email = email
@@ -463,9 +463,9 @@ up.util = (function() {
 
   We may now use `Account` instances with `up.util.isBlank()`:
 
-  ```
-  foo = new Account('foo@foo.com')
-  bar = new Account('')
+  ```js
+  let foo = new Account('foo@foo.com')
+  let bar = new Account('')
 
   console.log(up.util.isBlank(foo)) // prints false
   console.log(up.util.isBlank(bar)) // prints true
@@ -807,7 +807,7 @@ up.util = (function() {
 
   We have a user-defined `Account` class that we want to use with `up.util.copy()`:
 
-  ```
+  ```js
   class Account {
     constructor(email) {
       this.email = email
@@ -1745,16 +1745,13 @@ up.util = (function() {
 
   We may now use `Account` instances with `up.util.isEqual()`:
 
-  ```
-  one = new User('foo@foo.com')
-  two = new User('foo@foo.com')
-  three = new User('bar@bar.com')
+  ```js
+  let one = new User('foo@foo.com')
+  let two = new User('foo@foo.com')
+  let three = new User('bar@bar.com')
 
-  isEqual = up.util.isEqual(one, two)
-  // isEqual is now true
-
-  isEqual = up.util.isEqual(one, three)
-  // isEqual is now false
+  up.util.isEqual(one, two)   // returns true
+  up.util.isEqual(one, three) // returns false
   ```
 
   @property up.util.isEqual.key
