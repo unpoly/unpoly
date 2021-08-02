@@ -19,48 +19,48 @@ up.form = (function() {
   const ATTRIBUTES_SUGGESTING_SUBMIT = ['[up-submit]', '[up-target]', '[up-layer]', '[up-transition]']
 
   /*-
-   Sets default options for form submission and validation.
+  Sets default options for form submission and validation.
 
-   @property up.form.config
+  @property up.form.config
 
-   @param {number} [config.observeDelay=0]
-   The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
-   after the input value changes. Use this to limit how often the callback
-   will be invoked for a fast typist.
+  @param {number} [config.observeDelay=0]
+    The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
+    after the input value changes. Use this to limit how often the callback
+    will be invoked for a fast typist.
 
-   @param {Array<string>} [config.submitSelectors]
-   An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
+  @param {Array<string>} [config.submitSelectors]
+    An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
 
-   You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
+    You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
-   ```js
-   up.form.config.submitSelectors.push('form']
-   ```
+    ```js
+    up.form.config.submitSelectors.push('form']
+    ```
 
-   Individual forms may opt out with an `[up-submit=follow]` attribute.
-   You may configure additional exceptions in `config.noSubmitSelectors`.
+    Individual forms may opt out with an `[up-submit=follow]` attribute.
+    You may configure additional exceptions in `config.noSubmitSelectors`.
 
-   @param {Array<string>} [config.noSubmitSelectors]
-   Exceptions to `config.submitSelectors`.
+  @param {Array<string>} [config.noSubmitSelectors]
+    Exceptions to `config.submitSelectors`.
 
-   Matching forms will *not* be [submitted through Unpoly](/form-up-submit), even if they match `config.submitSelectors`.
+    Matching forms will *not* be [submitted through Unpoly](/form-up-submit), even if they match `config.submitSelectors`.
 
-   @param {Array<string>} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
-   An array of CSS selectors that are searched around a form field
-   that wants to [validate](/up.validate).
+  @param {Array<string>} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
+    An array of CSS selectors that are searched around a form field
+    that wants to [validate](/up.validate).
 
-   The first matching selector will be updated with the validation messages from the server.
+    The first matching selector will be updated with the validation messages from the server.
 
-   By default this looks for a `<fieldset>`, `<label>` or `<form>`
-   around the validating input field.
+    By default this looks for a `<fieldset>`, `<label>` or `<form>`
+    around the validating input field.
 
-   @param {string} [config.fieldSelectors]
-   An array of CSS selectors that represent form fields, such as `input` or `select`.
+  @param {string} [config.fieldSelectors]
+    An array of CSS selectors that represent form fields, such as `input` or `select`.
 
-   @param {string} [config.submitButtonSelectors]
-   An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
+  @param {string} [config.submitButtonSelectors]
+    An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
 
-   @stable
+  @stable
    */
   const config = new up.Config(() => ({
     validateTargets: ['[up-fieldset]:has(:origin)', 'fieldset:has(:origin)', 'label:has(:origin)', 'form:has(:origin)'],
@@ -90,21 +90,22 @@ up.form = (function() {
   }
 
   /*-
-   Returns a list of form fields within the given element.
+  Returns a list of form fields within the given element.
 
-   You can configure what Unpoly considers a form field by adding CSS selectors to the
-   `up.form.config.fieldSelectors` array.
+  You can configure what Unpoly considers a form field by adding CSS selectors to the
+  `up.form.config.fieldSelectors` array.
 
-   If the given element is itself a form field, a list of that given element is returned.
+  If the given element is itself a form field, a list of that given element is returned.
 
-   @function up.form.fields
-   @param {Element|jQuery} root
-   The element to scan for contained form fields.
+  @function up.form.fields
+  @param {Element|jQuery} root
+    The element to scan for contained form fields.
 
-   If the element is itself a form field, a list of that element is returned.
-   @return {NodeList<Element>|Array<Element>}
-   @experimental
-   */
+    If the element is itself a form field, a list of that element is returned.
+  @return {NodeList<Element>|Array<Element>}
+
+  @experimental
+  */
   function findFields(root) {
     root = e.get(root); // unwrap jQuery
     let fields = e.subtree(root, fieldSelector())
@@ -123,10 +124,10 @@ up.form = (function() {
   }
 
   /*-
-   @function up.form.submittingButton
-   @param {Element} form
-   @internal
-   */
+  @function up.form.submittingButton
+  @param {Element} form
+  @internal
+  */
   function submittingButton(form) {
     const selector = submitButtonSelector()
     const focusedElement = document.activeElement
@@ -139,9 +140,9 @@ up.form = (function() {
   }
 
   /*-
-   @function up.form.submitButtonSelector
-   @internal
-   */
+  @function up.form.submitButtonSelector
+  @internal
+  */
   function submitButtonSelector() {
     return config.submitButtonSelectors.join(',')
   }
@@ -162,28 +163,30 @@ up.form = (function() {
 
   ### Example
 
+  ```js
   up.submit('form.new-user', { target: '.main' })
+  ```
 
   @function up.submit
 
   @param {Element|jQuery|string} form
-  The form to submit.
+    The form to submit.
 
-  If the argument points to an element that is not a form,
-  Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
+    If the argument points to an element that is not a form,
+    Unpoly will search its ancestors for the [closest](/up.fragment.closest) form.
 
   @param {Object} [options]
-  [Render options](/up.render) that should be used for submitting the form.
+    [Render options](/up.render) that should be used for submitting the form.
 
-  Unpoly will parse render options from the given form's attributes
-  like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
-  of supported attributes.
+    Unpoly will parse render options from the given form's attributes
+    like `[up-target]` or `[up-transition]`. See `form[up-submit]` for a list
+    of supported attributes.
 
-  You may pass this additional `options` object to supplement or override
-  options parsed from the form attributes.
+    You may pass this additional `options` object to supplement or override
+    options parsed from the form attributes.
 
   @return {Promise<up.RenderResult>}
-  A promise that will be fulfilled when the server response was rendered.
+    A promise that will be fulfilled when the server response was rendered.
 
   @stable
   */
@@ -192,39 +195,39 @@ up.form = (function() {
   })
 
   /*-
-   Parses the [render](/up.render) options that would be used to
-   [`submit`](/up.submit) the given form, but does not render.
+  Parses the [render](/up.render) options that would be used to
+  [`submit`](/up.submit) the given form, but does not render.
 
-   ### Example
+  ### Example
 
-   Given a form element:
+  Given a form element:
 
-   ```html
-   <form action="/foo" method="post" up-target=".content">
-   ...
-   </form>
-   ```
+  ```html
+  <form action="/foo" method="post" up-target=".content">
+  ...
+  </form>
+  ```
 
-   We can parse the link's render options like this:
+  We can parse the link's render options like this:
 
-   ```js
-   let form = document.querySelector('form')
-   let options = up.form.submitOptions(form)
-   // => { url: '/foo', method: 'POST', target: '.content', ... }
-   ```
+  ```js
+  let form = document.querySelector('form')
+  let options = up.form.submitOptions(form)
+  // => { url: '/foo', method: 'POST', target: '.content', ... }
+  ```
 
-   @param {Element|jQuery|string} form
+  @param {Element|jQuery|string} form
    The form to submit.
-   @param {Object} [options]
-   Additional options for the form submission.
+  @param {Object} [options]
+    Additional options for the form submission.
 
-   Will override any attribute values set on the given form element.
+    Will override any attribute values set on the given form element.
 
-   See `up.render()` for detailed documentation of individual option properties.
-   @function up.form.submitOptions
-   @return {Object}
-   @stable
-   */
+    See `up.render()` for detailed documentation of individual option properties.
+  @function up.form.submitOptions
+  @return {Object}
+  @stable
+  */
   function submitOptions(form, options) {
     options = u.options(options)
     form = up.fragment.get(form)
@@ -277,37 +280,37 @@ up.form = (function() {
   }
 
   /*-
-   This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
+  This event is [emitted](/up.emit) when a form is [submitted](/up.submit) through Unpoly.
 
-   The event is emitted on the `<form>` element.
+  The event is emitted on the `<form>` element.
 
-   When the form is being [validated](/input-up-validate), this event is not emitted.
-   Instead an `up:form:validate` event is emitted.
+  When the form is being [validated](/input-up-validate), this event is not emitted.
+  Instead an `up:form:validate` event is emitted.
 
-   ### Changing render options
+  ### Changing render options
 
-   Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
+  Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
 
-   The code below will use a custom [transition](/a-up-transition)
-   when a form submission [fails](/server-errors):
+  The code below will use a custom [transition](/a-up-transition)
+  when a form submission [fails](/server-errors):
 
-   ```js
-   up.on('up:form:submit', function(event, form) {
+  ```js
+  up.on('up:form:submit', function(event, form) {
     event.renderOptions.failTransition = 'shake'
   })
-   ```
+  ```
 
-   @event up:form:submit
-   @param {Element} event.target
-   The `<form>` element that will be submitted.
-   @param {Object} event.renderOptions
-   An object with [render options](/up.render) for the fragment update
+  @event up:form:submit
+  @param {Element} event.target
+    The `<form>` element that will be submitted.
+  @param {Object} event.renderOptions
+    An object with [render options](/up.render) for the fragment update
 
-   Listeners may inspect and modify these options.
-   @param event.preventDefault()
-   Event listeners may call this method to prevent the form from being submitted.
-   @stable
-   */
+    Listeners may inspect and modify these options.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the form from being submitted.
+  @stable
+  */
 
   // MacOS does not focus buttons on click.
   // That means that submittingButton() cannot rely on document.activeElement.
@@ -322,63 +325,69 @@ up.form = (function() {
   })
 
   /*-
-   Observes form fields and runs a callback when a value changes.
+  Observes form fields and runs a callback when a value changes.
 
-   This is useful for observing text fields while the user is typing.
+  This is useful for observing text fields while the user is typing.
 
-   The unobtrusive variant of this is the [`[up-observe]`](/input-up-observe) attribute.
+  The unobtrusive variant of this is the [`[up-observe]`](/input-up-observe) attribute.
 
-   \#\#\# Example
+  \#\#\# Example
 
-   The following would print to the console whenever an input field changes:
+  The following would print to the console whenever an input field changes:
 
-   up.observe('input.query', function(value) {
-        console.log('Query is now %o', value)
-      })
+  ```js
+  up.observe('input.query', function(value) {
+    console.log('Query is now %o', value)
+  })
+  ```
 
-   Instead of a single form field, you can also pass multiple fields,
-   a `<form>` or any container that contains form fields.
-   The callback will be run if any of the given fields change:
+  Instead of a single form field, you can also pass multiple fields,
+  a `<form>` or any container that contains form fields.
+  The callback will be run if any of the given fields change:
 
-   up.observe('form', function(value, name) {
-        console.log('The value of %o is now %o', name, value)
-      })
+  ```js
+  up.observe('form', function(value, name) {
+   console.log('The value of %o is now %o', name, value)
+  })
+  ```
 
-   You may also pass the `{ batch: true }` option to receive all
-   changes since the last callback in a single object:
+  You may also pass the `{ batch: true }` option to receive all
+  changes since the last callback in a single object:
 
-   up.observe('form', { batch: true }, function(diff) {
-        console.log('Observed one or more changes: %o', diff)
-      })
+  ```js
+  up.observe('form', { batch: true }, function(diff) {
+   console.log('Observed one or more changes: %o', diff)
+  })
+  ```
 
-   @function up.observe
-   @param {string|Element|Array<Element>|jQuery} elements
-   The form fields that will be observed.
+  @function up.observe
+  @param {string|Element|Array<Element>|jQuery} elements
+    The form fields that will be observed.
 
-   You can pass one or more fields, a `<form>` or any container that contains form fields.
-   The callback will be run if any of the given fields change.
-   @param {boolean} [options.batch=false]
-   If set to `true`, the `onChange` callback will receive multiple
-   detected changes in a single diff object as its argument.
-   @param {number} [options.delay=up.form.config.observeDelay]
-   The number of miliseconds to wait before executing the callback
-   after the input value changes. Use this to limit how often the callback
-   will be invoked for a fast typist.
-   @param {Function(value, name): string} onChange
-   The callback to run when the field's value changes.
+    You can pass one or more fields, a `<form>` or any container that contains form fields.
+    The callback will be run if any of the given fields change.
+  @param {boolean} [options.batch=false]
+    If set to `true`, the `onChange` callback will receive multiple
+    detected changes in a single diff object as its argument.
+  @param {number} [options.delay=up.form.config.observeDelay]
+    The number of miliseconds to wait before executing the callback
+    after the input value changes. Use this to limit how often the callback
+    will be invoked for a fast typist.
+  @param {Function(value, name): string} onChange
+    The callback to run when the field's value changes.
 
-   If given as a function, it receives two arguments (`value`, `name`).
-   `value` is a string with the new attribute value and `string` is the name
-   of the form field that changed. If given as a string, it will be evaled as
-   JavaScript code in a context where (`value`, `name`) are set.
+    If given as a function, it receives two arguments (`value`, `name`).
+    `value` is a string with the new attribute value and `string` is the name
+    of the form field that changed. If given as a string, it will be evaled as
+    JavaScript code in a context where (`value`, `name`) are set.
 
-   A long-running callback function may return a promise that settles when
-   the callback completes. In this case the callback will not be called again while
-   it is already running.
-   @return {Function()}
-   A destructor function that removes the observe watch when called.
-   @stable
-   */
+    A long-running callback function may return a promise that settles when
+    the callback completes. In this case the callback will not be called again while
+    it is already running.
+  @return {Function()}
+    A destructor function that removes the observe watch when called.
+  @stable
+  */
   const observe = function (elements, ...args) {
     elements = e.list(elements)
     const fields = u.flatMap(elements, findFields)
@@ -398,22 +407,22 @@ up.form = (function() {
   }
 
   /*-
-   [Observes](/up.observe) a field or form and submits the form when a value changes.
+  [Observes](/up.observe) a field or form and submits the form when a value changes.
 
-   Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
-   while the autosubmitted form is processing.
+  Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
+  while the autosubmitted form is processing.
 
-   The unobtrusive variant of this is the [`[up-autosubmit]`](/form-up-autosubmit) attribute.
+  The unobtrusive variant of this is the [`[up-autosubmit]`](/form-up-autosubmit) attribute.
 
-   @function up.autosubmit
-   @param {string|Element|jQuery} target
-   The field or form to observe.
-   @param {Object} [options]
-   See options for [`up.observe()`](/up.observe)
-   @return {Function()}
-   A destructor function that removes the observe watch when called.
-   @stable
-   */
+  @function up.autosubmit
+  @param {string|Element|jQuery} target
+    The field or form to observe.
+  @param {Object} [options]
+    See options for [`up.observe()`](/up.observe)
+  @return {Function()}
+    A destructor function that removes the observe watch when called.
+  @stable
+  */
   function autosubmit(target, options) {
     return observe(target, options, () => submit(target))
   }
@@ -783,38 +792,42 @@ up.form = (function() {
 
   Let's look at a standard registration form that asks for an e-mail and password:
 
-      <form action="/users">
+  ```html
+  <form action="/users">
 
-        <label>
-          E-mail: <input type="text" name="email" />
-        </label>
+    <label>
+      E-mail: <input type="text" name="email" />
+    </label>
 
-        <label>
-          Password: <input type="password" name="password" />
-        </label>
+    <label>
+      Password: <input type="password" name="password" />
+    </label>
 
-        <button type="submit">Register</button>
+    <button type="submit">Register</button>
 
-      </form>
+  </form>
+  ```
 
   When the user changes the `email` field, we want to validate that
   the e-mail address is valid and still available. Also we want to
   change the `password` field for the minimum required password length.
   We can do this by giving both fields an `up-validate` attribute:
 
-      <form action="/users">
+  ```html
+  <form action="/users">
 
-        <label>
-          E-mail: <input type="text" name="email" up-validate />
-        </label>
+    <label>
+      E-mail: <input type="text" name="email" up-validate />
+    </label>
 
-        <label>
-          Password: <input type="password" name="password" up-validate />
-        </label>
+    <label>
+      Password: <input type="password" name="password" up-validate />
+    </label>
 
-        <button type="submit">Register</button>
+    <button type="submit">Register</button>
 
-      </form>
+  </form>
+  ```
 
   Whenever a field with `up-validate` changes, the form is POSTed to
   `/users` with an additional `X-Up-Validate` HTTP header.
@@ -823,39 +836,43 @@ up.form = (function() {
 
   In Ruby on Rails the processing action should behave like this:
 
-      class UsersController < ApplicationController
+  ```ruby
+  class UsersController < ApplicationController
 
-        * This action handles POST /users
-        def create
-          user_params = params[:user].permit(:email, :password)
-          @user = User.new(user_params)
-          if request.headers['X-Up-Validate']
-            @user.valid?  # run validations, but don't save to the database
-            render 'form' # render form with error messages
-          elsif @user.save?
-            sign_in @user
-          else
-            render 'form', status: :bad_request
-          end
-        end
-
+    * This action handles POST /users
+    def create
+      user_params = params[:user].permit(:email, :password)
+      @user = User.new(user_params)
+      if request.headers['X-Up-Validate']
+        @user.valid?  # run validations, but don't save to the database
+        render 'form' # render form with error messages
+      elsif @user.save?
+        sign_in @user
+      else
+        render 'form', status: :bad_request
       end
+    end
+
+  end
+  ```
 
   Note that if you're using the `unpoly-rails` gem you can simply say `up.validate?`
   instead of manually checking for `request.headers['X-Up-Validate']`.
 
   The server now renders an updated copy of the form with eventual validation errors:
 
-      <form action="/users">
+  ```ruby
+  <form action="/users">
 
-        <label class="has-error">
-          E-mail: <input type="text" name="email" value="foo@bar.com" />
-          Has already been taken!
-        </label>
+    <label class="has-error">
+      E-mail: <input type="text" name="email" value="foo@bar.com" />
+      Has already been taken!
+    </label>
 
-        <button type="submit">Register</button>
+    <button type="submit">Register</button>
 
-      </form>
+  </form>
+  ```
 
   The `<label>` around the e-mail field is now updated to have the `has-error`
   class and display the validation message.
@@ -875,14 +892,18 @@ up.form = (function() {
 
   You can change this default behavior by setting `up.form.config.validateTargets`:
 
-      // Always update the entire form containing the current field ("&")
-      up.form.config.validateTargets = ['form &']
+  ```js
+  // Always update the entire form containing the current field ("&")
+  up.form.config.validateTargets = ['form &']
+  ```
 
   You can also individually override what to update by setting the `up-validate`
   attribute to a CSS selector:
 
-      <input type="text" name="email" up-validate=".email-errors">
-      <span class="email-errors"></span>
+  ```html
+  <input type="text" name="email" up-validate=".email-errors">
+  <span class="email-errors"></span>
+  ```
 
   \#\#\# Updating dependent fields
 
@@ -892,17 +913,21 @@ up.form = (function() {
   Let's say you have a form with one `<select>` to pick a department (sales, engineering, ...)
   and another `<select>` to pick an employeee from the selected department:
 
-      <form action="/contracts">
-        <select name="department">...</select> <!-- options for all departments -->
-        <select name="employeed">...</select> <!-- options for employees of selected department -->
-      </form>
+  ```html
+  <form action="/contracts">
+    <select name="department">...</select> <!-- options for all departments -->
+    <select name="employeed">...</select> <!-- options for employees of selected department -->
+  </form>
+  ```
 
   The list of employees needs to be updated as the appartment changes:
 
-      <form action="/contracts">
-        <select name="department" up-validate="[name=employee]">...</select>
-        <select name="employee">...</select>
-      </form>
+  ```html
+  <form action="/contracts">
+    <select name="department" up-validate="[name=employee]">...</select>
+    <select name="employee">...</select>
+  </form>
+  ```
 
   In order to update the `department` field in addition to the `employee` field, you could say
   `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
@@ -959,67 +984,79 @@ up.form = (function() {
 
   The controlling form field gets an `up-switch` attribute with a selector for the elements to show or hide:
 
-      <select name="advancedness" up-switch=".target">
-        <option value="basic">Basic parts</option>
-        <option value="advanced">Advanced parts</option>
-        <option value="very-advanced">Very advanced parts</option>
-      </select>
+  ```html
+  <select name="advancedness" up-switch=".target">
+    <option value="basic">Basic parts</option>
+    <option value="advanced">Advanced parts</option>
+    <option value="very-advanced">Very advanced parts</option>
+  </select>
+  ```
 
   The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
   attributes to indicate for which values they should be shown or hidden:
 
-      <div class="target" up-show-for="basic">
-        only shown for advancedness = basic
-      </div>
+  ```html
+  <div class="target" up-show-for="basic">
+    only shown for advancedness = basic
+  </div>
 
-      <div class="target" up-hide-for="basic">
-        hidden for advancedness = basic
-      </div>
+  <div class="target" up-hide-for="basic">
+    hidden for advancedness = basic
+  </div>
 
-      <div class="target" up-show-for="advanced very-advanced">
-        shown for advancedness = advanced or very-advanced
-      </div>
+  <div class="target" up-show-for="advanced very-advanced">
+    shown for advancedness = advanced or very-advanced
+  </div>
+  ```
 
   \#\#\# Example: Text field
 
   The controlling `<input>` gets an `up-switch` attribute with a selector for the elements to show or hide:
 
-      <input type="text" name="user" up-switch=".target">
+  ```html
+  <input type="text" name="user" up-switch=".target">
 
-      <div class="target" up-show-for="alice">
-        only shown for user alice
-      </div>
+  <div class="target" up-show-for="alice">
+    only shown for user alice
+  </div>
+  ```
 
   You can also use the pseudo-values `:blank` to match an empty input value,
   or `:present` to match a non-empty input value:
 
-      <input type="text" name="user" up-switch=".target">
+  ```html
+  <input type="text" name="user" up-switch=".target">
 
-      <div class="target" up-show-for=":blank">
-        please enter a username
-      </div>
+  <div class="target" up-show-for=":blank">
+    please enter a username
+  </div>
+  ```
 
   \#\#\# Example: Checkbox
 
   For checkboxes you can match against the pseudo-values `:checked` or `:unchecked`:
 
-      <input type="checkbox" name="flag" up-switch=".target">
+  ```html
+  <input type="checkbox" name="flag" up-switch=".target">
 
-      <div class="target" up-show-for=":checked">
-        only shown when checkbox is checked
-      </div>
+  <div class="target" up-show-for=":checked">
+    only shown when checkbox is checked
+  </div>
 
-      <div class="target" up-show-for=":unchecked">
-        only shown when checkbox is unchecked
-      </div>
+  <div class="target" up-show-for=":unchecked">
+    only shown when checkbox is unchecked
+  </div>
+  ```
 
   Of course you can also match against the `value` property of the checkbox element:
 
-      <input type="checkbox" name="flag" value="active" up-switch=".target">
+  ```html
+  <input type="checkbox" name="flag" value="active" up-switch=".target">
 
-      <div class="target" up-show-for="active">
-        only shown when checkbox is checked
-      </div>
+  <div class="target" up-show-for="active">
+    only shown when checkbox is checked
+  </div>
+  ```
 
   @selector input[up-switch]
   @param up-switch
@@ -1073,16 +1110,20 @@ up.form = (function() {
   The following would run a global `showSuggestions(value)` function
   whenever the `<input>` changes:
 
-      <input name="query" up-observe="showSuggestions(value)">
+  ```html
+  <input name="query" up-observe="showSuggestions(value)">
+  ```
   
   Note that the parameter name in the markup must be called `value` or it will not work.
   The parameter name can be called whatever you want in the JavaScript, however.
       
   Also note that the function must be declared on the `window` object to work, like so:
-      
-      window.showSuggestions = function(selectedValue) {
-        console.log(`Called showSuggestions() with ${selectedValue}`)
-      }
+
+  ```js
+  window.showSuggestions = function(selectedValue) {
+    console.log(`Called showSuggestions() with ${selectedValue}`)
+  }
+  ```
 
   \#\#\# Callback context
 
@@ -1102,11 +1143,13 @@ up.form = (function() {
   To observe radio buttons group, use the `[up-observe]` attribute on an
   element that contains all radio button elements with a given name:
 
-      <div up-observe="formatSelected(value)">
-        <input type="radio" name="format" value="html"> HTML format
-        <input type="radio" name="format" value="pdf"> PDF format
-        <input type="radio" name="format" value="txt"> Text format
-      </div>
+  ```html
+  <div up-observe="formatSelected(value)">
+    <input type="radio" name="format" value="html"> HTML format
+    <input type="radio" name="format" value="pdf"> PDF format
+    <input type="radio" name="format" value="txt"> Text format
+  </div>
+  ```
 
   @selector input[up-observe]
   @param up-observe
@@ -1129,10 +1172,12 @@ up.form = (function() {
   The would call a function `somethingChanged(value)`
   when any `<input>` within the `<form>` changes:
 
-      <form up-observe="somethingChanged(value)">
-        <input name="foo">
-        <input name="bar">
-      </form>
+  ```html
+  <form up-observe="somethingChanged(value)">
+    <input name="foo">
+    <input name="bar">
+  </form>
+  ```
 
   \#\#\# Callback context
 
@@ -1165,10 +1210,12 @@ up.form = (function() {
 
   The following would automatically submit the form when the query is changed:
 
-      <form method="GET" action="/search">
-        <input type="search" name="query" up-autosubmit>
-        <input type="checkbox" name="archive"> Include archive
-      </form>
+  ```html
+  <form method="GET" action="/search">
+    <input type="search" name="query" up-autosubmit>
+    <input type="checkbox" name="archive"> Include archive
+  </form>
+  ```
 
   \#\#\# Auto-submitting radio buttons
 
@@ -1178,11 +1225,13 @@ up.form = (function() {
   To auto-submit radio buttons group, use the `[up-submit]` attribute on an
   element that contains all radio button elements with a given name:
 
-      <div up-autosubmit>
-        <input type="radio" name="format" value="html"> HTML format
-        <input type="radio" name="format" value="pdf"> PDF format
-        <input type="radio" name="format" value="txt"> Text format
-      </div>
+  ```html
+  <div up-autosubmit>
+    <input type="radio" name="format" value="html"> HTML format
+    <input type="radio" name="format" value="pdf"> PDF format
+    <input type="radio" name="format" value="txt"> Text format
+  </div>
+  ```
 
   @selector input[up-autosubmit]
   @param [up-delay]
@@ -1202,10 +1251,12 @@ up.form = (function() {
 
   This will submit the form when either query or checkbox was changed:
 
-      <form method="GET" action="/search" up-autosubmit>
-        <input type="search" name="query">
-        <input type="checkbox" name="archive"> Include archive
-      </form>
+  ```html
+  <form method="GET" action="/search" up-autosubmit>
+    <input type="search" name="query">
+    <input type="checkbox" name="archive"> Include archive
+  </form>
+  ```
 
   @selector form[up-autosubmit]
   @param [up-delay]
