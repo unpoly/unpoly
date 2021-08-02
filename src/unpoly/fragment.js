@@ -191,7 +191,7 @@ up.fragment = (function() {
   a fragment. This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
   request/response exchange to **~1 KB**.
 
-  \#\# Example
+  ## Example
 
   Let's say we display a list of recent messages.
   We use the `[up-poll]` attribute to reload the `.messages` fragment every 30 seconds:

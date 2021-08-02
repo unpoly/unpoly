@@ -24,7 +24,7 @@ This may cause some of the following issues:
 The cleanest solution to these issues is to call all your JavaScript
 from an [Unpoly compiler](/up.compiler).
 
-\#\#\# Migrating legacy scripts to a compiler
+### Migrating legacy scripts to a compiler
 
 The legacy code below waits for the page to load, then selects all links with a
 `.lightbox` class and calls `lightboxfiy()` for each of these links:
@@ -52,7 +52,7 @@ When the page initially loads, Unpoly will call this compiler for every element
 matching `a.lightbox`. When a fragment is updated later, Unpoly will call this compiler
 for new matches within the new fragment.
 
-\#\#\# Running inline `<script>` tags
+### Running inline `<script>` tags
 
 By default Unpoly does not execute `<script>` tags in an updated fragment to prevent
 unwanted side effects.

@@ -57,7 +57,7 @@ See [closing overlays](/closing-overlays) for an extensive explanation.
 Common acceptance callbacks
 ---------------------------
 
-\#\#\# Reloading on acceptance
+### Reloading on acceptance
 
 A **common callback** is to reload an element in the parent layer:
 
@@ -74,7 +74,7 @@ A **common callback** is to reload an element in the parent layer:
 </div>
 ```
 
-\#\#\# Adding options to an existing select
+### Adding options to an existing select
 
 Another common callback reloads `<select>` options and selects the new foreign key.
 

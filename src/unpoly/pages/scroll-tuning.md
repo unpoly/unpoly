@@ -7,7 +7,7 @@ All features are available both as JavaScript options (like `{ revealSnap }`) an
 HTML attributes (like `[up-reveal-snap]`).
 
 
-\#\#\# Animating the scroll motion
+### Animating the scroll motion
 
 To animate the scroll motion, pass `{ scrollBehavior: 'smooth' }.`
 To *not* animate the scrolling, pass `{ scrollBehavior: 'auto' }` (the default).
@@ -23,7 +23,7 @@ You *can* animate the scroll motion when [prepending, appending](/fragment-place
 or [destroying](/up.destroy) a fragment.
 
 
-\#\#\# Fixed layout elements obstructing the viewport
+### Fixed layout elements obstructing the viewport
 
 Fixed layout elements (like navigation bars) may obstruct the view on
 an element that is being [revealed](/up.reveal).
@@ -37,7 +37,7 @@ of an obstructing layout element to the `up.viewport.config.fixedTop` or
 `up.viewport.config.fixedBottom` array.
 
 
-\#\#\# Snapping to the screen edge
+### Snapping to the screen edge
 
 When [revealing](/up.reveal) an element near the top edge of the viewport,
 you often want to scroll to the very top for aesthetic reasons. For example, if you reveal a navigation
@@ -53,7 +53,7 @@ You may change this default in `up.viewport.config.revealSnap`.
 To disable snapping, use `{ revealSnap: 0 }`.
 
 
-\#\#\# Revealing large elements
+### Revealing large elements
 
 When [revealing](/up.reveal) an element, the viewport will scroll
 as far as necessary to make the element visible.
@@ -72,7 +72,7 @@ reveal high elements until half the screen height is filled.
 You may change this default in `up.viewport.config.revealMax`.
 
 
-\#\#\# Revealing with padding
+### Revealing with padding
 
 To add space between a [revealed](/up.reveal) element and the closest viewport edge,
 pass a pixel value as `{ revealPadding }` option.
@@ -81,7 +81,7 @@ The default is `{ revealPadding: 0 }`.
 You may change this default in `up.viewport.config.revealPadding`.
 
 
-\#\#\# Moving revealed elements to the top
+### Moving revealed elements to the top
 
 When [revealing](/up.reveal) an element, the viewport will only scroll
 *as little as possible* to make the element visible. For instance, if the viewport is

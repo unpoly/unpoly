@@ -10,7 +10,7 @@ This page shows how to make handle Unpoly all interactive elements.
 It also explains how to configure smart defaults that work for most of your links and forms.
 
 
-\#\# Following all links
+## Following all links
 
 To follow *all* links on a page without requiring an [`[up-follow]`](/a-up-follow) attribute:
 
@@ -25,7 +25,7 @@ There are some exceptions when links will still make a full page load under this
   like links with an `[download]` attribute or with a cross-origin `[href]`.
 - You have configured additional exceptions in `up.link.config.noFollowSelectors`.
 
-\#\#\# Following all links on `mousedown`
+### Following all links on `mousedown`
 
 To follow all links on `mousedown` instead of `click` without an [`[up-instant]`](/a-up-instant) attribute:
 
@@ -42,7 +42,7 @@ There are some exceptions when links still activate on `click` under this settin
 Note that if you have event listeners bound to `click` on accelerated links, they will
 no longer be called. You need to bind these listeners to `mousedown` or, better, `up:click` instead.
 
-\#\#\# Preloading all links
+### Preloading all links
 
 To preload *all* links on when hovering over them, without requiring an [`[up-preload]`](/a-up-preload) attribute:
 
@@ -58,7 +58,7 @@ There are some exceptions when links will not be preloaded under this setting:
 - You have configured additional exceptions in `up.link.config.noPreloadSelectors`.
 
 
-\#\# Handling all forms
+## Handling all forms
 
 To handle *all* forms on a page without requiring an [`[up-submit]`](/form-up-submit) attribute:
 
@@ -74,7 +74,7 @@ There are some exceptions when forms will still submit with a full page load und
 You may configure additional exceptions in `up.form.config.noSubmitSelectors`.
 
 
-\#\# Fixing legacy JavaScript code
+## Fixing legacy JavaScript code
 
 Legacy code often contains JavaScript that expects a full page load whenever the
 user interacts with the page. When you configure Unpoly to handle all interaction,
@@ -83,7 +83,7 @@ there will not be additional page loads as the user clicks a link or submits a f
 See [Making JavaScripts work with fragment updates](/legacy-scripts).
 
 
-\#\# Customizing navigation defaults
+## Customizing navigation defaults
 
 [Following a link](/a-up-follow) or [submitting a form](/form-up-submit) is considered
 [navigation](/navigation) by default.

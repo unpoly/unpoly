@@ -331,7 +331,7 @@ up.form = (function() {
 
   The unobtrusive variant of this is the [`[up-observe]`](/input-up-observe) attribute.
 
-  \#\#\# Example
+  ### Example
 
   The following would print to the console whenever an input field changes:
 
@@ -466,7 +466,7 @@ up.form = (function() {
   See the documentation for [`input[up-validate]`](/input-up-validate) for more information
   on how server-side validation works in Unpoly.
 
-  \#\#\# Example
+  ### Example
 
   ```js
   up.validate('input[name=email]', { target: '.email-errors' })
@@ -681,7 +681,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.submit()`](/up.submit) function.
 
-  \#\#\# Example
+  ### Example
 
   ```html
   <form method="post" action="/users" up-submit>
@@ -689,7 +689,7 @@ up.form = (function() {
   </form>
   ```
 
-  \#\#\# Handling validation errors
+  ### Handling validation errors
 
   When the server was unable to save the form due to invalid params,
   it will usually re-render an updated copy of the form with
@@ -738,12 +738,12 @@ up.form = (function() {
   [`input[up-validate]`](/input-up-validate) to perform server-side
   validations while the user is completing fields.
 
-  \#\#\# Giving feedback while the form is processing
+  ### Giving feedback while the form is processing
 
   The `<form>` element will be assigned a CSS class [`.up-active`](/form.up-active) while
   the submission is loading.
 
-  \#\#\# Short notation
+  ### Short notation
 
   You may omit the `[up-submit]` attribute if the form has one of the following attributes:
 
@@ -753,7 +753,7 @@ up.form = (function() {
 
   Such a form will still be submitted through Unpoly.
 
-  \#\#\# Handling all forms automatically
+  ### Handling all forms automatically
 
   You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute.
 
@@ -788,7 +788,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.validate()`](/up.validate) function.
 
-  \#\#\# Example
+  ### Example
 
   Let's look at a standard registration form that asks for an e-mail and password:
 
@@ -877,7 +877,7 @@ up.form = (function() {
   The `<label>` around the e-mail field is now updated to have the `has-error`
   class and display the validation message.
 
-  \#\#\# How validation results are displayed
+  ### How validation results are displayed
 
   Although the server will usually respond to a validation with a complete,
   fresh copy of the form, Unpoly will by default not update the entire form.
@@ -905,7 +905,7 @@ up.form = (function() {
   <span class="email-errors"></span>
   ```
 
-  \#\#\# Updating dependent fields
+  ### Updating dependent fields
 
   The `[up-validate]` behavior is also a great way to partially update a form
   when one fields depends on the value of another field.
@@ -980,7 +980,7 @@ up.form = (function() {
   /*-
   Show or hide elements when a form field is set to a given value.
 
-  \#\#\# Example: Select options
+  ### Example: Select options
 
   The controlling form field gets an `up-switch` attribute with a selector for the elements to show or hide:
 
@@ -1009,7 +1009,7 @@ up.form = (function() {
   </div>
   ```
 
-  \#\#\# Example: Text field
+  ### Example: Text field
 
   The controlling `<input>` gets an `up-switch` attribute with a selector for the elements to show or hide:
 
@@ -1032,7 +1032,7 @@ up.form = (function() {
   </div>
   ```
 
-  \#\#\# Example: Checkbox
+  ### Example: Checkbox
 
   For checkboxes you can match against the pseudo-values `:checked` or `:unchecked`:
 
@@ -1105,7 +1105,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
-  \#\#\# Example
+  ### Example
 
   The following would run a global `showSuggestions(value)` function
   whenever the `<input>` changes:
@@ -1125,7 +1125,7 @@ up.form = (function() {
   }
   ```
 
-  \#\#\# Callback context
+  ### Callback context
 
   The script given to `[up-observe]` runs with the following context:
 
@@ -1135,7 +1135,7 @@ up.form = (function() {
   | `this`   | `Element` | The form field                        |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
 
-  \#\#\# Observing radio buttons
+  ### Observing radio buttons
 
   Multiple radio buttons with the same `[name]` (a radio button group)
   produce a single value for the form.
@@ -1167,7 +1167,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
-  \#\#\# Example
+  ### Example
 
   The would call a function `somethingChanged(value)`
   when any `<input>` within the `<form>` changes:
@@ -1179,7 +1179,7 @@ up.form = (function() {
   </form>
   ```
 
-  \#\#\# Callback context
+  ### Callback context
 
   The script given to `[up-observe]` runs with the following context:
 
@@ -1206,7 +1206,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 
-  \#\#\# Example
+  ### Example
 
   The following would automatically submit the form when the query is changed:
 
@@ -1217,7 +1217,7 @@ up.form = (function() {
   </form>
   ```
 
-  \#\#\# Auto-submitting radio buttons
+  ### Auto-submitting radio buttons
 
   Multiple radio buttons with the same `[name]` (a radio button group)
   produce a single value for the form.
@@ -1247,7 +1247,7 @@ up.form = (function() {
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 
-  \#\#\# Example
+  ### Example
 
   This will submit the form when either query or checkbox was changed:
 

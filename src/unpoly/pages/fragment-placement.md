@@ -4,7 +4,7 @@ Fragment placement
 This page outlines various ways to place new fragments in your existing DOM tree.
 
 
-\#\#\# Swapping fragments
+### Swapping fragments
 
 Pass a CSS selector like `{ target: '.content' }` to replace an existing element
 with a new version, usually fetched from the server via HTTP.
@@ -13,7 +13,7 @@ The server may return additional HTML, but only the element matching the selecto
 All other HTML from the server response is discarded.
 
 
-\#\#\# Interaction origin is considered
+### Interaction origin is considered
 
 When a link or form updates a fragment, Unpoly will prefer to match fragments
 in the vicinity of that link or form element.
@@ -41,7 +41,7 @@ render a single `.card` element.
 See `up.fragment.get()` for more examples and advanced use cases.
 
 
-\#\#\# Updating multiple fragments
+### Updating multiple fragments
 
 You can update multiple fragments from a single request by separating
 separators with a comma (like in CSS).
@@ -54,7 +54,7 @@ do this:
 <a href="/posts/5" up-target=".content, .unread-count">Read post</a>
 ```
 
-\#\#\# Appending or prepending content
+### Appending or prepending content
 
 By default Unpoly will replace the given selector with the same
 selector from the server response. Instead of replacing you
@@ -78,7 +78,7 @@ by using `:after` in the `[up-target]` selector like this:
 </a>
 ```
 
-\#\#\# Replacing an element's inner HTML
+### Replacing an element's inner HTML
 
 If you would like to preserve the target element, but replace all of its child content,
 use the `:content` pseudo selector:
@@ -89,7 +89,7 @@ use the `:content` pseudo selector:
 
 For more advanced cases of preserving elements, see `[up-keep]`.
 
-\#\#\# Rendering nothing
+### Rendering nothing
 
 To make a server request without changing a fragment, use the `:none` selector:
 

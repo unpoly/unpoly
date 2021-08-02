@@ -9,15 +9,15 @@ Changing the focus will make a screen reader start reading from the focused posi
 When [navigating](/navigation) Unpoly will default to
 [`{ focus: 'auto' }`](#automatic-focus-logic).
 
-\#\#\# Focusing the fragment
+### Focusing the fragment
 
 Pass `'target`' to focus the new fragment.
 
-\#\#\# Focusing the current layer
+### Focusing the current layer
 
 Pass `'layer`' to focus the [layer](/up.layer) of the updated fragment.
 
-\#\#\# Focusing another element
+### Focusing another element
 
 Pass a CSS selector string to focus a matching element.
 
@@ -25,7 +25,7 @@ From JavaScript you may also pass the `Element` object that should be focused.
 
 If the element isn't already focusable, Unpoly will give it an `[tabindex=-1]` attribute.
 
-\#\#\# Preserving focus
+### Preserving focus
 
 Pass `'keep'` to preserve focus-related element properties.
 
@@ -35,30 +35,30 @@ When the focused fragment is rediscovered in the new content, the following prop
 - Selection range
 - Scroll position (X/Y)
 
-\#\#\# Resetting focus to the layer
+### Resetting focus to the layer
 
 Pass `'layer'` to focus the container element of the updated [layer](/up.layer).
 
-\#\#\# Restoring focus positions
+### Restoring focus positions
 
 Pass `'reset'` to restore the last known focus positions for the updated layer's URL.
 
 Unpoly will automatically save focus positions before a fragment update.
 You may disable this behavior with `{ saveFocus: false }`.
 
-\#\#\# Revealing the URL's `#hash` target
+### Revealing the URL's `#hash` target
 
 Pass `'hash'` to focus the element matching the `#hash` in the URL.
 
-\#\#\# Revealing the main element
+### Revealing the main element
 
 Pass `'main'` to reveal the updated layer's [main element](/up-main).
 
-\#\#\# Don't focus
+### Don't focus
 
 Pass `false` to keep all focus positions.
 
-\#\#\# Conditional focusing
+### Conditional focusing
 
 To only focus when a [main target](/up-main) is updated,
 you may append `-if-main` to any of the string options in this list.
@@ -73,14 +73,14 @@ to be lost.
 
 To implement other conditions, [pass a function](#custom-focus-logic) instead.
 
-\#\#\# Attempt multiple focus strategies
+### Attempt multiple focus strategies
 
 Pass an array of focus option and Unpoly will use the first applicable value.
 
 E.g. `['hash', 'reset']` will first try to an element mathing the `#hash` in the URL.
 If the URL has no `#hash`, focus positions will be reset.
 
-\#\#\# Automatic focus logic
+### Automatic focus logic
 
 Pass `'auto'` to try a sequence of focus strategies that works for most cases.
 This is the default when [navigating](/navigation).
@@ -92,7 +92,7 @@ This is the default when [navigating](/navigation).
 
 You may configure this logic in `up.fragment.config.autoFocus`.
 
-\#\#\# Custom focus logic
+### Custom focus logic
 
 You may also pass a function with your custom focusing logic.
 

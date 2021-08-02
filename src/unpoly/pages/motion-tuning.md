@@ -8,7 +8,7 @@ When updating page fragments, you may animate the change using an
 The page details some features to fine-tune the animation effect.
 
 
-\#\#\# Changing the duration
+### Changing the duration
 
 You may change the duration of an animation or transition by passing a `{ duration }` option.
 Its value is the duration in milliseconds.
@@ -16,7 +16,7 @@ Its value is the duration in milliseconds.
 The default is `{ duration: 175 }`. You may change this with `up.motion.config.duration`.
 
 
-\#\#\# Easing
+### Easing
 
 To control the acceleration of an animation, pass an `{ easing }` option.
 
@@ -26,7 +26,7 @@ for a list of pre-defined timing functions.
 The default is `{ easing: 'ease' }`. You may change this with `up.motion.config.easing`.
 
 
-\#\#\# Disabling animation globally
+### Disabling animation globally
 
 By default animations are enabled unless the user has chosen to minimize non-essential
 motion it in their system.

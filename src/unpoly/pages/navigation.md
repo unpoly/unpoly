@@ -9,7 +9,7 @@ request cancelation, etc. When an Unpoly feature
 When an Unpoly feature does *not* navigate, it only renders a new fragment,
 without affecting scroll positions, browser, history, etc.
 
-\#\# Navigating features
+## Navigating features
 
 [Following a link](/a-up-follow), [submitting a form](/form-up-submit) or
 [opening an overlay](/up.layer.open) is considered navigation by default.
@@ -34,7 +34,7 @@ considered navigation by default. You may opt *into* navigation by passing a
 | `up.validate()`      | no                    |
 | `[up-poll]`          | no                    |
 
-\#\# Navigation defaults
+## Navigation defaults
 
 The following default options will be used when navigating:
 
@@ -50,7 +50,7 @@ The following default options will be used when navigating:
 | `{ peel: true }`        | Close overlays when targeting a layer below |
 
 
-\#\#\# Customizing defaults
+### Customizing defaults
 
 You can customize your navigation defaults with `up.fragment.config.navigateOptions`:
 
@@ -58,7 +58,7 @@ You can customize your navigation defaults with `up.fragment.config.navigateOpti
 up.fragment.config.navigateOptions.transition = 'cross-fade'
 ```
 
-\#\#\# Defaults that depend on the origin
+### Defaults that depend on the origin
 
 Sometimes you need to configure defaults that depend on the link or form that was activated.
 

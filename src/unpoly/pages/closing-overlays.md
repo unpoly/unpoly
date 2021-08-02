@@ -87,7 +87,7 @@ By defining a close condition, the overlay content does not need to be aware tha
 in an overlay. The overlay interaction is decoupled from the interaction in the parent layer.
 
 
-\#\#\# Closing when a location is reached
+### Closing when a location is reached
 
 The following will open an overlay that closes once a URL like `/companies/123` is reached:
 
@@ -106,7 +106,7 @@ become the overlay's *acceptance value*.
 To *dismiss* an overlay once a given location is reached, use `[up-dismiss-location]` and `[up-on-dismissed]` in the same fashion.
 
 
-\#\#\# Closing when an event is emitted
+### Closing when an event is emitted
 
 Instead of waiting for a location to be reached,
 you may accept an overlay\

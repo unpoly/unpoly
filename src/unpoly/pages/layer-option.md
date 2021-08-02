@@ -8,7 +8,7 @@ Must Unpoly features accept a `{ layer }` option or `[up-layer]` attribute to in
 the layer in which a fragment should be rendered or in which a CSS selector should match elements.
 Elements in other layers are ignored.
 
-\#\#\# The default
+### The default
 
 When no `{ layer }` option or `[up-layer]` attribute is given, Unpoly will generally
 match in the [current layer](/up.layer.current).
@@ -17,19 +17,19 @@ The one exception is that when a DOM element is passed as `{ target }` or `{ ori
 Unpoly will use that element's layer. Clicking an Unpoly-enabled [link](/a-up-follow) or
 [form](/form-up-submit) will automatically set that link or form as the `{ origin }`.
 
-\#\#\# Disabling layer isolation
+### Disabling layer isolation
 
 To disable layer isolation and match elements in *any* layer, pass `{ layer: 'any' }`.
 
-\#\#\# Matching the root layer
+### Matching the root layer
 
 To match within the [root layer](/up.layer.root), pass `{ layer: 'root' }`.
 
-\#\#\# Matching any overlay
+### Matching any overlay
 
 To match within any layer that is not the root layer, pass `{ pass: 'overlay' }`.
 
-\#\#\# Matching the current or frontmost layer
+### Matching the current or frontmost layer
 
 To match within the [current layer](/up.layer.current),
 either omit the `{ layer }` option or explictely pass `{ layer: 'current' }`.
@@ -43,7 +43,7 @@ in the layer stack. There are however some cases where the current layer is a la
 - While an Unpoly event like `up:request:loaded` is being triggered from a background layer.
 - While an event listener bound to a background layer using `up.Layer#on()` is being called.
 
-\#\#\# Matching relative to the current layer
+### Matching relative to the current layer
 
 You may use common tree terminology to match a layer relative to the current layer:
 
@@ -56,7 +56,7 @@ You may use common tree terminology to match a layer relative to the current lay
 | `child`          | The child layer of the current layer                         |
 | `descendant`     | Any descendant of the current layer                          |
 
-\#\#\# Matching the layer of a given element
+### Matching the layer of a given element
 
 When a DOM element is passed as `{ target }` or `{ origin }` option,
 Unpoly will use that element's layer.
@@ -64,14 +64,14 @@ Unpoly will use that element's layer.
 Clicking an Unpoly-enabled [link](/a-up-follow) or
 [form](/form-up-submit) will automatically set that link or form as the `{ origin }`.
 
-\#\#\# Matching a layer by index
+### Matching a layer by index
 
 Pass a number to match within a layer with that index.
 
 Layers are counted from the root layer upwards. Therefore `{ layer: 0 }` matches
 within the root layer. `{ layer: 1 }` would match within the first overlay.
 
-\#\#\# Using a layer reference
+### Using a layer reference
 
 Functions like `up.layer.get()` or `up.layer.current` return an `up.Layer` instance
 that you can later pass as a `{ layer }` option.
@@ -91,7 +91,7 @@ setTimeout(function() {
 }, 10000)
 ```
 
-\#\#\# Matching in multiple layers
+### Matching in multiple layers
 
 You can pass more than one layer reference as an array of options.
 Alternatively you may pass a a space-separated string of layer names.
@@ -103,14 +103,14 @@ to match within a parent layer. If there is no parent layer (because we're alrea
 Unpoly will match within the root layer.
 
 
-\#\#\# Opening new layers
+### Opening new layers
 
 You may render a fragment in a new overlay by passing `{ layer: 'new' }`.
 
 See [opening overlays](/opening-overlays) for details.
 
 
-\#\#\# Targeting another layer for server errors
+### Targeting another layer for server errors
 
 Like most render options, `{ layer }` and `[up-layer]` indicate which layer
 to update in case of a successful server response.

@@ -5,7 +5,7 @@ Some Unpoly features like `a[up-alias]` let you match any URL with a given patte
 
 For this matching Unpoly does *not* use regular expressions, but the URL pattern format outlined below.
 
-\#\#\# Matching an exact URL
+### Matching an exact URL
 
 Pass any absolute path or fully qualified URL to only match this exact value:
 
@@ -13,7 +13,7 @@ Pass any absolute path or fully qualified URL to only match this exact value:
 /users/new
 ```
 
-\#\#\# Matching with wildcards
+### Matching with wildcards
 
 Append an asterisk (`*`) to any path to match all URLs with that prefix:
 
@@ -33,7 +33,7 @@ You may also infix an asterisk to match URLs with the given prefix and suffix:
 /admin/*/edit
 ```
 
-\#\#\# Matching one of multiple alternatives
+### Matching one of multiple alternatives
 
 To match one of multiple URLs or patterns, separate the alternatives by a space.
 
@@ -51,7 +51,7 @@ up.layer.open({ acceptLocation: '/users/* /account')
 up.layer.open({ acceptLocation: ['/users/*', '/account'])
 ```
 
-\#\#\# Excluding patterns
+### Excluding patterns
 
 To exclude an URL or pattern, prefix with a minus.
 
@@ -61,7 +61,7 @@ The following will match `/users/alice` but not `/users/new`:
 /users/* -/users/new
 ```
 
-\#\#\# Capturing named segments
+### Capturing named segments
 
 It is sometimes useful to capture the value of a wildcard match, e.g. to
 [close an overlay once a location is reached](/up.layer.open#options.acceptLocation).
