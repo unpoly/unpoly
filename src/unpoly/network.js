@@ -29,6 +29,7 @@ Unpoly's `up.request()` has a number of convenience features:
 @module up.network
 */
 up.network = (function() {
+
   /*-
   Sets default options for this package.
 
