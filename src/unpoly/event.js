@@ -60,16 +60,20 @@ up.event = (function() {
   The code below will call the listener when a `<a>` is clicked
   anywhere in the `document`:
 
-      up.on('click', 'a', function(event, element) {
-        console.log("Click on a link %o", element)
-      })
+  ```js
+  up.on('click', 'a', function(event, element) {
+    console.log("Click on a link %o", element)
+  })
+  ```
 
   You may also bind the listener to a given element instead of `document`:
 
-      var form = document.querySelector('form')
-      up.on(form, 'click', function(event, form) {
-        console.log("Click within %o", form)
-      })
+  ```js
+  var form = document.querySelector('form')
+  up.on(form, 'click', function(event, form) {
+    console.log("Click within %o", form)
+  })
+  ```
 
   ### Event delegation
 
@@ -79,54 +83,64 @@ up.event = (function() {
   The example below registers a single event listener to the given `form`,
   but only calls the listener when the clicked element is a `select` element:
 
-      var form = document.querySelector('form')
-      up.on(form, 'click', 'select', function(event, select) {
-        console.log("Click on select %o within %o", select, form)
-      })
+  ```
+  var form = document.querySelector('form')
+  up.on(form, 'click', 'select', function(event, select) {
+    console.log("Click on select %o within %o", select, form)
+  })
+  ```
 
   ### Attaching structured data
 
   In case you want to attach structured data to the event you're observing,
   you can serialize the data to JSON and put it into an `[up-data]` attribute:
 
-      <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
-      <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
+  ```html
+  <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
+  <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
+  ```
 
   The JSON will be parsed and handed to your event handler as a third argument:
 
-      up.on('click', '.person', function(event, element, data) {
-        console.log("This is %o who is %o years old", data.name, data.age)
-      })
+  ```js
+  up.on('click', '.person', function(event, element, data) {
+    console.log("This is %o who is %o years old", data.name, data.age)
+  })
+  ```
 
   ### Unbinding an event listener
 
   `up.on()` returns a function that unbinds the event listeners when called:
 
-      // Define the listener
-      var listener =  function(event) { ... }
+  ```js
+  // Define the listener
+  var listener =  function(event) { ... }
 
-      // Binding the listener returns an unbind function
-      var unbind = up.on('click', listener)
+  // Binding the listener returns an unbind function
+  var unbind = up.on('click', listener)
 
-      // Unbind the listener
-      unbind()
+  // Unbind the listener
+  unbind()
+  ```
 
   There is also a function [`up.off()`](/up.off) which you can use for the same purpose:
 
-      // Define the listener
-      var listener =  function(event) { ... }
+  ```js
+  // Define the listener
+  var listener =  function(event) { ... }
 
-      // Bind the listener
-      up.on('click', listener)
+  // Bind the listener
+  up.on('click', listener)
 
-      // Unbind the listener
-      up.off('click', listener)
+  // Unbind the listener
+  up.off('click', listener)
+  ```
 
   ### Binding to multiple elements
 
   You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements:
 
-  ```javascript
+  ```js
   let allForms = document.querySelectorAll('form')
   up.on(allForms, 'submit', function(event, form) {
     console.log('Submitting form %o', form)
@@ -137,7 +151,7 @@ up.event = (function() {
 
   You may register a listener to multiple event types by passing a space-separated list of event types:
 
-  ```javascript
+  ```js
   let element = document.querySelector(...)
   up.on(element, 'mouseenter mouseleave', function(event) {
     console.log('Mouse entered or left')
@@ -250,12 +264,16 @@ up.event = (function() {
 
   Let's say you are listing to clicks on `.button` elements:
 
-      var listener = function() { ... }
-      up.on('click', '.button', listener)
+  ```js
+  var listener = function() { ... }
+  up.on('click', '.button', listener)
+  ```
 
   You can stop listening to these events like this:
 
-      up.off('click', '.button', listener)
+  ```js
+  up.off('click', '.button', listener)
+  ```
 
   @function up.off
   @param {Element|jQuery} [element=document]
@@ -291,12 +309,14 @@ up.event = (function() {
 
   ### Example
 
-      up.on('my:event', function(event) {
-        console.log(event.foo)
-      })
+  ```js
+  up.on('my:event', function(event) {
+    console.log(event.foo)
+  })
 
-      up.emit('my:event', { foo: 'bar' })
-      // Prints "bar" to the console
+  up.emit('my:event', { foo: 'bar' })
+  // Prints "bar" to the console
+  ```
 
   @function up.emit
   @param {Element|jQuery} [target=document]
@@ -336,11 +356,13 @@ up.event = (function() {
 
   ### Example
 
-      let event = up.event.build('my:event', { foo: 'bar' })
-      console.log(event.type)              // logs "my:event"
-      console.log(event.foo)               // logs "bar"
-      console.log(event.defaultPrevented)  // logs "false"
-      up.emit(event)                       // emits the event
+  ```js
+  let event = up.event.build('my:event', { foo: 'bar' })
+  console.log(event.type)              // logs "my:event"
+  console.log(event.foo)               // logs "bar"
+  console.log(event.defaultPrevented)  // logs "false"
+  up.emit(event)                       // emits the event
+  ```
 
   @function up.event.build
   @param {string} [type]
@@ -401,7 +423,7 @@ up.event = (function() {
 
   ### Example
 
-  ```javascript
+  ```js
   up.event.onEscape(function(event) {
     console.log('Escape pressed!')
   })
@@ -444,9 +466,11 @@ up.event = (function() {
 
   ### Example
 
-      up.on('click', 'link.disabled', function(event) {
-        up.event.halt(event)
-      })
+  ```js
+  up.on('click', 'link.disabled', function(event) {
+    up.event.halt(event)
+  })
+  ```
 
   @function up.event.halt
   @param {Event} event
