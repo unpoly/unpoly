@@ -709,39 +709,43 @@ up.viewport = (function() {
   Here is an example for a layout for an e-mail client, showing a list of e-mails
   on the left side and the e-mail text on the right side:
 
-      .side {
-        position: fixed
-        top: 0
-        bottom: 0
-        left: 0
-        width: 100px
-        overflow-y: scroll
-      }
+  ```css
+  .side {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    overflow-y: scroll;
+  }
 
-      .main {
-        position: fixed
-        top: 0
-        bottom: 0
-        left: 100px
-        right: 0
-        overflow-y: scroll
-      }
+  .main {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 100px;
+    right: 0;
+    overflow-y: scroll;
+  }
+  ```
 
   This would be the HTML (notice the `up-viewport` attribute):
 
-      <div class=".side" up-viewport>
-        <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
-        <a href="/emails/2023" up-target=".main">Quote for services</a>
-        <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
-      </div>
+  ```html
+  <div class=".side" up-viewport>
+    <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
+    <a href="/emails/2023" up-target=".main">Quote for services</a>
+    <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
+  </div>
 
-      <div class="main" up-viewport>
-        <h1>Re: Your Invoice</h1>
-        <p>
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
-          Stet clita kasd gubergren, no sea takimata sanctus est.
-        </p>
-      </div>
+  <div class="main" up-viewport>
+    <h1>Re: Your Invoice</h1>
+    <p>
+      Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
+      Stet clita kasd gubergren, no sea takimata sanctus est.
+    </p>
+  </div>
+  ```
 
   @selector [up-viewport]
   @stable
@@ -807,17 +811,21 @@ up.viewport = (function() {
 
   Here is the CSS for a navigation bar that is anchored to the top edge of the screen:
 
-      .top-nav {
-         position: fixed
-         top: 0
-         left: 0
-         right: 0
-       }
+  ```css
+  .top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  ```
 
   By adding an `up-anchored="right"` attribute to the element, we can prevent the
   `right` edge from jumping when an [overlay](/up.layer) opens or closes:
 
-      <div class="top-nav" up-anchored="right">...</div>
+  ```html
+  <div class="top-nav" up-anchored="right">...</div>
+  ```
 
   @selector [up-anchored=right]
   @stable

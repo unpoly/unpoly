@@ -157,7 +157,7 @@ up.network = (function() {
 
     ```css
     up-progress-bar {
-      background-color: red
+      background-color: red;
     }
     ```
 

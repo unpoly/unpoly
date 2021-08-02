@@ -1687,14 +1687,14 @@ up.fragment = (function() {
 
   ```html
   <body>
-  <div class="layout" up-main="root">
-  <div class="layout--side">
-  ...
-  </div>
-  <div class="layout--content" up-main="modal">
-  ...
-  </div>
-  </div>
+    <div class="layout" up-main="root">
+      <div class="layout--side">
+        ...
+      </div>
+      <div class="layout--content" up-main="modal">
+        ...
+      </div>
+    </div>
   </body>
   ```
 

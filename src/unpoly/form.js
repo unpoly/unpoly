@@ -217,7 +217,7 @@ up.form = (function() {
   ```
 
   @param {Element|jQuery|string} form
-   The form to submit.
+    The form for which to parse render option.
   @param {Object} [options]
     Additional options for the form submission.
 

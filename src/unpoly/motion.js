@@ -121,9 +121,9 @@ up.motion = (function() {
 
   ```js
   up.animate('.warning', 'fade-in', {
-   delay: 1000,
-   duration: 250,
-   easing: 'linear'
+    delay: 1000,
+    duration: 250,
+    easing: 'linear'
   })
   ```
 
