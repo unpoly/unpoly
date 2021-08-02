@@ -41,7 +41,7 @@ Let's say we are rendering three pages with a tabbed navigation to switch betwee
 
 Your HTML could look like this:
 
-```
+```html
 <nav>
   <a href="/pages/a">A</a>
   <a href="/pages/b">B</a>
@@ -56,7 +56,7 @@ Your HTML could look like this:
 Since we only want to update the `<article>` tag, we annotate the links
 with an `up-target` attribute:
 
-```
+```html
 <nav>
   <a href="/pages/a" up-target="article">A</a>
   <a href="/pages/b" up-target="article">B</a>
@@ -281,13 +281,17 @@ up.link = (function() {
 
   Assume we have a link with an `a[up-target]` attribute:
 
-      <a href="/users" up-target=".main">Users</a>
+  ```html
+  <a href="/users" up-target=".main">Users</a>
+  ```
 
   Calling `up.follow()` with this link will replace the page's `.main` fragment
   as if the user had clicked on the link:
 
-      var link = document.querySelector('a')
-      up.follow(link)
+  ```js
+  var link = document.querySelector('a')
+  up.follow(link)
+  ```
 
   @function up.follow
 
