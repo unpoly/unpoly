@@ -103,6 +103,7 @@ up.syntax = (function() {
     setInterval(update, 1000)
     return () => clearInterval(update)
   })
+  ```
 
   If we didn't clean up after ourselves, we would have many ticking intervals
   operating on detached DOM elements after we have created and removed a couple
@@ -225,7 +226,7 @@ up.syntax = (function() {
   We can define the `[content-link]` attribute by registering a macro that
   sets the `[up-target]`, `[up-transition]` and `[up-duration]` attributes for us:
 
-  ```
+  ```js
   up.macro('[smooth-link]', function(link) {
     link.setAttribute('up-target', '.content')
     link.setAttribute('up-transition', 'cross-fade')
