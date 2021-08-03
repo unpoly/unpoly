@@ -87,7 +87,8 @@ function scriptPipeline(target) {
     },
     resolve: {
       extensions: ['.js', '.coffee', '.js.erb', '.coffee.erb']
-    }
+    },
+    target: ['web', target]
   }
 }
 
