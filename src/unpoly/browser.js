@@ -4,16 +4,19 @@ Browser support
 
 Unpoly supports all modern browsers.
 
-Chrome, Firefox, Edge, Safari
-: Full support
+### Chrome, Firefox, Edge, Safari
 
-Internet Explorer 11
-: Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).\
-  Support may be removed when Microsoft retires IE11 in [June 2022](https://blogs.windows.com/windowsexperience/2021/05/19/the-future-of-internet-explorer-on-windows-10-is-in-microsoft-edge/).
+Full support.
 
-Internet Explorer 10 or lower
-: Unpoly will not boot or [run compilers](/up.compiler),
-  leaving you with a classic server-side application.
+### Internet Explorer 11
+
+Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).\
+Support may be removed when Microsoft retires IE11 in [June 2022](https://blogs.windows.com/windowsexperience/2021/05/19/the-future-of-internet-explorer-on-windows-10-is-in-microsoft-edge/).
+
+### Internet Explorer 10 or lower
+
+Unpoly will not boot or [run compilers](/up.compiler),
+leaving you with a classic server-side application.
 
 @module up.browser
 */
@@ -127,7 +130,7 @@ up.browser = (function() {
 
   /*-
   @return {boolean}
-  @function up,browser.ensureConfirmed
+  @function up.browser.ensureConfirmed
   @param {string} options.confirm
   @param {boolean} options.preload
   @internal
@@ -153,7 +156,16 @@ up.browser = (function() {
   @stable
   */
   function isSupported() {
-    return canPromise() && document.compatMode !== 'BackCompat'
+    return !supportIssue()
+  }
+
+  function supportIssue() {
+    if (!canPromise()) {
+      return "Browser doesn't support promises"
+    }
+    if (document.compatMode === 'BackCompat') {
+      return 'Browser is in quirks mode (missing DOCTYPE?)'
+    }
   }
 
   return {
@@ -165,6 +177,7 @@ up.browser = (function() {
     canJQuery,
     assertConfirmed,
     isSupported,
+    supportIssue,
     popCookie,
     get jQuery() { return getJQuery() },
     isIE11

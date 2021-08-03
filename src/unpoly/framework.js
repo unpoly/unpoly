@@ -42,7 +42,8 @@ up.framework = (function() {
     // and executed. We cannot delay booting until the DOM is ready, since by then
     // all user-defined event listeners and compilers will have registered.
     // Note that any non-async scripts after us will delay DOMContentLoaded.
-    if (up.browser.isSupported()) {
+    let supportIssue = up.browser.supportIssue()
+    if (!supportIssue) {
       // Some Unpoly modules will use the up:framework:boot event to:
       //
       // - Snapshot their state before user-defined compilers, handlers, etc. have
@@ -63,7 +64,7 @@ up.framework = (function() {
         up.emit('up:app:boot', {log: 'Booting user application'})
       })
     } else {
-      console.log("Unpoly doesn't support this browser. Framework was not booted.")
+      console.error("Unpoly cannot load: %s", supportIssue)
     }
   }
 
