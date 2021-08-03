@@ -56,11 +56,11 @@ describe 'up.motion', ->
 
         next.after 10, =>
           $element.css
-            transition: 'font-size 500ms linear, height 500ms linear'
+            transition: 'font-size 1000ms linear, height 1000ms linear'
             fontSize: '100px'
             height: '200px'
 
-        next.after 250, =>
+        next.after 500, =>
           # Original CSS transition should now be ~50% done
           @fontSizeBeforeAnimate = parseFloat($element.css('fontSize'))
           @heightBeforeAnimate = parseFloat($element.css('height'))
@@ -68,22 +68,22 @@ describe 'up.motion', ->
           expect(@fontSizeBeforeAnimate).toBeAround(0.5 * (100 - 10), 20)
           expect(@heightBeforeAnimate).toBeAround(0.5 * (200 - 20), 40)
 
-          up.animate($element, 'fade-in', duration: 500, easing: 'linear')
+          up.animate($element, 'fade-in', duration: 1000, easing: 'linear')
 
-        next.after 250, =>
+        next.after 500, =>
           # Original CSS transition should remain paused at ~50%
           # Unpoly animation should now be ~50% done
           expect(parseFloat($element.css('fontSize'))).toBeAround(@fontSizeBeforeAnimate, 10)
           expect(parseFloat($element.css('height'))).toBeAround(@heightBeforeAnimate, 10)
           expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.3)
 
-        next.after 250, =>
+        next.after 500, =>
           # Unpoly animation should now be done
           # The original transition resumes. For technical reasons it will take
           # its full duration for the remaining frames of the transition.
           expect(parseFloat($element.css('opacity'))).toBeAround(1.0, 0.3)
 
-        next.after (500 + (tolerance = 125)), =>
+        next.after (1000 + (tolerance = 250)), =>
           expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
           expect(parseFloat($element.css('height'))).toBeAround(200, 40)
 
