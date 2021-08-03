@@ -152,7 +152,9 @@ up.browser = (function() {
   @function up.browser.isSupported
   @stable
   */
-  const isSupported = canPromise
+  function isSupported() {
+    return canPromise() && document.compatMode !== 'BackCompat'
+  }
 
   return {
     loadPage,
