@@ -14,8 +14,7 @@ Getting started
 
 - See [unpoly.com](https://unpoly.com) for guides and documentation.
 - See [installation instructions](https://unpoly.com/install) for many different package managers and languages.
-- See [`CHANGELOG.md`](https://github.com/unpoly/unpoly/blob/master/CHANGELOG.md) for notable changes.
-- See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md) documentation of the Rails bindings.
+- See [notable changes](https://unpoly.com/changes).
 
 
 Development
