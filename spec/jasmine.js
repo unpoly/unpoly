@@ -1,3 +1,5 @@
+require('es6-promise/dist/es6-promise.auto')
+
 require('jasmine-core/lib/jasmine-core/jasmine')
 require('jasmine-core/lib/jasmine-core/jasmine-html')
 require('jasmine-core/lib/jasmine-core/boot')
