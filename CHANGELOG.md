@@ -8,10 +8,36 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-Unreleased
-----------
+2.2.0
+-----
 
-- Function `up.util.times()` has been deprecated. Use a `for` loop instead.
+### Reduced file size
+
+The size of [`unpoly.js`](/install) has been reduced significantly. It now weighs 41.6 KB (minified and gzipped).
+
+To achieve this `unpoly.js` is now compiled with modern JavaScript syntax that works across all modern browsers (Chrome, Firefox, Edge, Safari, Mobile Chrome, Mobile Safari).
+
+### ES5 build for legacy browsers
+
+If you need support for Internet Explorer 11 you can either use a transpiler like [Babel](https://babeljs.io/) **or** use Unpoly's ES5 build. To use the ES5 build, load `unpoly.es5.js` instead of `unpoly.js`. There is also a minified version `unpoly.es5.min.js`.
+
+Like in earlier versions of Unpoly, supporting IE11 requires a polyfill for the `Promise` API. No additional polyfills are required by this version.
+
+### The future of IE11 support
+
+Microsoft is going to retire IE11 in [June 2022](https://blogs.windows.com/windowsexperience/2021/05/19/the-future-of-internet-explorer-on-windows-10-is-in-microsoft-edge/).
+
+After that date Unpoly will remove support for IE11 and no longer provide ES5 builds. It may be possible to keep supporting IE11 through polyfills and transpilation, but the Unpoly maintainers will no longer support or test with IE11.
+
+This step will allow Unpoly to use modern web APIs and reduce its bundle size even further.
+
+### Other changes
+
+- When going back in history, Unpoly reloads the `body` instead of the `:main` element. You can customize this behavior in `up.history.config.restoreTargets`.
+- The function `up.util.times()` has been deprecated. Use a classic [`for`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for) statement instead.
+- The function `up.Params.wrap()` has been removed without replacement.
+- Unpoly no longer loads when the browser is in quirks mode.
+- When Unpoly cannot load, it prints a reason to the error log.
 
 
 2.1.0
