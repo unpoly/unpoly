@@ -1,5 +1,5 @@
 {
-  "name": "unpoly-test",
+  "name": "unpoly",
   "version": "2.2.0-rc1",
   "description": "Unobtrusive JavaScript framework",
   "main": "unpoly.js",
