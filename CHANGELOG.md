@@ -13,7 +13,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 
 ### Reduced file size
 
-The size of [`unpoly.js`](/install) has been reduced significantly. It now weighs 41.6 KB (minified and gzipped).
+The size of [`unpoly.js`](https://unpoly.com/install) has been reduced significantly. It now weighs 41.6 KB (minified and gzipped).
 
 To achieve this `unpoly.js` is now compiled with modern JavaScript syntax that works across all modern browsers (Chrome, Firefox, Edge, Safari, Mobile Chrome, Mobile Safari).
 
