@@ -17,9 +17,18 @@ module Unpoly
         version =~ /rc|beta|pre|alpha/
       end
 
-      def run(command)
-        system(command) or raise "Error running command: #{command}"
+      def run(command, optional: false)
+        system(command) or optional or raise "Error running command: #{command}"
       end
+
+      def git_tag
+        'v' + version
+      end
+
+      def git_tag_message
+        'Version ' + version
+      end
+
     end
   end
 end
@@ -63,6 +72,15 @@ namespace :release do
     puts "- Tweet a link to the CHANGELOG as @unpolyjs"
   end
 
+  desc 'Push version tag to GitHub'
+  task :push_tag do
+    tag = Unpoly::Release.git_tag
+    tag_message = Unpoly::Release.git_tag_message
+    Unpoly::Release.run("git push origin :refs/tags/#{tag}")
+    Unpoly::Release.run("git tag --annotate --force --message='#{tag_message}' #{tag} HEAD")
+    Unpoly::Release.run("git push -f origin #{tag}")
+  end
+
   desc 'Publish package to npm'
   task :publish_to_npm do
     if Unpoly::Release.pre_release?
@@ -89,7 +107,7 @@ namespace :release do
   end
 
   desc 'Build artifacts, confirm with user and release to npm'
-  task :process => [:build, :confirm, :publish_to_npm, :remind_to_update_site] do
+  task :process => [:build, :confirm, :push_tag, :publish_to_npm, :remind_to_update_site] do
   end
 
 end
