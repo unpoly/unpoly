@@ -1,5 +1,6 @@
 const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const ESLintPlugin = require('eslint-webpack-plugin')
 
 function minify(doMinify) {
   return { mode: doMinify ? 'production' : 'none' }
@@ -27,9 +28,9 @@ function file(srcPath, output) {
   }
 }
 
-function scriptPipeline(target) {
-  if (target === 'modern') {
-    target = 'es2020'
+function scriptPipeline({ es, lint = true }) {
+  if (es === 'modern') {
+    es = 'es2020'
   }
 
   let erbLoader = {
@@ -50,7 +51,7 @@ function scriptPipeline(target) {
         checkJs: true,
         // importHelpers: true,
         // module: "ES2020",
-        target: target
+        target: es
       }
 
     }
@@ -60,7 +61,17 @@ function scriptPipeline(target) {
     loader: 'coffee-loader'
   }
 
+  let plugins = []
+  if (lint) {
+    plugins.push(
+      new ESLintPlugin({
+        extensions: ['js', 'ts']
+      })
+    )
+  }
+
   return {
+    plugins,
     module: {
       rules: [
         {
@@ -88,7 +99,7 @@ function scriptPipeline(target) {
     resolve: {
       extensions: ['.js', '.coffee', '.js.erb', '.coffee.erb']
     },
-    target: ['web', target]
+    target: ['web', es]
   }
 }
 
