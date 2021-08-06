@@ -31,7 +31,7 @@ up.ProgressBar = class ProgressBar {
     } else {
       // Above 80% completion we grow the bar more slowly,
       // using a formula that can never reach 100%.
-      diff = 0.13 * (100 - width) * Math.random()
+      diff = 0.13 * (100 - this.width) * Math.random()
     }
 
     this.moveTo(this.width + diff)
