@@ -619,7 +619,7 @@ up.viewport = (function() {
   }
 
   function resetScroll(...args) {
-    const [viewports, options] = parseOptions(args)
+    const [viewports, _options] = parseOptions(args)
     return setScrollTops(viewports, {})
   }
 

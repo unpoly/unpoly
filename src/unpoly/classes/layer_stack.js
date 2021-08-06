@@ -1,5 +1,4 @@
 const u = up.util
-const e = up.element
 
 up.LayerStack = class LayerStack extends Array {
 

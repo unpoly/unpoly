@@ -1,5 +1,3 @@
-const e = up.element
-
 up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overlay {
 
   static bodyShifter = new up.BodyShifter()

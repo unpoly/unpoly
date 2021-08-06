@@ -2,9 +2,6 @@
 @module up.layer
 */
 
-const u = up.util
-const e = up.element
-
 up.popup = {
   /*-
   Attaches a popup overlay to the given element or selector.

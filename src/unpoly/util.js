@@ -193,7 +193,7 @@ up.util = (function() {
     // In IE11 the #hostname and #port properties of unqualified URLs are empty strings.
     // We can fix this by setting the link's { href } on the link itself.
     if (!link.hostname) {
-      link.href = link.href
+      link.href = link.href // eslint-disable-line no-self-assign
     }
 
     // Some IEs don't include a leading slash in the #pathname property.
@@ -1673,7 +1673,7 @@ up.util = (function() {
 //    totalValue
 
   function isBasicObjectProperty(k) {
-    return Object.prototype.hasOwnProperty(k)
+    return Object.prototype.hasOwnProperty(k) // eslint-disable-line no-prototype-builtins
   }
 
   /*-
@@ -1925,7 +1925,7 @@ up.util = (function() {
       for (let attr of ['id', 'name', 'class']) {
         let value = arg.getAttribute(attr)
         if (value) {
-          string += ` ${attr}=\"${value}\"`
+          string += ` ${attr}="${value}"`
         }
       }
       string += ">"
@@ -1951,7 +1951,7 @@ up.util = (function() {
     return string
   }
 
-  const SPRINTF_PLACEHOLDERS = /\%[oOdisf]/g
+  const SPRINTF_PLACEHOLDERS = /%[oOdisf]/g
 
   function secondsSinceEpoch() {
     return Math.floor(Date.now() * 0.001)

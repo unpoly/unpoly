@@ -16,7 +16,8 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
     switch (opt) {
       case 'keep':
         return this.restoreFocus()
-      case 'target': case true:
+      case 'target':
+      case true:
         return this.focusElement(this.fragment)
       case 'layer':
         return this.focusElement(this.layer.getFocusElement())

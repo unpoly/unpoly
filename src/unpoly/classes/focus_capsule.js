@@ -1,4 +1,3 @@
-const u = up.util
 const e = up.element
 
 const PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']

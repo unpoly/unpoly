@@ -635,7 +635,7 @@ up.layer = (function() {
 
   function optionToString(option) {
     if (u.isString(option)) {
-      return `layer \"${option}\"`
+      return `layer "${option}"`
     } else {
       return option.toString()
     }

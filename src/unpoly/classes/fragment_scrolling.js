@@ -1,5 +1,4 @@
 const u = up.util
-const e = up.element
 
 up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
 

@@ -3,10 +3,10 @@ const e = up.element
 
 up.HTMLWrapper = class HTMLWrapper {
 
-  constructor(tagName, options = {}) {
+  constructor(tagName) {
     this.tagName = tagName
     const openTag = `<${this.tagName}[^>]*>`
-    const closeTag = `<\/${this.tagName}>`
+    const closeTag = `</${this.tagName}>`
     const innerHTML = "(.|\\s)*?"
     this.pattern = new RegExp(openTag + innerHTML + closeTag, 'ig')
     this.attrName = `up-wrapped-${this.tagName}`

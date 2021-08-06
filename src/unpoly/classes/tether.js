@@ -64,7 +64,7 @@ up.Tether = class Tether {
     let top
 
     switch (this.alignAxis) {
-      case 'horizontal': // position is 'top' or 'bottom'
+      case 'horizontal': { // position is 'top' or 'bottom'
         switch (this.position) {
           case 'top':
             top = anchorBox.top - elementMargin.bottom - elementBox.height
@@ -107,8 +107,8 @@ up.Tether = class Tether {
             //       anchor
         }
         break
-
-      case 'vertical': // position is 'left' or 'right'
+      }
+      case 'vertical': { // position is 'left' or 'right'
         switch (this.align) {
           case 'top':
             // anchored to the top, grows to the bottom
@@ -143,6 +143,7 @@ up.Tether = class Tether {
           // anchor | margin | element
         }
         break
+      }
     }
 
     if (u.isDefined(left) || u.isDefined(top)) {

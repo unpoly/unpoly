@@ -21,7 +21,7 @@ Object.defineProperty(up.network.config, 'preloadDelay', {
   },
   set(value) {
     preloadDelayMoved()
-    return up.link.config.preloadDelay = value
+    up.link.config.preloadDelay = value
   }
 })
 

@@ -1077,7 +1077,7 @@ up.fragment = (function() {
     return getAll(...args)[0]
   }
 
-  const CSS_HAS_SUFFIX_PATTERN = /\:has\(([^\)]+)\)$/
+  const CSS_HAS_SUFFIX_PATTERN = /:has\(([^)]+)\)$/
 
   /*-
   Returns all elements matching the given selector, but

@@ -692,7 +692,7 @@ up.Layer = class Layer extends up.Record {
     return this.constructor.selector(part)
   }
 
-  static selector(part) {
+  static selector(_part) {
     throw up.error.notImplemented()
   }
 

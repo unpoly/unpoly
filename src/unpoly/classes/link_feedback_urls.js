@@ -1,5 +1,3 @@
-const u = up.util
-
 up.LinkFeedbackURLs = class LinkFeedbackURLs {
 
   constructor(link) {

@@ -3,7 +3,7 @@ const u = up.util
 // We want to make the default speed mimic Chrome's smooth scrolling behavior.
 // We also want to keep the default value in up.viewport.config.scrollSpeed to be 1.
 // For our calculation in #animationFrame() we need to multiply it with this factor.
-SPEED_CALIBRATION = 0.065
+const SPEED_CALIBRATION = 0.065
 
 up.ScrollMotion = class ScrollMotion {
 

@@ -28,7 +28,7 @@ up.URLPattern = class URLPattern {
 
     reCode = reCode.replace(/\\\*/g, '.*?')
 
-    reCode = reCode.replace(/(\:|\\\$)([a-z][\w-]*)/ig, (match, type, name) => {
+    reCode = reCode.replace(/(:|\\\$)([a-z][\w-]*)/ig, (match, type, name) => {
       // It's \\$ instead of $ because we do u.escapeRegExp above
       if (type === '\\$') {
         if (capture) { this.groups.push({ name, cast: Number }); }

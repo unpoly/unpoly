@@ -1,5 +1,4 @@
 const u = up.util
-const e = up.element
 
 up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
 

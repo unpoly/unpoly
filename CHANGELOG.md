@@ -7,6 +7,12 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
+Unreleased
+----------
+
+- Fix progress bar no longer progressing after 80%
+- Fix deprecated function `up.util.any()` not being forwarded to `up.util.some()` with `unpoly-migrate.js`.
+
 
 2.2.0
 -----

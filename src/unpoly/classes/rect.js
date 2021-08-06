@@ -1,5 +1,3 @@
-const u = up.util
-
 up.Rect = class Rect extends up.Record {
 
   keys() {

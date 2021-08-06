@@ -1,5 +1,3 @@
-const e = up.element
-
 up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
 
   createElements(content) {

@@ -1,5 +1,3 @@
-const u = up.util
-
 up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
   constructor(options) {
@@ -43,7 +41,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       throw this.notApplicable()
     }
 
-    up.puts('up.render()', `Opening element \"${this.target}\" in new overlay`)
+    up.puts('up.render()', `Opening element "${this.target}" in new overlay`)
 
     this.options.title = this.improveHistoryValue(this.options.title, responseDoc.getTitle())
 

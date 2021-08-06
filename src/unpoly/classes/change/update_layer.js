@@ -40,7 +40,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.matchPostflight()
 
     // Don't log @target since that does not include hungry elements
-    up.puts('up.render()', `Updating \"${this.bestPreflightSelector()}\" in ${this.layer}`)
+    up.puts('up.render()', `Updating "${this.bestPreflightSelector()}" in ${this.layer}`)
 
     this.options.title = this.improveHistoryValue(this.options.title, this.responseDoc.getTitle())
 
@@ -96,13 +96,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   async executeStep(step) {
-    let promise
-
     // Remember where the element came from to support up.reload(element).
     this.setSource(step)
 
     switch (step.placement) {
-      case 'swap':
+      case 'swap': {
         let keepPlan = this.findKeepPlan(step)
         if (keepPlan) {
           // Since we're keeping the element that was requested to be swapped,
@@ -131,7 +129,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
               up.hello(step.newElement, step)
             },
             beforeDetach: () => {
-              up.syntax.clean(step.oldElement, { layer: this.layer })
+              up.syntax.clean(step.oldElement, {layer: this.layer})
             },
             afterDetach() {
               e.remove(step.oldElement); // clean up jQuery data
@@ -152,8 +150,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           )
         }
         break
-
-      case 'content':
+      }
+      case 'content': {
         let oldWrapper = e.wrapChildren(step.oldElement)
         // oldWrapper.appendTo(step.oldElement)
         let newWrapper = e.wrapChildren(step.newElement)
@@ -172,9 +170,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         await this.handleFocus(step.oldElement, step)
 
         break
-
+      }
       case 'before':
-      case 'after':
+      case 'after': {
         // We're either appending or prepending. No keepable elements must be honored.
 
         // Text nodes are wrapped in an <up-wrapper> container so we can
@@ -205,9 +203,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         await e.unwrap(wrapper)
 
         break
-
-      default:
+      }
+      default: {
         up.fail('Unknown placement: %o', step.placement)
+      }
     }
   }
 
@@ -293,7 +292,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // up.fragment.expandTargets() was already called by up.Change.FromContent
     for (let simpleTarget of u.splitValues(this.target, ',')) {
       if (simpleTarget !== ':none') {
-        const expressionParts = simpleTarget.match(/^(.+?)(?:\:(before|after))?$/)
+        const expressionParts = simpleTarget.match(/^(.+?)(?::(before|after))?$/)
         if (!expressionParts) {
           throw up.error.invalidSelector(simpleTarget)
         }
@@ -319,7 +318,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       // Note that step.oldElement might already have been set by @parseSteps().
       step.oldElement ||= finder.find()
       if (!step.oldElement) {
-        throw this.notApplicable(`Could not find element \"${this.target}\" in current page`)
+        throw this.notApplicable(`Could not find element "${this.target}" in current page`)
       }
     }
 
@@ -339,7 +338,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       if (newElement) {
         step.newElement = newElement
       } else {
-        throw this.notApplicable(`Could not find element \"${this.target}\" in server response`)
+        throw this.notApplicable(`Could not find element "${this.target}" in server response`)
       }
     }
 

@@ -1,5 +1,4 @@
 const u = up.util
-const e = up.element
 
 /*-
 A normalized description of an [HTTP request](/up.request).

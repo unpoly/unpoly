@@ -6,7 +6,7 @@ up.Record = class Record {
     throw 'Return an array of keys'
   }
 
-  defaults(options) {
+  defaults(_options) {
     return {}
   }
 

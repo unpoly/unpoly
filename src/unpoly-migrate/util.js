@@ -39,7 +39,7 @@ up.util.parseUrl = function(...args) {
 
 up.util.any = function(...args) {
   up.migrate.warn('up.util.any() has been renamed to up.util.some()')
-  return some(...args)
+  return up.util.some(...args)
 }
 
 up.util.all = function(...args) {

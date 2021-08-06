@@ -508,7 +508,7 @@ up.element = (function() {
     // Attribute values might contain spaces, and then we would incorrectly
     // split depths at that space.
     const attrValues = []
-    const selectorWithoutAttrValues = selector.replace(/\[([\w-]+)(?:[\~\|\^\$\*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
+    const selectorWithoutAttrValues = selector.replace(/\[([\w-]+)(?:[~|^$*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
       attrValues.push(attrValue || '')
       return `[${attrName}]`
     })
@@ -529,7 +529,7 @@ up.element = (function() {
       depthElement = document.createElement(tagName || 'div')
       if (!rootElement) { rootElement = depthElement }
 
-      depthSelector = depthSelector.replace(/\#([\w-]+)/, function(_match, id) {
+      depthSelector = depthSelector.replace(/#([\w-]+)/, function(_match, id) {
         depthElement.id = id
         return ''
       })
@@ -676,7 +676,7 @@ up.element = (function() {
   */
   function attributeSelector(attribute, value) {
     value = value.replace(/"/g, '\\"')
-    return `[${attribute}=\"${value}\"]`
+    return `[${attribute}="${value}"]`
   }
 
   function trueAttributeSelector(attribute){
@@ -926,12 +926,19 @@ up.element = (function() {
   function booleanAttr(element, attribute, pass) {
     const value = stringAttr(element, attribute)
     switch (value) {
-      case 'false':
+      case 'false': {
         return false
-      case 'true': case '': case attribute:
+      }
+      case 'true':
+      case '':
+      case attribute: {
         return true
-      default:
-        if (pass) { return value }
+      }
+      default: {
+        if (pass) {
+          return value
+        }
+      }
     }
   }
 
@@ -969,7 +976,7 @@ up.element = (function() {
     let value = element.getAttribute(attribute)
     if (value) {
       value = value.replace(/_/g, '')
-      if (value.match(/^[\d\.]+$/)) {
+      if (value.match(/^[\d.]+$/)) {
         return parseFloat(value)
       }
     }
