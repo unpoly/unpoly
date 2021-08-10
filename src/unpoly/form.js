@@ -34,7 +34,7 @@ up.form = (function() {
     You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
     ```js
-    up.form.config.submitSelectors.push('form']
+    up.form.config.submitSelectors.push('form')
     ```
 
     Individual forms may opt out with an `[up-submit=follow]` attribute.
