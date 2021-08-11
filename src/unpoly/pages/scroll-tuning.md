@@ -13,7 +13,7 @@ To animate the scroll motion, pass `{ scrollBehavior: 'smooth' }.`
 To *not* animate the scrolling, pass `{ scrollBehavior: 'auto' }` (the default).
 
 The acceleration of the scroll motion may be controlled using the `{ scrollSpeed }` option.
-If defaults to `{ scrollSpeed: 1 }`.
+It defaults to `{ scrollSpeed: 1 }`.
 This roughly corresponds to the speed of Chrome's
 [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
 You may change this default in `up.viewport.config.scrollSpeed`.

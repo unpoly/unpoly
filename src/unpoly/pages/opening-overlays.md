@@ -41,7 +41,7 @@ Replacing existing overlays
 
 By default the new overlay will be stacked on top of the current layer. There is no limit for the number of stacked layers.
 
-You can pass an option `[up-layer="swap]` or `[up-layer="shatter"]` to replace existing overlays:
+You can pass an option `[up-layer="swap"]` or `[up-layer="shatter"]` to replace existing overlays:
 
 | Option     | Description                                                            |
 | ---------- | ---------------------------------------------------------------------- |

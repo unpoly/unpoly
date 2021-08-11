@@ -21,7 +21,7 @@ up.render({
   target: '.content',   // when submission succeeds update '.content'
   failTarget: 'form',   // when submission fails update the form
   scroll: 'auto',       // when submission succeeds use default scroll behavior
-  failScroll: '.errors' // when submission falis scroll to the error messages
+  failScroll: '.errors' // when submission fails scroll to the error messages
 })
 ```
 
