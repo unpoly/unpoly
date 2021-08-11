@@ -27,7 +27,7 @@ from an [Unpoly compiler](/up.compiler).
 ### Migrating legacy scripts to a compiler
 
 The legacy code below waits for the page to load, then selects all links with a
-`.lightbox` class and calls `lightboxfiy()` for each of these links:
+`.lightbox` class and calls `lightboxify()` for each of these links:
 
 ```js
 window.addEventListener('DOMContentLoaded', function(event) {

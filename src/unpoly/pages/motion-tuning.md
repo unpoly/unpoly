@@ -2,7 +2,7 @@ Motion tuning
 =============
 
 When updating page fragments, you may animate the change using an
-´{ animation }` or `{ transition }` option. Respectively you may use an
+`{ animation }` or `{ transition }` option. Respectively you may use an
 `[up-animation]` or `[up-transition]` HTML attribute.
 
 The page details some features to fine-tune the animation effect.
