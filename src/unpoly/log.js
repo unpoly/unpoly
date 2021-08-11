@@ -21,13 +21,13 @@ up.log = (function() {
   Configures the logging output on the developer console.
 
   @property up.log.config
-  @param {boolean} [options.enabled=false]
+  @param {boolean} [config.enabled=false]
     Whether Unpoly will print debugging information to the developer console.
 
     Debugging information includes which elements are being [compiled](/up.syntax)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
-  @param {boolean} [options.banner=true]
+  @param {boolean} [config.banner=true]
     Print the Unpoly banner to the developer console.
   @stable
   */
