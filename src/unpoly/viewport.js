@@ -519,23 +519,6 @@ up.viewport = (function() {
   }
 
   /*-
-  Returns a hash with scroll positions.
-
-  Each key in the hash is a viewport selector. The corresponding
-  value is the viewport's top scroll position:
-
-      up.viewport.scrollTops()
-      => { '.main': 0, '.sidebar': 73 }
-
-  @function up.viewport.scrollTops
-  @return Object<string, number>
-  @internal
-  */
-  function scrollTops(options = {}) {
-    return u.mapObject(getAll(options), viewport => [scrollTopKey(viewport), viewport.scrollTop])
-  }
-
-  /*-
   @function up.viewport.fixedElements
   @internal
   */
@@ -575,6 +558,19 @@ up.viewport = (function() {
     }
   }
 
+  /*-
+  Returns a hash with scroll positions.
+
+  Each key in the hash is a viewport selector. The corresponding
+  value is the viewport's top scroll position:
+
+      getScrollTops()
+      => { '.main': 0, '.sidebar': 73 }
+
+  @function up.viewport.getScrollTops
+  @return Object<string, number>
+  @internal
+  */
   function getScrollTops(viewports) {
     return u.mapObject(viewports, viewport => [scrollTopKey(viewport), viewport.scrollTop])
   }
@@ -900,16 +896,14 @@ up.viewport = (function() {
     rootOverflowElement,
     isRoot,
     scrollbarWidth,
-    scrollTops,
     saveScroll,
     restoreScroll,
     resetScroll,
     anchoredRight,
-    fixedElements,
     absolutize,
     focus: doFocus,
     tryFocus,
-    makeFocusable
+    makeFocusable,
   }
 })()
 
