@@ -76,6 +76,8 @@ npm run test
 
 This will open a server on <http://localhost:3000> and opens that URL with your default browser.
 
+In addition to the unit tests, there is an optional support repo [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests). It contains a Rails app to play with Unpoly features that are hard to test well with a unit test. E.g. the visual look of overlays, or edge cases when booting Unpoly.
+
 ### Making a new release
 
 You can use this repository to publish a new version of the `unpoly` npm package.
