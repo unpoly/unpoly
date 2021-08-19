@@ -324,6 +324,10 @@ up.syntax = (function() {
   }
 
   function insertCompiler(queue, newCompiler) {
+    if (up.framework.booted) {
+      up.puts('Compiler %o was registered after booting Unpoly. Compiler will run for future fragments.', newCompiler.selector)
+    }
+
     let existingCompiler
     let index = 0
     while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
