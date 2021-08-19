@@ -481,30 +481,6 @@ up.event = (function() {
     event.preventDefault()
   }
 
-  /*-
-  Runs the given callback when the the initial HTML document has been completely loaded.
-
-  The callback is guaranteed to see the fully parsed DOM tree.
-  This function does not wait for stylesheets, images or frames to finish loading.
-
-  If `up.event.onReady()` is called after the initial document was loaded,
-  the given callback is run immediately.
-
-  @function up.event.onReady
-  @param {Function} callback
-    The function to call then the DOM tree is acessible.
-  @experimental
-  */
-  function onReady(callback) {
-    // Values are "loading", "interactive" and "completed".
-    // https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
-    if (document.readyState !== 'loading') {
-      callback()
-    } else {
-      document.addEventListener('DOMContentLoaded', callback)
-    }
-  }
-
   const keyModifiers = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
   /*-
@@ -597,7 +573,6 @@ up.event = (function() {
     assertEmitted,
     onEscape,
     halt,
-    onReady,
     isUnmodified,
     fork,
     keyModifiers

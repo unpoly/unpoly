@@ -1800,7 +1800,7 @@ up.fragment = (function() {
     return selector.matches(element)
   }
 
-  up.on('up:app:boot', function () {
+  up.on('up:framework:boot', function() {
     const {body} = document
     body.setAttribute('up-source', up.history.location)
     hello(body)

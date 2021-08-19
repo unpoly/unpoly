@@ -92,7 +92,7 @@ up.log = (function() {
     }
   }
 
-  const printBanner = function() {
+  function printBanner() {
     if (!config.banner) { return; }
 
     // The ASCII art looks broken in code since we need to escape backslashes
@@ -123,8 +123,7 @@ up.log = (function() {
     }
   }
 
-
-  up.on('up:app:boot', printBanner)
+  up.on('up:framework:boot', printBanner)
 
   up.on('up:framework:reset', reset)
 
@@ -227,7 +226,7 @@ up.log = (function() {
     disable,
     fail,
     muteUncriticalRejection,
-    isEnabled() { return config.enabled; }
+    isEnabled() { return config.enabled },
   }
 })()
 

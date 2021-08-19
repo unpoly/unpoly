@@ -860,21 +860,23 @@ up.viewport = (function() {
   let userScrolled = false
   up.on('scroll', { once: true }, () => userScrolled = true)
 
-  up.on('up:app:boot', () => // When the initial URL contains an #anchor link, the browser will automatically
-  // reveal a matching fragment. We want to override that behavior with our own,
-  // so we can honor configured obstructions. Since we cannot disable the automatic
-  // browser behavior we need to ensure our code runs after it.
-  //
-  // In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
-  // However, when we follow a link with an #anchor URL, the browser
-  // behavior happens *after* DOMContentLoaded. Hence we wait one more task.
-  u.task(function() {
-    // If the user has scrolled while the page was loading, we will
-    // not reset their scroll position by revealing the #anchor fragment.
-    if (!userScrolled) {
-      return revealHash()
-    }
-  }))
+  up.on('up:framework:boot', function() {
+    // When the initial URL contains an #anchor link, the browser will automatically
+    // reveal a matching fragment. We want to override that behavior with our own,
+    // so we can honor configured obstructions. Since we cannot disable the automatic
+    // browser behavior we need to ensure our code runs after it.
+    //
+    // In Chrome, when reloading, the browser behavior happens before DOMContentLoaded.
+    // However, when we follow a link with an #anchor URL, the browser
+    // behavior happens *after* DOMContentLoaded. Hence we wait one more task.
+    u.task(function () {
+      // If the user has scrolled while the page was loading, we will
+      // not reset their scroll position by revealing the #anchor fragment.
+      if (!userScrolled) {
+        return revealHash()
+      }
+    })
+  })
 
   up.on(window, 'hashchange', () => revealHash())
 

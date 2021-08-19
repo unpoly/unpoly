@@ -526,7 +526,7 @@ up.motion = (function() {
   */
   function registerTransition(name, transition) {
     const fn = findTransitionFn(transition)
-    fn.isDefault = up.framework.booting
+    fn.isDefault = up.framework.evaling
     namedTransitions[name] = fn
   }
 
@@ -566,17 +566,17 @@ up.motion = (function() {
   */
   function registerAnimation(name, animation) {
     const fn = findAnimationFn(animation)
-    fn.isDefault = up.framework.booting
+    fn.isDefault = up.framework.evaling
     namedAnimations[name] = fn
   }
 
-  function warnIfDisabled() {
+  up.on('up:framework:boot', function() {
     // Explain to the user why animations aren't working.
     // E.g. the user might have disabled animations in her OS.
     if (!isEnabled()) {
       up.puts('up.motion', 'Animations are disabled')
     }
-  }
+  })
 
   /*-
   Returns whether the given animation option will cause the animation
@@ -709,7 +709,6 @@ up.motion = (function() {
   @stable
   */
 
-  up.on('up:framework:boot', warnIfDisabled)
   up.on('up:framework:reset', reset)
 
   return {

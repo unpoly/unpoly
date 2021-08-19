@@ -248,7 +248,7 @@ up.syntax = (function() {
   function registerMacro(...args) {
     const macro = buildCompiler(args)
 
-    if (up.framework.booting) {
+    if (up.framework.evaling) {
       macro.priority = detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
     }
@@ -313,7 +313,7 @@ up.syntax = (function() {
     let [selector, options, callback] = parseCompilerArgs(args)
     options = u.options(options, {
       selector,
-      isDefault: up.framework.booting,
+      isDefault: up.framework.evaling,
       priority: 0,
       batch: false,
       keep: false,

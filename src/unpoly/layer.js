@@ -862,7 +862,10 @@ up.layer = (function() {
     stack.sync()
   })
 
-  up.on('up:framework:boot', function() {
+  up.on('up:framework:evaled', function() {
+    // Due to circular dependencies we must delay initialization of the stack until all of
+    // Unpoly's submodules have been evaled. We cannot delay initialization until up:framework:boot,
+    // since by then user scripts have run and event listeners will no longer register as "default".
     stack = new up.LayerStack()
   })
 

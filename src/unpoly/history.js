@@ -243,7 +243,7 @@ up.history = (function() {
     }
   }
 
-  up.on('up:app:boot', function() {
+  up.on('up:framework:boot', function() {
     if ('jasmine' in window) {
       // Can't delay this in tests.
       register()

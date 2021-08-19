@@ -20,7 +20,7 @@ up.EventListener = class EventListener extends up.Record {
   constructor(attributes) {
     super(attributes)
     this.key = this.constructor.buildKey(attributes)
-    this.isDefault = up.framework.booting
+    this.isDefault = up.framework.evaling
     // Need to store the bound nativeCallback function because addEventListener()
     // and removeEventListener() need to see the exact same reference.
     this.nativeCallback = this.nativeCallback.bind(this)
