@@ -76,8 +76,15 @@ up.Change.FromContent = class FromContent extends up.Change {
       return Promise.resolve()
     }
 
-    const executePlan = plan => plan.execute(this.getResponseDoc())
-    return this.seekPlan(executePlan) || this.postflightTargetNotApplicable()
+    return this.seekPlan(this.executePlan.bind(this)) || this.postflightTargetNotApplicable()
+  }
+
+  executePlan(matchedPlan) {
+    let primaryPlan = this.getPlans()[0]
+    if (matchedPlan !== primaryPlan) {
+      up.puts('Could not match primary target (%o). Updating a fallback target (%o).', primaryPlan.target, matchedPlan.target)
+    }
+    return matchedPlan.execute(this.getResponseDoc())
   }
 
   getResponseDoc() {
