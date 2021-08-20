@@ -536,7 +536,7 @@ up.link = (function() {
   }
 
   function followURL(link, options = {}) {
-    const url = options.url || link.getAttribute('href') || link.getAttribute('up-href')
+    const url = options.url || link.getAttribute('up-href') || link.getAttribute('href')
 
     // Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
     // link behavior (like keyboard navigation or default styles). However, we don't want to

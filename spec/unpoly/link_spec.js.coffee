@@ -650,6 +650,11 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.method).toEqual('PATCH')
 
+      it "prefers a link's [up-href] attribute to its [href] attribute", ->
+        link = fixture('a[href="/foo"][up-href="/bar"]')
+        options = up.link.followOptions(link)
+        expect(options.url).toEqual('/bar')
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->
