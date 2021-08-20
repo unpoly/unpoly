@@ -21,6 +21,12 @@ describe 'up.syntax', ->
         expect(observeElement).not.toHaveBeenCalledWith($otherChild[0])
         expect(observeElement).toHaveBeenCalledWith($child[0])
 
+      it 'prints a message when a compiler is registered after booting, explaining that the compiler will only run for future fragments', ->
+        spyOn(up, 'puts').and.callThrough()
+        up.compiler('.foo', u.noop)
+        expect(up.puts).toHaveBeenCalled()
+        expect(up.puts.calls.argsFor(0)[0]).toMatch(/will run for future fragments/i)
+
     describe 'up.$compiler', ->
 
       it 'registers a compiler that receives the element as a jQuery collection', ->
