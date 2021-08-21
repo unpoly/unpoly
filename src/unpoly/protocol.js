@@ -709,7 +709,7 @@ up.protocol = (function() {
     The name of request parameter containing the original request method when Unpoly needs to wrap
     the method.
 
-    Methods must be wrapped when making a [full page request](/up.browser.loadPage) with a methods other
+    Methods must be wrapped when making a [full page request](/up.network.loadPage) with a methods other
     than GET or POST. In this case Unpoly will make a POST request with the original request method
     in a form parameter named `_method`:
 

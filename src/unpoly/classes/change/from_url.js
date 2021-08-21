@@ -26,7 +26,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     let newPageReason = this.newPageReason()
     if (newPageReason) {
       up.puts('up.render()', newPageReason)
-      up.browser.loadPage(this.options)
+      up.network.loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
       return u.unresolvablePromise()

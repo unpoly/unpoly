@@ -24,25 +24,6 @@ up.browser = (function() {
   const u = up.util
 
   /*-
-  Makes a full-page request, replacing the entire browser environment with a new page from the server response.
-
-  Also see `up.Request#loadPage()`.
-
-  @function up.browser.loadPage
-  @param {string} options.url
-    The URL to load.
-  @param {string} [options.method='get']
-    The method for the request.
-
-    Methods other than GET or POST will be [wrapped](/up.protocol.config#config.methodParam) in a POST request.
-  @param {Object|Array|FormData|string} [options.params]
-  @experimental
-  */
-  function loadPage(requestsAttrs) {
-    new up.Request(requestsAttrs).loadPage()
-  }
-
-  /*-
   Submits the given form with a full page load.
   
   For mocking in specs.
@@ -169,7 +150,6 @@ up.browser = (function() {
   }
 
   return {
-    loadPage,
     submitForm,
     canPushState,
     canFormatLog,

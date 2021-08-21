@@ -1780,8 +1780,138 @@ describe('up.network', function() {
         expect({url: '/bar/1'}).toBeCached()
       })
     })
-  })
 
+    describe('up.network.loadPage', function() {
+
+      afterEach(function() {
+        // We're preventing the form to be submitted during tests,
+        // so we need to remove it manually after each example.
+        $('form.up-request-loader').remove()
+      })
+
+      describe("for GET requests", function() {
+
+        it("creates a GET form, adds all { params } as hidden fields and submits the form", function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+          up.network.loadPage({url: '/foo', method: 'GET', params: { param1: 'param1 value', param2: 'param2 value' }})
+          expect(submitForm).toHaveBeenCalled()
+
+          const $form = $('form.up-request-loader')
+
+          expect($form).toBeAttached()
+          // GET forms cannot have an URL with a query section in their [action] attribute.
+          // The query section would be overridden by the serialized input values on submission.
+          expect($form.attr('action')).toMatchURL('/foo')
+
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
+        })
+
+        it('merges params from the given URL and the { params } option', function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+          up.network.loadPage({url: '/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' }})
+          expect(submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          expect($form).toBeAttached()
+          // GET forms cannot have an URL with a query section in their [action] attribute.
+          // The query section would be overridden by the serialized input values on submission.
+          expect($form.attr('action')).toMatchURL('/foo')
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
+        })
+      })
+
+      describe("for POST requests", function() {
+
+        it("creates a POST form, adds all { params } params as hidden fields and submits the form", function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+          up.network.loadPage({url: '/foo', method: 'POST', params: { param1: 'param1 value', param2: 'param2 value' }})
+          expect(submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          expect($form).toBeAttached()
+          expect($form.attr('action')).toMatchURL('/foo')
+          expect($form.attr('method')).toEqual('POST')
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
+        })
+
+        it('merges params from the given URL and the { params } option', function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+          up.network.loadPage({url: '/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' }})
+          expect(submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          expect($form).toBeAttached()
+          expect($form.attr('action')).toMatchURL('/foo')
+          expect($form.attr('method')).toEqual('POST')
+          expect($form.find('input[name="param1"][value="param1 value"]')).toBeAttached()
+          expect($form.find('input[name="param2"][value="param2 value"]')).toBeAttached()
+        })
+
+        it('uses the given { contentType }', function() {
+          const submitForm = spyOn(up.browser, 'submitForm')
+          up.network.loadPage({url: '/foo', method: 'POST', params: { foo: 'bar' }, contentType: 'multipart/form-data'})
+          expect(submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          expect($form).toBeAttached()
+          expect($form.attr('enctype')).toEqual('multipart/form-data')
+        })
+      })
+
+      u.each(['PUT', 'PATCH', 'DELETE'], method => describe(`for ${method} requests`, () => it("uses a POST form and sends the actual method as a { _method } param", function() {
+        const submitForm = spyOn(up.browser, 'submitForm')
+        up.network.loadPage({url: '/foo', method})
+        expect(submitForm).toHaveBeenCalled()
+        const $form = $('form.up-request-loader')
+        expect($form).toBeAttached()
+        expect($form.attr('method')).toEqual('POST')
+        expect($form.find('input[name="_method"]').val()).toEqual(method)
+      })))
+
+      describe('CSRF', function() {
+
+        beforeEach(function() {
+          up.protocol.config.csrfToken = () => 'csrf-token'
+          up.protocol.config.csrfParam = () => 'csrf-param'
+          this.submitForm = spyOn(up.browser, 'submitForm')
+        })
+
+        it('submits an CSRF token as another hidden field', function() {
+          up.network.loadPage({url: '/foo', method: 'post'})
+          expect(this.submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          const $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).toBeAttached()
+          expect($tokenInput.val()).toEqual('csrf-token')
+        })
+
+        it('does not add a CSRF token if there is none', function() {
+          up.protocol.config.csrfToken = () => ''
+          up.network.loadPage({url: '/foo', method: 'post'})
+          expect(this.submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          const $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).not.toBeAttached()
+        })
+
+        it('does not add a CSRF token for GET requests', function() {
+          up.network.loadPage({url: '/foo', method: 'get'})
+          expect(this.submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          const $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).not.toBeAttached()
+        })
+
+        it('does not add a CSRF token when loading content from another domain', function() {
+          up.network.loadPage({url: 'http://other-domain.tld/foo', method: 'get'})
+          expect(this.submitForm).toHaveBeenCalled()
+          const $form = $('form.up-request-loader')
+          const $tokenInput = $form.find('input[name="csrf-param"]')
+          expect($tokenInput).not.toBeAttached()
+        })
+      })
+    })
+
+  })
 
   describe('unobtrusive behavior', function() {
 

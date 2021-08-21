@@ -700,7 +700,7 @@ describe 'up.fragment', ->
         describe 'for a cross-origin URL', ->
 
           it 'loads the content in a new page', asyncSpec (next) ->
-            loadPage = spyOn(up.browser, 'loadPage')
+            loadPage = spyOn(up.network, 'loadPage')
 
             fixture('.one')
             up.render(target: '.one', url: 'http://other-domain.com/path/to')
@@ -710,7 +710,7 @@ describe 'up.fragment', ->
               expect(jasmine.Ajax.requests.count()).toBe(0)
 
           it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", (done) ->
-            loadPage = spyOn(up.browser, 'loadPage')
+            loadPage = spyOn(up.network, 'loadPage')
 
             fixture('.one')
             promise = up.render(target: '.one', url: 'http://other-domain.com/path/to')
@@ -722,7 +722,7 @@ describe 'up.fragment', ->
       describeFallback 'canPushState', ->
 
         it 'loads the content in a new page', asyncSpec (next) ->
-          loadPage = spyOn(up.browser, 'loadPage')
+          loadPage = spyOn(up.network, 'loadPage')
 
           fixture('.one')
           up.render(target: '.one', url: '/path')
@@ -732,7 +732,7 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
         it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", (done) ->
-          loadPage = spyOn(up.browser, 'loadPage')
+          loadPage = spyOn(up.network, 'loadPage')
 
           fixture('.one')
           promise = up.render(target: '.one', url: '/path')

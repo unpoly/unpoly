@@ -586,6 +586,25 @@ up.network = (function() {
   const isIdle = u.negate(isBusy)
 
   /*-
+  Makes a full-page request, replacing the entire browser environment with a new page from the server response.
+
+  Also see `up.Request#loadPage()`.
+
+  @function up.network.loadPage
+  @param {string} options.url
+    The URL to load.
+  @param {string} [options.method='get']
+    The method for the request.
+
+    Methods other than GET or POST will be [wrapped](/up.protocol.config#config.methodParam) in a POST request.
+  @param {Object|Array|FormData|string} [options.params]
+  @experimental
+  */
+  function loadPage(requestsAttrs) {
+    new up.Request(requestsAttrs).loadPage()
+  }
+
+  /*-
   Returns whether optional requests should be avoided where possible.
 
   We assume the user wants to avoid requests if either of following applies:
@@ -840,7 +859,8 @@ up.network = (function() {
     registerAliasForRedirect,
     queue, // for testing
     shouldReduceRequests,
-    mimicLocalRequest
+    mimicLocalRequest,
+    loadPage,
   }
 })()
 

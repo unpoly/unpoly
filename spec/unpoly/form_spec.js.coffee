@@ -379,7 +379,7 @@ describe 'up.form', ->
         form = fixture('form#form-id[action="https://external-domain.com/path"][up-submit][method=post]')
         e.affix(form, 'input[name="field-name"][value="field-value"]')
 
-        loadPage = spyOn(up.browser, 'loadPage')
+        loadPage = spyOn(up.network, 'loadPage')
 
         up.submit(form)
 
