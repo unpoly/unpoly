@@ -40,7 +40,7 @@ up.RevealMotion = class RevealMotion {
 
     if (this.top || (elementRect.height > viewportRect.height)) {
       // Element is either larger than the viewport,
-      // or the user has explicitely requested for the element to align at top
+      // or the user has explicitly requested for the element to align at top
       // => Scroll the viewport so the first element row is the first viewport row
       const diff = elementRect.top - viewportRect.top
       newScrollTop += diff

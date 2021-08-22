@@ -116,7 +116,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 
 - New overlays are focused automatically and trap focus in a cycle. Closing the overlay re-focuses the link that opened it.
 - Focus is automatically managed when rendering major new content. A new [`[up-focus]` attribute](/focus-option) allows
-  you to explicitely move the user's focus as you update fragments.
+  you to explicitly move the user's focus as you update fragments.
 - Keyboard navigation is supported everywhere.
 - Focus, selection and scroll positions are preserved within an updated fragment.
 

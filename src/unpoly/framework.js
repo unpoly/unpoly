@@ -83,7 +83,7 @@ up.framework = (function() {
       return true
     }
 
-    // If we're loaded with <script up-boot="manual"> the user explicitely
+    // If we're loaded with <script up-boot="manual"> the user explicitly
     // requested to boot Unpoly manually.
     if (unpolyScript?.getAttribute('up-boot') === 'manual') {
       return true

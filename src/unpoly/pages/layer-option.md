@@ -34,7 +34,7 @@ To match within any layer that is not the root layer, pass `{ pass: 'overlay' }`
 To match within the [current layer](/up.layer.current),
 either omit the `{ layer }` option or explictely pass `{ layer: 'current' }`.
 
-You may also explicitely target the [frontmost layer](/up.layer.front) by passing `{ layer: 'front' }`.
+You may also explicitly target the [frontmost layer](/up.layer.front) by passing `{ layer: 'front' }`.
 
 Most of the time, the *current* and *frontmost* layer both refer to the last layer
 in the layer stack. There are however some cases where the current layer is a layer in the background:

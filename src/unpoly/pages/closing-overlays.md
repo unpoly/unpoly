@@ -152,7 +152,7 @@ Closing from JavaScript
 -----------------------
 
 If for some reason you cannot use a [close condition](#close-conditions), you may
-call `up.layer.accept()` to explicitely accept a layer from JavaScript:
+call `up.layer.accept()` to explicitly accept a layer from JavaScript:
 
 
 ```js

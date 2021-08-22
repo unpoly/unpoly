@@ -68,7 +68,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     // because the layer is detached. We do not want to emit it on the parent layer where users
     // might confuse it with an event for the parent layer itself. Since @layer.element
     // is now detached, the event will no longer bubble up to the document where global
-    // event listeners can receive it. So we explicitely emit the event a second time
+    // event listeners can receive it. So we explicitly emit the event a second time
     // on the document.
     return this.layer.emit(
       this.buildEvent(`up:layer:${verbPast}`), {

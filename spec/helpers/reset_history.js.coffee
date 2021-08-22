@@ -12,7 +12,7 @@ afterAll ->
 
 beforeEach ->
   # Webkit ignores replaceState() calls after 100 calls / 30 sec.
-  # So specs need to explicitely enable history handling.
+  # So specs need to explicitly enable history handling.
   up.history.config.enabled = false
 
   # Store original URL and title so specs may use it

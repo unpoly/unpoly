@@ -240,7 +240,7 @@ up.protocol = (function() {
   /*-
   This request header contains a timestamp of an existing fragment that is being [reloaded](/up.reload).
 
-  The timestamp must be explicitely set by the user as an `[up-time]` attribute on the fragment.
+  The timestamp must be explicitly set by the user as an `[up-time]` attribute on the fragment.
   It should indicate the time when the fragment's underlying data was last changed.
 
   See `[up-time]` for a detailed example.

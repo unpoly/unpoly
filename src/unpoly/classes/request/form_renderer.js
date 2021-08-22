@@ -31,7 +31,7 @@ up.Request.FormRenderer = class FormRenderer {
 
     this.form = e.affix(document.body, 'form.up-request-loader', { method, action })
 
-    // We only need an [enctype] attribute if the user has explicitely
+    // We only need an [enctype] attribute if the user has explicitly
     // requested one. If none is given, we can use the browser's default
     // [enctype]. Binary values cannot be sent by this renderer anyway, so
     // we don't need to default to multipart/form-data in this case.
