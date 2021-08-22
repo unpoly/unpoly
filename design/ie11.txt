@@ -29,11 +29,13 @@ Quick wins: Removals
 - viewport.rootSelector can just be document.scrollingElement
 - replace isNativelyFocusable() with element.tabIndex >= 0
 - up.on() options { passive, one } can just be forwarded to Element#addEventListener()
+- up.framework.mustBootManually() can rely on document.currentScript being supported
+- Drop IE11 fies from parseURL()
 
 
 More work required
 ------------------
 
 - maybe don't even have a ES5 build?
-- we might want to parse URLs faster with the URL class
+- we might want to parse URLs faster with the URL class (but check how it handles non-fully-qualified URLs)
 - maybe replace up.Params with FormData, but we would need a lot of utility methods around it
