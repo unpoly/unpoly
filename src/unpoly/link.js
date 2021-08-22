@@ -250,7 +250,7 @@ up.link = (function() {
     const options = parseRequestOptions(link)
     if (options.url) {
       if (options.cache == null) { options.cache = 'auto'; }
-      options.basic = true; //
+      options.basic = true
       const request = new up.Request(options)
       return request.willCache()
     }

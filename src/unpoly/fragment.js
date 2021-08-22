@@ -818,14 +818,16 @@ up.fragment = (function() {
   */
 
   /*-
-  Compiles a page fragment that has been inserted into the DOM
+  Manually compiles a page fragment that has been inserted into the DOM
   by external code.
 
+  All registered [compilers](/up.compiler) and [macros](/up.macro) will be called
+  with matches in the given `element`.
+
   **As long as you manipulate the DOM using Unpoly, you will never
-  need to call this method.** You only need to use `up.hello()` if the
+  need to call `up.hello()`.** You only need to use `up.hello()` if the
   DOM is manipulated without Unpoly' involvement, e.g. by setting
-  the `innerHTML` property or calling jQuery methods like
-  `html`, `insertAfter` or `appendTo`:
+  the `innerHTML` property:
 
   ```html
   element = document.createElement('div')
@@ -837,7 +839,7 @@ up.fragment = (function() {
   event.
 
   @function up.hello
-  @param {Element|jQuery} target
+  @param {Element|jQuery} element
   @param {Element|jQuery} [options.origin]
   @return {Element}
     The compiled element

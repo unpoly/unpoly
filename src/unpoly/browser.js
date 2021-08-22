@@ -125,7 +125,7 @@ up.browser = (function() {
   }
 
   /*-
-  Returns whether Unpoly supports the current browser.
+  Returns whether Unpoly can boot in the current browser.
 
   If this returns `false` Unpoly will prevent itself from booting
   and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).

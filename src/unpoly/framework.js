@@ -1,4 +1,13 @@
 /*-
+Framework initialization
+========================
+
+The `up.framework` module lets you customize Unpoly's [initialization sequence](/install#initialization).
+
+@see up.boot
+@see script[up-boot=manual]
+@see up.browser.isSupported
+
 @module up.framework
 */
 
@@ -37,18 +46,23 @@ up.framework = (function() {
   */
 
   /*-
-  Boots the Unpoly framework.
+  Manually boots the Unpoly framework.
 
-  **This is called automatically** by including the Unpoly JavaScript files.
+  It is not usually necessary to call `up.boot()` yourself. When you load [Unpoly's JavaScript file](/install),
+  Unpoly will automatically boot on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
+  There are only two cases when you would boot manually:
 
-  Unpoly will not boot if the current browser is [not supported](/up.browser.isSupported).
+  - When you load Unpoly with `<script async>`
+  - When you explicitly ask to manually boot by loading Unpoly with [`<script up-boot="manual">`](/script-up-boot-manual).
+
+  Before you manually boot, Unpoly should be configured and compilers should be registered.
+  Booting will cause Unpoly to [compile](/up.hello) the initial page.
+
+  Unpoly will refuse to boot if the current browser is [not supported](/up.browser.isSupported).
   This leaves you with a classic server-side application on legacy browsers.
 
-  TODO: Make public
-  TODO: Update docs to explain when this is needed
-
   @function up.boot
-  @internal
+  @experimental
   */
   function boot() {
     if (readyState !== 'configuring') {
@@ -96,6 +110,23 @@ up.framework = (function() {
       return true
     }
   }
+
+  /*-
+  Prevent Unpoly from booting automatically.
+
+  By default Unpoly [automatically boots](/install#initialization)
+  on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
+  To prevent this, add an `[up-boot="manual"]` attribute to the `<script>` element
+  that loads Unpoly:
+
+  ```html
+  <script src="unpoly.js" up-boot="manual"></script>
+  ```
+  You may then call `up.boot()` to manually boot Unpoly at a later time.
+
+  @selector script[up-boot=manual]
+  @experimental
+  */
 
   function onEvaled() {
     up.emit('up:framework:evaled', { log: false })
