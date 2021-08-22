@@ -1,22 +1,8 @@
 /*-
-Browser support
-===============
+Browser interface
+=================
 
-Unpoly supports all modern browsers.
-
-### Chrome, Firefox, Edge, Safari
-
-Full support.
-
-### Internet Explorer 11
-
-Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).\
-Support may be removed when Microsoft retires IE11 in [June 2022](https://blogs.windows.com/windowsexperience/2021/05/19/the-future-of-internet-explorer-on-windows-10-is-in-microsoft-edge/).
-
-### Internet Explorer 10 or lower
-
-Unpoly will not boot or [run compilers](/up.compiler),
-leaving you with a classic server-side application.
+We tunnel some browser APIs through this module for easier mocking in tests.
 
 @module up.browser
 */
@@ -124,40 +110,14 @@ up.browser = (function() {
     return true
   }
 
-  /*-
-  Returns whether Unpoly can boot in the current browser.
-
-  If this returns `false` Unpoly will prevent itself from booting
-  and ignores all registered [event handlers](/up.on) and [compilers](/up.compiler).
-  This leaves you with a classic server-side application.
-  This is usually a better fallback than loading incompatible Javascript and causing
-  many errors on load.
-
-  @function up.browser.isSupported
-  @stable
-  */
-  function isSupported() {
-    return !supportIssue()
-  }
-
-  function supportIssue() {
-    if (!canPromise()) {
-      return "Browser doesn't support promises"
-    }
-    if (document.compatMode === 'BackCompat') {
-      return 'Browser is in quirks mode (missing DOCTYPE?)'
-    }
-  }
-
   return {
     submitForm,
     canPushState,
     canFormatLog,
     canPassiveEventListener,
     canJQuery,
+    canPromise,
     assertConfirmed,
-    isSupported,
-    supportIssue,
     popCookie,
     get jQuery() { return getJQuery() },
     isIE11

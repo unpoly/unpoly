@@ -6,7 +6,7 @@ The `up.framework` module lets you customize Unpoly's [initialization sequence](
 
 @see up.boot
 @see script[up-boot=manual]
-@see up.browser.isSupported
+@see up.framework.isSupported
 
 @module up.framework
 */
@@ -58,7 +58,7 @@ up.framework = (function() {
   Before you manually boot, Unpoly should be configured and compilers should be registered.
   Booting will cause Unpoly to [compile](/up.hello) the initial page.
 
-  Unpoly will refuse to boot if the current browser is [not supported](/up.browser.isSupported).
+  Unpoly will refuse to boot if the current browser is [not supported](/up.framework.isSupported).
   This leaves you with a classic server-side application on legacy browsers.
 
   @function up.boot
@@ -75,7 +75,7 @@ up.framework = (function() {
     // and executed. We cannot delay booting until the DOM is ready, since by then
     // all user-defined event listeners and compilers will have registered.
     // Note that any non-async scripts after us will delay DOMContentLoaded.
-    let supportIssue = up.browser.supportIssue()
+    let supportIssue = up.framework.supportIssue()
     if (!supportIssue) {
       // Change the state in case any user-provided compiler calls up.boot().
       // up.boot() is a no-op unless readyState === 'configuring'.
@@ -124,6 +124,10 @@ up.framework = (function() {
   ```
   You may then call `up.boot()` to manually boot Unpoly at a later time.
 
+  ### Browser support
+
+  To use this feature in Internet Explorer 11 you need a polyfill for `document.currentScript`.
+
   @selector script[up-boot=manual]
   @experimental
   */
@@ -158,6 +162,47 @@ up.framework = (function() {
     readyState = 'configuring'
   }
 
+  /*-
+  Returns whether Unpoly can boot in the current browser.
+
+  If this returns `false` Unpoly will prevent itself from [booting](/up.boot)
+  and will not [compile](/up.compiler) the initial page.
+  This leaves you with a classic server-side application.
+
+  ### Browser support
+
+  Unpoly aims to supports all modern browsers.
+
+  #### Chrome, Firefox, Edge, Safari
+
+  Full support.
+
+  #### Internet Explorer 11
+
+  Full support with a `Promise` polyfill like [es6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB).\
+  Support may be removed when Microsoft retires IE11 in [June 2022](https://blogs.windows.com/windowsexperience/2021/05/19/the-future-of-internet-explorer-on-windows-10-is-in-microsoft-edge/).
+
+  #### Internet Explorer 10 or lower
+
+  Unpoly will not boot or [run compilers](/up.compiler),
+  leaving you with a classic server-side application.
+
+  @function up.framework.isSupported
+  @stable
+  */
+  function isSupported() {
+    return !supportIssue()
+  }
+
+  function supportIssue() {
+    if (!up.browser.canPromise()) {
+      return "Browser doesn't support promises"
+    }
+    if (document.compatMode === 'BackCompat') {
+      return 'Browser is in quirks mode (missing DOCTYPE?)'
+    }
+  }
+
   return {
     onEvaled,
     boot,
@@ -166,6 +211,8 @@ up.framework = (function() {
     reset: emitReset,
     get evaling() { return readyState === 'evaling' },
     get booted() { return readyState === 'booted' },
+    isSupported,
+    supportIssue,
   }
 })()
 
