@@ -25,7 +25,7 @@ describe 'up.syntax', ->
         spyOn(up, 'puts').and.callThrough()
         up.compiler('.foo', u.noop)
         expect(up.puts).toHaveBeenCalled()
-        expect(up.puts.calls.argsFor(0)[0]).toMatch(/will run for future fragments/i)
+        expect(up.puts.calls.argsFor(0)[1]).toMatch(/will run for future fragments/i)
 
     describe 'up.$compiler', ->
 

@@ -80,11 +80,17 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   executePlan(matchedPlan) {
+    return matchedPlan.execute(
+      this.getResponseDoc(),
+      this.onPlanApplicable.bind(this, matchedPlan)
+    )
+  }
+
+  onPlanApplicable(plan) {
     let primaryPlan = this.getPlans()[0]
-    if (matchedPlan !== primaryPlan) {
-      up.puts('Could not match primary target (%o). Updating a fallback target (%o).', primaryPlan.target, matchedPlan.target)
+    if (plan !== primaryPlan) {
+      up.puts('up.render()', 'Could not match primary target (%s). Updating a fallback target (%s).', primaryPlan.target, plan.target)
     }
-    return matchedPlan.execute(this.getResponseDoc())
   }
 
   getResponseDoc() {

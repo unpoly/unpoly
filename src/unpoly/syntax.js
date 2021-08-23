@@ -325,7 +325,7 @@ up.syntax = (function() {
 
   function insertCompiler(queue, newCompiler) {
     if (up.framework.booted) {
-      up.puts('Compiler %o was registered after booting Unpoly. Compiler will run for future fragments.', newCompiler.selector)
+      up.puts('up.compiler()', 'Compiler %s was registered after booting Unpoly. Compiler will run for future fragments.', newCompiler.selector)
     }
 
     let existingCompiler

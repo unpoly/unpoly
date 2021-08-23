@@ -32,13 +32,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return u.map(this.steps, 'selector').join(', ') || ':none'
   }
 
-  execute(responseDoc) {
+  execute(responseDoc, onApplicable) {
     this.responseDoc = responseDoc
 
     // For each step, find a step.alternative that matches in both the current page
     // and the response document.
     this.matchPostflight()
 
+    onApplicable()
     // Don't log @target since that does not include hungry elements
     up.puts('up.render()', `Updating "${this.bestPreflightSelector()}" in ${this.layer}`)
 

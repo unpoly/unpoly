@@ -30,7 +30,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     return this.target
   }
 
-  execute(responseDoc) {
+  execute(responseDoc, onApplicable) {
     if (this.target === ':none') {
       this.content = document.createElement('up-none')
     } else {
@@ -41,6 +41,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       throw this.notApplicable()
     }
 
+    onApplicable()
     up.puts('up.render()', `Opening element "${this.target}" in new overlay`)
 
     this.options.title = this.improveHistoryValue(this.options.title, responseDoc.getTitle())
