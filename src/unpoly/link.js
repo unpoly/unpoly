@@ -968,6 +968,8 @@ up.link = (function() {
     With `[up-cache=auto]` Unpoly will use the cache only if `up.network.config.autoCache`
     returns `true` for the request.
 
+    With `[up-cache=false]` Unpoly will always make a network request.
+
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param [up-clear-cache]
