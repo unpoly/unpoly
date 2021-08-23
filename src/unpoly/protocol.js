@@ -568,7 +568,7 @@ up.protocol = (function() {
   ### Rendering content
 
   The response may contain `text/html` content. If the root layer is targeted,
-  the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
+  the `X-Up-Dismiss-Layer` header is ignored and the fragment is updated with
   the response's HTML content.
 
   If you know that an overlay will be closed don't want to render HTML,
@@ -577,7 +577,7 @@ up.protocol = (function() {
   ```http
   HTTP/1.1 200 OK
   Content-Type: text/html
-  X-Up-Accept-Layer: {"user_id": 1012}
+  X-Up-Dismiss-Layer: {"user_id": 1012}
   X-Up-Target: :none
   ```
 
