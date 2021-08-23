@@ -311,7 +311,9 @@ up.link = (function() {
   @param {boolean} [options.navigate=true]
     Whether this fragment update is considered [navigation](/navigation).
 
-    Setting this to `false` will disable most defaults.
+    Setting this to `false` will disable most defaults, causing
+    Unpoly to render a fragment without side-effects like updating history
+    or scroll positions.
 
   @return {Promise<up.RenderResult>}
     A promise that will be fulfilled when the link destination
@@ -830,7 +832,9 @@ up.link = (function() {
   @param [up-navigate='true']
     Whether this fragment update is considered [navigation](/navigation).
 
-    Setting this to `false` will disable most defaults documented below.
+    Setting this to `false` will disable most defaults documented below,
+    causing Unpoly to render a fragment without side-effects like updating history
+    or scroll positions.
 
   @param [href]
     The URL to fetch from the server.
@@ -843,7 +847,7 @@ up.link = (function() {
 
     If omitted a [main target](/up-main) will be rendered.
 
-  @param [up-fallback]
+  @param [up-fallback='true']
     Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
 
     If set to a CSS selector, Unpoly will attempt to replace that selector instead.
@@ -914,7 +918,7 @@ up.link = (function() {
 
     See [handling server errors](/server-errors) for details.
 
-  @param [up-history]
+  @param [up-history='auto']
     Whether the browser URL and window title will be updated.
 
     If set to `true`, the history will always be updated, using the title and URL from
@@ -965,7 +969,7 @@ up.link = (function() {
     See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
     for a list of available timing functions.
 
-  @param [up-cache]
+  @param [up-cache='auto']
     Whether to read from and write to the [cache](/up.request#caching).
 
     With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
@@ -987,7 +991,7 @@ up.link = (function() {
 
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
-  @param [up-solo]
+  @param [up-solo='true']
     With `[up-solo=true]` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
 
     To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
@@ -1000,7 +1004,7 @@ up.link = (function() {
     To [open the fragment in a new overlay](/opening-overlays), pass `[up-layer=new]`.
     In this case attributes for `a[up-layer=new]` may also be used.
 
-  @param [up-peel]
+  @param [up-peel='true']
     Whether to close overlays obstructing the updated layer when the fragment is updated.
 
     This is only relevant when updating a layer that is not the [frontmost layer](/up.layer.front).
@@ -1015,7 +1019,7 @@ up.link = (function() {
   @param [up-hungry='true']
     Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
 
-  @param [up-scroll]
+  @param [up-scroll='auto']
     How to scroll after the new fragment was rendered.
 
     See [scroll option](/scroll-option) for a list of allowed values.
@@ -1025,7 +1029,7 @@ up.link = (function() {
 
     Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scroll-option#restoring-scroll-positions).
 
-  @param [up-focus]
+  @param [up-focus='auto']
     What to focus after the new fragment was rendered.
 
     See [focus option](/focus-option) for a list of allowed values.
@@ -1037,7 +1041,7 @@ up.link = (function() {
 
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
-  @param [up-feedback]
+  @param [up-feedback='true']
     Whether to give the link an `.up-active` class
     while loading and rendering content.
 

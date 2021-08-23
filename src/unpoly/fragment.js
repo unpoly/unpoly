@@ -510,11 +510,11 @@ up.fragment = (function() {
   @param {boolean|string} [options.clearCache]
     Whether existing [cache](/up.request#caching) entries will be [cleared](/up.cache.clear) with this request.
 
-    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
+    Defaults to the result of `up.network.config.clearCache`, which
+    defaults to clearing the entire cache after a non-GET request.
 
-    By default a non-GET request will clear the entire cache.
-
-    Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
+    To only uncache some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
+    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {boolean|string|Function(request): boolean} [options.solo]
     With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
