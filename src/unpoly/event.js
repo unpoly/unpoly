@@ -7,7 +7,7 @@ This module contains functions to [emit](/up.emit) and [observe](/up.on) DOM eve
 While the browser also has built-in functions to work with events,
 you will find Unpoly's functions to be very concise and feature-rich.
 
-*# Events emitted by Unpoly
+### Events emitted by Unpoly
 
 Most Unpoly features emit events that are prefixed with `up:`.
 

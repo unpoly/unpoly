@@ -14,7 +14,7 @@ While the protocol can help you optimize performance and handle some edge cases,
 implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
 that uses Unpoly on the frontend and doesn't even have an active server component.
 
-*# Existing implementations
+### Existing implementations
 
 You should be able to implement the protocol in a very short time.
 
