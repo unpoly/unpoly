@@ -24,7 +24,18 @@ up.URLPattern = class URLPattern {
   buildRegexp(list, capture) {
     if (!list.length) { return; }
 
-    let reCode = list.map(this.normalizeURL).map(u.escapeRegExp).join('|')
+    list = list.map((url) => {
+      // If the current browser location is multiple directories deep (e.g. /foo/bar),
+      // a leading asterisk would be normalized to /foo/*. So we prepend a slash.
+      if (url[0] === '*') {
+        url = '/' + url
+      }
+      url = this.normalizeURL(url)
+      url = u.escapeRegExp(url)
+      return url
+    })
+
+    let reCode = list.join('|')
 
     reCode = reCode.replace(/\\\*/g, '.*?')
 

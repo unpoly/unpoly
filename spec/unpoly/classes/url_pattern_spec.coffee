@@ -6,6 +6,17 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/bar')
       expect(pattern.test('/foo/bar')).toBe(true)
 
+    it 'returns true for any URL if the pattern is a single asterisk (*)', ->
+      pattern = new up.URLPattern('*')
+      expect(pattern.test('/foo')).toBe(true)
+      expect(pattern.test('/bar')).toBe(true)
+
+    it 'returns true for any URL if the pattern is a single asterisk (*) and the browser location is multiple directories deep (bugfix)', ->
+      history.replaceState?({}, 'title', '/dir1/dir2/dir3')
+      pattern = new up.URLPattern('*')
+      expect(pattern.test('/foo')).toBe(true)
+      expect(pattern.test('/bar')).toBe(true)
+
     it 'returns false if the given URL test the end of an exact pattern, but misses a prefix', ->
       pattern = new up.URLPattern('/foo/bar')
       expect(pattern.test('/bar')).toBe(false)
