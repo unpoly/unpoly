@@ -234,7 +234,7 @@ up.network = (function() {
   By default Unpoly automatically clears the entire cache whenever it processes
   a request with an non-GET HTTP method. To customize this rule, use `up.network.config.clearCache`.
 
-  The server may also clear the cache by sending an [`X-Up-Cache: clear`](/X-Up-Cache) header.
+  The server may also clear the cache by sending an [`X-Up-Clear-Cache`](/X-Up-Clear-Cache) header.
 
   @function up.cache.clear
   @param {string} [pattern]
@@ -388,7 +388,7 @@ up.network = (function() {
     Defaults to the result of `up.network.config.clearCache`, which
     defaults to clearing the entire cache after a non-GET request.
 
-    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
+    You may also pass a [URL pattern](/url-patterns) to only uncache matching responses.
 
   @param {boolean|string|Function} [options.solo]
     With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before making this new request.

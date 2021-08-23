@@ -223,17 +223,33 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may send this optional response header with the value `clear` to [clear the cache](/up.cache.clear).
+  The server may send this optional response header to control which previously cached responses should be [uncached](/up.cache.clear) after this response.
 
-  ### Example
+  The value of this header is a [URL pattern](/url-patterns) matching responses that should be uncached.
+
+  For example, to uncache all responses to URLs starting with `/notes/`:
 
   ```http
-  X-Up-Cache: clear
+  X-Up-Clear-Cache: /notes/*
   ```
 
-  @header X-Up-Cache
-  @param value
-    The string `"clear"`.
+  ### Overriding the client-side default
+
+  If the server does not send an `X-Up-Clear-Cache` header, Unpoly will [clear the entire cache](/up.network.config#config.clearCache) after a non-GET request.
+
+  You may force Unpoly to *keep* the cache after a non-GET request:
+
+  ```http
+  X-Up-Clear-Cache: false
+  ```
+
+  You may also force Unpoly to *clear* the cache after a GET request:
+
+  ```http
+  X-Up-Clear-Cache: *
+  ```
+
+  @header X-Up-Clear-Cache
   @stable
   */
 
