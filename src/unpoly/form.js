@@ -185,6 +185,11 @@ up.form = (function() {
     You may pass this additional `options` object to supplement or override
     options parsed from the form attributes.
 
+  @param {boolean} [options.navigate=true]
+    Whether this fragment update is considered [navigation](/navigation).
+
+    Setting this to `false` will disable most defaults.
+
   @return {Promise<up.RenderResult>}
     A promise that will be fulfilled when the server response was rendered.
 
@@ -762,7 +767,7 @@ up.form = (function() {
   @selector form[up-submit]
 
   @params-note
-    All attributes for `a[up-follow]` may also be used.
+    All attributes for `a[up-follow]` may be used.
 
   @stable
   */

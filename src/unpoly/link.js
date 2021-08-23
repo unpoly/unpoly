@@ -308,6 +308,11 @@ up.link = (function() {
     You may pass this additional `options` object to supplement or override
     options parsed from the link attributes.
 
+  @param {boolean} [options.navigate=true]
+    Whether this fragment update is considered [navigation](/navigation).
+
+    Setting this to `false` will disable most defaults.
+
   @return {Promise<up.RenderResult>}
     A promise that will be fulfilled when the link destination
     has been loaded and rendered.
@@ -844,6 +849,8 @@ up.link = (function() {
 
   @param [up-navigate='true']
     Whether this fragment update is considered [navigation](/navigation).
+
+    Setting this to `false` will disable most defaults.
 
   @param [up-method='get']
     The HTTP method to use for the request.
