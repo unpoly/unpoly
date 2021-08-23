@@ -333,7 +333,7 @@ up.link = (function() {
     parser.json('params')
     parser.booleanOrString('cache')
     parser.booleanOrString('clearCache')
-    parser.boolean('solo')
+    parser.booleanOrString('solo')
     parser.string('contentType', {attr: ['enctype', 'up-content-type']})
 
     return options
@@ -827,6 +827,11 @@ up.link = (function() {
 
   @selector a[up-follow]
 
+  @param [up-navigate='true']
+    Whether this fragment update is considered [navigation](/navigation).
+
+    Setting this to `false` will disable most defaults documented below.
+
   @param [href]
     The URL to fetch from the server.
 
@@ -846,11 +851,6 @@ up.link = (function() {
     If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
 
     If set to `false` Unpoly will immediately reject the render promise.
-
-  @param [up-navigate='true']
-    Whether this fragment update is considered [navigation](/navigation).
-
-    Setting this to `false` will disable most defaults.
 
   @param [up-method='get']
     The HTTP method to use for the request.
@@ -986,6 +986,11 @@ up.link = (function() {
     You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
 
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
+
+  @param [up-solo]
+    With `[up-solo=true]` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
+
+    To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.

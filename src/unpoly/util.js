@@ -1256,7 +1256,7 @@ up.util = (function() {
 
   @function up.util.pickBy
   @param {Object} object
-  @param {Function<string, string, object>} tester
+  @param {Function(string, string, object): boolean} tester
     A function that will be called with each property.
 
     The arguments are the property value, key and the entire object.

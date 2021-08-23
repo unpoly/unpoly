@@ -622,5 +622,18 @@ up.Request = class Request extends up.Record {
 
 }
 
+// A request is also a promise ("thenable") for its response.
 u.delegate(up.Request.prototype, ['then', 'catch', 'finally'], function() { return this.deferred })
 
+up.Request.tester = function(condition) {
+  if (u.isFunction(condition)) {
+    return condition
+  } else if (condition instanceof this) {
+    return (request) => condition === request
+  } else if (u.isString(condition)) {
+    let pattern = new up.URLPattern(condition)
+    return (request) => pattern.test(request.url)
+  } else { // boolean, truthy/falsy values
+    return (_request) => condition
+  }
+}

@@ -385,10 +385,16 @@ up.network = (function() {
   @param {boolean|string} [options.clearCache]
     Whether to [clear](/up.cache.clear) the [cache](/up.cache.get) after this request.
 
-    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
-
     Defaults to the result of `up.network.config.clearCache`, which
     defaults to clearing the entire cache after a non-GET request.
+
+    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
+
+  @param {boolean|string|Function} [options.solo]
+    With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before making this new request.
+
+    To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
+    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.

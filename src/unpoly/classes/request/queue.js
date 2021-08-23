@@ -109,11 +109,13 @@ up.Request.Queue = class Queue {
 
   // Aborting a request will cause its promise to reject, which will also uncache it
   abort(conditions = true) {
+    let tester = up.Request.tester(conditions)
     for (let list of [this.currentRequests, this.queuedRequests]) {
-      const matches = u.filter(list, request => this.requestMatches(request, conditions))
-      matches.forEach(function(match) {
-        match.abort()
-        u.remove(list, match)
+      const abortableRequests = u.filter(list, tester)
+      abortableRequests.forEach(function(abortableRequest) {
+        abortableRequest.abort()
+        // Avoid changing the list we're iterating over.
+        u.remove(list, abortableRequest)
       })
     }
   }
@@ -121,10 +123,6 @@ up.Request.Queue = class Queue {
   abortExcept(excusedRequest, additionalConditions = true) {
     const excusedCacheKey = excusedRequest.cacheKey()
     this.abort(queuedRequest => (queuedRequest.cacheKey() !== excusedCacheKey) && u.evalOption(additionalConditions, queuedRequest))
-  }
-
-  requestMatches(request, conditions) {
-    return (request === conditions) || u.evalOption(conditions, request)
   }
 
   checkSlow() {

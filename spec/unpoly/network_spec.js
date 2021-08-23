@@ -312,141 +312,6 @@ describe('up.network', function() {
         })
       }))
 
-      describe('aborting', function() {
-
-        it('may be aborted with up.network.abort()', asyncSpec(function(next) {
-          const request = up.request('/url')
-
-          next(() => up.network.abort(request))
-
-          next.await(() => promiseState(request))
-
-          next(function (result) {
-            expect(result.state).toEqual('rejected')
-            expect(result.value.name).toEqual('AbortError')
-          })
-        }))
-
-        it('may be aborted with up.Request#abort()', asyncSpec(function(next) {
-          const request = up.request('/url')
-
-          next(() => request.abort())
-
-          next.await(() => promiseState(request))
-
-          next(function (result) {
-            expect(result.state).toEqual('rejected')
-            expect(result.value.name).toEqual('AbortError')
-          })
-        }))
-
-//        it "may be aborted through an AbortController's { signal }", asyncSpec (next) ->
-//          abortController = new up.AbortController()
-//          request = up.request('/url', signal: abortController.signal)
-//
-//          next ->
-//            abortController.abort()
-//
-//          next.await ->
-//            promiseState(request)
-//
-//          next (result) ->
-//            expect(result.state).toEqual('rejected')
-//            expect(result.value.name).toEqual('AbortError')
-
-        it('emits an up:request:aborted event', asyncSpec(function(next) {
-          const listener = jasmine.createSpy('event listener')
-          up.on('up:request:aborted', listener)
-
-          const request = up.request('/url')
-
-          next(() => request.abort())
-
-          next(function() {
-            expect(listener).toHaveBeenCalled()
-            expect(listener.calls.argsFor(0)[0]).toBeEvent('up:request:aborted')
-          })
-        }))
-
-        it('does not send multiple up:request:aborted events if the request is aborted multiple times', asyncSpec(function(next) {
-          const listener = jasmine.createSpy('event listener')
-          up.on('up:request:aborted', listener)
-
-          const request = up.request('/url')
-
-          next(function() {
-            up.network.abort(request)
-            up.network.abort(request)
-          })
-
-          next(() => expect(listener.calls.count()).toBe(1))
-        }))
-
-        it('does not reset the XHR object by calling xhr.abort() on a loaded XHR object (bugfix)', asyncSpec(function(next) {
-          const request = up.request('/url')
-          let response = null
-          request.then(r => response = r)
-
-          next(() => {
-            expect(request.xhr).toBeGiven()
-
-            // Just to make sure that the fake XHR object we have in specs has different
-            // side effects than the real one: Check that xhr.abort() is never called.
-            spyOn(request.xhr, 'abort').and.callThrough()
-
-            this.respondWith('response text')
-          })
-
-          next(() => {
-            expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
-            expect(response.contentType).toEqual('text/html')
-
-            request.abort()
-          })
-
-          next(() => {
-            // Calling xhr.abort() on a loaded XHR will reset the readyState to 0
-            expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
-
-            // Calling xhr.abort() on a loaded XHR will lose all response headers
-            expect(response.contentType).toEqual('text/html')
-
-            expect(request.xhr.abort).not.toHaveBeenCalled()
-          })
-        }))
-
-        it('does not abort a request that was already fulfilled with a response', asyncSpec(function(next) {
-          const listener = jasmine.createSpy('event listener')
-          up.on('up:request:aborted', listener)
-
-          const request = up.request('/url')
-
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(1)
-            this.respondWith('response from server')
-          })
-
-          next.await(() => promiseState(request))
-
-          next(function (result) {
-            expect(result.state).toBe('fulfilled')
-            expect(result.value).toEqual(jasmine.any(up.Response))
-            expect(listener).not.toHaveBeenCalled()
-          })
-
-          next(() => request.abort())
-
-          next.await(() => promiseState(request))
-
-          next(function (result) {
-            expect(result.state).toBe('fulfilled')
-            expect(result.value).toEqual(jasmine.any(up.Response))
-            expect(listener).not.toHaveBeenCalled()
-          })
-        }))
-
-      })
-
       describe('when the server responds with an X-Up-Location header', function() {
 
         it('sets the { url } property on the response object', function(done) {
@@ -1055,6 +920,36 @@ describe('up.network', function() {
           expect({url: '/bar/1'}).toBeCached()
 
           up.request({url: '/other', clearCache: '/foo/*'})
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo'
+            })
+          })
+          // responseHeaders: { 'X-Up-Clear-Cache': '/foo/*' }
+
+          next(function() {
+            expect({url: '/foo/1'}).not.toBeCached()
+            expect({url: '/foo/2'}).not.toBeCached()
+            expect({url: '/bar/1'}).toBeCached()
+          })
+        }))
+
+        it('accepts an function as { clearCache } option', asyncSpec(function(next) {
+          up.request({url: '/foo/1', cache: true})
+          up.request({url: '/foo/2', cache: true})
+          up.request({url: '/bar/1', cache: true})
+
+          expect({url: '/foo/1'}).toBeCached()
+          expect({url: '/foo/2'}).toBeCached()
+          expect({url: '/bar/1'}).toBeCached()
+
+          let clearCache = (request) => request.url.indexOf('/foo/') === 0
+          up.request({ url: '/other', clearCache })
 
           next(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(4)
@@ -1724,6 +1619,183 @@ describe('up.network', function() {
         })
       })
     }
+
+    describe('up.network.abort()', function() {
+
+      it('aborts the given up.Request', asyncSpec(function(next) {
+        const request1 = up.request('/url')
+        const request2 = up.request('/url')
+
+        next(() => up.network.abort(request1))
+
+        next.await(() => promiseState(request1))
+
+        next((result) => {
+          expect(result.state).toEqual('rejected')
+          expect(result.value?.name).toEqual('AbortError')
+        })
+
+        next.await(() => promiseState(request2))
+
+        next((result) => {
+          expect(result.state).toEqual('pending')
+        })
+
+      }))
+
+      it('aborts all requests when called without an argument', asyncSpec(function(next) {
+        const request = up.request('/url')
+
+        next(() => up.network.abort())
+
+        next.await(() => promiseState(request))
+
+        next(function(result) {
+          expect(result.state).toEqual('rejected')
+          expect(result.value?.name).toEqual('AbortError')
+        })
+      }))
+
+      it('aborts all requests for which the given function returns true', asyncSpec(function(next) {
+        const request1 = up.request('/foo')
+        const request2 = up.request('/bar')
+
+        next(() => {
+          let matcher = (request) => request.url === '/foo'
+          up.network.abort(matcher)
+        })
+
+        next.await(() => promiseState(request1))
+
+        next((result) => {
+          expect(result.state).toEqual('rejected')
+          expect(result.value?.name).toEqual('AbortError')
+        })
+
+        next.await(() => promiseState(request2))
+
+        next((result) => {
+          expect(result.state).toEqual('pending')
+        })
+
+      }))
+
+      it('aborts all requests matching the given URL pattern', asyncSpec(function(next) {
+        const request1 = up.request('/foo/123')
+        const request2 = up.request('/bar/456')
+
+        next(() => {
+          up.network.abort('/foo/*')
+        })
+
+        next.await(() => promiseState(request1))
+
+        next((result) => {
+          expect(result.state).toEqual('rejected')
+          expect(result.value?.name).toEqual('AbortError')
+        })
+
+        next.await(() => promiseState(request2))
+
+        next((result) => {
+          expect(result.state).toEqual('pending')
+        })
+
+      }))
+
+      it('emits an up:request:aborted event', asyncSpec(function(next) {
+        const listener = jasmine.createSpy('event listener')
+        up.on('up:request:aborted', listener)
+
+        const request = up.request('/url')
+
+        next(() => request.abort())
+
+        next(function() {
+          expect(listener).toHaveBeenCalled()
+          expect(listener.calls.argsFor(0)[0]).toBeEvent('up:request:aborted')
+        })
+      }))
+
+      it('does not send multiple up:request:aborted events if the request is aborted multiple times', asyncSpec(function(next) {
+        const listener = jasmine.createSpy('event listener')
+        up.on('up:request:aborted', listener)
+
+        const request = up.request('/url')
+
+        next(function() {
+          up.network.abort(request)
+          up.network.abort(request)
+        })
+
+        next(() => expect(listener.calls.count()).toBe(1))
+      }))
+
+      it('does not reset the XHR object by calling xhr.abort() on a loaded XHR object (bugfix)', asyncSpec(function(next) {
+        const request = up.request('/url')
+        let response = null
+        request.then(r => response = r)
+
+        next(() => {
+          expect(request.xhr).toBeGiven()
+
+          // Just to make sure that the fake XHR object we have in specs has different
+          // side effects than the real one: Check that xhr.abort() is never called.
+          spyOn(request.xhr, 'abort').and.callThrough()
+
+          this.respondWith('response text')
+        })
+
+        next(() => {
+          expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
+          expect(response.contentType).toEqual('text/html')
+
+          request.abort()
+        })
+
+        next(() => {
+          // Calling xhr.abort() on a loaded XHR will reset the readyState to 0
+          expect(response.xhr.readyState).toBe(XMLHttpRequest.DONE)
+
+          // Calling xhr.abort() on a loaded XHR will lose all response headers
+          expect(response.contentType).toEqual('text/html')
+
+          expect(request.xhr.abort).not.toHaveBeenCalled()
+        })
+      }))
+
+      it('does not abort a request that was already fulfilled with a response', asyncSpec(function(next) {
+        const listener = jasmine.createSpy('event listener')
+        up.on('up:request:aborted', listener)
+
+        const request = up.request('/url')
+
+        next(() => {
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          this.respondWith('response from server')
+        })
+
+        next.await(() => promiseState(request))
+
+        next(function (result) {
+          expect(result.state).toBe('fulfilled')
+          expect(result.value).toEqual(jasmine.any(up.Response))
+          expect(listener).not.toHaveBeenCalled()
+        })
+
+        next(() => request.abort())
+
+        next.await(() => promiseState(request))
+
+        next(function (result) {
+          expect(result.state).toBe('fulfilled')
+          expect(result.value).toEqual(jasmine.any(up.Response))
+          expect(listener).not.toHaveBeenCalled()
+        })
+      }))
+
+    })
+
 
     describe('up.cache.get()', function() {
 

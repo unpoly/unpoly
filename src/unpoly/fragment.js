@@ -516,6 +516,12 @@ up.fragment = (function() {
 
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
+  @param {boolean|string|Function(request): boolean} [options.solo]
+    With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
+
+    To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
+    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
+
   @param {Element|jQuery} [options.origin]
     The element that triggered the change.
 

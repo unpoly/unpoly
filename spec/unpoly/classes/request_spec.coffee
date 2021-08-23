@@ -94,3 +94,16 @@ describe 'up.Request', ->
     it "returns a blank up.Params object for HTTP methods that don't allow a payload", ->
       request = new up.Request(url: 'http://host.com/foo', params: { key: 'value' }, method: 'get')
       expect(request.params).toBeBlank()
+
+  describe '#abort', ->
+
+    it 'aborts this request', asyncSpec (next) ->
+      request = up.request('/url')
+
+      next => request.abort()
+
+      next.await => promiseState(request)
+
+      next (result) =>
+        expect(result.state).toEqual('rejected')
+        expect(result.value.name).toEqual('AbortError')

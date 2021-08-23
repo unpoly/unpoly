@@ -32,16 +32,14 @@ up.Request.Cache = class Cache extends up.Cache {
 //
 //    u.findResult candidates, (candidate) => super(candidate)
 
-  clear(pattern) {
-    if (pattern && (pattern !== '*') && (pattern !== true)) {
-      pattern = new up.URLPattern(pattern)
-      return this.each((key, request) => {
-        if (pattern.test(request.url)) {
-          this.store.remove(key)
-        }
-      })
-    } else {
-      super.clear()
-    }
+  clear(condition = true) {
+    let tester = up.Request.tester(condition)
+    this.each((key, request) => {
+      if (tester(request)) {
+        // It is generally not a great idea to manipulate the list we're iterating over,
+        // but the implementation of up.Cache#each copies keys before iterating.
+        this.store.remove(key)
+      }
+    })
   }
 }
