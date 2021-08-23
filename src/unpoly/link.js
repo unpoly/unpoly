@@ -313,7 +313,7 @@ up.link = (function() {
 
     Setting this to `false` will disable most defaults, causing
     Unpoly to render a fragment without side-effects like updating history
-    or scroll positions.
+    or scrolling.
 
   @return {Promise<up.RenderResult>}
     A promise that will be fulfilled when the link destination
@@ -834,7 +834,7 @@ up.link = (function() {
 
     Setting this to `false` will disable most defaults documented below,
     causing Unpoly to render a fragment without side-effects like updating history
-    or scroll positions.
+    or scrolling.
 
   @param [href]
     The URL to fetch from the server.
