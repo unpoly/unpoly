@@ -5,6 +5,16 @@ Changes to this project will be documented in this file.
 
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
+
+1.0.2
+-----
+
+This maintenance release addresses two issues that were introduced in version 1.0.0:
+
+- Unpoly can now be loaded with `<script defer>`. This can be used to load your scripts without blocking the DOM parser.
+- Unpoly can now be loaded with `<script type="module">`. This can be used deliver a modern JS build to modern browsers only.
+
+
 1.0.1
 -----
 
