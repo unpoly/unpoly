@@ -3,12 +3,12 @@
   <head>
     <title>Integration test - Unpoly</title>
     <%= stylesheet_link_tag 'integration_test', media: 'all' %>
-    <%= javascript_include_tag 'integration_test' %>
+    <%= javascript_include_tag 'integration_test', script_options %>
     <% if params[:bootstrap] == '1' %>
       <%= stylesheet_link_tag 'bootstrap_manifest', media: 'all' %>
-      <%= javascript_include_tag 'bootstrap_manifest' %>
+      <%= javascript_include_tag 'bootstrap_manifest', script_options %>
       <%= stylesheet_link_tag 'unpoly-bootstrap3', media: 'all' %>
-      <%= javascript_include_tag 'unpoly-bootstrap3' %>
+      <%= javascript_include_tag 'unpoly-bootstrap3', script_options %>
     <% end %>
     <%= csrf_meta_tags %>
     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1'>

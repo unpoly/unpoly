@@ -1,0 +1,18 @@
+<% script_options(defer: true) %>
+<%= include_user_script(script_options.merge(delay: 2)) %>
+
+<h1>Booting (defer scripts)</h1>
+
+<h2>Setup</h2>
+
+<ul>
+  <li>Both Unpoly and user script have loaded with <code>[defer]</code>.</li>
+  <li>The user script took intentionally long to render.</li>
+</ul>
+
+<h2>Expectations</h2>
+
+<ul>
+  <li>Unpoly has booted automatically after the user script was called.</li>
+  <li>The background should be red (from a user script compiler).</li>
+</ul>

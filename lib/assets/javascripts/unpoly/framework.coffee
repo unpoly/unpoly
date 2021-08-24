@@ -49,7 +49,7 @@ up.framework = do ->
 
       # From here on, all event handlers (both Unpoly's and user code) should be able
       # to work with the DOM, so wait for the DOM to be ready.
-      up.event.onReady ->
+      document.addEventListener 'DOMContentLoaded', ->
         # By now all non-sync <script> tags have been loaded and called, including
         # those after us. All user-provided compilers, event handlers, etc. have
         # been registered.
