@@ -79,6 +79,17 @@ up.browser = (function() {
     return !!window.jQuery
   }
 
+  const canEval = u.memoize(function() {
+    try {
+      // Don't use eval() which would prevent minifiers from compressing local variables.
+      return new Function('return true')()
+    } catch {
+      // With a strict CSP this will be an error like:
+      // Uncaught EvalError: call to Function() blocked by CSP
+      return false
+    }
+  })
+
   // IE11: Use the browser.cookies API instead.
   function popCookie(name) {
     let value = document.cookie.match(new RegExp(name+"=(\\w+)"))?.[1]
@@ -117,6 +128,7 @@ up.browser = (function() {
     canPassiveEventListener,
     canJQuery,
     canPromise,
+    canEval,
     assertConfirmed,
     popCookie,
     get jQuery() { return getJQuery() },

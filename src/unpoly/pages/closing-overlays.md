@@ -41,7 +41,7 @@ In HTML you may use `[up-on-accepted]` and `[up-on-dismissed]` attributes for th
 <a href="/select-user"
   up-layer="new"
   up-on-accepted="console.log('User was created')"
-  up-on-dismissed="console.log('User createion was canceled')">>
+  up-on-dismissed="console.log('User creation was canceled')">>
   ...
 </a>
 ```

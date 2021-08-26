@@ -3230,6 +3230,86 @@ describe 'up.fragment', ->
               expect(text0).toEqual('<img src="foo.png">')
               expect(text1).toEqual('<img src="bar.png">')
 
+      describe 'CSP nonces', ->
+
+        beforeEach ->
+          up.protocol.config.nonceableAttributes.push('callback')
+
+        it "rewrites nonceable callbacks to use the current page's nonce", asyncSpec (next) ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', url: '/path')
+
+          next ->
+            jasmine.respondWith(
+              responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
+              responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            )
+
+          next ->
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+
+        it "rewrites a callback's nonce it the nonce matches one of multiple script-src nonces in its own response", asyncSpec (next) ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', url: '/path')
+
+          next ->
+            jasmine.respondWith(
+              responseText: '<div class="target" callback="nonce-secret3 alert()">new text</div>'
+              responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2' 'self' 'nonce-secret3'"}
+            )
+
+          next ->
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('callback', "nonce-secret1 alert()")
+
+        it "does not rewrite a callback's nonce it the nonce does not match a script-src nonce in its own response", asyncSpec (next) ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', url: '/path')
+
+          next ->
+            jasmine.respondWith(
+              responseText: '<div class="target" callback="nonce-wrong alert()">new text</div>'
+              responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            )
+
+          next ->
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('callback', "nonce-wrong alert()")
+
+        it "does not rewrite a callback's nonce it the nonce only matches a style-src nonce in its own response", asyncSpec (next) ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue('secret1')
+          fixture('.target')
+          up.render('.target', url: '/path')
+
+          next ->
+            jasmine.respondWith(
+              responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
+              responseHeaders: { 'Content-Security-Policy': "style-src: 'nonce-secret2'"}
+            )
+
+          next ->
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
+
+        it "does not rewrite a callback's nonce it the curent page's nonce is unknown", asyncSpec (next) ->
+          spyOn(up.protocol, 'cspNonce').and.returnValue(null)
+          fixture('.target')
+          up.render('.target', url: '/path')
+
+          next ->
+            jasmine.respondWith(
+              responseText: '<div class="target" callback="nonce-secret2 alert()">new text</div>'
+              responseHeaders: { 'Content-Security-Policy': "script-src: 'nonce-secret2'"}
+            )
+
+          next ->
+            expect('.target').toHaveText('new text')
+            expect('.target').toHaveAttribute('callback', "nonce-secret2 alert()")
+
       describe 'destruction of old element', ->
 
         it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->

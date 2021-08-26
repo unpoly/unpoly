@@ -95,7 +95,7 @@ up.Change.FromContent = class FromContent extends up.Change {
 
   getResponseDoc() {
     if (!this.preview && !this.responseDoc) {
-      const docOptions = u.pick(this.options, ['target', 'content', 'fragment', 'document', 'html'])
+      const docOptions = u.pick(this.options, ['target', 'content', 'fragment', 'document', 'html', 'nonces'])
       up.migrate.handleResponseDocOptions?.(docOptions)
 
       // If neither { document } nor { fragment } source is given, we assume { content }.

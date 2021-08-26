@@ -29,6 +29,10 @@ up.ResponseDoc = class ResponseDoc {
       this.parseDocument(options) ||
       this.parseFragment(options) ||
       this.parseContent(options)
+
+    if (options.nonces) {
+      this.nonces = options.nonces
+    }
   }
 
   parseDocument(options) {
@@ -108,7 +112,45 @@ up.ResponseDoc = class ResponseDoc {
     // Restore <noscript> tags so they become available to compilers.
     this.noscriptWrapper.unwrap(element)
 
+    // Rewrite per-request CSP nonces to match that of the current page.
+    this.rewriteNonces(element)
+
     // Restore <script> so they will run.
     this.scriptWrapper.unwrap(element)
   }
+
+  rewriteNonces(element) {
+    if (!this.nonces?.length) {
+      return
+    }
+
+    u.each(up.protocol.config.nonceableAttributes, (attribute) => {
+      let matches = e.subtree(element, `[${attribute}^="nonce-"]`)
+      u.each(matches, (match) => {
+        let attributeValue = match.getAttribute(attribute)
+        let { nonce, script } = u.parseSafeFunction(attributeValue)
+        let warn = (message) => up.log.warn('up.render()', `Cannot rewrite nonce in [${attribute}="${attributeValue}"]: ${message}`)
+
+        if (this.nonces.indexOf(nonce) === -1) {
+          // Don't rewrite a nonce that the browser would have rejected.
+          return warn("Incorrect callback nonce")
+        }
+
+        let pageNonce = this.getPageNonce()
+        if (!pageNonce) {
+          return warn("Current page's nonce is unknown")
+        }
+
+        // Replace the nonce with that of the current page.
+        // This will allow the handler to run via up.util.safeFunction().
+        match.setAttribute(attribute, `nonce-${pageNonce} ${script}`)
+      })
+    })
+  }
+
+  getPageNonce() {
+    // Only look up the nonce once per ResponseDoc (it requires a DOM query).
+    return this.pageNonce ||= up.protocol.cspNonce()
+  }
+
 }

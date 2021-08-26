@@ -171,5 +171,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     // If the server has provided an update to our context via the X-Up-Context
     // response header, merge it into our existing { context } option.
     renderOptions.context = u.merge(renderOptions.context, this.response.context)
+
+    renderOptions.nonces = this.response.nonces
   }
 }

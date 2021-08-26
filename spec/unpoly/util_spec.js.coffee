@@ -1742,3 +1742,37 @@ describe 'up.util', ->
         up.util.asyncify(callback).catch (error) ->
           expect(error).toEqual('an error')
           done()
+
+    describe 'up.util.safeFunction()', ->
+
+      it 'builds a function with the same API as `new Function()`', ->
+        fn = up.util.safeFunction('a', 'b', 'return a + b')
+        expect(fn(2, 3)).toBe(5)
+
+      it 'evals a function with an embedded nonce', ->
+        fn = up.util.safeFunction('a', 'b', 'nonce-secret return a + b')
+        expect(fn(2, 3)).toBe(5)
+
+      describe 'when the Content Security Policy disallows eval()', ->
+
+        beforeEach ->
+          spyOn(up.browser, 'canEval').and.returnValue(false)
+
+        it 'evals a function with an embedded nonce', ->
+          fn = up.util.safeFunction('a', 'b', 'nonce-secret return a + b')
+          expect(fn(2, 3)).toBe(5)
+
+        it "evals the function using a <script nonce> element", ->
+          spyOn(up.element, 'affix').and.callThrough()
+          fn = up.util.safeFunction('a', 'b', 'nonce-secret return a + b')
+          fn()
+          expect(up.element.affix).toHaveBeenCalledWith(document.body, 'script', jasmine.objectContaining(nonce: 'secret'))
+
+        it 'throws exceptions with an embedded nonce', ->
+          fn = up.util.safeFunction('a', 'b', 'nonce-secret throw "error message"')
+          expect(fn).toThrow('error message')
+
+        it 'returns a function that throws an explanation when no nonce is given', ->
+          fn = up.util.safeFunction('a', 'b', 'return a + b')
+          expect(fn).toThrowError(/Your Content Security Policy disallows .* https:\/\/unpoly.com\/csp/i)
+          

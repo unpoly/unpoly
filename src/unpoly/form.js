@@ -407,7 +407,7 @@ up.form = (function() {
   function observeCallbackFromElement(element) {
     let rawCallback = element.getAttribute('up-observe')
     if (rawCallback) {
-      return new Function('value', 'name', rawCallback)
+      return u.safeFunction('value', 'name', rawCallback)
     }
   }
 

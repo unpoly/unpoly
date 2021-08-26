@@ -1010,7 +1010,7 @@ up.element = (function() {
     let code = link.getAttribute(attr)
     if (code) {
       // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
-      const callback = new Function('event', ...exposedKeys, code)
+      const callback = u.safeFunction('event', ...exposedKeys, code)
       // Emulate the behavior of the `onclick` attribute,
       // where `this` refers to the clicked element.
       return function(event) {
