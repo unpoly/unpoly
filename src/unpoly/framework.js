@@ -201,6 +201,9 @@ up.framework = (function() {
     if (document.compatMode === 'BackCompat') {
       return 'Browser is in quirks mode (missing DOCTYPE?)'
     }
+    if (up.browser.isEdge18()) {
+      return 'Edge 18 or lower is unsupported'
+    }
   }
 
   return {

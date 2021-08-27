@@ -25,6 +25,12 @@ up.browser = (function() {
     return 'ActiveXObject' in window // this is undefined, but the key is set
   }
 
+  function isEdge18() {
+    // Edge 18: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582
+    // Edge 92: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.78
+    return u.contains(navigator.userAgent, ' Edge/')
+  }
+
   /*-
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
@@ -132,6 +138,7 @@ up.browser = (function() {
     assertConfirmed,
     popCookie,
     get jQuery() { return getJQuery() },
-    isIE11
+    isIE11,
+    isEdge18,
   }
 })()
