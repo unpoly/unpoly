@@ -30,9 +30,7 @@ up.ResponseDoc = class ResponseDoc {
       this.parseFragment(options) ||
       this.parseContent(options)
 
-    if (options.nonces) {
-      this.nonces = options.nonces
-    }
+    this.nonces = options.nonces
   }
 
   parseDocument(options) {
