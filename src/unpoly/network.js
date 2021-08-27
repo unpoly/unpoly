@@ -425,6 +425,11 @@ up.network = (function() {
   @param {string} [options.layer='current']
     The [layer](/up.layer) this request is associated with.
 
+    If this request is intended to update an existing fragment, this is that fragment's layer.
+
+    If this request is intended to [open an overlay](/opening-overlays),
+    the associated layer is the future overlay's parent layer.
+
   @param {string} [options.failLayer='current']
     The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/server-errors).
 
@@ -695,11 +700,23 @@ up.network = (function() {
   The event is emitted on the layer that caused the request.
 
   @event up:request:aborted
+
   @param {up.Request} event.request
     The aborted request.
+
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) that caused the request.
+    The [layer](/up.layer) this request is associated with.
+
+    If this request was intended to update an existing fragment, this is that fragment's layer.
+
+    If this request was intended to [open an overlay](/opening-overlays),
+    the associated layer is the future overlay's parent layer.
+
+  @param {Element} [event.origin]
+    The link or form element that caused the request.
+
   @param event.preventDefault()
+
   @experimental
   */
 
@@ -781,7 +798,14 @@ up.network = (function() {
   @param {up.Request} event.request
     The request to be sent.
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) that caused the request.
+    The [layer](/up.layer) this request is associated with.
+
+    If this request is intended to update an existing fragment, this is that fragment's layer.
+
+    If this request is intended to [open an overlay](/opening-overlays),
+    the associated layer is the future overlay's parent layer.
+  @param {Element} [event.origin]
+    The link or form element that caused the request.
   @param event.preventDefault()
     Event listeners may call this method to prevent the request from being sent.
   @stable
@@ -809,12 +833,24 @@ up.network = (function() {
   The event is emitted on the layer that caused the request.
 
   @event up:request:loaded
+
   @param {up.Request} event.request
     The request.
+
   @param {up.Response} event.response
     The response that was received from the server.
+
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) that caused the request.
+    The [layer](/up.layer) this request is associated with.
+
+    If this request is intended to update an existing fragment, this is that fragment's layer.
+
+    If this request is intended to [open an overlay](/opening-overlays),
+    the associated layer is the future overlay's parent layer.
+
+  @param {Element} [event.origin]
+    The link or form element that caused the request.
+
   @stable
   */
 
@@ -829,10 +865,21 @@ up.network = (function() {
   The event is emitted on the layer that caused the request.
 
   @event up:request:fatal
+
   @param {up.Request} event.request
-    The request.
+    The failed request.
+
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) that caused the request.
+    The [layer](/up.layer) this request is associated with.
+
+    If this request was intended to update an existing fragment, this is that fragment's layer.
+
+    If this request was intended to [open an overlay](/opening-overlays),
+    the associated layer is the future overlay's parent layer.
+
+  @param {Element} [event.origin]
+    The link or form element that caused the request.
+
   @stable
   */
 

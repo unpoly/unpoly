@@ -1234,18 +1234,20 @@ describe('up.network', function() {
       describe('up:request:load event', function() {
 
         it('emits an up:request:load event before the request touches the network', asyncSpec(function(next) {
+          let origin = fixture('.origin')
           const listener = jasmine.createSpy('listener')
           up.on('up:request:load', listener)
-          up.request('/bar')
+          up.request('/bar', { origin })
 
           next(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
 
             const partialRequest = jasmine.objectContaining({
               method: 'GET',
-              url: jasmine.stringMatching('/bar')
+              url: jasmine.stringMatching('/bar'),
+              origin: origin
             })
-            const partialEvent = jasmine.objectContaining({request: partialRequest})
+            const partialEvent = jasmine.objectContaining({ request: partialRequest })
 
             expect(listener).toHaveBeenCalledWith(partialEvent, jasmine.anything(), jasmine.anything())
           })

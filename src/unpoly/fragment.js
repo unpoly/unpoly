@@ -708,12 +708,19 @@ up.fragment = (function() {
   to mutate options to the `up.render()` call that will process the server response.
 
   @event up:fragment:loaded
+
   @param event.preventDefault()
     Event listeners may call this method to prevent the fragment change.
+
   @param {up.Request} event.request
     The original request to the server.
+
   @param {up.Response} event.response
     The server response.
+
+  @param {Element} [event.origin]
+    The link or form element that caused the fragment update.
+
   @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
   @stable

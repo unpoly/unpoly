@@ -70,6 +70,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
     )
 
+    console.log("--- building request with origin: %o", requestAttrs.origin)
     this.request = up.request(requestAttrs)
 
     // The request is also a promise for its response.
@@ -105,18 +106,22 @@ up.Change.FromURL = class FromURL extends up.Change {
     return (this.successOptions.fail === false) || this.response.ok
   }
 
-  buildEvent(type, props) {
-    const defaultProps = { request: this.request, response: this.response, renderOptions: this.options }
-    return up.event.build(type, u.merge(defaultProps, props))
-  }
+  // buildEvent(type, props) {
+  //   const defaultProps = { request: this.request, response: this.response, renderOptions: this.options }
+  //   return up.event.build(type, u.merge(defaultProps, props))
+  // }
 
   updateContentFromResponse(log, renderOptions) {
     // Allow listeners to inspect the response and either prevent the fragment change
     // or manipulate change options. An example for when this is useful is a maintenance
     // page with its own layout, that cannot be loaded as a fragment and must be loaded
     // with a full page load.
-    const event = this.buildEvent('up:fragment:loaded', { renderOptions })
-    this.request.assertEmitted(event, { log, callback: this.options.onLoaded })
+    this.request.assertEmitted('up:fragment:loaded', {
+      callback: this.options.onLoaded,
+      response: this.response,
+      log,
+      renderOptions,
+    })
 
     // The response might carry some updates for our change options,
     // like a server-set location, or server-sent events.

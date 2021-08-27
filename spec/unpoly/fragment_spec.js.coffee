@@ -433,21 +433,25 @@ describe 'up.fragment', ->
         describe 'interrupting the change', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
+            origin = fixture('.origin')
             fixture('.target')
             event = undefined
             up.on 'up:fragment:loaded', (e) -> event = e
 
-            up.render(target: '.target', url: '/url', location: '/location-from-option', peel: false)
+            up.render(target: '.target', url: '/url', location: '/location-from-option', peel: false, origin: origin)
 
             next =>
-              @respondWith('text from server')
+              @respondWith('<div class="target">text from server</div>')
 
             next ->
               expect(event).toBeGiven()
+              expect(event.request).toEqual(jasmine.any(up.Request))
               expect(event.request.url).toMatchURL('/url')
               expect(event.response.text).toContain('text from server')
               expect(event.renderOptions.peel).toBe(false)
               expect(event.renderOptions.location).toMatchURL('/location-from-option')
+              expect(event.origin).toBe(origin)
+              expect(event.layer).toBe(up.layer.root)
 
           it 'allows listeners to prevent an up:fragment:loaded event to prevent changes to the DOM and browser history', (done) ->
             up.history.config.enabled = true
