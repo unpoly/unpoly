@@ -1,6 +1,5 @@
 - Update Card and Slide for Testing config (maxRequests => concurrency, preloadConcurrency, disable preloading entirely)
 - Update "Long Story" Slides with new API
-- We haven't documented [up-content]
 - Doc page about "Fragments from local HTML"
   - link from [up-document], [up-fragment], [up-content], { document, fragment, content }.
 - Expose more { origin } event props
