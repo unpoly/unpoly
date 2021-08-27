@@ -410,7 +410,7 @@ up.fragment = (function() {
     for the fragment.
 
   @param {string|Element} [options.fragment]
-    A string of HTML comprising *only* the new fragment.
+    A string of HTML comprising *only* the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
 
     The `{ target }` selector will be derived from the root element in the given
     HTML:

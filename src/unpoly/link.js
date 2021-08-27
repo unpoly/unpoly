@@ -880,8 +880,15 @@ up.link = (function() {
     E.g. the `X-Up-Target` header includes the targeted CSS selector.
     See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
+  @param [up-content]
+    A string for the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
+
+    If your HTML string also contains the fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML),
+    consider the `[up-fragment]` attribute instead.
+
   @param [up-fragment]
-    A string of HTML comprising *only* the new fragment. No server request will be sent.
+    A string of HTML comprising *only* the new fragment's
+    [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
 
     The `[up-target]` selector will be derived from the root element in the given
     HTML:
