@@ -1051,9 +1051,13 @@ up.link = (function() {
 
     The callback argument is a preventable `up:fragment:loaded` event.
 
+    With a strict Content Security Policy [additional rules apply](/csp).
+
   @param [up-on-finished]
     A JavaScript snippet that is called when all animations have concluded and
     elements were removed from the DOM tree.
+
+    With a strict Content Security Policy [additional rules apply](/csp).
 
   @stable
   */

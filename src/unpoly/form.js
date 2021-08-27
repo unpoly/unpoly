@@ -1108,6 +1108,8 @@ up.form = (function() {
   This is useful for observing text fields while the user is typing.
   If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
 
+  With a strict Content Security Policy [additional rules apply](/csp).
+
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 
   ### Example
@@ -1169,6 +1171,8 @@ up.form = (function() {
 
   This is useful for observing text fields while the user is typing.
   If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
+
+  With a strict Content Security Policy [additional rules apply](/csp).
 
   The programmatic variant of this is the [`up.observe()`](/up.observe) function.
 

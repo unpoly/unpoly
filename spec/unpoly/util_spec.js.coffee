@@ -1775,4 +1775,3 @@ describe 'up.util', ->
         it 'returns a function that throws an explanation when no nonce is given', ->
           fn = up.util.safeFunction('a', 'b', 'return a + b')
           expect(fn).toThrowError(/Your Content Security Policy disallows .* https:\/\/unpoly.com\/csp/i)
-          

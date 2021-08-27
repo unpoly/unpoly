@@ -721,6 +721,8 @@ up.layer = (function() {
     | `value`    | The overlay's [acceptance value](/closing-overlays#overlay-result-values) |
     | `event`    | An `up:layer:accepted` event                  |
 
+    With a strict Content Security Policy [additional rules apply](/csp).
+
   @param [up-on-dismissed]
     A JavaScript snippet that is called when the overlay was [dismissed](/closing-overlays).
 
@@ -732,6 +734,8 @@ up.layer = (function() {
     | `layer`    | An `up.Layer` object for the dismissed overlay |
     | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
     | `event`    | An `up:layer:dismissed` event                   |
+
+    With a strict Content Security Policy [additional rules apply](/csp).
 
   @param [up-accept-event]
     One or more space-separated event types that will cause this overlay to automatically be

@@ -2039,6 +2039,7 @@ up.util = (function() {
   up.util.safeFunction('nonce:secret 1 + 2')
   ```
 
+  @function up.util.safeFunction
   @internal
   */
   function safeFunction(...args) {
@@ -2052,7 +2053,7 @@ up.util = (function() {
       return buildNoncedFunction(nonce, script, namedArgs)
     } else {
       return function() {
-        throw new Error(`Your Content Security Policy disallows inline JavaScript (${raw}). See https://unpoly.com/csp for workarounds.`)
+        throw new Error(`Your Content Security Policy disallows inline JavaScript (${raw}). See https://unpoly.com/csp for solutions.`)
       }
     }
   }
