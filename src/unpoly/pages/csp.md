@@ -41,7 +41,7 @@ Unpoly lets your work around this by prefixing your callback with a [CSP nonce](
 
 The `nonce-` prefix is static, followed by your random nonce in Base64, followed by a space and your original JavaScript code.
 
-The embedded nonce must match a `script-src` nonce for your current response:
+The embedded nonce must match a `script-src` nonce of the response that you're currently rendering:
 
 ```http
 Content-Type: text/html
@@ -51,7 +51,7 @@ Content-Security-Policy: script-src 'self' 'nonce-kO52Iphm8B'
 <a href="/path" up-follow up-on-loaded="nonce-kO52Iphm8B alert()">Click me</a>
 ```
 
-For this to work you must also include the `<meta name="csp-nonce">` tag in the `<head>` of your initial page:
+For this to work you must also include the `<meta name="csp-nonce">` tag in the `<head>` of the initial page that [booted](/up.boot) Unpoly:
 
 ```html
 <head>
@@ -60,8 +60,10 @@ For this to work you must also include the `<meta name="csp-nonce">` tag in the 
 </head>
 ```
 
+To provide the nonce through another method, configure `up.protocol.config.cspNonce`.
+
 When responding to a fragment update, you may use a CSP nonce unique to that latest response.
-You do *not* need to reuse the nonce of the initial page. Neither to you need to update the `<meta>` tag with the latest nonce.
+You do *not* need to reuse the nonce of the initial page that booted Unpoly. Neither to you need to update the `<meta>` tag with the latest nonce.
 
 
 ### Solution 3: Relax your CSP

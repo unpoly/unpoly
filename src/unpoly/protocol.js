@@ -721,6 +721,22 @@ up.protocol = (function() {
     <meta name='csrf-token' content='secret12345'>
     ```
 
+  @param {string|Function(): string} [config.cspNonce]
+    A [CSP nonce](https://content-security-policy.com/nonce/)
+    for the initial page that [booted](/up.boot) Unpoly.
+
+    The nonce let Unpoly run JavaScript in HTML attributes like
+    [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/a-up-layer-new#up-on-accepted).
+    See [Working with a strict Content Security Policy](/csp).
+
+    The nonce can either be configured as a string or as function that returns the nonce.
+
+    Defaults to the `content` attribute of a `<meta>` tag named `csp-nonce`:
+
+    ```
+    <meta name='csrf-token' content='secret98765'>
+    ```
+
   @param {string} [config.methodParam='_method']
     The name of request parameter containing the original request method when Unpoly needs to wrap
     the method.
