@@ -396,6 +396,15 @@ up.form = (function() {
   const observe = function (elements, ...args) {
     elements = e.list(elements)
     const fields = u.flatMap(elements, findFields)
+    const unnamedFields = u.reject(fields, 'name')
+    if (unnamedFields.length) {
+      // (1) We do not need to exclude the unnamed fields for up.FieldObserver, since that
+      //     parses values with up.Params.fromFields(), and that ignores unnamed fields.
+      // (2) Only warn, don't crash. There are some legitimate cases for having unnamed
+      //     a mix of named and unnamed fields in a form, and we don't want to prevent
+      //     <form up-observe> in that case.
+      up.warn('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
+    }
     const callback = u.extractCallback(args) || observeCallbackFromElement(elements[0]) || up.fail('up.observe: No change callback given')
     const options = u.extractOptions(args)
     options.delay = options.delay ?? e.numberAttr(elements[0], 'up-delay') ?? config.observeDelay
