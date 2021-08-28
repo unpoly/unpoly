@@ -30,7 +30,7 @@ The legacy code below waits for the page to load, then selects all links with a
 `.lightbox` class and calls `lightboxify()` for each of these links:
 
 ```js
-window.addEventListener('DOMContentLoaded', function(event) {
+document.addEventListener('DOMContentLoaded', function(event) {
   document.querySelectorAll('a.lightbox').forEach(function(element) {
     lightboxify(element)
   })
