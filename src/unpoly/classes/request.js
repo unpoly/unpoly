@@ -323,8 +323,6 @@ up.Request = class Request extends up.Record {
       this.layer = undefined
       this.failLayer = undefined
 
-      console.log("@@@ evicting origin %o", this.origin)
-
       // We want to provide the triggering element as { origin } to the function
       // providing the CSRF function. We now evict this property, since
       // response.request.origin will prevent its (now maybe detached) DOM tree

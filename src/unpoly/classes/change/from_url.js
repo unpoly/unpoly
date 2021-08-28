@@ -70,7 +70,6 @@ up.Change.FromURL = class FromURL extends up.Change {
       u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
     )
 
-    console.log("--- building request with origin: %o", requestAttrs.origin)
     this.request = up.request(requestAttrs)
 
     // The request is also a promise for its response.
