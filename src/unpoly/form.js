@@ -780,6 +780,7 @@ up.form = (function() {
 
   @stable
   */
+
   up.on('submit', fullSubmitSelector, function(event, form) {
     // Users may configure up.form.config.submitSelectors.push('form')
     // and then opt out individual forms with [up-submit=false].

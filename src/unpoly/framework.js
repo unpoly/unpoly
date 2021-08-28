@@ -214,6 +214,7 @@ up.framework = (function() {
     reset: emitReset,
     get evaling() { return readyState === 'evaling' },
     get booted() { return readyState === 'booted' },
+    get beforeBoot() { return readyState !== 'booting' && readyState !== 'booted' },
     isSupported,
     supportIssue,
   }

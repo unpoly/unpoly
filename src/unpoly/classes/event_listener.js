@@ -13,7 +13,8 @@ up.EventListener = class EventListener extends up.Record {
       'guard',
       'baseLayer',
       'passive',
-      'once'
+      'once',
+      'beforeBoot',
     ]
   }
 
@@ -21,6 +22,14 @@ up.EventListener = class EventListener extends up.Record {
     super(attributes)
     this.key = this.constructor.buildKey(attributes)
     this.isDefault = up.framework.evaling
+
+    // We don't usually run up.on() listeners before Unpoly has booted.
+    // This is done so incompatible code is not called on browsers that don't support Unpoly.
+    // Listeners that do need to run before Unpoly boots can pass { beforeBoot: true } to override.
+    // We also default to { beforeBoot: true } for framework events that are emitted
+    // before booting.
+    this.beforeBoot ??= (this.eventType.indexOf('up:framework:') === 0)
+
     // Need to store the bound nativeCallback function because addEventListener()
     // and removeEventListener() need to see the exact same reference.
     this.nativeCallback = this.nativeCallback.bind(this)
@@ -53,6 +62,10 @@ up.EventListener = class EventListener extends up.Record {
   }
 
   nativeCallback(event) {
+    if (up.framework.beforeBoot && !this.beforeBoot) {
+      return
+    }
+
     // Once we drop IE11 support we can forward the { once } option
     // to Element#addEventListener().
     if (this.once) {

@@ -239,6 +239,40 @@ describe 'up.event', ->
         unregister()
         expect(register).not.toThrowError()
 
+      describe 'when Unpoly cannot boot', ->
+
+        it 'does not call the listener before Unpoly has booted', ->
+          isBeforeBoot = true
+          spyOnProperty(up.framework, 'beforeBoot', 'get').and.callFake -> isBeforeBoot
+
+          element = fixture('.element')
+          listener = jasmine.createSpy('listener')
+          up.on(element, 'my:event', listener)
+
+          up.emit(element, 'my:event')
+          expect(listener).not.toHaveBeenCalled()
+
+          isBeforeBoot = false
+
+          up.emit(element, 'my:event')
+          expect(listener).toHaveBeenCalled()
+
+        it 'does call the listener before Unpoly has booted if it was registered with { beforeBoot: true }', ->
+          isBeforeBoot = true
+          spyOnProperty(up.framework, 'beforeBoot', 'get').and.callFake -> isBeforeBoot
+
+          element = fixture('.element')
+          listener = jasmine.createSpy('listener')
+          up.on(element, 'my:event', { beforeBoot: true }, listener)
+
+          up.emit(element, 'my:event')
+          expect(listener.calls.count()).toBe(1)
+
+          isBeforeBoot = false
+
+          up.emit(element, 'my:event')
+          expect(listener.calls.count()).toBe(2)
+
       describe 'when a listener throws an error', ->
         allowGlobalErrors()
 

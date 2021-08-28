@@ -12,7 +12,8 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
       'guard',
       'baseLayer',
       'passive',
-      'once'
+      'once',
+      'beforeBoot',
     ]
   }
 

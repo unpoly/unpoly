@@ -854,7 +854,7 @@ up.viewport = (function() {
   }
 
   let userScrolled = false
-  up.on('scroll', { once: true }, () => userScrolled = true)
+  up.on('scroll', { once: true, beforeBoot: true }, () => userScrolled = true)
 
   up.on('up:framework:boot', function() {
     // When the initial URL contains an #anchor link, the browser will automatically
