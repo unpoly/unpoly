@@ -8,7 +8,10 @@ const cwd = execSync('pwd').toString().trim()
 
 app.use(express.static(cwd))
 
-app.listen(3000, function(){
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || 'localhost';
+
+app.listen(PORT, HOST, function(){
   console.log("Unpoly specs serving on http://localhost:3000.")
   console.log("Press CTRL+C to quit.")
   opn('http://localhost:3000')
