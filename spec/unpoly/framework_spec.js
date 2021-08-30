@@ -37,16 +37,20 @@ describe('up.framework', function() {
         }
       })
 
-      it('returns false for Edge 18', function() {
-        spyOnProperty(navigator, 'userAgent', 'get').and.returnValue('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582')
-        expect(up.framework.isSupported()).toBe(false)
-      })
+      // Cannot mock navigator.userAgent on IE11
+      if (!up.browser.isIE11()) {
 
-      it('returns true for Edge 79+', function() {
-        spyOnProperty(navigator, 'userAgent', 'get').and.returnValue('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.78')
-        expect(up.framework.isSupported()).toBe(true)
-      })
+        it('returns false for Edge 18', function () {
+          spyOnProperty(navigator, 'userAgent', 'get').and.returnValue('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19582')
+          expect(up.framework.isSupported()).toBe(false)
+        })
 
+        it('returns true for Edge 79+', function () {
+          spyOnProperty(navigator, 'userAgent', 'get').and.returnValue('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.78')
+          expect(up.framework.isSupported()).toBe(true)
+        })
+
+      }
     })
 
   })
