@@ -167,22 +167,8 @@ up.Response = class Response extends up.Record {
     return this.getHeader('Content-Type')
   }
 
-  get nonces() {
-    let nonces = []
-    let cspHeader = this.getHeader('Content-Security-Policy')
-    if (cspHeader) {
-      let parts = cspHeader.split(/\s*;\s*/)
-      for (let part of parts) {
-        if (part.indexOf('script-src') === 0) {
-          let noncePattern = /'nonce-([^']+)'/g
-          let match
-          while (match = noncePattern.exec(part)) {
-            nonces.push(match[1])
-          }
-        }
-      }
-    }
-    return nonces
+  get cspNonces() {
+    return up.protocol.cspNoncesFromHeader(this.getHeader('Content-Security-Policy'))
   }
 
   /*-

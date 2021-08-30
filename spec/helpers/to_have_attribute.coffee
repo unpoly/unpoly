@@ -10,5 +10,10 @@ beforeEach ->
         if u.isMissing(expectedAttrValue)
           return { pass: element.hasAttribute(expectedAttrName) }
         else
-          return { pass: element.getAttribute(expectedAttrName) == expectedAttrValue }
-
+          actualAttrValue = element.getAttribute(expectedAttrName)
+          pass = (actualAttrValue == expectedAttrValue)
+          if pass
+            message = "Expected element to not have attribute [#{expectedAttrName}] with value #{JSON.stringify expectedAttrValue}"
+          else
+            message = "Expected element to have attribute [#{expectedAttrName}] with value #{JSON.stringify expectedAttrValue}, but the value was #{JSON.stringify actualAttrValue}"
+          return { pass, message }

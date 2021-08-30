@@ -42,3 +42,22 @@ describe 'up.protocol', ->
     it 'turns a camelized identifier into an X-Up-Foo-Bar style header name', ->
       header = up.protocol.headerize('fooBar')
       expect(header).toEqual('X-Up-Foo-Bar')
+
+  describe 'up.protocol.cspNoncesFromHeader', ->
+
+    it 'returns the CSP nonces for script-src', ->
+      nonces = up.protocol.cspNoncesFromHeader("script-src: 'nonce-secret2' 'self' 'nonce-secret3'")
+      expect(nonces).toEqual ['secret2', 'secret3']
+
+    it 'returns the CSP nonces for script-src-elem', ->
+      nonces = up.protocol.cspNoncesFromHeader("script-src-elem: 'nonce-secret2' 'self' 'nonce-secret3'")
+      expect(nonces).toEqual ['secret2', 'secret3']
+
+    it 'does not return the CSP nonces for style-src', ->
+      nonces = up.protocol.cspNoncesFromHeader("style-src 'nonce-secret'")
+      expect(nonces).toEqual([])
+
+    it 'returns an empty array if the header is missing', ->
+      nonces = up.protocol.cspNoncesFromHeader(null)
+      expect(nonces).toEqual([])
+

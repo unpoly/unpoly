@@ -22,7 +22,8 @@ module.exports = {
       "argsIgnorePattern": "^_",
       "varsIgnorePattern": "^_"
     }],
-    "@typescript-eslint/no-empty-function": "off"
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-this-alias": "off"
   },
   "globals": {
     "up": "writable",

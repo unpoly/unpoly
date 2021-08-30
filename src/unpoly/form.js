@@ -416,7 +416,7 @@ up.form = (function() {
   function observeCallbackFromElement(element) {
     let rawCallback = element.getAttribute('up-observe')
     if (rawCallback) {
-      return u.safeFunction('value', 'name', rawCallback)
+      return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name')
     }
   }
 

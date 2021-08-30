@@ -722,7 +722,7 @@ up.protocol = (function() {
     ```
 
   @param {string|Function(): string} [config.cspNonce]
-    A [CSP nonce](https://content-security-policy.com/nonce/)
+    A [CSP script nonce](https://content-security-policy.com/nonce/)
     for the initial page that [booted](/up.boot) Unpoly.
 
     The nonce let Unpoly run JavaScript in HTML attributes like
@@ -780,6 +780,23 @@ up.protocol = (function() {
     return u.evalOption(config.cspNonce)
   }
 
+  function cspNoncesFromHeader(cspHeader) {
+    let nonces = []
+    if (cspHeader) {
+      let parts = cspHeader.split(/\s*;\s*/)
+      for (let part of parts) {
+        if (part.indexOf('script-src') === 0) {
+          let noncePattern = /'nonce-([^']+)'/g
+          let match
+          while (match = noncePattern.exec(part)) {
+            nonces.push(match[1])
+          }
+        }
+      }
+    }
+    return nonces
+  }
+
   function wrapMethod(method, params) {
     params.add(config.methodParam, method)
     return 'POST'
@@ -809,6 +826,7 @@ up.protocol = (function() {
     cspNonce,
     initialRequestMethod,
     headerize,
-    wrapMethod
+    wrapMethod,
+    cspNoncesFromHeader,
   }
 })()

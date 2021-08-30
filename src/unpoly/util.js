@@ -1995,74 +1995,6 @@ up.util = (function() {
     }
   }
 
-  function buildNoncedFunction(nonce, script, namedArgs) {
-    let wrappedScript = `
-      up.noncedEval.value = (function() {
-        try {
-          ${namedArgs.map((namedArg, index) => `var ${namedArg} = up.noncedEval.args[${index}]`).join("\n")}
-          ${script}
-        } catch (error) {
-          up.noncedEval.error = error
-        }  
-      })()
-    `
-
-    return function(...args) {
-      let script
-      try {
-        up.noncedEval = { args }
-        script = up.element.affix(document.body, 'script', { nonce, text: wrappedScript })
-        if (up.noncedEval.error) {
-          throw up.noncedEval.error
-        } else {
-          return up.noncedEval.value
-        }
-      } finally {
-        up.noncedEval = undefined
-        if (script) {
-          up.element.remove(script)
-        }
-      }
-    }
-  }
-
-  /*-
-  Replacement for `new Function()` that can take a nonce to work with a strict Content Security Policy.
-
-  It also prints an error when a strict CSP is active, but user supplies no nonce.
-
-  ### Examples
-
-  ```js
-  up.util.safeFunction('1 + 2')
-  up.util.safeFunction('a', 'b', 'return 1 + 2')
-  up.util.safeFunction('nonce:secret 1 + 2')
-  ```
-
-  @function up.util.safeFunction
-  @internal
-  */
-  function safeFunction(...args) {
-    let raw = args.pop()
-    let namedArgs = args
-    let { nonce, script } = parseSafeFunction(raw)
-
-    if (up.browser.canEval()) {
-      return new Function(...namedArgs, script)
-    } else if (nonce) {
-      return buildNoncedFunction(nonce, script, namedArgs)
-    } else {
-      return function() {
-        throw new Error(`Your Content Security Policy disallows inline JavaScript (${raw}). See https://unpoly.com/csp for solutions.`)
-      }
-    }
-  }
-
-  function parseSafeFunction(raw) {
-    let match = raw.match(/^(nonce-([^\s]+)\s)?(.*)$/)
-    return { nonce: match[2], script: match[3] }
-  }
-
   return {
     parseURL,
     normalizeURL,
@@ -2176,7 +2108,5 @@ up.util = (function() {
     timestamp: secondsSinceEpoch,
     allSettled,
     negate,
-    safeFunction,
-    parseSafeFunction
   }
 })();

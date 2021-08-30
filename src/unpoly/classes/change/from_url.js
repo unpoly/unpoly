@@ -176,6 +176,6 @@ up.Change.FromURL = class FromURL extends up.Change {
     // response header, merge it into our existing { context } option.
     renderOptions.context = u.merge(renderOptions.context, this.response.context)
 
-    renderOptions.nonces = this.response.nonces
+    renderOptions.cspNonces = this.response.cspNonces
   }
 }
