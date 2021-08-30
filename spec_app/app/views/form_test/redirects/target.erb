@@ -1,4 +1,6 @@
 <div class="example">
   <p>Redirect target reached</p>
   <p>URL should be <code><%= target_form_test_redirect_path %></code></p>
+  <p><code>X-Up-Target</code> request header is <code><%= request.headers['X-Up-Target'] %></code></p>
+  <p><code>X-Up-Version</code> request header is <code><%= request.headers['X-Up-Version'] %></code></p>
 </div>
