@@ -1,4 +1,4 @@
-Working with a strict Content Security Policy
+Working with strict Content Security Policies
 =============================================
 
 When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/a-up-layer-new#up-on-accepted).
@@ -33,7 +33,7 @@ up.on('up:link:follow', '.alert-on-loaded', (event) => {
 
 ### Solution 2: Prefix a CSP nonce
 
-Unpoly lets your work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
+Unpoly lets you work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 
 ```html
 <a href="/path" up-follow up-on-loaded="nonce-kO52Iphm8B alert()">Click me</a>

@@ -8,6 +8,58 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.3.0
+-----
+
+### More control over loading Unpoly
+
+- Unpoly can now be loaded with `<script defer>`. This can be used to load your scripts without blocking the DOM parser.
+- Unpoly can now be loaded with `<script type="module">`. This can be used deliver a modern JS build to modern browsers only.
+- Unpoly can now be [booted manually](/up.boot) at a time of your choice. By default Unpoly boots automatically once the initial DOM is parsed.
+- Event listeners registered with `up.on()` will no longer be called before Unpoly was [booted](/up.boot). Like with [compilers](/up.compiler), this lets you register behavior that is only active on [supported browsers](/up.framework.isSupported).
+- Unpoly no longer boots on Edge 18 or lower. Edge 18 was the last version of Edge to use Microsoft's custom rendering engine. Later versions use Chromium.
+
+
+### Compatibility with strict Content Security Policies (CSP)
+
+When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/a-up-follow#up-on-loaded) or [`[up-on-accepted]`](/a-up-layer-new#up-on-accepted).
+
+Unpoly 2.3 lets your work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
+
+```html
+<a href="/path" up-follow up-on-loaded="nonce-kO52Iphm8B alert()">Click me</a>
+```
+
+Also see our new [guide to working with strict Content Security Policies](/csp).
+
+### New options for existing features
+
+- `a[up-follow]` links may now pass the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) using an `[up-content]` attribute. To pass the outer HTML, use the `[up-fragment]` attribute.
+- New option `{ solo }` for `up.render()` and `up.request()` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
+- New attribute `[up-solo]` for `a[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
+- The `{ clearCache }` option for `up.render()` and `up.request()` now accepts a boolean value, a [URL pattern](/url-patterns) or a function.
+
+
+### New properties for request-related events
+
+Request-related events now expose additional context about the event. This affects the events `up:fragment:loaded`, `up:request:load`, `up:request:loaded`, `up:request:aborted`, `up:request:fatal`.
+
+The link or form element that caused the request can now be access through `event.origin`.
+
+The layer associated with the request can now be accessed through `event.layer`. If the request is intended to update an existing fragment, this is that fragment's layer. If the request is intended to [open an overlay](/opening-overlays), the associated layer is the future overlay's parent layer.
+
+
+### Various changes
+
+- Fix a bug with [`a[up-back]`](/a-up-back) where Unpoly would follow the link's default `[href]` instead of visiting the previous URL.
+- Fix a bug where the [URL pattern](/url-patterns) `*` would not match most URLs when the current location is multiple directories deep.
+- When a target cannot be found and a fallback target is used, Unpoly now [logs](/up.log) a message.
+- When a [compiler](/up.compiler) is registered after [booting](/up.boot), Unpoly now explains in the log that the compiler will only run for fragments inserted in the future.
+- `up.observe()` and `input[up-observe]` now [log](/up.log) a warning when trying to observe a field without a `[name]` attribute.
+- `up.browser.loadPage()` has been renamed to `up.network.loadPage()`.
+- `up.browser.isSupported()` has been renamed to `up.framework.isSupported()`.
+
+
 1.0.2
 -----
 
