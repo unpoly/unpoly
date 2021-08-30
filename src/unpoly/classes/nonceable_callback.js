@@ -93,7 +93,6 @@ up.NonceableCallback = class NonceableCallback {
 
     u.each(up.protocol.config.nonceableAttributes, (attribute) => {
       let matches = e.subtree(element, `[${attribute}^="nonce-"]`)
-      console.log("Matches for %o is %o", attribute, up.util.toArray(matches))
       u.each(matches, (match) => {
         let attributeValue = match.getAttribute(attribute)
         let callback = this.fromString(attributeValue)
