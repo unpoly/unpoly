@@ -5,7 +5,7 @@
 
 (function() {
   window.up = {
-    version: "1.0.1"
+    version: "1.0.3"
   };
 
 }).call(this);
@@ -6834,7 +6834,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
           log: 'Framework booted'
         });
         isBooting = false;
-        return up.event.onReady(function() {
+        return document.addEventListener('DOMContentLoaded', function() {
           up.emit('up:app:boot', {
             log: 'Booting user application'
           });
