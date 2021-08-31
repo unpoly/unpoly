@@ -60,7 +60,7 @@ The layer associated with the request can now be accessed through `event.layer`.
 - `up.browser.isSupported()` has been renamed to `up.framework.isSupported()`.
 
 
-1.0.2
+1.0.3
 -----
 
 This maintenance release addresses two issues that were introduced in version 1.0.0:
