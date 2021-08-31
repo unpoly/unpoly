@@ -6,7 +6,7 @@ Changes to this project will be documented in this file.
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-1.0.2
+1.0.3
 -----
 
 This maintenance release addresses two issues that were introduced in version 1.0.0:
