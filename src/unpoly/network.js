@@ -468,28 +468,34 @@ up.network = (function() {
 
     useCachedRequest(request) || queueRequest(request)
 
-    let solo = request.solo
-    if (solo) {
-      // The { solo } option may also contain a function.
-      // This way users can excempt some requests from being solo-aborted
-      // by configuring up.fragment.config.navigateOptions.
-      queue.abortExcept(request, solo)
-    }
+    handleSolo(request)
 
     return request
   }
 
   function mimicLocalRequest(options) {
-    let solo = options.solo
-    if (solo) {
-      abortRequests(solo)
-    }
+    handleSolo(options)
 
     // We cannot consult config.clearCache since there is no up.Request
     // for a local update.
     let clearCache = options.clearCache
     if (clearCache) {
       cache.clear(clearCache)
+    }
+  }
+
+  function handleSolo(requestOrOptions) {
+    let solo = requestOrOptions.solo
+    if (solo && isBusy()) {
+      up.puts('up.request()', 'Change with { solo } option will abort other requests')
+      // The { solo } option may also contain a function.
+      // This way users can excempt some requests from being solo-aborted
+      // by configuring up.fragment.config.navigateOptions.
+      if (requestOrOptions instanceof up.Request) {
+        queue.abortExcept(requestOrOptions, solo)
+      } else {
+        abortRequests(solo)
+      }
     }
   }
 
