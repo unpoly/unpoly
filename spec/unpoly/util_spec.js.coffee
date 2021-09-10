@@ -1027,8 +1027,16 @@ describe 'up.util', ->
       it 'strips a query string with { search: false } option', ->
         expect(up.util.normalizeURL('/foo/bar?key=value', search: false)).toBe('/foo/bar')
 
-      it 'does not strip a trailing slash by default', ->
-        expect(up.util.normalizeURL('/foo/')).toEqual("/foo/")
+      describe 'trailing slashes', ->
+
+        it 'does not strip a trailing slash by default', ->
+          expect(up.util.normalizeURL('/foo/')).toEqual("/foo/")
+
+        it 'strips a trailing slash with { stripTrailingSlash: true }', ->
+          expect(up.util.normalizeURL('/foo/', stripTrailingSlash: true)).toEqual("/foo")
+
+        it 'does not strip a trailing slash when passed the "/" URL', ->
+          expect(up.util.normalizeURL('/', stripTrailingSlash: true)).toEqual("/")
 
       it 'normalizes redundant segments', ->
         expect(up.util.normalizeURL('/foo/../foo')).toBe("/foo")

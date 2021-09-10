@@ -113,7 +113,7 @@ up.util = (function() {
     let {
       pathname
     } = parts
-    if (options.stripTrailingSlash) {
+    if (options.stripTrailingSlash && pathname !== '/') {
       pathname = pathname.replace(/\/$/, '')
     }
     normalized += pathname

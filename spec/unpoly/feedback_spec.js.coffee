@@ -162,6 +162,21 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
+      it 'marks a link as .up-current if the current URL is "/" (bugfix)', ->
+        up.history.replace('/')
+        nav = fixture('div[up-nav]')
+        link = e.affix(nav, 'a[href="/"]')
+        up.hello(link)
+        expect(link).toHaveClass('up-current')
+
+      it 'marks a link as .up-current if it links to the current URL if the current URL also has a #hash (bugfix)', ->
+        up.history.replace('/foo#hash')
+        nav = fixture('div[up-nav]')
+        link = e.affix(nav, 'a[href="/foo"]')
+        up.hello(link)
+        debugger
+        expect(link).toHaveClass('up-current')
+
       describe 'updating .up-current marks when the URL changes', ->
 
         it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
