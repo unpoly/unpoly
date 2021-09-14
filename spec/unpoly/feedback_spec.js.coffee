@@ -174,7 +174,6 @@ describe 'up.feedback', ->
         nav = fixture('div[up-nav]')
         link = e.affix(nav, 'a[href="/foo"]')
         up.hello(link)
-        debugger
         expect(link).toHaveClass('up-current')
 
       describe 'updating .up-current marks when the URL changes', ->
