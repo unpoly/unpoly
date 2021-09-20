@@ -94,7 +94,7 @@ up.feedback = (function() {
 
   function normalizeURL(url) {
     if (url) {
-      return u.normalizeURL(url, { stripTrailingSlash: true, hash: false })
+      return u.normalizeURL(url, { trailingSlash: false, hash: false })
     }
   }
 

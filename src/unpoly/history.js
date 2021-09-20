@@ -105,7 +105,7 @@ up.history = (function() {
   // Some web frameworks care about a trailing slash, some consider it optional.
   // Only for the equality test ("is this the current URL?") we consider it optional.
   // Note that we inherit { hash: true } from DEFAULT_NORMALIZE_OPTIONS.
-  const ADDITIONAL_NORMALIZE_OPTIONS_FOR_COMPARISON = { stripTrailingSlash: true  }
+  const ADDITIONAL_NORMALIZE_OPTIONS_FOR_COMPARISON = { trailingSlash: false  }
 
   /*-
   Returns whether the given URL matches the [current browser location](/up.history.location).
@@ -144,8 +144,9 @@ up.history = (function() {
   @internal
   */
   function replace(url, options = {}) {
+    url = normalizeURL(url)
     if (manipulate('replaceState', url) && (options.event !== false)) {
-      emit('up:location:changed', {url, reason: 'replace', log: `Replaced state for ${u.urlWithoutHost(url)}`})
+      emit('up:location:changed', {url, reason: 'replace', log: `Replaced state for ${url}`})
     }
   }
 
@@ -171,7 +172,7 @@ up.history = (function() {
   function push(url) {
     url = normalizeURL(url)
     if (!isLocation(url) && manipulate('pushState', url)) {
-      up.emit('up:location:changed', {url, reason: 'push', log: `Advanced to location ${u.urlWithoutHost(url)}`})
+      up.emit('up:location:changed', {url, reason: 'push', log: `Advanced to location ${url}`})
     }
   }
 

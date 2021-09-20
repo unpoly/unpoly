@@ -67,8 +67,6 @@ up.util = (function() {
 
   const NORMALIZE_URL_DEFAULTS = {
     host: 'cross-domain',
-    stripTrailingSlash: false,
-    search: true,
     hash: false
   }
 
@@ -84,8 +82,8 @@ up.util = (function() {
     Whether to include an `#hash` anchor in the normalized URL
   @param {boolean} [options.search=true]
     Whether to include a `?query` string in the normalized URL
-  @param {boolean} [options.stripTrailingSlash=false]
-    Whether to strip a trailing slash from the pathname
+  @param {boolean} [options.trailingSlash=true]
+    Whether to include a trailing slash from the pathname
   @return {string}
     The normalized URL.
   @internal
@@ -110,27 +108,21 @@ up.util = (function() {
       }
     }
 
-    let {
-      pathname
-    } = parts
-    if (options.stripTrailingSlash && pathname !== '/') {
+    let { pathname } = parts
+    if (options.trailingSlash === false && pathname !== '/') {
       pathname = pathname.replace(/\/$/, '')
     }
     normalized += pathname
 
-    if (options.search) {
+    if (options.search !== false) {
       normalized += parts.search
     }
 
-    if (options.hash) {
+    if (options.hash !== false) {
       normalized += parts.hash
     }
 
     return normalized
-  }
-
-  function urlWithoutHost(url) {
-    return normalizeURL(url, {host: false})
   }
 
   function matchURLs(leftURL, rightURL) {
@@ -1998,7 +1990,6 @@ up.util = (function() {
   return {
     parseURL,
     normalizeURL,
-    urlWithoutHost,
     matchURLs,
     normalizeMethod,
     methodAllowsPayload,

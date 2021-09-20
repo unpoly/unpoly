@@ -594,7 +594,7 @@ up.viewport = (function() {
     const [viewports, options] = parseOptions(args)
     const url = options.layer.location
     const scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
-    up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', u.urlWithoutHost(url), scrollTopsForURL)
+    up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL)
     return setScrollTops(viewports, scrollTopsForURL)
   }
 
