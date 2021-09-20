@@ -11,9 +11,14 @@ describe 'up.feedback', ->
   describe 'unobtrusive behavior', ->
 
     describe '[up-nav]', ->
+      
+      replaceURL = (url) ->
+        # Don't use up.history.replace() since that fires up:location:changed
+        # which up.feedback listens to.
+        history.replaceState({}, 'title', url)
 
       it 'marks a child link as .up-current if it links to the current URL', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/foo"]')
         $otherLink = $nav.affix('a[href="/bar"]')
@@ -22,7 +27,7 @@ describe 'up.feedback', ->
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'marks the element as .up-current if it is also a link to the current URL', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $currentLink = $fixture('a[href="/foo"][up-nav]')
         $otherLink = $fixture('a[href="/bar"][up-nav]')
         up.hello($currentLink)
@@ -31,7 +36,7 @@ describe 'up.feedback', ->
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'does not mark a link as .up-current if the link is outside an [up-nav]', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLinkInNav = $nav.affix('a[href="/foo"]')
         $currentLinkOutsideNav = $fixture('a[href="/foo"]')
@@ -40,7 +45,7 @@ describe 'up.feedback', ->
         expect($currentLinkOutsideNav).not.toHaveClass('up-current')
 
       it 'marks any link as .up-current if its up-href attribute matches the current URL', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('span[up-href="/foo"]')
         $otherLink = $nav.affix('span[up-href="/bar"]')
@@ -49,21 +54,21 @@ describe 'up.feedback', ->
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'matches the current and destination URLs if they only differ by a trailing slash', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('span[up-href="/foo/"]')
         up.hello($nav)
         expect($currentLink).toHaveClass('up-current')
 
       it 'does not match the current and destination URLs if they differ in the search', ->
-        up.history.replace('/foo?q=1')
+        replaceURL('/foo?q=1')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('span[up-href="/foo?q=2"]')
         up.hello($nav)
         expect($currentLink).not.toHaveClass('up-current')
 
       it 'marks any link as .up-current if any of its space-separated up-alias values matches the current URL', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo /bbb"]')
         $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
@@ -82,7 +87,7 @@ describe 'up.feedback', ->
         expect($link).not.toHaveClass('up-current')
 
       it 'does not highlight links with unsafe methods', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $defaultLink = $nav.affix('a[href="/foo"]')
         $getLink = $nav.affix('a[href="/foo"][up-method="get"]')
@@ -100,7 +105,7 @@ describe 'up.feedback', ->
         expect($deleteLink).not.toHaveClass('up-current')
 
       it 'marks URL prefixes as .up-current if an up-alias value ends in *', ->
-        up.history.replace('/foo/123')
+        replaceURL('/foo/123')
 
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]')
@@ -111,7 +116,7 @@ describe 'up.feedback', ->
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'marks URL prefixes as .up-current if an up-alias has multiple * placeholders', ->
-        up.history.replace('/a-foo-b-bar-c')
+        replaceURL('/a-foo-b-bar-c')
 
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/x"][up-alias="*-foo-*-bar-*"]')
@@ -132,7 +137,7 @@ describe 'up.feedback', ->
 
       it 'allows to configure a custom "current" class in addition to .up-current', ->
         up.feedback.config.currentClasses.push('highlight')
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/foo"]')
         up.hello($nav)
@@ -143,7 +148,7 @@ describe 'up.feedback', ->
       it 'allows to configure multiple additional "current" classes', ->
         up.feedback.config.currentClasses.push('highlight1')
         up.feedback.config.currentClasses.push('highlight2')
-        up.history.replace('/foo')
+        replaceURL('/foo')
         $nav = $fixture('div[up-nav]')
         $currentLink = $nav.affix('a[href="/foo"]')
         up.hello($nav)
@@ -153,7 +158,7 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
 
       it 'allows to configure additional nav selectors', ->
-        up.history.replace('/foo')
+        replaceURL('/foo')
         up.feedback.config.navSelectors.push('.navi')
         $nav = $fixture('div.navi')
         $currentLink = $nav.affix('a[href="/foo"]')
@@ -163,18 +168,36 @@ describe 'up.feedback', ->
         expect($otherLink).not.toHaveClass('up-current')
 
       it 'marks a link as .up-current if the current URL is "/" (bugfix)', ->
-        up.history.replace('/')
+        replaceURL('/')
         nav = fixture('div[up-nav]')
         link = e.affix(nav, 'a[href="/"]')
         up.hello(link)
         expect(link).toHaveClass('up-current')
 
       it 'marks a link as .up-current if it links to the current URL if the current URL also has a #hash (bugfix)', ->
-        up.history.replace('/foo#hash')
-        nav = fixture('div[up-nav]')
+        replaceURL('/foo#hash')
+        container = fixture('.container')
+        nav = e.affix(container, 'div[up-nav]')
         link = e.affix(nav, 'a[href="/foo"]')
-        up.hello(link)
+        up.hello(container)
         expect(link).toHaveClass('up-current')
+
+      it 'marks a link as .up-current if it links to a #hash and the current URL only has a matching path without a #hash (bugfixxx)', ->
+        replaceURL('/bar')
+        container = fixture('.container')
+        nav = e.affix(container, 'div[up-nav]')
+        link = e.affix(nav, 'a[href="/bar#hash"]')
+        up.hello(container)
+        expect(link).toHaveClass('up-current')
+
+#      it 'marks a link as .up-current if it links to the current URL and the current URL also has a #hash (bugfix)', ->
+#        history.replaceState({}, "title", '/baz#hash')
+#        expect(up.layer.location).toMatchURL('/baz')
+#        container = fixture('.container')
+#        nav = e.affix(container, 'div[up-nav]')
+#        link = e.affix(nav, 'a[href="/baz#hash"]')
+#        up.hello(container)
+#        expect(link).toHaveClass('up-current')
 
       describe 'updating .up-current marks when the URL changes', ->
 
@@ -212,7 +235,7 @@ describe 'up.feedback', ->
             expect($link).toHaveClass('up-current')
 
         it "marks a link as .up-current if it links to its own layer's URL, but not when it links to another layer's URL", asyncSpec (next) ->
-          up.history.replace('/background-url')
+          replaceURL('/background-url')
 
           nav = fixture('div[up-nav]')
           @backgroundLinkToBackgroundURL = e.affix(nav, 'a[href="/background-url"]')
@@ -252,7 +275,7 @@ describe 'up.feedback', ->
             expect(@backgroundLinkToOtherURL).not.toHaveClass('up-current')
 
         it "marks a link as .up-current if it links to its current layer's URL, even if that layer does not render location", asyncSpec (next) ->
-          up.history.replace('/background-url')
+          replaceURL('/background-url')
 
           fragment = """
             <div class="layer-content" up-nav>

@@ -185,6 +185,70 @@ describe 'up.Layer.Overlay', ->
 
       expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 'dismissal value'))
 
+  describe '#location', ->
+
+    beforeEach ->
+      up.history.config.enabled = true
+
+    describe 'if the layer is the frontmost layer', ->
+
+      it 'returns the current browser location', ->
+        up.layer.open(location: '/foo/bar', history: true)
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.location).toEqual('/foo/bar')
+
+        history.replaceState({}, 'title', '/qux')
+        expect(up.layer.location).toEqual('/qux')
+
+      it 'returns the current browser location with a #hash', ->
+        up.layer.open(location: '/foo/bar', history: true)
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.location).toEqual('/foo/bar')
+
+        history.replaceState({}, 'title', '/qux#hash')
+        expect(up.layer.location).toEqual('/qux#hash')
+
+    describe 'for an overlay that does not render history', ->
+
+      it 'returns the location of the last fragment update that rendered history', ->
+        up.layer.open(content: 'step1', history: false)
+        expect(up.layer.isOverlay()).toBe(true)
+
+        up.render(content: 'step2', history: true, location: '/step2', target: ':layer')
+
+        debugger
+
+        expect(up.layer.location).toEqual('/step2')
+
+    describe 'for an overlay in the background', ->
+
+      it "returns the overlay's location", ->
+        [overlay1, overlay2] = makeLayers [
+          { history: true, location: '/overlay1' }
+          { history: true, location: '/overlay2' }
+        ]
+
+        expect(overlay1.location).toEqual('/overlay1')
+        expect(overlay2.location).toEqual('/overlay2')
+
+      it "returns the overlay's location with a #hash", asyncSpec (next) ->
+        up.layer.open({ url: '/ol1#hash', target: '.target' })
+
+        next =>
+          jasmine.respondWithSelector('.target', text: 'overlay 1')
+
+        next =>
+          up.layer.open({ url: '/ol2#hash', target: '.target' })
+
+        next =>
+          jasmine.respondWithSelector('.target', text: 'overlay 2')
+
+        next =>
+          expect(up.layer.stack.length).toBe(3)
+
+          expect(up.layer.stack[1].location).toEqual('/ol1#hash')
+          expect(up.layer.stack[2].location).toEqual('/ol2#hash')
+
     describe 'events', ->
 
       it 'should have examples'

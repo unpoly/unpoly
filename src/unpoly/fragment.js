@@ -1817,7 +1817,7 @@ up.fragment = (function() {
 
   up.on('up:framework:boot', function() {
     const {body} = document
-    body.setAttribute('up-source', up.history.location)
+    body.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
     hello(body)
 
     if (!up.browser.canPushState()) {

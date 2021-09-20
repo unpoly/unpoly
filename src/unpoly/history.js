@@ -41,7 +41,7 @@ up.history = (function() {
   /*-
   Returns a normalized URL for the previous history entry.
 
-  Only history entries pushed by Unpoly will be considered.
+  Only history entries added by Unpoly functions will be considered.
 
   @property up.history.previousLocation
   @param {string} previousLocation
@@ -57,13 +57,21 @@ up.history = (function() {
     trackCurrentLocation()
   }
 
-  function normalizeURL(url, normalizeOptions = {}) {
-    normalizeOptions.hash = true
-    return u.normalizeURL(url, normalizeOptions)
+  const DEFAULT_NORMALIZE_OPTIONS = { hash: true }
+
+  function normalizeURL(url, options) {
+    // The reason why we this takes an { options } object is that
+    // isCurrentLocation() ignores a trailing slash. This is used to check whether
+    // we're already at the given URL before pushing a history state.
+    options = u.merge(DEFAULT_NORMALIZE_OPTIONS, options)
+    return u.normalizeURL(url, options)
   }
 
   /*-
   Returns a normalized URL for the current browser location.
+
+  The returned URL is an absolute pathname like `"/path"` without a hostname or port.
+  It will include a `#hash` fragment and query string, if present.
 
   Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
   the browser's address bar will show the location of an ancestor layer.
@@ -94,11 +102,29 @@ up.history = (function() {
 
   trackCurrentLocation()
 
-  function isCurrentLocation(url) {
-    // Some web frameworks care about a trailing slash, some consider it optional.
-    // Only for the equality test (is this the current URL) we consider it optional.
-    const normalizeOptions = { stripTrailingSlash: true }
-    return normalizeURL(url, normalizeOptions) === currentLocation(normalizeOptions)
+  // Some web frameworks care about a trailing slash, some consider it optional.
+  // Only for the equality test ("is this the current URL?") we consider it optional.
+  // Note that we inherit { hash: true } from DEFAULT_NORMALIZE_OPTIONS.
+  const ADDITIONAL_NORMALIZE_OPTIONS_FOR_COMPARISON = { stripTrailingSlash: true  }
+
+  /*-
+  Returns whether the given URL matches the [current browser location](/up.history.location).
+
+  @function up.history.isLocation
+  @param {string} url
+    The URL to compare against the current browser location.
+
+    This can be a either an absolute pathname (`/path`), a relative filename (`index.html`) or a fully qualified URL (`https://...`).
+  @param {boolean} [options.hash=true]
+    Whether to consider `#hash` fragments in the given or current URLs.
+
+    When set to `false` this function will consider the URLs `/foo#one` and `/foo#two` to be equal.
+  @return {boolean}
+  @experimental
+  */
+  function isLocation(url, options) {
+    options = u.merge(ADDITIONAL_NORMALIZE_OPTIONS_FOR_COMPARISON, options)
+    return normalizeURL(url, options) === currentLocation(options)
   }
 
   /*-
@@ -133,6 +159,8 @@ up.history = (function() {
   Note that [fragment navigation](/navigation) will automatically update the
   browser's location bar for you.
 
+  Does not add a history entry if the the given URL is already the current browser location.
+
   Emits event `up:location:changed`.
 
   @function up.history.push
@@ -142,7 +170,7 @@ up.history = (function() {
   */
   function push(url) {
     url = normalizeURL(url)
-    if (!isCurrentLocation(url) && manipulate('pushState', url)) {
+    if (!isLocation(url) && manipulate('pushState', url)) {
       up.emit('up:location:changed', {url, reason: 'push', log: `Advanced to location ${u.urlWithoutHost(url)}`})
     }
   }
@@ -303,7 +331,7 @@ up.history = (function() {
     replace,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
-    isLocation: isCurrentLocation,
-    normalizeURL
+    normalizeURL,
+    isLocation
   }
 })()

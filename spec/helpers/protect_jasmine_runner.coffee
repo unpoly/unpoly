@@ -100,7 +100,6 @@ afterEach ->
 willScrollWithinPage = (link) ->
   verbatimHREF = link.getAttribute('href')
 
-  # There is up.history.isLocation(), but that considers different hashes to be a different location.
   linkURL = u.normalizeURL(verbatimHREF, hash: false)
   currentURL = u.normalizeURL(up.history.location, hash: false)
   return linkURL == currentURL

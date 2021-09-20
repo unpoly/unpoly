@@ -77,11 +77,12 @@ up.feedback = (function() {
   */
   const config = new up.Config(() => ({
     currentClasses: ['up-current'],
-    navSelectors: ['[up-nav]', 'nav']
+    navSelectors: ['[up-nav]', 'nav'],
   }))
 
   function reset() {
     config.reset()
+    up.layer.root.feedbackLocation = null
   }
 
   const CLASS_ACTIVE = 'up-active'
@@ -93,7 +94,7 @@ up.feedback = (function() {
 
   function normalizeURL(url) {
     if (url) {
-      return u.normalizeURL(url, { stripTrailingSlash: true })
+      return u.normalizeURL(url, { stripTrailingSlash: true, hash: false })
     }
   }
 
@@ -132,16 +133,11 @@ up.feedback = (function() {
     updateLinks(links, options)
   }
 
-  const getLayerLocation = layer => // We store the last processed location in layer.feedbackLocation,
-  // so multiple calls for the same layer won't unnecessarily reprocess links.
-  // We update the property on up:layer:location:changed.
-  //
-  // The { feedbackLocation } property may be nil if:
-  // (1) The layer was opened without a location, e.g. if it was created from local HTML.
-  // (2) The layer is the root layer and the location was never changed.
-  //     The initial page load does not emit an up:layer:location:changed event for
-  //     the root layer to be consistent with up:location:changed.
-  layer.feedbackLocation || layer.location
+  function getNormalizedLayerLocation(layer) {
+    // Don't re-use layer.feedbackLocation since the current layer returns
+    // location.href in case someone changed the history using the pushState API.
+    return layer.feedbackLocation || normalizeURL(layer.location)
+  }
 
   function updateLinks(links, options = {}) {
     if (!links.length) { return; }
@@ -150,7 +146,7 @@ up.feedback = (function() {
 
     // An overlay might not have a { location } property, e.g. if it was created
     // from local { content }. In this case we do not set .up-current.
-    let layerLocation = getLayerLocation(layer)
+    let layerLocation = getNormalizedLayerLocation(layer)
     if (layerLocation) {
       for (let link of links) {
         const isCurrent = linkURLs(link).isCurrent(layerLocation)
@@ -373,6 +369,8 @@ up.feedback = (function() {
   - the link's `[up-href]` attribute
   - the URL pattern in the link's [`[up-alias]`](/a-up-alias) attribute
 
+  Any `#hash` fragments in the link's or current URLs will be ignored.
+
   @selector [up-nav]
   @stable
   */
@@ -411,14 +409,15 @@ up.feedback = (function() {
   function updateLayerIfLocationChanged(layer) {
     const processedLocation = layer.feedbackLocation
 
-    const currentLocation = normalizeURL(layer.location)
+    const layerLocation = getNormalizedLayerLocation(layer.location)
 
     // A history change might call this function multiple times,
     // since we listen to both up:location:changed and up:layer:location:changed.
+    // We also don't want to unnecessarily reprocess nav links, which is expensive.
     // For this reason we check whether the current location differs from
     // the last processed location.
-    if (!processedLocation || (processedLocation !== currentLocation)) {
-      layer.feedbackLocation = currentLocation
+    if (!processedLocation || (processedLocation !== layerLocation)) {
+      layer.feedbackLocation = layerLocation
       updateLinksWithinNavs(layer.element, { layer })
     }
   }
@@ -455,6 +454,6 @@ up.feedback = (function() {
     stop,
     around,
     aroundForOptions,
-    normalizeURL
+    normalizeURL,
   }
 })()

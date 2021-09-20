@@ -1908,6 +1908,12 @@ describe 'up.fragment', ->
             next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
             next => expect(location.href).toMatchURL('/other-path')
 
+          it "preserves the #hash when the server sets an X-Up-Location header (like a vanilla form submission would do in the browser)", asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/path#hash', history: true)
+            next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
+            next => expect(location.href).toMatchURL('/other-path#hash')
+
           it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/requested-path', method: 'post', history: true)
@@ -2272,6 +2278,14 @@ describe 'up.fragment', ->
         it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
           fixture('.target')
           up.render('.target', url: '/path')
+          next =>
+            @respondWithSelector('.target')
+          next =>
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/path')
+
+        it 'returns the source location without a #hash', asyncSpec (next) ->
+          fixture('.target')
+          up.render('.target', url: '/path#hash')
           next =>
             @respondWithSelector('.target')
           next =>

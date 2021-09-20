@@ -43,6 +43,26 @@ describe 'up.history', ->
         history.replaceState?({}, 'title', '/host/path')
         expect(up.history.isLocation('/host/path/')).toBe(true)
 
+      describe 'when either URL contains a #hash', ->
+
+        it 'returns false if the given path is the current URL with a #hash', ->
+          history.replaceState?({}, 'title', '/host/path/')
+          expect(up.history.isLocation('/host/path/#hash')).toBe(false)
+
+        it 'returns false if the given path is the current URL without a #hash', ->
+          history.replaceState?({}, 'title', '/host/path/#hash')
+          expect(up.history.isLocation('/host/path/')).toBe(false)
+
+        describe 'with { hash: false }', ->
+
+          it 'returns true if the given path is the current URL with a #hash', ->
+            history.replaceState?({}, 'title', '/host/path/')
+            expect(up.history.isLocation('/host/path/#hash', hash: false)).toBe(true)
+
+          it 'returns true if the given path is the current URL without a #hash', ->
+            history.replaceState?({}, 'title', '/host/path/#hash')
+            expect(up.history.isLocation('/host/path/', hash: false)).toBe(true)
+
     describe 'up.history.previousLocation', ->
 
       it 'returns the previous location', ->
@@ -54,6 +74,16 @@ describe 'up.history', ->
 
         up.history.replace('/location3')
         expect(up.history.previousLocation).toMatchURL('/location2')
+
+      it 'returns the previous location with a #hash', ->
+        initialLocation = location.href
+        expect(up.history.previousLocation).toBeMissing()
+
+        up.history.replace('/location2#hash')
+        expect(up.history.previousLocation).toMatchURL(initialLocation)
+
+        up.history.replace('/location3')
+        expect(up.history.previousLocation).toMatchURL('/location2#hash')
 
       it 'returns the last previous location that is different from the current URL', ->
         initialLocation = location.href
