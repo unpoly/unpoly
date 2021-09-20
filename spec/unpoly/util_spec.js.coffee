@@ -1041,14 +1041,16 @@ describe 'up.util', ->
       it 'normalizes redundant segments', ->
         expect(up.util.normalizeURL('/foo/../foo')).toBe("/foo")
 
-      it 'strips a #hash by default', ->
-        expect(up.util.normalizeURL('/foo/bar#fragment')).toBe('/foo/bar')
+      describe 'hash fragments', ->
 
-      it 'preserves a #hash with { hash: true } option', ->
-        expect(up.util.normalizeURL('/foo/bar#fragment', hash: true)).toBe('/foo/bar#fragment')
+        it 'strips a #hash with { hash: false }', ->
+          expect(up.util.normalizeURL('/foo/bar#fragment', hash: false)).toBe('/foo/bar')
 
-      it 'puts a #hash behind the query string', ->
-        expect(up.util.normalizeURL('/foo/bar?key=value#fragment', hash: true)).toBe('/foo/bar?key=value#fragment')
+        it 'preserves a #hash by default', ->
+          expect(up.util.normalizeURL('/foo/bar#fragment')).toBe('/foo/bar#fragment')
+
+        it 'puts a #hash behind the query string', ->
+          expect(up.util.normalizeURL('/foo/bar?key=value#fragment')).toBe('/foo/bar?key=value#fragment')
 
     describe 'up.util.find', ->
 

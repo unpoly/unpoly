@@ -67,7 +67,6 @@ up.util = (function() {
 
   const NORMALIZE_URL_DEFAULTS = {
     host: 'cross-domain',
-    hash: false
   }
 
   /*-
@@ -77,8 +76,10 @@ up.util = (function() {
   @param {boolean} [options.host='cross-domain']
     Whether to include protocol, hostname and port in the normalized URL.
 
-    By default the host is only included if it differ's from the page's hostname.
-  @param {boolean} [options.hash=false]
+    When set to `'cross-domain'` (the default), the host is only included if it differ's from the page's hostname.
+
+    The port is omitted if the port is the standard port for the given protocol, e.g. `:443` for `https://`.
+  @param {boolean} [options.hash=true]
     Whether to include an `#hash` anchor in the normalized URL
   @param {boolean} [options.search=true]
     Whether to include a `?query` string in the normalized URL
@@ -86,7 +87,7 @@ up.util = (function() {
     Whether to include a trailing slash from the pathname
   @return {string}
     The normalized URL.
-  @internal
+  @experimental
   */
   function normalizeURL(urlOrAnchor, options) {
     options = newOptions(options, NORMALIZE_URL_DEFAULTS)

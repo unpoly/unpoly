@@ -81,7 +81,7 @@ up.Change.Addition = class Addition extends up.Change {
     // (1) Don't set a source if { false } is passed.
     // (2) Don't set a source if the element HTML already has an [up-source] attribute.
     if (source) {
-      e.setMissingAttr(newElement, 'up-source', u.normalizeURL(source))
+      e.setMissingAttr(newElement, 'up-source', u.normalizeURL(source, { hash: false }))
     }
   }
 }
