@@ -8,6 +8,17 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.4.0
+-----
+
+- New experimental function `up.history.isLocation()`. It returns whether the given URL matches the [current browser location](/up.history.location).
+- New experimental function `up.util.normalizeURL()`. It returns a normalized version of the given URL string. Two URLs that point to the same resource should normalize to the same string.
+- Fix a bug where an `[up-nav]` link to the root path (`/`) would never receive the `.up-current` class (#280).
+- Fix a bug where an `[up-nav]` link would never receive the `.up-current` class if the current URL contains a `#hash` fragment (#284).
+- Unpoly now prints a [log entry](/up.log) when a [request](/up.request) or [fragment update](/up.render) with `{ solo: true }` abort all other requests.
+- All API functions that work with URL now document how they handle `#hash` fragments.
+
+
 2.3.0
 -----
 
