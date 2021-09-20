@@ -190,15 +190,6 @@ describe 'up.feedback', ->
         up.hello(container)
         expect(link).toHaveClass('up-current')
 
-#      it 'marks a link as .up-current if it links to the current URL and the current URL also has a #hash (bugfix)', ->
-#        history.replaceState({}, "title", '/baz#hash')
-#        expect(up.layer.location).toMatchURL('/baz')
-#        container = fixture('.container')
-#        nav = e.affix(container, 'div[up-nav]')
-#        link = e.affix(nav, 'a[href="/baz#hash"]')
-#        up.hello(container)
-#        expect(link).toHaveClass('up-current')
-
       describe 'updating .up-current marks when the URL changes', ->
 
         it 'marks a link as .up-current if it links to the current URL, but is missing a trailing slash', asyncSpec (next) ->
