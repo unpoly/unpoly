@@ -70,7 +70,44 @@ up.util = (function() {
   }
 
   /*-
-  Normalizes the given URL or path.
+  Returns a normalized version of the given URL string.
+
+  Two URLs that point to the same resource should normalize to the same string.
+
+  ### Comparing normalized URLs
+
+  The main purpose of this function is to normalize two URLs for string comparison:
+
+  ```js
+  up.util.normalizeURL('http://current-host/path') === up.util.normalizeURL('/path') // => true
+  ```
+
+  By default the hostname is only included if it points to a different origin:
+
+  ```js
+  up.util.normalizeURL('http://current-host/path') // => '/path'
+  up.util.normalizeURL('http://other-host/path') // => 'http://other-host/path'
+  ```
+
+  Relative paths are normalized to absolute paths:
+
+  ```js
+  up.util.normalizeURL('index.html') // => '/path/index.html'
+  ```
+
+  ### Excluding URL components
+
+  You may pass options to exclude URL components from the normalized string:
+
+  ```js
+  up.util.normalizeURL('/foo?query=bar', { query: false }) => '/foo'
+  up.util.normalizeURL('/bar#hash', { hash: false }) => '/bar'
+  ```
+
+  ### Limitations
+
+  - Username and password are always omitted from the normalized URL.
+  - Only `http` and `https` schemes are supported.
 
   @function up.util.normalizeURL
   @param {boolean} [options.host='cross-domain']
@@ -80,11 +117,11 @@ up.util = (function() {
 
     The port is omitted if the port is the standard port for the given protocol, e.g. `:443` for `https://`.
   @param {boolean} [options.hash=true]
-    Whether to include an `#hash` anchor in the normalized URL
+    Whether to include an `#hash` anchor in the normalized URL.
   @param {boolean} [options.search=true]
-    Whether to include a `?query` string in the normalized URL
+    Whether to include a `?query` string in the normalized URL.
   @param {boolean} [options.trailingSlash=true]
-    Whether to include a trailing slash from the pathname
+    Whether to include a trailing slash from the pathname.
   @return {string}
     The normalized URL.
   @experimental

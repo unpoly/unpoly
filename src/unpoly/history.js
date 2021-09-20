@@ -110,6 +110,29 @@ up.history = (function() {
   /*-
   Returns whether the given URL matches the [current browser location](/up.history.location).
 
+  ### Examples
+
+  ```js
+  location.hostname // => '/path'
+
+  up.history.isLocation('/path') // => true
+  up.history.isLocation('/path?query') // => false
+  up.history.isLocation('/path#hash') // => false
+  up.history.isLocation('/other') // => false
+  ```
+
+  The given URL is [normalized](/up.util.normalizeURL), so any URL string pointing to the browser location
+  will match:
+
+  ```js
+  location.hostname // => '/current-host'
+  location.pathname // => '/foo'
+
+  up.history.isLocation('/foo') // => true
+  up.history.isLocation('http://current-host/foo') // => true
+  up.history.isLocation('http://otgher-host/foo') // => false
+  ```
+
   @function up.history.isLocation
   @param {string} url
     The URL to compare against the current browser location.
