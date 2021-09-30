@@ -568,12 +568,10 @@ up.Layer = class Layer extends up.Record {
   restoreHistory() {
     if (this.savedLocation) {
       up.history.push(this.savedLocation)
-      this.savedLocation = null
     }
 
     if (this.savedTitle) {
       document.title = this.savedTitle
-      this.savedTitle = null
     }
   }
 
