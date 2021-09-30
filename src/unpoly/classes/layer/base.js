@@ -566,7 +566,13 @@ up.Layer = class Layer extends up.Record {
   }
 
   restoreHistory() {
+    if (!this.showsLiveHistory()) {
+      return
+    }
+
     if (this.savedLocation) {
+      // We cannot use the `this.title` setter as that does not
+      // push a state if `newLocation === this.savedLocation`.
       up.history.push(this.savedLocation)
     }
 

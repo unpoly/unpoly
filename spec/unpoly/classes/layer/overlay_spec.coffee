@@ -115,6 +115,28 @@ describe 'up.Layer.Overlay', ->
       expect(up.layer.isRoot()).toBe(true)
       expect(location.href).toMatchURL(@locationBeforeExample)
 
+    it "does not restore the parent layer's location if the parent layer does not render history", ->
+      up.history.config.enabled = true
+
+      makeLayers [
+        { },
+        { history: false, location: '/overlay1' },
+        { history: true, location: '/overlay2' }
+      ]
+
+      expect(up.layer.current.index).toBe(2)
+      expect(location.href).toMatchURL(@locationBeforeExample)
+
+      up.layer.current.accept()
+
+      expect(up.layer.current.index).toBe(1)
+      expect(location.href).toMatchURL(@locationBeforeExample)
+
+      up.layer.current.accept()
+
+      expect(up.layer.current.index).toBe(0)
+      expect(location.href).toMatchURL(@locationBeforeExample)
+
     it 'manipulates the layer stack synchronously, to avoid concurrency issues when we need to close layers within another change', ->
       makeLayers(2)
       expect(up.layer.count).toBe(2)
