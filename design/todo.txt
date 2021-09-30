@@ -2,4 +2,5 @@
 - Doc page about "Fragments from local HTML"
   - link from [up-document], [up-fragment], [up-content], { document, fragment, content }.
 - Warn when registering compiler in [up-] namespace
-- Machen wir irgendwas kaputt mit window.history.scrollRestoration = 'manual' ?
+- Do we need window.history.scrollRestoration = 'manual' ?
+  - Is this setting per-state?
