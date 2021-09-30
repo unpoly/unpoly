@@ -216,8 +216,6 @@ describe 'up.Layer.Overlay', ->
 
         up.render(content: 'step2', history: true, location: '/step2', target: ':layer')
 
-        debugger
-
         expect(up.layer.location).toEqual('/step2')
 
     describe 'for an overlay in the background', ->
