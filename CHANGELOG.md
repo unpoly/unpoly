@@ -8,6 +8,12 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.4.1
+-----
+
+- Fix a bug where closing an overlay would render the location URL of a parent layer when the parent layer does not render history.
+
+
 2.4.0
 -----
 
