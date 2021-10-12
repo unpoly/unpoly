@@ -258,7 +258,6 @@ up.history = (function() {
         layer: 'root',
         target: config.restoreTargets,
         cache: true,
-        keep: false,
         scroll: 'restore',
         // Since the URL was already changed by the browser, don't save scroll state.
         saveScroll: false
