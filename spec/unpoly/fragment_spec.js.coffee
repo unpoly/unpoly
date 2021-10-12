@@ -4125,6 +4125,30 @@ describe 'up.fragment', ->
             expect($('.middle')).toHaveText('old-middle')
             expect($('.after')).toHaveText('new-after')
 
+        it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
+          # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
+          up.element.isSingleton.mock().and.callFake (element) -> e.matches(element, 'middle-element')
+
+          $container = $fixture('.container')
+          $container.affix('before-element').text('old-before')
+          # Must use a custom element since up.fragment.toTarget() only returns the element name for singleton elements.
+          # Using a <div class="middle"> would return "div" and match the before-element.
+          $container.affix('middle-element[up-keep]').text('old-middle')
+          $container.affix('after-element').text('old-after')
+
+          up.render '.container', document: """
+            <<div class='container'>
+              <before-element>new-before</before-element>
+              <middle-element class='middle' up-keep>new-middle</middle-element>
+              <after-element class='after'>new-after</after-element>
+            </div>
+            """
+
+          next =>
+            expect($('before-element')).toHaveText('new-before')
+            expect($('middle-element')).toHaveText('old-middle')
+            expect($('after-element')).toHaveText('new-after')
+
         it 'keeps an [up-keep] element, but does replace text nodes around it', asyncSpec (next) ->
           $container = $fixture('.container')
           $container.html """
