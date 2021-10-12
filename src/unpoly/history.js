@@ -19,9 +19,11 @@ up.history = (function() {
 
   @property up.history.config
   @param {Array} [config.restoreTargets=[]]
-    A list of possible CSS selectors to [replace](/up.render) when the user goes back in history.
+    A list of possible CSS selectors to [replace](/up.render) when the user goes back or forward in history.
 
-    By default the [root layer's main target](/up.fragment.config#config.mainTargets).
+    If more than one target is configured, the first selector matching both the current page and server response will be updated.
+
+    If nothing is configured, the `<body>` element will be replaced.
   @param {boolean} [config.enabled=true]
     Defines whether [fragment updates](/up.render) will update the browser's current URL.
 

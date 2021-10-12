@@ -44,7 +44,8 @@ up.fragment = (function() {
   @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
     An array of CSS selectors matching default render targets.
 
-    When no other render target is given, Unpoly will try to find and replace a main target.
+    When no other render target is given, Unpoly will update the first selector matching both
+    the current page and the server response.
 
     When [navigating](/navigation) to a main target, Unpoly will automatically
     [reset scroll positions](/scroll-option) and
