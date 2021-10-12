@@ -240,6 +240,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
       let partner
       if (options.descendantsOnly) {
+        // Since newElement is from a freshly parsed HTML document, we could use
+        // up.element functions to match the selector. However, since we also want
+        // to use custom selectors like ":main" or "&" we use up.fragment.get().
         partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
       } else {
         partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
