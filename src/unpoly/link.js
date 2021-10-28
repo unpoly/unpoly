@@ -388,6 +388,7 @@ up.link = (function() {
     parser.string('content')
     parser.string('fragment')
     parser.string('document')
+    parser.parse(e.callbackAttr, 'onFinished')
 
     // Layer options
     parser.boolean('peel')

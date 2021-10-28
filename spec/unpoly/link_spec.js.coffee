@@ -655,6 +655,18 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.url).toEqual('/bar')
 
+      it 'parses an [up-on-finished] attribute', ->
+        window.onFinishedCallback = jasmine.createSpy('onFinished callback')
+        link = fixture('a[href="/path"][up-on-finished="window.onFinishedCallback(this)"]')
+        options = up.link.followOptions(link)
+
+        expect(u.isFunction(options.onFinished)).toBe(true)
+        options.onFinished()
+
+        expect(window.onFinishedCallback).toHaveBeenCalledWith(link)
+
+        delete window.onFinishedCallback
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->
