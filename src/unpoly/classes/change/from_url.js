@@ -95,11 +95,11 @@ up.Change.FromURL = class FromURL extends up.Change {
       return this.updateContentFromResponse(['Loaded fragment from successful response to %s', this.request.description], this.successOptions)
     } else {
       const log = ['Loaded fragment from failed response to %s (HTTP %d)', this.request.description, this.response.status]
+      // Although updateContentFromResponse() will fulfill with a successful replacement of options.failTarget,
+      // we still want to reject the promise that's returned to our API client. Hence we throw.
       throw this.updateContentFromResponse(log, this.failOptions)
     }
   }
-      // Although processResponse() will fulfill with a successful replacement of options.failTarget,
-      // we still want to reject the promise that's returned to our API client.
 
   isSuccessfulResponse() {
     return (this.successOptions.fail === false) || this.response.ok
