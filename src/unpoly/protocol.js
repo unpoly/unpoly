@@ -100,13 +100,16 @@ up.protocol = (function() {
   The frontend will use the server-provided target for both successful (HTTP status `200 OK`)
   and failed (status `4xx` or `5xx`) responses.
 
-  The server may also set a target of `:none` to have the frontend render nothing.
-  In this case no response body is required:
 
-  ```http
-  Content-Type: text/html
-  X-Up-Target: :none
-  ```
+  ### Rendering nothing
+
+  If the server wants to render nothing they can do one of the following:
+
+  - Send a header `X-Up-Target: :none`.
+  - Send a HTTP status `204 No Content`.
+  - Send a HTTP status `304 Not Modified`.
+
+  In all of these cases no response body is required.
 
   @header X-Up-Target
   @stable

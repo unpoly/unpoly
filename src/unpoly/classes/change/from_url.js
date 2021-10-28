@@ -102,7 +102,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   isSuccessfulResponse() {
-    return (this.successOptions.fail === false) || this.response.ok
+    return (this.successOptions.fail === false) || this.response.ok || this.response.status === 304
   }
 
   // buildEvent(type, props) {
@@ -161,14 +161,18 @@ up.Change.FromURL = class FromURL extends up.Change {
       renderOptions.target = serverTarget
     }
 
-    renderOptions.document = this.response.text
-
     renderOptions.acceptLayer = this.response.acceptLayer
     renderOptions.dismissLayer = this.response.dismissLayer
+    renderOptions.document = this.response.text
 
-    // Don't require a target match if the server wants to close the overlay and doesn't send content.
-    // However the server is still free to send matching HTML. It would be used if the root layer is updated.
-    if (!renderOptions.document && (u.isDefined(renderOptions.acceptLayer) || u.isDefined(renderOptions.dismissLayer))) {
+    // There are some cases where the user might send us an empty body:
+    //
+    // - HTTP status `304 Not Modified` (especially when reloading)
+    // - HTTP status `204 No Content`
+    // - Header `X-Up-Target: :none`
+    // - Header `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer`, although the server
+    //   may send an optional body in case the response is used on the root layer.
+    if (!renderOptions.document) {
       renderOptions.target = ':none'
     }
 

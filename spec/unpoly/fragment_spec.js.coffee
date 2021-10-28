@@ -639,6 +639,44 @@ describe 'up.fragment', ->
             next ->
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 123))
 
+        describe 'when the server sends no content', ->
+
+          it 'succeeds when the server sends an empty body with HTTP status 304 (not modified)', asyncSpec (next) ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+
+            promise = up.render(target: '.one', url: '/path')
+
+            next =>
+              @respondWith(status: 304, responseText: '')
+
+            next ->
+              expect('.one').toHaveText('old one')
+              expect('.two').toHaveText('old two')
+
+              next.await promiseState(promise)
+
+            next (result) ->
+              expect(result.state).toBe('fulfilled')
+
+          it 'succeeds when the server sends an empty body with HTTP status 204 (no content)', asyncSpec (next) ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+
+            promise = up.render(target: '.one', url: '/path')
+
+            next =>
+              @respondWith(status: 204, responseText: '')
+
+            next ->
+              expect('.one').toHaveText('old one')
+              expect('.two').toHaveText('old two')
+
+              next.await promiseState(promise)
+
+            next (result) ->
+              expect(result.state).toBe('fulfilled')
+
         describe 'when the server sends an X-Up-Target header', ->
 
           it 'renders the server-provided target', asyncSpec (next) ->
