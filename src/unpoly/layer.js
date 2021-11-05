@@ -551,7 +551,7 @@ up.layer = (function() {
   */
 
   /*-
-  This event is emitted after a new overlay has been placed into the DOM.
+  This event is emitted after a new overlay was placed into the DOM.
 
   The event is emitted right before the opening animation starts. Because the overlay
   has not been rendered by the browser, this makes it a good occasion to
@@ -1037,6 +1037,36 @@ up.layer = (function() {
   */
 
   /*-
+  This event is emitted before a layer is [accepted](/closing-overlays).
+
+  The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
+
+  @event up:layer:accept
+  @param {up.Layer} event.layer
+    The layer that is about to close.
+  @param {Element} [event.origin]
+    The element that is causing the layer to close.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the overlay from closing.
+  @stable
+  */
+
+  /*-
+  This event is emitted after a layer was [accepted](/closing-overlays).
+
+  The event is emitted on the [layer's](/up.layer.element) when the close animation
+  is starting. If the layer has no close animaton and was already removed from the DOM,
+  the event is emitted a second time on the `document`.
+
+  @event up:layer:accepted
+  @param {up.Layer} event.layer
+    The layer that was closed.
+  @param {Element} [event.origin]
+    The element that has caused the layer to close.
+  @stable
+  */
+
+  /*-
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.dismiss()`.
@@ -1045,6 +1075,36 @@ up.layer = (function() {
   @function up.layer.dismiss
   @param {any} [value]
   @param {Object} [options]
+  @stable
+  */
+
+  /*-
+  This event is emitted before a layer is [dismissed](/closing-overlays).
+
+  The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
+
+  @event up:layer:dismiss
+  @param {up.Layer} event.layer
+    The layer that is about to close.
+  @param {Element} [event.origin]
+    The element that is causing the layer to close.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the overlay from closing.
+  @stable
+  */
+
+  /*-
+  This event is emitted after a layer was [dismissed](/closing-overlays).
+
+  The event is emitted on the [layer's](/up.layer.element) when the close animation
+  is starting. If the layer has no close animaton and was already removed from the DOM,
+  the event is emitted a second time on the `document`.
+
+  @event up:layer:dismissed
+  @param {up.Layer} event.layer
+    The layer that was closed.
+  @param {Element} [event.origin]
+    The element that has caused the layer to close.
   @stable
   */
 
