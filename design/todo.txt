@@ -1,3 +1,6 @@
+- DestructorPass sammelt zwar Exceptions, aber wirft am Ende. Wer fängt das dann?
+- ConstructorPass sammelt zwar Exceptions, aber wirft am Ende. Wer fängt das dann?
+
 - Update "Long Story" Slides with new API
 - Doc page about "Fragments from local HTML"
   - link from [up-document], [up-fragment], [up-content], { document, fragment, content }.
