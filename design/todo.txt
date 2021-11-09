@@ -2,18 +2,18 @@
 - Dokumentieren, dass unpoly-migrate vor dem eigenen Code geladen werden muss
 - CheapEnergy hatte bedarf auf "[up-validate] on input"
 - Publish { onQueued }
+  - More canonic would be if up.render() returned a up.RenderRequest, which has abort().
 - Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird
   - aber laufende Observer-Delays warten können danach noch Dinge tun
   - kann ich irgendwie laufende Observer pausieren? stoppen? während das formular submittet?
 - Evtl. Warnung ausbauen: "Will not observe fields without [name]"
 - [up-emit] auf Buttons erlauben
-- [up-validate] sync
+- [up-validate] can leak request when following a link from within a dirty field
   - Feld mit [up-validate] ändern
   - Direkt auf Navi-Link klicken
   - Dann läuft immer noch der [up-validate] Request und möchte ersetzen
 - Beim Schließen des Modals prevented jemand up:layer:dismiss, und dann steht "Abort Error: Close event was prevented" in der Konsole.
   - Wollen wir das schlucken?
-- Sollte unpoly-migrate statt "new" lieber "swap" machen?
 - DestructorPass sammelt zwar Exceptions, aber wirft am Ende. Wer fängt das dann?
 - ConstructorPass sammelt zwar Exceptions, aber wirft am Ende. Wer fängt das dann?
 
