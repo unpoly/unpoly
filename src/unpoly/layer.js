@@ -642,7 +642,7 @@ up.layer = (function() {
   }
 
   /*-
-  [Follows](/a-up-follow) this link and opens the result in a new overlay.
+  [Follows](/a-up-follow) this link and [opens the result in a new overlay](/opening-overlays).
 
   ### Example
 
