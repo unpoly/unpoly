@@ -393,7 +393,7 @@ up.form = (function() {
     A destructor function that removes the observe watch when called.
   @stable
   */
-  const observe = function (elements, ...args) {
+  function observe(elements, ...args) {
     elements = e.list(elements)
     const fields = u.flatMap(elements, findFields)
     const unnamedFields = u.reject(fields, 'name')
