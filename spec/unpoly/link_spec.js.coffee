@@ -2334,3 +2334,16 @@ describe 'up.link', ->
       fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
 
       expect(fauxLink).toBeKeyboardFocusable()
+
+    it 'gives the element a pointer cursor', ->
+      fauxLink = up.hello(fixture('.hyperlink[up-clickable]'))
+
+      expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
+
+    it 'makes other selectors clickable via up.link.config.clickableSelectors', ->
+      up.link.config.clickableSelectors.push('.foo')
+      fauxLink = up.hello(fixture('.foo'))
+
+      expect(fauxLink).toBeKeyboardFocusable()
+      expect(getComputedStyle(fauxLink).cursor).toEqual('pointer')
+      expect(fauxLink).toHaveAttribute('up-clickable')
