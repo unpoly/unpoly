@@ -25,4 +25,12 @@ You can change this in `up.layer.config.mode`.
 
 You may configure default attributes for each layer mode in `up.layer.config`.
 
+
+See also
+--------
+
+- [Layer option](/layer-option) explains how to target another layer
+- [Opening overlays](/opening-overlays) explains how to open overlays with different modes
+
+
 @page layer-terminology
