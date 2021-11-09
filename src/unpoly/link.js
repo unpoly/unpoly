@@ -606,8 +606,9 @@ up.link = (function() {
     }
 
     e.setMissingAttrs(link, {
-      tabindex: '0', // Make them part of the natural tab order
-      role: 'link'  // Make screen readers pronounce "link"
+      tabindex: '0',     // Make them part of the natural tab order
+      role: 'link',      // Make screen readers pronounce "link"
+      'up-clickable': '' // Get pointer pointer from link.css
     })
 
     link.addEventListener('keydown', function(event) {
@@ -1155,6 +1156,10 @@ up.link = (function() {
       if (!areaAttrs['up-href']) { areaAttrs['up-href'] = childLink.getAttribute('href'); }
       e.setMissingAttrs(area, areaAttrs)
       makeFollowable(area)
+      // We could also consider making the area clickable, via makeClickable().
+      // However, since the original link is already present within the area,
+      // we would not add accessibility benefits. We might also confuse screen readers
+      // with a nested link.
     }
   })
 
