@@ -631,7 +631,7 @@ up.form = (function() {
     }
 
     e.toggle(target, show)
-    return target.classList.add('up-switched')
+    target.classList.add('up-switched')
   })
 
   function findSwitcherForTarget(target) {
