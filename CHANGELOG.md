@@ -47,7 +47,7 @@ Unpoly 2.3 lets your work around this by prefixing your callback with a [CSP non
 <a href="/path" up-follow up-on-loaded="nonce-kO52Iphm8B alert()">Click me</a>
 ```
 
-Users of the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem can insert the nonce using the `up.safe_calback` helper:
+Users of the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem can insert the nonce using the `up.safe_callback` helper:
 
 ```erb
 <a href="/path" up-follow up-on-loaded="<%= up.safe_callback('alert()') %>">Click me</a>
