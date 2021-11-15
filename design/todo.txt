@@ -1,4 +1,4 @@
-- Dokumentieren, dass unpoly-migrate vor dem eigenen Code geladen werden muss
+- Consider delaying appending of new layer elements until we have constructed all children https://github.com/unpoly/unpoly/discussions/314
 - CheapEnergy hatte bedarf auf "[up-validate] on input"
 - Publish { onQueued }
   - More canonic would be if up.render() returned a up.RenderRequest, which has abort().
