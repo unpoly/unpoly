@@ -120,7 +120,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Don't wait to animations to finish:
     return new up.RenderResult({
       layer: this.layer,
-      fragments: [this.content]
+      fragments: [this.content],
+      target: this.target
     })
   }
 

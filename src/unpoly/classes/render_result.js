@@ -29,10 +29,30 @@ up.RenderResult = class RenderResult extends up.Record {
   @stable
   */
 
+  /*-
+  The target selector rendered.
+
+  @property up.RenderResult#target
+  @param {string} target
+  @experimental
+  */
+
   keys() {
     return [
       'fragments',
       'layer',
+      'target',
     ]
+  }
+
+  isNone() {
+    // There are some cases where we did not render any fragment:
+    //
+    // - Server sent HTTP status `304 Not Modified` (especially when reloading)
+    // - Server sent HTTP status `204 No Content`
+    // - Target was :none (can be set by both client and server)
+    // - Server sent `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer`, although the server
+    //   may send an optional body in case the response is used on the root layer.
+    return !this.fragments.length
   }
 }

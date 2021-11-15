@@ -8,7 +8,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     super(options)
     this.layer = options.layer
     this.target = options.target
-    this.placement = options.placement
+    this.defaultPlacement = options.defaultPlacement || 'swap'
     this.context = options.context
     this.parseSteps()
   }
@@ -117,7 +117,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Don't wait for animations to finish.
     return new up.RenderResult({
       layer: this.layer,
-      fragments: u.map(this.steps, 'newElement')
+      fragments: u.map(this.steps, 'newElement'),
+      target: this.target,
     })
   }
 
@@ -330,7 +331,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         const step = {
           ...this.options,
           selector: expressionParts[1],
-          placement: expressionParts[2] || this.placement || 'swap'
+          placement: expressionParts[2] || this.defaultPlacement
         }
 
         this.steps.push(step)

@@ -172,6 +172,7 @@ up.network = (function() {
     badDownlink: 0.6,
     badRTT: 750,
     badResponseTime: 400,
+    verifyCache: (response) => response.age > 15 * 1000,
 
     // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
@@ -533,6 +534,8 @@ up.network = (function() {
       //
       // What we do instead is have `request` follow the state of `cachedRequest`'s exchange.
       request.followState(cachedRequest)
+      request.fromCache = true
+
       return true
     }
   }
@@ -917,6 +920,12 @@ up.network = (function() {
     progressBar?.conclude()
   }
 
+  function shouldVerifyCache(response, options = {}) {
+    return response.fromCache &&
+      options.verifyCache !== false &&
+      u.evalOption(config.verifyCache, response)
+  }
+
   up.on('up:request:late', onLate)
   up.on('up:request:recover', onRecover)
   up.on('up:framework:reset', reset)
@@ -935,7 +944,8 @@ up.network = (function() {
     mimicLocalRequest,
     loadPage,
     abortSubtree,
-    handleSolo
+    handleSolo,
+    shouldVerifyCache,
   }
 })()
 

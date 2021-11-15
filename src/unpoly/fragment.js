@@ -710,8 +710,13 @@ up.fragment = (function() {
     The callback argument is a preventable `up:fragment:loaded` event.
 
   @param {Function()} [options.onFinished]
-    A callback that will be run when all animations have concluded and
-    elements were removed from the DOM tree.
+    A function to call when no further DOM changes will be caused by this render pass.
+
+    In particular:
+
+    - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
+    - A [cached response](#options.cache) was [verified with the server](/up.network.config#config.verifyCache).
+      If the server has responded with new content, this content has also been rendered.
 
   @return {Promise<up.RenderResult>}
     A promise that fulfills when the page has been updated.
@@ -1499,7 +1504,7 @@ up.fragment = (function() {
   a fragment. See `[up-time]` for a detailed example.
 
   @function up.reload
-  @param {string|Element|jQuery} [target]
+  @param {string|Element|Array<Element>|jQuery} [target]
     The element that should be reloaded.
 
     If omitted, an element matching a selector in `up.fragment.config.mainTargets`

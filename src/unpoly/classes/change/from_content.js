@@ -59,7 +59,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       // concrete selectors, like ['main', '.content'].
       for (let target of this.expandTargets(targets, layer)) {
         // Any plans we add will inherit all properties from @options
-        const props = { ...this.options, target, layer, placement: this.defaultPlacement() }
+        const props = { ...this.options, target, layer, defaultPlacement: this.defaultPlacement() }
         const change = layer === 'new' ? new up.Change.OpenLayer(props) : new up.Change.UpdateLayer(props)
         this.plans.push(change)
       }
