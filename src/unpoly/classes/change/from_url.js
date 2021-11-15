@@ -131,7 +131,43 @@ up.Change.FromURL = class FromURL extends up.Change {
     // like a server-set location, or server-sent events.
     this.augmentOptionsFromResponse(renderOptions)
 
+    if (up.network.shouldVerifyCache(this.request, this.response, renderOptions)) {
+      // Copy the given options, as we're going to override the { onFinished } prop.
+      let originalRenderOptions = u.copy(renderOptions)
+      renderOptions.onFinished = (renderResult) => this.verifyCache(renderResult, originalRenderOptions)
+    }
+
     return new up.Change.FromContent(renderOptions).execute()
+  }
+
+  async verifyCache(renderResult, originalRenderOptions) {
+    let target = originalRenderOptions.target
+    if (/:(before|after)/.test(target)) {
+      up.warn('up.render()', 'Cannot verify cache when prepending/appending (target %s)', target)
+    } else {
+      up.warn('up.render()', 'Verifying cached response')
+      let verifyResult = await up.reload(renderResult.target, {
+        ...originalRenderOptions,
+        layer: renderResult.layer,
+        scroll: false,
+        focus: 'keep',
+        transition: false, // oferring something like { verifyTransition } would mean we need to delay { onFinished } even further
+        cache: false, // this implies { verifyCache: false }
+        confirm: false,
+        feedback: false,
+        solo: false,
+      })
+
+      // A well-behaved server will respond with "304 Not Modified" if the reload
+      // produced the same E-tag or Last-Modified timestamp. In that case we keep
+      // the original up.RenderResult.
+      if (!verifyResult.isNone()) {
+        renderResult = verifyResult
+      }
+    }
+
+    // Call the original { onFinished } callback provided by the user.
+    originalRenderOptions.onFinished?.(renderResult)
   }
 
   augmentOptionsFromResponse(renderOptions) {
