@@ -1,4 +1,3 @@
-- Prüfen ob Docs für up.layer.open() und [up-layer=new] auf /opening-overlays linken (ich glaube nicht)
 - Dokumentieren, dass unpoly-migrate vor dem eigenen Code geladen werden muss
 - CheapEnergy hatte bedarf auf "[up-validate] on input"
 - Publish { onQueued }
