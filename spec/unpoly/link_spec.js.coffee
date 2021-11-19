@@ -93,6 +93,19 @@ describe 'up.link', ->
           expect(result.state).toBe('fulfilled')
           expect(window).not.toHaveUnhandledRejections()
 
+#      it 'does not change focus in a programmatic call', asyncSpec (next) ->
+#        input = fixture('input[type=text]')
+#        target = fixture('.target')
+#        link = fixture('a[href="/path"][up-target=".target"]')
+#
+#        input.focus()
+#        expect(input).toBeFocused()
+#        up.follow(link)
+#
+#        next ->
+#          # Assert that focus did not change
+#          expect(input).toBeFocused()
+
       describe 'events', ->
 
         it 'emits a preventable up:link:follow event', asyncSpec (next) ->
@@ -1573,7 +1586,7 @@ describe 'up.link', ->
             expect(clickListener).toHaveBeenCalled()
             expect(clickListener.calls.argsFor(0)[0].defaultPrevented).toBe(false)
 
-        it 'fires a click event on a cross-origin link that will be handled by thebrowser', asyncSpec (next) ->
+        it 'fires a click event on a cross-origin link that will be handled by the browser', asyncSpec (next) ->
           followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
           # In reality the user will have configured an overly greedy selector like
           # up.fragment.config.instantSelectors.push('a[href]') and we want to help them
@@ -1590,6 +1603,15 @@ describe 'up.link', ->
 
             expect(clickListener).toHaveBeenCalled()
             expect(link).toHaveBeenDefaultFollowed()
+
+        it 'focused the link after the click sequence (like a vanilla link) zzz', ->
+          followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+          link = up.hello fixture('a[href="/path"][up-instant]')
+
+          Trigger.clickSequence(link, focus: false)
+
+          expect(followSpy).toHaveBeenCalled()
+          expect(link).toBeFocused()
 
         describe 'handling of up.link.config.instantSelectors', ->
 

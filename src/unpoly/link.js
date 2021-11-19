@@ -1073,6 +1073,29 @@ up.link = (function() {
   up.on('up:click', fullFollowSelector, function(event, link) {
     if (shouldFollowEvent(event, link)) {
       up.event.halt(event)
+
+      // When the user clicks an hyperlink, the browser will focus the link element on `click`.
+      // However, for an `a[up-instant]` link we will emit `up:click` on `mousedown` and halt the `click` event.
+      // Without a `click` event the browser won't focus the link.
+      //
+      // This also has an unfortunate effect on `input[up-validate]`:
+      //
+      // - User types into a text field
+      // - With focus still on the text field, the user clicks on an `a[up-instant]`.
+      // - The link is being followed, causing a request for the new fragment.
+      // - When the response is received, Unpoly will update the targeted fragment.
+      // - This causes the text field (probably being replaced) from losing focus, causing a `change` event,
+      //   triggering `[up-validate]` and another server request for the validation.
+      // - The link request is probably `{ solo: true }`, but since it happened *before* the
+      //   validation request there was nothing to abort.
+      // - When the validation response is received, the text field is probably gone, causing error.
+      //
+      // To preseve behavioral symmetry to standard links, we manually focus the link when it was activated
+      // on `mousedown`.
+      if (event.originalEvent.type === 'mousedown') {
+        up.focus(link, { preventScroll: true })
+      }
+
       up.log.muteUncriticalRejection(follow(link))
     }
   })
