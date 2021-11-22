@@ -1092,9 +1092,7 @@ up.link = (function() {
       //
       // To preseve behavioral symmetry to standard links, we manually focus the link when it was activated
       // on `mousedown`.
-      if (event.originalEvent.type === 'mousedown') {
-        up.focus(link, { preventScroll: true })
-      }
+      up.focus(link, { preventScroll: true })
 
       up.log.muteUncriticalRejection(follow(link))
     }
