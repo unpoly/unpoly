@@ -116,7 +116,6 @@ up.fragment = (function() {
     // if { navigate: true } is given.
     navigateOptions: {
       solo: true,      // preflight
-      feedback: true,  // preflight
       cache: 'auto',   // preflight
       fallback: true,  // FromContent
       focus: 'auto',   // UpdateLayer/OpenLayer
@@ -575,12 +574,6 @@ up.fragment = (function() {
 
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
-  @param {boolean|Element} [options.feedback]
-    Whether to give the [`{ origin }`](#options.origin) element an `.up-active` class
-    while loading and rendering content.
-
-    May also pass an element which should receive the `.up-active` class.
-
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when when the server responds with new HTML,
     but before the HTML is rendered.
@@ -631,10 +624,7 @@ up.fragment = (function() {
   })
 
   function renderRemoteContent(options) {
-    // Rendering a remote URL is an async operation.
-    // We give feedback (.up-active) while the fragment is loading.
-    let execute = () => new up.Change.FromURL(options).execute()
-    return up.feedback.aroundForOptions(options, execute)
+    return new up.Change.FromURL(options).execute()
   }
 
   function renderLocalContent(options) {

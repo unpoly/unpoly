@@ -21,7 +21,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       context: this.buildLayer().context,
       // The target will always exist in the current page, since
       // we're opening a new layer that will match the target.
-      target: this.target
+      target: this.target,
+      targetElements: [], // The element does not exist yet
     }
   }
 

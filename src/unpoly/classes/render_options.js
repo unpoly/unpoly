@@ -7,7 +7,8 @@ up.RenderOptions = (function() {
     keep: true,
     source: true,
     saveScroll: true,
-    fail: 'auto'
+    fail: 'auto',
+    feedback: true,
   }
 
   const PRELOAD_OVERRIDES = {

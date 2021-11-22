@@ -57,7 +57,6 @@ describe 'up.RenderOptions', ->
         options = up.RenderOptions.preprocess(givenOptions)
 
         expect(options.solo).toBeUndefined()
-        expect(options.feedback).toBeUndefined()
         expect(options.fallback).toBeUndefined()
         expect(options.peel).toBeUndefined()
         expect(options.cache).toBeUndefined()

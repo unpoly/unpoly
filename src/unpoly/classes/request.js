@@ -242,6 +242,7 @@ up.Request = class Request extends up.Record {
       'failMode',    // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
+      'targetElements',
       'solo',
       'queueTime',
       'wrapMethod',
@@ -327,7 +328,9 @@ up.Request = class Request extends up.Record {
       // providing the CSRF function. We now evict this property, since
       // response.request.origin will prevent its (now maybe detached) DOM tree
       // from garbage collection while the response is cached by up.network.
-      return this.origin = undefined
+      this.origin = undefined
+
+      this.targetElements = undefined
     })
   }
 

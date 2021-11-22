@@ -32,28 +32,38 @@ If the current URL is `/foo`, the first link is automatically marked with an [`.
 </nav>
 ```
 
-When the user clicks on the `/bar` link, the link will receive the [`up-active`](/a.up-active) class while it is waiting
-for the server to respond:
+When the user clicks on the `/bar` link, the link will receive the [`.up-active`](/a.up-active) class while it is waiting
+for the server to respond. The targeted fragment (the `<main>` element) gets the `.up-loading` class:
 
 ```
 <nav up-nav>
   <a href="/foo" up-follow class="up-current">Foo</a>
   <a href="/bar" up-follow class="up-active">Bar</a>
 </div>
+
+<main class="up-loading">
+  Foo content
+</main>
 ```
 
-Once the response is received the URL will change to `/bar` and the `up-active` class is removed:
+Once the response is received the [`.up-active`](/a.up-active) and `.up-loading` classes are removed.
+Since the new URL is `/bar`, the [`.up-current`](/a.up-current) class has been moved to the "Bar" link.
 
 ```html
 <nav up-nav>
   <a href="/foo" up-follow>Foo</a>
   <a href="/bar" up-follow class="up-current">Bar</a>
 </nav>
+
+<main>
+  Bar content
+</main>
 ```
 
 @see [up-nav]
 @see a.up-current
 @see a.up-active
+@see .up-loading
 
 @module up.feedback
 */
@@ -86,6 +96,7 @@ up.feedback = (function() {
   }
 
   const CLASS_ACTIVE = 'up-active'
+  const CLASS_LOADING = 'up-loading'
   const SELECTOR_LINK = 'a, [up-href]'
 
   function navSelector() {
@@ -170,35 +181,6 @@ up.feedback = (function() {
   }
 
   /*-
-  Marks the given element as currently loading, by assigning the CSS class [`up-active`](/a.up-active).
-
-  This happens automatically when following links or submitting forms through the Unpoly API.
-  Use this function if you make custom network calls from your own JavaScript code.
-
-  If the given element is a link within an [expanded click area](/up-expand),
-  the class will be assigned to the expanded area.
-
-  ### Example
-
-      var button = document.querySelector('button')
-
-      button.addEventListener('click', () => {
-        up.feedback.start(button)
-        up.request(...).then(() => {
-          up.feedback.stop(button)
-        })
-      })
-
-  @function up.feedback.start
-  @param {Element} element
-    The element to mark as active
-  @internal
-  */
-  function start(element) {
-    findActivatableArea(element).classList.add(CLASS_ACTIVE)
-  }
-
-  /*-
   Links that are currently [loading through Unpoly](/a-up-follow)
   are assigned the `.up-active` class automatically.
 
@@ -216,7 +198,7 @@ up.feedback = (function() {
   ```
 
   The user clicks on the link. While the request is loading,
-  the link has the `up-active` class:
+  the link has the `.up-active` class:
 
   ```html
   <a href="/foo" up-follow class="up-active">Foo</a>
@@ -229,7 +211,56 @@ up.feedback = (function() {
   <a href="/foo" up-follow class="up-current">Foo</a>
   ```
 
+  ### Related
+
+  If you're looking to style the targeted fragment, use the `.up-loading` class.
+
   @selector a.up-active
+  @stable
+  */
+
+  /*-
+  Targeted fragments are assigned the `.up-loading` class while waiting for the server response.
+
+  The `.up-loading` class will be removed when the fragment was updated.
+
+  ### Example
+
+  We have a fragment that we want to update:
+
+  ```html
+  <div class="foo">
+    Old content
+  </div>
+  ```
+
+  We now update the fragment with new content from the server:
+
+  ```js
+  up.render('.foo', { url: '/path' })
+  ```
+
+  While the request is loading, the targeted element has the `.up-loading` class:
+
+  ```html
+  <div class="foo up-loading">
+    Old content
+  </div>
+  ```
+
+  Once the response was rendered, the `.up-loading` class is removed:
+
+  ```html
+  <div class="foo">
+    New content
+  </div>
+  ```
+
+  ### Related
+
+  If you're looking to style the link that targeted the fragment, use the [`.up-active`](/a.up-active) class.
+
+  @selector .up-loading
   @stable
   */
 
@@ -264,53 +295,47 @@ up.feedback = (function() {
   Once the link destination has loaded and rendered, the `.up-active` class
   is removed.
 
+  ### Related
+
+  If you're looking to style the targeted fragment, use the `.up-loading` class.
+
   @selector form.up-active
   @stable
   */
 
-  /*-
-  Marks the given element as no longer loading, by removing the CSS class [`.up-active`](/a.up-active).
-
-  This happens automatically when network requests initiated by the Unpoly API have completed.
-  Use this function if you make custom network calls from your own JavaScript code.
-
-  @function up.feedback.stop
-  @param {Element} element
-    The link or form that has finished loading.
-  @internal
-  */
-  function stop(element) {
-    findActivatableArea(element).classList.remove(CLASS_ACTIVE)
-  }
-
-  function around(element, fn) {
-    start(element)
-    const result = fn()
-    u.always(result, () => stop(element))
-    // Return the original promise returned by fn(), not the
-    // new promise from u.always(), which cannot reject.
-    return result
-  }
-
-  function aroundForOptions(options, fn) {
-    let element
-    let feedbackOpt = options.feedback
-    if (feedbackOpt) {
-      if (u.isBoolean(feedbackOpt)) {
-        element = options.origin
-      } else {
-        element = feedbackOpt
-      }
+  function aroundRequest(request, options) {
+    if (options.feedback === false) {
+      return
     }
 
-    if (element) {
-      // In case we get passed a selector or jQuery collection as { origin }
-      // or { feedback }, unwrap it with up.fragment.get().
-      element = up.fragment.get(element)
+    let map = getFeedbackClassAssignments(request)
 
-      return around(element, fn)
-    } else {
-      return fn()
+    for (let [element, klass] of map) {
+      element.classList.add(klass)
+      u.always(request, () => element.classList.remove(klass))
+    }
+  }
+
+  function getFeedbackClassAssignments(request) {
+    let map = []
+
+    let activeElement = getActiveElementFromRenderOptions(request)
+    if (activeElement) {
+      map.push([activeElement, CLASS_ACTIVE])
+    }
+
+    for (let targetElement of request.targetElements) {
+      map.push([targetElement, CLASS_LOADING])
+    }
+
+    return map
+  }
+
+  function getActiveElementFromRenderOptions(request) {
+    let activeElement = request.origin
+    if (activeElement) {
+      // If the link area was grown with [up-expand], we highlight the [up-expand] container.
+      return findActivatableArea(activeElement)
     }
   }
 
@@ -450,10 +475,7 @@ up.feedback = (function() {
 
   return {
     config,
-    start,
-    stop,
-    around,
-    aroundForOptions,
+    aroundRequest,
     normalizeURL,
   }
 })()

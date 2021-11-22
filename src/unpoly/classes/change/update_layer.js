@@ -23,6 +23,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       mode: this.layer.mode,
       context: u.merge(this.layer.context, this.context),
       target: this.bestPreflightSelector(),
+      targetElements: this.getTargetElements(),
     }
   }
 
@@ -30,6 +31,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.matchPreflight()
 
     return u.map(this.steps, 'selector').join(', ') || ':none'
+  }
+
+  getTargetElements() {
+    this.matchPreflight()
+
+    return u.map(this.steps, 'oldElement')
   }
 
   execute(responseDoc, onApplicable) {

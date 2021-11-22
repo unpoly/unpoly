@@ -72,6 +72,8 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     this.request = up.request(requestAttrs)
 
+    up.feedback.aroundRequest(this.request, this.options)
+
     // The request is also a promise for its response.
     return this.request
   }
