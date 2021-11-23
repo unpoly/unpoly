@@ -328,6 +328,20 @@ describe 'up.fragment', ->
           up.render('.target', url: '/path', method: 'put')
           next => expect(@lastRequest()).toHaveRequestMethod('PUT')
 
+        it 'rejects with an AbortError if the request is aborted', (done) ->
+          fixture('.target')
+          promise = up.render('.target', url: '/path')
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.network.abort()
+
+          u.task ->
+            promiseState(promise).then (result) ->
+              expect(result.state).toBe('rejected')
+              expect(result.value).toBeAbortError()
+              done()
+
         describe 'with { params } option', ->
 
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
@@ -3898,7 +3912,7 @@ describe 'up.fragment', ->
             expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
             expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
 
-      describe 'with { solo } option', ->
+      describe 'with { solo: true } option zzz', ->
 
         it 'aborts the request of an existing change', asyncSpec (next) ->
           fixture('.element')
@@ -3907,7 +3921,8 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: true)
+          change1Promise.catch (e) -> change1Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(1)
@@ -3916,7 +3931,7 @@ describe 'up.fragment', ->
             change2Promise = up.render('.element', url: '/path2', solo: true)
 
           next =>
-            expect(change1Error).toBeError(/aborted/)
+            expect(change1Error).toBeAbortError()
             expect(up.network.queue.allRequests.length).toEqual(1)
 
         it 'aborts the request of an existing change if the new change is made from local content', asyncSpec (next) ->
@@ -3926,7 +3941,8 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: true)
+          change1Promise.catch (e) -> change1Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(1)
@@ -3935,7 +3951,7 @@ describe 'up.fragment', ->
             change2Promise = up.render('.element', content: 'local content', solo: true)
 
           next =>
-            expect(change1Error).toBeError(/aborted/)
+            expect(change1Error).toBeAbortError()
             expect(up.network.queue.allRequests.length).toEqual(0)
 
         it "does not abort an existing change's request when preloading", asyncSpec (next) ->
@@ -3945,7 +3961,8 @@ describe 'up.fragment', ->
           change1Promise = undefined
           change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1', solo: true).catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: true)
+          change1Promise.catch (e) -> change1Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(1)
@@ -3985,39 +4002,150 @@ describe 'up.fragment', ->
 
           change1Error  = undefined
           change1Promise = undefined
-          change2Promise = undefined
 
-          change1Promise = up.render('.element', url: '/path1', solo: false).catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1', solo: false)
+          change1Promise.catch (e) -> change1Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', url: '/path2', solo: true)
+            up.render('.element', url: '/path2', solo: true)
 
           next =>
-            expect(change1Error).toBeError(/aborted/)
+            expect(change1Error).toBeAbortError()
             expect(up.network.queue.allRequests.length).toEqual(1)
 
-        it "does not abort an existing change's request when called with { solo: false }", asyncSpec (next) ->
+      describe 'with { solo: "subtree" } zzz', ->
+
+        it 'aborts existing requests targeting the same element', (done) ->
+          fixture('.element')
+          change1Promise = up.render('.element', url: '/path1')
+
+          expect(up.network.queue.allRequests.length).toBe(1)
+
+          up.render('.element', url: '/path2', solo: 'subtree')
+
+          u.task ->
+            promiseState(change1Promise).then (result) ->
+              expect(result.state).toBe('rejected')
+              expect(result.value).toBeAbortError()
+              done()
+
+        it 'aborts existing requests targeting the same element when updating from local content', (done) ->
+          fixture('.element')
+          change1Promise = up.render('.element', url: '/path1')
+
+          expect(up.network.queue.allRequests.length).toBe(1)
+
+          up.render('.element', content: 'new content', solo: 'subtree')
+
+          u.task ->
+            expect('.element').toHaveText('new content')
+
+            promiseState(change1Promise).then (result) ->
+              expect(result.state).toBe('rejected')
+              expect(result.value).toBeAbortError()
+              done()
+
+        it 'aborts existing requests targeting a descendant of the targeted element', (done) ->
+          fixture('.parent .child')
+          change1Promise = up.render('.child', url: '/path1')
+
+          expect(up.network.queue.allRequests.length).toBe(1)
+
+          up.render('.parent', url: '/path2', solo: 'subtree')
+
+          u.task ->
+            promiseState(change1Promise).then (result) ->
+              expect(result.state).toBe('rejected')
+              expect(result.value).toBeAbortError()
+              done()
+
+        it 'does not abort existing requests targeting an ascendant of the targeted element', (done) ->
+          fixture('.parent .child')
+          parentChangePromise = up.render('.parent', url: '/path1')
+
+          expect(up.network.queue.allRequests.length).toBe(1)
+
+          up.render('.child', url: '/path2', solo: 'subtree')
+
+          u.task ->
+            promiseState(parentChangePromise).then (result) ->
+              expect(result.state).toBe('pending')
+              done()
+
+        it 'does not abort its own preloading request', (done) ->
+          fixture('.element')
+          preloadPromise = up.render('.element', url: '/path', preload: true)
+
+          expect(up.network.queue.allRequests.length).toBe(1)
+
+          up.render('.element', url: '/path', solo: 'subtree', cache: true)
+
+          u.task ->
+            promiseState(preloadPromise).then (result) ->
+              expect(result.state).toBe('pending')
+              expect(up.network.queue.allRequests.length).toBe(1)
+              done()
+
+        it 'does not let multiple preload requests for the same target abort each other', (done) ->
+          fixture('.element')
+          preloadPromise1 = up.render('.element', url: '/path1', solo: 'subtree', preload: true)
+          preloadPromise2 = up.render('.element', url: '/path2', solo: 'subtree', preload: true)
+
+          u.task ->
+            Promise.all([promiseState(preloadPromise1), promiseState(preloadPromise2)]).then ([result1, result2]) ->
+              expect(result1.state).toBe('pending')
+              expect(result2.state).toBe('pending')
+              expect(up.network.queue.allRequests.length).toBe(2)
+              done()
+
+      describe 'with { solo: false } option zzz', ->
+
+        it "does not abort an existing change's request", asyncSpec (next) ->
           fixture('.element')
 
           change1Error = undefined
           change1Promise = undefined
 
-          change2Promise = undefined
-
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
+          change1Promise = up.render('.element', url: '/path1')
+          change1Promise.catch (e) -> change1Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
-            change2Promise = up.render('.element', url: '/path2', solo: false)
+            up.render('.element', url: '/path2', solo: false)
 
           next =>
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(2)
+
+        it 'does not abort requests targeting the same subtree once our response is received and swapped in', asyncSpec (next) ->
+          fixture('.element', text: 'old text')
+
+          change1Promise = up.render('.element', url: '/path1', solo: false)
+          change1Error = undefined
+          change1Promise.catch (e) -> change1Error = e
+
+          next =>
+            expect(up.network.queue.allRequests.length).toEqual(1)
+
+            up.render('.element', url: '/path2', solo: false)
+
+          next =>
+            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(change1Error).toBeUndefined()
+
+            jasmine.respondWithSelector('.element', text: 'text from /path2')
+
+          next =>
+            expect('.element').toHaveText('text from /path2')
+            expect(change1Error).toBeUndefined()
+            expect(up.network.queue.allRequests.length).toEqual(1)
+            
+      describe 'with { solo: Function } option zzz', ->
 
         it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
           fixture('.element')
@@ -4031,28 +4159,33 @@ describe 'up.fragment', ->
           change3Promise = undefined
           change3Error = undefined
 
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
-          change2Promise = up.render('.element', url: '/path2').catch (e) -> change2Error = e
+          soloFn = (request) ->
+            u.matchURLs(request.url, '/path1')
+
+          change1Promise = up.render('.element', url: '/path1', solo: false)
+          change1Promise.catch (e) -> change1Error = e
+          change2Promise = up.render('.element', url: '/path2', solo: false)
+          change2Promise.catch (e) -> change2Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(2)
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
 
-            soloFn = (request) ->
-              u.matchURLs(request.url, '/path1')
-
-            change3Promise = up.render('.element', url: '/path3', solo: soloFn).catch (e) -> change3Error = e
+            change3Promise = up.render('.element', url: '/path3', solo: soloFn)
+            change3Promise.catch (e) -> change3Error = e
 
           next =>
-            expect(change1Error).toBeError(/aborted/)
+            expect(change1Error).toBeAbortError()
             expect(change2Error).toBeUndefined()
             expect(change3Error).toBeUndefined()
 
             expect(up.network.queue.allRequests.length).toEqual(2)
 
         it 'may be passed as a function that decides which existing requests are aborted when updating from local content', asyncSpec (next) ->
-          fixture('.element')
+          fixture('.element1')
+          fixture('.element2')
+          fixture('.element3')
 
           change1Promise = undefined
           change1Error = undefined
@@ -4063,8 +4196,10 @@ describe 'up.fragment', ->
           change3Promise = undefined
           change3Error = undefined
 
-          change1Promise = up.render('.element', url: '/path1').catch (e) -> change1Error = e
-          change2Promise = up.render('.element', url: '/path2').catch (e) -> change2Error = e
+          change1Promise = up.render('.element1', url: '/path1')
+          change1Promise.catch (e) -> change1Error = e
+          change2Promise = up.render('.element2', url: '/path2')
+          change2Promise.catch (e) -> change2Error = e
 
           next =>
             expect(up.network.queue.allRequests.length).toEqual(2)
@@ -4074,15 +4209,15 @@ describe 'up.fragment', ->
             soloFn = (request) ->
               u.matchURLs(request.url, '/path1')
 
-            change3Promise = up.render('.element', content: 'new content', solo: soloFn).catch (e) -> change3Error = e
+            change3Promise = up.render('.element3', content: 'new content', solo: soloFn)
+            change3Promise.catch (e) -> change3Error = e
 
           next =>
-            expect(change1Error).toBeError(/aborted/)
+            expect(change1Error).toBeAbortError()
             expect(change2Error).toBeUndefined()
             expect(change3Error).toBeUndefined()
 
             expect(up.network.queue.allRequests.length).toEqual(1)
-
 
       describe 'with { cache } option', ->
 
@@ -4879,6 +5014,51 @@ describe 'up.fragment', ->
         up.hello(detachedElement)
         up.destroy(detachedElement)
         expect(destructor).toHaveBeenCalled()
+
+      describe 'pending requests zzz', ->
+
+        it 'aborts pending requests targeting the given element', (done) ->
+          target = fixture('.target')
+          promise = up.render(target, { url: '/path' })
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.destroy(target)
+
+          u.task ->
+            promiseState(promise).then (result) ->
+              expect(result.state).toBe('rejected')
+              expect(result.value).toBeAbortError()
+              done()
+
+        it 'aborts pending requests targeting a descendant of the given element', (done) ->
+          parent = fixture('.parent')
+          child = e.affix(parent, '.child')
+          promise = up.render(child, { url: '/path' })
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.destroy(parent)
+
+          u.task ->
+            promiseState(promise).then (result) ->
+              expect(result.state).toBe('rejected')
+              expect(result.value).toBeAbortError()
+              done()
+
+        it 'does not abort pending requests targeting an ascendant of the given element', (done) ->
+          parent = fixture('.parent')
+          child = e.affix(parent, '.child')
+          promise = up.render(parent, { url: '/path' })
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.destroy(child)
+
+          u.task ->
+            promiseState(promise).then (result) ->
+              expect(result.state).toBe('pending')
+              done()
 
     describe 'up.reload()', ->
 

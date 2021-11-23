@@ -83,13 +83,16 @@ up.Request.Queue = class Queue {
       // the request's cache key ({ url, method, params }), we need to normalize
       // again. Normalizing e.g. moves the params into the URL for GET requests.
       request.normalizeForCaching()
+
       this.currentRequests.push(request)
       request.load()
     }
   }
 
   onRequestSettled(request, responseOrError) {
-    u.remove(this.currentRequests, request)
+    // If the request was aborted before it was sent, it still sits in @queuedRequests.
+    u.remove(this.currentRequests, request) || u.remove(this.queuedRequests, request)
+
     if ((responseOrError instanceof up.Response) && responseOrError.ok) {
       up.network.registerAliasForRedirect(request, responseOrError)
     }

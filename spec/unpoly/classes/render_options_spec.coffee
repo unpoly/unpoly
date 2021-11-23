@@ -56,7 +56,7 @@ describe 'up.RenderOptions', ->
         givenOptions = { navigate: false }
         options = up.RenderOptions.preprocess(givenOptions)
 
-        expect(options.solo).toBeUndefined()
+        expect(options.solo).toBe('subtree')
         expect(options.fallback).toBeUndefined()
         expect(options.peel).toBeUndefined()
         expect(options.cache).toBeUndefined()
@@ -148,6 +148,7 @@ describe 'up.RenderOptions', ->
 
         expect(options.history).toBeFalsy()
         expect(options.cache).toBe(undefined)
+        expect(options.solo).toBe('subtree')
 
     it 'inherits shared keys from success options', ->
       givenOptions = { confirm: 'Really?', origin: document.body, history: true }

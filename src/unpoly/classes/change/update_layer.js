@@ -60,10 +60,23 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     if (this.options.peel) {
-      this.layer.peel()
-    }
       // Layer#peel() will manipulate the stack sync.
       // We don't wait for the peeling animation to finish.
+      // Closing a layer will also abort requests targeting that layer.
+      this.layer.peel()
+    }
+
+    // Unless the user has explicitly opted out of the default { solo: 'subtree' }
+    // by passing { solo: false }, we abort pending requests targeting
+    // the elements that we're about to remove.
+    if (this.options.solo !== false) {
+      up.network.abortSubtree(this.getTargetElements())
+    }
+
+    // up.network.handleSolo({
+    //   solo: this.options.solo,
+    //   targetElements: this.getTargetElements()
+    // })
 
     u.assign(this.layer.context, this.context)
 
@@ -73,7 +86,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     // Change history before compilation, so new fragments see the new location.
     if (this.options.history) {
-      this.layer.updateHistory(this.options); // layer location changed event soll hier nicht mehr fliegen
+      this.layer.updateHistory(this.options)
     }
 
     // The server may trigger multiple signals that may cause the layer to close:

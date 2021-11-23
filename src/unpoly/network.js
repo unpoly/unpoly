@@ -1,6 +1,7 @@
 require('./network.sass')
 
 const u = up.util
+const e = up.element
 
 /*-
 Network requests
@@ -488,10 +489,9 @@ up.network = (function() {
     let solo = requestOrOptions.solo
     if (solo && isBusy()) {
       up.puts('up.request()', 'Change with { solo } option will abort other requests')
-      // The { solo } option may also contain a function.
-      // This way users can excempt some requests from being solo-aborted
-      // by configuring up.fragment.config.navigateOptions.
-      if (requestOrOptions instanceof up.Request) {
+      if (solo === 'subtree') {
+        abortSubtree(requestOrOptions.targetElements, requestOrOptions)
+      } else if (requestOrOptions instanceof up.Request) {
         queue.abortExcept(requestOrOptions, solo)
       } else {
         abortRequests(solo)
@@ -546,6 +546,13 @@ up.network = (function() {
     handleCaching(request)
 
     queue.asap(request)
+
+    if (request.targetElements) {
+      for (let targetElement of request.targetElements) {
+        trackRequestOnFragment(targetElement, request)
+      }
+    }
+
     return true
   }
 
@@ -697,6 +704,38 @@ up.network = (function() {
   */
   function abortRequests(...args) {
     queue.abort(...args)
+  }
+
+  function abortSubtree(elements, excusedRequest) {
+    console.log("*** abortSubtree(%o)", elements)
+
+    if (!elements) {
+      return
+    }
+
+    let excusedCacheKey = excusedRequest?.cacheKey?.()
+
+    for (element of u.wrapList(elements)) {
+      let conflictingFragments = e.subtree(element, '.up-request')
+      let conflictingRequests = u.flatMap(conflictingFragments, 'upRequests')
+      for (let conflictingRequest of conflictingRequests) {
+        if (conflictingRequest.cacheKey() != excusedCacheKey) {
+          conflictingRequest.abort(`Another fragment update targeted the same element`)
+        }
+      }
+    }
+  }
+
+  function trackRequestOnFragment(fragment, request) {
+    fragment.classList.add('up-request')
+    fragment.upRequests ||= []
+    fragment.upRequests.push(request)
+    u.always(request, function() {
+      u.remove(fragment.upRequests, request)
+      if (!fragment.upRequests.length) {
+        fragment.classList.remove('up-request')
+      }
+    })
   }
 
   /*-
@@ -920,6 +959,8 @@ up.network = (function() {
     shouldReduceRequests,
     mimicLocalRequest,
     loadPage,
+    abortSubtree,
+    handleSolo
   }
 })()
 

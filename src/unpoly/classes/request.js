@@ -489,21 +489,32 @@ up.Request = class Request extends up.Record {
   @function up.Request#abort
   @experimental
   */
-  abort() {
+  abort(reason) {
     // setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call setAbortedState() a second time, without a message.
-    if (this.setAbortedState() && this.xhr) {
+    if (this.setAbortedState(reason) && this.xhr) {
       this.xhr.abort()
     }
   }
 
-  setAbortedState(reason = ["Request to %s %s was aborted", this.method, this.url]) {
+  setAbortedState(reason) {
     if ((this.state !== 'new') && (this.state !== 'loading')) { return; }
     this.state = 'aborted'
-    this.emit('up:request:aborted', {log: reason})
-    this.deferred.reject(up.error.aborted(reason))
+
+    let message = this.abortMessage(reason)
+    this.emit('up:request:aborted', {log: message})
+    this.deferred.reject(up.error.aborted(message))
+
     // Return true so callers know we didn't return early without actually aborting anything.
     return true
+  }
+
+  abortMessage(reason) {
+    let message = `Aborted request to ${this.description}`
+    if (reason) {
+      message += `: ${reason}`
+    }
+    return message
   }
 
   respondWith(response) {

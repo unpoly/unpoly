@@ -70,7 +70,10 @@ up.Change.FromURL = class FromURL extends up.Change {
       u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
     )
 
+    // up.request() also handles the { solo } option.
     this.request = up.request(requestAttrs)
+
+    // up.feedback.abortConflictingRequests(successAttrs.targetElements)
 
     up.feedback.aroundRequest(this.request, this.options)
 

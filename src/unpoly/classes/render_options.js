@@ -9,6 +9,7 @@ up.RenderOptions = (function() {
     saveScroll: true,
     fail: 'auto',
     feedback: true,
+    solo: 'subtree',
   }
 
   const PRELOAD_OVERRIDES = {
@@ -52,8 +53,8 @@ up.RenderOptions = (function() {
   // - Layer-related options (e.g. target layer or options for a new layer)
   // - Options that change focus. The user might focus a specific element from a success element,
   //   like { focus: '.result', failFocus: '.errors' }.
-  // - Options that change focus. The user might scroll to a specific element from a success element,
-  //   like { reveal: '.result', failReaveal: '.errors' }.
+  // - Options that change scrolling. The user might scroll to a specific element from a success element,
+  //   like { scroll: '.result', failScroll: '.errors' }.
   const SHARED_KEYS = PREFLIGHT_KEYS.concat([
     'keep',         // If I want to discard [up-keep] elements, I also want to discard them for the fail case.
     'hungry',       // If I want to opportunistically update [up-hungry] elements, I also want it for the fail case.

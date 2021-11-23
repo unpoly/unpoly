@@ -1079,6 +1079,16 @@ describe 'up.util', ->
         up.util.remove(array, obj2)
         expect(array).toEqual [obj1, obj3]
 
+      it 'returns the removed value if the array was changed', ->
+        array = ['a', 'b', 'c']
+        returned = up.util.remove(array, 'b')
+        expect(returned).toBe('b')
+
+      it "returns undefined if the given array didn't contain the given value", ->
+        array = ['a', 'b', 'c']
+        returned = up.util.remove(array, 'd')
+        expect(returned).toBeUndefined()
+
     describe 'up.util.unresolvablePromise', ->
 
       it 'return a pending promise', (done) ->
