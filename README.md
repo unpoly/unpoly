@@ -32,6 +32,16 @@ To install Webpack and other required npm packages, run:
 npm install
 ```
 
+### Quick start
+
+The following will build the library and open a web browser with the test suite:
+
+```
+npm run dev
+```
+
+To run individual tasks instead, see below.
+
 ### Building the library
 
 Tests don't consume the sources directly, but from a transpiled build in `dist/`.
@@ -74,7 +84,7 @@ To start a web server serving the Jasmine runner:
 npm run test
 ```
 
-This will open a server on <http://localhost:3000> and opens that URL with your default browser.
+This will open a server on <http://localhost:4000> and opens that URL with your default browser.
 
 In addition to the unit tests, there is an optional support repo [`unpoly-manual-tests`](https://github.com/unpoly/unpoly-manual-tests). It contains a Rails app to play with Unpoly features that are hard to test well with a unit test. E.g. the visual look of overlays, or edge cases when booting Unpoly.
 

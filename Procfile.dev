@@ -1,0 +1,2 @@
+watch-dev: npm run watch-dev
+test: npm run test

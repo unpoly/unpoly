@@ -14,6 +14,7 @@
   "scripts": {
     "test": "node spec/app.js",
     "build": "webpack --config ./webpack/production.js && gzip --keep --force dist/unpoly.es5.min.js dist/unpoly.min.js",
+    "dev": "npx nf start --procfile Procfile.dev",
     "watch-dev": "webpack --watch --config ./webpack/development.js",
     "build-dev": "webpack --config ./webpack/development.js",
     "lint": "npx eslint src",
@@ -37,7 +38,6 @@
     "url": "https://github.com/unpoly/unpoly/issues"
   },
   "homepage": "https://unpoly.com",
-  "dependencies": {},
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
@@ -49,6 +49,7 @@
     "eslint-webpack-plugin": "^3.0.1",
     "express": "^4.17.1",
     "fibers": "^5.0.0",
+    "foreman": "^3.0.1",
     "jasmine": "^2.99.0",
     "jasmine-ajax": "^4.0.0",
     "jasmine-core": "^2.99.0",
