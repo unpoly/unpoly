@@ -336,6 +336,11 @@ up.fragment = (function() {
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
 
+  ### Concurrency
+
+  Unfinished requests targeting the updated fragment or its descendants are [aborted](/up.network.abort).
+  You may control this behavior using the [`{ solo }`](#options.solo) option.
+
   ### Events
 
   Unpoly will emit events at various stages of the rendering process:
@@ -516,10 +521,12 @@ up.fragment = (function() {
     To only uncache some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
-  @param {boolean|string|Function(request): boolean} [options.solo]
+  @param {boolean|string|Function(request): boolean} [options.solo='subtree']
+    With `{ solo: subtree }` Unpoly will abort requests targeting the same fragment or its descendants.
+
     With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
 
-    To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
+    To abort a particular set of requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {Element|jQuery} [options.origin]
@@ -1247,6 +1254,8 @@ up.fragment = (function() {
 
   All [`up.compiler()`](/up.compiler) destructors, if any, are called.
   The element is then removed from the DOM.
+
+  Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/up.network.abort).
 
   Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
 

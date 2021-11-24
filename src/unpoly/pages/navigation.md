@@ -41,12 +41,12 @@ The following default options will be used when navigating:
 | Option                  | Effect                                       |
 | ----------------------- | -------------------------------------------- |
 | `{ history: 'auto' }`   | Update browser location and window title if updating a main target |
-| `{ scroll: 'auto' }`    | Reset scroll position if updating a main target |
+| `{ scroll: 'auto' }`    | Reset scroll position if updating a main target ([read more](/up.fragment.config#config.autoScroll)) |
 | `{ fallback: ':main' }` | Replace a [main target](/up-main) if response doesn't contain target |
 | `{ cache: true }`       | Cache responses for 5 minutes |
 | `{ feedback: true }`    | Set [`.up-active`](/a.up-active) on the activated link |
-| `{ focus: 'auto' }`     | Focus [autofocus] elements in the new fragment |
-| `{ solo: true }`        | Cancel existing requests |
+| `{ focus: 'auto' }`     | Focus the new fragment ([read more](/up.fragment.config#config.autoFocus)) |
+| `{ solo: true }`        | Abort all existing requests |
 | `{ peel: true }`        | Close overlays when targeting a layer below |
 
 

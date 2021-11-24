@@ -700,6 +700,13 @@ up.network = (function() {
     queue.abort(...args)
   }
 
+  /*-
+  Aborts other requests targeting the given element or its descendants.
+
+  @function up.network.abortSubtree
+  @param {Element} element
+  @experimental
+  */
   function abortSubtree(elements, excusedRequest) {
     const testFn = (request) => request.isPartOfSubtree(elements)
     const reason = 'Another fragment update targeted the same element'

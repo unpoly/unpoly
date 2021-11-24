@@ -1003,7 +1003,9 @@ up.link = (function() {
   @param [up-solo='true']
     With `[up-solo=true]` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
 
-    To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
+    With `[up-solo=subtree]` Unpoly will abort requests targeting the same fragment or its descendants.
+
+    To abort a particular set requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.
