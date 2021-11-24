@@ -638,6 +638,18 @@ up.Request = class Request extends up.Record {
     return this.method + ' ' + this.url
   }
 
+  isPartOfSubtree(subtreeElements) {
+    if (!this.targetElements || !subtreeElements) {
+      return false
+    }
+
+    subtreeElements = u.wrapList(subtreeElements)
+
+    return u.some(this.targetElements, function(targetElement) {
+      return u.some(subtreeElements, (subtreeElement) => subtreeElement.contains(targetElement))
+    })
+  }
+
 }
 
 // A request is also a promise ("thenable") for its response.

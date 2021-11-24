@@ -547,12 +547,6 @@ up.network = (function() {
 
     queue.asap(request)
 
-    if (request.targetElements) {
-      for (let targetElement of request.targetElements) {
-        trackRequestOnFragment(targetElement, request)
-      }
-    }
-
     return true
   }
 
@@ -707,35 +701,9 @@ up.network = (function() {
   }
 
   function abortSubtree(elements, excusedRequest) {
-    console.log("*** abortSubtree(%o)", elements)
-
-    if (!elements) {
-      return
-    }
-
-    let excusedCacheKey = excusedRequest?.cacheKey?.()
-
-    for (element of u.wrapList(elements)) {
-      let conflictingFragments = e.subtree(element, '.up-request')
-      let conflictingRequests = u.flatMap(conflictingFragments, 'upRequests')
-      for (let conflictingRequest of conflictingRequests) {
-        if (conflictingRequest.cacheKey() != excusedCacheKey) {
-          conflictingRequest.abort(`Another fragment update targeted the same element`)
-        }
-      }
-    }
-  }
-
-  function trackRequestOnFragment(fragment, request) {
-    fragment.classList.add('up-request')
-    fragment.upRequests ||= []
-    fragment.upRequests.push(request)
-    u.always(request, function() {
-      u.remove(fragment.upRequests, request)
-      if (!fragment.upRequests.length) {
-        fragment.classList.remove('up-request')
-      }
-    })
+    const testFn = (request) => request.isPartOfSubtree(elements)
+    const reason = 'Another fragment update targeted the same element'
+    queue.abortExcept(excusedRequest, testFn, reason)
   }
 
   /*-
