@@ -4266,54 +4266,6 @@ describe 'up.fragment', ->
             # See that the cached request is used.
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
-      describe 'interaction with loading fragments', ->
-
-        it 'gives the loading element an .up-loading class', asyncSpec (next) ->
-          fixture('.target')
-
-          up.render('.target', url: '/path')
-
-          next ->
-            expect('.target').toHaveClass('up-loading')
-
-        it 'does not assign the .up-loading class when preloading', asyncSpec (next) ->
-          fixture('.target')
-
-          up.render('.target', url: '/path', preload: true)
-
-          next ->
-            expect('.target').not.toHaveClass('up-loading')
-
-        it 'removes the .up-loading class when the fragment was updated', asyncSpec (next) ->
-          fixture('.target')
-
-          up.render('.target', url: '/path')
-
-          next ->
-            expect('.target').toHaveClass('up-loading')
-
-            jasmine.respondWithSelector('.target', text: 'new text')
-
-          next ->
-            expect('.target').toHaveText('new text')
-            expect('.target').not.toHaveClass('up-loading')
-
-        it 'removes the .up-loading class when another fragment was updated due to a failed response', asyncSpec (next) ->
-          fixture('.target')
-          fixture('.fail-target')
-
-          up.render('.target', url: '/path', failTarget: '.fail-target')
-
-          next ->
-            expect('.target').toHaveClass('up-loading')
-
-            jasmine.respondWithSelector('.fail-target', text: 'new text', status: 400)
-
-          next ->
-            expect('.fail-target').toHaveText('new text')
-            expect('.target').not.toHaveClass('up-loading')
-            expect('.fail-target').not.toHaveClass('up-loading')
-
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->

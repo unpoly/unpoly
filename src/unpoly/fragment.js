@@ -117,6 +117,7 @@ up.fragment = (function() {
     navigateOptions: {
       solo: true,      // preflight
       cache: 'auto',   // preflight
+      feedback: true,  // preflight
       fallback: true,  // FromContent
       focus: 'auto',   // UpdateLayer/OpenLayer
       scroll: 'auto',  // UpdateLayer/OpenLayer
@@ -580,6 +581,11 @@ up.fragment = (function() {
     The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
 
     If the user does not confirm the render promise will reject and no fragments will be updated.
+
+  @param {boolean|Element} [options.feedback]
+    Whether to give the [`{ origin }`](#options.origin) element an [`.up-active`](/a.up-active) class
+    and the targeted element an `.up-loading` class
+    while loading content.
 
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when when the server responds with new HTML,

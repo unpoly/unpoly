@@ -44,7 +44,7 @@ The following default options will be used when navigating:
 | `{ scroll: 'auto' }`    | Reset scroll position if updating a main target ([read more](/up.fragment.config#config.autoScroll)) |
 | `{ fallback: ':main' }` | Replace a [main target](/up-main) if response doesn't contain target |
 | `{ cache: true }`       | Cache responses for 5 minutes |
-| `{ feedback: true }`    | Set [`.up-active`](/a.up-active) on the activated link |
+| `{ feedback: true }`    | Set [`.up-active`](/a.up-active) and [`.up-loading`](/up-loading) classes while waiting for the server |
 | `{ focus: 'auto' }`     | Focus the new fragment ([read more](/up.fragment.config#config.autoFocus)) |
 | `{ solo: true }`        | Abort all existing requests |
 | `{ peel: true }`        | Close overlays when targeting a layer below |

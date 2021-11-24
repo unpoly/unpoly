@@ -237,7 +237,7 @@ up.feedback = (function() {
   We now update the fragment with new content from the server:
 
   ```js
-  up.render('.foo', { url: '/path' })
+  up.render('.foo', { url: '/path', feedback: true })
   ```
 
   While the request is loading, the targeted element has the `.up-loading` class:
@@ -304,7 +304,7 @@ up.feedback = (function() {
   */
 
   function aroundRequest(request, options) {
-    if (options.feedback === false) {
+    if (!options.feedback) {
       return
     }
 

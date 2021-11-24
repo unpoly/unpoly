@@ -148,12 +148,6 @@ up.migrate.handleHistoryOption = function(options) {
 }
 
 up.migrate.preprocessRenderOptions = function(options) {
-  if (u.isDefined(options.feedback)) {
-    // There is still a { feedback } option, but it's no longer public API for the user.
-    // Too much internals depend on .up-loading classes being always set on targeted fragments.
-    up.migrate.warn("The { feedback } option has been removed without replacement.")
-  }
-
   up.migrate.handleHistoryOption(options)
 
   for (let prop of ['target', 'origin']) {
