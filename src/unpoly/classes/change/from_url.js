@@ -154,6 +154,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         cache: false, // this implies { verifyCache: false }
         confirm: false,
         feedback: false,
+        solo: false,
       })
 
       // A well-behaved server will respond with "304 Not Modified" if the reload
