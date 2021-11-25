@@ -1276,6 +1276,23 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
           expect(@lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
+      it "does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", asyncSpec (next) ->
+        renderSpy = spyOn(up, 'render')
+        form = fixture('form[up-submit][action="/path"][up-scroll="main"][up-confirm="really submit?"][up-focus="layer"][up-history="true"][up-location="/thanks"][up-navigate=true][up-transition="cross-fade"]')
+        textField = e.affix(form, 'input[type=text][name=input][up-validate]')
+        textField.value = 'changed'
+
+        Trigger.change(textField)
+
+        next ->
+          expect(renderSpy.calls.count()).toBe(1)
+          expect(renderSpy.calls.mostRecent().args[0].scroll).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].confirm).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].history).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].location).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].navigate).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].transition).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].focus).toEqual('keep') # forced setting
 
     describe 'form[up-validate]', ->
 

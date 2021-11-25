@@ -234,9 +234,29 @@ up.form = (function() {
   @stable
   */
   function submitOptions(form, options) {
+    form = getForm(form)
+    options = parseBasicOptions(form, options)
+
+    parser = new up.OptionsParser(options, form)
+    parser.string('failTarget', { default: up.fragment.toTarget(form) })
+
+    // The guardEvent will also be assigned an { renderOptions } property in up.render()
+    options.guardEvent ||= up.event.build('up:form:submit', {log: 'Submitting form'})
+
+    // Now that we have extracted everything form-specific into options, we can call
+    // up.link.followOptions(). This will also parse the myriads of other options
+    // that are possible on both <form> and <a> elements.
+    u.assign(options, up.link.followOptions(form, options))
+
+    return options
+  }
+
+  // This was extracted from submitOptions().
+  // Validation needs to submit a form without options intended for the final submission,
+  // like [up-scroll], [up-confirm], etc.
+  function parseBasicOptions(form, options) {
     options = u.options(options)
-    form = up.fragment.get(form)
-    form = e.closest(form, 'form')
+    form = getForm(form)
     const parser = new up.OptionsParser(options, form)
 
     // Parse params from form fields.
@@ -270,16 +290,6 @@ up.form = (function() {
       // a demo of vanilla browser behavior.
       options.url = up.Params.stripURL(options.url)
     }
-
-    parser.string('failTarget', {default: up.fragment.toTarget(form)})
-
-    // The guardEvent will also be assigned an { renderOptions } property in up.render()
-    options.guardEvent ||= up.event.build('up:form:submit', {log: 'Submitting form'})
-
-    // Now that we have extracted everything form-specific into options, we can call
-    // up.link.followOptions(). This will also parse the myriads of other options
-    // that are possible on both <form> and <a> elements.
-    u.assign(options, up.link.followOptions(form, options))
 
     return options
   }
@@ -323,7 +333,7 @@ up.form = (function() {
   up.on('up:click', submitButtonSelector, function (event, button) {
     // Don't mess with focus unless we know that we're going to handle the form.
     // https://groups.google.com/g/unpoly/c/wsiATxepVZk
-    const form = e.closest(button, 'form')
+    const form = getForm(button)
     if (form && isSubmittable(form)) {
       button.focus()
     }
@@ -509,10 +519,8 @@ up.form = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     field = up.fragment.get(field)
 
-    options = u.options(options)
-    options.navigate = false
+    options = parseBasicOptions(field, options)
     options.origin = field
-    options.history = false
     options.target = findValidateTarget(field, options)
     options.focus = 'keep'
 
@@ -528,7 +536,7 @@ up.form = (function() {
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
     options.guardEvent = up.event.build('up:form:validate', { field, log: 'Validating form' })
 
-    return submit(field, options)
+    return up.render(options)
   }
 
   /*-
@@ -644,9 +652,15 @@ up.form = (function() {
     return switcher || up.fail('Could not find [up-switch] field for %o', target)
   }
 
-  function getContainer(element) {
+  function getForm(elementOrTarget, fallbackSelector) {
+    const element = up.fragment.get(elementOrTarget)
+
     // Element#form will also work if the element is outside the form with an [form=form-id] attribute
-    return element.form || e.closest(element, `form, ${up.layer.anySelector()}`)
+    return element.form || e.closest(element, 'form') || (fallbackSelector && e.closest(element, fallbackSelector))
+  }
+
+  function getContainer(element) {
+    return getForm(element, up.layer.anySelector())
   }
 
   function isField(element) {
