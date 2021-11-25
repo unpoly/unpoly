@@ -342,6 +342,47 @@ describe 'up.fragment', ->
               expect(result.value).toBeAbortError()
               done()
 
+        describe 'last modification time' , ->
+
+          it 'sets an Last-Modified response header as an [up-time] attribute', asyncSpec (next) ->
+            fixture('.target', text: 'old content')
+            up.render('.target', url: '/path')
+
+            next ->
+              jasmine.respondWithSelector('.target',
+                text: 'new content',
+                responseHeaders: { 'Last-Modified': 'Wed, 21 Oct 2015 07:28:00 GMT' }
+              )
+
+            next ->
+              expect('.target').toHaveText('new content')
+              expect('.target').toHaveAttribute('up-time', '1445412480')
+
+          it 'does not change an existing [up-time] attribute on the new fragment with information from the Last-Modified header', asyncSpec (next) ->
+            fixture('.target', text: 'old content')
+            up.render('.target', url: '/path')
+
+            next ->
+              jasmine.respondWithSelector('.target[up-time=123]',
+                text: 'new content',
+                responseHeaders: { 'Last-Modified': 'Wed, 21 Oct 2015 07:28:00 GMT' }
+              )
+
+            next ->
+              expect('.target').toHaveText('new content')
+              expect('.target').toHaveAttribute('up-time', '123')
+
+          it 'does not set an [up-time] attribute if the server did not send an Last-Modified header', asyncSpec (next) ->
+            fixture('.target', text: 'old content')
+            up.render('.target', url: '/path')
+
+            next ->
+              jasmine.respondWithSelector('.target', text: 'new content')
+
+            next ->
+              expect('.target').toHaveText('new content')
+              expect('.target').not.toHaveAttribute('up-time')
+
         describe 'with { params } option', ->
 
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->

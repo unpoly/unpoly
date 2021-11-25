@@ -84,4 +84,23 @@ up.Change.Addition = class Addition extends up.Change {
       e.setMissingAttr(newElement, 'up-source', u.normalizeURL(source, { hash: false }))
     }
   }
+
+  setTime({ newElement, time }) {
+    if (!time) {
+      return
+    }
+
+    if (time instanceof Date) {
+      time = time.getTime() / 1000
+    }
+
+    // time.valueOf() casts to epoch seconds for Date,
+    // and returns self for numbers or strings.
+    e.setMissingAttr(newElement, 'up-time', time)
+  }
+
+  setMeta(options) {
+    this.setSource(options)
+    this.setTime(options)
+  }
 }

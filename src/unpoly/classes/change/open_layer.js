@@ -69,7 +69,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.handleHistory()
 
     // Remember where the element came from to support up.reload(element).
-    this.setSource({ newElement: this.content, source: this.options.source })
+    this.setMeta({ newElement: this.content, source: this.options.source })
 
     // Unwrap <noscript> tags
     responseDoc.finalizeElement(this.content)

@@ -118,7 +118,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
   async executeStep(step) {
     // Remember where the element came from to support up.reload(element).
-    this.setSource(step)
+    this.setMeta(step)
 
     switch (step.placement) {
       case 'swap': {

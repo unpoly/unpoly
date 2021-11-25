@@ -171,6 +171,13 @@ up.Response = class Response extends up.Record {
     return up.protocol.cspNoncesFromHeader(this.getHeader('Content-Security-Policy'))
   }
 
+  get lastModified() {
+    let header = this.getHeader('Last-Modified')
+    if (header) {
+      return new Date(header)
+    }
+  }
+
   /*-
   The response body parsed as a JSON string.
 
