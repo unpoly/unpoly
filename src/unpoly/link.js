@@ -370,6 +370,8 @@ up.link = (function() {
   function followOptions(link, options) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
+
+    // Request options
     options = parseRequestOptions(link, options)
 
     const parser = new up.OptionsParser(options, link, {fail: true})
