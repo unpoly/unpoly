@@ -5095,23 +5095,42 @@ describe 'up.fragment', ->
           expect('.element').toHaveText('new text')
           expect(up.reveal).not.toHaveBeenCalled()
 
-      it "sends an X-Up-Reload-From-Time header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec (next) ->
-        element = fixture('.element[up-source="/source"][up-time="1608712106"]')
+      it "sends an If-Modified-Since header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec (next) ->
+        element = fixture('.element[up-source="/source"][up-time="1445412480"]')
 
         up.reload(element)
 
         next =>
           expect(@lastRequest().url).toMatchURL('/source')
-          expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
+          expect(@lastRequest().requestHeaders['If-Modified-Since']).toEqual('Wed, 21 Oct 2015 07:28:00 GMT')
 
-      it "sends an X-Up-Reload-From-Time: 0 header if no timestamp is known for the fragment", asyncSpec (next) ->
+      it "sends no If-Modified-Since header if no timestamp is known for the fragment", asyncSpec (next) ->
         element = fixture('.element[up-source="/source"]')
 
         up.reload(element)
 
         next =>
           expect(@lastRequest().url).toMatchURL('/source')
-          expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
+          expect(@lastRequest().requestHeaders['If-Modified-Since']).toBeUndefined()
+
+      - if up.migrate.loaded
+        it "sends an X-Up-Reload-From-Time header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec (next) ->
+          element = fixture('.element[up-source="/source"][up-time="1608712106"]')
+
+          up.reload(element)
+
+          next =>
+            expect(@lastRequest().url).toMatchURL('/source')
+            expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('1608712106')
+
+        it "sends an X-Up-Reload-From-Time: 0 header if no timestamp is known for the fragment", asyncSpec (next) ->
+          element = fixture('.element[up-source="/source"]')
+
+          up.reload(element)
+
+          next =>
+            expect(@lastRequest().url).toMatchURL('/source')
+            expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
 
       it "reloads the layer's main element if no selector is given", asyncSpec (next) ->
         up.fragment.config.mainTargets = ['.element']

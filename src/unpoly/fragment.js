@@ -178,11 +178,14 @@ up.fragment = (function() {
 
   @function up.fragment.time
   @param {Element} element
-  @return {string}
+  @return {Date}
   @internal
   */
   function timeOf(element) {
-    return e.closestAttr(element, 'up-time') || '0'
+    let value = e.closestAttr(element, 'up-time')
+    if (value) {
+      return new Date(Number(value) * 1000)
+    }
   }
 
   /*-
@@ -1400,7 +1403,11 @@ up.fragment = (function() {
     const element = getSmart(options.target, options)
     options.url ||= sourceOf(element)
     options.headers ||= {}
-    options.headers[up.protocol.headerize('reloadFromTime')] = timeOf(element)
+    let time = timeOf(element)
+    if (time) {
+      options.headers['If-Modified-Since'] = time.toUTCString()
+    }
+    up.migrate.postprocessReloadOptions?.(options, time)
     return render(options)
   }
 

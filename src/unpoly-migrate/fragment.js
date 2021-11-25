@@ -157,3 +157,7 @@ up.migrate.preprocessRenderOptions = function(options) {
     }
   }
 }
+
+up.migrate.postprocessReloadOptions = function(options, time) {
+  options.headers[up.protocol.headerize('reloadFromTime')] = u.dateToSeconds(time) || '0'
+}

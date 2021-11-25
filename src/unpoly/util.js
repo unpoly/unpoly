@@ -1983,8 +1983,12 @@ up.util = (function() {
 
   const SPRINTF_PLACEHOLDERS = /%[oOdisf]/g
 
-  function secondsSinceEpoch() {
-    return Math.floor(Date.now() * 0.001)
+  function dateToSeconds(date) {
+    return Math.floor(date.getTime() * 0.001)
+  }
+
+  function secondsToDate(seconds) {
+    return new Date(seconds * 1000)
   }
 
   /*-
@@ -2024,6 +2028,8 @@ up.util = (function() {
       return !fn(...args)
     }
   }
+
+
 
   return {
     parseURL,
@@ -2134,7 +2140,8 @@ up.util = (function() {
     sprintf,
     sprintfWithFormattedArgs,
     renameKeys,
-    timestamp: secondsSinceEpoch,
+    dateToSeconds,
+    secondsToDate,
     allSettled,
     negate,
   }

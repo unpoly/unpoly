@@ -278,6 +278,8 @@ up.protocol = (function() {
   If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Time: 0`).
 
   @header X-Up-Reload-From-Time
+  @deprecated
+    Use the standard [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) header instead.
   @stable
   */
 

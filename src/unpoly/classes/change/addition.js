@@ -86,17 +86,11 @@ up.Change.Addition = class Addition extends up.Change {
   }
 
   setTime({ newElement, time }) {
-    if (!time) {
-      return
-    }
-
-    if (time instanceof Date) {
-      time = time.getTime() / 1000
-    }
+    if (!time) return
 
     // time.valueOf() casts to epoch seconds for Date,
     // and returns self for numbers or strings.
-    e.setMissingAttr(newElement, 'up-time', time)
+    e.setMissingAttr(newElement, 'up-time', u.dateToSeconds(time))
   }
 
   setMeta(options) {
