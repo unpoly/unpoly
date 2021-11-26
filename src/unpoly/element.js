@@ -1024,6 +1024,13 @@ up.element = (function() {
     return closest(element, '[' + attr + ']')?.getAttribute(attr)
   }
 
+  // function closestAttr(element, attr, parser = stringAttr) {
+  //   let element = closest(element, '[' + attr + ']')?
+  //   if (element) {
+  //     return parser(element, attr)
+  //   }
+  // }
+
   /*-
   Temporarily sets the inline CSS styles on the given element.
 

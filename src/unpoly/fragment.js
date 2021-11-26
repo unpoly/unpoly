@@ -184,7 +184,11 @@ up.fragment = (function() {
   function timeOf(element) {
     let value = e.closestAttr(element, 'up-time')
     if (value) {
-      return new Date(Number(value) * 1000)
+      if (value === 'false') {
+        return null
+      } else {
+        return new Date(Number(value) * 1000)
+      }
     }
   }
 

@@ -187,6 +187,6 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     renderOptions.cspNonces = this.response.cspNonces
 
-    renderOptions.time = this.response.lastModified
+    renderOptions.time ??= this.response.lastModified
   }
 }
