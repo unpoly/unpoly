@@ -786,6 +786,24 @@ describe 'up.form', ->
         next =>
           expect('.response').toHaveText('new text')
 
+      it 'emits an up:form:submit event with information about the form submission', ->
+        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+        e.affix(form, 'input[name="field1"][value="value1"]')
+        e.affix(form, 'input[name="field2"][value="value2"]')
+        submitButton = e.affix(form, 'input[type="submit"][name="submit-button"][value="submit-button-value"]')
+        up.hello(form)
+
+        submitEvent = null
+        form.addEventListener('up:form:submit', (event) => submitEvent = event)
+
+        Trigger.clickSequence(submitButton)
+
+        expect(submitEvent).toBeEvent('up:form:submit')
+        expect(submitEvent.params).toEqual(jasmine.any(up.Params))
+        expect(submitEvent.params.get('field1')).toEqual('value1')
+        expect(submitEvent.params.get('field2')).toEqual('value2')
+        expect(submitEvent.submitButton).toBe(submitButton)
+
       it 'allows to refer to this form as "&" in the target selector', asyncSpec (next) ->
         $form = $fixture('form.my-form[action="/form-target"][up-target="&"]').text('old form text')
         $submitButton = $form.affix('input[type="submit"]')
