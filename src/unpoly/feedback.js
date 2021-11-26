@@ -23,25 +23,31 @@ Let's say we have an `<nav>` element with two links, pointing to `/foo` and `/ba
 By giving the navigation bar the `[up-nav]` attribute, links pointing to the current browser address are highlighted
 as we navigate through the site.
 
-If the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class:
+While the current URL is `/foo`, the first link is automatically marked with an [`.up-current`](/a.up-current) class.
+We also assign an [`[aria-current]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-current) attribute
+to convey the highlighted link to assistive technologies:
 
 ```html
 <nav up-nav>
-  <a href="/foo" up-follow class="up-current">Foo</a>
+  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
   <a href="/bar" up-follow>Bar</a>
 </nav>
 ```
 
 When the user clicks on the `/bar` link, the link will receive the [`.up-active`](/a.up-active) class while it is waiting
-for the server to respond. The targeted fragment (the `<main>` element) gets the `.up-loading` class:
+for the server to respond.
+
+The targeted fragment (the `<main>` element) gets the `.up-loading` class.
+We also assign an [`[aria-busy]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-busy) attribute
+to convey the pending update to assistive technologies:
 
 ```
 <nav up-nav>
-  <a href="/foo" up-follow class="up-current">Foo</a>
+  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
   <a href="/bar" up-follow class="up-active">Bar</a>
 </div>
 
-<main class="up-loading">
+<main class="up-loading" aria-busy="true">
   Foo content
 </main>
 ```
@@ -52,7 +58,7 @@ Since the new URL is `/bar`, the [`.up-current`](/a.up-current) class has been m
 ```html
 <nav up-nav>
   <a href="/foo" up-follow>Foo</a>
-  <a href="/bar" up-follow class="up-current">Bar</a>
+  <a href="/bar" up-follow class="up-current" aria-current="page">Bar</a>
 </nav>
 
 <main>
@@ -181,13 +187,19 @@ up.feedback = (function() {
   }
 
   /*-
-  Links that are currently [loading through Unpoly](/a-up-follow)
-  are assigned the `.up-active` class automatically.
+  Links that are being [followed](/a-up-follow)
+  are assigned the `.up-active` class while waiting for the server response.
 
-  Style `.up-active` in your CSS to improve the perceived responsiveness
-  of your user interface.
+  Consider styling active links in your CSS to improve the perceived responsiveness
+  of your user interface:
 
-  The `.up-active` class will be removed when the link is done loading.
+  ```css
+  a.up-active {
+    background-color: yellow;
+  }
+  ```
+
+  The `.up-active` attribute will be removed when the link is done loading.
 
   ### Example
 
@@ -197,8 +209,8 @@ up.feedback = (function() {
   <a href="/foo" up-follow>Foo</a>
   ```
 
-  The user clicks on the link. While the request is loading,
-  the link has the `.up-active` class:
+  When the user clicks on the link, the link is assigned the `.up-active` class
+  while the request is loading:
 
   ```html
   <a href="/foo" up-follow class="up-active">Foo</a>
@@ -208,7 +220,7 @@ up.feedback = (function() {
   is removed and the [`.up-current`](/a.up-current) class is added:
 
   ```html
-  <a href="/foo" up-follow class="up-current">Foo</a>
+  <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
   ```
 
   ### Related
@@ -222,7 +234,19 @@ up.feedback = (function() {
   /*-
   Targeted fragments are assigned the `.up-loading` class while waiting for the server response.
 
-  The `.up-loading` class will be removed when the fragment was updated.
+  Consider styling loading fragments in your CSS to improve the perceived responsiveness
+  of your user interface:
+
+  ```css
+  .up-loading {
+    opacity: 0.6;
+  }
+  ```
+
+  Loading fragments also get an [`[aria-busy=true]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-busy) attribute
+  to convey the pending update to assistive technologies.
+
+  The `.up-loading` class and `[aria-busy]` attribute will be removed when the fragment was updated.
 
   ### Example
 
@@ -243,7 +267,7 @@ up.feedback = (function() {
   While the request is loading, the targeted element has the `.up-loading` class:
 
   ```html
-  <div class="foo up-loading">
+  <div class="foo up-loading" aria-busy="busy">
     Old content
   </div>
   ```
