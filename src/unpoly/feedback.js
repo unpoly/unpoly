@@ -308,27 +308,17 @@ up.feedback = (function() {
       return
     }
 
-    let map = getFeedbackClassAssignments(request)
-
-    for (let [element, klass] of map) {
-      element.classList.add(klass)
-      u.always(request, () => element.classList.remove(klass))
-    }
-  }
-
-  function getFeedbackClassAssignments(request) {
-    let map = []
+    let clean = (fn) => u.always(request, fn)
 
     let activeElement = getActiveElementFromRenderOptions(request)
     if (activeElement) {
-      map.push([activeElement, CLASS_ACTIVE])
+      clean(e.addTemporaryClass(activeElement, CLASS_ACTIVE))
     }
 
     for (let targetElement of request.targetElements) {
-      map.push([targetElement, CLASS_LOADING])
+      clean(e.addTemporaryClass(targetElement, CLASS_LOADING))
+      clean(e.setTemporaryAttr(targetElement, 'aria-busy', 'true'))
     }
-
-    return map
   }
 
   function getActiveElementFromRenderOptions(request) {

@@ -1052,6 +1052,16 @@ up.element = (function() {
     return () => setInlineStyle(element, oldStyles)
   }
 
+  function addTemporaryClass(element, klass) {
+    element.classList.add(klass)
+    return () => element.classList.remove(klass)
+  }
+
+  function setTemporaryAttr(element, attr, value) {
+    element.setAttribute(attr, value)
+    return () => element.removeAttribute(element, attr)
+  }
+
   /*-
   Receives [computed CSS styles](https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle)
   for the given element.
@@ -1289,6 +1299,8 @@ up.element = (function() {
     isVisible, // practical
     upAttrs,
     toggleAttr,
-    isDetached
+    isDetached,
+    addTemporaryClass,
+    setTemporaryAttr
   }
 })()
