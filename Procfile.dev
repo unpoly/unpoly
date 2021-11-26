@@ -1,2 +1,3 @@
-watch-dev: npm run watch-dev
+build: npm run watch-dev
 test: npm run test
+docs: test -d ../unpoly-site && cd ../unpoly-site && bundle exec middleman server
