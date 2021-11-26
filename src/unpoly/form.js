@@ -241,7 +241,11 @@ up.form = (function() {
     parser.string('failTarget', { default: up.fragment.toTarget(form) })
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
-    options.guardEvent ||= up.event.build('up:form:submit', {log: 'Submitting form'})
+    options.guardEvent ||= up.event.build('up:form:submit', {
+      submitButton: options.submitButton,
+      params: options.params,
+      log: 'Submitting form'
+    })
 
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
@@ -262,16 +266,16 @@ up.form = (function() {
     // Parse params from form fields.
     const params = up.Params.fromForm(form)
 
-    let submitButton = submittingButton(form)
-    if (submitButton) {
+    options.submitButton ||= submittingButton(form)
+    if (options.submitButton) {
       // Submit buttons with a [name] attribute will add to the params.
       // Note that addField() will only add an entry if the given button has a [name] attribute.
-      params.addField(submitButton)
+      params.addField(options.submitButton)
 
       // Submit buttons may have [formmethod] and [formaction] attribute
       // that override [method] and [action] attribute from the <form> element.
-      options.method ||= submitButton.getAttribute('formmethod')
-      options.url ||= submitButton.getAttribute('formaction')
+      options.method ||= options.submitButton.getAttribute('formmethod')
+      options.url ||= options.submitButton.getAttribute('formaction')
     }
 
     params.addAll(options.params)
@@ -318,8 +322,12 @@ up.form = (function() {
   @event up:form:submit
   @param {Element} event.target
     The `<form>` element that will be submitted.
+  @param {up.Params} event.params
+    The [form parameters](/up.Params) that will be send as the form's request payload.
+  @param {Element} [event.submitButton]
+    The button used to submit the form.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render) for the fragment update
+    An object with [render options](/up.render) for the fragment update.
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
