@@ -283,8 +283,11 @@ up.fragment = (function() {
   @param {string} up-time
     The time when the element's underlying data was last changed.
 
-    The value can either be a Unix timestamp (e.g. `1445412480`)
+    The value can either be a Unix timestamp (e.g. `"1445412480"`)
     or an RFC 1123 time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
+
+    You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
+    when reloading this fragment.
   @experimental
   */
 
