@@ -383,61 +383,6 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('new content')
               expect('.target').toHaveAttribute('up-time', 'false')
 
-        describe 'ETags' , ->
-
-          it 'sets a weak ETag header as an [up-etag] attribute', asyncSpec (next) ->
-            fixture('.target', text: 'old content')
-            up.render('.target', url: '/path')
-
-            next ->
-              jasmine.respondWithSelector('.target',
-                text: 'new content',
-                responseHeaders: { 'Etag': 'W/"0815"' }
-              )
-
-            next ->
-              expect('.target').toHaveText('new content')
-              expect('.target').toHaveAttribute('up-etag', 'W/"0815"')
-
-          it 'sets a strong ETag header as an [up-etag] attribute', asyncSpec (next) ->
-            fixture('.target', text: 'old content')
-            up.render('.target', url: '/path')
-
-            next ->
-              jasmine.respondWithSelector('.target',
-                text: 'new content',
-                responseHeaders: { 'Etag': '"33a64df551425fcc55e4d42a148795d9f25f89d4"' } # it does have extra quotes
-              )
-
-            next ->
-              expect('.target').toHaveText('new content')
-              expect('.target').toHaveAttribute('up-etag', '"33a64df551425fcc55e4d42a148795d9f25f89d4"')
-
-          it 'does not change an existing [up-etag] attribute on the new fragment with information from the ETag header', asyncSpec (next) ->
-            fixture('.target', text: 'old content')
-            up.render('.target', url: '/path')
-
-            next ->
-              jasmine.respondWithSelector('.target[up-etag=123]',
-                text: 'new content',
-                responseHeaders: { 'ETag': '"33a64df551425fcc55e4d42a148795d9f25f89d4"' }
-              )
-
-            next ->
-              expect('.target').toHaveText('new content')
-              expect('.target').toHaveAttribute('up-etag', '123')
-
-          it "sets an [up-etag=false] attribute if the server did not send an ETag header, so we won't fall back to a parent's ETag header later", asyncSpec (next) ->
-            fixture('.target', text: 'old content')
-            up.render('.target', url: '/path')
-
-            next ->
-              jasmine.respondWithSelector('.target', text: 'new content')
-
-            next ->
-              expect('.target').toHaveText('new content')
-              expect('.target').toHaveAttribute('up-etag', 'false')
-
         describe 'with { params } option', ->
 
           it "uses the given params as a non-GET request's payload", asyncSpec (next) ->
@@ -5190,26 +5135,6 @@ describe 'up.fragment', ->
               expect(@lastRequest().requestHeaders['X-Up-Reload-From-Time']).toEqual('0')
 
 
-      describe 'ETags', ->
-
-        it "sends an If-None-Match header with the fragment's timestamp so the server can render nothing if no fresher content exists", asyncSpec (next) ->
-          element = fixture(".element[up-source='/source'][up-etag='\"abc\"']")
-
-          up.reload(element)
-
-          next =>
-            expect(@lastRequest().url).toMatchURL('/source')
-            expect(@lastRequest().requestHeaders['If-None-Match']).toEqual('"abc"') # double quotes are part of the ETag
-
-        it "sends no If-None-Match header if no timestamp is known for the fragment", asyncSpec (next) ->
-          element = fixture('.element[up-source="/source"]')
-
-          up.reload(element)
-
-          next =>
-            expect(@lastRequest().url).toMatchURL('/source')
-            expect(@lastRequest().requestHeaders['If-None-Match']).toBeUndefined()
-
       it "reloads the layer's main element if no selector is given", asyncSpec (next) ->
         up.fragment.config.mainTargets = ['.element']
 
@@ -5528,30 +5453,3 @@ describe 'up.fragment', ->
       it 'returns an [up-time] value seriaized in RFC 1123 format', ->
         element = fixture('.element[up-source="/source"][up-time="Wed, 21 Oct 2015 07:28:00 GMT"]')
         expect(up.fragment.time(element)).toEqual(new Date('Wed, 21 Oct 2015 07:28:00 GMT'))
-
-    describe 'up.fragment.etag', ->
-
-      it 'returns the [up-etag] value of the given element', ->
-        element = fixture(".element[up-etag='\"abc\"']")
-        expect(up.fragment.etag(element)).toEqual('"abc"')
-
-      it 'returns the [up-etag] value of an ancestor', ->
-        parent = fixture(".parent[up-etag='\"abc\"']")
-        element = e.affix(parent, '.element')
-        expect(up.fragment.etag(element)).toEqual('"abc"')
-
-      it "returns undefined if there is no [up-etag] value in the element's ancestry", ->
-        parent = fixture(".parent")
-        element = e.affix(parent, '.element')
-        expect(up.fragment.etag(element)).toBeUndefined()
-
-      it "returns undefined and ignores ancestor's [up-etag] if the element itself has [up-time=etag], indicating that the response had no ETag header", ->
-        parent = fixture(".parent[up-etag='\"abc\"']")
-        element = e.affix(parent, '.element[up-etag=false]')
-        expect(up.fragment.etag(element)).toBeUndefined()
-
-
-
-
-
-
