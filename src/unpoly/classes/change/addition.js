@@ -86,13 +86,23 @@ up.Change.Addition = class Addition extends up.Change {
   }
 
   setTime({ newElement, time }) {
-    // time.valueOf() casts to epoch seconds for Date,
-    // and returns self for numbers or strings.
-    e.setMissingAttr(newElement, 'up-time', time ? u.dateToSeconds(time) : false)
+    // If the server didn't send a Last-Modified header, tag the element
+    // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
+
+    console.log("Time is %o", { time })
+
+    e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
+  }
+
+  setETag({ newElement, etag }) {
+    // If the server didn't send an Etag header, tag the element
+    // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
+    e.setMissingAttr(newElement, 'up-etag', etag || false)
   }
 
   setMeta(options) {
     this.setSource(options)
     this.setTime(options)
+    this.setETag(options)
   }
 }

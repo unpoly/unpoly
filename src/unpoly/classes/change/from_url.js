@@ -186,7 +186,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     renderOptions.context = u.merge(renderOptions.context, this.response.context)
 
     renderOptions.cspNonces = this.response.cspNonces
-
     renderOptions.time ??= this.response.lastModified
+    renderOptions.etag ??= this.response.etag
   }
 }

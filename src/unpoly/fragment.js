@@ -174,21 +174,44 @@ up.fragment = (function() {
   }
 
   /*-
-  Returns a timestamp for the last modification of the content in the given element.
+  Returns a `Date` for the last modification time of the content in the given element.
+
+  The last modification time corresponds to the `Last-Modified` header in the response that
+  rendered the fragment. Alternatively the `[up-time]` attribute of the element or an ancestor is used.
 
   @function up.fragment.time
   @param {Element} element
-  @return {Date}
-  @internal
+  @return {Date|undefined}
+  @experimental
   */
   function timeOf(element) {
     let value = e.closestAttr(element, 'up-time')
-    if (value) {
-      if (value === 'false') {
-        return null
-      } else {
-        return new Date(Number(value) * 1000)
-      }
+    if (value && value !== 'false') {
+      // We support both Unix timestamps (e.g. "1445412480")
+      // and RFC 1123 times (e.g. "Wed, 21 Oct 2015 07:28:00 GMT").
+      if (/^\d+$/.test(value)) {
+       value = Number(value) * 1000
+     }
+     return new Date(value)
+    }
+  }
+
+  /*-
+  Returns the ETag of the content in the given element.
+
+  The ETag corresponds to the [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
+  header in the response that rendered the fragment.
+  Alternatively the `[up-etag]` attribute of the element or an ancestor is used.
+
+  @function up.fragment.etag
+  @param {Element} element
+  @return {string|undefined}
+  @experimental
+  */
+  function etagOf(element) {
+    let value = e.closestAttr(element, 'up-etag')
+    if (value && value !== 'false') {
+      return value
     }
   }
 
@@ -198,6 +221,9 @@ up.fragment = (function() {
   This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
   a fragment. This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
   request/response exchange to **~1 KB**.
+
+  Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
+  from a response with a `Last-Modified` header.
 
   ## Example
 
@@ -214,36 +240,36 @@ up.fragment = (function() {
   and we waste resources sending the same unchanged HTML from the server.
 
   We can improve this by setting an `[up-time]` attribute and the message list.
-  The attribute value is the time of the most recent message.
-
-  The time is encoded as the number of seconds since [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
-  When, for instance, the last message in a list was received from December 24th, 1:51:46 PM UTC,
-  we use the following HTML:
+  The attribute value is the time of the most recent message:
 
   ```html
-  <div class="messages" up-time="1608730818" up-poll>
+  <div class="messages" up-time="December 24th, 13:51:46 GMT" up-poll>
   ...
   </div>
   ```
 
-  When reloading Unpoly will echo the `[up-time]` timestamp in an `X-Up-Reload-From-Time` header:
+  When reloading Unpoly will send the `[up-time]` as an [`If-Modified-Since`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since) header:
 
   ```http
-  X-Up-Reload-From-Time: 1608730818
+  If-Modified-Since: December 24th, 13:51:46 GMT
   ```
 
   The server can compare the time from the request with the time of the last data update.
   If no more recent data is available, the server can render nothing and respond with
-  an [`X-Up-Target: :none`](/X-Up-Target) header.
+  a
 
-  Here is an example with [unpoly-rails](https://unpoly.com/install/ruby):
+  Here is an example for a Ruby on Rails backend, expanded for clarity:
 
   ```ruby
   class MessagesController < ApplicationController
 
     def index
-      if up.reload_from_time == current_user.last_message_at
-        up.render_nothing
+      # Set response's Last-Modified header
+      response.last_modified = current_user.last_message_at
+
+      # Compare response's Last-Modified header with request's If-Modified-Since header.
+      if request.fresh?(response)
+        head :not_modified
       else
         @messages = current_user.messages.order(time: :desc).to_a
         render 'index'
@@ -255,8 +281,10 @@ up.fragment = (function() {
 
   @selector [up-time]
   @param {string} up-time
-    The number of seconds between the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
-    and the time when the element's underlying data was last changed.
+    The time when the element's underlying data was last changed.
+
+    The value can either be a Unix timestamp (e.g. `1445412480`)
+    or an RFC 1123 time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
   @experimental
   */
 
@@ -1406,13 +1434,22 @@ up.fragment = (function() {
     options.target ||= ':main'
     const element = getSmart(options.target, options)
     options.url ||= sourceOf(element)
-    options.headers ||= {}
-    let time = timeOf(element)
-    if (time) {
-      options.headers['If-Modified-Since'] = time.toUTCString()
-    }
+    options.headers = u.merge(options.headers, conditionalHeaders(element))
     up.migrate.postprocessReloadOptions?.(options, time)
     return render(options)
+  }
+
+  function conditionalHeaders(element) {
+    let headers = {}
+    let time = timeOf(element)
+    if (time) {
+      headers['If-Modified-Since'] = time.toUTCString()
+    }
+    let etag = etagOf(element)
+    if (etag) {
+      headers['If-None-Match'] = etag
+    }
+    return headers
   }
 
   /*-
@@ -1869,7 +1906,9 @@ up.fragment = (function() {
     expandTargets,
     toTarget,
     matches,
-    hasAutoHistory
+    hasAutoHistory,
+    time: timeOf,
+    etag: etagOf,
   }
 })()
 

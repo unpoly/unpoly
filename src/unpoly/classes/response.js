@@ -178,6 +178,10 @@ up.Response = class Response extends up.Record {
     }
   }
 
+  get etag() {
+    return this.getHeader('ETag')
+  }
+
   /*-
   The response body parsed as a JSON string.
 

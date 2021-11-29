@@ -1983,14 +1983,6 @@ up.util = (function() {
 
   const SPRINTF_PLACEHOLDERS = /%[oOdisf]/g
 
-  function dateToSeconds(date) {
-    return Math.floor(date.getTime() * 0.001)
-  }
-
-  function secondsToDate(seconds) {
-    return new Date(seconds * 1000)
-  }
-
   /*-
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
 
@@ -2140,8 +2132,6 @@ up.util = (function() {
     sprintf,
     sprintfWithFormattedArgs,
     renameKeys,
-    dateToSeconds,
-    secondsToDate,
     allSettled,
     negate,
   }
