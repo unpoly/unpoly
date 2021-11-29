@@ -200,8 +200,9 @@ up.radio = (function() {
   This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
   request/response exchange to **~1 KB**.
 
-  To achieve this we timestamp your fragments with an `[up-time]` attribute to indicate
-  when the underlying data was last changed. See `[up-time]` for a detailed example.
+  To achieve this, assign `[up-time]` or `[up-etag]` attributes to the fragment you're
+  reloading. Unpoly will automatically send these values as `If-Modified-Since` or
+  `If-None-Match` headers when reloading.
 
   @selector [up-poll]
   @param [up-interval]
