@@ -47,8 +47,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.matchPostflight()
 
     onApplicable()
-    // Don't log @target since that does not include hungry elements
-    up.puts('up.render()', `Updating "${this.bestPreflightSelector()}" in ${this.layer}`)
+
+    if (this.steps.length) {
+      // Don't log @target since that does not include hungry elements
+      up.puts('up.render()', `Updating "${this.bestPreflightSelector()}" in ${this.layer}`)
+    } else {
+      up.puts('up.render()', 'Nothing to render')
+    }
 
     this.options.title = this.improveHistoryValue(this.options.title, this.responseDoc.getTitle())
 
