@@ -94,8 +94,15 @@ up.Change.Addition = class Addition extends up.Change {
     e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
   }
 
+  setETag({ newElement, etag }) {
+    // If the server didn't send an Etag header, tag the element
+    // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
+    e.setMissingAttr(newElement, 'up-etag', etag || false)
+  }
+
   setMeta(options) {
     this.setSource(options)
     this.setTime(options)
+    this.setETag(options)
   }
 }

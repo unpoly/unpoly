@@ -198,9 +198,11 @@ up.radio = (function() {
 
   When polling a fragment periodically we want to avoid rendering unchanged content.
   This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
-  unchanged request/response exchange to **~1 KB**.
+  request/response exchange to **~1 KB**.
 
-  See `[up-time]` for more details on how to achieve this.
+  To achieve this, assign `[up-time]` or `[up-etag]` attributes to the fragment you're
+  reloading. Unpoly will automatically send these values as `If-Modified-Since` or
+  `If-None-Match` headers when reloading.
 
   @selector [up-poll]
   @param [up-interval]

@@ -197,6 +197,25 @@ up.fragment = (function() {
   }
 
   /*-
+  Returns the [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) of the content in the given element.
+
+  The ETag corresponds to the [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
+  header in the response that rendered the fragment.
+  Alternatively the `[up-etag]` attribute of the element or an ancestor is used.
+
+  @function up.fragment.etag
+  @param {Element} element
+  @return {string|undefined}
+  @experimental
+  */
+  function etagOf(element) {
+    let value = e.closestAttr(element, 'up-etag')
+    if (value && value !== 'false') {
+      return value
+    }
+  }
+
+  /*-
   Sets the time when the fragment's underlying data was last changed.
 
   This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
@@ -270,6 +289,82 @@ up.fragment = (function() {
     or an RFC 1123 time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
 
     You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
+    when reloading this fragment.
+  @experimental
+  */
+
+  /*-
+  Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
+
+  This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
+  a fragment. This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
+  request/response exchange to **~1 KB**.
+
+  Unpoly will automatically set an `[up-etag]` attribute when a fragment was rendered
+  from a response with a `ETag` header.
+
+
+  ## Example
+
+
+  Let's say we display a stock symbol with its current trading price.  We use the `[up-poll]` attribute to reload the `.stock` fragment every 30 seconds:
+
+  ```html
+  <div class="stock" up-poll>
+    Name: Games Workshop Group PLC
+    Price: 119.05 USD
+  </div>
+  ```
+
+  The view is now always up to date. But most of the time there will not be a change in price,
+  and we waste resources sending the same unchanged HTML from the server.
+
+  We can improve this by setting an `[up-etag]` attribute on the fragment.
+  The attribute value is an [entity tag](https://en.wikipedia.org/wiki/HTTP_ETag) for the underlying data:
+
+  ```html
+  <!-- Double quotes are part of an ETag -->
+  <div class="stock" up-time="W/&quot;stock/mwfk/20211129140459&quot;" up-poll>
+    ...
+  </div>
+  ```
+
+  When reloading Unpoly will send the `[up-etag]` as an [`If-None-Match`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match) header:
+
+  ```http
+  If-None-Match: W/"stock/mwfk/20211129140459"
+  ```
+
+  The server can compare the ETag from the request with the ETag of the underlying data.
+  If no more recent data is available, the server can skip rendering and
+  send with an empty `304 Not Modified` response.
+
+  Here is an example for a Ruby on Rails backend, expanded for clarity:
+
+  ```ruby
+  class MessagesController < ApplicationController
+
+    def index
+      # Set response's Last-Modified header
+      response.etag = current_user.cache_key_with_version
+
+      # Compare response's ETag header with request's If-None-Match header.
+      if request.fresh?(response)
+        head :not_modified
+      else
+        @messages = current_user.messages.order(time: :desc).to_a
+        render 'index'
+      end
+    end
+
+  end
+  ```
+
+  @selector [up-etag]
+  @param {string} up-etag
+    An ETag for the element's underlying data.
+
+    You can also set the value to `"false"` to prevent a `If-None-Match` request header
     when reloading this fragment.
   @experimental
   */
@@ -1419,18 +1514,23 @@ up.fragment = (function() {
     const options = parseTargetAndOptions(args)
     options.target ||= ':main'
     const element = getSmart(options.target, options)
-
     options.url ||= sourceOf(element)
+    options.headers = u.merge(options.headers, conditionalHeaders(element))
+    up.migrate.postprocessReloadOptions?.(options, time)
+    return render(options)
+  }
 
-    options.headers ||= {}
+  function conditionalHeaders(element) {
+    let headers = {}
     let time = timeOf(element)
     if (time) {
-      options.headers['If-Modified-Since'] = time.toUTCString()
+      headers['If-Modified-Since'] = time.toUTCString()
     }
-
-    up.migrate.postprocessReloadOptions?.(options, time)
-
-    return render(options)
+    let etag = etagOf(element)
+    if (etag) {
+      headers['If-None-Match'] = etag
+    }
+    return headers
   }
 
   /*-
@@ -1889,6 +1989,7 @@ up.fragment = (function() {
     matches,
     hasAutoHistory,
     time: timeOf,
+    etag: etagOf,
   }
 })()
 
