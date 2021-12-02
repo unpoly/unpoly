@@ -619,6 +619,22 @@ describe 'up.element', ->
       expect(element.tagName).toEqual('NOSCRIPT')
       expect(element.textContent).toEqual('alternative content')
 
+    it 'create an element when there is leading whitespace in the given string (bugfix)', ->
+      html = "    <h1>Full story</h1>"
+      element = up.element.createFromHTML(html)
+      expect(element.tagName).toEqual('H1')
+      expect(element.textContent).toEqual('Full story')
+
+    it "throws an error if there is more than one element in the given string's the root depth", ->
+      html = "<h1>Full story</h1><h2>Subtitle </h2>"
+      parse = -> up.element.createFromHTML(html)
+      expect(parse).toThrowError(/must have a single root element/)
+
+    it "throws an error if there is no element in the given string", ->
+      html = "    "
+      parse = -> up.element.createFromHTML(html)
+      expect(parse).toThrowError(/must have a single root element/)
+
   describe 'up.element.fixedToAbsolute', ->
 
     it "changes the given element's position from fixed to absolute, without changing its rendered position", ->
