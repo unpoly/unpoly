@@ -260,7 +260,7 @@ up.form = (function() {
     form = getForm(form)
     options = parseBasicOptions(form, options)
 
-    parser = new up.OptionsParser(options, form)
+    let parser = new up.OptionsParser(options, form)
     parser.string('failTarget', { default: up.fragment.toTarget(form) })
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
