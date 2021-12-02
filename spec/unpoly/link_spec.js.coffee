@@ -1167,6 +1167,33 @@ describe 'up.link', ->
             expect(document).toHaveSelector('main.target.new')
             expect(document).not.toHaveSelector('main.target.old')
 
+        it 'does not crash when updating an element that is being transitioned', asyncSpec (next) ->
+          $fixture('.target.old', text: 'text 1')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="600"][up-easing="linear"]')
+          Trigger.clickSequence($link)
+
+          next =>
+            jasmine.respondWith('<div class="target">text 2</div>')
+
+          next =>
+            expect('.target.old').toBeAttached()
+            expect('.target.old').toHaveOpacity(1, 0.15)
+            expect('.target.old').toHaveText('text 1')
+
+            expect('.target:not(.old)').toBeAttached()
+            expect('.target:not(.old)').toHaveOpacity(0, 0.15)
+            expect('.target:not(.old)').toHaveText('text 2')
+
+            up.render('.target', content: 'text 3')
+
+          next.after 300, =>
+            expect('.target.old').toHaveOpacity(0.5, 0.15)
+            expect('.target.old').toHaveText('text 1')
+
+            expect('.target:not(.old)').toHaveOpacity(0.5, 0.15)
+            expect('.target:not(.old)').toHaveText('text 3')
+
+
       describe 'wih a CSS selector in the [up-fallback] attribute', ->
 
         it 'uses the fallback selector if the [up-target] CSS does not exist on the page', asyncSpec (next) ->
