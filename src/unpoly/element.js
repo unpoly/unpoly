@@ -738,8 +738,12 @@ up.element = (function() {
     //     innerHTML on Chrome. See https://jsben.ch/QQngJ
     const range = document.createRange()
     range.setStart(document.body, 0)
-    const fragment = range.createContextualFragment(html)
-    return fragment.childNodes[0]
+    const fragment = range.createContextualFragment(html.trim())
+    let elements = fragment.childNodes
+    if (elements.length !== 1) {
+      throw new Error('HTML must have a single root element')
+    }
+    return elements[0]
   }
 
   /*-
