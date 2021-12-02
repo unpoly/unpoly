@@ -119,12 +119,16 @@ up.Response = class Response extends up.Record {
       'eventPlans',
       'context',
       'clearCache',
-      'headers' // custom headers to for synthetic reponses without { xhr } property
+      'headers', // custom headers to for synthetic reponses without { xhr } property
+      'time'
     ]
   }
 
   defaults() {
-    return {headers: {}}
+    return {
+      headers: {},
+      time: new Date()
+    }
   }
 
   /*-
@@ -199,6 +203,11 @@ up.Response = class Response extends up.Record {
   */
   get json() {
     return this.parsedJSON ||= JSON.parse(this.text)
+  }
+
+  get age() {
+    let now = new Date()
+    return now - this.time
   }
 
 }

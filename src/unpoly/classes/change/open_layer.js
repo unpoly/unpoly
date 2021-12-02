@@ -78,6 +78,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
     up.hello(this.layer.element, { layer: this.layer, origin: this.origin })
 
+    let renderResult = new up.RenderResult({
+      layer: this.layer,
+      fragments: [this.content],
+      target: this.target
+    })
+
     // The server may trigger multiple signals that may cause the layer to close:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -101,7 +107,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       }
 
       // Run callbacks for callers that need to know when animations are done.
-      this.onFinished()
+      this.onFinished(renderResult)
     })
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
@@ -118,11 +124,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //     layer = await up.layer.open(...)
     //
     // Don't wait to animations to finish:
-    return new up.RenderResult({
-      layer: this.layer,
-      fragments: [this.content],
-      target: this.target
-    })
+    return renderResult
   }
 
   buildLayer() {

@@ -21,7 +21,9 @@ jasmine.respondWith = (args...) ->
     options = firstArg
     responseText = options.responseText
 
-  if u.isMissing(responseText) # don't override ""
+  status = options.status || 200
+
+  if status != 204 && status != 304 && u.isMissing(responseText) # don't override ""
     responseText = 'response-text'
 
   contentType = options.contentType || 'text/html'
@@ -29,7 +31,7 @@ jasmine.respondWith = (args...) ->
   headers['Content-Type'] ||= contentType
 
   requestAttrs =
-    status: options.status || 200
+    status: status
     contentType: contentType
     responseHeaders: headers
     responseText: responseText

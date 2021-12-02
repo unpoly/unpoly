@@ -919,8 +919,8 @@ up.network = (function() {
     progressBar?.conclude()
   }
 
-  function shouldVerifyCache(response, options = {}) {
-    return response.fromCache &&
+  function shouldVerifyCache(request, response, options = {}) {
+    return request.fromCache &&
       options.verifyCache !== false &&
       u.evalOption(config.verifyCache, response)
   }

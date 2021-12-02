@@ -131,7 +131,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     // like a server-set location, or server-sent events.
     this.augmentOptionsFromResponse(renderOptions)
 
-    if (up.network.shouldVerifyCache(response, renderOptions)) {
+    if (up.network.shouldVerifyCache(this.request, this.response, renderOptions)) {
       // Copy the given options, as we're going to override the { onFinished } prop.
       let originalRenderOptions = u.copy(renderOptions)
       renderOptions.onFinished = (renderResult) => this.verifyCache(renderResult, originalRenderOptions)
@@ -145,6 +145,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     if (/:(before|after)/.test(target)) {
       up.warn('up.render()', 'Cannot verify cache when prepending/appending (target %s)', target)
     } else {
+      up.warn('up.render()', 'Verifying cached response')
       let verifyResult = await up.reload(renderResult.target, {
         ...originalRenderOptions,
         layer: renderResult.layer,

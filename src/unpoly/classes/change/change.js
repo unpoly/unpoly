@@ -14,8 +14,8 @@ up.Change = class Change {
     throw up.error.notImplemented()
   }
 
-  onFinished() {
-    return this.options.onFinished?.()
+  onFinished(renderResult) {
+    return this.options.onFinished?.(renderResult)
   }
 
   // Values we want to keep:

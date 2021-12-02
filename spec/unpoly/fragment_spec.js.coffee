@@ -4362,6 +4362,7 @@ describe 'up.fragment', ->
             # See that the cached request is used.
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
+
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->
@@ -5225,12 +5226,6 @@ describe 'up.fragment', ->
 
         next =>
           expect('.element').toHaveText('new text')
-
-      it 'reloads the given element, deriving a target selector', ->
-        throw "test me"
-
-      it 'reloads multiple elements on the same layer, deriving a target selector', ->
-        throw "test me"
 
     describe 'up.fragment.source()', ->
 

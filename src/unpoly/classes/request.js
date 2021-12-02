@@ -561,7 +561,7 @@ up.Request = class Request extends up.Record {
       dismissLayer: up.protocol.dismissLayerFromXHR(this.xhr),
       eventPlans: up.protocol.eventPlansFromXHR(this.xhr),
       context: up.protocol.contextFromXHR(this.xhr),
-      clearCache: up.protocol.clearCacheFromXHR(this.xhr)
+      clearCache: up.protocol.clearCacheFromXHR(this.xhr),
     }
 
     let methodFromResponse = up.protocol.methodFromXHR(this.xhr)

@@ -107,19 +107,21 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     const swapPromises = this.steps.map(step => this.executeStep(step))
 
-    Promise.all(swapPromises).then(() => {
-      this.abortWhenLayerClosed()
-
-      // Run callback for callers that need to know when animations are done.
-      return this.onFinished()
-    })
-
-    // Don't wait for animations to finish.
-    return new up.RenderResult({
+    let renderResult = new up.RenderResult({
       layer: this.layer,
       fragments: u.map(this.steps, 'newElement'),
       target: this.target,
     })
+
+    Promise.all(swapPromises).then(() => {
+      this.abortWhenLayerClosed()
+
+      // Run callback for callers that need to know when animations are done.
+      return this.onFinished(renderResult)
+    })
+
+    // Don't wait for animations to finish.
+    return renderResult
   }
 
   async executeStep(step) {
