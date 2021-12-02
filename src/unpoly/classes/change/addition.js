@@ -88,9 +88,6 @@ up.Change.Addition = class Addition extends up.Change {
   setTime({ newElement, time }) {
     // If the server didn't send a Last-Modified header, tag the element
     // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
-
-    console.log("Time is %o", { time })
-
     e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
   }
 

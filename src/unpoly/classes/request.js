@@ -386,7 +386,7 @@ up.Request = class Request extends up.Record {
   load() {
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
-    if (this.state !== 'new') { return; }
+    if (this.state !== 'new') { return }
     this.state = 'loading'
 
     // Convert from XHR's callback-based API to up.Request's promise-based API

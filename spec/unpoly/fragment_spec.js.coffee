@@ -332,7 +332,7 @@ describe 'up.fragment', ->
           fixture('.target')
           promise = up.render('.target', url: '/path')
 
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(up.network.isBusy()).toBe(true)
 
           up.network.abort()
 
@@ -5069,7 +5069,7 @@ describe 'up.fragment', ->
           target = fixture('.target')
           promise = up.render(target, { url: '/path' })
 
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(up.network.isBusy()).toBe(true)
 
           up.destroy(target)
 
@@ -5084,7 +5084,7 @@ describe 'up.fragment', ->
           child = e.affix(parent, '.child')
           promise = up.render(child, { url: '/path' })
 
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(up.network.isBusy()).toBe(true)
 
           up.destroy(parent)
 
@@ -5099,7 +5099,7 @@ describe 'up.fragment', ->
           child = e.affix(parent, '.child')
           promise = up.render(parent, { url: '/path' })
 
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(up.network.isBusy()).toBe(true)
 
           up.destroy(child)
 

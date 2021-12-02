@@ -28,12 +28,8 @@ up.Request.Queue = class Queue {
     // make its own check whether a request in the queue is considered slow.
     request.queueTime = new Date()
     this.setSlowTimer()
-
-    if (this.hasConcurrencyLeft()) {
-      this.sendRequestNow(request)
-    } else {
-      this.queueRequest(request)
-    }
+    this.queueRequest(request)
+    u.microtask(() => this.poke())
   }
 
   // Changes a preload request to a non-preload request.
@@ -57,7 +53,7 @@ up.Request.Queue = class Queue {
   }
 
   isBusy() {
-    return this.currentRequests.length > 0
+    return this.currentRequests.length > 0 || this.queuedRequests.length > 0
   }
 
   queueRequest(request) {
@@ -115,11 +111,11 @@ up.Request.Queue = class Queue {
     let tester = up.Request.tester(conditions)
     for (let list of [this.currentRequests, this.queuedRequests]) {
       const abortableRequests = u.filter(list, tester)
-      abortableRequests.forEach(function(abortableRequest) {
+      for (let abortableRequest of abortableRequests) {
         abortableRequest.abort(reason)
         // Avoid changing the list we're iterating over.
         u.remove(list, abortableRequest)
-      })
+      }
     }
   }
 

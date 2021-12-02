@@ -17,20 +17,26 @@ describe('up.network', function() {
 
     describe('up.request()', function() {
 
-      it('makes a request with the given URL and params', function() {
+      it('makes a request with the given URL and params', function(done) {
         up.request('/foo', {params: {key: 'value'}, method: 'post'})
-        const request = this.lastRequest()
-        expect(request.url).toMatchURL('/foo')
-        expect(request.data()).toEqual({key: ['value']})
-        expect(request.method).toEqual('POST')
+        u.microtask(function() {
+          const request = jasmine.lastRequest()
+          expect(request.url).toMatchURL('/foo')
+          expect(request.data()).toEqual({key: ['value']})
+          expect(request.method).toEqual('POST')
+          done()
+        })
       })
 
-      it('also allows to pass the URL as a { url } option instead', function() {
+      it('also allows to pass the URL as a { url } option instead', function(done) {
         up.request({url: '/foo', params: {key: 'value'}, method: 'post'})
-        const request = this.lastRequest()
-        expect(request.url).toMatchURL('/foo')
-        expect(request.data()).toEqual({key: ['value']})
-        expect(request.method).toEqual('POST')
+        u.microtask(function() {
+          const request = jasmine.lastRequest()
+          expect(request.url).toMatchURL('/foo')
+          expect(request.data()).toEqual({key: ['value']})
+          expect(request.method).toEqual('POST')
+          done()
+        })
       })
 
 //      it 'allows to pass in an up.Request instance instead of an options object', ->
@@ -118,6 +124,18 @@ describe('up.network', function() {
         u.task(() => {
           const headers = this.lastRequest().requestHeaders
           expect(headers['X-Requested-With']).toBeMissing()
+          done()
+        })
+      })
+
+      it('does not touch the network if a request is scheduled and aborted within the same microtask', function(done) {
+        let request = up.request('/url')
+        up.network.abort()
+
+        promiseState(request).then(function (result) {
+          expect(result.state).toBe('rejected')
+          expect(result.value).toBeAbortError()
+          expect(jasmine.Ajax.requests.count()).toBe(0)
           done()
         })
       })
@@ -648,6 +666,9 @@ describe('up.network', function() {
 
           next(() => {
             up.request({url: '/foo', cache: true}).then(trackResponse)
+          })
+
+          next(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(1)
           })
 
@@ -677,7 +698,9 @@ describe('up.network', function() {
             // The clock is now a total of 6 minutes after the first request,
             // exceeding the cache's retention time of 5 minutes.
             up.request({url: '/foo', cache: true}).then(trackResponse)
+          })
 
+          next(() => {
             // See that we have triggered a second request
             expect(jasmine.Ajax.requests.count()).toEqual(2)
           })
@@ -1983,6 +2006,20 @@ describe('up.network', function() {
           expect($tokenInput).not.toBeAttached()
         })
       })
+    })
+
+    describe('up.network.isBusy()', function() {
+
+      it('returns true while a request is loading')
+
+      it('returns true in the same microtask that scheduled a request')
+
+      it('returns false before any requests have been schedule')
+
+      it('returns false after all requests succeeded')
+
+      it('returns false after all requests failed')
+
     })
 
   })
