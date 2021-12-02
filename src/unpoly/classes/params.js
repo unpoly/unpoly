@@ -508,7 +508,7 @@ up.Params = class Params {
 
   The added params will include exactly those form values that would be
   included for the given field in a regular form submission. If the given field wouldn't
-    submit a value (like an unchecked `<input type="checkbox">`, nothing will be added.
+  submit a value (like an unchecked `<input type="checkbox">`, nothing will be added.
 
   See `up.Params.fromForm()` for more details and examples.
 

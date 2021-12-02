@@ -154,10 +154,18 @@ up.RenderOptions = (function() {
     )
   }
 
+  function addCallback(options, prop, callback) {
+    if (options[prop]) {
+      callback = u.sequence(options.prop[prop], callback)
+    }
+    options[prop] = callback
+  }
+
   return {
     preprocess,
     finalize,
     assertContentGiven,
     deriveFailOptions,
+    addCallback
   }
 })()

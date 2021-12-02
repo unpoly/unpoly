@@ -23,6 +23,9 @@ up.form = (function() {
 
   @property up.form.config
 
+  @param {boolean} [config.disable=false]
+    Whether to [disable](/up.form.disable) forms while they are submitting.
+
   @param {number} [config.observeDelay=0]
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes. Use this to limit how often the callback
@@ -57,6 +60,8 @@ up.form = (function() {
   @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
 
+    When you add custom JavaScript controls to this list, matching elements should respond to the properties `{ name, value, disabled }`.
+
   @param {string} [config.submitButtonSelectors]
     An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
 
@@ -68,7 +73,8 @@ up.form = (function() {
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
-    observeDelay: 0
+    observeDelay: 0,
+    disable: false
   }))
 
   let abortScheduledValidate
@@ -102,7 +108,7 @@ up.form = (function() {
     The element to scan for contained form fields.
 
     If the element is itself a form field, a list of that element is returned.
-  @return {NodeList<Element>|Array<Element>}
+  @return {List<Element>}
 
   @experimental
   */
@@ -121,6 +127,23 @@ up.form = (function() {
     }
 
     return fields
+  }
+
+  /*-
+  Returns a list of submit buttons within the given element.
+
+  You can configure what Unpoly considers a submit button by adding CSS selectors to the
+  `up.form.config.submitButtonSelectors` array.
+
+  @function up.form.submitButtons
+  @param {Element|jQuery} root
+    The element to scan for contained submit buttons.
+  @return {List<Element>}
+
+  @experimental
+  */
+  function findSubmitButtons(root) {
+    return e.subtree(root, submitButtonSelector())
   }
 
   /*-
@@ -247,12 +270,52 @@ up.form = (function() {
       log: 'Submitting form'
     })
 
+    parser.booleanOrString('disable', { default: config.disable })
+    if (options.disable) {
+      let reenableControls
+      up.RenderOptions.addCallback(options, 'onGuarded', () => reenableControls = disableContainer(form))
+      up.RenderOptions.addCallback(options, 'onLoaded', () => reenableControls())
+    }
+
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
     // that are possible on both <form> and <a> elements.
     u.assign(options, up.link.followOptions(form, options))
 
     return options
+  }
+
+  /*-
+  Disables all [fields](/up.form.fields) and [submit buttons](/up.form.submitButtons) within the given element.
+
+  To automatically disable a form when it is submitted, add the [`[up-disable]`](/form-up-submit#up-disable)
+  property to the `<form>` element.
+
+  @function up.form.disable
+  @param {Element} element
+    The element within which fields and buttons should be disabled.
+  @return {Function}
+    A function that re-enables the elements that were disabled.
+  @experimental
+  */
+  function disableContainer(container) {
+    let wasFocusInContainer = container.contains(document.activeElement)
+
+    let controls = [...findFields(container), ...findSubmitButtons(container)]
+    controls = u.reject(controls, 'disabled')
+    setControlsDisabled(controls, true)
+
+    if (wasFocusInContainer && !container.contains(document.activeElement)) {
+      up.focus(container, { force: true, preventScroll: true })
+    }
+
+    return () => setControlsDisabled(controls, false)
+  }
+
+  function setControlsDisabled(controls, disabled) {
+    for (let control of controls) {
+      control.disabled = disabled
+    }
   }
 
   // This was extracted from submitOptions().
@@ -800,6 +863,20 @@ up.form = (function() {
   @params-note
     All attributes for `a[up-follow]` may be used.
 
+  @param [up-fail-target]
+    The CSS selector to update when the server responds with an error code.
+
+    Defaults to the form element itself.
+
+    @see server-errors
+
+  @param [up-disable]
+    Whether to [disable](/up.form.disable) this forms while it is submitting.
+
+    With `[up-disable=true]` user input to all forms and buttons will be blocked while the form is waiting for a server response.
+
+    This attribute is ignored when [validating](/input-up-validate).
+
   @stable
   */
 
@@ -1319,7 +1396,8 @@ up.form = (function() {
     fieldSelector,
     fields: findFields,
     focusedField,
-    switchTarget
+    switchTarget,
+    disable: disableContainer
   }
 })()
 

@@ -727,6 +727,22 @@ describe 'up.form', ->
         options = up.form.submitOptions(form)
         expect(options.method).toEqual('GET')
 
+      it "parses the form's [up-disable] attribute", ->
+        formWithDisable = fixture('form[up-disable=true]')
+        formWithoutDisable = fixture('form[up-disable=false]')
+        expect(up.form.submitOptions(formWithDisable).disable).toBe(true)
+        expect(up.form.submitOptions(formWithoutDisable).disable).toBe(false)
+
+      it "defaults a missing [up-disable] attribute to up.form.config.disable", ->
+        form = fixture('form')
+
+        up.form.config.disable = true
+        expect(up.form.submitOptions(form).disable).toBe(true)
+
+        up.form.config.disable = false
+        expect(up.form.submitOptions(form).disable).toBe(false)
+
+
     describe 'up.validate()', ->
 
       it 'emits an up:form:validate event instead of an up:form:submit event', asyncSpec (next) ->
@@ -753,6 +769,81 @@ describe 'up.form', ->
 
         next ->
           expect(validateListener).toHaveBeenCalled()
+
+    describe 'up.form.disable()', ->
+
+      it "disables the form's fields", ->
+        form = fixture('form')
+        textField = e.affix(form, 'input[type=text]')
+        selectField = e.affix(form, 'select')
+        expect(textField).not.toBeDisabled()
+        expect(selectField).not.toBeDisabled()
+
+        up.form.disable(form)
+
+        expect(textField).toBeDisabled()
+        expect(selectField).toBeDisabled()
+
+      it 'disables fields within the given container', ->
+        form = fixture('form')
+        container1 = e.affix(form, 'div')
+        container2 = e.affix(form, 'div')
+        fieldInContainer1 = e.affix(container1, 'input[type=text]')
+        fieldInContainer2 = e.affix(container2, 'input[type=text]')
+
+        up.form.disable(container2)
+
+        expect(fieldInContainer1).not.toBeDisabled()
+        expect(fieldInContainer2).toBeDisabled()
+
+      it "disables the form's submit buttons", ->
+        form = fixture('form')
+        submitInput = e.affix(form, 'input[type=submit]')
+        selectButton = e.affix(form, 'button[type=submit]')
+        expect(submitInput).not.toBeDisabled()
+        expect(selectButton).not.toBeDisabled()
+
+        up.form.disable(form)
+
+        expect(submitInput).toBeDisabled()
+        expect(selectButton).toBeDisabled()
+
+      it "sets focus on the form if focus was lost from the disabled element", ->
+        form = fixture('form')
+        fieldInsideForm = e.affix(form, 'input[type=text]')
+        fieldInsideForm.focus()
+        expect(fieldInsideForm).toBeFocused()
+
+        up.form.disable(form)
+
+        expect(form).toBeFocused()
+
+      it "does not change focus if focus wasn't lost", ->
+        form = fixture('form')
+        fieldOutsideForm = fixture('input[type=text]')
+        fieldOutsideForm.focus()
+        expect(fieldOutsideForm).toBeFocused()
+
+        up.form.disable(form)
+
+        expect(fieldOutsideForm).toBeFocused()
+
+      it 'returns a function that re-enables the fields that were disabled', ->
+        form = fixture('form')
+        field1 = e.affix(form, 'input[type=text]')
+        field2 = e.affix(form, 'input[type=text][disabled]')
+        expect(field1).not.toBeDisabled()
+        expect(field2).toBeDisabled()
+
+        reenable = up.form.disable(form)
+
+        expect(field1).toBeDisabled()
+        expect(field2).toBeDisabled()
+
+        reenable()
+
+        expect(field1).not.toBeDisabled()
+        expect(field2).toBeDisabled()
 
   describe 'unobtrusive behavior', ->
 
@@ -1296,7 +1387,15 @@ describe 'up.form', ->
 
       it "does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", asyncSpec (next) ->
         renderSpy = spyOn(up, 'render')
-        form = fixture('form[up-submit][action="/path"][up-scroll="main"][up-confirm="really submit?"][up-focus="layer"][up-history="true"][up-location="/thanks"][up-navigate=true][up-transition="cross-fade"]')
+        form = fixture('form[up-submit][action="/path"]')
+        form.setAttribute('up-scroll', 'main')
+        form.setAttribute('up-confirm', 'really submit?')
+        form.setAttribute('up-focus', 'layer')
+        form.setAttribute('up-history', 'true')
+        form.setAttribute('up-location', '/thanks')
+        form.setAttribute('up-navigate', '/true')
+        form.setAttribute('up-transition', 'cross-fade')
+        form.setAttribute('up-disable', 'true')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
         textField.value = 'changed'
 
@@ -1310,7 +1409,8 @@ describe 'up.form', ->
           expect(renderSpy.calls.mostRecent().args[0].location).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].navigate).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].transition).toBeUndefined()
-          expect(renderSpy.calls.mostRecent().args[0].focus).toEqual('keep') # forced setting
+          expect(renderSpy.calls.mostRecent().args[0].disable).toBeUndefined()
+          expect(renderSpy.calls.mostRecent().args[0].focus).not.toEqual('layer') # forced setting
 
     describe 'form[up-validate]', ->
 

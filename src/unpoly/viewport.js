@@ -256,9 +256,16 @@ up.viewport = (function() {
   @param {[options.preventScroll=false]}
     Whether to prevent changes to the acroll position.
 
+  @param {[options.force=false]}
+    Whether to force focus even if `element` would otherwise not be a focusable element.
+
   @experimental
   */
   function doFocus(element, options = {}) {
+    if (options.force) {
+      makeFocusable(element)
+    }
+
     // First focus without scrolling, since we're going to use our custom scrolling
     // logic below.
     if (up.browser.isIE11()) {

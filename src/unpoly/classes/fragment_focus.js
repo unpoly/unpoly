@@ -66,8 +66,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   focusElement(element) {
-    up.viewport.makeFocusable(element)
-    up.focus(element, PREVENT_SCROLL_OPTIONS)
+    up.focus(element, { force: true, ...PREVENT_SCROLL_OPTIONS })
     return true
   }
 

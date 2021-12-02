@@ -297,6 +297,8 @@ up.feedback = (function() {
   The `.up-active` class will be removed as soon as the response to the
   form submission has been received.
 
+  To block user input while the form is submitting, use the [`[up-disable]`](/form-up-submit#up-disable) attribute.
+
   ### Example
 
   We have a form:

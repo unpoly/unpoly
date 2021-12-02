@@ -732,25 +732,28 @@ up.fragment = (function() {
     return u.asyncify(function () {
       let options = parseTargetAndOptions(args)
       options = up.RenderOptions.preprocess(options)
-
-      up.browser.assertConfirmed(options)
-
-      let guardEvent = u.pluckKey(options, 'guardEvent')
-      if (guardEvent) {
-        // Allow guard event handlers to manipulate render options for the default behavior.
-        //
-        // Note that we have removed { guardEvent } from options to not recursively define
-        // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
-        // listeners that prevent the default and re-render.
-        guardEvent.renderOptions = options
-        up.event.assertEmitted(guardEvent, {target: options.origin})
-      }
-
-      up.RenderOptions.assertContentGiven(options)
-
+      guardRender(options)
       return (options.url ? renderRemoteContent : renderLocalContent)(options)
     })
   })
+
+  function guardRender(options) {
+    up.browser.assertConfirmed(options)
+
+    let guardEvent = u.pluckKey(options, 'guardEvent')
+    if (guardEvent) {
+      // Allow guard event handlers to manipulate render options for the default behavior.
+      //
+      // Note that we have removed { guardEvent } from options to not recursively define
+      // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
+      // listeners that prevent the default and re-render.
+      guardEvent.renderOptions = options
+      up.event.assertEmitted(guardEvent, {target: options.origin})
+    }
+    options.onGuarded?.()
+
+    up.RenderOptions.assertContentGiven(options)
+  }
 
   function renderRemoteContent(options) {
     return new up.Change.FromURL(options).execute()
