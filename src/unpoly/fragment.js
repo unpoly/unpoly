@@ -1524,7 +1524,7 @@ up.fragment = (function() {
     const element = getSmart(options.target, options)
     options.url ||= sourceOf(element)
     options.headers = u.merge(options.headers, conditionalHeaders(element))
-    up.migrate.postprocessReloadOptions?.(options, time)
+    up.migrate.postprocessReloadOptions?.(options)
     return render(options)
   }
 
