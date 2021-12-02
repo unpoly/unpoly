@@ -158,10 +158,15 @@ up.migrate.preprocessRenderOptions = function(options) {
   }
 }
 
-function dateToSeconds(date) {
-  return Math.floor(date.getTime() * 0.001)
-}
+up.migrate.postprocessReloadOptions = function(options) {
+  let lastModified = options.headers?.['If-Modified-Since']
+  console.debug("lastModified header is %o", lastModified)
+  let legacyHeader
+  if (lastModified) {
+    legacyHeader = Math.floor(new Date(lastModified) * 0.001).toString()
+  } else {
+    legacyHeader = '0'
+  }
 
-up.migrate.postprocessReloadOptions = function(options, time) {
-  options.headers[up.protocol.headerize('reloadFromTime')] = dateToSeconds(time) || '0'
+  options.headers[up.protocol.headerize('reloadFromTime')] = legacyHeader
 }
