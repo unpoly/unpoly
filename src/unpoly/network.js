@@ -1,7 +1,6 @@
 require('./network.sass')
 
 const u = up.util
-const e = up.element
 
 /*-
 Network requests
