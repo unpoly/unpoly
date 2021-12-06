@@ -79,7 +79,7 @@ describe 'cache verification', ->
   it 'allows to define which responses to verify in up.network.config.verifyCache'
 
   it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
-    confirmSpy = spyOn(up.browser, 'assertConfirmed')
+    confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
 
     up.render('.target', { url: '/cached-path', cache: true, confirm: true })
     expect(confirmSpy.calls.count()).toBe(1)
