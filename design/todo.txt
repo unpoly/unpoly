@@ -1,6 +1,36 @@
+TODOs Concurrency
+=================
+
+- Use some form options (like [up-feedback], [up-disable]) for [up-validate], [up-observe] promises and [up-autosubmit]
+  - Element attribute should override form attribute
+  - Parse form options, but only use some of them
+    - This would evaluate [up-navigate]
+    - This could also let us get rid of parseBasicOptions()
+    - Maybe allow up.OptionsParser to parse more than one element
+    - Maybe allow up.OptionsParser to take a whitelist of interesting options. This way we would only pay for parsing we care about.
+- When we lose focus during form disable, try to focus a form group instead of the form
+  - This could also be a feature of `{ focus: 'keep' }`?
+  - For this we need to refactor up.form.config.validateTargets to up.form.config.groups
+    - Maybe also offer up.form.groups(form)
+- Complete swr-Branch
+- Consider whether to keep up.form.disable() experimental or set it to internal
+- Guard Events for Rendering could have a Promise for "done"
+  - Is this better than setting event.renderOptions.onFinished()?
+
+Long term solution
+------------------
+
+- Consolidate [up-validate], [up-switch] and [up-observe] into a tree of form dependencies
+- This way we can selectively disable parts of the form
+
+
+Backlog
+=======
+
 - New event up:request:solo ?
 - Consider delaying appending of new layer elements until we have constructed all children https://github.com/unpoly/unpoly/discussions/314
 - CheapEnergy hatte bedarf auf "[up-validate] on input"
+- CheapEnergy hatte bedarf auf "[up-validate] mit delay"
 - Publish { onQueued }
   - More canonic would be if up.render() returned a up.RenderRequest, which has abort().
 - Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Observer-Delays warten können danach noch Dinge tun
