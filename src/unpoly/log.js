@@ -29,11 +29,14 @@ up.log = (function() {
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [config.banner=true]
     Print the Unpoly banner to the developer console.
+  @param {boolean} [config.format=!isIE11]
+    Format output using CSS.
   @stable
   */
   const config = new up.Config(() => ({
     enabled: sessionStore.get('enabled'),
-    banner: true
+    banner: true,
+    format: up.browser.canFormatLog()
   }))
 
   function reset() {
@@ -80,7 +83,7 @@ up.log = (function() {
 
   function printToStream(stream, trace, message, ...args) {
     if (message) {
-      if (up.browser.canFormatLog()) {
+      if (config.format) {
         args.unshift(''); // Reset
         args.unshift('color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block')
         message = `%c${trace}%c ${message}`
@@ -116,7 +119,7 @@ up.log = (function() {
 
     const color = 'color: #777777'
 
-    if (up.browser.canFormatLog()) {
+    if (config.format) {
       console.log('%c' + logo + '%c' + text, 'font-family: monospace;' + color, color)
     } else {
       console.log(logo + text)
