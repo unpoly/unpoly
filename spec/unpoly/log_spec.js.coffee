@@ -18,6 +18,24 @@ describe 'up.log', ->
         up.log.puts('trace', 'message')
         expect(console.log.calls.mostRecent().args[0]).toMatch(/message/)
 
+      it 'does not format log messages if format is false', ->
+        spyOn(console, 'log')
+
+        up.log.enable()
+        up.log.config.format = false
+
+        up.log.puts('trace', 'message')
+        expect(console.log.calls.mostRecent().args[0]).toEqual('[trace] message')
+
+      it 'formats log messages if format is true', ->
+        spyOn(console, 'log')
+
+        up.log.enable()
+        up.log.config.format = true
+
+        up.log.puts('trace', 'message')
+        expect(console.log.calls.mostRecent().args[0]).toMatch('%ctrace%c message')
+
 #    describe 'up.log.debug', ->
 #
 #      it 'sends a debug message to the developer console iff the log is enabled', ->
