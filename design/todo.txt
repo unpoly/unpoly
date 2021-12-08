@@ -1,6 +1,8 @@
 TODOs Concurrency
 =================
 
+- Document [up-verify-cache], render({verifyCache}) and up.network.config.verifyCache
+- Should we move or alias up.network.config.verifyCache to up.fragment.config.verifyCache ?
 - Use some form options (like [up-feedback], [up-disable]) for [up-validate], [up-observe] promises and [up-autosubmit]
   - Element attribute should override form attribute
   - Parse form options, but only use some of them
@@ -17,7 +19,6 @@ TODOs Concurrency
   - For this we need to refactor up.form.config.validateTargets to up.form.config.groups
     - Append :has(&) if it's not already in the selector
     - Maybe offer up.form.group(element)
-- Complete swr-Branch
 - Consider whether to keep up.form.disable() experimental or set it to internal
 
 
