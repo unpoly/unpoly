@@ -8,14 +8,28 @@ TODOs Concurrency
     - This could also let us get rid of parseBasicOptions()
     - Maybe allow up.OptionsParser to parse more than one element
     - Maybe allow up.OptionsParser to take a whitelist of interesting options. This way we would only pay for parsing we care about.
+- Support more than one [disable] option
+  - [disable=form] (gleich wie true)
+  - [disable=form-group]
+  - [disable=selector]
+  - [disable=false]
 - When we lose focus during form disable, try to focus a form group instead of the form
-  - This could also be a feature of `{ focus: 'keep' }`?
   - For this we need to refactor up.form.config.validateTargets to up.form.config.groups
-    - Maybe also offer up.form.groups(form)
+    - Append :has(&) if it's not already in the selector
+    - Maybe offer up.form.group(element)
 - Complete swr-Branch
 - Consider whether to keep up.form.disable() experimental or set it to internal
+
+
+Maybe
+-----
+
 - Guard Events for Rendering could have a Promise for "done"
   - Is this better than setting event.renderOptions.onFinished()?
+    - Yes, because onFinished may not fire for fatals or prevented up:fragment:loaded
+  - How would this work together with future up.RenderRequest?
+  - How would this work together with "local changes are sync"?
+
 
 Long term solution
 ------------------
@@ -27,6 +41,12 @@ Long term solution
 Backlog
 =======
 
+- Improve `{ focus: 'keep' }` so it focuses the former form group if we lose focus
+  - This may be easier said than done
+    - we would need to remember the original form group before the swap in the FocusCapsule
+    - re-discover the form group in the new HTML
+    - check that the form group is a closer match than target-if-lost
+    - come up for a better name for the option (target-if-lost)
 - New event up:request:solo ?
 - Consider delaying appending of new layer elements until we have constructed all children https://github.com/unpoly/unpoly/discussions/314
 - CheapEnergy hatte bedarf auf "[up-validate] on input"
