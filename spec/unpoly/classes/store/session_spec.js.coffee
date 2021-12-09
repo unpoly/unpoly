@@ -6,6 +6,15 @@ describe 'up.store.Session', ->
   afterEach ->
     sessionStorage.removeItem('spec')
 
+  describe 'constructor', ->
+
+    it 'does not create a key "undefined" in sessionStorage (bugfix)', ->
+      sessionStorage.removeItem('undefined')
+
+      store = new up.store.Session('spec')
+
+      expect(sessionStorage.getItem('undefined')).toBeMissing()
+
   describe '#get', ->
 
     it 'returns an item that was previously set', ->

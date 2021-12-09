@@ -5,7 +5,7 @@ up.store ||= {}
 up.store.Memory = class Memory {
 
   constructor() {
-    this.clear()
+    this.data = {}
   }
 
   clear() {
