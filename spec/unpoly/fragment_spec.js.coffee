@@ -229,7 +229,7 @@ describe 'up.fragment', ->
 
       it 'returns the closest ancestor of the given root that matches the given selector', ->
         $grandGrandMother = $fixture('.match')
-        $grandMother = $fixture('.match')
+        $grandMother = $grandGrandMother.affix('.match')
         $mother = $grandMother.affix('.no-match')
         $element = $mother.affix('.element')
 
@@ -263,6 +263,18 @@ describe 'up.fragment', ->
         start = up.layer.element
         result = up.fragment.closest(start, 'body')
         expect(result).toBeMissing()
+
+      it 'returns the closest ancestor in a detached tree', ->
+        $grandGrandMother = $fixture('.match')
+        $grandMother = $grandGrandMother.affix('.match')
+        $mother = $grandMother.affix('.no-match')
+        $element = $mother.affix('.element')
+
+        $grandGrandMother.detach()
+
+        result = up.fragment.closest($element[0], '.match')
+        expect(result).toBe($grandMother[0])
+
 
     describe 'up.render()', ->
 
@@ -1221,6 +1233,53 @@ describe 'up.fragment', ->
 
               expect(children[2]).toHaveText('old element2Child1')
               expect(children[3]).toHaveText('new text')
+
+          it 'rediscovers the { origin } in the new content and prefers matching an element closest to the rediscovered origin', ->
+            root = fixture('.element#root')
+            one = e.affix(root, '.element', text: 'old one')
+            two = e.affix(root, '.element', text: 'old two')
+            childOfTwo = e.affix(two, '.origin')
+            three = e.affix(root, '.element', text: 'old three')
+
+            newHTML = root.outerHTML.replace(/old/g, 'new')
+
+            up.render('.element', origin: childOfTwo, document: newHTML)
+
+            elements = e.all('.element')
+            expect(elements.length).toBe(4)
+
+            # While #root is an ancestor, two was closer
+            expect(elements[0]).toMatchSelector('#root')
+
+            # One is a sibling of two
+            expect(elements[1]).toHaveText('old one')
+
+            # Two is the closest match around the origin (childOfTwo)
+            expect(elements[2]).toHaveText('new two')
+
+            # Three is a sibling of three
+            expect(elements[3]).toHaveText('old three')
+
+          it 'uses the first match in the new content if the { origin } cannot be rediscovered in the new content', ->
+            root = fixture('#root')
+            one = e.affix(root, '.element', text: 'old one')
+            two = e.affix(root, '.element', text: 'old two')
+            childOfTwo = e.affix(two, '.origin')
+            three = e.affix(root, '.element', text: 'old three')
+
+            newHTML = root.outerHTML.replace(/old/g, 'new').replace('origin', 'not-origin')
+
+            up.render('.element', origin: childOfTwo, document: newHTML)
+
+            elements = e.all('.element')
+
+            expect(elements.length).toBe(3)
+
+            # In the old content we could find a match oround the origin, so we're changing "two".
+            # We could not rediscover the origin in the new content, so the first match ("one") is used.
+            expect(elements[0]).toHaveText('old one')
+            expect(elements[1]).toHaveText('new one')
+            expect(elements[2]).toHaveText('old three')
 
           it 'considers an Element argument to be the origin if no { origin } is given', asyncSpec (next) ->
             root = fixture('.element#root')

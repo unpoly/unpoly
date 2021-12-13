@@ -1740,14 +1740,20 @@ up.fragment = (function() {
       filters.push(isNotDestroying)
     }
 
-    // Some up.fragment function center around an element, like closest() or matches().
-    options.layer ||= element
-    const layers = up.layer.getAll(options)
-    if (options.layer !== 'any' && !(element && e.isDetached(element))) {
+    let detachedElementGiven = element && e.isDetached(element)
+    let expandTargetLayer
+
+    if (detachedElementGiven || options.layer === 'any') {
+      expandTargetLayer = up.layer.root
+    } else {
+      // Some up.fragment function center around an element, like closest() or matches().
+      options.layer ||= element
+      const layers = up.layer.getAll(options)
       filters.push(match => u.some(layers, layer => layer.contains(match)))
+      expandTargetLayer = layers[0]
     }
 
-    let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: layers[0]})
+    let expandedTargets = up.fragment.expandTargets(selector, {...options, layer: expandTargetLayer})
 
     expandedTargets = expandedTargets.map(function (target) {
       target = target.replace(CSS_HAS_SUFFIX_PATTERN, function (match, descendantSelector) {

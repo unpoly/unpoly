@@ -4,9 +4,11 @@ up.FragmentFinder = class FragmentFinder {
 
   constructor(options) {
     this.options = options
-    this.origin = this.options.origin
-    this.selector = this.options.selector
-    this.layer = this.options.layer
+    this.origin = options.origin
+    // Selector is a string, not an up.Selector
+    this.selector = options.selector
+    // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
+    this.externalRoot = options.externalRoot
   }
 
   find() {
@@ -14,9 +16,17 @@ up.FragmentFinder = class FragmentFinder {
   }
 
   findAroundOrigin() {
-    if (this.origin && up.fragment.config.matchAroundOrigin && !up.element.isDetached(this.origin)) {
+    if (this.origin && up.fragment.config.matchAroundOrigin && this.isOriginAttached()) {
       return this.findClosest() || this.findInVicinity()
     }
+  }
+
+  getDocumentRoot() {
+    return this.externalRoot || document.documentElement
+  }
+
+  isOriginAttached() {
+    return this.getDocumentRoot().contains(this.origin)
   }
 
   findClosest() {
@@ -34,6 +44,10 @@ up.FragmentFinder = class FragmentFinder {
   }
 
   findInLayer() {
-    return up.fragment.getDumb(this.selector, this.options)
+    if (this.externalRoot) {
+      return up.fragment.subtree(this.externalRoot, this.selector, this.options)[0]
+    } else {
+      return up.fragment.getDumb(this.selector, this.options)
+    }
   }
 }

@@ -31,6 +31,11 @@ up.ResponseDoc = class ResponseDoc {
       this.parseContent(options)
 
     this.cspNonces = options.cspNonces
+
+    if (options.origin) {
+      let originSelector = up.fragment.toTarget(options.origin)
+      this.rediscoveredOrigin = this.select(originSelector)
+    }
   }
 
   parseDocument(options) {
@@ -99,11 +104,12 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   select(selector) {
-    // Use up.fragment.subtree() instead of up.element.subtree()
-    // so we can support the non-standard :has() selector.
-    // We need to disable layer matching with { layer: 'any' } since
-    // our detached document is not part of the layer stack.
-    return up.fragment.subtree(this.root, selector, { layer: 'any' })[0]
+    let finder = new up.FragmentFinder({
+      selector: selector,
+      origin: this.rediscoveredOrigin,
+      externalRoot: this.root,
+    })
+    return finder.find()
   }
 
   finalizeElement(element) {
