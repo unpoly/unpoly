@@ -115,6 +115,17 @@ describe 'up.feedback', ->
         expect($currentLink).toHaveClass('up-current')
         expect($otherLink).not.toHaveClass('up-current')
 
+      it 'does not match an [up-alias] prefix in the middle of the URL', ->
+        replaceURL('/other/prefix_other.html')
+
+        $nav = $fixture('div[up-nav]')
+        $currentLink = $nav.affix('a[href="/other/prefix_other.html"]')
+        $otherLink = $nav.affix('a[href="/prefix.html"][up-alias="/prefix /prefix.html /prefix/* /prefix?*"]')
+        up.hello($nav)
+
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink).not.toHaveClass('up-current')
+
       it 'marks URL prefixes as .up-current if an up-alias has multiple * placeholders', ->
         replaceURL('/a-foo-b-bar-c')
 
