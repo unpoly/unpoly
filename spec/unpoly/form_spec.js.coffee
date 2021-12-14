@@ -414,6 +414,86 @@ describe 'up.form', ->
           expect(result.value.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
           expect(result.value.layer).toBe(up.layer.root)
 
+      describe 'with { disable } option', ->
+
+        it 'disables form fields while submitting', asyncSpec (next) ->
+          form = fixture('form')
+          input = e.affix(form, 'input[name=email]')
+
+          up.submit(form, { disable: true })
+
+          next =>
+            expect(input).toBeDisabled()
+
+        it 'disables submit buttons while submitting', asyncSpec (next) ->
+          form = fixture('form')
+          submitButton = e.affix(form, 'input[type=submit]')
+
+          up.submit(form, { disable: true })
+
+          next =>
+            expect(submitButton).toBeDisabled()
+
+        it 're-enables the form when the submission ends in a successful response', asyncSpec (next) ->
+          fixture('.target')
+          form = fixture('form[up-target=".target"]')
+          input = e.affix(form, 'input[name=email]')
+
+          up.submit(form, { disable: true })
+
+          next =>
+            expect(input).toBeDisabled()
+
+            jasmine.respondWithSelector('.target')
+
+          next =>
+            expect(input).not.toBeDisabled()
+
+        it 're-enables the form when the submission ends in a failed response', asyncSpec (next) ->
+          fixture('.success-target')
+          fixture('.fail-target')
+          form = fixture('form[up-target=".success-target"][up-fail-target=".fail-target"]')
+          input = e.affix(form, 'input[name=email]')
+
+          up.submit(form, { disable: true })
+
+          next =>
+            expect(input).toBeDisabled()
+
+            jasmine.respondWithSelector('.target', status: 500)
+
+          next =>
+            expect(input).not.toBeDisabled()
+
+        describe 'loss of focus when disabling a focused input', ->
+
+          it 'focuses the form', asyncSpec (next) ->
+            form = fixture('form')
+            input = e.affix(form, 'input[name=email]')
+            input.focus()
+
+            expect(input).toBeFocused()
+
+            up.submit(form, { disable: true })
+
+            next =>
+              unless document.activeElement == input
+                expect(form).toBeFocused()
+
+          it 'focuses the closest form group', asyncSpec (next) ->
+            form = fixture('form')
+            group = e.affix(form, 'fieldset')
+            input = e.affix(group, 'input[name=email]')
+            input.focus()
+
+            expect(input).toBeFocused()
+
+            up.submit(form, { disable: true })
+
+            next =>
+              unless document.activeElement == input
+                expect(group).toBeFocused()
+
       describe 'content type', ->
 
         it 'defaults to application/x-www-form-urlencoded in a form without file inputs', asyncSpec (next) ->
@@ -701,6 +781,8 @@ describe 'up.form', ->
             next =>
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
+
+
 
     describe 'up.form.submitOptions()', ->
 

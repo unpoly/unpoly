@@ -8,7 +8,7 @@ up.viewport.config.fixedTop.push('.navbar.fixed-top')
 up.viewport.config.fixedBottom.push('.navbar.fixed-bottom')
 up.viewport.config.anchoredRight.push('.navbar.fixed-top', '.navbar.fixed-bottom')
 
-// We would really like to provide a nice default for up.form.config.validateTargets.
+// We would really like to provide a nice default for up.form.config.groupSelectors.
 // Unfortunately Bootstrap 5 no longer has a selector like ".form-group" to group labels
 // and inputs. All the examples now use <div class="mb-3"> .
 

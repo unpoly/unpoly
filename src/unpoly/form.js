@@ -48,14 +48,12 @@ up.form = (function() {
 
     Matching forms will *not* be [submitted through Unpoly](/form-up-submit), even if they match `config.submitSelectors`.
 
-  @param {Array<string>} [config.validateTargets=['[up-fieldset]:has(&)', 'fieldset:has(&)', 'label:has(&)', 'form:has(&)']]
-    An array of CSS selectors that are searched around a form field
-    that wants to [validate](/up.validate).
+  @param {Array<string>} [config.groupSelectors=['[up-fieldset]', 'fieldset', 'label', 'form']]
+    An array of CSS selectors matching a [form group](https://getbootstrap.com/docs/4.6/components/forms/#form-groups).
+    A form group is any container that (usually) wraps a label, input and error message.
 
-    The first matching selector will be updated with the validation messages from the server.
-
-    By default this looks for a `<fieldset>`, `<label>` or `<form>`
-    around the validating input field.
+    When [validating](/input-up-validate) a field, Unpoly will re-render the closest form group
+    around that field.
 
   @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
@@ -68,7 +66,7 @@ up.form = (function() {
   @stable
    */
   const config = new up.Config(() => ({
-    validateTargets: ['[up-fieldset]:has(:origin)', 'fieldset:has(:origin)', 'label:has(:origin)', 'form:has(:origin)'],
+    groupSelectors: ['[up-fieldset]', 'fieldset', 'label', 'form'],
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
@@ -299,14 +297,20 @@ up.form = (function() {
   @experimental
   */
   function disableContainer(container) {
-    let wasFocusInContainer = container.contains(document.activeElement)
+    let focusedElement = document.activeElement
+    let focusFallback
+    if (container.contains(focusedElement)) {
+      let focusedGroup = findGroup(focusedElement)
+      // If the field's form group is closer than the container, we should restore focus there.
+      focusFallback = container.contains(focusedGroup) ? focusedGroup : container
+    }
 
     let controls = [...findFields(container), ...findSubmitButtons(container)]
     controls = u.reject(controls, 'disabled')
     setControlsDisabled(controls, true)
 
-    if (wasFocusInContainer && !container.contains(document.activeElement)) {
-      up.focus(container, { force: true, preventScroll: true })
+    if (focusFallback && !focusFallback.contains(document.activeElement)) {
+      up.focus(focusFallback, { force: true, preventScroll: true })
     }
 
     return () => setControlsDisabled(controls, false)
@@ -522,32 +526,28 @@ up.form = (function() {
     return observe(target, options, () => submit(target))
   }
 
-  function findValidateTarget(element, options) {
-    let givenTarget
-    const container = getContainer(element)
+  function getGroupSelectors() {
+    return up.migrate.migratedFormGroupSelectors?.() || config.groupSelectors
+  }
 
-    if (u.isElementish(options.target)) {
-      return up.fragment.toTarget(options.target)
-    } else if (givenTarget = options.target || element.getAttribute('up-validate') || container.getAttribute('up-validate')) {
-      return givenTarget
-    } else if (e.matches(element, 'form')) {
-      // If element is the form, we cannot find a better validate target than this.
-      return up.fragment.toTarget(element)
-    } else {
-      return findValidateTargetFromConfig(element, options) || up.fail('Could not find validation target for %o (tried defaults %o)', element, config.validateTargets)
+  function findGroup(field) {
+    return u.findResult(getGroupSelectors(), (groupSelector) => e.closest(field, groupSelector))
+  }
+
+  function findGroupTarget(field) {
+    let selector = u.find(getGroupSelectors(), (groupSelector) => e.closest(field, groupSelector))
+    if (selector) {
+      // Most forms have multiple groups with no identifying attributes.
+      // Hence we use a :has() selector to identify the form group by the selector
+      // of the contained field, which usually has an identifying [name] or [id] attribute.
+      return `${selector}:has(${up.fragment.toTarget(field)})`
     }
   }
 
-  function findValidateTargetFromConfig(element, options) {
-    // for the first selector that has a match in the field's layer.
-    const layer = up.layer.get(element)
-    return u.findResult(config.validateTargets, function(defaultTarget) {
-      if (up.fragment.get(defaultTarget, { ...options, layer })) {
-        // We want to return the selector, *not* the element. If we returned the element
-        // and derive a selector from that, any :has() expression would be lost.
-        return defaultTarget
-      }
-    })
+  function findValidateTarget(element) {
+    const container = getContainer(element)
+    let explicitTarget = element.getAttribute('up-validate') || container.getAttribute('up-validate')
+    return explicitTarget || findGroupTarget(element) || up.fail('Could not find validation target for %o', element)
   }
 
   /*-
@@ -579,7 +579,7 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.target]
     The element that will be [updated](/up.render) with the validation results.
 
-    By default the closest [validate target](/up.form.config#config.validateTargets)
+    By default the closest [form group](/up.form.config#config.groupSelectors)
     around the given `field` is updated.
   @return {Promise}
     A promise that fulfills when the server-side
@@ -988,7 +988,7 @@ up.form = (function() {
   </form>
   ```
 
-  The `<label>` around the e-mail field is now updated to have the `has-error`
+  The `<label>` around the e-mail field is now updated to have the `.has-error`
   class and display the validation message.
 
   ### How validation results are displayed
@@ -1000,18 +1000,16 @@ up.form = (function() {
 
   By default Unpoly looks for a `<fieldset>`, `<label>` or `<form>`
   around the validating input field, or any element with an
-  `up-fieldset` attribute.
-  With the Bootstrap bindings, Unpoly will also look
-  for a container with the `form-group` class.
+  `[up-fieldset]` attribute.
 
-  You can change this default behavior by setting `up.form.config.validateTargets`:
+  You can change this default behavior by setting `up.form.config.groupSelectors`:
 
   ```js
-  // Always update the entire form containing the current field ("&")
-  up.form.config.validateTargets = ['form &']
+  // Update the closest <div class="form-group"> around field
+  up.form.config.groupSelectors = ['.form-group']
   ```
 
-  You can also individually override what to update by setting the `up-validate`
+  You can also individually override what to update by setting the `[up-validate]`
   attribute to a CSS selector:
 
   ```html
@@ -1050,15 +1048,12 @@ up.form = (function() {
   @param up-validate
     The CSS selector to update with the server response.
 
-    This defaults to a fieldset or form group around the validating field.
+    This defaults the closest form group around the validating field.
   @stable
   */
 
   /*-
   Validates this form on the server when any field changes and shows validation errors.
-
-  You can configure what Unpoly considers a fieldset by adding CSS selectors to the
-  `up.form.config.validateTargets` array.
 
   See `input[up-validate]` for detailed documentation.
 
@@ -1066,7 +1061,8 @@ up.form = (function() {
   @param up-validate
     The CSS selector to update with the server response.
 
-    This defaults to a fieldset or form group around the changing field.
+    This defaults to the closest [form group](/up.form.config#config.groupSelectors)
+    around the validating field.
   @stable
   */
   up.on('change', '[up-validate]', function(event) {

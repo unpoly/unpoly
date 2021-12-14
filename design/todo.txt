@@ -11,7 +11,7 @@ TODOs Concurrency
     - Maybe allow up.OptionsParser to parse more than one element
     - Maybe allow up.OptionsParser to take a whitelist of interesting options. This way we would only pay for parsing we care about.
 - Support more than one [disable] option
-  - [disable=form] (gleich wie true)
+  - [disable=form] (gleich wie true, kann auch selektor sein)
   - [disable=form-group]
   - [disable=selector]
   - [disable=false]
