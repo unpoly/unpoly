@@ -30,7 +30,7 @@ describe 'up.fragment', ->
           elementWithinContainer = e.affix(container, '.element')
           elementAfterContainer = fixture('.element')
 
-          result = up.fragment.get('.element')
+          result = up.fragment.get(container, '.element')
 
           expect(result).toEqual(elementWithinContainer)
 
@@ -41,6 +41,23 @@ describe 'up.fragment', ->
           result = up.fragment.get(root, element)
 
           expect(result).toBe(element)
+
+        it 'finds an element in a detached tree', ->
+          detachedTree = e.createFromSelector('.detached-tree')
+          element = e.affix(detachedTree, '.element')
+
+          result = up.fragment.get(detachedTree, '.element')
+
+          expect(result).toEqual(element)
+
+        it 'finds an element in a detached tree if the current layer is an overlay (bugfix)', ->
+          makeLayers(2)
+          detachedTree = e.createFromSelector('.detached-tree')
+          element = e.affix(detachedTree, '.element')
+
+          result = up.fragment.get(detachedTree, '.element')
+
+          expect(result).toEqual(element)
 
       describe 'layers', ->
 
