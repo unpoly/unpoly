@@ -8,6 +8,24 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.5.0
+-----
+
+This is a maintenance release while we're working on the next major feature update.
+
+- The event `up:form:submit` has a new property `{ submitButton }`. It points to the `<button>` or `<input>` element used to submit the form, if the form was submitted with a button.
+- The event `up:form:submit` has a new property `{ params }`. It points to an editable `up.Params` object for the form's data payload.
+- Fix a bug where [`[up-validate]`](/input-up-validate) would use form attributes intended for the final form submission, like `[up-scroll]` or `[up-confirm]`.
+- Fix a bug where an [`.up-current`](/a.up-current) class would sometimes match an `[up-alias]` pattern in the middle of the current URL. This happened when `[up-alias]` contained multiple patterns and the last pattern is a prefix (e.g. `/foo/*`).
+- New option `up.log.config.format` lets you disable colors from log messages (thanks @stefanfisk!).
+- Elements with `[up-keep]` are now preserved when going back/forward in history (#293).
+- The function `up.element.createFromHTML()` now creates an element if the given HTML string begins with whitespace.
+- The function `up.element.createFromHTML()` now throws an error if the given HTML string contains more than one element on the root depth.
+- Elements matching `up.link.config.clickableSelectors` now get a `cursor: pointer` style through CSS.
+- Published new events to observe [closing overlay](/closing-overlays) (`up:layer:dismiss`, `up:layer:dismissed`, `up:layer:accept`, `up:layer:accepted`). These events were implemented since Unpoly 2.0, but never documented.
+- Fix a bug where loading Unpoly would save a key called `"undefined"` to sessionStorage (#300).
+
+
 2.4.1
 -----
 
