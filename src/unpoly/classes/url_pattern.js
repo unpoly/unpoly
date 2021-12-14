@@ -50,7 +50,7 @@ up.URLPattern = class URLPattern {
       }
     })
 
-    return new RegExp('^' + reCode + '$')
+    return new RegExp('^(?:' + reCode + ')$')
   }
 
   // This method is performance-sensitive. It's called for every link in an [up-nav]

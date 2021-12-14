@@ -29,6 +29,14 @@ describe 'up.URLPattern', ->
       pattern = new up.URLPattern('/foo/*/baz')
       expect(pattern.test('/foo/bar/baz')).toBe(true)
 
+    it 'returns false if a prefix pattern matches in the middle of the given URL', ->
+      pattern = new up.URLPattern('/foo/*')
+      expect(pattern.test('/namespace/foo/123')).toBe(false)
+
+    it 'returns false if a prefix pattern matches in the middle of the given URL and is preceded by another prefix pattern (bugfix)', ->
+      pattern = new up.URLPattern('/bar/* /foo/*')
+      expect(pattern.test('/namespace/foo/123')).toBe(false)
+
     it 'returns true if the given URL test a pattern with a named string segment', ->
       pattern = new up.URLPattern('/foo/:middle/baz')
       expect(pattern.test('/foo/bar/baz')).toBe(true)
