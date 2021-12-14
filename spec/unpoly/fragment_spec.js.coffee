@@ -292,6 +292,76 @@ describe 'up.fragment', ->
         result = up.fragment.closest($element[0], '.match')
         expect(result).toBe($grandMother[0])
 
+    describe 'up.fragment.subtree()', ->
+
+      it 'returns all descendants of the given root matching the given selector', ->
+        $element = $fixture('.element')
+        $matchingChild = $element.affix('.child.match')
+        $matchingGrandChild = $matchingChild.affix('.grand-child.match')
+        $otherChild = $element.affix('.child')
+        $otherGrandChild = $otherChild.affix('.grand-child')
+        results = up.fragment.subtree($element[0], '.match')
+        expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
+
+      it 'includes the given root if it matches the selector', ->
+        $element = $fixture('.element.match')
+        $matchingChild = $element.affix('.child.match')
+        $matchingGrandChild = $matchingChild.affix('.grand-child.match')
+        $otherChild = $element.affix('.child')
+        $otherGrandChild = $otherChild.affix('.grand-child')
+        results = up.fragment.subtree($element[0], '.match')
+        expect(results).toEqual [$element[0], $matchingChild[0], $matchingGrandChild[0]]
+
+      it 'does not return ancestors of the root, even if they match', ->
+        $parent = $fixture('.parent.match')
+        $element = $parent.affix('.element')
+        results = up.fragment.subtree($element[0], '.match')
+        expect(results).toEqual []
+
+      it 'returns an empty list if neither root nor any descendant matches', ->
+        $element = $fixture('.element')
+        $child = $element.affix('.child')
+        results = up.fragment.subtree($element[0], '.match')
+        expect(results).toEqual []
+
+      it 'ignores descendants that are being destroyed', ->
+        element = fixture('.element')
+        activeChild = e.affix(element, '.child')
+        destroyingChild = e.affix(element, '.child.up-destroying')
+
+        results = up.fragment.subtree(element, '.child')
+
+        expect(results).toEqual [activeChild]
+
+      it 'supports non-standard selector extensions like :has()', ->
+        element = fixture('.element')
+        matchingChild = e.affix(element, '.child')
+        requiredGrandChild = e.affix(matchingChild, '.grand-child')
+        otherChild = e.affix(element, '.child.up-destroying')
+
+        results = up.fragment.subtree(element, '.child:has(.grand-child)')
+
+        expect(results).toEqual [matchingChild]
+
+      it 'matches descendants in a detached tree', ->
+        detachedTree = fixture('.element')
+        matchingChild = e.affix(detachedTree, '.child')
+        otherChild = e.affix(detachedTree, '.other-child')
+
+        results = up.fragment.subtree(detachedTree, '.child')
+
+        expect(results).toEqual [matchingChild]
+
+      it 'matches descendants in a detached tree when the current layer is an overlay (bugfix)', ->
+        makeLayers(2)
+
+        detachedTree = fixture('.element')
+        matchingChild = e.affix(detachedTree, '.child')
+        otherChild = e.affix(detachedTree, '.other-child')
+
+        results = up.fragment.subtree(detachedTree, '.child')
+
+        expect(results).toEqual [matchingChild]
 
     describe 'up.render()', ->
 
