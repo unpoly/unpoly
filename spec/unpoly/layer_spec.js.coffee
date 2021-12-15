@@ -1485,6 +1485,21 @@ describe 'up.layer', ->
         expect(up.layer.isRoot()).toBe(true)
         expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
 
+      it 'parses the acceptance value if the user clicks on a descendant of the [up-accept] element (bugfix)', ->
+        acceptListener = jasmine.createSpy('accept listener')
+        up.on('up:layer:accept', acceptListener)
+
+        makeLayers(2)
+
+        expect(up.layer.isOverlay()).toBe(true)
+        link = up.layer.affix('a[href="#"]')
+        link.setAttribute('up-accept', JSON.stringify(foo: 'bar'))
+        child = e.affix(link, 'span.child', text: 'label')
+        Trigger.clickSequence(child)
+
+        expect(up.layer.isRoot()).toBe(true)
+        expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', value: { foo: 'bar' })
+
       it 'prevents a link from being followed on an overlay', ->
         followListener = jasmine.createSpy('follow listener')
         up.on('up:link:follow', followListener)
