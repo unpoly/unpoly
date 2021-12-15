@@ -2,6 +2,7 @@ TODOs Concurrency
 =================
 
 - Document [up-verify-cache], render({verifyCache}) and up.network.config.verifyCache
+  - This may be a new caching page
 - Should we move or alias up.network.config.verifyCache to up.fragment.config.verifyCache ?
 - Use some form options (like [up-feedback], [up-disable]) for [up-validate], [up-observe] promises and [up-autosubmit]
   - Element attribute should override form attribute

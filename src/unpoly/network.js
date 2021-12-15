@@ -161,6 +161,11 @@ up.network = (function() {
     }
     ```
 
+  @param {boolean|Function(up.Response): boolean} [config.verifyCache]
+    Whether to reload a fragment after it was rendered from a cached response.
+
+    This is an alias for `up.fragment.config.verifyCache`.
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -171,7 +176,6 @@ up.network = (function() {
     badDownlink: 0.6,
     badRTT: 750,
     badResponseTime: 400,
-    verifyCache: (response) => response.age > 15 * 1000,
 
     // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
@@ -181,6 +185,8 @@ up.network = (function() {
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true
   }))
+
+  u.delegate(config, 'verifyCache', () => up.fragment.config.verifyCache)
 
   const queue = new up.Request.Queue()
 

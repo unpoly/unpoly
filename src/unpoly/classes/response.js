@@ -171,10 +171,24 @@ up.Response = class Response extends up.Record {
     return this.getHeader('Content-Type')
   }
 
+  /*-
+  @property up.Response#cspNonces
+  @param {Array<string>} cspNonces
+  @internal
+  */
   get cspNonces() {
     return up.protocol.cspNoncesFromHeader(this.getHeader('Content-Security-Policy'))
   }
 
+  /*-
+  The last modification time of the response's underlying content.
+
+  This is extracted from the `Last-Modified` header sent by the server.
+
+  @property up.Response#lastModified
+  @param {Date|undefined} lastModified
+  @experimental
+  */
   get lastModified() {
     let header = this.getHeader('Last-Modified')
     if (header) {
@@ -182,6 +196,15 @@ up.Response = class Response extends up.Record {
     }
   }
 
+  /*-
+  The response's [ETag](https://en.wikipedia.org/wiki/HTTP_ETag).
+
+  This is extracted from the `ETag` header sent by the server.
+
+  @property up.Response#etag
+  @param {string|undefined} etag
+  @experimental
+  */
   get etag() {
     return this.getHeader('ETag')
   }
@@ -205,6 +228,13 @@ up.Response = class Response extends up.Record {
     return this.parsedJSON ||= JSON.parse(this.text)
   }
 
+  /*-
+  The number of milliseconds since this response was received.
+
+  @property up.Response#age
+  @param {number} age
+  @experimental
+  */
   get age() {
     let now = new Date()
     return now - this.time

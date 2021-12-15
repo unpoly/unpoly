@@ -107,6 +107,15 @@ up.fragment = (function() {
     In that case you must configure a different main target that does not include
     your application scripts.
 
+  @param {boolean|Function(up.Response): boolean} [config.verifyCache]
+    Whether to reload a fragment after it was rendered from a cached response.
+
+    By default Unpoly verifies cached responses that are older than 15 seconds:
+
+    ```js
+    up.fragment.config.verifyCache = (response) => response.age > 15_000
+    ```
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -129,7 +138,8 @@ up.fragment = (function() {
     runScripts: false,
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost'],
-    autoScroll: ['hash', 'layer-if-main']
+    autoScroll: ['hash', 'layer-if-main'],
+    verifyCache: (response) => response.age > 15 * 1000,
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -303,9 +313,7 @@ up.fragment = (function() {
   Unpoly will automatically set an `[up-etag]` attribute when a fragment was rendered
   from a response with a `ETag` header.
 
-
   ## Example
-
 
   Let's say we display a stock symbol with its current trading price.  We use the `[up-poll]` attribute to reload the `.stock` fragment every 30 seconds:
 
