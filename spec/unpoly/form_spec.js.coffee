@@ -898,13 +898,38 @@ describe 'up.form', ->
 
       it "sets focus on the form if focus was lost from the disabled element", ->
         form = fixture('form')
-        fieldInsideForm = e.affix(form, 'input[type=text]')
-        fieldInsideForm.focus()
-        expect(fieldInsideForm).toBeFocused()
+        field = e.affix(form, 'input[type=text]')
+        field.focus()
+        expect(field).toBeFocused()
 
         up.form.disable(form)
 
-        expect(form).toBeFocused()
+        unless document.activeElement == field
+          expect(form).toBeFocused()
+
+      it "sets focus on the closest form group if focus was lost from the disabled element", ->
+        form = fixture('form')
+        group = e.affix(form, '[up-form-group]')
+        field = e.affix(group, 'input[type=text]')
+        field.focus()
+        expect(field).toBeFocused()
+
+        up.form.disable(field)
+
+        unless document.activeElement == field
+          expect(group).toBeFocused()
+
+      it "sets focus on the form group closest to the previously focused field when disabling the entire form", ->
+        form = fixture('form')
+        group = e.affix(form, '[up-form-group]')
+        field = e.affix(group, 'input[type=text]')
+        field.focus()
+        expect(field).toBeFocused()
+
+        up.form.disable(form)
+
+        unless document.activeElement == field
+          expect(group).toBeFocused()
 
       it "does not change focus if focus wasn't lost", ->
         form = fixture('form')
@@ -1424,11 +1449,11 @@ describe 'up.form', ->
           container.innerHTML = """
             <form action="/users" id="registration">
 
-              <div up-fieldset>
+              <div up-form-group>
                 <input type="text" name="email" up-validate />
               </div>
 
-              <div up-fieldset>
+              <div up-form-group>
                 <input type="password" name="password" up-validate />
               </div>
 
@@ -1442,12 +1467,12 @@ describe 'up.form', ->
             @respondWith """
               <form action="/users" id="registration">
 
-                <div up-fieldset>
+                <div up-form-group>
                   Validation message
                   <input type="text" name="email" up-validate />
                 </div>
 
-                <div up-fieldset>
+                <div up-form-group>
                   Validation message
                   <input type="password" name="password" up-validate />
                 </div>
@@ -1456,7 +1481,7 @@ describe 'up.form', ->
             """
 
           next =>
-            $labels = $('#registration [up-fieldset]')
+            $labels = $('#registration [up-form-group]')
             expect($labels[0]).not.toHaveText('Validation message')
             expect($labels[1]).toHaveText('Validation message')
 
@@ -1509,11 +1534,11 @@ describe 'up.form', ->
         container.innerHTML = """
           <form action="/users" id="registration" up-validate>
 
-            <div up-fieldset>
+            <div up-form-group>
               <input type="text" name="email">
             </div>
 
-            <div up-fieldset>
+            <div up-form-group>
               <input type="password" name="password">
             </div>
 
@@ -1526,18 +1551,18 @@ describe 'up.form', ->
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(@lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
-          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-fieldset]:has(input[name="password"])')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="password"])')
 
 
           @respondWith """
             <form action="/users" id="registration" up-validate>
 
-              <div up-fieldset>
+              <div up-form-group>
                 Validation message
                 <input type="text" name="email">
               </div>
 
-              <div up-fieldset>
+              <div up-form-group>
                 Validation message
                 <input type="password" name="password">
               </div>
@@ -1546,7 +1571,7 @@ describe 'up.form', ->
           """
 
         next =>
-          $labels = $('#registration [up-fieldset]')
+          $labels = $('#registration [up-form-group]')
           expect($labels[0]).not.toHaveText('Validation message')
           expect($labels[1]).toHaveText('Validation message')
 
@@ -1555,7 +1580,7 @@ describe 'up.form', ->
         container.innerHTML = """
           <form action="/users" id="registration" up-validate>
 
-            <div up-fieldset>
+            <div up-form-group>
               <input type="radio" name="foo" value="1" checked>
               <input type="radio" name="foo" value="2">
             </div>
@@ -1574,7 +1599,7 @@ describe 'up.form', ->
         container.innerHTML = """
           <form action="/users" id="registration" up-validate='.result'>
 
-            <div up-fieldset>
+            <div up-form-group>
               <input name="email">
             </div>
 

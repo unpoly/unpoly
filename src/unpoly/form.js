@@ -295,10 +295,16 @@ up.form = (function() {
   function disableContainer(container) {
     let focusedElement = document.activeElement
     let focusFallback
-    if (container.contains(focusedElement)) {
+    let mayLoseFocus = container.contains(focusedElement)
+    if (mayLoseFocus) {
       let focusedGroup = findGroup(focusedElement)
-      // If the field's form group is closer than the container, we should restore focus there.
-      focusFallback = container.contains(focusedGroup) ? focusedGroup : container
+      // (1) If the field's form group is closer than the container, we should restore focus there.
+      // (2) If we're disabling the focused element directly, we should focus the group.
+      if (container.contains(focusedGroup) || container === focusedElement) {
+        focusFallback = focusedGroup
+      } else {
+        focusFallback = container
+      }
     }
 
     let controls = [...findFields(container), ...findSubmitButtons(container)]
@@ -1068,22 +1074,11 @@ up.form = (function() {
   ### How validation results are displayed
 
   Although the server will usually respond to a validation with a complete,
-  fresh copy of the form, Unpoly will by default not update the entire form.
-  This is done in order to preserve volatile state such as the scroll position
-  of `<textarea>` elements.
+  fresh copy of the form, Unpoly will only update the closest [form group](/up-form-group)
+  around the validating field. If the form is not structured into groups, the entire
+  form will be updated.
 
-  By default Unpoly looks for a `<fieldset>`, `<label>` or `<form>`
-  around the validating input field, or any element with an
-  `[up-fieldset]` attribute.
-
-  You can change this default behavior by setting `up.form.config.groupSelectors`:
-
-  ```js
-  // Update the closest <div class="form-group"> around field
-  up.form.config.groupSelectors = ['.form-group']
-  ```
-
-  You can also individually override what to update by setting the `[up-validate]`
+  You can also override what to update by setting the `[up-validate]`
   attribute to a CSS selector:
 
   ```html
