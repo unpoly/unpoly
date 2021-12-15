@@ -48,12 +48,8 @@ up.form = (function() {
 
     Matching forms will *not* be [submitted through Unpoly](/form-up-submit), even if they match `config.submitSelectors`.
 
-  @param {Array<string>} [config.groupSelectors=['[up-fieldset]', 'fieldset', 'label', 'form']]
-    An array of CSS selectors matching a [form group](https://getbootstrap.com/docs/4.6/components/forms/#form-groups).
-    A form group is any container that (usually) wraps a label, input and error message.
-
-    When [validating](/input-up-validate) a field, Unpoly will re-render the closest form group
-    around that field.
+  @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
+    An array of CSS selectors matching a [form group](/up-form-group).
 
   @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
@@ -66,7 +62,7 @@ up.form = (function() {
   @stable
    */
   const config = new up.Config(() => ({
-    groupSelectors: ['[up-fieldset]', 'fieldset', 'label', 'form'],
+    groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
     fieldSelectors: ['select', 'input:not([type=submit]):not([type=image])', 'button[type]:not([type=submit])', 'textarea'],
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
@@ -530,11 +526,87 @@ up.form = (function() {
     return up.migrate.migratedFormGroupSelectors?.() || config.groupSelectors
   }
 
-  function findGroup(field) {
-    return u.findResult(getGroupSelectors(), (groupSelector) => e.closest(field, groupSelector))
+  function getFullGroupSelector() {
+    return getGroupSelectors().join(',')
   }
 
+  /*-
+  Returns the [form group](/up-form-group) for the given element.
+
+  Form groups may be nested. This function returns the closest group around the given element.
+
+  ### Example
+
+  This is a form with two groups:
+
+  ```html
+  <form>
+    <div up-form-group>
+      <label for="email">E-mail</label>
+      <input type="text" name="email" id="email">
+    </div>
+    <div up-form-group>
+      <label for="password">Password</label>
+      <input type="text" name="password" id="password">
+    </div>
+  </form>
+  ```
+
+  We can now retrieve the form group for any element in the form:
+
+  ```js
+  let passwordField = document.querySelector('#password')
+  let group = up.form.group(passwordField) // returns second <fieldset>
+  ```
+
+  @function up.form.group
+  @param {Element} element
+    The element for which to find a form group.
+  @return {Element|undefined}
+    The closest form group around the given element.
+
+    If no better group can be found, the `form` element is returned.
+  @experimental
+  */
+  function findGroup(field) {
+    return e.closest(field, getFullGroupSelector())
+  }
+
+  /*-
+  Marks this element as a from group, which (usually) contains a label, input and error message.
+
+  You are not required to use form groups to [submit forms through Unpoly](/form-up-submit).
+  However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
+  working with complex form. For instance, when [validating](/input-up-validate) a field,
+  Unpoly will re-render the closest form group around that field.
+
+  By default Unpoly will also consider a `fieldset` or `label` around a field to be a form group.
+  You can configure this in `up.form.config.groupSelectors`.
+
+  ### Example
+
+  Many apps use form groups to wrap a label, input field, error message and help text.
+
+  ```html
+  <form>
+    <div up-form-group>
+      <label for="email">E-mail</label>
+      <input type="text" name="email" id="email">
+    </div>
+    <div up-form-group>
+      <label for="password">Password</label>
+      <input type="text" name="password" id="password">
+      <div class="error">Must be 8 characters or longer</div>
+    </div>
+  </form>
+  ```
+
+  @selector [up-form-group]
+  @experimental
+  */
+
   function findGroupTarget(field) {
+    // We cannot use findGroup() as we must return a selector, not an element.
     let selector = u.find(getGroupSelectors(), (groupSelector) => e.closest(field, groupSelector))
     if (selector) {
       // Most forms have multiple groups with no identifying attributes.
@@ -556,6 +628,8 @@ up.form = (function() {
   `up.validate()` submits the given field's form with an additional `X-Up-Validate`
   HTTP header. Upon seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
+
+  Unpoly will re-render the closest [form group](/up-form-group) around the validating field.
 
   The unobtrusive variant of this is the [`input[up-validate]`](/input-up-validate) selector.
   See the documentation for [`input[up-validate]`](/input-up-validate) for more information
@@ -579,7 +653,7 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.target]
     The element that will be [updated](/up.render) with the validation results.
 
-    By default the closest [form group](/up.form.config#config.groupSelectors)
+    By default the closest [form group](/up-form-group)
     around the given `field` is updated.
   @return {Promise}
     A promise that fulfills when the server-side
@@ -1061,7 +1135,7 @@ up.form = (function() {
   @param up-validate
     The CSS selector to update with the server response.
 
-    This defaults to the closest [form group](/up.form.config#config.groupSelectors)
+    This defaults to the closest [form group](/up-form-group)
     around the validating field.
   @stable
   */
@@ -1393,7 +1467,8 @@ up.form = (function() {
     fields: findFields,
     focusedField,
     switchTarget,
-    disable: disableContainer
+    disable: disableContainer,
+    group: findGroup,
   }
 })()
 

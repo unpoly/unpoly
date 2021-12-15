@@ -15,3 +15,6 @@ up.migrate.migratedFormGroupSelectors = function() {
     return migratedSelector
   })
 }
+
+// We used to configure this selector. It's now [up-form-group].
+up.form.config.groupSelectors.unshift('[up-fieldset]')

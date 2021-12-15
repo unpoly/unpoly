@@ -782,8 +782,6 @@ describe 'up.form', ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
 
-
-
     describe 'up.form.submitOptions()', ->
 
       it 'parses the render options that would be used to submit the given frm', ->
@@ -824,6 +822,14 @@ describe 'up.form', ->
         up.form.config.disable = false
         expect(up.form.submitOptions(form).disable).toBe(false)
 
+    describe 'up.form.group()', ->
+
+      it 'returns the closest form group around the given element', ->
+        form = fixture('form')
+        group = e.affix(form, '[up-form-group]')
+        input = e.affix(group, 'input[name=email]')
+
+        expect(up.form.group(input)).toBe(group)
 
     describe 'up.validate()', ->
 
