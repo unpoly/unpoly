@@ -240,13 +240,14 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   registerClickCloser(attribute, closeFn) {
+    let selector = `[${attribute}]`
     // Allow the fallbacks to be both vanilla links and Unpoly [up-target] links
-    this.on('up:click', `[${attribute}]`, function(event) {
+    this.on('up:click', selector, function(event) {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a link from being followed on the root layer.
       up.event.halt(event)
 
-      const origin = event.target
+      const origin = event.target.closest(selector)
       const value = e.jsonAttr(origin, attribute)
       const closeOptions = { origin }
       const parser = new up.OptionsParser(closeOptions, origin)
