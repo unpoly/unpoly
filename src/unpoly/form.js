@@ -282,6 +282,9 @@ up.form = (function() {
   /*-
   Disables all [fields](/up.form.fields) and [submit buttons](/up.form.submitButtons) within the given element.
 
+  Disabling a focused control may cause focus to be reset. To prevent this, Unpoly will
+  focus the closest [form group](/up-form-group) around the disabled control.
+
   To automatically disable a form when it is submitted, add the [`[up-disable]`](/form-up-submit#up-disable)
   property to the `<form>` element.
 
