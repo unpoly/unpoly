@@ -1302,7 +1302,7 @@ describe 'up.form', ->
       afterEach ->
         window.observeCallbackSpy = undefined
 
-      it 'runs the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
+      it 'calls the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
         $form = $fixture('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
@@ -1313,7 +1313,20 @@ describe 'up.form', ->
         next =>
           expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', 'input-name')
 
-      it 'does not run the JavaScript code when the form is submitted immediately after a change, e.g. in a test', asyncSpec (next) ->
+      it 'runs the callback only once for multiple changes in the same task', asyncSpec (next) ->
+        $form = $fixture('form')
+        window.observeCallbackSpy = jasmine.createSpy('observe callback')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
+        up.hello($form)
+        $field.val('a')
+        Trigger.input($field)
+        $field.val('ab')
+        Trigger.input($field)
+
+        next =>
+          expect(window.observeCallbackSpy.calls.count()).toBe(1)
+
+      it 'does not run the callback when the form is submitted immediately after a change, e.g. in a test', asyncSpec (next) ->
         $form = $fixture('form')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
         $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
