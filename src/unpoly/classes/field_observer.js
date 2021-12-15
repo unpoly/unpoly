@@ -3,11 +3,12 @@ const e = up.element
 
 up.FieldObserver = class FieldObserver {
 
-  constructor(fieldOrFields, options, callback) {
+  constructor(form, fields, options, callback) {
     this.scheduleValues = this.scheduleValues.bind(this)
     this.isNewValues = this.isNewValues.bind(this)
     this.callback = callback
-    this.fields = e.list(fieldOrFields)
+    this.form = form
+    this.fields = fields
     this.delay = options.delay
     this.batch = options.batch
   }
@@ -19,11 +20,13 @@ up.FieldObserver = class FieldObserver {
     this.callbackRunning = false
     // Although (depending on the browser) we only need/receive either input or change,
     // we always bind to both events in case another script manually triggers it.
-    this.unbind = up.on(this.fields, 'input change', () => this.check())
+    this.unbindFieldEvents = up.on(this.fields, 'input change', () => this.check())
+    this.unbindFormEvents = up.on(this.form, 'up:form:submit', () => this.cancelTimer())
   }
 
   stop() {
-    this.unbind()
+    this.unbindFieldEvents()
+    this.unbindFormEvents()
     this.cancelTimer()
   }
 

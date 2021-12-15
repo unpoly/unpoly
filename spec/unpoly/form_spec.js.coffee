@@ -1313,18 +1313,48 @@ describe 'up.form', ->
         next =>
           expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', 'input-name')
 
+      it 'does not run the JavaScript code when the form is submitted immediately after a change, e.g. in a test', asyncSpec (next) ->
+        $form = $fixture('form')
+        window.observeCallbackSpy = jasmine.createSpy('observe callback')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
+        up.hello($form)
+        $field.val('new-value')
+        Trigger.change($field)
+        up.submit($form)
+
+        next =>
+          expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+
       describe 'with [up-delay] modifier', ->
 
         it 'debounces the callback', asyncSpec (next) ->
           $form = $fixture('form')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="50"]')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="40"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
 
-          next => expect(window.observeCallbackSpy).not.toHaveBeenCalled()
-          next.after 80, => expect(window.observeCallbackSpy).toHaveBeenCalled()
+          next ->
+            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+
+          next.after 80, ->
+            expect(window.observeCallbackSpy).toHaveBeenCalled()
+
+        it 'aborts the callback if the form was submitted while waiting', asyncSpec (next) ->
+          $form = $fixture('form[action="/path"]')
+          window.observeCallbackSpy = jasmine.createSpy('observe callback')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="40"]')
+          up.hello($form)
+          $field.val('new-value')
+          Trigger.change($field)
+
+          next ->
+            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            up.form.submit($form)
+
+          next.after 80, ->
+            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
 
     describe 'form[up-observe]', ->
 

@@ -28,8 +28,9 @@ up.form = (function() {
 
   @param {number} [config.observeDelay=0]
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
-    after the input value changes. Use this to limit how often the callback
-    will be invoked for a fast typist.
+    after the input value changes.
+
+    You may use this option to limit how often the callback will run for a fast typist.
 
   @param {Array<string>} [config.submitSelectors]
     An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
@@ -466,8 +467,11 @@ up.form = (function() {
     detected changes in a single diff object as its argument.
   @param {number} [options.delay=up.form.config.observeDelay]
     The number of miliseconds to wait before executing the callback
-    after the input value changes. Use this to limit how often the callback
-    will be invoked for a fast typist.
+    after the input value changes.
+
+    You may use this option to limit how often the callback will run for a fast typist.
+
+    If form is submitted during the delay, the callback will not run.
   @param {Function(value, name): string} onChange
     The callback to run when the field's value changes.
 
@@ -485,6 +489,7 @@ up.form = (function() {
   */
   function observe(elements, ...args) {
     elements = e.list(elements)
+    let form = getForm(elements[0])
     const fields = u.flatMap(elements, findFields)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
@@ -498,7 +503,7 @@ up.form = (function() {
     const callback = u.extractCallback(args) || observeCallbackFromElement(elements[0]) || up.fail('up.observe: No change callback given')
     const options = u.extractOptions(args)
     options.delay = options.delay ?? e.numberAttr(elements[0], 'up-delay') ?? config.observeDelay
-    const observer = new up.FieldObserver(fields, options, callback)
+    const observer = new up.FieldObserver(form, fields, options, callback)
     observer.start()
     return () => observer.stop()
   }
@@ -1340,6 +1345,10 @@ up.form = (function() {
     The code to run when the field's value changes.
   @param up-delay
     The number of miliseconds to wait after a change before the code is run.
+
+    You may use this option to limit how often the callback will run for a fast typist.
+
+    If form is submitted during the delay, the callback will not run.
   @stable
   */
 
@@ -1467,6 +1476,7 @@ up.form = (function() {
     switchTarget,
     disable: disableContainer,
     group: findGroup,
+    get: getForm,
   }
 })()
 

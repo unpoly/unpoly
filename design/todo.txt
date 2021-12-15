@@ -17,6 +17,8 @@ TODOs Concurrency
   - [disable=selector]
   - [disable=false]
   - Evaluate in up.Change.FromURL
+- Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Observer-Delays warten können danach noch Dinge tun
+  - Wie wäre "submit stoppt das delay"?
 
 
 Maybe

@@ -679,7 +679,7 @@ up.element = (function() {
     return `[${attribute}="${value}"]`
   }
 
-  function trueAttributeSelector(attribute){
+  function trueAttributeSelector(attribute) {
     return `[${attribute}]:not([${attribute}=false])`
   }
 
