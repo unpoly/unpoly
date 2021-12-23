@@ -1,6 +1,7 @@
 TODOs Concurrency
 =================
 
+- Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Document [up-verify-cache], render({verifyCache}) and up.network.config.verifyCache
   - This may be a new caching page
 - Should we move or alias up.network.config.verifyCache to up.fragment.config.verifyCache ?
@@ -10,7 +11,11 @@ TODOs Concurrency
     - This would evaluate [up-navigate]
     - This could also let us get rid of parseBasicOptions()
     - Maybe allow up.OptionsParser to parse more than one element
-    - Maybe allow up.OptionsParser to take a whitelist of interesting options. This way we would only pay for parsing we care about.
+    - Maybe allow up.OptionsParser to take a whitelist of interesting options.
+      - This way we would only pay for parsing we care about.
+      - => But what about code outside the OptionsParser that post-processes options?
+        - if (options.method === 'GET') { options.url = up.Params.stripURL(options.url) }
+      - It would be easier to whitelist after the fact
 - Support more than one [disable] option
   - [disable=form] (gleich wie true, kann auch selektor sein)
   - [disable=form-group]
@@ -19,11 +24,75 @@ TODOs Concurrency
   - Evaluate in up.Change.FromURL
 - Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Observer-Delays warten können danach noch Dinge tun
   - Wie wäre "submit stoppt das delay"?
-
+- Move mimicLocalRequest() into useCachedRequest()
+- Consolidate [up-autosubmit], [up-observe] and [up-validate] to all use up.FieldObserver
+  - Different trigger events { observeEvent }
+  - User-controlled trigger events
+    - <input up-validate="other" up-observe-event="input">
+  - FieldObserver should also stop if observed field is destroyed
+    - Could be an up.destructor()
+    - Explain in docs
+- Maybe input[type=date] could default to observeEvent="blur"
+- *When people do manual validation in a callback, they are outside the form lock*
+- Missing docs
+    parser.boolean('revealTop')
+    parser.number('revealMax')
+    parser.number('revealPadding')
+    parser.number('revealSnap')
+    parser.string('scrollBehavior') // why is this always set to 'auto'? can we allow 'smooth' here if we're not animating?
+- What happens here for synthetic "click" events that don't define clientX/clientY? Should we just skip the check then?
+    wasHitByMouseEvent(event) {
+      const hittableElement = document.elementFromPoint(event.clientX, event.clientY)
+      return !hittableElement || this.contains(hittableElement)
+    }
+- Allow to prevent Unpoly's state restoration handling with a preventable up:location:restore event (it used to be up:history:restore)
+- Serialize *all* actions in a form
+  - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
+  - The new default form submit/observe/validate is { sequence: 'form' }
+  - Can be overriden bei individual inputs with [up-observe/autosubmit/validate]
+  - The sequence is not handled by up.form or up.FieldObserver
+    - Instead it is a property of up.Request().
+    - up.Request() resolves { sequence } to an element, using up.fragment.get(this.sequence, { layer: this.layer, origin: this.origin })
+  - The up.Request#sequence property is handled by up.Request.Queue.
+    - When up.Request.Queue picks the next request to load, it skips over requests if there is a currently loading request for the same { sequence }
+      - Two sequences collide if their sequence elements are in the same dynasty, e.g. a.contains(b) or b.contains(a)
+    - This has the benefit that requests in a sequence can be *aborted* while they wait for their turn
+    - To make { sequence } work for cached content we also queue cached responses
+      - Cached responses must *not* resolve immediately, but only when the queue calls #load()
+        - Move up.Request#followState() to up.Request#load()
+      - Don't emit up:request:load or up:request:loaded for cached responses
+- Hungry elements that update for all layers
+  - <div up-hungry up-layer="any">
 
 Maybe
 -----
 
+- Replace up.hello() and up.syntax.clean() to MutationObserver()
+- Do we want to serialize all actions in a form?
+  - up-sequence="form"
+  - This would need to abortable on submit => Would be handled by existing { solo: 'subtree' } IF there is a request
+  - This would need to abortable on form destroy => Would be handled by existing { solo: 'subtree' } IF there is a request
+  - => This would need to be handled by up.Queue, or else there would be nothing to abort
+  - => It is not sufficient to have up.form.sequence(..., callback)
+  - => We would need to do something like { sequence: ElementOfSubtree }
+  - => Before picking a new request, make sure no existing request exists
+  - What about our old idea: { order: 'abort target', order: 'abort form', order: 'after form', order: 'after selector' }
+      => How to say "after ElementObject" ?
+  - Who would fetch the element that is 'form' or 'selector'?
+      => up.Change.UpdateLayer#preflightProps(), which already loads targetElements()
+  - What would we do if both was given, e.g. { solo: true, sequence: 'form' }
+    - Do we forbid the combination?
+    - Do we first abort, then do a squence?
+    - Do we first wait, then abort? => I think this, but this also means our { solo } handling is in the wrong place. It must move to the queue.
+  - Does { sequence: 'form' } also queue local content, like { solo } ?
+   - We could do something like up.LocalRequest, but then local updates would no longer be sync!
+   - We could not support { sequence } for local updates => YES
+  - What about cached content with { sequence }?
+    - We could do queue.asapLocal() which immediately executes unless there is { sequence }
+  - How does queue resolve a sequence?
+    - Before dispatching a request with { sequence }
+    - Check if we have *current* requests with { sequence }
+    - If any of the other requests's sequence contains our *or* if any other sequence is contained by ours, don't dispatch
 - Guard Events for Rendering could have a Promise for "done"
   - Is this better than setting event.renderOptions.onFinished()?
     - Yes, because onFinished may not fire for fatals or prevented up:fragment:loaded
