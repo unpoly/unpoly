@@ -144,12 +144,12 @@ up.radio = (function() {
     up.emit(element, 'up:poll:stop')
   }
 
+  function shouldAutoPoll(fragment) {
+    return !document.hidden && !up.network.shouldReduceRequests() && up.layer.get(fragment)?.isFront?.()
+  }
+
   function shouldPoll(fragment) {
-    const setting = u.evalOption(config.pollEnabled, fragment)
-    if (setting === 'auto') {
-      return !document.hidden && !up.network.shouldReduceRequests() && up.layer.get(fragment)?.isFront?.()
-    }
-    return setting
+    return u.evalAutoOption(config.pollEnabled, shouldAutoPoll, fragment)
   }
 
   /*-

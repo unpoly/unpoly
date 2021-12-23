@@ -1762,3 +1762,46 @@ describe 'up.util', ->
         up.util.asyncify(callback).catch (error) ->
           expect(error).toEqual('an error')
           done()
+
+    describe 'up.util.evalOption()', ->
+
+      it 'returns the given primitive value', ->
+        expect(up.util.evalOption('foo')).toBe('foo')
+
+      it 'calls the given function and returns its return value', ->
+        fn = -> 'foo'
+        expect(up.util.evalOption(fn)).toBe('foo')
+
+      it 'calls the given function with additional args', ->
+        sum = (a, b) -> a + b
+        expect(up.util.evalOption(sum, 3, 2)).toBe(5)
+
+    describe 'up.util.evalAutoOption()', ->
+
+      describe 'if the first argument is a primitive value', ->
+
+        it 'returns the first argument', ->
+          autoDefault = 'auto default'
+          expect(up.util.evalAutoOption('foo', autoDefault)).toBe('foo')
+
+      describe 'if the first agument is "auto"', ->
+
+        it 'returns the second argument if it is a primitive value', ->
+          autoDefault = 'auto default'
+          expect(up.util.evalAutoOption('auto', autoDefault)).toBe('auto default')
+
+        it 'calls the second argument if it is a function', ->
+          sum = (a, b) -> a + b
+          expect(up.util.evalAutoOption('auto', sum, 2, 5)).toBe(7)
+
+      describe 'if the first argument is a function', ->
+
+        it 'calls the first argument', ->
+          sum = (a, b) -> a + b
+          autoDefault = 'auto default'
+          expect(up.util.evalAutoOption(sum, autoDefault, 3, 5)).toBe(8)
+
+        it 'still applies the auto default if the function returns "auto"', ->
+          fn = -> 'auto'
+          autoSum = (a, b) -> a + b
+          expect(up.util.evalAutoOption(fn, autoSum, 3, 5)).toBe(8)

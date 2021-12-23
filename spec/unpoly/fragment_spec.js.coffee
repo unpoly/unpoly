@@ -4513,7 +4513,7 @@ describe 'up.fragment', ->
 
           beforeEach (done) ->
             up.network.config.requestMetaKeys = []
-            up.network.config.verifyCache = (response) => response.age >= 0
+            up.fragment.config.autoVerifyCache = (response) => response.age >= 0
             fixture('.target', text: 'initial text')
 
             up.request('/cached-path', { cache: true })
@@ -4539,7 +4539,7 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('verified text')
 
           it 'does not verify a fragment rendered from a recent cached response', asyncSpec (next) ->
-            up.network.config.verifyCache = (response) => response.age >= 10 * 1000
+            up.fragment.config.autoVerifyCache = (response) => response.age >= 10 * 1000
 
             up.render('.target', { url: '/cached-path', cache: true })
 
@@ -4554,11 +4554,6 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(true)
 
               jasmine.respondWithSelector('.target', text: 'server text')
-
-            next ->
-              expect('.target').toHaveText('server text')
-
-              expect(up.network.isBusy()).toBe(false)
 
           it 'does not verify a fragment when prepending content with :before', asyncSpec (next) ->
             up.render('.target:before', { url: '/cached-path', cache: true })
@@ -4587,7 +4582,7 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-          it 'allows to define which responses to verify in up.network.config.verifyCache'
+          it 'allows to define which responses to verify in up.fragment.config.autoVerifyCache'
 
           it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
             confirmSpy = spyOn(window, 'confirm').and.returnValue(true)

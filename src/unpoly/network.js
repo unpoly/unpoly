@@ -161,11 +161,6 @@ up.network = (function() {
     }
     ```
 
-  @param {boolean|Function(up.Response): boolean} [config.verifyCache]
-    Whether to reload a fragment after it was rendered from a cached response.
-
-    This is an alias for `up.fragment.config.verifyCache`.
-
   @stable
   */
   const config = new up.Config(() => ({
@@ -173,20 +168,16 @@ up.network = (function() {
     wrapMethod: true,
     cacheSize: 70,
     cacheExpiry: 1000 * 60 * 5,
+    // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
+    // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     badDownlink: 0.6,
     badRTT: 750,
     badResponseTime: 400,
-
-    // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
-    // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     autoCache(request) { return request.isSafe(); },
-
     clearCache(request, _response) { return !request.isSafe(); },
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true
   }))
-
-  u.delegate(config, 'verifyCache', () => up.fragment.config.verifyCache)
 
   const queue = new up.Request.Queue()
 
@@ -925,12 +916,6 @@ up.network = (function() {
     progressBar?.conclude()
   }
 
-  function shouldVerifyCache(request, response, options = {}) {
-    return request.fromCache &&
-      options.verifyCache !== false &&
-      u.evalOption(config.verifyCache, response)
-  }
-
   up.on('up:request:late', onLate)
   up.on('up:request:recover', onRecover)
   up.on('up:framework:reset', reset)
@@ -950,7 +935,6 @@ up.network = (function() {
     loadPage,
     abortSubtree,
     handleSolo,
-    shouldVerifyCache,
   }
 })()
 

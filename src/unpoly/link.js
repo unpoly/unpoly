@@ -508,15 +508,10 @@ up.link = (function() {
   }
 
   function shouldPreload() {
-    const setting = config.preloadEnabled
-
-    if (setting === 'auto') {
-      // Since connection.effectiveType might change during a session we need to
-      // re-evaluate the value every time.
-      return !up.network.shouldReduceRequests()
-    }
-
-    return setting
+    // Since connection.effectiveType might change during a session we need to
+    // re-evaluate the value every time.
+    let goodConnection = u.negate(up.network.shouldReduceRequests)
+    return u.evalAutoOption(config.preloadEnabled, goodConnection)
   }
 
   /*-

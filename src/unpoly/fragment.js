@@ -107,13 +107,14 @@ up.fragment = (function() {
     In that case you must configure a different main target that does not include
     your application scripts.
 
-  @param {boolean|Function(up.Response): boolean} [config.verifyCache]
+  @param {boolean|Function(up.Response): boolean} [config.autoVerifyCache]
     Whether to reload a fragment after it was rendered from a cached response.
 
-    By default Unpoly verifies cached responses that are older than 15 seconds:
+    By default Unpoly verifies cached responses that are older than 15 seconds
+    when we're on a good connection:
 
     ```js
-    up.fragment.config.verifyCache = (response) => response.age > 15_000
+    up.fragment.config.autoVerifyCache = (response) => response.age > 15_000 && !up.network.shouldReduceRequests()
     ```
 
   @stable
@@ -139,7 +140,7 @@ up.fragment = (function() {
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
-    verifyCache: (response) => response.age > 15 * 1000,
+    autoVerifyCache: (response) => (response.age > 15 * 1000) && !up.network.shouldReduceRequests(),
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -1972,6 +1973,10 @@ up.fragment = (function() {
     return selector.matches(element)
   }
 
+  function shouldVerifyCache(request, response, options = {}) {
+    return request.fromCache && u.evalAutoOption(options.verifyCache, config.autoVerifyCache, response)
+  }
+
   up.on('up:framework:boot', function() {
     const {body} = document
     body.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
@@ -2012,6 +2017,7 @@ up.fragment = (function() {
     hasAutoHistory,
     time: timeOf,
     etag: etagOf,
+    shouldVerifyCache
   }
 })()
 

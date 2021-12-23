@@ -369,11 +369,7 @@ up.Request = class Request extends up.Record {
   }
 
   willCache() {
-    if (this.cache === 'auto') {
-      return up.network.config.autoCache(this)
-    } else {
-      return this.cache
-    }
+    return u.evalAutoOption(this.cache, up.network.config.autoCache, this)
   }
 
   runQueuedCallbacks() {

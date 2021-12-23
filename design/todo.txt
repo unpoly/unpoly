@@ -2,9 +2,8 @@ TODOs Concurrency
 =================
 
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
-- Document [up-verify-cache], render({verifyCache}) and up.network.config.verifyCache
+- Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
   - This may be a new caching page
-- Should we move or alias up.network.config.verifyCache to up.fragment.config.verifyCache ?
 - Use some form options (like [up-feedback], [up-disable]) for [up-validate], [up-observe] promises and [up-autosubmit]
   - Element attribute should override form attribute
   - Parse form options, but only use some of them

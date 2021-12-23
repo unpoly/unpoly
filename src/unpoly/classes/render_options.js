@@ -9,6 +9,7 @@ up.RenderOptions = (function() {
     saveScroll: true,
     fail: 'auto',
     solo: 'subtree',
+    verifyCache: 'auto',
   }
 
   const PRELOAD_OVERRIDES = {

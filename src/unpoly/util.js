@@ -1373,6 +1373,15 @@ up.util = (function() {
     return isFunction(value) ? value(...args) : value
   }
 
+  function evalAutoOption(value, autoMeans, ...args) {
+    value = evalOption(value, ...args)
+    // Allow functions to return 'auto'
+    if (value === 'auto') {
+      value = evalOption(autoMeans, ...args)
+    }
+    return value
+  }
+
   const ESCAPE_HTML_ENTITY_MAP = {
     "&": "&amp;",
     "<": "&lt;",
@@ -2099,6 +2108,7 @@ up.util = (function() {
     escapeRegExp,
     sequence,
     evalOption,
+    evalAutoOption,
     flatten,
     isTruthy,
     newDeferred,
