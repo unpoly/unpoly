@@ -28,9 +28,6 @@ up.history = (function() {
     Defines whether [fragment updates](/up.render) will update the browser's current URL.
 
     If set to `false` Unpoly will never change the browser URL.
-  @param {boolean} [config.enabled=true]
-    Whether to restore the known scroll positions
-    when the user goes back or forward in history.
   @stable
   */
   const config = new up.Config(() => ({
