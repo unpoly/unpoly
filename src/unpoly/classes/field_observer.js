@@ -21,12 +21,14 @@ up.FieldObserver = class FieldObserver {
     // Although (depending on the browser) we only need/receive either input or change,
     // we always bind to both events in case another script manually triggers it.
     this.unbindFieldEvents = up.on(this.fields, 'input change', () => this.check())
-    this.unbindFormEvents = up.on(this.form, 'up:form:submit', () => this.cancelTimer())
+    if (this.form) {
+      this.unbindFormEvents = up.on(this.form, 'up:form:submit', () => this.cancelTimer())
+    }
   }
 
   stop() {
     this.unbindFieldEvents()
-    this.unbindFormEvents()
+    this.unbindFormEvents?.()
     this.cancelTimer()
   }
 

@@ -490,6 +490,7 @@ up.form = (function() {
   function observe(elements, ...args) {
     elements = e.list(elements)
     let form = getForm(elements[0])
+    console.log("observe(%o) gets form %o", elements, form)
     const fields = u.flatMap(elements, findFields)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
