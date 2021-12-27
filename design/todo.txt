@@ -1,5 +1,8 @@
-TODOs Concurrency
-=================
+TODOs for next release
+======================
+
+Concurrency
+-----------
 
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
@@ -21,8 +24,6 @@ TODOs Concurrency
   - [disable=selector]
   - [disable=false]
   - Evaluate in up.Change.FromURL
-- Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Observer-Delays warten können danach noch Dinge tun
-  - Wie wäre "submit stoppt das delay"?
 - Move mimicLocalRequest() into useCachedRequest()
 - Consolidate [up-autosubmit], [up-observe] and [up-validate] to all use up.FieldObserver
   - Different trigger events { observeEvent }
@@ -31,20 +32,6 @@ TODOs Concurrency
   - FieldObserver should also stop if observed field is destroyed
     - Could be an up.destructor()
     - Explain in docs
-- Maybe input[type=date] could default to observeEvent="blur"
-- *When people do manual validation in a callback, they are outside the form lock*
-- Missing docs
-    parser.boolean('revealTop')
-    parser.number('revealMax')
-    parser.number('revealPadding')
-    parser.number('revealSnap')
-    parser.string('scrollBehavior') // why is this always set to 'auto'? can we allow 'smooth' here if we're not animating?
-- What happens here for synthetic "click" events that don't define clientX/clientY? Should we just skip the check then?
-    wasHitByMouseEvent(event) {
-      const hittableElement = document.elementFromPoint(event.clientX, event.clientY)
-      return !hittableElement || this.contains(hittableElement)
-    }
-- Allow to prevent Unpoly's state restoration handling with a preventable up:location:restore event (it used to be up:history:restore)
 - Serialize *all* actions in a form
   - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
   - The new default form submit/observe/validate is { sequence: 'form' }
@@ -60,6 +47,27 @@ TODOs Concurrency
       - Cached responses must *not* resolve immediately, but only when the queue calls #load()
         - Move up.Request#followState() to up.Request#load()
       - Don't emit up:request:load or up:request:loaded for cached responses
+
+Various changes
+---------------
+
+- Maybe input[type=date] could default to observeEvent="blur"
+- Missing docs for render options
+  - { revealTop }
+  - { revealMax }
+  - { revealPadding }
+  - { revealSnap }
+  - { scrollBehavior }
+    - if we stop auto-set it to auto, otherwise stop parsing this
+- Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
+  - Could we even allow this *when* morphing?
+- What happens here for synthetic "click" events that don't define clientX/clientY? Should we just skip the check then?
+    wasHitByMouseEvent(event) {
+      const hittableElement = document.elementFromPoint(event.clientX, event.clientY)
+      return !hittableElement || this.contains(hittableElement)
+    }
+- Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
+  - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Hungry elements that update for all layers
   - <div up-hungry up-layer="any">
 
