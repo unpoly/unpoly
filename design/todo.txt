@@ -61,14 +61,14 @@ Various changes
     - if we stop auto-set it to auto, otherwise stop parsing this
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
-- Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
-  - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Hungry elements that update for all layers
   - <div up-hungry up-layer="any">
 
 Maybe
 -----
 
+- Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
+  - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Replace up.hello() and up.syntax.clean() to MutationObserver()
 - Do we want to serialize all actions in a form?
   - up-sequence="form"
