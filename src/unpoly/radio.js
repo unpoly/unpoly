@@ -55,12 +55,16 @@ up.radio = (function() {
     config.reset()
   }
 
-  /*-
-  @function up.radio.hungrySelector
-  @internal
-  */
-  function hungrySelector() {
-    return config.hungrySelectors.join(',')
+  function hungrySelector(suffix = '') {
+    let withSuffix = config.hungrySelectors.map((selector) => selector + suffix)
+    return withSuffix.join(',')
+  }
+
+  function hungryElements(layer) {
+    let anyLayerSelector = '[up-layer=any]'
+    let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
+    let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
+    return [...hungriesOnTargetedLayer, ...hungriesOnAnyLayer]
   }
 
   /*-
@@ -72,6 +76,11 @@ up.radio = (function() {
   being replaced.
 
   @selector [up-hungry]
+  @param [up-layer='current']
+    For updates on which layer this hungry element should be matched.
+
+    By default only hungry elements on the targeted layer are updated.
+    To match a hungry element when updating *any* layer, set this attribute to `[up-layer=any]`.
   @param [up-transition]
     The transition to use when this element is updated.
   @stable
@@ -217,8 +226,8 @@ up.radio = (function() {
 
   return {
     config,
-    hungrySelector,
+    hungryElements,
     startPolling,
-    stopPolling
+    stopPolling,
   }
 })()

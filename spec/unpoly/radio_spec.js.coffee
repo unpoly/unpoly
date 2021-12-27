@@ -206,6 +206,39 @@ describe 'up.radio', ->
         expect($('.inside')).toHaveText('new inside')
         expect($('.outside')).toHaveText('old outside')
 
+      it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-layer=any]', ->
+        up.layer.config.openDuration = 0
+        up.layer.config.closeDuration = 0
+
+        $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-layer', 'any')
+
+        closeEventHandler = jasmine.createSpy('close event handler')
+        up.on('up:layer:dismiss', closeEventHandler)
+
+        up.layer.open fragment: """
+          <div class='inside'>
+            old inside
+          </div>
+          """
+
+        expect(up.layer.isOverlay()).toBe(true)
+
+        up.render
+          target: '.inside',
+          document: """
+            <div class="outside">
+              new outside
+            </div>
+            <div class='inside'>
+              new inside
+            </div>
+            """,
+          layer: 'front'
+
+        expect(closeEventHandler).not.toHaveBeenCalled()
+        expect($('.inside')).toHaveText('new inside')
+        expect($('.outside')).toHaveText('new outside')
+
       it 'does not update an [up-hungry] element if it was contained by the original fragment', asyncSpec (next) ->
         container = fixture('.container')
         e.affix(container, '.child[up-hungry]')
