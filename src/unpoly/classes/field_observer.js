@@ -41,8 +41,14 @@ up.FieldObserver = class FieldObserver {
     this.cancelTimer()
     this.currentTimer = u.timer(this.delay, () => {
       this.currentTimer = undefined
-      this.requestCallback()
+      if (this.isAnyFieldAttached()) {
+        this.requestCallback()
+      }
     })
+  }
+
+  isAnyFieldAttached() {
+    return u.some(this.fields, (field) => !e.isDetached(field))
   }
 
   scheduleValues(values) {

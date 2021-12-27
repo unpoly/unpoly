@@ -27,11 +27,10 @@ Concurrency
 - Move mimicLocalRequest() into useCachedRequest()
 - Consolidate [up-autosubmit], [up-observe] and [up-validate] to all use up.FieldObserver
   - Different trigger events { observeEvent }
+  - up-validate needs defaults [up-observe-event="change"][up-delay="0"]
   - User-controlled trigger events
     - <input up-validate="other" up-observe-event="input">
-  - FieldObserver should also stop if observed field is destroyed
-    - Could be an up.destructor()
-    - Explain in docs
+  - Consider renaming "*observe*" to "*watch*"
 - Serialize *all* actions in a form
   - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
   - The new default form submit/observe/validate is { sequence: 'form' }
@@ -61,8 +60,6 @@ Various changes
     - if we stop auto-set it to auto, otherwise stop parsing this
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
-- Hungry elements that update for all layers
-  - <div up-hungry up-layer="any">
 
 Maybe
 -----

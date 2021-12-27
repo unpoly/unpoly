@@ -81,40 +81,55 @@ describe 'up.form', ->
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
-            it 'debounces the callback when the { delay } option is given', asyncSpec (next) ->
-              $input = $fixture('input[name="input-name"][value="old-value"]')
-              callback = jasmine.createSpy('change callback')
-              up.observe($input, { delay: 200 }, callback)
-              $input.val('new-value-1')
-              Trigger[eventType]($input)
+            describe 'with { delay } option', ->
 
-              next.after 100, ->
-                # 100 ms after change 1: We're still waiting for the 200ms delay to expire
-                expect(callback.calls.count()).toEqual(0)
-
-              next.after 200, ->
-                # 300 ms after change 1: The 200ms delay has expired
-                expect(callback.calls.count()).toEqual(1)
-                expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
-                $input.val('new-value-2')
+              it 'debounces the callback', asyncSpec (next) ->
+                $input = $fixture('input[name="input-name"][value="old-value"]')
+                callback = jasmine.createSpy('change callback')
+                up.observe($input, { delay: 200 }, callback)
+                $input.val('new-value-1')
                 Trigger[eventType]($input)
 
-              next.after 80, ->
-                # 80 ms after change 2: We change again, resetting the delay
-                expect(callback.calls.count()).toEqual(1)
-                $input.val('new-value-3')
-                Trigger[eventType]($input)
+                next.after 100, ->
+                  # 100 ms after change 1: We're still waiting for the 200ms delay to expire
+                  expect(callback.calls.count()).toEqual(0)
 
-              next.after 170, ->
-                # 250 ms after change 2, which was superseded by change 3
-                # 170 ms after change 3
-                expect(callback.calls.count()).toEqual(1)
+                next.after 200, ->
+                  # 300 ms after change 1: The 200ms delay has expired
+                  expect(callback.calls.count()).toEqual(1)
+                  expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
+                  $input.val('new-value-2')
+                  Trigger[eventType]($input)
 
-              next.after 130, ->
-                # 190 ms after change 2, which was superseded by change 3
-                # 150 ms after change 3
-                expect(callback.calls.count()).toEqual(2)
-                expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
+                next.after 80, ->
+                  # 80 ms after change 2: We change again, resetting the delay
+                  expect(callback.calls.count()).toEqual(1)
+                  $input.val('new-value-3')
+                  Trigger[eventType]($input)
+
+                next.after 170, ->
+                  # 250 ms after change 2, which was superseded by change 3
+                  # 170 ms after change 3
+                  expect(callback.calls.count()).toEqual(1)
+
+                next.after 130, ->
+                  # 190 ms after change 2, which was superseded by change 3
+                  # 150 ms after change 3
+                  expect(callback.calls.count()).toEqual(2)
+                  expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
+
+              it 'does not run the callback if the field was detached during the delay', asyncSpec (next) ->
+                input = fixture('input[name="input-name"][value="old-value"]')
+                callback = jasmine.createSpy('observer callback')
+                up.observe(input, { delay: 150 }, callback)
+                input.value = 'new-value'
+                Trigger[eventType](input)
+
+                next.after 50, ->
+                  up.destroy(input)
+
+                next.after 150, ->
+                  expect(callback).not.toHaveBeenCalled()
 
             it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
               $input = $fixture('input[name="input-name"][value="old-value"]')

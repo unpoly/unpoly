@@ -485,6 +485,8 @@ up.form = (function() {
     it is already running.
   @return {Function()}
     A destructor function that removes the observe watch when called.
+
+    Observing will stop automatically when the targeted fields are removed from the DOM.
   @stable
   */
   function observe(elements, ...args) {
@@ -531,6 +533,8 @@ up.form = (function() {
     See options for [`up.observe()`](/up.observe)
   @return {Function()}
     A destructor function that removes the observe watch when called.
+
+    Autosubmitting will stop automatically when the targeted fields are removed from the DOM.
   @stable
   */
   function autosubmit(target, options) {
