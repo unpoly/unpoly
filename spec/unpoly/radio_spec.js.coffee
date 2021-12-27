@@ -173,7 +173,7 @@ describe 'up.radio', ->
           expect('.target').toHaveText('new target')
           expect('.hungry').toHaveText('old hungry')
 
-      it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', asyncSpec (next) ->
+      it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', ->
         up.layer.config.openDuration = 0
         up.layer.config.closeDuration = 0
 
@@ -184,31 +184,27 @@ describe 'up.radio', ->
 
         up.layer.open fragment: """
           <div class='inside'>
-            <div class="inside-text">old inside</div>
-            <div class="inside-link">update</div>
+            old inside
           </div>
           """
 
-        next =>
-          expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.isOverlay()).toBe(true)
 
-          up.render
-            target: '.inside-text',
-            document: """
-              <div class="outside">
-                new outside
-              </div>
-              <div class='inside'>
-                <div class="inside-text">new inside</div>
-                <div class="inside-link">update</div>
-              </div>
-              """,
-            origin: document.querySelector('.inside-link')
+        up.render
+          target: '.inside',
+          document: """
+            <div class="outside">
+              new outside
+            </div>
+            <div class='inside'>
+              new inside
+            </div>
+            """,
+          layer: 'front'
 
-        next =>
-          expect(closeEventHandler).not.toHaveBeenCalled()
-          expect($('.inside-text')).toHaveText('new inside')
-          expect($('.outside')).toHaveText('old outside')
+        expect(closeEventHandler).not.toHaveBeenCalled()
+        expect($('.inside')).toHaveText('new inside')
+        expect($('.outside')).toHaveText('old outside')
 
       it 'does not update an [up-hungry] element if it was contained by the original fragment', asyncSpec (next) ->
         container = fixture('.container')
