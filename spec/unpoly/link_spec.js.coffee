@@ -2205,6 +2205,19 @@ describe 'up.link', ->
         expect(listener).toHaveBeenCalled()
         expect(link).toHaveBeenDefaultFollowed()
 
+      it 'does not crash with a synthetic click event that may not have all properties defined (bugfix)', ->
+        link = fixture('a[href="/path"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link, {
+          clientX: undefined,
+          clientY: undefined,
+          screenX: undefined,
+          screenY: undefined,
+        })
+        expect(listener).toHaveBeenCalled()
+        expect(link).toHaveBeenDefaultFollowed()
+
       it 'prevents the click event when the up:click event is prevented', ->
         clickEvent = null
         link = fixture('a[href="/path"]')
