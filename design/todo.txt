@@ -31,6 +31,9 @@ Concurrency
   - User-controlled trigger events
     - <input up-validate="other" up-observe-event="input">
   - Consider renaming "*observe*" to "*watch*"
+    - Maybe take this opportunity to change the attribute?
+      - <form up-watch="change" up-on-changed="...">
+      - up.watch(field, 'change', function() { ... })
 - Serialize *all* actions in a form
   - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
   - The new default form submit/observe/validate is { sequence: 'form' }
