@@ -7,17 +7,10 @@ Concurrency
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
   - This may be a new caching page
-- Use some form options (like [up-feedback], [up-disable]) for [up-validate], [up-observe] promises and [up-autosubmit]
+- Parse { feedback, disable } for [up-validate]
   - Element attribute should override form attribute
-  - Parse form options, but only use some of them
-    - This would evaluate [up-navigate]
-    - This could also let us get rid of parseBasicOptions()
-    - Maybe allow up.OptionsParser to parse more than one element
-    - Maybe allow up.OptionsParser to take a whitelist of interesting options.
-      - This way we would only pay for parsing we care about.
-      - => But what about code outside the OptionsParser that post-processes options?
-        - if (options.method === 'GET') { options.url = up.Params.stripURL(options.url) }
-      - It would be easier to whitelist after the fact
+- Parse and use { disable } while an [up-observe] callback is running
+  - No up.render() here!
 - Support more than one [disable] option
   - [disable=form] (gleich wie true, kann auch selektor sein)
   - [disable=form-group]
