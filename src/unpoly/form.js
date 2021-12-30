@@ -76,8 +76,6 @@ up.form = (function() {
     disable: false
   }))
 
-  let abortScheduledValidate
-
   function fullSubmitSelector() {
     return config.submitSelectors.join(',')
   }
@@ -496,7 +494,6 @@ up.form = (function() {
   function observe(elements, ...args) {
     elements = e.list(elements)
     let form = getForm(elements[0])
-    console.log("observe(%o) gets form %o", elements, form)
     const fields = u.flatMap(elements, findFields)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
@@ -984,7 +981,6 @@ up.form = (function() {
       return
     }
 
-    abortScheduledValidate?.()
     up.event.halt(event)
     up.log.muteUncriticalRejection(submit(form))
   })
@@ -1151,26 +1147,11 @@ up.form = (function() {
     around the validating field.
   @stable
   */
-  up.on('change', '[up-validate]', function(event) {
-    // Even though [up-validate] may be used on either an entire form or an individual input,
-    // the change event will trigger on a given field.
-    const field = findFields(event.target)[0]
-
-    // There is an edge case where the user is changing an input with [up-validate],
-    // but blurs the input by directly clicking the submit button. In this case the
-    // following events will be emitted:
-    //
-    // - change on the input
-    // - focus on the button
-    // - submit on the form
-    //
-    // In this case we do not want to send a validate request to the server, but
-    // simply submit the form. Because this event handler does not know if a submit
-    // event is about to fire, we delay the validation to the next microtask.
-    // In case we receive a submit event after this, we can cancel the validation.
-    abortScheduledValidate = u.abortableMicrotask(() => {
-      return up.log.muteUncriticalRejection(validate(field))
-    })
+  up.compiler('[up-validate]', function(container) {
+    let fields = findFields(container)
+    for (let field of fields) {
+      observe(field, { event: 'change' }, () => validate(field))
+    }
   })
 
   /*-

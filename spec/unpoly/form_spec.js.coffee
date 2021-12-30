@@ -1417,27 +1417,29 @@ describe 'up.form', ->
       describe 'when a selector is given', ->
 
         it "submits the input's form with an 'X-Up-Validate' header and replaces the selector with the response", asyncSpec (next) ->
-
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
-              <input name="user" value="judy" up-validate=".field-group:has(&)">
+              <input name="user" value="judy" up-validate=".field-group">
             </div>
           """).appendTo($form)
+          up.hello($form)
 
-          Trigger.change($group.find('input'))
+          $input = $group.find('input')
+          $input.val('carl')
+          Trigger.change($input)
 
           next =>
             request = @lastRequest()
             expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
-            expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group:has(input[name="user"])')
+            expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group')
 
             @respondWith
               status: 500
               responseText: """
                 <div class="field-group has-error">
                   <div class='error'>Username has already been taken</div>
-                  <input name="user" value="judy" up-validate=".field-group:has(&)">
+                  <input name="user" value="judy" up-validate=".field-group>
                 </div>
               """
 
@@ -1457,10 +1459,14 @@ describe 'up.form', ->
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
-              <input name="user" value="judy" up-validate=".field-group:has(&)">
+              <input name="user" value="judy" up-validate=".field-group">
             </div>
           """).appendTo($form)
-          Trigger.change($group.find('input'))
+          up.hello($form)
+
+          $input = $group.find('input')
+          $input.val('carl')
+          Trigger.change($input)
 
           next =>
             @respondWith """
@@ -1480,12 +1486,14 @@ describe 'up.form', ->
               <input name="user" value="judy" up-validate=".field-group:has(&)">
             </div>
           """).appendTo($form)
+          up.hello($form)
 
           $input = $('input[name=user]')
-          $input.focus()
 
+          $input.focus()
           expect('input[name=user]').toBeFocused()
 
+          $input.val('carl')
           Trigger.change($input)
 
           next =>
@@ -1499,6 +1507,22 @@ describe 'up.form', ->
           next =>
             expect(document).toHaveSelector('.field-group.has-error')
             expect('input[name=user]').toBeFocused()
+
+        it 'does not validate on input event, as the user may still be typing', asyncSpec (next) ->
+          $form = $fixture('form[action="/path/to"]')
+          $group = $("""
+            <div class="field-group">
+              <input name="user" value="judy" up-validate=".field-group:has(&)">
+            </div>
+          """).appendTo($form)
+          up.hello($form)
+
+          $input = $group.find('input')
+          $input.val('carl')
+          Trigger.input($input)
+
+          next =>
+            expect(jasmine.Ajax.requests.count()).toBe(0)
 
       describe 'when no selector is given', ->
 
@@ -1519,9 +1543,15 @@ describe 'up.form', ->
           """
           up.hello(container)
 
-          Trigger.change $('#registration input[name=password]')
+          $passwordInput = $('#registration input[name=password]')
+          $passwordInput.val('secret5555')
+          Trigger.change($passwordInput)
 
           next =>
+            request = @lastRequest()
+            expect(request.requestHeaders['X-Up-Validate']).toEqual('password')
+            expect(request.requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="password"])')
+
             @respondWith """
               <form action="/users" id="registration">
 
@@ -1547,8 +1577,9 @@ describe 'up.form', ->
         form = fixture('form[up-submit][action="/path"]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
         submitButton = e.affix(form, 'input[type=submit]')
-        textField.value = "foo"
+        up.hello(form)
 
+        textField.value = "foo"
         Trigger.change(textField)
         Trigger.clickSequence(submitButton)
 
@@ -1568,8 +1599,9 @@ describe 'up.form', ->
         form.setAttribute('up-transition', 'cross-fade')
         form.setAttribute('up-disable', 'true')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
-        textField.value = 'changed'
+        up.hello(form)
 
+        textField.value = 'changed'
         Trigger.change(textField)
 
         next ->
@@ -1604,7 +1636,9 @@ describe 'up.form', ->
         """
         up.hello(container)
 
-        Trigger.change $('#registration input[name=password]')
+        $passwordInput = $('#registration input[name=password]')
+        $passwordInput.val('secret5435')
+        Trigger.change($passwordInput)
 
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -1647,7 +1681,9 @@ describe 'up.form', ->
         """
         up.hello(container)
 
-        Trigger.change $('#registration input[value="2"]')
+        $secondOption = $('#registration input[value="2"]')
+        $secondOption.prop('checked', true)
+        Trigger.change($secondOption)
 
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)
@@ -1662,14 +1698,16 @@ describe 'up.form', ->
             </div>
 
             <div class="result">
-              Validation resutls will appear here
+              Validation results will appear here
             </div>
 
           </form>
         """
         up.hello(container)
 
-        Trigger.change container.querySelector('input[name=email]')
+        emailInput = container.querySelector('input[name=email]')
+        emailInput.value = "foo@bar.com"
+        Trigger.change(emailInput)
 
         next =>
           expect(jasmine.Ajax.requests.count()).toEqual(1)

@@ -1212,12 +1212,6 @@ up.util = (function() {
     return Promise.resolve().then(task)
   }
 
-  function abortableMicrotask (task) {
-    let aborted = false
-    queueMicrotask(function() { if (!aborted) { return task(); } })
-    return () => aborted = true
-  }
-
   /*-
   Returns the last element of the given array.
 
@@ -2119,7 +2113,6 @@ up.util = (function() {
     isCrossOrigin,
     task: queueTask,
     microtask: queueMicrotask,
-    abortableMicrotask,
     isEqual,
     splitValues,
     endsWith,

@@ -9,7 +9,7 @@ up.FieldObserver = class FieldObserver {
     this.callback = callback
     this.form = form
     this.fields = fields
-    this.events = options.events || up.form.config.observeEvents
+    this.event = options.event || up.form.config.observeEvents
     this.delay = options.delay
     this.batch = options.batch
   }
@@ -21,7 +21,7 @@ up.FieldObserver = class FieldObserver {
     this.callbackRunning = false
     // Although (depending on the browser) we only need/receive either input or change,
     // we always bind to both events in case another script manually triggers it.
-    this.unbindFieldEvents = up.on(this.fields, this.events, () => this.check())
+    this.unbindFieldEvents = up.on(this.fields, this.event, () => this.check())
     if (this.form) {
       this.unbindFormEvents = up.on(this.form, 'up:form:submit', () => this.cancelTimer())
     }
