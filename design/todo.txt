@@ -14,9 +14,11 @@ Concurrency
 - Support more than one [disable] option
   - [disable=form] (gleich wie true, kann auch selektor sein)
   - [disable=form-group]
+  - [disable=submit-button]
   - [disable=selector]
   - [disable=false]
   - Evaluate in up.Change.FromURL
+    - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
 - User-controlled trigger events
   - <input up-validate="other" up-observe-event="input">
