@@ -32,6 +32,9 @@ up.form = (function() {
 
     You may use this option to limit how often the callback will run for a fast typist.
 
+  @param {string} [config.observeEvents]
+    An array of event types used when [observing](/up.observe) a form field.
+
   @param {Array<string>} [config.submitSelectors]
     An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
 
@@ -68,6 +71,7 @@ up.form = (function() {
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
+    observeEvents: ['input', 'change'],
     observeDelay: 0,
     disable: false
   }))

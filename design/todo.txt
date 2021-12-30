@@ -28,6 +28,7 @@ Concurrency
 - Consolidate [up-autosubmit], [up-observe] and [up-validate] to all use up.FieldObserver
   - Different trigger events { observeEvent }
   - up-validate needs defaults [up-observe-event="change"][up-delay="0"]
+  - up.form.config.observeEvents
   - User-controlled trigger events
     - <input up-validate="other" up-observe-event="input">
   - Consider renaming "*observe*" to "*watch*"
