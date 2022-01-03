@@ -5,7 +5,7 @@ up.OptionsParser = class OptionsParser {
 
   constructor(options, element, parserOptions = {}) {
     this.options = options
-    this.elements = u.uniq(u.compact(u.wrapList(element)))
+    this.element = element
     this.fail = parserOptions.fail
     this.closest = parserOptions.closest
   }
@@ -36,10 +36,8 @@ up.OptionsParser = class OptionsParser {
     // Below we will only set @options[key] = value if value is defined.
     let value = this.options[key]
 
-    for (let element of this.elements) {
-      for (let attrName of attrNames) {
-        value ??= this.parseFromAttr(attrValueFn, element, attrName)
-      }
+    for (let attrName of attrNames) {
+      value ??= this.parseFromAttr(attrValueFn, this.element, attrName)
     }
 
     value ??= keyOptions.default

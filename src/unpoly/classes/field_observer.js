@@ -23,13 +23,13 @@ up.FieldObserver = class FieldObserver {
 
     // We get the { feedback } option through the following priorities:
     // (0) Passed as explicit observe() option (this.options.feedback)
-    // (1) Attribute prefixed to the observe() type (Closest [up-infix-feedback] attr)
+    // (1) Attribute prefixed to the observe() type (Closest [up-observe-feedback] attr)
     // (2) Default config for this observe() type (options.defaults.feedback)
     // (3) Option for regular submit (this.submitOptions.feedback)
-    parser.boolean('feedback', { attr: this.prefix + '-feedback', default: this.defaults.feedback ?? this.submitOptions.feedback })
-    parser.boolean('disable', { attr: this.prefix + '-disable', default: this.defaults.disable ?? this.submitOptions.disable })
-    parser.number('delay', { attr: this.prefix + '-delay', default: this.defaults.delay })
-    parser.string('event', { attr: this.prefix + '-event', default: u.evalOption(this.defaults.event, field) })
+    parser.boolean('feedback', { attr: this.attrPrefix + '-feedback', default: this.defaults.feedback ?? this.submitOptions.feedback })
+    parser.boolean('disable', { attr: this.attrPrefix + '-disable', default: this.defaults.disable ?? this.submitOptions.disable })
+    parser.number('delay', { attr: this.attrPrefix + '-delay', default: this.defaults.delay })
+    parser.string('event', { attr: this.attrPrefix + '-event', default: u.evalOption(this.defaults.event, field) })
 
     return options
   }
