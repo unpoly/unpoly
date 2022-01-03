@@ -1097,6 +1097,8 @@ up.util = (function() {
   }
 
   /*-
+  After IE11 this can just be Array.from(set)
+
   @function up.util.setToArray
   @internal
   */
@@ -1107,6 +1109,8 @@ up.util = (function() {
   }
 
   /*-
+  After IE11 this can just be new Set(array)
+
   @function up.util.arrayToSet
   @internal
   */

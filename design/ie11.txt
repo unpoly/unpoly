@@ -31,6 +31,8 @@ Quick wins: Removals
 - up.on() options { passive, one } can just be forwarded to Element#addEventListener()
 - up.framework.mustBootManually() can rely on document.currentScript being supported
 - Drop IE11 fies from parseURL()
+- up.util.arrayToSet() can just be new Set(array)
+- up.util.setToArray() can just be new Array.from(set)
 
 
 More work required
