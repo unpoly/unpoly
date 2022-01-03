@@ -12,27 +12,54 @@ up.FieldObserver = class FieldObserver {
     this.options = options
     this.defaults = options.defaults
     this.batch = options.batch
-    this.attrPrefix = options.attrPrefix || 'up-observe'
-    this.submitOptions = up.form.submitOptions(form)
+    this.intent = options.intent || 'observe'
+    // this.attrPrefix = options.attrPrefix || 'up-observe'
+    this.formOptions = up.form.submitOptions(form)
+    this.formOptionsForIntent = {
+      feedback: e.booleanAttr(this.form, `up-${this.intent}-feedback`),
+      disable: e.booleanOrStringAttr(this.form, `up-${this.intent}-disable`),
+      delay: e.numberAttr(this.form, `up-${this.intent}-delay`),
+      event: e.stringAttr(this.form, `up-${this.intent}-event`)
+    }
+
     this.subscriber = new up.Subscriber()
   }
 
   fieldOptions(field) {
     let options = { ...this.options, origin: field }
-    let parser = new up.OptionsParser(options, field, { closest: true })
+    let parser = new up.OptionsParser(options, field, { closest: true, ignore: this.form })
 
     // We get the { feedback } option through the following priorities:
     // (0) Passed as explicit observe() option (this.options.feedback)
     // (1) Attribute prefixed to the observe() type (Closest [up-observe-feedback] attr)
     // (2) Default config for this observe() type (options.defaults.feedback)
     // (3) Option for regular submit (this.submitOptions.feedback)
-    parser.boolean('feedback', { attr: this.attrPrefix + '-feedback', default: this.defaults.feedback ?? this.submitOptions.feedback })
-    parser.boolean('disable', { attr: this.attrPrefix + '-disable', default: this.defaults.disable ?? this.submitOptions.disable })
-    parser.number('delay', { attr: this.attrPrefix + '-delay', default: this.defaults.delay })
-    parser.string('event', { attr: this.attrPrefix + '-event', default: u.evalOption(this.defaults.event, field) })
+    parser.boolean('feedback', { default: this.formOptionsForIntent.feedback ?? this.defaults.feedback ?? this.formOptions.feedback })
+    parser.booleanOrString('disable', { default: this.formOptionsForIntent.disable ?? this.defaults.disable ?? this.formOptions.disable })
+    parser.number('delay', { attr: this.attrPrefix + '-delay', default: this.formOptionsForIntent.delay ?? this.defaults.delay})
+    parser.string('event', { attr: this.attrPrefix + '-event', default: this.formOptionsForIntent.event ?? u.evalOption(this.defaults.event, field) })
+
+    throw "weird: ich kann <input up-autosubmit up-delay=300> machen, aber nicht <form up-autosubmit up-event='foo'>"
 
     return options
   }
+
+  // fieldOptions(field) {
+  //   let options = { ...this.options, origin: field }
+  //   let parser = new up.OptionsParser(options, field, { closest: true })
+  //
+  //   // We get the { feedback } option through the following priorities:
+  //   // (0) Passed as explicit observe() option (this.options.feedback)
+  //   // (1) Attribute prefixed to the observe() type (Closest [up-observe-feedback] attr)
+  //   // (2) Default config for this observe() type (options.defaults.feedback)
+  //   // (3) Option for regular submit (this.submitOptions.feedback)
+  //   parser.boolean('feedback', { attr: this.attrPrefix + '-feedback', default: this.defaults.feedback ?? this.submitOptions.feedback })
+  //   parser.boolean('disable', { attr: this.attrPrefix + '-disable', default: this.defaults.disable ?? this.submitOptions.disable })
+  //   parser.number('delay', { attr: this.attrPrefix + '-delay', default: this.defaults.delay })
+  //   parser.string('event', { attr: this.attrPrefix + '-event', default: u.evalOption(this.defaults.event, field) })
+  //
+  //   return options
+  // }
 
   start() {
     this.scheduledValues = null

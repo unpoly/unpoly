@@ -73,7 +73,7 @@ up.form = (function() {
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
 
     /*
-    submitOptions: { // Orthogonal to navigate? But submit is always navigation.
+    submitOptions: { // Orthogonal to navigate? But submit is navigation by default...
       disable: false,
     },
     */

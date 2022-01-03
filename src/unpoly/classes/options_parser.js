@@ -36,6 +36,8 @@ up.OptionsParser = class OptionsParser {
     // Below we will only set @options[key] = value if value is defined.
     let value = this.options[key]
 
+    attrValueFn = this.attrValueFnWithIgnore(attrValueFn)
+
     for (let attrName of attrNames) {
       value ??= this.parseFromAttr(attrValueFn, this.element, attrName)
     }
@@ -63,6 +65,18 @@ up.OptionsParser = class OptionsParser {
       return e.closestAttr(element, attrName, attrValueFn)
     } else {
       return attrValueFn(element, attrName)
+    }
+  }
+
+  attrValueFnWithIgnore(originalAttrValueFn) {
+    if (this.ignore) {
+      return (element, attrName) => {
+        if (element !== this.ignore) {
+          return originalAttrValueFn(element, attrName)
+        }
+      }
+    } else {
+      return originalAttrValueFn
     }
   }
 
