@@ -329,7 +329,7 @@ up.feedback = (function() {
   @stable
   */
 
-  function aroundRequest(request, options) {
+  function showAroundRequest(request, options) {
     if (!options.feedback) {
       return
     }
@@ -491,7 +491,7 @@ up.feedback = (function() {
 
   return {
     config,
-    aroundRequest,
+    showAroundRequest,
     normalizeURL,
   }
 })()

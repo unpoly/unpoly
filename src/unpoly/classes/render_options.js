@@ -156,6 +156,7 @@ up.RenderOptions = (function() {
   }
 
   function addCallback(options, prop, callback) {
+    throw "Do we still need this after moving disable to up.Change.FromURL ?"
     if (options[prop]) {
       callback = u.sequence(options.prop[prop], callback)
     }

@@ -249,7 +249,8 @@ up.syntax = (function() {
     const macro = buildCompiler(args)
 
     if (up.framework.evaling) {
-      macro.priority = detectSystemMacroPriority(macro.selector) ||
+      // Don't allow the default priority (0) for Unpoly's own macros.
+      macro.priority ||= detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
     }
     return insertCompiler(macros, macro)

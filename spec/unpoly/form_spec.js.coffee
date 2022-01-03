@@ -70,7 +70,7 @@ describe 'up.form', ->
               Trigger[eventType]($input)
               Trigger[eventType]($input)
               next =>
-                expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
+                expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
@@ -222,9 +222,9 @@ describe 'up.form', ->
 
           it 'runs the callback when the group changes its selection', asyncSpec (next) ->
             $form = $fixture('form')
-            $radio1 = $form.affix('input[type="radio"][name="group"][value="1"]')
-            $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
-            $group = $radio1.add($radio2)
+            $group = $form.affix('div')
+            $radio1 = $group.affix('input[type="radio"][name="group"][value="1"]')
+            $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
             callback = jasmine.createSpy('change callback')
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
@@ -245,11 +245,11 @@ describe 'up.form', ->
 
           it "runs the callbacks when a radio button is selected or deselected by clicking a label in the group", asyncSpec (next) ->
             $form = $fixture('form')
-            $radio1 = $form.affix('input#radio1[type="radio"][name="group"][value="1"]')
-            $radio1Label = $form.affix('label[for="radio1"]').text('label 1')
-            $radio2 = $form.affix('input#radio2[type="radio"][name="group"][value="2"]')
-            $radio2Label = $form.affix('label[for="radio2"]').text('label 2')
-            $group = $radio1.add($radio2)
+            $group = $form.affix('div')
+            $radio1 = $group.affix('input#radio1[type="radio"][name="group"][value="1"]')
+            $radio1Label = $group.affix('label[for="radio1"]').text('label 1')
+            $radio2 = $group.affix('input#radio2[type="radio"][name="group"][value="2"]')
+            $radio2Label = $group.affix('label[for="radio2"]').text('label 2')
             callback = jasmine.createSpy('change callback')
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(false)
@@ -266,9 +266,9 @@ describe 'up.form', ->
 
           it "takes the group's initial selected value into account", asyncSpec (next) ->
             $form = $fixture('form')
-            $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
-            $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
-            $group = $radio1.add($radio2)
+            $group = $form.affix('div')
+            $radio1 = $group.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
+            $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
             callback = jasmine.createSpy('change callback')
             up.observe($group, callback)
             expect($radio1.is(':checked')).toBe(true)
@@ -303,7 +303,7 @@ describe 'up.form', ->
               Trigger[eventType]($input)
               Trigger[eventType]($input)
               next =>
-                expect(callback).toHaveBeenCalledWith('new-value', 'input-name')
+                expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
@@ -726,7 +726,7 @@ describe 'up.form', ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
-          it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
+          it 'allows to refer to the origin as "&" in the selector', asyncSpec (next) ->
             $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
@@ -772,7 +772,7 @@ describe 'up.form', ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
 
-          it 'allows to refer to this form as "&" in the selector', asyncSpec (next) ->
+          it 'allows to refer to the origin as "&" in the selector', asyncSpec (next) ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
@@ -828,13 +828,13 @@ describe 'up.form', ->
         expect(up.form.submitOptions(formWithDisable).disable).toBe(true)
         expect(up.form.submitOptions(formWithoutDisable).disable).toBe(false)
 
-      it "defaults a missing [up-disable] attribute to up.form.config.disable", ->
+      it "defaults a missing [up-disable] attribute to up.form.config.submitOptions.disable", ->
         form = fixture('form')
 
-        up.form.config.disable = true
+        up.form.config.submitOptions.disable = true
         expect(up.form.submitOptions(form).disable).toBe(true)
 
-        up.form.config.disable = false
+        up.form.config.submitOptions.disable = false
         expect(up.form.submitOptions(form).disable).toBe(false)
 
     describe 'up.form.group()', ->
@@ -1023,19 +1023,20 @@ describe 'up.form', ->
         expect(submitEvent.params.get('field2')).toEqual('value2')
         expect(submitEvent.submitButton).toBe(submitButton)
 
-      it 'allows to refer to this form as "&" in the target selector', asyncSpec (next) ->
-        $form = $fixture('form.my-form[action="/form-target"][up-target="&"]').text('old form text')
-        $submitButton = $form.affix('input[type="submit"]')
+      it 'allows to refer to the origin as "&" in the target selector', asyncSpec (next) ->
+        $form = $fixture('form.my-form[action="/form-target"][up-target="form:has(&)"]').text('old form text')
+        $submitButton = $form.affix('input.submit[type="submit"]')
         up.hello($form)
 
         Trigger.clickSequence($submitButton)
 
         next =>
-          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.my-form')
+          expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('form:has(.submit)')
 
           @respondWith """
             <form class="my-form">
               new form text
+              <input class="submit" type="submit">
             </form>
           """
 
@@ -1132,21 +1133,24 @@ describe 'up.form', ->
             expect('.target').toHaveText('old target text')
             expect('.errors').toHaveText('new errors text')
 
-        it 'allows to refer to this form as "&" in the [up-fail-target] selector', asyncSpec (next) ->
-          $form = $fixture('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="&"]').text('old form text')
+        it 'allows to refer to the origin as "&" in the [up-fail-target] selector', asyncSpec (next) ->
+          $form = $fixture('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="form:has(&)"]').text('old form text')
           $target = $fixture('.target').text('old target text')
 
-          $submitButton = $form.affix('input[type="submit"]')
+          $submitButton = $form.affix('input.submit[type="submit"]')
           up.hello($form)
 
           Trigger.clickSequence($submitButton)
 
           next =>
+            expect(@lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('form:has(.submit)')
+
             @respondWith
               status: 500,
               responseText: """
                 <form class="my-form">
                   new form text
+                  <input class="submit" type="submit">
                 </form>
                 """
 
@@ -1294,10 +1298,10 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
-      describe 'with [up-delay] modifier', ->
+      describe 'with [up-observe-delay] modifier', ->
 
         it 'debounces the form submission', asyncSpec (next) ->
-          $form = $fixture('form[up-autosubmit][up-delay="50"]')
+          $form = $fixture('form[up-autosubmit][up-observe-delay="50"]')
           $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
           submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
@@ -1353,12 +1357,12 @@ describe 'up.form', ->
         next =>
           expect(window.observeCallbackSpy).not.toHaveBeenCalled()
 
-      describe 'with [up-delay] modifier', ->
+      describe 'with [up-observe-delay] modifier', ->
 
         it 'debounces the callback', asyncSpec (next) ->
           $form = $fixture('form')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="40"]')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-observe-delay="40"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
@@ -1372,7 +1376,7 @@ describe 'up.form', ->
         it 'aborts the callback if the form was submitted while waiting', asyncSpec (next) ->
           $form = $fixture('form[action="/path"]')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-delay="40"]')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-observe-delay="40"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
@@ -1597,7 +1601,6 @@ describe 'up.form', ->
         form.setAttribute('up-location', '/thanks')
         form.setAttribute('up-navigate', '/true')
         form.setAttribute('up-transition', 'cross-fade')
-        form.setAttribute('up-disable', 'true')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
         up.hello(form)
 
@@ -1612,7 +1615,6 @@ describe 'up.form', ->
           expect(renderSpy.calls.mostRecent().args[0].location).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].navigate).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].transition).toBeUndefined()
-          expect(renderSpy.calls.mostRecent().args[0].disable).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].focus).not.toEqual('layer') # forced setting
 
     describe 'form[up-validate]', ->

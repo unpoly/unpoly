@@ -834,6 +834,12 @@ describe 'up.element', ->
       element = up.element.affix(parent, 'div')
       expect(up.element.closestAttr(element, 'foo')).toBeMissing()
 
+    it 'uses the third optional argument to parse the attribute', ->
+      grandParent = fixture('div[foo]')
+      parent = up.element.affix(grandParent, 'div')
+      element = up.element.affix(parent, 'div')
+      expect(up.element.closestAttr(element, 'foo', up.element.booleanAttr)).toBe(true)
+
   describe 'up.element.setTemporaryStyle', ->
 
     it "sets the given inline styles and returns a function that will restore the previous inline styles", ->

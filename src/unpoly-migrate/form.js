@@ -16,5 +16,18 @@ up.migrate.migratedFormGroupSelectors = function() {
   })
 }
 
-// We used to configure this selector. It's now [up-form-group].
-up.form.config.groupSelectors.unshift('[up-fieldset]')
+const observeDelayMovedWarning = () => warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
+Object.defineProperty(up.form.config, 'observeDelay', {
+  get() {
+    observeDelayMovedWarning()
+    return up.form.config.observeOptions.delay
+  },
+  set(newDelay) {
+    observeDelayMovedWarning()
+    return up.form.config.observeOptions.delay = newDelay
+  }
+})
+
+up.migrate.renameAttribute('up-fieldset', 'up-form-group')
+up.migrate.renameAttribute('up-delay', 'up-observe-delay', { scope: '[up-autosubmit]' })
+up.migrate.renameAttribute('up-delay', 'up-observe-delay', { scope: '[up-observe]' })

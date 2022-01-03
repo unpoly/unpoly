@@ -9,9 +9,28 @@ up.migrate = (function() {
     logLevel: 'warn'
   }))
 
+  // function getPath(object, path) {
+  //   for (let leg in path.split('.')) {
+  //     object = object[leg]
+  //   }
+  //   return object
+  // }
+  //
+  // function setPath(object, path, newValue) {
+  //   let legs = path.split('.')
+  //   u.each(legs, function(leg, i) {
+  //     if (i === legs.length - 1) {
+  //       object[leg] = newValue
+  //     } else {
+  //       object = object[leg]
+  //     }
+  //   })
+  //   return newValue
+  // }
+
   function renamedProperty(object, oldKey, newKey) {
     const warning = () => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
-    return Object.defineProperty(object, oldKey, {
+    Object.defineProperty(object, oldKey, {
       get() {
         warning()
         return this[newKey]
@@ -20,8 +39,20 @@ up.migrate = (function() {
         warning()
         this[newKey] = newValue
       }
-    }
-    )
+    })
+  }
+
+  function renamedAttribute(oldAttr, newAttr, { scope }) {
+    // Scope may be a selector string OR a function
+    let selector = scope || `[${oldAttr}]`
+    up.macro(selector, { priority: -1000 }, function(element) {
+      // If scope is given as a function it does not select for the attribute
+      if (element.hasAttribute(oldAttr)) {
+        warn('Attribute [%s] has been renamed to [%s] (found in %o)', oldAttr, newAttr, element)
+        let value = element.getAttribute(oldAttr)
+        element.setAttribute(newAttr, value)
+      }
+    })
   }
 
   function fixKey(object, oldKey, newKey) {

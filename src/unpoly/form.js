@@ -71,9 +71,30 @@ up.form = (function() {
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
-    observeEvents: ['input', 'change'],
-    observeDelay: 0,
-    disable: false
+
+    submitOptions: { // Orthogonal to navigate? But submit is always navigation.
+      disable: false,
+      sequence: 'form',
+    },
+
+    observeOptions: {
+      // Although we only need to bind to `input, we always also bind to `change`
+      // in case another script manually triggers it.
+      event: 'input change',
+      delay: 0,
+      feedback: undefined, // TODO: document, but remove undefined options
+      disable: undefined, // TODO: document, but remove undefined options
+      // sequence: undefined,
+    },
+
+    validateOptions: {
+      event: (field) => e.matches(field, 'input[type=date]') ? 'blur' : 'change',
+      delay: 0,
+      feedback: undefined, // TODO: document, but remove undefined options
+      disable: undefined, // TODO: document, but remove undefined options
+      // sequence: undefined,
+    },
+
   }))
 
   function fullSubmitSelector() {
@@ -125,6 +146,12 @@ up.form = (function() {
 
     return fields
   }
+
+  // function findFieldBatches(root) {
+  //   let fields = findFields(root)
+  //   let fieldsByName = u.groupBy(fields, 'name')
+  //   return u.values(fieldsByNames)
+  // }
 
   /*-
   Returns a list of submit buttons within the given element.
@@ -253,12 +280,14 @@ up.form = (function() {
   @return {Object}
   @stable
   */
-  function submitOptions(form, options) {
+  function submitOptions(form, options, parserOptions) {
     form = getForm(form)
-    options = parseBasicOptions(form, options)
+    parserOptions = u.options(parserOptions, { defaults: config.submitOptions })
+    options = parseDestinationOptions(form, options, parserOptions)
 
-    let parser = new up.OptionsParser(options, form)
+    let parser = new up.OptionsParser(options, form, parserOptions)
     parser.string('failTarget', { default: up.fragment.toTarget(form) })
+    parser.boolean('disable')
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', {
@@ -267,17 +296,10 @@ up.form = (function() {
       log: 'Submitting form'
     })
 
-    parser.booleanOrString('disable', { default: config.disable })
-    if (options.disable) {
-      let reenableControls
-      up.RenderOptions.addCallback(options, 'onGuarded', () => reenableControls = disableContainer(form))
-      up.RenderOptions.addCallback(options, 'onLoaded', () => reenableControls())
-    }
-
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
     // that are possible on both <form> and <a> elements.
-    u.assign(options, up.link.followOptions(form, options))
+    u.assign(options, up.link.followOptions(form, options, parserOptions))
 
     return options
   }
@@ -330,33 +352,51 @@ up.form = (function() {
     }
   }
 
+  function disableAroundRequest(request, options) {
+    if (options.disable && options.origin) {
+      let form = getForm(options.origin)
+      let undoDisable = disableContainer(form)
+      u.always(request, undoDisable)
+    }
+  }
+
   // This was extracted from submitOptions().
   // Validation needs to submit a form without options intended for the final submission,
   // like [up-scroll], [up-confirm], etc.
-  function parseBasicOptions(form, options) {
+  function parseDestinationOptions(form, options, parserOptions) {
     options = u.options(options)
     form = getForm(form)
-    const parser = new up.OptionsParser(options, form)
+    const parser = new up.OptionsParser(options, form, parserOptions)
 
-    // Parse params from form fields.
-    const params = up.Params.fromForm(form)
+    parser.string('contentType', { attr: ['enctype', 'up-content-type'] })
+    parser.json('headers')
 
-    options.submitButton ||= submittingButton(form)
-    if (options.submitButton) {
-      // Submit buttons with a [name] attribute will add to the params.
-      // Note that addField() will only add an entry if the given button has a [name] attribute.
-      params.addField(options.submitButton)
+    parser.process('params', function() {
+      // Parse params from form fields.
+      const params = up.Params.fromForm(form)
 
-      // Submit buttons may have [formmethod] and [formaction] attribute
-      // that override [method] and [action] attribute from the <form> element.
-      options.method ||= options.submitButton.getAttribute('formmethod')
-      options.url ||= options.submitButton.getAttribute('formaction')
-    }
+      const submitButton = submittingButton(form)
+      if (submitButton) {
+        options.submitButton = submitButton
+        // Submit buttons with a [name] attribute will add to the params.
+        // Note that addField() will only add an entry if the given button has a [name] attribute.
+        params.addField(submitButton)
 
-    params.addAll(options.params)
-    options.params = params
+        // Submit buttons may have [formmethod] and [formaction] attribute
+        // that override [method] and [action] attribute from the <form> element.
+        options.method ||= submitButton.getAttribute('formmethod')
+        options.url ||= submitButton.getAttribute('formaction')
+        options.origin ||= submitButton
+      }
 
-    parser.string('url', {attr: 'action', default: up.fragment.source(form)})
+      // We had any { params } option to the params that we got from the form.
+      params.addAll(options.params)
+      options.params = params
+    })
+
+    // Parse the form element's { url, method } *after* parsing the submit button.
+    // The submit button's [formmethod] and [formaction] attributes have precedence.
+    parser.string('url', { attr: 'action', default: up.fragment.source(form) })
     parser.string('method', {
       attr: ['up-method', 'data-method', 'method'],
       default: 'GET',
@@ -491,10 +531,9 @@ up.form = (function() {
     Observing will stop automatically when the targeted fields are removed from the DOM.
   @stable
   */
-  function observe(elements, ...args) {
-    elements = e.list(elements)
-    let form = getForm(elements[0])
-    const fields = u.flatMap(elements, findFields)
+  function observe(container, ...args) {
+    let form = getForm(container)
+    const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
       // (1) We do not need to exclude the unnamed fields for up.FieldObserver, since that
@@ -504,9 +543,9 @@ up.form = (function() {
       //     <form up-observe> in that case.
       up.warn('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
     }
-    const callback = u.extractCallback(args) || observeCallbackFromElement(elements[0]) || up.fail('up.observe: No change callback given')
-    const options = u.extractOptions(args)
-    options.delay = options.delay ?? e.numberAttr(elements[0], 'up-delay') ?? config.observeDelay
+    const callback = u.extractCallback(args) || observeCallbackFromElement(container) || up.fail('No callback given for up.observe()')
+    let options = u.extractOptions(args)
+
     const observer = new up.FieldObserver(form, fields, options, callback)
     observer.start()
     return () => observer.stop()
@@ -637,8 +676,7 @@ up.form = (function() {
   }
 
   function findValidateTarget(element) {
-    const container = getContainer(element)
-    let explicitTarget = element.getAttribute('up-validate') || container.getAttribute('up-validate')
+    let explicitTarget = e.closestAttr(element, 'up-validate')
     return explicitTarget || findGroupTarget(element) || up.fail('Could not find validation target for %o', element)
   }
 
@@ -684,7 +722,7 @@ up.form = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     field = up.fragment.get(field)
 
-    options = parseBasicOptions(field, options)
+    options = parseDestinationOptions(field, options)
     options.origin = field
     options.target = findValidateTarget(field, options)
     options.focus = 'keep'
@@ -1148,10 +1186,9 @@ up.form = (function() {
   @stable
   */
   up.compiler('[up-validate]', function(container) {
-    let fields = findFields(container)
-    for (let field of fields) {
-      observe(field, { event: 'change' }, () => validate(field))
-    }
+    observe(container, { intent: 'validate' }, function(value, name, fieldOptions) {
+      return validate(fieldOptions.origin, fieldOptions)
+    })
   })
 
   /*-
@@ -1465,6 +1502,7 @@ up.form = (function() {
     focusedField,
     switchTarget,
     disable: disableContainer,
+    disableAroundRequest,
     group: findGroup,
     get: getForm,
   }

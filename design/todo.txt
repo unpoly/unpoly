@@ -4,12 +4,13 @@ TODOs for next release
 Concurrency
 -----------
 
+- Merge field-specific observe options
+  - Clean up diff
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
-- Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
-  - This may be a new caching page
-- Parse { feedback, disable } for [up-validate]
-  - Element attribute should override form attribute
+- Test that the default validateOptions.event for an input[type=date] is "blur", not "change"
 - Parse and use { disable } while an [up-observe] callback is running
+  - We should disable fields without help by the user
+  - Strip { disable } from field options passed to observe callback, since we already processed it
   - No up.render() here!
 - Support more than one [disable] option
   - [disable=form] (gleich wie true, kann auch selektor sein)
@@ -20,12 +21,6 @@ Concurrency
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
-- User-controlled trigger events
-  - <input up-validate="other" up-observe-event="input">
-- Consider renaming "*observe*" to "*watch*"
-  - Maybe take this opportunity to change the attribute?
-    - <form up-watch="change" up-on-changed="...">
-    - up.watch(field, 'change', function() { ... })
 - Serialize *all* actions in a form
   - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
   - The new default form submit/observe/validate is { sequence: 'form' }
@@ -41,11 +36,35 @@ Concurrency
       - Cached responses must *not* resolve immediately, but only when the queue calls #load()
         - Move up.Request#followState() to up.Request#load()
       - Don't emit up:request:load or up:request:loaded for cached responses
+- { sequence } should be an option that is overridable per-field in FieldObserver, config.validateOptions, etc.
+- When iterating over all fields for individual observe()s, we really need to go over all groups with the same [name]
+
 
 Various changes
 ---------------
 
-- Maybe input[type=date] could default to observeEvent="blur"
+- Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
+  - Could we even allow this *when* morphing?
+
+
+Docs
+----
+
+- Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
+  - This may be a new caching page
+- New observe() and validate() options
+  - { feedback, disable, delay, event }
+- [up-observe-feedback], [up-observe-disable],  [up-observe-delay],  [up-observe-event]
+  - [up-autosubmit] needs options params that attributes for [up-observe] may be used
+- [up-validate-feedback], [up-validate-disable],  [up-validate-delay],  [up-validate-event]
+- up.form.config.submitOptions
+- up.form.config.observeOptions
+- up.form.config.validateOptions
+- Consider consolidating docs for
+  - input[up-observe]/form[up-observe] as well as
+  - input[up-validate]/form[up-validate]
+  - input[up-autosubmit]/form[up-autosubmit]
+  - ... so it's only "within the container"
 - Missing docs for render options
   - { revealTop }
   - { revealMax }
@@ -53,12 +72,15 @@ Various changes
   - { revealSnap }
   - { scrollBehavior }
     - if we stop auto-set it to auto, otherwise stop parsing this
-- Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
-  - Could we even allow this *when* morphing?
 
 Maybe
 -----
 
+- Consider renaming "*observe*" to "*watch*"
+  - Maybe take this opportunity to change the attribute?
+    - <form up-watch up-watch-event="change" up-on-changed="...">
+    - up.watch(field, 'change', function() { ... })
+    - Keep the callback signature like it is
 - Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
   - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Replace up.hello() and up.syntax.clean() to MutationObserver()

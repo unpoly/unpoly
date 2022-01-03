@@ -325,9 +325,9 @@ up.link = (function() {
     return up.render(followOptions(link, options))
   })
 
-  function parseRequestOptions(link, options) {
+  function parseRequestOptions(link, options, parserOptions) {
     options = u.options(options)
-    const parser = new up.OptionsParser(options, link)
+    const parser = new up.OptionsParser(options, link, parserOptions)
 
     options.url = followURL(link, options)
     options.method = followMethod(link, options)
@@ -336,7 +336,7 @@ up.link = (function() {
     parser.booleanOrString('cache')
     parser.booleanOrString('clearCache')
     parser.booleanOrString('solo')
-    parser.string('contentType', {attr: ['enctype', 'up-content-type']})
+    parser.string('contentType')
 
     return options
   }
@@ -367,21 +367,21 @@ up.link = (function() {
   @return {Object}
   @stable
   */
-  function followOptions(link, options) {
+  function followOptions(link, options, parserOptions) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     link = up.fragment.get(link)
 
     // Request options
-    options = parseRequestOptions(link, options)
+    options = parseRequestOptions(link, options, parserOptions)
 
-    const parser = new up.OptionsParser(options, link, {fail: true})
+    const parser = new up.OptionsParser(options, link, { fail: true, ...parserOptions })
 
     // Feedback options
     parser.boolean('feedback')
 
     // Fragment options
     parser.boolean('fail')
-    if (parser.options.origin == null) { parser.options.origin = link; }
+    options.origin ||= link
     parser.boolean('navigate', {default: true})
     parser.string('confirm')
     parser.string('target')
@@ -1191,7 +1191,7 @@ up.link = (function() {
   making the interaction feel instant.
 
   @selector a[up-preload]
-  @param [up-delay]
+  @param [up-preload-delay]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
@@ -1219,7 +1219,8 @@ up.link = (function() {
     followMethod,
     convertClicks,
     config,
-    combineFollowableSelectors
+    combineFollowableSelectors,
+    preloadSelector: fullPreloadSelector
   }
 })()
 

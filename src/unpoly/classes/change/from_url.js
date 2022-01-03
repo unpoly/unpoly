@@ -73,9 +73,9 @@ up.Change.FromURL = class FromURL extends up.Change {
     // up.request() also handles the { solo } option.
     this.request = up.request(requestAttrs)
 
-    // up.feedback.abortConflictingRequests(successAttrs.targetElements)
+    up.feedback.showAroundRequest(this.request, this.options)
 
-    up.feedback.aroundRequest(this.request, this.options)
+    up.form.disableAroundRequest(this.request, this.options)
 
     // The request is also a promise for its response.
     return this.request
