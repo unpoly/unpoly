@@ -7,7 +7,7 @@ Concurrency
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
   - This may be a new caching page
-- Parse { feedback, disable } for [up-validate]
+- Parse { feedback, disable, observeEvent } for [up-validate]
   - Element attribute should override form attribute
 - Parse and use { disable } while an [up-observe] callback is running
   - No up.render() here!
@@ -20,12 +20,14 @@ Concurrency
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
+- Support form[up-observe-event] to set a default watch event for all contained observers
 - User-controlled trigger events
   - <input up-validate="other" up-observe-event="input">
-- Consider renaming "*observe*" to "*watch*"
-  - Maybe take this opportunity to change the attribute?
-    - <form up-watch="change" up-on-changed="...">
-    - up.watch(field, 'change', function() { ... })
+- Consider consolidating docs for
+  - input[up-observe]/form[up-observe] as well as
+  - input[up-validate]/form[up-validate]
+  - input[up-autosubmit]/form[up-autosubmit]
+  - ... so it's only "within the container"
 - Serialize *all* actions in a form
   - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
   - The new default form submit/observe/validate is { sequence: 'form' }
@@ -41,6 +43,11 @@ Concurrency
       - Cached responses must *not* resolve immediately, but only when the queue calls #load()
         - Move up.Request#followState() to up.Request#load()
       - Don't emit up:request:load or up:request:loaded for cached responses
+- Should I be able to set difference observe events?
+  <form up-validate-event="change" up-autosubmit-event="input" up-observe-event="input">
+  => NO
+- When iterating over all fields for individual observe()s, we really need to go over all groups with the same [name]
+
 
 Various changes
 ---------------
@@ -59,6 +66,11 @@ Various changes
 Maybe
 -----
 
+- Consider renaming "*observe*" to "*watch*"
+  - Maybe take this opportunity to change the attribute?
+    - <form up-watch up-watch-event="change" up-on-changed="...">
+    - up.watch(field, 'change', function() { ... })
+    - Keep the callback signature like it is
 - Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
   - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Replace up.hello() and up.syntax.clean() to MutationObserver()

@@ -1580,9 +1580,15 @@ up.fragment = (function() {
   }
 
   function failKey(key) {
-    if (!key.match(/^fail[A-Z]/)) {
+    if (!isFailKey(key)) {
       return u.prefixCamelCase(key, 'fail')
     }
+  }
+
+  const FAIL_KEY_PATTERN = /^fail[A-Z]/
+
+  function isFailKey(key) {
+    return FAIL_KEY_PATTERN.test(key)
   }
 
   /*-
@@ -2011,6 +2017,7 @@ up.fragment = (function() {
     emitKept: emitFragmentKept,
     successKey,
     failKey,
+    isFailKey,
     expandTargets,
     toTarget,
     matches,

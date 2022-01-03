@@ -71,9 +71,11 @@ up.form = (function() {
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
-    observeEvents: ['input', 'change'],
-    observeDelay: 0,
-    disable: false
+    // Although (depending on the browser) we only need/receive either input or change,
+    // we always bind to both events in case another script manually triggers it.
+    observeEvent: (field) => field.matches('input[type=date]') ? 'blur' : 'input change', // TODO: Needs to be autoObserveEvent ?
+    observeDelay: 0, // TODO: Needs to be autoObserveDelay ?
+    disable: false // TODO: Needs to be autoDisable and implemented with evalAutoOption ?
   }))
 
   function fullSubmitSelector() {
@@ -124,6 +126,12 @@ up.form = (function() {
     }
 
     return fields
+  }
+
+  function findFieldBatches(root) {
+    let fields = findFields(root)
+    let fieldsByName = u.groupBy(fields, 'name')
+    return u.values(fieldsByNames)
   }
 
   /*-
@@ -254,30 +262,14 @@ up.form = (function() {
   @stable
   */
   function submitOptions(form, options) {
-    form = getForm(form)
-    options = parseBasicOptions(form, options)
-
-    let parser = new up.OptionsParser(options, form)
-    parser.string('failTarget', { default: up.fragment.toTarget(form) })
+    options = parseOptionsFromElements(form, null, options)
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
-    options.guardEvent ||= up.event.build('up:form:submit', {
+    options.guardEvent = up.event.build('up:form:submit', {
       submitButton: options.submitButton,
       params: options.params,
       log: 'Submitting form'
     })
-
-    parser.booleanOrString('disable', { default: config.disable })
-    if (options.disable) {
-      let reenableControls
-      up.RenderOptions.addCallback(options, 'onGuarded', () => reenableControls = disableContainer(form))
-      up.RenderOptions.addCallback(options, 'onLoaded', () => reenableControls())
-    }
-
-    // Now that we have extracted everything form-specific into options, we can call
-    // up.link.followOptions(). This will also parse the myriads of other options
-    // that are possible on both <form> and <a> elements.
-    u.assign(options, up.link.followOptions(form, options))
 
     return options
   }
@@ -330,13 +322,54 @@ up.form = (function() {
     }
   }
 
-  // This was extracted from submitOptions().
-  // Validation needs to submit a form without options intended for the final submission,
-  // like [up-scroll], [up-confirm], etc.
-  function parseBasicOptions(form, options) {
+  // // This was extracted from submitOptions().
+  // // Validation needs to submit a form without options intended for the final submission,
+  // // like [up-scroll], [up-confirm], etc.
+  // function parseBasicOptions(form, options) {
+  //   options = u.options(options)
+  //   form = getForm(form)
+  //   const parser = new up.OptionsParser(options, form)
+  //
+  //   // Parse params from form fields.
+  //   const params = up.Params.fromForm(form)
+  //
+  //   options.submitButton ||= submittingButton(form)
+  //   if (options.submitButton) {
+  //     // Submit buttons with a [name] attribute will add to the params.
+  //     // Note that addField() will only add an entry if the given button has a [name] attribute.
+  //     params.addField(options.submitButton)
+  //
+  //     // Submit buttons may have [formmethod] and [formaction] attribute
+  //     // that override [method] and [action] attribute from the <form> element.
+  //     options.method ||= options.submitButton.getAttribute('formmethod')
+  //     options.url ||= options.submitButton.getAttribute('formaction')
+  //   }
+  //
+  //   params.addAll(options.params)
+  //   options.params = params
+  //
+  //   parser.string('url', {attr: 'action', default: up.fragment.source(form)})
+  //   parser.string('method', {
+  //     attr: ['up-method', 'data-method', 'method'],
+  //     default: 'GET',
+  //     normalize: u.normalizeMethod
+  //   })
+  //   if (options.method === 'GET') {
+  //     // Only for GET forms, browsers discard all query params from the form's [action] URL.
+  //     // The URLs search part will be replaced with the serialized form data.
+  //     // See design/query-params-in-form-actions/cases.html for
+  //     // a demo of vanilla browser behavior.
+  //     options.url = up.Params.stripURL(options.url)
+  //   }
+  //
+  //   return options
+  // }
+
+  function parseOptionsFromElements(form, originField, options) {
     options = u.options(options)
-    form = getForm(form)
-    const parser = new up.OptionsParser(options, form)
+    const parser = new up.OptionsParser(options, [originField, form])
+
+    options.origin ||= originField
 
     // Parse params from form fields.
     const params = up.Params.fromForm(form)
@@ -370,6 +403,36 @@ up.form = (function() {
       options.url = up.Params.stripURL(options.url)
     }
 
+    parser.string('failTarget', { default: up.fragment.toTarget(form) })
+
+    parser.booleanOrString('disable', { default: config.disable })
+    // if (options.disable) {
+    //   let reenableControls
+    //   up.RenderOptions.addCallback(options, 'onGuarded', () => reenableControls = disableContainer(form))
+    //   up.RenderOptions.addCallback(options, 'onLoaded', () => reenableControls())
+    // }
+
+    parser.string('observeEvent')
+
+    // Now that we have extracted everything form-specific into options, we can call
+    // up.link.followOptions(). This will also parse the myriads of other options
+    // that are possible on both <form> and <a> elements.
+    u.assign(options, up.link.followOptions(form, options))
+
+    return options
+  }
+
+  function parseObserveOptions(form, field, options) {
+    options = parseOptionsFromElements(form, field, options)
+    options = u.only(options, [
+      'method',
+      'url',
+      'params',
+      'origin',
+      // 'feedback',
+      // 'disable',
+      // 'observeEvent',
+    ])
     return options
   }
 
@@ -491,10 +554,9 @@ up.form = (function() {
     Observing will stop automatically when the targeted fields are removed from the DOM.
   @stable
   */
-  function observe(elements, ...args) {
-    elements = e.list(elements)
-    let form = getForm(elements[0])
-    const fields = u.flatMap(elements, findFields)
+  function observe(container, ...args) {
+    let form = getForm(container)
+    const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
       // (1) We do not need to exclude the unnamed fields for up.FieldObserver, since that
@@ -504,9 +566,10 @@ up.form = (function() {
       //     <form up-observe> in that case.
       up.warn('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
     }
-    const callback = u.extractCallback(args) || observeCallbackFromElement(elements[0]) || up.fail('up.observe: No change callback given')
-    const options = u.extractOptions(args)
-    options.delay = options.delay ?? e.numberAttr(elements[0], 'up-delay') ?? config.observeDelay
+    const callback = u.extractCallback(args) || observeCallbackFromElement(elements[0]) || up.fail('No callback given for up.observe()')
+    let options = u.extractOptions(args)
+    options = parseObserveOptions(form, container, options)
+
     const observer = new up.FieldObserver(form, fields, options, callback)
     observer.start()
     return () => observer.stop()
@@ -1148,9 +1211,16 @@ up.form = (function() {
   @stable
   */
   up.compiler('[up-validate]', function(container) {
-    let fields = findFields(container)
-    for (let field of fields) {
-      observe(field, { event: 'change' }, () => validate(field))
+    let batches = findFieldBatches(container)
+    for (let batch of batches) {
+      throw "People will naively set up.form.config.observeDelay = 100 and their validations will be slow. They can fix it by setting a function, but will they?"
+      throw "Maybe not allow global delay config?"
+      throw "If we want to fix validation for input[type=date] we cannot default to form.config.observeEvent"
+      throw "Maybe have separate config.validateEvent? And not parse observeDelay?"
+      observe(batch, { defaultEvent: 'change' }, function(value, name, options) {
+        return validate(u.last(batch), options)
+      })
+      throw "TODO: Now that the observeCallback gets a third argument, we may want to use an event-style arg instead"
     }
   })
 

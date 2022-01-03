@@ -5,8 +5,9 @@ up.OptionsParser = class OptionsParser {
 
   constructor(options, element, parserOptions) {
     this.options = options
-    this.element = element
+    this.elements = u.uniq(u.compact(u.wrapList(element)))
     this.fail = parserOptions?.fail
+    this.closest = parserOptions?.closest
   }
 
   string(key, keyOptions) {
@@ -33,12 +34,11 @@ up.OptionsParser = class OptionsParser {
     const attrNames = u.wrapList(keyOptions.attr ?? this.attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
-    // Setting undefined values would throw of up.RenderOptionsAssembler in up.render().
     let value = this.options[key]
 
-    if (this.element) {
+    for (let element of this.elements) {
       for (let attrName of attrNames) {
-        value ??= attrValueFn(this.element, attrName)
+        value ??= this.parseFromAttr(attrValueFn, element, attrName)
       }
     }
 
@@ -54,14 +54,17 @@ up.OptionsParser = class OptionsParser {
     }
 
     let failKey
-    if ((keyOptions.fail || this.fail) && (failKey = up.fragment.failKey(key))) {
+    if (this.fail && (failKey = up.fragment.failKey(key))) {
       const failAttrNames = u.compact(u.map(attrNames, this.deriveFailAttrName))
-      const failKeyOptions = {
-        ... keyOptions,
-        attr: failAttrNames,
-        fail: false
-      }
-      this.parse(attrValueFn, failKey, failKeyOptions)
+      this.parse(attrValueFn, failKey, { ... keyOptions, attr: failAttrNames })
+    }
+  }
+
+  parseFromAttr(attrValueFn, element, attrName) {
+    if (this.closest) {
+      return e.closestAttr(element, attrName, attrValueFn)
+    } else {
+      return attrValueFn(element, attrName)
     }
   }
 

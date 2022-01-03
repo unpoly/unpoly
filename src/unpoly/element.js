@@ -1027,8 +1027,11 @@ up.element = (function() {
     }
   }
 
-  function closestAttr(element, attr) {
-    return closest(element, '[' + attr + ']')?.getAttribute(attr)
+  function closestAttr(element, attr, parseFn = stringAttr) {
+    let match = closest(element, '[' + attr + ']')
+    if (match) {
+      return parseFn(element, attr)
+    }
   }
 
   // function closestAttr(element, attr, parser = stringAttr) {
