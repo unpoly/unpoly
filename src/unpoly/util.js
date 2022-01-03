@@ -1405,16 +1405,16 @@ up.util = (function() {
     return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
   }
 
-  function groupBy(list, block) {
-    block = iteratee(block)
-    let groups = {}
-    for (let entry in list) {
-      let key = block(entry)
-      let group = (groups[key] ||= [])
-      group.push(entry)
-    }
-    return groups
-  }
+  // function groupBy(list, block) {
+  //   block = iteratee(block)
+  //   let groups = {}
+  //   for (let entry in list) {
+  //     let key = block(entry)
+  //     let group = (groups[key] ||= [])
+  //     group.push(entry)
+  //   }
+  //   return groups
+  // }
 
   /*-
   Deletes the property with the given key from the given object
@@ -2148,6 +2148,6 @@ up.util = (function() {
     renameKeys,
     allSettled,
     negate,
-    groupBy,
+    // groupBy,
   }
 })();

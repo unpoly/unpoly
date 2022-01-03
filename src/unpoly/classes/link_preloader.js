@@ -63,7 +63,7 @@ up.LinkPreloader = class LinkPreloader {
   }
 
   preloadAfterDelay(link) {
-    const delay = e.numberAttr(link, 'up-delay') ?? up.link.config.preloadDelay
+    const delay = e.numberAttr(link, 'up-preload-delay') ?? up.link.config.preloadDelay
     this.timer = u.timer(delay, () => this.preloadNow(link))
   }
 

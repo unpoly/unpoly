@@ -3,11 +3,11 @@ const e = up.element
 
 up.OptionsParser = class OptionsParser {
 
-  constructor(options, element, parserOptions) {
+  constructor(options, element, parserOptions = {}) {
     this.options = options
     this.elements = u.uniq(u.compact(u.wrapList(element)))
-    this.fail = parserOptions?.fail
-    this.closest = parserOptions?.closest
+    this.fail = parserOptions.fail
+    this.closest = parserOptions.closest
   }
 
   string(key, keyOptions) {

@@ -10,32 +10,29 @@ up.FieldObserver = class FieldObserver {
     this.form = form
     this.fields = fields
     this.options = options
-
-    this.defaultEvent = options.defaultEvent || up.form.config.observeEvent
-    this.defaultDelay = options.defaultDelay || up.form.config.observeDelay
-
+    this.defaults = options.defaults
     this.batch = options.batch
-    this.destructors = []
+    this.attrPrefix = options.attrPrefix || 'up-observe'
+    this.submitOptions = up.form.submitOptions(form)
+    this.subscriber = new up.Subscriber()
   }
 
   fieldOptions(field) {
-    throw "move parsing base <form> options from up.form to this class."
-    throw "reconsider whether we want observe-infixed attr names"
-    throw "how are the { disable, feedback } options passed to the callback? As a third option? Then we should switch to new callback style"
-
-    let options = u.copy(this.options, { origin: field })
+    let options = { ...this.options, origin: field }
     let parser = new up.OptionsParser(options, field, { closest: true })
-    options.origin = field
 
-    // TODO: We cannot preload [up-feedback], [up-disable] from <form> or parsing below will short-circuit
-    parser.boolean('feedback', { attr: ['up-observe-feedback', 'up-feedback'] })
-    parser.boolean('disable', { attr: ['up-observe-disable', 'up-disable'], default: up.form.config.disable })
-    parser.boolean('observeDelay', { default: this.defaultDelay })
-    parser.boolean('observeEvent', { default: u.evalOption(this.defaultEvent, field) })
+    // We get the { feedback } option through the following priorities:
+    // (0) Passed as explicit observe() option (this.options.feedback)
+    // (1) Attribute prefixed to the observe() type (Closest [up-infix-feedback] attr)
+    // (2) Default config for this observe() type (options.defaults.feedback)
+    // (3) Option for regular submit (this.submitOptions.feedback)
+    parser.boolean('feedback', { attr: this.prefix + '-feedback', default: this.defaults.feedback ?? this.submitOptions.feedback })
+    parser.boolean('disable', { attr: this.prefix + '-disable', default: this.defaults.disable ?? this.submitOptions.disable })
+    parser.number('delay', { attr: this.prefix + '-delay', default: this.defaults.delay })
+    parser.string('event', { attr: this.prefix + '-event', default: u.evalOption(this.defaults.event, field) })
 
-    // TODO: If we keep [up-observe-delay] we should deprecate/migrate [up-observe][up-delay] / [up-autosubmit][up-delay]
+    return options
   }
-
 
   start() {
     this.scheduledValues = null
@@ -45,18 +42,16 @@ up.FieldObserver = class FieldObserver {
 
     for (let field in this.fields) {
       let fieldOptions = this.fieldOptions(field)
-      let unbindField = up.on(field, fieldOptions.observeEvent, (event) => this.check(event, fieldOptions))
-      destructors.push(unbindField)
+      this.subscriber.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions))
     }
 
     if (this.form) {
-      this.unbindFormEvents = up.on(this.form, 'up:form:submit', () => this.cancelTimer())
+      this.subscriber.on(this.form, 'up:form:submit', () => this.cancelTimer())
     }
   }
 
   stop() {
-    this.unbindFieldEvents()
-    this.unbindFormEvents?.()
+    this.subscriber.unbindAll()
     this.cancelTimer()
   }
 
@@ -65,30 +60,27 @@ up.FieldObserver = class FieldObserver {
     this.currentTimer = undefined
   }
 
-  scheduleTimer(delay) {
-    this.cancelTimer()
-    this.currentTimer = u.timer(delay, () => {
-      this.currentTimer = undefined
-      if (this.isAnyFieldAttached()) {
-        this.requestCallback()
-      }
-    })
-  }
-
   isAnyFieldAttached() {
     return u.some(this.fields, (field) => !e.isDetached(field))
   }
 
-  scheduleValues(values, delay) {
+  scheduleValues(values, fieldOptions) {
+    this.cancelTimer()
     this.scheduledValues = values
-    this.scheduleTimer(delay)
+    let delay = u.evalOption(fieldOptions.delay, event)
+    this.currentTimer = u.timer(delay, () => {
+      this.currentTimer = undefined
+      if (this.isAnyFieldAttached()) {
+        this.requestCallback(fieldOptions)
+      }
+    })
   }
 
   isNewValues(values) {
     return !u.isEqual(values, this.processedValues) && !u.isEqual(this.scheduledValues, values)
   }
 
-  async requestCallback() {
+  async requestCallback(fieldOptions) {
     if ((this.scheduledValues !== null) && !this.currentTimer && !this.callbackRunning) {
       const diff = this.changedValues(this.processedValues, this.scheduledValues)
       this.processedValues = this.scheduledValues
@@ -97,11 +89,11 @@ up.FieldObserver = class FieldObserver {
 
       const callbackReturnValues = []
       if (this.batch) {
-        callbackReturnValues.push(this.callback(diff))
+        callbackReturnValues.push(this.callback(diff, fieldOptions))
       } else {
         for (let name in diff) {
           const value = diff[name]
-          callbackReturnValues.push(this.callback(value, name))
+          callbackReturnValues.push(this.callback(value, name, fieldOptions))
         }
       }
 
@@ -133,8 +125,7 @@ up.FieldObserver = class FieldObserver {
   check(event, fieldOptions) {
     const values = this.readFieldValues()
     if (this.isNewValues(values)) {
-      let delay = u.evalOption(fieldOptions.observeDelay, event)
-      this.scheduleValues(values, delay)
+      this.scheduleValues(values, fieldOptions)
     }
   }
 }

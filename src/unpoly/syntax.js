@@ -249,7 +249,7 @@ up.syntax = (function() {
     const macro = buildCompiler(args)
 
     if (up.framework.evaling) {
-      macro.priority = detectSystemMacroPriority(macro.selector) ||
+      macro.priority ??= detectSystemMacroPriority(macro.selector) ??
         up.fail('Unregistered priority for system macro %o', macro.selector)
     }
     return insertCompiler(macros, macro)

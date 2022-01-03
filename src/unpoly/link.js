@@ -336,7 +336,7 @@ up.link = (function() {
     parser.booleanOrString('cache')
     parser.booleanOrString('clearCache')
     parser.booleanOrString('solo')
-    parser.string('contentType', {attr: ['enctype', 'up-content-type']})
+    parser.string('contentType')
 
     return options
   }
@@ -1191,7 +1191,7 @@ up.link = (function() {
   making the interaction feel instant.
 
   @selector a[up-preload]
-  @param [up-delay]
+  @param [up-preload-delay]
     The number of milliseconds to wait between hovering
     and preloading. Increasing this will lower the load in your server,
     but will also make the interaction feel less instant.
@@ -1219,7 +1219,8 @@ up.link = (function() {
     followMethod,
     convertClicks,
     config,
-    combineFollowableSelectors
+    combineFollowableSelectors,
+    preloadSelector: fullPreloadSelector
   }
 })()
 
