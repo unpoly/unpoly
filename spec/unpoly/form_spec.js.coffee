@@ -1395,26 +1395,65 @@ describe 'up.form', ->
 
       it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $form = $fixture('form[up-observe="window.observeCallbackSpy(value, name)"]')
-        $field1 = $form.affix('input[name="field1"][value="field1-old-value"]')
-        $field2 = $form.affix('input[name="field2"][value="field2-old-value"]')
-        up.hello($form)
-        $field1.val('field1-new-value')
-        Trigger.change($field1)
+        form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"]')
+        field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
+        field2 = e.affix(form, 'input[name="field2"][value="field2-old-value"]')
+        up.hello(form)
+        field1.value = 'field1-new-value'
+        Trigger.change(field1)
 
         next =>
           expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
             ['field1-new-value', 'field1']
           ]
 
-          $field2.val('field2-new-value')
-          Trigger.change($field2)
+          field2.value = 'field2-new-value'
+          Trigger.change(field2)
 
         next =>
           expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
             ['field1-new-value', 'field1'],
             ['field2-new-value', 'field2']
           ]
+
+      describe 'with [up-observe-event] modifier', ->
+
+        it 'allows to set a different event to observe', asyncSpec (next) ->
+          window.observeCallbackSpy = jasmine.createSpy('observe callback')
+          form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"][up-observe-event="foo"]')
+          field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
+          up.hello(form)
+          field1.value = 'field1-new-value'
+          Trigger.change(field1)
+
+          next ->
+            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+
+            up.emit(field1, 'foo')
+
+          next ->
+            expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+              ['field1-new-value', 'field1'],
+            ]
+
+        it 'allows to override the custom event at individual inputs', asyncSpec (next) ->
+          window.observeCallbackSpy = jasmine.createSpy('observe callback')
+          form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"][up-observe-event="foo"]')
+          field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"][up-observe-event="bar"]')
+          up.hello(form)
+          field1.value = 'field1-new-value'
+          Trigger.change(field1)
+          up.emit(field1, 'foo')
+
+          next ->
+            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+
+            up.emit(field1, 'bar')
+
+          next ->
+            expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+              ['field1-new-value', 'field1'],
+            ]
 
     describe 'input[up-validate]', ->
 
