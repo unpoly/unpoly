@@ -14,6 +14,7 @@ Getting started
 
 - See [unpoly.com](https://unpoly.com) for guides and documentation.
 - See [installation instructions](https://unpoly.com/install) for many different package managers and languages.
+- See [discussions](https://github.com/unpoly/unpoly/discussions) for our community forum.
 - See [notable changes](https://unpoly.com/changes).
 
 
