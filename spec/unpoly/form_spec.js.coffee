@@ -1459,7 +1459,7 @@ describe 'up.form', ->
 
       describe 'when a selector is given', ->
 
-        it "submits the input's form with an 'X-Up-Validate' header and replaces the selector with the response", asyncSpec (next) ->
+        it "submits the input's form when the input is changed, adding an 'X-Up-Validate' header, and then replaces the selector", asyncSpec (next) ->
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
@@ -1495,6 +1495,30 @@ describe 'up.form', ->
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
             expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+
+        # https://github.com/unpoly/unpoly/issues/336
+        it 'validates a input[type=date] on blur instead of change, as browser date pickers often emit `change` when any date component changes', asyncSpec (next) ->
+          $form = $fixture('form[action="/path/to"]')
+          $group = $("""
+            <div class="field-group">
+              <input name="birthday" type="date" up-validate=".field-group">
+            </div>
+          """).appendTo($form)
+          up.hello($form)
+
+          $input = $group.find('input')
+          $input.focus()
+          $input.val('2017-01-02')
+          Trigger.change($input)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+            up.emit($input, 'blur')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('birthday')
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
