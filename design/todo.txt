@@ -4,8 +4,12 @@ TODOs for next release
 Concurrency
 -----------
 
-- Merge field-specific observe options
-  - Clean up diff
+- Keep config.validateOptions, but [up-validate] should also use [up-observe-event] & friends
+  - So fewer attributes
+  - config.validateOptions inherits from config.observeOptions, overriding { delay: 0 }
+- Allow { keep: 'selector' } to define additional elements to keep
+  - Document this lets us validate-on-input:
+    - <input up-validate up-event="input" up-keep="&">
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Test that the default validateOptions.event for an input[type=date] is "blur", not "change"
 - Parse and use { disable } while an [up-observe] callback is running
