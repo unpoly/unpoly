@@ -9,15 +9,13 @@ up.FieldObserver = class FieldObserver {
     this.fields = fields
     this.options = options
     this.batch = options.batch
-    this.intent = options.intent || 'observe'
-    this.intentDefaults = up.form.config[this.intent + 'Options']
     this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable'] }) : {} // TODO: Also parse [up-sequence] when we get it
     this.subscriber = new up.Subscriber()
   }
 
   fieldOptions(field) {
     let options = { ...this.options, origin: field }
-    let parser = new up.OptionsParser(options, field, { closest: true })
+    let parser = new up.OptionsParser(options, field, { closest: true, attrPrefix: 'up-observe-' })
 
     // Computing the effective options for a given field is pretty involved,
     // as there are multiple layers of defaults.
@@ -53,7 +51,7 @@ up.FieldObserver = class FieldObserver {
     //
     // Users can configure app-wide defaults:
     //
-    // 		up.form.config.observeOptions.disable = true
+    // 		up.form.config.inputDelay = 100
     //
     // Summing up, we get an option like { disable } through the following priorities:
     //
@@ -61,16 +59,20 @@ up.FieldObserver = class FieldObserver {
     // 2. Attribute for the observe intent (e.g. `[up-observe-disable]` at the input or form)
     // 3. Default config for this observe() intent (e.g. `up.form.config.observeOptions.disable`).
     // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
-    parser.boolean('feedback', { attr: this.intentAttr('feedback'), default: this.intentDefaults.feedback ?? this.formDefaults.feedback })
-    parser.boolean('disable', { attr: this.intentAttr('disable'), default: this.intentDefaults.disable ?? this.formDefaults.disable })
-    parser.number('delay', { attr: this.intentAttr('delay'), default: this.intentDefaults.delay })
-    parser.string('event', { attr: this.intentAttr('event'), default: u.evalOption(this.intentDefaults.event, field) })
+    parser.boolean('feedback', { default: this.formDefaults.feedback })
+    parser.boolean('disable', { default: this.formDefaults.disable })
+    parser.string('event')
+    parser.number('delay')
+
+    let config = up.form.config
+    if (!options.event || options.event === 'input') {
+      options.event = u.evalOption(config.inputEvent, field)
+      options.delay ??= config.inputDelay
+    } else if (options.event === 'change') {
+      options.event = u.evalOption(config.changeEvent, field)
+    }
 
     return options
-  }
-
-  intentAttr(key) {
-    return `up-${this.intent}-${key}`
   }
 
   start() {

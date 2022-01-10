@@ -1028,7 +1028,6 @@ up.element = (function() {
   }
 
   function closestAttr(element, attr, parseFn = stringAttr) {
-    console.log("Calling closest(%o, %o)", element, '[' + attr + ']')
     let match = closest(element, '[' + attr + ']')
     if (match) {
       return parseFn(match, attr)

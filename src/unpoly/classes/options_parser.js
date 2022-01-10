@@ -28,6 +28,7 @@ up.OptionsParser = class OptionsParser {
     this.element = element
     this.fail = parserOptions.fail
     this.closest = parserOptions.closest
+    this.attrPrefix = parserOptions.attrPrefix || 'up-'
     this.defaults = parserOptions.defaults || {}
     if (parserOptions.only) {
       this.only = u.arrayToSet(parserOptions.only)
@@ -81,7 +82,7 @@ up.OptionsParser = class OptionsParser {
 
     let failKey
     if (this.fail && (failKey = up.fragment.failKey(key))) {
-      const failAttrNames = u.compact(u.map(attrNames, this.deriveFailAttrName))
+      const failAttrNames = u.compact(u.map(attrNames, (attrName) => this.deriveFailAttrName(attrName)))
       this.parse(attrValueFn, failKey, { ... keyOptions, attr: failAttrNames })
     }
   }
@@ -105,12 +106,12 @@ up.OptionsParser = class OptionsParser {
   }
 
   deriveFailAttrName(attr) {
-    if (attr.indexOf('up-') === 0) {
-      return `up-fail-${attr.slice(3)}`
+    if (attr.indexOf(this.attrPrefix) === 0) {
+      return `${this.attrPrefix}fail-${attr.slice(3)}`
     }
   }
 
   attrNameForKey(option) {
-    return `up-${u.camelToKebabCase(option)}`
+    return `${this.attrPrefix}${u.camelToKebabCase(option)}`
   }
 }

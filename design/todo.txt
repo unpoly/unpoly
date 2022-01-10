@@ -4,12 +4,9 @@ TODOs for next release
 Concurrency
 -----------
 
-- Keep config.validateOptions, but [up-validate] should also use [up-observe-event] & friends
-  - So fewer attributes
-  - config.validateOptions inherits from config.observeOptions, overriding { delay: 0 }
 - Allow { keep: 'selector' } to define additional elements to keep
   - Document this lets us validate-on-input:
-    - <input up-validate up-event="input" up-keep="&">
+    - <input up-validate up-observe-event="input" up-keep="&">
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Test that the default validateOptions.event for an input[type=date] is "blur", not "change"
 - Parse and use { disable } while an [up-observe] callback is running
@@ -59,11 +56,13 @@ Docs
 - New observe() and validate() options
   - { feedback, disable, delay, event }
 - [up-observe-feedback], [up-observe-disable],  [up-observe-delay],  [up-observe-event]
-  - [up-autosubmit] needs options params that attributes for [up-observe] may be used
-- [up-validate-feedback], [up-validate-disable],  [up-validate-delay],  [up-validate-event]
-- up.form.config.submitOptions
-- up.form.config.observeOptions
-- up.form.config.validateOptions
+  - [up-autosubmit] needs a params note saying that that attributes for [up-observe] may be used
+  - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
+- up.form.config.disable
+- up.form.config.inputEvent
+- up.form.config.inputDelay
+- up.form.config.feedback
+- up.form.config.changeEvent
 - Consider consolidating docs for
   - input[up-observe]/form[up-observe] as well as
   - input[up-validate]/form[up-validate]

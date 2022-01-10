@@ -828,13 +828,13 @@ describe 'up.form', ->
         expect(up.form.submitOptions(formWithDisable).disable).toBe(true)
         expect(up.form.submitOptions(formWithoutDisable).disable).toBe(false)
 
-      it "defaults a missing [up-disable] attribute to up.form.config.submitOptions.disable", ->
+      it "defaults a missing [up-disable] attribute to up.form.config.disable", ->
         form = fixture('form')
 
-        up.form.config.submitOptions.disable = true
+        up.form.config.disable = true
         expect(up.form.submitOptions(form).disable).toBe(true)
 
-        up.form.config.submitOptions.disable = false
+        up.form.config.disable = false
         expect(up.form.submitOptions(form).disable).toBe(false)
 
     describe 'up.form.group()', ->

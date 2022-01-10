@@ -72,28 +72,34 @@ up.form = (function() {
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
 
-    submitOptions: { // Orthogonal to navigate? But submit is always navigation.
-      disable: false,
-      sequence: 'form',
-    },
+    // submitOptions: { // Orthogonal to navigate? But submit is always navigation.
+    //   disable: false,
+    //   sequence: 'form',
+    // },
+    //
+    // observeOptions: {
+    //   event: 'input change',
+    //   delay: 0,
+    //   feedback: undefined, // TODO: document, but remove undefined options
+    //   disable: undefined, // TODO: document, but remove undefined options
+    //   // sequence: undefined,
+    // },
+    //
+    // validateOptions: {
+    //   event: ,
+    //   delay: 0,
+    //   feedback: undefined, // TODO: document, but remove undefined options
+    //   disable: undefined, // TODO: document, but remove undefined options
+    //   // sequence: undefined,
+    // },
 
-    observeOptions: {
-      // Although we only need to bind to `input, we always also bind to `change`
-      // in case another script manually triggers it.
-      event: 'input change',
-      delay: 0,
-      feedback: undefined, // TODO: document, but remove undefined options
-      disable: undefined, // TODO: document, but remove undefined options
-      // sequence: undefined,
-    },
-
-    validateOptions: {
-      event: (field) => e.matches(field, 'input[type=date]') ? 'blur' : 'change',
-      delay: 0,
-      feedback: undefined, // TODO: document, but remove undefined options
-      disable: undefined, // TODO: document, but remove undefined options
-      // sequence: undefined,
-    },
+    // Although we only need to bind to `input, we always also bind to `change`
+    // in case another script manually triggers it.
+    inputEvent: 'input change',
+    inputDelay: 0,
+    changeEvent: (field) => e.matches(field, 'input[type=date]') ? 'blur' : 'change',
+    disable: false,
+    feedback: undefined,
 
   }))
 
@@ -282,7 +288,7 @@ up.form = (function() {
   */
   function submitOptions(form, options, parserOptions) {
     form = getForm(form)
-    parserOptions = u.options(parserOptions, { defaults: config.submitOptions })
+    parserOptions = u.options(parserOptions, { defaults: defaultSubmitOptions() })
     options = parseDestinationOptions(form, options, parserOptions)
 
     let parser = new up.OptionsParser(options, form, parserOptions)
@@ -302,6 +308,10 @@ up.form = (function() {
     u.assign(options, up.link.followOptions(form, options, parserOptions))
 
     return options
+  }
+
+  function defaultSubmitOptions() {
+    return u.pick(config, ['disable', 'feedback']) // TODO: 'sequence'
   }
 
   /*-
@@ -1186,7 +1196,7 @@ up.form = (function() {
   @stable
   */
   up.compiler('[up-validate]', function(container) {
-    observe(container, { intent: 'validate' }, function(value, name, fieldOptions) {
+    observe(container, { event: 'change' }, function(value, name, fieldOptions) {
       return validate(fieldOptions.origin, fieldOptions)
     })
   })
