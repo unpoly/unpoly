@@ -48,7 +48,6 @@ Various changes
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
-- Remove handling of "user scrolled while we were smooth-scrolling". Chrome doesn't do this either.
 
 
 Docs
