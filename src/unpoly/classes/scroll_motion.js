@@ -45,12 +45,6 @@ up.ScrollMotion = class ScrollMotion {
   animationFrame() {
     if (this.settled) { return }
 
-    // When the scroll position is not the one we previously set, we assume
-    // that the user has tried scrolling on her own. We then cancel the scrolling animation.
-    if (this.frameTop && (Math.abs(this.frameTop - this.scrollable.scrollTop) > 1.5)) {
-      this.abort('Animation aborted due to user intervention')
-    }
-
     const currentTime = Date.now()
     const timeElapsed = currentTime - this.startTime
     const timeFraction = Math.min(timeElapsed / this.duration, 1)
