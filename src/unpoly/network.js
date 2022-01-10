@@ -167,7 +167,7 @@ up.network = (function() {
     concurrency: 4,
     wrapMethod: true,
     cacheSize: 70,
-    cacheExpiry: 1000 * 60 * 5,
+    cacheExpiry: 1000 * 60 * 15,
     // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     badDownlink: 0.6,

@@ -8,7 +8,6 @@ Concurrency
   - Document this lets us validate-on-input:
     - <input up-validate up-observe-event="input" up-keep=":origin">
     => How to differentiate [up-keep] between keepable element and { keep } option?
-- Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Test that the default validateOptions.event for an input[type=date] is "blur", not "change"
 - Parse and use { disable } while an [up-observe] callback is running
   - We should disable fields without help by the user
