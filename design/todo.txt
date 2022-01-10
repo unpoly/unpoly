@@ -6,7 +6,8 @@ Concurrency
 
 - Allow { keep: 'selector' } to define additional elements to keep
   - Document this lets us validate-on-input:
-    - <input up-validate up-observe-event="input" up-keep="&">
+    - <input up-validate up-observe-event="input" up-keep=":origin">
+    => How to differentiate [up-keep] between keepable element and { keep } option?
 - Now that we're verifying cache, increase the cache default time from 5 minutes to 20 minutes
 - Test that the default validateOptions.event for an input[type=date] is "blur", not "change"
 - Parse and use { disable } while an [up-observe] callback is running
@@ -46,6 +47,8 @@ Various changes
 
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
+- Scroll behavior should be { behavior: 'instant' }, not 'auto'
+- Remove handling of "user scrolled while we were smooth-scrolling". Chrome doesn't do this either.
 
 
 Docs
