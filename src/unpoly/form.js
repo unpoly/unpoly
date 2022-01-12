@@ -1095,6 +1095,26 @@ up.form = (function() {
   </div>
   ```
 
+  ### Example: Radio button
+
+  ```html
+  <input type="radio" name="advancedness" value="basic" up-switch=".target">
+  <input type="radio" name="advancedness" value="advanced" up-switch=".target">
+  <input type="radio" name="advancedness" value="very-advanced" up-switch=".target">
+
+  <div class="target" up-show-for="basic">
+    only shown for advancedness = basic
+  </div>
+
+  <div class="target" up-hide-for="basic">
+    hidden for advancedness = basic
+  </div>
+
+  <div class="target" up-show-for="advanced very-advanced">
+    shown for advancedness = advanced or very-advanced
+  </div>
+  ```
+
   @selector input[up-switch]
   @param up-switch
     A CSS selector for elements whose visibility depends on this field's value.
