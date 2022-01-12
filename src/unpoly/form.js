@@ -1204,6 +1204,9 @@ up.form = (function() {
   /*-
   Show or hide elements when a form field is set to a given value.
 
+  When the controlling form field gets an `up-switch` attribute, and that form field is nested inside a `<form>`
+  parent, the targets elements must also be inside that same `<form>` parent.
+
   ### Example: Select options
 
   The controlling form field gets an `up-switch` attribute with a selector for the elements to show or hide:
