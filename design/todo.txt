@@ -8,7 +8,6 @@ Concurrency
   - Document this lets us validate-on-input:
     - <input up-validate up-observe-event="input" up-keep=":origin">
     => How to differentiate [up-keep] between keepable element and { keep } option?
-- Test that the default validateOptions.event for an input[type=date] is "blur", not "change"
 - Parse and use { disable } while an [up-observe] callback is running
   - We should disable fields without help by the user
   - Strip { disable } from field options passed to observe callback, since we already processed it
@@ -22,23 +21,6 @@ Concurrency
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
-- Serialize *all* actions in a form
-  - We keep the "schedule next" logic from up.FieldObserver, but we simply render with { sequence: 'form' }
-  - The new default form submit/observe/validate is { sequence: 'form' }
-  - Can be overriden bei individual inputs with [up-observe/autosubmit/validate]
-  - The sequence is not handled by up.form or up.FieldObserver
-    - Instead it is a property of up.Request().
-    - up.Request() resolves { sequence } to an element, using up.fragment.get(this.sequence, { layer: this.layer, origin: this.origin })
-  - The up.Request#sequence property is handled by up.Request.Queue.
-    - When up.Request.Queue picks the next request to load, it skips over requests if there is a currently loading request for the same { sequence }
-      - Two sequences collide if their sequence elements are in the same dynasty, e.g. a.contains(b) or b.contains(a)
-    - This has the benefit that requests in a sequence can be *aborted* while they wait for their turn
-    - To make { sequence } work for cached content we also queue cached responses
-      - Cached responses must *not* resolve immediately, but only when the queue calls #load()
-        - Move up.Request#followState() to up.Request#load()
-      - Don't emit up:request:load or up:request:loaded for cached responses
-- { sequence } should be an option that is overridable per-field in FieldObserver, config.validateOptions, etc.
-- When iterating over all fields for individual observe()s, we really need to go over all groups with the same [name]
 
 
 Various changes
