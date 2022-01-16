@@ -4,6 +4,16 @@ TODOs for next release
 Concurrency
 -----------
 
+- form.config.inputEvent => form.config.observeInputEvent
+- form.config.inputDelay => form.config.observeInputDelay
+- form.config.changeEvent => form.config.observeChangeEvent
+- Passing an options this way prevents custom observe events through attribute:
+      up.compiler('[up-validate]', function(container) {
+        observe(container, { event: 'change' }, function(value, name, fieldOptions) {
+          return validate(fieldOptions.origin, fieldOptions)
+        })
+      })
+- findGroupTarget(field) must not append :has(...) if the closest selector is the element itself
 - Allow { keep: 'selector' } to define additional elements to keep
   - Document this lets us validate-on-input:
     - <input up-validate up-observe-event="input" up-keep=":origin">
