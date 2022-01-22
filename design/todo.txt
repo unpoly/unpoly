@@ -44,6 +44,9 @@ Various changes
 Docs
 ----
 
+- Document django-forms-dynamic for [up-validate]
+  - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
+  - https://github.com/dabapps/django-forms-dynamic
 - Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
   - This may be a new caching page
 - New observe() and validate() options
