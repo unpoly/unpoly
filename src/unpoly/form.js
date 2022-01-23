@@ -119,6 +119,10 @@ up.form = (function() {
     return config.fieldSelectors.map(field => field + suffix).join(',')
   }
 
+  function isField(element) {
+    return e.matches(element, fieldSelector())
+  }
+
   /*-
   Returns a list of form fields within the given element.
 
@@ -145,7 +149,7 @@ up.form = (function() {
     // is an HTML feature.)
     if (e.matches(root, 'form[id]')) {
       const outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.getAttribute('id')))
-      const outsideFields = e.all(outsideFieldSelector)
+      const outsideFields = up.fragment.all(outsideFieldSelector, { layer: root })
       fields.push(...outsideFields)
       fields = u.uniq(fields)
     }
@@ -291,7 +295,7 @@ up.form = (function() {
     parserOptions = u.options(parserOptions, { defaults: defaultSubmitOptions() })
     options = parseDestinationOptions(form, options, parserOptions)
 
-    let parser = new up.OptionsParser(options, form, parserOptions)
+    let parser = new up.OptionsParser(form, options, parserOptions)
     parser.string('failTarget', { default: up.fragment.toTarget(form) })
     parser.boolean('disable')
 
@@ -306,6 +310,69 @@ up.form = (function() {
     // up.link.followOptions(). This will also parse the myriads of other options
     // that are possible on both <form> and <a> elements.
     u.assign(options, up.link.followOptions(form, options, parserOptions))
+
+    return options
+  }
+
+  function observeOptions(field, options, parserOptions) {
+    let parser = new up.OptionsParser(field, options, { closest: true, attrPrefix: 'up-observe-', ...parserOptions })
+
+    // Computing the effective options for a given field is pretty involved,
+    // as there are multiple layers of defaults.
+    //
+    // Form-wide options are also used for observers:
+    //
+    // 		<form up-disable="true">
+    // 			<input up-autosubmit>
+    // 		</form>
+    //
+    // Form-wide options can be overridden at the input level:
+    //
+    // 		<form up-disable="true">
+    // 			<input up-autosubmit up-observe-disable="false">
+    // 		</form>
+    //
+    // Forms can configure a separate option for all observers:
+    //
+    // 		<form up-disable="true" up-observe-disable="false">
+    // 			<input up-autosubmit>
+    // 		</form>
+    //
+    // Radio buttons are grouped within a container that has all the options.
+    // There are no options at individual inputs:
+    //
+    // 		<form up-disable="true">
+    // 			<div up-form-group up-autosubmit up-observe-disable="false">
+    // 				<input type="radio" name="kind" value="0">
+    // 				<input type="radio" name="kind" value="1">
+    // 				<input type="radio" name="kind" value="2">
+    // 			</div>
+    // 		</form>
+    //
+    // Users can configure app-wide defaults:
+    //
+    // 		up.form.config.inputDelay = 100
+    //
+    // Summing up, we get an option like { disable } through the following priorities:
+    //
+    // 1. Passed as explicit `up.observe({ disable })` option
+    // 2. Attribute for the observe intent (e.g. `[up-observe-disable]` at the input or form)
+    // 3. Default config for this observe() intent (e.g. `up.form.config.observeOptions.disable`).
+    // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
+    parser.boolean('feedback')
+    parser.boolean('disable')
+    parser.string('event')
+    parser.number('delay')
+
+    let config = up.form.config
+    if (options.event === 'input') {
+      options.event = u.evalOption(config.inputEvent, field)
+      options.delay ??= config.inputDelay
+    } else if (options.event === 'change') {
+      options.event = u.evalOption(config.changeEvent, field)
+    }
+
+    options.origin ||= field
 
     return options
   }
@@ -376,7 +443,7 @@ up.form = (function() {
   function parseDestinationOptions(form, options, parserOptions) {
     options = u.options(options)
     form = getForm(form)
-    const parser = new up.OptionsParser(options, form, parserOptions)
+    const parser = new up.OptionsParser(form, options, parserOptions)
 
     parser.string('contentType', { attr: ['enctype', 'up-content-type'] })
     parser.json('headers')
@@ -638,7 +705,7 @@ up.form = (function() {
   @experimental
   */
   function findGroup(field) {
-    return e.closest(field, getFullGroupSelector())
+    return findGroupSolution(field).element
   }
 
   /*-
@@ -674,18 +741,27 @@ up.form = (function() {
   @experimental
   */
 
-  function findGroupTarget(field) {
-    // We cannot use findGroup() as we must return a selector, not an element.
-    let selector = u.find(getGroupSelectors(), (groupSelector) => e.closest(field, groupSelector))
-    if (selector) {
-      // Most forms have multiple groups with no identifying attributes.
-      // Hence we use a :has() selector to identify the form group by the selector
-      // of the contained field, which usually has an identifying [name] or [id] attribute.
-      return `${selector}:has(${up.fragment.toTarget(field)})`
-    }
+  function findGroupSolution(field) {
+    return u.findResult(getGroupSelectors(), function(groupSelector) {
+      let group = e.closest(field, groupSelector)
+      if (group) {
+        let target = groupSelector
+        if (group !== field) {
+          // Most forms have multiple groups with no identifying attributes.
+          // Hence we use a :has() selector to identify the form group by the selector
+          // of the contained field, which usually has an identifying [name] or [id] attribute.
+          target += `:has(${up.fragment.toTarget(field)})`
+        }
+        return {
+          target,
+          element: group,
+          origin: field
+        }
+      }
+    })
   }
 
-  function findValidateTarget(element) {
+  function findValidateTarget(element) { // TODO: Remove
     let explicitTarget = e.closestAttr(element, 'up-validate')
     return explicitTarget || findGroupTarget(element) || up.fail('Could not find validation target for %o', element)
   }
@@ -729,35 +805,21 @@ up.form = (function() {
   @stable
   */
   function validate(field, options) {
-    // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    field = up.fragment.get(field)
-
-    options = parseDestinationOptions(field, options)
-    options.origin = field
-    options.target = findValidateTarget(field, options)
-    options.focus = 'keep'
-
-    // The protocol doesn't define whether the validation results in a status code.
-    // Hence we use the same options for both success and failure.
-    options.fail = false
-
-    // Make sure the X-Up-Validate header is present, so the server-side
-    // knows that it should not persist the form submission
-    options.headers ||= {}
-    options.headers[up.protocol.headerize('validate')] = field.getAttribute('name') || ':unknown'
-
-    // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
-    options.guardEvent = up.event.build('up:form:validate', { field, log: 'Validating form' })
-
-    return up.render(options)
+    let validator = up.FormValidator.forElement(field)
+    return validator.validate(field, options)
   }
 
   /*-
-  This event is emitted before a field is being [validated](/input-up-validate).
+  This event is emitted before a form is being [validated](/input-up-validate).
 
   @event up:form:validate
-  @param {Element} event.field
-    The form field that has been changed and caused the validated request.
+  @param {Element} event.target
+    The form that is being validated.
+  @param {Element} event.fields
+    The form fields that triggered this validation pass.
+
+    When multiple fields are validating within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/),
+    Unpoly will make a single validation request with multiple targets.
   @param {Object} event.renderOptions
     An object with [render options](/up.render) for the fragment update
     that will show the validation results.
@@ -874,10 +936,6 @@ up.form = (function() {
 
   function getContainer(element) {
     return getForm(element, up.layer.anySelector())
-  }
-
-  function isField(element) {
-    return e.matches(element, fieldSelector())
   }
 
   function focusedField() {
@@ -1195,11 +1253,14 @@ up.form = (function() {
     around the validating field.
   @stable
   */
-  up.compiler('[up-validate]', function(container) {
-    observe(container, { event: 'change' }, function(value, name, fieldOptions) {
-      return validate(fieldOptions.origin, fieldOptions)
-    })
+  up.compiler(validatingFieldSelector, function(field) {
+    let validator = up.FormValidator.forElement(field)
+    validator.watchField(field)
   })
+
+  function validatingFieldSelector() {
+    return config.fieldSelectors.map((selector) => `${selector}[up-validate], [up-validate] ${selector}`).join(', ')
+  }
 
   /*-
   Show or hide elements when a form field is set to a given value.
@@ -1526,6 +1587,7 @@ up.form = (function() {
     config,
     submit,
     submitOptions,
+    observeOptions,
     isSubmittable,
     observe,
     validate,
@@ -1537,6 +1599,7 @@ up.form = (function() {
     disable: disableContainer,
     disableAroundRequest,
     group: findGroup,
+    groupSolution: findGroupSolution,
     get: getForm,
   }
 })()

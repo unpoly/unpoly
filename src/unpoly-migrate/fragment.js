@@ -160,7 +160,6 @@ up.migrate.preprocessRenderOptions = function(options) {
 
 up.migrate.postprocessReloadOptions = function(options) {
   let lastModified = options.headers?.['If-Modified-Since']
-  console.debug("lastModified header is %o", lastModified)
   let legacyHeader
   if (lastModified) {
     legacyHeader = Math.floor(new Date(lastModified) * 0.001).toString()

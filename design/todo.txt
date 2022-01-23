@@ -31,6 +31,8 @@ Concurrency
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
+- Test that a form[up-validate] will pick up new inputs added after form compilation
+- Do we need to pause validation tasks while the form is submitting?
 
 
 Various changes
@@ -39,11 +41,16 @@ Various changes
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
+- Destruction of observe watches
+  - Test that observe watches automatically disappear when the element is detached
+  - Test that observe callbacks are not called if the element is detached while waiting for the delay
+  - Also document that the destructor function does rarely need to be called
 
 
 Docs
 ----
 
+- Changes to X-Up-Validate
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic

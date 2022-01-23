@@ -23,7 +23,7 @@ up.OptionsParser = class OptionsParser {
     There is no guarantee that only these properties will be returned by functions
     like `up.form.submitOptions()`.
   */
-  constructor(options, element, parserOptions = {}) {
+  constructor(element, options, parserOptions = {}) {
     this.options = options
     this.element = element
     this.fail = parserOptions.fail

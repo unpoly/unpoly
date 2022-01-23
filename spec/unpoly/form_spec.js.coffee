@@ -861,7 +861,7 @@ describe 'up.form', ->
         next ->
           expect(submitListener).not.toHaveBeenCalled()
           expect(validateListener).toHaveBeenCalled()
-          expect(validateListener.calls.argsFor(0)[0]).toBeEvent('up:form:validate', field: input)
+          expect(validateListener.calls.argsFor(0)[0]).toBeEvent('up:form:validate', fields: [input])
 
       it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
         form = fixture('form[action=/path] input[name=foo]')
@@ -1655,7 +1655,7 @@ describe 'up.form', ->
           expect(@lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
       it "does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", asyncSpec (next) ->
-        renderSpy = spyOn(up, 'render')
+        renderSpy = spyOn(up, 'render').and.returnValue(u.unresolvablePromise())
         form = fixture('form[up-submit][action="/path"]')
         form.setAttribute('up-scroll', 'main')
         form.setAttribute('up-confirm', 'really submit?')

@@ -250,7 +250,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       const origin = event.target.closest(selector)
       const value = e.jsonAttr(origin, attribute)
       const closeOptions = { origin }
-      const parser = new up.OptionsParser(closeOptions, origin)
+      const parser = new up.OptionsParser(origin, closeOptions)
       parser.booleanOrString('animation')
       parser.string('easing')
       parser.number('duration')

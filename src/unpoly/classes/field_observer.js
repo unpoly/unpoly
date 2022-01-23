@@ -14,65 +14,9 @@ up.FieldObserver = class FieldObserver {
   }
 
   fieldOptions(field) {
-    let options = { ...this.options, origin: field }
-    let parser = new up.OptionsParser(options, field, { closest: true, attrPrefix: 'up-observe-' })
-
-    // Computing the effective options for a given field is pretty involved,
-    // as there are multiple layers of defaults.
-    //
-    // Form-wide options are also used for observers:
-    //
-    // 		<form up-disable="true">
-    // 			<input up-autosubmit>
-    // 		</form>
-    //		
-    // Form-wide options can be overridden at the input level:
-    //
-    // 		<form up-disable="true">
-    // 			<input up-autosubmit up-observe-disable="false">
-    // 		</form>
-    //		
-    // Forms can configure a separate option for all observers:
-    //
-    // 		<form up-disable="true" up-observe-disable="false">
-    // 			<input up-autosubmit>
-    // 		</form>
-    //
-    // Radio buttons are grouped within a container that has all the options.
-    // There are no options at individual inputs:
-    //
-    // 		<form up-disable="true">
-    // 			<div up-form-group up-autosubmit up-observe-disable="false">
-    // 				<input type="radio" name="kind" value="0">
-    // 				<input type="radio" name="kind" value="1">
-    // 				<input type="radio" name="kind" value="2">
-    // 			</div>
-    // 		</form>
-    //
-    // Users can configure app-wide defaults:
-    //
-    // 		up.form.config.inputDelay = 100
-    //
-    // Summing up, we get an option like { disable } through the following priorities:
-    //
-    // 1. Passed as explicit `up.observe({ disable })` option
-    // 2. Attribute for the observe intent (e.g. `[up-observe-disable]` at the input or form)
-    // 3. Default config for this observe() intent (e.g. `up.form.config.observeOptions.disable`).
-    // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
-    parser.boolean('feedback', { default: this.formDefaults.feedback })
-    parser.boolean('disable', { default: this.formDefaults.disable })
-    parser.string('event')
-    parser.number('delay')
-
-    let config = up.form.config
-    if (!options.event || options.event === 'input') {
-      options.event = u.evalOption(config.inputEvent, field)
-      options.delay ??= config.inputDelay
-    } else if (options.event === 'change') {
-      options.event = u.evalOption(config.changeEvent, field)
-    }
-
-    return options
+    let options = u.copy(this.options)
+    let defaults = { event: 'input', ...this.formDefaults }
+    return up.form.observeOptions(field, options, { defaults })
   }
 
   start() {
@@ -82,13 +26,22 @@ up.FieldObserver = class FieldObserver {
     this.callbackRunning = false
 
     for (let field of this.fields) {
-      let fieldOptions = this.fieldOptions(field)
-      this.subscriber.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions))
+      this.observeField(field)
     }
 
     if (this.form) {
       this.subscriber.on(this.form, 'up:form:submit', () => this.cancelTimer())
     }
+  }
+
+  addField(field) {
+    this.fields.push(field)
+    this.observeField(field)
+  }
+
+  observeField(field) {
+    let fieldOptions = this.fieldOptions(field)
+    this.subscriber.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions))
   }
 
   stop() {

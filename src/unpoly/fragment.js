@@ -2019,6 +2019,7 @@ up.fragment = (function() {
     failKey,
     isFailKey,
     expandTargets,
+    resolveOrigin: resolveOriginReference,
     toTarget,
     matches,
     hasAutoHistory,

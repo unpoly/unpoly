@@ -327,7 +327,7 @@ up.link = (function() {
 
   function parseRequestOptions(link, options, parserOptions) {
     options = u.options(options)
-    const parser = new up.OptionsParser(options, link, parserOptions)
+    const parser = new up.OptionsParser(link, options, parserOptions)
 
     options.url = followURL(link, options)
     options.method = followMethod(link, options)
@@ -374,7 +374,7 @@ up.link = (function() {
     // Request options
     options = parseRequestOptions(link, options, parserOptions)
 
-    const parser = new up.OptionsParser(options, link, { fail: true, ...parserOptions })
+    const parser = new up.OptionsParser(link, options, { fail: true, ...parserOptions })
 
     // Feedback options
     parser.boolean('feedback')
