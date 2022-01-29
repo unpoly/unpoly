@@ -7,12 +7,6 @@ Concurrency
 - form.config.inputEvent => form.config.observeInputEvent
 - form.config.inputDelay => form.config.observeInputDelay
 - form.config.changeEvent => form.config.observeChangeEvent
-- Passing an options this way prevents custom observe events through attribute:
-      up.compiler('[up-validate]', function(container) {
-        observe(container, { event: 'change' }, function(value, name, fieldOptions) {
-          return validate(fieldOptions.origin, fieldOptions)
-        })
-      })
 - findGroupTarget(field) must not append :has(...) if the closest selector is the element itself
 - Allow { keep: 'selector' } to define additional elements to keep
   - Document this lets us validate-on-input:
@@ -22,17 +16,20 @@ Concurrency
   - We should disable fields without help by the user
   - Strip { disable } from field options passed to observe callback, since we already processed it
   - No up.render() here!
-- Support more than one [disable] option
-  - [disable=form] (gleich wie true, kann auch selektor sein)
-  - [disable=form-group]
-  - [disable=submit-button]
-  - [disable=selector]
-  - [disable=false]
+- Test that we can use [up-validate] with another event and a delay
+- Support more than one [up-disable] option
+  - [up-disable=form] (gleich wie true, kann auch selektor sein)
+  - [up-disable=form-group]
+  - [up-disable=submit-button]
+  - [up-disable=selector]
+  - [up-disable=false]
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
 - Test that a form[up-validate] will pick up new inputs added after form compilation
-- Do we need to pause validation tasks while the form is submitting?
+- Test that [up-validate] will not make a request if the target is removed while waiting for the delay
+- Test that multiple [up-validate] requests are merged into a single request
+- Remove 'change' from up.form.config.inputEvent
 
 
 Various changes
@@ -50,7 +47,11 @@ Various changes
 Docs
 ----
 
-- Changes to X-Up-Validate
+- Document that we can use live validation like this:
+  <input up-keep up-validate up-observe-event="input">
+- Document that multiple [up-validate] requests are merged into a single request
+  - Document that X-Up-Validate may contain multiple names
+  - Document that X-Up-Validate may contain :unknown
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic
