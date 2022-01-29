@@ -1763,7 +1763,7 @@ describe 'up.form', ->
             </div>
 
             <div class="result">
-              Validation results will appear here
+              Validation result will appear here
             </div>
 
           </form>
@@ -1778,6 +1778,42 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toEqual(1)
           expect(@lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
           expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
+
+      it 'picks up new inputs after the form was compiled', asyncSpec (next) ->
+        container = fixture('.container')
+        container.innerHTML = """
+          <form action="/users" id="registration" up-validate='.result'>
+
+            <fieldset>
+              <input type="text" name="email">
+            </fieldset>
+
+            <fieldset class="next"></fieldset>
+
+            <div class="result">
+              Validation result will appear here
+            </div>
+
+          </form>
+        """
+        up.hello(container)
+
+        next ->
+          up.render fragment: """
+            <fieldset class="next">
+              <input type="password" name="password">
+            </fieldset>
+          """
+
+        next ->
+          passwordField = document.querySelector('[name=password]')
+          passwordField.value = "foo"
+          Trigger.change(passwordField)
+
+        next ->
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('password')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.result')
 
     describe '[up-switch]', ->
 

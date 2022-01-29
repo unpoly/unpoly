@@ -26,7 +26,6 @@ Concurrency
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
-- Test that a form[up-validate] will pick up new inputs added after form compilation
 - Test that [up-validate] will not make a request if the target is removed while waiting for the delay
 - Test that multiple [up-validate] requests are merged into a single request
 - Remove 'change' from up.form.config.inputEvent
