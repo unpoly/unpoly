@@ -1914,7 +1914,7 @@ describe 'up.link', ->
         $fixture('.target').text('old text')
         $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)
-        abortListener = jasmine.createSpy('up:request:abort listener')
+        abortListener = jasmine.createSpy('up:request:aborted listener')
         up.on('up:request:aborted', abortListener)
 
         Trigger.hoverSequence($link)
@@ -1933,7 +1933,7 @@ describe 'up.link', ->
         $fixture('.target').text('old text')
         $link = $fixture('a[href="/foo"][up-target=".target"][up-preload]')
         up.hello($link)
-        abortListener = jasmine.createSpy('up:request:abort listener')
+        abortListener = jasmine.createSpy('up:request:aborted listener')
         up.on('up:request:aborted', abortListener)
 
         Trigger.hoverSequence($link)
