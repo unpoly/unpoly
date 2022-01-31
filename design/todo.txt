@@ -4,19 +4,47 @@ TODOs for next release
 Concurrency
 -----------
 
-- form.config.inputEvent => form.config.observeInputEvent
-- form.config.inputDelay => form.config.observeInputDelay
-- form.config.changeEvent => form.config.observeChangeEvent
+- Abort validate observers when requests targeting the form are aborted through { solo }
+  - We introduced a regression
+    - Dirty field with [up-validate], waiting for 1 task
+    - User clicks a link to navigate away
+    - { solo } does not see anything to abort
+    - After 1 task, [up-validate] sends a request, which is now racing against the navigation link
+    - Why no test?
+  - We could fix this by replacing the request queue with a task queue
+    - However, this would be a large refactoring
+    - We would need to implement { delay } for tasks/requests
+    - We would maybe need to implement microtask/task
+  - A simpler solution would be to implement up:fragment:solo
+    - Remove { solo: Function } variant as this would have a weird signature for tasks that are not a request
+      - We still need to support up.request.abort(Function) as we use this internally to abort requests by URL
+    - Remaining variants are
+      - { solo: true }
+      - { solo: 'target' } // was { solo: 'subtree' }, will be expanded to elements before the event is emitted
+      - { solo: document }
+      - { solo: fragment }
+      - { solo: [f0, f1, ...] }
+    - Implement an up.fragment.solo(fragment) or up.fragment.abort(fragment) method
+    - Event must have { elements } or { fragments } property
+    - Event should have #contains(elementOrElements) method to quickly check if something is in solo scope
+    - The event should not be abortable itself
+    - Consider renaming { solo } to { abort } (must be renamed in up.Request constructor to not override @abort() method)
+    - In up.FormValidator, cancel timer on contained up:fragment:solo instead of up:form:submit
+      - Or, remove any dirtySolution if it is in the solo scope
+    - Consider doing the same for up.FieldObserver
+- Polish form.config options
+  - form.config.inputEvent => form.config.observeInputEvent
+  - form.config.inputDelay => form.config.observeInputDelay
+  - form.config.changeEvent => form.config.observeChangeEvent
+  - Remove 'change' from up.form.config.inputEvent
 - findGroupTarget(field) must not append :has(...) if the closest selector is the element itself
-- Allow { keep: 'selector' } to define additional elements to keep
-  - Document this lets us validate-on-input:
-    - <input up-validate up-observe-event="input" up-keep=":origin">
-    => How to differentiate [up-keep] between keepable element and { keep } option?
+  - Tests for up.form.groupTarget(field)
+  - Tests for up.form.groupTarget(group)
+  - Tests for up.form.groupTarget(otherElement)
 - Parse and use { disable } while an [up-observe] callback is running
   - We should disable fields without help by the user
   - Strip { disable } from field options passed to observe callback, since we already processed it
   - No up.render() here!
-- Test that we can use [up-validate] with another event and a delay
 - Support more than one [up-disable] option
   - [up-disable=form] (gleich wie true, kann auch selektor sein)
   - [up-disable=form-group]
@@ -26,9 +54,10 @@ Concurrency
   - Evaluate in up.Change.FromURL
     - Keep logic reusable for disabling during async up.observe() callbacks
 - Move mimicLocalRequest() into useCachedRequest()
-- Test that [up-validate] will not make a request if the target is removed while waiting for the delay
-- Test that multiple [up-validate] requests are merged into a single request
-- Remove 'change' from up.form.config.inputEvent
+- Test [up-validate] features
+  - Test that we can use [up-validate] with another event and a delay
+  - Test that [up-validate] will not make a request if the target is removed while waiting for the delay
+  - Test that multiple [up-validate] requests are merged into a single request
 
 
 Various changes
@@ -40,7 +69,7 @@ Various changes
 - Destruction of observe watches
   - Test that observe watches automatically disappear when the element is detached
   - Test that observe callbacks are not called if the element is detached while waiting for the delay
-  - Also document that the destructor function does rarely need to be called
+  - Replace destructor functions with an unpoly-migrate fallback that says "observe watches teardown automatically"
 
 
 Docs
@@ -82,6 +111,10 @@ Docs
 Maybe
 -----
 
+- Consider implementing an abortable up:navigate event
+  - This would be the first feature that goes beyond "navigation is just a preset"
+  - People might expect history changes to trigger this
+  - Maybe think about this more
 - Consider renaming "*observe*" to "*watch*"
   - Maybe take this opportunity to change the attribute?
     - <form up-watch up-watch-event="change" up-on-changed="...">
