@@ -46,6 +46,42 @@ describe 'up.form', ->
         results = up.form.fields(form)
         expect(results).toMatchList([field])
 
+    describe 'up.form.groupSolution()', ->
+
+      it 'returns a solution for the form group closest to the given element, distinguishing the selector from other form groups by refering to the given element with :has()', ->
+        form = fixture('form')
+        group = e.affix(form, '[up-form-group]')
+        input = e.affix(group, 'input[name=foo]')
+
+        groupSolution = up.form.groupSolution(input)
+
+        expect(groupSolution).toEqual(jasmine.objectContaining(
+          element: group,
+          target: '[up-form-group]:has(input[name="foo"])'
+        ))
+
+      it 'returns the form if no closer group exists', ->
+        form = fixture('form')
+        container = e.affix(form, 'div')
+        input = e.affix(container, 'input[name=foo]')
+
+        groupSolution = up.form.groupSolution(input)
+
+        expect(groupSolution).toEqual(jasmine.objectContaining(
+          element: form,
+          target: 'form:has(input[name="foo"])'
+        ))
+
+      it 'does not append a :has(...) if the given element is already a group', ->
+        form = fixture('form')
+        group = e.affix(form, '[up-form-group]')
+
+        groupSolution = up.form.groupSolution(group)
+
+        expect(groupSolution).toEqual(jasmine.objectContaining(
+          element: group,
+          target: '[up-form-group]'
+        ))
 
     describe 'up.observe', ->
 
