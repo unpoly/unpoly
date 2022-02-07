@@ -117,6 +117,17 @@ describe 'up.fragment', ->
         results = up.fragment.all(match)
         expect(results).toEqual [match]
 
+      it 'returns a given Array unchanged', ->
+        match = fixture('.match')
+        results = up.fragment.all([match])
+        expect(results).toEqual [match]
+
+      it 'returns a given NodeList unchanged', ->
+        match = fixture('.match')
+        nodeList = document.querySelectorAll('.match')
+        results = up.fragment.all(nodeList)
+        expect(results).toEqual nodeList
+
       it 'returns an empty array if there are no matches', ->
         results = up.fragment.all('.match')
         expect(results).toEqual []
@@ -5899,8 +5910,31 @@ describe 'up.fragment', ->
         element = e.affix(parent, '.element[up-etag=false]')
         expect(up.fragment.etag(element)).toBeUndefined()
 
+    describe 'up.fragment.abort()', ->
 
+      describe 'without an argument', ->
 
+        it 'aborts requests for the current layer'
 
+        it "also aborts requests outside the layer's main element"
 
+        describe 'with { layer } option', ->
+
+          it 'aborts requests on the given layer'
+
+        describe 'with { layer: "any" }', ->
+
+          it 'aborts requests on all layers'
+
+      describe 'with an element', ->
+
+        it "aborts requests targeting given element's subtree"
+
+      describe 'with a selector', ->
+
+        it "matches the selector in the current layer and aborts requests within that subtree"
+
+        describe 'with { layer } option', ->
+
+          it 'resolves the selector on another layer'
 

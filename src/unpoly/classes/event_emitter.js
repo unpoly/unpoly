@@ -96,8 +96,8 @@ up.EventEmitter = class EventEmitter extends up.Record {
     let layer
     if (options.layer) {
       layer = up.layer.get(options.layer)
-      if (options.target == null) { options.target = layer.element; }
-      if (options.baseLayer == null) { options.baseLayer = layer; }
+      options.target ||= layer.element
+      options.baseLayer ||= layer
     }
 
     // Setting { baseLayer } will fix up.layer.current to that layer during emission.
@@ -118,7 +118,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
       // In this branch we receive an Event object that was already built:
       // up.emit([target], event, [emitOptions])
       options.event = args[0]
-      if (options.log == null) { options.log = args[0].log; }
+      options.log ??= args[0].log
     } else if (u.isString(args[0])) {
       // In this branch we receive an Event type and props object.
       // The props object may also include options for the emission, such as

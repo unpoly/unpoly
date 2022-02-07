@@ -1300,14 +1300,19 @@ up.fragment = (function() {
   */
   function getAll(...args) {
     const options = u.extractOptions(args)
-    let selector = args.pop()
+    let selectorString = args.pop()
     const root = args[0]
+
+    // (0) up.fragment.all(list) should return the list unchanged
+    if (u.isList(selectorString)) {
+      return selectorString
+    }
 
     // (1) up.fragment.all(rootElement, selector) should find selector within
     //     the descendants of rootElement.
     // (2) up.fragment.all(selector) should find selector within the current layer.
     // (3) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
-    selector = parseSelector(selector, root, options)
+    let selector = parseSelector(selectorString, root, options)
     return selector.descendants(root || document)
   }
 
@@ -1984,6 +1989,56 @@ up.fragment = (function() {
     return request.fromCache && u.evalAutoOption(options.verifyCache, config.autoVerifyCache, response)
   }
 
+  // function callbackWhileAlive(element, callback) {
+  //   element = e.get(element)
+  //   let aborted = false
+  //   let layer = up.layer.get(element)
+  //   let unsubscribe = layer.on('up:fragment:solo', function({ target } ) {
+  //     if (target.contains(element)) aborted = true
+  //   })
+  //   return function() {
+  //     unsubscribe()
+  //     if (!e.isDetached(element) && !aborted) callback()
+  //   }
+  // }
+  //
+  // function scheduleTimer(element, millis, callback) {
+  //   return u.timer(millis, callbackWhileAlive(element, callback))
+  // }
+
+  function abort(...args) {
+    let options = parseTargetAndOptions(args)
+
+    let testFn
+    let reason
+    let elements
+
+    if (options.target) {
+      // If we're given an element or selector, we abort all requests
+      // targeting that subtree.
+      elements = getAll(options.target, options)
+      testFn = (request) => request.isPartOfSubtree(elements)
+      reason = 'Requests within the fragment were aborted'
+    } else {
+      // If we're not given an element or selector, we abort all layers
+      // matching the { layer } option. If no { layer } option is given,
+      // all requests in the current layer are aborted.
+      //
+      // This behavior is slightly inconsistent with that of other up.fragment
+      // functions, which operate on the main element if no other target is given.
+      // However, when we navigate on a layer, we want to abort *all* requests on
+      // that layer, even requests with a target outside of main, e.g. a nav bar.
+      let layers = up.layer.getAll(options)
+      elements = u.map(layers, 'element')
+      testFn = (request) => u.contains(layers, request.layer)
+      reason = 'Requests within the layer were aborted'
+    }
+
+    up.emit(elements, 'up:fragment:abort', { reason })
+
+    return up.network.abort(testFn, reason)
+  }
+
   up.on('up:framework:boot', function() {
     const {body} = document
     body.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
@@ -2026,7 +2081,9 @@ up.fragment = (function() {
     hasAutoHistory,
     time: timeOf,
     etag: etagOf,
-    shouldVerifyCache
+    shouldVerifyCache,
+    abort,
+    // timer: scheduleTimer
   }
 })()
 
