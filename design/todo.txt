@@ -1,17 +1,33 @@
 TODOs for next release
 ======================
 
-fail setter
------------
-
-- Document that { fail } can be a function, true, false or default 'auto'
-- Consider moving { fail } to up.request property
+| Scope                | up.fragment.abort() | up.render({ abort })  |
+----------------------------------------------------------------------
+| nothing              | don't call          | false, undefined      |
+| current layer        | no args             | 'layer'               |
+| element subtree      | Element             | 'target', Element     | new render default
+| element subtrees     | [Element] or 'a, b' | [Element] or 'a, b'   | new render default
+| all requests         | { layer: 'any' }    | 'all', true           | navigation default
+| other layer          | { layer: 'root' }   | not possible          |
 
 
 Concurrency
 -----------
 
 - Unpoly Rails must have up.validate_names instead of up.validate_name
+- Introduce new function up.fragment.abort(fragment)
+- Rename up.render({ solo }) to up.render({ abort })
+  - Use up.fragment.abort() internally
+  - Remove { abort: Function } variant
+    - Remaining variants are
+      - { abort: '.selector' }
+      - { abort: [e0, e1, ...] }
+      - { abort: element }
+      - { abort: true }     // abort all
+      - { abort: document } // abort all
+      - { abort: 'target' } // was { solo: 'subtree' }, will be expanded to elements before the event is emitted
+  - Remove { solo } option from up.request()
+    - Deprecation says to use up.network.abort() instead
 - Abort validate observers when requests targeting the form are aborted through { solo }
   - We introduced a regression
     - Dirty field with [up-validate], waiting for 1 task
@@ -23,21 +39,12 @@ Concurrency
     - However, this would be a large refactoring
     - We would need to implement { delay } for tasks/requests
     - We would maybe need to implement microtask/task
-  - A simpler solution would be to implement up:fragment:solo
-    - Remove { solo: Function } variant as this would have a weird signature for tasks that are not a request
-      - We still need to support up.request.abort(Function) as we use this internally to abort requests by URL
-    - Remaining variants are
-      - { solo: true }
-      - { solo: 'target' } // was { solo: 'subtree' }, will be expanded to elements before the event is emitted
-      - { solo: document }
-      - { solo: fragment }
-      - { solo: [f0, f1, ...] }
+  - A simpler solution would be to implement up:fragment:abort
     - Implement an up.fragment.solo(fragment) or up.fragment.abort(fragment) method
     - Event must have { elements } or { fragments } property
     - Event should have #contains(elementOrElements) method to quickly check if something is in solo scope
     - The event should not be abortable itself
-    - Consider renaming { solo } to { abort } (must be renamed in up.Request constructor to not override @abort() method)
-    - In up.FormValidator, cancel timer on contained up:fragment:solo instead of up:form:submit
+    - In up.FormValidator, cancel timer on contained up:fragment:abort instead of up:form:submit
       - Or, remove any dirtySolution if it is in the solo scope
     - Consider doing the same for up.FieldObserver
 - Polish form.config options
@@ -68,6 +75,7 @@ Concurrency
   - Test that multiple [up-validate] requests are merged into a single request
 
 
+
 Various changes
 ---------------
 
@@ -84,13 +92,19 @@ Various changes
 - For overlays with a backdrop, don't listen to click on parent.element
   - This fixes cases where other overlay libs append elements to document.body
   - For modes without a backdrop (popup), people can prevent up:overlay:dismiss if they don't like the { origin }
+- Change abort(reason) to abort({ reason })
+  - In up.Queue#abort
+  - In up.network.abort()
+  - In up.fragment.abort()
+  - In up.Request#abort
+- Fix clicking on a label[for] when there are elements with duplicate IDs in another layer
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
 - Destruction of observe watches
   - Test that observe watches automatically disappear when the element is detached
   - Test that observe callbacks are not called if the element is detached while waiting for the delay
-  - Replace destructor functions with an unpoly-migrate fallback that says "observe watches teardown automatically"
+  - When someone registers an unobserve-function as a destructor, print a message that this is not necessary anymore
 
 
 Docs
@@ -186,6 +200,7 @@ Long term solution
 Backlog
 =======
 
+- Functionality that checks for isDetached() should probably also check for .up-destroying
 - Improve `{ focus: 'keep' }` so it focuses the former form group if we lose focus
   - This may be easier said than done
     - we would need to remember the original form group before the swap in the FocusCapsule

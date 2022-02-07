@@ -4,6 +4,7 @@ const e = up.element
 up.FormValidator = class FormValidator {
 
   constructor(form) {
+    console.debug("Validator for %o", form)
     this.form = form
     this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable', 'contentType', 'headers', 'params', 'url', 'method'] }) : {} // TODO: Also parse [up-sequence] when we get it
     this.dirtySolutions = []
@@ -11,7 +12,17 @@ up.FormValidator = class FormValidator {
     this.nextRenderOptions = null
     this.rendering = false
     this.resetNextRenderPromise()
-    up.on(form, 'up:form:submit', () => this.unscheduleNextRender())
+    this.honorAbort()
+  }
+
+  honorAbort() {
+    let layer = up.layer.get(this.form)
+    let unsubscribe = layer.on('up:fragment:aborted', ({ target }) => {
+      this.dirtySolutions = u.reject(this.dirtySolutions, ({ element }) => target.contains(element))
+    })
+    // Since we're binding to an element that is an ancestor of the form (its layer),
+    // we need to unregister the event listener when the form is removed.
+    up.destructor(this.form, unsubscribe)
   }
 
   resetNextRenderPromise() {
@@ -86,10 +97,11 @@ up.FormValidator = class FormValidator {
 
   scheduleNextRender(options) {
     let delay = options.delay || 0
+    console.debug("Scheduling validate render after %o ms", delay)
     this.nextRenderOptions = options
     // Render requests always reset the timer, using their then-current delay.
     this.unscheduleNextRender()
-    this.nextRenderTimer = setTimeout(() => this.renderDirtySolutions(), delay)
+    this.nextRenderTimer = u.timer(delay, () => this.renderDirtySolutions())
   }
 
   unscheduleNextRender() {

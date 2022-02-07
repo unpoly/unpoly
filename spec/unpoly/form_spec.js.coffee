@@ -1686,9 +1686,40 @@ describe 'up.form', ->
         Trigger.change(textField)
         Trigger.clickSequence(submitButton)
 
-        next =>
+        next ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(@lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
+
+      it 'does not send a validation request if the input field is blurred by following an [up-instant] link (bugfix)', asyncSpec (next) ->
+        form = fixture('form[up-submit][action="/form-path"]')
+        textField = e.affix(form, 'input[type=text][name=input][up-validate]')
+        instantLink = fixture('a[up-follow][up-instant][href="/link-path"]')
+        up.hello(form)
+
+        textField.value = "foo"
+        Trigger.change(textField)
+        Trigger.clickSequence(instantLink)
+
+        next ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/link-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
+
+      it 'does not send a validation request when we render with { solo } while waiting for the validation delay', asyncSpec (next) ->
+        target = fixture('.target')
+        form = fixture('form[up-submit][action="/form-path"][up-validate-delay=20]')
+        textField = e.affix(form, 'input[type=text][name=input][up-validate]')
+        up.hello(form)
+
+        textField.value = "foo"
+        Trigger.change(textField)
+
+        up.render('.target', { url: '/render-path', solo: true })
+
+        next.after 80, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/render-path')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
       it "does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", asyncSpec (next) ->
         renderSpy = spyOn(up, 'render').and.returnValue(u.unresolvablePromise())
