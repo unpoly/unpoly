@@ -2004,6 +2004,16 @@ up.fragment = (function() {
   //   return u.timer(millis, callbackWhileAlive(element, callback))
   // }
 
+  /*-
+  TODO: Docs
+
+  @function up.fragment.abort
+  @param {string|Element} [element]
+  @param {string|up.Layer} [options.layer]
+  @param {Element} [options.origin]
+  @return {Promise}
+  @experimental
+  */
   function abort(...args) {
     let options = parseTargetAndOptions(args)
 
@@ -2016,7 +2026,7 @@ up.fragment = (function() {
       // targeting that subtree.
       elements = getAll(options.target, options)
       testFn = (request) => request.isPartOfSubtree(elements)
-      reason = 'Requests within the fragment were aborted'
+      reason = 'Aborting requests within fragment'
     } else {
       // If we're not given an element or selector, we abort all layers
       // matching the { layer } option. If no { layer } option is given,
@@ -2029,12 +2039,29 @@ up.fragment = (function() {
       let layers = up.layer.getAll(options)
       elements = u.map(layers, 'element')
       testFn = (request) => u.contains(layers, request.layer)
-      reason = 'Requests within the layer were aborted'
+      reason = 'Aborting requests within layer'
     }
 
-    up.emit(elements, 'up:fragment:abort', { reason })
+    up.emit(elements, 'up:fragment:abort', { reason, log: reason })
 
     return up.network.abort(testFn, reason)
+  }
+
+  /*-
+  TODO: Docs
+
+  @function up.fragment.onAborted
+  @param {Element} element
+  @param {Function(event}} callback
+  @experimental
+  */
+  function onAborted(fragment, callback) {
+    let guard = (event) => event.target.contains(fragment)
+    let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
+    // Since we're binding to an element that is an ancestor of the fragment,
+    // we need to unregister the event listener when the form is removed.
+    up.destructor(this.form, unsubscribe)
+    return unsubscribe
   }
 
   up.on('up:framework:boot', function() {
@@ -2081,6 +2108,7 @@ up.fragment = (function() {
     etag: etagOf,
     shouldVerifyCache,
     abort,
+    onAborted,
     // timer: scheduleTimer
   }
 })()

@@ -16,13 +16,9 @@ up.FormValidator = class FormValidator {
   }
 
   honorAbort() {
-    let layer = up.layer.get(this.form)
-    let unsubscribe = layer.on('up:fragment:aborted', ({ target }) => {
+    up.fragment.onAborted(this.form, ({ target }) => {
       this.dirtySolutions = u.reject(this.dirtySolutions, ({ element }) => target.contains(element))
     })
-    // Since we're binding to an element that is an ancestor of the form (its layer),
-    // we need to unregister the event listener when the form is removed.
-    up.destructor(this.form, unsubscribe)
   }
 
   resetNextRenderPromise() {
