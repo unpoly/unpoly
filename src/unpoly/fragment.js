@@ -2066,6 +2066,10 @@ up.fragment = (function() {
     return unsubscribe
   }
 
+  function handleAbortOption(elements, options) {
+
+  }
+
   up.on('up:framework:boot', function() {
     const {body} = document
     body.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))

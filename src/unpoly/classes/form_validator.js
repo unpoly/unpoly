@@ -59,7 +59,7 @@ up.FormValidator = class FormValidator {
   getSelectorSolution(selector) {
     let element = up.fragment.get(selector, { layer: this.form })
     return {
-      target,
+      target, // Throw we obviously have no test for this error
       element,
       origin: element
     }

@@ -83,6 +83,18 @@ describe 'up.form', ->
           target: '[up-form-group]'
         ))
 
+    describe 'up.form.submitButtons()', ->
+
+      it "returns the given form's submit buttons", ->
+        form = fixture('form')
+        submitButton = e.affix(form, 'button[type=submit]')
+        submitInput = e.affix(form, 'input[type=submit]')
+        otherButton = e.affix(form, 'button[type=reset]')
+        otherInput = e.affix(form, 'input[type=text]')
+
+        result = up.form.submitButtons(form)
+        expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
+
     describe 'up.observe', ->
 
       beforeEach ->
