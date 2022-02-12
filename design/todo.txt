@@ -15,6 +15,9 @@ Concurrency
 -----------
 
 - Unpoly Rails must have up.validate_names instead of up.validate_name
+- Consider renaming up.Request#targetElements to just #elements or #fragments
+  - However, if we ever wanted to expose this property in up:link:follow (to get a preview of what's being replaced), #elements would be too generic a name
+- Can we get rid of excerpt argument now that most aborting happens within up.fragment?
 - Introduce new function up.fragment.abort(fragment)
 - Rename up.render({ solo }) to up.render({ abort })
   - Use up.fragment.abort() internally
@@ -92,6 +95,7 @@ Various changes
 - For overlays with a backdrop, don't listen to click on parent.element
   - This fixes cases where other overlay libs append elements to document.body
   - For modes without a backdrop (popup), people can prevent up:overlay:dismiss if they don't like the { origin }
+- up.form.submitButtons is documented, but not public
 - Change abort(reason) to abort({ reason })
   - In up.Queue#abort
   - In up.network.abort()
