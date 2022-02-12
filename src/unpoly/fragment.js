@@ -2042,7 +2042,7 @@ up.fragment = (function() {
       reason = 'Aborting requests within layer'
     }
 
-    up.emit(elements, 'up:fragment:abort', { reason, log: reason })
+    up.emit(elements, 'up:fragment:aborted', { reason, log: reason })
 
     return up.network.abort(testFn, reason)
   }
@@ -2060,7 +2060,7 @@ up.fragment = (function() {
     let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
     // Since we're binding to an element that is an ancestor of the fragment,
     // we need to unregister the event listener when the form is removed.
-    up.destructor(this.form, unsubscribe)
+    up.destructor(fragment, unsubscribe)
     return unsubscribe
   }
 

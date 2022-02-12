@@ -5938,3 +5938,27 @@ describe 'up.fragment', ->
 
           it 'resolves the selector on another layer'
 
+    describe 'up.fragment.onAborted()', ->
+
+      it "runs the callback when the fragment is aborted", asyncSpec (next) ->
+        fragment = fixture('.fragment')
+        callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+        expect(callback).not.toHaveBeenCalled()
+
+        up.fragment.abort(fragment)
+
+        next ->
+          expect(callback).toHaveBeenCalled()
+
+      it "runs the callback when the fragment's ancestor is aborted", asyncSpec (next) ->
+        ancestor = fixture('.ancestor')
+        fragment = e.affix(ancestor, '.fragment')
+        callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+        expect(callback).not.toHaveBeenCalled()
+
+        up.fragment.abort(ancestor)
+
+        next ->
+          expect(callback).toHaveBeenCalled()
