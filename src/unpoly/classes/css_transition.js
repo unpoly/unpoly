@@ -33,7 +33,7 @@ up.CSSTransition = class CSSTransition {
 
     this.startMotion()
 
-    return this.deferred.promise()
+    return this.deferred
   }
 
   listenToFinishEvent() {

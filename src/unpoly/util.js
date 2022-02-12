@@ -1684,7 +1684,6 @@ up.util = (function() {
     })
     nativePromise.resolve = resolveFn
     nativePromise.reject = rejectFn
-    nativePromise.promise = () => nativePromise; // just return self
     return nativePromise
   }
 
