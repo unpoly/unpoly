@@ -1587,6 +1587,7 @@ up.form = (function() {
     autosubmit,
     fieldSelector,
     fields: findFields,
+    submitButtons: findSubmitButtons,
     focusedField,
     switchTarget,
     disable: disableContainer,
