@@ -5940,7 +5940,7 @@ describe 'up.fragment', ->
 
     describe 'up.fragment.onAborted()', ->
 
-      it "runs the callback when the fragment is aborted", asyncSpec (next) ->
+      it "runs the callback when the fragment is aborted", ->
         fragment = fixture('.fragment')
         callback = jasmine.createSpy('aborted callback')
         up.fragment.onAborted(fragment, callback)
@@ -5948,10 +5948,9 @@ describe 'up.fragment', ->
 
         up.fragment.abort(fragment)
 
-        next ->
-          expect(callback).toHaveBeenCalled()
+        expect(callback).toHaveBeenCalled()
 
-      it "runs the callback when the fragment's ancestor is aborted", asyncSpec (next) ->
+      it "runs the callback when the fragment's ancestor is aborted", ->
         ancestor = fixture('.ancestor')
         fragment = e.affix(ancestor, '.fragment')
         callback = jasmine.createSpy('aborted callback')
@@ -5960,5 +5959,4 @@ describe 'up.fragment', ->
 
         up.fragment.abort(ancestor)
 
-        next ->
-          expect(callback).toHaveBeenCalled()
+        expect(callback).toHaveBeenCalled()

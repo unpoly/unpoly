@@ -2011,7 +2011,6 @@ up.fragment = (function() {
   @param {string|Element} [element]
   @param {string|up.Layer} [options.layer]
   @param {Element} [options.origin]
-  @return {Promise}
   @experimental
   */
   function abort(...args) {
@@ -2042,9 +2041,11 @@ up.fragment = (function() {
       reason = 'Aborting requests within layer'
     }
 
-    up.emit(elements, 'up:fragment:aborted', { reason, log: reason })
+    up.network.abort(testFn, reason)
 
-    return up.network.abort(testFn, reason)
+    // Emit an event so other async code can choose to abort itself,
+    // e.g. timers waiting for a delay.
+    up.emit(elements, 'up:fragment:aborted', { reason, log: reason })
   }
 
   /*-
