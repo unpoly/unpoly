@@ -18,7 +18,7 @@ module.exports = {
   "rules": {
     "no-implicit-globals": "error",
     "no-cond-assign": "off",
-    "@typescript-eslint/no-unused-vars": ["error", {
+    "@typescript-eslint/no-unused-vars": ["warn", {
       "argsIgnorePattern": "^_",
       "varsIgnorePattern": "^_"
     }],
