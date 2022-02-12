@@ -761,11 +761,6 @@ up.form = (function() {
     })
   }
 
-  function findValidateTarget(element) { // TODO: Remove
-    let explicitTarget = e.closestAttr(element, 'up-validate')
-    return explicitTarget || findGroupTarget(element) || up.fail('Could not find validation target for %o', element)
-  }
-
   /*-
   Performs a server-side validation of a form field.
 
