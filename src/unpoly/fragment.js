@@ -742,48 +742,9 @@ up.fragment = (function() {
   @stable
   */
   const render = up.mockable((...args) => {
-    // Convert thrown errors into rejected promises.
-    // Convert non-promise values into a resolved promise.
-    return u.asyncify(function () {
-      let options = parseTargetAndOptions(args)
-      options = up.RenderOptions.preprocess(options)
-      guardRender(options)
-      return (options.url ? renderRemoteContent : renderLocalContent)(options)
-    })
+    let options = parseTargetAndOptions(args)
+    return new up.Change.FromOptions(options).execute()
   })
-
-  function guardRender(options) {
-    up.browser.assertConfirmed(options)
-
-    let guardEvent = u.pluckKey(options, 'guardEvent')
-    if (guardEvent) {
-      // Allow guard event handlers to manipulate render options for the default behavior.
-      //
-      // Note that we have removed { guardEvent } from options to not recursively define
-      // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
-      // listeners that prevent the default and re-render.
-      guardEvent.renderOptions = options
-      up.event.assertEmitted(guardEvent, {target: options.origin})
-    }
-    options.onGuarded?.()
-
-    up.RenderOptions.assertContentGiven(options)
-  }
-
-  function renderRemoteContent(options) {
-    return new up.Change.FromURL(options).execute()
-  }
-
-  function renderLocalContent(options) {
-    // When we have a given { url }, the { solo } option is honored by up.request().
-    // But up.request() is never called when we have local content given as { document },
-    // { content } or { fragment }. Hence we abort here.
-    up.network.mimicLocalRequest(options)
-
-    // (1) No need to give feedback as local changes are sync.
-    // (2) Value will be converted to a fulfilled promise by up.util.asyncify() in render().
-    return new up.Change.FromContent(options).execute()
-  }
 
   /*-
   [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
@@ -2065,8 +2026,17 @@ up.fragment = (function() {
     return unsubscribe
   }
 
-  function handleAbortOption(elements, options) {
-
+  function handleAbortOption({ abort, elements, layer, origin }) {
+    if (abort === 'layer') {
+      abort({ layer })
+    } else if (abort === 'target') {
+      abort(elements)
+    } else if (abort === 'all' || abort === true) {
+      abort({ layer: 'any' })
+    } else if (abort) {
+      // Element, [Element], string, [string]
+      abort(abort, { layer, origin })
+    }
   }
 
   up.on('up:framework:boot', function() {
