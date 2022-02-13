@@ -26,7 +26,7 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
     }
 
     if (u.isElement(opt)) {
-      return this.processElement()
+      return this.processElement(opt) // TODO: Test that { focus: Element } works
     }
 
     if (u.isString(opt)) {
