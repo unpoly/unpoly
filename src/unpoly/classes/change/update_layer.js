@@ -342,8 +342,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   matchPreflight() {
-    if (this.matchedPreflight) { return; }
-
     for (let step of this.steps) {
       const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.
@@ -355,13 +353,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     this.resolveOldNesting()
-
-    this.matchedPreflight = true
   }
 
   matchPostflight() {
-    if (this.matchedPostflight) { return; }
-
     this.matchPreflight()
 
     for (let step of this.steps) {
@@ -383,8 +377,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 //    # Remove steps when their oldElement is nested inside the oldElement
 //    # of another step.
     this.resolveOldNesting()
-
-    this.matchedPostflight = true
   }
 
   addHungrySteps() {
@@ -463,4 +455,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     const oldFragments = u.map(this.steps, 'oldElement')
     return u.some(oldFragments, oldFragment => up.fragment.hasAutoHistory(oldFragment))
   }
+
+  static {
+    u.memoizeMethod(this.prototype, [
+      'matchPreflight',
+      'matchPostflight',
+    ])
+  }
+
 }
+

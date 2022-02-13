@@ -26,10 +26,10 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     }
   }
 
-  bestPreflightSelector() {
-    // We assume that the server will respond with our target.
-    return this.target
-  }
+  // bestPreflightSelector() {
+  //   // We assume that the server will respond with our target.
+  //   return this.target
+  // }
 
   execute(responseDoc, onApplicable) {
     if (this.target === ':none') {

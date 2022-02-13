@@ -95,9 +95,6 @@ up.Request.XHRRenderer = class XHRRenderer {
   }
 
   finalizePayload() {
-    if (this.payloadFinalized) { return; }
-    this.payloadFinalized = true
-
     this.payload = this.request.payload
     this.contentType = this.request.contentType
 
@@ -124,5 +121,11 @@ up.Request.XHRRenderer = class XHRRenderer {
         this.payload = this.params.toQuery().replace(/%20/g, '+')
       }
     }
+  }
+
+  static {
+    u.memoizeMethod(this.prototype, [
+      'finalizePayload',
+    ])
   }
 }

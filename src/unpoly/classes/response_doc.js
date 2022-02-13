@@ -96,11 +96,7 @@ up.ResponseDoc = class ResponseDoc {
   getTitle() {
     // Cache since multiple plans will query this.
     // Use a flag so we can cache an empty result.
-    if (!this.titleParsed) {
-      this.title = this.root.querySelector("head title")?.textContent
-      this.titleParsed = true
-    }
-    return this.title
+    return this.root.querySelector("head title")?.textContent
   }
 
   select(selector) {
@@ -121,6 +117,10 @@ up.ResponseDoc = class ResponseDoc {
 
     // Restore <script> so they will run.
     this.scriptWrapper.unwrap(element)
+  }
+
+  static {
+    u.memoizeMethod(this.prototype, 'getTitle')
   }
 
 }

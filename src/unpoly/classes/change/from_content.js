@@ -36,24 +36,22 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   getPlans() {
-    if (!this.plans) {
-      this.plans = []
+    let plans = []
 
-      if (this.options.fragment) {
-        // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
-        // requires a { target }. We use a target that matches the parsed { fragment }.
-        this.options.target = this.getResponseDoc().rootSelector()
-      }
-
-      // First seek { target } in all layers, then seek { fallback } in all layers.
-      this.expandIntoPlans(this.layers, this.options.target)
-      this.expandIntoPlans(this.layers, this.options.fallback)
+    if (this.options.fragment) {
+      // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
+      // requires a { target }. We use a target that matches the parsed { fragment }.
+      this.options.target = this.getResponseDoc().rootSelector()
     }
 
-    return this.plans
+    // First seek { target } in all layers, then seek { fallback } in all layers.
+    this.expandIntoPlans(plans, this.layers, this.options.target)
+    this.expandIntoPlans(plans, this.layers, this.options.fallback)
+
+    return plans
   }
 
-  expandIntoPlans(layers, targets) {
+  expandIntoPlans(plans, layers, targets) {
     for (let layer of layers) {
       // An abstract selector like :main may expand into multiple
       // concrete selectors, like ['main', '.content'].
@@ -61,7 +59,7 @@ up.Change.FromContent = class FromContent extends up.Change {
         // Any plans we add will inherit all properties from @options
         const props = { ...this.options, target, layer, defaultPlacement: this.defaultPlacement() }
         const change = layer === 'new' ? new up.Change.OpenLayer(props) : new up.Change.UpdateLayer(props)
-        this.plans.push(change)
+        plans.push(change)
       }
     }
   }
@@ -94,29 +92,27 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   getResponseDoc() {
-    if (!this.preview && !this.responseDoc) {
-      const docOptions = u.pick(this.options, [
-        'target',
-        'content',
-        'fragment',
-        'document',
-        'html',
-        'cspNonces',
-        'origin',
-      ])
-      up.migrate.handleResponseDocOptions?.(docOptions)
+    if (this.preview) return
 
-      // If neither { document } nor { fragment } source is given, we assume { content }.
-      if (this.defaultPlacement() === 'content') {
-        // When processing { content }, ResponseDoc needs a { target }
-        // to create a matching element.
-        docOptions.target = this.firstExpandedTarget(docOptions.target)
-      }
+    const docOptions = u.pick(this.options, [
+      'target',
+      'content',
+      'fragment',
+      'document',
+      'html',
+      'cspNonces',
+      'origin',
+    ])
+    up.migrate.handleResponseDocOptions?.(docOptions)
 
-      this.responseDoc = new up.ResponseDoc(docOptions)
+    // If neither { document } nor { fragment } source is given, we assume { content }.
+    if (this.defaultPlacement() === 'content') {
+      // When processing { content }, ResponseDoc needs a { target }
+      // to create a matching element.
+      docOptions.target = this.firstExpandedTarget(docOptions.target)
     }
 
-    return this.responseDoc
+    return new up.ResponseDoc(docOptions)
   }
 
   defaultPlacement() {
@@ -171,6 +167,13 @@ up.Change.FromContent = class FromContent extends up.Change {
         }
       }
     }
+  }
+
+  static {
+    u.memoizeMethod(this.prototype, [
+      'getPlans',
+      'getResponseDoc',
+    ])
   }
 
 }

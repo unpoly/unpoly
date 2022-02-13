@@ -2039,7 +2039,34 @@ up.util = (function() {
     }
   }
 
+  function useMemoizeCacheEntry(cacheEntry) {
+    if (cacheEntry.error) {
+      throw cacheEntry.error
+    } else {
+      return cacheEntry.value
+    }
+  }
 
+  function buildMemoizeCacheEntry(oldImpl, self, args) {
+    try {
+      return { value: oldImpl.apply(self, args) }
+    } catch (e) {
+      return { error: e }
+    }
+  }
+
+  function memoizeMethod(object, propOrProps) {
+    for (let prop of wrapList(propOrProps)) {
+      // let originalDescriptor = object.getOwnPropertyDescriptor(object)
+      let oldImpl = object[prop]
+      object[prop] = function (...args) {
+        let cache = this[`__${prop}MemoizeCache`] ||= {}
+        let cacheKey = JSON.stringify(args)
+        cache[cacheKey] ||= buildMemoizeCacheEntry(oldImpl, this, args)
+        return useMemoizeCacheEntry(cache[cacheKey])
+      }
+    }
+  }
 
   return {
     parseURL,
@@ -2152,6 +2179,7 @@ up.util = (function() {
     renameKeys,
     allSettled,
     negate,
+    memoizeMethod
     // groupBy,
   }
 })();

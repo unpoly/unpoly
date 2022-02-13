@@ -1763,6 +1763,89 @@ describe 'up.util', ->
           expect(error).toEqual('an error')
           done()
 
+    describe 'up.util.memoizeMethod()', ->
+
+      it "caches a function property's return value", ->
+        spy = jasmine.createSpy('method').and.returnValue('return value')
+
+        obj = { foo: spy }
+        up.util.memoizeMethod(obj, 'foo')
+
+        expect(obj.foo()).toBe('return value')
+        expect(obj.foo()).toBe('return value')
+
+        expect(spy.calls.count()).toBe(1)
+
+      it 'does not share its cache between multiple instances', ->
+        class Person
+          constructor: (@firstName, @lastName) ->
+          getFullName: ->
+            return @firstName + ' ' + @lastName
+
+        up.util.memoizeMethod(Person.prototype, 'getFullName')
+
+        alice = new Person('Alice', 'Anderson')
+        bob = new Person('Bob', 'Bertison')
+
+        expect(alice.getFullName()).toBe('Alice Anderson')
+        expect(bob.getFullName()).toBe('Bob Bertison')
+
+      it 'forwards arguments and this context', ->
+        spy = jasmine.createSpy('spy')
+
+        obj = { foo: (arg) -> spy(this, arg) }
+        up.util.memoizeMethod(obj, 'foo')
+
+        obj.foo('given arg')
+
+        expect(spy.calls.count()).toBe(1)
+        expect(spy.calls.argsFor(0)).toEqual [obj, 'given arg']
+
+      it "caches a function property's thrown error", ->
+        spy = jasmine.createSpy('method').and.throwError(new Error('error message'))
+
+        obj = { foo: spy }
+        up.util.memoizeMethod(obj, 'foo')
+
+        expect(-> obj.foo()).toThrowError(/error message/)
+        expect(-> obj.foo()).toThrowError(/error message/)
+
+        expect(spy.calls.count()).toBe(1)
+
+      it 'caches separately for separate arguments', ->
+        spy = jasmine.createSpy('spy')
+
+        obj =
+          foo: (arg) ->
+            spy(arg)
+            return arg * 2
+
+        up.util.memoizeMethod(obj, 'foo')
+
+        expect(obj.foo(3)).toBe(6)
+        expect(obj.foo(3)).toBe(6)
+        expect(spy.calls.count()).toBe(1)
+
+        expect(obj.foo(5)).toBe(10)
+        expect(spy.calls.count()).toBe(2)
+
+      it 'caches multiple method names', ->
+        fooSpy = jasmine.createSpy('foo method').and.returnValue('foo return value')
+        barSpy = jasmine.createSpy('bar method').and.returnValue('bar return value')
+
+        obj =
+          foo: fooSpy
+          bar: barSpy
+        up.util.memoizeMethod(obj, ['foo', 'bar'])
+
+        expect(obj.foo()).toBe('foo return value')
+        expect(obj.foo()).toBe('foo return value')
+        expect(fooSpy.calls.count()).toBe(1)
+
+        expect(obj.bar()).toBe('bar return value')
+        expect(obj.bar()).toBe('bar return value')
+        expect(barSpy.calls.count()).toBe(1)
+
     describe 'up.util.evalOption()', ->
 
       it 'returns the given primitive value', ->
