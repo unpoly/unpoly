@@ -72,6 +72,9 @@ require('./unpoly/classes/store/session')
 require('./unpoly/classes/tether')
 require('./unpoly/classes/url_pattern')
 
+require('./unpoly/classes/test_class')
+require('./unpoly/classes/test_class2')
+
 require('./unpoly/framework')
 require('./unpoly/event')
 require('./unpoly/protocol')

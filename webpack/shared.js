@@ -51,7 +51,8 @@ function scriptPipeline({ es, lint = true }) {
         checkJs: true,
         // importHelpers: true,
         // module: "ES2020",
-        target: es
+        target: es,
+        experimentalDecorators: true,
       }
 
     }
@@ -75,7 +76,7 @@ function scriptPipeline({ es, lint = true }) {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(js|ts)$/,
           exclude: /node_modules/,
           use: [tsLoader]
         },
@@ -97,7 +98,7 @@ function scriptPipeline({ es, lint = true }) {
       ]
     },
     resolve: {
-      extensions: ['.js', '.coffee', '.js.erb', '.coffee.erb']
+      extensions: ['.js', '.ts', '.coffee', '.js.erb', '.coffee.erb']
     },
     target: ['web', es]
   }
