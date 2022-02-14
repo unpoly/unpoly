@@ -300,6 +300,35 @@ up.Request = class Request extends up.Record {
     }
   }
 
+  // Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
+  //
+  // @property up.Request#targetElements
+  // @param List<Element> targetElements
+  // @experimental
+  get targetElements() {
+    // This property is required for `up.fragment.abort()` to select requests within
+    // the subtree that we're cancling.
+    //
+    // We allow users to pass in pre-matched `{ targetElements }` in the constructor.
+    // We use this in `up.Change.FromURL` since we already know the element's we're trying
+    // to replace.
+    //
+    // If we haven't received a `{ targetElements }` property but did we receive a `{ target }`,
+    // we find matching elements here.
+    if (!this._targetElements && this.target) {
+      let steps = up.fragment.parseTargetSteps(this.target)
+      let selectors = u.map(steps, 'selector')
+      let lookupOpts = { origin: this.origin, layer: this.layer }
+      this._targetElements = u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
+    }
+
+    return this._targetElements
+  }
+
+  set targetElements(value) {
+    this._targetElements = value
+  }
+
   followState(sourceRequest) {
     u.delegate(this, ['deferred', 'state', 'preload'], () => sourceRequest)
   }

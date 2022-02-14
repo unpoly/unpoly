@@ -8,9 +8,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     super(options)
     this.layer = options.layer
     this.target = options.target
-    this.defaultPlacement = options.defaultPlacement || 'swap'
     this.context = options.context
-    this.parseSteps()
+    // up.fragment.expandTargets() was already called by up.Change.FromContent
+    this.steps = up.fragment.parseTargetSteps(this.target, this.options)
   }
 
   preflightProps() {
@@ -316,29 +316,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     step.keepPlans = keepPlans
-  }
-
-  parseSteps() {
-    this.steps = []
-
-    // up.fragment.expandTargets() was already called by up.Change.FromContent
-    for (let simpleTarget of u.splitValues(this.target, ',')) {
-      if (simpleTarget !== ':none') {
-        const expressionParts = simpleTarget.match(/^(.+?)(?::(before|after))?$/)
-        if (!expressionParts) {
-          throw up.error.invalidSelector(simpleTarget)
-        }
-
-        // Each step inherits all options of this change.
-        const step = {
-          ...this.options,
-          selector: expressionParts[1],
-          placement: expressionParts[2] || this.defaultPlacement
-        }
-
-        this.steps.push(step)
-      }
-    }
   }
 
   matchPreflight() {

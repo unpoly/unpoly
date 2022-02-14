@@ -1748,6 +1748,32 @@ up.fragment = (function() {
     return new up.Selector(expandedTargets, filters)
   }
 
+  function parseTargetSteps(target, options = {}) {
+    let defaultPlacement = options.defaultPlacement || 'swap'
+
+    let steps = []
+
+    for (let simpleTarget of u.splitValues(target, ',')) {
+      if (simpleTarget !== ':none') {
+        const expressionParts = simpleTarget.match(/^(.+?)(?::(before|after))?$/)
+        if (!expressionParts) {
+          throw up.error.invalidSelector(simpleTarget)
+        }
+
+        // Each step inherits all options of this change.
+        const step = {
+          ...options,
+          selector: expressionParts[1],
+          placement: expressionParts[2] || defaultPlacement
+        }
+
+        steps.push(step)
+      }
+    }
+
+    return steps
+  }
+
   function hasAutoHistory(fragment) {
     if (contains(fragment, config.autoHistoryTargets)) {
       return true
@@ -2086,6 +2112,7 @@ up.fragment = (function() {
     shouldVerifyCache,
     abort,
     onAborted,
+    parseTargetSteps,
     // timer: scheduleTimer
   }
 })()
