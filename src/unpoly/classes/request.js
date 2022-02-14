@@ -283,8 +283,18 @@ up.Request = class Request extends up.Record {
     this.normalizeForCaching()
 
     if (!options.basic) {
-      this.layer = up.layer.get(this.layer); // If @layer and @origin is undefined, this will choose the current layer.
-      this.failLayer = up.layer.get(this.failLayer || this.layer)
+      const layerLookupOptions = { origin: this.origin }
+      // Calling up.layer.get() will give us:
+      //
+      // (1) Resolution of strings like 'current' to an up.Layer instance
+      // (2) Default of origin's layer
+      // (3) Default of up.layer.current
+      //
+      // up.layer.get('new') will return 'new' unchanged, but I'm not sure
+      // if any code actually calls up.request({ ..., layer: 'new' }).
+      // In up.Change.OpenLayer we connect requests to the base layer we're stacking upon.
+      this.layer = up.layer.get(this.layer, layerLookupOptions)
+      this.failLayer = up.layer.get(this.failLayer || this.layer, layerLookupOptions)
       this.context ||= this.layer.context || {} // @layer might be "new", so we default to {}
       this.failContext ||= this.failLayer.context || {} // @failLayer might be "new", so we default to {}
       this.mode ||= this.layer.mode
