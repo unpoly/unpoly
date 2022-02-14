@@ -95,6 +95,22 @@ describe 'up.Request', ->
       request = new up.Request(url: 'http://host.com/foo', params: { key: 'value' }, method: 'get')
       expect(request.params).toBeBlank()
 
+  describe '#targetElements', ->
+
+    it 'returns the elements passes to constructor', ->
+      request = new up.Request(url: '/path', targetElements: [document.body])
+      expect(request.targetElements).toEqual [document.body]
+
+    it 'matches the { target } if no elements were passed to the constructor', ->
+      element = fixture('.element')
+      otherElement = fixture('.other-element')
+      request = new up.Request(url: '/path', target: '.element, .other-element')
+      expect(request.targetElements).toEqual [element, otherElement]
+
+    it 'returns undefined if neither { target, targetElements } were passed to the constructor', ->
+      request = new up.Request(url: '/path')
+      expect(request.targetElements).toBeUndefined()
+
   describe '#abort', ->
 
     it 'aborts this request', asyncSpec (next) ->

@@ -20,6 +20,11 @@ Concurrency
   - Fix docs
 - Consider renaming up.Request#targetElements to just #elements or #fragments
   - However, if we ever wanted to expose this property in up:link:follow (to get a preview of what's being replaced), #elements would be too generic a name
+    - event.elements
+    - event.fragments
+    - event.targetElements
+    - event.solutions
+- When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - Can we get rid of excerpt argument now that most aborting happens within up.fragment?
 - Introduce new function up.fragment.abort(fragment)
 - Rename up.render({ solo }) to up.render({ abort })
