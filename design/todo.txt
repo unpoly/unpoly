@@ -4,13 +4,6 @@ TODOs for next release
 Concurrency
 -----------
 
-- Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
-  - Presence form does not in the docs
-- Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
-  - At least key dimissalm outside does not
-- For overlays with a backdrop, don't listen to click on parent.element
-  - This fixes cases where other overlay libs append elements to document.body
-  - For modes without a backdrop (popup), people can prevent up:overlay:dismiss if they don't like the { origin }
 - Abort validate observers when requests targeting the form are aborted through { solo }
   - We introduced a regression
     - Dirty field with [up-validate], waiting for 1 task
@@ -70,6 +63,14 @@ Concurrency
 Various changes
 ---------------
 
+- Document that up:click can be prevented to prevent Unpoly from following links
+- Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
+  - Presence form does not in the docs
+- Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
+  - At least key dimissalm outside does not
+- For overlays with a backdrop, don't listen to click on parent.element
+  - This fixes cases where other overlay libs append elements to document.body
+  - For modes without a backdrop (popup), people can prevent up:overlay:dismiss if they don't like the { origin }
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
