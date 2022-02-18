@@ -8,6 +8,14 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.5.1
+-----
+
+This patch release contains a single fix:
+
+- Fix a bug where the value was lost when clicking on a descendant element of an `a[up-accept]` or `a[up-dismiss]`.
+
+
 2.5.0
 -----
 
