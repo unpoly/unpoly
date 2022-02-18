@@ -747,10 +747,13 @@ up.link = (function() {
   })
   ```
 
-  ### Cancelation is forwarded
+  ### Cancelation
 
-  If the user cancels an `up:click` event using `event.preventDefault()`,
-  the underlying `click` or `mousedown` event will also be canceled.
+  You may cancel an `up:click` event using `event.preventDefault()`.
+
+  Canceling `up:click` on a hyperlink will prevent any Unpoly from [following](/a-up-follow) that link.
+
+  The underlying `click` or `mousedown` event will also be canceled.
 
   ### Accessibility
 
@@ -769,6 +772,8 @@ up.link = (function() {
     The clicked element.
   @param {Event} event.originalEvent
     The underlying `click` or `mousedown` event.
+  @param event.preventDefault()
+    Prevents this event and also the original `click` or `mousedown` event.
   @stable
   */
 
@@ -825,6 +830,14 @@ up.link = (function() {
   You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
 
   See [Handling all links and forms](/handling-everything).
+
+  ### Preventing Unpoly from following links
+
+  To prevent Unpoly from following an `a[up-follow]` link, use one of the following options:
+
+  - Prevent the `up:link:follow` event on the link element
+  - Prevent the `up:click` event on the link element
+  - Set an `[up-follow=false]` attribute on the link element
 
   @selector a[up-follow]
 
