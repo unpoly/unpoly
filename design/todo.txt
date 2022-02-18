@@ -4,6 +4,7 @@ TODOs for next release
 Concurrency
 -----------
 
+- Unpoly Rails must have up.validate_names instead of up.validate_name
 - Abort validate observers when requests targeting the form are aborted through { solo }
   - We introduced a regression
     - Dirty field with [up-validate], waiting for 1 task
@@ -63,7 +64,7 @@ Concurrency
 Various changes
 ---------------
 
-- Document that up:click can be prevented to prevent Unpoly from following links
+- Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
   - Presence form does not in the docs
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
