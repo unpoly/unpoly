@@ -886,7 +886,7 @@ up.element = (function() {
   If the element does not have the given attribute, it returns `undefined`.
   This is a difference to the native `Element#getAttribute()`, which [mostly returns `null` in that case](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute#Non-existing_attributes).
 
-  If the element has the attribute but without value (e.g. '<input readonly>'>), it returns an empty string.
+  If the element has the attribute but without value (e.g. `<input readonly>`), it returns an empty string.
 
   @function up.element.attr
   @stable
