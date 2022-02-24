@@ -64,6 +64,12 @@ Concurrency
 Various changes
 ---------------
 
+- Allow to mark a target component as soft
+- unpoly-rails könnte unparsebares JSON verwerfen: https://zammad.makandra.de/#ticket/zoom/76579
+- Custom Fail Conditions für Devise u.ä.?
+  - Oder in :loaded Event fail anschalten?
+- Test that setting autoCache = false for a route also prevents an a[up-preload]
+  - up.Request sets cache = true if preload is set!
 - Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
   - Presence form does not in the docs
