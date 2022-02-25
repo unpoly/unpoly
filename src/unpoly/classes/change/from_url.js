@@ -14,12 +14,6 @@ up.Change.FromURL = class FromURL extends up.Change {
     // Since up.layer.getAll() already normalizes layer options,
     // we don't need to normalize again in up.Change.FromContent.
     this.options.normalizeLayerOptions = false
-
-    // We keep all failKeys in our successOptions, nothing will use them.
-    this.successOptions = this.options
-
-    // deriveFailOptions() will merge shared keys and (unsuffixed) failKeys.
-    this.failOptions = up.RenderOptions.deriveFailOptions(this.successOptions)
   }
 
   execute() {
@@ -43,6 +37,11 @@ up.Change.FromURL = class FromURL extends up.Change {
     return u.always(promise, responseOrError => this.onRequestSettled(responseOrError))
   }
 
+  deriveFailOptions() {
+    // This will merge shared keys and unprefix failKeys.
+    return up.RenderOptions.deriveFailOptions(this.options)
+  }
+
   newPageReason() {
     // Rendering content from cross-origin URLs is out of scope for Unpoly.
     // We still allow users to call up.render() with a cross-origin URL, but
@@ -61,12 +60,12 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   makeRequest() {
-    const successAttrs = this.preflightPropsForRenderOptions(this.successOptions)
-    const failAttrs = this.preflightPropsForRenderOptions(this.failOptions, { optional: true })
+    const successAttrs = this.preflightPropsForRenderOptions(this.options)
+    const failAttrs = this.preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
     const requestAttrs = u.merge(
-      this.successOptions, // contains preflight keys relevant for the request, e.g. { url, method, solo }
-      successAttrs,    // contains meta information for an successful update, e.g. { layer, mode, context, target }
+      this.options, // contains preflight keys relevant for the request, e.g. { url, method, solo }
+      successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
       u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
     )
 
@@ -90,54 +89,50 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   onRequestSettled(response) {
-    this.response = response
-    if (!(response instanceof up.Response)) {
+    if (response instanceof up.Response) {
+      this.response = response
+
+      // Allow listeners to inspect the response and either prevent the fragment change
+      // or manipulate change options. An example for when this is useful is a maintenance
+      // page with its own layout, that cannot be loaded as a fragment and must be loaded
+      // with a full page load.
+      this.request.assertEmitted('up:fragment:loaded', {
+        callback: this.options.onLoaded,
+        response: this.response,
+        renderOptions: this.options,
+        log: ['Loaded fragment from response to %s (HTTP %d)', this.request.description, this.response.status]
+      })
+
+      if (this.isSuccessfulResponse()) {
+        return this.updateContentFromResponse(this.options)
+      } else {
+        throw this.updateContentFromResponse(this.deriveFailOptions())
+      }
+    } else {
       // value is up.error.aborted() or another fatal error that can never
       // be used as a fragment update. At this point up:request:aborted or up:request:fatal
       // have already been emitted by up.Request.
       throw response
-    } else if (this.isSuccessfulResponse()) {
-      return this.updateContentFromResponse(['Loaded fragment from successful response to %s', this.request.description], this.successOptions)
-    } else {
-      const log = ['Loaded fragment from failed response to %s (HTTP %d)', this.request.description, this.response.status]
-      // Although updateContentFromResponse() will fulfill with a successful replacement of options.failTarget,
-      // we still want to reject the promise that's returned to our API client. Hence we throw.
-      throw this.updateContentFromResponse(log, this.failOptions)
     }
+  }
+
+  updateContentFromResponse(finalRenderOptions) {
+    // The response might carry some updates for our change options,
+    // like a server-set location, or server-sent events.
+    this.augmentOptionsFromResponse(finalRenderOptions)
+
+    if (up.fragment.shouldVerifyCache(this.request, this.response, finalRenderOptions)) {
+      // Copy the given options, as we're going to override the { onFinished } prop.
+      let originalRenderOptions = u.copy(finalRenderOptions)
+      finalRenderOptions.onFinished = (renderResult) => this.verifyCache(renderResult, originalRenderOptions)
+    }
+
+    return new up.Change.FromContent(finalRenderOptions).execute()
   }
 
   isSuccessfulResponse() {
-    return (this.successOptions.fail === false) || this.response.ok || this.response.status === 304
-  }
-
-  // buildEvent(type, props) {
-  //   const defaultProps = { request: this.request, response: this.response, renderOptions: this.options }
-  //   return up.event.build(type, u.merge(defaultProps, props))
-  // }
-
-  updateContentFromResponse(log, renderOptions) {
-    // Allow listeners to inspect the response and either prevent the fragment change
-    // or manipulate change options. An example for when this is useful is a maintenance
-    // page with its own layout, that cannot be loaded as a fragment and must be loaded
-    // with a full page load.
-    this.request.assertEmitted('up:fragment:loaded', {
-      callback: this.options.onLoaded,
-      response: this.response,
-      log,
-      renderOptions,
-    })
-
-    // The response might carry some updates for our change options,
-    // like a server-set location, or server-sent events.
-    this.augmentOptionsFromResponse(renderOptions)
-
-    if (up.fragment.shouldVerifyCache(this.request, this.response, renderOptions)) {
-      // Copy the given options, as we're going to override the { onFinished } prop.
-      let originalRenderOptions = u.copy(renderOptions)
-      renderOptions.onFinished = (renderResult) => this.verifyCache(renderResult, originalRenderOptions)
-    }
-
-    return new up.Change.FromContent(renderOptions).execute()
+    let autoFail = () => !this.response.ok && this.response.status !== 304
+    return !u.evalAutoOption(this.options.fail, autoFail, this.response)
   }
 
   async verifyCache(renderResult, originalRenderOptions) {

@@ -1,6 +1,13 @@
 TODOs for next release
 ======================
 
+fail setter
+-----------
+
+- Document that { fail } can be a function, true, false or default 'auto'
+- Consider moving { fail } to up.request property
+
+
 Concurrency
 -----------
 

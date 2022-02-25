@@ -603,6 +603,95 @@ describe 'up.fragment', ->
                     expect(result.state).toEqual('rejected')
                     done()
 
+          describe 'with { fail } option', ->
+
+            it 'always uses success options with { fail: false }', asyncSpec (next) ->
+              fixture('.success-target', text: 'old success text')
+              fixture('.failure-target', text: 'old failure text')
+
+              up.render(
+                target: '.success-target',
+                failTarget: '.failure-target',
+                url: '/path',
+                status: 200,
+                fail: true
+              )
+
+              next ->
+                jasmine.respondWith """
+                  <div class="success-target">new success text</div>
+                  <div class="failure-target">new failure text</div>
+                  """
+
+              next ->
+                expect('.success-target').toHaveText('old success text')
+                expect('.failure-target').toHaveText('new failure text')
+            it 'always uses failure options with { fail: true }', asyncSpec (next) ->
+              fixture('.success-target', text: 'old success text')
+              fixture('.failure-target', text: 'old failure text')
+
+              up.render(
+                target: '.success-target',
+                failTarget: '.failure-target',
+                url: '/path',
+                status: 200,
+                fail: true
+              )
+
+              next ->
+                jasmine.respondWith """
+                  <div class="success-target">new success text</div>
+                  <div class="failure-target">new failure text</div>
+                  """
+
+              next ->
+                expect('.success-target').toHaveText('old success text')
+                expect('.failure-target').toHaveText('new failure text')
+
+            it 'accepts a function as { fail } option', asyncSpec (next) ->
+              failFn = jasmine.createSpy('fail function').and.returnValue(false)
+
+              fixture('.success-target', text: 'old success text')
+              fixture('.failure-target', text: 'old failure text')
+
+              up.render(
+                target: '.success-target',
+                failTarget: '.failure-target',
+                url: '/path',
+                status: 500,
+                fail: failFn
+              )
+
+              next ->
+                jasmine.respondWith """
+                  <div class="success-target">new success text</div>
+                  <div class="failure-target">old failure text</div>
+                  """
+
+              next ->
+                expect(failFn).toHaveBeenCalled
+
+                expect('.success-target').toHaveText('new success text')
+                expect('.failure-target').toHaveText('old failure text')
+
+            it 'lets up:fragment:loaded listeners force a failure response by setting event.renderOptions.fail = true', asyncSpec (next) ->
+              fixture('.success-target', text: 'old success text')
+              fixture('.failure-target', text: 'old failure text')
+
+              up.on('up:fragment:loaded', (e) -> e.renderOptions.fail = true)
+
+              up.render(target: '.success-target', failTarget: '.failure-target', url: '/path')
+
+              next ->
+                jasmine.respondWith """
+                  <div class="success-target">new success text</div>
+                  <div class="failure-target">new failure text</div>
+                  """
+
+              next ->
+                expect('.success-target').toHaveText('old success text')
+                expect('.failure-target').toHaveText('new failure text')
+
         describe 'when the request times out', ->
 
           it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
@@ -639,7 +728,7 @@ describe 'up.fragment', ->
                     expect(result.state).toEqual('rejected')
                     done()
 
-        describe 'interrupting the change', ->
+        describe 'up:fragment:loaded event', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->
             origin = fixture('.origin')
@@ -705,12 +794,12 @@ describe 'up.fragment', ->
             fixture('.two', text: 'old two')
             fixture('.three', text: 'old three')
 
-            up.on('up:fragment:loaded', (e) -> e.renderOptions.target = '.three')
+            up.on('up:fragment:loaded', (e) -> e.renderOptions.failTarget = '.three')
 
-            changePromise = up.render(target: '.one', failTarget: '.two', url: '/url')
+            up.render(target: '.one', failTarget: '.two', url: '/url')
 
-            next =>
-              @respondWith
+            next ->
+              jasmine.respondWith
                 status: 500
                 responseText: """
                   <div class="one">new one</div>
@@ -722,6 +811,7 @@ describe 'up.fragment', ->
               expect('.one').toHaveText('old one')
               expect('.two').toHaveText('old two')
               expect('.three').toHaveText('new three')
+
 
         describe 'when the server sends an X-Up-Events header', ->
 
@@ -3945,7 +4035,7 @@ describe 'up.fragment', ->
 
             next ->
               expect(up.layer.front).toBeFocused()
-              
+
 
         describe 'with { focus: "target-if-main" }', ->
 
@@ -3974,7 +4064,7 @@ describe 'up.fragment', ->
 
             next =>
               expect('.foo-bar').not.toBeFocused()
-              
+
         describe 'with { focus: "target-if-lost" }', ->
 
           it 'focuses the target if the focus was lost with the old fragment', asyncSpec (next) ->
@@ -4008,7 +4098,7 @@ describe 'up.fragment', ->
 
             next ->
               expect('.outside').toBeFocused()
-              
+
         describe 'with an array of { focus } options', ->
 
           it 'tries each option until one succeeds', asyncSpec (next) ->
@@ -4386,7 +4476,7 @@ describe 'up.fragment', ->
             expect('.element').toHaveText('text from /path2')
             expect(change1Error).toBeUndefined()
             expect(up.network.queue.allRequests.length).toEqual(1)
-            
+
       describe 'with { solo: Function } option zzz', ->
 
         it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
@@ -5609,30 +5699,30 @@ describe 'up.fragment', ->
           expect(layerSpy.calls.argsFor(0)[0]).toBe up.layer.current
 
     describe 'up.fragment.toTarget', ->
-  
+
       it "prefers using the element's 'up-id' attribute to using the element's ID", ->
         element = fixture('div[up-id=up-id-value]#id-value')
         expect(up.fragment.toTarget(element)).toBe('[up-id="up-id-value"]')
-  
+
       it "prefers using the element's ID to using the element's name", ->
         element = fixture('div#id-value[name=name-value]')
         expect(up.fragment.toTarget(element)).toBe("#id-value")
-  
+
       it "selects the ID with an attribute selector if the ID contains a slash", ->
         element = fixture('div')
         element.setAttribute('id', 'foo/bar')
         expect(up.fragment.toTarget(element)).toBe('[id="foo/bar"]')
-  
+
       it "selects the ID with an attribute selector if the ID contains a space", ->
         element = fixture('div')
         element.setAttribute('id', 'foo bar')
         expect(up.fragment.toTarget(element)).toBe('[id="foo bar"]')
-  
+
       it "selects the ID with an attribute selector if the ID contains a dot", ->
         element = fixture('div')
         element.setAttribute('id', 'foo.bar')
         expect(up.fragment.toTarget(element)).toBe('[id="foo.bar"]')
-  
+
       it "selects the ID with an attribute selector if the ID contains a quote", ->
         element = fixture('div')
         element.setAttribute('id', 'foo"bar')
@@ -5641,7 +5731,7 @@ describe 'up.fragment', ->
       it "prefers using the element's class to using the element's tag name", ->
         element = fixture('div.class')
         expect(up.fragment.toTarget(element)).toBe(".class")
-  
+
       it 'does not use Unpoly classes to compose a class selector', ->
         element = fixture('div.up-current.class')
         expect(up.fragment.toTarget(element)).toBe(".class")
@@ -5677,7 +5767,7 @@ describe 'up.fragment', ->
       it "uses the element's tag name if no better description is available", ->
         element = fixture('div')
         expect(up.fragment.toTarget(element)).toBe("div")
-  
+
       it 'escapes quotes in attribute selector values', ->
         element = fixture('input')
         element.setAttribute('name', 'foo"bar')
