@@ -8,7 +8,6 @@ describe 'up.RenderOptions', ->
       expect(options.hungry).toBe(true)
       expect(options.keep).toBe(true)
       expect(options.source).toBe(true)
-      expect(options.fail).toBe('auto')
 
     describe 'with { navigate: true }', ->
 
@@ -108,14 +107,14 @@ describe 'up.RenderOptions', ->
         expect(warnSpy).not.toHaveBeenCalled()
 
   describe '.deriveFailOptions()', ->
-    
+
     # In the code flow in up.fragment, options are first preprocessed and then
     # failOptions are derived. Mimic this behavior here.
     preprocessAndDerive = (options) ->
       options = up.RenderOptions.preprocess(options)
       options = up.RenderOptions.deriveFailOptions(options)
       options
-    
+
     it 'sets global defaults', ->
       givenOptions = {}
       options = preprocessAndDerive(givenOptions)
@@ -123,8 +122,7 @@ describe 'up.RenderOptions', ->
       expect(options.hungry).toBe(true)
       expect(options.keep).toBe(true)
       expect(options.source).toBe(true)
-      expect(options.fail).toBe('auto')
-      
+
     describe 'with { navigate: true }', ->
 
       it 'sets defaults appropriate for user navigation', ->

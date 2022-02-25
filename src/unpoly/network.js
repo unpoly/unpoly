@@ -175,7 +175,7 @@ up.network = (function() {
     badResponseTime: 400,
     autoCache(request) { return request.isSafe(); },
     clearCache(request, _response) { return !request.isSafe(); },
-    fail(response) {  },
+    fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true
   }))

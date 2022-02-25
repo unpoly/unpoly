@@ -248,7 +248,8 @@ up.Request = class Request extends up.Record {
       'wrapMethod',
       'contentType',
       'payload',
-      'onQueued'
+      'onQueued',
+      'fail',
     ]
   }
 
@@ -558,6 +559,7 @@ up.Request = class Request extends up.Record {
       eventPlans: up.protocol.eventPlansFromXHR(this.xhr),
       context: up.protocol.contextFromXHR(this.xhr),
       clearCache: up.protocol.clearCacheFromXHR(this.xhr),
+      fail: this.fail,
     }
 
     let methodFromResponse = up.protocol.methodFromXHR(this.xhr)

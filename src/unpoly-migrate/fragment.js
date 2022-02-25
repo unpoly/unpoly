@@ -156,6 +156,11 @@ up.migrate.preprocessRenderOptions = function(options) {
       options[prop] = up.element.get(options[prop])
     }
   }
+
+  if (options.fail === 'auto') {
+    up.migrate.warn("The option { fail: 'auto' } is deprecated. Omit the option instead.")
+    delete options.fail
+  }
 }
 
 up.migrate.postprocessReloadOptions = function(options) {

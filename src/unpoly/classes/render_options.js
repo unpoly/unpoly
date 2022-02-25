@@ -7,7 +7,6 @@ up.RenderOptions = (function() {
     keep: true,
     source: true,
     saveScroll: true,
-    fail: 'auto',
     solo: 'subtree',
     verifyCache: 'auto',
   }

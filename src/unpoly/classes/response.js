@@ -120,7 +120,8 @@ up.Response = class Response extends up.Record {
       'context',
       'clearCache',
       'headers', // custom headers to for synthetic reponses without { xhr } property
-      'time'
+      'time',
+      'fail',
     ]
   }
 
@@ -139,10 +140,9 @@ up.Response = class Response extends up.Record {
   @stable
   */
   get ok() {
-    // 0 is falsy in JavaScript
-    return this.status && ((this.status >= 200) && (this.status <= 299))
+    return !u.evalOption(this.fail ?? up.network.config.fail, this)
   }
-  
+
   /*-
   Returns the HTTP header value with the given name.
 

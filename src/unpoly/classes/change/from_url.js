@@ -103,7 +103,11 @@ up.Change.FromURL = class FromURL extends up.Change {
         log: ['Loaded fragment from response to %s (HTTP %d)', this.request.description, this.response.status]
       })
 
-      if (this.isSuccessfulResponse()) {
+      // Listeners to up:fragment:loaded may have changed renderOptions.fail
+      // to force success or failure options.
+      response.fail = this.options.fail
+
+      if (response.ok) {
         return this.updateContentFromResponse(this.options)
       } else {
         throw this.updateContentFromResponse(this.deriveFailOptions())
@@ -128,11 +132,6 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
 
     return new up.Change.FromContent(finalRenderOptions).execute()
-  }
-
-  isSuccessfulResponse() {
-    let autoFail = () => !this.response.ok && this.response.status !== 304
-    return !u.evalAutoOption(this.options.fail, autoFail, this.response)
   }
 
   async verifyCache(renderResult, originalRenderOptions) {
