@@ -930,11 +930,12 @@ up.link = (function() {
     If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
     consider the `[up-content]` attribute.
 
-  @param [up-fail='auto']
-    How to render a server response with an error code.
+  @param [up-fail]
+    Whether the server response should be considered failed.
 
-    Any HTTP status code other than 2xx is considered an error code.
+    By default any HTTP status code other than 2xx or 304 is considered an error code.
 
+    For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. `[up-fail-target]`.
     See [handling server errors](/server-errors) for details.
 
   @param [up-history='auto']

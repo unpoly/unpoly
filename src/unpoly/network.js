@@ -89,6 +89,19 @@ up.network = (function() {
 
     The value is given in milliseconds.
 
+  @param {boolean|Function(up.Response): boolean} [config.fail]
+    Whether Unpoly will consider a response to constitute a [server error](/server-errors).
+
+    By default Unpoly will consider any status code other than HTTP 2xx or 304 to represent a failed response.
+    You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
+
+    The following configuration will fail all responses with an `X-Unauthorized` header.
+
+    ```js
+    let badStatus = up.network.config.fail
+    up.network.config.fail = (response) => badStatus(response) || response.getHeader('X-Unauthorized')
+    ```
+
   @param {Function(up.Request): boolean} [config.autoCache]
     Whether to cache the given request with `{ cache: 'auto' }`.
 
@@ -173,9 +186,9 @@ up.network = (function() {
     badDownlink: 0.6,
     badRTT: 750,
     badResponseTime: 400,
+    fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     autoCache(request) { return request.isSafe(); },
     clearCache(request, _response) { return !request.isSafe(); },
-    fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true
   }))

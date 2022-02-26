@@ -1,7 +1,7 @@
 /*-
 Forms
 =====
-  
+
 The `up.form` module helps you work with non-trivial forms.
 
 @see form[up-submit]
@@ -990,34 +990,32 @@ up.form = (function() {
 
   ### Handling validation errors
 
-  When the server was unable to save the form due to invalid params,
-  it will usually re-render an updated copy of the form with
-  validation messages.
+  When a server-side web application was unable to save the form due to invalid params,
+  it will usually re-render the form with validation errors.
 
-  For Unpoly to be able to detect a failed form submission,
-  the form must be re-rendered with a non-200 HTTP status code.
-  We recommend to use either 400 (bad request) or
-  422 (unprocessable entity).
-
-  In Ruby on Rails, you can pass a
-  [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option)
-  for this:
+  For Unpoly to be able to detect a failed form submission, the form must be re-rendered with a non-200 HTTP status code.
+  We recommend to use either 400 (bad request) or 422 (unprocessable entity). In a Ruby on Rails app
+  this would look like this:
 
   ```ruby
   class UsersController < ApplicationController
 
     def create
-      user_params = params[:user].permit(:email, :password)
+      user_params = params.require(:user).permit(:email, :password)
       @user = User.new(user_params)
       if @user.save?
         sign_in @user
       else
+        # Signal a failed form submission with an HTTP 400 status
         render 'form', status: :bad_request
       end
     end
 
   end
   ```
+
+  If your server-side code cannot communicate status codes like that,
+  you may [customize Unpoly's failure detection](/up.network.config#config.fail).
 
   You may define different option for the failure case by infixing an attribute with `fail`:
 
@@ -1423,10 +1421,10 @@ up.form = (function() {
   ```html
   <input name="query" up-observe="showSuggestions(value)">
   ```
-  
+
   Note that the parameter name in the markup must be called `value` or it will not work.
   The parameter name can be called whatever you want in the JavaScript, however.
-      
+
   Also note that the function must be declared on the `window` object to work, like so:
 
   ```js

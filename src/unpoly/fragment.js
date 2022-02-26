@@ -571,11 +571,12 @@ up.fragment = (function() {
     If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
     consider the [`{ content }`](#options.content) option.
 
-  @param {string} [options.fail='auto']
-    How to render a server response with an error code.
+  @param {boolean|Function(up.Response): boolean} [options.fail]
+    Whether the server response should be considered failed.
 
-    Any HTTP status code other than 2xx is considered an error code.
+    By default any HTTP status code other than 2xx or 304 is considered an error code.
 
+    For failed responses Unpoly will use options prefixed with `fail`, e.g. `{ failTarget }`.
     See [handling server errors](/server-errors) for details.
 
   @param {boolean|string} [options.history]

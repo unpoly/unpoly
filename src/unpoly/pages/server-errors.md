@@ -3,7 +3,7 @@ Handling server errors
 
 You may pass different render options for server responses with an error code.
 
-Any HTTP status code other than 2xx is considered an error code.
+Any HTTP status code other than 2xx or 304 is considered an error code.
 
 A common use case for this is [form submissions](/up.form), where a successful response
 should display a follow-up screen, but a failed response should re-render the form
@@ -44,20 +44,37 @@ successful and failed responses, but may be overriden with a fail-prefixed varia
 (e.g. `{ history: true, failHistory: false }`. Options related to layers, scrolling or
 focus are never shared.
 
+### Ignoring HTTP error codes
+
+With `{ fail: false }` or `[up-fail=false]` Unpoly will always consider the response
+to be successful, even with a HTTP 4xx or 5xx status code.
+
+### Customizing failure detection
+
+By default any HTTP 2xx or 304 status code will be considered successful, and any other status code will be considered failed. This behavior can be customized. For instance, you can fail a response if it contains a given header or body text.
+
+The following configuration will fail all responses with an `X-Unauthorized` header.
+
+```js
+let badStatus = up.network.config.fail
+up.network.config.fail = (response) => badStatus(response) || response.getHeader('X-Unauthorized')
+```
+
+You can also decide to fail a response in an `up:fragment:loaded` listener:
+
+```js
+up.on('up:fragment:loaded', function(event) {
+  if (event.response.getHeader('X-Unauthorized')) {
+    event.renderOptions.fail = true
+  }
+})
+```
+
 ### Local content cannot fail
 
 When the updated fragment content is not requested from a `{ url }`, but rather passed as a
 HTML string, the update is always considered successful.
 
-### Ignoring HTTP error codes
-
-The `{ fail }` option or `[up-fail]` attribute changes how Unpoly determines whether a
-server response was successful.
-By default (`{ fail: 'auto' }`) any HTTP 2xx status code will be considered successful,
-and any other status code will be considered failed.
-
-You may also pass `{ fail: false }` or `[up-fail=false]` to always consider the response
-to be successful, even with a HTTP 4xx or 5xx status code.
 
 ## Handling other types of failure
 
@@ -69,6 +86,8 @@ will emit `up:request:fatal` and not render.
 ### Aborted requests
 
 When a request was aborted, Unpoly will emit `up:request:aborted` and not render.
+
+A promise for an aborted request will reject with an `up.AbortError`.
 
 ### Unexpected content
 
