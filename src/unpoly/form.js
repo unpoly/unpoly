@@ -37,7 +37,7 @@ up.form = (function() {
     up.form.config.submitSelectors.push('form')
     ```
 
-    Individual forms may opt out with an `[up-submit=follow]` attribute.
+    Individual forms may opt out with an `[up-submit=false]` attribute.
     You may configure additional exceptions in `config.noSubmitSelectors`.
 
   @param {Array<string>} [config.noSubmitSelectors]
