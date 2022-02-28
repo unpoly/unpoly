@@ -14,18 +14,8 @@ TODOs for next release
 Concurrency
 -----------
 
-- Unpoly Rails must have up.validate_names instead of up.validate_name
-- up.fragment.abort() should be sync
-  - Fix tests for onAborted()
-  - Fix docs
-- Consider renaming up.Request#targetElements to just #elements or #fragments
-  - However, if we ever wanted to expose this property in up:link:follow (to get a preview of what's being replaced), #elements would be too generic a name
-    - event.elements
-    - event.fragments
-    - event.targetElements
-    - event.solutions
 - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
-- Can we get rid of excerpt argument now that most aborting happens within up.fragment?
+- up.network.abort(): Can we get rid of excerpt argument now that most aborting happens within up.fragment?
 - Introduce new function up.fragment.abort(fragment)
 - Rename up.render({ solo }) to up.render({ abort })
   - Use up.fragment.abort() internally
@@ -63,14 +53,10 @@ Concurrency
   - form.config.inputDelay => form.config.observeInputDelay
   - form.config.changeEvent => form.config.observeChangeEvent
   - Remove 'change' from up.form.config.inputEvent
-- findGroupTarget(field) must not append :has(...) if the closest selector is the element itself
-  - Tests for up.form.groupTarget(field)
-  - Tests for up.form.groupTarget(group)
-  - Tests for up.form.groupTarget(otherElement)
 - Parse and use { disable } while an [up-observe] callback is running
   - We should disable fields without help by the user
   - Strip { disable } from field options passed to observe callback, since we already processed it
-  - No up.render() here!
+  - Note there's no up.render() here!
 - Support more than one [up-disable] option
   - [up-disable=form] (gleich wie true, kann auch selektor sein)
   - [up-disable=form-group]
@@ -90,8 +76,13 @@ Concurrency
 Various changes
 ---------------
 
+- up:click forking could print a warning when an a[href] is instant, but not followable
+- unpoly-rails must have up.validate_names instead of up.validate_name
 - Allow to mark a target component as soft
-- unpoly-rails könnte unparsebares JSON verwerfen: https://zammad.makandra.de/#ticket/zoom/76579
+  - :optional ?
+  - :hungry ?
+  - :maybe ?
+- unpoly-rails should discard invalid JSON verwerfen: https://zammad.makandra.de/#ticket/zoom/76579
 - Test that setting autoCache = false for a route also prevents an a[up-preload]
   - up.Request sets cache = true if preload is set!
 - Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
