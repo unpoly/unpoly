@@ -14,7 +14,12 @@ TODOs for next release
 Concurrency
 -----------
 
+- Rethink request defaults
+  - Rethink whether we want to link up.request() to the current layer by default?
+    - Or only when { layer } or { origin } options are given?
+    - Counter-point is: All other functionality sees the current layer by default
 - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
+- NavigateOptions should default to `{ abort: 'target' }`
 - up.network.abort(): Can we get rid of excerpt argument now that most aborting happens within up.fragment?
 - Introduce new function up.fragment.abort(fragment)
 - Rename up.render({ solo }) to up.render({ abort })
@@ -76,6 +81,7 @@ Concurrency
 Various changes
 ---------------
 
+- expose up.layer.config.overlay.class
 - up:click forking could print a warning when an a[href] is instant, but not followable
 - unpoly-rails must have up.validate_names instead of up.validate_name
 - Allow to mark a target component as soft
@@ -112,7 +118,8 @@ Various changes
 Docs
 ----
 
-- Document that we can use live validation like this:
+- Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
+- Test and Document that we can use live validation like this:
   <input up-keep up-validate up-observe-event="input">
 - Document that multiple [up-validate] requests are merged into a single request
   - Document that X-Up-Validate may contain multiple names
