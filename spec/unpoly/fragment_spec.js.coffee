@@ -77,6 +77,13 @@ describe 'up.fragment', ->
 
           expect(up.layer.get(result)).toBe(up.layer.get(1))
 
+        it 'matches elements on the root layer with { layer: 0 } (bugfix)', ->
+          makeLayers [{ target: '.element' }, { target: '.element' }]
+
+          result = up.fragment.get('.element', layer: 0)
+
+          expect(up.layer.get(result)).toBe(up.layer.root)
+
       describe 'matching around the { origin }', ->
 
         it 'prefers to match an element closest to origin', ->
