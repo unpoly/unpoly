@@ -1997,7 +1997,7 @@ up.fragment = (function() {
   TODO: Docs
 
   @function up.fragment.abort
-  @param {string|Element} [element]
+  @param {string|Element|List<Element>} [element]
   @param {string|up.Layer} [options.layer]
   @param {Element} [options.origin]
   @experimental

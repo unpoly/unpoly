@@ -5992,6 +5992,19 @@ describe 'up.fragment', ->
           expect(@layer1Parent0ChildRequest.state).toBe('loading')
           expect(@layer1Parent1ChildRequest.state).toBe('loading')
 
+      describe 'with a list of elements', ->
+
+        it "aborts requests targeting any of the given elements' subtrees", ->
+          layer0Parent0 = up.fragment.get('#parent0', layer: 0)
+          layer0Parent1 = up.fragment.get('#parent1', layer: 0)
+
+          up.fragment.abort([layer0Parent0, layer0Parent1])
+
+          expect(@layer0Parent0ChildRequest.state).toBe('aborted')
+          expect(@layer0Parent1ChildRequest.state).toBe('aborted')
+          expect(@layer1Parent0ChildRequest.state).toBe('loading')
+          expect(@layer1Parent1ChildRequest.state).toBe('loading')
+
       describe 'with a selector', ->
 
         it "matches the selector in the current layer and aborts requests within that subtree", ->
