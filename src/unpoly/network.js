@@ -500,7 +500,7 @@ up.network = (function() {
     let solo = requestOrOptions.solo
     if (solo && isBusy()) {
       up.puts('up.request()', 'Change with { solo } option will abort other requests')
-      if (solo === 'subtree') {
+      if (solo === 'target') {
         abortSubtree(requestOrOptions.targetElements, requestOrOptions)
       } else if (requestOrOptions instanceof up.Request) {
         queue.abortExcept(requestOrOptions, solo)

@@ -4366,7 +4366,7 @@ describe 'up.fragment', ->
             expect(change1Error).toBeAbortError()
             expect(up.network.queue.allRequests.length).toEqual(1)
 
-      describe 'with { solo: "subtree" } zzz', ->
+      describe 'with { solo: "target" } zzz', ->
 
         it 'aborts existing requests targeting the same element', (done) ->
           fixture('.element')
@@ -4374,7 +4374,7 @@ describe 'up.fragment', ->
 
           expect(up.network.queue.allRequests.length).toBe(1)
 
-          up.render('.element', url: '/path2', solo: 'subtree')
+          up.render('.element', url: '/path2', solo: 'target')
 
           u.task ->
             promiseState(change1Promise).then (result) ->
@@ -4388,7 +4388,7 @@ describe 'up.fragment', ->
 
           expect(up.network.queue.allRequests.length).toBe(1)
 
-          up.render('.element', content: 'new content', solo: 'subtree')
+          up.render('.element', content: 'new content', solo: 'target')
 
           u.task ->
             expect('.element').toHaveText('new content')
@@ -4404,7 +4404,7 @@ describe 'up.fragment', ->
 
           expect(up.network.queue.allRequests.length).toBe(1)
 
-          up.render('.parent', url: '/path2', solo: 'subtree')
+          up.render('.parent', url: '/path2', solo: 'target')
 
           u.task ->
             promiseState(change1Promise).then (result) ->
@@ -4418,7 +4418,7 @@ describe 'up.fragment', ->
 
           expect(up.network.queue.allRequests.length).toBe(1)
 
-          up.render('.child', url: '/path2', solo: 'subtree')
+          up.render('.child', url: '/path2', solo: 'target')
 
           u.task ->
             promiseState(parentChangePromise).then (result) ->
@@ -4431,7 +4431,7 @@ describe 'up.fragment', ->
 
           expect(up.network.queue.allRequests.length).toBe(1)
 
-          up.render('.element', url: '/path', solo: 'subtree', cache: true)
+          up.render('.element', url: '/path', solo: 'target', cache: true)
 
           u.task ->
             promiseState(preloadPromise).then (result) ->
@@ -4441,8 +4441,8 @@ describe 'up.fragment', ->
 
         it 'does not let multiple preload requests for the same target abort each other', (done) ->
           fixture('.element')
-          preloadPromise1 = up.render('.element', url: '/path1', solo: 'subtree', preload: true)
-          preloadPromise2 = up.render('.element', url: '/path2', solo: 'subtree', preload: true)
+          preloadPromise1 = up.render('.element', url: '/path1', solo: 'target', preload: true)
+          preloadPromise2 = up.render('.element', url: '/path2', solo: 'target', preload: true)
 
           u.task ->
             Promise.all([promiseState(preloadPromise1), promiseState(preloadPromise2)]).then ([result1, result2]) ->

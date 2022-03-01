@@ -648,7 +648,7 @@ up.fragment = (function() {
     To only uncache some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
-  @param {boolean|string|Function(request): boolean} [options.solo='subtree']
+  @param {boolean|string|Function(request): boolean} [options.solo='target']
     With `{ solo: subtree }` Unpoly will abort requests targeting the same fragment or its descendants.
 
     With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.

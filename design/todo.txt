@@ -186,8 +186,8 @@ Maybe
 - Replace up.hello() and up.syntax.clean() to MutationObserver()
 - Do we want to serialize all actions in a form?
   - up-sequence="form"
-  - This would need to abortable on submit => Would be handled by existing { solo: 'subtree' } IF there is a request
-  - This would need to abortable on form destroy => Would be handled by existing { solo: 'subtree' } IF there is a request
+  - This would need to abortable on submit => Would be handled by existing { solo: 'target' } IF there is a request
+  - This would need to abortable on form destroy => Would be handled by existing { solo: 'target' } IF there is a request
   - => This would need to be handled by up.Queue, or else there would be nothing to abort
   - => It is not sufficient to have up.form.sequence(..., callback)
   - => We would need to do something like { sequence: ElementOfSubtree }
