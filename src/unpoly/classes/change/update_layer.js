@@ -71,7 +71,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       this.layer.peel()
     }
 
-    // Unless the user has explicitly opted out of the default { solo: 'subtree' }
+    // Unless the user has explicitly opted out of the default { solo: 'target' }
     // by passing { solo: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.solo !== false) {
