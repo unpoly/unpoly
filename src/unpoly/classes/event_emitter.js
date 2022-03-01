@@ -94,7 +94,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
     // Setting a { layer } is a shorthand to (1) emit the event on the layer's
     // element and (2) to set up.layer.current to that layer during emission.
     let layer
-    if (options.layer) {
+    if (u.isGiven(options.layer)) {
       layer = up.layer.get(options.layer)
       options.target ||= layer.element
       options.baseLayer ||= layer

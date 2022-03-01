@@ -1727,7 +1727,7 @@ up.fragment = (function() {
       expandTargetLayer = up.layer.root
     } else {
       // Some up.fragment function center around an element, like closest() or matches().
-      options.layer ||= element
+      options.layer ??= element
       const layers = up.layer.getAll(options)
       filters.push(match => u.some(layers, layer => layer.contains(match)))
       expandTargetLayer = layers[0]
