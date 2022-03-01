@@ -5919,31 +5919,100 @@ describe 'up.fragment', ->
 
     describe 'up.fragment.abort()', ->
 
+      beforeEach (done) ->
+        layerHTML = """
+          <div class='parent' id='parent0'>
+            <div class='child' id='parent0-child'></div>
+          </div>
+          <div class='parent' id='parent1'>
+            <div class='child' id='parent1-child'></div>
+          </div>
+          """
+
+        @layers = makeLayers [
+          { content: layerHTML },
+          { content: layerHTML },
+        ]
+
+        @layer0Parent0ChildRequest = up.request('/path/a', layer: @layers[0], target: '#parent0-child')
+        @layer0Parent1ChildRequest = up.request('/path/b', layer: @layers[0], target: '#parent1-child')
+        @layer1Parent0ChildRequest = up.request('/path/c', layer: @layers[1], target: '#parent0-child')
+        @layer1Parent1ChildRequest = up.request('/path/d', layer: @layers[1], target: '#parent1-child')
+
+        u.task(done)
+
       describe 'without an argument', ->
 
-        it 'aborts requests for the current layer'
+        it 'aborts requests for the current layer', ->
+          up.fragment.abort()
 
-        it "also aborts requests outside the layer's main element"
+          expect(@layer0Parent0ChildRequest.state).toBe('loading')
+          expect(@layer0Parent1ChildRequest.state).toBe('loading')
+          expect(@layer1Parent0ChildRequest.state).toBe('aborted')
+          expect(@layer1Parent1ChildRequest.state).toBe('aborted')
+
+        it "also aborts requests outside the layer's main element", asyncSpec (next) ->
+          e.affix(up.layer.element, '#outside-main')
+          outsideRequest = up.request('/path/e', layer: up.layer.element, target: '#outside-main')
+
+          next ->
+            up.fragment.abort()
+
+            expect(outsideRequest.state).toBe('aborted')
 
         describe 'with { layer } option', ->
 
-          it 'aborts requests on the given layer'
+          it 'aborts requests on the given layer', ->
+            up.fragment.abort(layer: 'root')
+
+            expect(@layer0Parent0ChildRequest.state).toBe('aborted')
+            expect(@layer0Parent1ChildRequest.state).toBe('aborted')
+            expect(@layer1Parent0ChildRequest.state).toBe('loading')
+            expect(@layer1Parent1ChildRequest.state).toBe('loading')
 
         describe 'with { layer: "any" }', ->
 
-          it 'aborts requests on all layers'
+          it 'aborts requests on all layers', ->
+            up.fragment.abort(layer: 'any')
+
+            expect(@layer0Parent0ChildRequest.state).toBe('aborted')
+            expect(@layer0Parent1ChildRequest.state).toBe('aborted')
+            expect(@layer1Parent0ChildRequest.state).toBe('aborted')
+            expect(@layer1Parent1ChildRequest.state).toBe('aborted')
 
       describe 'with an element', ->
 
-        it "aborts requests targeting given element's subtree"
+        it "aborts requests targeting given element's subtree", ->
+          layer0Parent0 = up.fragment.get('#parent0', layer: 0)
+
+          console.log("found parent on layer %o", up.layer.get(layer0Parent0).index)
+
+          up.fragment.abort(layer0Parent0)
+
+          expect(@layer0Parent0ChildRequest.state).toBe('aborted')
+          expect(@layer0Parent1ChildRequest.state).toBe('loading')
+          expect(@layer1Parent0ChildRequest.state).toBe('loading')
+          expect(@layer1Parent1ChildRequest.state).toBe('loading')
 
       describe 'with a selector', ->
 
-        it "matches the selector in the current layer and aborts requests within that subtree"
+        it "matches the selector in the current layer and aborts requests within that subtree", ->
+          up.fragment.abort('.parent')
+
+          expect(@layer0Parent0ChildRequest.state).toBe('loading')
+          expect(@layer0Parent1ChildRequest.state).toBe('loading')
+          expect(@layer1Parent0ChildRequest.state).toBe('aborted')
+          expect(@layer1Parent1ChildRequest.state).toBe('aborted')
 
         describe 'with { layer } option', ->
 
-          it 'resolves the selector on another layer'
+          it 'resolves the selector on another layer', ->
+            up.fragment.abort('.parent', layer: 'root')
+
+            expect(@layer0Parent0ChildRequest.state).toBe('aborted')
+            expect(@layer0Parent1ChildRequest.state).toBe('aborted')
+            expect(@layer1Parent0ChildRequest.state).toBe('loading')
+            expect(@layer1Parent1ChildRequest.state).toBe('loading')
 
     describe 'up.fragment.onAborted()', ->
 

@@ -97,15 +97,26 @@ describe 'up.Request', ->
 
   describe '#targetElements', ->
 
-    it 'returns the elements passes to constructor', ->
+    it 'returns the { targetElements } passed to constructor', ->
       request = new up.Request(url: '/path', targetElements: [document.body])
       expect(request.targetElements).toEqual [document.body]
 
-    it 'matches the { target } if no elements were passed to the constructor', ->
-      element = fixture('.element')
-      otherElement = fixture('.other-element')
-      request = new up.Request(url: '/path', target: '.element, .other-element')
-      expect(request.targetElements).toEqual [element, otherElement]
+    describe 'when no { targetElements } were passed to the constructor', ->
+
+      it 'looks up the { target } selector', ->
+        element = fixture('.element')
+        otherElement = fixture('.other-element')
+        request = new up.Request(url: '/path', target: '.element, .other-element')
+        expect(request.targetElements).toEqual [element, otherElement]
+
+      it 'looks up the { target } selector in a different { layer }', ->
+        element = fixture('.element')
+        otherElement = fixture('.other-element')
+
+        makeLayers(2)
+
+        request = new up.Request(url: '/path', target: '.element, .other-element', layer: 'root')
+        expect(request.targetElements).toEqual [element, otherElement]
 
     it 'returns undefined if neither { target, targetElements } were passed to the constructor', ->
       request = new up.Request(url: '/path')
