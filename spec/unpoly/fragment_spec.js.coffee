@@ -5985,8 +5985,6 @@ describe 'up.fragment', ->
         it "aborts requests targeting given element's subtree", ->
           layer0Parent0 = up.fragment.get('#parent0', layer: 0)
 
-          console.log("found parent on layer %o", up.layer.get(layer0Parent0).index)
-
           up.fragment.abort(layer0Parent0)
 
           expect(@layer0Parent0ChildRequest.state).toBe('aborted')
