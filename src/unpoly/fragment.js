@@ -1262,15 +1262,20 @@ up.fragment = (function() {
     let selectorString = args.pop()
     const root = args[0]
 
-    // (0) up.fragment.all(list) should return the list unchanged
+    // (0) up.fragment.all(element) should return an array of that element.
+    if (u.isElement(selectorString)) {
+      return [selectorString]
+    }
+
+    // (1) up.fragment.all(list) should return the list unchanged
     if (u.isList(selectorString)) {
       return selectorString
     }
 
-    // (1) up.fragment.all(rootElement, selector) should find selector within
+    // (2) up.fragment.all(rootElement, selector) should find selector within
     //     the descendants of rootElement.
-    // (2) up.fragment.all(selector) should find selector within the current layer.
-    // (3) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
+    // (3) up.fragment.all(selector) should find selector within the current layer.
+    // (4) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
     let selector = parseSelector(selectorString, root, options)
     return selector.descendants(root || document)
   }
@@ -1998,13 +2003,15 @@ up.fragment = (function() {
   @param {string|Element|List<Element>} [element]
   @param {string|up.Layer} [options.layer]
   @param {Element} [options.origin]
+  @param {string} [options.reason]
+  @param {up.Request} [options.except]
   @experimental
   */
   function abort(...args) {
     let options = parseTargetAndOptions(args)
 
     let testFn
-    let reason
+    let { reason } = options
     let elements
 
     if (options.target) {
@@ -2012,7 +2019,7 @@ up.fragment = (function() {
       // targeting that subtree.
       elements = getAll(options.target, options)
       testFn = (request) => request.isPartOfSubtree(elements)
-      reason = 'Aborting requests within fragment'
+      reason ||= 'Aborting requests within fragment'
     } else {
       // If we're not given an element or selector, we abort all layers
       // matching the { layer } option. If no { layer } option is given,
@@ -2025,10 +2032,10 @@ up.fragment = (function() {
       let layers = up.layer.getAll(options)
       elements = u.map(layers, 'element')
       testFn = (request) => u.contains(layers, request.layer)
-      reason = 'Aborting requests within layer'
+      reason ||= 'Aborting requests within layer'
     }
 
-    up.network.abort(testFn, reason)
+    up.network.abort(testFn, { ...options, reason })
 
     // Emit an event so other async code can choose to abort itself,
     // e.g. timers waiting for a delay.
@@ -2054,18 +2061,18 @@ up.fragment = (function() {
     return unsubscribe
   }
 
-  function handleAbortOption({ abort, elements, layer, origin }) {
-    if (abort === 'layer') {
-      abort({ layer })
-    } else if (abort === 'target') {
-      abort(elements)
-    } else if (abort === 'all' || abort === true) {
-      abort({ layer: 'any' })
-    } else if (abort) {
-      // Element, [Element], string, [string]
-      abort(abort, { layer, origin })
-    }
-  }
+  // function handleAbortOption({ abort, elements, layer, origin }) {
+  //   if (abort === 'layer') {
+  //     abort({ layer })
+  //   } else if (abort === 'target') {
+  //     abort(elements)
+  //   } else if (abort === 'all' || abort === true) {
+  //     abort({ layer: 'any' })
+  //   } else if (abort) {
+  //     // Element, [Element], string, [string]
+  //     abort(abort, { layer, origin })
+  //   }
+  // }
 
   up.on('up:framework:boot', function() {
     const {body} = document

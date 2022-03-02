@@ -129,8 +129,8 @@ up.Change.FromContent = class FromContent extends up.Change {
 
   // Returns information about the change that is most likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
-  preflightProps(opts = {}) {
-    const getPlanProps = plan => plan.preflightProps()
+  getPreflightProps(opts = {}) {
+    const getPlanProps = plan => plan.getPreflightProps()
     return this.seekPlan(getPlanProps) || opts.optional || this.preflightTargetNotApplicable()
   }
 
@@ -173,6 +173,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     u.memoizeMethod(this.prototype, [
       'getPlans',
       'getResponseDoc',
+      'getPreflightProps',
     ])
   }
 

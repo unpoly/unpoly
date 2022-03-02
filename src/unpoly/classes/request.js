@@ -243,7 +243,6 @@ up.Request = class Request extends up.Record {
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
       'targetElements',
-      'solo',
       'queueTime',
       'wrapMethod',
       'contentType',
@@ -523,9 +522,10 @@ up.Request = class Request extends up.Record {
   ```
 
   @function up.Request#abort
+  @string [options.reason]
   @experimental
   */
-  abort(reason) {
+  abort({ reason } = {}) {
     // setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call setAbortedState() a second time, without a message.
     if (this.setAbortedState(reason) && this.xhr) {
@@ -687,16 +687,24 @@ up.Request = class Request extends up.Record {
     })
   }
 
-  static tester(condition) {
+  static tester(condition, { except } = {}) {
+    let testFn
     if (u.isFunction(condition)) {
-      return condition
+      testFn = condition
     } else if (condition instanceof this) {
-      return (request) => condition === request
+      testFn = (request) => condition === request
     } else if (u.isString(condition)) {
       let pattern = new up.URLPattern(condition)
-      return (request) => pattern.test(request.url)
+      testFn = (request) => pattern.test(request.url)
     } else { // boolean, truthy/falsy values
-      return (_request) => condition
+      testFn = (_request) => condition
+    }
+
+    if (except) {
+      let exceptCacheKey = except.cacheKey()
+      return (request) => (request.cacheKey() !== exceptCacheKey) && testFn(request)
+    } else {
+      return testFn
     }
   }
 

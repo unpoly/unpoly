@@ -1,8 +1,9 @@
 u = up.util
 $ = jQuery
 
+message = 'Resetting framework for next test'
+
 logResetting = ->
-  message = 'Resetting framework for next test'
   if up.browser.canFormatLog()
     console.debug("%c#{message}%c", 'color: #2244aa', '')
   else
@@ -14,7 +15,7 @@ afterEach (done) ->
   jasmine.clock().uninstall()
 
   # Abort all requests so any cancel handlers can run and do async things.
-  up.network.abort()
+  up.network.abort(reason: message)
 
   # Most pending promises will wait for an animation to finish.
   whenMotionsDone = up.motion.finish()

@@ -28,7 +28,13 @@ Object.defineProperty(up.network.config, 'preloadDelay', {
 up.migrate.renamedProperty(up.network.config, 'maxRequests', 'concurrency')
 up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
 
-up.migrate.handleRequestOptions = options => up.migrate.fixKey(options, 'data', 'params')
+up.migrate.handleRequestOptions = function(options) {
+  up.migrate.fixKey(options, 'data', 'params')
+
+  if (option.solo) {
+    up.migrate.deprecated('The option up.request({ solo })', 'Call up.network.abort() before the request')
+  }
+}
 
 /*-
 Makes an AJAX request to the given URL and caches the response.
@@ -78,6 +84,13 @@ up.network.clear = function() {
 up.network.preload = function(...args) {
   up.migrate.deprecated('up.proxy.preload(link)', 'up.link.preload(link)')
   return up.link.preload(...args)
+}
+
+up.migrate.preprocessAbortArgs = function(args) {
+  if (args.length === 2 && u.isString(args[1])) {
+    up.migrate.warn('up.network.abort() no longer takes a reason as a second argument. Pass it as { reason } option instead.')
+    args[1] = { reason: args[1] }
+  }
 }
 
 /*-
