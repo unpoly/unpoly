@@ -49,7 +49,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
 
   wipe() {
     this.layer.asCurrent(() => {
-      up.network.abortSubtree(this.element)
+      up.fragment.abort(this.element, { reason: 'Fragment is being destroyed' })
       up.syntax.clean(this.element, { layer: this.layer })
 
       if (up.browser.canJQuery()) {

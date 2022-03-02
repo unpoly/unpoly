@@ -10,13 +10,17 @@ up.Change.FromOptions = class FromOptions extends up.Change {
     // Convert non-promise values into a resolved promise.
     return u.asyncify(() => {
       this.guardRender()
-      this.handleAbort()
 
       if (this.options.url) {
-        return this.renderFromURL()
+        let onRequest = (request) => this.handleSolo(request)
+        this.change = new up.Change.FromURL({ ...this.options, onRequest })
       } else {
-        return this.renderFromContent()
+        // No need to give feedback as local changes are sync.
+        this.change = new up.Change.FromContent(this.options)
+        this.handleSolo()
       }
+
+      return this.change.execute()
     })
   }
 
@@ -37,23 +41,32 @@ up.Change.FromOptions = class FromOptions extends up.Change {
     up.RenderOptions.assertContentGiven(this.options)
   }
 
-  handleAbort() {
-    throw "TODO. Hier müssen wir die Change previewen."
-  }
+  handleSolo(request) {
+    let solo = this.options.solo
 
-  renderFromURL() {
-    return new up.Change.FromURL(this.options).execute()
-  }
+    if (!solo || up.network.isIdle()) return
 
-  renderFromContent() {
-    // When we have a given { url }, the { solo } option is honored by up.request().
-    // But up.request() is never called when we have local content given as { document },
-    // { content } or { fragment }. Hence we abort here.
-    up.network.mimicLocalRequest(this.options)
+    let { targetElements, layer, origin } = this.change.getPreflightProps()
 
-    // (1) No need to give feedback as local changes are sync.
-    // (2) Value will be converted to a fulfilled promise by up.util.asyncify() in render().
-    return new up.Change.FromContent(this.options).execute()
+    let abortOptions = {
+      except: request, // don't abort the request we just made
+      logOnce: ['up.request()', 'Change with { solo } option will abort other requests'],
+    }
+
+    if (solo === 'target') {
+      // Abort requests in the subtree of the targeted fragment
+      up.fragment.abort(targetElements, abortOptions)
+    } else if (solo === 'layer') {
+      // Abort requests targeting any fragment in the targeted layer
+      up.fragment.abort({ ...abortOptions, layer })
+    } else if (solo === 'all' || solo === true) {
+      // Abort requests targeting any fragment in any layer
+      up.fragment.abort({ ...abortOptions, layer: 'any' })
+    } else {
+      // (1) Abort requests in the subtree of a given selector (string)
+      // (2) Abort requests targeting a given element element
+      up.fragment.abort(solo, { ...abortOptions, layer, origin })
+    }
   }
 
 }

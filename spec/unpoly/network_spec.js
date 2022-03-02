@@ -1819,7 +1819,24 @@ describe('up.network', function() {
         })
       }))
 
+      describe('with { reason } option', function() {
+
+        it("sets the given reason as the AbortError's message", function(done) {
+          let request = up.request('/url')
+
+          up.network.abort(request, { reason: 'Given reason'})
+
+          promiseState(request).then(function({ state, value }) {
+            expect(state).toBe('rejected')
+            expect(value).toBeAbortError(/Given reason/)
+            done()
+          })
+        })
+
+      })
+
     })
+
 
 
     describe('up.cache.get()', function() {

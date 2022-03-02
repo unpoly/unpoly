@@ -476,39 +476,39 @@ up.network = (function() {
   @stable
   */
   function makeRequest(...args) {
-    const request = new up.Request(parseRequestOptions(args))
+    const options = parseRequestOptions(args)
+    const request = new up.Request(options)
 
     useCachedRequest(request) || queueRequest(request)
 
-    handleSolo(request)
+    // handleSolo({ ...options, targetElements: request.targetElements, except: request })
 
     return request
   }
 
-  function mimicLocalRequest(options) {
-    handleSolo(options)
-
-    // We cannot consult config.clearCache since there is no up.Request
-    // for a local update.
-    let clearCache = options.clearCache
-    if (clearCache) {
-      cache.clear(clearCache)
-    }
-  }
-
-  function handleSolo(requestOrOptions) {
-    let solo = requestOrOptions.solo
-    if (solo && isBusy()) {
-      up.puts('up.request()', 'Change with { solo } option will abort other requests')
-      if (solo === 'target') {
-        abortSubtree(requestOrOptions.targetElements, requestOrOptions)
-      } else if (requestOrOptions instanceof up.Request) {
-        queue.abortExcept(requestOrOptions, solo)
-      } else {
-        abortRequests(solo)
-      }
-    }
-  }
+  // function mimicLocalRequest({ solo, targetElements, clearCache }) {
+  //   handleSolo({ solo, targetElements })
+  //
+  //   // We cannot consult config.clearCache since there is no up.Request
+  //   // for a local update.
+  //   if (clearCache) {
+  //     cache.clear(clearCache)
+  //   }
+  // }
+  //
+  // function handleSolo({ solo, targetElements, except }) {
+  //   if (solo && isBusy()) {
+  //     let abortOptions = {
+  //       except,
+  //       logOnce: ['up.request()', 'Change with { solo } option will abort other requests']
+  //     }
+  //     if (solo === 'target') {
+  //       abortSubtree(targetElements, abortOptions)
+  //     } else {
+  //       abortRequests(solo, abortOptions)
+  //     }
+  //   }
+  // }
 
   function parseRequestOptions(args) {
     const options = u.extractOptions(args)
@@ -666,28 +666,34 @@ up.network = (function() {
   }
 
   /*-
-  Aborts pending [requests](/up.request).
+  Aborts pending [requests](/up.request) matching a condition.
 
   The event `up:request:aborted` will be emitted.
 
   The promise returned by `up.request()` will be rejected with an exception named `AbortError`:
 
-      try {
-        let response = await up.request('/path')
-        console.log(response.text)
-      } catch (err) {
-        if (err.name == 'AbortError') {
-          console.log('Request was aborted')
-        }
-      }
+  ```js
+  try {
+    let response = await up.request('/path')
+    console.log(response.text)
+  } catch (error) {
+    if (error.name == 'AbortError') {
+      console.log('Request was aborted: ' + error.reason)
+    }
+  }
+  ```
 
-  ### Examples
+  Also consider using `up.fragment.abort()`, which is a higher-level API.
+
+  ### Aborting all requests
 
   Without arguments, this will abort all pending requests:
 
   ```js
   up.network.abort()
   ```
+
+  ### Aborting a single request
 
   To abort a given `up.Request` object, pass it as the first argument:
 
@@ -696,7 +702,17 @@ up.network = (function() {
   up.network.abort(request)
   ```
 
-  To abort all requests matching a condition, pass a function that takes a request
+  ### Aborting requests matching a pattern
+
+  To abort all requests matching an [URL pattern](/url-pattern), pass it as the first argument:
+
+  ```js
+  up.network.abort('/path/*')
+  ```
+
+  ### Aborting requests matching an arbitrary condition
+
+  To abort all requests matching an arbitrary condition, pass a function that takes a request
   and returns a boolean value. Unpoly will abort all request for which the given
   function returns `true`. E.g. to abort all requests with a HTTP method as `GET`:
 
@@ -704,28 +720,26 @@ up.network = (function() {
   up.network.abort((request) => request.method == 'GET')
   ```
 
+  ### Aborting requests targeting a fragment or layer
+
+  Use `up.fragment.abort()`.
+
   @function up.network.abort
-  @param {up.Request|boolean|Function(up.Request): boolean} [matcher=true]
+  @param {up.Request|boolean|Function(up.Request|string): boolean} [condition=true]
+    Which requests to abort.
+
     If this argument is omitted, all pending requests are aborted.
-  @param {string} [reason='Request was aborted']
+  @param {string} [options.reason='Request was aborted']
     A reason for why the request was aborted.
+
+    The reason will be set as the `AbortError`'s message.
+  @param {up.Request} [options.except]
+    An `up.Request` that should not be aborted even if it matches the given `condition`.
   @stable
   */
   function abortRequests(...args) {
+    up.migrate.preprocessAbortArgs?.(args)
     queue.abort(...args)
-  }
-
-  /*-
-  Aborts other requests targeting the given element or its descendants.
-
-  @function up.network.abortSubtree
-  @param {Element} element
-  @internal
-  */
-  function abortSubtree(elements, excusedRequest) {
-    const testFn = (request) => request.isPartOfSubtree(elements)
-    const reason = 'Another fragment update targeted the same element'
-    queue.abortExcept(excusedRequest, testFn, reason)
   }
 
   /*-
@@ -947,10 +961,7 @@ up.network = (function() {
     registerAliasForRedirect,
     queue, // for testing
     shouldReduceRequests,
-    mimicLocalRequest,
     loadPage,
-    abortSubtree,
-    handleSolo,
   }
 })()
 

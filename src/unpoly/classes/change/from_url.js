@@ -26,15 +26,19 @@ up.Change.FromURL = class FromURL extends up.Change {
       return u.unresolvablePromise()
     }
 
-    const promise = this.makeRequest()
+    this.request = up.request(this.getRequestAttrs())
+    this.options.onRequest?.(this.request)
+
+    up.feedback.showAroundRequest(this.request, this.options)
+    up.form.disableAroundRequest(this.request, this.options)
 
     if (this.options.preload) {
-      return promise
+      return this.request
     }
 
     // Use always() since onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return u.always(promise, responseOrError => this.onRequestSettled(responseOrError))
+    return u.always(this.request, responseOrError => this.onRequestSettled(responseOrError))
   }
 
   deriveFailOptions() {
@@ -59,33 +63,28 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
   }
 
-  makeRequest() {
+  getRequestAttrs() {
     const successAttrs = this.preflightPropsForRenderOptions(this.options)
     const failAttrs = this.preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
-    const requestAttrs = u.merge(
-      this.options, // contains preflight keys relevant for the request, e.g. { url, method, solo }
-      successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
-    )
+    return {
+      ...this.options, // contains preflight keys relevant for the request, e.g. { url, method, solo }
+      ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
+      ...u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
+    }
+  }
 
-    // up.request() also handles the { solo } option.
-    this.request = up.request(requestAttrs)
-
-    up.feedback.showAroundRequest(this.request, this.options)
-
-    up.form.disableAroundRequest(this.request, this.options)
-
-    // The request is also a promise for its response.
-    return this.request
+  // This is required by up.Change.FromOptions to handle { solo: 'target' }.
+  getPreflightProps() {
+    return this.getRequestAttrs()
   }
 
   preflightPropsForRenderOptions(renderOptions, requestAttributesOptions) {
     const preview = new up.Change.FromContent({ ...renderOptions, preview: true })
-    // #preflightProps() will return meta information about the change that is most
+    // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
     // This might change postflight if the response does not contain the desired target.
-    return preview.preflightProps(requestAttributesOptions)
+    return preview.getPreflightProps(requestAttributesOptions)
   }
 
   onRequestSettled(response) {
@@ -218,5 +217,11 @@ up.Change.FromURL = class FromURL extends up.Change {
     renderOptions.cspNonces = this.response.cspNonces
     renderOptions.time ??= this.response.lastModified
     renderOptions.etag ??= this.response.etag
+  }
+
+  static {
+    u.memoizeMethod(this.prototype, [
+      'getRequestAttrs',
+    ])
   }
 }

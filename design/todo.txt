@@ -194,7 +194,7 @@ Maybe
   - What about our old idea: { order: 'abort target', order: 'abort form', order: 'after form', order: 'after selector' }
       => How to say "after ElementObject" ?
   - Who would fetch the element that is 'form' or 'selector'?
-      => up.Change.UpdateLayer#preflightProps(), which already loads targetElements()
+      => up.Change.UpdateLayer#getPreflightProps(), which already loads targetElements()
   - What would we do if both was given, e.g. { solo: true, sequence: 'form' }
     - Do we forbid the combination?
     - Do we first abort, then do a squence?

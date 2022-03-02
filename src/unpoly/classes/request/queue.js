@@ -73,7 +73,7 @@ up.Request.Queue = class Queue {
 
   sendRequestNow(request) {
     if (request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented) {
-      request.abort('Prevented by event listener')
+      request.abort({ reason: 'Prevented by event listener' })
     } else {
       // Since up:request:load listeners may have mutated properties used in
       // the request's cache key ({ url, method, params }), we need to normalize
@@ -107,22 +107,25 @@ up.Request.Queue = class Queue {
   }
 
   // Aborting a request will cause its promise to reject, which will also uncache it
-  abort(conditions = true, reason) {
-    let tester = up.Request.tester(conditions)
+  abort(...args) {
+    let options = u.extractOptions(args)
+    let { except, reason, logOnce } = options
+
+    let conditions = args[0] ?? true
+
+    let tester = up.Request.tester(conditions, { except })
     for (let list of [this.currentRequests, this.queuedRequests]) {
       const abortableRequests = u.filter(list, tester)
       for (let abortableRequest of abortableRequests) {
-        abortableRequest.abort(reason)
+        if (logOnce) {
+          up.puts(...logOnce)
+          logOnce = null
+        }
+        abortableRequest.abort({ reason })
         // Avoid changing the list we're iterating over.
         u.remove(list, abortableRequest)
       }
     }
-  }
-
-  abortExcept(excusedRequest, additionalConditions = true, reason) {
-    const excusedCacheKey = excusedRequest?.cacheKey?.()
-    const testFn = (queuedRequest) => (queuedRequest.cacheKey() !== excusedCacheKey) && u.evalOption(additionalConditions, queuedRequest)
-    this.abort(testFn, reason)
   }
 
   checkSlow() {

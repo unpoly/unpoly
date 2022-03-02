@@ -21,12 +21,12 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
 
     up.browser.assertConfirmed(this.options)
 
-    // Abort all pending requests targeting the layer we're now closing.
-    up.network.abort(request => request.layer === this.layer)
-
     if (this.emitCloseEvent().defaultPrevented && this.preventable) {
       throw up.error.aborted('Close event was prevented')
     }
+
+    // Abort all pending requests targeting the layer we're now closing.
+    up.fragment.abort({ reason: 'Layer is closing', layer: this.layer })
 
     // Remember the parent, which will no longer be accessible once we
     // remove @layer from the @stack.

@@ -9,7 +9,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // to up:layer:open may modify layer options.
   }
 
-  preflightProps() {
+  getPreflightProps() {
     // We assume that the server will respond with our target.
     // Hence this change will always be applicable.
 
@@ -19,6 +19,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.baseLayer,
       mode: this.options.mode,
       context: this.buildLayer().context,
+      origin: this.options.origin,
       // The target will always exist in the current page, since
       // we're opening a new layer that will match the target.
       target: this.target,

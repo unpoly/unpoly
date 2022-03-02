@@ -436,7 +436,6 @@ describe 'up.fragment', ->
             @respondWithSelector('.target', text: 'new-text')
 
           next =>
-            console.log(promise)
             expect(resolution).toHaveBeenCalled()
             expect($('.target')).toHaveText('new-text')
 
@@ -4386,17 +4385,24 @@ describe 'up.fragment', ->
           fixture('.element')
           change1Promise = up.render('.element', url: '/path1')
 
-          expect(up.network.queue.allRequests.length).toBe(1)
+          fixture('.sibling')
+          change2Promise = up.render('.sibling', url: '/path2')
+
+          expect(up.network.queue.allRequests.length).toBe(2)
 
           up.render('.element', content: 'new content', solo: 'target')
 
           u.task ->
             expect('.element').toHaveText('new content')
 
-            promiseState(change1Promise).then (result) ->
-              expect(result.state).toBe('rejected')
-              expect(result.value).toBeAbortError()
-              done()
+            promiseState(change1Promise).then ({ state, value }) ->
+              expect(state).toBe('rejected')
+              expect(value).toBeAbortError()
+
+              # Show that the untargeted element still has a pending request
+              promiseState(change2Promise).then ({ state, value }) ->
+                expect(state).toBe('pending')
+                done()
 
         it 'aborts existing requests targeting a descendant of the targeted element', (done) ->
           fixture('.parent .child')
@@ -4497,77 +4503,77 @@ describe 'up.fragment', ->
 
       describe 'with { solo: Function } option zzz', ->
 
-        it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
-          fixture('.element')
-
-          change1Promise = undefined
-          change1Error = undefined
-
-          change2Promise = undefined
-          change2Error = undefined
-
-          change3Promise = undefined
-          change3Error = undefined
-
-          soloFn = (request) ->
-            u.matchURLs(request.url, '/path1')
-
-          change1Promise = up.render('.element', url: '/path1', solo: false)
-          change1Promise.catch (e) -> change1Error = e
-          change2Promise = up.render('.element', url: '/path2', solo: false)
-          change2Promise.catch (e) -> change2Error = e
-
-          next =>
-            expect(up.network.queue.allRequests.length).toEqual(2)
-            expect(change1Error).toBeUndefined()
-            expect(change2Error).toBeUndefined()
-
-            change3Promise = up.render('.element', url: '/path3', solo: soloFn)
-            change3Promise.catch (e) -> change3Error = e
-
-          next =>
-            expect(change1Error).toBeAbortError()
-            expect(change2Error).toBeUndefined()
-            expect(change3Error).toBeUndefined()
-
-            expect(up.network.queue.allRequests.length).toEqual(2)
-
-        it 'may be passed as a function that decides which existing requests are aborted when updating from local content', asyncSpec (next) ->
-          fixture('.element1')
-          fixture('.element2')
-          fixture('.element3')
-
-          change1Promise = undefined
-          change1Error = undefined
-
-          change2Promise = undefined
-          change2Error = undefined
-
-          change3Promise = undefined
-          change3Error = undefined
-
-          change1Promise = up.render('.element1', url: '/path1')
-          change1Promise.catch (e) -> change1Error = e
-          change2Promise = up.render('.element2', url: '/path2')
-          change2Promise.catch (e) -> change2Error = e
-
-          next =>
-            expect(up.network.queue.allRequests.length).toEqual(2)
-            expect(change1Error).toBeUndefined()
-            expect(change2Error).toBeUndefined()
-
-            soloFn = (request) ->
-              u.matchURLs(request.url, '/path1')
-
-            change3Promise = up.render('.element3', content: 'new content', solo: soloFn)
-            change3Promise.catch (e) -> change3Error = e
-
-          next =>
-            expect(change1Error).toBeAbortError()
-            expect(change2Error).toBeUndefined()
-            expect(change3Error).toBeUndefined()
-
-            expect(up.network.queue.allRequests.length).toEqual(1)
+#        it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
+#          fixture('.element')
+#
+#          change1Promise = undefined
+#          change1Error = undefined
+#
+#          change2Promise = undefined
+#          change2Error = undefined
+#
+#          change3Promise = undefined
+#          change3Error = undefined
+#
+#          soloFn = (request) ->
+#            u.matchURLs(request.url, '/path1')
+#
+#          change1Promise = up.render('.element', url: '/path1', solo: false)
+#          change1Promise.catch (e) -> change1Error = e
+#          change2Promise = up.render('.element', url: '/path2', solo: false)
+#          change2Promise.catch (e) -> change2Error = e
+#
+#          next =>
+#            expect(up.network.queue.allRequests.length).toEqual(2)
+#            expect(change1Error).toBeUndefined()
+#            expect(change2Error).toBeUndefined()
+#
+#            change3Promise = up.render('.element', url: '/path3', solo: soloFn)
+#            change3Promise.catch (e) -> change3Error = e
+#
+#          next =>
+#            expect(change1Error).toBeAbortError()
+#            expect(change2Error).toBeUndefined()
+#            expect(change3Error).toBeUndefined()
+#
+#            expect(up.network.queue.allRequests.length).toEqual(2)
+#
+#        it 'may be passed as a function that decides which existing requests are aborted when updating from local content', asyncSpec (next) ->
+#          fixture('.element1')
+#          fixture('.element2')
+#          fixture('.element3')
+#
+#          change1Promise = undefined
+#          change1Error = undefined
+#
+#          change2Promise = undefined
+#          change2Error = undefined
+#
+#          change3Promise = undefined
+#          change3Error = undefined
+#
+#          change1Promise = up.render('.element1', url: '/path1')
+#          change1Promise.catch (e) -> change1Error = e
+#          change2Promise = up.render('.element2', url: '/path2')
+#          change2Promise.catch (e) -> change2Error = e
+#
+#          next =>
+#            expect(up.network.queue.allRequests.length).toEqual(2)
+#            expect(change1Error).toBeUndefined()
+#            expect(change2Error).toBeUndefined()
+#
+#            soloFn = (request) ->
+#              u.matchURLs(request.url, '/path1')
+#
+#            change3Promise = up.render('.element3', content: 'new content', solo: soloFn)
+#            change3Promise.catch (e) -> change3Error = e
+#
+#          next =>
+#            expect(change1Error).toBeAbortError()
+#            expect(change2Error).toBeUndefined()
+#            expect(change3Error).toBeUndefined()
+#
+#            expect(up.network.queue.allRequests.length).toEqual(1)
 
       describe 'with { cache } option', ->
 
@@ -6024,6 +6030,16 @@ describe 'up.fragment', ->
             expect(@layer0Parent1ChildRequest.state).toBe('aborted')
             expect(@layer1Parent0ChildRequest.state).toBe('loading')
             expect(@layer1Parent1ChildRequest.state).toBe('loading')
+
+      describe 'with { reason } option', ->
+
+        it 'aborts the request with the given reason', (done) ->
+          up.fragment.abort('#parent0', reason: 'Given reason')
+
+          promiseState(@layer1Parent0ChildRequest).then ({ state, value }) ->
+            expect(state).toBe('rejected')
+            expect(value).toBeAbortError(/Given reason/)
+            done()
 
     describe 'up.fragment.onAborted()', ->
 

@@ -13,7 +13,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.steps = up.fragment.parseTargetSteps(this.target, this.options)
   }
 
-  preflightProps() {
+  getPreflightProps() {
     // This will throw up.error.notApplicable() if { target } cannot
     // be found in { layer }.
     this.matchPreflight()
@@ -22,6 +22,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       layer: this.layer,
       mode: this.layer.mode,
       context: u.merge(this.layer.context, this.context),
+      origin: this.options.origin,
       target: this.bestPreflightSelector(),
       targetElements: this.getTargetElements(),
     }
@@ -75,7 +76,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // by passing { solo: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.solo !== false) {
-      up.network.abortSubtree(this.getTargetElements())
+      up.fragment.abort(this.getTargetElements(), { reason: 'Fragment is being replaced' })
     }
 
     // up.network.handleSolo({
