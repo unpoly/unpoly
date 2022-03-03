@@ -253,10 +253,10 @@ up.viewport = (function() {
   @param {string|Element|jQuery} element
     The element to focus.
 
-  @param {[options.preventScroll=false]}
+  @param {boolean} [options.preventScroll=false]
     Whether to prevent changes to the acroll position.
 
-  @param {[options.force=false]}
+  @param {boolean} [options.force=false]
     Whether to force focus even if `element` would otherwise not be a focusable element.
 
   @experimental

@@ -85,6 +85,7 @@ Concurrency
 Various changes
 ---------------
 
+- Do follow links with [target=_self]
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
 - Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
   - It's actually more like "appendableElement"
