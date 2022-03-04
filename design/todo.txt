@@ -95,6 +95,7 @@ Various changes
   - { documentTemplate }, { fragmentTemplate }, { contentTemplate }
   - Separate doc page "Rendering from local content"
   - Fail when template cannot be found
+  - But what if I really need to re-use an existing element that is then placed back into the body, like in WB?
 - Consider exposing up.layer.contentElement
 - up.layer.config.externalOverlaySelectors
   - Hier würden wir keinen Fokus stehlen
