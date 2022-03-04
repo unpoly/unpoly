@@ -42,7 +42,7 @@ up.migrate = (function() {
     })
   }
 
-  function renamedAttribute(oldAttr, newAttr, { scope }) {
+  function renamedAttribute(oldAttr, newAttr, { scope } = {}) {
     // Scope may be a selector string OR a function
     let selector = scope || `[${oldAttr}]`
     up.macro(selector, { priority: -1000 }, function(element) {
@@ -129,6 +129,7 @@ up.migrate = (function() {
     deprecated,
     renamedPackage,
     renamedProperty,
+    renamedAttribute,
     formerlyAsync,
     renamedEvent,
     fixEventTypes,

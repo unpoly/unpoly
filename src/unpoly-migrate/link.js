@@ -42,4 +42,4 @@ This is shorthand for:
 */
 up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => up.migrate.deprecated('a[up-dash]', 'up.link.config.instantSelectors and up.link.config.preloadSelectors'))
 
-up.migrate.renameAttribute('up-delay', 'up-preload-delay', { scope: up.link.preloadSelector })
+up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: up.link.preloadSelector })
