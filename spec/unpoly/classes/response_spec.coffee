@@ -15,3 +15,9 @@ describe 'up.Response', ->
       expect(response.json).toEqual(foo: 'bar')
       response.json.bam = 'baz'
       expect(response.json).toEqual(foo: 'bar', bam: 'baz')
+
+  describe '#ok', ->
+
+    it 'must have tests', ->
+      throw "tests missing!"
+

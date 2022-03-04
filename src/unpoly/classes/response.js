@@ -1,3 +1,5 @@
+const u = up.util
+
 /*-
 A response to an [HTTP request](/up.request).
 
