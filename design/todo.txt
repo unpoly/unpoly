@@ -23,7 +23,6 @@ Concurrency
       - { abort: [e0, e1, ...] }
       - { abort: element }
       - { abort: true }     // abort all
-      - { abort: document } // abort all
       - { abort: 'target' } // was { solo: 'subtree' }, will be expanded to elements before the event is emitted
   - Remove { solo } option from up.request()
     - Deprecation says to use up.network.abort() instead
