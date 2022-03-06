@@ -14,18 +14,7 @@ TODOs for next release
 Concurrency
 -----------
 
-- Rethink request defaults
-  - Rethink whether we want to link up.request() to the current layer by default?
-    - Or only when { layer } or { origin } options are given?
-    - Counter-point is: All other functionality sees the current layer by default
-- When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - NavigateOptions should default to `{ abort: 'target' }`
-- up.network.abort(): Can we get rid of excerpt argument now that most aborting happens within up.fragment?
-- Introduce new function up.fragment.abort(fragment)
-- Abort logging
-  - Print { solo } warning only if there are other requests to abort
-  - When aborting a request due to layer closing, log so
-  - When aborting a request due to fragment destroy, log so
 - Rename up.render({ solo }) to up.render({ abort })
   - Use up.fragment.abort() internally
   - Remove { abort: Function } variant
@@ -86,6 +75,12 @@ Various changes
 ---------------
 
 - Fix all Webpack errors
+- unpoly-migrate does not warn i.r.t. [up-reveal] ?
+- Rethink request defaults
+  - Rethink whether we want to link up.request() to the current layer by default?
+    - Or only when { layer } or { origin } options are given?
+    - Counter-point is: All other functionality sees the current layer by default
+  - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - Do follow links with [target=_self]
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
 - Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
@@ -137,6 +132,7 @@ Various changes
 Docs
 ----
 
+- Document { abort } option and link everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
 - Test and Document that we can use live validation like this:
   <input up-keep up-validate up-observe-event="input">
@@ -171,8 +167,10 @@ Docs
   - { scrollBehavior }
     - if we stop auto-set it to auto, otherwise stop parsing this
 
-Maybe
------
+
+
+Backlog
+=======
 
 - Consider implementing an abortable up:navigate event
   - This would be the first feature that goes beyond "navigation is just a preset"
@@ -216,18 +214,8 @@ Maybe
     - Yes, because onFinished may not fire for fatals or prevented up:fragment:loaded
   - How would this work together with future up.RenderRequest?
   - How would this work together with "local changes are sync"?
-
-
-Long term solution
-------------------
-
 - Consolidate [up-validate], [up-switch] and [up-observe] into a tree of form dependencies
-- This way we can selectively disable parts of the form
-
-
-Backlog
-=======
-
+  - This way we can selectively disable parts of the form
 - Functionality that checks for isDetached() should probably also check for .up-destroying
 - Improve `{ focus: 'keep' }` so it focuses the former form group if we lose focus
   - This may be easier said than done
