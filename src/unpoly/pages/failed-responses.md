@@ -1,15 +1,22 @@
-Handling server errors
-======================
+Handling failed responses
+=========================
 
-You may pass different render options for server responses with an error code.
+You can configure how Unpoly handles failed server responses.
 
-Any HTTP status code other than 2xx or 304 is considered an error code.
+Some example for failed responses are:
 
-A common use case for this is [form submissions](/up.form), where a successful response
-should display a follow-up screen, but a failed response should re-render the form
-or display errors.
+- A form submission fails due to invalid user input. The server re-renders the form with validation errors.
+- The server renders unexpected content, like a login screen or a maintenance page.
+- The server-side app crashes with an HTTP 500 server error.
+- The request is aborted by a second request targeting the same fragment.
 
 ## Rendering failed responses differently
+
+You may pass different render options for server responses with an error code, which we will call *failed* responses below.
+Any HTTP status other than 2xx or 304 is considered a failed response.
+
+A common use case for this is [form submissions](/up.form), where a successful response
+should display a follow-up screen, but a failed response should re-render the form with validation errors.
 
 To use a different [render option](/up.render) for a failed server response,
 prefix the option with `fail`:
@@ -30,10 +37,10 @@ you may infix an attribute with `fail`:
 
 ```html
 <form method="post" action="/action"
-  up-target=".content"
-  up-fail-target="form"
-  up-scroll="auto"
-  up-fail-scroll=".errors">
+  up-target=".content"      <!-- when submission succeeds update '.content' -->
+  up-fail-target="form"     <!-- when submission fails update the form -->
+  up-scroll="auto"          <!-- when submission succeeds use default scroll behavior -->
+  up-fail-scroll=".errors"> <!-- when submission fails scroll to the error messages -->
   ...
 </form>
 ```
@@ -76,24 +83,32 @@ When the updated fragment content is not requested from a `{ url }`, but rather 
 HTML string, the update is always considered successful.
 
 
-## Handling other types of failure
+## Handling unexpected content
 
-### Fatal network errors
+A server might sometimes respond with unexpected content, like a maintenance page or a
+login form. In these cases a specific target selector may not match in the server response.
+
+With `{ fallback: true }` or `[up-fallback=true]` Unpoly will try to match a [main target](/up-main)
+before giving up. This will show the server content in the application's main content area,
+which is often preferred to a link appearing dead. Fallback targets are enabled by default when [navigating](/navigation).
+
+To configure a custom handling of unexpected content, use the `up:fragment:loaded` event.
+
+
+## Handling fatal network errors
 
 When a request encounters fatal error like a timeout or loss of network connectivity, Unpoly
 will emit `up:request:fatal` and not render.
 
-### Aborted requests
+Because there never was a server response, `up:fragment:loaded` will *not* be emitted in this case.
+
+
+## Handling aborted requests
 
 When a request was aborted, Unpoly will emit `up:request:aborted` and not render.
 
 A promise for an aborted request will reject with an `up.AbortError`.
 
-### Unexpected content
-
-A server might sometimes respond with unexpected content, like a maintenance page or a
-login form.
-
-To handle these cases, see `up:fragment:loaded`.
+[By default](/up.render#options.solo) Unpoly will abort a request when a second request targets the same fragment.
 
 @page server-errors
