@@ -14,9 +14,6 @@ TODOs for next release
 Concurrency
 -----------
 
-- Fix and test FormValidator#getSelectorSolution
-- We still pass on { solo } to request
-  - With migrate we get: The option up.request({ solo }) has been deprecated. Use Call up.network.abort() before the request instead.
 - NavigateOptions should default to `{ abort: 'target' }`
 - Rename up.render({ solo }) to up.render({ abort })
   - Use up.fragment.abort() internally

@@ -4276,6 +4276,15 @@ describe 'up.fragment', ->
 
       describe 'with { solo } option', ->
 
+        it 'does not pass the option to up.request(), where it would be handled a second time (bugfix)', asyncSpec (next) ->
+          fixture('.target')
+          requestSpy = spyOn(up, 'request').and.callThrough()
+
+          up.render(target: '.target', url: '/path', solo: false)
+
+          next ->
+            expect(requestSpy.calls.argsFor(0)[0].solo).not.toBe(false)
+
         describe 'with { solo: true }', ->
 
           it 'aborts the request of an existing change', asyncSpec (next) ->
