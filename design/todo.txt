@@ -74,6 +74,7 @@ Various changes
 ---------------
 
 - Fix all Webpack errors
+- When server responds with 500 and no { fallback }, we get an error "No target selector given"?
 - unpoly-migrate does not warn i.r.t. [up-reveal] ?
 - Rethink request defaults
   - Rethink whether we want to link up.request() to the current layer by default?
