@@ -68,7 +68,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     const failAttrs = this.preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
     return {
-      ...this.options, // contains preflight keys relevant for the request, e.g. { url, method, solo }
+      ...u.omit(this.options, ['solo']), // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
       ...u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
     }
