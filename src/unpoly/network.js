@@ -90,7 +90,7 @@ up.network = (function() {
     The value is given in milliseconds.
 
   @param {boolean|Function(up.Response): boolean} [config.fail]
-    Whether Unpoly will consider a response to constitute a [server error](/failed-responses).
+    Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 
     By default Unpoly will consider any status code other than HTTP 2xx or 304 to represent a failed response.
     You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
