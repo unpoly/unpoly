@@ -799,9 +799,9 @@ up.form = (function() {
     validation is received and the form was updated.
   @stable
   */
-  function validate(field, options) {
-    let validator = up.FormValidator.forElement(field)
-    return validator.validate(field, options)
+  function validate(fieldOrSelector, options) {
+    let validator = up.FormValidator.forElement(fieldOrSelector)
+    return validator.validate(fieldOrSelector, options)
   }
 
   /*-

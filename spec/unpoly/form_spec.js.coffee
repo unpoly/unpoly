@@ -921,6 +921,28 @@ describe 'up.form', ->
         next ->
           expect(validateListener).toHaveBeenCalled()
 
+      it 'validates the given element', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        formInput = e.affix(form, 'input[name=foo]')
+
+        up.validate(formInput)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
+
+
+      it 'validates the element matching the given CSS selector', asyncSpec (next) ->
+        otherForm = fixture('form[action=/other]')
+        otherFormInput = e.affix(otherForm, 'input[name=foo]')
+
+        form = fixture('form[action=/form]')
+        formInput = e.affix(form, 'input[name=foo]')
+
+        up.validate('[name=foo]')
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
+
     describe 'up.form.disable()', ->
 
       it "disables the form's fields", ->
