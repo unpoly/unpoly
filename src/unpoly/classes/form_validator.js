@@ -43,7 +43,7 @@ up.FormValidator = class FormValidator {
     return up.form.observeOptions(field, {}, { defaults })
   }
 
-  getSolution(elementOrSelector,) {
+  getSolution(elementOrSelector) {
     let solution
     if (u.isString(elementOrSelector)) {
       solution = this.getSelectorSolution(elementOrSelector)
@@ -59,7 +59,7 @@ up.FormValidator = class FormValidator {
   getSelectorSolution(selector) {
     let element = up.fragment.get(selector, { layer: this.form })
     return {
-      target, // Throw we obviously have no test for this error
+      target: selector,
       element,
       origin: element
     }
