@@ -99,7 +99,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         callback: this.options.onLoaded,
         response: this.response,
         renderOptions: this.options,
-        log: ['Loaded fragment from response to %s (HTTP %d)', this.request.description, this.response.status]
+        log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description]
       })
 
       // Listeners to up:fragment:loaded may have changed renderOptions.fail
@@ -109,6 +109,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       if (response.ok) {
         return this.updateContentFromResponse(this.options)
       } else {
+        up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
         throw this.updateContentFromResponse(this.deriveFailOptions())
       }
     } else {

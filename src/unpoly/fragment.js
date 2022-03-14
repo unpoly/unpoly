@@ -577,7 +577,7 @@ up.fragment = (function() {
     By default any HTTP status code other than 2xx or 304 is considered an error code.
 
     For failed responses Unpoly will use options prefixed with `fail`, e.g. `{ failTarget }`.
-    See [handling server errors](/server-errors) for details.
+    See [handling server errors](/failed-responses) for details.
 
   @param {boolean|string} [options.history]
     Whether the browser URL and window title will be updated.

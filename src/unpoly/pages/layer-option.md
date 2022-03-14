@@ -115,7 +115,7 @@ See [opening overlays](/opening-overlays) for details.
 Like most render options, `{ layer }` and `[up-layer]` indicate which layer
 to update in case of a successful server response.
 
-To set the layer when the [server responds with an error code](/server-errors),
+To set the layer when the [server responds with an error code](/failed-responses),
 use `{ failLayer }` or `[up-fail-layer]`.
 
 

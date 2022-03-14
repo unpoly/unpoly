@@ -678,7 +678,7 @@ up.motion = (function() {
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
-    @see server-errors
+    @see failed-responses
   @stable
   */
 
@@ -704,7 +704,7 @@ up.motion = (function() {
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
-    @see server-errors
+    @see failed-responses
   @stable
   */
 

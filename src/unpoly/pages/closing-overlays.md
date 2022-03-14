@@ -201,7 +201,7 @@ after a successful form submission. This will automatically close the form's own
 </form>
 ```
 
-Note that the form will still update its own layer when the [server responds with an error code](/server-errors)
+Note that the form will still update its own layer when the [server responds with an error code](/failed-responses)
 due to a validation error. To target another layer in this case, set an `[up-fail-layer]` attribute.
 
 

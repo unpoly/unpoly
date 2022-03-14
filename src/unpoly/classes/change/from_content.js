@@ -148,7 +148,11 @@ up.Change.FromContent = class FromContent extends up.Change {
       const humanizedLayerOption = up.layer.optionToString(this.options.layer)
       up.fail(reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption)
     } else if (this.layers.length) {
-      up.fail('No target selector given')
+      if (this.options.isFailOptions) {
+        up.fail('No target selector given for failed responses (https://unpoly.com/failed-responses)')
+      } else {
+        up.fail('No target selector given')
+      }
     } else {
       up.fail('Layer %o does not exist', this.options.layer)
     }
