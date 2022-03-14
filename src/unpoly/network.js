@@ -90,7 +90,7 @@ up.network = (function() {
     The value is given in milliseconds.
 
   @param {boolean|Function(up.Response): boolean} [config.fail]
-    Whether Unpoly will consider a response to constitute a [server error](/server-errors).
+    Whether Unpoly will consider a response to constitute a [server error](/failed-responses).
 
     By default Unpoly will consider any status code other than HTTP 2xx or 304 to represent a failed response.
     You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
@@ -443,7 +443,7 @@ up.network = (function() {
     the associated layer is the future overlay's parent layer.
 
   @param {string} [options.failLayer='current']
-    The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/server-errors).
+    The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/failed-responses).
 
   @param {Element} [options.origin]
     The DOM element that caused this request to be sent, e.g. a hyperlink or form element.

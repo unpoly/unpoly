@@ -70,7 +70,7 @@ up.Request = class Request extends up.Record {
 
   /*-
   The CSS selector targeted by this request in case the server responds
-  with an [error code](/server-errors).
+  with an [error code](/failed-responses).
 
   The selector will be sent as an `X-Up-Fail-Target` header.
 
@@ -125,7 +125,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [context](/context) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
+  The [context](/context) of the layer targeted by this request in case the server responds with an [error code](/failed-responses).
 
   The context object will be sent as an `X-Up-Fail-Context` header.
 
@@ -147,7 +147,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [layer](/up.layer) targeted by this request in case the server responds with an [error code](/server-errors).
+  The [layer](/up.layer) targeted by this request in case the server responds with an [error code](/failed-responses).
 
   Setting the `{ failLayer }` property will automatically derive `{ failContext }` and `{ failMode }` properties.
 
@@ -182,7 +182,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [mode](/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/server-errors).
+  The [mode](/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/failed-responses).
 
   The value will be sent as an `X-Up-Fail-Mode` header.
 

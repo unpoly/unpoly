@@ -111,4 +111,4 @@ A promise for an aborted request will reject with an `up.AbortError`.
 
 [By default](/up.render#options.solo) Unpoly will abort a request when a second request targets the same fragment.
 
-@page server-errors
+@page failed-responses

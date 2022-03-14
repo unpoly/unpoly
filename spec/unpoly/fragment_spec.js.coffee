@@ -620,6 +620,19 @@ describe 'up.fragment', ->
                     expect(result.state).toEqual('rejected')
                     done()
 
+          it 'rejects with an error that explains why success targets were not used', (done) ->
+            fixture('.target')
+            promise = up.render('.target', url: '/qux')
+
+            u.task ->
+              jasmine.respondWithSelector('.unexpected', status: 500)
+
+              u.task ->
+                promiseState(promise).then ({ state, value }) ->
+                  expect(state).toBe('rejected')
+                  expect(value).toMatch(/No target selector given for failed responses/i)
+                  done()
+
           describe 'with { fail } option', ->
 
             it 'always uses success options with { fail: false }', asyncSpec (next) ->

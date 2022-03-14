@@ -936,7 +936,7 @@ up.link = (function() {
     By default any HTTP status code other than 2xx or 304 is considered an error code.
 
     For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. `[up-fail-target]`.
-    See [handling server errors](/server-errors) for details.
+    See [handling server errors](/failed-responses) for details.
 
   @param [up-history='auto']
     Whether the browser URL and window title will be updated.

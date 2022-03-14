@@ -147,11 +147,12 @@ up.RenderOptions = (function() {
   }
 
   function deriveFailOptions(preprocessedOptions) {
-    return u.merge(
-      preprocessedOptions.defaults,
-      u.pick(preprocessedOptions, SHARED_KEYS),
-      failOverrides(preprocessedOptions)
-    )
+    return {
+      ...preprocessedOptions.defaults,
+      ...u.pick(preprocessedOptions, SHARED_KEYS),
+      ...failOverrides(preprocessedOptions),
+      ...{ isFailOptions: true }
+    }
   }
 
   function addCallback(options, prop, callback) {

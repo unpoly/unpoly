@@ -503,7 +503,7 @@ up.form = (function() {
   Listeners may inspect and manipulate [render options](/up.render) for the coming fragment update.
 
   The code below will use a custom [transition](/a-up-transition)
-  when a form submission [fails](/server-errors):
+  when a form submission [fails](/failed-responses):
 
   ```js
   up.on('up:form:submit', function(event, form) {
@@ -1024,7 +1024,7 @@ up.form = (function() {
   </form>
   ```
 
-  See [handling server errors](/server-errors) for details.
+  See [handling server errors](/failed-responses) for details.
 
   Note that you can also use
   [`input[up-validate]`](/input-up-validate) to perform server-side
@@ -1061,7 +1061,7 @@ up.form = (function() {
 
     Defaults to the form element itself.
 
-    @see server-errors
+    @see failed-responses
 
   @param [up-disable]
     Whether to [disable](/up.form.disable) this forms while it is submitting.
