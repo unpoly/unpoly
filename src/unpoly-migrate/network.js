@@ -31,7 +31,7 @@ up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
 up.migrate.handleRequestOptions = function(options) {
   up.migrate.fixKey(options, 'data', 'params')
 
-  if (option.solo) {
+  if (options.solo) {
     up.migrate.deprecated('The option up.request({ solo })', 'Call up.network.abort() before the request')
   }
 }

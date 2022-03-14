@@ -1,3 +1,5 @@
+const u = up.util
+
 up.Change.FromOptions = class FromOptions extends up.Change {
 
   constructor(options) {
