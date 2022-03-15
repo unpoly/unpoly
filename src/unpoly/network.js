@@ -481,34 +481,8 @@ up.network = (function() {
 
     useCachedRequest(request) || queueRequest(request)
 
-    // handleSolo({ ...options, targetElements: request.targetElements, except: request })
-
     return request
   }
-
-  // function mimicLocalRequest({ solo, targetElements, clearCache }) {
-  //   handleSolo({ solo, targetElements })
-  //
-  //   // We cannot consult config.clearCache since there is no up.Request
-  //   // for a local update.
-  //   if (clearCache) {
-  //     cache.clear(clearCache)
-  //   }
-  // }
-  //
-  // function handleSolo({ solo, targetElements, except }) {
-  //   if (solo && isBusy()) {
-  //     let abortOptions = {
-  //       except,
-  //       logOnce: ['up.request()', 'Change with { solo } option will abort other requests']
-  //     }
-  //     if (solo === 'target') {
-  //       abortSubtree(targetElements, abortOptions)
-  //     } else {
-  //       abortRequests(solo, abortOptions)
-  //     }
-  //   }
-  // }
 
   function parseRequestOptions(args) {
     const options = u.extractOptions(args)
