@@ -110,30 +110,28 @@ up.fragment.first = function(...args) {
 up.first = up.fragment.first
 
 up.migrate.handleScrollOptions = function(options) {
-  if (u.isUndefined(options.scroll)) {
-    // Rewrite deprecated { reveal } option (it had multiple variants)
-    if (u.isString(options.reveal)) {
-      up.migrate.deprecated(`Option { reveal: '${options.reveal}' }`, `{ scroll: '${options.reveal}' }`)
-      options.scroll = options.reveal
-    } else if (options.reveal === true) {
-      up.migrate.deprecated('Option { reveal: true }', "{ scroll: 'target' }")
-      options.scroll = 'target'
-    } else if (options.reveal === false) {
-      up.migrate.deprecated('Option { reveal: false }', "{ scroll: false }")
-      options.scroll = false
-    }
+  // Rewrite deprecated { reveal } option (it had multiple variants)
+  if (u.isString(options.reveal)) {
+    up.migrate.deprecated(`Option { reveal: '${options.reveal}' }`, `{ scroll: '${options.reveal}' }`)
+    options.scroll = options.reveal
+  } else if (options.reveal === true) {
+    up.migrate.deprecated('Option { reveal: true }', "{ scroll: 'target' }")
+    options.scroll = 'target'
+  } else if (options.reveal === false) {
+    up.migrate.deprecated('Option { reveal: false }', "{ scroll: false }")
+    options.scroll = false
+  }
 
-    // Rewrite deprecated { resetScroll } option
-    if (u.isDefined(options.resetScroll)) {
-      up.migrate.deprecated('Option { resetScroll: true }', "{ scroll: 'reset' }")
-      options.scroll = 'teset'
-    }
+  // Rewrite deprecated { resetScroll } option
+  if (u.isDefined(options.resetScroll)) {
+    up.migrate.deprecated('Option { resetScroll: true }', "{ scroll: 'reset' }")
+    options.scroll = 'teset'
+  }
 
-    // Rewrite deprecated { restoreScroll } option
-    if (u.isDefined(options.restoreScroll)) {
-      up.migrate.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
-      options.scroll = 'restore'
-    }
+  // Rewrite deprecated { restoreScroll } option
+  if (u.isDefined(options.restoreScroll)) {
+    up.migrate.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
+    options.scroll = 'restore'
   }
 }
 
