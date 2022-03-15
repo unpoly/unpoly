@@ -56,6 +56,14 @@ Concurrency
   - Test that we can use [up-validate] with another event and a delay
   - Test that [up-validate] will not make a request if the target is removed while waiting for the delay
   - Test that multiple [up-validate] requests are merged into a single request
+- Do we want a shortcut macro for this:
+      <input up-validate up-keep up-observe-event="input">
+  - <input up-live-validate>
+  - <input up-fast-validate>
+  - <input up-concurrent-validate>
+  - <input up-quick-validate>
+  - <input up-input-validate>
+  - <input up-validate-on-input>
 
 
 
@@ -69,6 +77,7 @@ Various changes
   - Rethink whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
     - Counter-point is: All other functionality sees the current layer by default
+    - If we do this we should also remove auto-lookup of { targetElements }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - Do follow links with [target=_self]
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
@@ -138,6 +147,7 @@ Docs
 - [up-observe-feedback], [up-observe-disable],  [up-observe-delay],  [up-observe-event]
   - [up-autosubmit] needs a params note saying that that attributes for [up-observe] may be used
   - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
+  - Explain that they can be set either on the form or on an input
 - up.form.config.disable
 - up.form.config.inputEvent
 - up.form.config.inputDelay
