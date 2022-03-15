@@ -16,7 +16,7 @@ up.migrate.migratedFormGroupSelectors = function() {
   })
 }
 
-const observeDelayMovedWarning = () => warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
+const observeDelayMovedWarning = () => up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
 Object.defineProperty(up.form.config, 'observeDelay', {
   get() {
     observeDelayMovedWarning()
@@ -24,7 +24,7 @@ Object.defineProperty(up.form.config, 'observeDelay', {
   },
   set(newDelay) {
     observeDelayMovedWarning()
-    return up.form.config.observeOptions.delay = newDelay
+    up.form.config.observeOptions.delay = newDelay
   }
 })
 

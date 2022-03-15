@@ -72,17 +72,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       this.layer.peel()
     }
 
-    // Unless the user has explicitly opted out of the default { solo: 'target' }
-    // by passing { solo: false }, we abort pending requests targeting
+    // Unless the user has explicitly opted out of the default { abort: 'target' }
+    // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
-    if (this.options.solo !== false) {
+    if (this.options.abort !== false) {
       up.fragment.abort(this.getTargetElements(), { reason: 'Fragment is being replaced' })
     }
-
-    // up.network.handleSolo({
-    //   solo: this.options.solo,
-    //   targetElements: this.getTargetElements()
-    // })
 
     u.assign(this.layer.context, this.context)
 

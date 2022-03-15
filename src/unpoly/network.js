@@ -402,8 +402,8 @@ up.network = (function() {
 
     You may also pass a [URL pattern](/url-patterns) to only uncache matching responses.
 
-  @param {boolean|string|Function} [options.solo]
-    With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before making this new request.
+  @param {boolean|string|Function} [options.abort]
+    With `{ abort: true }` Unpoly will [abort](/up.network.abort) all other requests before making this new request.
 
     To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.

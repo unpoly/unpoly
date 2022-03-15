@@ -4274,18 +4274,21 @@ describe 'up.fragment', ->
             expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
             expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
 
-      describe 'with { solo } option', ->
+      - if up.migrate.loaded
+        describe 'with legacy { solo } option', ->
 
-        it 'does not pass the option to up.request(), where it would be handled a second time (bugfix)', asyncSpec (next) ->
-          fixture('.target')
-          requestSpy = spyOn(up, 'request').and.callThrough()
+          it 'does not pass the option to up.request(), where it would be handled a second time (bugfix)', asyncSpec (next) ->
+            fixture('.target')
+            requestSpy = spyOn(up, 'request').and.callThrough()
 
-          up.render(target: '.target', url: '/path', solo: false)
+            up.render(target: '.target', url: '/path', solo: false)
 
-          next ->
-            expect(requestSpy.calls.argsFor(0)[0].solo).not.toBe(false)
+            next ->
+              expect(requestSpy.calls.argsFor(0)[0].solo).not.toBe(false)
 
-        describe 'with { solo: true }', ->
+      describe 'with { abort } option', ->
+
+        describe 'with { abort: true }', ->
 
           it 'aborts the request of an existing change', asyncSpec (next) ->
             fixture('.element')
@@ -4294,14 +4297,14 @@ describe 'up.fragment', ->
             change1Promise = undefined
             change2Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path1', solo: true)
+            change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
             next =>
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', url: '/path2', solo: true)
+              change2Promise = up.render('.element', url: '/path2', abort: true)
 
             next =>
               expect(change1Error).toBeAbortError()
@@ -4314,14 +4317,14 @@ describe 'up.fragment', ->
             change1Promise = undefined
             change2Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path1', solo: true)
+            change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
             next =>
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', content: 'local content', solo: true)
+              change2Promise = up.render('.element', content: 'local content', abort: true)
 
             next =>
               expect(change1Error).toBeAbortError()
@@ -4334,14 +4337,14 @@ describe 'up.fragment', ->
             change1Promise = undefined
             change2Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path1', solo: true)
+            change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
             next =>
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', url: '/path2', preload: true, solo: true)
+              change2Promise = up.render('.element', url: '/path2', preload: true, abort: true)
 
             next =>
               expect(change1Error).toBeUndefined()
@@ -4362,7 +4365,7 @@ describe 'up.fragment', ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', url: '/path', solo: true, cache: true)
+              change2Promise = up.render('.element', url: '/path', abort: true, cache: true)
               change2Promise.catch (e) -> change2Error = e
 
             next =>
@@ -4370,40 +4373,40 @@ describe 'up.fragment', ->
               expect(change2Error).toBeUndefined()
               expect(up.network.queue.allRequests.length).toEqual(1)
 
-          it "aborts an existing change's request that was queued with { solo: false }", asyncSpec (next) ->
+          it "aborts an existing change's request that was queued with { abort: false }", asyncSpec (next) ->
             fixture('.element')
 
             change1Error  = undefined
             change1Promise = undefined
 
-            change1Promise = up.render('.element', url: '/path1', solo: false)
+            change1Promise = up.render('.element', url: '/path1', abort: false)
             change1Promise.catch (e) -> change1Error = e
 
             next =>
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              up.render('.element', url: '/path2', solo: true)
+              up.render('.element', url: '/path2', abort: true)
 
             next =>
               expect(change1Error).toBeAbortError()
               expect(up.network.queue.allRequests.length).toEqual(1)
 
-        describe 'with { solo: "all" }', ->
+        describe 'with { abort: "all" }', ->
 
-          it 'is an alias for { solo: true }', asyncSpec (next) ->
+          it 'is an alias for { abort: true }', asyncSpec (next) ->
             fixture('.element')
             # We must have some earlier requests or up.fragment.abort() will not be called.
             previousRequest = up.request('/baz')
 
             abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', url: '/path1', solo: 'all')
+            up.render('.element', url: '/path1', abort: 'all')
 
             next ->
               expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining(layer: 'any'))
 
-        describe 'with { solo: "layer" }', ->
+        describe 'with { abort: "layer" }', ->
 
           it "aborts all requests on the targeted fragment's layer ", asyncSpec (next) ->
             layers = makeLayers(3)
@@ -4415,12 +4418,12 @@ describe 'up.fragment', ->
 
             abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', url: '/path1', solo: 'layer', layer: 1)
+            up.render('.element', url: '/path1', abort: 'layer', layer: 1)
 
             next ->
               expect(abortSpy).toHaveBeenCalledWith(jasmine.objectContaining(layer: up.layer.get(1)))
 
-        describe 'with { solo } option set to a CSS selector', ->
+        describe 'with { abort } option set to a CSS selector', ->
 
           it "aborts all requests in the subtree of a matching element in the targeted layer", asyncSpec (next) ->
             layers = makeLayers(3)
@@ -4432,12 +4435,12 @@ describe 'up.fragment', ->
 
             abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', url: '/path1', solo: '.element', layer: 1)
+            up.render('.element', url: '/path1', abort: '.element', layer: 1)
 
             next ->
               expect(abortSpy).toHaveBeenCalledWith('.element', jasmine.objectContaining(layer: up.layer.get(1)))
 
-        describe 'with { solo } option set to an Element', ->
+        describe 'with { abort } option set to an Element', ->
 
           it "aborts all requests in the subtree of that Element", asyncSpec (next) ->
             element = fixture('.element')
@@ -4447,12 +4450,12 @@ describe 'up.fragment', ->
 
             abortSpy = spyOn(up.fragment, 'abort')
 
-            up.render('.element', url: '/path1', solo: element)
+            up.render('.element', url: '/path1', abort: element)
 
             next ->
               expect(abortSpy).toHaveBeenCalledWith(element, jasmine.anything())
 
-        describe 'with { solo: "target" }', ->
+        describe 'with { abort: "target" }', ->
 
           it 'aborts existing requests targeting the same element', (done) ->
             fixture('.element')
@@ -4460,7 +4463,7 @@ describe 'up.fragment', ->
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.element', url: '/path2', solo: 'target')
+            up.render('.element', url: '/path2', abort: 'target')
 
             u.task ->
               promiseState(change1Promise).then (result) ->
@@ -4477,7 +4480,7 @@ describe 'up.fragment', ->
 
             expect(up.network.queue.allRequests.length).toBe(2)
 
-            up.render('.element', content: 'new content', solo: 'target')
+            up.render('.element', content: 'new content', abort: 'target')
 
             u.task ->
               expect('.element').toHaveText('new content')
@@ -4497,7 +4500,7 @@ describe 'up.fragment', ->
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.parent', url: '/path2', solo: 'target')
+            up.render('.parent', url: '/path2', abort: 'target')
 
             u.task ->
               promiseState(change1Promise).then (result) ->
@@ -4511,7 +4514,7 @@ describe 'up.fragment', ->
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.child', url: '/path2', solo: 'target')
+            up.render('.child', url: '/path2', abort: 'target')
 
             u.task ->
               promiseState(parentChangePromise).then (result) ->
@@ -4524,7 +4527,7 @@ describe 'up.fragment', ->
 
             expect(up.network.queue.allRequests.length).toBe(1)
 
-            up.render('.element', url: '/path', solo: 'target', cache: true)
+            up.render('.element', url: '/path', abort: 'target', cache: true)
 
             u.task ->
               promiseState(preloadPromise).then (result) ->
@@ -4534,8 +4537,8 @@ describe 'up.fragment', ->
 
           it 'does not let multiple preload requests for the same target abort each other', (done) ->
             fixture('.element')
-            preloadPromise1 = up.render('.element', url: '/path1', solo: 'target', preload: true)
-            preloadPromise2 = up.render('.element', url: '/path2', solo: 'target', preload: true)
+            preloadPromise1 = up.render('.element', url: '/path1', abort: 'target', preload: true)
+            preloadPromise2 = up.render('.element', url: '/path2', abort: 'target', preload: true)
 
             u.task ->
               Promise.all([promiseState(preloadPromise1), promiseState(preloadPromise2)]).then ([result1, result2]) ->
@@ -4544,7 +4547,7 @@ describe 'up.fragment', ->
                 expect(up.network.queue.allRequests.length).toBe(2)
                 done()
 
-        describe 'with { solo: false }', ->
+        describe 'with { abort: false }', ->
 
           it "does not abort an existing change's request", asyncSpec (next) ->
             fixture('.element')
@@ -4559,7 +4562,7 @@ describe 'up.fragment', ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              up.render('.element', url: '/path2', solo: false)
+              up.render('.element', url: '/path2', abort: false)
 
             next =>
               expect(change1Error).toBeUndefined()
@@ -4568,14 +4571,14 @@ describe 'up.fragment', ->
           it 'does not abort requests targeting the same subtree once our response is received and swapped in', asyncSpec (next) ->
             fixture('.element', text: 'old text')
 
-            change1Promise = up.render('.element', url: '/path1', solo: false)
+            change1Promise = up.render('.element', url: '/path1', abort: false)
             change1Error = undefined
             change1Promise.catch (e) -> change1Error = e
 
             next =>
               expect(up.network.queue.allRequests.length).toEqual(1)
 
-              up.render('.element', url: '/path2', solo: false)
+              up.render('.element', url: '/path2', abort: false)
 
             next =>
               expect(up.network.queue.allRequests.length).toEqual(2)
@@ -4588,7 +4591,7 @@ describe 'up.fragment', ->
               expect(change1Error).toBeUndefined()
               expect(up.network.queue.allRequests.length).toEqual(1)
 
-        describe 'with { solo: Function } option zzz', ->
+        describe 'with { abort: Function } option zzz', ->
 
   #        it 'may be passed as a function that decides which existing requests are aborted', asyncSpec (next) ->
   #          fixture('.element')
@@ -4605,9 +4608,9 @@ describe 'up.fragment', ->
   #          soloFn = (request) ->
   #            u.matchURLs(request.url, '/path1')
   #
-  #          change1Promise = up.render('.element', url: '/path1', solo: false)
+  #          change1Promise = up.render('.element', url: '/path1', abort: false)
   #          change1Promise.catch (e) -> change1Error = e
-  #          change2Promise = up.render('.element', url: '/path2', solo: false)
+  #          change2Promise = up.render('.element', url: '/path2', abort: false)
   #          change2Promise.catch (e) -> change2Error = e
   #
   #          next =>
@@ -4615,7 +4618,7 @@ describe 'up.fragment', ->
   #            expect(change1Error).toBeUndefined()
   #            expect(change2Error).toBeUndefined()
   #
-  #            change3Promise = up.render('.element', url: '/path3', solo: soloFn)
+  #            change3Promise = up.render('.element', url: '/path3', abort: soloFn)
   #            change3Promise.catch (e) -> change3Error = e
   #
   #          next =>
@@ -4652,7 +4655,7 @@ describe 'up.fragment', ->
   #            soloFn = (request) ->
   #              u.matchURLs(request.url, '/path1')
   #
-  #            change3Promise = up.render('.element3', content: 'new content', solo: soloFn)
+  #            change3Promise = up.render('.element3', content: 'new content', abort: soloFn)
   #            change3Promise.catch (e) -> change3Error = e
   #
   #          next =>

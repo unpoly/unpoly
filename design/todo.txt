@@ -14,17 +14,7 @@ TODOs for next release
 Concurrency
 -----------
 
-- Rename up.render({ solo }) to up.render({ abort })
-  - Use up.fragment.abort() internally
-  - Remove { abort: Function } variant
-    - Remaining variants are
-      - { abort: '.selector' }
-      - { abort: [e0, e1, ...] }
-      - { abort: element }
-      - { abort: true }     // abort all
-      - { abort: 'target' } // was { solo: 'subtree' }, will be expanded to elements before the event is emitted
-  - Remove { solo } option from up.request()
-    - Deprecation says to use up.network.abort() instead
+- This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
 - Abort validate observers when requests targeting the form are aborted through { solo }
   - We introduced a regression
     - Dirty field with [up-validate], waiting for 1 task
