@@ -68,13 +68,13 @@ up.Change.FromURL = class FromURL extends up.Change {
     const failAttrs = this.preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
     return {
-      ...u.omit(this.options, ['solo']), // contains preflight keys relevant for the request, e.g. { url, method }
+      ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
       ...u.renameKeys(failAttrs, up.fragment.failKey) // contains meta information for a failed update, e.g. { failTarget }
     }
   }
 
-  // This is required by up.Change.FromOptions to handle { solo: 'target' }.
+  // This is required by up.Change.FromOptions to handle { abort: 'target' }.
   getPreflightProps() {
     return this.getRequestAttrs()
   }
@@ -149,7 +149,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         cache: false, // this implies { verifyCache: false }
         confirm: false,
         feedback: false,
-        solo: false,
+        abort: false,
       })
 
       // A well-behaved server will respond with "304 Not Modified" if the reload

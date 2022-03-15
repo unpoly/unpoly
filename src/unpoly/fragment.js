@@ -464,7 +464,7 @@ up.fragment = (function() {
   ### Concurrency
 
   Unfinished requests targeting the updated fragment or its descendants are [aborted](/up.network.abort).
-  You may control this behavior using the [`{ solo }`](#options.solo) option.
+  You may control this behavior using the [`{ abort }`](#options.abort) option.
 
   ### Events
 
@@ -647,10 +647,10 @@ up.fragment = (function() {
     To only uncache some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
-  @param {boolean|string|Function(request): boolean} [options.solo='target']
-    With `{ solo: subtree }` Unpoly will abort requests targeting the same fragment or its descendants.
+  @param {boolean|string|Function(request): boolean} [options.abort='target']
+    With `{ abort: subtree }` Unpoly will abort requests targeting the same fragment or its descendants.
 
-    With `{ solo: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
+    With `{ abort: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
 
     To abort a particular set of requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
@@ -1982,7 +1982,7 @@ up.fragment = (function() {
   //   element = e.get(element)
   //   let aborted = false
   //   let layer = up.layer.get(element)
-  //   let unsubscribe = layer.on('up:fragment:solo', function({ target } ) {
+  //   let unsubscribe = layer.on('up:fragment:abort', function({ target } ) {
   //     if (target.contains(element)) aborted = true
   //   })
   //   return function() {

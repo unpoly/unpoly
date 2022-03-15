@@ -7,12 +7,12 @@ up.RenderOptions = (function() {
     keep: true,
     source: true,
     saveScroll: true,
-    solo: 'target',
+    abort: 'target',
     verifyCache: 'auto',
   }
 
   const PRELOAD_OVERRIDES = {
-    solo: false,
+    abort: false,
     confirm: false,
     feedback: false
   }
@@ -28,7 +28,7 @@ up.RenderOptions = (function() {
     'cache',
     'clearCache',
     'fallback',  // this may produce a different X-Up-Target request header if { target } is missing on page
-    'solo',
+    'abort',
     'confirm',
     'feedback',
     'origin',
@@ -43,7 +43,7 @@ up.RenderOptions = (function() {
   //
   // Generally we have decided to share:
   //
-  // - Options that are relevant before the request is sent (e.g. { url } or { solo }).
+  // - Options that are relevant before the request is sent (e.g. { url } or { abort }).
   // - Options that change how we think about the entire rendering operation.
   //   E.g. if we always want to see a server response, we set { fallback: true }.
   //

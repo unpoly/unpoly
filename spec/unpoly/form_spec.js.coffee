@@ -1741,7 +1741,7 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().url).toMatchURL('/link-path')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
-      it 'does not send a validation request when we render with { solo } while waiting for the validation delay', asyncSpec (next) ->
+      it 'does not send a validation request when we render with { abort } while waiting for the validation delay', asyncSpec (next) ->
         target = fixture('.target')
         form = fixture('form[up-submit][action="/form-path"][up-validate-delay=20]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
@@ -1750,7 +1750,7 @@ describe 'up.form', ->
         textField.value = "foo"
         Trigger.change(textField)
 
-        up.render('.target', { url: '/render-path', solo: true })
+        up.render('.target', { url: '/render-path', abort: true })
 
         next.after 80, ->
           expect(jasmine.Ajax.requests.count()).toBe(1)

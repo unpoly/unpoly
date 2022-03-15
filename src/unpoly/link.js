@@ -335,7 +335,7 @@ up.link = (function() {
     parser.json('params')
     parser.booleanOrString('cache')
     parser.booleanOrString('clearCache')
-    parser.booleanOrString('solo')
+    parser.booleanOrString('abort')
     parser.string('contentType')
 
     return options
@@ -1011,10 +1011,10 @@ up.link = (function() {
 
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
-  @param [up-solo='true']
-    With `[up-solo=true]` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
+  @param [up-abort='true']
+    With `[up-abort=true]` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
 
-    With `[up-solo=subtree]` Unpoly will abort requests targeting the same fragment or its descendants.
+    With `[up-abort=subtree]` Unpoly will abort requests targeting the same fragment or its descendants.
 
     To abort a particular set requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
 
@@ -1099,7 +1099,7 @@ up.link = (function() {
       // - When the response is received, Unpoly will update the targeted fragment.
       // - This causes the text field (probably being replaced) from losing focus, causing a `change` event,
       //   triggering `[up-validate]` and another server request for the validation.
-      // - The link request is probably `{ solo: true }`, but since it happened *before* the
+      // - The link request is probably `{ abort: true }`, but since it happened *before* the
       //   validation request there was nothing to abort.
       // - When the validation response is received, the text field is probably gone, causing error.
       //

@@ -8,7 +8,7 @@ describe 'up.RenderOptions', ->
       expect(options.hungry).toBe(true)
       expect(options.keep).toBe(true)
       expect(options.source).toBe(true)
-      expect(options.solo).toBe('target')
+      expect(options.abort).toBe('target')
 
     describe 'with { navigate: true }', ->
 
@@ -76,10 +76,10 @@ describe 'up.RenderOptions', ->
     describe 'with { preload: true }', ->
 
       it 'disables features inappropriate when preloading, regardless of given options', ->
-        givenOptions = { preload: true, solo: true, confirm: true, feedback: true, url: '/path' }
+        givenOptions = { preload: true, abort: true, confirm: true, feedback: true, url: '/path' }
         options = up.RenderOptions.preprocess(givenOptions)
 
-        expect(options.solo).toBe(false)
+        expect(options.abort).toBe(false)
         expect(options.confirm).toBe(false)
         expect(options.feedback).toBe(false)
 
@@ -144,7 +144,7 @@ describe 'up.RenderOptions', ->
 
         expect(options.history).toBeFalsy()
         expect(options.cache).toBe(undefined)
-        expect(options.solo).toBe('target')
+        expect(options.abort).toBe('target')
 
     it 'inherits shared keys from success options', ->
       givenOptions = { confirm: 'Really?', origin: document.body, history: true }
