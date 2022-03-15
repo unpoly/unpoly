@@ -8,6 +8,47 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Next
+====
+
+Changes tracked until 2021-03-15:
+
+- Live validatation while typing
+- .up-loading / aria-busy
+- Rename { solo } to { abort }
+- Remove up.request({ solo }) option
+- { abort: 'target' } as new default everywhere (navigation or not)
+- Cache verification, stale-while-revalidate
+  - Don't verify cached content on bad connections (is this documented?)
+  - increase cache time to 15 minutes (up from 5 minutes)
+- Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`. Deprecated `X-Up-Reload-From-Time`.
+- Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
+- Disabling busy forms with `[up-disable]`
+- Fixing forms from hell with stacked [up-validate]
+- Parse `[up-on-finished]`
+- Focus a[up-instant] links on mousedown, so they behave link standard links
+- Abort unfinished requests targeting a fragment that is updated or destroyed
+- Log when nothing is rendered
+- Log when we're rendering a failed response using fail-prefixed options
+- When rendering content from an { origin }, rediscover origin element in server response and prefer matching fragments closest to that
+- Change up.form.config.validateTargets to up.form.config.groupSelectors
+- New experimental features up.form.group(), [up-form-group]; Also configure [up-form-group] instead of [up-fieldset]
+- Abort delayed observer callbacks when the form is submitted
+- up.fragment.abort(), up:fragment:aborted, up.fragment.onAborted()
+  - Fix up.observe() crashing with inputs outside of a form (seems to be valid HTML)
+- Allow to consider [up-hungry] elements for updates to any layer with [up-layer=any]
+- Don't run delayed callbacks when the observed field was removed from the DOM during the delay
+- up.form.config.inputEvent, up.form.config.changeEvent
+- up.form.config.observeDelay => inputDelay
+- input[up-observe-event]
+- Date input validated on blur
+- Listeners to up:fragment:loaded can force failure options by setting event.renderOptions.fail
+- Allow to customize response failure with up.network.config.fail
+- up.form.submitButtons()
+- Fix a bug where up.fragment.get(selector, { layer: 0 }) will always match in the current layer instead of root
+- Fix a up where unpoly-migrate would not rewrite the deprecated { reveal } option when navigating 
+
+
 2.5.3
 -----
 
