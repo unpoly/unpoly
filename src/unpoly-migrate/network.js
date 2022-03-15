@@ -32,7 +32,7 @@ up.migrate.handleRequestOptions = function(options) {
   up.migrate.fixKey(options, 'data', 'params')
 
   if (options.solo) {
-    up.migrate.deprecated('The option up.request({ solo })', 'Call up.network.abort() before the request')
+    up.migrate.warn('The option up.request({ solo }) has been removed. Use up.network.abort() or up.fragment.abort() instead.')
   }
 }
 
