@@ -49,7 +49,8 @@ describe 'up.layer', ->
             expect(element).toHaveClass('other-class')
             expect(element).toHaveText('element text')
 
-        it 'aborts a previous pending request for the current layer', asyncSpec (next) ->
+        it 'aborts a pending request targeting the main element in the current layer', asyncSpec (next) ->
+          up.fragment.config.mainTargets.unshift('.root-element')
           fixture('.root-element')
 
           up.navigate('.root-element', url: '/path1')
@@ -64,6 +65,21 @@ describe 'up.layer', ->
           next ->
             expect(abortedURLs.length).toBe(1)
             expect(abortedURLs[0]).toMatchURL('/path1')
+
+        it 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
+          fixture('.root-element')
+
+          up.navigate('.root-element', url: '/path1')
+          abortedURLs = []
+          up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
+
+          next ->
+            expect(abortedURLs).toBeBlank()
+
+            up.layer.open(url: '/path2')
+
+          next ->
+            expect(abortedURLs).toBeBlank()
 
         it 'aborts a previous pending request that would result in opening a new overlay', asyncSpec (next) ->
           up.layer.open(url: '/path1')

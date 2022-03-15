@@ -8,6 +8,7 @@ describe 'up.RenderOptions', ->
       expect(options.hungry).toBe(true)
       expect(options.keep).toBe(true)
       expect(options.source).toBe(true)
+      expect(options.solo).toBe('target')
 
     describe 'with { navigate: true }', ->
 
@@ -15,7 +16,6 @@ describe 'up.RenderOptions', ->
         givenOptions = { navigate: true }
         options = up.RenderOptions.preprocess(givenOptions)
 
-        expect(options.solo).toBe(true)
         expect(options.feedback).toBe(true)
         expect(options.fallback).toBe(true)
         expect(options.peel).toBe(true)
@@ -55,7 +55,6 @@ describe 'up.RenderOptions', ->
         givenOptions = { navigate: false }
         options = up.RenderOptions.preprocess(givenOptions)
 
-        expect(options.solo).toBe('target')
         expect(options.fallback).toBeUndefined()
         expect(options.peel).toBeUndefined()
         expect(options.cache).toBeUndefined()
@@ -130,7 +129,6 @@ describe 'up.RenderOptions', ->
 
         options = preprocessAndDerive(givenOptions)
 
-        expect(options.solo).toBe(true)
         expect(options.feedback).toBe(true)
         expect(options.fallback).toBe(true)
         expect(options.history).toBe('auto')

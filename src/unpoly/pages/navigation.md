@@ -46,7 +46,6 @@ The following default options will be used when navigating:
 | `{ cache: true }`       | Cache responses for 5 minutes |
 | `{ feedback: true }`    | Set [`.up-active`](/a.up-active) and [`.up-loading`](/up-loading) classes while waiting for the server |
 | `{ focus: 'auto' }`     | Focus the new fragment ([read more](/up.fragment.config#config.autoFocus)) |
-| `{ solo: true }`        | Abort all existing requests |
 | `{ peel: true }`        | Close overlays when targeting a layer below |
 
 

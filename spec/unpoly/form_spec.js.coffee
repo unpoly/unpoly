@@ -1711,7 +1711,8 @@ describe 'up.form', ->
             expect($labels[1]).toHaveText('Validation message')
 
       it 'does not send a validation request if the input field is blurred by clicking the submit button (bugfix)', asyncSpec (next) ->
-        form = fixture('form[up-submit][action="/path"]')
+        container = fixture('.container')
+        form = e.affix(container, 'form[action="/path"][up-target=".container"]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
         submitButton = e.affix(form, 'input[type=submit]')
         up.hello(form)
@@ -1725,9 +1726,10 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBeMissing()
 
       it 'does not send a validation request if the input field is blurred by following an [up-instant] link (bugfix)', asyncSpec (next) ->
-        form = fixture('form[up-submit][action="/form-path"]')
+        container = fixture('.container')
+        form = e.affix(container, 'form[up-submit][action="/form-path"]')
         textField = e.affix(form, 'input[type=text][name=input][up-validate]')
-        instantLink = fixture('a[up-follow][up-instant][href="/link-path"]')
+        instantLink = e.affix(container, 'a[up-target=".container"][up-instant][href="/link-path"]')
         up.hello(form)
 
         textField.value = "foo"
