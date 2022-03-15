@@ -14,16 +14,23 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Hence this change will always be applicable.
 
     return {
-      // We associate this request to our current layer so up:request events
-      // may be emitted on something more specific than the document.
-      layer: this.baseLayer,
       mode: this.options.mode,
       context: this.buildLayer().context,
       origin: this.options.origin,
+
       // The target will always exist in the current page, since
       // we're opening a new layer that will match the target.
       target: this.target,
-      targetElements: [], // The element does not exist yet
+
+      // We associate this request to our base layer so up:request events may be emitted on something
+      // more specific than the document. This will also abort this request when
+      // `up.fragment.abort({ layer })` is called for the base layer.
+      layer: this.baseLayer,
+
+      // We associate this request with the base layer's main element. This way the request
+      // will be aborted if the base layer receives a major navigation, but not when a
+      // minor fragment is updated.
+      targetElements: u.compact([up.fragment.get(':main', { layer: this.baseLayer })]),
     }
   }
 

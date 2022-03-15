@@ -125,7 +125,6 @@ up.fragment = (function() {
     // These defaults will be set to both success and fail options
     // if { navigate: true } is given.
     navigateOptions: {
-      solo: true,      // preflight
       cache: 'auto',   // preflight
       feedback: true,  // preflight
       fallback: true,  // FromContent

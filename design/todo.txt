@@ -14,7 +14,6 @@ TODOs for next release
 Concurrency
 -----------
 
-- NavigateOptions should default to `{ abort: 'target' }`
 - Rename up.render({ solo }) to up.render({ abort })
   - Use up.fragment.abort() internally
   - Remove { abort: Function } variant

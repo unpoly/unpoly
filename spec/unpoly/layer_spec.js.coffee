@@ -49,7 +49,8 @@ describe 'up.layer', ->
             expect(element).toHaveClass('other-class')
             expect(element).toHaveText('element text')
 
-        it 'aborts a previous pending request for the current layer', asyncSpec (next) ->
+        it 'aborts a pending request targeting the main element in the current layer', asyncSpec (next) ->
+          up.fragment.config.mainTargets.unshift('.root-element')
           fixture('.root-element')
 
           up.navigate('.root-element', url: '/path1')
@@ -64,6 +65,21 @@ describe 'up.layer', ->
           next ->
             expect(abortedURLs.length).toBe(1)
             expect(abortedURLs[0]).toMatchURL('/path1')
+
+        it 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
+          fixture('.root-element')
+
+          up.navigate('.root-element', url: '/path1')
+          abortedURLs = []
+          up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
+
+          next ->
+            expect(abortedURLs).toBeBlank()
+
+            up.layer.open(url: '/path2')
+
+          next ->
+            expect(abortedURLs).toBeBlank()
 
         it 'aborts a previous pending request that would result in opening a new overlay', asyncSpec (next) ->
           up.layer.open(url: '/path1')
@@ -267,27 +283,27 @@ describe 'up.layer', ->
               fragment: '<div class="element">element text</div>'
               history: true
             )
-  
+
             next ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(up.layer.history).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
-  
+
           it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
             makeLayers [
               { target: '.root-element' },
               { target: '.overlay-element', location: '/modal-location', history: true }
             ]
-  
+
             expect(up.layer.isOverlay()).toBe(true)
             expect(location.href).toMatchURL('/modal-location')
 
             up.navigate(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false, history: true)
-  
+
             expect(location.href).toMatchURL('/modal-location')
 
             up.layer.dismiss()
-  
+
             expect(up.layer.isRoot()).toBe(true)
             expect(location.href).toMatchURL('/new-root-location')
 
@@ -295,44 +311,44 @@ describe 'up.layer', ->
 
           it 'does not update the browser location ', asyncSpec (next) ->
             originalLocation = location.href
-  
+
             up.layer.open(
               target: '.element',
               history: false,
               location: '/modal-url'
             )
-  
+
             next ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(location.href).toMatchURL(originalLocation)
-  
+
               # We can still ask the layer what location it displays
               expect(up.layer.location).toMatchURL('/modal-url')
-  
+
           it 'does not let child layers update the browser location', asyncSpec (next) ->
             originalLocation = location.href
-  
+
             up.layer.open(
               target: '.element',
               history: false,
               location: '/overlay1',
             )
-  
+
             next ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(location.href).toMatchURL(originalLocation)
-  
+
               up.layer.open(
                 target: '.element',
                 history: true,
                 location: '/overlay2',
               )
-  
+
             next ->
               expect(location.href).toMatchURL(originalLocation)
-            
+
         describe 'with { history: "auto" }', ->
-        
+
           it 'gives the layer history if the initial overlay content is a main selector', asyncSpec (next) ->
             up.layer.config.modal.history = 'auto'
             up.fragment.config.mainTargets = ['.main']
