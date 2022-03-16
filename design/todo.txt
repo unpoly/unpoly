@@ -1,46 +1,22 @@
 TODOs for next release
 ======================
 
-| Scope                | up.fragment.abort() | up.render({ abort })  |
-----------------------------------------------------------------------
-| nothing              | don't call          | false, undefined      |
-| current layer        | no args             | 'layer'               |
-| element subtree      | Element             | 'target', Element     | new render default
-| element subtrees     | [Element] or 'a, b' | [Element] or 'a, b'   | new render default
-| all requests         | { layer: 'any' }    | 'all', true           | navigation default (maybe)
-| other layer          | { layer: 'root' }   | not possible          |
-
 
 Concurrency
 -----------
 
-- This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
-- Abort validate observers when requests targeting the form are aborted through { solo }
-  - We introduced a regression
-    - Dirty field with [up-validate], waiting for 1 task
-    - User clicks a link to navigate away
-    - { solo } does not see anything to abort
-    - After 1 task, [up-validate] sends a request, which is now racing against the navigation link
-    - Why no test?
-  - We could fix this by replacing the request queue with a task queue
-    - However, this would be a large refactoring
-    - We would need to implement { delay } for tasks/requests
-    - We would maybe need to implement microtask/task
-  - A simpler solution would be to implement up:fragment:abort
-    - Implement an up.fragment.solo(fragment) or up.fragment.abort(fragment) method
-    - Event must have { elements } or { fragments } property
-    - Event should have #contains(elementOrElements) method to quickly check if something is in solo scope
-    - The event should not be abortable itself
-    - In up.FormValidator, cancel timer on contained up:fragment:abort instead of up:form:submit
-      - Or, remove any dirtySolution if it is in the solo scope
-    - Consider doing the same for up.FieldObserver
+- Make up.FieldObserver abort aware
+  - What does this mean given that we don't know what's being updated?
+  - We could cancel a pending delay if the input is being targeted
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay
   - form.config.changeEvent => form.config.observeChangeEvent
   - Remove 'change' from up.form.config.inputEvent
+- This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
+  - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeChangeDelay`
 - Parse and use { disable } while an [up-observe] callback is running
-  - We should disable fields without help by the user
+  - With { disable } given we should disable fields without requiring users to pass on { disable } in her callbacks
   - Strip { disable } from field options passed to observe callback, since we already processed it
   - Note there's no up.render() here!
 - Support more than one [up-disable] option
@@ -50,8 +26,8 @@ Concurrency
   - [up-disable=selector]
   - [up-disable=false]
   - Evaluate in up.Change.FromURL
+    - No need in up.Change.FromContent since that is sync
     - Keep logic reusable for disabling during async up.observe() callbacks
-- Move mimicLocalRequest() into useCachedRequest()
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
   - Test that [up-validate] will not make a request if the target is removed while waiting for the delay
@@ -71,9 +47,11 @@ Various changes
 ---------------
 
 - Fix all Webpack errors
+- Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
-- Should we get rid of up.fail?
-- When server responds with 500 and no { fallback }, we get an error "No target selector given"?
+- Should we get rid of up.fail()?
+  - This just spams the error log with duplicate errors
+  - It's nice that it's an expression, but it weirds up stacktraces
 - Rethink request defaults
   - Rethink whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
@@ -82,26 +60,17 @@ Various changes
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - Do follow links with [target=_self]
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
-- Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
-  - It's actually more like "appendableElement"
-  - Maybe offer up.Layer#append
-- New up.render() options to clone from a template
-  - { documentTemplate }, { fragmentTemplate }, { contentTemplate }
-  - Separate doc page "Rendering from local content"
-  - Fail when template cannot be found
-  - But what if I really need to re-use an existing element that is then placed back into the body, like in WB?
-- Consider exposing up.layer.contentElement
 - up.layer.config.externalOverlaySelectors
   - Hier würden wir keinen Fokus stehlen
   - Hier würden wir keinen background dismissable durchführen
-- expose up.layer.config.overlay.class
+- Expose and test up.layer.config.overlay.class
+  - Use case was a .default class
 - up:click forking could print a warning when an a[href] is instant, but not followable
 - unpoly-rails must have up.validate_names instead of up.validate_name
-- Allow to mark a target component as soft
-  - :optional ?
-  - :hungry ?
-  - :maybe ?
-- unpoly-rails should discard invalid JSON verwerfen: https://zammad.makandra.de/#ticket/zoom/76579
+- Allow to mark a target component as soft:
+  - .target, .other:maybe
+  - .target, :maybe(.other)
+- unpoly-rails should discard invalid JSON: https://zammad.makandra.de/#ticket/zoom/76579
 - Test that setting autoCache = false for a route also prevents an a[up-preload]
   - up.Request sets cache = true if preload is set!
 - Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
@@ -113,14 +82,7 @@ Various changes
   - This fixes cases where other overlay libs append elements to document.body
   - For modes without a backdrop (popup), people can prevent up:overlay:dismiss if they don't like the { origin }
 - up.form.submitButtons is documented, but not public
-- Change abort(reason) to abort({ reason })
-  - In up.Queue#abort
-  - In up.network.abort()
-  - In up.fragment.abort()
-  - In up.Request#abort
 - Fix clicking on a label[for] when there are elements with duplicate IDs in another layer
-- Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
-  - Could we even allow this *when* morphing?
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
 - Destruction of observe watches
   - Test that observe watches automatically disappear when the element is detached
@@ -131,6 +93,10 @@ Various changes
 Docs
 ----
 
+- Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
+  - It's actually more like "appendableElement"
+  - Maybe offer up.Layer#append
+- Consider exposing up.layer.contentElement
 - Document { abort } option and link everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
 - Test and Document that we can use live validation like this:
@@ -150,10 +116,10 @@ Docs
   - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
   - Explain that they can be set either on the form or on an input
 - up.form.config.disable
-- up.form.config.inputEvent
-- up.form.config.inputDelay
 - up.form.config.feedback
-- up.form.config.changeEvent
+- up.form.config.observeInputEvent
+- up.form.config.observeChangeEvent
+- up.form.config.observeInputDelay
 - Consider consolidating docs for
   - input[up-observe]/form[up-observe] as well as
   - input[up-validate]/form[up-validate]
@@ -169,9 +135,21 @@ Docs
 
 
 
-Backlog
-=======
+Icebox
+======
 
+- Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
+  - Could we even allow this *when* morphing?
+- What is the purpose of up.error.emitGlobal?
+  - Don't we throw a compound error that would be tracked?
+    - We do
+    - But the error does not bubble up
+    - What do we want here?
+- New up.render() options to clone from a template
+  - { documentTemplate }, { fragmentTemplate }, { contentTemplate }
+  - Separate doc page "Rendering from local content"
+  - Fail when template cannot be found
+  - But what if I really need to re-use an existing element that is then placed back into the body, like in WB?
 - Consider implementing an abortable up:navigate event
   - This would be the first feature that goes beyond "navigation is just a preset"
   - People might expect history changes to trigger this
