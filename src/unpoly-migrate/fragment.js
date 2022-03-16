@@ -135,7 +135,7 @@ up.migrate.handleScrollOptions = function(options) {
   }
 }
 
-up.migrate.handleHistoryOption = function(options) {
+up.migrate.preprocessRenderOptions = function(options) {
   if (u.isString(options.history) && (options.history !== 'auto')) {
     up.migrate.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
     options.location = options.history
@@ -143,10 +143,6 @@ up.migrate.handleHistoryOption = function(options) {
     // where it would be expanded to { failLocation }.
     options.history = 'auto'
   }
-}
-
-up.migrate.preprocessRenderOptions = function(options) {
-  up.migrate.handleHistoryOption(options)
 
   for (let prop of ['target', 'origin']) {
     if (u.isJQuery(options[prop])) {
