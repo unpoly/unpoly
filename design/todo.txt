@@ -5,9 +5,6 @@ TODOs for next release
 Concurrency
 -----------
 
-- Make up.FieldObserver abort aware
-  - What does this mean given that we don't know what's being updated?
-  - We could cancel a pending delay if the input is being targeted
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay
