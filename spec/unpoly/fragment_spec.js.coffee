@@ -4847,6 +4847,32 @@ describe 'up.fragment', ->
           next =>
             expect(squish($('.container').text())).toEqual('new-before new-inside new-after')
 
+        it 'keeps the scroll position of an [up-viewport] within a kept element', ->
+          container = fixture('.container')
+          keepable = e.affix(container, '.keepable[up-keep]')
+          viewport = e.affix(keepable, '.viewport[up-viewport]', style: { height: '100px', overflowY: 'scroll' })
+          viewportContent = e.affix(viewport, '.viewport-content', style: { height: '500px' })
+          unkeeptSibling = e.affix(container, '.other', text: 'old other text')
+
+          viewport.scrollTop = 100
+
+          expect(viewport).toBeAttached()
+          expect(viewport.scrollTop).toBe(100)
+
+          up.render fragment: """
+
+            <div class="container">
+              <div class="keepable" up-keep>
+                <div class="viewport" up-viewport></div>
+              </div>
+              <div class="other">new other text</div>
+            </div>
+          """
+
+          expect('.other').toHaveText('new other text')
+          expect(viewport).toBeAttached()
+          expect(viewport.scrollTop).toBe(100)
+
         describe 'if an [up-keep] element is itself a direct replacement target', ->
 
           it "keeps that element", asyncSpec (next) ->
@@ -4975,6 +5001,7 @@ describe 'up.fragment', ->
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')
           up.$compiler('.keeper', compiler)
+
           $container = $fixture('.container')
           $container.html """
             <div class="keeper" up-keep>old-text</div>
@@ -4992,6 +5019,7 @@ describe 'up.fragment', ->
           next =>
             expect(compiler.calls.count()).toEqual(1)
             expect('.keeper').toBeAttached()
+            expect('.keeper').toHaveText('old-text')
 
         it 'does not lose jQuery event handlers on a kept element (bugfix)', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
