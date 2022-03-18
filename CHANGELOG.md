@@ -11,7 +11,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Next
 ====
 
-Changes tracked until 2021-03-15:
+Changes tracked until 2021-03-18:
 
 - Live validatation while typing
 - .up-loading / aria-busy
@@ -47,6 +47,7 @@ Changes tracked until 2021-03-15:
 - up.form.submitButtons()
 - Fix a bug where up.fragment.get(selector, { layer: 0 }) will always match in the current layer instead of root
 - Fix a up where unpoly-migrate would not rewrite the deprecated { reveal } option when navigating 
+- Preserve the scroll positions of viewports inside a kept [up-keep] fragment
 
 
 
