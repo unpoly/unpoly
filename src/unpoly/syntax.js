@@ -316,7 +316,6 @@ up.syntax = (function() {
       isDefault: up.framework.evaling,
       priority: 0,
       batch: false,
-      keep: false,
       jQuery: false
     }
     )

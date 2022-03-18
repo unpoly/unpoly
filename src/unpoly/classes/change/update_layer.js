@@ -127,9 +127,19 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             },
             afterInsert: () => {
               this.responseDoc.finalizeElement(step.newElement)
+
+              step.keepPlans.forEach(this.reviveKeepable)
+
+              // In the case of [up-keep] descendants, keepable elements are now transferred
+              // to step.newElement, leaving a clone in their old DOM Position.
+              // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
               up.hello(step.newElement, step)
             },
             beforeDetach: () => {
+              // In the case of [up-keep] descendants, keepable elements have been replaced
+              // with a clone in step.oldElement. However, since that clone was never compiled,
+              // it does not have destructors registered. Hence we will not clean the clone
+              // unnecessarily.
               up.syntax.clean(step.oldElement, {layer: this.layer})
             },
             afterDetach() {
@@ -269,9 +279,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     const keepPlans = []
     if (step.keep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
-        let plan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
-        if (plan) {
+        let keepPlan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
+        if (keepPlan) {
           // plan.oldElement is now keepable
+          this.hibernateKeepable(keepPlan)
 
           // Replace keepable with its clone so it looks good in a transition between
           // oldElement and newElement. Note that keepable will still point to the same element
@@ -281,8 +292,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
           // Since we're going to swap the entire oldElement and newElement containers afterwards,
           // replace the matching element with keepable so it will eventually return to the DOM.
-          e.replace(plan.newElement, keepable)
-          keepPlans.push(plan)
+          e.replace(keepPlan.newElement, keepable)
+          keepPlans.push(keepPlan)
         }
       }
     }
@@ -310,6 +321,20 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
         this.steps.push(step)
       }
+    }
+  }
+
+  hibernateKeepable(keepPlan) {
+    let viewports = up.viewport.subtree(keepPlan.oldElement)
+    keepPlan.revivers = viewports.map(function(viewport) {
+      let { scrollTop, scrollLeft } = viewport
+      return () => u.assign(viewport, { scrollTop, scrollLeft })
+    })
+  }
+
+  reviveKeepable(keepPlan) {
+    for (let reviver of keepPlan.revivers) {
+      reviver()
     }
   }
 
