@@ -679,6 +679,9 @@ up.element = (function() {
   */
   function attributeSelector(attribute, value) {
     value = value.replace(/"/g, '\\"')
+    // We could get away with omitting the quotes for simple alphanumeric strings,
+    // but e.g. not for a string with quotes or spaces or a string that is all numbers.
+    // Better add the quotes in all cases.
     return `[${attribute}="${value}"]`
   }
 

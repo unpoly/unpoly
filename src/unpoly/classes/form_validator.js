@@ -6,7 +6,7 @@ up.FormValidator = class FormValidator {
   constructor(form) {
     console.debug("Validator for %o", form)
     this.form = form
-    this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable', 'contentType', 'headers', 'params', 'url', 'method'] }) : {} // TODO: Also parse [up-sequence] when we get it
+    this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable', 'contentType', 'headers', 'params', 'url', 'method'] }) : {}
     this.dirtySolutions = []
     this.nextRenderTimer = null
     this.nextRenderOptions = null
