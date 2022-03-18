@@ -43,6 +43,8 @@ Quick wins: Removals
 More work required
 ------------------
 
+- Maybe replace up.Params.fromForm() with new FormData()
+  - However, we also use up.Params.fromFields() in FieldObserver
 - maybe don't even have a ES5 build?
 - we might want to parse URLs faster with the URL class (but check how it handles non-fully-qualified URLs)
 - maybe replace up.Params with FormData, but we would need a lot of utility methods around it
