@@ -1,3 +1,5 @@
+u = up.util
+
 up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
   constructor(options) {
