@@ -497,11 +497,11 @@ up.element = (function() {
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
   @param {Object} [attrs.content]
     The [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) of the created element.
-  @param {Object} [attrs.style]
+  @param {Object|string} [attrs.style]
     An object of CSS properties that will be set as the inline style
-    of the created element.
+    of the created element. The given object may use kebab-case or camelCase keys.
 
-    The given object may use kebab-case or camelCase keys.
+    You may also pass a string with semicolon-separated styles.
   @return {Element}
     The created element.
   @stable
@@ -615,7 +615,7 @@ up.element = (function() {
     An object of attributes to set on the created element.
   @param {Object} attrs.text
     The [text content](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) of the created element.
-  @param {Object} attrs.style
+  @param {Object|string} attrs.style
     An object of CSS properties that will be set as the inline style
     of the created element.
 
@@ -1171,11 +1171,15 @@ up.element = (function() {
   @stable
   */
   function setInlineStyle(element, props) {
-    const { style } = element
-    for (let key in props) {
-      let value = props[key]
-      value = normalizeStyleValueForWrite(key, value)
-      style[key] = value
+    if (u.isString(props)) {
+      element.setAttribute('style', props)
+    } else {
+      const { style } = element
+      for (let key in props) {
+        let value = props[key]
+        value = normalizeStyleValueForWrite(key, value)
+        style[key] = value
+      }
     }
   }
 

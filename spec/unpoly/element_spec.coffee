@@ -474,8 +474,18 @@ describe 'up.element', ->
       expect(element.getAttribute('foo')).toEqual('one')
       expect(element.getAttribute('bar')).toEqual('two')
 
-    it 'sets inline styles from a { style } option', ->
+    it 'sets inline styles from a { style } object with camelCase keys', ->
       element = up.element.createFromSelector('div', style: { fontSize: '100px', marginTop: '200px' })
+      expect(element.style.fontSize).toEqual('100px')
+      expect(element.style.marginTop).toEqual('200px')
+
+    it 'sets inline styles from a { style } object with kebab-case keys', ->
+      element = up.element.createFromSelector('div', style: { 'font-size': '100px', 'margin-top': '200px' })
+      expect(element.style.fontSize).toEqual('100px')
+      expect(element.style.marginTop).toEqual('200px')
+
+    it 'sets inline styles from a { style } string with semicolon-separated styles', ->
+      element = up.element.createFromSelector('div', style: 'font-size: 100px; margin-top: 200px')
       expect(element.style.fontSize).toEqual('100px')
       expect(element.style.marginTop).toEqual('200px')
 
@@ -742,7 +752,7 @@ describe 'up.element', ->
       expect(up.element.attr(element, 'foo')).toBeUndefined()
 
   describe 'up.element.booleanAttr', ->
-    
+
     it 'returns true if the attribute value is the string "true"', ->
       element = up.element.createFromHTML('<div foo="true"></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBe(true)
