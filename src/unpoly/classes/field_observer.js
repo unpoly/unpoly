@@ -10,7 +10,7 @@ up.FieldObserver = class FieldObserver {
     this.options = options
     this.batch = options.batch
     this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable'] }) : {} // TODO: Also parse [up-sequence] when we get it
-    this.subscriber = new up.Subscriber()
+    this.unbindFns = []
   }
 
   fieldOptions(field) {
@@ -28,24 +28,16 @@ up.FieldObserver = class FieldObserver {
     for (let field of this.fields) {
       this.observeField(field)
     }
-
-    if (this.form) {
-      this.subscriber.on(this.form, 'up:form:submit', () => this.cancelTimer())
-    }
-  }
-
-  addField(field) {
-    this.fields.push(field)
-    this.observeField(field)
   }
 
   observeField(field) {
     let fieldOptions = this.fieldOptions(field)
-    this.subscriber.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions))
+    this.unbindFns.push(up.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions)))
+    this.unbindFns.push(up.fragment.onAborted(field, () => this.cancelTimer()))
   }
 
   stop() {
-    this.subscriber.unbindAll()
+    for (let unbindFn of this.unbindFns) unbindFn()
     this.cancelTimer()
   }
 

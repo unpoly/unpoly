@@ -179,6 +179,20 @@ describe 'up.form', ->
                 next.after 150, ->
                   expect(callback).not.toHaveBeenCalled()
 
+              it 'does not run the callback if the field was aborted during the delay', asyncSpec (next) ->
+                container = fixture('.container')
+                input = e.affix(container, 'input[name="input-name"][value="old-value"]')
+                callback = jasmine.createSpy('observer callback')
+                up.observe(input, { delay: 150 }, callback)
+                input.value = 'new-value'
+                Trigger[eventType](input)
+
+                next.after 50, ->
+                  up.fragment.abort(container)
+
+                next.after 150, ->
+                  expect(callback).not.toHaveBeenCalled()
+
             it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
               $input = $fixture('input[name="input-name"][value="old-value"]')
               callbackCount = 0
@@ -1416,13 +1430,14 @@ describe 'up.form', ->
           expect(window.observeCallbackSpy.calls.count()).toBe(1)
 
       it 'does not run the callback when the form is submitted immediately after a change, e.g. in a test', asyncSpec (next) ->
-        $form = $fixture('form')
+        container = fixture('.container[up-main]')
+        form = e.affix(container, 'form[action="/path"]')
         window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
-        up.hello($form)
-        $field.val('new-value')
-        Trigger.change($field)
-        up.submit($form)
+        field = e.affix(form, 'input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy(value, name)"]')
+        up.hello(form)
+        field.value = 'new-value'
+        Trigger.change(field)
+        up.submit(form)
 
         next =>
           expect(window.observeCallbackSpy).not.toHaveBeenCalled()
@@ -1444,16 +1459,17 @@ describe 'up.form', ->
             expect(window.observeCallbackSpy).toHaveBeenCalled()
 
         it 'aborts the callback if the form was submitted while waiting', asyncSpec (next) ->
-          $form = $fixture('form[action="/path"]')
+          container = fixture('.container[up-main]')
+          form = e.affix(container, 'form[action="/path"]')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-observe-delay="40"]')
-          up.hello($form)
-          $field.val('new-value')
-          Trigger.change($field)
+          field = e.affix(form, 'input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-observe-delay="40"]')
+          up.hello(form)
+          field.value = 'new-value'
+          Trigger.change(field)
 
           next ->
             expect(window.observeCallbackSpy).not.toHaveBeenCalled()
-            up.form.submit($form)
+            up.form.submit(form)
 
           next.after 80, ->
             expect(window.observeCallbackSpy).not.toHaveBeenCalled()
