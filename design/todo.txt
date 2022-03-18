@@ -35,17 +35,14 @@ Concurrency
 - Do we want a shortcut macro for this:
       <input up-validate up-keep up-observe-event="input">
   - <input up-live-validate>
-  - <input up-fast-validate>
-  - <input up-concurrent-validate>
-  - <input up-quick-validate>
-  - <input up-input-validate>
-  - <input up-validate-on-input>
 
 
 
 Various changes
 ---------------
 
+- { style } option for createElementFromSelector should also accept a single string
+- When an [up-keep] element contains a viewport, its scroll position is lost when kept
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
 - Should we get rid of up.fail()?
@@ -54,6 +51,7 @@ Various changes
 - Rethink request defaults
   - Rethink whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
+    - We could argue that this is a low-level API and up.render() should be used for updating content
     - Counter-point is: All other functionality sees the current layer by default
     - If we do this we should also remove auto-lookup of { targetElements }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
