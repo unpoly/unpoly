@@ -41,8 +41,6 @@ Concurrency
 Various changes
 ---------------
 
-- { style } option for createElementFromSelector should also accept a single string
-- When an [up-keep] element contains a viewport, its scroll position is lost when kept
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
 - Should we get rid of up.fail()?
