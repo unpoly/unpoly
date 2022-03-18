@@ -967,10 +967,10 @@ up.fragment = (function() {
     const keepPlans = options.keepPlans || []
     const skip = keepPlans.map(function (plan) {
       emitFragmentKept(plan)
-      return plan.oldElement
+      return plan.oldElement // the kept element
     })
 
-    up.syntax.compile(element, {skip, layer: options.layer})
+    up.syntax.compile(element, { skip, layer: options.layer })
     emitFragmentInserted(element, options)
 
     return element
