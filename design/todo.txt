@@ -10,8 +10,39 @@ Concurrency
   - form.config.inputDelay => form.config.observeInputDelay
   - form.config.changeEvent => form.config.observeChangeEvent
   - Remove 'change' from up.form.config.inputEvent
+- Is up.validate() inconsistent with its args?
+  - up.validate(element) follows an [up-validate] attr or seeks a form group
+  - However, up.validate(selector) directly invalidates the given selector. It does not follow [up-validate].
+    - This also breaks compatibility!
+  - Do we need up.invalidate(target) ?
+    - Is this the same as up.validate(form, { target })?
+  - I don't think we do anything with the { target } option currently?
+    - This is already public API
+    - This should make its own solution, overriding all the other defaults
+      - Also when doing up.validate(container, { target })
+        - We would make multiple dirty solution with the
+- Should up.validate(container) work?
+  - Invalidate each contained field?
+  - It would not be a problem to start with a field lookup and then go to everything individually
+    - However, which render option would work? first? last?
+    - Options are currently
+      - parser.boolean('feedback')
+        - we could || them together, so if any wants feedback they all get it
+      - parser.boolean('disable')
+        - we collect it all, do it manually and set { disable: false } for the up.submit() call
+        - we cannot make up.render({ disable: [array] }) since { disable: 'form-group' } each needs its own { origin }
+      - parser.string('event') (does not matter here)
+      - parser.number('delay') (we could ignore the option for manual calls)
+  - Docs
 - This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
   - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeChangeDelay`
+- Support disable attrs in up.FormValidator
+  - We would need to collect and execute disable options for each solution!
+    - e.g. a validation with two inputs and { disable: 'form-group' } should disable both form groups
+    - up.form.disable() already ignores fields that are already disabled, so we can call it multiple times
+  - I don't think we currently track disable options per-solution?
+    - No, but we could easily
+  - If we do this we must set { disable: false } for the submit()
 - Parse and use { disable } while an [up-observe] callback is running
   - With { disable } given we should disable fields without requiring users to pass on { disable } in her callbacks
   - Strip { disable } from field options passed to observe callback, since we already processed it
