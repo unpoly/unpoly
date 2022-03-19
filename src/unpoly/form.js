@@ -326,6 +326,8 @@ up.form = (function() {
     // 			<input up-autosubmit>
     // 		</form>
     //
+    // Form-wide defaults are not parsed by this function, but merged in by up.FormValidator or up.FieldObserver.
+    //
     // Form-wide options can be overridden at the input level:
     //
     // 		<form up-disable="true">
