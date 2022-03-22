@@ -69,21 +69,6 @@ Concurrency
 Various changes
 ---------------
 
-- Introduce boundaries or "softly isolated zones"
-  - The idea started with: Should fragment lookups with an { origin } within a form prefer to look within the form?
-    - Also related to https://github.com/unpoly/unpoly/issues/197 , which would no longer work
-      now that a form submission's orgin is the submit button instead of the form element
-  - E.g. <div up-boundary>
-    - Lookups within prefer to match within the boundary
-    - It's a new fallback target
-      - Also for errors
-    - up.fragment.config.boundaryTargets = ['[up-boundary]', 'form', ':main']
-    - Is this also controlled by { fallback }?
-    - Maybe identification using [up-boundary=123]
-    - Should this rather be [up-zone]?
-      - If we ever make fully isolated containers we would call them frames
-        - https://github.com/unpoly/unpoly/discussions/350
-    - We could also offer :zone as a selector
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
 - Should we get rid of up.fail()?
@@ -176,6 +161,31 @@ Docs
 Icebox
 ======
 
+- Introduce boundaries or "softly isolated zones"
+  - The idea started with: Should fragment lookups with an { origin } within a form prefer to look within the form?
+    - Also related to https://github.com/unpoly/unpoly/issues/197 , which would no longer work
+      now that a form submission's orgin is the submit button instead of the form element
+  - E.g. <div up-boundary>
+    - Lookups within prefer to match within the boundary
+    - It's a new fallback target
+      - Also for errors
+    - up.fragment.config.boundaryTargets = ['[up-boundary]', 'form', ':main']
+    - Is this also controlled by { fallback }?
+    - Maybe identification using [up-boundary=123]
+      - But don't enforce this, it's not a great auto-target
+    - Should this rather be [up-zone]?
+      - If we ever make fully isolated containers we would call them frames
+        - https://github.com/unpoly/unpoly/discussions/350
+    - We could also offer :zone as a selector
+    - Would we still offer { target: '.container .child' }?
+      - Would we offer { target: ':zone .foo' }, since it's really the same as { target: '.foo' } ?
+    - Is this a repetition of "fragment needs to know whether it is used as component or main target"?
+      - We would need to fix infinite looping in expandTargets()
+      - It would be nice to disable history in a zone
+        - but then it's not usable as a main target
+        - Disable history in a container?
+          - It's weird to nest multiple containerish elements
+        - => This is really already solved through { history: 'auto' }, which only updates history if updating :main
 - Rendering: allow { scrollBehavior: 'smooth' } when we're not morphing
   - Could we even allow this *when* morphing?
 - What is the purpose of up.error.emitGlobal?
