@@ -1,4 +1,4 @@
-u = up.util
+let u = up.util
 
 up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
