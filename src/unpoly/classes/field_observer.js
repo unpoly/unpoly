@@ -73,26 +73,41 @@ up.FieldObserver = class FieldObserver {
   }
 
   async requestCallback() {
+    let fieldOptions = this.scheduledFieldOptions
+
     if ((this.scheduledValues !== null) && !this.currentTimer && !this.callbackRunning) {
       const diff = this.changedValues(this.processedValues, this.scheduledValues)
       this.processedValues = this.scheduledValues
       this.scheduledValues = null
       this.callbackRunning = true
+      this.scheduledFieldOptions = null
+
+      // If any callback returns a promise, we will handle { disable } below.
+      // We set { disable: false } so callbacks that *do* forward options
+      // to up.render() don't unnecessarily disable a second time.
+      fieldOptions.disable = false
 
       const callbackReturnValues = []
       if (this.batch) {
-        callbackReturnValues.push(this.callback(diff, this.scheduledFieldOptions))
+        callbackReturnValues.push(this.callback(diff, fieldOptions))
       } else {
         for (let name in diff) {
           const value = diff[name]
-          callbackReturnValues.push(this.callback(value, name, this.scheduledFieldOptions))
+          callbackReturnValues.push(this.callback(value, name, fieldOptions))
         }
       }
 
-      this.scheduledFieldOptions = null
+      // If any callbacks returned promises, we wait for all of them to settle.
+      // We also process a { disable } option from [up-disable] or [up-observe-disable]
+      // attrs so callbacks don't have to handle this.
+      if (u.some(callbackReturnValues, u.isPromise)) {
+        let callbackDone = u.allSettled(callbackReturnValues)
+        up.form.disableAroundRequest(callbackDone, fieldOptions)
+        await callbackDone
+      }
 
-      await u.allSettled(callbackReturnValues)
       this.callbackRunning = false
+
       this.requestCallback()
     }
   }

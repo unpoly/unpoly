@@ -14,12 +14,12 @@ up.Change.FromOptions = class FromOptions extends up.Change {
       this.guardRender()
 
       if (this.options.url) {
-        let onRequest = (request) => this.handleAbort(request)
+        let onRequest = (request) => this.handleAbortOption(request)
         this.change = new up.Change.FromURL({ ...this.options, onRequest })
       } else {
         // No need to give feedback as local changes are sync.
         this.change = new up.Change.FromContent(this.options)
-        this.handleAbort()
+        this.handleAbortOption()
       }
 
       return this.change.execute()
@@ -43,8 +43,8 @@ up.Change.FromOptions = class FromOptions extends up.Change {
     up.RenderOptions.assertContentGiven(this.options)
   }
 
-  handleAbort(request) {
-    let abort = this.options.abort
+  handleAbortOption(request) {
+    let { abort } = this.options
 
     if (!abort || up.network.isIdle()) return
 

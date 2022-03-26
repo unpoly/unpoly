@@ -432,11 +432,35 @@ up.form = (function() {
   }
 
   function disableAroundRequest(request, options) {
-    if (options.disable && options.origin) {
-      let form = getForm(options.origin)
-      let undoDisable = disableContainer(form)
-      u.always(request, undoDisable)
+    options.targetElements ||= request.targetElements
+    let undoDisable = handleDisableOption(options)
+    u.always(request, undoDisable)
+  }
+
+  function handleDisableOption({ disable, origin, targetElements }) {
+    if (!disable) return u.noop
+
+    let missingOption = (key) => { throw up.error.failed("Cannot process { disable: '%s' } option without { %s }", disable, key) }
+    let getOrigin = () => origin || missingOption('origin')
+    let getTargetElements = () => targetElements || missingOption('origin')
+    let getOriginForm = () => getForm(getOrigin())
+
+    let containers
+
+    if (disable === true || disable === 'form') {
+      containers = [getOriginForm()]
+    } else if (disable === 'target') {
+      containers = getTargetElements()
+    } else if (disable === 'form-group') {
+      containers = [findGroup(getOrigin())]
+    } else if (disable === 'submit-button') {
+      containers = findSubmitButtons(getOriginForm())
+    } else if (u.isString(disable)) {
+      // Disable given selector
+      containers = up.fragment.all(getOriginForm(), disable)
     }
+
+    return u.sequence(containers.map(disableContainer))
   }
 
   // This was extracted from submitOptions().
@@ -1592,8 +1616,8 @@ up.form = (function() {
     submitButtons: findSubmitButtons,
     focusedField,
     switchTarget,
-    disable: disableContainer,
     disableAroundRequest,
+    disable: disableContainer,
     group: findGroup,
     groupSolution: findGroupSolution,
     get: getForm,
