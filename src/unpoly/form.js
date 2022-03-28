@@ -825,9 +825,22 @@ up.form = (function() {
     validation is received and the form was updated.
   @stable
   */
-  function validate(fieldOrSelector, options) {
-    let validator = up.FormValidator.forElement(fieldOrSelector)
-    return validator.validate(fieldOrSelector, options)
+  function validate(...args) {
+
+    // up.validate('input[name=email]')
+    // up.validate('input[name=email]', { origin: element })
+    // up.validate('input[name=email]', { origin: element, target: '.other' })
+    // up.validate(inputElement)
+    // up.validate({ target: '.other' })
+
+    const options = u.extractOptions(args)
+    // Legacy API preferred { target } option over first arg
+    if (args.length) options.target ||= args[0]
+
+    let targetElement = up.fragment.get(options.target, options)
+
+    let validator = up.FormValidator.forElement(targetElement)
+    return validator.validate(targetElement, options)
   }
 
   /*-
@@ -948,15 +961,17 @@ up.form = (function() {
     return switcher || up.fail('Could not find [up-switch] field for %o', target)
   }
 
-  function getForm(elementOrTarget, fallbackSelector) {
-    const element = up.fragment.get(elementOrTarget)
+  function getForm(elementOrSelector, options) {
+    const element = up.fragment.get(elementOrSelector, options)
 
     // Element#form will also work if the element is outside the form with an [form=form-id] attribute
-    return element.form || e.closest(element, 'form') || (fallbackSelector && e.closest(element, fallbackSelector))
+    return element.form || e.closest(element, 'form')
   }
 
-  function getContainer(element) {
-    return getForm(element, up.layer.anySelector())
+  // Alternative to getForm() which falls back to the layer element for elements without a form.
+  // Only works with elements. Does not support a selector as a first argument.
+  function getContainer(element, options) {
+    return getForm(element, options) || up.layer.get(element).element
   }
 
   function focusedField() {

@@ -42,6 +42,40 @@ up.FormValidator = class FormValidator {
     return this.nextRenderPromise
   }
 
+  validate2(element, options) {
+    let solution
+
+    if (u.isString(options.target)) {
+      solution = { target: options.target, element }
+    } else if (up.form.isField(element)) {
+      solution = getValidateAttrSolution(element) || up.form.groupSolution(element)
+    } else {
+      solution = { target: up.fragment.toTarget(element), element }
+    }
+
+
+
+
+    if (u.isString(renderOptions.target)) {
+      let selector = renderOptions.target
+      let element = up.fragment.get(selector, renderOptions)
+    } else if (u.isElement(renderOptions.target)) {
+      let selector = up.fragment.toTarget(renderOptions.target)
+      //   element: renderOptions.target
+      // }
+    }
+
+    let fields = up.form.fields(container)
+
+    for (let field of fields) {
+      let solution = this.getSolution(field, renderOptions)
+      this.dirtySolutions.push(solution)
+    }
+
+    this.scheduleNextRender()
+    return this.nextRenderPromise
+  }
+
   elementOptions(field) {
     let defaults = { event: 'change', ...this.formDefaults }
     return up.form.observeOptions(field, {}, { defaults })
@@ -188,8 +222,8 @@ up.FormValidator = class FormValidator {
     }
   }
 
-  static forElement(element) {
-    let form = up.form.get(element)
+  static forElement(elementOrSelector, options) {
+    let form = up.form.get(elementOrSelector, options)
     return form.upFormValidator ||= new this(form)
   }
 
