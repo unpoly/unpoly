@@ -297,7 +297,7 @@ up.form = (function() {
 
     let parser = new up.OptionsParser(form, options, parserOptions)
     parser.string('failTarget', { default: up.fragment.toTarget(form) })
-    parser.boolean('disable')
+    parser.booleanOrString('disable')
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', {
@@ -362,7 +362,7 @@ up.form = (function() {
     // 3. Default config for this observe() intent (e.g. `up.form.config.observeOptions.disable`).
     // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
     parser.boolean('feedback')
-    parser.boolean('disable')
+    parser.booleanOrString('disable')
     parser.string('event')
     parser.number('delay')
 
@@ -457,7 +457,7 @@ up.form = (function() {
       containers = findSubmitButtons(getOriginForm())
     } else if (u.isString(disable)) {
       // Disable given selector
-      containers = up.fragment.all(getOriginForm(), disable)
+      containers = up.fragment.all(getOriginForm(), disable, { origin })
     }
 
     return u.sequence(containers.map(disableContainer))
@@ -688,10 +688,6 @@ up.form = (function() {
     return up.migrate.migratedFormGroupSelectors?.() || config.groupSelectors
   }
 
-  function getFullGroupSelector() {
-    return getGroupSelectors().join(',')
-  }
-
   /*-
   Returns the [form group](/up-form-group) for the given element.
 
@@ -800,15 +796,46 @@ up.form = (function() {
   See the documentation for [`input[up-validate]`](/input-up-validate) for more information
   on how server-side validation works in Unpoly.
 
-  ### Example
+
+  ### Examples
 
   ```js
-  up.validate('input[name=email]', { target: '.email-errors' })
+  // Update the form group around the email field
+  up.validate('input[name=email]')
+
+  // Update a form element matching `.preview`
+  up.validate('.preview')
+  ```
+
+  ### Multiple validations are batched together
+
+  Multiple calls of `up.validate()` within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+  are batched into a single request. For instance, the following will send a single request targeting `.foo, .bar`:
+
+  ```js
+  up.validate('.foo')
+  up.validate('.bar')
+  ```
+
+  Validating the same target multiple times will also only send a single request.
+  For instance, the following will send a single request targeting `.qux`:
+
+  ```js
+  up.validate('.qux')
+  up.validate('.qux')
+  ```
+
+  When one of your target elements is an ancestor of another target, Unpoly will only request the ancestor.
+  For instance, the following would send a single request targeting `form`:
+
+  ```js
+  up.validate('input[name=email]')
+  up.validate('form')
   ```
 
   @function up.validate
-  @param {string|Element|jQuery} field
-    The form field to validate.
+  @param {string|Element|jQuery} target
+    TODO
   @param {Object} [options]
     Additional [submit options](/up.submit#options) that should be used for
     submitting the form for validation.
@@ -818,16 +845,62 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.target]
     The element that will be [updated](/up.render) with the validation results.
 
-    By default the closest [form group](/up-form-group)
-    around the given `field` is updated.
-  @return {Promise}
+    TODO describe default
+  @param {string|Element|jQuery} [options.origin]
+    TODO
+  @param {string|Element|jQuery} [options.delay]
+    TODO
+  @param {string|Element|jQuery} [options.formGroup = true]
+    TODO
+  @return {Promise<up.RenderResult>}
     A promise that fulfills when the server-side
     validation is received and the form was updated.
+
+    The promise also fulfills if the server sends matching
+    HTML under an [error code](/failed-responses).
+    It will reject if there is a fatal network error, or if no targets could be matched.
   @stable
   */
-  function validate(fieldOrSelector, options) {
-    let validator = up.FormValidator.forElement(fieldOrSelector)
-    return validator.validate(fieldOrSelector, options)
+  function validate(...args) {
+    let options = parseValidateArgs(args)
+    let validator = up.FormValidator.forElement(options.origin)
+    return validator.validate(options)
+  }
+
+  /*-
+  Parses the many signatures of `up.validate()`:
+
+      up.validate('input[name=email]')                          => { target: 'input[name=email]', origin: <lookup> }
+      up.validate('input[name=email]', { origin: element })     => { target: 'input[name=email]', origin: element }
+      up.validate('input[name=email]', { target: '.other' })    => { target: '.other', origin: element }
+      up.validate({ target: '.other' })                         => { target: '.other', origin: <lookup> }
+      up.validate(form)                                         => { origin: form }
+      up.validate(form, { target: '.other' })                   => { target: '.other', origin: form }
+      up.validate(form, { target: '.other', origin: element })  => { target: '.other', origin: element }
+
+  Any signature *must* contain an { origin }. We use it to look up the responsible up.FormValidator.
+
+  @function up.form.parseValidateArgs
+  @internal
+  */
+  function parseValidateArgs(args) {
+    const options = u.extractOptions(args)
+
+    if (args.length) {
+
+      if (u.isString(args[0])) {
+        options.target ||= args[0]
+      } else if (u.isElement(args[0])) {
+        // Call variant: up.validate(inputElement, { target: '.container:has(&)' })
+        options.origin ||= args[0]
+      }
+    }
+
+    if (u.isString(options.target)) {
+      options.origin ||= up.fragment.get(options.target, options)
+    }
+
+    return options
   }
 
   /*-
@@ -948,15 +1021,17 @@ up.form = (function() {
     return switcher || up.fail('Could not find [up-switch] field for %o', target)
   }
 
-  function getForm(elementOrTarget, fallbackSelector) {
-    const element = up.fragment.get(elementOrTarget)
+  function getForm(elementOrSelector, options = {}) {
+    const element = up.fragment.get(elementOrSelector, options)
 
     // Element#form will also work if the element is outside the form with an [form=form-id] attribute
-    return element.form || e.closest(element, 'form') || (fallbackSelector && e.closest(element, fallbackSelector))
+    return element.form || e.closest(element, 'form')
   }
 
-  function getContainer(element) {
-    return getForm(element, up.layer.anySelector())
+  // Alternative to getForm() which falls back to the layer element for elements without a form.
+  // Only works with elements. Does not support a selector as a first argument.
+  function getContainer(element, options) {
+    return getForm(element, options) || up.layer.get(element).element
   }
 
   function focusedField() {
@@ -1274,7 +1349,7 @@ up.form = (function() {
   */
   up.compiler(validatingFieldSelector, function(field) {
     let validator = up.FormValidator.forElement(field)
-    validator.watchField(field)
+    validator.observeField(field)
   })
 
   function validatingFieldSelector() {
@@ -1610,9 +1685,11 @@ up.form = (function() {
     isSubmittable,
     observe,
     validate,
+    parseValidateArgs,
     autosubmit,
     fieldSelector,
     fields: findFields,
+    isField,
     submitButtons: findSubmitButtons,
     focusedField,
     switchTarget,

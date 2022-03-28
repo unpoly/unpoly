@@ -4,7 +4,6 @@ const e = up.element
 up.FormValidator = class FormValidator {
 
   constructor(form) {
-    console.debug("Validator for %o", form)
     this.form = form
     this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable', 'contentType', 'headers', 'params', 'url', 'method'] }) : {}
     this.dirtySolutions = []
@@ -24,52 +23,62 @@ up.FormValidator = class FormValidator {
     this.nextRenderPromise = u.newDeferred()
   }
 
-  watchField(field) {
-    let fieldOptions = this.elementOptions(field)
-    up.on(field, fieldOptions.event, () => this.validate(field, fieldOptions))
+  observeField(field) {
+    let { event } = this.originOptions(field)
+    up.on(field, event, () => this.validate({ origin: field }))
   }
 
-  validate(elementOrSelector, renderOptions) {
-    let container = up.fragment.get(elementOrSelector, { layer: this.form })
-    let fields = up.form.fields(container)
-
-    for (let field of fields) {
-      let solution = this.getSolution(field, renderOptions)
-      this.dirtySolutions.push(solution)
-    }
-
+  validate(options = {}) {
+    let solution = this.getSolution(options)
+    this.dirtySolutions.push(solution)
     this.scheduleNextRender()
     return this.nextRenderPromise
   }
 
-  elementOptions(field) {
-    let defaults = { event: 'change', ...this.formDefaults }
-    return up.form.observeOptions(field, {}, { defaults })
-  }
+  getSolution(options) {
+    let solution = this.getTargetSelectorSolution(options)
+      || this.getFieldSolution(options)
+      || this.getElementSolution(options.origin)
 
-  getSolution(field, renderOptions) {
-    let solution = this.getExplicitTargetSolution(field, renderOptions)
-      || this.getValidateAttrSolution(field)
-      || up.form.groupSolution(field) // the fallback group is the entire form
+    solution.renderOptions = { ...this.formDefaults, ...this.originOptions(solution.origin), ...options }
 
-    // Since we may render multiple targets with a single { origin },
-    // we must resolve any :origin selectors now.
+    // Resolve :origin selector here. We can't delegate to up.render({ origin })
+    // as that only takes a single origin, even with multiple targets.
     solution.target = up.fragment.resolveOrigin(solution.target, solution)
 
-    solution.renderOptions = { ...this.elementOptions(field), ...renderOptions }
+    return solution
   }
 
-  getExplicitTargetSolution(field, renderOptions) {
-    let target = renderOptions.target
+  getFieldSolution({ origin, ... options }) {
+    if (up.form.isField(origin)) {
+      return this.getValidateAttrSolution(origin) || this.getFormGroupSolution(origin, options)
+    }
+  }
 
-    if (target) {
-      let element = up.fragment.get(target, { origin: field })
+  getFormGroupSolution(field, { formGroup = true }) {
+    if (!formGroup) return
 
-      return {
-        target,
-        element,
-        origin: field
-      }
+    let solution = up.form.groupSolution(field)
+    if (solution) {
+      up.puts('up.validate()', 'Validating form group of field %o', field)
+      return solution
+    }
+  }
+
+  getTargetSelectorSolution({ target, origin }) {
+    if (u.isString(target)) {
+      up.puts('up.validate()', 'Validating target "%s"', target)
+      const element = up.fragment.get(target, { origin })
+      return { target, element, origin }
+    }
+  }
+
+  getElementSolution(element) {
+    up.puts('up.validate()', 'Validating element %o', element)
+    return {
+      element,
+      target: up.fragment.toTarget(element),
+      origin: element
     }
   }
 
@@ -80,8 +89,22 @@ up.FormValidator = class FormValidator {
 
     if (containerWithAttr) {
       let target = containerWithAttr.getAttribute('up-validate')
-      return this.getExplicitTargetSolution(field, { target })
+
+      if (target) {
+        up.puts('up.validate()', 'Validating [up-validate] target "%s" from field %o', target, field)
+        return {
+          target,
+          element: up.fragment.get(target, { origin: field }),
+          origin: field
+        }
+      }
     }
+  }
+
+  originOptions(element, overrideOptions) {
+    let defaults = { event: 'change', ...this.formDefaults }
+    let closestOptions = up.form.observeOptions(element, {}, { defaults })
+    return { ...this.formDefaults, ...closestOptions, ...overrideOptions }
   }
 
   scheduleNextRender() {
@@ -100,12 +123,13 @@ up.FormValidator = class FormValidator {
   async renderDirtySolutions() {
     // Remove solutions for elements that were detached while we were waiting for the timer.
     this.dirtySolutions = u.reject(this.dirtySolutions, (solution) => e.isDetached(solution.element) || e.isDetached(solution.origin))
-
     if (!this.dirtySolutions.length || this.rendering) {
       return
     }
 
-    let dirtySolutions = u.uniqBy(this.dirtySolutions, 'element')
+    let dirtySolutions = this.dirtySolutions // u.uniqBy(this.dirtySolutions, 'element')
+    this.dirtySolutions = []
+
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //
@@ -113,11 +137,14 @@ up.FormValidator = class FormValidator {
     //       <input type="text" name="email" up-validate=".results">
     //       <div class="results"></div>
     //     </form>
-    let dirtyFields = u.uniq(u.map(dirtySolutions, 'origin'))
+
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
-    let dirtyNames = u.uniq(u.compact(u.map(dirtyFields, 'name')))
+    let dirtyOrigins = u.map(dirtySolutions, 'origin')
+    let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
+    let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
+    // Merge together all render options for all origins.
     let options = u.merge(this.formDefaults, ...dirtyRenderOptionsList)
 
     // Update the collected targets of all solutions.
@@ -142,7 +169,7 @@ up.FormValidator = class FormValidator {
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
     options.headers ||= {}
-    options.headers[up.protocol.headerize('validate')] =  dirtyNames.join(' ') || ':unknown'
+    options.headers[up.protocol.headerize('validate')] = dirtyNames.join(' ') || ':unknown'
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
@@ -151,7 +178,6 @@ up.FormValidator = class FormValidator {
     // We don't render concurrently. If additional fields want to validate
     // while our request is in flight, they add to a new @dirtySolutions array.
     this.rendering = true
-    this.dirtySolutions = []
 
     // Just like we're gathering new dirty solutions for our next render pass,
     // we now pass out a new validate() promise for that next pass.
@@ -165,7 +191,7 @@ up.FormValidator = class FormValidator {
     //
     // Disabling the same elements multiple time is not an issue since up.form.disable()
     // only sees enabled elements.
-    delete options.delay
+    delete options.disable
     for (let solution of dirtySolutions) {
       up.form.disableAroundRequest(renderingPromise, {
         disable: solution.renderOptions.disable,

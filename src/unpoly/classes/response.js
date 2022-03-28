@@ -191,7 +191,7 @@ up.Response = class Response extends up.Record {
   @param {Date|undefined} lastModified
   @experimental
   */
-  get lastModified() {
+  get lastModified() { // eslint-disable-line getter-return
     let header = this.getHeader('Last-Modified')
     if (header) {
       return new Date(header)
