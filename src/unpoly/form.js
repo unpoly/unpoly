@@ -443,7 +443,7 @@ up.form = (function() {
     let missingOption = (key) => { throw up.error.failed("Cannot process { disable: '%s' } option without { %s }", disable, key) }
     let getOrigin = () => origin || missingOption('origin')
     let getTargetElements = () => targetElements || missingOption('origin')
-    let getOriginForm = () => getForm(getOrigin())
+    let getOriginForm = () => getContainer(getOrigin())
 
     let containers
 

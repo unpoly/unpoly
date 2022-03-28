@@ -9,7 +9,6 @@ up.FormValidator = class FormValidator {
     this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable', 'contentType', 'headers', 'params', 'url', 'method'] }) : {}
     this.dirtySolutions = []
     this.nextRenderTimer = null
-    this.nextRenderOptions = null
     this.rendering = false
     this.resetNextRenderPromise()
     this.honorAbort()
@@ -31,10 +30,15 @@ up.FormValidator = class FormValidator {
   }
 
   validate(elementOrSelector, renderOptions) {
-    let solution = this.getSolution(elementOrSelector)
-    this.dirtySolutions.push(solution)
-    let nextRenderOptions = { ...this.elementOptions(solution.origin || solution.element), ...renderOptions }
-    this.scheduleNextRender(nextRenderOptions)
+    let container = up.fragment.get(elementOrSelector, { layer: this.form })
+    let fields = up.form.fields(container)
+
+    for (let field of fields) {
+      let solution = this.getSolution(field, renderOptions)
+      this.dirtySolutions.push(solution)
+    }
+
+    this.scheduleNextRender()
     return this.nextRenderPromise
   }
 
@@ -43,68 +47,57 @@ up.FormValidator = class FormValidator {
     return up.form.observeOptions(field, {}, { defaults })
   }
 
-  getSolution(elementOrSelector) {
-    let solution
-    if (u.isString(elementOrSelector)) {
-      solution = this.getSelectorSolution(elementOrSelector)
-    } else {
-      solution = this.getValidateAttrSolution(elementOrSelector)
-        || up.form.groupSolution(elementOrSelector)
-        || this.getGivenElementSolution(elementOrSelector)
-    }
+  getSolution(field, renderOptions) {
+    let solution = this.getExplicitTargetSolution(field, renderOptions)
+      || this.getValidateAttrSolution(field)
+      || up.form.groupSolution(field) // the fallback group is the entire form
+
+    // Since we may render multiple targets with a single { origin },
+    // we must resolve any :origin selectors now.
     solution.target = up.fragment.resolveOrigin(solution.target, solution)
-    return solution
+
+    solution.renderOptions = { ...this.elementOptions(field), ...renderOptions }
   }
 
-  getSelectorSolution(selector) {
-    let element = up.fragment.get(selector, { layer: this.form })
-    return {
-      target: selector,
-      element,
-      origin: element
-    }
-  }
+  getExplicitTargetSolution(field, renderOptions) {
+    let target = renderOptions.target
 
-  getValidateAttrSolution(origin) {
-    let containerWithAttr = e.closest(origin, '[up-validate]')
+    if (target) {
+      let element = up.fragment.get(target, { origin: field })
 
-    if (containerWithAttr) {
-      let target = containerWithAttr.getAttribute('up-validate')
-
-      if (target) {
-        let element = up.fragment.get(target, { origin })
-
-        return {
-          target,
-          element,
-          origin
-        }
+      return {
+        target,
+        element,
+        origin: field
       }
     }
   }
 
-  getGivenElementSolution(element) {
-    return {
-      element,
-      target: up.fragment.toTarget(element),
-      origin: element,
+  getValidateAttrSolution(field) {
+    // In case of radio buttons the [up-validate] attribute will
+    // be set on a container containing the entire radio button group.
+    let containerWithAttr = e.closest(field, '[up-validate]')
+
+    if (containerWithAttr) {
+      let target = containerWithAttr.getAttribute('up-validate')
+      return this.getExplicitTargetSolution(field, { target })
     }
   }
 
-  scheduleNextRender(options) {
-    let delay = options.delay || 0
-    console.debug("Scheduling validate render after %o ms", delay)
-    this.nextRenderOptions = options
+  scheduleNextRender() {
+    let solutionDelays = this.dirtySolutions.map((solution) => solution.renderOptions.delay)
+    let shortestDelay = Math.min(...solutionDelays) || 0
     // Render requests always reset the timer, using their then-current delay.
     this.unscheduleNextRender()
-    this.nextRenderTimer = u.timer(delay, () => this.renderDirtySolutions())
+    this.nextRenderTimer = u.timer(shortestDelay, () => this.renderDirtySolutions())
   }
 
   unscheduleNextRender() {
     clearTimeout(this.nextRenderTimer)
   }
 
-  renderDirtySolutions() {
+  // noinspection ES6MissingAwait
+  async renderDirtySolutions() {
     // Remove solutions for elements that were detached while we were waiting for the timer.
     this.dirtySolutions = u.reject(this.dirtySolutions, (solution) => e.isDetached(solution.element) || e.isDetached(solution.origin))
 
@@ -113,7 +106,6 @@ up.FormValidator = class FormValidator {
     }
 
     let dirtySolutions = u.uniqBy(this.dirtySolutions, 'element')
-    let dirtyTargets = u.map(dirtySolutions, 'target')
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //
@@ -121,20 +113,27 @@ up.FormValidator = class FormValidator {
     //       <input type="text" name="email" up-validate=".results">
     //       <div class="results"></div>
     //     </form>
-    let dirtyFields = u.uniq(u.flatMap(dirtySolutions, (solution) => up.form.fields(solution.origin)))
+    let dirtyFields = u.uniq(u.map(dirtySolutions, 'origin'))
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
     let dirtyNames = u.uniq(u.compact(u.map(dirtyFields, 'name')))
+    let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
-    let options = u.merge(this.formDefaults, this.nextRenderOptions)
+    let options = u.merge(this.formDefaults, ...dirtyRenderOptionsList)
+
+    // Update the collected targets of all solutions.
+    options.target = u.map(dirtySolutions, 'target').join(', ')
+
+    // If any solution wants feedback, they all get it.
+    options.feedback = u.some(dirtyRenderOptionsList, 'feedback')
 
     // Since we may render multiple dirty elements we cannot have individual origins
     // for each. We already resolved an :origin selector in getSolution(), so we don't
     // need { origin } for target resolution.
     options.origin = this.form
 
+    // In case we're replacing an input that the user is typing in,
+    // preserve focus, selection and scroll positions.
     options.focus = 'keep'
-
-    options.target = dirtyTargets.join(', ')
 
     // The protocol doesn't define whether the validation results in a status code.
     // Hence we use the same options for both success and failure.
@@ -150,22 +149,43 @@ up.FormValidator = class FormValidator {
     options.guardEvent = up.event.build('up:form:validate', { fields: dirtyFields, log: 'Validating form' })
 
     // We don't render concurrently. If additional fields want to validate
-    // while our request is in flight, they add to @dirtySolutions.
+    // while our request is in flight, they add to a new @dirtySolutions array.
     this.rendering = true
     this.dirtySolutions = []
 
     // Just like we're gathering new dirty solutions for our next render pass,
     // we now pass out a new validate() promise for that next pass.
-    let promise = this.nextRenderPromise
+    let renderingPromise = this.nextRenderPromise
     this.resetNextRenderPromise()
 
-    u.always(up.render(options), (result) => {
-      this.rendering = false
+    // We may render multiple solutions with { disable } options, and most delay options
+    // are specific to an { origin }. For instance, { disable: 'form-group' } disables the closest
+    // form group around the origin. Since up.render({ disable }) can only take a single
+    // value for { disable, origin }, we disable each solution outside of rendering.
+    //
+    // Disabling the same elements multiple time is not an issue since up.form.disable()
+    // only sees enabled elements.
+    delete options.delay
+    for (let solution of dirtySolutions) {
+      up.form.disableAroundRequest(renderingPromise, {
+        disable: solution.renderOptions.disable,
+        origin: solution.origin,
+        targetElements: [solution.element]
+      })
+    }
+
+    try {
       // Resolve all promises we have handed out for the now-rendered solutions.
-      promise.resolve(result)
-      // Additional solutions may have become dirty while we were rendering.
+      // Since we passed { fail: false } above we will always fulfill for a matchable
+      // HTML response, but still reject for fatal errors (e.g. connectivity loss).
+      renderingPromise.resolve(up.render(options))
+      await renderingPromise
+    } finally {
+      this.rendering = false
+      // Additional solutions may have become dirty while we were rendering so we check again.
+      // If no pending solutions are found, the method will return immediately.
       this.renderDirtySolutions()
-    })
+    }
   }
 
   static forElement(element) {

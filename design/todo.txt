@@ -1,5 +1,15 @@
 TODOs for next release
 ======================
+                                               Automatischer Field-Finder                  Explicit
+-------------------------------------------------------------------------------------------------------------------------------------
+Ich möchte eine Feld-Gruppe validieren         up.validate(field)                          up.validate(':form-group', origin: field)    (oder automatischer lookup WENN ich field habe?)
+
+Ich möchte das ganze Form validieren           up.validate(form)                           up.validate(form)
+
+Ich möchte ein bestimmtes Ziel validieren      up.validate(form, target: '.total-price')   up.validate('.total-price')
+
+X-Up-Validate                                  passt                                       nicht machbar
+
 
 
 Concurrency
@@ -23,6 +33,9 @@ Concurrency
         - We would make multiple dirty solution with the
 - Should up.validate(container) work?
   - Invalidate each contained field?
+  - We currently only use render options from the last field
+    - Do we need to merge them now?
+      - Yes, or [up-disable="form-group"] would only disable a single field with up.validate(form)
   - It would not be a problem to start with a field lookup and then go to everything individually
     - However, which render option would work? first? last?
     - Options are currently
