@@ -999,6 +999,48 @@ describe 'up.form', ->
         next ->
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
 
+    describe 'up.form.parseValidateArgs()', ->
+
+      it 'parses [String]', ->
+        foo = fixture('.foo')
+        options = up.form.parseValidateArgs(['.foo'])
+        expect(options).toEqual(target: '.foo', origin: foo)
+
+      it 'parses [String, { origin: Element }]', ->
+        foo = fixture('.foo')
+        bar = fixture('.bar')
+        options = up.form.parseValidateArgs(['.foo', origin: bar])
+        expect(options).toEqual(target: '.foo', origin: bar)
+
+      it 'parses [String, { target: String }], preferring the { target } attribute for backwards compatibility', ->
+        foo = fixture('.foo')
+        bar = fixture('.bar')
+        options = up.form.parseValidateArgs(['.foo', target: '.bar'])
+        expect(options).toEqual(target: '.bar', origin: bar)
+
+      it 'parses [{ target: String }]', ->
+        foo = fixture('.foo')
+        options = up.form.parseValidateArgs([{ target: '.foo' }])
+        expect(options).toEqual(target: '.foo', origin: foo)
+
+      it 'parses [Element]', ->
+        foo = fixture('.foo')
+        options = up.form.parseValidateArgs([foo])
+        expect(options).toEqual(origin: foo)
+
+      it 'parses [Element, { target: String }]', ->
+        foo = fixture('.foo')
+        bar = fixture('.bar')
+        options = up.form.parseValidateArgs([foo, { target: '.bar' }])
+        expect(options).toEqual(origin: foo, target: '.bar')
+
+      it 'parses [Element, { target: String, origin: Element }]', ->
+        foo = fixture('.foo')
+        bar = fixture('.bar')
+        baz = fixture('.baz')
+        options = up.form.parseValidateArgs([foo, { target: '.bar', origin: baz }])
+        expect(options).toEqual(origin: baz, target: '.bar')
+
     describe 'up.form.disable()', ->
 
       it "disables the form's fields", ->

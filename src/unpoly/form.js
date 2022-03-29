@@ -807,8 +807,8 @@ up.form = (function() {
   ```
 
   @function up.validate
-  @param {string|Element|jQuery} field
-    The form field to validate.
+  @param {string|Element|jQuery} element
+    The element to validate.
   @param {Object} [options]
     Additional [submit options](/up.submit#options) that should be used for
     submitting the form for validation.
@@ -820,27 +820,48 @@ up.form = (function() {
 
     By default the closest [form group](/up-form-group)
     around the given `field` is updated.
-  @return {Promise}
+  @return {Promise<up.RenderResult>}
     A promise that fulfills when the server-side
     validation is received and the form was updated.
   @stable
   */
   function validate(...args) {
+    let options = parseValidateArgs(args)
+    let validator = up.FormValidator.forElement(options.origin)
+    return validator.validate(options)
+  }
 
-    // up.validate('input[name=email]')
-    // up.validate('input[name=email]', { origin: element })
-    // up.validate('input[name=email]', { origin: element, target: '.other' })
-    // up.validate(inputElement)
-    // up.validate({ target: '.other' })
+  /*-
+  Parses the many signatures of `up.validate()`:
 
+      up.validate('input[name=email]')                          => { target: 'input[name=email]', origin: <lookup> }
+      up.validate('input[name=email]', { origin: element })     => { target: 'input[name=email]', origin: element }
+      up.validate('input[name=email]', { target: '.other' })    => { target: '.other', origin: element }
+      up.validate({ target: '.other' })                         => { target: '.other', origin: <lookup> }
+      up.validate(form)                                         => { origin: form }
+      up.validate(form, { target: '.other' })                   => { target: '.other', origin: form }
+      up.validate(form, { target: '.other', origin: element })  => { target: '.other', origin: element }
+
+  Any signature *must* contain an { origin }. We use it to look up the responsible up.FormValidator.
+  */
+  function parseValidateArgs(args) {
     const options = u.extractOptions(args)
-    // Legacy API preferred { target } option over first arg
-    if (args.length) options.target ||= args[0]
 
-    let targetElement = up.fragment.get(options.target, options)
+    if (args.length) {
 
-    let validator = up.FormValidator.forElement(targetElement)
-    return validator.validate(targetElement, options)
+      if (u.isString(args[0])) {
+        options.target ||= args[0]
+      } else if (u.isElement(args[0])) {
+        // Call variant: up.validate(inputElement, { target: '.container:has(&)' })
+        options.origin ||= args[0]
+      }
+    }
+
+    if (u.isString(options.target)) {
+      options.origin ||= up.fragment.get(options.target, options)
+    }
+
+    return options
   }
 
   /*-
@@ -1289,7 +1310,7 @@ up.form = (function() {
   */
   up.compiler(validatingFieldSelector, function(field) {
     let validator = up.FormValidator.forElement(field)
-    validator.watchField(field)
+    validator.observeField(field)
   })
 
   function validatingFieldSelector() {
@@ -1625,6 +1646,7 @@ up.form = (function() {
     isSubmittable,
     observe,
     validate,
+    parseValidateArgs,
     autosubmit,
     fieldSelector,
     fields: findFields,

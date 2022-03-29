@@ -4,7 +4,7 @@ TODOs for next release
 -------------------------------------------------------------------------------------------------------------------------------------
 Ich möchte eine Feld-Gruppe validieren         up.validate(field)                          up.validate(':form-group', origin: field)    (oder automatischer lookup WENN ich field habe?)
 
-Ich möchte das ganze Form validieren           up.validate(form)                           up.validate(form)  [aber disable wird hier nicht ausgewertet]
+Ich möchte das ganze Form validieren           up.validate(form)                           up.validate(form)  [aber disable muss hier explizit gegeben werden]
 
 Ich möchte ein bestimmtes Ziel validieren      up.validate(form, target: '.total-price')   up.validate('.total-price')
 
@@ -15,6 +15,7 @@ X-Up-Validate                                  passt                            
 Concurrency
 -----------
 
+- Should { disable: 'selector' } disable all matches?2
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay

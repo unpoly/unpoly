@@ -24,86 +24,64 @@ up.FormValidator = class FormValidator {
     this.nextRenderPromise = u.newDeferred()
   }
 
-  watchField(field) {
-    let fieldOptions = this.elementOptions(field)
-    up.on(field, fieldOptions.event, () => this.validate(field, fieldOptions))
+  observeField(field) {
+    up.on(field, fieldOptions.event, () => this.validate(field))
   }
 
-  validate(elementOrSelector, renderOptions) {
-    let container = up.fragment.get(elementOrSelector, { layer: this.form })
-    let fields = up.form.fields(container)
-
-    for (let field of fields) {
-      let solution = this.getSolution(field, renderOptions)
-      this.dirtySolutions.push(solution)
-    }
-
+  validate(element, options = {}) {
+    let solution = this.getSolution(element, options)
+    this.dirtySolutions.push(solution)
     this.scheduleNextRender()
     return this.nextRenderPromise
   }
 
-  validate2(element, options) {
-    let solution
+  getSolution(element, options) {
+    let solution = this.getFieldSolution(element, { options })
+      || this.getTargetSelectorSolution(element, options)
+      || this.getElementSolution(element)
 
-    if (u.isString(options.target)) {
-      solution = { target: options.target, element }
-    } else if (up.form.isField(element)) {
-      solution = getValidateAttrSolution(element) || up.form.groupSolution(element)
-    } else {
-      solution = { target: up.fragment.toTarget(element), element }
-    }
+    solution.renderOptions = { ...formDefaults, ...this.containerOptions(element), ...options }
 
-
-
-
-    if (u.isString(renderOptions.target)) {
-      let selector = renderOptions.target
-      let element = up.fragment.get(selector, renderOptions)
-    } else if (u.isElement(renderOptions.target)) {
-      let selector = up.fragment.toTarget(renderOptions.target)
-      //   element: renderOptions.target
-      // }
-    }
-
-    let fields = up.form.fields(container)
-
-    for (let field of fields) {
-      let solution = this.getSolution(field, renderOptions)
-      this.dirtySolutions.push(solution)
-    }
-
-    this.scheduleNextRender()
-    return this.nextRenderPromise
-  }
-
-  elementOptions(field) {
-    let defaults = { event: 'change', ...this.formDefaults }
-    return up.form.observeOptions(field, {}, { defaults })
-  }
-
-  getSolution(field, renderOptions) {
-    let solution = this.getExplicitTargetSolution(field, renderOptions)
-      || this.getValidateAttrSolution(field)
-      || up.form.groupSolution(field) // the fallback group is the entire form
-
-    // Since we may render multiple targets with a single { origin },
-    // we must resolve any :origin selectors now.
+    // Resolve :origin selector here. We can't delegate to up.render({ origin })
+    // as that only takes a single origin, even with multiple targets.
     solution.target = up.fragment.resolveOrigin(solution.target, solution)
 
-    solution.renderOptions = { ...this.elementOptions(field), ...renderOptions }
+    return solution
   }
 
-  getExplicitTargetSolution(field, renderOptions) {
-    let target = renderOptions.target
+  getFieldSolution(element, options) {
+    if (u.isField(element)) {
+      return this.getValidateAttrSolution(element) || this.getFormGroupSolution(element, options)
+    }
+  }
 
-    if (target) {
-      let element = up.fragment.get(target, { origin: field })
+  getFormGroupSolution(field, { formGroup = true }) {
+    if (!formGroup) return
 
+    let solution = up.form.groupSolution(field)
+    if (solution) {
+      up.puts('up.validate()', 'Validating form group of field %o', field)
+      return solution
+    }
+  }
+
+  getTargetSelectorSolution(element, { target, origin, log = true }) {
+    if (u.isString(target)) {
+      if (log) up.puts('up.validate()', 'Validating target "%s"', target)
       return {
         target,
         element,
-        origin: field
+        origin: origin || element
       }
+    }
+  }
+
+  getElementSolution(element) {
+    up.puts('up.validate()', 'Validating element %o', element)
+    return {
+      element,
+      target: up.fragment.toTarget(element),
+      origin: element
     }
   }
 
@@ -114,8 +92,19 @@ up.FormValidator = class FormValidator {
 
     if (containerWithAttr) {
       let target = containerWithAttr.getAttribute('up-validate')
-      return this.getExplicitTargetSolution(field, { target })
+      let solution = this.getTargetSelectorSolution(field, { target, log: false })
+
+      if (solution) {
+        up.puts('up.validate()', 'Validating [up-validate] target "%s" from field %o', target, field)
+        return solution
+      }
     }
+  }
+
+  containerOptions(element, overrideOptions) {
+    let defaults = { event: 'change', ...this.formDefaults }
+    let closestOptions = up.form.observeOptions(element, {}, { defaults })
+    return { ...this.formDefaults, ...closestOptions, ...overrideOptions }
   }
 
   scheduleNextRender() {
@@ -176,7 +165,7 @@ up.FormValidator = class FormValidator {
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
     options.headers ||= {}
-    options.headers[up.protocol.headerize('validate')] =  dirtyNames.join(' ') || ':unknown'
+    options.headers[up.protocol.headerize('validate')] = up.migrate?.validateNames?.(dirtySolutions) || 'true'
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
@@ -222,8 +211,8 @@ up.FormValidator = class FormValidator {
     }
   }
 
-  static forElement(elementOrSelector, options) {
-    let form = up.form.get(elementOrSelector, options)
+  static forElement(element) {
+    let form = up.form.get(element)
     return form.upFormValidator ||= new this(form)
   }
 
