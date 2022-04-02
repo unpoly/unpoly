@@ -15,7 +15,17 @@ X-Up-Validate                                  passt                            
 Concurrency
 -----------
 
-- Should { disable: 'selector' } disable all matches?2
+- Should { disable: 'selector' } disable all matches?
+  - Yes!
+- I find it counter-intuitive that this does not work:
+  <form>
+    <div up-disable=".target">
+      <input type="radio" ...>
+      <input type="radio" ...>
+    </div>
+  </div>
+  (it must be up-observe-disable)
+
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay

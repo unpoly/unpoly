@@ -967,6 +967,73 @@ describe 'up.form', ->
           expect(validateListener).toHaveBeenCalled()
           expect(validateListener.calls.argsFor(0)[0]).toBeEvent('up:form:validate', fields: [input])
 
+      it 'validates the given element', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        element = e.affix(form, '.element')
+
+        up.validate(element)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+
+      it 'validates the element matching the given CSS selector', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        element = e.affix(form, '.element')
+
+        up.validate('.element')
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+
+      it 'validates the closest form group around the given field', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        group = e.affix(form, '[up-form-group]')
+        field = e.affix(group, 'input[name=email]')
+
+        up.validate(field)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+      it 'updates a different target with { target } option', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        group = e.affix(form, '[up-form-group]')
+        field = e.affix(group, 'input[name=email]')
+        otherTarget = e.affix(form, '.other-target')
+
+        up.validate(field, { target: '.other-target' })
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+      it 'does not seek a form group around the given non-field element', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        group = e.affix(form, '[up-form-group]')
+        element = e.affix(group, '.element')
+
+        up.validate(element)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+
+      it 'validates all fields within the given container', asyncSpec (next) ->
+        form = fixture('form[action=/path]')
+        container = e.affix(form, '.container')
+        input1 = e.affix(container, 'input[name=foo]')
+        input2 = e.affix(container, 'input[name=bar]')
+        input3 = e.affix(form, 'input[name=baz]')
+
+        up.validate(container)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.container')
+
       it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
         form = fixture('form[action=/path] input[name=foo]')
         validateListener = jasmine.createSpy('up:form:validate listener')
@@ -977,27 +1044,57 @@ describe 'up.form', ->
         next ->
           expect(validateListener).toHaveBeenCalled()
 
-      it 'validates the given element', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        formInput = e.affix(form, 'input[name=foo]')
+      describe 'request sequence', ->
 
-        up.validate(formInput)
+        it 'only sends a single concurrent requests'
 
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
+        it 'queues new validations while a validation request is in flight'
 
+      describe 'batching', ->
 
-      it 'validates the element matching the given CSS selector', asyncSpec (next) ->
-        otherForm = fixture('form[action=/other]')
-        otherFormInput = e.affix(otherForm, 'input[name=foo]')
+        it 'batches multiple up.validate() calls into a single request', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          fooGroup = e.affix(form, '[up-form-group]')
+          fooField = e.affix(fooGroup, 'input[name=foo]')
+          barGroup = e.affix(form, '[up-form-group]')
+          barField = e.affix(barGroup, 'input[name=bar]')
+          bazGroup = e.affix(form, '[up-form-group]')
+          bazField = e.affix(bazGroup, 'input[name=baz]')
 
-        form = fixture('form[action=/form]')
-        formInput = e.affix(form, 'input[name=foo]')
+          up.validate(fooField)
+          up.validate(bazField)
+          up.validate(fooField)
 
-        up.validate('[name=foo]')
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
 
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo')
+        it 'honors the { disable } option of each batched validation', asyncSpec (next) ->
+          form = fixture('form[action=/path][up-observe-disable=":origin"]')
+          fooField = e.affix(form, 'input[name=foo]')
+          barField = e.affix(form, 'input[name=bar]')
+          bazField = e.affix(form, 'input[name=baz]')
+
+          up.validate(fooField)
+          up.validate(bazField)
+
+          next ->
+            expect(fooField).toBeDisabled()
+            expect(barField).not.toBeDisabled()
+            expect(bazField).toBeDisabled()
+
+            jasmine.respondWith """
+              <form action="/path">
+                <input name='foo'>
+                <input name='bar'>
+                <input name='baz'>
+              </form>
+            """
+
+          next ->
+            expect(fooField).not.toBeDisabled()
+            expect(barField).not.toBeDisabled()
+            expect(bazField).not.toBeDisabled()
 
     describe 'up.form.parseValidateArgs()', ->
 

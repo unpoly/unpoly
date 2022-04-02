@@ -157,10 +157,6 @@ up.form = (function() {
     return fields
   }
 
-  function isField(element) {
-    return e.matches(element, fieldSelector())
-  }
-
   // function findFieldBatches(root) {
   //   let fields = findFields(root)
   //   let fieldsByName = u.groupBy(fields, 'name')
@@ -301,7 +297,7 @@ up.form = (function() {
 
     let parser = new up.OptionsParser(form, options, parserOptions)
     parser.string('failTarget', { default: up.fragment.toTarget(form) })
-    parser.boolean('disable')
+    parser.booleanOrString('disable')
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', {
@@ -366,7 +362,7 @@ up.form = (function() {
     // 3. Default config for this observe() intent (e.g. `up.form.config.observeOptions.disable`).
     // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
     parser.boolean('feedback')
-    parser.boolean('disable')
+    parser.booleanOrString('disable')
     parser.string('event')
     parser.number('delay')
 
@@ -461,7 +457,7 @@ up.form = (function() {
       containers = findSubmitButtons(getOriginForm())
     } else if (u.isString(disable)) {
       // Disable given selector
-      containers = up.fragment.all(getOriginForm(), disable)
+      containers = up.fragment.all(getOriginForm(), disable, { origin })
     }
 
     return u.sequence(containers.map(disableContainer))
@@ -692,10 +688,6 @@ up.form = (function() {
     return up.migrate.migratedFormGroupSelectors?.() || config.groupSelectors
   }
 
-  function getFullGroupSelector() {
-    return getGroupSelectors().join(',')
-  }
-
   /*-
   Returns the [form group](/up-form-group) for the given element.
 
@@ -887,6 +879,9 @@ up.form = (function() {
       up.validate(form, { target: '.other', origin: element })  => { target: '.other', origin: element }
 
   Any signature *must* contain an { origin }. We use it to look up the responsible up.FormValidator.
+
+  @function up.form.parseValidateArgs
+  @internal
   */
   function parseValidateArgs(args) {
     const options = u.extractOptions(args)
@@ -1028,7 +1023,6 @@ up.form = (function() {
 
   function getForm(elementOrSelector, options = {}) {
     const element = up.fragment.get(elementOrSelector, options)
-    console.log("get(%o, %o) => %o", elementOrSelector, options, element)
 
     // Element#form will also work if the element is outside the form with an [form=form-id] attribute
     return element.form || e.closest(element, 'form')

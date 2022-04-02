@@ -123,12 +123,13 @@ up.FormValidator = class FormValidator {
   async renderDirtySolutions() {
     // Remove solutions for elements that were detached while we were waiting for the timer.
     this.dirtySolutions = u.reject(this.dirtySolutions, (solution) => e.isDetached(solution.element) || e.isDetached(solution.origin))
-
     if (!this.dirtySolutions.length || this.rendering) {
       return
     }
 
-    let dirtySolutions = u.uniqBy(this.dirtySolutions, 'element')
+    let dirtySolutions = this.dirtySolutions // u.uniqBy(this.dirtySolutions, 'element')
+    this.dirtySolutions = []
+
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //
@@ -177,7 +178,6 @@ up.FormValidator = class FormValidator {
     // We don't render concurrently. If additional fields want to validate
     // while our request is in flight, they add to a new @dirtySolutions array.
     this.rendering = true
-    this.dirtySolutions = []
 
     // Just like we're gathering new dirty solutions for our next render pass,
     // we now pass out a new validate() promise for that next pass.
@@ -191,7 +191,7 @@ up.FormValidator = class FormValidator {
     //
     // Disabling the same elements multiple time is not an issue since up.form.disable()
     // only sees enabled elements.
-    delete options.delay
+    delete options.disable
     for (let solution of dirtySolutions) {
       up.form.disableAroundRequest(renderingPromise, {
         disable: solution.renderOptions.disable,
