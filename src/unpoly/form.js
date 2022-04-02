@@ -157,6 +157,10 @@ up.form = (function() {
     return fields
   }
 
+  function isField(element) {
+    return e.matches(element, fieldSelector())
+  }
+
   // function findFieldBatches(root) {
   //   let fields = findFields(root)
   //   let fieldsByName = u.groupBy(fields, 'name')
@@ -800,15 +804,46 @@ up.form = (function() {
   See the documentation for [`input[up-validate]`](/input-up-validate) for more information
   on how server-side validation works in Unpoly.
 
-  ### Example
+
+  ### Examples
 
   ```js
-  up.validate('input[name=email]', { target: '.email-errors' })
+  // Update the form group around the email field
+  up.validate('input[name=email]')
+
+  // Update a form element matching `.preview`
+  up.validate('.preview')
+  ```
+
+  ### Multiple validations are batched together
+
+  Multiple calls of `up.validate()` within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+  are batched into a single request. For instance, the following will send a single request targeting `.foo, .bar`:
+
+  ```js
+  up.validate('.foo')
+  up.validate('.bar')
+  ```
+
+  Validating the same target multiple times will also only send a single request.
+  For instance, the following will send a single request targeting `.qux`:
+
+  ```js
+  up.validate('.qux')
+  up.validate('.qux')
+  ```
+
+  When one of your target elements is an ancestor of another target, Unpoly will only request the ancestor.
+  For instance, the following would send a single request targeting `form`:
+
+  ```js
+  up.validate('input[name=email]')
+  up.validate('form')
   ```
 
   @function up.validate
-  @param {string|Element|jQuery} element
-    The element to validate.
+  @param {string|Element|jQuery} target
+    TODO
   @param {Object} [options]
     Additional [submit options](/up.submit#options) that should be used for
     submitting the form for validation.
@@ -818,11 +853,20 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.target]
     The element that will be [updated](/up.render) with the validation results.
 
-    By default the closest [form group](/up-form-group)
-    around the given `field` is updated.
+    TODO describe default
+  @param {string|Element|jQuery} [options.origin]
+    TODO
+  @param {string|Element|jQuery} [options.delay]
+    TODO
+  @param {string|Element|jQuery} [options.formGroup = true]
+    TODO
   @return {Promise<up.RenderResult>}
     A promise that fulfills when the server-side
     validation is received and the form was updated.
+
+    The promise also fulfills if the server sends matching
+    HTML under an [error code](/failed-responses).
+    It will reject if there is a fatal network error, or if no targets could be matched.
   @stable
   */
   function validate(...args) {
@@ -982,8 +1026,9 @@ up.form = (function() {
     return switcher || up.fail('Could not find [up-switch] field for %o', target)
   }
 
-  function getForm(elementOrSelector, options) {
+  function getForm(elementOrSelector, options = {}) {
     const element = up.fragment.get(elementOrSelector, options)
+    console.log("get(%o, %o) => %o", elementOrSelector, options, element)
 
     // Element#form will also work if the element is outside the form with an [form=form-id] attribute
     return element.form || e.closest(element, 'form')
@@ -1650,6 +1695,7 @@ up.form = (function() {
     autosubmit,
     fieldSelector,
     fields: findFields,
+    isField,
     submitButtons: findSubmitButtons,
     focusedField,
     switchTarget,

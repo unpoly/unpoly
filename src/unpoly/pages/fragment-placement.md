@@ -54,6 +54,17 @@ do this:
 <a href="/posts/5" up-target=".content, .unread-count">Read post</a>
 ```
 
+When one of your target elements is an ancestor of another target,
+Unpoly will only request the ancestor.
+
+For instance, the following link would only target `body`, since that
+already contains `.unread-count`:
+
+```html
+<a href="/home" up-target="body, .unread-count">...</a>
+```
+
+
 ### Appending or prepending content
 
 By default Unpoly will replace the given selector with the same

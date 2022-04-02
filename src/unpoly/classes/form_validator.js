@@ -24,7 +24,8 @@ up.FormValidator = class FormValidator {
   }
 
   observeField(field) {
-    up.on(field, fieldOptions.event, () => this.validate({ origin: field }))
+    let { event } = this.originOptions(field)
+    up.on(field, event, () => this.validate({ origin: field }))
   }
 
   validate(options = {}) {
@@ -39,7 +40,7 @@ up.FormValidator = class FormValidator {
       || this.getFieldSolution(options)
       || this.getElementSolution(options.origin)
 
-    solution.renderOptions = { ...formDefaults, ...this.originOptions(solution.origin), ...options }
+    solution.renderOptions = { ...this.formDefaults, ...this.originOptions(solution.origin), ...options }
 
     // Resolve :origin selector here. We can't delegate to up.render({ origin })
     // as that only takes a single origin, even with multiple targets.
@@ -49,7 +50,7 @@ up.FormValidator = class FormValidator {
   }
 
   getFieldSolution({ origin, ... options }) {
-    if (u.isField(origin)) {
+    if (up.form.isField(origin)) {
       return this.getValidateAttrSolution(origin) || this.getFormGroupSolution(origin, options)
     }
   }
@@ -138,7 +139,8 @@ up.FormValidator = class FormValidator {
 
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
     let dirtyOrigins = u.map(dirtySolutions, 'origin')
-    let dirtyNames = u.uniq(u.flatMap(dirtyOrigins, up.form.fields))
+    let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
+    let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // Merge together all render options for all origins.
@@ -166,7 +168,7 @@ up.FormValidator = class FormValidator {
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
     options.headers ||= {}
-    options.headers[up.protocol.headerize('validate')] = dirtyNames || ':unknown'
+    options.headers[up.protocol.headerize('validate')] = dirtyNames.join(' ') || ':unknown'
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
