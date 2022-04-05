@@ -15,17 +15,46 @@ X-Up-Validate                                  passt                            
 Concurrency
 -----------
 
+- Disable automatic { disable } application for observe callbacks
+  - Devs cannot opt out
+- Do replace observe with watch
+- Consider whether form[up-disable] and up.form.config.disable should really be a default for form[up-observe-disable]
+  - I find it counter-intuitive that this does not work:
+
+        <form>
+          <div up-disable=".target">
+            <input type="radio" ...>
+            <input type="radio" ...>
+          </div>
+        </div>
+
+    (it must be up-observe-disable)
+
+    While this works:
+
+        <form up-disable=".target">
+          <div up-disable=".target">
+            <input type="radio" ...>
+            <input type="radio" ...>
+          </div>
+        </div>
+
+  - Also I think for advanced cases it's hard to define an [up-disable] selector that works for both submission (where the origin is the submit button) and observing (where the origin is a form field)
+- Is it really helpful to have options like { disable: 'submit-button' }
+  - I think in practice you would often want to disable more than one container, e.g. the form group AND the submit buttons
+     - But this cannot work: { disable: 'submit-button, form-group' }
+     - Maybe it's better to only accept `true` or a selector
+     - We could support this with more pseudo-class selectors like :form-group and :submit-button
+        - :submit-button is hard to build origin-aware
+        - :form-group is also supper hard to support in a selector like ".foo, :form-group, :bar" due to the way we hacked :has()
+          - :has() is still behind a flag in Chrome and no Firefox support
+- Is this an edge case with disable?
+  - Validation with [up-observe-disable] disables a form group (1)
+  - User submits form[up-disable], which disables the entire form (2)
+  - While the form is submitting, the validation request finishes. The form group (1) is re-enabled.
+  - Do we need a "disable count" stack?
 - Should { disable: 'selector' } disable all matches?
   - Yes!
-- I find it counter-intuitive that this does not work:
-  <form>
-    <div up-disable=".target">
-      <input type="radio" ...>
-      <input type="radio" ...>
-    </div>
-  </div>
-  (it must be up-observe-disable)
-
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay
