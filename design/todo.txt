@@ -15,49 +15,26 @@ X-Up-Validate                                  passt                            
 Concurrency
 -----------
 
+- Do replace the term "observe" with "watch"
+- Is it really helpful to have options like { disable: 'submit-button' }
+  - I think in practice you would often want to disable more than one container, e.g. the form group AND the submit buttons
+     - But this cannot work: { disable: 'submit-button, form-group' }
+  => Only accept `true` or a selector
+- Is this an edge case with disable?
+  - Validation with [up-observe-disable] disables a form group (1)
+  - User submits form[up-disable], which disables the entire form (2)
+  - While the form is submitting, the validation request finishes. The form group (1) is re-enabled.
+  - Do we need a "disable count" stack?
+  => It *might* not a problem as submitting will cancel the observer. However, there is async involved so we should really test this.
 - Should { disable: 'selector' } disable all matches?
   - Yes!
-- I find it counter-intuitive that this does not work:
-  <form>
-    <div up-disable=".target">
-      <input type="radio" ...>
-      <input type="radio" ...>
-    </div>
-  </div>
-  (it must be up-observe-disable)
-
+  - It already does.
+  => Add a test!
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay
   - form.config.changeEvent => form.config.observeChangeEvent
   - Remove 'change' from up.form.config.inputEvent
-- Is up.validate() inconsistent with its args?
-  - up.validate(element) follows an [up-validate] attr or seeks a form group
-  - However, up.validate(selector) directly invalidates the given selector. It does not follow [up-validate].
-    - This also breaks compatibility!
-  - Do we need up.invalidate(target) ?
-    - Is this the same as up.validate(form, { target })?
-  - I don't think we do anything with the { target } option currently?
-    - This is already public API
-    - This should make its own solution, overriding all the other defaults
-      - Also when doing up.validate(container, { target })
-        - We would make multiple dirty solution with the
-- Should up.validate(container) work?
-  - Invalidate each contained field?
-  - We currently only use render options from the last field
-    - Do we need to merge them now?
-      - Yes, or [up-disable="form-group"] would only disable a single field with up.validate(form)
-  - It would not be a problem to start with a field lookup and then go to everything individually
-    - However, which render option would work? first? last?
-    - Options are currently
-      - parser.boolean('feedback')
-        - we could || them together, so if any wants feedback they all get it
-      - parser.boolean('disable')
-        - we collect it all, do it manually and set { disable: false } for the up.submit() call
-        - we cannot make up.render({ disable: [array] }) since { disable: 'form-group' } each needs its own { origin }
-      - parser.string('event') (does not matter here)
-      - parser.number('delay') (we could ignore the option for manual calls)
-  - Docs
 - This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
   - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeChangeDelay`
 - Support disable attrs in up.FormValidator
@@ -71,9 +48,6 @@ Concurrency
   - Test that we can use [up-validate] with another event and a delay
   - Test that [up-validate] will not make a request if the target is removed while waiting for the delay
   - Test that multiple [up-validate] requests are merged into a single request
-- Do we want a shortcut macro for this:
-      <input up-validate up-keep up-observe-event="input">
-  - <input up-live-validate>
 
 
 
@@ -145,10 +119,11 @@ Various changes
 Docs
 ----
 
-- Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
-  - It's actually more like "appendableElement"
-  - Maybe offer up.Layer#append
-- Consider exposing up.layer.contentElement
+- Docs for up.validate()
+  - { feedback, disable, delay, event }
+  - Explain that you can use it both on containers and individual fields
+  - Explain that it is batched
+- Explain and test [up-validate] usage for radio buttons
 - Document { abort } option and link everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
 - Test and Document that we can use live validation like this:
@@ -190,6 +165,18 @@ Docs
 Icebox
 ======
 
+- Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
+  - It's actually more like "appendableElement"
+  - Maybe offer up.Layer#append
+- Consider exposing up.layer.contentElement
+- Do we want a shortcut macro for this:
+      <input up-validate up-keep up-observe-event="input">
+  - <input up-live-validate>
+  - It's weird for users who don't target the input. They may expect to just override the event.
+- We could support this with more pseudo-class selectors like :form-group and :submit-button
+  - :submit-button is hard to build origin-aware => It could just be a substitution with :is() / :-moz-any() & :-webkit-any()
+  - :form-group is also supper hard to support in a selector like ".foo, :form-group, :bar" due to the way we hacked :has()
+    - :has() is still behind a flag in Chrome and no Firefox support
 - Introduce boundaries or "softly isolated zones"
   - The idea started with: Should fragment lookups with an { origin } within a form prefer to look within the form?
     - Also related to https://github.com/unpoly/unpoly/issues/197 , which would no longer work
