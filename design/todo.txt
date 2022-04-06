@@ -26,10 +26,6 @@ Concurrency
   - While the form is submitting, the validation request finishes. The form group (1) is re-enabled.
   - Do we need a "disable count" stack?
   => It *might* not a problem as submitting will cancel the observer. However, there is async involved so we should really test this.
-- Should { disable: 'selector' } disable all matches?
-  - Yes!
-  - It already does.
-  => Add a test!
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay
