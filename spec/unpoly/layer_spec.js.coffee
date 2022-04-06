@@ -11,7 +11,7 @@ describe 'up.layer', ->
 
     describe 'up.layer.open()', ->
 
-      it 'resolves to an up.Layer instance xxx', (done) ->
+      it 'resolves to an up.Layer instance', (done) ->
         up.layer.open().then (value) ->
           expect(value).toEqual(jasmine.any(up.Layer))
           done()
@@ -267,27 +267,27 @@ describe 'up.layer', ->
               fragment: '<div class="element">element text</div>'
               history: true
             )
-  
+
             next ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(up.layer.history).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
-  
+
           it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
             makeLayers [
               { target: '.root-element' },
               { target: '.overlay-element', location: '/modal-location', history: true }
             ]
-  
+
             expect(up.layer.isOverlay()).toBe(true)
             expect(location.href).toMatchURL('/modal-location')
 
             up.navigate(layer: 'root', target: '.root-element', content: 'new text', location: '/new-root-location', peel: false, history: true)
-  
+
             expect(location.href).toMatchURL('/modal-location')
 
             up.layer.dismiss()
-  
+
             expect(up.layer.isRoot()).toBe(true)
             expect(location.href).toMatchURL('/new-root-location')
 
@@ -295,44 +295,44 @@ describe 'up.layer', ->
 
           it 'does not update the browser location ', asyncSpec (next) ->
             originalLocation = location.href
-  
+
             up.layer.open(
               target: '.element',
               history: false,
               location: '/modal-url'
             )
-  
+
             next ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(location.href).toMatchURL(originalLocation)
-  
+
               # We can still ask the layer what location it displays
               expect(up.layer.location).toMatchURL('/modal-url')
-  
+
           it 'does not let child layers update the browser location', asyncSpec (next) ->
             originalLocation = location.href
-  
+
             up.layer.open(
               target: '.element',
               history: false,
               location: '/overlay1',
             )
-  
+
             next ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(location.href).toMatchURL(originalLocation)
-  
+
               up.layer.open(
                 target: '.element',
                 history: true,
                 location: '/overlay2',
               )
-  
+
             next ->
               expect(location.href).toMatchURL(originalLocation)
-            
+
         describe 'with { history: "auto" }', ->
-        
+
           it 'gives the layer history if the initial overlay content is a main selector', asyncSpec (next) ->
             up.layer.config.modal.history = 'auto'
             up.fragment.config.mainTargets = ['.main']
