@@ -543,7 +543,6 @@ describe 'up.form', ->
 
             group = e.affix(form, '.one')
             input = e.affix(group, 'input[name=email]')
-
             otherGroup = e.affix(form, '.two')
             otherInput = e.affix(otherGroup, 'input[name=password]')
 
@@ -552,6 +551,35 @@ describe 'up.form', ->
             next =>
               expect(input).toBeDisabled()
               expect(otherInput).not.toBeDisabled()
+
+          it 'disables within all (not just the first) match of the given selector', asyncSpec (next) ->
+            form = fixture('form')
+
+            group = e.affix(form, '.group')
+            input = e.affix(group, 'input[name=email]')
+            alsoGroup = e.affix(form, '.group')
+            alsoInput = e.affix(alsoGroup, 'input[name=email]')
+
+            up.submit(form, { disable: '.group' })
+
+            next =>
+              expect(input).toBeDisabled()
+              expect(alsoInput).toBeDisabled()
+
+          it 'does not disable matches outside of the form', asyncSpec (next) ->
+            form = fixture('form')
+            groupInside = e.affix(form, '.group')
+            inputInside = e.affix(groupInside, 'input[name=email]')
+
+            otherForm = fixture('form')
+            groupOutside = e.affix(otherForm, '.group')
+            inputOutside = e.affix(groupOutside, 'input[name=email]')
+
+            up.submit(form, { disable: '.group' })
+
+            next =>
+              expect(inputInside).toBeDisabled()
+              expect(inputOutside).not.toBeDisabled()
 
         it 're-enables the form when the submission ends in a successful response', asyncSpec (next) ->
           fixture('.target')
@@ -1046,9 +1074,11 @@ describe 'up.form', ->
 
       describe 'request sequence', ->
 
-        it 'only sends a single concurrent requests'
+        it 'only sends a single concurrent requests', ->
+          throw "test me"
 
-        it 'queues new validations while a validation request is in flight'
+        it 'queues new validations while a validation request is in flight', ->
+          throw "test me"
 
       describe 'batching', ->
 
