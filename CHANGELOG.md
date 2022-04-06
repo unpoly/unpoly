@@ -8,6 +8,15 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.5.3
+-----
+
+This maintenance release contains a single fix:
+
+- Fix a bug where modal overlays would not adjust its height to the height of its content.
+
+
+
 2.5.2
 -----
 
