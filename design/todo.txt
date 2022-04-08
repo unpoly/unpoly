@@ -20,12 +20,6 @@ Concurrency
   - I think in practice you would often want to disable more than one container, e.g. the form group AND the submit buttons
      - But this cannot work: { disable: 'submit-button, form-group' }
   => Only accept `true` or a selector
-- Is this an edge case with disable?
-  - Validation with [up-observe-disable] disables a form group (1)
-  - User submits form[up-disable], which disables the entire form (2)
-  - While the form is submitting, the validation request finishes. The form group (1) is re-enabled.
-  - Do we need a "disable count" stack?
-  => It *might* not a problem as submitting will cancel the observer. However, there is async involved so we should really test this.
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay
