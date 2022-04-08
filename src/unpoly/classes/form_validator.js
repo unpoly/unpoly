@@ -193,10 +193,9 @@ up.FormValidator = class FormValidator {
     // only sees enabled elements.
     delete options.disable
     for (let solution of dirtySolutions) {
-      up.form.disableAroundRequest(renderingPromise, {
+      up.form.disableWhile(renderingPromise, {
         disable: solution.renderOptions.disable,
         origin: solution.origin,
-        targetElements: [solution.element]
       })
     }
 

@@ -1,25 +1,11 @@
 TODOs for next release
 ======================
-                                               Automatischer Field-Finder                  Explicit
--------------------------------------------------------------------------------------------------------------------------------------
-Ich möchte eine Feld-Gruppe validieren         up.validate(field)                          up.validate(':form-group', origin: field)    (oder automatischer lookup WENN ich field habe?)
-
-Ich möchte das ganze Form validieren           up.validate(form)                           up.validate(form)  [aber disable muss hier explizit gegeben werden]
-
-Ich möchte ein bestimmtes Ziel validieren      up.validate(form, target: '.total-price')   up.validate('.total-price')
-
-X-Up-Validate                                  passt                                       nicht machbar
-
 
 
 Concurrency
 -----------
 
 - Do replace the term "observe" with "watch"
-- Is it really helpful to have options like { disable: 'submit-button' }
-  - I think in practice you would often want to disable more than one container, e.g. the form group AND the submit buttons
-     - But this cannot work: { disable: 'submit-button, form-group' }
-  => Only accept `true` or a selector
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
   - form.config.inputDelay => form.config.observeInputDelay

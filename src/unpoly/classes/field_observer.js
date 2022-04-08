@@ -102,7 +102,7 @@ up.FieldObserver = class FieldObserver {
       // attrs so callbacks don't have to handle this.
       if (u.some(callbackReturnValues, u.isPromise)) {
         let callbackDone = u.allSettled(callbackReturnValues)
-        up.form.disableAroundRequest(callbackDone, fieldOptions)
+        up.form.disableWhile(callbackDone, fieldOptions)
         await callbackDone
       }
 
