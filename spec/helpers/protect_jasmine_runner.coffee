@@ -171,13 +171,6 @@ beforeEach ->
   up.history.config.restoreTargets = ['default-fallback']
   appendDefaultFallback(document.body)
 
-#  debugger
-#
-#  up.on 'up:layer:opened', (event) ->
-#    layer = event.layer
-#    parent = layer.getContentElement()
-#    appendDefaultFallback(parent)
-
 afterEach ->
   for element in document.querySelectorAll('default-fallback')
     up.destroy(element, log: false)

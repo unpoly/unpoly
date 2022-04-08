@@ -397,7 +397,7 @@ up.form = (function() {
     The element within which fields and buttons should be disabled.
   @return {Function}
     A function that re-enables the elements that were disabled.
-  @experimental
+  @internal
   */
   function disableContainer(container) {
     let focusedElement = document.activeElement
@@ -415,19 +415,40 @@ up.form = (function() {
     }
 
     let controls = [...findFields(container), ...findSubmitButtons(container)]
-    controls = u.reject(controls, 'disabled')
-    setControlsDisabled(controls, true)
+
+    controls.forEach(raiseDisableStack)
 
     if (focusFallback && !focusFallback.contains(document.activeElement)) {
       up.focus(focusFallback, { force: true, preventScroll: true })
     }
 
-    return () => setControlsDisabled(controls, false)
+    return function() {
+      controls.forEach(lowerDisableStack)
+    }
   }
 
-  function setControlsDisabled(controls, disabled) {
-    for (let control of controls) {
-      control.disabled = disabled
+  function raiseDisableStack(control) {
+    if (!control.upDisableCount) {
+      control.upDisableCount ||= 0
+      control.upOriginalDisabled = control.disabled
+    }
+
+    control.upDisableCount++
+    control.disabled = true
+  }
+
+  function lowerDisableStack(control) {
+    if (control.upDisableCount) {
+      if (!control.disabled) {
+        // In this case external code has re-enabled this field.
+        // We abort our own disablement stack.
+        control.upDisableCount = 0
+      } else {
+        control.upDisableCount--
+        if (!control.upDisableCount) {
+          control.disabled = control.upOriginalDisabled
+        }
+      }
     }
   }
 
