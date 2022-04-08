@@ -506,35 +506,18 @@ describe 'up.form', ->
               expect(input).toBeDisabled()
               expect(submitButton).toBeDisabled()
 
-        describe 'with { disable: "submit-button" }', ->
+        describe 'with { disable: true }', ->
 
-          it 'disables all submit buttons while submitting', asyncSpec (next) ->
+          it 'disables all fields and buttons while submitting', asyncSpec (next) ->
             form = fixture('form')
             input = e.affix(form, 'input[name=email]')
             submitButton = e.affix(form, 'input[type=submit]')
 
-            up.submit(form, { disable: 'submit-button' })
-
-            next =>
-              expect(input).not.toBeDisabled()
-              expect(submitButton).toBeDisabled()
-
-        describe 'with { disable: "form-group" }', ->
-
-          it "disables the origin's form group while submitting", asyncSpec (next) ->
-            form = fixture('form')
-
-            group = e.affix(form, '[up-form-group]')
-            input = e.affix(group, 'input[name=email]')
-
-            otherGroup = e.affix(form, '[up-form-group]')
-            otherInput = e.affix(otherGroup, 'input[name=password]')
-
-            up.submit(form, { disable: 'form-group', origin: input })
+            up.submit(form, { disable: true })
 
             next =>
               expect(input).toBeDisabled()
-              expect(otherInput).not.toBeDisabled()
+              expect(submitButton).toBeDisabled()
 
         describe 'with a CSS selector', ->
 

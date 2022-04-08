@@ -31,7 +31,7 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     up.feedback.showAroundRequest(this.request, this.options)
 
-    up.form.disableAroundRequest(this.request, this.options)
+    up.form.disableWhile(this.request, this.options)
 
     if (this.options.preload) {
       return this.request
