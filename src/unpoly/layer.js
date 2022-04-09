@@ -261,7 +261,7 @@ up.layer = (function() {
       return [config[mode], config.overlay, config.any]
     }
   }
-      
+
   function normalizeOptions(options) {
     up.migrate.handleLayerOptions?.(options)
 
@@ -657,7 +657,7 @@ up.layer = (function() {
 
     You may configure default layer attributes in `up.layer.config`.
 
-  @param {string} [up-layer="new"]
+  @param [up-layer="new"]
     Whether to stack the new overlay onto the current layer or replace existing overlays.
 
     See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).

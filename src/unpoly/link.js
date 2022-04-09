@@ -1011,12 +1011,8 @@ up.link = (function() {
 
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
-  @param [up-abort='true']
-    With `[up-abort=true]` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
-
-    With `[up-abort=subtree]` Unpoly will abort requests targeting the same fragment or its descendants.
-
-    To abort a particular set requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
+  @param [up-abort='target']
+    Whether to [abort existing requests](/abort-option) before rendering.
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.
