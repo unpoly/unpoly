@@ -2,6 +2,8 @@
 Navigation feedback
 ===================
 
+TODO: Integrate .up-loading
+
 The `up.feedback` module adds useful CSS classes to links while they are loading,
 or when they point to the current URL.
 

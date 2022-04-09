@@ -648,12 +648,7 @@ up.fragment = (function() {
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {boolean|string|Function(request): boolean} [options.abort='target']
-    With `{ abort: subtree }` Unpoly will abort requests targeting the same fragment or its descendants.
-
-    With `{ abort: true }` Unpoly will [abort](/up.network.abort) all other requests before laoding the new fragment.
-
-    To abort a particular set of requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
-    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
+    Whether to [abort existing requests](/abort-option) before rendering.
 
   @param {Element|jQuery} [options.origin]
     The element that triggered the change.

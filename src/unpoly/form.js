@@ -623,13 +623,21 @@ up.form = (function() {
   @param {boolean} [options.batch=false]
     If set to `true`, the `onChange` callback will receive multiple
     detected changes in a single diff object as its argument.
+  @param {string} [options.event='input']
+    Which event to observe.
+
+    Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
+
+    You may pass multiple event types as a space-separated string.
   @param {number} [options.delay=up.form.config.observeDelay]
-    The number of miliseconds to wait before executing the callback
-    after the input value changes.
+    The number of miliseconds to wait between an observed event and running the callback.
 
-    You may use this option to limit how often the callback will run for a fast typist.
+    When observing the `input` event the default is  `up.form.config.inputDelay`.
+    For other events there is no default delay.
+  @param {boolean|string} [options.disable]
+    Whether to [disable fields](/disable-option) while an async callback is running.
 
-    If form is submitted during the delay, the callback will not run.
+    Defaults to the input or form's `[up-observe-disable]` or `[up-disable]` attribute.
   @param {Function(value, name): string} onChange
     The callback to run when the field's value changes.
 
@@ -657,7 +665,7 @@ up.form = (function() {
       // (2) Only warn, don't crash. There are some legitimate cases for having unnamed
       //     a mix of named and unnamed fields in a form, and we don't want to prevent
       //     <form up-observe> in that case.
-      up.warn('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
+      up.puts('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
     }
     const callback = u.extractCallback(args) || observeCallbackFromElement(container) || up.fail('No callback given for up.observe()')
     let options = u.extractOptions(args)
@@ -859,10 +867,28 @@ up.form = (function() {
     The element that will be [updated](/up.render) with the validation results.
 
     TODO describe default
+  @param {string|Element|jQuery} [options.event='change']
+    The event type that causes validation.
+
+    Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
+
+    You may pass multiple event types as a space-separated string.
+  @param {string|Element|jQuery} [options.delay]
+    The number of miliseconds to wait between an observed event and validating.
+
+    For most events there is no default delay.
+    Only when observing the `input` event the default is `up.form.config.inputDelay`.
   @param {string|Element|jQuery} [options.origin]
     TODO
-  @param {string|Element|jQuery} [options.delay]
-    TODO
+  @param {string|Element|jQuery} [options.disable]
+    Whether to [disable fields](/disable-option) while validation is running.
+
+    Defaults to the closest `[up-observe-disable]` or `[up-disable]` attribute on either
+    the input or its form.
+  @param {string|Element|jQuery} [options.feedback]
+    Whether to give [navigation feedback](/up.feedback) while validating.
+
+    Defaults to the form's `[up-observe-feedback]` or `[up-feedback]` attribute.
   @param {string|Element|jQuery} [options.formGroup = true]
     TODO
   @return {Promise<up.RenderResult>}
@@ -1178,11 +1204,22 @@ up.form = (function() {
     @see failed-responses
 
   @param [up-disable]
-    Whether to [disable](/up.form.disable) this forms while it is submitting.
+    Whether to [disable fields](/disable-option) while the form is submitting.
 
-    With `[up-disable=true]` user input to all forms and buttons will be blocked while the form is waiting for a server response.
+  @param [up-observe-disable]
+    Whether to [disable fields](/disable-option) while the form is
+    [validating](/input-up-validate) or running [`[up-observe]`](/input-up-observe) callbacks.
 
-    This attribute is ignored when [validating](/input-up-validate).
+    Defaults to the form's `[up-disable]` attribute.
+
+  @param [up-feedback]
+    Whether to give [navigation feedback](/disable-option) while the form is submitting.
+
+  @param [up-observe-feedback]
+    Whether to give [navigation feedback](/disable-option) while the form is
+    [validating](/input-up-validate) or running [`[up-observe]`](/input-up-observe) callbacks.
+
+    Defaults to the form's `[up-feedback]` attribute.
 
   @stable
   */
@@ -1340,10 +1377,29 @@ up.form = (function() {
   `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
 
   @selector input[up-validate]
-  @param up-validate
+  @param [up-validate]
     The CSS selector to update with the server response.
 
     This defaults the closest form group around the validating field.
+  @param [up-observe-event='change']
+    The event type that causes validation.
+
+    Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
+
+    You may pass multiple event types as a space-separated string.
+  @param [up-observe-delay]
+    The number of miliseconds to wait between an observed event and validating.
+
+    For most events there is no default delay.
+    Only when observing the `input` event the default is `up.form.config.inputDelay`.
+  @param [up-observe-disable]
+    Whether to [disable fields](/disable-option) while validation is running.
+
+    Defaults to the form's `[up-observe-disable]` or `[up-disable]` attribute.
+  @param [up-observe-feedback]
+    Whether to give [navigation feedback](/up.feedback) while validating.
+
+    Defaults to the form's `[up-observe-feedback]` or `[up-feedback]` attribute.
   @stable
   */
 
@@ -1570,13 +1626,22 @@ up.form = (function() {
 
   @selector input[up-observe]
   @param up-observe
-    The code to run when the field's value changes.
-  @param up-delay
-    The number of miliseconds to wait after a change before the code is run.
+    The callback to run when the field's value changes.
+  @param [up-observe-event='input']
+    Which event to observe.
 
-    You may use this option to limit how often the callback will run for a fast typist.
+    Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
-    If form is submitted during the delay, the callback will not run.
+    You may pass multiple event types as a space-separated string.
+  @param [up-observe-delay]
+    The number of miliseconds to wait between an observed event and running the callback.
+
+    When observing the `input` event the default is  `up.form.config.inputDelay`.
+    For other events there is no default delay.
+  @param [up-observe-disable]
+    Whether to [disable fields](/disable-option) while an async callback is running.
+
+    Defaults to the form's `[up-observe-disable]` or `[up-disable]` attribute.
   @stable
   */
 

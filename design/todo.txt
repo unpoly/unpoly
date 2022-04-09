@@ -19,11 +19,13 @@ Concurrency
     - up.form.disable() already ignores fields that are already disabled, so we can call it multiple times
   - I don't think we currently track disable options per-solution?
     - No, but we could easily
-  - If we do this we must set { disable: false } for the submit()
+  - If we do this we must set { disable: false } for the submit(), lest we get the navigateOptions
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
-  - Test that [up-validate] will not make a request if the target is removed while waiting for the delay
-  - Test that multiple [up-validate] requests are merged into a single request
+- Destruction of observe watches
+  - Test that observe watches automatically disappear when the element is detached
+  - Test that observe callbacks are not called if the element is detached while waiting for the delay
+  - When someone registers an unobserve-function as a destructor, print a message that this is not necessary anymore
 
 
 
@@ -86,10 +88,6 @@ Various changes
 - up.form.submitButtons is documented, but not public
 - Fix clicking on a label[for] when there are elements with duplicate IDs in another layer
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
-- Destruction of observe watches
-  - Test that observe watches automatically disappear when the element is detached
-  - Test that observe callbacks are not called if the element is detached while waiting for the delay
-  - When someone registers an unobserve-function as a destructor, print a message that this is not necessary anymore
 
 
 Docs

@@ -32,6 +32,7 @@ up.FieldObserver = class FieldObserver {
 
   observeField(field) {
     let fieldOptions = this.fieldOptions(field)
+    console.log("Observing %o with fieldOptions %o", field, fieldOptions)
     this.unbindFns.push(up.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions)))
     this.unbindFns.push(up.fragment.onAborted(field, () => this.cancelTimer()))
   }
@@ -85,15 +86,15 @@ up.FieldObserver = class FieldObserver {
       // If any callback returns a promise, we will handle { disable } below.
       // We set { disable: false } so callbacks that *do* forward options
       // to up.render() don't unnecessarily disable a second time.
-      fieldOptions.disable = false
+      let callbackOptions = { ...fieldOptions, disable: false }
 
       const callbackReturnValues = []
       if (this.batch) {
-        callbackReturnValues.push(this.callback(diff, fieldOptions))
+        callbackReturnValues.push(this.callback(diff, callbackOptions))
       } else {
         for (let name in diff) {
           const value = diff[name]
-          callbackReturnValues.push(this.callback(value, name, fieldOptions))
+          callbackReturnValues.push(this.callback(value, name, callbackOptions))
         }
       }
 

@@ -243,6 +243,61 @@ describe 'up.form', ->
               next.after 100, ->
                 expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
 
+            it "executes the form's [up-observe-disable] option while an async callback is running", asyncSpec (next) ->
+              form = fixture('form[up-observe-disable]')
+              input = e.affix(form, 'input[name=email]')
+              callbackDeferred = u.newDeferred()
+              callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
+
+              up.observe(input, callback)
+
+              input.value = "other"
+              Trigger[eventType](input)
+
+              next ->
+                expect(callback).toHaveBeenCalled()
+                expect(input).toBeDisabled()
+
+                callbackDeferred.resolve()
+
+              next ->
+                expect(input).not.toBeDisabled()
+
+            it "executes the fields's [up-observe-disable] option while an async callback is running", asyncSpec (next) ->
+              form = fixture('form')
+              input = e.affix(form, 'input[name=email][up-observe-disable]')
+              callbackDeferred = u.newDeferred()
+              callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
+
+              up.observe(input, callback)
+
+              input.value = "other"
+              Trigger[eventType](input)
+
+              next ->
+                expect(callback).toHaveBeenCalled()
+                expect(input).toBeDisabled()
+
+                callbackDeferred.resolve()
+
+              next ->
+                expect(input).not.toBeDisabled()
+
+            it "overrides the [up-observe-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
+              form = fixture('form[up-observe-disable]')
+              input = e.affix(form, 'input[name=email][up-observe-disable]')
+              callbackDeferred = u.newDeferred()
+              callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
+
+              up.observe(input, { disable: false }, callback)
+
+              input.value = "other"
+              Trigger[eventType](input)
+
+              next ->
+                expect(callback).toHaveBeenCalled()
+                expect(input).not.toBeDisabled()
+
         describe 'when the first argument is a checkbox', ->
 
           it 'runs the callback when the checkbox changes its checked state', asyncSpec (next) ->
@@ -1040,6 +1095,17 @@ describe 'up.form', ->
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
 
+      it 'does not seek a form group around the given field with { formGroup: false }', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        group = e.affix(form, '[up-form-group]')
+        field = e.affix(group, 'input[name=email]')
+
+        up.validate(field, { formGroup: false })
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('input[name="email"]')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
       it 'does not seek a form group around the given non-field element', asyncSpec (next) ->
         form = fixture('form[action=/form]')
         group = e.affix(form, '[up-form-group]')
@@ -1076,11 +1142,122 @@ describe 'up.form', ->
 
       describe 'request sequence', ->
 
-        it 'only sends a single concurrent requests', ->
-          throw "test me"
+        it 'only sends a single concurrent request and queues new validations while a validation request is in flight', asyncSpec (next) ->
+          form = fixture('form[up-observe-disable]')
+          group1 = e.affix(form, '[up-form-group]')
+          input1 = e.affix(group1, 'input[name=email]')
+          group2 = e.affix(form, '[up-form-group]')
+          input2 = e.affix(group2, 'input[name=password]')
 
-        it 'queues new validations while a validation request is in flight', ->
-          throw "test me"
+          up.validate(input1)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+
+            up.validate(input2)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="password"])')
+
+      describe 'disabling', ->
+
+        it "executes the form's [up-observe-disable] option while a validation request is in flight", asyncSpec (next) ->
+          form = fixture('form[up-observe-disable]')
+          group = e.affix(form, '[up-form-group]')
+          input = e.affix(group, 'input[name=email]')
+
+          up.validate(input)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            expect(input).toBeDisabled()
+
+            jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          next ->
+            expect(input).not.toBeDisabled()
+
+        it "executes the fields's [up-observe-disable] option while a validation request is in flight", asyncSpec (next) ->
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          input = e.affix(group, 'input[name=email][up-observe-disable]')
+
+          up.validate(input)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            expect(input).toBeDisabled()
+
+            jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          next ->
+            expect(input).not.toBeDisabled()
+
+        it "overrides the [up-observe-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
+          form = fixture('form[up-observe-disable]')
+          group = e.affix(form, '[up-form-group]')
+          input = e.affix(group, 'input[name=email][up-observe-disable]')
+
+          up.validate(input, { disable: false })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            expect(input).not.toBeDisabled()
+
+
+      describe 'feedback', ->
+
+        it "executes the form's [up-observe-feedback] option while a validation request is in flight", asyncSpec (next) ->
+          form = fixture('form[up-observe-feedback]')
+          group = e.affix(form, '[up-form-group]')
+          input = e.affix(group, 'input[name=email]')
+
+          up.validate(input)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            expect(group).toHaveClass('up-loading')
+
+            jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          next ->
+            expect(group).not.toHaveClass('up-loading')
+
+        it "executes the fields's [up-observe-feedback] option while a validation request is in flight", asyncSpec (next) ->
+          form = fixture('form')
+          group = e.affix(form, '[up-form-group]')
+          input = e.affix(group, 'input[name=email][up-observe-feedback]')
+
+          up.validate(input)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            expect(group).toHaveClass('up-loading')
+
+            jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+
+          next ->
+            expect(group).not.toHaveClass('up-loading')
+
+        it "overrides the [up-observe-feedback] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
+          form = fixture('form[up-observe-feedback]')
+          group = e.affix(form, '[up-form-group]')
+          input = e.affix(group, 'input[name=email][up-observe-feedback]')
+
+          up.validate(input, { feedback: false })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('[up-form-group]:has(input[name="email"])')
+            expect(group).not.toHaveClass('up-loading')
+
 
       describe 'batching', ->
 
