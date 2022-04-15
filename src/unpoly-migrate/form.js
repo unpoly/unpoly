@@ -5,6 +5,7 @@
 up.migrate.renamedProperty(up.form.config, 'fields', 'fieldSelectors')
 up.migrate.renamedProperty(up.form.config, 'submitButtons', 'submitButtonSelectors')
 up.migrate.renamedProperty(up.form.config, 'validateTargets', 'groupSelectors')
+up.migrate.renamedProperty(up.form.config, 'observeDelay', 'inputDelay')
 
 up.migrate.migratedFormGroupSelectors = function() {
   return up.form.config.groupSelectors.map((originalSelector) => {
@@ -15,18 +16,6 @@ up.migrate.migratedFormGroupSelectors = function() {
     return migratedSelector
   })
 }
-
-const observeDelayMovedWarning = () => up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
-Object.defineProperty(up.form.config, 'observeDelay', {
-  get() {
-    observeDelayMovedWarning()
-    return up.form.config.observeOptions.delay
-  },
-  set(newDelay) {
-    observeDelayMovedWarning()
-    up.form.config.observeOptions.delay = newDelay
-  }
-})
 
 up.migrate.renamedAttribute('up-fieldset', 'up-form-group')
 up.migrate.renamedAttribute('up-delay', 'up-observe-delay', { scope: '[up-autosubmit]' })

@@ -29,8 +29,6 @@ Concurrency
   - Implement { abortable: Boolean } to give a simple option to fix the above cases
     - Dunno if we want [up-abortable] on a link, since we may have a different notion for preloading
 - Do replace the term "observe" with "watch"
-- This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
-  - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.inputDelay`
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
 - Once more reconsider if [up-disable] should be a default for [up-watch-disable]
