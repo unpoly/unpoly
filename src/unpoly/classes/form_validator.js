@@ -191,7 +191,7 @@ up.FormValidator = class FormValidator {
     //
     // Disabling the same elements multiple time is not an issue since up.form.disable()
     // only sees enabled elements.
-    delete options.disable
+    options.disable = false
     for (let solution of dirtySolutions) {
       up.form.disableWhile(renderingPromise, {
         disable: solution.renderOptions.disable,
