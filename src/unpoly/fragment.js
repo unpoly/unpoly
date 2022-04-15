@@ -108,7 +108,7 @@ up.fragment = (function() {
     your application scripts.
 
   @param {boolean|Function(up.Response): boolean} [config.autoVerifyCache]
-    Whether to reload a fragment after it was rendered from a cached response.
+    Whether to reload a fragment after it was rendered from a cached response with `{ verifyCache: 'auto' }`.
 
     By default Unpoly verifies cached responses that are older than 15 seconds
     when we're on a good connection:
@@ -637,6 +637,11 @@ up.fragment = (function() {
     the server response.
 
     Also see [`up.request({ cache })`](/up.request#options.cache).
+
+  @param {boolean} [options.verifyCache]
+    Whether to reload the targeted fragment after it was rendered from a cached response.
+
+    Also see `up.fragment.config.autoVerifyCache`.
 
   @param {boolean|string} [options.clearCache]
     Whether existing [cache](/up.request#caching) entries will be [cleared](/up.cache.clear) with this request.

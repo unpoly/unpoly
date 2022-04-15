@@ -5,6 +5,29 @@ TODOs for next release
 Concurrency
 -----------
 
+- Reconsider binding new layers to the main element for aborting
+  - Would this have fixed the SF case?
+    - Yes, since it uses faux overlays and renders into the head
+    - It would have broken if SF had used a popup link, which is the canonical way to do it (like in WB)
+  - Would it be better to abort on { origin } instead?
+  - Requests to open new layers should always cancel each other out, regardless of { targetElements }
+    - This would be a regression when we switch to { origin }
+    - Test this to prevent this future regression!
+- Define abort behavior of preload vs. foreground (non-preload) requests
+  - I think it would be like this:
+    - preload requests never abort other requests
+      - we may preload multiple requests that would update :main, e.g. prev/next in cards
+      - However, preload requests get an { onPromotedToForeground: this.handleAbort.bind(this) }
+    - foreground requests cancel other foreground requests
+    - should foreground requests cancel preload requests?
+      - this would be about minimizing bandwidth use, not correctness
+      - the link preloader is already built to only preload a single link at a time
+      - so we're talking about manual up.link.preload()
+        - in the past I've often wanted to preload some heavy links just in case, but was worried about { solo }
+        - maybe default to { abortable: false } for preloading?
+          - maybe even pass { abortable: true } in up.LinkPreloader, since it makes sense there
+  - Implement { abortable: Boolean } to give a simple option to fix the above cases
+    - Dunno if we want [up-abortable] on a link, since we may have a different notion for preloading
 - Do replace the term "observe" with "watch"
 - Polish form.config options
   - form.config.inputEvent => form.config.observeInputEvent
@@ -12,21 +35,25 @@ Concurrency
   - form.config.changeEvent => form.config.observeChangeEvent
   - Remove 'change' from up.form.config.inputEvent
 - This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
-  - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeChangeDelay`
+  - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeInputDelay`
 - Support disable attrs in up.FormValidator
   - We would need to collect and execute disable options for each solution!
     - e.g. a validation with two inputs and { disable: 'form-group' } should disable both form groups
     - up.form.disable() already ignores fields that are already disabled, so we can call it multiple times
   - I don't think we currently track disable options per-solution?
     - No, but we could easily
-  - If we do this we must set { disable: false } for the submit(), lest we get the navigateOptions
+  ====> If we do this we must set { disable: false } for the submit(), lest we get the navigateOptions or up.form.config.disable <===
+  ====> Same thing in FieldObserver
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
 - Destruction of observe watches
   - Test that observe watches automatically disappear when the element is detached
   - Test that observe callbacks are not called if the element is detached while waiting for the delay
   - When someone registers an unobserve-function as a destructor, print a message that this is not necessary anymore
-
+- Is it weird to have up.form.config.disable / disable?
+  - vs. the concept of navigateOptions
+  - I feel that disable would rather be a navigateOption
+  => Remove both
 
 
 Various changes
@@ -50,6 +77,9 @@ Various changes
       - If we ever make fully isolated containers we would call them frames
         - https://github.com/unpoly/unpoly/discussions/350
     - We could also offer :zone as a selector
+- [After IE11] Merge up-data lazily and merge element.dataSet into up-data.
+  - This requires Proxy
+  - How would this work with non-object [up-data]?
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
 - Should we get rid of up.fail()?
@@ -108,8 +138,7 @@ Docs
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic
-- Document [up-verify-cache], render({verifyCache}) and up.fragment.config.autoVerifyCache
-  - This may be a new caching page
+- Consider a new page for caching
 - New observe() and validate() options
   - { feedback, disable, delay, event }
 - [up-observe-feedback], [up-observe-disable],  [up-observe-delay],  [up-observe-event]

@@ -50,3 +50,6 @@ More work required
 - maybe don't even have a ES5 build?
 - we might want to parse URLs faster with the URL class (but check how it handles non-fully-qualified URLs)
 - maybe replace up.Params with FormData, but we would need a lot of utility methods around it
+- Merge up-data lazily and merge element.dataSet into up-data.
+  - This requires Proxy
+  - How would this work with non-object [up-data]?
