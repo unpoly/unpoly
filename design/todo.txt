@@ -31,14 +31,6 @@ Concurrency
 - Do replace the term "observe" with "watch"
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
-- Once more reconsider if [up-disable] should be a default for [up-watch-disable]
-  - PRO
-    - It makes a lot of sense for { disable: true } or { disable: 'button' }, where we disable an entire form or its buttons
-    - It makes less sense for more selective disabling
-  - CON
-    - One more default layer to understand
-    - Forms with a lot of up-validate don't really need to disable
-  => Yes, I'm not even sure these are two distinct attributes in practice
 
 
 Various changes
@@ -85,6 +77,7 @@ Various changes
 - Expose and test up.layer.config.overlay.class
   - Use case was a .default class
 - up:click forking could print a warning when an a[href] is instant, but not followable
+- Test that preventing `click` (not `up:click`) prevents following a link
 - unpoly-rails must have up.validate_names instead of up.validate_name
 - Allow to mark a target component as soft:
   - .target, .other:maybe
