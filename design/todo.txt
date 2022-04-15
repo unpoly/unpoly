@@ -38,10 +38,6 @@ Concurrency
   - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeInputDelay`
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
-- Is it weird to have up.form.config.disable / disable?
-  - vs. the concept of navigateOptions
-  - I feel that disable would rather be a navigateOption
-  => Remove both
 
 
 Various changes

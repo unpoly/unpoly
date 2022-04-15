@@ -98,9 +98,6 @@ up.form = (function() {
     inputEvent: 'input change',
     inputDelay: 0,
     changeEvent: (field) => e.matches(field, 'input[type=date]') ? 'blur' : 'change',
-    disable: false,
-    feedback: undefined,
-
   }))
 
   function fullSubmitSelector() {
@@ -292,7 +289,6 @@ up.form = (function() {
   */
   function submitOptions(form, options, parserOptions) {
     form = getForm(form)
-    parserOptions = u.options(parserOptions, { defaults: defaultSubmitOptions() })
     options = parseDestinationOptions(form, options, parserOptions)
 
     let parser = new up.OptionsParser(form, options, parserOptions)
@@ -377,10 +373,6 @@ up.form = (function() {
     options.origin ||= field
 
     return options
-  }
-
-  function defaultSubmitOptions() {
-    return u.pick(config, ['disable', 'feedback']) // TODO: 'sequence'
   }
 
   /*-
