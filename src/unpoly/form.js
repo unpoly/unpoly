@@ -634,6 +634,9 @@ up.form = (function() {
 
     When observing the `input` event the default is  `up.form.config.inputDelay`.
     For other events there is no default delay.
+
+    The callback will not run if the observed field is [destroyed](/up.destroy) or
+    [aborted](/up.fragment.abort) while waiting for the delay.
   @param {boolean|string} [options.disable]
     Whether to [disable fields](/disable-option) while an async callback is running.
 
@@ -652,7 +655,8 @@ up.form = (function() {
   @return {Function()}
     A destructor function that removes the observe watch when called.
 
-    Observing will stop automatically when the targeted fields are removed from the DOM.
+    Observing will stop automatically when the targeted fields are
+    [destroyed](/up.destroy).
   @stable
   */
   function observe(container, ...args) {

@@ -32,7 +32,6 @@ up.FieldObserver = class FieldObserver {
 
   observeField(field) {
     let fieldOptions = this.fieldOptions(field)
-    console.log("Observing %o with fieldOptions %o", field, fieldOptions)
     this.unbindFns.push(up.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions)))
     this.unbindFns.push(up.fragment.onAborted(field, () => this.cancelTimer()))
   }

@@ -39,8 +39,6 @@ Concurrency
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
 - Destruction of observe watches
-  - Test that observe watches automatically disappear when the element is detached
-  - Test that observe callbacks are not called if the element is detached while waiting for the delay
   - When someone registers an unobserve-function as a destructor, print a message that this is not necessary anymore
 - Is it weird to have up.form.config.disable / disable?
   - vs. the concept of navigateOptions
