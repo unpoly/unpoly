@@ -29,15 +29,18 @@ Concurrency
   - Implement { abortable: Boolean } to give a simple option to fix the above cases
     - Dunno if we want [up-abortable] on a link, since we may have a different notion for preloading
 - Do replace the term "observe" with "watch"
-- Polish form.config options
-  - form.config.inputEvent => form.config.observeInputEvent
-  - form.config.inputDelay => form.config.observeInputDelay
-  - form.config.changeEvent => form.config.observeChangeEvent
-  - Remove 'change' from up.form.config.inputEvent
 - This is not true in migrate/form: up.migrate.warn('up.form.config.observeDelay has been renamed to up.form.config.observeOptions.delay')
-  - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.observeInputDelay`
+  - This should just rename the property from `up.form.config.observeDelay` to `up.form.config.inputDelay`
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
+- Once more reconsider if [up-disable] should be a default for [up-watch-disable]
+  - PRO
+    - It makes a lot of sense for { disable: true } or { disable: 'button' }, where we disable an entire form or its buttons
+    - It makes less sense for more selective disabling
+  - CON
+    - One more default layer to understand
+    - Forms with a lot of up-validate don't really need to disable
+  => Yes, I'm not even sure these are two distinct attributes in practice
 
 
 Various changes
