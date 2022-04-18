@@ -57,6 +57,7 @@ Various changes
 - [After IE11] Merge up-data lazily and merge element.dataSet into up-data.
   - This requires Proxy
   - How would this work with non-object [up-data]?
+    - We could disabling merging in that case
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
 - Should we get rid of up.fail()?
