@@ -26,7 +26,7 @@ Unpoly's own events are documented in their respective modules, for example:
 @module up.event
 */
 up.event = (function() {
-  
+
   const u = up.util
   const e = up.element
 
@@ -52,9 +52,7 @@ up.event = (function() {
   - Your event listener will not be called when Unpoly has not [booted](/up.boot) in an unsupported browser
   - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
   - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.
-  - You use an [`[up-data]`](/up-data) attribute to [attach structured data](/up.on#attaching-structured-data)
-    to observed elements. If an `[up-data]` attribute is set, its value will automatically be
-    parsed as JSON and passed as a third argument.
+  - Any [data attached to the observed element](/data) will be passed as a third argument to your handler function.
 
   ### Basic example
 
@@ -91,20 +89,20 @@ up.event = (function() {
   })
   ```
 
-  ### Attaching structured data
+  ### Attaching data
 
-  In case you want to attach structured data to the event you're observing,
-  you can serialize the data to JSON and put it into an `[up-data]` attribute:
+  Any [data attached to the observed element](/data) will be passed to your event handler.
+
+  For instance, this element has attached data in its `[up-data]` attribute:
 
   ```html
-  <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
-  <span class='person' up-data='{ "age": 22, "name": "Jim" }'>Jim</span>
+  <span class='user' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
   ```
 
-  The JSON will be parsed and handed to your event handler as a third argument:
+The parsed data will be passed to your event handler as a third argument:
 
   ```js
-  up.on('click', '.person', function(event, element, data) {
+  up.on('click', '.user', function(event, element, data) {
     console.log("This is %o who is %o years old", data.name, data.age)
   })
   ```
@@ -198,9 +196,8 @@ up.event = (function() {
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
-    The function takes the affected element as a second argument.
-    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
-    and passed as a third argument.
+    The function takes the observed element as a second argument.
+    The element's [attached data](/data) is passed as a third argument.
 
   @return {Function()}
     A function that unbinds the event listeners when called.
@@ -247,9 +244,8 @@ up.event = (function() {
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
-    The function takes the affected element as the first argument).
-    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
-    and passed as a second argument.
+    The function takes the observed element as the first argument.
+    The element's [attached data](/data) is passed as a third argument.
   @return {Function()}
     A function that unbinds the event listeners when called.
   @stable

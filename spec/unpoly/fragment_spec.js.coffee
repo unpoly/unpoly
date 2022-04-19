@@ -5033,7 +5033,7 @@ describe 'up.fragment', ->
             expect(listener).toHaveBeenCalledWith(
               jasmine.objectContaining(
                 newFragment: jasmine.objectContaining(className: 'keeper new')
-                newData: { key: 'new-value' },
+                newData: jasmine.objectContaining({ key: 'new-value' }),
                 target: $keeper[0]
               )
             )
@@ -5048,7 +5048,7 @@ describe 'up.fragment', ->
             expect(keeper.onKeepSpy).toHaveBeenCalledWith(
               keeper,
               jasmine.objectContaining(className: 'keeper new'),
-              { key: 'new-value' }
+              jasmine.objectContaining({ key: 'new-value' })
             )
 
         it 'lets listeners cancel the keeping by preventing default on an up:fragment:keep event', asyncSpec (next) ->
@@ -5102,7 +5102,7 @@ describe 'up.fragment', ->
 
           next =>
             expect($('.keeper')).toHaveText('old-inside')
-            expect(keptListener).toHaveBeenCalledWith($keeper[0], { 'foo': 'bar' })
+            expect(keptListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ 'foo': 'bar' }))
 
         it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
@@ -5141,8 +5141,8 @@ describe 'up.fragment', ->
           next =>
             $keeper = $('.keeper')
             expect($keeper).toHaveText('old-inside')
-            expect(keptListener).toHaveBeenCalledWith($keeper[0], { key: 'value1' })
-            expect(keptListener).toHaveBeenCalledWith($keeper[0], { key: 'value2' })
+            expect(keptListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value1' }))
+            expect(keptListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value2' }))
 
         it "doesn't let the discarded element appear in a transition", (done) ->
           up.motion.config.enabled = true

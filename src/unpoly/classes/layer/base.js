@@ -461,9 +461,8 @@ up.Layer = class Layer extends up.Record {
   @param {Function(event, [element], [data])} listener
     The listener function that should be called.
 
-    The function takes the affected element as the second argument.
-    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
-    and passed as a third argument.
+    The function takes the observed element as the second argument.
+    The element's [attached data](/data) is passed as a third argument.
 
   @return {Function()}
     A function that unbinds the event listeners when called.

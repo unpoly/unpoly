@@ -11,7 +11,7 @@ up.browser = (function() {
 
   /*-
   Submits the given form with a full page load.
-  
+
   For mocking in specs.
 
   @function up.browser.submitForm

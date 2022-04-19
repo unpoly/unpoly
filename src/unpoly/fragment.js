@@ -945,8 +945,7 @@ up.fragment = (function() {
   @param {Element} event.newFragment
     The discarded element.
   @param {Object} event.newData
-    The value of the [`up-data`](/up-data) attribute of the discarded element,
-    parsed as a JSON object.
+    The [data](/data) attached to the discarded element.
   @stable
   */
 
@@ -963,8 +962,7 @@ up.fragment = (function() {
   @param {Element} event.newFragment
     The discarded fragment.
   @param {Object} event.newData
-    The value of the [`up-data`](/up-data) attribute of the discarded fragment,
-    parsed as a JSON object.
+    The [data](/data) attached to the discarded fragment.
   @stable
   */
 

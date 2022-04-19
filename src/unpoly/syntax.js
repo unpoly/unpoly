@@ -113,19 +113,7 @@ up.syntax = (function() {
 
   ### Passing parameters to a compiler
 
-  Use the `[up-data]` attribute to attach structured data to a DOM element.
-  The data will be parsed and passed to your compiler function.
-
-  Alternatively your compiler may access attributes for the compiled element
-  via the standard [`Element#getAttribute()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute)
-  method.
-
-  Unpoly also provides utility functions to read an element attribute and
-  cast it to a given type:
-
-  - `up.element.booleanAttr(element, attr)`
-  - `up.element.numberAttr(element, attr)`
-  - `up.element.jsonAttr(element, attr)`
+  See [attaching data to an element](/data).
 
   @function up.compiler
   @param {string} selector
@@ -143,15 +131,10 @@ up.syntax = (function() {
     The function to call when a matching element is inserted.
 
     The function takes the new element as the first argument.
-    If the element has an [`up-data`](/up-data) attribute, its value is parsed as JSON
-    and passed as a second argument.
+    Any [attached data](/data) will be passed as a second argument.
 
-    The function may return a destructor function that cleans the compiled
-    object before it is removed from the DOM. The destructor is supposed to
-    [clear global state](/up.compiler#cleaning-up-after-yourself)
-    such as timeouts and event handlers bound to the document.
-    The destructor is *not* expected to remove the element from the DOM, which
-    is already handled by [`up.destroy()`](/up.destroy).
+    The function may return a destructor function that [cleans the compiled object](#cleaning-up-after-yourself)
+    before it is removed from the DOM. The destructor is *not* expected to remove the element from the DOM.
   @stable
   */
   function registerCompiler(...args) {
@@ -407,13 +390,13 @@ up.syntax = (function() {
   }
 
   /*-
-  Returns the given element's `[up-data]`, parsed as a JavaScript object.
+  Returns the [data](/data) attached to the given element.
 
-  Returns `undefined` if the element has no `[up-data]` attribute.
+  Returns an empty object if the element has no attached data.
 
-  ### Example
+  ### Use with `[up-data]`
 
-  You have an element with JSON data serialized into an `up-data` attribute:
+  You have an element with JSON data serialized into an `[up-data]` attribute:
 
   ```html
   <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
@@ -422,29 +405,47 @@ up.syntax = (function() {
   Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
 
   ```js
-  up.syntax.data('.person') // returns { age: 18, name: 'Bob' }
+  up.data('.person') // returns { age: 18, name: 'Bob' }
   ```
+
+  ### Use with data attributes
+
+  You may also use standard [`[data-*]` attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes)
+  to attach data to an element.
+
+  ```html
+  <span class='person' data-first-name='Alice' data-last-name='Anderson'>Alice</span>
+  ```
+
+  The object returned by `up.data()` will contain all data attributes with camelCased keys:
+
+  ```js
+  up.data('.person') // returns { firstName: 'Alice', lastName: 'Anderson' }
+  ```
+
+  You may use both `[up-data]` and `[data-*]` attributes on the same element.
+  The object returned by `up.data()` will contain values from both.
 
   @function up.data
   @param {string|Element|jQuery} element
     The element for which to return data.
-  @return
-    The JSON-decoded value of the `up-data` attribute.
+  @return {Object}
+    The [data](/data) attached to the element.
 
-    Returns `undefined` if the element has no (or an empty) `up-data` attribute.
+    Returns an empty object if the element has no attached data.
   @stable
   */
 
   /*-
-  Attaches structured data to an element, to be consumed by a compiler.
+  Attaches structured data to an element, to be consumed by a compiler or event handler.
 
   If an element with an `[up-data]` attribute enters the DOM,
   Unpoly will parse the JSON and pass the resulting object to any matching
-  [`up.compiler()`](/up.compiler) functions.
+  `up.compiler()` functions and `up.on()` callbacks.
 
   ### Example
 
-  For instance, a container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
+  A container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
   might attach the location and names of its marker pins:
 
   ```html
@@ -459,14 +460,10 @@ up.syntax = (function() {
   ```js
   up.compiler('.google-map', function(element, pins) {
     var map = new google.maps.Map(element)
-    pins.forEach(function(pin) {
+    for (let pin of pins) {
       var position = new google.maps.LatLng(pin.lat, pin.lng)
-      new google.maps.Marker({
-        position: position,
-        map: map,
-        title: pin.title
-      })
-    })
+      new google.maps.Marker({ position, map, title: pin.title })
+    }
   })
   ```
 
@@ -475,10 +472,14 @@ up.syntax = (function() {
   [`up.on()`](/up.on) handlers.
 
   ```js
-  up.on('click', '.google-map', function(event, element, pins) {
-    console.log("There are %d pins on the clicked map", pins.length)
+  up.on('click', '.google-map', function(event, element, data) {
+    console.log("There are %d pins on the clicked map", data.pins.length)
   })
   ```
+
+  ### Alternatives
+
+  See [attaching data to an element](/data).
 
   @selector [up-data]
   @param up-data
@@ -488,7 +489,31 @@ up.syntax = (function() {
   function readData(element) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
-    return e.jsonAttr(element, 'up-data') || {}
+
+    // up.on(document) and up.on(window) may call this with a non-element.
+    if (!element.getAttribute) {
+      return {}
+    }
+
+    let { dataset } = element
+    let jsonString = element.getAttribute('up-data')
+
+    // If we don't have [up-data] we don't need to construct a Proxy.
+    if (!jsonString) {
+      return dataset
+    }
+
+    // If the [up-data] JSON isn't an object then we cannot offer live merging
+    // of [up-data] and [data-...] attributes.
+    //
+    // It would be better to parse this lazily, but I don't want to pay
+    // the bytes for a second Proxy handler when dealing with this edge case.
+    if (!jsonString.startsWith('{')) {
+      return JSON.parse(jsonString)
+    }
+
+    let handler = new up.FragmentDataProxyHandler(jsonString)
+    return new Proxy(dataset, handler)
   }
 
   /*

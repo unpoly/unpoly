@@ -3,7 +3,7 @@ e = up.element
 $ = jQuery
 
 describe 'up.event', ->
-  
+
   describe 'JavaScript functions', ->
 
     describe 'up.on', ->
@@ -33,7 +33,7 @@ describe 'up.event', ->
           expect(listener).toHaveBeenCalledWith(
             jasmine.any(MouseEvent),
             $container[0],
-            {}
+            jasmine.any(Object)
           )
 
       it 'passes the event target as the second argument if no selector was passed to up.on()', asyncSpec (next) ->
@@ -46,7 +46,7 @@ describe 'up.event', ->
           expect(listener).toHaveBeenCalledWith(
             jasmine.any(MouseEvent),
             $element[0],
-            {}
+            jasmine.any(Object)
           )
 
       it 'allows to bind the listener to a given element', asyncSpec (next) ->
@@ -60,7 +60,7 @@ describe 'up.event', ->
           expect(listener).toHaveBeenCalledWith(
             jasmine.any(MouseEvent),
             element1,
-            {}
+            jasmine.any(Object)
           )
           expect(listener.calls.count()).toBe(1)
 
@@ -107,7 +107,7 @@ describe 'up.event', ->
           expect(listener).toHaveBeenCalledWith(
             jasmine.any(MouseEvent),
             element2Child1,
-            {}
+            jasmine.any(Object)
           )
           expect(listener.calls.count()).toBe(1)
 
@@ -352,7 +352,7 @@ describe 'up.event', ->
           Trigger.click($child)
 
           next =>
-            expect(observeArgs).toHaveBeenCalledWith('child', data)
+            expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining(data))
 
         it 'passes an empty object as a second argument to the listener if there is no [up-data] attribute', asyncSpec (next) ->
           $child = $fixture('.child')
@@ -363,7 +363,7 @@ describe 'up.event', ->
           Trigger.click($('.child'))
 
           next =>
-            expect(observeArgs).toHaveBeenCalledWith('child', {})
+            expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining({}))
 
         it 'does not parse an [up-data] attribute if the listener function only takes one argument', asyncSpec (next) ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})

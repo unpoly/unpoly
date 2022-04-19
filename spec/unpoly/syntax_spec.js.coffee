@@ -4,9 +4,9 @@ $ = jQuery
 describe 'up.syntax', ->
 
   describe 'JavaScript functions', ->
-  
+
     describe 'up.compiler', ->
-      
+
       it 'applies an event initializer whenever a matching fragment is inserted', ->
         observeElement = jasmine.createSpy()
         up.compiler '.child', (element) -> observeElement(element)
@@ -16,7 +16,7 @@ describe 'up.syntax', ->
         $otherChild = $container.affix('.other-child')
 
         up.hello($container[0])
-   
+
         expect(observeElement).not.toHaveBeenCalledWith($container[0])
         expect(observeElement).not.toHaveBeenCalledWith($otherChild[0])
         expect(observeElement).toHaveBeenCalledWith($child[0])
@@ -105,18 +105,142 @@ describe 'up.syntax', ->
 
     describe 'up.syntax.data', ->
 
-      it 'returns the [up-data] attribute of the given element, parsed as JSON', ->
-        $element = $fixture('.element').attr('up-data', '{ "foo": 1, "bar": 2 }')
-        data = up.syntax.data($element)
-        expect(data).toEqual(foo: 1, bar: 2)
+      describe 'when the element has an [up-data] attribute', ->
 
-      it 'returns en empty object if the given element has no [up-data] attribute', ->
-        $element = $fixture('.element')
-        data = up.syntax.data($element)
-        expect(data).toEqual({})
+        it 'parses an object value serialized as JSON', ->
+          element = fixture('.element', 'up-data': '{ "foo": 1, "bar": 2 }')
+          data = up.syntax.data(element)
+
+          expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
+          expect(data.foo).toBe(1)
+          expect(data.bar).toBe(2)
+
+        it 'parses an array value serialized as JSON', ->
+          element = fixture('.element', 'up-data': '["foo", "bar"]')
+          data = up.syntax.data(element)
+
+          expect(data).toEqual(['foo', 'bar'])
+
+        it 'parses a string value serialized as JSON', ->
+          element = fixture('.element', 'up-data': '"foo"')
+          data = up.syntax.data(element)
+
+          expect(data).toBe('foo')
+
+      describe 'when the element has no [up-data] attribute', ->
+
+        it 'returns a blank object', ->
+          element = fixture('.element')
+          data = up.syntax.data(element)
+
+          expect(typeof data).toBe('object')
+          expect(Object.keys(data)).toBeBlank()
+
+        it "returns access to the element's vanilla [data-] attributes", ->
+          element = fixture('.element', 'data-foo': 'foo value', 'data-bar': 'bar value')
+          data = up.syntax.data(element)
+
+          expect(data.foo).toBe('foo value')
+          expect(data.bar).toBe('bar value')
+
+        it 'allows to access [data-] attribute with camelCase keys', ->
+          element = fixture('.element', 'data-foo-bar': 'value')
+          data = up.syntax.data(element)
+
+          expect(data.fooBar).toBe('value')
+
+      describe 'when the element has both an [up-data] and vanilla [data-] attributes', ->
+
+        it 'returns an object with properties from both', ->
+          element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
+          data = up.syntax.data(element)
+
+          expect(data.foo).toBe('foo value')
+          expect(data.bar).toBe('bar value')
+
+        it 'allows to access [data-] attribute with camelCase keys', ->
+          element = fixture('.element', 'data-foo-bar': 'value1', 'up-data': JSON.stringify(baz: 'value2'))
+          data = up.syntax.data(element)
+
+          expect(data.fooBar).toBe('value1')
+
+        it 'supports the `in` operator', ->
+          element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
+          data = up.syntax.data(element)
+
+          # The `in` operator is `of` in CoffeeScript
+          # See https://makandracards.com/makandra/52454
+          expect('foo' of data).toBe(true)
+          expect('bar' of data).toBe(true)
+          expect('baz' of data).toBe(false)
+
+        it 'supports Object.keys()', ->
+          element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
+          data = up.syntax.data(element)
+
+          expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
+
+        it 'prefers properties from [up-data]', ->
+          element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
+          data = up.syntax.data(element)
+
+          expect(data.foo).toBe('b')
+
+        it 'allows to override a property from a [data-] attribute', ->
+          element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
+          data = up.syntax.data(element)
+
+          data.foo = 'new a'
+
+          expect(data.foo).toBe('new a')
+
+        it 'allows to override a property from [up-data]', ->
+          element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
+          data = up.syntax.data(element)
+
+          data.foo = 'overridden'
+
+          expect(data.foo).toBe('overridden')
+
+        it 'allows to delete a property from a [data-] attribute', ->
+          element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(bar: 'b'))
+          data = up.syntax.data(element)
+
+          data.foo = 'overridden'
+
+          expect(data.foo).toBe('overridden')
+
+        it 'allows to delete a property from [up-data]', ->
+          element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
+          data = up.syntax.data(element)
+
+          delete data.foo
+
+          expect(data.foo).toBeUndefined()
+          expect('foo' of data).toBe(false)
+
+        it 'allows to delete a property from a [data-] attribute', ->
+          element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(bar: 'b'))
+          data = up.syntax.data(element)
+
+          delete data.foo
+
+          expect(data.foo).toBeUndefined()
+          expect('foo' of data).toBe(false)
+
+        it 'delays JSON parsing until the first access', ->
+          parseSpy = spyOn(JSON, 'parse').and.callThrough()
+          element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
+          data = up.syntax.data(element)
+
+          expect(JSON.parse).not.toHaveBeenCalled()
+
+          expect(data.foo).toBe('foo value')
+
+          expect(JSON.parse).toHaveBeenCalled()
 
     describe 'up.syntax.compile', ->
-      
+
       it "sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer"
 
       describe 'when a compiler throws an error', ->
@@ -168,7 +292,7 @@ describe 'up.syntax', ->
           $tag = $fixture(".child").attr('up-data', JSON.stringify(data))
           up.hello($tag[0])
 
-          expect(observeArgs).toHaveBeenCalledWith('child', data)
+          expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining(data))
 
         it 'passes an empty object as a second argument to the compiler if there is no [up-data] attribute', ->
           observeArgs = jasmine.createSpy()
@@ -177,7 +301,7 @@ describe 'up.syntax', ->
 
           up.hello(fixture(".child"))
 
-          expect(observeArgs).toHaveBeenCalledWith('child', {})
+          expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining({}))
 
         it 'does not parse an [up-data] attribute if the compiler function only takes a single argument', ->
           parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
@@ -265,7 +389,7 @@ describe 'up.syntax', ->
           up.compiler '.element', { priority: 1 }, -> traces.push('bar')
           up.hello(fixture('.element'))
           expect(traces).toEqual ['foo', 'bar']
-        
+
     describe 'up.syntax.clean', ->
 
       it 'allows compilers to return a function to call when the compiled element is cleaned', ->
