@@ -71,6 +71,7 @@ Concurrency
 Various changes
 ---------------
 
+- Fix all Webpack errors
 - Allow to mark a target component as soft
 - unpoly-rails könnte unparsebares JSON verwerfen: https://zammad.makandra.de/#ticket/zoom/76579
 - Test that setting autoCache = false for a route also prevents an a[up-preload]
