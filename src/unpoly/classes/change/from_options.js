@@ -44,6 +44,7 @@ up.Change.FromOptions = class FromOptions extends up.Change {
   }
 
   handleAbortOption(request) {
+    // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.options
 
     if (!abort || up.network.isIdle()) return

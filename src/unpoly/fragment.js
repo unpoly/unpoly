@@ -655,6 +655,9 @@ up.fragment = (function() {
   @param {boolean|string|Function(request): boolean} [options.abort='target']
     Whether to [abort existing requests](/abort-option) before rendering.
 
+  @param {boolean} [options.abortable]
+    Whether this request may be aborted through another `up.render({ abort })` or `up.fragment.abort()`.
+
   @param {Element|jQuery} [options.origin]
     The element that triggered the change.
 
@@ -2034,7 +2037,8 @@ up.fragment = (function() {
       reason ||= 'Aborting requests within layer'
     }
 
-    up.network.abort(testFn, { ...options, reason })
+    let testFnWithAbortable = (request) => request.abortable && testFn(request)
+    up.network.abort(testFnWithAbortable, { ...options, reason })
 
     // Emit an event so other async code can choose to abort itself,
     // e.g. timers waiting for a delay.

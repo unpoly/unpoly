@@ -29,6 +29,7 @@ up.RenderOptions = (function() {
     'clearCache',
     'fallback',  // this may produce a different X-Up-Target request header if { target } is missing on page
     'abort',
+    'abortable',
     'confirm',
     'feedback',
     'origin',

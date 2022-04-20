@@ -210,6 +210,17 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
+  Whether the request is abortable through `up.fragment.abort()`.
+
+  This belongs to the `up.fragment` API, not `up.request`.
+  A request with `{ abortable: false }` can still be aborted through `up.request.abort()`.
+
+  @property up.Request#abortable
+  @param {boolean} [abortable=true]
+  @internal
+  */
+
+  /*-
   @property up.Request#preload
   @param {boolean} preload
   @experimental
@@ -249,7 +260,16 @@ up.Request = class Request extends up.Record {
       'payload',
       'onQueued',
       'fail',
+      'abortable',
     ]
+  }
+
+  defaults() {
+    return {
+      state: 'new',
+      abortable: true,
+      headers: {}
+    }
   }
 
   /*-
@@ -271,7 +291,6 @@ up.Request = class Request extends up.Record {
     super(options)
 
     this.params = new up.Params(this.params); // copies, which we want
-    this.headers ||= {}
 
     if (this.preload) {
       // Preloading requires caching.
@@ -305,7 +324,6 @@ up.Request = class Request extends up.Record {
       // We delegate all promise-related methods (then, catch, finally) to an internal
       // deferred object.
       this.deferred = u.newDeferred()
-      this.state = 'new'
     }
   }
 

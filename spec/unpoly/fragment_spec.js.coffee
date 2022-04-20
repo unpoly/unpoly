@@ -4310,6 +4310,27 @@ describe 'up.fragment', ->
               expect(change1Error).toBeAbortError()
               expect(up.network.queue.allRequests.length).toEqual(1)
 
+          it 'does not abort an earlier request that was made with { abortable: false }', asyncSpec (next) ->
+            fixture('.element')
+
+            change1Error  = undefined
+            change1Promise = undefined
+            change2Promise = undefined
+
+            change1Promise = up.render('.element', url: '/path1', abortable: false)
+            change1Promise.catch (e) -> change1Error = e
+
+            next =>
+              expect(up.network.queue.allRequests.length).toEqual(1)
+              expect(change1Error).toBeUndefined()
+              debugger
+
+              change2Promise = up.render('.element', url: '/path2', abort: true)
+
+            next =>
+              expect(change1Error).toBeUndefined()
+              expect(up.network.queue.allRequests.length).toEqual(2)
+
           it 'aborts the request of an existing change if the new change is made from local content', asyncSpec (next) ->
             fixture('.element')
 
