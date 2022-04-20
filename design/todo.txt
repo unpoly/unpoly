@@ -5,15 +5,6 @@ TODOs for next release
 Concurrency
 -----------
 
-- Reconsider binding new layers to the main element for aborting
-  - Would this have fixed the SF case?
-    - Yes, since it uses faux overlays and renders into the head
-    - It would have broken if SF had used a popup link, which is the canonical way to do it (like in WB)
-  - Would it be better to abort on { origin } instead?
-  - Requests to open new layers should always cancel each other out, regardless of { targetElements }
-    - This would be a regression when we switch from the base layer's main element to { origin }
-    - Test this to prevent this future regression!
-  => Is { abortable: false } the better fix here?
 - Define abort behavior of preload vs. foreground (non-preload) requests
   - I think it would be like this:
     - preload requests never abort other requests
