@@ -4295,18 +4295,17 @@ describe 'up.fragment', ->
 
             change1Error  = undefined
             change1Promise = undefined
-            change2Promise = undefined
 
             change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
-            next =>
+            next ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', url: '/path2', abort: true)
+              up.render('.element', url: '/path2', abort: true)
 
-            next =>
+            next ->
               expect(change1Error).toBeAbortError()
               expect(up.network.queue.allRequests.length).toEqual(1)
 
@@ -4315,19 +4314,17 @@ describe 'up.fragment', ->
 
             change1Error  = undefined
             change1Promise = undefined
-            change2Promise = undefined
 
             change1Promise = up.render('.element', url: '/path1', abortable: false)
             change1Promise.catch (e) -> change1Error = e
 
-            next =>
+            next ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
-              debugger
 
-              change2Promise = up.render('.element', url: '/path2', abort: true)
+              up.render('.element', url: '/path2', abort: true)
 
-            next =>
+            next ->
               expect(change1Error).toBeUndefined()
               expect(up.network.queue.allRequests.length).toEqual(2)
 
@@ -4336,18 +4333,17 @@ describe 'up.fragment', ->
 
             change1Error  = undefined
             change1Promise = undefined
-            change2Promise = undefined
 
             change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
-            next =>
+            next ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', content: 'local content', abort: true)
+              up.render('.element', content: 'local content', abort: true)
 
-            next =>
+            next ->
               expect(change1Error).toBeAbortError()
               expect(up.network.queue.allRequests.length).toEqual(0)
 
@@ -4356,20 +4352,44 @@ describe 'up.fragment', ->
 
             change1Error  = undefined
             change1Promise = undefined
-            change2Promise = undefined
 
             change1Promise = up.render('.element', url: '/path1', abort: true)
             change1Promise.catch (e) -> change1Error = e
 
-            next =>
+            next ->
               expect(up.network.queue.allRequests.length).toEqual(1)
               expect(change1Error).toBeUndefined()
 
-              change2Promise = up.render('.element', url: '/path2', preload: true, abort: true)
+              up.render('.element', url: '/path2', preload: true, abort: true)
 
-            next =>
+            next ->
               expect(change1Error).toBeUndefined()
               expect(up.network.queue.allRequests.length).toEqual(2)
+
+          it 'aborts an existing request when a preload request gets promoted to the foreground', asyncSpec (next) ->
+            fixture('.element')
+
+            change1Error  = undefined
+            change1Promise = undefined
+
+            change1Promise = up.render('.element', url: '/path1', abort: true)
+            change1Promise.catch (e) -> change1Error = e
+
+            next ->
+              expect(up.network.queue.allRequests.length).toEqual(1)
+              expect(change1Error).toBeUndefined()
+
+              up.render('.element', url: '/path2', cache: true, preload: true, abort: true)
+
+            next ->
+              expect(change1Error).toBeUndefined()
+              expect(up.network.queue.allRequests.length).toEqual(2)
+
+              up.render('.element', url: '/path2', cache: true, preload: false, abort: true)
+
+            next ->
+              expect(change1Error).toBeAbortError()
+              expect(up.network.queue.allRequests.length).toEqual(1)
 
           it 'does not cancel its own pending preload request (bugfix)', asyncSpec (next) ->
             fixture('.element')

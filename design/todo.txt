@@ -9,7 +9,6 @@ Concurrency
   - I think it would be like this:
     - preload requests never abort other requests
       - we may preload multiple requests that would update :main, e.g. prev/next in cards
-      - However, preload requests get an { onPromotedToForeground: this.handleAbort.bind(this) }
     - foreground requests cancel other foreground requests
     - should foreground requests cancel preload requests?
       - this would be about minimizing bandwidth use, not correctness
@@ -18,8 +17,6 @@ Concurrency
         - in the past I've often wanted to preload some heavy links just in case, but was worried about { solo }
         - maybe default to { abortable: false } for preloading?
           - maybe even pass { abortable: true } in up.LinkPreloader, since it makes sense there
-  - Implement { abortable: Boolean } to give a simple option to fix the above cases
-    - Dunno if we want [up-abortable] on a link, since we may have a different notion for preloading
 - Do replace the term "observe" with "watch"
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
