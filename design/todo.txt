@@ -5,18 +5,6 @@ TODOs for next release
 Concurrency
 -----------
 
-- Define abort behavior of preload vs. foreground (non-preload) requests
-  - I think it would be like this:
-    - preload requests never abort other requests
-      - we may preload multiple requests that would update :main, e.g. prev/next in cards
-    - foreground requests cancel other foreground requests
-    - should foreground requests cancel preload requests?
-      - this would be about minimizing bandwidth use, not correctness
-      - the link preloader is already built to only preload a single link at a time
-      - so we're talking about manual up.link.preload()
-        - in the past I've often wanted to preload some heavy links just in case, but was worried about { solo }
-        - maybe default to { abortable: false } for preloading?
-          - maybe even pass { abortable: true } in up.LinkPreloader, since it makes sense there
 - Do replace the term "observe" with "watch"
 - Test [up-validate] features
   - Test that we can use [up-validate] with another event and a delay
@@ -70,6 +58,7 @@ Various changes
 Docs
 ----
 
+- Explain that preloading will not abort other requests
 - Docs for up.validate()
   - { feedback, disable, delay, event }
   - Explain that you can use it both on containers and individual fields

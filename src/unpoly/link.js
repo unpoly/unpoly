@@ -489,6 +489,10 @@ up.link = (function() {
     The element or selector whose destination should be preloaded.
   @param {Object} options
     See options for `up.follow()`.
+  @param {boolean} [options.abortable=true]
+    Whether the preload request may be aborted when the user [navigates](/navigation)
+    or when `up.fragment.abort()` is called.
+
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
