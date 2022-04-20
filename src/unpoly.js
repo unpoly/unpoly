@@ -19,6 +19,7 @@ require('./unpoly/classes/change/destroy_fragment')
 require('./unpoly/classes/change/open_layer')
 require('./unpoly/classes/change/update_layer')
 require('./unpoly/classes/change/close_layer')
+require('./unpoly/classes/change/from_options')
 require('./unpoly/classes/change/from_content')
 require('./unpoly/classes/change/from_url')
 require('./unpoly/classes/fragment_data_proxy_handler')
@@ -91,3 +92,4 @@ require('./unpoly/radio')
 require('./unpoly/rails')
 
 up.framework.onEvaled()
+
