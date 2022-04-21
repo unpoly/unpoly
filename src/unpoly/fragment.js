@@ -463,7 +463,7 @@ up.fragment = (function() {
 
   ### Concurrency
 
-  Unfinished requests targeting the updated fragment or its descendants are [aborted](/up.network.abort).
+  Unfinished requests targeting the updated fragment or its descendants are [aborted](/aborting-requests).
   You may control this behavior using the [`{ abort }`](#options.abort) option.
 
   ### Events
@@ -653,7 +653,9 @@ up.fragment = (function() {
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {boolean|string|Function(request): boolean} [options.abort='target']
-    Whether to [abort existing requests](/abort-option) before rendering.
+    Whether to abort existing requests before rendering.
+
+    See [aborting requests](/aborting-requests) for details and a list of options.
 
   @param {boolean} [options.abortable]
     Whether this request may be aborted through another `up.render({ abort })` or `up.fragment.abort()`.
@@ -1366,7 +1368,7 @@ up.fragment = (function() {
   All [`up.compiler()`](/up.compiler) destructors, if any, are called.
   The element is then removed from the DOM.
 
-  Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/up.network.abort).
+  Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/aborting-requests).
 
   Emits events [`up:fragment:destroyed`](/up:fragment:destroyed).
 
@@ -1382,11 +1384,7 @@ up.fragment = (function() {
   the accessibility tree.
 
   Elements that are about to be destroyed (but still animating) are ignored by all
-  functions for fragment lookup:
-
-  - `up.fragment.all()`
-  - `up.fragment.get()`
-  - `up.fragment.closest()`
+  functions that lookup fragments, like `up.fragment.all()`, `up.fragment.get()` or `up.fragment.closest()`.
 
   @function up.destroy
   @param {string|Element|jQuery} target
@@ -1999,14 +1997,65 @@ up.fragment = (function() {
   // }
 
   /*-
-  TODO: Docs
+  [Aborts requests](/aborting-requests) targeting a fragment or layer.
+
+  Always emits the event `up:fragment:aborted`, regardless of whether there were requests to abort.
+  If a request was aborted, the event `up:request:aborted` will also be emitted.
+
+  There is also a low-level `up.network.abort()` function, which aborts requests
+  matching arbitrary conditions.
+
+  ### Aborting requests targeting a fragment
+
+  To abort requests targeting an element or its descendants, pass a reference or CSS selector
+  for that element:
+
+  ```js
+  up.fragment.abort(element)
+  up.fragment.abort('.foo')
+  ```
+
+  You may also pass an `{ origin }` or `{ layer }` option to help look up the selector.
+
+  ### Aborting requests targeting a layer
+
+  To abort all requests targeting elements on a given layer,
+  pass a [`{ layer }` option](/layer-option):
+
+  ```js
+  up.fragment.abort({ layer: 'root' })
+  ```
+
+  ### Aborting all requests
+
+  This would abort requests targeting any elements on any layer:
+
+  ```js
+  up.fragment.abort({ layer: 'any' })
+  ```
 
   @function up.fragment.abort
   @param {string|Element|List<Element>} [element]
+    The element for which requests should be aborted.
+
+    May be omitted with `{ layer }` option.
   @param {string|up.Layer} [options.layer]
+    The [layer](/layer-option) for which requests should be aborted.
+
+    May be omitted with `element` argument.
   @param {Element} [options.origin]
+    The element causing requests to be aborted.
+
+    This is used to look up an `element` selector or `{ layer }` name.
   @param {string} [options.reason]
+    The reason for aborting requests.
+
+    The promise by an aborted `up.request()` will reject with this reason.
+
+    If omitted a default message will describe the abort conditions.
   @param {up.Request} [options.except]
+    A request that should not be aborted, even if it matches
+    the conditions above.
   @experimental
   */
   function abort(...args) {
@@ -2048,11 +2097,72 @@ up.fragment = (function() {
   }
 
   /*-
-  TODO: Docs
+  This event is emitted when requests for an element were [aborted](/aborting-requests).
+
+  This event is emitted on the element for which requests were aborted.
+  If requests for entire layer were aborted, this event is emitted the
+  [layer's outmost element](/up.Layer.prototype.element).
+
+  Note that this event will *not* be emitted by the low-level `up.network.abort()` function.
+
+  ### Example
+
+  This would run code when an element or its descendants were aborted:
+
+  ```js
+  up.on(element, 'up:fragment:aborted', function(event) {
+    // element or its descendants were aborted
+  })
+  ```
+
+  A more common use case is to run code when an element *or one of its ancestors*
+  were aborted:
+
+    ```js
+  // Listen to all up:fragment:aborted events in case an ancestor
+  let off = up.on('up:fragment:aborted', function(event) {
+     if (event.target.contains(element)) {
+        // element or its ancestors were aborted
+     }
+  })
+  // Because we're registering a global event listener, we should
+  // clean up when `element` is destroyed.
+  up.destructor(element, off)
+  ```
+
+  To simplify observing an element and its ancestors for aborted requests,
+  the function `up.fragment.onAborted()` is provided.
+
+  @event up:fragment:aborted
+  @param {Element} event.target
+    The element for which requests were aborted.
+  @param {string} event.reason
+    The reason why requests were aborted.
+  @experimental
+  */
+
+  /*-
+  Runs a callback when the given element *or its ancestors* were [aborted](/aborting-requests).
+
+  This utility function simplifies consumption of the `up:fragment:aborted` event.
+
+  ### Example
+
+  Let's say we want to [reload](/up.reload) an element after 10 seconds.
+  If requests for that element were [aborted](/aborting-requests) before the
+  10 seconds are over, we no no longer want to reload:
+
+  ```js
+  let timeout = setTimeout(() => up.reload(element), 10000)
+  up.fragment.onAborted(element, () => clearTimeout(timeout))
+  ```
 
   @function up.fragment.onAborted
   @param {Element} element
-  @param {Function(event}} callback
+  @param {Function(event)} callback
+    The callback to run.
+
+    It will be called with an `up:fragment:aborted` argument.
   @experimental
   */
   function onAborted(fragment, callback) {
@@ -2063,19 +2173,6 @@ up.fragment = (function() {
     up.destructor(fragment, unsubscribe)
     return unsubscribe
   }
-
-  // function handleAbortOption({ abort, elements, layer, origin }) {
-  //   if (abort === 'layer') {
-  //     abort({ layer })
-  //   } else if (abort === 'target') {
-  //     abort(elements)
-  //   } else if (abort === 'all' || abort === true) {
-  //     abort({ layer: 'any' })
-  //   } else if (abort) {
-  //     // Element, [Element], string, [string]
-  //     abort(abort, { layer, origin })
-  //   }
-  // }
 
   up.on('up:framework:boot', function() {
     const {body} = document

@@ -461,21 +461,7 @@ up.Request = class Request extends up.Record {
   Properties that are not possible in a full-page request (such as custom HTTP headers)
   will be ignored.
 
-  ### Example
-
-  ```javascript
-  let request = await up.request('/path')
-
-  try {
-    let response = await request('/path')
-  } catch (result) {
-    if (result.name === 'AbortError') {
-      console.log('Request was aborted.')
-    }
-  }
-
-  request.abort()
-  ```
+  Aborts all pending requests.
 
   @function up.Request#loadPage
   @experimental

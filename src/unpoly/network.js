@@ -402,12 +402,6 @@ up.network = (function() {
 
     You may also pass a [URL pattern](/url-patterns) to only uncache matching responses.
 
-  @param {boolean|string|Function} [options.abort]
-    With `{ abort: true }` Unpoly will [abort](/up.network.abort) all other requests before making this new request.
-
-    To only abort some requests, pass an [URL pattern](/url-patterns) that matches requests to abort.
-    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
-
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
 
@@ -593,6 +587,8 @@ up.network = (function() {
   /*-
   Makes a full-page request, replacing the entire browser environment with a new page from the server response.
 
+  Aborts all pending requests.
+
   Also see `up.Request#loadPage()`.
 
   @function up.network.loadPage
@@ -642,9 +638,11 @@ up.network = (function() {
   /*-
   Aborts pending [requests](/up.request) matching a condition.
 
-  The event `up:request:aborted` will be emitted.
+  This is a low-level API. If possible, use `up.fragment.abort()` instead.
 
-  The promise returned by `up.request()` will be rejected with an exception named `AbortError`:
+  ### Effects of aborting
+
+  When an `up.request()` is aborted, its returned promise rejects with an exception named `AbortError`:
 
   ```js
   try {
@@ -657,7 +655,7 @@ up.network = (function() {
   }
   ```
 
-  Also consider using `up.fragment.abort()`, which is a higher-level API.
+  Also the event `up:request:aborted` will be emitted.
 
   ### Aborting all requests
 
@@ -718,9 +716,11 @@ up.network = (function() {
 
   /*-
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  was [aborted](/up.network.abort).
+  was [aborted](/aborting-requests).
 
   The event is emitted on the layer that caused the request.
+
+  Also see `up:fragment:aborted`.
 
   @event up:request:aborted
 

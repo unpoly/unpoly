@@ -1023,7 +1023,7 @@ up.link = (function() {
     Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
 
   @param [up-abort='target']
-    Whether to [abort existing requests](/abort-option) before rendering.
+    Whether to [abort existing requests](/aborting-requests) before rendering.
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.
