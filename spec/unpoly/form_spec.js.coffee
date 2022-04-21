@@ -2228,6 +2228,40 @@ describe 'up.form', ->
           expect(renderSpy.calls.mostRecent().args[0].transition).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].focus).not.toEqual('layer') # forced setting
 
+      describe 'with [up-observe-event]', ->
+
+        it 'starts validation on another event', asyncSpec (next) ->
+          form = fixture('form[up-submit][action="/path"]')
+          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-observe-event="custom:event"]')
+          up.hello(form)
+
+          textField.value = 'changed'
+          Trigger.change(textField)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+            up.emit(textField, 'custom:event')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      describe 'with [up-observe-delay]', ->
+
+        it 'delays the validation by the given number of milliseconds', asyncSpec (next) ->
+          form = fixture('form[up-submit][action="/path"]')
+          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-observe-delay="200"]')
+          up.hello(form)
+
+          textField.value = 'changed'
+          Trigger.change(textField)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          next.after 350, ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
     describe 'form[up-validate]', ->
 
       # it 'prints an error saying that this form is not yet supported', ->

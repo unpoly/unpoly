@@ -6,8 +6,6 @@ Concurrency
 -----------
 
 - Do replace the term "observe" with "watch"
-- Test [up-validate] features
-  - Test that we can use [up-validate] with another event and a delay
 
 
 Various changes
