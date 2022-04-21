@@ -2163,6 +2163,8 @@ up.fragment = (function() {
     The callback to run.
 
     It will be called with an `up:fragment:aborted` argument.
+  @return {Function}
+    A function that unsubscribes the callback.
   @experimental
   */
   function onAborted(fragment, callback) {

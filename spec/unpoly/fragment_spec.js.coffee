@@ -6148,3 +6148,24 @@ describe 'up.fragment', ->
         up.fragment.abort(ancestor)
 
         expect(callback).toHaveBeenCalled()
+
+      it "runs the callback when the fragment's descendant is aborted", ->
+        fragment = fixture('.fragment')
+        descendant = e.affix(fragment, '.descendant')
+        callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+        expect(callback).not.toHaveBeenCalled()
+
+        up.fragment.abort(descendant)
+
+        expect(callback).not.toHaveBeenCalled()
+
+      it 'returns a callback that stops the event listener', ->
+        fragment = fixture('.fragment')
+        callback = jasmine.createSpy('aborted callback')
+        unsubscribe = up.fragment.onAborted(fragment, callback)
+
+        unsubscribe()
+        up.fragment.abort(fragment)
+
+        expect(callback).not.toHaveBeenCalled()
