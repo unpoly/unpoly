@@ -16,7 +16,7 @@ up.FieldWatcher = class FieldWatcher {
   fieldOptions(field) {
     let options = u.copy(this.options)
     let defaults = { event: 'input', ...this.formDefaults }
-    return up.form.observeOptions(field, options, { defaults })
+    return up.form.watchOptions(field, options, { defaults })
   }
 
   start() {
