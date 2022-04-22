@@ -40,7 +40,7 @@ Changes tracked until 2021-03-18:
 - Don't run delayed callbacks when the observed field was removed from the DOM during the delay
 - up.form.config.inputEvent, up.form.config.changeEvent
 - up.form.config.observeDelay => inputDelay
-- input[up-observe-event]
+- input[up-watch-event]
 - Date input validated on blur
 - Listeners to up:fragment:loaded can force failure options by setting event.renderOptions.fail
 - Allow to customize response failure with up.network.config.fail
