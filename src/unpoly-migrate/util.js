@@ -33,47 +33,47 @@ up.util.except = function(object, ...keys) {
 }
 
 up.util.parseUrl = function(...args) {
-  up.migrate.warn('up.util.parseUrl() has been renamed to up.util.parseURL()')
+  up.migrate.deprecated('up.util.parseUrl()', 'up.util.parseURL()')
   return up.util.parseURL(...args)
 }
 
 up.util.any = function(...args) {
-  up.migrate.warn('up.util.any() has been renamed to up.util.some()')
+  up.migrate.deprecated('up.util.any()', 'up.util.some()')
   return up.util.some(...args)
 }
 
 up.util.all = function(...args) {
-  up.migrate.warn('up.util.all() has been renamed to up.util.every()')
+  up.migrate.deprecated('up.util.all()', 'up.util.every()')
   return up.util.every(...args)
 }
 
 up.util.detect = function(...args) {
-  up.migrate.warn('up.util.detect() has been renamed to up.util.find()')
+  up.migrate.deprecated('up.util.detect()', 'up.util.find()')
   return up.util.find(...args)
 }
 
 up.util.select = function(...args) {
-  up.migrate.warn('up.util.select() has been renamed to up.util.filter()')
+  up.migrate.deprecated('up.util.select()', 'up.util.filter()')
   return up.util.filter(...args)
 }
 
 up.util.setTimer = function(...args) {
-  up.migrate.warn('up.util.setTimer() has been renamed to up.util.timer()')
+  up.migrate.deprecated('up.util.setTimer()', 'up.util.timer()')
   return up.util.timer(...args)
 }
 
 up.util.escapeHtml = function(...args) {
-  up.migrate.deprecated('up.util.escapeHtml', 'up.util.escapeHTML')
+  up.migrate.deprecated('up.util.escapeHtml()', 'up.util.escapeHTML()')
   return up.util.escapeHTML(...args)
 }
 
 up.util.selectorForElement = function(...args) {
-  up.migrate.warn('up.util.selectorForElement() has been renamed to up.fragment.toTarget()')
+  up.migrate.deprecated('up.util.selectorForElement()', 'up.fragment.toTarget()')
   return up.fragment.toTarget(...args)
 }
 
 up.util.nextFrame = function(...args) {
-  up.migrate.warn('up.util.nextFrame() has been renamed to up.util.task()')
+  up.migrate.deprecated('up.util.nextFrame()', 'up.util.task()')
   return up.util.task(...args)
 }
 

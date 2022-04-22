@@ -25,6 +25,6 @@ up.element.first = function(...args) {
 }
 
 up.element.createFromHtml = function(...args) {
-  up.migrate.deprecated('up.element.createFromHtml', 'up.element.createFromHTML')
+  up.migrate.deprecated('up.element.createFromHtml()', 'up.element.createFromHTML()')
   return up.element.createFromHTML(...args)
 }
