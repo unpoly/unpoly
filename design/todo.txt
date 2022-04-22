@@ -6,6 +6,18 @@ Concurrency
 -----------
 
 - Do replace the term "observe" with "watch"
+  - FieldObserver => FieldWatcher
+  - observeOptions => watchOptions
+- up-observe-event => up-watch-event        gab's vorher nicht
+- up-observe-feedback => up-watch-feebdack  gab's vorher nicht
+- up-observe prefix => up-watch prefix
+- up-observe-delay => up-watch-delay        war nur [up-delay]
+- up-observe-disable => up-watch-disable    gab's vorher nicht
+- [up-observe] -> [up-watch]
+- up.observe() => up.watch()
+- Go through comments with "observe"
+- first replace observer => watcher
+- then observed => watched
 
 
 Various changes
