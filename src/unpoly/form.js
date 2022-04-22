@@ -288,7 +288,7 @@ up.form = (function() {
   }
 
   function watchOptions(field, options, parserOptions) {
-    let parser = new up.OptionsParser(field, options, { closest: true, attrPrefix: 'up-observe-', ...parserOptions })
+    let parser = new up.OptionsParser(field, options, { closest: true, attrPrefix: 'up-watch-', ...parserOptions })
 
     // Computing the effective options for a given field is pretty involved,
     // as there are multiple layers of defaults.
@@ -304,12 +304,12 @@ up.form = (function() {
     // Form-wide options can be overridden at the input level:
     //
     // 		<form up-disable="true">
-    // 			<input up-autosubmit up-observe-disable="false">
+    // 			<input up-autosubmit up-watch-disable="false">
     // 		</form>
     //
     // Forms can configure a separate option for all observers:
     //
-    // 		<form up-disable="true" up-observe-disable="false">
+    // 		<form up-disable="true" up-watch-disable="false">
     // 			<input up-autosubmit>
     // 		</form>
     //
@@ -317,7 +317,7 @@ up.form = (function() {
     // There are no options at individual inputs:
     //
     // 		<form up-disable="true">
-    // 			<div up-form-group up-autosubmit up-observe-disable="false">
+    // 			<div up-form-group up-autosubmit up-watch-disable="false">
     // 				<input type="radio" name="kind" value="0">
     // 				<input type="radio" name="kind" value="1">
     // 				<input type="radio" name="kind" value="2">
@@ -331,7 +331,7 @@ up.form = (function() {
     // Summing up, we get an option like { disable } through the following priorities:
     //
     // 1. Passed as explicit `up.observe({ disable })` option
-    // 2. Attribute for the observe intent (e.g. `[up-observe-disable]` at the input or form)
+    // 2. Attribute for the observe intent (e.g. `[up-watch-disable]` at the input or form)
     // 3. Default config for this observe() intent (e.g. `up.form.config.watchOptions.disable`).
     // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
     parser.boolean('feedback')
@@ -609,7 +609,7 @@ up.form = (function() {
   @param {boolean|string} [options.disable]
     Whether to [disable fields](/disable-option) while an async callback is running.
 
-    Defaults to the input or form's `[up-observe-disable]` or `[up-disable]` attribute.
+    Defaults to the input or form's `[up-watch-disable]` or `[up-disable]` attribute.
   @param {Function(value, name): string} onChange
     The callback to run when the field's value changes.
 
@@ -856,12 +856,12 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.disable]
     Whether to [disable fields](/disable-option) while validation is running.
 
-    Defaults to the closest `[up-observe-disable]` or `[up-disable]` attribute on either
+    Defaults to the closest `[up-watch-disable]` or `[up-disable]` attribute on either
     the input or its form.
   @param {string|Element|jQuery} [options.feedback]
     Whether to give [navigation feedback](/up.feedback) while validating.
 
-    Defaults to the form's `[up-observe-feedback]` or `[up-feedback]` attribute.
+    Defaults to the form's `[up-watch-feedback]` or `[up-feedback]` attribute.
   @param {string|Element|jQuery} [options.formGroup = true]
     TODO
   @return {Promise<up.RenderResult>}
@@ -1179,7 +1179,7 @@ up.form = (function() {
   @param [up-disable]
     Whether to [disable fields](/disable-option) while the form is submitting.
 
-  @param [up-observe-disable]
+  @param [up-watch-disable]
     Whether to [disable fields](/disable-option) while the form is
     [validating](/input-up-validate) or running [`[up-observe]`](/input-up-observe) callbacks.
 
@@ -1188,7 +1188,7 @@ up.form = (function() {
   @param [up-feedback]
     Whether to give [navigation feedback](/disable-option) while the form is submitting.
 
-  @param [up-observe-feedback]
+  @param [up-watch-feedback]
     Whether to give [navigation feedback](/disable-option) while the form is
     [validating](/input-up-validate) or running [`[up-observe]`](/input-up-observe) callbacks.
 
@@ -1354,25 +1354,25 @@ up.form = (function() {
     The CSS selector to update with the server response.
 
     This defaults the closest form group around the validating field.
-  @param [up-observe-event='change']
+  @param [up-watch-event='change']
     The event type that causes validation.
 
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
     You may pass multiple event types as a space-separated string.
-  @param [up-observe-delay]
+  @param [up-watch-delay]
     The number of miliseconds to wait between an observed event and validating.
 
     For most events there is no default delay.
     Only when observing the `input` event the default is `up.form.config.inputDelay`.
-  @param [up-observe-disable]
+  @param [up-watch-disable]
     Whether to [disable fields](/disable-option) while validation is running.
 
-    Defaults to the form's `[up-observe-disable]` or `[up-disable]` attribute.
-  @param [up-observe-feedback]
+    Defaults to the form's `[up-watch-disable]` or `[up-disable]` attribute.
+  @param [up-watch-feedback]
     Whether to give [navigation feedback](/up.feedback) while validating.
 
-    Defaults to the form's `[up-observe-feedback]` or `[up-feedback]` attribute.
+    Defaults to the form's `[up-watch-feedback]` or `[up-feedback]` attribute.
   @stable
   */
 
@@ -1600,21 +1600,21 @@ up.form = (function() {
   @selector input[up-observe]
   @param up-observe
     The callback to run when the field's value changes.
-  @param [up-observe-event='input']
+  @param [up-watch-event='input']
     Which event to observe.
 
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
     You may pass multiple event types as a space-separated string.
-  @param [up-observe-delay]
+  @param [up-watch-delay]
     The number of miliseconds to wait between an observed event and running the callback.
 
     When observing the `input` event the default is  `up.form.config.inputDelay`.
     For other events there is no default delay.
-  @param [up-observe-disable]
+  @param [up-watch-disable]
     Whether to [disable fields](/disable-option) while an async callback is running.
 
-    Defaults to the form's `[up-observe-disable]` or `[up-disable]` attribute.
+    Defaults to the form's `[up-watch-disable]` or `[up-disable]` attribute.
   @stable
   */
 
@@ -1653,7 +1653,7 @@ up.form = (function() {
   @selector form[up-observe]
   @param up-observe
     The code to run when any field's value changes.
-  @param up-delay
+  @param up-watch-delay
     The number of miliseconds to wait after a change before the code is run.
   @stable
   */
@@ -1695,7 +1695,7 @@ up.form = (function() {
   ```
 
   @selector input[up-autosubmit]
-  @param [up-delay]
+  @param [up-watch-delay]
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   */
@@ -1720,7 +1720,7 @@ up.form = (function() {
   ```
 
   @selector form[up-autosubmit]
-  @param [up-delay]
+  @param [up-watch-delay]
     The number of miliseconds to wait after a change before the form is submitted.
   @stable
   */

@@ -243,8 +243,8 @@ describe 'up.form', ->
               next.after 100, ->
                 expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
 
-            it "executes the form's [up-observe-disable] option while an async callback is running", asyncSpec (next) ->
-              form = fixture('form[up-observe-disable]')
+            it "executes the form's [up-watch-disable] option while an async callback is running", asyncSpec (next) ->
+              form = fixture('form[up-watch-disable]')
               input = e.affix(form, 'input[name=email]')
               callbackDeferred = u.newDeferred()
               callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
@@ -263,9 +263,9 @@ describe 'up.form', ->
               next ->
                 expect(input).not.toBeDisabled()
 
-            it "executes the fields's [up-observe-disable] option while an async callback is running", asyncSpec (next) ->
+            it "executes the fields's [up-watch-disable] option while an async callback is running", asyncSpec (next) ->
               form = fixture('form')
-              input = e.affix(form, 'input[name=email][up-observe-disable]')
+              input = e.affix(form, 'input[name=email][up-watch-disable]')
               callbackDeferred = u.newDeferred()
               callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
 
@@ -283,9 +283,9 @@ describe 'up.form', ->
               next ->
                 expect(input).not.toBeDisabled()
 
-            it "overrides the [up-observe-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
-              form = fixture('form[up-observe-disable]')
-              input = e.affix(form, 'input[name=email][up-observe-disable]')
+            it "overrides the [up-watch-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
+              form = fixture('form[up-watch-disable]')
+              input = e.affix(form, 'input[name=email][up-watch-disable]')
               callbackDeferred = u.newDeferred()
               callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
 
@@ -478,9 +478,9 @@ describe 'up.form', ->
 
     describe 'up.form.watchOptions()', ->
 
-      it 'parses the closest [up-observe-event] attribute into an { event } option', ->
+      it 'parses the closest [up-watch-event] attribute into an { event } option', ->
         form = fixture('form')
-        container = e.affix(form, 'div[up-observe-event="my:event"]')
+        container = e.affix(form, 'div[up-watch-event="my:event"]')
         field = e.affix(container, 'input[type="text"][name="foo"]')
 
         options = {}
@@ -488,9 +488,9 @@ describe 'up.form', ->
 
         expect(options.event).toBe('my:event')
 
-      it 'expands [up-observe-event="change"] into up.form.config.changeEvents', ->
+      it 'expands [up-watch-event="change"] into up.form.config.changeEvents', ->
         form = fixture('form')
-        field = e.affix(form, 'input[type="text"][name="foo"][up-observe-event="change"]')
+        field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="change"]')
         up.form.config.changeEvents = ['change', 'blur']
 
         options = {}
@@ -498,9 +498,9 @@ describe 'up.form', ->
 
         expect(options.event).toEqual ['change', 'blur']
 
-      it 'expands [up-observe-event="input"] into up.form.config.inputEvents', ->
+      it 'expands [up-watch-event="input"] into up.form.config.inputEvents', ->
         form = fixture('form')
-        field = e.affix(form, 'input[type="text"][name="foo"][up-observe-event="input"]')
+        field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="input"]')
         up.form.config.inputEvents = ['custom:event']
 
         options = {}
@@ -1165,7 +1165,7 @@ describe 'up.form', ->
       describe 'request sequence', ->
 
         it 'only sends a single concurrent request and queues new validations while a validation request is in flight', asyncSpec (next) ->
-          form = fixture('form[up-observe-disable]')
+          form = fixture('form[up-watch-disable]')
           group1 = e.affix(form, '[up-form-group]')
           input1 = e.affix(group1, 'input[name=email]')
           group2 = e.affix(form, '[up-form-group]')
@@ -1191,8 +1191,8 @@ describe 'up.form', ->
 
       describe 'disabling', ->
 
-        it "executes the form's [up-observe-disable] option while a validation request is in flight", asyncSpec (next) ->
-          form = fixture('form[up-observe-disable]')
+        it "executes the form's [up-watch-disable] option while a validation request is in flight", asyncSpec (next) ->
+          form = fixture('form[up-watch-disable]')
           group = e.affix(form, '[up-form-group]')
           input = e.affix(group, 'input[name=email]')
 
@@ -1207,10 +1207,10 @@ describe 'up.form', ->
           next ->
             expect(input).not.toBeDisabled()
 
-        it "executes the fields's [up-observe-disable] option while a validation request is in flight", asyncSpec (next) ->
+        it "executes the fields's [up-watch-disable] option while a validation request is in flight", asyncSpec (next) ->
           form = fixture('form')
           group = e.affix(form, '[up-form-group]')
-          input = e.affix(group, 'input[name=email][up-observe-disable]')
+          input = e.affix(group, 'input[name=email][up-watch-disable]')
 
           up.validate(input)
 
@@ -1223,10 +1223,10 @@ describe 'up.form', ->
           next ->
             expect(input).not.toBeDisabled()
 
-        it "overrides the [up-observe-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
-          form = fixture('form[up-observe-disable]')
+        it "overrides the [up-watch-disable] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
+          form = fixture('form[up-watch-disable]')
           group = e.affix(form, '[up-form-group]')
-          input = e.affix(group, 'input[name=email][up-observe-disable]')
+          input = e.affix(group, 'input[name=email][up-watch-disable]')
 
           up.validate(input, { disable: false })
 
@@ -1237,8 +1237,8 @@ describe 'up.form', ->
 
       describe 'feedback', ->
 
-        it "executes the form's [up-observe-feedback] option while a validation request is in flight", asyncSpec (next) ->
-          form = fixture('form[up-observe-feedback]')
+        it "executes the form's [up-watch-feedback] option while a validation request is in flight", asyncSpec (next) ->
+          form = fixture('form[up-watch-feedback]')
           group = e.affix(form, '[up-form-group]')
           input = e.affix(group, 'input[name=email]')
 
@@ -1253,10 +1253,10 @@ describe 'up.form', ->
           next ->
             expect(group).not.toHaveClass('up-loading')
 
-        it "executes the fields's [up-observe-feedback] option while a validation request is in flight", asyncSpec (next) ->
+        it "executes the fields's [up-watch-feedback] option while a validation request is in flight", asyncSpec (next) ->
           form = fixture('form')
           group = e.affix(form, '[up-form-group]')
-          input = e.affix(group, 'input[name=email][up-observe-feedback]')
+          input = e.affix(group, 'input[name=email][up-watch-feedback]')
 
           up.validate(input)
 
@@ -1269,10 +1269,10 @@ describe 'up.form', ->
           next ->
             expect(group).not.toHaveClass('up-loading')
 
-        it "overrides the [up-observe-feedback] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
-          form = fixture('form[up-observe-feedback]')
+        it "overrides the [up-watch-feedback] option from form and field if an { disable } option is also passed", asyncSpec (next) ->
+          form = fixture('form[up-watch-feedback]')
           group = e.affix(form, '[up-form-group]')
-          input = e.affix(group, 'input[name=email][up-observe-feedback]')
+          input = e.affix(group, 'input[name=email][up-watch-feedback]')
 
           up.validate(input, { feedback: false })
 
@@ -1301,7 +1301,7 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
 
         it 'honors the { disable } option of each batched validation', asyncSpec (next) ->
-          form = fixture('form[action=/path][up-observe-disable=":origin"]')
+          form = fixture('form[action=/path][up-watch-disable=":origin"]')
           fooField = e.affix(form, 'input[name=foo]')
           barField = e.affix(form, 'input[name=bar]')
           bazField = e.affix(form, 'input[name=baz]')
@@ -1842,10 +1842,10 @@ describe 'up.form', ->
         Trigger.change($field)
         next => expect(submitSpy).toHaveBeenCalled()
 
-      describe 'with [up-observe-delay] modifier', ->
+      describe 'with [up-watch-delay] modifier', ->
 
         it 'debounces the form submission', asyncSpec (next) ->
-          $form = $fixture('form[up-autosubmit][up-observe-delay="50"]')
+          $form = $fixture('form[up-autosubmit][up-watch-delay="50"]')
           $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
           submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
@@ -1902,12 +1902,12 @@ describe 'up.form', ->
         next =>
           expect(window.observeCallbackSpy).not.toHaveBeenCalled()
 
-      describe 'with [up-observe-delay] modifier', ->
+      describe 'with [up-watch-delay] modifier', ->
 
         it 'debounces the callback', asyncSpec (next) ->
           $form = $fixture('form')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-observe-delay="40"]')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-watch-delay="40"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
@@ -1922,7 +1922,7 @@ describe 'up.form', ->
           container = fixture('.container[up-main]')
           form = e.affix(container, 'form[action="/path"]')
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          field = e.affix(form, 'input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-observe-delay="40"]')
+          field = e.affix(form, 'input[name="input-name"][value="old-value"][up-observe="window.observeCallbackSpy()"][up-watch-delay="40"]')
           up.hello(form)
           field.value = 'new-value'
           Trigger.change(field)
@@ -1962,11 +1962,11 @@ describe 'up.form', ->
             ['field2-new-value', 'field2']
           ]
 
-      describe 'with [up-observe-event] modifier', ->
+      describe 'with [up-watch-event] modifier', ->
 
         it 'allows to set a different event to observe', asyncSpec (next) ->
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"][up-observe-event="foo"]')
+          form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"][up-watch-event="foo"]')
           field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
           up.hello(form)
           field1.value = 'field1-new-value'
@@ -1984,8 +1984,8 @@ describe 'up.form', ->
 
         it 'allows to override the custom event at individual inputs', asyncSpec (next) ->
           window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"][up-observe-event="foo"]')
-          field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"][up-observe-event="bar"]')
+          form = fixture('form[up-observe="window.observeCallbackSpy(value, name)"][up-watch-event="foo"]')
+          field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"][up-watch-event="bar"]')
           up.hello(form)
           field1.value = 'field1-new-value'
           Trigger.change(field1)
@@ -2259,11 +2259,11 @@ describe 'up.form', ->
           expect(renderSpy.calls.mostRecent().args[0].transition).toBeUndefined()
           expect(renderSpy.calls.mostRecent().args[0].focus).not.toEqual('layer') # forced setting
 
-      describe 'with [up-observe-event]', ->
+      describe 'with [up-watch-event]', ->
 
         it 'starts validation on another event', asyncSpec (next) ->
           form = fixture('form[up-submit][action="/path"]')
-          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-observe-event="custom:event"]')
+          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-watch-event="custom:event"]')
           up.hello(form)
 
           textField.value = 'changed'
@@ -2277,11 +2277,11 @@ describe 'up.form', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      describe 'with [up-observe-delay]', ->
+      describe 'with [up-watch-delay]', ->
 
         it 'delays the validation by the given number of milliseconds', asyncSpec (next) ->
           form = fixture('form[up-submit][action="/path"]')
-          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-observe-delay="200"]')
+          textField = e.affix(form, 'input[type=text][name=email][up-validate][up-watch-delay="200"]')
           up.hello(form)
 
           textField.value = 'changed'

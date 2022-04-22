@@ -18,5 +18,5 @@ up.migrate.migratedFormGroupSelectors = function() {
 }
 
 up.migrate.renamedAttribute('up-fieldset', 'up-form-group')
-up.migrate.renamedAttribute('up-delay', 'up-observe-delay', { scope: '[up-autosubmit]' })
-up.migrate.renamedAttribute('up-delay', 'up-observe-delay', { scope: '[up-observe]' })
+up.migrate.renamedAttribute('up-delay', 'up-watch-delay', { scope: '[up-autosubmit]' })
+up.migrate.renamedAttribute('up-delay', 'up-watch-delay', { scope: '[up-observe]' })
