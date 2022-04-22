@@ -79,6 +79,10 @@ Docs
   - [up-autosubmit] needs a params note saying that that attributes for [up-observe] may be used
   - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
   - Explain that they can be set either on the form or on an input
+- Document all the ways we prevent concurrency
+  - In up.observe()
+  - In up.validate()
+    - Can be called multiple times with a single request
 - up.form.config.disable
 - up.form.config.feedback
 - up.form.config.observeInputEvent

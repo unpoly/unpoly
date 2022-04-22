@@ -23,11 +23,8 @@ up.form = (function() {
 
   @property up.form.config
 
-  @param {number} [config.observeDelay=0]
-    The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
-    after the input value changes.
-
-    You may use this option to limit how often the callback will run for a fast typist.
+  @param {number} [config.inputDelay=0]
+    TODO: Docs
 
   @param {string} [config.inputEvents]
     TODO: Docs
@@ -573,7 +570,7 @@ up.form = (function() {
 
   ```js
   up.observe('form', function(value, name) {
-   console.log('The value of %o is now %o', name, value)
+    console.log('The value of %o is now %o', name, value)
   })
   ```
 
@@ -582,7 +579,7 @@ up.form = (function() {
 
   ```js
   up.observe('form', { batch: true }, function(diff) {
-   console.log('Observed one or more changes: %o', diff)
+    console.log('Observed one or more changes: %o', diff)
   })
   ```
 
@@ -601,7 +598,7 @@ up.form = (function() {
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
     You may pass multiple event types as a space-separated string.
-  @param {number} [options.delay=up.form.config.observeDelay]
+  @param {number} [options.delay=up.form.config.inputDelay]
     The number of miliseconds to wait between an observed event and running the callback.
 
     When observing the `input` event the default is  `up.form.config.inputDelay`.
