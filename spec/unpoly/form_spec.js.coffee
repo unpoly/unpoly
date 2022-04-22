@@ -95,7 +95,7 @@ describe 'up.form', ->
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
 
-    describe 'up.observe', ->
+    describe 'up.observe()', ->
 
       beforeEach ->
         up.form.config.observeDelay = 0
@@ -476,8 +476,39 @@ describe 'up.form', ->
               'input2': 'input2-c'
             }
 
+    describe 'up.form.observeOptions()', ->
 
-    describe 'up.submit', ->
+      it 'parses the closest [up-observe-event] attribute into an { event } option', ->
+        form = fixture('form')
+        container = e.affix(form, 'div[up-observe-event="my:event"]')
+        field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        options = {}
+        up.form.observeOptions(field, options)
+
+        expect(options.event).toBe('my:event')
+
+      it 'expands [up-observe-event="change"] into up.form.config.changeEvent', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[type="text"][name="foo"][up-observe-event="change"]')
+        up.form.config.changeEvent = 'change blur'
+
+        options = {}
+        up.form.observeOptions(field, options)
+
+        expect(options.event).toBe('change blur')
+
+      it 'expands [up-observe-event="input"] into up.form.config.inputEvent', ->
+        form = fixture('form')
+        field = e.affix(form, 'input[type="text"][name="foo"][up-observe-event="input"]')
+        up.form.config.inputEvent = 'custom:event'
+
+        options = {}
+        up.form.observeOptions(field, options)
+
+        expect(options.event).toBe('custom:event')
+
+    describe 'up.submit()', ->
 
       it 'emits a preventable up:form:submit event', asyncSpec (next) ->
         $form = $fixture('form[action="/form-target"][up-target=".response"]')
