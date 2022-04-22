@@ -476,7 +476,7 @@ describe 'up.form', ->
               'input2': 'input2-c'
             }
 
-    describe 'up.form.observeOptions()', ->
+    describe 'up.form.watchOptions()', ->
 
       it 'parses the closest [up-observe-event] attribute into an { event } option', ->
         form = fixture('form')
@@ -484,7 +484,7 @@ describe 'up.form', ->
         field = e.affix(container, 'input[type="text"][name="foo"]')
 
         options = {}
-        up.form.observeOptions(field, options)
+        up.form.watchOptions(field, options)
 
         expect(options.event).toBe('my:event')
 
@@ -494,7 +494,7 @@ describe 'up.form', ->
         up.form.config.changeEvents = ['change', 'blur']
 
         options = {}
-        up.form.observeOptions(field, options)
+        up.form.watchOptions(field, options)
 
         expect(options.event).toEqual ['change', 'blur']
 
@@ -504,7 +504,7 @@ describe 'up.form', ->
         up.form.config.inputEvents = ['custom:event']
 
         options = {}
-        up.form.observeOptions(field, options)
+        up.form.watchOptions(field, options)
 
         expect(options.event).toEqual ['custom:event']
 

@@ -103,7 +103,7 @@ up.FormValidator = class FormValidator {
 
   originOptions(element, overrideOptions) {
     let defaults = { event: 'change', ...this.formDefaults }
-    let closestOptions = up.form.observeOptions(element, {}, { defaults })
+    let closestOptions = up.form.watchOptions(element, {}, { defaults })
     return { ...this.formDefaults, ...closestOptions, ...overrideOptions }
   }
 

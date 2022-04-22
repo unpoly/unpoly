@@ -287,7 +287,7 @@ up.form = (function() {
     return options
   }
 
-  function observeOptions(field, options, parserOptions) {
+  function watchOptions(field, options, parserOptions) {
     let parser = new up.OptionsParser(field, options, { closest: true, attrPrefix: 'up-observe-', ...parserOptions })
 
     // Computing the effective options for a given field is pretty involved,
@@ -332,7 +332,7 @@ up.form = (function() {
     //
     // 1. Passed as explicit `up.observe({ disable })` option
     // 2. Attribute for the observe intent (e.g. `[up-observe-disable]` at the input or form)
-    // 3. Default config for this observe() intent (e.g. `up.form.config.observeOptions.disable`).
+    // 3. Default config for this observe() intent (e.g. `up.form.config.watchOptions.disable`).
     // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
     parser.boolean('feedback')
     parser.booleanOrString('disable')
@@ -1732,7 +1732,7 @@ up.form = (function() {
     config,
     submit,
     submitOptions,
-    observeOptions,
+    watchOptions,
     isSubmittable,
     observe,
     validate,
