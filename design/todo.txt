@@ -6,7 +6,6 @@ Concurrency
 -----------
 
 - Do replace the term "observe" with "watch"
-  - [up-observe] -> [up-watch]
   - up.observe() => up.watch()
   - Go through comments with "observe"
     - first replace observer => watcher
@@ -65,19 +64,19 @@ Docs
 ### Watch/validate rework
 
 - Consider consolidating docs for
-  - input[up-observe]/form[up-observe] as well as
+  - input[up-watch]/form[up-watch] as well as
   - input[up-validate]/form[up-validate]
   - input[up-autosubmit]/form[up-autosubmit]
   - ... so it's only "within the container"
 - [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
-  - [up-autosubmit] needs a params note saying that that attributes for [up-observe] may be used
-  - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
+  - [up-autosubmit] needs a params note saying that that attributes for [up-watch] may be used
+  - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
   - Explain that they can be set either on the form or on an input
 - New obserrve options are not documented everywhere
   - form[up-autosubmit]
   - input[up-autsubmit]
-  - input[up-observe]
-  - form[up-observe]
+  - input[up-watch]
+  - form[up-watch]
 - Docs for up.validate()
   - { feedback, disable, delay, event }
   - Explain that you can use it both on containers and individual fields
@@ -209,7 +208,7 @@ Icebox
     - Yes, because onFinished may not fire for fatals or prevented up:fragment:loaded
   - How would this work together with future up.RenderRequest?
   - How would this work together with "local changes are sync"?
-- Consolidate [up-validate], [up-switch] and [up-observe] into a tree of form dependencies
+- Consolidate [up-validate], [up-switch] and [up-watch] into a tree of form dependencies
   - This way we can selectively disable parts of the form
 - Functionality that checks for isDetached() should probably also check for .up-destroying
 - Improve `{ focus: 'keep' }` so it focuses the former form group if we lose focus
