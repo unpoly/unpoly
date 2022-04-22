@@ -552,7 +552,7 @@ up.form = (function() {
 
   This is useful for observing text fields while the user is typing.
 
-  The unobtrusive variant of this is the [`[up-observe]`](/input-up-observe) attribute.
+  The unobtrusive variant of this is the [`[up-watch]`](/input-up-watch) attribute.
 
   ### Example
 
@@ -637,7 +637,7 @@ up.form = (function() {
       //     parses values with up.Params.fromFields(), and that ignores unnamed fields.
       // (2) Only warn, don't crash. There are some legitimate cases for having unnamed
       //     a mix of named and unnamed fields in a form, and we don't want to prevent
-      //     <form up-observe> in that case.
+      //     <form up-watch> in that case.
       up.puts('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
     }
     const callback = u.extractCallback(args) || observeCallbackFromElement(container) || up.fail('No callback given for up.observe()')
@@ -649,7 +649,7 @@ up.form = (function() {
   }
 
   function observeCallbackFromElement(element) {
-    let rawCallback = element.getAttribute('up-observe')
+    let rawCallback = element.getAttribute('up-watch')
     if (rawCallback) {
       return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name')
     }
@@ -1181,7 +1181,7 @@ up.form = (function() {
 
   @param [up-watch-disable]
     Whether to [disable fields](/disable-option) while the form is
-    [validating](/input-up-validate) or running [`[up-observe]`](/input-up-observe) callbacks.
+    [validating](/input-up-validate) or running [`[up-watch]`](/input-up-watch) callbacks.
 
     Defaults to the form's `[up-disable]` attribute.
 
@@ -1190,7 +1190,7 @@ up.form = (function() {
 
   @param [up-watch-feedback]
     Whether to give [navigation feedback](/disable-option) while the form is
-    [validating](/input-up-validate) or running [`[up-observe]`](/input-up-observe) callbacks.
+    [validating](/input-up-validate) or running [`[up-watch]`](/input-up-watch) callbacks.
 
     Defaults to the form's `[up-feedback]` attribute.
 
@@ -1557,7 +1557,7 @@ up.form = (function() {
   whenever the `<input>` changes:
 
   ```html
-  <input name="query" up-observe="showSuggestions(value)">
+  <input name="query" up-watch="showSuggestions(value)">
   ```
 
   Note that the parameter name in the markup must be called `value` or it will not work.
@@ -1573,7 +1573,7 @@ up.form = (function() {
 
   ### Callback context
 
-  The script given to `[up-observe]` runs with the following context:
+  The script given to `[up-watch]` runs with the following context:
 
   | Name     | Type      | Description                           |
   | -------- | --------- | ------------------------------------- |
@@ -1586,19 +1586,19 @@ up.form = (function() {
   Multiple radio buttons with the same `[name]` (a radio button group)
   produce a single value for the form.
 
-  To observe radio buttons group, use the `[up-observe]` attribute on an
+  To observe radio buttons group, use the `[up-watch]` attribute on an
   element that contains all radio button elements with a given name:
 
   ```html
-  <div up-observe="formatSelected(value)">
+  <div up-watch="formatSelected(value)">
     <input type="radio" name="format" value="html"> HTML format
     <input type="radio" name="format" value="pdf"> PDF format
     <input type="radio" name="format" value="txt"> Text format
   </div>
   ```
 
-  @selector input[up-observe]
-  @param up-observe
+  @selector input[up-watch]
+  @param up-watch
     The callback to run when the field's value changes.
   @param [up-watch-event='input']
     Which event to observe.
@@ -1634,7 +1634,7 @@ up.form = (function() {
   when any `<input>` within the `<form>` changes:
 
   ```html
-  <form up-observe="somethingChanged(value)">
+  <form up-watch="somethingChanged(value)">
     <input name="foo">
     <input name="bar">
   </form>
@@ -1642,7 +1642,7 @@ up.form = (function() {
 
   ### Callback context
 
-  The script given to `[up-observe]` runs with the following context:
+  The script given to `[up-watch]` runs with the following context:
 
   | Name     | Type      | Description                           |
   | -------- | --------- | ------------------------------------- |
@@ -1650,14 +1650,14 @@ up.form = (function() {
   | `this`   | `Element` | The form field                        |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
 
-  @selector form[up-observe]
-  @param up-observe
+  @selector form[up-watch]
+  @param up-watch
     The code to run when any field's value changes.
   @param up-watch-delay
     The number of miliseconds to wait after a change before the code is run.
   @stable
   */
-  up.compiler('[up-observe]', (formOrField) => observe(formOrField))
+  up.compiler('[up-watch]', (formOrField) => observe(formOrField))
 
   /*-
   Submits this field's form when this field changes its values.
