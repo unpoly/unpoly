@@ -29,8 +29,11 @@ up.form = (function() {
 
     You may use this option to limit how often the callback will run for a fast typist.
 
-  @param {string} [config.observeEvents]
-    An array of event types used when [observing](/up.observe) a form field.
+  @param {string} [config.inputEvents]
+    TODO: Docs
+
+  @param {string} [config.changeEvents]
+    TODO: Docs
 
   @param {Array<string>} [config.submitSelectors]
     An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
@@ -68,33 +71,13 @@ up.form = (function() {
     submitSelectors: up.link.combineFollowableSelectors(['form'], ATTRIBUTES_SUGGESTING_SUBMIT),
     noSubmitSelectors: ['[up-submit=false]', '[target]'],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
-
-    // submitOptions: { // Orthogonal to navigate? But submit is always navigation.
-    //   disable: false,
-    //   sequence: 'form',
-    // },
-    //
-    // observeOptions: {
-    //   event: 'input change',
-    //   delay: 0,
-    //   feedback: undefined, // TODO: document, but remove undefined options
-    //   disable: undefined, // TODO: document, but remove undefined options
-    //   // sequence: undefined,
-    // },
-    //
-    // validateOptions: {
-    //   event: ,
-    //   delay: 0,
-    //   feedback: undefined, // TODO: document, but remove undefined options
-    //   disable: undefined, // TODO: document, but remove undefined options
-    //   // sequence: undefined,
-    // },
-
-    // Although we only need to bind to `input, we always also bind to `change`
+    // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
-    inputEvent: 'input change',
+    inputEvents: ['input', 'change'],
     inputDelay: 0,
-    changeEvent: (field) => e.matches(field, 'input[type=date]') ? 'blur' : 'change',
+    // Date inputs trigger `change` when editing a single date component
+    // https://github.com/unpoly/unpoly/issues/336
+    changeEvents: (field) => e.matches(field, 'input[type=date]') ? ['blur'] : ['change'],
   }))
 
   function fullSubmitSelector() {
@@ -361,10 +344,10 @@ up.form = (function() {
 
     let config = up.form.config
     if (options.event === 'input') {
-      options.event = u.evalOption(config.inputEvent, field)
+      options.event = u.evalOption(config.inputEvents, field)
       options.delay ??= config.inputDelay
     } else if (options.event === 'change') {
-      options.event = u.evalOption(config.changeEvent, field)
+      options.event = u.evalOption(config.changeEvents, field)
     }
 
     options.origin ||= field

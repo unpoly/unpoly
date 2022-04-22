@@ -488,25 +488,25 @@ describe 'up.form', ->
 
         expect(options.event).toBe('my:event')
 
-      it 'expands [up-observe-event="change"] into up.form.config.changeEvent', ->
+      it 'expands [up-observe-event="change"] into up.form.config.changeEvents', ->
         form = fixture('form')
         field = e.affix(form, 'input[type="text"][name="foo"][up-observe-event="change"]')
-        up.form.config.changeEvent = 'change blur'
+        up.form.config.changeEvents = ['change', 'blur']
 
         options = {}
         up.form.observeOptions(field, options)
 
-        expect(options.event).toBe('change blur')
+        expect(options.event).toEqual ['change', 'blur']
 
-      it 'expands [up-observe-event="input"] into up.form.config.inputEvent', ->
+      it 'expands [up-observe-event="input"] into up.form.config.inputEvents', ->
         form = fixture('form')
         field = e.affix(form, 'input[type="text"][name="foo"][up-observe-event="input"]')
-        up.form.config.inputEvent = 'custom:event'
+        up.form.config.inputEvents = ['custom:event']
 
         options = {}
         up.form.observeOptions(field, options)
 
-        expect(options.event).toBe('custom:event')
+        expect(options.event).toEqual ['custom:event']
 
     describe 'up.submit()', ->
 
