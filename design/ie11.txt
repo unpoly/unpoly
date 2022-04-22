@@ -46,7 +46,7 @@ More work required
 - Replace up.error.* with custom error classes that extend `Error`
   - This may not be transpilable to ES5
 - Maybe replace up.Params.fromForm() with new FormData()
-  - However, we also use up.Params.fromFields() in FieldObserver
+  - However, we also use up.Params.fromFields() in FieldWatcher
 - maybe don't even have a ES5 build?
 - we might want to parse URLs faster with the URL class (but check how it handles non-fully-qualified URLs)
 - maybe replace up.Params with FormData, but we would need a lot of utility methods around it

@@ -1,7 +1,7 @@
 const u = up.util
 const e = up.element
 
-up.FieldObserver = class FieldObserver {
+up.FieldWatcher = class FieldWatcher {
 
   constructor(form, fields, options, callback) {
     this.callback = callback

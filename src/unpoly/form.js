@@ -299,7 +299,7 @@ up.form = (function() {
     // 			<input up-autosubmit>
     // 		</form>
     //
-    // Form-wide defaults are not parsed by this function, but merged in by up.FormValidator or up.FieldObserver.
+    // Form-wide defaults are not parsed by this function, but merged in by up.FormValidator or up.FieldWatcher.
     //
     // Form-wide options can be overridden at the input level:
     //
@@ -633,7 +633,7 @@ up.form = (function() {
     const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
     if (unnamedFields.length) {
-      // (1) We do not need to exclude the unnamed fields for up.FieldObserver, since that
+      // (1) We do not need to exclude the unnamed fields for up.FieldWatcher, since that
       //     parses values with up.Params.fromFields(), and that ignores unnamed fields.
       // (2) Only warn, don't crash. There are some legitimate cases for having unnamed
       //     a mix of named and unnamed fields in a form, and we don't want to prevent
@@ -643,7 +643,7 @@ up.form = (function() {
     const callback = u.extractCallback(args) || observeCallbackFromElement(container) || up.fail('No callback given for up.observe()')
     let options = u.extractOptions(args)
 
-    const observer = new up.FieldObserver(form, fields, options, callback)
+    const observer = new up.FieldWatcher(form, fields, options, callback)
     observer.start()
     return () => observer.stop()
   }
