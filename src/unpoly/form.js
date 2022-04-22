@@ -23,9 +23,6 @@ up.form = (function() {
 
   @property up.form.config
 
-  @param {boolean} [config.disable=false]
-    Whether to [disable](/up.form.disable) forms while they are submitting.
-
   @param {number} [config.observeDelay=0]
     The number of miliseconds to wait before [`up.observe()`](/up.observe) runs the callback
     after the input value changes.
