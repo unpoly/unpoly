@@ -293,7 +293,7 @@ up.form = (function() {
     // Computing the effective options for a given field is pretty involved,
     // as there are multiple layers of defaults.
     //
-    // Form-wide options are also used for observers:
+    // Form-wide options are also used for watchers:
     //
     // 		<form up-disable="true">
     // 			<input up-autosubmit>
@@ -307,7 +307,7 @@ up.form = (function() {
     // 			<input up-autosubmit up-watch-disable="false">
     // 		</form>
     //
-    // Forms can configure a separate option for all observers:
+    // Forms can configure a separate option for all watchers:
     //
     // 		<form up-disable="true" up-watch-disable="false">
     // 			<input up-autosubmit>
@@ -330,9 +330,9 @@ up.form = (function() {
     //
     // Summing up, we get an option like { disable } through the following priorities:
     //
-    // 1. Passed as explicit `up.observe({ disable })` option
-    // 2. Attribute for the observe intent (e.g. `[up-watch-disable]` at the input or form)
-    // 3. Default config for this observe() intent (e.g. `up.form.config.watchOptions.disable`).
+    // 1. Passed as explicit `up.watch({ disable })` option
+    // 2. Attribute for the watch intent (e.g. `[up-watch-disable]` at the input or form)
+    // 3. Default config for this watch() intent (e.g. `up.form.config.watchOptions.disable`).
     // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
     parser.boolean('feedback')
     parser.booleanOrString('disable')
@@ -548,7 +548,7 @@ up.form = (function() {
   })
 
   /*-
-  Observes form fields and runs a callback when a value changes.
+  Watches form fields and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
 
@@ -559,7 +559,7 @@ up.form = (function() {
   The following would print to the console whenever an input field changes:
 
   ```js
-  up.observe('input.query', function(value) {
+  up.watch('input.query', function(value) {
     console.log('Query is now %o', value)
   })
   ```
@@ -569,7 +569,7 @@ up.form = (function() {
   The callback will be run if any of the given fields change:
 
   ```js
-  up.observe('form', function(value, name) {
+  up.watch('form', function(value, name) {
     console.log('The value of %o is now %o', name, value)
   })
   ```
@@ -578,33 +578,33 @@ up.form = (function() {
   changes since the last callback in a single object:
 
   ```js
-  up.observe('form', { batch: true }, function(diff) {
+  up.watch('form', { batch: true }, function(diff) {
     console.log('Observed one or more changes: %o', diff)
   })
   ```
 
-  @function up.observe
+  @function up.watch
   @param {string|Element|Array<Element>|jQuery} elements
-    The form fields that will be observed.
+    The form fields that will be watched.
 
     You can pass one or more fields, a `<form>` or any container that contains form fields.
     The callback will be run if any of the given fields change.
   @param {boolean} [options.batch=false]
     If set to `true`, the `onChange` callback will receive multiple
     detected changes in a single diff object as its argument.
-  @param {string} [options.event='input']
+  @param {string|Array<string>} [options.event='input']
     Which event to observe.
 
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
-    You may pass multiple event types as a space-separated string.
+    You may pass multiple event types as a space-separated string or as an array.
   @param {number} [options.delay=up.form.config.inputDelay]
     The number of miliseconds to wait between an observed event and running the callback.
 
     When observing the `input` event the default is  `up.form.config.inputDelay`.
     For other events there is no default delay.
 
-    The callback will not run if the observed field is [destroyed](/up.destroy) or
+    The callback will not run if the watched field is [destroyed](/up.destroy) or
     [aborted](/up.fragment.abort) while waiting for the delay.
   @param {boolean|string} [options.disable]
     Whether to [disable fields](/disable-option) while an async callback is running.
@@ -622,13 +622,13 @@ up.form = (function() {
     the callback completes. In this case the callback will not be called again while
     it is already running.
   @return {Function()}
-    A destructor function that removes the observe watch when called.
+    A destructor function that unsubscribes the watcher when called.
 
-    Observing will stop automatically when the targeted fields are
+    Watching will stop automatically when the targeted fields are
     [destroyed](/up.destroy).
   @stable
   */
-  function observe(container, ...args) {
+  function watch(container, ...args) {
     let form = getForm(container)
     const fields = findFields(container)
     const unnamedFields = u.reject(fields, 'name')
@@ -638,17 +638,17 @@ up.form = (function() {
       // (2) Only warn, don't crash. There are some legitimate cases for having unnamed
       //     a mix of named and unnamed fields in a form, and we don't want to prevent
       //     <form up-watch> in that case.
-      up.puts('up.observe()', 'Will not observe fields without a [name]: %o', unnamedFields)
+      up.puts('up.watch()', 'Will not watch fields without a [name]: %o', unnamedFields)
     }
-    const callback = u.extractCallback(args) || observeCallbackFromElement(container) || up.fail('No callback given for up.observe()')
+    const callback = u.extractCallback(args) || watchCallbackFromElement(container) || up.fail('No callback given for up.watch()')
     let options = u.extractOptions(args)
 
-    const observer = new up.FieldWatcher(form, fields, options, callback)
-    observer.start()
-    return () => observer.stop()
+    const watch = new up.FieldWatcher(form, fields, options, callback)
+    watch.start()
+    return () => watch.stop()
   }
 
-  function observeCallbackFromElement(element) {
+  function watchCallbackFromElement(element) {
     let rawCallback = element.getAttribute('up-watch')
     if (rawCallback) {
       return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name')
@@ -656,7 +656,7 @@ up.form = (function() {
   }
 
   /*-
-  [Observes](/up.observe) a field or form and submits the form when a value changes.
+  [Watchs](/up.watch) a field or form and submits the form when a value changes.
 
   Both the form and the changed field will be assigned a CSS class [`.up-active`](/form.up-active)
   while the autosubmitted form is processing.
@@ -665,17 +665,17 @@ up.form = (function() {
 
   @function up.autosubmit
   @param {string|Element|jQuery} target
-    The field or form to observe.
+    The field or form to watch.
   @param {Object} [options]
-    See options for [`up.observe()`](/up.observe)
+    See options for [`up.watch()`](/up.watch)
   @return {Function()}
-    A destructor function that removes the observe watch when called.
+    A destructor function that unsubscribes the watcher when called.
 
     Autosubmitting will stop automatically when the targeted fields are removed from the DOM.
   @stable
   */
   function autosubmit(target, options) {
-    return observe(target, options, () => submit(target))
+    return watch(target, options, () => submit(target))
   }
 
   function getGroupSelectors() {
@@ -840,12 +840,12 @@ up.form = (function() {
     The element that will be [updated](/up.render) with the validation results.
 
     TODO describe default
-  @param {string|Element|jQuery} [options.event='change']
+  @param {string|Array<string>} [options.event='change']
     The event type that causes validation.
 
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
-    You may pass multiple event types as a space-separated string.
+    You may pass multiple event types as a space-separated string or as an array.
   @param {string|Element|jQuery} [options.delay]
     The number of miliseconds to wait between an observed event and validating.
 
@@ -1391,7 +1391,7 @@ up.form = (function() {
   */
   up.compiler(validatingFieldSelector, function(field) {
     let validator = up.FormValidator.forElement(field)
-    validator.observeField(field)
+    validator.watchField(field)
   })
 
   function validatingFieldSelector() {
@@ -1542,14 +1542,14 @@ up.form = (function() {
   })
 
   /*-
-  Observes this field and runs a callback when a value changes.
+  Watches this field and runs a callback when a value changes.
 
   This is useful for observing text fields while the user is typing.
   If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
 
   With a strict Content Security Policy [additional rules apply](/csp).
 
-  The programmatic variant of this is the [`up.observe()`](/up.observe) function.
+  The programmatic variant of this is the [`up.watch()`](/up.watch) function.
 
   ### Example
 
@@ -1586,7 +1586,7 @@ up.form = (function() {
   Multiple radio buttons with the same `[name]` (a radio button group)
   produce a single value for the form.
 
-  To observe radio buttons group, use the `[up-watch]` attribute on an
+  To watch radio buttons group, use the `[up-watch]` attribute on an
   element that contains all radio button elements with a given name:
 
   ```html
@@ -1619,14 +1619,14 @@ up.form = (function() {
   */
 
   /*-
-  Observes this form and runs a callback when any field changes.
+  Watches this form and runs a callback when any field changes.
 
   This is useful for observing text fields while the user is typing.
   If you want to submit the form after a change see [`input[up-autosubmit]`](/input-up-autosubmit).
 
   With a strict Content Security Policy [additional rules apply](/csp).
 
-  The programmatic variant of this is the [`up.observe()`](/up.observe) function.
+  The programmatic variant of this is the [`up.watch()`](/up.watch) function.
 
   ### Example
 
@@ -1657,7 +1657,7 @@ up.form = (function() {
     The number of miliseconds to wait after a change before the code is run.
   @stable
   */
-  up.compiler('[up-watch]', (formOrField) => observe(formOrField))
+  up.compiler('[up-watch]', (formOrField) => watch(formOrField))
 
   /*-
   Submits this field's form when this field changes its values.
@@ -1734,7 +1734,7 @@ up.form = (function() {
     submitOptions,
     watchOptions,
     isSubmittable,
-    observe,
+    watch,
     validate,
     parseValidateArgs,
     autosubmit,
@@ -1753,6 +1753,6 @@ up.form = (function() {
 })()
 
 up.submit = up.form.submit
-up.observe = up.form.observe
+up.watch = up.form.watch
 up.autosubmit = up.form.autosubmit
 up.validate = up.form.validate

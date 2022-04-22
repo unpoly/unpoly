@@ -2,16 +2,6 @@ TODOs for next release
 ======================
 
 
-Concurrency
------------
-
-- Do replace the term "observe" with "watch"
-  - up.observe() => up.watch()
-  - Go through comments with "observe"
-    - first replace observer => watcher
-    - then observed => watched
-
-
 Various changes
 ---------------
 
@@ -80,10 +70,10 @@ Docs
 - Docs for up.validate()
   - { feedback, disable, delay, event }
   - Explain that you can use it both on containers and individual fields
-- New observe() and validate() options
+- New watch() and validate() options
   - { feedback, disable, delay, event }
 - Document all the ways we prevent concurrency
-  - In up.observe()
+  - In up.watch()
   - In up.validate()
   - Document that multiple [up-validate] requests are merged into a single request
 
@@ -170,11 +160,6 @@ Icebox
   - This would be the first feature that goes beyond "navigation is just a preset"
   - People might expect history changes to trigger this
   - Maybe think about this more
-- Consider renaming "*observe*" to "*watch*"
-  - Maybe take this opportunity to change the attribute?
-    - <form up-watch up-watch-event="change" up-on-changed="...">
-    - up.watch(field, 'change', function() { ... })
-    - Keep the callback signature like it is
 - Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
   - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Replace up.hello() and up.syntax.clean() to MutationObserver()
@@ -223,9 +208,9 @@ Icebox
 - CheapEnergy hatte bedarf auf "[up-validate] mit delay"
 - Publish { onQueued }
   - More canonic would be if up.render() returned a up.RenderRequest, which has abort().
-- Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Observer-Delays warten können danach noch Dinge tun
+- Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Watcher-Delays warten können danach noch Dinge tun
   - Wie wäre "submit stoppt das delay"?
-  Evtl. Warnung ausbauen: "Will not observe fields without [name]"
+  Evtl. Warnung ausbauen: "Will not watch fields without [name]"
 - [up-emit] auf Buttons erlauben
 - Beim Schließen des Modals prevented jemand up:layer:dismiss, und dann steht "Abort Error: Close event was prevented" in der Konsole.
   - Wollen wir das schlucken?

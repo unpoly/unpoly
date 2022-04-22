@@ -33,11 +33,11 @@ Changes tracked until 2021-03-18:
 - When rendering content from an { origin }, rediscover origin element in server response and prefer matching fragments closest to that
 - Change up.form.config.validateTargets to up.form.config.groupSelectors
 - New experimental features up.form.group(), [up-form-group]; Also configure [up-form-group] instead of [up-fieldset]
-- Abort delayed observer callbacks when the form is submitted
+- Abort delayed watcher callbacks when the form is submitted
 - up.fragment.abort(), up:fragment:aborted, up.fragment.onAborted()
-  - Fix up.observe() crashing with inputs outside of a form (seems to be valid HTML)
+  - Fix up.watch() crashing with inputs outside of a form (seems to be valid HTML)
 - Allow to consider [up-hungry] elements for updates to any layer with [up-layer=any]
-- Don't run delayed callbacks when the observed field was removed from the DOM during the delay
+- Don't run delayed callbacks when the watched field was removed from the DOM during the delay
 - up.form.config.inputEvent, up.form.config.changeEvent
 - up.form.config.observeDelay => inputDelay
 - input[up-watch-event]

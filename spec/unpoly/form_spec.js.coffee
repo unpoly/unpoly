@@ -95,10 +95,10 @@ describe 'up.form', ->
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
 
-    describe 'up.observe()', ->
+    describe 'up.watch()', ->
 
       beforeEach ->
-        up.form.config.observeDelay = 0
+        up.form.config.inputDelay = 0
 
       # Actually we only need `input`, but we want to notice
       # if another script manually triggers `change` on the element.
@@ -113,7 +113,7 @@ describe 'up.form', ->
             it "runs the callback if the value changed", asyncSpec (next) ->
               $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.observe($input, callback)
+              up.watch($input, callback)
               $input.val('new-value')
               Trigger[eventType]($input)
               Trigger[eventType]($input)
@@ -124,7 +124,7 @@ describe 'up.form', ->
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
               $input = $fixture('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.observe($input, callback)
+              up.watch($input, callback)
               Trigger[eventType]($input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
@@ -134,7 +134,7 @@ describe 'up.form', ->
               it 'debounces the callback', asyncSpec (next) ->
                 $input = $fixture('input[name="input-name"][value="old-value"]')
                 callback = jasmine.createSpy('change callback')
-                up.observe($input, { delay: 200 }, callback)
+                up.watch($input, { delay: 200 }, callback)
                 $input.val('new-value-1')
                 Trigger[eventType]($input)
 
@@ -168,8 +168,8 @@ describe 'up.form', ->
 
               it 'does not run the callback if the field was detached during the delay', asyncSpec (next) ->
                 input = fixture('input[name="input-name"][value="old-value"]')
-                callback = jasmine.createSpy('observer callback')
-                up.observe(input, { delay: 150 }, callback)
+                callback = jasmine.createSpy('watcher callback')
+                up.watch(input, { delay: 150 }, callback)
                 input.value = 'new-value'
                 Trigger[eventType](input)
 
@@ -182,8 +182,8 @@ describe 'up.form', ->
               it 'does not run the callback if the field was aborted during the delay', asyncSpec (next) ->
                 container = fixture('.container')
                 input = e.affix(container, 'input[name="input-name"][value="old-value"]')
-                callback = jasmine.createSpy('observer callback')
-                up.observe(input, { delay: 150 }, callback)
+                callback = jasmine.createSpy('watcher callback')
+                up.watch(input, { delay: 150 }, callback)
                 input.value = 'new-value'
                 Trigger[eventType](input)
 
@@ -199,7 +199,7 @@ describe 'up.form', ->
               callback = ->
                 callbackCount += 1
                 return up.specUtil.promiseTimer(100)
-              up.observe($input, { delay: 1 }, callback)
+              up.watch($input, { delay: 1 }, callback)
               $input.val('new-value-1')
               Trigger[eventType]($input)
 
@@ -225,7 +225,7 @@ describe 'up.form', ->
                 callbackArgs.push(value)
                 return up.specUtil.promiseTimer(100)
 
-              up.observe($input, { delay: 1 }, callback)
+              up.watch($input, { delay: 1 }, callback)
               $input.val('new-value-1')
               Trigger[eventType]($input)
 
@@ -249,7 +249,7 @@ describe 'up.form', ->
               callbackDeferred = u.newDeferred()
               callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
 
-              up.observe(input, callback)
+              up.watch(input, callback)
 
               input.value = "other"
               Trigger[eventType](input)
@@ -269,7 +269,7 @@ describe 'up.form', ->
               callbackDeferred = u.newDeferred()
               callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
 
-              up.observe(input, callback)
+              up.watch(input, callback)
 
               input.value = "other"
               Trigger[eventType](input)
@@ -289,7 +289,7 @@ describe 'up.form', ->
               callbackDeferred = u.newDeferred()
               callback = jasmine.createSpy('callback').and.returnValue(callbackDeferred)
 
-              up.observe(input, { disable: false }, callback)
+              up.watch(input, { disable: false }, callback)
 
               input.value = "other"
               Trigger[eventType](input)
@@ -304,7 +304,7 @@ describe 'up.form', ->
             $form = $fixture('form')
             $checkbox = $form.affix('input[name="input-name"][type="checkbox"][value="checkbox-value"]')
             callback = jasmine.createSpy('change callback')
-            up.observe($checkbox, callback)
+            up.watch($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
             Trigger.clickSequence($checkbox)
 
@@ -322,7 +322,7 @@ describe 'up.form', ->
             $checkbox = $form.affix('input#tick[name="input-name"][type="checkbox"][value="checkbox-value"]')
             $label = $form.affix('label[for="tick"]').text('tick label')
             callback = jasmine.createSpy('change callback')
-            up.observe($checkbox, callback)
+            up.watch($checkbox, callback)
             expect($checkbox.is(':checked')).toBe(false)
             Trigger.clickSequence($label)
 
@@ -343,7 +343,7 @@ describe 'up.form', ->
             $radio1 = $group.affix('input[type="radio"][name="group"][value="1"]')
             $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
             callback = jasmine.createSpy('change callback')
-            up.observe($group, callback)
+            up.watch($group, callback)
             expect($radio1.is(':checked')).toBe(false)
 
             Trigger.clickSequence($radio1)
@@ -368,7 +368,7 @@ describe 'up.form', ->
             $radio2 = $group.affix('input#radio2[type="radio"][name="group"][value="2"]')
             $radio2Label = $group.affix('label[for="radio2"]').text('label 2')
             callback = jasmine.createSpy('change callback')
-            up.observe($group, callback)
+            up.watch($group, callback)
             expect($radio1.is(':checked')).toBe(false)
             Trigger.clickSequence($radio1Label)
 
@@ -387,7 +387,7 @@ describe 'up.form', ->
             $radio1 = $group.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
             $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
             callback = jasmine.createSpy('change callback')
-            up.observe($group, callback)
+            up.watch($group, callback)
             expect($radio1.is(':checked')).toBe(true)
             expect($radio2.is(':checked')).toBe(false)
             Trigger.clickSequence($radio1)
@@ -415,7 +415,7 @@ describe 'up.form', ->
               $form = $fixture('form')
               $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.observe($form, callback)
+              up.watch($form, callback)
               $input.val('new-value')
               Trigger[eventType]($input)
               Trigger[eventType]($input)
@@ -427,7 +427,7 @@ describe 'up.form', ->
               $form = $fixture('form')
               $input = $form.affix('input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.observe($form, callback)
+              up.watch($form, callback)
               Trigger[eventType]($input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
@@ -437,7 +437,7 @@ describe 'up.form', ->
   #          $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
   #          $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
   #          callback = jasmine.createSpy('change callback')
-  #          up.observe($form, callback)
+  #          up.watch($form, callback)
   #          $radio2.get(0).click()
   #          u.task ->
   #            expect(callback.calls.count()).toEqual(1)
@@ -450,7 +450,7 @@ describe 'up.form', ->
           $input1 = $form.affix('input[name="input1"][value="input1-a"]')
           $input2 = $form.affix('input[name="input2"][value="input2-a"]')
           callback = jasmine.createSpy('change callback')
-          up.observe($form, { batch: true }, callback)
+          up.watch($form, { batch: true }, callback)
 
           next ->
             expect(callback.calls.count()).toEqual(0)
@@ -1800,7 +1800,7 @@ describe 'up.form', ->
     describe 'input[up-autosubmit]', ->
 
       beforeEach ->
-        up.form.config.observeDelay = 0
+        up.form.config.inputDelay = 0
 
       it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
         $form = $fixture('form')
@@ -1831,7 +1831,7 @@ describe 'up.form', ->
     describe 'form[up-autosubmit]', ->
 
       beforeEach ->
-        up.form.config.observeDelay = 0
+        up.form.config.inputDelay = 0
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
         $form = $fixture('form[up-autosubmit]')
@@ -1863,23 +1863,23 @@ describe 'up.form', ->
     describe 'input[up-watch]', ->
 
       afterEach ->
-        window.observeCallbackSpy = undefined
+        window.watchCallbackSpy = undefined
 
       it 'calls the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
         $form = $fixture('form')
-        window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.observeCallbackSpy(value, name)"]')
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
         up.hello($form)
         $field.val('new-value')
         Trigger.change($field)
 
         next =>
-          expect(window.observeCallbackSpy).toHaveBeenCalledWith('new-value', 'input-name')
+          expect(window.watchCallbackSpy).toHaveBeenCalledWith('new-value', 'input-name')
 
       it 'runs the callback only once for multiple changes in the same task', asyncSpec (next) ->
         $form = $fixture('form')
-        window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.observeCallbackSpy(value, name)"]')
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
         up.hello($form)
         $field.val('a')
         Trigger.input($field)
@@ -1887,61 +1887,61 @@ describe 'up.form', ->
         Trigger.input($field)
 
         next =>
-          expect(window.observeCallbackSpy.calls.count()).toBe(1)
+          expect(window.watchCallbackSpy.calls.count()).toBe(1)
 
       it 'does not run the callback when the form is submitted immediately after a change, e.g. in a test', asyncSpec (next) ->
         container = fixture('.container[up-main]')
         form = e.affix(container, 'form[action="/path"]')
-        window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.observeCallbackSpy(value, name)"]')
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+        field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
         up.hello(form)
         field.value = 'new-value'
         Trigger.change(field)
         up.submit(form)
 
         next =>
-          expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+          expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
       describe 'with [up-watch-delay] modifier', ->
 
         it 'debounces the callback', asyncSpec (next) ->
           $form = $fixture('form')
-          window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.observeCallbackSpy()"][up-watch-delay="40"]')
+          window.watchCallbackSpy = jasmine.createSpy('watch callback')
+          $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy()"][up-watch-delay="40"]')
           up.hello($form)
           $field.val('new-value')
           Trigger.change($field)
 
           next ->
-            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
           next.after 80, ->
-            expect(window.observeCallbackSpy).toHaveBeenCalled()
+            expect(window.watchCallbackSpy).toHaveBeenCalled()
 
         it 'aborts the callback if the form was submitted while waiting', asyncSpec (next) ->
           container = fixture('.container[up-main]')
           form = e.affix(container, 'form[action="/path"]')
-          window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.observeCallbackSpy()"][up-watch-delay="40"]')
+          window.watchCallbackSpy = jasmine.createSpy('watch callback')
+          field = e.affix(form, 'input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy()"][up-watch-delay="40"]')
           up.hello(form)
           field.value = 'new-value'
           Trigger.change(field)
 
           next ->
-            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            expect(window.watchCallbackSpy).not.toHaveBeenCalled()
             up.form.submit(form)
 
           next.after 80, ->
-            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
     describe 'form[up-watch]', ->
 
       afterEach ->
-        window.observeCallbackSpy = undefined
+        window.watchCallbackSpy = undefined
 
       it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
-        window.observeCallbackSpy = jasmine.createSpy('observe callback')
-        form = fixture('form[up-watch="window.observeCallbackSpy(value, name)"]')
+        window.watchCallbackSpy = jasmine.createSpy('watch callback')
+        form = fixture('form[up-watch="window.watchCallbackSpy(value, name)"]')
         field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
         field2 = e.affix(form, 'input[name="field2"][value="field2-old-value"]')
         up.hello(form)
@@ -1949,7 +1949,7 @@ describe 'up.form', ->
         Trigger.change(field1)
 
         next =>
-          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+          expect(window.watchCallbackSpy.calls.allArgs()).toEqual [
             ['field1-new-value', 'field1']
           ]
 
@@ -1957,34 +1957,34 @@ describe 'up.form', ->
           Trigger.change(field2)
 
         next =>
-          expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+          expect(window.watchCallbackSpy.calls.allArgs()).toEqual [
             ['field1-new-value', 'field1'],
             ['field2-new-value', 'field2']
           ]
 
       describe 'with [up-watch-event] modifier', ->
 
-        it 'allows to set a different event to observe', asyncSpec (next) ->
-          window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          form = fixture('form[up-watch="window.observeCallbackSpy(value, name)"][up-watch-event="foo"]')
+        it 'allows to set a different event to watch', asyncSpec (next) ->
+          window.watchCallbackSpy = jasmine.createSpy('watch callback')
+          form = fixture('form[up-watch="window.watchCallbackSpy(value, name)"][up-watch-event="foo"]')
           field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
           up.hello(form)
           field1.value = 'field1-new-value'
           Trigger.change(field1)
 
           next ->
-            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
             up.emit(field1, 'foo')
 
           next ->
-            expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+            expect(window.watchCallbackSpy.calls.allArgs()).toEqual [
               ['field1-new-value', 'field1'],
             ]
 
         it 'allows to override the custom event at individual inputs', asyncSpec (next) ->
-          window.observeCallbackSpy = jasmine.createSpy('observe callback')
-          form = fixture('form[up-watch="window.observeCallbackSpy(value, name)"][up-watch-event="foo"]')
+          window.watchCallbackSpy = jasmine.createSpy('watch callback')
+          form = fixture('form[up-watch="window.watchCallbackSpy(value, name)"][up-watch-event="foo"]')
           field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"][up-watch-event="bar"]')
           up.hello(form)
           field1.value = 'field1-new-value'
@@ -1992,12 +1992,12 @@ describe 'up.form', ->
           up.emit(field1, 'foo')
 
           next ->
-            expect(window.observeCallbackSpy).not.toHaveBeenCalled()
+            expect(window.watchCallbackSpy).not.toHaveBeenCalled()
 
             up.emit(field1, 'bar')
 
           next ->
-            expect(window.observeCallbackSpy.calls.allArgs()).toEqual [
+            expect(window.watchCallbackSpy.calls.allArgs()).toEqual [
               ['field1-new-value', 'field1'],
             ]
 

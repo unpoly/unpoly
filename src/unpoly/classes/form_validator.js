@@ -23,7 +23,7 @@ up.FormValidator = class FormValidator {
     this.nextRenderPromise = u.newDeferred()
   }
 
-  observeField(field) {
+  watchField(field) {
     let { event } = this.originOptions(field)
     up.on(field, event, () => this.validate({ origin: field }))
   }
