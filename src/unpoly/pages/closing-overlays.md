@@ -124,7 +124,7 @@ once a given **event** is observed on the overlay:
 When the `user:created` event is observed within the new overlay, the event's [default action is prevented](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault) and the overlay is closed.
 The event object becomes the overlay's acceptance value.
 
-To *dismiss* an overlay once a given event is observerd, use the `[up-dismiss-event]` and `[up-on-dismissed]` attributes in the same fashion.
+To *dismiss* an overlay once a given event is observed, use the `[up-dismiss-event]` and `[up-on-dismissed]` attributes in the same fashion.
 
 To emit an event, use one of the following methods:
 

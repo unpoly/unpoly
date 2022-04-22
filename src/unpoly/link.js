@@ -1216,7 +1216,7 @@ up.link = (function() {
   */
   up.compiler(fullPreloadSelector, function(link) {
     if (!isPreloadDisabled(link)) {
-      linkPreloader.observeLink(link)
+      linkPreloader.watchLink(link)
     }
   })
 

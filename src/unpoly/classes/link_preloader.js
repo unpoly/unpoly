@@ -7,7 +7,7 @@ up.LinkPreloader = class LinkPreloader {
     this.considerPreload = this.considerPreload.bind(this)
   }
 
-  observeLink(link) {
+  watchLink(link) {
     // If the link has an unsafe method (like POST) and is hence not preloadable,
     // prevent up.link.preload() from blowing up by not observing the link (even if
     // the user uses [up-preload] everywhere).

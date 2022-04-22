@@ -26,11 +26,11 @@ up.FieldWatcher = class FieldWatcher {
     this.callbackRunning = false
 
     for (let field of this.fields) {
-      this.observeField(field)
+      this.watchField(field)
     }
   }
 
-  observeField(field) {
+  watchField(field) {
     let fieldOptions = this.fieldOptions(field)
     this.unbindFns.push(up.on(field, fieldOptions.event, (event) => this.check(event, fieldOptions)))
     this.unbindFns.push(up.fragment.onAborted(field, () => this.cancelTimer()))

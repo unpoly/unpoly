@@ -10,7 +10,7 @@ The `up.history` module helps you work with the browser history.
 @module up.history
 */
 up.history = (function() {
-  
+
   const u = up.util
   const e = up.element
 
@@ -87,7 +87,7 @@ up.history = (function() {
   /*-
   Remembers the current URL so we can use previousURL on pop.
 
-  @function observeNewURL
+  @function trackCurrentLocation
   @internal
   */
   function trackCurrentLocation() {
