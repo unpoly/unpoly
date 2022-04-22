@@ -6,11 +6,6 @@ Concurrency
 -----------
 
 - Do replace the term "observe" with "watch"
-  - up-observe-event => up-watch-event        gab's vorher nicht
-  - up-observe-feedback => up-watch-feebdack  gab's vorher nicht
-  - up-observe prefix => up-watch prefix
-  - up-observe-delay => up-watch-delay        war nur [up-delay]
-  - up-observe-disable => up-watch-disable    gab's vorher nicht
   - [up-observe] -> [up-watch]
   - up.observe() => up.watch()
   - Go through comments with "observe"
@@ -61,53 +56,55 @@ Various changes
 - up.form.submitButtons is documented, but not public
 - Fix clicking on a label[for] when there are elements with duplicate IDs in another layer
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
+  - Migrate old option
 
 
 Docs
 ----
+
+### Watch/validate rework
 
 - Consider consolidating docs for
   - input[up-observe]/form[up-observe] as well as
   - input[up-validate]/form[up-validate]
   - input[up-autosubmit]/form[up-autosubmit]
   - ... so it's only "within the container"
+- [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
+  - [up-autosubmit] needs a params note saying that that attributes for [up-observe] may be used
+  - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
+  - Explain that they can be set either on the form or on an input
 - New obserrve options are not documented everywhere
   - form[up-autosubmit]
   - input[up-autsubmit]
   - input[up-observe]
   - form[up-observe]
-- Explain that preloading will not abort other requests
 - Docs for up.validate()
   - { feedback, disable, delay, event }
   - Explain that you can use it both on containers and individual fields
-  - Explain that it is batched
-- Explain and test [up-validate] usage for radio buttons
-- Document { abort } option and link everywhere
-- Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
-- Test and Document that we can use live validation like this:
-  <input up-keep up-validate up-watch-event="input">
-- Document that multiple [up-validate] requests are merged into a single request
-  - Document that X-Up-Validate may contain multiple names
-  - Document that X-Up-Validate may contain :unknown
-- Document django-forms-dynamic for [up-validate]
-  - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
-  - https://github.com/dabapps/django-forms-dynamic
-- Consider a new page for caching
 - New observe() and validate() options
   - { feedback, disable, delay, event }
-- [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
-  - [up-autosubmit] needs a params note saying that that attributes for [up-observe] may be used
-  - [up-validate] needs a params note saying that that attributes for [up-observe] may be used
-  - Explain that they can be set either on the form or on an input
 - Document all the ways we prevent concurrency
   - In up.observe()
   - In up.validate()
-    - Can be called multiple times with a single request
-- up.form.config.disable
-- up.form.config.feedback
-- up.form.config.observeInputEvent
-- up.form.config.observeChangeEvent
-- up.form.config.observeInputDelay
+  - Document that multiple [up-validate] requests are merged into a single request
+
+### Other docs
+
+- Explain that preloading will not abort other requests
+- Explain and test [up-validate] usage for radio buttons
+- Document { abort } option and [up-abort] everywhere
+- Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
+- Test and Document that we can use live validation like this:
+  <input up-keep up-validate up-watch-event="input">
+- Document that X-Up-Validate may contain multiple names
+- Document that X-Up-Validate may contain :unknown
+- Document django-forms-dynamic for [up-validate]
+  - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
+  - https://github.com/dabapps/django-forms-dynamic
+- Consider a new page for caching and verification
+- up.form.config.inputEvents
+- up.form.config.changeEvents
+- up.form.config.inputDelay
 - Missing docs for render options
   - { revealTop }
   - { revealMax }
