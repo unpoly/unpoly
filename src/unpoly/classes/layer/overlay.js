@@ -173,13 +173,6 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     }
 
     if (this.supportsDismissMethod('outside')) {
-      this.unbindParentClicked = this.parent.on('up:click', (event, element) => {
-        // When our origin is clicked again, halt the click event
-        // We achieve this by halting the click event.
-        const originClicked = this.origin && this.origin.contains(element)
-        this.onOutsideClicked(event, originClicked)
-      })
-
       // If this overlay has its own viewport, a click outside the frame will hit
       // the viewport and not the parent element.
       if (this.viewportElement) {
@@ -188,6 +181,17 @@ up.Layer.Overlay = class Overlay extends up.Layer {
           if (event.target === this.viewportElement) {
             this.onOutsideClicked(event, true)
           }
+        })
+      } else {
+        // Only bind to the parent if there's not already a viewport.
+        // This prevents issues with other overlay libs appending elements to document.body,
+        // but overlaying this overlay with a huge z-index. Clicking such a foreign overlay
+        // would close this layer, as Unpoly considers it to be on the root layer (our parent).2
+        this.unbindParentClicked = this.parent.on('up:click', (event, element) => {
+          // When our origin is clicked again, halt the click event
+          // We achieve this by halting the click event.
+          const originClicked = this.origin && this.origin.contains(element)
+          this.onOutsideClicked(event, originClicked)
         })
       }
     }
