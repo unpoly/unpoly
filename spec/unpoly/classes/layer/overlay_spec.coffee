@@ -269,49 +269,85 @@ describe 'up.Layer.Overlay', ->
           expect(up.layer.stack[1].location).toEqual('/ol1#hash')
           expect(up.layer.stack[2].location).toEqual('/ol2#hash')
 
-    describe 'events', ->
+  describe 'focus', ->
 
-      it 'should have examples'
+    beforeEach ->
+      unless document.hasFocus()
+        throw "The Jasmine spec runner must be focused for focus-related specs to pass"
 
-    describe 'focus', ->
+    it 'traps focus within the overlay', asyncSpec (next) ->
+      makeLayers(2)
 
-      beforeEach ->
-        unless document.hasFocus()
-          throw "The Jasmine spec runner must be focused for focus-related specs to pass"
+      next =>
+        @link1 = up.layer.affix('a[href="/one"]', text: 'link1')
+        @link2 = up.layer.affix('a[href="/one"]', text: 'link2')
 
-      it 'traps focus within the overlay', asyncSpec (next) ->
-        makeLayers(2)
+        @dismisser = up.fragment.get('up-modal-dismiss')
 
-        next =>
-          @link1 = up.layer.affix('a[href="/one"]', text: 'link1')
-          @link2 = up.layer.affix('a[href="/one"]', text: 'link2')
+        expect(up.layer.current).toBeFocused()
 
-          @dismisser = up.fragment.get('up-modal-dismiss')
+        Trigger.tabSequence()
 
-          expect(up.layer.current).toBeFocused()
+      next =>
+        expect(@link1).toBeFocused()
 
-          Trigger.tabSequence()
+        Trigger.tabSequence()
 
-        next =>
-          expect(@link1).toBeFocused()
+      next =>
+        expect(@link2).toBeFocused()
 
-          Trigger.tabSequence()
+        Trigger.tabSequence()
 
-        next =>
-          expect(@link2).toBeFocused()
+      next =>
+        expect(@dismisser).toBeFocused()
 
-          Trigger.tabSequence()
+        Trigger.tabSequence()
 
-        next =>
-          expect(@dismisser).toBeFocused()
+      next =>
+        expect(up.layer.current).toBeFocused()
 
-          Trigger.tabSequence()
+        # Focus cycle works reverse, too
+        Trigger.tabSequence({ shiftKey: true })
 
-        next =>
-          expect(up.layer.current).toBeFocused()
+      next =>
+        expect(@dismisser).toBeFocused()
 
-          # Focus cycle works reverse, too
-          Trigger.tabSequence({ shiftKey: true })
+  describe 'labels', ->
 
-        next =>
-          expect(@dismisser).toBeFocused()
+    it 'supports label[for] when an element with the target ID also exists in the parent layer (bugfix)', asyncSpec (next) ->
+      form = """
+        <form>
+          <label for="foo">label</label>
+          <input id="foo">
+        </form>
+      """
+
+      makeLayers([
+        { content: form }
+        { content: form }
+      ])
+
+      rootLabel = up.fragment.get('label', layer: 'root')
+      rootInput = up.fragment.get('#foo', layer: 'root')
+      overlayLabel = up.fragment.get('label', layer: 'overlay')
+      overlayInput = up.fragment.get('#foo', layer: 'overlay')
+
+      next ->
+        expect(up.layer.isOverlay()).toBe(true)
+
+        Trigger.clickSequence(overlayLabel)
+
+      next ->
+        expect(overlayInput).toBeFocused()
+
+        up.layer.dismiss()
+
+      next ->
+        expect(up.layer.isRoot()).toBe(true)
+
+        Trigger.clickSequence(rootLabel)
+
+      next ->
+        expect(rootInput).toBeFocused()
+
+

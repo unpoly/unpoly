@@ -216,6 +216,19 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     // registerEventCloser() will fill in this and arguments.
     this.registerEventCloser(this.acceptEvent, this.accept)
     this.registerEventCloser(this.dismissEvent, this.dismiss)
+
+    this.on('up:click', 'label[for]', (event, label) => this.onLabelClicked(event, label))
+  }
+
+  onLabelClicked(event, label) {
+    // We do our own focus logic when the user clicks an label[for].
+    // If an input with the same [id] is on an ancestor layer the browser would
+    // focus that (even though label and input are in different forms).
+    event.preventDefault()
+    let id = label.getAttribute('for')
+    let fieldSelector = e.idSelector(id)
+    let field = up.fragment.get(fieldSelector, { layer: this })
+    field.focus()
   }
 
   onOutsideClicked(event, halt) {
