@@ -147,7 +147,7 @@ up.form = (function() {
   @param {Element|jQuery} root
     The element to scan for contained submit buttons.
   @return {List<Element>}
-
+    The list of found submit buttons.
   @experimental
   */
   function findSubmitButtons(root) {
