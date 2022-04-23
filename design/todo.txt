@@ -28,6 +28,9 @@ Various changes
   - Presence form does not in the docs
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
   - At least key dimissalm outside does not
+
+### unpoly-rails
+
 - unpoly-rails must have up.validate_names instead of up.validate_name
 - unpoly-rails should discard invalid JSON: https://zammad.makandra.de/#ticket/zoom/76579
 
