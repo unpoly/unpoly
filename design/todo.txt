@@ -11,6 +11,7 @@ Various changes
 - Should we get rid of up.fail()?
   - This just spams the error log with duplicate errors
   - It's nice that it's an expression, but it weirds up stacktraces
+  => Turn this into a shortcut for `throw up.error.failed(msg)` and lose the logging
 - Rethink request defaults
   - Rethink whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
