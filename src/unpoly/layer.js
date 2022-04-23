@@ -144,6 +144,11 @@ up.layer = (function() {
     If set to `true`, the overlay will always render history.
     If set to `false`, the overlay will never render history.
 
+  @param {string} [config.overlay.class]
+    An HTML class for the overlay's container element.
+
+    See [overlay classes](/customizing-overlays#overlay-classes).
+
   @param {object} config.modal
     Defaults for [modal overlays](/layer-terminology).
 
