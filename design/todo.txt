@@ -6,6 +6,7 @@ Various changes
 ---------------
 
 - Fix all Webpack errors
+  - Start out with a fresh build
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
 - Rethink request defaults
@@ -27,8 +28,6 @@ Various changes
   - Presence form does not in the docs
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
   - At least key dimissalm outside does not
-- Scroll behavior should be { behavior: 'instant' }, not 'auto'
-  - Migrate old option
 - unpoly-rails must have up.validate_names instead of up.validate_name
 - unpoly-rails should discard invalid JSON: https://zammad.makandra.de/#ticket/zoom/76579
 
