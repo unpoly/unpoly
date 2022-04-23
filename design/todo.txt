@@ -8,10 +8,6 @@ Various changes
 - Fix all Webpack errors
 - Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
 - Remove RenderOptions.addCallback
-- Should we get rid of up.fail()?
-  - This just spams the error log with duplicate errors
-  - It's nice that it's an expression, but it weirds up stacktraces
-  => Turn this into a shortcut for `throw up.error.failed(msg)` and lose the logging
 - Rethink request defaults
   - Rethink whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
@@ -19,31 +15,20 @@ Various changes
     - Counter-point is: All other functionality sees the current layer by default
     - If we do this we should also remove auto-lookup of { targetElements }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
-- Do follow links with [target=_self]
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
-- up.layer.config.externalOverlaySelectors
+- up.layer.config.externalOverlaySelectors (foreignOverlaySelectors?)
   - Hier würden wir keinen Fokus stehlen
   - Hier würden wir keinen background dismissable durchführen
-- Expose and test up.layer.config.overlay.class
-  - Use case was a .default class
-- up:click forking could print a warning when an a[href] is instant, but not followable
-- Test that preventing `click` (not `up:click`) prevents following a link
 - unpoly-rails must have up.validate_names instead of up.validate_name
 - Allow to mark a target component as soft:
   - .target, .other:maybe
   - .target, :maybe(.other)
 - unpoly-rails should discard invalid JSON: https://zammad.makandra.de/#ticket/zoom/76579
-- Test that setting autoCache = false for a route also prevents an a[up-preload]
-  - up.Request sets cache = true if preload is set!
 - Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
   - Presence form does not in the docs
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
   - At least key dimissalm outside does not
-- For overlays with a backdrop, don't listen to click on parent.element
-  - This fixes cases where other overlay libs append elements to document.body
-  - For modes without a backdrop (popup), people can prevent up:overlay:dismiss if they don't like the { origin }
-- up.form.submitButtons is documented, but not public
 - Fix clicking on a label[for] when there are elements with duplicate IDs in another layer
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
   - Migrate old option
@@ -108,6 +93,8 @@ Docs
 Icebox
 ======
 
+- Do follow links with [target=_self]
+- up:click forking could print a warning when an a[href] is instant, but not followable
 - Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
   - It's actually more like "appendableElement"
   - Maybe offer up.Layer#append
