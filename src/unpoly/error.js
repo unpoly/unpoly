@@ -51,7 +51,33 @@ up.error = (function() {
     up.emit(window, 'error', { message, error, log: false })
   }
 
+  /*-
+  Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
+  with the given message.
+
+  The message may contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions).
+
+  ### Examples
+
+      up.fail('Division by zero')
+      up.fail('Unexpected result %o', result)
+
+  @function up.fail
+  @param {string} message
+    A message with details about the error.
+
+    The message can contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
+    like `%s` or `%o`.
+  @param {Array<string>} vars...
+    A list of variables to replace any substitution marks in the error message.
+  @internal
+  */
+  function fail(...args) {
+    throw up.error.failed(args)
+  }
+
   return {
+    fail,
     failed,
     aborted,
     invalidSelector,
@@ -60,3 +86,5 @@ up.error = (function() {
     emitGlobal
   }
 })()
+
+up.fail = up.error.fail

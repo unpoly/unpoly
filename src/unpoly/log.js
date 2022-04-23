@@ -163,34 +163,6 @@ up.log = (function() {
   }
 
   /*-
-  Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
-  with the given message.
-
-  The message will also be printed to the error log. Also a notification will be shown at the bottom of the screen.
-
-  The message may contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions).
-
-  ### Examples
-
-      up.fail('Division by zero')
-      up.fail('Unexpected result %o', result)
-
-  @function up.fail
-  @param {string} message
-    A message with details about the error.
-
-    The message can contain [substitution marks](https://developer.mozilla.org/en-US/docs/Web/API/console#Using_string_substitutions)
-    like `%s` or `%o`.
-  @param {Array<string>} vars...
-    A list of variables to replace any substitution marks in the error message.
-  @experimental
-  */
-  function fail(...args) {
-    printToError('error', ...args)
-    throw up.error.failed(args)
-  }
-
-  /*-
   Registers an empty rejection handler in case the given promise
   rejects with an AbortError or a failed up.Response.
 
@@ -227,7 +199,6 @@ up.log = (function() {
     config,
     enable,
     disable,
-    fail,
     muteUncriticalRejection,
     isEnabled() { return config.enabled },
   }
@@ -235,4 +206,3 @@ up.log = (function() {
 
 up.puts = up.log.puts
 up.warn = up.log.warn
-up.fail = up.log.fail

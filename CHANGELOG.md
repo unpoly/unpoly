@@ -48,7 +48,8 @@ Changes tracked until 2021-03-18:
 - Fix a bug where up.fragment.get(selector, { layer: 0 }) will always match in the current layer instead of root
 - Fix a up where unpoly-migrate would not rewrite the deprecated { reveal } option when navigating 
 - Preserve the scroll positions of viewports inside a kept [up-keep] fragment
-- up.element.createFromSelector() and up.element.affix() accept a string value for { style }
+- up.element.createFromSelector() and up.element.affix() accept a string value for { style } 
+- up.fail() has been removed from public API
 
 
 2.5.3
