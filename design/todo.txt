@@ -16,22 +16,21 @@ Various changes
     - If we do this we should also remove auto-lookup of { targetElements }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
-- up.layer.config.externalOverlaySelectors (foreignOverlaySelectors?)
-  - Hier würden wir keinen Fokus stehlen
-  - Hier würden wir keinen background dismissable durchführen
-- unpoly-rails must have up.validate_names instead of up.validate_name
+- up.layer.config.foreignOverlaySelectors
+  - When focusing within such a selector our overlay focus trap would not steal focus
+  - When clicking within such a selector we would not do an outside-dismiss
 - Allow to mark a target component as soft:
   - .target, .other:maybe
   - .target, :maybe(.other)
-- unpoly-rails should discard invalid JSON: https://zammad.makandra.de/#ticket/zoom/76579
 - Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
   - Presence form does not in the docs
 - Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
   - At least key dimissalm outside does not
-- Fix clicking on a label[for] when there are elements with duplicate IDs in another layer
 - Scroll behavior should be { behavior: 'instant' }, not 'auto'
   - Migrate old option
+- unpoly-rails must have up.validate_names instead of up.validate_name
+- unpoly-rails should discard invalid JSON: https://zammad.makandra.de/#ticket/zoom/76579
 
 
 Docs
