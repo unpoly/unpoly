@@ -265,7 +265,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 - The client-side cache can be carefully managed by both the client and server.
 - Unpoly 1 had many functions for updating fragments (`up.replace()`, `up.extract()`, `up.modal.extract()`, etc.). Unpoly 2 has unified these into a single function `up.render()`.
 - Event handlers to `up:link:follow`, `up:form:submit` etc. may change the render options for the coming fragment update.
-- Added more options to handle [unexpected server responses](/server-errors), including the new `up:fragment:loaded` event.
+- Added more options to handle [unexpected server responses](/failed-responses), including the new `up:fragment:loaded` event.
 
 #### Extended server protocol
 
