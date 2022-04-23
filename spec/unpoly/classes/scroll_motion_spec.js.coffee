@@ -28,7 +28,16 @@ describe 'up.ScrollMotion', ->
 
         expect(@$viewport.scrollTop()).toEqual(530)
 
-    describe '(with { behavior: "scroll" } option)', ->
+    describe '(with { behavior: "instant" } option)', ->
+
+      it 'abruptly scrolls the given element to the given y-position', ->
+        motion = new up.ScrollMotion(@$viewport[0], 530, { behavior: 'instant' })
+
+        motion.start()
+
+        expect(@$viewport.scrollTop()).toEqual(530)
+
+    describe '(with { behavior: "smooth" } option)', ->
 
       it 'animates the scrolling to the given y-position', asyncSpec (next) ->
         motion = new up.ScrollMotion(@$viewport[0], 2050, { behavior: 'smooth' })

@@ -10,7 +10,7 @@ HTML attributes (like `[up-reveal-snap]`).
 ### Animating the scroll motion
 
 To animate the scroll motion, pass `{ scrollBehavior: 'smooth' }.`
-To *not* animate the scrolling, pass `{ scrollBehavior: 'auto' }` (the default).
+To *not* animate the scrolling, pass `{ scrollBehavior: 'instant' }` (the default).
 
 The acceleration of the scroll motion may be controlled using the `{ scrollSpeed }` option.
 It defaults to `{ scrollSpeed: 1 }`.

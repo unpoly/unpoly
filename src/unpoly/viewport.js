@@ -118,8 +118,8 @@ up.viewport = (function() {
     The container element to scroll.
   @param {number} scrollPos
     The absolute number of pixels to set the scroll position to.
-  @param {string}[options.behavior='auto']
-    When set to `'auto'`, this will immediately scroll to the new position.
+  @param {string}[options.behavior='instant']
+    When set to `'instant'`, this will immediately scroll to the new position.
 
     When set to `'smooth'`, this will scroll smoothly to the new position.
   @param {number}[options.speed]
@@ -193,8 +193,8 @@ up.viewport = (function() {
 
     Defaults to `up.viewport.config.revealTop`.
 
-  @param {string}[options.behavior='auto']
-    When set to `'auto'`, this will immediately scroll to the new position.
+  @param {string}[options.behavior='instant']
+    When set to `'instant'`, this will immediately scroll to the new position.
 
     When set to `'smooth'`, this will scroll smoothly to the new position.
 
@@ -306,7 +306,7 @@ up.viewport = (function() {
   /*-
   [Reveals](/up.reveal) an element matching the given `#hash` anchor.
 
-  Other than the default behavior found in browsers, `up.revealHash` works with
+  Other than the default behavior found in browsers, `up.revealHash()` works with
   [multiple viewports](/up-viewport) and honors [fixed elements](/up-fixed-top) obstructing the user's
   view of the viewport.
 
