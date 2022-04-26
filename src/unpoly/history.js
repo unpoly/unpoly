@@ -282,9 +282,6 @@ up.history = (function() {
   }
 
   function register() {
-    // Supported by all browser except IE:
-    // https://developer.mozilla.org/en-US/docs/Web/API/History/scrollRestoration
-    window.history.scrollRestoration = 'manual'
     window.addEventListener('popstate', onPop)
 
     // Unpoly replaces the initial page state so it can later restore it when the user
