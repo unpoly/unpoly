@@ -7,23 +7,15 @@ Various changes
 
 - Fix all Webpack errors
   - Start out with a fresh build
-- Merge up.migrate.handleScrollOptions into up.migrate.preprocessRenderOptions
-- Remove RenderOptions.addCallback
-- Rethink request defaults
-  - Rethink whether we want to link up.request() to the current layer by default?
+- Reconsider request defaults
+  - Reconsider whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
     - We could argue that this is a low-level API and up.render() should be used for updating content
     - Counter-point is: All other functionality sees the current layer by default
     - If we do this we should also remove auto-lookup of { targetElements }
+    - If we do this we can also get rid of { basic: true }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
-- up.layer.config.foreignOverlaySelectors
-  - When focusing within such a selector our overlay focus trap would not steal focus
-  - When clicking within such a selector we would not do an outside-dismiss
-  - Configure for unpoly-bootstrap
-    - .dropdown-menu
-    - .modal
-    - .popover
 - Allow to mark a target component as soft:
   - .target, .other:maybe
   - .target, :maybe(.other)
