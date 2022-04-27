@@ -13,7 +13,6 @@ The `up.syntax` package lets you pair HTML elements with JavaScript behavior.
 up.syntax = (function() {
 
   const u = up.util
-  const e = up.element
 
   const SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100,        // sets [up-href] to previous URL

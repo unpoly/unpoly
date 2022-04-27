@@ -5,8 +5,6 @@ TODOs for next release
 Various changes
 ---------------
 
-- Fix all Webpack errors
-  - Start out with a fresh build
 - Reconsider request defaults
   - Reconsider whether we want to link up.request() to the current layer by default?
     - Or only when { layer } or { origin } options are given?
@@ -15,7 +13,6 @@ Various changes
     - If we do this we should also remove auto-lookup of { targetElements }
     - If we do this we can also get rid of { basic: true }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
-- makeLayers([{ content }]) leaves <up-wrapper> elements in the DOM
 - Allow to mark a target component as soft:
   - .target, .other:maybe
   - .target, :maybe(.other)
