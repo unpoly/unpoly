@@ -15,4 +15,10 @@ up.fragment.config.badTargetClasses.push(
   /^col(-xs|-sm|-md|-lg)?(-\d+)?$/
 )
 
+up.layer.config.foreignOverlaySelectors.push(
+  '.modal:not(up-modal)',
+  '.popover:not(up-popup)',
+  '.dropdown-menu:not(up-popup)'
+)
+
 require('./unpoly-bootstrap3.sass')

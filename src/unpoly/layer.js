@@ -169,6 +169,19 @@ up.layer = (function() {
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
+  @param {Array<string>} config.foreignOverlaySelectors
+    An array of CSS selectors matching overlays not constructed by Unpoly.
+
+    Other JavaScript libraries often attach their overlay elements
+    to the end of the `<body>`, which makes Unpoly consider these overlays
+    to be part of the root layer. This can cause Unpoly to steal focus from foreign
+    overlays, or cause Unpoly overlays to incorrectly close when the foreign overlay is clicked.
+    Adding a selector to this array will cause Unpoly to
+    be less opinionated about user interactions within matching elements.
+
+    By default this contains a selector matching the
+    [`<dialog>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog) element.
+
   @stable
   */
   const config = new up.Config(function() {
@@ -226,7 +239,8 @@ up.layer = (function() {
         size: 'medium',
         align: 'left',
         dismissable: 'outside key'
-      }
+      },
+      foreignOverlaySelectors: ['dialog']
     }
 
     for (let Class of LAYER_CLASSES) {
@@ -646,6 +660,11 @@ up.layer = (function() {
     }
   }
 
+  function isWithinForeignOverlay(element) {
+    let selector = config.foreignOverlaySelectors.join(',')
+    return !!(selector && element.closest(selector))
+  }
+
   /*-
   [Follows](/a-up-follow) this link and [opens the result in a new overlay](/opening-overlays).
 
@@ -891,7 +910,8 @@ up.layer = (function() {
     closeCallbackAttr,
     anySelector,
     optionToString,
-    get stack() { return stack }
+    get stack() { return stack },
+    isWithinForeignOverlay
   }
 
   /*-

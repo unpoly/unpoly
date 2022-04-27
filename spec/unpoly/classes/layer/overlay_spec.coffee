@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 
 describe 'up.Layer.Overlay', ->
 
@@ -275,7 +276,7 @@ describe 'up.Layer.Overlay', ->
       unless document.hasFocus()
         throw "The Jasmine spec runner must be focused for focus-related specs to pass"
 
-    it 'traps focus within the overlay', asyncSpec (next) ->
+    it 'cycles focus within the overlay', asyncSpec (next) ->
       makeLayers(2)
 
       next =>
@@ -311,6 +312,53 @@ describe 'up.Layer.Overlay', ->
 
       next =>
         expect(@dismisser).toBeFocused()
+
+    it 'recaptures focus outside the overlay', asyncSpec (next) ->
+      rootInput = fixture('input[type=text]')
+      rootInput.focus()
+      expect(rootInput).toBeFocused()
+
+      up.layer.open()
+
+      next ->
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.current).toBeFocused()
+
+        rootInput.focus()
+
+      next ->
+        expect(up.layer.current).toBeFocused()
+
+    it 'does not trap focus within a foreign overlay', asyncSpec (next) ->
+      up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
+
+      rootInput = fixture('input[type=text]')
+      foreignOverlay = fixture('.foreign-overlay')
+      foreignInput = e.affix(foreignOverlay, 'input[type=text]')
+      foreignInput.focus()
+      expect(foreignInput).toBeFocused()
+
+      up.layer.open()
+
+      next ->
+        expect(up.layer.isOverlay()).toBe(true)
+
+        # Do steal the focus from the foreign overlay, as opening an Unpoly overlay
+        # was the most recent user action.
+        expect(up.layer.current).toBeFocused()
+
+        foreignInput.focus()
+
+      next ->
+        # See that the focus trap did not capture focus
+        expect(foreignInput).toBeFocused()
+
+        rootInput.focus()
+
+      next ->
+        # See that moving from the foreign overlay to another input
+        # outside our Unpoly overlay does recapture focus.
+        expect(up.layer.current).toBeFocused()
 
   describe 'labels', ->
 

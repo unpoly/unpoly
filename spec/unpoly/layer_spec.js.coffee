@@ -553,28 +553,73 @@ describe 'up.layer', ->
 
           describe 'with { dismissable: "outside" }', ->
 
-            it 'lets the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
-              up.layer.open(dismissable: 'outside', mode: 'modal')
+            describe 'for an overlay with viewport', ->
 
-              next ->
-                expect(up.layer.isOverlay()).toBe(true)
+              it 'dismisses the overlay when the user clicks on the viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
+                up.layer.open(dismissable: 'outside', mode: 'modal')
 
-                Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
 
-              next ->
-                expect(up.layer.isOverlay()).toBe(false)
+                  Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0 })
 
-            it 'lets the user close a layer with tether by clicking on its opener', asyncSpec (next) ->
-              opener = fixture('a', text: 'label')
-              up.layer.open(dismissable: 'outside', mode: 'popup', origin: opener)
+                next ->
+                  expect(up.layer.isOverlay()).toBe(false)
 
-              next ->
-                expect(up.layer.isOverlay()).toBe(true)
+              it 'does not dismiss the overlay when the user clicks on the parent layer, but within a foreign overlay', asyncSpec (next) ->
+                up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
+                foreignOverlay = fixture('.foreign-overlay', text: 'foreign overlay content')
 
-                Trigger.clickSequence(opener)
+                up.layer.open(dismissable: 'outside', mode: 'modal')
 
-              next ->
-                expect(up.layer.isOverlay()).toBe(false)
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  Trigger.clickSequence(foreignOverlay, { clientX: 0, clientY: 0 })
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+            describe 'for an overlay with tether', ->
+
+              it 'dismisses the overlay when the user clicks anywhere on the parent layer', asyncSpec (next) ->
+                opener = fixture('a', text: 'label')
+                up.layer.open(dismissable: 'outside', mode: 'popup', origin: opener)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  Trigger.clickSequence(document.body)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(false)
+
+              it 'does not dismiss the overlay when the user clicks on the parent layer, but within a foreign overlay', asyncSpec (next) ->
+                up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
+                foreignOverlay = fixture('.foreign-overlay', text: 'foreign overlay content')
+
+                opener = fixture('a', text: 'label')
+                up.layer.open(dismissable: 'outside', mode: 'popup', origin: opener)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  Trigger.clickSequence(foreignOverlay)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+              it 'lets the user close an overlay with tether by clicking on its opener', asyncSpec (next) ->
+                opener = fixture('a', text: 'label')
+                up.layer.open(dismissable: 'outside', mode: 'popup', origin: opener)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  Trigger.clickSequence(opener)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(false)
 
           describe 'without { dismissable: "outside" }', ->
 

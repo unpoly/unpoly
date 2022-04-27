@@ -188,10 +188,12 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         // but overlaying this overlay with a huge z-index. Clicking such a foreign overlay
         // would close this layer, as Unpoly considers it to be on the root layer (our parent).2
         this.unbindParentClicked = this.parent.on('up:click', (event, element) => {
-          // When our origin is clicked again, halt the click event
-          // We achieve this by halting the click event.
-          const originClicked = this.origin && this.origin.contains(element)
-          this.onOutsideClicked(event, originClicked)
+          if (!up.layer.isWithinForeignOverlay(element)) {
+            // When our origin is clicked again, halt the click event
+            // We achieve this by halting the click event.
+            const originClicked = this.origin && this.origin.contains(element)
+            this.onOutsideClicked(event, originClicked)
+          }
         })
       }
     }

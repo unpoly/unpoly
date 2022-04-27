@@ -49,8 +49,12 @@ up.OverlayFocus = class OverlayFocus {
   onFocus(event) {
     const { target } = event
 
-    // Ignore focus events triggered by this method.
-    if (this.processingFocusEvent) { return }
+    // (1) Ignore focus events triggered by this method.
+    // (2) Ignore focus events within overlays by other libraries.
+    if (this.processingFocusEvent || up.layer.isWithinForeignOverlay(target)) {
+      return
+    }
+
     this.processingFocusEvent = true
 
     if (target === this.focusTrapBefore) {

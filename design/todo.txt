@@ -20,6 +20,10 @@ Various changes
 - up.layer.config.foreignOverlaySelectors
   - When focusing within such a selector our overlay focus trap would not steal focus
   - When clicking within such a selector we would not do an outside-dismiss
+  - Configure for unpoly-bootstrap
+    - .dropdown-menu
+    - .modal
+    - .popover
 - Allow to mark a target component as soft:
   - .target, .other:maybe
   - .target, :maybe(.other)
@@ -66,6 +70,7 @@ Docs
 
 ### Other docs
 
+- up.layer.config.foreignOverlaySelectors
 - Explain that preloading will not abort other requests
 - Explain and test [up-validate] usage for radio buttons
 - Document { abort } option and [up-abort] everywhere
