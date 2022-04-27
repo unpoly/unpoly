@@ -109,7 +109,33 @@ up.fragment.first = function(...args) {
 
 up.first = up.fragment.first
 
-up.migrate.handleScrollOptions = function(options) {
+up.migrate.preprocessRenderOptions = function(options) {
+  // Rewrite deprecated { history: URLString } option
+  if (u.isString(options.history) && (options.history !== 'auto')) {
+    up.migrate.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
+    options.location = options.history
+    // Also the URL in { history } is truthy, keeping a value in there would also inherit to failOptions,
+    // where it would be expanded to { failLocation }.
+    options.history = 'auto'
+  }
+
+  // Rewrite deprecated { target: jQuery } option
+  // Rewrite deprecated { origin: jQuery } option
+  for (let prop of ['target', 'origin']) {
+    if (u.isJQuery(options[prop])) {
+      up.migrate.warn('Passing a jQuery collection as { %s } is deprecated. Pass it as a native element instead.', prop)
+      options[prop] = up.element.get(options[prop])
+    }
+  }
+
+  // Rewrite deprecated { fail: 'auto' } option
+  if (options.fail === 'auto') {
+    up.migrate.warn("The option { fail: 'auto' } is deprecated. Omit the option instead.")
+    delete options.fail
+  }
+
+  up.migrate.fixKey(options, 'solo', 'abort')
+
   // Rewrite deprecated { reveal } option (it had multiple variants)
   if (u.isString(options.reveal)) {
     up.migrate.deprecated(`Option { reveal: '${options.reveal}' }`, `{ scroll: '${options.reveal}' }`)
@@ -133,30 +159,6 @@ up.migrate.handleScrollOptions = function(options) {
     up.migrate.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
     options.scroll = 'restore'
   }
-}
-
-up.migrate.preprocessRenderOptions = function(options) {
-  if (u.isString(options.history) && (options.history !== 'auto')) {
-    up.migrate.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
-    options.location = options.history
-    // Also the URL in { history } is truthy, keeping a value in there would also inherit to failOptions,
-    // where it would be expanded to { failLocation }.
-    options.history = 'auto'
-  }
-
-  for (let prop of ['target', 'origin']) {
-    if (u.isJQuery(options[prop])) {
-      up.migrate.warn('Passing a jQuery collection as { %s } is deprecated. Pass it as a native element instead.', prop)
-      options[prop] = up.element.get(options[prop])
-    }
-  }
-
-  if (options.fail === 'auto') {
-    up.migrate.warn("The option { fail: 'auto' } is deprecated. Omit the option instead.")
-    delete options.fail
-  }
-
-  up.migrate.fixKey(options, 'solo', 'abort')
 }
 
 up.migrate.postprocessReloadOptions = function(options) {

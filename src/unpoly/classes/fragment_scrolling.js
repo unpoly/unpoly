@@ -14,11 +14,6 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
     ])
   }
 
-  constructor(options) {
-    up.migrate.handleScrollOptions?.(options)
-    super(options)
-  }
-
   process(opt) {
     // If no option can be applied, return a fulfilled promise to
     // satisfy our signature as an async function.
