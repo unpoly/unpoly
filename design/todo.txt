@@ -17,10 +17,6 @@ Various changes
   - .target, .other:maybe
   - .target, :maybe(.other)
 - Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
-- Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { value }
-  - Presence form does not in the docs
-- Make sure that up:layer:dismiss/:dismissed/:accept/:accepted expose { origin }
-  - At least key dimissalm outside does not
 
 
 Docs
