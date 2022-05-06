@@ -13,8 +13,6 @@ Various changes
     - If we do this we should also remove auto-lookup of { targetElements }
     - If we do this we can also get rid of { basic: true }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
-- Allow to mark a target component as soft:
-  - .target, .other:maybe
 - Maybe remove some simple IE11
 
 
