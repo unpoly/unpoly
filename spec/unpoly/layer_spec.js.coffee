@@ -566,6 +566,27 @@ describe 'up.layer', ->
                 next ->
                   expect(up.layer.isOverlay()).toBe(false)
 
+              it 'emits an up:layer:dismissed event with { value: ":outside" } and other details', asyncSpec (next) ->
+                up.layer.open(dismissable: 'outside', mode: 'modal')
+                viewportElement = null
+                listener = jasmine.createSpy('up:layer:dismissed listener')
+                up.on('up:layer:dismissed', listener)
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(true)
+
+                  viewportElement = up.layer.current.viewportElement
+                  Trigger.clickSequence(viewportElement, { clientX: 0, clientY: 0 })
+
+                next ->
+                  expect(up.layer.isOverlay()).toBe(false)
+
+                  expect(listener).toHaveBeenCalledWith(
+                    jasmine.objectContaining(value: ':outside', origin: viewportElement),
+                    jasmine.anything(),
+                    jasmine.anything()
+                  )
+
               it 'does not dismiss the overlay when the user clicks on the parent layer, but within a foreign overlay', asyncSpec (next) ->
                 up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
                 foreignOverlay = fixture('.foreign-overlay', text: 'foreign overlay content')

@@ -237,7 +237,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     if (halt) {
       up.event.halt(event)
     }
-    this.dismiss(':outside')
+    this.dismiss(':outside', { origin: event.target })
   }
 
   onEscapePressed(event) {
