@@ -1037,7 +1037,7 @@ up.fragment = (function() {
   }
 
   function isDestroying(element) {
-    return !!e.closest(element, '.up-destroying')
+    return !!element.closest('.up-destroying')
   }
 
   const isNotDestroying = u.negate(isDestroying)

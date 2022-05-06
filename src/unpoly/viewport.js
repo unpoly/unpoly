@@ -358,7 +358,7 @@ up.viewport = (function() {
     // Use up.element.closest() which searches across layer boundaries.
     // It is OK to find a viewport in a parent layer. Layers without its
     // own viewport (like popups) are scrolled by the parent layer's viewport.
-    return e.closest(element, allSelector())
+    return element.closest(allSelector())
   }
 
   /*-

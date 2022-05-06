@@ -753,7 +753,7 @@ up.form = (function() {
 
   function findGroupSolution(field) {
     return u.findResult(getGroupSelectors(), function(groupSelector) {
-      let group = e.closest(field, groupSelector)
+      let group = field.closest(groupSelector)
       if (group) {
         let target = groupSelector
         if (group !== field) {
@@ -1031,7 +1031,7 @@ up.form = (function() {
     const element = up.fragment.get(elementOrSelector, options)
 
     // Element#form will also work if the element is outside the form with an [form=form-id] attribute
-    return element.form || e.closest(element, 'form')
+    return element.form || element.closest('form')
   }
 
   // Alternative to getForm() which falls back to the layer element for elements without a form.

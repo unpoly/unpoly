@@ -78,3 +78,29 @@ up.util.matches = function(element, selector) {
   return element[MATCH_FN_NAME]?.(selector)
 }
 
+/*-
+Returns the first element that matches the selector by testing the element itself
+and traversing up through its ancestors in the DOM tree.
+
+@function up.element.closest
+@param {Element} element
+  The element on which to start the search.
+@param {string} selector
+  The CSS selector to match.
+@return {Element|null|undefined} element
+  The matching element.
+
+  Returns `null` or `undefined` if no element matches.
+@deprecated
+  Use [`Element.prototype.closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) instead.
+*/
+up.element.closest = function(element, selector) {
+  if (element.closest) {
+    return element.closest(selector)
+    // If the browser doesn't support Element#closest, we mimic the behavior.
+  } else if (element.matches(selector)) {
+    return element
+  } else {
+    return up.element.ancestor(element, selector)
+  }
+}

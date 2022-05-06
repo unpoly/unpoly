@@ -85,7 +85,7 @@ up.FormValidator = class FormValidator {
   getValidateAttrSolution(field) {
     // In case of radio buttons the [up-validate] attribute will
     // be set on a container containing the entire radio button group.
-    let containerWithAttr = e.closest(field, '[up-validate]')
+    let containerWithAttr = field.closest('[up-validate]')
 
     if (containerWithAttr) {
       let target = containerWithAttr.getAttribute('up-validate')

@@ -78,7 +78,7 @@ up.EventListener = class EventListener extends up.Record {
     // 3. There is only a single event bubbling up the DOM, so we are only called once.
     let element = event.target
     if (this.selector) {
-      element = e.closest(element, u.evalOption(this.selector))
+      element = element.closest(u.evalOption(this.selector))
     }
 
     if (this.guard && !this.guard(event)) {

@@ -94,32 +94,6 @@ up.element = (function() {
   }
 
   /*-
-  Returns the first element that matches the selector by testing the element itself
-  and traversing up through its ancestors in the DOM tree.
-
-  @function up.element.closest
-  @param {Element} element
-    The element on which to start the search.
-  @param {string} selector
-    The CSS selector to match.
-  @return {Element|null|undefined} element
-    The matching element.
-
-    Returns `null` or `undefined` if no element matches.
-  @stable
-  */
-  function closest(element, selector) {
-    if (element.closest) {
-      return element.closest(selector)
-    // If the browser doesn't support Element#closest, we mimic the behavior.
-    } else if (element.matches(selector)) {
-      return element
-    } else {
-      return ancestor(element, selector)
-    }
-  }
-
-  /*-
   @function up.element.ancestor
   @internal
   */
@@ -135,7 +109,7 @@ up.element = (function() {
   }
 
   function around(element, selector) {
-    return getList(closest(element, selector), subtree(element, selector))
+    return getList(element.closest(selector), subtree(element, selector))
   }
 
   /*-
@@ -984,7 +958,7 @@ up.element = (function() {
   }
 
   function closestAttr(element, attr, parseFn = stringAttr) {
-    let match = closest(element, '[' + attr + ']')
+    let match = element.closest('[' + attr + ']')
     if (match) {
       return parseFn(match, attr)
     }
@@ -1234,9 +1208,8 @@ up.element = (function() {
     all, // same as document.querySelectorAll
     subtree, // practical
     isInSubtree,
-    closest, // needed for IE11
     closestAttr,
-    ancestor, // not practical. we use it to implement closest
+    ancestor, // not practical. we use it in up.feedback
     around,
     get: getOne, // practical for code that also works with jQuery
     list: getList, // practical for composing multiple collections, or wrapping.

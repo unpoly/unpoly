@@ -207,37 +207,38 @@ describe 'up.element', ->
       results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
 
-  describe 'up.element.closest()', ->
+  if up.migrate.loaded
+    describe 'up.element.closest()', ->
 
-    it 'returns the closest ancestor of the given root that matches the given selector', ->
-      $grandGrandMother = $fixture('.match')
-      $grandMother = $fixture('.match')
-      $mother = $grandMother.affix('.no-match')
-      $element = $mother.affix('.element')
+      it 'returns the closest ancestor of the given root that matches the given selector', ->
+        $grandGrandMother = $fixture('.match')
+        $grandMother = $fixture('.match')
+        $mother = $grandMother.affix('.no-match')
+        $element = $mother.affix('.element')
 
-      result = up.element.closest($element[0], '.match')
-      expect(result).toBe($grandMother[0])
+        result = up.element.closest($element[0], '.match')
+        expect(result).toBe($grandMother[0])
 
-    it 'returns the given root if it matches', ->
-      $mother = $fixture('.match')
-      $element = $mother.affix('.match')
+      it 'returns the given root if it matches', ->
+        $mother = $fixture('.match')
+        $element = $mother.affix('.match')
 
-      result = up.element.closest($element[0], '.match')
-      expect(result).toBe($element[0])
+        result = up.element.closest($element[0], '.match')
+        expect(result).toBe($element[0])
 
-    it 'does not return descendants of the root, even if they match', ->
-      $element = $fixture('.element')
-      $child = $element.affix('.match')
+      it 'does not return descendants of the root, even if they match', ->
+        $element = $fixture('.element')
+        $child = $element.affix('.match')
 
-      result = up.element.closest($element[0], '.match')
-      expect(result).toBeMissing()
+        result = up.element.closest($element[0], '.match')
+        expect(result).toBeMissing()
 
-    it 'returns missing if neither root nor ancestor matches', ->
-      $mother = $fixture('.no-match')
-      $element = $mother.affix('.no-match')
+      it 'returns missing if neither root nor ancestor matches', ->
+        $mother = $fixture('.no-match')
+        $element = $mother.affix('.no-match')
 
-      result = up.element.closest($element[0], '.match')
-      expect(result).toBeMissing()
+        result = up.element.closest($element[0], '.match')
+        expect(result).toBeMissing()
 
   describe 'up.element.ancestor()', ->
 

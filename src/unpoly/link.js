@@ -643,12 +643,12 @@ up.link = (function() {
     // If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
     // we want those other elements handle the click.
     const betterTargetSelector = `a, [up-href], ${up.form.fieldSelector()}`
-    const betterTarget = e.closest(event.target, betterTargetSelector)
+    const betterTarget = event.target.closest(betterTargetSelector)
     return !betterTarget || (betterTarget === link)
   }
 
   function isInstant(linkOrDescendant) {
-    const element = e.closest(linkOrDescendant, fullInstantSelector())
+    const element = linkOrDescendant.closest(fullInstantSelector())
     // Allow users to configure up.link.config.instantSelectors.push('a')
     // but opt out individual links with [up-instant=false].
     return element && !isInstantDisabled(element)
