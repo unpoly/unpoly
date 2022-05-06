@@ -1755,23 +1755,33 @@ up.fragment = (function() {
     let defaultPlacement = options.defaultPlacement || 'swap'
 
     let steps = []
+    let simpleSelectors = u.splitValues(target, ',')
 
-    for (let simpleTarget of u.splitValues(target, ',')) {
-      if (simpleTarget !== ':none') {
-        const expressionParts = simpleTarget.match(/^(.+?)(?::(before|after))?$/)
-        if (!expressionParts) {
-          throw up.error.invalidSelector(simpleTarget)
-        }
+    for (let selector of simpleSelectors) {
+      if (selector === ':none') continue
 
-        // Each step inherits all options of this change.
-        const step = {
-          ...options,
-          selector: expressionParts[1],
-          placement: expressionParts[2] || defaultPlacement
-        }
+      let placement = defaultPlacement
+      let maybe = false
 
-        steps.push(step)
+      selector = selector.replace(/\b:(before|after)\b/, (_match, customPlacement) => {
+        placement = customPlacement
+        return ''
+      })
+
+      selector = selector.replace(/\b:maybe\b/, () => {
+        maybe = true
+        return ''
+      })
+
+      // Each step inherits all options of this change.
+      const step = {
+        ...options,
+        selector,
+        placement,
+        maybe
       }
+
+      steps.push(step)
     }
 
     return steps

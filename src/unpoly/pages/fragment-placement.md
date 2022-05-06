@@ -15,8 +15,8 @@ All other HTML from the server response is discarded.
 
 ### Interaction origin is considered
 
-When a link or form updates a fragment, Unpoly will prefer to match fragments
-in the vicinity of that link or form element.
+When a target selector matches more than one element, Unpoly will generally update the first match.
+However, Unpoly will prefer to match fragments in the vicinity of a clicked link or a submitted form.
 
 For example, assume we have two links that replace `.card`:
 
@@ -65,6 +65,23 @@ already contains `.unread-count`:
 ```
 
 
+### Optional targets
+
+By default Unpoly expects all targeted fragments to be present in
+both the current page and the server response.
+If a target selector doesn't match in either, an error is thrown.
+
+You may mark a target as optional by using the `:maybe` pseudo selector.
+
+```html
+<a href="/card/5" up-target=".content, .details:maybe">...</a>
+```
+
+In this case Unpoly would only require `.content` to match. If `.details` is missing
+in the current or the server response, Unpoly would only only update `.content`
+without an error.
+
+
 ### Appending or prepending content
 
 By default Unpoly will replace the given selector with the same
@@ -99,6 +116,7 @@ use the `:content` pseudo selector:
 ```
 
 For more advanced cases of preserving elements, see `[up-keep]`.
+
 
 ### Rendering nothing
 

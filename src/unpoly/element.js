@@ -551,8 +551,8 @@ up.element = (function() {
         })
       }
 
-      if (depthSelector !== '') {
-        throw up.error.invalidSelector(selector)
+      if (depthSelector) {
+        up.fail('Cannot parse selector: ' + selector)
       }
 
       previousElement?.appendChild(depthElement)

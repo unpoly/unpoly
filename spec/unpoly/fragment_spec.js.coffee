@@ -1326,67 +1326,114 @@ describe 'up.fragment', ->
 
         it 'replaces the body if asked to replace the "html" selector'
 
-        it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
-          target = fixture('.target')
-          e.affix(target, '.child', text: 'old')
-          up.render('.target:before', document: """
-            <div class='target'>
-              <div class='child'>new</div>
-            </div>"
+        describe 'appending and prepending', ->
+
+          it 'prepends instead of replacing when the target has a :before pseudo-selector', asyncSpec (next) ->
+            target = fixture('.target')
+            e.affix(target, '.child', text: 'old')
+            up.render('.target:before', document: """
+              <div class='target'>
+                <div class='child'>new</div>
+              </div>"
+              """
+            )
+
+            next ->
+              children = target.querySelectorAll('.child')
+              expect(children.length).toBe(2)
+              expect(children[0]).toHaveText('new')
+              expect(children[1]).toHaveText('old')
+
+          it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
+            target = fixture('.target')
+            e.affix(target, '.child', text: 'old')
+            up.render('.target:after', document: """
+              <div class='target'>
+                <div class='child'>new</div>
+              </div>
+              """
+            )
+
+            next ->
+              children = target.querySelectorAll('.child')
+              expect(children.length).toBe(2)
+              expect(children[0]).toHaveText('old')
+              expect(children[1]).toHaveText('new')
+
+          it "lets the developer choose between replacing/prepending/appending for each selector", asyncSpec (next) ->
+            fixture('.before', text: 'old-before')
+            fixture('.middle', text: 'old-middle')
+            fixture('.after', text: 'old-after')
+            up.render '.before:before, .middle, .after:after', document: """
+              <div class="before">new-before</div>
+              <div class="middle">new-middle</div>
+              <div class="after">new-after</div>
+              """
+            next ->
+              expect($('.before')).toHaveText('new-beforeold-before')
+              expect($('.middle')).toHaveText('new-middle')
+              expect($('.after')).toHaveText('old-afternew-after')
+
+          it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
+            fixture('.before', text: 'old-before')
+            fixture('.middle', text: 'old-middle')
+            fixture('.after', text: 'old-after')
+
+            up.render '.middle, .after', document: """
+              <div class="before">new-before</div>
+              <div class="middle">new-middle</div>
+              <div class="after">new-after</div>
+              """
+
+            next ->
+              expect($('.before')).toHaveText('old-before')
+              expect($('.middle')).toHaveText('new-middle')
+              expect($('.after')).toHaveText('new-after')
+
+        describe 'optional targets', ->
+
+          it 'uses a target with a :maybe pseudo-selector if it is found in the response', asyncSpec (next) ->
+            fixture('.foo', text: 'old foo')
+            fixture('.bar', text: 'old bar')
+
+            up.render '.foo:maybe, .bar', document: """
+              <div class="foo">new foo</div>
+              <div class="bar">new bar</div>
             """
-          )
 
-          next =>
-            children = target.querySelectorAll('.child')
-            expect(children.length).toBe(2)
-            expect(children[0]).toHaveText('new')
-            expect(children[1]).toHaveText('old')
+            next ->
+              expect('.foo').toHaveText('new foo')
+              expect('.bar').toHaveText('new bar')
 
-        it 'appends instead of replacing when the target has a :after pseudo-selector', asyncSpec (next) ->
-          target = fixture('.target')
-          e.affix(target, '.child', text: 'old')
-          up.render('.target:after', document: """
-            <div class='target'>
-              <div class='child'>new</div>
-            </div>
-            """
-          )
+          it 'does not impede the render pass if the :maybe target is missing from the response', (done) ->
+            fixture('.foo', text: 'old foo')
+            fixture('.bar', text: 'old bar')
 
-          next =>
-            children = target.querySelectorAll('.child')
-            expect(children.length).toBe(2)
-            expect(children[0]).toHaveText('old')
-            expect(children[1]).toHaveText('new')
-
-        it "lets the developer choose between replacing/prepending/appending for each selector", asyncSpec (next) ->
-          fixture('.before', text: 'old-before')
-          fixture('.middle', text: 'old-middle')
-          fixture('.after', text: 'old-after')
-          up.render '.before:before, .middle, .after:after', document: """
-            <div class="before">new-before</div>
-            <div class="middle">new-middle</div>
-            <div class="after">new-after</div>
-            """
-          next =>
-            expect($('.before')).toHaveText('new-beforeold-before')
-            expect($('.middle')).toHaveText('new-middle')
-            expect($('.after')).toHaveText('old-afternew-after')
-
-        it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
-          fixture('.before', text: 'old-before')
-          fixture('.middle', text: 'old-middle')
-          fixture('.after', text: 'old-after')
-
-          up.render '.middle, .after', document: """
-            <div class="before">new-before</div>
-            <div class="middle">new-middle</div>
-            <div class="after">new-after</div>
+            promise = up.render '.foo:maybe, .bar', document: """
+              <div class="bar">new bar</div>
             """
 
-          next =>
-            expect($('.before')).toHaveText('old-before')
-            expect($('.middle')).toHaveText('new-middle')
-            expect($('.after')).toHaveText('new-after')
+            promiseState(promise).then ({ state }) ->
+              expect(state).toBe('fulfilled')
+              expect('.foo').toHaveText('old foo')
+              expect('.bar').toHaveText('new bar')
+              done()
+
+          it 'does not impede the render pass if the :maybe target is missing from the current page', (done) ->
+            fixture('.bar', text: 'old bar')
+
+            promise = up.render '.foo:maybe, .bar', document: """
+              <div class="foo">new foo</div>
+              <div class="bar">new bar</div>
+            """
+
+            promiseState(promise).then ({ state }) ->
+              expect(state).toBe('fulfilled')
+              expect(document).not.toHaveSelector('.foo')
+              expect('.bar').toHaveText('new bar')
+              done()
+
+          it 'allows to combine :maybe and :after pseudo-selectors'
 
         describe 'matching old fragments around the origin', ->
 

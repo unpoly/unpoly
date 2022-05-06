@@ -41,10 +41,6 @@ up.error = (function() {
     return build(`Cannot apply change: ${change} (${reason})`)
   })
 
-  const invalidSelector = errorInterface('up.InvalidSelector', (selector) => {
-    return build(`Cannot parse selector: ${selector}`)
-  })
-
   function emitGlobal(error) {
     // Emit an ErrorEvent on window.onerror for exception tracking tools
     const { message } = error
@@ -80,7 +76,6 @@ up.error = (function() {
     fail,
     failed,
     aborted,
-    invalidSelector,
     notApplicable,
     notImplemented,
     emitGlobal

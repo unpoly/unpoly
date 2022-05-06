@@ -22,15 +22,13 @@ Quick wins: Removals
     #     getElementsByTagName() when the tag was created by DOMParser. This is a bug.
     #     https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/
 - up.focus() can use native preventScroll: true
-- passive event listeners are supported natively
 - IE11 hack to implement defaultPrevented in custom events
 - normalizeURL can use { host } to strip away standard ports
-- ie11 hacks in parseURL
 - viewport.rootSelector can just be document.scrollingElement
 - replace isNativelyFocusable() with element.tabIndex >= 0
 - up.on() options { passive, one } can just be forwarded to Element#addEventListener()
 - up.framework.mustBootManually() can rely on document.currentScript being supported
-- Drop IE11 fies from parseURL()
+- Drop IE11 hacks from parseURL()
 - up.util.arrayToSet() can just be new Set(array)
 - up.util.setToArray() can just be new Array.from(set)
 - Do we want to replace ScrollMotion / RevealMotion with native { behavior: 'smooth' }?

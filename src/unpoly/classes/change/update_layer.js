@@ -340,15 +340,18 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   matchPreflight() {
-    for (let step of this.steps) {
+    this.filterSteps((step) => {
       const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by @parseSteps().
       step.oldElement ||= finder.find()
-      if (!step.oldElement) {
+
+      if (step.oldElement) {
+        return true
+      } else if (!step.maybe) {
         throw this.notApplicable(`Could not find element "${this.target}" in current page`)
       }
-    }
+    })
 
     this.resolveOldNesting()
   }
@@ -356,25 +359,32 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   matchPostflight() {
     this.matchPreflight()
 
-    for (let step of this.steps) {
-      // The responseDoc has no layers.
-      let newElement = this.responseDoc.select(step.selector)
-      if (newElement) {
-        step.newElement = newElement
-      } else {
-        throw this.notApplicable(`Could not find element "${this.target}" in server response`)
-      }
-    }
-
     // Only when we have a match in the required selectors, we
     // append the optional steps for [up-hungry] elements.
     if (this.options.hungry) {
       this.addHungrySteps()
     }
 
+    this.filterSteps((step) => {
+      // The responseDoc has no layers.
+      step.newElement = this.responseDoc.select(step.selector)
+
+      if (step.newElement) {
+        return true
+      } else if (!step.maybe) {
+        throw this.notApplicable(`Could not find element "${this.target}" in server response`)
+      }
+    })
+
+    console.log("Steps after are %o", u.copy(this.steps))
+
 //    # Remove steps when their oldElement is nested inside the oldElement
 //    # of another step.
     this.resolveOldNesting()
+  }
+
+  filterSteps(condition) {
+    this.steps = u.filter(this.steps, condition)
   }
 
   addHungrySteps() {
@@ -382,12 +392,16 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     const hungries = up.radio.hungryElements(this.layer)
     for (let oldElement of hungries) {
       const selector = up.fragment.toTarget(oldElement)
-      const newElement = this.responseDoc.select(selector)
-      if (newElement) {
-        const transition = e.booleanOrStringAttr(oldElement, 'transition')
-        const step = { selector, oldElement, newElement, transition, placement: 'swap' }
-        this.steps.push(step)
+      const transition = e.booleanOrStringAttr(oldElement, 'transition')
+
+      const step = {
+        selector,
+        oldElement,
+        transition,
+        placement: 'swap',
+        maybe: true
       }
+      this.steps.push(step)
     }
   }
 

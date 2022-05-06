@@ -15,7 +15,7 @@ Various changes
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - Allow to mark a target component as soft:
   - .target, .other:maybe
-  - .target, :maybe(.other)
+- Maybe remove some simple IE11
 
 
 Docs
