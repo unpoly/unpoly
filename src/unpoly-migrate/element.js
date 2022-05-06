@@ -45,7 +45,7 @@ on the given elements. For this use `up.destroy()`.
   Use [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/remove) instead.
 */
 up.element.remove = function(element) {
-  up.migrate.deprecated('up.element.remove()', 'Element.prototype.remove()')
+  up.migrate.deprecated('up.element.remove()', 'Element#remove()')
   return element.remove()
 }
 
@@ -63,10 +63,10 @@ use `up.fragment.matches()` instead.
 @return {boolean}
   Whether `element` matches `selector`.
 @deprecated
-  Use [`Element.prototype.matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches) instead.
+  Use [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches) instead.
 */
 up.util.matches = function(element, selector) {
-  up.migrate.deprecated('up.element.matches()', 'Element.prototype.matches()')
+  up.migrate.deprecated('up.element.matches()', 'Element#matches()')
   return element.matches(selector)
 }
 
@@ -84,10 +84,10 @@ and traversing up through its ancestors in the DOM tree.
 
   Returns `null` or `undefined` if no element matches.
 @deprecated
-  Use [`Element.prototype.closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) instead.
+  Use [`Element#closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) instead.
 */
 up.element.closest = function(element, selector) {
-  up.migrate.deprecated('up.element.closest()', 'Element.prototype.closest()')
+  up.migrate.deprecated('up.element.closest()', 'Element#closest()')
   return element.closest(selector)
 }
 
@@ -103,10 +103,10 @@ If you don't need IE11 support you may also use the built-in
 @param {Element} oldElement
 @param {Element} newElement
 @deprecated
-  Use [`Element.prototype.replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceWith) instead.
+  Use [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceWith) instead.
 */
 up.element.replace = function(oldElement, newElement) {
-  up.migrate.deprecated('up.element.replace()', 'Element.prototype.replaceWith()')
+  up.migrate.deprecated('up.element.replace()', 'Element#replaceWith()')
   return oldElement.replaceWith(newElement)
 }
 
@@ -125,12 +125,38 @@ Returns all descendant elements matching the given selector.
 
   Returns an empty list if there are no matches.
 @deprecated
-  Use [`Document.prototype.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll) or
-  [`Element.prototype.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll) instead
+  Use [`Document#querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll) or
+  [`Element#querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll) instead
 */
 up.element.all = function(...args) {
-  up.migrate.deprecated('up.element.all()', 'Document.prototype.querySelectorAll() or Element.prototype.querySelectorAll()')
+  up.migrate.deprecated('up.element.all()', 'Document#querySelectorAll() or Element#querySelectorAll()')
   const selector = args.pop()
   const root = args[0] || document
   return root.querySelectorAll(selector)
 }
+
+/*-
+Adds or removes the given class from the given element.
+
+@function up.element.toggleClass
+@param {Element} element
+  The element for which to add or remove the class.
+@param {string} className
+  The class which should be added or removed.
+@param {Boolean} [newPresent]
+  Pass `true` to add the class to the element or `false` to remove it.
+
+  If omitted, the class will be added if missing and removed if present.
+@deprecated
+  USe [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) instead.
+*/
+up.element.toggleClass = function(element, klass, newPresent) {
+  const list = element.classList
+  if (newPresent == null) { newPresent = !list.contains(klass) }
+  if (newPresent) {
+    return list.add(klass)
+  } else {
+    return list.remove(klass)
+  }
+}
+

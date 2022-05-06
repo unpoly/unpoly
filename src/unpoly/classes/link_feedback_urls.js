@@ -26,7 +26,8 @@ up.LinkFeedbackURLs = class LinkFeedbackURLs {
 
   isCurrent(normalizedLocation) {
     // It is important to return false instead of a falsey value.
-    // up.feedback feeds the return value to element.toggleClass(), which would use a default for undefined.
+    // up.feedback feeds the return value to element.classList.toggle(),
+    // which would use a default for undefined.
     return this.isSafe && !!(
       (this.href && (this.href === normalizedLocation)) ||
       (this.upHREF && (this.upHREF === normalizedLocation)) ||

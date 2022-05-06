@@ -229,33 +229,6 @@ up.element = (function() {
 //      console.debug("Calling %o with %o", fn, args)
 //      fn(args...)
 
-  /*-
-  Adds or removes the given class from the given element.
-
-  If you don't need IE11 support you may also use the built-in
-  [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) to the same effect.
-
-  @function up.element.toggleClass
-  @param {Element} element
-    The element for which to add or remove the class.
-  @param {string} className
-    The class which should be added or removed.
-  @param {Boolean} [newPresent]
-    Pass `true` to add the class to the element or `false` to remove it.
-
-    If omitted, the class will be added if missing and removed if present.
-  @stable
-  */
-  function toggleClass(element, klass, newPresent) {
-    const list = element.classList
-    if (newPresent == null) { newPresent = !list.contains(klass) }
-    if (newPresent) {
-      return list.add(klass)
-    } else {
-      return list.remove(klass)
-    }
-  }
-
   function toggleAttr(element, attr, value, newPresent) {
     if (newPresent == null) { newPresent = !element.hasAttribute(attr) }
     if (newPresent) {
@@ -1171,7 +1144,6 @@ up.element = (function() {
     get: getOne, // practical for code that also works with jQuery
     list: getList, // practical for composing multiple collections, or wrapping.
     toggle, // practical
-    toggleClass, // practical
     hide, // practical
     show, // practical
     metaContent, // internal

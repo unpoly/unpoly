@@ -170,7 +170,7 @@ up.feedback = (function() {
       for (let link of links) {
         const isCurrent = linkURLs(link).isCurrent(layerLocation)
         for (let currentClass of config.currentClasses) {
-          e.toggleClass(link, currentClass, isCurrent)
+          link.classList.toggle(currentClass, isCurrent)
         }
         e.toggleAttr(link, 'aria-current', 'page', isCurrent)
       }
