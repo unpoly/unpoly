@@ -1447,7 +1447,7 @@ describe 'up.fragment', ->
             up.render('.element', origin: childOfTwo, content: 'new text')
 
             next =>
-              elements = e.all('.element')
+              elements = document.querySelectorAll('.element')
               expect(elements.length).toBe(4)
 
               # While #root is an ancestor, two was closer
@@ -1478,7 +1478,7 @@ describe 'up.fragment', ->
             """)
 
             next =>
-              children = e.all('.child')
+              children = document.querySelectorAll('.child')
 
               expect(children.length).toBe(4)
 
@@ -1499,7 +1499,7 @@ describe 'up.fragment', ->
 
             up.render('.element', origin: childOfTwo, document: newHTML)
 
-            elements = e.all('.element')
+            elements = document.querySelectorAll('.element')
             expect(elements.length).toBe(4)
 
             # While #root is an ancestor, two was closer
@@ -1525,7 +1525,7 @@ describe 'up.fragment', ->
 
             up.render('.element', origin: childOfTwo, document: newHTML)
 
-            elements = e.all('.element')
+            elements = document.querySelectorAll('.element')
 
             expect(elements.length).toBe(3)
 
@@ -1544,7 +1544,7 @@ describe 'up.fragment', ->
             up.render(two, content: 'new text')
 
             next =>
-              elements = e.all('.element')
+              elements = document.querySelectorAll('.element')
               expect(elements.length).toBe(4)
 
               # While #root is an ancestor, two was closer

@@ -71,43 +71,44 @@ describe 'up.element', ->
           expect(result).toBeMissing()
 
 
-  describe 'up.element.all()', ->
+  if up.migrate.loaded
+    describe 'up.element.all()', ->
 
-    it 'returns all elements matching the given selector', ->
-      match = fixture('.match')
-      otherMatch = fixture('.match')
-      noMatch = fixture('.no-match')
-      result = up.element.all('.match')
-      expect(result).toMatchList [match, otherMatch]
+      it 'returns all elements matching the given selector', ->
+        match = fixture('.match')
+        otherMatch = fixture('.match')
+        noMatch = fixture('.no-match')
+        result = up.element.all('.match')
+        expect(result).toMatchList [match, otherMatch]
 
-    describe 'when given a root element for the search', ->
+      describe 'when given a root element for the search', ->
 
-      it 'returns all descendants of the given root matching the given selector', ->
-        $element = $fixture('.element')
-        $matchingChild = $element.affix('.child.match')
-        $matchingGrandChild = $matchingChild.affix('.grand-child.match')
-        $otherChild = $element.affix('.child')
-        $otherGrandChild = $otherChild.affix('.grand-child')
-        results = up.element.all($element[0], '.match')
-        expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
+        it 'returns all descendants of the given root matching the given selector', ->
+          $element = $fixture('.element')
+          $matchingChild = $element.affix('.child.match')
+          $matchingGrandChild = $matchingChild.affix('.grand-child.match')
+          $otherChild = $element.affix('.child')
+          $otherGrandChild = $otherChild.affix('.grand-child')
+          results = up.element.all($element[0], '.match')
+          expect(results).toEqual [$matchingChild[0], $matchingGrandChild[0]]
 
-      it 'returns an empty list if no descendant matches', ->
-        $element = $fixture('.element')
-        $child = $element.affix('.child')
-        $grandChild = $child.affix('.grand-child')
-        results = up.element.all($element[0], '.match')
-        expect(results).toEqual []
+        it 'returns an empty list if no descendant matches', ->
+          $element = $fixture('.element')
+          $child = $element.affix('.child')
+          $grandChild = $child.affix('.grand-child')
+          results = up.element.all($element[0], '.match')
+          expect(results).toEqual []
 
-      it 'does not return the root itself, even if it matches', ->
-        $element = $fixture('.element.match')
-        results = up.element.all($element[0], '.match')
-        expect(results).toEqual []
+        it 'does not return the root itself, even if it matches', ->
+          $element = $fixture('.element.match')
+          results = up.element.all($element[0], '.match')
+          expect(results).toEqual []
 
-      it 'does not return ancestors of the root, even if they match', ->
-        $parent = $fixture('.parent.match')
-        $element = $parent.affix('.element')
-        results = up.element.all($element[0], '.match')
-        expect(results).toEqual []
+        it 'does not return ancestors of the root, even if they match', ->
+          $parent = $fixture('.parent.match')
+          $element = $parent.affix('.element')
+          results = up.element.all($element[0], '.match')
+          expect(results).toEqual []
 
 
   describe 'up.element.list()', ->

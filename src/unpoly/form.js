@@ -991,7 +991,7 @@ up.form = (function() {
     targetSelector || up.fail("No switch target given for %o", switcher)
     const fieldValues = switcherValues(switcher)
 
-    for (let target of e.all(form, targetSelector)) {
+    for (let target of up.fragment.all(form, targetSelector)) {
       switchTarget(target, fieldValues)
     }
   }
@@ -1019,7 +1019,7 @@ up.form = (function() {
 
   function findSwitcherForTarget(target) {
     const form = getContainer(target)
-    const switchers = e.all(form, '[up-switch]')
+    const switchers = form.querySelectorAll('[up-switch]')
     const switcher = u.find(switchers, function(switcher) {
       const targetSelector = switcher.getAttribute('up-switch')
       return target.matches(targetSelector)

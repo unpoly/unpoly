@@ -35,28 +35,6 @@ up.element = (function() {
   }
 
   /*-
-  Returns all descendant elements matching the given selector.
-
-  @function up.element.all
-  @param {Element} [parent=document]
-    The parent element whose descendants to search.
-
-    If omitted, all elements in the `document` will be searched.
-  @param {string} selector
-    The CSS selector to match.
-  @return {NodeList<Element>|Array<Element>}
-    A list of all elements matching the selector.
-
-    Returns an empty list if there are no matches.
-  @stable
-  */
-  function all(...args) {
-    const selector = args.pop()
-    const root = args[0] || document
-    return root.querySelectorAll(selector)
-  }
-
-  /*-
   Returns a list of the given parent's descendants matching the given selector.
   The list will also include the parent element if it matches the selector itself.
 
@@ -76,7 +54,7 @@ up.element = (function() {
       results.push(root)
     }
 
-    results.push(...all(root, selector))
+    results.push(...root.querySelectorAll(selector))
 
     return results
   }
@@ -183,7 +161,7 @@ up.element = (function() {
 
   function valueToList(value) {
     if (u.isString(value)) {
-      return all(value)
+      return document.querySelectorAll(value)
     } else {
       return u.wrapList(value)
     }
@@ -1185,7 +1163,6 @@ up.element = (function() {
   }
 
   return {
-    all, // same as document.querySelectorAll
     subtree, // practical
     isInSubtree,
     closestAttr,

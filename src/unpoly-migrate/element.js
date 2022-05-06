@@ -109,3 +109,28 @@ up.element.replace = function(oldElement, newElement) {
   up.migrate.deprecated('up.element.replace()', 'Element.prototype.replaceWith()')
   return oldElement.replaceWith(newElement)
 }
+
+/*-
+Returns all descendant elements matching the given selector.
+
+@function up.element.all
+@param {Element} [parent=document]
+  The parent element whose descendants to search.
+
+  If omitted, all elements in the `document` will be searched.
+@param {string} selector
+  The CSS selector to match.
+@return {NodeList<Element>|Array<Element>}
+  A list of all elements matching the selector.
+
+  Returns an empty list if there are no matches.
+@deprecated
+  Use [`Document.prototype.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll) or
+  [`Element.prototype.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll) instead
+*/
+up.element.all = function(...args) {
+  up.migrate.deprecated('up.element.all()', 'Document.prototype.querySelectorAll() or Element.prototype.querySelectorAll()')
+  const selector = args.pop()
+  const root = args[0] || document
+  return root.querySelectorAll(selector)
+}

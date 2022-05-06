@@ -1230,7 +1230,7 @@ up.fragment = (function() {
   ### Similar features
 
   - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
-  - The [`up.element.all()`](/up.element.get) function simply returns the all elements matching a selector
+  - The [`up.element.all()`](/up.element.all) function simply returns the all elements matching a selector
     without further filtering.
 
   @function up.fragment.all

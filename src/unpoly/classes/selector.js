@@ -37,7 +37,7 @@ up.Selector = class Selector {
     //
     // To respect this priority we do not join @selectors into a single, comma-separated
     // CSS selector, but rather make one query per selector and concatenate the results.
-    const results = u.flatMap(this.selectors, selector => e.all(root, selector))
+    const results = u.flatMap(this.selectors, selector => root.querySelectorAll(selector))
     return u.filter(results, element => this.passesFilter(element))
   }
 
