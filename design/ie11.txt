@@ -4,7 +4,6 @@ Code we can remove once we drop IE11
 Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 --------------------------------------------------------------------
 
-- up.element.closest => Eelement#closest
 - up.element.replace => Eelement#replaceWith
 - up.element.all => Element#querySelectorAll
 - up.element.toggleClass can just be classList.toggleClass => deprecate
