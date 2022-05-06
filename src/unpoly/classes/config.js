@@ -8,6 +8,6 @@ up.Config = class Config {
   }
 
   reset() {
-    u.assign(this, this.blueprintFn())
+    Object.assign(this, this.blueprintFn())
   }
 }

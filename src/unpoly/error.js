@@ -7,7 +7,7 @@ up.error = (function() {
       message = u.sprintf(...message)
     }
     const error = new Error(message)
-    u.assign(error, props)
+    Object.assign(error, props)
     return error
   }
 

@@ -282,7 +282,7 @@ up.form = (function() {
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
     // that are possible on both <form> and <a> elements.
-    u.assign(options, up.link.followOptions(form, options, parserOptions))
+    Object.assign(options, up.link.followOptions(form, options, parserOptions))
 
     return options
   }

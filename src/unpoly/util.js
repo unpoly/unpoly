@@ -59,7 +59,7 @@ up.util = (function() {
 
   @function up.util.isStandardPort
   @internal
-  */  
+  */
   function isStandardPort(protocol, port) {
     port = port.toString()
     return (((port === "") || (port === "80")) && (protocol === 'http:')) || ((port === "443") && (protocol === 'https:'))
@@ -255,26 +255,6 @@ up.util = (function() {
   }
 
   // Remove with IE11
-  function assignPolyfill(target, ...sources) {
-    for (let source of sources) {
-      for (let key in source) {
-        target[key] = source[key]
-      }
-    }
-    return target
-  }
-
-  /*-
-  Merge the own properties of one or more `sources` into the `target` object.
-
-  @function up.util.assign
-  @param {Object} target
-  @param {Array<Object>} sources...
-  @stable
-  */
-  const assign = Object.assign || assignPolyfill
-
-  // Remove with IE11
   function valuesPolyfill(object) {
     return Object.keys(object).map((key) => object[key])
   }
@@ -381,7 +361,7 @@ up.util = (function() {
   function isUndefined(object) {
     return object === undefined
   }
-  
+
 
   /*-
   Returns whether the given argument is not `undefined`.
@@ -820,7 +800,7 @@ up.util = (function() {
     } else if (isList(value)) {
       value = copyArrayLike(value)
     } else if (isOptions(value)) {
-      value = assign({}, value)
+      value = Object.assign({}, value)
     }
     return value
   }
@@ -896,7 +876,7 @@ up.util = (function() {
   @stable
   */
   function merge(...sources) {
-    return assign({}, ...sources)
+    return Object.assign({}, ...sources)
   }
 
   /*-
@@ -2073,8 +2053,6 @@ up.util = (function() {
     matchURLs,
     normalizeMethod,
     methodAllowsPayload,
-    assign,
-    assignPolyfill,
     copy,
     copyArrayLike,
     merge,

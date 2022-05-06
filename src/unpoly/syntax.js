@@ -302,7 +302,7 @@ up.syntax = (function() {
       jQuery: false
     }
     )
-    return u.assign(callback, options)
+    return Object.assign(callback, options)
   }
 
   function insertCompiler(queue, newCompiler) {

@@ -68,7 +68,7 @@ up.Layer.Root = class Root extends up.Layer {
   }
 
   reset() {
-    u.assign(this, this.defaults())
+    Object.assign(this, this.defaults())
   }
 
   toString() {

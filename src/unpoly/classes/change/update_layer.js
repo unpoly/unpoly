@@ -79,7 +79,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       up.fragment.abort(this.getTargetElements(), { reason: 'Fragment is being replaced' })
     }
 
-    u.assign(this.layer.context, this.context)
+    Object.assign(this.layer.context, this.context)
 
     if (this.options.history === 'auto') {
       this.options.history = this.hasAutoHistory()
@@ -329,7 +329,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     let viewports = up.viewport.subtree(keepPlan.oldElement)
     keepPlan.revivers = viewports.map(function(viewport) {
       let { scrollTop, scrollLeft } = viewport
-      return () => u.assign(viewport, { scrollTop, scrollLeft })
+      return () => Object.assign(viewport, { scrollTop, scrollLeft })
     })
   }
 

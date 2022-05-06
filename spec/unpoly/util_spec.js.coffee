@@ -1348,55 +1348,56 @@ describe 'up.util', ->
         expect(memoized(2, 3)).toEqual(5)
         expect(spy.calls.count()).toEqual(1)
 
-    ['assign', 'assignPolyfill'].forEach (assignVariant) ->
+    if up.migrate.loaded
+      ['assign', 'assignPolyfill'].forEach (assignVariant) ->
 
-      describe "up.util.#{assignVariant}", ->
+        describe "up.util.#{assignVariant}", ->
 
-        assign = up.util[assignVariant]
+          assign = up.util[assignVariant]
 
-        it 'copies the second object into the first object', ->
-          target = { a: 1 }
-          source = { b: 2, c: 3 }
+          it 'copies the second object into the first object', ->
+            target = { a: 1 }
+            source = { b: 2, c: 3 }
 
-          assign(target, source)
+            assign(target, source)
 
-          expect(target).toEqual { a: 1, b: 2, c: 3 }
+            expect(target).toEqual { a: 1, b: 2, c: 3 }
 
-          # Source is unchanged
-          expect(source).toEqual { b: 2, c: 3 }
+            # Source is unchanged
+            expect(source).toEqual { b: 2, c: 3 }
 
-        it 'copies null property values', ->
-          target = { a: 1, b: 2 }
-          source = { b: null }
+          it 'copies null property values', ->
+            target = { a: 1, b: 2 }
+            source = { b: null }
 
-          assign(target, source)
+            assign(target, source)
 
-          expect(target).toEqual { a: 1, b: null }
+            expect(target).toEqual { a: 1, b: null }
 
-        it 'copies undefined property values', ->
-          target = { a: 1, b: 2 }
-          source = { b: undefined }
+          it 'copies undefined property values', ->
+            target = { a: 1, b: 2 }
+            source = { b: undefined }
 
-          assign(target, source)
+            assign(target, source)
 
-          expect(target).toEqual { a: 1, b: undefined }
+            expect(target).toEqual { a: 1, b: undefined }
 
-        it 'returns the first object', ->
-          target = { a: 1 }
-          source = { b: 2 }
+          it 'returns the first object', ->
+            target = { a: 1 }
+            source = { b: 2 }
 
-          result = assign(target, source)
+            result = assign(target, source)
 
-          expect(result).toBe(target)
+            expect(result).toBe(target)
 
-        it 'takes multiple sources to copy from', ->
-          target = { a: 1 }
-          source1 = { b: 2, c: 3 }
-          source2 = { d: 4, e: 5 }
+          it 'takes multiple sources to copy from', ->
+            target = { a: 1 }
+            source1 = { b: 2, c: 3 }
+            source2 = { d: 4, e: 5 }
 
-          assign(target, source1, source2)
+            assign(target, source1, source2)
 
-          expect(target).toEqual { a: 1, b: 2, c: 3, d: 4, e: 5 }
+            expect(target).toEqual { a: 1, b: 2, c: 3, d: 4, e: 5 }
 
     describe 'up.util.copy', ->
 

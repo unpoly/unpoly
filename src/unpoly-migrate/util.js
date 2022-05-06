@@ -91,3 +91,24 @@ up.util.times = function(count, block) {
     block()
   }
 }
+
+// Remove with IE11
+up.util.assignPolyfill = function(target, ...sources) {
+  for (let source of sources) {
+    for (let key in source) {
+      target[key] = source[key]
+    }
+  }
+  return target
+}
+
+/*-
+Merge the own properties of one or more `sources` into the `target` object.
+
+@function up.util.assign
+@param {Object} target
+@param {Array<Object>} sources...
+@deprecated
+  User `Object.assign()` instead.
+*/
+up.util.assign = Object.assign || up.util.assignPolyfill

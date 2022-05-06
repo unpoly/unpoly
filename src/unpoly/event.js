@@ -381,7 +381,7 @@ The parsed data will be passed to your event handler as a third argument:
 
     const event = document.createEvent('Event')
     event.initEvent(type, true, true); // name, bubbles, cancelable
-    u.assign(event, u.omit(props, ['type', 'target']))
+    Object.assign(event, u.omit(props, ['type', 'target']))
 
     // IE11 does not set { defaultPrevented: true } after #preventDefault()
     // was called on a custom event.
@@ -549,7 +549,7 @@ The parsed data will be passed to your event handler as a third argument:
     const eventType = e.attr(element, 'up-emit')
     const eventProps = e.jsonAttr(element, 'up-emit-props')
     const forkedEvent = fork(event, eventType)
-    u.assign(forkedEvent, eventProps)
+    Object.assign(forkedEvent, eventProps)
     up.emit(element, forkedEvent)
   }
 

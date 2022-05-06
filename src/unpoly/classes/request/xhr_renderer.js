@@ -56,7 +56,7 @@ up.Request.XHRRenderer = class XHRRenderer {
       this.addHeader('Content-Type', contentType)
     }
 
-    u.assign(this.xhr, handlers)
+    Object.assign(this.xhr, handlers)
     this.xhr.send(this.getPayload())
 
     return this.xhr
