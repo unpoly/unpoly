@@ -16,7 +16,6 @@ Various changes
 - Allow to mark a target component as soft:
   - .target, .other:maybe
   - .target, :maybe(.other)
-- Maybe log close value with up:layer:dismiss/:dismissed/:accept/:accepted
 
 
 Docs
