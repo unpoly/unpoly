@@ -235,12 +235,12 @@ up.link = (function() {
   @return {boolean}
   */
   function isFollowDisabled(link) {
-    return e.matches(link, config.noFollowSelectors.join(',')) || u.isCrossOrigin(link)
+    return link.matches(config.noFollowSelectors.join(',')) || u.isCrossOrigin(link)
   }
 
   function isPreloadDisabled(link) {
     return !up.browser.canPushState() ||
-      e.matches(link, config.noPreloadSelectors.join(',')) ||
+      link.matches(config.noPreloadSelectors.join(',')) ||
       isFollowDisabled(link) ||
       !willCache(link)
   }
@@ -257,7 +257,7 @@ up.link = (function() {
   }
 
   function isInstantDisabled(link) {
-    return e.matches(link, config.noInstantSelectors.join(',')) || isFollowDisabled(link)
+    return link.matches(config.noInstantSelectors.join(',')) || isFollowDisabled(link)
   }
 
   function reset() {
@@ -582,7 +582,7 @@ up.link = (function() {
   */
   function isFollowable(link) {
     link = up.fragment.get(link)
-    return e.matches(link, fullFollowSelector()) && !isFollowDisabled(link)
+    return link.matches(fullFollowSelector()) && !isFollowDisabled(link)
   }
 
   /*-
@@ -604,7 +604,7 @@ up.link = (function() {
   }
 
   function makeClickable(link) {
-    if (e.matches(link, 'a[href], button')) {
+    if (link.matches('a[href], button')) {
       return
     }
 

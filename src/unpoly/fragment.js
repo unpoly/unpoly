@@ -1963,8 +1963,8 @@ up.fragment = (function() {
   /*-
   Returns whether the given element matches the given CSS selector.
 
-  Other than `up.element.matches()` this function supports non-standard selectors
-  like `:main` or `:layer`.
+  Other than [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches)
+  this function supports non-standard selectors like `:main` or `:layer`.
 
   @function up.fragment.matches
   @param {Element} fragment

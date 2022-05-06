@@ -74,7 +74,7 @@ up.form = (function() {
     inputDelay: 0,
     // Date inputs trigger `change` when editing a single date component
     // https://github.com/unpoly/unpoly/issues/336
-    changeEvents: (field) => e.matches(field, 'input[type=date]') ? ['blur'] : ['change'],
+    changeEvents: (field) => field.matches('input[type=date]') ? ['blur'] : ['change'],
   }))
 
   function fullSubmitSelector() {
@@ -94,7 +94,7 @@ up.form = (function() {
   }
 
   function isField(element) {
-    return e.matches(element, fieldSelector())
+    return element.matches(fieldSelector())
   }
 
   /*-
@@ -121,7 +121,7 @@ up.form = (function() {
     // If findFields() is called with an entire form, gather fields outside the form
     // element that are associated with the form (through <input form="id-of-form">, which
     // is an HTML feature.)
-    if (e.matches(root, 'form[id]')) {
+    if (root.matches('form[id]')) {
       const outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.getAttribute('id')))
       const outsideFields = up.fragment.all(outsideFieldSelector, { layer: root })
       fields.push(...outsideFields)
@@ -156,7 +156,7 @@ up.form = (function() {
   function submittingButton(form) {
     const selector = submitButtonSelector()
     const focusedElement = document.activeElement
-    if (focusedElement && e.matches(focusedElement, selector) && form.contains(focusedElement)) {
+    if (focusedElement && focusedElement.matches(selector) && form.contains(focusedElement)) {
       return focusedElement
     } else {
       // If no button is focused, we assume the first button in the form.
@@ -935,14 +935,14 @@ up.form = (function() {
     let value
     let meta
 
-    if (e.matches(field, 'input[type=checkbox]')) {
+    if (field.matches('input[type=checkbox]')) {
       if (field.checked) {
         value = field.value
         meta = ':checked'
       } else {
         meta = ':unchecked'
       }
-    } else if (e.matches(field, 'input[type=radio]')) {
+    } else if (field.matches('input[type=radio]')) {
       const form = getContainer(field)
       const groupName = field.getAttribute('name')
       const checkedButton = form.querySelector(`input[type=radio]${e.attributeSelector('name', groupName)}:checked`)
@@ -1022,7 +1022,7 @@ up.form = (function() {
     const switchers = e.all(form, '[up-switch]')
     const switcher = u.find(switchers, function(switcher) {
       const targetSelector = switcher.getAttribute('up-switch')
-      return e.matches(target, targetSelector)
+      return target.matches(targetSelector)
     })
     return switcher || up.fail('Could not find [up-switch] field for %o', target)
   }
@@ -1065,13 +1065,13 @@ up.form = (function() {
   */
   function isSubmittable(form) {
     form = up.fragment.get(form)
-    return e.matches(form, fullSubmitSelector()) && !isSubmitDisabled(form)
+    return form.matches(fullSubmitSelector()) && !isSubmitDisabled(form)
   }
 
   function isSubmitDisabled(form) {
     // We also don't want to handle cross-origin forms.
     // That will be handled in `up.Change.FromURL#newPageReason`.
-    return e.matches(form, config.noSubmitSelectors.join(','))
+    return form.matches(config.noSubmitSelectors.join(','))
   }
 
   /*-

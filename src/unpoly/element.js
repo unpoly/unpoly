@@ -12,8 +12,6 @@ up.element = (function() {
 
   const u = up.util
 
-  const MATCH_FN_NAME = up.browser.isIE11() ? 'msMatchesSelector' : 'matches'
-
   /*-
   Returns the first descendant element matching the given selector.
 
@@ -74,7 +72,7 @@ up.element = (function() {
   function subtree(root, selector) {
     const results = []
 
-    if (matches(root, selector)) {
+    if (root.matches(selector)) {
       results.push(root)
     }
 
@@ -114,30 +112,11 @@ up.element = (function() {
     if (element.closest) {
       return element.closest(selector)
     // If the browser doesn't support Element#closest, we mimic the behavior.
-    } else if (matches(element, selector)) {
+    } else if (element.matches(selector)) {
       return element
     } else {
       return ancestor(element, selector)
     }
-  }
-
-  /*-
-  Returns whether the given element matches the given CSS selector.
-
-  To match against a non-standard selector like `:main`,
-  use `up.fragment.matches()` instead.
-
-  @function up.element.matches
-  @param {Element} element
-    The element to check.
-  @param {string} selector
-    The CSS selector to match.
-  @return {boolean}
-    Whether `element` matches `selector`.
-  @stable
-  */
-  function matches(element, selector) {
-    return element[MATCH_FN_NAME]?.(selector)
   }
 
   /*-
@@ -147,7 +126,7 @@ up.element = (function() {
   function ancestor(element, selector) {
     let parentElement = element.parentElement
     if (parentElement) {
-      if (matches(parentElement, selector)) {
+      if (parentElement.matches(selector)) {
         return parentElement
       } else {
         return ancestor(parentElement, selector)
@@ -637,7 +616,7 @@ up.element = (function() {
   @function up.element.isSingleton
   @internal
   */
-  const isSingleton = up.mockable(element => matches(element, SINGLETON_TAG_NAMES.join(',')))
+  const isSingleton = up.mockable(element => element.matches(SINGLETON_TAG_NAMES.join(',')))
 
   function isSingletonSelector(selector) {
     return SINGLETON_PATTERN.test(selector)
@@ -1257,7 +1236,6 @@ up.element = (function() {
     isInSubtree,
     closest, // needed for IE11
     closestAttr,
-    matches, // needed for IE11
     ancestor, // not practical. we use it to implement closest
     around,
     get: getOne, // practical for code that also works with jQuery

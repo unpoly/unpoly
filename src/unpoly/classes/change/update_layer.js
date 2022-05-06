@@ -282,7 +282,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
       }
 
-      if (partner && e.matches(partner, '[up-keep]')) {
+      if (partner && partner.matches('[up-keep]')) {
         const plan = {
           oldElement, // the element that should be kept
           newElement: partner, // the element that would have replaced it but now does not

@@ -86,7 +86,7 @@ window.Trigger = (->
   FOCUSABLE_SELECTOR = 'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
   isFocusable = (element) ->
-    return e.matches(element, FOCUSABLE_SELECTOR)
+    return element.matches(FOCUSABLE_SELECTOR)
 
   focusableElements = ->
     nodeList = document.querySelectorAll(FOCUSABLE_SELECTOR)
@@ -129,8 +129,8 @@ window.Trigger = (->
     element.dispatchEvent(event)
 
   clickSequence = (element, options = {}) ->
-    isButton = e.matches(element, 'button, input[type=button], input[type=submit], input[type=image]')
     element = e.get(element)
+    isButton = element.matches('button, input[type=button], input[type=submit], input[type=image]')
     mouseover(element, options)
     mousedown(element, options)
     # MacOS by default does not focus buttons on click

@@ -152,27 +152,28 @@ describe 'up.element', ->
       expect(u.isArray(result)).toBe(true)
       expect(result).toEqual [div0, div1, div2, div3]
 
-  describe 'up.element.matches()', ->
+  if up.migrate.loaded
+    describe 'up.element.matches()', ->
 
-    it 'returns true if the given element matches the given selector', ->
-      element = fixture('.foo')
-      result = up.element.matches(element, '.foo')
-      expect(result).toBe(true)
+      it 'returns true if the given element matches the given selector', ->
+        element = fixture('.foo')
+        result = up.element.matches(element, '.foo')
+        expect(result).toBe(true)
 
-    it "returns false if the given element doesn't match the given selector", ->
-      element = fixture('.foo')
-      result = up.element.matches(element, '.bar')
-      expect(result).toBe(false)
+      it "returns false if the given element doesn't match the given selector", ->
+        element = fixture('.foo')
+        result = up.element.matches(element, '.bar')
+        expect(result).toBe(false)
 
-    it "returns false if the given element doesn't match the given selector, even if a child matches", ->
-      element = fixture('.foo')
-      child = up.element.affix(element, '.bar')
-      result = up.element.matches(element, '.bar')
-      expect(result).toBe(false)
+      it "returns false if the given element doesn't match the given selector, even if a child matches", ->
+        element = fixture('.foo')
+        child = up.element.affix(element, '.bar')
+        result = up.element.matches(element, '.bar')
+        expect(result).toBe(false)
 
-    it 'does not crash if the given "element" is a document', ->
-      result = up.element.matches(document, '.foo')
-      expect(result).toBeFalsy()
+      it 'does not crash if the given "element" is a document', ->
+        result = up.element.matches(document, '.foo')
+        expect(result).toBeFalsy()
 
   describe 'up.element.subtree()', ->
 

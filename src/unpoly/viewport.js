@@ -293,7 +293,7 @@ up.viewport = (function() {
   function isNativelyFocusable(element) {
     // IE11: In modern browsers we can check if element.tabIndex >= 0.
     // But IE11 returns 0 for all elements, including <div> etc.
-    return e.matches(element, 'a[href], button, textarea, input, select')
+    return element.matches('a[href], button, textarea, input, select')
   }
 
   function makeFocusable(element) {
@@ -444,7 +444,7 @@ up.viewport = (function() {
   }
 
   function isRoot(element) {
-    return e.matches(element, rootSelector())
+    return element.matches(rootSelector())
   }
 
   /*-

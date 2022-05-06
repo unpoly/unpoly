@@ -53,3 +53,28 @@ up.element.remove = function(element) {
     parent.removeChild(element)
   }
 }
+
+const MATCH_FN_NAME = up.browser.isIE11() ? 'msMatchesSelector' : 'matches'
+
+/*-
+Returns whether the given element matches the given CSS selector.
+
+To match against a non-standard selector like `:main`,
+use `up.fragment.matches()` instead.
+
+@function up.element.matches
+@param {Element} element
+  The element to check.
+@param {string} selector
+  The CSS selector to match.
+@return {boolean}
+  Whether `element` matches `selector`.
+@deprecated
+  Use [`Element.prototype.matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches) instead.
+*/
+up.util.matches = function(element, selector) {
+  up.migrate.deprecated('up.element.matches()', 'Element.prototype.matches()')
+
+  return element[MATCH_FN_NAME]?.(selector)
+}
+

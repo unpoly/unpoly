@@ -2903,7 +2903,7 @@ describe 'up.fragment', ->
 
         it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          spyOn(up.element, 'isSingleton').and.callFake (element) -> e.matches(element, 'fake-body')
+          spyOn(up.element, 'isSingleton').and.callFake (element) -> element.matches('fake-body')
 
           $fixture('fake-body').text('old text')
 
@@ -3839,7 +3839,7 @@ describe 'up.fragment', ->
 
         it 'calls destructors when the replaced element is a singleton element like <body> (bugfix)', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.isSingleton.mock().and.callFake (element) -> e.matches(element, '.container')
+          up.element.isSingleton.mock().and.callFake (element) -> element.matches('.container')
           destructor = jasmine.createSpy('destructor')
           up.$compiler '.container', -> destructor
           $container = $fixture('.container')
@@ -4873,7 +4873,7 @@ describe 'up.fragment', ->
 
         it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.isSingleton.mock().and.callFake (element) -> e.matches(element, 'middle-element')
+          up.element.isSingleton.mock().and.callFake (element) -> element.matches('middle-element')
 
           $container = $fixture('.container')
           $container.affix('before-element').text('old-before')

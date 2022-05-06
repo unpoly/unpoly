@@ -13,7 +13,7 @@ up.Selector = class Selector {
   }
 
   matches(element) {
-    return e.matches(element, this.unionSelector) && this.passesFilter(element)
+    return element.matches(this.unionSelector) && this.passesFilter(element)
   }
 
   closest(element) {
@@ -43,7 +43,8 @@ up.Selector = class Selector {
 
   subtree(root) {
     const results = []
-    if (this.matches(root)) {
+
+    if (!(root instanceof Document) && this.matches(root)) {
       results.push(root)
     }
     results.push(...this.descendants(root))
