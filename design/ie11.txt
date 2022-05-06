@@ -4,7 +4,6 @@ Code we can remove once we drop IE11
 Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 --------------------------------------------------------------------
 
-- In up.util, remove traditional `for` loops with `for..of` loops so methods work on iteratable objects
 - up.browser.isIE11()
 
 
@@ -34,6 +33,8 @@ Quick wins: Removals
 
 More work required
 ------------------
+
+- In up.util, remove traditional `for` loops with `for..of` loops so methods work on iteratable objects
 - up.util.toArray => Array.from
   - But Array.from() always makes a new object
 - We may be able to leverage structuredClone() for up.util.copy()
