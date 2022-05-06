@@ -560,6 +560,27 @@ describe 'up.layer', ->
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
 
+            it 'emits an up:layer:dismissed event with { value: ":outside" } and other details', asyncSpec (next) ->
+              up.layer.open(dismissable: 'outside', mode: 'modal')
+              viewportElement = null
+              listener = jasmine.createSpy('up:layer:dismissed listener')
+              up.on('up:layer:dismissed', listener)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
+
+                viewportElement = up.layer.current.viewportElement
+                Trigger.clickSequence(viewportElement, { clientX: 0, clientY: 0 })
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(false)
+
+                expect(listener).toHaveBeenCalledWith(
+                  jasmine.objectContaining(value: ':outside', origin: viewportElement),
+                  jasmine.anything(),
+                  jasmine.anything()
+                )
+
           describe 'without { dismissable: "outside" }', ->
 
             it 'does not let the user close a layer with viewport by clicking on its viewport (which sits over the backdrop and will receive all clicks outside the frame)', asyncSpec (next) ->
