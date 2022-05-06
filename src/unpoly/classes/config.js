@@ -1,5 +1,3 @@
-const u = up.util
-
 up.Config = class Config {
 
   constructor(blueprintFn = (() => ({}))) {

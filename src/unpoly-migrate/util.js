@@ -93,18 +93,6 @@ up.util.times = function(count, block) {
   }
 }
 
-// Remove with IE11
-up.util.assignPolyfill = function(target, ...sources) {
-  for (let source of sources) {
-    for (let key in source) {
-      target[key] = source[key]
-    }
-  }
-  return target
-}
-
-let objectAssign = Object.assign || up.util.assignPolyfill
-
 /*-
 Merge the own properties of one or more `sources` into the `target` object.
 
@@ -116,14 +104,8 @@ Merge the own properties of one or more `sources` into the `target` object.
 */
 up.util.assign = function(...args) {
   up.migrate.deprecated('up.util.assign()', 'Object.assign()')
-  return objectAssign(...args)
+  return Object.assign(...args)
 }
-
-function valuesPolyfill(object) {
-  return Object.keys(object).map((key) => object[key])
-}
-
-let objectValues = Object.values || valuesPolyfill
 
 /*-
 Returns an array of values of the given object.
@@ -136,5 +118,5 @@ Returns an array of values of the given object.
 */
 up.util.values = function(...args) {
   up.migrate.deprecated('up.util.values()', 'Object.values()')
-  return objectValues(...args)
+  return Object.values(...args)
 }

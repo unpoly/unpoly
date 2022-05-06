@@ -1,5 +1,3 @@
-const u = up.util
-
 up.store ||= {}
 
 up.store.Memory = class Memory {

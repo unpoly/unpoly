@@ -35,7 +35,7 @@ up.HTMLWrapper = class HTMLWrapper {
     for (let wrappedChild of element.querySelectorAll(`meta[name='${this.attrName}']`)) {
       const originalHTML = wrappedChild.getAttribute('value')
       const restoredElement = e.createFromHTML(originalHTML)
-      e.replace(wrappedChild, restoredElement)
+      wrappedChild.replaceWith(restoredElement)
     }
   }
 }

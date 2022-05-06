@@ -483,7 +483,7 @@ up.motion = (function() {
 
   // Have a separate function so we can mock it in specs.
   const swapElementsDirectly = up.mockable(function(oldElement, newElement) {
-    e.replace(oldElement, newElement)
+    oldElement.replaceWith(newElement)
   })
 
   /*-

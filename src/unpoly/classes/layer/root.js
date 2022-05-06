@@ -1,4 +1,3 @@
-const u = up.util
 const e = up.element
 
 up.Layer.Root = class Root extends up.Layer {

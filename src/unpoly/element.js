@@ -338,26 +338,6 @@ up.element = (function() {
     existingElement.insertAdjacentElement('beforebegin', newElement)
   }
 
-//  insertAfter = (existingElement, newElement) ->
-//    existingElement.insertAdjacentElement('afterend', newElement)
-
-  /*-
-  Replaces the given old element with the given new element.
-
-  The old element will be removed from the DOM tree.
-
-  If you don't need IE11 support you may also use the built-in
-  [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/replaceWith) to the same effect.
-
-  @function up.element.replace
-  @param {Element} oldElement
-  @param {Element} newElement
-  @stable
-  */
-  function replace(oldElement, newElement) {
-    oldElement.parentElement.replaceChild(newElement, oldElement)
-  }
-
   /*-
   Creates an element matching the given CSS selector.
 
@@ -1218,7 +1198,6 @@ up.element = (function() {
     hide, // practical
     show, // practical
     metaContent, // internal
-    replace, // needed for IE11
     insertBefore, // internal shortcut, people can use insertAdjacentElement and i don't want to support insertAfter when I don't need it.
     createFromSelector, // practical for element creation.
     setAttrs, // practical

@@ -312,11 +312,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           // oldElement and newElement. Note that keepable will still point to the same element
           // after the replacement, which is now detached.
           const keepableClone = keepable.cloneNode(true)
-          e.replace(keepable, keepableClone)
+          keepable.replaceWith(keepableClone)
 
           // Since we're going to swap the entire oldElement and newElement containers afterwards,
           // replace the matching element with keepable so it will eventually return to the DOM.
-          e.replace(keepPlan.newElement, keepable)
+          keepPlan.newElement.replaceWith(keepable)
           keepPlans.push(keepPlan)
         }
       }

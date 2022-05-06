@@ -46,15 +46,8 @@ on the given elements. For this use `up.destroy()`.
 */
 up.element.remove = function(element) {
   up.migrate.deprecated('up.element.remove()', 'Element.prototype.remove()')
-
-  // IE does not support Element#remove()
-  let parent = element.parentNode
-  if (parent) {
-    parent.removeChild(element)
-  }
+  return element.remove()
 }
-
-const MATCH_FN_NAME = up.browser.isIE11() ? 'msMatchesSelector' : 'matches'
 
 /*-
 Returns whether the given element matches the given CSS selector.
@@ -74,8 +67,7 @@ use `up.fragment.matches()` instead.
 */
 up.util.matches = function(element, selector) {
   up.migrate.deprecated('up.element.matches()', 'Element.prototype.matches()')
-
-  return element[MATCH_FN_NAME]?.(selector)
+  return element.matches(selector)
 }
 
 /*-
@@ -95,12 +87,25 @@ and traversing up through its ancestors in the DOM tree.
   Use [`Element.prototype.closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) instead.
 */
 up.element.closest = function(element, selector) {
-  if (element.closest) {
-    return element.closest(selector)
-    // If the browser doesn't support Element#closest, we mimic the behavior.
-  } else if (element.matches(selector)) {
-    return element
-  } else {
-    return up.element.ancestor(element, selector)
-  }
+  up.migrate.deprecated('up.element.closest()', 'Element.prototype.closest()')
+  return element.closest(selector)
+}
+
+/*-
+Replaces the given old element with the given new element.
+
+The old element will be removed from the DOM tree.
+
+If you don't need IE11 support you may also use the built-in
+[`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/replaceWith) to the same effect.
+
+@function up.element.replace
+@param {Element} oldElement
+@param {Element} newElement
+@deprecated
+  Use [`Element.prototype.replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceWith) instead.
+*/
+up.element.replace = function(oldElement, newElement) {
+  up.migrate.deprecated('up.element.replace()', 'Element.prototype.replaceWith()')
+  return oldElement.replaceWith(newElement)
 }
