@@ -87,6 +87,7 @@ Calls the given function for the given number of times.
   Use a `for` loop instead.
 */
 up.util.times = function(count, block) {
+  up.migrate.deprecated('up.util.times()', 'a `for` loop')
   for (let i = 0; i < count; i++) {
     block()
   }
@@ -102,6 +103,8 @@ up.util.assignPolyfill = function(target, ...sources) {
   return target
 }
 
+let objectAssign = Object.assign || up.util.assignPolyfill
+
 /*-
 Merge the own properties of one or more `sources` into the `target` object.
 
@@ -109,14 +112,18 @@ Merge the own properties of one or more `sources` into the `target` object.
 @param {Object} target
 @param {Array<Object>} sources...
 @deprecated
-  Use `Object.assign()` instead.
+  Use [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) instead.
 */
-up.util.assign = Object.assign || up.util.assignPolyfill
+up.util.assign = function(...args) {
+  up.migrate.deprecated('up.util.assign()', 'Object.assign()')
+  return objectAssign(...args)
+}
 
-// Remove with IE11
 function valuesPolyfill(object) {
   return Object.keys(object).map((key) => object[key])
 }
+
+let objectValues = Object.values || valuesPolyfill
 
 /*-
 Returns an array of values of the given object.
@@ -125,6 +132,9 @@ Returns an array of values of the given object.
 @param {Object} object
 @return {Array<string>}
 @deprecated
-  Use `Object.values()` instead.
+  Use [`Object.values()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values) instead.
 */
-up.util.values = Object.values || valuesPolyfill
+up.util.values = function(...args) {
+  up.migrate.deprecated('up.util.values()', 'Object.values()')
+  return objectValues(...args)
+}
