@@ -1024,7 +1024,7 @@ up.element = (function() {
       // Emulate the behavior of the `onclick` attribute,
       // where `this` refers to the clicked element.
       return function(event) {
-        const exposedValues = u.values(u.pick(event, exposedKeys))
+        const exposedValues = Object.values(u.pick(event, exposedKeys))
         return callback.call(link, event, ...exposedValues)
       }
     }

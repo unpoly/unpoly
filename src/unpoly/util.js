@@ -254,21 +254,6 @@ up.util = (function() {
     return (method !== 'GET') && (method !== 'HEAD')
   }
 
-  // Remove with IE11
-  function valuesPolyfill(object) {
-    return Object.keys(object).map((key) => object[key])
-  }
-
-  /*-
-  Returns an array of values of the given object.
-
-  @function up.util.values
-  @param {Object} object
-  @return {Array<string>}
-  @stable
-  */
-  const objectValues = Object.values || valuesPolyfill
-
   function iteratee(block) {
     if (isString(block)) {
       return item => item[block]
@@ -2138,7 +2123,6 @@ up.util = (function() {
     wrapList,
     wrapValue,
     simpleEase,
-    values: objectValues,
     arrayToSet,
     setToArray,
     uid,

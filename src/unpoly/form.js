@@ -131,12 +131,6 @@ up.form = (function() {
     return fields
   }
 
-  // function findFieldBatches(root) {
-  //   let fields = findFields(root)
-  //   let fieldsByName = u.groupBy(fields, 'name')
-  //   return u.values(fieldsByNames)
-  // }
-
   /*-
   Returns a list of submit buttons within the given element.
 

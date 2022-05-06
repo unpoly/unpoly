@@ -4,7 +4,6 @@ Code we can remove once we drop IE11
 Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 --------------------------------------------------------------------
 
-- up.util.values => Object.values
 - up.util.toArray => Array.from
 - up.element.remove => Element#remove
 - up.element.matches => Element#matches

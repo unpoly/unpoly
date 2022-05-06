@@ -136,7 +136,7 @@ up.EventListener = class EventListener extends up.Record {
   static allNonDefault(element) {
     let map = element.upEventListeners
     if (map) {
-      const listeners = u.values(map)
+      const listeners = Object.values(map)
       return u.reject(listeners, 'isDefault')
     } else {
       return []

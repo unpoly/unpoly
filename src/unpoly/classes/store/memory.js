@@ -33,6 +33,6 @@ up.store.Memory = class Memory {
   }
 
   values() {
-    return u.values(this.data)
+    return Object.values(this.data)
   }
 }

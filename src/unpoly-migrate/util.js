@@ -109,6 +109,22 @@ Merge the own properties of one or more `sources` into the `target` object.
 @param {Object} target
 @param {Array<Object>} sources...
 @deprecated
-  User `Object.assign()` instead.
+  Use `Object.assign()` instead.
 */
 up.util.assign = Object.assign || up.util.assignPolyfill
+
+// Remove with IE11
+function valuesPolyfill(object) {
+  return Object.keys(object).map((key) => object[key])
+}
+
+/*-
+Returns an array of values of the given object.
+
+@function up.util.values
+@param {Object} object
+@return {Array<string>}
+@deprecated
+  Use `Object.values()` instead.
+*/
+up.util.values = Object.values || valuesPolyfill
