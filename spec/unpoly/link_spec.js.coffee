@@ -6,7 +6,7 @@ describe 'up.link', ->
   u = up.util
 
   describe 'JavaScript functions', ->
-  
+
     describe 'up.follow', ->
 
       it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->
@@ -818,28 +818,30 @@ describe 'up.link', ->
         @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
 
       it "loads and caches the given link's destination", asyncSpec (next) ->
-        $fixture('.target')
-        $link = $fixture('a[href="/path"][up-target=".target"]')
+        fixture('.target')
+        link = fixture('a[href="/path"][up-target=".target"]')
 
-        up.link.preload($link)
+        up.link.preload(link)
 
         next =>
           cachedPromise = up.cache.get
             url: '/path'
             target: '.target'
             failTarget: 'default-fallback'
+            origin: link
           expect(u.isPromise(cachedPromise)).toBe(true)
 
       it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
-        $fixture('.target')
-        $link = $fixture('a[href="/path"][up-target=".target"]')
-        up.link.preload($link, url: '/options-path')
+        fixture('.target')
+        link = fixture('a[href="/path"][up-target=".target"]')
+        up.link.preload(link, url: '/options-path')
 
         next =>
           cachedPromise = up.cache.get
             url: '/options-path'
             target: '.target'
             failTarget: 'default-fallback'
+            origin: link
           expect(u.isPromise(cachedPromise)).toBe(true)
 
       it 'does not dispatch another request for a link that is currently loading', asyncSpec (next) ->

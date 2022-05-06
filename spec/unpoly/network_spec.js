@@ -211,6 +211,13 @@ describe('up.network', function() {
           expect(request.failContext).toEqual({drawerKey: 'drawerValue'})
         })
 
+        it('does not associate the request with the current layer if no { target, origin, layer } options are given', function() {
+          const request = up.request({url: '/foo'})
+          expect(request.layer).toBeUndefined()
+          expect(request.mode).toBeUndefined()
+          expect(request.context).toBeUndefined()
+        })
+
         it('allows to quickly construct a cacheable up.Request by passing an { origin } option', function() {
           makeLayers([
             {mode: 'root', context: {rootKey: 'rootValue'}},
@@ -224,17 +231,17 @@ describe('up.network', function() {
           expect(request.failContext).toEqual({drawerKey: 'drawerValue'})
         })
 
-        it('assumes the current layer if neither { layer, failLayer, origin} are given', function() {
+        it('assumes no layer if neither { layer, failLayer, origin } are given', function() {
           makeLayers([
             {mode: 'root', context: {rootKey: 'rootValue'}},
             {mode: 'drawer', context: {drawerKey: 'drawerValue'}}
           ])
 
           const request = up.request({url: '/foo'})
-          expect(request.mode).toEqual('drawer')
-          expect(request.failMode).toEqual('drawer')
-          expect(request.context).toEqual({drawerKey: 'drawerValue'})
-          expect(request.failContext).toEqual({drawerKey: 'drawerValue'})
+          expect(request.mode).toBeUndefined()
+          expect(request.failMode).toBeUndefined()
+          expect(request.context).toBeUndefined()
+          expect(request.failContext).toBeUndefined()
         })
       })
 

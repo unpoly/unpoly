@@ -302,7 +302,7 @@ up.Request = class Request extends up.Record {
     // Normalize a first time to get a normalized cache key.
     this.normalizeForCaching()
 
-    if (!options.basic) {
+    if ((this.target || this.layer || this.origin) && !options.basic) {
       const layerLookupOptions = { origin: this.origin }
       // Calling up.layer.get() will give us:
       //
@@ -319,12 +319,12 @@ up.Request = class Request extends up.Record {
       this.failContext ||= this.failLayer.context || {} // @failLayer might be "new", so we default to {}
       this.mode ||= this.layer.mode
       this.failMode ||= this.failLayer.mode
-
-      // This up.Request object is also promise for its up.Response.
-      // We delegate all promise-related methods (then, catch, finally) to an internal
-      // deferred object.
-      this.deferred = u.newDeferred()
     }
+
+    // This up.Request object is also promise for its up.Response.
+    // We delegate all promise-related methods (then, catch, finally) to an internal
+    // deferred object.
+    this.deferred = u.newDeferred()
   }
 
   // Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
