@@ -167,7 +167,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
               up.syntax.clean(step.oldElement, {layer: this.layer})
             },
             afterDetach() {
-              e.remove(step.oldElement); // clean up jQuery data
+              up.element.cleanJQuery()
               up.fragment.emitDestroyed(step.oldElement, {parent, log: false})
             },
             scrollNew: () => {

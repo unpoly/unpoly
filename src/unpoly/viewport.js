@@ -517,7 +517,7 @@ up.viewport = (function() {
     }
     const outer = up.element.affix(document.body, '[up-viewport]', { style: outerStyle })
     const width = outer.offsetWidth - outer.clientWidth
-    up.element.remove(outer)
+    outer.remove()
     return width
   })
 

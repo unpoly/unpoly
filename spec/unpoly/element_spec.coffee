@@ -271,13 +271,14 @@ describe 'up.element', ->
 
   describe 'up.element.emit()', ->
 
-  describe 'up.element.remove()', ->
+  if up.migrate.loaded
+    describe 'up.element.remove()', ->
 
-    it 'removes the given element from the DOM', ->
-      element = fixture('.element')
-      expect(element).toBeAttached()
-      up.element.remove(element)
-      expect(element).toBeDetached()
+      it 'removes the given element from the DOM', ->
+        element = fixture('.element')
+        expect(element).toBeAttached()
+        up.element.remove(element)
+        expect(element).toBeDetached()
 
   describe 'up.element.toggle()', ->
 
@@ -516,7 +517,7 @@ describe 'up.element', ->
       expect(element.parentElement).toBe(document.body)
 
       # Since this is not a fixture that would auto-remove itself after the test, remove it manually.
-      up.element.remove(element)
+      element.remove()
 
 
   describe 'up.element.createDocumentFromHTML', ->

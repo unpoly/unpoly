@@ -72,7 +72,7 @@ up.NonceableCallback = class NonceableCallback {
     } finally {
       up.noncedEval = undefined
       if (script) {
-        up.element.remove(script)
+        script.remove()
       }
     }
   }

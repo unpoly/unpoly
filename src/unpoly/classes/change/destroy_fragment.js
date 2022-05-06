@@ -51,15 +51,8 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
     this.layer.asCurrent(() => {
       up.fragment.abort(this.element, { reason: 'Fragment is being destroyed' })
       up.syntax.clean(this.element, { layer: this.layer })
-
-      if (up.browser.canJQuery()) {
-        // jQuery elements store internal attributes in a global cache.
-        // We need to remove the element via jQuery or we will leak memory.
-        // See https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery
-        jQuery(this.element).remove()
-      } else {
-        e.remove(this.element)
-      }
+      up.element.cleanJQuery(this.element)
+      this.element.remove()
     })
   }
 

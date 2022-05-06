@@ -80,7 +80,7 @@ describe 'up.link', ->
         next ->
           expect(jasmine.Ajax.requests.count()).toEqual(1)
 
-          up.element.remove(link)
+          link.remove()
 
         next ->
           jasmine.respondWithSelector('.target', text: 'new text')

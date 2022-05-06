@@ -42,8 +42,8 @@ up.OverlayFocus = class OverlayFocus {
     // mutually exclusive [aria-modal] layers.
     this.unsetAttrs()
 
-    e.remove(this.focusTrapBefore)
-    e.remove(this.focusTrapAfter)
+    this.focusTrapBefore.remove()
+    this.focusTrapAfter.remove()
   }
 
   onFocus(event) {

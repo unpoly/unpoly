@@ -49,7 +49,7 @@ up.ProgressBar = class ProgressBar {
 
   destroy() {
     clearTimeout(this.timeout)
-    e.remove(this.element)
+    this.element.remove()
   }
 
   conclude() {

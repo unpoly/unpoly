@@ -28,3 +28,28 @@ up.element.createFromHtml = function(...args) {
   up.migrate.deprecated('up.element.createFromHtml()', 'up.element.createFromHTML()')
   return up.element.createFromHTML(...args)
 }
+
+/*-
+Removes the given element from the DOM tree.
+
+If you don't need IE11 support you may also use the built-in
+[`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove) to the same effect.
+
+Note that `up.element.remove()` does *not* run [destructor functions](/up.destructor)
+on the given elements. For this use `up.destroy()`.
+
+@function up.element.remove
+@param {Element} element
+  The element to remove.
+@deprecated
+  Use [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/remove) instead.
+*/
+up.element.remove = function(element) {
+  up.migrate.deprecated('up.element.remove()', 'Element.prototype.remove()')
+
+  // IE does not support Element#remove()
+  let parent = element.parentNode
+  if (parent) {
+    parent.removeChild(element)
+  }
+}

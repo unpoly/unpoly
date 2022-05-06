@@ -236,32 +236,6 @@ up.element = (function() {
     }
   }
 
-//  assertIsElement = (element) ->
-//    unless u.isElement(element)
-//      up.fail('Not an element: %o', element)
-
-  /*-
-  Removes the given element from the DOM tree.
-
-  If you don't need IE11 support you may also use the built-in
-  [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove) to the same effect.
-
-  Note that `up.element.remove()` does *not* run [destructor functions](/up.destructor)
-  on the given elements. For this use `up.destroy()`.
-
-  @function up.element.remove
-  @param {Element} element
-    The element to remove.
-  @stable
-  */
-  function remove(element) {
-    // IE does not support Element#remove()
-    let parent = element.parentNode
-    if (parent) {
-      parent.removeChild(element)
-    }
-  }
-
   /*-
   Hides the given element.
 
@@ -1259,6 +1233,24 @@ up.element = (function() {
     return  (element !== document) && !getRoot().contains(element)
   }
 
+  /*-
+  Cleans up internal jQuery caches for the given element.
+
+  As a side effect the element is removed from the DOM.
+
+  @function up.element.safeRemove
+  @param {Element} element
+  @internal
+  */
+  function cleanJQuery(element) {
+    if (up.browser.canJQuery()) {
+      // jQuery elements store internal attributes in a global cache.
+      // We need to remove the element via jQuery or we will leak memory.
+      // See https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery
+      jQuery(element).remove()
+    }
+  }
+
   return {
     all, // same as document.querySelectorAll
     subtree, // practical
@@ -1270,7 +1262,6 @@ up.element = (function() {
     around,
     get: getOne, // practical for code that also works with jQuery
     list: getList, // practical for composing multiple collections, or wrapping.
-    remove, // needed for IE11
     toggle, // practical
     toggleClass, // practical
     hide, // practical
@@ -1318,6 +1309,7 @@ up.element = (function() {
     toggleAttr,
     isDetached,
     addTemporaryClass,
-    setTemporaryAttr
+    setTemporaryAttr,
+    cleanJQuery
   }
 })()
