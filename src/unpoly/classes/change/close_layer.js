@@ -72,13 +72,13 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     // on the document.
     return this.layer.emit(
       this.buildEvent(`up:layer:${verbPast}`), {
-      // Set up.layer.current to the parent of the closed layer, which is now likely
-      // to be the front layer.
-      baseLayer: formerParent,
-      callback: this.layer.callback(`on${verbPastUpperCaseFirst}`),
-      ensureBubbles: true,
-      log: `${verbPastUpperCaseFirst} ${this.layer}`
-    }
+        // Set up.layer.current to the parent of the closed layer, which is now likely
+        // to be the front layer.
+        baseLayer: formerParent,
+        callback: this.layer.callback(`on${verbPastUpperCaseFirst}`),
+        ensureBubbles: true,
+        log: `${verbPastUpperCaseFirst} ${this.layer}`
+      }
     )
   }
 

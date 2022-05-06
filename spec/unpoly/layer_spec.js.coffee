@@ -518,6 +518,27 @@ describe 'up.layer', ->
                 expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
                 done()
 
+            it 'emits an up:layer:dismissed event with { value: ":button" } and other details', asyncSpec (next) ->
+              up.layer.open(dismissable: 'button', mode: 'modal')
+              buttonElement = null
+              listener = jasmine.createSpy('up:layer:dismissed listener')
+              up.on('up:layer:dismissed', listener)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
+
+                buttonElement = up.fragment.get('up-modal-dismiss')
+                Trigger.clickSequence(buttonElement, { clientX: 0, clientY: 0 })
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(false)
+
+                expect(listener).toHaveBeenCalledWith(
+                  jasmine.objectContaining(value: ':button', origin: buttonElement),
+                  jasmine.anything(),
+                  jasmine.anything()
+                )
+
           describe 'without { dismissable: "button" }', ->
 
             it 'does not add a button that dimisses the layer', (done) ->
@@ -537,6 +558,25 @@ describe 'up.layer', ->
 
               next ->
                 expect(up.layer.isOverlay()).toBe(false)
+
+            it 'emits an up:layer:dismissed event with { value: ":key" } and other details', asyncSpec (next) ->
+              up.layer.open(dismissable: 'key', mode: 'modal')
+              listener = jasmine.createSpy('up:layer:dismissed listener')
+              up.on('up:layer:dismissed', listener)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(true)
+
+                Trigger.escapeSequence(document.body)
+
+              next ->
+                expect(up.layer.isOverlay()).toBe(false)
+
+                expect(listener).toHaveBeenCalledWith(
+                  jasmine.objectContaining(value: ':key'),
+                  jasmine.anything(),
+                  jasmine.anything()
+                )
 
           describe 'without { dismissable: "key" }', ->
 

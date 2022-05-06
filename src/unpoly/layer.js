@@ -1069,6 +1069,8 @@ up.layer = (function() {
   @event up:layer:accept
   @param {up.Layer} event.layer
     The layer that is about to close.
+  @param {Element} [event.value]
+    The overlay's [acceptance value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that is causing the layer to close.
   @param event.preventDefault()
@@ -1086,6 +1088,8 @@ up.layer = (function() {
   @event up:layer:accepted
   @param {up.Layer} event.layer
     The layer that was closed.
+  @param {Element} [event.value]
+    The overlay's [acceptance value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that has caused the layer to close.
   @stable
@@ -1111,6 +1115,8 @@ up.layer = (function() {
   @event up:layer:dismiss
   @param {up.Layer} event.layer
     The layer that is about to close.
+  @param {Element} [event.value]
+    The overlay's [dismissal value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that is causing the layer to close.
   @param event.preventDefault()
@@ -1128,6 +1134,8 @@ up.layer = (function() {
   @event up:layer:dismissed
   @param {up.Layer} event.layer
     The layer that was closed.
+  @param {Element} [event.value]
+    The overlay's [dismissal value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that has caused the layer to close.
   @stable
