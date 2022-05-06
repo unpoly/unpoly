@@ -56,7 +56,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     return this.layer.emit(
       this.buildEvent(`up:layer:${this.verb}`), {
       callback: this.layer.callback(`on${u.upperCaseFirst(this.verb)}`),
-      log: `Will ${this.verb} ${this.layer}`
+      log: [`Will ${this.verb} ${this.layer} with value %o`, this.value]
     })
   }
 
@@ -77,7 +77,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
         baseLayer: formerParent,
         callback: this.layer.callback(`on${verbPastUpperCaseFirst}`),
         ensureBubbles: true,
-        log: `${verbPastUpperCaseFirst} ${this.layer}`
+        log: [`${verbPastUpperCaseFirst} ${this.layer} with value %o`, this.value]
       }
     )
   }
