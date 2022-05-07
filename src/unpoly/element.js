@@ -1050,7 +1050,7 @@ up.element = (function() {
     return value
   }
 
-  const CSS_LENGTH_PROPS = u.arrayToSet([
+  const CSS_LENGTH_PROPS = new Set([
     'top', 'right', 'bottom', 'left',
     'padding', 'paddingtop', 'paddingright', 'paddingbottom', 'paddingleft',
     'margin', 'margintop', 'marginright', 'marginbottom', 'marginleft',

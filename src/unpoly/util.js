@@ -1032,7 +1032,7 @@ up.util = (function() {
   */
   function uniq(array) {
     if (array.length < 2) { return array; }
-    return setToArray(arrayToSet(array))
+    return Array.from(new Set(array))
   }
 
   /*-
@@ -1059,30 +1059,6 @@ up.util = (function() {
         return true
       }
     })
-  }
-
-  /*-
-  After IE11 this can just be Array.from(set)
-
-  @function up.util.setToArray
-  @internal
-  */
-  function setToArray(set) {
-    const array = []
-    set.forEach(elem => array.push(elem))
-    return array
-  }
-
-  /*-
-  After IE11 this can just be new Set(array)
-
-  @function up.util.arrayToSet
-  @internal
-  */
-  function arrayToSet(array) {
-    const set = new Set()
-    array.forEach(elem => set.add(elem))
-    return set
   }
 
   /*-
@@ -2123,8 +2099,6 @@ up.util = (function() {
     wrapList,
     wrapValue,
     simpleEase,
-    arrayToSet,
-    setToArray,
     uid,
     upperCaseFirst,
     lowerCaseFirst,

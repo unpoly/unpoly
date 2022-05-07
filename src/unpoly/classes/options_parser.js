@@ -31,7 +31,7 @@ up.OptionsParser = class OptionsParser {
     this.attrPrefix = parserOptions.attrPrefix || 'up-'
     this.defaults = parserOptions.defaults || {}
     if (parserOptions.only) {
-      this.only = u.arrayToSet(parserOptions.only)
+      this.only = new Set(parserOptions.only)
     }
   }
 
