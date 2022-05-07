@@ -88,6 +88,9 @@ up.framework = (function() {
   }
 
   function mustBootManually() {
+    // Since this function runs before the support check, we may be dealing
+    // with a browser that does not support `document.currentScript` (e.g. IE11).
+    // See https://caniuse.com/document-currentscript
     let unpolyScript = document.currentScript
 
     // If we're is loaded via <script async>, there are no guarantees
