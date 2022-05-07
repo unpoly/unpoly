@@ -4,25 +4,16 @@ const e = up.element
 up.ResponseDoc = class ResponseDoc {
 
   constructor(options) {
-    // We wrap <noscript> tags into a <div> for two reasons:
-    //
-    // (1) IE11 and Edge cannot find <noscript> tags with jQuery or querySelector() or
-    //     getElementsByTagName() when the tag was created by DOMParser. This is a bug.
-    //     https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/
-    //
-    // (2) The children of a <nonscript> tag are expected to be a verbatim text node
-    //     in a scripting-capable browser. However, due to rules in the DOMParser spec,
-    //     the children are parsed into actual DOM nodes. This confuses libraries that
-    //     work with <noscript> tags, such as lazysizes.
-    //     http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring
-    //
-    // We will unwrap the wrapped <noscript> tags when a fragment is requested with
-    // #first(), and only in the requested fragment.
+    // We wrap <noscript> tags into a <div> because the children of a <nonscript> tag
+    // are expected to be a verbatim text node in a scripting-capable browser.
+    // However, due to rules in the DOMParser spec, the children are parsed into actual DOM nodes.
+    // This confuses libraries that work with <noscript> tags, such as lazysizes.
+    // See http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring .
     this.noscriptWrapper = new up.HTMLWrapper('noscript')
 
     // We strip <script> tags from the HTML.
     // If you need a fragment update to call JavaScript code, call it from a compiler
-    // ([Google Analytics example](https://makandracards.com/makandra/41488-using-google-analytics-with-unpoly)).
+    // or set `up.fragment.config.runScripts = true`.
     this.scriptWrapper = new up.HTMLWrapper('script')
 
     this.root =

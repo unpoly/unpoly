@@ -14,6 +14,8 @@ Various changes
     - If we do this we can also get rid of { basic: true }
   - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
 - Maybe remove some simple IE11
+- Rewrite Legacy Browser section
+  - https://unpoly.com/install#legacy-browsers
 
 
 Docs
