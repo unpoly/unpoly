@@ -10,9 +10,7 @@ Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 Quick wins: Removals
 --------------------
 
-- up.focus() can use native preventScroll: true
 - normalizeURL can use { host } to strip away standard ports
-- replace isNativelyFocusable() with element.tabIndex >= 0
 - up.on() options { one } can just be forwarded to Element#addEventListener()
 - up.framework.mustBootManually() can rely on document.currentScript being supported
   - IF it happens after compatibility check
