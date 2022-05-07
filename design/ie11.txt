@@ -11,7 +11,7 @@ Quick wins: Removals
 --------------------
 
 - normalizeURL can use { host } to strip away standard ports
-- up.on() options { one } can just be forwarded to Element#addEventListener()
+- up.on() options { once } can just be forwarded to Element#addEventListener()
 - Drop IE11 hacks from parseURL()
 - Do we want to replace ScrollMotion / RevealMotion with native { behavior: 'smooth' }?
   - I think so
