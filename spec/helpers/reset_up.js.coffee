@@ -4,10 +4,7 @@ $ = jQuery
 message = 'Resetting framework for next test'
 
 logResetting = ->
-  if up.browser.canFormatLog()
-    console.debug("%c#{message}%c", 'color: #2244aa', '')
-  else
-    console.debug("[#{message}]")
+  console.debug("%c#{message}%c", 'color: #2244aa', '')
 
 afterEach (done) ->
   # If the spec has installed the Jasmine clock, uninstall it so

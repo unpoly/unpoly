@@ -150,30 +150,7 @@ window.Trigger = (->
     mouseleave(element, options)
 
   buildEvent = (klass) ->
-    event = document.createEvent(klass)
-
-    # IE11 does not set { defaultPrevented: true } after #preventDefault()
-    # was called on a custom event.
-    # See discussion here: https://stackoverflow.com/questions/23349191
-    if up.browser.isIE11()
-      originalPreventDefault = event.preventDefault
-
-      event.preventDefault = ->
-        # Even though we're swapping out defaultPrevented() with our own implementation,
-        # we still need to call the original method to trigger the forwarding of up:click.
-        originalPreventDefault.call(event)
-        try
-          u.getter(event, 'defaultPrevented', -> true)
-        catch
-          # Sometimes (but not always!) IE11 throws an error when redefining the { defaultPrevented }
-          # property. We're just ignoring the issue because that only affects specs where the flag
-          # does not matter and IE11 finally dies in June 2022. This browser has been the scourge
-          # of my life and my entire industry.
-          console.error('IE11 prevented reconfiguration of { defaultPrevented } property')
-          # Try something else. Doesn't usually work. Whatever, I don't even care at this point.
-          event.defaultPrevented = true
-
-    return event
+    return document.createEvent(klass)
 
   # Can't use the new Event constructor in IE11 because computer.
   # http://www.codeproject.com/Tips/893254/JavaScript-Triggering-Event-Manually-in-Internet-E

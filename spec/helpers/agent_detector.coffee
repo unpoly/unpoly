@@ -9,12 +9,12 @@ window.AgentDetector = do ->
   isIE = ->
     match(/\bTrident\b/)
 
-  isEdge = ->
+  isLegacyEdge = ->
     match(/\bEdge\b/)
 
   isSafari = ->
     match(/\bSafari\b/) && !match(/\bChrome\b/)
 
   isIE: isIE
-  isEdge: isEdge
+  isLegacyEdge: isLegacyEdge
   isSafari: isSafari

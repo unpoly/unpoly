@@ -45,11 +45,14 @@ up.EventListener = class EventListener extends up.Record {
   }
 
   addListenerArgs() {
-    const args = [this.eventType, this.nativeCallback]
-    if (this.passive && up.browser.canPassiveEventListener()) {
-      args.push({ passive: true })
+    let options = {}
+    if (this.passive) {
+      // Avoid setting a default { passive: false } since some browsers have non-false
+      // defaults for some event types like `touchstart`.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
+      options.passive = true
     }
-    return args
+    return [this.eventType, this.nativeCallback, options]
   }
 
   unbind() {

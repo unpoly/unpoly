@@ -17,7 +17,6 @@ The following types of parameter representation are supported:
 2. A query string like `'email=foo%40bar.com'`
 3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
 4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
-   On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
 
 @class up.Params
 */

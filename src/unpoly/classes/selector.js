@@ -1,4 +1,3 @@
-const e = up.element
 const u = up.util
 
 up.Selector = class Selector {

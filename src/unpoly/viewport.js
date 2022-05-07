@@ -266,17 +266,8 @@ up.viewport = (function() {
       makeFocusable(element)
     }
 
-    // First focus without scrolling, since we're going to use our custom scrolling
-    // logic below.
-    if (up.browser.isIE11()) {
-      // IE11 does not support the { preventScroll } option for Element#focus().
-      const viewport = closest(element)
-      const oldScrollTop = viewport.scrollTop
-      element.focus()
-      viewport.scrollTop = oldScrollTop
-    } else {
-      element.focus({ preventScroll: true })
-    }
+    // First focus without scrolling, since we're going to use our custom scrolling logic below.
+    element.focus({ preventScroll: true })
 
     if (!options.preventScroll) {
       // Use up.reveal() which scrolls far enough to ignore fixed nav bars

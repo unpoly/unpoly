@@ -304,27 +304,25 @@ describe 'up.event', ->
 
       describe 'with { passive } option', ->
 
-        describeCapability 'canPassiveEventListener', ->
+        it 'registers a passive event listener', ->
+          element = fixture('.element')
+          spyOn(element, 'addEventListener')
+          listener = ->
 
-          it 'registers a passive event listener', ->
+          up.on(element, 'my:event', { passive: true }, listener)
+
+          expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function), { passive: true })
+
+      describe 'without { passive } option', ->
+
+          it 'does not pass { passive: false } since this would override defaults some browser have for certain event types', ->
             element = fixture('.element')
             spyOn(element, 'addEventListener')
             listener = ->
 
-            up.on(element, 'my:event', { passive: true }, listener)
+            up.on(element, 'my:event', listener)
 
-            expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function), { passive: true })
-
-        describeFallback 'canPassiveEventListener', ->
-
-          it 'registers a non-passive event listener', ->
-            element = fixture('.element')
-            spyOn(element, 'addEventListener')
-            listener = ->
-
-            up.on(element, 'my:event', { passive: true }, listener)
-
-            expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function))
+            expect(element.addEventListener).toHaveBeenCalledWith('my:event', jasmine.any(Function), {})
 
       describe 'with { once } option', ->
 
@@ -729,17 +727,15 @@ describe 'up.event', ->
         expect(fooListener).toHaveBeenCalled()
         expect(fooListener.calls.mostRecent().args[0]).toBeEvent('foo', key: 'value')
 
-      # IE does not call JavaScript and always performs the default action on right clicks
-      unless AgentDetector.isIE() || AgentDetector.isEdge()
-        it 'does not emit the event if the right mouse button is used', asyncSpec (next) ->
-          link = up.hello(fixture("a[up-emit='foo']", text: 'label'))
-          fooListener = jasmine.createSpy('fooListener')
-          link.addEventListener('foo', fooListener)
+      it 'does not emit the event if the right mouse button is used', asyncSpec (next) ->
+        link = up.hello(fixture("a[up-emit='foo']", text: 'label'))
+        fooListener = jasmine.createSpy('fooListener')
+        link.addEventListener('foo', fooListener)
 
-          Trigger.clickSequence(link, button: 2)
+        Trigger.clickSequence(link, button: 2)
 
-          next ->
-            expect(fooListener).not.toHaveBeenCalled()
+        next ->
+          expect(fooListener).not.toHaveBeenCalled()
 
       it 'does not emit the event if ctrl is pressed during the click', asyncSpec (next) ->
         link = up.hello(fixture("a[up-emit='foo']", text: 'label'))

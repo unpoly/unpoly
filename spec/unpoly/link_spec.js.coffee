@@ -1352,17 +1352,15 @@ describe 'up.link', ->
             expect(link).not.toHaveBeenDefaultFollowed()
             expect('.target').toHaveText('new text')
 
-        # IE does not call JavaScript and always performs the default action on right clicks
-        unless AgentDetector.isIE() || AgentDetector.isEdge()
-          it 'does nothing if the right mouse button is used', asyncSpec (next) ->
-            @$link = $fixture('a[href="/follow-path"][up-follow]')
-            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+        it 'does nothing if the right mouse button is used', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
-            Trigger.click(@$link, button: 2)
+          Trigger.click(@$link, button: 2)
 
-            next =>
-              expect(@followSpy).not.toHaveBeenCalled()
-              expect(@$link).toHaveBeenDefaultFollowed()
+          next =>
+            expect(@followSpy).not.toHaveBeenCalled()
+            expect(@$link).toHaveBeenDefaultFollowed()
 
         it 'does nothing if shift is pressed during the click', asyncSpec (next) ->
           @$link = $fixture('a[href="/follow-path"][up-follow]')
@@ -1475,15 +1473,13 @@ describe 'up.link', ->
 
           next => expect(@followSpy.calls.mostRecent().args[0]).toEqual(@$link[0])
 
-        # IE does not call JavaScript and always performs the default action on right clicks
-        unless AgentDetector.isIE() || AgentDetector.isEdge()
-          it 'does nothing if the right mouse button is pressed down', asyncSpec (next) ->
-            @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
-            @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+        it 'does nothing if the right mouse button is pressed down', asyncSpec (next) ->
+          @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
+          @followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
 
-            Trigger.mousedown(@$link, button: 2)
+          Trigger.mousedown(@$link, button: 2)
 
-            next => expect(@followSpy).not.toHaveBeenCalled()
+          next => expect(@followSpy).not.toHaveBeenCalled()
 
         it 'does nothing if shift is pressed during mousedown', asyncSpec (next) ->
           @$link = $fixture('a[href="/follow-path"][up-follow][up-instant]')
@@ -1989,17 +1985,15 @@ describe 'up.link', ->
           # The target is replaced instantly
           expect('.target').toHaveText('new text')
 
-      describeCapability 'canPassiveEventListener', ->
+      it 'registers the touchstart callback as a passive event listener', ->
+        fixture('.target')
+        link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
 
-        it 'registers the touchstart callback as a passive event listener', ->
-          fixture('.target')
-          link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        spyOn(link, 'addEventListener')
 
-          spyOn(link, 'addEventListener')
+        up.hello(link)
 
-          up.hello(link)
-
-          expect(link.addEventListener).toHaveBeenCalledWith('touchstart', jasmine.any(Function), { passive: true })
+        expect(link.addEventListener).toHaveBeenCalledWith('touchstart', jasmine.any(Function), { passive: true })
 
       it 'preloads the link destination on mousedown (without delay)', asyncSpec (next) ->
         up.link.config.preloadDelay = 100
@@ -2245,16 +2239,14 @@ describe 'up.link', ->
           expect(listener).not.toHaveBeenCalled()
           expect(link).toHaveBeenDefaultFollowed()
 
-      # IE does not call JavaScript and always performs the default action on right clicks
-      unless AgentDetector.isIE() || AgentDetector.isEdge()
-        it 'does not emit an up:click event if the right mouse button is used', asyncSpec (next) ->
-          link = fixture('a[href="/path"]')
-          listener = jasmine.createSpy('up:click listener')
-          link.addEventListener('up:click', listener)
-          Trigger.click(link, button: 2)
-          next ->
-            expect(listener).not.toHaveBeenCalled()
-            expect(link).toHaveBeenDefaultFollowed()
+      it 'does not emit an up:click event if the right mouse button is used', asyncSpec (next) ->
+        link = fixture('a[href="/path"]')
+        listener = jasmine.createSpy('up:click listener')
+        link.addEventListener('up:click', listener)
+        Trigger.click(link, button: 2)
+        next ->
+          expect(listener).not.toHaveBeenCalled()
+          expect(link).toHaveBeenDefaultFollowed()
 
       it 'does not emit an up:click event if shift is pressed during the click', asyncSpec (next) ->
         link = fixture('a[href="/path"]')

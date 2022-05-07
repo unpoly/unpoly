@@ -376,10 +376,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       }
     })
 
-    console.log("Steps after are %o", u.copy(this.steps))
-
-//    # Remove steps when their oldElement is nested inside the oldElement
-//    # of another step.
     this.resolveOldNesting()
   }
 

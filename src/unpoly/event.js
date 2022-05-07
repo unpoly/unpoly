@@ -383,20 +383,6 @@ The parsed data will be passed to your event handler as a third argument:
     event.initEvent(type, true, true); // name, bubbles, cancelable
     Object.assign(event, u.omit(props, ['type', 'target']))
 
-    // IE11 does not set { defaultPrevented: true } after #preventDefault()
-    // was called on a custom event.
-    // See discussion here: https://stackoverflow.com/questions/23349191
-    if (up.browser.isIE11()) {
-      const originalPreventDefault = event.preventDefault
-
-      event.preventDefault = function() {
-        // Even though we're swapping out defaultPrevented() with our own implementation,
-        // we still need to call the original method to trigger the forwarding of up:click.
-        originalPreventDefault.call(event)
-        return u.getter(event, 'defaultPrevented', () => true)
-      }
-    }
-
     return event
   }
 

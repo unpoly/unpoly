@@ -29,14 +29,14 @@ up.log = (function() {
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [config.banner=true]
     Print the Unpoly banner to the developer console.
-  @param {boolean} [config.format=!isIE11]
+  @param {boolean} [config.format=true]
     Format output using CSS.
   @stable
   */
   const config = new up.Config(() => ({
     enabled: sessionStore.get('enabled'),
     banner: true,
-    format: up.browser.canFormatLog()
+    format: true
   }))
 
   function reset() {
