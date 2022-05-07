@@ -527,23 +527,23 @@ describe 'up.viewport', ->
           @resetHTMLCSS?()
 
         it 'falls back to the scrolling element', ->
-          $element = $fixture('.element').css(height: '3000px')
-          $result = up.viewport.get($element)
-          expect($result).toMatchSelector(up.viewport.rootSelector())
+          element = fixture('.element', style: { height: '3000px' })
+          result = up.viewport.get(element)
+          expect(result).toBe(document.scrollingElement)
 
         it 'falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', ->
-          $element = $fixture('.element').css(height: '3000px')
+          element = fixture('.element', style: { height: '3000px' })
           @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'hidden')
           @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'scroll')
-          $result = up.viewport.get($element)
-          expect($result).toMatchSelector(up.viewport.rootSelector())
+          result = up.viewport.get(element)
+          expect(result).toBe(document.scrollingElement)
 
         it 'falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', ->
-          $element = $fixture('.element').css(height: '3000px')
+          element = fixture('.element', style: { height: '3000px' })
           @resetHTMLCSS = e.setTemporaryStyle(document.documentElement, 'overflow-y': 'scroll')
           @resetBodyCSS = e.setTemporaryStyle(document.body, 'overflow-y': 'hidden')
-          $result = up.viewport.get($element)
-          expect($result).toMatchSelector(up.viewport.rootSelector())
+          result = up.viewport.get(element)
+          expect(result).toBe(document.scrollingElement)
 
     describe 'up.viewport.restoreScroll', ->
 

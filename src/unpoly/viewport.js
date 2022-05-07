@@ -399,17 +399,7 @@ up.viewport = (function() {
   }
 
   function rootSelector() {
-    // The spec says this should be <html> in standards mode
-    // and <body> in quirks mode. However, it is currently (2018-07)
-    // always <body> in Webkit browsers (not Blink). Luckily Webkit
-    // also supports document.scrollingElement.
-    let element
-    if ((element = document.scrollingElement)) {
-      return element.tagName
-    } else {
-      // IE11
-      return 'html'
-    }
+    return getRoot().tagName
   }
 
   /*-
@@ -421,7 +411,7 @@ up.viewport = (function() {
   @experimental
   */
   function getRoot() {
-    return document.querySelector(rootSelector())
+    return document.scrollingElement
   }
 
   function rootWidth() {
@@ -435,7 +425,7 @@ up.viewport = (function() {
   }
 
   function isRoot(element) {
-    return element.matches(rootSelector())
+    return element === getRoot()
   }
 
   /*-
@@ -886,7 +876,6 @@ up.viewport = (function() {
     subtree: getSubtree,
     around: getAround,
     all: getAll,
-    rootSelector,
     get root() { return getRoot() },
     rootWidth,
     rootHeight,
