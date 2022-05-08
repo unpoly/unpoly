@@ -10,9 +10,7 @@ Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 Quick wins: Removals
 --------------------
 
-- normalizeURL can use { host } to strip away standard ports
 - up.on() options { once } can just be forwarded to Element#addEventListener()
-- Drop IE11 hacks from parseURL()
 - Do we want to replace ScrollMotion / RevealMotion with native { behavior: 'smooth' }?
   - I think so
   - Chrome's behavior for parallel scrolling is simply that the later call overrides the scroll target for the earlier call

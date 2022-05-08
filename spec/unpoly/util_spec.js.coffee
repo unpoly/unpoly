@@ -474,16 +474,6 @@ describe 'up.util', ->
         expect(url.search).toEqual('?search')
         expect(url.hash).toEqual('#bar')
 
-      it 'allows to pass a link element as a jQuery collection', ->
-        $link = $('<a></a>').attr(href: '/qux/foo?search#bar')
-        url = up.util.parseURL($link)
-        expect(url.protocol).toEqual(location.protocol)
-        expect(url.hostname).toEqual(location.hostname)
-        expect(url.port).toEqual(location.port)
-        expect(url.pathname).toEqual('/qux/foo')
-        expect(url.search).toEqual('?search')
-        expect(url.hash).toEqual('#bar')
-
     describe 'up.util.map', ->
 
       it 'creates a new array of values by calling the given function on each item of the given array', ->
@@ -1021,11 +1011,28 @@ describe 'up.util', ->
       it 'preserves a protocol and hostname for a URL from another domain', ->
         expect(up.util.normalizeURL('http://example.com/foo/bar')).toBe('http://example.com/foo/bar')
 
+      it 'removes a standard port for http:// URLs', ->
+        expect(up.util.normalizeURL('http://example.com:80/foo/bar')).toBe('http://example.com/foo/bar')
+
+      it 'removes a standard port for https:// URLs', ->
+        expect(up.util.normalizeURL('https://example.com:443/foo/bar')).toBe('https://example.com/foo/bar')
+
+      it 'preserves a non-standard port', ->
+        expect(up.util.normalizeURL('http://example.com:8080/foo/bar')).toBe('http://example.com:8080/foo/bar')
+
       it 'preserves a query string', ->
         expect(up.util.normalizeURL('/foo/bar?key=value')).toBe('/foo/bar?key=value')
 
       it 'strips a query string with { search: false } option', ->
         expect(up.util.normalizeURL('/foo/bar?key=value', search: false)).toBe('/foo/bar')
+
+      it 'normalizes a result from up.util.parseURL()', ->
+        url = up.util.parseURL('/foo')
+        expect(up.util.normalizeURL(url)).toBe("/foo")
+
+      it 'normalizes a URL', ->
+        url = new URL('/foo', location.href)
+        expect(up.util.normalizeURL(url)).toBe("/foo")
 
       describe 'trailing slashes', ->
 

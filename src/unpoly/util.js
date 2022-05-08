@@ -54,17 +54,6 @@ up.util = (function() {
     }
   }
 
-  /*-
-  Returns if the given port is the default port for the given protocol.
-
-  @function up.util.isStandardPort
-  @internal
-  */
-  function isStandardPort(protocol, port) {
-    port = port.toString()
-    return (((port === "") || (port === "80")) && (protocol === 'http:')) || ((port === "443") && (protocol === 'https:'))
-  }
-
   const NORMALIZE_URL_DEFAULTS = {
     host: 'cross-domain',
   }
@@ -110,6 +99,7 @@ up.util = (function() {
   - Only `http` and `https` schemes are supported.
 
   @function up.util.normalizeURL
+  @param {string|URL} the URL to normalize
   @param {boolean} [options.host='cross-domain']
     Whether to include protocol, hostname and port in the normalized URL.
 
@@ -126,10 +116,10 @@ up.util = (function() {
     The normalized URL.
   @experimental
   */
-  function normalizeURL(urlOrAnchor, options) {
+  function normalizeURL(url, options) {
     options = newOptions(options, NORMALIZE_URL_DEFAULTS)
 
-    const parts = parseURL(urlOrAnchor)
+    const parts = parseURL(url)
     let normalized = ''
 
     if (options.host === 'cross-domain') {
@@ -137,13 +127,7 @@ up.util = (function() {
     }
 
     if (options.host) {
-      normalized += parts.protocol + "//" + parts.hostname
-      // Once we drop IE11 we can just use { host }, which contains port and hostname
-      // and also handles standard ports.
-      // See https://developer.mozilla.org/en-US/docs/Web/API/URL/host
-      if (!isStandardPort(parts.protocol, parts.port)) {
-        normalized += `:${parts.port}`
-      }
+      normalized += parts.protocol + "//" + parts.host
     }
 
     let { pathname } = parts
@@ -201,40 +185,22 @@ up.util = (function() {
   ```
 
   @function up.util.parseURL
-  @return {Object}
+  @param {string|URL} the URL to parse
+  @return {object}
     The parsed URL as an object with
-    `protocol`, `hostname`, `port`, `pathname`, `search` and `hash`
-    properties.
+    `{ protocol, hostname, port, pathname, search, hash }` properties.
   @stable
   */
-  function parseURL(urlOrLink) {
-    let link
-    if (isJQuery(urlOrLink)) {
-      // In case someone passed us a $link, unwrap it
-      link = up.element.get(urlOrLink)
-    } else if (urlOrLink.pathname) {
-      // If we are handed a parsed URL, just return it
-      link = urlOrLink
-    } else {
-      link = document.createElement('a')
-      link.href = urlOrLink
+  function parseURL(url) {
+    if (url.pathname) {
+      return url
     }
 
-    // In IE11 the #hostname and #port properties of unqualified URLs are empty strings.
-    // We can fix this by setting the link's { href } on the link itself.
-    if (!link.hostname) {
-      link.href = link.href // eslint-disable-line no-self-assign
-    }
-
-    // Some IEs don't include a leading slash in the #pathname property.
-    // We have confirmed this in IE11 and earlier.
-    if (link.pathname[0] !== '/') {
-      // Only copy the link into an object when we need to (to change a property).
-      // Note that we're parsing a lot of URLs for [up-active].
-      link = pick(link, ['protocol', 'hostname', 'port', 'pathname', 'search', 'hash'])
-      link.pathname = '/' + link.pathname
-    }
-
+    // We would prefer to use `new URL(url, location.href)` here, but that is 30% slower
+    // than creating a link (see benchmark at https://jsbench.me/l7l2x9cruf/1).
+    // We're parsing a *lot* of URLs for [up-active], so this matters.
+    let link = document.createElement('a')
+    link.href = url
     return link
   }
 
