@@ -4,13 +4,10 @@ Code we can remove once we drop IE11
 Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 --------------------------------------------------------------------
 
-- up.browser.isIE11()
-
 
 Quick wins: Removals
 --------------------
 
-- up.on() options { once } can just be forwarded to Element#addEventListener()
 - Do we want to replace ScrollMotion / RevealMotion with native { behavior: 'smooth' }?
   - I think so
   - Chrome's behavior for parallel scrolling is simply that the later call overrides the scroll target for the earlier call
@@ -30,8 +27,3 @@ More work required
 - Maybe replace up.Params.fromForm() with new FormData()
   - However, we also use up.Params.fromFields() in FieldWatcher
 - maybe don't even have a ES5 build?
-- we might want to parse URLs faster with the URL class (but check how it handles non-fully-qualified URLs)
-- maybe replace up.Params with FormData, but we would need a lot of utility methods around it
-- Merge up-data lazily and merge element.dataSet into up-data.
-  - This requires Proxy
-  - How would this work with non-object [up-data]?
