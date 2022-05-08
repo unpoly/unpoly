@@ -45,13 +45,10 @@ up.EventListener = class EventListener extends up.Record {
   }
 
   addListenerArgs() {
-    let options = {}
-    if (this.passive) {
-      // Avoid setting a default { passive: false } since some browsers have non-false
-      // defaults for some event types like `touchstart`.
-      // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
-      options.passive = true
-    }
+    // Avoid setting a default { passive: false } since some browsers have non-false
+    // defaults for some event types like `touchstart`.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
+    let options = u.compactObject(u.pick(this, ['once', 'passive']))
     return [this.eventType, this.nativeCallback, options]
   }
 
@@ -66,12 +63,6 @@ up.EventListener = class EventListener extends up.Record {
   nativeCallback(event) {
     if (up.framework.beforeBoot && !this.beforeBoot) {
       return
-    }
-
-    // Once we drop IE11 support we can forward the { once } option
-    // to Element#addEventListener().
-    if (this.once) {
-      this.unbind()
     }
 
     // 1. Since we're listing on `document`, event.currentTarget is now `document`.
