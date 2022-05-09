@@ -49,6 +49,7 @@ Docs
 
 ### Other docs
 
+- Own docs entry for :maybe
 - up.layer.config.foreignOverlaySelectors
 - Explain that preloading will not abort other requests
 - Explain and test [up-validate] usage for radio buttons
