@@ -1053,6 +1053,8 @@ describe 'up.fragment', ->
 
             next (result) ->
               expect(result.state).toBe('fulfilled')
+              expect(result.value).toEqual(jasmine.any(up.RenderResult))
+              expect(result.value.fragments).toEqual []
 
           it 'lets the server sends an abstract target like :main', asyncSpec (next) ->
             fixture('.one', text: 'old content')
