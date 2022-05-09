@@ -266,6 +266,24 @@ describe 'up.radio', ->
         next.after 100, ->
           expect(reloadSpy.calls.count()).toBe(2)
 
+      it 'keeps the polling rhythm when the server responds with `X-Up-Target: :none` (bugfix)', asyncSpec (next) ->
+        up.radio.config.pollInterval = 250
+
+        up.hello(fixture('.element[up-poll][up-source="/source"]'))
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after 250, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWith(status: 200, responseHeaders: { 'X-Up-Target': ':none' })
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        next.after 250, ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
       it 'keeps polling if a request failed', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject()

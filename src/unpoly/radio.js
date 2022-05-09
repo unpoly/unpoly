@@ -103,7 +103,7 @@ up.radio = (function() {
       if (stopped) { return; }
 
       if (shouldPoll(fragment)) {
-        u.always(up.reload(fragment, options), doSchedule)
+        u.always(up.reload(fragment, options), () => doSchedule())
       } else {
         up.puts('[up-poll]', 'Polling is disabled')
         // Reconsider after 10 seconds at most
