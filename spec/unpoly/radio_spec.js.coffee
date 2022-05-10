@@ -21,14 +21,11 @@ describe 'up.radio', ->
           expect(reloadSpy).not.toHaveBeenCalled()
 
         next.after interval, ->
-          expect(reloadSpy).toHaveBeenCalledWith(element, jasmine.anything())
+          expect(reloadSpy).toHaveBeenCalledWith(element)
           expect(reloadSpy.calls.count()).toBe(1)
 
         next.after (timingTolerance + interval), ->
           expect(reloadSpy.calls.count()).toBe(2)
-
-          # TODO: Why is this needed? The fragment should stop polling when it is removed from the DOM.
-          up.radio.stopPolling('.element')
 
       it 'does not stop polling when the server responds without an [up-poll] attribute', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150
@@ -49,6 +46,7 @@ describe 'up.radio', ->
 
         next.after (timingTolerance + interval), ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
+          console.log("!!! Spec over")
 
       it 'stops polling when the element is removed from the DOM', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150
@@ -65,6 +63,57 @@ describe 'up.radio', ->
 
         next.after interval, ->
           expect(reloadSpy).not.toHaveBeenCalled()
+
+      it 'does not cause duplicate requests when called on an [up-poll] element that is already polling', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = up.hello(fixture('.element[up-poll]', text: 'old text'))
+
+        next ->
+          up.radio.startPolling(element)
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      it 'can override an [up-source] attribute from an [up-poll] element', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = up.hello(fixture('.element[up-poll][up-source="/one"]'))
+
+        next ->
+          up.radio.startPolling(element, { source: '/two' })
+
+        next.after timingTolerance, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/two')
+
+      it 'can override an [up-interval] attribute from an [up-poll] element', asyncSpec (next) ->
+        initialInterval = 100
+        up.radio.config.pollInterval = initialInterval
+        timingTolerance = initialInterval / 3
+
+        element = up.hello(fixture(".element[up-poll][up-interval='#{initialInterval}']"))
+
+        next ->
+          up.radio.startPolling(element, { interval: initialInterval * 2 })
+
+        next.after timingTolerance, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after initialInterval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after initialInterval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
     describe 'up.radio.stopPolling()', ->
 
@@ -402,7 +451,6 @@ describe 'up.radio', ->
         timingTolerance = interval / 3
 
         element = up.hello(fixture('.element[up-poll]', text: 'old text'))
-        up.radio.startPolling(element)
 
         next.after timingTolerance, ->
           expect('.element').toHaveText('old text')
@@ -422,8 +470,7 @@ describe 'up.radio', ->
         up.radio.config.pollInterval = interval = 150
         timingTolerance = interval / 3
 
-        element = up.hello(fixture('.element[up-poll][up-source="/one"]', text: 'old text'))
-        up.radio.startPolling(element)
+        up.hello(fixture('.element[up-poll][up-source="/one"]', text: 'old text'))
 
         next.after timingTolerance, ->
           expect('.element').toHaveText('old text')
@@ -442,11 +489,10 @@ describe 'up.radio', ->
           expect(jasmine.lastRequest().url).toMatchURL('/two')
 
       it 'lets the server change the [up-interval] (bugfix)', asyncSpec (next) ->
-        up.radio.config.pollInterval = initialInterval = 100
+        up.radio.config.pollInterval = initialInterval = 150
         timingTolerance = initialInterval / 3
 
-        element = up.hello(fixture(".element[up-poll][up-interval='#{initialInterval}']", text: 'old text'))
-        up.radio.startPolling(element)
+        up.hello(fixture(".element[up-poll][up-interval='#{initialInterval}']", text: 'old text'))
 
         next.after timingTolerance, ->
           expect('.element').toHaveText('old text')

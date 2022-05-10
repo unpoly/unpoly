@@ -12,7 +12,6 @@ This package contains functionality to passively receive updates from the server
 up.radio = (function() {
 
   const u = up.util
-  const e = up.element
 
   /*-
   Configures defaults for passive updates.
@@ -99,46 +98,7 @@ up.radio = (function() {
   @stable
   */
   function startPolling(fragment, options = {}) {
-    const interval = (options.interval ?? e.numberAttr(fragment, 'up-interval')) ?? config.pollInterval
-
-    let stopped = false
-
-    let lastRequest = null
-    options.onQueued = request => lastRequest = request
-
-    function doReload() {
-      // The setTimeout(doReload) callback might already be scheduled
-      // before the polling stopped.
-      if (stopped) { return; }
-
-      if (shouldPoll(fragment)) {
-        u.always(up.reload(fragment, options), () => doSchedule())
-      } else {
-        up.puts('[up-poll]', 'Polling is disabled')
-        // Reconsider after 10 seconds at most
-        doSchedule(Math.min(10 * 1000, interval))
-      }
-    }
-
-    function doSchedule(delay = interval) {
-      // The up.reload().then(doSchedule) callback might already be
-      // registered before the polling stopped.
-      if (stopped) { return; }
-
-      setTimeout(doReload, delay)
-    }
-
-    function destructor() {
-      stopped = true;       // Don't execute already-scheduled callbacks
-      lastRequest?.abort(); // Abort any pending request
-    }
-
-    // up.radio.stopPolling() will emit up:poll:stop to signal cancelation.
-    up.on(fragment, 'up:poll:stop', destructor)
-
-    doSchedule()
-
-    return destructor
+    up.FragmentPolling.forFragment(fragment).forceStart(options)
   }
 
   /*-
@@ -150,7 +110,7 @@ up.radio = (function() {
   @stable
   */
   function stopPolling(element) {
-    up.emit(element, 'up:poll:stop')
+    up.FragmentPolling.forFragment(element).forceStop()
   }
 
   function shouldAutoPoll(fragment) {
@@ -220,7 +180,9 @@ up.radio = (function() {
     Defaults to `up.radio.config.pollInterval`.
   @stable
   */
-  up.compiler('[up-poll]', startPolling)
+  up.compiler('[up-poll]', (fragment) => {
+    up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
+  })
 
   up.on('up:framework:reset', reset)
 
@@ -229,5 +191,6 @@ up.radio = (function() {
     hungryElements,
     startPolling,
     stopPolling,
+    shouldPoll,
   }
 })()

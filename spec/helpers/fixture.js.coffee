@@ -7,9 +7,10 @@ externalFixtures = []
 
 afterEach ->
   if fixtureContainer
+    console.log("!!! destroying fixtures")
     up.destroy(fixtureContainer)
     fixtureContainer = null
-  
+
   while element = externalFixtures.pop()
     up.destroy(element)
 

@@ -362,6 +362,7 @@ up.syntax = (function() {
     let destructors = element.upDestructors
     if (!destructors) {
       destructors = []
+      console.log("!!! registering destructor on element %o, classList is %o", element, element.classList)
       element.upDestructors = destructors
       element.classList.add('up-can-clean')
     }
