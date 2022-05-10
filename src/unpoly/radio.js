@@ -90,7 +90,7 @@ up.radio = (function() {
   Starts [polling](/up-poll) the given element.
 
   @function up.radio.startPolling
-  @param {Element|jQuery|string} fragment
+  @param {Element} fragment
     The fragment to reload periodically.
   @param {number} options.interval
     The reload interval in milliseconds.
@@ -145,7 +145,7 @@ up.radio = (function() {
   Stops [polling](/up-poll) the given element.
 
   @function up.radio.stopPolling
-  @param {Element|jQuery|string} fragment
+  @param {Element} fragment
     The fragment to stop reloading.
   @stable
   */
