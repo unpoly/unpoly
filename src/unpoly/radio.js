@@ -12,7 +12,6 @@ This package contains functionality to passively receive updates from the server
 up.radio = (function() {
 
   const u = up.util
-  const e = up.element
 
   /*-
   Configures defaults for passive updates.
@@ -31,7 +30,7 @@ up.radio = (function() {
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
-    When set to `'auto'` Unpoly will poll if one of the following applies:
+    When set to `'auto'` Unpoly will skip polling updates while one of the following applies:
 
     - The browser tab is in the foreground
     - The fragment's layer is the [frontmost layer](/up.layer.front).
@@ -42,6 +41,9 @@ up.radio = (function() {
     When set to `false`, Unpoly will never allow polling.
 
     You may also pass a function that accepts the polling fragment and returns `true`, `false` or `'auto'`.
+
+    When an update is skipped due to polling being disabled,
+    Unpoly will try to poll again after the configured interval.
 
   @stable
   */
@@ -80,68 +82,33 @@ up.radio = (function() {
   /*-
   Starts [polling](/up-poll) the given element.
 
+  The given element does not need an `[up-poll]` attribute.
+
   @function up.radio.startPolling
-  @param {Element|jQuery|string} fragment
+  @param {Element} fragment
     The fragment to reload periodically.
   @param {number} options.interval
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
+  @param {string} options.url
+    Defaults to the element's closest `[up-source]` attribute.
   @stable
   */
   function startPolling(fragment, options = {}) {
-    const interval = (options.interval ?? e.numberAttr(fragment, 'up-interval')) ?? config.pollInterval
-
-    let stopped = false
-
-    let lastRequest = null
-    options.onQueued = request => lastRequest = request
-
-    function doReload() {
-      // The setTimeout(doReload) callback might already be scheduled
-      // before the polling stopped.
-      if (stopped) { return; }
-
-      if (shouldPoll(fragment)) {
-        u.always(up.reload(fragment, options), () => doSchedule())
-      } else {
-        up.puts('[up-poll]', 'Polling is disabled')
-        // Reconsider after 10 seconds at most
-        doSchedule(Math.min(10 * 1000, interval))
-      }
-    }
-
-    function doSchedule(delay = interval) {
-      // The up.reload().then(doSchedule) callback might already be
-      // registered before the polling stopped.
-      if (stopped) { return; }
-
-      setTimeout(doReload, delay)
-    }
-
-    function destructor() {
-      stopped = true;       // Don't execute already-scheduled callbacks
-      lastRequest?.abort(); // Abort any pending request
-    }
-
-    // up.radio.stopPolling() will emit up:poll:stop to signal cancelation.
-    up.on(fragment, 'up:poll:stop', destructor)
-
-    doSchedule()
-
-    return destructor
+    up.FragmentPolling.forFragment(fragment).forceStart(options)
   }
 
   /*-
   Stops [polling](/up-poll) the given element.
 
   @function up.radio.stopPolling
-  @param {Element|jQuery|string} fragment
+  @param {Element} fragment
     The fragment to stop reloading.
   @stable
   */
   function stopPolling(element) {
-    up.emit(element, 'up:poll:stop')
+    up.FragmentPolling.forFragment(element).forceStop()
   }
 
   function shouldPoll(fragment) {
@@ -194,7 +161,17 @@ up.radio = (function() {
   </div>
   ```
 
-  ### Skipping updates when nothing changed
+  ### Skipping updates on the client
+
+  Client-side code may skip an update by preventing an `up:fragment:poll` event
+  on the polling fragment.
+
+  Unpoly will also choose to skip updates under certain conditions,
+  e.g. when the browser tab is in the background. See `up.radio.config.pollEnabled` for details.
+
+  When an update is skipped, Unpoly will try to poll again after the configured interval.
+
+  ### Skipping updates on the server
 
   When polling a fragment periodically we want to avoid rendering unchanged content.
   This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
@@ -203,14 +180,45 @@ up.radio = (function() {
   To achieve this we timestamp your fragments with an `[up-time]` attribute to indicate
   when the underlying data was last changed. See `[up-time]` for a detailed example.
 
+  If the server has no more recent changes, it may skip the update by responding
+  with an HTTP status `304 Not Modified`.
+
+  When an update is skipped, Unpoly will try to poll again after the configured interval.
+
+  ### Stopping polling
+
+  - The fragment from the server response no longer has an `[up-poll]` attribute.
+  - Client-side code has called `up.radio.stopPolling()` with the polling element.
+  - Polling was [disabled globally](/up.radio.config#config.pollEnabled).
+
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
+  @param [up-source]
+    The URL from which to reload the fragment.
+
+    Defaults to the closest `[up-source]` attribute of an ancestor element.
   @stable
   */
-  up.compiler('[up-poll]', startPolling)
+  up.compiler('[up-poll]', (fragment) => {
+    up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
+  })
+
+  /*-
+  This event is emitted before a [polling](/up-poll) fragment is reloaded from the server.
+
+  Listener may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
+  Preventing the event will only skip a single update. It will *not* stop future polling.
+
+  @event up:fragment:poll
+  @param {Element} event.target
+    The polling fragment.
+  @param event.preventDefault()
+    Event listeners may call this method to prevent the fragment from being reloaded.
+  @experimental
+  */
 
   up.on('up:framework:reset', reset)
 
@@ -218,6 +226,7 @@ up.radio = (function() {
     config,
     hungrySelector,
     startPolling,
-    stopPolling
+    stopPolling,
+    shouldPoll,
   }
 })()
