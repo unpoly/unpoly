@@ -9,7 +9,7 @@ afterEach ->
   if fixtureContainer
     up.destroy(fixtureContainer)
     fixtureContainer = null
-  
+
   while element = externalFixtures.pop()
     up.destroy(element)
 

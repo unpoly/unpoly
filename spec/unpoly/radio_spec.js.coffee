@@ -9,36 +9,131 @@ describe 'up.radio', ->
     describe 'up.radio.startPolling()', ->
 
       it 'starts polling the given element', asyncSpec (next) ->
-        up.radio.config.pollInterval = 150
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = fixture('.element', text: 'old text')
+        up.radio.startPolling(element)
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
+          jasmine.respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+      it 'does not stop polling when the server responds without an [up-poll] attribute', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = fixture('.element', text: 'old text')
+        up.radio.startPolling(element)
+
+        next.after timingTolerance, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+      it 'stops polling when the element is removed from the DOM', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         element = fixture('.element')
         up.radio.startPolling(element)
 
-        next.after 75, ->
+        next.after timingTolerance, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+          up.destroy(element)
+
+        next.after interval, ->
           expect(reloadSpy).not.toHaveBeenCalled()
 
-        next.after 150, ->
-          expect(reloadSpy).toHaveBeenCalledWith(element, jasmine.anything())
-          expect(reloadSpy.calls.count()).toBe(1)
+      it 'does not cause duplicate requests when called on an [up-poll] element that is already polling', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
 
-        next.after 150, ->
-          expect(reloadSpy.calls.count()).toBe(2)
-          up.radio.stopPolling(element)
+        element = up.hello(fixture('.element[up-poll]', text: 'old text'))
+
+        next ->
+          up.radio.startPolling(element)
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      it 'can override an [up-source] attribute from an [up-poll] element', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = up.hello(fixture('.element[up-poll][up-source="/one"]'))
+
+        next ->
+          up.radio.startPolling(element, { url: '/two' })
+
+        next.after timingTolerance, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/two')
+
+      it 'polls with the given { interval }', asyncSpec (next) ->
+        defaultInterval = 100
+        up.radio.config.pollInterval = defaultInterval
+        timingTolerance = defaultInterval / 3
+
+        element = up.hello(fixture('.element'))
+
+        next ->
+          up.radio.startPolling(element, { interval: defaultInterval * 2 })
+
+        next.after timingTolerance, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after defaultInterval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after defaultInterval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
     describe 'up.radio.stopPolling()', ->
 
       it 'stops polling the given, polling element', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        interval = 150
+        timingTolerance = interval / 3
+
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         element = fixture('.element')
-        up.radio.startPolling(element, interval: 100)
+        up.radio.startPolling(element, interval: interval)
 
-        next.after 150, ->
+        next.after (timingTolerance + interval), ->
           expect(reloadSpy.calls.count()).toBe(1)
           up.radio.stopPolling(element)
 
-        next.after 100, ->
+        next.after (timingTolerance + interval), ->
           expect(reloadSpy.calls.count()).toBe(1)
 
   describe 'unobtrusive behavior', ->
@@ -262,20 +357,26 @@ describe 'up.radio', ->
     describe '[up-poll]', ->
 
       it 'reloads the element periodically', asyncSpec (next) ->
-        up.radio.config.pollInterval = 150
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        interval = 150
+        timingTolerance = interval / 3
 
-        element = up.hello(fixture('.element[up-poll]'))
+        up.radio.config.pollInterval = interval
 
-        next.after 75, ->
-          expect(reloadSpy).not.toHaveBeenCalled()
+        element = up.hello(fixture('.element[up-poll]', text: 'old text'))
 
-        next.after 150, ->
-          expect(reloadSpy).toHaveBeenCalledWith(element, jasmine.anything())
-          expect(reloadSpy.calls.count()).toBe(1)
+        next.after timingTolerance, ->
+          expect(element).toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after 150, ->
-          expect(reloadSpy.calls.count()).toBe(2)
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('.element[up-poll]', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
 
       it 'does not make additional requests while a previous requests is still in flight', asyncSpec (next) ->
         deferred = u.newDeferred()
@@ -315,7 +416,7 @@ describe 'up.radio', ->
 
       it 'keeps polling if a request failed', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(up.error.failed('network error'))
 
         up.hello(fixture('.element[up-poll]'))
 
@@ -328,7 +429,7 @@ describe 'up.radio', ->
       it 'does not reload if the tab is hidden', asyncSpec (next) ->
         up.radio.config.pollInterval = 50
         spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         up.hello(fixture('.element[up-poll]'))
 
@@ -337,7 +438,7 @@ describe 'up.radio', ->
 
       it 'stops polling when the element is destroyed', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         element = up.hello(fixture('.element[up-poll]'))
 
@@ -347,6 +448,71 @@ describe 'up.radio', ->
 
         next.after 75, ->
           expect(reloadSpy.calls.count()).toBe(1)
+
+      it 'stops polling when the server responds without an [up-poll] attribute', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = up.hello(fixture('.element[up-poll]', text: 'old text'))
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      it 'lets the server change the [up-source] (bugfix)', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        up.hello(fixture('.element[up-poll][up-source="/one"]', text: 'old text'))
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/one')
+          jasmine.respondWithSelector('.element[up-poll][up-source="/two"]', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/two')
+
+      it 'lets the server change the [up-interval] (bugfix)', asyncSpec (next) ->
+        up.radio.config.pollInterval = initialInterval = 150
+        timingTolerance = initialInterval / 3
+
+        up.hello(fixture(".element[up-poll][up-interval='#{initialInterval}']", text: 'old text'))
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after initialInterval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector(".element[up-poll][up-interval='#{initialInterval * 2}']", text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+        next.after (timingTolerance + initialInterval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        next.after initialInterval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
 
       it 'stops polling when the element is destroyed while waiting for a previous request (bugfix)', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
@@ -366,7 +532,7 @@ describe 'up.radio', ->
           expect(reloadSpy.calls.count()).toBe(1)
 
       it 'allows to pass a polling interval per [up-interval] attribute', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         up.radio.config.pollInterval = 5
 
@@ -385,7 +551,7 @@ describe 'up.radio', ->
           expect(@lastRequest().url).toMatchURL('/optimized-path')
 
       it 'pauses polling while we avoid optional requests', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         shouldReduceRequests = true
         spyOn(up.network, 'shouldReduceRequests').and.callFake -> shouldReduceRequests
@@ -400,7 +566,7 @@ describe 'up.radio', ->
           expect(reloadSpy).toHaveBeenCalled()
 
       it 'pauses polling while the element is detached', asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         element = up.element.createFromSelector('.element[up-poll][up-interval=2]')
         registerFixture(element) # make sure this element is destroyed after the example
@@ -414,8 +580,32 @@ describe 'up.radio', ->
         next.after 20, ->
           expect(reloadSpy).toHaveBeenCalled()
 
+      it 'pauses polling when an up:fragment:poll event is prevented', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        up.hello(fixture('.element[up-poll]'))
+        eventCount = 0
+
+        up.on 'up:fragment:poll', '.element', (event) ->
+          eventCount++
+          if eventCount == 1
+            event.preventDefault()
+
+        next.after timingTolerance, ->
+          expect(eventCount).toBe(0)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(eventCount).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after (interval + timingTolerance), ->
+          expect(eventCount).toBe(2)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
       it "pauses polling while the element's layer is in the background", asyncSpec (next) ->
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve()
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
 
         makeLayers(2)
         expect(up.layer.isOverlay()).toBe(true)

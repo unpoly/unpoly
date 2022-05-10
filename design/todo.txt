@@ -5,15 +5,19 @@ TODOs for next release
 Various changes
 ---------------
 
-- Reconsider request defaults
-  - Reconsider whether we want to link up.request() to the current layer by default?
-    - Or only when { layer } or { origin } options are given?
-    - We could argue that this is a low-level API and up.render() should be used for updating content
-    - Counter-point is: All other functionality sees the current layer by default
-    - If we do this we should also remove auto-lookup of { targetElements }
-    - If we do this we can also get rid of { basic: true }
-  - When instantiating an up.Request with neither { target } or { targetElements }, do we want to default to @layer.element ?
-- Maybe remove some simple IE11
+- Polling issues
+  - Do the compilers for [up-poll] stack as up.reload() recompiles the new elements with [up-poll]?
+    => Maybe?
+  - No way to stop polling as a compiler once we are underway
+    => There is when we start with [up-poll]
+    => There is not when we start with startPolling(), but maybe that's OK
+  - No way to change the reload source with [up-source] once we are underway (because we're reloading a detached fragment again and again)
+  - Test: Stops polling after destroy
+  - Bug: Starting with up.radio.startPolling() keeps polling after the element was destroyed
+  - Stop polling when aborted?
+  - Manual abort no longer required
+  - New up:fragment:poll guard event that is preventable
+
 - Rewrite Legacy Browser section
   - https://unpoly.com/install#legacy-browsers
 
