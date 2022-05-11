@@ -5,18 +5,13 @@ TODOs for next release
 Various changes
 ---------------
 
-- Polling issues
-  - Do the compilers for [up-poll] stack as up.reload() recompiles the new elements with [up-poll]?
-    => Maybe?
-  - No way to stop polling as a compiler once we are underway
-    => There is when we start with [up-poll]
-    => There is not when we start with startPolling(), but maybe that's OK
-  - No way to change the reload source with [up-source] once we are underway (because we're reloading a detached fragment again and again)
-  - Test: Stops polling after destroy
-  - Bug: Starting with up.radio.startPolling() keeps polling after the element was destroyed
-  - Stop polling when aborted?
-  - Manual abort no longer required
-  - New up:fragment:poll guard event that is preventable
+- Stop polling when the fragment is aborted
+  - Consider up.radio.config.pollAbortable and up.form.config.watchAbortable
+
+- up:fragment:aborted events clog up the log
+  - There are a lot of them
+  - Even when nothing was aborted
+  - It's not even clear what's being aborted
 
 - Rewrite Legacy Browser section
   - https://unpoly.com/install#legacy-browsers
