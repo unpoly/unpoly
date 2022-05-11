@@ -251,7 +251,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       // a link from being followed on the root layer.
       up.event.halt(event)
 
-      const origin = event.target.closest(selector)
+      const origin = e.closest(event.target, selector)
       const value = e.jsonAttr(origin, attribute)
       const closeOptions = { origin }
       const parser = new up.OptionsParser(closeOptions, origin)

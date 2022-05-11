@@ -38,7 +38,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   forceStart(options) {
-    Object.assign(this.options, options)
+    u.assign(this.options, options)
     this.forceStarted = true
     this.start()
   }
