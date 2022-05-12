@@ -193,7 +193,7 @@ up.framework = (function() {
 
   Internet Explorer 11 or lower are [now longer supported](https://github.com/unpoly/unpoly/discussions/340).
 
-  The last Unpoly version to support Internet Explorer 11 is 2.5.x.
+  The last Unpoly version to support Internet Explorer 11 is 2.6.x.
 
   @function up.framework.isSupported
   @stable
