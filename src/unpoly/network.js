@@ -144,6 +144,7 @@ up.network = (function() {
         return []
       }
     }
+    ```
 
   @param {boolean|Function(): boolean} [config.progressBar]
     Whether to show a progress bar for [late requests](/up:request:late).
