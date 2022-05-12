@@ -8,13 +8,57 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.6.0
+-----
+
+This is a final maintenance release before Unpoly's next major feature drop in a few weeks.
+
+This is also the **last release with support for Internet Explorer 11**. Future releases will support Chrome, Firefox, Edge and the last two majors of Safari.
+
+### Polling
+
+The [polling](/up-poll) implementation was rewritten to fix many issues and edge cases:
+
+- Fix a bug with `[up-poll]` reloading very fast when the server responds with an [`X-Up-Target: :none`](/X-Up-Target) header (fixes #377).
+- Polling fragments now emit an `up:fragment:poll` event before every update. Listeners may prevent this event to skip the update.
+- Programmatically starting to poll with `up.radio.startPolling()` no longer requires the server to respond with an `[up-poll]` attribute.
+- The function `up.radio.startPolling()` no longer causes duplicate requests when an element is already polling.
+- Fix a memory leak where polling elements would sometimes continue to maintain a timer (but not send requests) after they were removed from the DOM.
+- The server can now stop a polling element by sending a matching element without an `[up-poll]` attribute.
+- The server can now change the polling interval by sending a matching element with a different `[up-interval]` attribute.
+- The server can now change the URL from which to poll by sending a matching element with a different `[up-source]` attribute.
+
+### Overlays
+
+- Events for [closing overlays](/closing-overlays) (`up:layer:dismiss`, `up:layer:dismissed`, `up:layer:accept`, `up:layer:accepted`) have gained new useful properties:
+  - The `{ value }` property is the [overlay result value](/closing-overlays#overlay-result-values).
+  - The `{ origin }` property is the element that caused the element to close.
+- When an overlay is [closed](/closing-overlays) its [result value](/closing-overlays#overlay-result-values) is now [logged](/up.log) for easier debugging.
+- Fix an issue where clicking on a `label[for]` in an overlay would focus an input in a background layer if that input had a matching `[id]` attribute.
+- Fix many issues where clicking into foreign overlays constructed other libraries would close an underlying Unpoly modal. In many cases this is no longer necessary. There are some remaining cases where Unpoly would steal focus from a foreign overlay. These can be fixed by attaching the foreign overlay to the Unpoly overlay's element. The next Unpoly version will ship a more comprehensive solution for this.
+- Published a configuration option `up.layer.config.overlay.class`. It can be used to configure a default HTML class for an overlay's container element.
+
+### Scrolling
+
+- Viewports within a `[up-keep]` fragment now retain their scroll positions during a fragment update.
+- The option for [revealing](/up.reveal) a fragment without animation is now `{ behavior: 'instant' }` instead of `{ behavior: 'auto' }`.
+- Fix an issue where Unpoly would prevent the browser's restoration of scroll positions when the the page was reloaded (closes #366 #65).
+
+### Various changes
+
+- `up.element.createFromSelector()` and `up.element.affix()` now also accept a `{ style }` option with a string value. It previously only accepted an object of camelCased CSS properties.
+- `up.request()` will automatically choose a layer based on a given `{ origin }`.
+- Remove duplicate logging of exceptions to the error consoles.
+- The experimental function `up.fail()` has been removed from public API.
+- Documentation fixes.
+
+
 2.5.3
 -----
 
 This maintenance release contains a single fix:
 
 - Fix a bug where modal overlays would not adjust its height to the height of its content.
-
 
 
 2.5.2
