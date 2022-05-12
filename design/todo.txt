@@ -13,8 +13,7 @@ Various changes
   - Even when nothing was aborted
   - It's not even clear what's being aborted
 
-- Rewrite Legacy Browser section
-  - https://unpoly.com/install#legacy-browsers
+- The HTTP term for [up-verify] would be [up-revalidate]
 
 
 Docs
@@ -78,6 +77,12 @@ Docs
 Icebox
 ======
 
+- Consider using `Cache-Control: stale-while-revalidate=<seconds>` to indicate how long we can use a response
+  - But then again we ignore Cache-Control for all other purposes
+    - E.g. Cache-Control: no-store
+    - E.g. Cache-Control: max-age
+    - How would Cache-Control: no-cache (equivalent of max-age=0 must-revalidate) work in connection with up.fragment.config.autoVerifyCache ?
+  - Maybe do a bigger workover of Cache-Control?
 - Do follow links with [target=_self]
 - up:click forking could print a warning when an a[href] is instant, but not followable
 - Is it weird that up.layer.affix appends to the first swappable element instead of the contentElement?
