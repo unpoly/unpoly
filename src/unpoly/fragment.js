@@ -1763,7 +1763,7 @@ up.fragment = (function() {
       let placement = defaultPlacement
       let maybe = false
 
-      selector = selector.replace(/\b:(before|after)\b/, (_match, customPlacement) => {
+      selector = selector.replace(/\b::?(before|after)\b/, (_match, customPlacement) => {
         placement = customPlacement
         return ''
       })

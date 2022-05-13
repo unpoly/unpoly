@@ -6256,3 +6256,77 @@ describe 'up.fragment', ->
         up.fragment.abort(fragment)
 
         expect(callback).not.toHaveBeenCalled()
+
+  describe 'up.fragment.parseTargetSteps()', ->
+
+    it 'parses a single target', ->
+      steps = up.fragment.parseTargetSteps('.one')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one')
+      ]
+
+    it 'parses multiple targets', ->
+      steps = up.fragment.parseTargetSteps('.one, .two')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one'),
+        jasmine.objectContaining(selector: '.two'),
+      ]
+
+    it 'does not parse any steps from a :none target', ->
+      steps = up.fragment.parseTargetSteps(':none')
+      expect(steps).toEqual []
+
+    it 'ignores a :none target in a union of other targets', ->
+      steps = up.fragment.parseTargetSteps('.one, :none, .two')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one'),
+        jasmine.objectContaining(selector: '.two'),
+      ]
+
+    it 'sets a default placement of "swap"', ->
+      steps = up.fragment.parseTargetSteps('.one')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', placement: 'swap')
+      ]
+
+    it 'parses a prepending placement from :before (single colon)', ->
+      steps = up.fragment.parseTargetSteps('.one:before, .two')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', placement: 'before'),
+        jasmine.objectContaining(selector: '.two', placement: 'swap'),
+      ]
+
+    it 'parses a prepending placement from ::before (double colon)', ->
+      steps = up.fragment.parseTargetSteps('.one::before, .two')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', placement: 'before'),
+        jasmine.objectContaining(selector: '.two', placement: 'swap'),
+      ]
+
+    it 'parses an append placement from :after (single colon)', ->
+      steps = up.fragment.parseTargetSteps('.one, .two:after')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', placement: 'swap'),
+        jasmine.objectContaining(selector: '.two', placement: 'after'),
+      ]
+
+    it 'parses an append placement from ::after (double colon)', ->
+      steps = up.fragment.parseTargetSteps('.one, .two::after')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', placement: 'swap'),
+        jasmine.objectContaining(selector: '.two', placement: 'after'),
+      ]
+
+    it 'parses an optional target from :maybe', ->
+      steps = up.fragment.parseTargetSteps('.one, .two:maybe')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', maybe: false),
+        jasmine.objectContaining(selector: '.two', maybe: true),
+      ]
+
+    it 'parses multiple pseudo elements in the same target', ->
+      steps = up.fragment.parseTargetSteps('.one:maybe:before')
+      expect(steps).toEqual [
+        jasmine.objectContaining(selector: '.one', maybe: true, placement: 'before'),
+      ]
+
