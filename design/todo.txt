@@ -5,8 +5,6 @@ TODOs for next release
 Various changes
 ---------------
 
-- The HTTP term for [up-verify] would be [up-revalidate]
-
 
 
 Docs
@@ -53,7 +51,7 @@ Docs
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic
-- Consider a new page for caching and verification
+- Consider a new page for caching and revalidation
 - up.form.config.inputEvents
 - up.form.config.changeEvents
 - up.form.config.inputDelay
@@ -74,7 +72,7 @@ Icebox
   - But then again we ignore Cache-Control for all other purposes
     - E.g. Cache-Control: no-store
     - E.g. Cache-Control: max-age
-    - How would Cache-Control: no-cache (equivalent of max-age=0 must-revalidate) work in connection with up.fragment.config.autoVerifyCache ?
+    - How would Cache-Control: no-cache (equivalent of max-age=0 must-revalidate) work in connection with up.fragment.config.autoRevalidate ?
   - Maybe do a bigger workover of Cache-Control?
 - Do follow links with [target=_self]
 - up:click forking could print a warning when an a[href] is instant, but not followable

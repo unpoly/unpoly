@@ -18,7 +18,7 @@ Changes tracked until 2021-03-18:
 - Rename { solo } to { abort }
 - Remove up.request({ solo }) option
 - { abort: 'target' } as new default everywhere (navigation or not)
-- Cache verification, stale-while-revalidate
+- Cache revalidation, stale-while-revalidate
   - Don't verify cached content on bad connections (is this documented?)
   - increase cache time to 15 minutes (up from 5 minutes)
 - Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`. Deprecated `X-Up-Reload-From-Time`.

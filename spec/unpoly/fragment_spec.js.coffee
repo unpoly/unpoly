@@ -4767,11 +4767,11 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
 
-        describe 'cache verification', ->
+        describe 'cache revalidation', ->
 
           beforeEach (done) ->
             up.network.config.requestMetaKeys = []
-            up.fragment.config.autoVerifyCache = (response) => response.age >= 0
+            up.fragment.config.autoRevalidate = (response) => response.age >= 0
             fixture('.target', text: 'initial text')
 
             up.request('/cached-path', { cache: true })
@@ -4797,7 +4797,7 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('verified text')
 
           it 'does not verify a fragment rendered from a recent cached response', asyncSpec (next) ->
-            up.fragment.config.autoVerifyCache = (response) => response.age >= 10 * 1000
+            up.fragment.config.autoRevalidate = (response) => response.age >= 10 * 1000
 
             up.render('.target', { url: '/cached-path', cache: true })
 
@@ -4827,7 +4827,7 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('initial text' + 'cached text')
               expect(up.network.isBusy()).toBe(false)
 
-          it 'does not render a second time if the verification response is a 304 Not Modified', asyncSpec (next) ->
+          it 'does not render a second time if the revalidation response is a 304 Not Modified', asyncSpec (next) ->
             up.render('.target', { url: '/cached-path', cache: true })
 
             next ->
@@ -4840,7 +4840,7 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-          it 'allows to define which responses to verify in up.fragment.config.autoVerifyCache'
+          it 'allows to define which responses to verify in up.fragment.config.autoRevalidate'
 
           it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
             confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
@@ -4854,7 +4854,7 @@ describe 'up.fragment', ->
 
               expect(confirmSpy.calls.count()).toBe(1)
 
-          it "delays verification until the original transition completed, so an element isn't changed in-flight", asyncSpec (next) ->
+          it "delays revalidation until the original transition completed, so an element isn't changed in-flight", asyncSpec (next) ->
             up.motion.config.enabled = true
             up.render('.target', { url: '/cached-path', cache: true, transition: 'cross-fade', easing: 'linear', duration: 200 })
 
@@ -4876,7 +4876,7 @@ describe 'up.fragment', ->
 
           it 'calls { onFinished } with the verified up.RenderResult'
 
-          it 'calls { onFinished } with the cached zo.RenderResult if verification responded with 304 Not Modified'
+          it 'calls { onFinished } with the cached zo.RenderResult if revalidation responded with 304 Not Modified'
 
 
     describe 'handling of [up-keep] elements', ->

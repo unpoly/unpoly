@@ -335,7 +335,7 @@ up.link = (function() {
     parser.json('params')
     parser.booleanOrString('cache')
     parser.booleanOrString('clearCache')
-    parser.booleanOrString('verifyCache')
+    parser.booleanOrString('revalidate')
     parser.booleanOrString('abort')
     parser.string('contentType')
 
@@ -999,7 +999,7 @@ up.link = (function() {
 
     With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
     to the network. To prevent display of stale content, cached responses are
-    [reloaded once rendered](#up-verify-cache). If no cached response exists,
+    [reloaded once rendered](#up-revalidate). If no cached response exists,
     Unpoly will make a request and cache the server response.
 
     With `[up-cache=auto]` Unpoly will use the cache only if `up.network.config.autoCache`
@@ -1009,10 +1009,10 @@ up.link = (function() {
 
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
-  @param [up-verify-cache='auto']
+  @param [up-revalidate='auto']
     Whether to reload the targeted fragment after it was rendered from a cached response.
 
-    Also see `up.fragment.config.autoVerifyCache`.
+    Also see `up.fragment.config.autoRevalidate`.
 
   @param [up-clear-cache]
     Whether existing [cache](/up.request#caching) entries will be cleared with this request.

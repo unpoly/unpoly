@@ -107,14 +107,14 @@ up.fragment = (function() {
     In that case you must configure a different main target that does not include
     your application scripts.
 
-  @param {boolean|Function(up.Response): boolean} [config.autoVerifyCache]
-    Whether to reload a fragment after it was rendered from a cached response with `{ verifyCache: 'auto' }`.
+  @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
+    Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
 
     By default Unpoly verifies cached responses that are older than 15 seconds
     when we're on a good connection:
 
     ```js
-    up.fragment.config.autoVerifyCache = (response) => response.age > 15_000 && !up.network.shouldReduceRequests()
+    up.fragment.config.autoRevalidate = (response) => response.age > 15_000 && !up.network.shouldReduceRequests()
     ```
 
   @stable
@@ -139,7 +139,7 @@ up.fragment = (function() {
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
-    autoVerifyCache: (response) => (response.age > 15 * 1000) && !up.network.shouldReduceRequests(),
+    autoRevalidate: (response) => (response.age > 15 * 1000) && !up.network.shouldReduceRequests(),
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -638,10 +638,10 @@ up.fragment = (function() {
 
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
-  @param {boolean} [options.verifyCache]
+  @param {boolean} [options.revalidate]
     Whether to reload the targeted fragment after it was rendered from a cached response.
 
-    Also see `up.fragment.config.autoVerifyCache`.
+    Also see `up.fragment.config.autoRevalidate`.
 
   @param {boolean|string} [options.clearCache]
     Whether existing [cache](/up.request#caching) entries will be [cleared](/up.cache.clear) with this request.
@@ -729,7 +729,7 @@ up.fragment = (function() {
     In particular:
 
     - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
-    - A [cached response](#options.cache) was [verified with the server](/up.network.config#config.verifyCache).
+    - A [cached response](#options.cache) was [verified with the server](/up.network.config#config.revalidate).
       If the server has responded with new content, this content has also been rendered.
 
   @return {Promise<up.RenderResult>}
@@ -1985,8 +1985,8 @@ up.fragment = (function() {
     return selector.matches(element)
   }
 
-  function shouldVerifyCache(request, response, options = {}) {
-    return request.fromCache && u.evalAutoOption(options.verifyCache, config.autoVerifyCache, response)
+  function shouldRevalidate(request, response, options = {}) {
+    return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
 
   // function callbackWhileAlive(element, callback) {
@@ -2231,7 +2231,7 @@ up.fragment = (function() {
     hasAutoHistory,
     time: timeOf,
     etag: etagOf,
-    shouldVerifyCache,
+    shouldRevalidate,
     abort,
     onAborted,
     parseTargetSteps,

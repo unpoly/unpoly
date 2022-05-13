@@ -8,7 +8,7 @@ up.RenderOptions = (function() {
     source: true,
     saveScroll: true,
     abort: 'target',
-    verifyCache: 'auto',
+    revalidate: 'auto',
   }
 
   const PRELOAD_OVERRIDES = {

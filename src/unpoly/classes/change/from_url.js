@@ -126,16 +126,16 @@ up.Change.FromURL = class FromURL extends up.Change {
     // like a server-set location, or server-sent events.
     this.augmentOptionsFromResponse(finalRenderOptions)
 
-    if (up.fragment.shouldVerifyCache(this.request, this.response, finalRenderOptions)) {
+    if (up.fragment.shouldRevalidate(this.request, this.response, finalRenderOptions)) {
       // Copy the given options, as we're going to override the { onFinished } prop.
       let originalRenderOptions = u.copy(finalRenderOptions)
-      finalRenderOptions.onFinished = (renderResult) => this.verifyCache(renderResult, originalRenderOptions)
+      finalRenderOptions.onFinished = (renderResult) => this.revalidate(renderResult, originalRenderOptions)
     }
 
     return new up.Change.FromContent(finalRenderOptions).execute()
   }
 
-  async verifyCache(renderResult, originalRenderOptions) {
+  async revalidate(renderResult, originalRenderOptions) {
     let target = originalRenderOptions.target
     if (/:(before|after)/.test(target)) {
       up.warn('up.render()', 'Cannot verify cache when prepending/appending (target %s)', target)
@@ -147,7 +147,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         scroll: false,
         focus: 'keep',
         transition: false, // oferring something like { verifyTransition } would mean we need to delay { onFinished } even further
-        cache: false, // this implies { verifyCache: false }
+        cache: false, // this implies { revalidate: false }
         confirm: false,
         feedback: false,
         abort: false,
