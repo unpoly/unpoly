@@ -2075,12 +2075,15 @@ up.fragment = (function() {
     let { reason } = options
     let elements
 
+    // An element can be passed as first argument (public API) or as { target } option.
+    // There's also an internal API that { target } can be an array of elements.
+    // This is used by up.Change.FromOptions.
     if (options.target) {
       // If we're given an element or selector, we abort all requests
       // targeting that subtree.
       elements = getAll(options.target, options)
       testFn = (request) => request.isPartOfSubtree(elements)
-      reason ||= 'Aborting requests within fragment'
+      reason ||= ['Aborting requests within %o', elements.length === 1 ? elements[0] : elements]
     } else {
       // If we're not given an element or selector, we abort all layers
       // matching the { layer } option. If no { layer } option is given,
@@ -2093,7 +2096,7 @@ up.fragment = (function() {
       let layers = up.layer.getAll(options)
       elements = u.map(layers, 'element')
       testFn = (request) => u.contains(layers, request.layer)
-      reason ||= 'Aborting requests within layer'
+      reason ||= ["Aborting requests within %s", layers.join(', ')]
     }
 
     let testFnWithAbortable = (request) => request.abortable && testFn(request)

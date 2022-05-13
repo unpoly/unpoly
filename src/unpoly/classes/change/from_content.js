@@ -87,7 +87,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   onPlanApplicable(plan) {
     let primaryPlan = this.getPlans()[0]
     if (plan !== primaryPlan) {
-      up.puts('up.render()', 'Could not match primary target (%s). Updating a fallback target (%s).', primaryPlan.target, plan.target)
+      up.puts('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
     }
   }
 
