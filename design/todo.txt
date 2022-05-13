@@ -8,11 +8,6 @@ Various changes
 - Stop polling when the fragment is aborted
   - Consider up.radio.config.pollAbortable and up.form.config.watchAbortable
 
-- up:fragment:aborted events clog up the log
-  - There are a lot of them
-  - Even when nothing was aborted
-  - It's not even clear what's being aborted
-
 - The HTTP term for [up-verify] would be [up-revalidate]
 
 
