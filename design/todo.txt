@@ -35,19 +35,19 @@ Docs
   - In up.watch()
   - In up.validate()
   - Document that multiple [up-validate] requests are merged into a single request
+- Test and Document that we can use live validation like this:
+  <input up-keep up-validate up-watch-event="input">
+- Document that X-Up-Validate may contain multiple names
+- Document that X-Up-Validate may contain :unknown
+
 
 ### Other docs
 
-- Own docs entry for :maybe
 - up.layer.config.foreignOverlaySelectors
 - Explain that preloading will not abort other requests
 - Explain and test [up-validate] usage for radio buttons
 - Document { abort } option and [up-abort] everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
-- Test and Document that we can use live validation like this:
-  <input up-keep up-validate up-watch-event="input">
-- Document that X-Up-Validate may contain multiple names
-- Document that X-Up-Validate may contain :unknown
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic

@@ -77,6 +77,9 @@ up.radio = (function() {
   Such elements often live in the layout, outside of the content area that is
   being replaced.
 
+  When an `[up-hungry]` element does not match in the server response,
+  the element will not be updated.
+
   @selector [up-hungry]
   @param [up-layer='current']
     For updates on which layer this hungry element should be matched.

@@ -1316,6 +1316,31 @@ up.fragment = (function() {
   */
 
   /*-
+  Marks a target selector as optional.
+
+  If a `:maybe` selector is not found in the current page or the server response,
+  Unpoly will skip rendering the fragment instead of throwing an error.
+
+  When [updating multiple fragments](/fragment-placement#updating-multiple-fragments)
+  you may combine required and optional selectors in a single target string.
+
+  ### Example
+
+  This link will update the fragments `.content` (required) and `.details` (optional):
+
+  ```html
+  <a href="/card/5" up-target=".content, .details:maybe">...</a>
+  ```
+
+  Only the fragment `.content` is required to match. If `.details` is missing
+  in the current page or the server response, Unpoly will only update `.content`
+  without an error.
+
+  @selector :maybe
+  @stable
+  */
+
+  /*-
   Returns a list of the given parent's descendants matching the given selector.
   The list will also include the parent element if it matches the selector itself.
 

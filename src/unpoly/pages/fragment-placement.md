@@ -78,7 +78,7 @@ You may mark a target as optional by using the `:maybe` pseudo selector.
 ```
 
 In this case Unpoly would only require `.content` to match. If `.details` is missing
-in the current or the server response, Unpoly would only only update `.content`
+in the current page or the server response, Unpoly will only update `.content`
 without an error.
 
 
