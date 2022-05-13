@@ -5,10 +5,8 @@ TODOs for next release
 Various changes
 ---------------
 
-- Stop polling when the fragment is aborted
-  - Consider up.radio.config.pollAbortable and up.form.config.watchAbortable
-
 - The HTTP term for [up-verify] would be [up-revalidate]
+
 
 
 Docs
