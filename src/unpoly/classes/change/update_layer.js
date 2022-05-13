@@ -235,7 +235,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         await up.animate(wrapper, step.transition, step)
 
         // Remove the wrapper now that is has served it purpose
-        await e.unwrap(wrapper)
+        e.unwrap(wrapper)
 
         break
       }

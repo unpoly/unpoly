@@ -1174,6 +1174,24 @@ describe 'up.fragment', ->
           up.render('.target', content: 'new text')
           expect('.target').toHaveText('new text')
 
+        it 'can append content with an :after selector', asyncSpec (next) ->
+          container = fixture('.target')
+          e.affix(container, '.old-child')
+
+          up.render('.target:after', content: '<div class="new-child"></div>')
+
+          next ->
+            expect(container.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
+
+        it 'can prepend content with an :before selector', asyncSpec (next) ->
+          container = fixture('.target')
+          e.affix(container, '.old-child')
+
+          up.render('.target:before', content: '<div class="new-child"></div>')
+
+          next ->
+            expect(container.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
+
       describe 'with { document } option', ->
 
         it 'replaces the given selector with a matching element that has the outer HTML from the given { document } string', asyncSpec (next) ->
@@ -1265,6 +1283,26 @@ describe 'up.fragment', ->
           fixture('.target', text: 'old text')
           up.render('.target', fragment: '<div class="target">new text</div>')
           expect('.target').toHaveText('new text')
+
+        it 'can append content with an :after selector', asyncSpec (next) ->
+          container = fixture('.target')
+          e.affix(container, '.old-child')
+
+          up.render('.target:after', fragment: '<div class="target"><div class="new-child"></div></div>')
+
+          next ->
+            newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="old-child"></div><div class="new-child"></div>')
+
+        it 'can prepend content with an :before selector', asyncSpec (next) ->
+          container = fixture('.target')
+          e.affix(container, '.old-child')
+
+          up.render('.target:before', fragment: '<div class="target"><div class="new-child"></div></div>')
+
+          next ->
+            newTarget = document.querySelector('.target')
+            expect(newTarget.innerHTML).toEqual('<div class="new-child"></div><div class="old-child"></div>')
 
       describe 'choice of target', ->
 

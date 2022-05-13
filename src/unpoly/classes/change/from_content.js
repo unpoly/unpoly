@@ -41,7 +41,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     if (this.options.fragment) {
       // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
       // requires a { target }. We use a target that matches the parsed { fragment }.
-      this.options.target = this.getResponseDoc().rootSelector()
+      this.options.target ||= this.getResponseDoc().rootSelector()
     }
 
     // First seek { target } in all layers, then seek { fallback } in all layers.
