@@ -67,6 +67,44 @@ describe 'up.radio', ->
         next.after interval, ->
           expect(reloadSpy).not.toHaveBeenCalled()
 
+      it 'stops polling when the polling fragment is aborted', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())
+
+        container = fixture('.container')
+        element = e.affix(container, '.element')
+        up.radio.startPolling(element)
+
+        next.after timingTolerance, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+          up.fragment.abort(container)
+
+        next.after interval, ->
+          expect(reloadSpy).not.toHaveBeenCalled()
+
+      it 'keeps polling when the polling fragment is aborted through its own reloading', asyncSpec (next) ->
+        up.radio.config.pollAbortable = false
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = fixture('.element', text: 'old text')
+        up.radio.startPolling(element)
+
+        next.after timingTolerance + interval, ->
+          expect('.element').toHaveText('old text')
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+        next.after timingTolerance + interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
       it 'does not cause duplicate requests when called on an [up-poll] element that is already polling', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150
         timingTolerance = interval / 3

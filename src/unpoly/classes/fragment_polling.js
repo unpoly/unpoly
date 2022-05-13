@@ -7,6 +7,7 @@ up.FragmentPolling = class FragmentPolling {
     this.options = {}
     this.state = 'initialized'
     this.setFragment(fragment)
+    this.abortable = true
   }
 
   static forFragment(fragment) {
@@ -21,6 +22,12 @@ up.FragmentPolling = class FragmentPolling {
     // The element may come back (when it is swapped) or or may not come back (when it is destroyed).
     // If it does come back, `onPollAttributeObserved()` will restart the polling.
     this.stop()
+  }
+
+  onFragmentAborted() {
+    if (this.abortable) {
+      this.stop()
+    }
   }
 
   start() {
@@ -58,17 +65,26 @@ up.FragmentPolling = class FragmentPolling {
     if (this.state !== 'started') { return }
 
     if (up.radio.shouldPoll(this.fragment)) {
-      let reloadOptions = {
-        url: this.options.url,
-        guardEvent: up.event.build('up:fragment:poll', { log: 'Polling fragment' })
-      }
-      u.always(up.reload(this.fragment, reloadOptions), (result) => this.onReloaded(result))
+      this.reloadNow()
     } else {
       up.puts('[up-poll]', 'Polling is disabled')
       // Reconsider after 10 seconds at most
       let reconsiderDisabledDelay = Math.min(10 * 1000, this.getInterval())
       this.scheduleReload(reconsiderDisabledDelay)
     }
+  }
+
+  reloadNow() {
+    let reloadOptions = {
+      url: this.options.url,
+      guardEvent: up.event.build('up:fragment:poll', { log: ['Polling fragment', this.fragment] })
+    }
+
+    // Prevent our own reloading from aborting ourselves.
+    let oldAbortable = this.abortable
+    this.abortable = false
+    u.always(up.reload(this.fragment, reloadOptions), (result) => this.onReloaded(result))
+    this.abortable = oldAbortable
   }
 
   onReloaded(result) {
@@ -102,6 +118,7 @@ up.FragmentPolling = class FragmentPolling {
   setFragment(newFragment) {
     this.fragment = newFragment
     up.destructor(newFragment, () => this.onFragmentDestroyed())
+    up.fragment.onAborted(newFragment, () => this.onFragmentAborted())
   }
 
 

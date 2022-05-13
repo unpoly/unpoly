@@ -50,7 +50,7 @@ up.radio = (function() {
   const config = new up.Config(() => ({
     hungrySelectors: ['[up-hungry]'],
     pollInterval: 30000,
-    pollEnabled: 'auto'
+    pollEnabled: 'auto',
   }))
 
   function reset() {
