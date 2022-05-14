@@ -1205,6 +1205,10 @@ up.link = (function() {
   When the link is clicked later the response will already be cached,
   making the interaction feel instant.
 
+  Preloading a link will *not* [abort](/up.fragment.abort) pending requests
+  targeting the same fragments. Only when the link is clicked later
+  conflicting requests are aborted.
+
   @selector a[up-preload]
   @param [up-preload-delay]
     The number of milliseconds to wait between hovering

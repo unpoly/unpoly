@@ -21,9 +21,8 @@ More work required
 - In up.util, remove traditional `for` loops with `for..of` loops so methods work on iteratable objects
 - up.util.toArray => Array.from
   - But Array.from() always makes a new object
-- We may be able to leverage structuredClone() for up.util.copy()
 - Replace up.error.* with custom error classes that extend `Error`
   - This may not be transpilable to ES5
 - Maybe replace up.Params.fromForm() with new FormData()
   - However, we also use up.Params.fromFields() in FieldWatcher
-- maybe don't even have a ES5 build?
+- Maybe don't even have a ES5 build?

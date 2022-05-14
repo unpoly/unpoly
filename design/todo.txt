@@ -39,13 +39,11 @@ Docs
   <input up-keep up-validate up-watch-event="input">
 - Document that X-Up-Validate may contain multiple names
 - Document that X-Up-Validate may contain :unknown
+- Explain and test [up-validate] usage for radio buttons
 
 
 ### Other docs
 
-- up.layer.config.foreignOverlaySelectors
-- Explain that preloading will not abort other requests
-- Explain and test [up-validate] usage for radio buttons
 - Document { abort } option and [up-abort] everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
 - Document django-forms-dynamic for [up-validate]
@@ -173,8 +171,6 @@ Icebox
     - come up for a better name for the option (target-if-lost)
 - New event up:request:solo ?
 - Consider delaying appending of new layer elements until we have constructed all children https://github.com/unpoly/unpoly/discussions/314
-- CheapEnergy hatte bedarf auf "[up-validate] on input"
-- CheapEnergy hatte bedarf auf "[up-validate] mit delay"
 - Publish { onQueued }
   - More canonic would be if up.render() returned a up.RenderRequest, which has abort().
 - Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Watcher-Delays warten können danach noch Dinge tun
@@ -190,5 +186,3 @@ Icebox
 - Doc page about "Fragments from local HTML"
   - link from [up-document], [up-fragment], [up-content], { document, fragment, content }.
 - Warn when registering compiler in [up-] namespace
-- Do we need window.history.scrollRestoration = 'manual' ?
-  - Is this setting per-state?
