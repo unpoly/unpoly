@@ -20,6 +20,7 @@ The following types of parameter representation are supported:
    On IE 11 and Edge, `FormData` payloads require a [polyfill for `FormData#entries()`](https://github.com/jimmywarting/FormData).
 
 @class up.Params
+@parent up.form
 */
 up.Params = class Params {
 

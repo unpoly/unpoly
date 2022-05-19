@@ -4,6 +4,8 @@ Forms
   
 The `up.form` module helps you work with non-trivial forms.
 
+@see disable-option
+
 @see form[up-submit]
 @see form[up-validate]
 @see input[up-switch]
@@ -201,7 +203,7 @@ up.form = (function() {
 
   /*-
   Parses the [render](/up.render) options that would be used to
-  [`submit`](/up.submit) the given form, but does not render.
+  [submit](/up.submit) the given form, but does not render.
 
   ### Example
 

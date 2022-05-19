@@ -9,6 +9,7 @@ A response to an [HTTP request](/up.request).
     })
 
 @class up.Response
+@parent up.network
 */
 up.Response = class Response extends up.Record {
 

@@ -22,6 +22,8 @@ Unpoly's `up.request()` has a number of convenience features:
   This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
 - A very concise API requiring zero boilerplate code.
 
+@see aborting-requests
+
 @see up.request
 @see up.Response
 @see up:request:late

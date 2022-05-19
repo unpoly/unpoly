@@ -1,5 +1,5 @@
-Making JavaScripts work with fragment updates
-=============================================
+Migrating legacy JavaScripts
+============================
 
 Legacy code often contains JavaScripts that expect a full page load whenever the
 user interacts with the page. When you configure Unpoly to handle all interaction,

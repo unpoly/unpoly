@@ -10,6 +10,7 @@ console.log(result.layer)     // => up.Layer.Root
 ```
 
 @class up.RenderResult
+@parent up.fragment
 */
 up.RenderResult = class RenderResult extends up.Record {
 

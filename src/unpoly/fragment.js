@@ -25,6 +25,10 @@ a server-rendered web application:
 
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
+@see navigation
+@see focus-option
+@see csp
+
 @see up.render
 @see up.navigate
 @see up.destroy

@@ -47,8 +47,8 @@ JavaScript functions that take URL patterns will accept multiple patterns
 as either a space-separated string or as an array of patterns:
 
 ```js
-up.layer.open({ acceptLocation: '/users/* /account')
-up.layer.open({ acceptLocation: ['/users/*', '/account'])
+up.layer.open({ acceptLocation: '/users/* /account' })
+up.layer.open({ acceptLocation: ['/users/*', '/account'] })
 ```
 
 ### Excluding patterns
@@ -79,3 +79,4 @@ To only match digits (`0-9`), use the dollar symbol:
 ```
 
 @page url-patterns
+
