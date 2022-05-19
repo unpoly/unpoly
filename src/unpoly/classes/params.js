@@ -398,7 +398,7 @@ up.Params = class Params {
   @param {string} name
   @return {any}
     The value of the param with the given name.
-  @internal
+  @experimental
   */
   getFirst(name) {
     const entry = u.find(this.entries, this.matchEntryFn(name))
@@ -414,7 +414,7 @@ up.Params = class Params {
   @param {string} name
   @return {Array}
     An array of all values with the given name.
-  @internal
+  @experimental
   */
   getAll(name) {
     if (this.isArrayKey(name)) {
