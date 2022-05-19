@@ -17,8 +17,16 @@ or events from another layer. For instance, [fragment links](/up.link) will only
 unless you [explicitly target another layer](/layer-option).
 
 Overlays allow you to break up a complex screen into [subinteractions](/subinteractions).
-Subinteractions take place in overlays and may span one or many pages. The original screen remains open in the background.
+Subinteractions take place in overlays and may span one or many pages while the original screen remains open in the background.
 Once the subinteraction is *done*, the overlay is closed and a result value is communicated back to the parent layer.
+
+@see layer-terminology
+@see layer-option
+@see opening-overlays
+@see closing-overlays
+@see subinteractions
+@see customizing-overlays
+@see context
 
 @see a[up-layer=new]
 @see up.layer.current

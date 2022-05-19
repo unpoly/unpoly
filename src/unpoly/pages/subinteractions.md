@@ -3,7 +3,7 @@ Subinteractions
 
 Unpoly lets you use [overlays](/up.layer) to break up a complex screen into *subinteractions*.
 
-Subinteractions take place in overlays and may span one or many pages. The original screen remains open in the background.
+Subinteractions take place in overlays and may span one or many pages while the original screen remains open in the background.
 Once the subinteraction is *done*, the overlay is closed and a result value is communicated back to the parent layer.
 
 

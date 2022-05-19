@@ -1,8 +1,8 @@
 require('./viewport.sass')
 
 /*-
-Scrolling viewports
-===================
+Scrolling
+=========
 
 The `up.viewport` module controls the scroll position and focus within scrollable containers ("viewports").
 
@@ -10,6 +10,9 @@ The default viewport for any web application is the main document. An applicatio
 define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
 
 Also see documentation for the [scroll option](/scroll-option) and [focus option](/focus-option).
+
+@see scroll-option
+@see scroll-tuning
 
 @see up.reveal
 @see [up-fixed=top]

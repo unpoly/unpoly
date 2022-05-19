@@ -13,6 +13,7 @@ up.request('/foo').then(function(response) {
 ```
 
 @class up.Response
+@parent up.network
 */
 up.Response = class Response extends up.Record {
 

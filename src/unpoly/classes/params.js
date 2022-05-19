@@ -19,6 +19,7 @@ The following types of parameter representation are supported:
 4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
 
 @class up.Params
+@parent up.form
 */
 up.Params = class Params {
 

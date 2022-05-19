@@ -12,6 +12,7 @@ even if that layer is not the frontmost layer. E.g. if you're compiling a fragme
 the background layer during compilation.
 
 @class up.Layer
+@parent up.layer
 */
 up.Layer = class Layer extends up.Record {
 

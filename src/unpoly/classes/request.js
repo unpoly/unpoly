@@ -15,6 +15,7 @@ console.log(response.text)
 ```
 
 @class up.Request
+@parent up.network
 */
 up.Request = class Request extends up.Record {
 
