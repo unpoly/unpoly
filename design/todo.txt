@@ -5,6 +5,11 @@ TODOs for next release
 Various changes
 ---------------
 
+- up.form.config.inputDelay => up.form.config.watchInputDelay ?
+- Remove custom smooth scrolling implementation
+  - No longer return a promise
+- [up-switch] soll klasse setzen statt inline hide/show
+
 
 
 Docs
@@ -40,6 +45,7 @@ Docs
 - Document that X-Up-Validate may contain multiple names
 - Document that X-Up-Validate may contain :unknown
 - Explain and test [up-validate] usage for radio buttons
+- [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
 
 
 ### Other docs
