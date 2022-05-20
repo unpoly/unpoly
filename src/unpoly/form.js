@@ -1,10 +1,8 @@
 /*-
 Forms
 =====
-  
-The `up.form` module helps you work with non-trivial forms.
 
-@see disable-option
+The `up.form` module helps you work with non-trivial forms.
 
 @see form[up-submit]
 @see form[up-validate]
@@ -1177,10 +1175,10 @@ up.form = (function() {
   ```html
   <input name="query" up-observe="showSuggestions(value)">
   ```
-  
+
   Note that the parameter name in the markup must be called `value` or it will not work.
   The parameter name can be called whatever you want in the JavaScript, however.
-      
+
   Also note that the function must be declared on the `window` object to work, like so:
 
   ```js

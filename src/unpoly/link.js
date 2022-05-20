@@ -72,7 +72,7 @@ new page is loading.
 
 @see fragment-placement
 @see handling-everything
-@see failed-responses
+@see server-errors
 
 @see a[up-follow]
 @see a[up-instant]

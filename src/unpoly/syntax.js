@@ -4,7 +4,6 @@ Custom JavaScript
 
 The `up.syntax` package lets you pair HTML elements with JavaScript behavior.
 
-@see data
 @see legacy-scripts
 
 @see up.compiler
