@@ -52,7 +52,7 @@ Changes tracked until 2021-03-18:
 - up.fail() has been removed from public API
 
 
-- 2.6.0
+2.6.0
 -----
 
 This is a final maintenance release before Unpoly's next major feature drop in a few weeks.
