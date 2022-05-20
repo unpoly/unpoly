@@ -54,7 +54,7 @@
     "jasmine-ajax": "^4.0.0",
     "jasmine-core": "^2.99.0",
     "jquery": "^3.5.1",
-    "mini-css-extract-plugin": "^0.8.2",
+    "mini-css-extract-plugin": "^2.6.0",
     "node-sass": "^4.14.1",
     "null-loader": "^4.0.1",
     "opn": "^6.0.0",

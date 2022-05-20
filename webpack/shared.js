@@ -144,9 +144,7 @@ function merge(...configs) {
 
 let extractCssLoader = {
   loader: MiniCssExtractPlugin.loader,
-  options: {
-    hmr: false
-  }
+  options: {}
 }
 
 stylePipeline = function(filename = "[name.css]") {
