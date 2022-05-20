@@ -58,6 +58,7 @@
     "node-sass": "^4.14.1",
     "null-loader": "^4.0.1",
     "opn": "^6.0.0",
+    "nf": ">=0.0.3",
     "process-exists": "^4.1.0",
     "rails-erb-loader": "^5.5.2",
     "sass": "^1.32.4",
