@@ -9,7 +9,7 @@ Various changes
 - Remove custom smooth scrolling implementation
   - No longer return a promise
 - [up-switch] soll klasse setzen statt inline hide/show
-
+- Consider up.fragment.toTarget('<div up-main="root">') => '[up-main=root]')
 
 
 Docs
