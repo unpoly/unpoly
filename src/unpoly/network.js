@@ -679,7 +679,7 @@ up.network = (function() {
 
   ### Aborting requests matching a pattern
 
-  To abort all requests matching an [URL pattern](/url-pattern), pass it as the first argument:
+  To abort all requests matching an [URL pattern](/url-patterns), pass it as the first argument:
 
   ```js
   up.network.abort('/path/*')
