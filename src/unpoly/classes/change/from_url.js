@@ -138,9 +138,9 @@ up.Change.FromURL = class FromURL extends up.Change {
   async revalidate(renderResult, originalRenderOptions) {
     let target = originalRenderOptions.target
     if (/:(before|after)/.test(target)) {
-      up.warn('up.render()', 'Cannot verify cache when prepending/appending (target %s)', target)
+      up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', target)
     } else {
-      up.puts('up.render()', 'Verifying cached response for target "%s"', target)
+      up.puts('up.render()', 'Revalidating cached response for target "%s"', target)
       let verifyResult = await up.reload(renderResult.target, {
         ...originalRenderOptions,
         layer: renderResult.layer,
