@@ -5,11 +5,133 @@ TODOs for next release
 Various changes
 ---------------
 
+- [up-switch] soll klasse setzen statt inline hide/show
 - up.form.config.inputDelay => up.form.config.watchInputDelay ?
 - Remove custom smooth scrolling implementation
   - No longer return a promise
-- [up-switch] soll klasse setzen statt inline hide/show
 - Consider up.fragment.toTarget('<div up-main="root">') => '[up-main=root]')
+- remove up.util.flatMap()
+- Support FormData und URLSearchParams everywhere we support up.Params
+- Bad connections should not impact correctness
+  - We should keep polling on a bad connection
+    - Introduce up.radio.config.pollIntervalScale = function(interval) { up.network.shouldReduceRequests() ? 2 : 1 }
+    - Do keep revalidating with reduced requests
+- Consider whether we're version 2.7 or 3.0
+- Polling
+  - It would be great to *not* have a timeout running while we're in the background or offline
+  - It would be great to not wait up to 10 seconds when we're re-focused or regain connectivity
+
+
+Offline / rework caching
+------------------------
+
+Our cache terminology is now inconsinstent with what's standard in HTTP specs and browsers.
+Also we could get away with *never* cleaning the cache (just expiration).
+This way we can keep using cached content if we're offline.
+
+### TODOs
+
+- Update up.Request.Cache
+  - Rename #expiry => #evictAge
+  - Introduce up.network.config.cacheEvictAge for use in Request.Cache
+    - Default is 90 minutes
+    - Maybe have a lower default when navigator.deviceMemory is known and < 2 GB
+  - Evict entries when >= up.network.config.cacheEvictAge
+  - With our long cache eviction background tabs could hog a lot of memory
+    - Have a slow timeout that evicts old entries
+      - Every 10 minutes would be slower than our test suite runs
+  - We should really use the age of the response, not the time the request was cached (entry#timestamp in the current implementation)
+    - have up.Request#responseAge which is 0 while there is no response, then delegates to up.Response#age
+    - For this we need to track our { response } and also delegate in #followState(otherRequest)
+  - Force-evict by LRU
+    - Updates by #get()
+  - We do not need to support the concept of "stale" here
+
+- Rename up.network.config.cacheExpiry to up.network.config.cacheExpireAge
+  - New default is 15 seconds (down from 5 minutes in Unpoly 2.6)
+  - Some users have reduced this to 10 seconds or so
+
+- New response props
+  - @internal up.Response#expireAge (returns up.network.config.cacheExpireAge(response)
+  - @internal up.Response#evictAge  (returns up.network.config.cacheEvictAge(response)
+  - @stable up.Response#fresh (#age <= #expireAge)
+  - @stable up.Response#stale (#age <= #evictAge)
+
+- Revalidate on stale responses
+  - Keep up.fragment.config.autoRevalidate
+    - This way users can easily excempt a troublesome request from auto-revalidation, e.g. a blank form
+    - It can now default to (response) => response.stale
+
+- "Clearing" the cache is now "expiring" the cache
+  - Rework X-Up-Clear-Cache
+    - Rename to X-Up-Expire-Cache
+    - Migrate old header
+    - Remove X-Up-Expire-Clache: false
+  - Rename up.network.config.clearCache to up.network.config.expireCache
+  - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
+  - Rename [up-clear-cache] to [up-expire-cache]
+  - Rename up.render({ clearCache }) to { expireCache })
+  - Rename up.request({ clearCache }) to { expireCache })
+
+- Update docs for confusing network config props
+  - autoCache(request)      autoCache            "should we use the cache for a request with { cache: 'auto' }?"
+  - expireCache(request)    "should we expire the entire cache or a pattern`"                (used to be clearCache)
+  - cacheExpireAge          "how long is a cached response fresh"?                           (used to be cacheExpiry)
+  - cacheEvictAge           "when do we remove an response from the cache entirely?"
+
+- Rework up.Request
+  - Rename up:request:fatal to up:request:offline
+    - No { retry } function here. We could offer this one day, but then we need many options from https://www.npmjs.com/package/axios-retry
+    - Offer up:fragment:offline
+    - event.renderOptions
+    - Offer an event.retry() method
+      - This makes another render pass
+      - This still fails the original render
+      - Document as @experimental
+  - Timeouts should be considered "offline", not "aborted"
+    - Although timeouts are really client-side aborting, it's more useful to us to consider a timeouted resource to be offline
+
+- Imperative eviction
+  - Introduce X-Up-Evict-Cache
+  - Introduce up.cache.evict(pattern)
+
+- Test that being offline will still cause a stale cached response to render
+  - Only the revalidation should fail with up:request:offline
+  - { onFinished } callback should not fire (It should already work that way)
+  - { onOffline } callback should still fire
+
+- Ensure we have all the render callbacks
+  - [up-on-aborted], { onAborted }
+  - [up-on-offline], { onOffline }
+  - Docs at [up-follow] and up.render()
+
+- New topic page for "offline"
+  - Document how to build an "you're offline. retry?" toast:
+    - <a up-follow up-offline="if (confirm('Offline, retry?') event.retry()">
+  - Explain that the initial request requires a service worker like the one from UpUp (no relation)
+
+- up.link.cacheState(link)
+  - Returns null, "fresh" or "stale"
+  - Or do we need additional properties { response }, { clearAge }, { staleAge }?
+  - Or just return the up.Response? It already has the properties above :)
+  - What do we return when the request is in flight? => null
+
+- Update up.link.preload()
+  - up.link.preload() should not abortable by default
+    - Document { abortable: false } option
+  - Test that up.link.preload() will not preload a resource that is already cached
+
+- Update unpoly-rails
+  - Remove up.cache.keep
+  - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
+  - Add up.cache.evict(pattern)
+
+- Revalidation logic uses no/wrong guardEvents
+  - Test that original guard event is not fired another time
+  - Delete existing guardEvents when revalidating
+  - Use a new guardEvent up:fragment:revalidate
+    - This one is preventable
+  - When done emit an event up:fragment:revalidated with the new up.RenderResult
 
 
 Docs
@@ -50,6 +172,12 @@ Docs
 
 ### Other docs
 
+- Consider a new page for defaults
+  - Explain that most opts are opt-in
+  - Explain navigation defaults
+  - Explain config objects
+  - Explain auto-Configs
+- Missing doc for up.render({ clearCache }) (but we do document [up-clear-cache])
 - Document { abort } option and [up-abort] everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
 - Document django-forms-dynamic for [up-validate]
@@ -73,6 +201,7 @@ Icebox
 ======
 
 - Consider using `Cache-Control: stale-while-revalidate=<seconds>` to indicate how long we can use a response
+  - But it could be paired like this: Cache-Control: max-age=1, stale-while-revalidate=59
   - But then again we ignore Cache-Control for all other purposes
     - E.g. Cache-Control: no-store
     - E.g. Cache-Control: max-age
@@ -192,3 +321,11 @@ Icebox
 - Doc page about "Fragments from local HTML"
   - link from [up-document], [up-fragment], [up-content], { document, fragment, content }.
 - Warn when registering compiler in [up-] namespace
+
+
+Decisions
+=========
+
+- Should the old "clear" be "expire" or "evict"?
+  => We really want to push our new defaults for both
+  => I think it should be "expire". Most users set a lower expire time.
