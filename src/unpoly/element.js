@@ -1,3 +1,5 @@
+require('./element.sass')
+
 /*-
 DOM helpers
 ===========
@@ -262,46 +264,93 @@ up.element = (function() {
   /*-
   Hides the given element.
 
-  The element is hidden by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
-  of `{ display: none }`.
+  Also see `up.element.show()` and `up.element.toggle()`.
 
-  Also see `up.element.show()`.
+  ### Implementation
+
+  The element is hidden by setting an `[hidden]` attribute.
+  This effectively gives the element a `display: none` rule.
+
+  To customize the CSS rule for hiding, see `[hidden]`.
 
   @function up.element.hide
   @param {Element} element
   @stable
   */
   function hide(element) {
-    element.style.display = 'none'
+    // Set an attribute that the user can style with custom "hidden" styles.
+    // E.g. certain JavaScript components cannot initialize properly within a
+    // { display: none }, as such an element has no width or height.
+    element.setAttribute('hidden', '')
   }
+
+  /*-
+  Elements with this attribute are hidden from the page.
+
+  While `[hidden]` is a [standard HTML attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden)
+  its default implementation is [not very useful](https://meowni.ca/hidden.is.a.lie.html).
+  In particular it cannot hide elements with any `display` rule.
+  Unpoly improves the default CSS styles of `[hidden]` so it can hide arbitrary elements.
+
+  ## Customizing the CSS
+
+  Unpoly's default styles for `[hidden]` look like this:
+
+  ```css
+  [hidden][hidden] {
+    display: none !important;
+  }
+  ```
+
+  You can override the CSS to hide an element in a different way, e.g. by giving it a zero height:
+
+  ```css
+  .my-element[hidden] {
+    display: block !important;
+    height: 0 !important;
+  }
+  ```
+
+  Note that any overriding selector must have a [specificity of `(0, 2, 0)`](https://polypane.app/css-specificity-calculator/#selector=.element%5Bhidden%5D).
+  Also all rules should be defined with [`!important`](https://www.w3schools.com/css/css_important.asp) to override other
+  styles defined on that element.
+
+  @selector [hidden]
+  @experimental
+  */
 
   /*-
   Shows the given element.
 
-  Also see `up.element.hide()`.
+  Also see `up.element.hide()` and `up.element.toggle()`.
 
   ### Limitations
 
-  The element is shown by setting an [inline style](https://www.codecademy.com/articles/html-inline-styles)
-  of `{ display: '' }`.
+  The element is shown by removing the `[hidden]` attribute set by `up.element.hide()`.
+  In case the element is hidden by an inline style (`[style="display: none"]`),
+  that inline style is also removed.
 
-  You might have CSS rules causing the element to remain hidden after calling `up.element.show(element)`.
-  Unpoly will not handle such cases in order to keep this function performant. As a workaround, you may
-  manually set the `element.style.display` property. Also see discussion
-  in jQuery issues [#88](https://github.com/jquery/jquery.com/issues/88),
-  [#2057](https://github.com/jquery/jquery/issues/2057) and
-  [this WHATWG mailing list post](http://lists.w3.org/Archives/Public/public-whatwg-archive/2014Apr/0094.html).
+  You may have CSS rules causing the element to remain hidden after calling `up.element.show(element)`.
+  Unpoly will *not* handle such cases in order to keep this function performant. As a workaround, you may
+  manually set `element.style.display = 'block'`.
 
   @function up.element.show
   @param {Element} element
   @stable
   */
   function show(element) {
-    element.style.display = ''
+    // Remove the attribute set by `up.element.hide()`.
+    element.removeAttribute('hidden')
+
+    // In case the element was manually hidden through an inline style
+    // of `display: none`, we also remove that.
+    if (element.style.display === 'none') {
+      element.style.display = ''
+    }
   }
 
   /*-
-  Display or hide the given element, depending on its current visibility.
+  Changes whether the given element is [shown](/up.element.show) or [hidden](/up.element.hide).
 
   @function up.element.toggle
   @param {Element} element
@@ -316,10 +365,6 @@ up.element = (function() {
     (newVisible ? show : hide)(element)
   }
 
-//  trace = (fn) ->
-//    (args...) ->
-//      console.debug("Calling %o with %o", fn, args)
-//      fn(args...)
 
   /*-
   Adds or removes the given class from the given element.

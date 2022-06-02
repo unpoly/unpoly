@@ -997,3 +997,51 @@ describe 'up.element', ->
       element = fixture('div')
       element.classList.add('print:sm:hidden')
       expect(up.element.classSelector('print:sm:hidden')).toBe('.print\\:sm\\:hidden')
+
+  describe 'up.element.hide()', ->
+
+    it 'makes the given element invisible', ->
+      element = fixture('div')
+      expect(element).toBeVisible()
+
+      up.element.hide(element)
+
+      expect(element).not.toBeVisible()
+
+    it 'allows users to implement custom hide behavior through CSS', ->
+      fixtureStyle """
+        .other[hidden] {
+          display: block !important;
+          height: 0px;
+        }
+      """
+
+      other = fixture('.other')
+      up.element.hide(other)
+
+      expect(getComputedStyle(other).display).toBe('block')
+      expect(getComputedStyle(other).height).toBe('0px')
+
+
+  describe 'up.element.show()', ->
+
+    it 'shows the given invisible element', ->
+      element = fixture('div')
+      up.element.hide(element)
+      expect(element).not.toBeVisible()
+
+      up.element.show(element)
+
+      expect(element).toBeVisible()
+
+    it 'restores the { display } property the element had before hiding', ->
+      element = fixture('div', style: { display: 'flex '})
+      expect(getComputedStyle(element).display).toBe('flex')
+      up.element.hide(element)
+      expect(element).not.toBeVisible()
+
+      up.element.show(element)
+
+      expect(element).toBeVisible()
+      expect(getComputedStyle(element).display).toBe('flex')
+

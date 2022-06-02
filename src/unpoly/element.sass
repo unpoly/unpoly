@@ -1,0 +1,13 @@
+// We need to fix two things about the standard `[hidden]` attribute:
+//
+// - We need to strengthen the default style from `display: hidden` to `display: hidden !important`.
+//   Otherwise *any* other `display` rule matching the element would cause the hidden element
+//   to show. For example a rule like `.element { display: flex; }`. See https://meowni.ca/hidden.is.a.lie.html
+//   This is also done by CSS frameworks like Bootstrap: https://getbootstrap.com/docs/4.1/content/reboot/#html5-hidden-attribute
+//
+// - We also to increase the specificity of our new rule from (0, 1, 0) to (0, 2, 0).
+//   Otherwise using any utility class on the same element would cause the hidden element
+//   show if the utility CSS was loaded after Unpoly. For example Bootstrap utilities
+//   like `d-flex`. This is also done by GitHub's Primer framework: https://github.com/primer/css/pull/561/files
+[hidden][hidden]
+  display: none !important
