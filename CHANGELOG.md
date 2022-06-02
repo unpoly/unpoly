@@ -1,3 +1,4 @@
+
 Changelog
 =========
 
@@ -73,6 +74,7 @@ Changes tracked until 2021-05-30:
 - New experimental features up.form.group(), [up-form-group]; Also configure [up-form-group] instead of [up-fieldset]
   - Change up.form.config.validateTargets to up.form.config.groupSelectors
 - Play nice with overlays from other libraries (up.layer.config.foreignOverlaySelectors)
+- Stylable [hidden]
 
 ### Small things
 
