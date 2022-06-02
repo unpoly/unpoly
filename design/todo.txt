@@ -20,6 +20,20 @@ Various changes
 - Polling
   - It would be great to *not* have a timeout running while we're in the background or offline
   - It would be great to not wait up to 10 seconds when we're re-focused or regain connectivity
+- Go through visibilities
+- https://github.com/unpoly/unpoly/issues/388
+- onTransitionEnd
+- Consider logging user events
+
+
+If we're launching V3
+---------------------
+
+- Ops need to give us a new site v2.makandra.de
+- We need a separate Algolia index for v2
+
+
+
 
 
 Offline / rework caching
