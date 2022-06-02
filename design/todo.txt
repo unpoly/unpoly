@@ -23,7 +23,7 @@ Various changes
 - Go through visibilities
 - https://github.com/unpoly/unpoly/issues/388
 - onTransitionEnd
-- Consider logging user events
+
 
 
 If we're launching V3

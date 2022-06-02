@@ -82,10 +82,16 @@ up.log = (function() {
   const printToError = (...args) => printToStream('error', ...args)
 
   function printToStream(stream, trace, message, ...args) {
+    printToStreamStyled(stream, trace, '', message, ...args)
+  }
+
+  function printToStreamStyled(stream, trace, customStyles, message, ...args) {
     if (message) {
       if (config.format) {
-        args.unshift(''); // Reset
-        args.unshift('color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block')
+        args.unshift(
+          'color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block;' + customStyles,
+          '' // reset for message after trace
+        )
         message = `%c${trace}%c ${message}`
       } else {
         message = `[${trace}] ${message}`
@@ -93,6 +99,12 @@ up.log = (function() {
 
       console[stream](message, ...args)
     }
+  }
+
+  function printUserEvent(event) {
+    event = event.originalEvent || event
+    let color = '#5566cc'
+    printToStreamStyled('log', event.type, `color: white; border-color: ${color}; background-color: ${color}`, 'Interaction on %o', event.target)
   }
 
   function printBanner() {
@@ -194,6 +206,7 @@ up.log = (function() {
 
   return {
     puts: printToStandard,
+    putsEvent: printUserEvent,
     error: printToError,
     warn: printToWarn,
     config,

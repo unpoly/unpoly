@@ -234,9 +234,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   onOutsideClicked(event, halt) {
-    if (halt) {
-      up.event.halt(event)
-    }
+    up.log.putsEvent(event)
+    if (halt) up.event.halt(event)
     this.dismiss(':outside', { origin: event.target })
   }
 
@@ -252,7 +251,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         // modal with escape.
         field.blur()
       } else if (this.supportsDismissMethod('key')) {
-        up.event.halt(event)
+        up.event.halt(event, { log: true })
         this.dismiss(':key')
       }
     }
@@ -264,7 +263,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     this.on('up:click', selector, function(event) {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a link from being followed on the root layer.
-      up.event.halt(event)
+      up.event.halt(event, { log: true })
 
       const origin = event.target.closest(selector)
       const value = e.jsonAttr(origin, attribute)

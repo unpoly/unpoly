@@ -1200,7 +1200,7 @@ up.form = (function() {
       return
     }
 
-    up.event.halt(event)
+    up.event.halt(event, { log: true })
     up.log.muteUncriticalRejection(submit(form))
   })
 

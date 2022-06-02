@@ -66,6 +66,7 @@ Changes tracked until 2021-05-30:
 
 (Maybe extract individual sections here)
 
+- The log shows which user interaction triggered an event chain
 - Optional targets with :maybe
 - Allow to consider [up-hungry] elements for updates to any layer with [up-layer=any]
 - Listeners to up:fragment:loaded can force failure options by setting event.renderOptions.fail

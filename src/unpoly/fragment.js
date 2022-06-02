@@ -2134,7 +2134,7 @@ up.fragment = (function() {
     // Emit an event so other async code can choose to abort itself,
     // e.g. timers waiting for a delay.
     for (let element of elements) {
-      up.emit(element, 'up:fragment:aborted', { reason, log: reason })
+      up.emit(element, 'up:fragment:aborted', { log: reason })
     }
   }
 
@@ -2178,8 +2178,6 @@ up.fragment = (function() {
   @event up:fragment:aborted
   @param {Element} event.target
     The element for which requests were aborted.
-  @param {string} event.reason
-    The reason why requests were aborted.
   @experimental
   */
 

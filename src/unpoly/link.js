@@ -1090,7 +1090,7 @@ up.link = (function() {
   */
   up.on('up:click', fullFollowSelector, function(event, link) {
     if (shouldFollowEvent(event, link)) {
-      up.event.halt(event)
+      up.event.halt(event, { log: true })
 
       // When the user clicks an hyperlink, the browser will focus the link element on `click`.
       // However, for an `a[up-instant]` link we will emit `up:click` on `mousedown` and halt the `click` event.

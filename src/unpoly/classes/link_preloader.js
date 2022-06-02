@@ -32,9 +32,9 @@ up.LinkPreloader = class LinkPreloader {
       // Don't preload when the user is holding down CTRL or SHIFT.
       if (up.link.shouldFollowEvent(event, link)) {
         if (applyDelay) {
-          this.preloadAfterDelay(link)
+          this.preloadAfterDelay(event, link)
         } else {
-          this.preloadNow(link)
+          this.preloadNow(event, link)
         }
       }
     }
@@ -62,12 +62,12 @@ up.LinkPreloader = class LinkPreloader {
     this.currentRequest = undefined
   }
 
-  preloadAfterDelay(link) {
+  preloadAfterDelay(event, link) {
     const delay = e.numberAttr(link, 'up-preload-delay') ?? up.link.config.preloadDelay
-    this.timer = u.timer(delay, () => this.preloadNow(link))
+    this.timer = u.timer(delay, () => this.preloadNow(event, link))
   }
 
-  preloadNow(link) {
+  preloadNow(event, link) {
     // Don't preload if the link was removed from the DOM while we were waiting for the timer.
     if (e.isDetached(link)) {
       this.reset()
@@ -75,6 +75,7 @@ up.LinkPreloader = class LinkPreloader {
     }
 
     const onQueued = request => { return this.currentRequest = request; }
+    up.log.putsEvent(event)
     up.log.muteUncriticalRejection(up.link.preload(link, { onQueued }))
     this.queued = true
   }

@@ -459,7 +459,8 @@ The parsed data will be passed to your event handler as a third argument:
   @param {Event} event
   @stable
   */
-  function halt(event) {
+  function halt(event, options = {}) {
+    if (options.log) up.log.putsEvent(event)
     event.stopImmediatePropagation()
     event.preventDefault()
   }
