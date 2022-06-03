@@ -2,9 +2,7 @@ const u = up.util
 
 up.Request.Queue = class Queue {
 
-  constructor(options = {}) {
-    this.concurrency = options.concurrency ?? (() => up.network.config.concurrency)
-    this.badResponseTime = options.badResponseTime ?? (() => up.network.config.badResponseTime)
+  constructor() {
     this.reset()
   }
 
@@ -38,17 +36,25 @@ up.Request.Queue = class Queue {
   promoteToForeground(request) {
     if (request.preload) {
       request.preload = false
-      return this.setSlowTimer()
+      this.setSlowTimer()
     }
   }
 
   setSlowTimer() {
-    const badResponseTime = u.evalOption(this.badResponseTime)
+    const badResponseTime = this.getBadResponseTime()
     this.checkSlowTimout = u.timer(badResponseTime, () => this.checkSlow())
   }
 
+  getMaxConcurrency() {
+    return up.network.config.concurrency
+  }
+
+  getBadResponseTime() {
+    return up.network.config.badResponseTime
+  }
+
   hasConcurrencyLeft() {
-    const maxConcurrency = u.evalOption(this.concurrency)
+    const maxConcurrency = this.getMaxConcurrency()
     return (maxConcurrency === -1) || (this.currentRequests.length < maxConcurrency)
   }
 
@@ -144,7 +150,7 @@ up.Request.Queue = class Queue {
 
   isSlow() {
     const now = new Date()
-    const delay = u.evalOption(this.badResponseTime)
+    const badResponseTime = this.getBadResponseTime()
     const allForegroundRequests = u.reject(this.allRequests, 'preload')
 
     // If badResponseTime is 200, we're scheduling the checkSlow() timer after 200 ms.
@@ -153,6 +159,6 @@ up.Request.Queue = class Queue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
 
-    return u.some(allForegroundRequests, request => (now - request.queueTime) >= (delay - timerTolerance))
+    return u.some(allForegroundRequests, request => (now - request.queueTime) >= (badResponseTime - timerTolerance))
   }
 }

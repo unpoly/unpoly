@@ -16,6 +16,7 @@ Various changes
 - Go through visibilities
 - https://github.com/unpoly/unpoly/issues/388
 - onTransitionEnd
+- can badResponseTime be a function that takes a request?
 
 
 
