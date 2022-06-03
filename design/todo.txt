@@ -6,10 +6,6 @@ Various changes
 ---------------
 
 - up.form.config.inputDelay => up.form.config.watchInputDelay ?
-- Remove custom smooth scrolling implementation
-  - No longer return a promise
-- Consider up.fragment.toTarget('<div up-main="root">') => '[up-main=root]')
-- remove up.util.flatMap()
 - Bad connections should not impact correctness
   - We should keep polling on a bad connection
     - Introduce up.radio.config.pollIntervalScale = function(interval) { up.network.shouldReduceRequests() ? 2 : 1 }
@@ -21,8 +17,6 @@ Various changes
 - Go through visibilities
 - https://github.com/unpoly/unpoly/issues/388
 - onTransitionEnd
-- Only log up:fragment:aborted when we're aborting requests
-- Remove logging for up.request({ solo })
 
 
 
@@ -344,3 +338,4 @@ Decisions
 - Should the old "clear" be "expire" or "evict"?
   => We really want to push our new defaults for both
   => I think it should be "expire". Most users set a lower expire time.
+- remove up.util.flatMap() => No, we need it to flatMap array-like objects (e.g. arguments)
