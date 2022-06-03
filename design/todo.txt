@@ -17,6 +17,22 @@ Various changes
 - https://github.com/unpoly/unpoly/issues/388
 - onTransitionEnd
 - can badResponseTime be a function that takes a request?
+- Consider a lower default concurrency when reducing requests
+- Background requests
+  - Don't trigger :late / progressBar
+  - Default false
+  - Default true for preload requests
+  - Is deprioritized by the queue
+    - It already deprioritizes preload requests
+  - up.request({ background })
+  - up.render({ background })
+  - [up-background]
+  - Default false
+- Bad up.fragment.toTarget()
+  - Consider default { hungry: false } and only setting { hungry: true } für Navigation
+  - Consider restricting the use of element names for toTarget()
+    - up.fragment.config.goodTargetElements
+      - html, head, body, main
 
 
 
