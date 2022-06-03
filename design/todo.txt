@@ -5,7 +5,6 @@ TODOs for next release
 Various changes
 ---------------
 
-- [up-switch] soll klasse setzen statt inline hide/show
 - up.form.config.inputDelay => up.form.config.watchInputDelay ?
 - Remove custom smooth scrolling implementation
   - No longer return a promise
@@ -23,6 +22,8 @@ Various changes
 - Go through visibilities
 - https://github.com/unpoly/unpoly/issues/388
 - onTransitionEnd
+- Only log up:fragment:aborted when we're aborting requests
+- Remove logging for up.request({ solo })
 
 
 
@@ -31,6 +32,7 @@ If we're launching V3
 
 - Ops need to give us a new site v2.makandra.de
 - We need a separate Algolia index for v2
+  - v3 would stay on "latest"
 
 
 

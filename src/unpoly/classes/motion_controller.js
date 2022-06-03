@@ -116,7 +116,7 @@ up.MotionController = class MotionController {
   finishOneElement(element) {
     // Animating code is expected to listen to this event, fast-forward
     // the animation and resolve their promise. All built-ins like
-    // `up.animate`, `up.morph`, or `up.scroll` behave that way.
+    // `up.animate()` or `up.morph()` behave that way.
     this.emitFinishEvent(element)
 
     // If animating code ignores the event, we cannot force the animation to

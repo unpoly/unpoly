@@ -10,7 +10,6 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       'revealMax',
       'revealSnap',
       'scrollBehavior',
-      'scrollSpeed'
     ])
   }
 

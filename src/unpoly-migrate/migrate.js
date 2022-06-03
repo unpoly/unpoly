@@ -113,7 +113,7 @@ up.migrate = (function() {
     const promise = Promise.resolve()
     const oldThen = promise.then
     promise.then = function() {
-      warn(`${label} is now a sync function`)
+      warn(`${label} no longer returns a promise`)
       return oldThen.apply(this, arguments)
     }
     return promise

@@ -69,6 +69,7 @@ up.error = (function() {
   @internal
   */
   function fail(...args) {
+    // Yes, we pass the message plus all substitution vars as an array in the first arg slot.
     throw up.error.failed(args)
   }
 

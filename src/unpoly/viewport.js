@@ -68,11 +68,6 @@ up.viewport = (function() {
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
     By default Unpoly will scroll as little as possible to make the element visible.
-  @param {number} [config.scrollSpeed=1]
-    The speed of the scrolling motion when [scrolling](/up.reveal) with `{ behavior: 'smooth' }`.
-
-    The default value (`1`) roughly corresponds to the speed of Chrome's
-    [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
   @stable
   */
   const config = new up.Config(() => ({
@@ -84,59 +79,10 @@ up.viewport = (function() {
     revealPadding: 0,
     revealTop: false,
     revealMax() { return 0.5 * window.innerHeight; },
-    scrollSpeed: 1
   }))
-
-  const scrollingController = new up.MotionController('scrolling')
 
   function reset() {
     config.reset()
-    scrollingController.reset()
-  }
-
-  /*-
-  Scrolls the given viewport to the given Y-position.
-
-  A "viewport" is an element that has scrollbars, e.g. `<body>` or
-  a container with `overflow-x: scroll`.
-
-  ### Example
-
-  This will scroll a `<div class="main">...</div>` to a Y-position of 100 pixels:
-
-      up.scroll('.main', 100)
-
-  ### Animating the scrolling motion
-
-  The scrolling can (optionally) be animated.
-
-      up.scroll('.main', 100, { behavior: 'smooth' })
-
-  If the given viewport is already in a scroll animation when `up.scroll()`
-  is called a second time, the previous animation will instantly jump to the
-  last frame before the next animation is started.
-
-  @function up.scroll
-  @param {string|Element|jQuery} viewport
-    The container element to scroll.
-  @param {number} scrollPos
-    The absolute number of pixels to set the scroll position to.
-  @param {string}[options.behavior='instant']
-    When set to `'instant'`, this will immediately scroll to the new position.
-
-    When set to `'smooth'`, this will scroll smoothly to the new position.
-  @param {number}[options.speed]
-    The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
-
-    Defaults to `up.viewport.config.scrollSpeed`.
-  @return {Promise}
-    A promise that will be fulfilled when the scrolling ends.
-  @internal
-  */
-  function scroll(viewport, scrollTop, options = {}) {
-    viewport = f.get(viewport, options)
-    const motion = new up.ScrollMotion(viewport, scrollTop, options)
-    scrollingController.startMotion(viewport, motion, options)
   }
 
   /*-
@@ -168,14 +114,6 @@ up.viewport = (function() {
 
   @param {string|Element|jQuery} element
     The element to reveal.
-
-  @param {number} [options.scrollSpeed=1]
-    The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
-
-    The default value (`1`) roughly corresponds to the speed of Chrome's
-    [native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
-
-    Defaults to `up.viewport.config.scrollSpeed`.
 
   @param {string} [options.revealSnap]
     When the the revealed element would be closer to the viewport's top edge
@@ -237,13 +175,15 @@ up.viewport = (function() {
     // Now that we have looked up the element with an option like { layer: 'any' },
     // the only layer relevant from here on is the element's layer.
     if (!(options.layer = up.layer.get(element))) {
-      return up.error.failed.async('Cannot reveal a detached element')
+      up.fail('Cannot reveal a detached element')
     }
 
     if (options.peel) { options.layer.peel(); }
 
     const motion = new up.RevealMotion(element, options)
-    return scrollingController.startMotion(element, motion, options)
+    motion.start()
+
+    return up.migrate.formerlyAsync?.('up.reveal()')
   }
 
   /*-
@@ -571,8 +511,6 @@ up.viewport = (function() {
   @param {Element} [viewport]
   @param {up.Layer|string} [options.layer]
     The layer on which to restore scroll positions.
-  @return {Promise}
-    A promise that will be fulfilled once scroll positions have been restored.
   @experimental
   */
   function restoreScroll(...args) {
@@ -580,7 +518,8 @@ up.viewport = (function() {
     const url = options.layer.location
     const scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
     up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL)
-    return setScrollTops(viewports, scrollTopsForURL)
+    setScrollTops(viewports, scrollTopsForURL)
+    return up.migrate.formerlyAsync?.('up.restoreScroll()')
   }
 
   function parseOptions(args) {
@@ -601,16 +540,14 @@ up.viewport = (function() {
 
   function resetScroll(...args) {
     const [viewports, _options] = parseOptions(args)
-    return setScrollTops(viewports, {})
+    setScrollTops(viewports, {})
   }
 
   function setScrollTops(viewports, tops) {
-    const allScrollPromises = u.map(viewports, function(viewport) {
+    for (let viewport of viewports) {
       const key = scrollTopKey(viewport)
-      const scrollTop = tops[key] || 0
-      return scroll(viewport, scrollTop, { duration: 0 })
-    })
-    return Promise.all(allScrollPromises)
+      viewport.scrollTop = tops[key] || 0
+    }
   }
 
   function absolutize(element, options = {}) {
@@ -867,12 +804,10 @@ up.viewport = (function() {
     reveal,
     revealHash,
     firstHashTarget,
-    scroll,
     config,
     get: closest,
     subtree: getSubtree,
     around: getAround,
-    all: getAll,
     get root() { return getRoot() },
     rootWidth,
     rootHeight,
@@ -892,5 +827,4 @@ up.viewport = (function() {
 })()
 
 up.focus = up.viewport.focus
-up.scroll = up.viewport.scroll
 up.reveal = up.viewport.reveal

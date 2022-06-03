@@ -39,5 +39,8 @@ afterEach (done) ->
         if document.querySelector('up-progress-bar')
           console.error('Progress bar survived reset!')
 
+        # Scroll to the top
+        document.scrollingElement.scrollTop = 0
+
         up.puts("Framework was reset")
         done()

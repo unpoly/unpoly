@@ -6,7 +6,7 @@ describe 'up.viewport', ->
 
   describe 'JavaScript functions', ->
 
-    describe 'up.reveal', ->
+    describe 'up.reveal()', ->
 
       beforeEach ->
         up.viewport.config.revealSnap = 0
@@ -278,11 +278,9 @@ describe 'up.viewport', ->
               (2 * 5)      # obstruction top and bottom paddings
             )
 
-        it 'does not crash when called with a CSS selector (bugfix)', (done) ->
-          promise = up.reveal('.container', { behavior: 'instant' })
-          promise.then ->
-            expect(true).toBe(true)
-            done()
+        it 'does not crash when called with a CSS selector (bugfix)', ->
+          up.reveal('.container', { behavior: 'instant' })
+          expect(true).toBe(true)
 
         it 'scrolls the viewport to the first row if the element if the element is higher than the viewport', asyncSpec (next) ->
           @$elements[0].css(height: '1000px')
@@ -447,7 +445,22 @@ describe 'up.viewport', ->
             # [5] 250..299
             expect($viewport.scrollTop()).toBe(50)
 
-    describe 'up.viewport.revealHash', ->
+      describe 'with { behavior: "smooth" }', ->
+
+        it 'animates the scroll motion', (done) ->
+          fixture('.between', text: 'between', style: { height: 20000 })
+          destination = fixture('.destination', text: 'destination')
+
+          expect(document.scrollingElement.scrollTop).toBe(0)
+
+          up.reveal(destination, behavior: 'smooth')
+
+          u.timer 250, ->
+            expect(document.scrollingElement.scrollTop).toBeGreaterThan(500)
+            expect(document.scrollingElement.scrollTop).toBeLessThan(10000)
+            done()
+
+    describe 'up.viewport.revealHash()', ->
 
       it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->
         revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
@@ -470,14 +483,7 @@ describe 'up.viewport', ->
           # Assert that we did not change the scroll position
           expect(up.viewport.root.scrollTop).toBe(50)
 
-    describe 'up.viewport.all', ->
-
-      it 'returns an array of all viewports on the screen', ->
-        viewportElement = $fixture('[up-viewport]')[0]
-        results = up.viewport.all()
-        expect(results).toMatchList([viewportElement, up.viewport.root])
-
-    describe 'up.viewport.subtree', ->
+    describe 'up.viewport.subtree()', ->
 
       it 'returns descendant viewports of the given element', ->
         $motherViewport = $fixture('.mother[up-viewport]')
@@ -494,7 +500,7 @@ describe 'up.viewport', ->
         results = up.viewport.subtree(viewportElement)
         expect(results).toMatchList([viewportElement])
 
-    describe 'up.viewport.around', ->
+    describe 'up.viewport.around()', ->
 
       it 'returns viewports that  are either ancestors, descendants, or the given element itself', ->
         $motherViewport = $fixture('.mother[up-viewport]')
@@ -506,7 +512,7 @@ describe 'up.viewport', ->
 
         expect(actual).toMatchList(expected)
 
-    describe 'up.viewport.get', ->
+    describe 'up.viewport.get()', ->
 
       it 'seeks upwards from the given element', ->
         up.viewport.config.viewportSelectors = ['.viewport1', '.viewport2']
@@ -545,9 +551,9 @@ describe 'up.viewport', ->
           result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
 
-    describe 'up.viewport.restoreScroll', ->
+    describe 'up.viewport.restoreScroll()', ->
 
-      it "restores a viewport's previously saved scroll position", (done) ->
+      it "restores a viewport's previously saved scroll position", ->
         $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         up.hello($viewport)
@@ -555,9 +561,9 @@ describe 'up.viewport', ->
         up.viewport.saveScroll()
         $viewport.scrollTop(70)
 
-        up.viewport.restoreScroll().then ->
-          expect($viewport.scrollTop()).toEqual(50)
-          done()
+        up.viewport.restoreScroll()
+
+        expect($viewport.scrollTop()).toEqual(50)
 
       it 'does not restore scroll positions that were saved for another layer', asyncSpec (next) ->
         viewportHTML = """
@@ -590,20 +596,15 @@ describe 'up.viewport', ->
           expect(@rootViewport.scrollTop).toBe(10)
           expect(@overlayViewport.scrollTop).toBe(0)
 
-      it "scrolls a viewport to the top (and does not crash) if no previous scroll position is known", (done) ->
+      it "scrolls a viewport to the top (and does not crash) if no previous scroll position is known", ->
         $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         $viewport.scrollTop(70)
 
-        up.viewport.restoreScroll().then ->
-          expect($viewport.scrollTop()).toEqual(0)
-          done()
+        up.viewport.restoreScroll()
+        expect($viewport.scrollTop()).toEqual(0)
 
-    describe 'up.scroll', ->
-
-      it 'should have tests'
-
-    describe 'up.viewport.rootOverflowElement', ->
+    describe 'up.viewport.rootOverflowElement()', ->
 
       beforeEach ->
         @body = document.body
@@ -636,7 +637,7 @@ describe 'up.viewport', ->
         @body.style.overflowY = 'visible'
         expect(up.viewport.rootOverflowElement()).toBe(up.viewport.root)
 
-    describe 'up.viewport.absolutize', ->
+    describe 'up.viewport.absolutize()', ->
 
       afterEach ->
         $('up-bounds, .fixture').remove()

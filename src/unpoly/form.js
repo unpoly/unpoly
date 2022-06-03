@@ -425,7 +425,7 @@ up.form = (function() {
   function handleDisableOption({ disable, origin }) {
     if (!disable) return u.noop
 
-    let missingOption = (key) => { throw up.error.failed("Cannot process { disable: '%s' } option without { %s }", disable, key) }
+    let missingOption = (key) => { up.fail("Cannot process { disable: '%s' } option without { %s }", disable, key) }
     let getOrigin = () => origin || missingOption('origin')
     let getOriginForm = () => getContainer(getOrigin())
 

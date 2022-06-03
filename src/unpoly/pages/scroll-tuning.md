@@ -12,12 +12,6 @@ HTML attributes (like `[up-reveal-snap]`).
 To animate the scroll motion, pass `{ scrollBehavior: 'smooth' }.`
 To *not* animate the scrolling, pass `{ scrollBehavior: 'instant' }` (the default).
 
-The acceleration of the scroll motion may be controlled using the `{ scrollSpeed }` option.
-It defaults to `{ scrollSpeed: 1 }`.
-This roughly corresponds to the speed of Chrome's
-[native smooth scrolling](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior).
-You may change this default in `up.viewport.config.scrollSpeed`.
-
 When swapping a fragment with a new version of itself, the scroll motion cannot be animated.
 You *can* animate the scroll motion when [prepending, appending](/fragment-placement]
 or [destroying](/up.destroy) a fragment.

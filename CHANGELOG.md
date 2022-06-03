@@ -79,6 +79,10 @@ Changes tracked until 2021-05-30:
 
 ### Small things
 
+- Native smooth scrolling
+  - up.viewport.config.scrollSpeed removed
+  - up.reveal() no longer returns a promise
+  - up.viewport.restoreScroll() no longer returns a promise
 - Only associate a request with the current layer if either { origin, layer, target } is given
 - Instant scrolling now with { behavior: 'instant' } instead of { behavior: 'auto' }
 - Parse `[up-on-finished]`

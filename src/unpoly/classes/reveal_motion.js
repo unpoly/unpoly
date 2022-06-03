@@ -6,10 +6,10 @@ up.RevealMotion = class RevealMotion {
   constructor(element, options = {}) {
     this.element = element
     this.options = options
-    const viewportConfig = up.viewport.config
     this.viewport = e.get(this.options.viewport) || up.viewport.get(this.element)
     this.obstructionsLayer = up.layer.get(this.viewport)
 
+    const viewportConfig = up.viewport.config
     this.snap    = this.options.snap    ?? this.options.revealSnap    ?? viewportConfig.revealSnap
     this.padding = this.options.padding ?? this.options.revealPadding ?? viewportConfig.revealPadding
     this.top     = this.options.top     ?? this.options.revealTop     ?? viewportConfig.revealTop
@@ -32,7 +32,7 @@ up.RevealMotion = class RevealMotion {
 
     // Cards test (topics dropdown) throw an error when we also fail at zero
     if (viewportRect.height < 0) {
-      return up.error.failed.async('Viewport has no visible area')
+      up.fail('Viewport has no visible area')
     }
 
     const originalScrollTop = this.viewport.scrollTop
@@ -63,15 +63,8 @@ up.RevealMotion = class RevealMotion {
     }
 
     if (newScrollTop !== originalScrollTop) {
-      return this.scrollTo(newScrollTop)
-    } else {
-      return Promise.resolve()
+      this.viewport.scrollTo({ ...this.options, top: newScrollTop })
     }
-  }
-
-  scrollTo(newScrollTop) {
-    this.scrollMotion = new up.ScrollMotion(this.viewport, newScrollTop, this.options)
-    return this.scrollMotion.start()
   }
 
   getViewportRect() {
@@ -116,9 +109,5 @@ up.RevealMotion = class RevealMotion {
         viewportRect.height -= diff
       }
     }
-  }
-
-  finish() {
-    this.scrollMotion?.finish()
   }
 }

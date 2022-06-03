@@ -63,7 +63,7 @@ up.Layer.Root = class Root extends up.Layer {
   }
 
   cannotCloseRoot() {
-    throw up.error.failed('Cannot close the root layer')
+    up.fail('Cannot close the root layer')
   }
 
   reset() {
