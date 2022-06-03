@@ -311,31 +311,35 @@ describe('up.network', function() {
 
       })
 
-      describe('when the server responds with an X-Up-Method header', () => it('updates the { method } property in the response object', function(done) {
-        const promise = up.request({
-          url: '/url',
-          params: {key: 'value'},
-          method: 'post',
-          target: '.target'
-        })
+      describe('when the server responds with an X-Up-Method header', function() {
 
-        u.task(() => {
-          this.respondWith({
-            responseHeaders: {
-              'X-Up-Location': '/redirect',
-              'X-Up-Method': 'GET'
-            }
+        it('updates the { method } property in the response object', function (done) {
+          const promise = up.request({
+            url: '/url',
+            params: { key: 'value' },
+            method: 'post',
+            target: '.target'
           })
 
-          promise.then(function (response) {
-            expect(response.request.url).toMatchURL('/url')
-            expect(response.request.method).toEqual('POST')
-            expect(response.url).toMatchURL('/redirect')
-            expect(response.method).toEqual('GET')
-            done()
+          u.task(() => {
+            this.respondWith({
+              responseHeaders: {
+                'X-Up-Location': '/redirect',
+                'X-Up-Method': 'GET'
+              }
+            })
+
+            promise.then(function (response) {
+              expect(response.request.url).toMatchURL('/url')
+              expect(response.request.method).toEqual('POST')
+              expect(response.url).toMatchURL('/redirect')
+              expect(response.method).toEqual('GET')
+              done()
+            })
           })
         })
-      }))
+
+      })
 
       describe('when the server responds with an X-Up-Location header', function() {
 
