@@ -466,6 +466,13 @@ up.network = (function() {
 
     If a `{ payload }` option is given you must also pass a `{ contentType }`.
 
+  @param {boolean} [options.background=false]
+    Whether this request will load in the background.
+
+    Background requests deprioritized over foreground requests.
+    Background requests also won't emit `up:request:late` events and won't trigger
+    the [progress bar](/up.network.config#config.progressBar).
+
   @return {up.Request}
     An object with information about the request.
 

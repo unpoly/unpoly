@@ -54,7 +54,7 @@ up.LinkPreloader = class LinkPreloader {
     // Only abort if the request is still preloading.
     // If the user has clicked on the link while the request was in flight,
     // and then unhovered the link, we do not abort the navigation.
-    if (this.currentRequest?.preload) {
+    if (this.currentRequest?.background) {
       this.currentRequest.abort()
     }
 

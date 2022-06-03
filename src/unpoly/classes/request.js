@@ -222,8 +222,22 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
+  Whether this request is [preloading](/a-up-preload) content.
+
   @property up.Request#preload
-  @param {boolean} preload
+  @param {boolean} [preload=false]
+  @experimental
+  */
+
+  /*-
+  Whether this request is loading in the background.
+
+  Background requests deprioritized over foreground requests.
+  Background requests also won't emit `up:request:late` events and won't trigger
+  the [progress bar](/up.network.config#config.progressBar).
+
+  @property up.Request#background
+  @param {boolean} [background=false]
   @experimental
   */
 
@@ -239,6 +253,7 @@ up.Request = class Request extends up.Record {
       'headers',
       'timeout',
       'preload', // since up.network.request() options are sometimes wrapped in this class
+      'background',
       'cache',  // since up.network.request() options are sometimes wrapped in this class
       'clearCache',  // since up.network.request() options are sometimes wrapped in this class
 
@@ -296,6 +311,9 @@ up.Request = class Request extends up.Record {
     if (this.preload) {
       // Preloading requires caching.
       this.cache = true
+
+      // Preloading is always in the background.
+      this.background = true
     }
 
     if (this.wrapMethod == null) { this.wrapMethod = up.network.config.wrapMethod }

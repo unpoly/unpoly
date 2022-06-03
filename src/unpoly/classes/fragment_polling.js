@@ -77,7 +77,8 @@ up.FragmentPolling = class FragmentPolling {
   reloadNow() {
     let reloadOptions = {
       url: this.options.url,
-      guardEvent: up.event.build('up:fragment:poll', { log: ['Polling fragment', this.fragment] })
+      guardEvent: up.event.build('up:fragment:poll', { log: ['Polling fragment', this.fragment] }),
+      background: true,
     }
 
     // Prevent our own reloading from aborting ourselves.

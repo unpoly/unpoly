@@ -1404,11 +1404,10 @@ describe('up.network', function() {
 
         it('emits an up:request:late event if the server takes too long to respond')
 
-        it('does not emit an up:request:late event if preloading', asyncSpec(function(next) {
+        it('does not emit an up:request:late event for background requests', asyncSpec(function(next) {
           next(() => {
-            // A request for preloading preloading purposes
-            // doesn't make us busy.
-            up.request({url: '/foo', preload: true})
+            // A background request doesn't make us busy.
+            up.request({url: '/foo', cache: true, background: true})
           })
 
           next(() => {
@@ -1418,7 +1417,7 @@ describe('up.network', function() {
           })
 
           next(() => {
-            // The same request with preloading does trigger up:request:late.
+            // The same request in the foreground does trigger up:request:late.
             up.request({url: '/foo', cache: true})
           })
 
@@ -1430,8 +1429,7 @@ describe('up.network', function() {
           })
 
           next(() => {
-            // The response resolves both promises and makes
-            // the proxy idle again.
+            // The response resolves both promises and emits up:request:recover.
             jasmine.Ajax.requests.at(0).respondWith({
               status: 200,
               contentType: 'text/html',
@@ -1630,6 +1628,20 @@ describe('up.network', function() {
             ])
           })
         }))
+
+      })
+
+      describe('with { preload: true }', function() {
+
+        it('sets { cache: true } since preloading requires caching', function() {
+          let request = up.request('/foo', { preload: true })
+          expect(request.cache).toBe(true)
+        })
+
+        it('sets { background: true } since preloading should be prioritized and not trigger up:request:late', function() {
+          let request = up.request('/foo', { preload: true })
+          expect(request.background).toBe(true)
+        })
 
       })
 

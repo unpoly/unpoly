@@ -341,6 +341,7 @@ up.link = (function() {
     parser.booleanOrString('clearCache')
     parser.booleanOrString('revalidate')
     parser.booleanOrString('abort')
+    parser.boolean('background')
     parser.string('contentType')
 
     return options
@@ -1028,6 +1029,13 @@ up.link = (function() {
 
   @param [up-abort='target']
     Whether to [abort existing requests](/aborting-requests) before rendering.
+
+  @param [up-background='false']
+    Whether this request will load in the background.
+
+    Background requests deprioritized over foreground requests.
+    Background requests also won't emit `up:request:late` events and won't trigger
+    the [progress bar](/up.network.config#config.progressBar).
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.

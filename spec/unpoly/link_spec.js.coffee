@@ -680,6 +680,11 @@ describe 'up.link', ->
 
         delete window.onFinishedCallback
 
+      it 'parses an [up-background] attribute', ->
+        link = fixture('a[href="/foo"][up-background="true"]')
+        options = up.link.followOptions(link)
+        expect(options.background).toBe(true)
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->

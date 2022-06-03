@@ -661,8 +661,15 @@ up.fragment = (function() {
 
     See [aborting requests](/aborting-requests) for details and a list of options.
 
-  @param {boolean} [options.abortable]
+  @param {boolean} [options.abortable=true]
     Whether this request may be aborted through another `up.render({ abort })` or `up.fragment.abort()`.
+
+  @param {boolean} [options.background=false]
+    Whether this request will load in the background.
+
+    Background requests deprioritized over foreground requests.
+    Background requests also won't emit `up:request:late` events and won't trigger
+    the [progress bar](/up.network.config#config.progressBar).
 
   @param {Element|jQuery} [options.origin]
     The element that triggered the change.

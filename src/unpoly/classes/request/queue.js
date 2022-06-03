@@ -30,12 +30,15 @@ up.Request.Queue = class Queue {
     u.microtask(() => this.poke())
   }
 
-  // Changes a preload request to a non-preload request.
-  // Does not change the request's position in the queue.
-  // Does nothing if the given request is not a preload request.
+  // Promotes a background request to a non-background request.
+  //
+  // Does not change the request's position in the queue, but foreground requests
+  // are prioritized when picking the next request under concurrency constraints.
+  //
+  // Does nothing if the given request is not a background request.
   promoteToForeground(request) {
-    if (request.preload) {
-      request.preload = false
+    if (request.background) {
+      request.background = false
       this.setSlowTimer()
     }
   }
@@ -68,11 +71,11 @@ up.Request.Queue = class Queue {
   }
 
   pluckNextRequest() {
-    // We always prioritize foreground requests over preload requests.
-    // Only when there is no foreground request left in the queue we will send a preload request.
+    // We always prioritize foreground requests over background requests.
+    // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
     // promote it to the foreground (see @promoteToForeground()).
-    let request = u.find(this.queuedRequests, request => !request.preload)
+    let request = u.find(this.queuedRequests, request => !request.background)
     request ||= this.queuedRequests[0]
     return u.remove(this.queuedRequests, request)
   }
@@ -151,7 +154,7 @@ up.Request.Queue = class Queue {
   isSlow() {
     const now = new Date()
     const badResponseTime = this.getBadResponseTime()
-    const allForegroundRequests = u.reject(this.allRequests, 'preload')
+    const allForegroundRequests = u.reject(this.allRequests, 'background')
 
     // If badResponseTime is 200, we're scheduling the checkSlow() timer after 200 ms.
     // The request must be slow when checkSlow() is called, or we will never look
