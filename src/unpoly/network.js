@@ -37,17 +37,18 @@ up.network = (function() {
 
   @property up.network.config
 
-  @param {number} [config.concurrency=4]
+  @param {number|Function(): number} [config.concurrency]
     The maximum number of concurrently loading requests.
 
     Additional requests are queued. [Preload](/a-up-preload) requests are
     always queued behind non-preload requests.
 
-    You might find it useful to set the request concurrency `1` in end-to-end tests
+    You might find it useful to set a concurrency of `1` in end-to-end tests
     to prevent race conditions.
 
-    Note that your browser might impose its own request limit
-    regardless of what you configure here.
+    By default Unpoly allows 6 concurrent requests. While [reducing requests](/up.network.shouldReduceRequests)
+    the default is lowered to 3. Your browser may impose additional concurrency
+    limits  regardless of what you configure here.
 
   @param {boolean} [config.wrapMethod]
     Whether to wrap non-standard HTTP methods in a POST request.
@@ -180,7 +181,7 @@ up.network = (function() {
   @stable
   */
   const config = new up.Config(() => ({
-    concurrency: 4,
+    concurrency() { return shouldReduceRequests() ? 3 : 6 },
     wrapMethod: true,
     cacheSize: 70,
     cacheExpiry: 1000 * 60 * 15,

@@ -79,6 +79,7 @@ Changes tracked until 2021-05-30:
 
 ### Small things
 
+- New concurrency default 6 (3 while reducing requests)
 - Keep polling on slow connections, but slower
   - up.radio.config.pollIntervalScale
 - Native smooth scrolling

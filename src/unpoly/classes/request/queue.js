@@ -46,7 +46,7 @@ up.Request.Queue = class Queue {
   }
 
   getMaxConcurrency() {
-    return up.network.config.concurrency
+    return u.evalOption(up.network.config.concurrency)
   }
 
   getBadResponseTime() {

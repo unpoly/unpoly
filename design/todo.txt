@@ -28,6 +28,7 @@ Various changes
   - up.render({ background })
   - [up-background]
   - Default false
+  - Docs in config.concurrency
 - Bad up.fragment.toTarget()
   - Consider default { hungry: false } and only setting { hungry: true } für Navigation
   - Consider restricting the use of element names for toTarget()
