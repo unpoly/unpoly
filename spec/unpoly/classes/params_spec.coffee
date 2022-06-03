@@ -101,6 +101,18 @@ describe 'up.Params', ->
         { name: 'bar-key', value: 'bar-value' },
       ])
 
+    it 'normalizes a FormData object to an array of objects with { name } and { value } keys', ->
+      formData = new FormData()
+      formData.append('foo-key', 'foo-value')
+      formData.append('bar-key', 'bar-value')
+
+      array = toArray(formData)
+
+      expect(array).toEqual([
+        { name: 'foo-key', value: 'foo-value' },
+        { name: 'bar-key', value: 'bar-value' },
+      ])
+
     it 'builds multiple entries if the given object has array values', ->
       array = toArray(
         foo: ['1', '2']
@@ -245,6 +257,18 @@ describe 'up.Params', ->
       obj = toObject("foo=bar&hasOwnProperty=baz")
       expect(obj['foo']).toEqual('bar')
       expect(u.isFunction obj['hasOwnProperty']).toBe(true)
+
+    it 'builds an object from the entries of a FormData object', ->
+      formData = new FormData()
+      formData.append('foo-key', 'foo-value')
+      formData.append('bar-key', 'bar-value')
+
+      obj = toObject(formData)
+
+      expect(obj).toEqual({
+        'foo-key': 'foo-value'
+        'bar-key': 'bar-value'
+      })
 
   describe '#add', ->
 

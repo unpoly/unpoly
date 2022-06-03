@@ -10,7 +10,6 @@ Various changes
   - No longer return a promise
 - Consider up.fragment.toTarget('<div up-main="root">') => '[up-main=root]')
 - remove up.util.flatMap()
-- Support FormData und URLSearchParams everywhere we support up.Params
 - Bad connections should not impact correctness
   - We should keep polling on a bad connection
     - Introduce up.radio.config.pollIntervalScale = function(interval) { up.network.shouldReduceRequests() ? 2 : 1 }

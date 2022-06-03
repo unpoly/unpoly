@@ -98,6 +98,7 @@ Changes tracked until 2021-05-30:
 - Support prepending with :before and appending with :after for up.render({ content }) and up.render({ fragment })
 - Support ::before and ::after pseudos (double colon)
 - Stop polling when the fragment is aborted
+- Support FormData everywhere we support up.Params
 
 ### IE11 removal
 

@@ -1,3 +1,4 @@
+
 const u = up.util
 const e = up.element
 
@@ -27,7 +28,7 @@ up.Params = class Params {
   Constructs a new `up.Params` instance.
 
   @constructor up.Params
-  @param {Object|Array|string|up.Params} [params]
+  @param {Object|Array|string|FormData|up.Params} [params]
     An existing list of params with which to initialize the new `up.Params` object.
 
     The given params value may be of any [supported type](/up.Params).
@@ -258,7 +259,7 @@ up.Params = class Params {
   The given params value may be of any [supported type](/up.Params).
 
   @function up.Params#addAll
-  @param {Object|Array|string|up.Params|undefined} params
+  @param {Object|Array|string|FormData|up.Params|undefined} params
   @experimental
   */
   addAll(raw) {

@@ -378,7 +378,7 @@ up.network = (function() {
   @param {string} [options.method='GET']
     The HTTP method for the request.
 
-  @param {Object|up.Params|string|Array} [options.params={}]
+  @param {Object|up.Params|FormData|string|Array} [options.params={}]
     [Parameters](/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 

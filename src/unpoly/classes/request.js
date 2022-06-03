@@ -281,7 +281,7 @@ up.Request = class Request extends up.Record {
   @constructor up.Request
   @param {string} attrs.url
   @param {string} [attrs.method='get']
-  @param {up.Params|string|Object|Array} [attrs.params]
+  @param {up.Params|string|Object|Array|FormData} [attrs.params]
   @param {string} [attrs.target]
   @param {string} [attrs.failTarget]
   @param {Object<string, string>} [attrs.headers]
