@@ -2100,8 +2100,15 @@ up.fragment = (function() {
   function abort(...args) {
     let options = parseTargetAndOptions(args)
 
+    // The function that checks whether a given function will be aborted.
     let testFn
+
+    // The reason will be logged with the up:request:abort event when we actually abort an event.
+    // It should be a string, not an array that goes through sprintf().
     let { reason } = options
+
+    // At the end we're going to emit up:fragment:aborted on these elements.
+    // Other async code observing these elements can then chose to abort itself.
     let elements
 
     // An element can be passed as first argument (public API) or as { target } option.
@@ -2112,7 +2119,7 @@ up.fragment = (function() {
       // targeting that subtree.
       elements = getAll(options.target, options)
       testFn = (request) => request.isPartOfSubtree(elements)
-      reason ||= ['Aborting requests within %o', elements.length === 1 ? elements[0] : elements]
+      reason ||= 'Aborting requests within fragment'
     } else {
       // If we're not given an element or selector, we abort all layers
       // matching the { layer } option. If no { layer } option is given,
@@ -2125,7 +2132,7 @@ up.fragment = (function() {
       let layers = up.layer.getAll(options)
       elements = u.map(layers, 'element')
       testFn = (request) => u.contains(layers, request.layer)
-      reason ||= ["Aborting requests within %s", layers.join(', ')]
+      reason ||= 'Aborting requests within ' + layers.join(', ')
     }
 
     let testFnWithAbortable = (request) => request.abortable && testFn(request)
@@ -2134,7 +2141,18 @@ up.fragment = (function() {
     // Emit an event so other async code can choose to abort itself,
     // e.g. timers waiting for a delay.
     for (let element of elements) {
-      up.emit(element, 'up:fragment:aborted', { log: reason })
+      // Some effort has invested to log about aborting only when necessary:
+      //
+      // (1) We don't log on up:fragment:aborted. This event is emitted with *every*
+      //     fragment update, whether or not we're actually aborting requests. Logging
+      //     with every update would make the log noisy and confusing.
+      // (2) When we *do* abort a request, up:request:aborted is emitted and logged.
+      //     This is done in up.Request#setAbortedState().
+      // (3) When up.fragment.abort() is called via up.render({ abort }) we also log
+      //     a message "Change with { abort } option will abort other requests' before
+      //     we abort the first request. This is done via an { logOnce } option that
+      //     this function passes on to up.network.abort().
+      up.emit(element, 'up:fragment:aborted', { log: false })
     }
   }
 

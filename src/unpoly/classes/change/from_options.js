@@ -53,7 +53,7 @@ up.Change.FromOptions = class FromOptions extends up.Change {
 
     let abortOptions = {
       except: request, // don't abort the request we just made
-      logOnce: ['up.request()', 'Change with { abort } option will abort other requests'],
+      logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
     }
 
     if (abort === 'target') {

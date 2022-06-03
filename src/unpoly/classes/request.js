@@ -543,7 +543,7 @@ up.Request = class Request extends up.Record {
     this.state = 'aborted'
 
     let message = this.abortMessage(reason)
-    this.emit('up:request:aborted', {log: message})
+    this.emit('up:request:aborted', { log: message })
     this.deferred.reject(up.error.aborted(message))
 
     // Return true so callers know we didn't return early without actually aborting anything.
