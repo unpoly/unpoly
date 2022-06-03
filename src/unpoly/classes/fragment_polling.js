@@ -123,7 +123,8 @@ up.FragmentPolling = class FragmentPolling {
 
 
   getInterval() {
-    return this.options.interval ?? e.numberAttr(this.fragment, 'up-interval') ?? up.radio.config.pollInterval
+    let interval = this.options.interval ?? e.numberAttr(this.fragment, 'up-interval') ?? up.radio.config.pollInterval
+    return up.radio.config.pollIntervalScale(interval)
   }
 
 }

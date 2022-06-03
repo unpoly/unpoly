@@ -5,7 +5,6 @@ TODOs for next release
 Various changes
 ---------------
 
-- up.form.config.inputDelay => up.form.config.watchInputDelay ?
 - Bad connections should not impact correctness
   - We should keep polling on a bad connection
     - Introduce up.radio.config.pollIntervalScale = function(interval) { up.network.shouldReduceRequests() ? 2 : 1 }
@@ -181,6 +180,7 @@ Docs
 
 ### Other docs
 
+- Go through TODO
 - Consider a new page for defaults
   - Explain that most opts are opt-in
   - Explain navigation defaults

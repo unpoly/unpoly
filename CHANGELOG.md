@@ -79,6 +79,8 @@ Changes tracked until 2021-05-30:
 
 ### Small things
 
+- Keep polling on slow connections, but slower
+  - up.radio.config.pollIntervalScale
 - Native smooth scrolling
   - up.viewport.config.scrollSpeed removed
   - up.reveal() no longer returns a promise

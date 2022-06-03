@@ -27,6 +27,9 @@ up.radio = (function() {
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll] interval in milliseconds.
 
+  @param {Function(number): number} [config.pollIntervalScale]
+    TODO: Docs
+
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
@@ -50,6 +53,7 @@ up.radio = (function() {
   const config = new up.Config(() => ({
     hungrySelectors: ['[up-hungry]'],
     pollInterval: 30000,
+    pollIntervalScale: (interval) => interval * (up.network.shouldReduceRequests() ? 2 : 1),
     pollEnabled: 'auto',
   }))
 
@@ -124,7 +128,7 @@ up.radio = (function() {
   }
 
   function shouldAutoPoll(fragment) {
-    return !document.hidden && !up.network.shouldReduceRequests() && up.layer.get(fragment)?.isFront?.()
+    return !document.hidden && up.layer.get(fragment)?.isFront?.()
   }
 
   function shouldPoll(fragment) {
