@@ -765,7 +765,7 @@ up.layer = (function() {
     | `this`     | The link that originally opened the overlay    |
     | `layer`    | An `up.Layer` object for the dismissed overlay |
     | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
-    | `event`    | An `up:layer:dismissed` event                   |
+    | `event`    | An `up:layer:dismissed` event                  |
 
     With a strict Content Security Policy [additional rules apply](/csp).
 

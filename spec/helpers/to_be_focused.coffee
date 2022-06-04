@@ -1,5 +1,9 @@
 u = up.util
+e = up.element
 $ = jQuery
+
+describeElement = (element) ->
+  up.fragment.toTarget(element, optional: true) || e.tagName(element)
 
 beforeEach ->
   jasmine.addMatchers
@@ -17,12 +21,12 @@ beforeEach ->
           message = 'cannot check focus on a null element'
         else if focusedElement == element
           pass = true
-          message = 'Expected ' + up.fragment.toTarget(element) + ' not to be focused'
+          message = 'Expected ' + describeElement(element) + ' not to be focused'
         else
           pass = false
-          message = 'Expected ' + up.fragment.toTarget(element) + ' to be focused'
+          message = 'Expected ' + describeElement(element) + ' to be focused'
           if focusedElement
-            message += ', but ' + up.fragment.toTarget(focusedElement) + ' was focused'
+            message += ', but ' + describeElement(focusedElement) + ' was focused'
           else
             message += ', but nothing was focused'
 
