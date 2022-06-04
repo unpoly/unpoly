@@ -3535,7 +3535,7 @@ describe 'up.fragment', ->
             next =>
               expect(@revealOptions.scrollBehavior).toEqual('auto')
 
-        describe 'with { scroll: "reset" } option', ->
+        describe 'with { scroll: "restore" } option', ->
 
           beforeEach ->
             up.history.config.enabled = true
@@ -3964,7 +3964,7 @@ describe 'up.fragment', ->
         describe 'with { focus: "autofocus" }', ->
 
           it 'focuses an [autofocus] element in the new fragment', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
             up.render focus: 'autofocus', fragment: """
               <form class='foo-bar'>
                 <input class="autofocused-input" autofocus>
@@ -3977,7 +3977,7 @@ describe 'up.fragment', ->
         describe 'with { focus: "target" }', ->
 
           it 'focuses the new fragment', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
             up.render focus: 'target', fragment: """
               <form class='foo-bar'>
                 <input>
@@ -4015,7 +4015,7 @@ describe 'up.fragment', ->
         describe 'with a CSS selector as { focus } option', ->
 
           it 'focuses a matching element within the new fragment', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
             up.render focus: '.input', fragment: """
               <form class='foo-bar'>
                 <input class='input'>
@@ -4026,7 +4026,7 @@ describe 'up.fragment', ->
               expect('.input').toBeFocused()
 
           it 'focuses a matching element in the same layer', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
 
             fixture('.element')
 
@@ -4157,7 +4157,7 @@ describe 'up.fragment', ->
         describe 'with { focus: "target-if-main" }', ->
 
           it 'focuses a main target', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
 
             up.fragment.config.mainTargets.push('.foo-bar')
 
@@ -4171,7 +4171,7 @@ describe 'up.fragment', ->
               expect('.foo-bar').toBeFocused()
 
           it 'does not focus a non-main target', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
 
             up.render focus: 'target-if-main', fragment: """
               <form class='foo-bar'>
@@ -4228,7 +4228,7 @@ describe 'up.fragment', ->
         describe 'with { focus: "auto" }', ->
 
           it 'focuses a main target', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
 
             up.fragment.config.mainTargets.unshift('.foo-bar')
 
@@ -4243,7 +4243,7 @@ describe 'up.fragment', ->
 
           it 'focuses a main target within the updated container', asyncSpec (next) ->
             container = fixture('.container')
-            e.affix(container, '.foo-bar')
+            e.affix(container, 'form.foo-bar')
 
             up.fragment.config.mainTargets.push('.foo-bar')
 
@@ -4271,7 +4271,7 @@ describe 'up.fragment', ->
               expect('.foo-bar').not.toBeFocused()
 
           it 'focuses an child element with [autofocus] attribute (even when not replacing a main target)', asyncSpec (next) ->
-            fixture('.foo-bar')
+            fixture('form.foo-bar')
             up.render focus: 'auto', fragment: """
               <form class='foo-bar'>
                 <input class="autofocused-input" autofocus>
@@ -5960,9 +5960,19 @@ describe 'up.fragment', ->
         element = fixture('meta[name="csrf-token"]')
         expect(up.fragment.toTarget(element)).toBe('meta[name="csrf-token"]')
 
-      it "uses the element's tag name if no better description is available", ->
-        element = fixture('div')
-        expect(up.fragment.toTarget(element)).toBe("div")
+      it "uses the tag name of a unique element if no better description is available", ->
+        element = fixture('body')
+        expect(up.fragment.toTarget(element)).toBe("body")
+
+      it 'throws an error if no good description is available and the element is not unique', ->
+        element = fixture('p')
+        deriveTarget = -> up.fragment.toTarget(element)
+        expect(deriveTarget).toThrowError(/cannot derive good target selector from a <p> element without identifying attributes/i)
+
+      it 'allows to configure tag names suitable for target derivation in up.fragment.config.goodTargetTags', ->
+        element = fixture('p')
+        up.fragment.config.goodTargetTags.push('p')
+        expect(up.fragment.toTarget(element)).toBe('p')
 
       it 'escapes quotes in attribute selector values', ->
         element = fixture('input')

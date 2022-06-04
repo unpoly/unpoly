@@ -1,4 +1,3 @@
-
 Changelog
 =========
 
@@ -66,6 +65,10 @@ Changes tracked until 2021-05-30:
 
 (Maybe extract individual sections here)
 
+- Background requests
+  - Deprioritized
+  - Doesn't trigger progress bar
+  - Slow polling responses no longer trigger progress bar  
 - The log shows which user interaction triggered an event chain
 - Optional targets with :maybe
 - Allow to consider [up-hungry] elements for updates to any layer with [up-layer=any]

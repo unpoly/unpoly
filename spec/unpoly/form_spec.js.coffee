@@ -69,7 +69,7 @@ describe 'up.form', ->
 
         expect(groupSolution).toEqual(jasmine.objectContaining(
           element: form,
-          target: 'form:has(input[name="foo"])'
+          target: 'form'
         ))
 
       it 'does not append a :has(...) if the given element is already a group', ->
@@ -820,7 +820,7 @@ describe 'up.form', ->
                   new-before
                 </div>
 
-                <form>
+                <form action='/form-target'>
                   error-messages
                 </form>
 
@@ -1636,7 +1636,7 @@ describe 'up.form', ->
             @respondWith
               status: 500
               responseText: """
-                <form class="test-form">
+                <form class="test-form" action='/form-target'>
                   validation errors
                 </form>
               """

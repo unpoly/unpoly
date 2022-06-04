@@ -125,6 +125,7 @@ up.fragment = (function() {
   */
   const config = new up.Config(() => ({
     badTargetClasses: [/^up-/],
+    goodTargetTags: ['html', 'head', 'body', 'main', 'form', /^up-\w+-viewport$/],
 
     // These defaults will be set to both success and fail options
     // if { navigate: true } is given.
@@ -1589,7 +1590,7 @@ up.fragment = (function() {
     if (!isFailKey(key)) {
       return u.prefixCamelCase(key, 'fail')
     }
-  }
+2  }
 
   const FAIL_KEY_PATTERN = /^fail[A-Z]/
 
@@ -1621,7 +1622,9 @@ up.fragment = (function() {
     The element for which to create a selector.
   @stable
   */
-  function toTarget(element) {
+  function toTarget(element, options = {}) {
+    console.log("!!! up.fragment.toTarget(%o)", element)
+
     if (u.isString(element)) {
       return element
     }
@@ -1638,17 +1641,25 @@ up.fragment = (function() {
       return e.idSelector(value)
     } else if (value = element.getAttribute("name")) {
       return e.tagName(element) + e.attributeSelector('name', value)
-    } else if (value = u.presence(u.filter(element.classList, isGoodClassForTarget))) {
+    } else if (element.matches('form[action]')) {
+      return 'form' + e.attributeSelector('action', element.getAttribute('action'))
+    } else if (value = element.getAttribute("up-main")) {
+      return e.attributeSelector('up-main', value)
+    } else if (value = goodTagForTarget(element)) {
+      return value
+    } else if (value = u.presence(goodClassesForTarget(element))) {
       let selector = ''
       for (let goodClass of value) {
         selector += e.classSelector(goodClass)
       }
       return selector
-    } else {
-      return e.tagName(element)
+    // } else if (options.default) {
+    //   return options.default
+    } else if (!options.optional) {
+      console.log("Options are %o", options)
+      up.fail(`Cannot derive good target selector from a <${e.tagName(element)}> element without identifying attributes`)
     }
   }
-
 
   /*-
   Sets an unique identifier for this element.
@@ -1694,15 +1705,23 @@ up.fragment = (function() {
   @stable
   */
 
-  function isGoodClassForTarget(klass) {
-    function matchesPattern(pattern) {
-      if (u.isRegExp(pattern)) {
-        return pattern.test(klass)
-      } else {
-        return pattern === klass
-      }
+  function matchesPattern(pattern, str) {
+    if (u.isRegExp(pattern)) {
+      return pattern.test(str)
+    } else {
+      return pattern === str
     }
-    return !u.some(config.badTargetClasses, matchesPattern)
+  }
+
+  function goodTagForTarget(element) {
+    let tagName = e.tagName(element)
+    let isGood = u.some(config.goodTargetTags, (goodTargetTagName) => matchesPattern(goodTargetTagName, tagName))
+    if (isGood) return tagName
+  }
+
+  function goodClassesForTarget(element) {
+    let isGood = (klass) => !u.some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+    return u.filter(element.classList, isGood)
   }
 
   function resolveOriginReference(target, options = {}) {
