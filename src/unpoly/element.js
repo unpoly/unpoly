@@ -410,52 +410,32 @@ up.element = (function() {
   @stable
   */
   function createFromSelector(selector, attrs) {
-    // Extract attribute values before we do anything else.
-    // Attribute values might contain spaces, and then we would incorrectly
-    // split depths at that space.
-    const attrValues = []
-    const selectorWithoutAttrValues = selector.replace(/\[([\w-]+)(?:[~|^$*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
-      attrValues.push(attrValue || '')
-      return `[${attrName}]`
-    })
+    let parsedDepths = parseSelector(selector)
 
-    const depths = selectorWithoutAttrValues.split(/[ >]+/)
     let rootElement
     let depthElement
     let previousElement
 
-    for (let depthSelector of depths) {
-      let tagName
-
-      depthSelector = depthSelector.replace(/^[\w-]+/, function(match) {
-        tagName = match
-        return ''
-      })
+    for (let parsedDepth of parsedDepths) {
+      let { tagName, id, classNames, attributes } = parsedDepth
 
       depthElement = document.createElement(tagName || 'div')
-      if (!rootElement) { rootElement = depthElement }
 
-      depthSelector = depthSelector.replace(/#([\w-]+)/, function(_match, id) {
-        depthElement.id = id
-        return ''
-      })
-
-      depthSelector = depthSelector.replace(/\.([\w-]+)/g, function(_match, className) {
-        depthElement.classList.add(className)
-        return ''
-      })
-
-      // If we have stripped out attrValues at the beginning of the function,
-      // they have been replaced with the attribute name only (as "[name]").
-      if (attrValues.length) {
-        depthSelector = depthSelector.replace(/\[([\w-]+)\]/g, function(_match, attrName) {
-          depthElement.setAttribute(attrName, attrValues.shift())
-          return ''
-        })
+      if (!rootElement) {
+        rootElement = depthElement
       }
 
-      if (depthSelector) {
-        up.fail('Cannot parse selector: ' + selector)
+      if (id) {
+        depthElement.id = id
+      }
+
+      for (let className of classNames) {
+        depthElement.classList.add(className)
+      }
+
+      for (let attributeName in attributes) {
+        let attributeValue = attributes[attributeName]
+        depthElement.setAttribute(attributeName, attributeValue)
       }
 
       previousElement?.appendChild(depthElement)
@@ -484,6 +464,58 @@ up.element = (function() {
     }
 
     return rootElement
+  }
+
+  function parseSelector(selector) {
+    // Extract attribute values before we do anything else.
+    // Attribute values might contain spaces, and then we would incorrectly
+    // split depths at that space.
+    const attrValues = []
+    const selectorWithoutAttrValues = selector.replace(/\[([\w-]+)(?:[~|^$*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
+      attrValues.push(attrValue || '')
+      return `[${attrName}]`
+    })
+
+    const depths = selectorWithoutAttrValues.split(/[ >]+/)
+
+    return depths.map(function(depthSelector) {
+      let parsed = {
+        tagName: null,
+        classNames: [],
+        id: null,
+        attributes: {}
+      }
+
+      depthSelector = depthSelector.replace(/^[\w-]+/, function(match) {
+        parsed.tagName = match
+        return ''
+      })
+
+      depthSelector = depthSelector.replace(/#([\w-]+)/, function(_match, id) {
+        parsed.id = id
+        return ''
+      })
+
+      depthSelector = depthSelector.replace(/\.([\w-]+)/g, function(_match, className) {
+        parsed.classNames.push(className)
+        return ''
+      })
+
+      // If we have stripped out attrValues at the beginning of the function,
+      // they have been replaced with the attribute name only (as "[name]").
+      if (attrValues.length) {
+        depthSelector = depthSelector.replace(/\[([\w-]+)\]/g, function(_match, attrName) {
+          parsed.attributes[attrName] = attrValues.shift()
+          return ''
+        })
+      }
+
+      if (depthSelector) {
+        up.fail('Cannot parse selector: ' + selector)
+      }
+
+      return parsed
+    })
   }
 
   /*-
