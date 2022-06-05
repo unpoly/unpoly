@@ -757,11 +757,11 @@ up.form = (function() {
     return u.findResult(getGroupSelectors(), function(groupSelector) {
       let group = field.closest(groupSelector)
       if (group) {
-        let goodDerivedGroupTarget = up.fragment.toTarget(group, { optional: true })
+        let goodDerivedGroupTarget = up.fragment.tryToTarget(group)
         // Most forms have multiple groups with no identifying attributes, e.g. <div up-form-group>.
         // Hence we use a :has() selector to identify the form group by the selector
         // of the contained field, which usually has an identifying [name] or [id] attribute.
-        let groupHasFieldTarget = (group !== field) && `${groupSelector}:has(${up.fragment.toTarget(field, { optional: true })})`
+        let groupHasFieldTarget = (group !== field) && `${groupSelector}:has(${up.fragment.tryToTarget(field)})`
         let target = goodDerivedGroupTarget || groupHasFieldTarget || groupSelector
 
         return {

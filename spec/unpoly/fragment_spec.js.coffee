@@ -5960,19 +5960,28 @@ describe 'up.fragment', ->
         element = fixture('meta[name="csrf-token"]')
         expect(up.fragment.toTarget(element)).toBe('meta[name="csrf-token"]')
 
-      it "uses the tag name of a unique element if no better description is available", ->
+      it "uses the tag name of a unique element", ->
         element = fixture('body')
         expect(up.fragment.toTarget(element)).toBe("body")
 
-      it 'throws an error if no good description is available and the element is not unique', ->
+      it "uses the tag name of a unique element even if it has a class", ->
+        document.body.classList.add('some-custom-class')
+        element = fixture('body')
+        expect(up.fragment.toTarget(element)).toBe("body")
+        document.body.classList.remove('some-custom-class')
+
+      it 'uses "link[rel=canonical]" for such a link', ->
+        link = fixture('link.some-class[rel="canonical"][href="/foo"]')
+        expect(up.fragment.toTarget(link)).toBe('link[rel="canonical"]')
+
+      it 'uses "up-modal-viewport" for such a link, so that viewport can get a key to save scrollTops', ->
+        link = fixture('up-modal-viewport')
+        expect(up.fragment.toTarget(link)).toBe('up-modal-viewport')
+
+      it 'throws an error if no good selector is available', ->
         element = fixture('p')
         deriveTarget = -> up.fragment.toTarget(element)
         expect(deriveTarget).toThrowError(/cannot derive good target selector from a <p> element without identifying attributes/i)
-
-      it 'allows to configure tag names suitable for target derivation in up.fragment.config.goodTargetTags', ->
-        element = fixture('p')
-        up.fragment.config.goodTargetTags.push('p')
-        expect(up.fragment.toTarget(element)).toBe('p')
 
       it 'escapes quotes in attribute selector values', ->
         element = fixture('input')

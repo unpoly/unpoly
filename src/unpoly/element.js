@@ -419,7 +419,11 @@ up.element = (function() {
     for (let parsedDepth of parsedDepths) {
       let { tagName, id, classNames, attributes } = parsedDepth
 
-      depthElement = document.createElement(tagName || 'div')
+      if (!tagName || tagName === '*') {
+        tagName = 'div'
+      }
+
+      depthElement = document.createElement(tagName)
 
       if (!rootElement) {
         rootElement = depthElement
@@ -466,6 +470,27 @@ up.element = (function() {
     return rootElement
   }
 
+  /*-
+  Parses a not-too-complex CSS selector.
+
+  ### Example
+
+  ```js
+  up.element.parseSelector('.content > form[action="/"]')
+  => [
+      { classNames: ['.content'],
+        attributes: []
+      },
+      { tagName: 'form',
+        classNames: [],
+        attributes: { action: "/" }
+      }
+    ]
+  ```
+
+  @function up.element.parseSelector
+  @internal
+  */
   function parseSelector(selector) {
     // Extract attribute values before we do anything else.
     // Attribute values might contain spaces, and then we would incorrectly
@@ -486,7 +511,7 @@ up.element = (function() {
         attributes: {}
       }
 
-      depthSelector = depthSelector.replace(/^[\w-]+/, function(match) {
+      depthSelector = depthSelector.replace(/^[\w-*]+/, function(match) {
         parsed.tagName = match
         return ''
       })
@@ -1266,6 +1291,7 @@ up.element = (function() {
     isDetached,
     addTemporaryClass,
     setTemporaryAttr,
-    cleanJQuery
+    cleanJQuery,
+    parseSelector
   }
 })()

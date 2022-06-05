@@ -24,7 +24,7 @@ up.ResponseDoc = class ResponseDoc {
     this.cspNonces = options.cspNonces
 
     if (options.origin) {
-      let originSelector = up.fragment.toTarget(options.origin, { optional: true })
+      let originSelector = up.fragment.tryToTarget(options.origin)
       if (originSelector) {
         this.rediscoveredOrigin = this.select(originSelector)
       }
