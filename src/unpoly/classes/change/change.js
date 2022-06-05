@@ -6,8 +6,8 @@ up.Change = class Change {
     this.options = options
   }
 
-  notApplicable(reason) {
-    return up.error.notApplicable(this, reason)
+  cannotApply(reason) {
+    return up.error.cannotApply(this, reason)
   }
 
   execute() {
