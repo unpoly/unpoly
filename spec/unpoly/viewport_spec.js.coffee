@@ -496,7 +496,7 @@ describe 'up.viewport', ->
         expect(actual).toMatchList(expected)
 
       it 'returns the given element if it is a viewport', ->
-        viewportElement = $fixture('[up-viewport]')[0]
+        viewportElement = $fixture('.viewport[up-viewport]')[0]
         results = up.viewport.subtree(viewportElement)
         expect(results).toMatchList([viewportElement])
 

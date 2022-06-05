@@ -440,7 +440,7 @@ up.viewport = (function() {
   })
 
   function scrollTopKey(viewport) {
-    return up.fragment.toTarget(viewport)
+    return up.fragment.tryToTarget(viewport)
   }
 
   /*-
@@ -470,15 +470,13 @@ up.viewport = (function() {
   @param {string} [options.layer]
     The layer for which to save scroll positions.
     If omitted, positions for the current layer will be saved.
-  @param {Object<string, number>} [options.tops]
-    An object mapping viewport selectors to vertical scroll positions in pixels.
   @experimental
   */
   function saveScroll(...args) {
     const [viewports, options] = parseOptions(args)
     const url = options.location || options.layer.location
     if (url) {
-      const tops = options.tops ?? getScrollTops(viewports)
+      const tops = getScrollTopsForSave(viewports)
       options.layer.lastScrollTops.set(url, tops)
     }
   }
@@ -489,15 +487,24 @@ up.viewport = (function() {
   Each key in the hash is a viewport selector. The corresponding
   value is the viewport's top scroll position:
 
-      getScrollTops()
+      getScrollTopsForSave()
       => { '.main': 0, '.sidebar': 73 }
 
-  @function up.viewport.getScrollTops
+  @function getScrollTopsForSave
   @return Object<string, number>
   @internal
   */
-  function getScrollTops(viewports) {
-    return u.mapObject(viewports, viewport => [scrollTopKey(viewport), viewport.scrollTop])
+  function getScrollTopsForSave(viewports) {
+    let tops = {}
+    for (let viewport of viewports) {
+      let key = scrollTopKey(viewport)
+      if (key) {
+        tops[key] = viewport.scrollTop
+      } else {
+        up.warn('up.viewport.saveScroll()', 'Cannot save scroll positions for untargetable viewport %o', viewport)
+      }
+    }
+    return tops
   }
 
   /*-
