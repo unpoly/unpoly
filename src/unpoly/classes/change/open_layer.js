@@ -49,7 +49,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     }
 
     if (!this.content || this.baseLayer.isClosed()) {
-      throw this.notApplicable()
+      throw this.cannotApply()
     }
 
     onApplicable()

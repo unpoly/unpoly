@@ -74,7 +74,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       return Promise.resolve()
     }
 
-    return this.seekPlan(this.executePlan.bind(this)) || this.postflightTargetNotApplicable()
+    return this.seekPlan(this.executePlan.bind(this)) || this.cannotApplyPostflightTarget()
   }
 
   executePlan(matchedPlan) {
@@ -131,18 +131,18 @@ up.Change.FromContent = class FromContent extends up.Change {
   // This might change postflight if the response does not contain the desired target.
   getPreflightProps(opts = {}) {
     const getPlanProps = plan => plan.getPreflightProps()
-    return this.seekPlan(getPlanProps) || opts.optional || this.preflightTargetNotApplicable()
+    return this.seekPlan(getPlanProps) || opts.optional || this.cannotApplyPreflightTarget()
   }
 
-  preflightTargetNotApplicable() {
-    this.targetNotApplicable('Could not find target in current page')
+  cannotApplyPreflightTarget() {
+    this.cannotApplyTarget('Could not find target in current page')
   }
 
-  postflightTargetNotApplicable() {
-    this.targetNotApplicable('Could not find common target in current page and response')
+  cannotApplyPostflightTarget() {
+    this.cannotApplyTarget('Could not find common target in current page and response')
   }
 
-  targetNotApplicable(reason) {
+  cannotApplyTarget(reason) {
     if (this.getPlans().length) {
       const planTargets = u.uniq(u.map(this.getPlans(), 'target'))
       const humanizedLayerOption = up.layer.optionToString(this.options.layer)
@@ -166,7 +166,7 @@ up.Change.FromContent = class FromContent extends up.Change {
         return fn(plan)
       } catch (error) {
         // Re-throw any unexpected type of error
-        if (!up.error.notApplicable.is(error)) {
+        if (!up.error.cannotApply.is(error)) {
           throw error
         }
       }
