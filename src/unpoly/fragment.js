@@ -64,6 +64,8 @@ up.fragment = (function() {
 
     This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
+  @param {Array<string|Function<Element>: string|undefined
+
   @param {Array<string|RegExp>} [config.badTargetClasses]
     An array of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).

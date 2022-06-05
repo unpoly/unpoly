@@ -531,7 +531,7 @@ describe 'up.link', ->
 
           it "does not reveal, but instead restores the scroll positions of the target's viewport", asyncSpec (next) ->
 
-            $viewport = $fixture('div[up-viewport] .element').css
+            $viewport = $fixture('.viewport[up-viewport] .element').css
               'height': '100px'
               'width': '100px'
               'overflow-y': 'scroll'

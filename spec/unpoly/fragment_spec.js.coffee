@@ -2945,6 +2945,7 @@ describe 'up.fragment', ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
           spyOn(up.element, 'isSingleton').and.callFake (element) -> element.matches('fake-body')
 
+          up.fragment.config.targetDerivers.unshift('fake-body')
           $fixture('fake-body').text('old text')
 
           renderDone = jasmine.createSpy('render() done')
@@ -4912,6 +4913,8 @@ describe 'up.fragment', ->
             expect($('.after')).toHaveText('new-after')
 
         it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
+          up.fragment.config.targetDerivers.unshift('middle-element')
+
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
           up.element.isSingleton.mock().and.callFake (element) -> element.matches('middle-element')
 
@@ -4923,7 +4926,7 @@ describe 'up.fragment', ->
           $container.affix('after-element').text('old-after')
 
           up.render '.container', document: """
-            <<div class='container'>
+            <div class='container'>
               <before-element>new-before</before-element>
               <middle-element class='middle' up-keep>new-middle</middle-element>
               <after-element class='after'>new-after</after-element>

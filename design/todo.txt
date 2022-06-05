@@ -178,6 +178,18 @@ This way we can keep using cached content if we're offline.
 Docs
 ----
 
+### Target derivation
+
+- Possibly own page
+- Document which features require targetable elements
+  - up.render(Element)
+  - up.reload(Element)
+  - [up-poll]
+  - [up-hungry]
+  - up.radio.config.hungrySelectors
+    - Note that the configured selector will be re-derived
+  - [up-viewport]
+
 ### Watch/validate rework
 
 - Consider consolidating docs for
@@ -213,6 +225,7 @@ Docs
 
 ### Other docs
 
+- Consider replacing type|undefined with type? in all type comments
 - Go through TODO
 - Consider a new page for defaults
   - Explain that most opts are opt-in
