@@ -37,16 +37,8 @@ Various changes
 - Parse [up-abortable] for links
 - toTarget
   - group selectoren nur nehmen, wenn sie gut sind?
-  - was ist mit schlechten targets, die aber durch die { origin } unique werden?
-  - toTarget for link[rel=canonical, next, prev]
-  - even if we abort this it would be a good idea to do cases for form[action] and [up-main] in toTarget()
-  - would it be better to improveTarget() ?
-  - oder switch-bar `meta:derive` ?
   - should we keep blank form?
-    - if not we should accept a bad selector here
-  - now things keep crashing like saving/restoring scroll positions for div[up-viewport]
-    - either we use bad targets here
-    - or we skip untargetable viewportds
+    - if not we should accept a bad selector here for failure
   - possibly do up.error.untargetable
 
 
