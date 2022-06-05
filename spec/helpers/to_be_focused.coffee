@@ -3,7 +3,7 @@ e = up.element
 $ = jQuery
 
 describeElement = (element) ->
-  up.fragment.toTarget(element, optional: true) || e.tagName(element)
+  up.fragment.tryToTarget(element) || e.tagName(element)
 
 beforeEach ->
   jasmine.addMatchers

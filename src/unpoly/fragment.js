@@ -40,6 +40,13 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 */
 up.fragment = (function() {
 
+  function upTagName(element) {
+    let tagName = e.tagName(element)
+    if (tagName.startsWith('up-')) {
+      return tagName
+    }
+  }
+
   /*-
   Configures defaults for fragment updates.
 
@@ -125,7 +132,22 @@ up.fragment = (function() {
   */
   const config = new up.Config(() => ({
     badTargetClasses: [/^up-/],
-    goodTargetTags: ['html', 'head', 'body', 'main', 'form', /^up-\w+-viewport$/],
+
+    targetDerivers: [
+      '[up-id]',
+      '[id]',
+      'html',
+      'head',
+      'body',
+      'main',
+      '[up-main]',
+      upTagName,
+      'link[rel=canonical]',
+      '*[name]',
+      'form[action]',
+      '[class]',
+      'form',
+    ],
 
     // These defaults will be set to both success and fail options
     // if { navigate: true } is given.
@@ -1622,44 +1644,78 @@ up.fragment = (function() {
     The element for which to create a selector.
   @stable
   */
-  function toTarget(element, options = {}) {
-    console.log("!!! up.fragment.toTarget(%o)", element)
-
-    if (u.isString(element)) {
-      return element
-    }
-
-    // In case we're called called with a jQuery collection
-    element = e.get(element)
-
-    let value
-    if (e.isSingleton(element)) {
-      return e.tagName(element)
-    } else if (value = element.getAttribute("up-id")) {
-      return e.attributeSelector('up-id', value)
-    } else if (value = element.getAttribute("id")) {
-      return e.idSelector(value)
-    } else if (value = element.getAttribute("name")) {
-      return e.tagName(element) + e.attributeSelector('name', value)
-    } else if (element.matches('form[action]')) {
-      return 'form' + e.attributeSelector('action', element.getAttribute('action'))
-    } else if (value = element.getAttribute("up-main")) {
-      return e.attributeSelector('up-main', value)
-    } else if (value = goodTagForTarget(element)) {
-      return value
-    } else if (value = u.presence(goodClassesForTarget(element))) {
-      let selector = ''
-      for (let goodClass of value) {
-        selector += e.classSelector(goodClass)
-      }
-      return selector
-    // } else if (options.default) {
-    //   return options.default
-    } else if (!options.optional) {
-      console.log("Options are %o", options)
-      up.fail(`Cannot derive good target selector from a <${e.tagName(element)}> element without identifying attributes`)
-    }
+  function toTarget(element) {
+    return tryToTarget(element) || cannotTarget(element)
   }
+
+  function cannotTarget(element) {
+    throw up.error.cannotTarget(`Cannot derive good target selector from a <${e.tagName(element)}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`)
+  }
+
+  function tryToTarget(element) {
+    return u.findResult(config.targetDerivers, function(deriver) {
+      if (u.isFunction(deriver)) {
+        return deriver(element)
+      } else if (element.matches(deriver)) {
+        // Now that we know that a deriver is applicable to our element, we're using
+        // the element's tag name and attribute to form a more specific target.
+        // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
+
+        let parsed = up.element.parseSelector(deriver)
+
+        if (parsed.length === 1) {
+          let { tagName, id, classNames, attributes } = parsed[0]
+          let result = ''
+
+          if (tagName === '*') {
+            // In a deriver '*' means to include the actual tag name in the target-
+            result += e.tagName(element)
+          } else if (tagName) {
+            // If a deriver contains an actual tag name like 'main' it becomes
+            // part of the target selector.
+            result += tagName
+          }
+
+          for (let className of classNames) {
+            result += e.classSelector(className)
+          }
+
+          if (id) {
+            result += e.idSelector(id)
+          }
+
+          for (let attributeName in attributes) {
+            // If a deriver contains an attribute value (e.g. '[rel=canonical]') we use that for the target.
+            // If the deriver has a value-less attribute (e.g. '[rel]') we use the actual attribute value from the element.
+            let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)
+
+            if (attributeName === 'id') {
+              // We allow a deriver '[id]' to apply to all elements with an ID.
+              // However, we want to use an ID selector ('#foo') instead of an attribute selector ('[id=foo]').
+              result += e.idSelector(attributeValue)
+            } else if (attributeName === 'class') {
+              // We allow a deriver '[class]' to apply to all elements with a class.
+              // However, we want to (1) filter class against config.badTargetClasses and
+              // (2) use an class selector ('.foo') instead of an attribute selector ('[class=foo]').
+              for (let goodClass of goodClassesForTarget(element)) {
+                result += e.classSelector(goodClass)
+              }
+            } else {
+              result += e.attributeSelector(attributeName, attributeValue)
+            }
+          }
+
+          return result
+        } else {
+          // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
+          // It's also not common to see such selectors configured in config.targetDerivers.
+          // Hence we just return the matching deriver.
+          return deriver
+        }
+      }
+    })
+  }
+
 
   /*-
   Sets an unique identifier for this element.
@@ -1711,12 +1767,6 @@ up.fragment = (function() {
     } else {
       return pattern === str
     }
-  }
-
-  function goodTagForTarget(element) {
-    let tagName = e.tagName(element)
-    let isGood = u.some(config.goodTargetTags, (goodTargetTagName) => matchesPattern(goodTargetTagName, tagName))
-    if (isGood) return tagName
   }
 
   function goodClassesForTarget(element) {
@@ -2298,6 +2348,7 @@ up.fragment = (function() {
     expandTargets,
     resolveOrigin: resolveOriginReference,
     toTarget,
+    tryToTarget,
     matches,
     hasAutoHistory,
     time: timeOf,
