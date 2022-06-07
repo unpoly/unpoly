@@ -64,34 +64,38 @@ up.FragmentPolling = class FragmentPolling {
     // before the polling stopped.
     if (this.state !== 'started') { return }
 
-    if (up.radio.shouldPoll(this.fragment)) {
-      this.reloadNow()
-    } else {
-      up.puts('[up-poll]', 'Polling is disabled')
+    let issue = up.radio.pollIssue(this.fragment)
+    if (issue) {
+      up.puts('[up-poll]', `Will not poll: ${issue}`)
       // Reconsider after 10 seconds at most
       let reconsiderDisabledDelay = Math.min(10 * 1000, this.getInterval())
       this.scheduleReload(reconsiderDisabledDelay)
+    } else {
+      this.reloadNow()
     }
   }
 
   reloadNow() {
     let reloadOptions = {
       url: this.options.url,
-      guardEvent: up.event.build('up:fragment:poll', { log: ['Polling fragment', this.fragment] }),
+      fail: false,
       background: true,
     }
 
     // Prevent our own reloading from aborting ourselves.
     let oldAbortable = this.abortable
     this.abortable = false
-    u.always(up.reload(this.fragment, reloadOptions), (result) => this.onReloaded(result))
+    up.reload(this.fragment, reloadOptions).then(
+      this.onReloadSuccess.bind(this),
+      this.onReloadFailure.bind(this)
+    )
     this.abortable = oldAbortable
   }
 
-  onReloaded(result) {
+  onReloadSuccess(result) {
     // Transfer this instance to the new fragment.
     // We can remove this in case we don't implement forced start/stop.
-    let newFragment = result?.fragments?.[0]
+    let newFragment = result.fragments[0]
     if (newFragment) {
       // No need to scheduleReload() in this branch:
       // (1) Either the new fragment also has an [up-poll] and we have already
@@ -99,20 +103,25 @@ up.FragmentPolling = class FragmentPolling {
       // (2) Or we are force-started and we will start in #onFragmentSwapped().
       this.onFragmentSwapped(newFragment)
     } else {
+      // The server may have opted to not send an update, e.g. if there is no fresher content.
+      // In that case we try again in the next interval.
       this.scheduleReload()
     }
   }
 
+  onReloadFailure(reason) {
+    this.scheduleReload()
+
+    if (up.error.isCritical(reason)) {
+      throw reason
+    }
+  }
+
   onFragmentSwapped(newFragment) {
-    // Transfer this polling to the new instance
-    newFragment.upPolling = this
-    delete this.fragment.upPolling
-    this.setFragment(newFragment)
-    if (this.state === 'stopped' && this.forceStarted) {
-      // When polling was started programmatically through up.fragment.startPolling()
-      // we don't require the updated fragment to have an [up-poll] attribute to
-      // continue polling.
-      this.start()
+    this.stop()
+
+    if (this.forceStarted && up.fragment.matches(this.fragment, newFragment)) {
+      this.constructor.forFragment(newFragment).forceStart(this.options)
     }
   }
 

@@ -75,6 +75,10 @@ up.error = (function() {
     throw up.error.failed(args)
   }
 
+  function isCritical(error) {
+    return (typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))
+  }
+
   return {
     fail,
     failed,
@@ -82,7 +86,8 @@ up.error = (function() {
     cannotApply,
     notImplemented,
     cannotTarget,
-    emitGlobal
+    emitGlobal,
+    isCritical,
   }
 })()
 

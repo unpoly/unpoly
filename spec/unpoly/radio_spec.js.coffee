@@ -31,6 +31,47 @@ describe 'up.radio', ->
         next.after (timingTolerance + interval), ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
+          jasmine.respondWithSelector('.element', text: 'newer text')
+
+        next ->
+          expect('.element').toHaveText('newer text')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
+      it 'does not cause duplicate requests when the server responds with an [up-poll] fragment (bugfix)', asyncSpec (next) ->
+        up.radio.config.pollInterval = interval = 150
+        timingTolerance = interval / 3
+
+        element = fixture('.element', text: 'old text')
+        up.radio.startPolling(element)
+
+        next.after timingTolerance, ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after interval, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
+          jasmine.respondWithSelector('.element[up-poll]', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          jasmine.respondWithSelector('.element[up-poll]', text: 'newer text')
+
+        next ->
+          expect('.element').toHaveText('newer text')
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+        next.after (timingTolerance + interval), ->
+          expect(jasmine.Ajax.requests.count()).toBe(3)
+
       it 'does not stop polling when the server responds without an [up-poll] attribute', asyncSpec (next) ->
         up.radio.config.pollInterval = interval = 150
         timingTolerance = interval / 3
@@ -451,8 +492,15 @@ describe 'up.radio', ->
         next ->
           expect('.element').toHaveText('new text')
 
-        next.after (timingTolerance + interval), ->
+        next.after (interval + timingTolerance), ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
+          jasmine.respondWithSelector('.element[up-poll]', text: 'newer text')
+
+        next ->
+          expect('.element').toHaveText('newer text')
+
+        next.after (interval + timingTolerance), ->
+          expect(jasmine.Ajax.requests.count()).toBe(3)
 
       it 'does not make additional requests while a previous requests is still in flight', asyncSpec (next) ->
         deferred = u.newDeferred()
@@ -467,7 +515,7 @@ describe 'up.radio', ->
 
         next.after 100, ->
           expect(reloadSpy.calls.count()).toBe(1)
-          deferred.resolve()
+          deferred.resolve(new up.RenderResult())
 
         next.after 100, ->
           expect(reloadSpy.calls.count()).toBe(2)

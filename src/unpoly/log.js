@@ -197,9 +197,9 @@ up.log = (function() {
   @internal
   */
   function muteUncriticalRejection(promise) {
-    return promise.catch(function(error) {
-      if ((typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))) {
-        throw error
+    return promise.catch(function(reason) {
+      if (up.error.isCritical(reason)) {
+        throw reason
       }
     })
   }
