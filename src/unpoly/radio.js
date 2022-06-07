@@ -70,7 +70,13 @@ up.radio = (function() {
     let anyLayerSelector = '[up-layer=any]'
     let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
     let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
-    return [...hungriesOnTargetedLayer, ...hungriesOnAnyLayer]
+    let hungries = hungriesOnTargetedLayer.concat(hungriesOnAnyLayer)
+    return u.reject(hungries, (element) => {
+      if (!up.fragment.isTargetable(element)) {
+        up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+        return true
+      }
+    })
   }
 
   /*-
