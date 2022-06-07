@@ -37,7 +37,11 @@ up.Change.FromOptions = class FromOptions extends up.Change {
       // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
       // listeners that prevent the default and re-render.
       guardEvent.renderOptions = this.options
-      up.event.assertEmitted(guardEvent, { target: this.options.origin })
+      if (up.emit(guardEvent, { target: this.options.origin }).defaultPrevented) {
+        let message = `Rendering was prevented by ${guardEvent.type} listener`
+        up.puts('up.render()', message)
+        throw up.error.aborted(message)
+      }
     }
 
     up.RenderOptions.assertContentGiven(this.options)
