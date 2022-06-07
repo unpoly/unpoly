@@ -233,6 +233,32 @@ describe 'up.radio', ->
           promiseState(promise).then (result) ->
             expect(result.state).toEqual('fulfilled')
 
+      it "does not reload an hungry element if it has a weak selector", asyncSpec (next) ->
+        $fixture('div[up-hungry]').text('old hungry')
+        $fixture('.target').text('old target')
+        warnSpy = spyOn(up, 'warn')
+
+        up.navigate('.target', url: '/path')
+
+        next =>
+          @respondWith """
+            <div class="target">
+              new target
+            </div>
+            <div class="between">
+              new between
+            </div>
+            <div up-hungry>
+              new hungry
+            </div>
+          """
+
+        next =>
+          expect('.target').toHaveText('new target')
+          expect('div[up-hungry]').toHaveText('old hungry')
+          expect(warnSpy).toHaveBeenCalled()
+          expect(warnSpy.calls.argsFor(0)[1]).toMatch(/ignoring untargetable fragment/i)
+
       it 'still reveals the element that was originally targeted', asyncSpec (next) ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
