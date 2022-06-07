@@ -36,16 +36,8 @@ Various changes
 - Breaking change: Consider sending :late und :recover events for every request
 - Parse [up-abortable] for links
 - toTarget
-  - group selectoren nur nehmen, wenn sie gut sind?
   - should we keep blank form?
     - if not we should accept a bad selector here for failure
-  - warn if we're using untargetable selectors
-    - [up-viewport] -- done
-    - [up-form-group] -- do it when finding group (should be rare because the child element is always targetable)
-    - [up-poll] -- do it in the existing compiler
-    - [up-hungry] -- do it while collecting elements
-- I think [up-poll] generates concurrent up.FragmentPolling instances for the same new fragment
-  - The old instance sets itself on the new element, but it already has its own instance that is presumably already polling
 - Move up.log.muteUncriticalRejections() to up.error
 
 
