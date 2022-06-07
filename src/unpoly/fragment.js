@@ -2081,9 +2081,26 @@ up.fragment = (function() {
   Other than [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches)
   this function supports non-standard selectors like `:main` or `:layer`.
 
+  Instead of a selector you may also pass a second element. In that case
+  the function returns whether both elements match the same [derived target](/up.fragment.toTarget).
+
+  ### Examples
+
+  ```js
+  let element = document.querySelector('div[up-main]')
+  up.fragment.matches(element, 'div') // => true
+  up.fragment.matches(element, 'span') // => false
+  up.fragment.matches(element, ':main') // => true
+  up.fragment.matches(element, element) // => true
+  ```
+
   @function up.fragment.matches
   @param {Element} fragment
-  @param {string|Array<string>} selectorOrSelectors
+  @param {string|Element} selector
+    The selector or element to match.
+
+    When an element is passed, returns whether `element` matches
+    the [target derived](/up.fragment.toTarget) from `selector`. .
   @param {string|up.Layer} [options.layer]
     The layer for which to match.
 
@@ -2096,8 +2113,12 @@ up.fragment = (function() {
   */
   function matches(element, selector, options = {}) {
     element = e.get(element)
-    selector = parseSelector(selector, element, options)
-    return selector.matches(element)
+    if (u.isElement(selector)) {
+      return element.matches(toTarget(selector))
+    } else {
+      selector = parseSelector(selector, element, options)
+      return selector.matches(element)
+    }
   }
 
   function shouldRevalidate(request, response, options = {}) {
