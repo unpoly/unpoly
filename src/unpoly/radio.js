@@ -133,12 +133,26 @@ up.radio = (function() {
     up.FragmentPolling.forFragment(element).forceStop()
   }
 
-  function shouldAutoPoll(fragment) {
-    return !document.hidden && up.layer.get(fragment)?.isFront?.()
-  }
+  function pollIssue(fragment) {
+    let enabled = config.pollEnabled
 
-  function shouldPoll(fragment) {
-    return u.evalAutoOption(config.pollEnabled, shouldAutoPoll, fragment)
+    if (enabled === false) {
+      return 'User has disabled polling'
+    }
+
+    if (enabled === 'auto') {
+      if (document.hidden) {
+        return 'Tab is hidden'
+      }
+
+      if (!up.layer.get(fragment)?.isFront?.()) {
+        return 'Fragment is on a background layer'
+      }
+    }
+
+    if (up.emit(fragment, 'up:fragment:poll', { log: ['Polling fragment', fragment] }).defaultPrevented) {
+      return 'User prevented up:fragment:poll event'
+    }
   }
 
   /*-
@@ -255,6 +269,6 @@ up.radio = (function() {
     hungryElements,
     startPolling,
     stopPolling,
-    shouldPoll,
+    pollIssue,
   }
 })()

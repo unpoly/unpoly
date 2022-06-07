@@ -46,6 +46,12 @@ up.RenderResult = class RenderResult extends up.Record {
     ]
   }
 
+  defaults() {
+    return {
+      fragments: []
+    }
+  }
+
   isNone() {
     // There are some cases where we did not render any fragment:
     //

@@ -10,7 +10,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
       'baseLayer',
       'callback',
       'log',
-      'ensureBubbles'
+      'ensureBubbles',
     ]
   }
 
