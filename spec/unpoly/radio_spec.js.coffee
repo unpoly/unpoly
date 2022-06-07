@@ -695,3 +695,13 @@ describe 'up.radio', ->
         next.after 20, ->
           expect(up.layer.isRoot()).toBe(true)
           expect(reloadSpy).toHaveBeenCalled()
+
+      it 'does not poll a fragment with a weak selector', asyncSpec (next) ->
+        warnSpy = spyOn(up, 'warn')
+
+        up.hello(fixture('div[up-poll][up-interval=30]', text: 'old text'))
+
+        next.after 80, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect(warnSpy).toHaveBeenCalled()
+          expect(warnSpy.calls.argsFor(0)[1]).toMatch(/ignoring untargetable fragment/i)
