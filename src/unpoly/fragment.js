@@ -1614,7 +1614,7 @@ up.fragment = (function() {
     if (!isFailKey(key)) {
       return u.prefixCamelCase(key, 'fail')
     }
-2  }
+  }
 
   const FAIL_KEY_PATTERN = /^fail[A-Z]/
 
