@@ -1650,8 +1650,16 @@ up.fragment = (function() {
     return tryToTarget(element) || cannotTarget(element)
   }
 
+  function isTargetable(element) {
+    return !!tryToTarget(element)
+  }
+
+  function untargetableMessage(element) {
+    return `Cannot derive good target selector from a <${e.tagName(element)}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
+  }
+
   function cannotTarget(element) {
-    throw up.error.cannotTarget(`Cannot derive good target selector from a <${e.tagName(element)}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`)
+    throw up.error.cannotTarget(untargetableMessage(element))
   }
 
   function tryToTarget(element) {
@@ -2351,6 +2359,7 @@ up.fragment = (function() {
     resolveOrigin: resolveOriginReference,
     toTarget,
     tryToTarget,
+    isTargetable,
     matches,
     hasAutoHistory,
     time: timeOf,
