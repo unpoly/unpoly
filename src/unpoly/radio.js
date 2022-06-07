@@ -225,7 +225,12 @@ up.radio = (function() {
     Defaults to the closest `[up-source]` attribute of an ancestor element.
   @stable
   */
-  up.compiler('[up-poll]', (fragment) => {
+  up.compiler('[up-poll]', function(fragment) {
+    if (!up.fragment.isTargetable(fragment)) {
+      up.warn('[up-poll]', 'Ignoring untargetable fragment %o', fragment)
+      return
+    }
+
     up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
 
