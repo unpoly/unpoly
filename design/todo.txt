@@ -6,38 +6,20 @@ Various changes
 ---------------
 
 - Bad connections should not impact correctness
-  - We should keep polling on a bad connection
-    - Introduce up.radio.config.pollIntervalScale = function(interval) { up.network.shouldReduceRequests() ? 2 : 1 }
-    - Do keep revalidating with reduced requests
+  - Do keep revalidating with reduced requests
 - Consider whether we're version 2.7 or 3.0
-- Polling
-  - It would be great to *not* have a timeout running while we're in the background or offline
-  - It would be great to not wait up to 10 seconds when we're re-focused or regain connectivity
 - Go through visibilities
-- https://github.com/unpoly/unpoly/issues/388
-- onTransitionEnd
-- can badResponseTime be a function that takes a request?
-- Background requests
-  - Don't trigger :late / progressBar
-  - Default false
-  - Default true for preload requests
-  - Is deprioritized by the queue
-    - It already deprioritizes preload requests
-  - up.request({ background })
-  - up.render({ background })
-  - [up-background]
-  - Default false
-  - Docs in config.concurrency
-- Bad up.fragment.toTarget()
-  - Consider default { hungry: false } and only setting { hungry: true } für Navigation
-  - Consider restricting the use of element names for toTarget()
-    - up.fragment.config.goodTargetTags
-      - html, head, body, main
-- Breaking change: Consider sending :late und :recover events for every request
+- Update layer location after replaceState() (https://github.com/unpoly/unpoly/issues/388)
+- New onTransitionEnd() callback to take some load off from onFinished()
+- Allow to restrict [up-hungry] to an updated fragment scope
+  - [up-hungry][up-if-layer="any"]
+    - Rename from [up-layer="any"]
+  - [up-hungry][up-if-target=".foo"]
+    - Checks whether the targeted fragment's subtree includes a .foo (that's how we do it in ...-if-main too)
+- Consider sending :late und :recover events for every request (Breaking change)
+  - New event property { request }
+  - Support up.network.isLate() to help implement progress bars
 - Parse [up-abortable] for links
-- toTarget
-  - should we keep blank form?
-    - if not we should accept a bad selector here for failure
 - Move up.log.muteUncriticalRejections() to up.error
 
 
@@ -47,9 +29,6 @@ If we're launching V3
 - Ops need to give us a new site v2.makandra.de
 - We need a separate Algolia index for v2
   - v3 would stay on "latest"
-
-
-
 
 
 Offline / rework caching
@@ -244,6 +223,13 @@ Docs
 Icebox
 ======
 
+- Improve polling in the background
+  - It would be great to *not* have a timeout running while we're in the background or offline
+  - It would be great to not wait up to 10 seconds when we're re-focused or regain connectivity
+- Elemente mit [up-hungry][up-layer=any] müssten wir *eigentlich* auch austauschen, wenn wir einen neuen Layer öffnen
+  - OpenLayer kann aber gar nicht mit mehreren Steps umgehen
+- can badResponseTime be a function that takes a request?
+  => Yes, but not trivially
 - Consider using `Cache-Control: stale-while-revalidate=<seconds>` to indicate how long we can use a response
   - But it could be paired like this: Cache-Control: max-age=1, stale-while-revalidate=59
   - But then again we ignore Cache-Control for all other purposes
