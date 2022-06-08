@@ -96,6 +96,10 @@ up.radio = (function() {
 
     By default only hungry elements on the targeted layer are updated.
     To match a hungry element when updating *any* layer, set this attribute to `[up-layer=any]`.
+
+    Even with `[up-layer=any]` hungry elements are only rendered when an
+    existing [layer](/up.layer) is updated. Hungry elements are never rendered
+    for responses that [open a new overlay](/opening-overlays).
   @param [up-transition]
     The transition to use when this element is updated.
   @stable
