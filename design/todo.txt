@@ -9,7 +9,6 @@ Various changes
 - Consider whether we're version 2.7 or 3.0 => I think 3.0
 - Go through visibilities
 - Update layer location after replaceState() (https://github.com/unpoly/unpoly/issues/388)
-- New onTransitionEnd() callback to take some load off from onFinished()
 - Allow to restrict [up-hungry] to an updated fragment scope
   - [up-hungry][up-if-layer="any"]
     - Rename from [up-layer="any"]
@@ -18,6 +17,7 @@ Various changes
 - Consider sending :late und :recover events for every request (Breaking change)
   - New event property { request }
   - Support up.network.isLate() to help implement progress bars
+  - I think this means moving the event logic to up.Response
 - Parse [up-abortable] for links
 - Move up.log.muteUncriticalRejections() to up.error
 - Rework history handling
@@ -231,6 +231,7 @@ Docs
 Icebox
 ======
 
+- New onTransitioned() callback to take some load off from onFinished()
 - Move scroll positions into state
   - This gets rid of the other up.Cache usage
   - This may mean we need to lose up.viewport.restoreScroll() and { scroll: 'restore' } and { saveScroll: true }
