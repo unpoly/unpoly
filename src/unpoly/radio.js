@@ -76,7 +76,7 @@ up.radio = (function() {
       if (hungryTarget) {
 
         let targetRestriction = hungryElement.getAttribute('up-if-target')
-        if (!targetRestriction || up.util.some(targetElements, (targetElement) => up.fragment.contains(targetElement, targetRestriction)) {
+        if (!targetRestriction || up.util.some(targetElements, (targetElement) => up.fragment.contains(targetElement, targetRestriction))) {
           return {
             target: hungryTarget,
             element: hungryElement
