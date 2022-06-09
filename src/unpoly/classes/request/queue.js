@@ -9,7 +9,6 @@ up.Request.Queue = class Queue {
   reset() {
     this.queuedRequests = []
     this.currentRequests = []
-    clearTimeout(this.checkSlowTimout)
     this.emittedSlow = false
   }
 
@@ -25,7 +24,7 @@ up.Request.Queue = class Queue {
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
     // make its own check whether a request in the queue is considered slow.
     request.queueTime = new Date()
-    this.setSlowTimer()
+    this.scheduleSlowTimer()
     this.queueRequest(request)
     u.microtask(() => this.poke())
   }
@@ -39,13 +38,15 @@ up.Request.Queue = class Queue {
   promoteToForeground(request) {
     if (request.background) {
       request.background = false
-      this.setSlowTimer()
+      this.scheduleSlowTimer()
     }
   }
 
-  setSlowTimer() {
+  scheduleSlowTimer() {
     const badResponseTime = this.getBadResponseTime()
-    this.checkSlowTimout = u.timer(badResponseTime, () => this.checkSlow())
+    // We may have multiple timers running concurrently.
+    // Nonethess we don't emit duplicate events due to the check in @checkSlow().
+    u.timer(badResponseTime, () => this.checkSlow())
   }
 
   getMaxConcurrency() {
