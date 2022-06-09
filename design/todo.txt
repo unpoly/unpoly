@@ -5,9 +5,8 @@ TODOs for next release
 Various changes
 ---------------
 
-- Bad connections should not impact correctness
-  - Do keep revalidating with reduced requests
-- Consider whether we're version 2.7 or 3.0
+- New render and request option { badResponseTime }, [up-bad-response-time]
+- Consider whether we're version 2.7 or 3.0 => I think 3.0
 - Go through visibilities
 - Update layer location after replaceState() (https://github.com/unpoly/unpoly/issues/388)
 - New onTransitionEnd() callback to take some load off from onFinished()
@@ -21,20 +20,28 @@ Various changes
   - Support up.network.isLate() to help implement progress bars
 - Parse [up-abortable] for links
 - Move up.log.muteUncriticalRejections() to up.error
-
+- Rework history handling
+  - Refocus the element before the state change
+    - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
 
 If we're launching V3
 ---------------------
 
-- Ops need to give us a new site v2.makandra.de
+- We don't need anything from Ops
+  - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
+- Make an 2.x-stable branch for unpoly-site
+- Make an 2.x-stable branch for unpoly
 - We need a separate Algolia index for v2
   - v3 would stay on "latest"
+- Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
+- Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
+
 
 
 Offline / rework caching
 ------------------------
 
-Our cache terminology is now inconsinstent with what's standard in HTTP specs and browsers.
+Our cache terminology is now inconsistent with what's standard in HTTP specs and browsers.
 Also we could get away with *never* cleaning the cache (just expiration).
 This way we can keep using cached content if we're offline.
 
@@ -70,6 +77,7 @@ This way we can keep using cached content if we're offline.
   - Keep up.fragment.config.autoRevalidate
     - This way users can easily excempt a troublesome request from auto-revalidation, e.g. a blank form
     - It can now default to (response) => response.stale
+      - We do keep revalidating with reduced requests. Bad connections shouldn't impact correctness.
 
 - "Clearing" the cache is now "expiring" the cache
   - Rework X-Up-Clear-Cache
@@ -223,6 +231,11 @@ Docs
 Icebox
 ======
 
+- Move scroll positions into state
+  - This gets rid of the other up.Cache usage
+  - This may mean we need to lose up.viewport.restoreScroll() and { scroll: 'restore' } and { saveScroll: true }
+    - Losing { scroll: 'restore' } is super sad :(
+  => Maybe revisit when the Navigation API is supported
 - Improve polling in the background
   - It would be great to *not* have a timeout running while we're in the background or offline
   - It would be great to not wait up to 10 seconds when we're re-focused or regain connectivity
