@@ -15,7 +15,6 @@ Various changes
 - Rework history handling
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
-- Consider renaming { hungry, keep } to { useHungry, useKeep } so we can have [up-use-hungry] and [up-use-keep]
 
 If we're launching V3
 ---------------------
