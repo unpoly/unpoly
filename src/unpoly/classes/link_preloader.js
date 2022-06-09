@@ -76,7 +76,7 @@ up.LinkPreloader = class LinkPreloader {
 
     const onQueued = request => { return this.currentRequest = request; }
     up.log.putsEvent(event)
-    up.log.muteUncriticalRejection(up.link.preload(link, { onQueued }))
+    up.error.muteUncriticalRejection(up.link.preload(link, { onQueued }))
     this.queued = true
   }
 }

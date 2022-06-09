@@ -79,6 +79,36 @@ up.error = (function() {
     return (typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))
   }
 
+  /*-
+  Registers an empty rejection handler in case the given promise
+  rejects with an AbortError or a failed up.Response.
+
+  This prevents browsers from printing "Uncaught (in promise)" to the error
+  console when the promise is rejected.
+
+  This is helpful for event handlers where it is clear that no rejection
+  handler will be registered:
+
+  ```js
+  up.on('submit', 'form[up-target]', (event, form) => {
+    promise = up.submit(form)
+    up.util.muteRejection(promise)
+  })
+  ```
+
+  @function up.error.muteUncriticalRejection
+  @param {Promise} promise
+  @return {Promise}
+  @internal
+  */
+  function muteUncriticalRejection(promise) {
+    return promise.catch(function(reason) {
+      if (isCritical(reason)) {
+        throw reason
+      }
+    })
+  }
+
   return {
     fail,
     failed,
@@ -88,6 +118,7 @@ up.error = (function() {
     cannotTarget,
     emitGlobal,
     isCritical,
+    muteUncriticalRejection,
   }
 })()
 

@@ -1141,7 +1141,7 @@ up.link = (function() {
       // on `mousedown`.
       up.focus(link, { preventScroll: true })
 
-      up.log.muteUncriticalRejection(follow(link))
+      up.error.muteUncriticalRejection(follow(link))
     }
   })
 

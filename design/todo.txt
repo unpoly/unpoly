@@ -11,7 +11,6 @@ Various changes
   - New event property { request }
   - Support up.network.isLate() to help implement progress bars
   - I think this means moving the event logic to up.Response
-- Move up.log.muteUncriticalRejections() to up.error
 - Rework history handling
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)

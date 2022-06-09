@@ -1408,6 +1408,7 @@ up.fragment = (function() {
 
   @param {Element} element
   @param {string} selector
+  @function up.fragment.contains
   @internal
   */
   function contains(element, selector) {
