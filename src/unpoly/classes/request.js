@@ -270,7 +270,7 @@ up.Request = class Request extends up.Record {
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
       'targetElements',
-      'queueTime',
+      'queuedAt',
       'wrapMethod',
       'contentType',
       'payload',
@@ -716,7 +716,7 @@ up.Request = class Request extends up.Record {
 
   get queueAge() {
     const now = new Date()
-    return now - this.queueTime
+    return now - this.queuedAt
   }
 
   static tester(condition, { except } = {}) {
