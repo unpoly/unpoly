@@ -24,7 +24,7 @@ up.Request.Queue = class Queue {
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
     // make its own check whether a request in the queue is considered slow.
     request.queueTime = new Date()
-    this.scheduleSlowTimer()
+    this.scheduleSlowTimer(request)
     this.queueRequest(request)
     u.microtask(() => this.poke())
   }
@@ -38,23 +38,18 @@ up.Request.Queue = class Queue {
   promoteToForeground(request) {
     if (request.background) {
       request.background = false
-      this.scheduleSlowTimer()
+      this.scheduleSlowTimer(request)
     }
   }
 
-  scheduleSlowTimer() {
-    const badResponseTime = this.getBadResponseTime()
+  scheduleSlowTimer(request) {
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @checkSlow().
-    u.timer(badResponseTime, () => this.checkSlow())
+    u.timer(request.badResponseTime, () => this.checkSlow())
   }
 
   getMaxConcurrency() {
     return u.evalOption(up.network.config.concurrency)
-  }
-
-  getBadResponseTime() {
-    return up.network.config.badResponseTime
   }
 
   hasConcurrencyLeft() {
@@ -153,8 +148,6 @@ up.Request.Queue = class Queue {
   }
 
   isSlow() {
-    const now = new Date()
-    const badResponseTime = this.getBadResponseTime()
     const allForegroundRequests = u.reject(this.allRequests, 'background')
 
     // If badResponseTime is 200, we're scheduling the checkSlow() timer after 200 ms.
@@ -163,6 +156,6 @@ up.Request.Queue = class Queue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
 
-    return u.some(allForegroundRequests, request => (now - request.queueTime) >= (badResponseTime - timerTolerance))
+    return u.some(allForegroundRequests, request => request.queueAge >= (request.badResponseTime - timerTolerance))
   }
 }

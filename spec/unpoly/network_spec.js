@@ -1402,7 +1402,41 @@ describe('up.network', function() {
           })
         })
 
-        it('emits an up:request:late event if the server takes too long to respond')
+        it('emits an up:request:late event if the server takes too long to respond', asyncSpec(function(next) {
+          let lateListener = jasmine.createSpy('up:request:late listener')
+          up.on('up:request:late', lateListener)
+
+          up.network.config.badResponseTime = 70
+
+          up.request({ url: '/foo' })
+
+          next.after(40, function() {
+            expect(lateListener).not.toHaveBeenCalled()
+          })
+
+          next.after(60, function() {
+            expect(lateListener).toHaveBeenCalled()
+          })
+        }))
+
+        it('allows to configure request-specific response times as a function in up.network.config.badResponseTime', asyncSpec(function(next) {
+          let lateListener = jasmine.createSpy('up:request:late listener')
+          up.on('up:request:late', lateListener)
+
+          let badResponseTimeFn = jasmine.createSpy('badResponseTime').and.callFake((request) => request.url === '/foo' ? 70 : 0)
+          up.network.config.badResponseTime = badResponseTimeFn
+
+          up.request({ url: '/foo' })
+
+          next.after(40, function() {
+            expect(badResponseTimeFn).toHaveBeenCalled()
+            expect(lateListener).not.toHaveBeenCalled()
+          })
+
+          next.after(60, function() {
+            expect(lateListener).toHaveBeenCalled()
+          })
+        }))
 
         it('does not emit an up:request:late event for background requests', asyncSpec(function(next) {
           next(() => {

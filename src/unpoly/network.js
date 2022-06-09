@@ -81,7 +81,7 @@ up.network = (function() {
 
     The value is given in milliseconds. Lower is better.
 
-  @param {number} [config.badResponseTime=400]
+  @param {number|Function(up.Request): number} [config.badResponseTime=400]
     How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
 
     Requests exceeding this response time will also cause a [progress bar](/up.network.config#config.progressBar)

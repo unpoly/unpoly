@@ -710,6 +710,15 @@ up.Request = class Request extends up.Record {
     })
   }
 
+  get badResponseTime() {
+    return u.evalOption(up.network.config.badResponseTime, this)
+  }
+
+  get queueAge() {
+    const now = new Date()
+    return now - this.queueTime
+  }
+
   static tester(condition, { except } = {}) {
     let testFn
     if (u.isFunction(condition)) {
