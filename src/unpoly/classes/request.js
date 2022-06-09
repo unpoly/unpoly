@@ -364,11 +364,13 @@ up.Request = class Request extends up.Record {
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
   }
 
-  // Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
-  //
-  // @property up.Request#targetElements
-  // @param List<Element> targetElements
-  // @experimental
+  /*-
+  Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
+
+  @property up.Request#targetElements
+  @param List<Element> targetElements
+  @experimental
+  */
   get targetElements() {
     // This property is required for `up.fragment.abort()` to select requests within
     // the subtree that we're cancling.
