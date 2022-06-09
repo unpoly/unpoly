@@ -66,15 +66,17 @@ up.radio = (function() {
     return withSuffix.join(',')
   }
 
-  function hungryElements(layer) {
+  function hungrySolutions(layer) {
     let anyLayerSelector = '[up-layer=any]'
     let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
     let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
     let hungries = hungriesOnTargetedLayer.concat(hungriesOnAnyLayer)
-    return u.reject(hungries, (element) => {
-      if (!up.fragment.isTargetable(element)) {
+    return u.filterMap(hungries, (element) => {
+      let target = up.fragment.tryToTarget(element)
+      if (target) {
+        return { target, element }
+      } else {
         up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
-        return true
       }
     })
   }
@@ -270,7 +272,7 @@ up.radio = (function() {
 
   return {
     config,
-    hungryElements,
+    hungrySolutions,
     startPolling,
     stopPolling,
     pollIssue,

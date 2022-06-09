@@ -385,9 +385,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
   addHungrySteps() {
     // Find all [up-hungry] fragments within @layer
-    const hungries = up.radio.hungryElements(this.layer)
-    for (let oldElement of hungries) {
-      const selector = up.fragment.toTarget(oldElement)
+    const hungrySolutions = up.radio.hungrySolutions(this.layer)
+    console.log({ hungrySolutions })
+
+    for (let { element: oldElement, target: selector } of hungrySolutions) {
       const transition = e.booleanOrStringAttr(oldElement, 'transition')
 
       const step = {
