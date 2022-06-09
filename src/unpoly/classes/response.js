@@ -125,7 +125,7 @@ up.Response = class Response extends up.Record {
       'context',
       'clearCache',
       'headers', // custom headers to for synthetic reponses without { xhr } property
-      'time',
+      'loadedTime',
       'fail',
     ]
   }
@@ -133,7 +133,7 @@ up.Response = class Response extends up.Record {
   defaults() {
     return {
       headers: {},
-      time: new Date()
+      loadedTime: new Date()
     }
   }
 
@@ -242,7 +242,7 @@ up.Response = class Response extends up.Record {
   */
   get age() {
     let now = new Date()
-    return now - this.time
+    return now - this.loadedTime
   }
 
 }
