@@ -67,7 +67,7 @@ up.radio = (function() {
   }
 
   function hungrySolutions(layer) {
-    let anyLayerSelector = '[up-layer=any]'
+    let anyLayerSelector = '[up-if-layer=any]'
     let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
     let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
     let hungries = hungriesOnTargetedLayer.concat(hungriesOnAnyLayer)
@@ -93,15 +93,14 @@ up.radio = (function() {
   the element will not be updated.
 
   @selector [up-hungry]
-  @param [up-layer='current']
-    For updates on which layer this hungry element should be matched.
+  @param [up-if-layer='current']
+    Only piggy-back on updates for the given [layer](/up.layer).
 
     By default only hungry elements on the targeted layer are updated.
     To match a hungry element when updating *any* layer, set this attribute to `[up-layer=any]`.
 
-    Even with `[up-layer=any]` hungry elements are only rendered when an
-    existing [layer](/up.layer) is updated. Hungry elements are never rendered
-    for responses that [open a new overlay](/opening-overlays).
+    Even with `[up-layer=any]` hungry elements are only rendered when updating an existinhg layer.
+    Hungry elements are never rendered for responses that [open a new overlay](/opening-overlays).
   @param [up-transition]
     The transition to use when this element is updated.
   @stable

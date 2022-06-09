@@ -418,11 +418,11 @@ describe 'up.radio', ->
         expect($('.inside')).toHaveText('new inside')
         expect($('.outside')).toHaveText('old outside')
 
-      it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-layer=any]', ->
+      it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-if-layer=any]', ->
         up.layer.config.openDuration = 0
         up.layer.config.closeDuration = 0
 
-        $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-layer', 'any')
+        $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
 
         closeEventHandler = jasmine.createSpy('close event handler')
         up.on('up:layer:dismiss', closeEventHandler)
