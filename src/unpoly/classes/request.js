@@ -241,6 +241,17 @@ up.Request = class Request extends up.Record {
   @experimental
   */
 
+  /*-
+  The number of milliseconds after which this request can cause
+  an `up:request:late` event.
+
+  Defaults to `up.network.config.badResponseTime`.
+
+  @property up.Request#badResponseTime
+  @param {number} [badResponseTime]
+  @experimental
+  */
+
   keys() {
     return [
       // 'signal',
@@ -277,6 +288,7 @@ up.Request = class Request extends up.Record {
       'onQueued',
       'fail',
       'abortable',
+      'badResponseTime',
     ]
   }
 
@@ -344,6 +356,12 @@ up.Request = class Request extends up.Record {
     // We delegate all promise-related methods (then, catch, finally) to an internal
     // deferred object.
     this.deferred = u.newDeferred()
+
+    // (1) We want to set the default after all other properties are initialized,
+    //     in case up.network.config.badResponseTime is a function that inspects this request.
+    // (2) We want to set the default once and then keep the value immutable. Otherwise
+    //     the timer logic for up:request:late/:recover gets inconvenient edge cases.
+    this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
   }
 
   // Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
@@ -708,10 +726,6 @@ up.Request = class Request extends up.Record {
     return u.some(this.targetElements, function(targetElement) {
       return u.some(subtreeElements, (subtreeElement) => subtreeElement.contains(targetElement))
     })
-  }
-
-  get badResponseTime() {
-    return u.evalOption(up.network.config.badResponseTime, this)
   }
 
   get queueAge() {

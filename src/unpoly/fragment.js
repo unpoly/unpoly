@@ -698,6 +698,12 @@ up.fragment = (function() {
     Background requests also won't emit `up:request:late` events and won't trigger
     the [progress bar](/up.network.config#config.progressBar).
 
+  @param {number} [options.badResponseTime]
+    The number of milliseconds after which this request can cause
+    an `up:request:late` event.
+
+    Defaults to `up.network.config.badResponseTime`.
+
   @param {Element|jQuery} [options.origin]
     The element that triggered the change.
 

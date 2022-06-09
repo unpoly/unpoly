@@ -5,9 +5,7 @@ TODOs for next release
 Various changes
 ---------------
 
-- New render and request option { badResponseTime }, [up-bad-response-time]
 - Consider whether we're version 2.7 or 3.0 => I think 3.0
-- Go through visibilities
 - Update layer location after replaceState() (https://github.com/unpoly/unpoly/issues/388)
 - Allow to restrict [up-hungry] to an updated fragment scope
   - [up-hungry][up-if-layer="any"]
@@ -202,6 +200,7 @@ Docs
 
 - Consider replacing type|undefined with type? in all type comments
 - Go through TODO
+- Go through visibilities *if* we're doing 3.0
 - Consider a new page for defaults
   - Explain that most opts are opt-in
   - Explain navigation defaults

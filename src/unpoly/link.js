@@ -344,6 +344,7 @@ up.link = (function() {
     parser.boolean('abortable')
     parser.boolean('background')
     parser.string('contentType')
+    parser.number('badResponseTime')
 
     return options
   }
@@ -1042,6 +1043,12 @@ up.link = (function() {
     Background requests deprioritized over foreground requests.
     Background requests also won't emit `up:request:late` events and won't trigger
     the [progress bar](/up.network.config#config.progressBar).
+
+  @param [up-bad-response-time]
+    The number of milliseconds after which this request can cause
+    an `up:request:late` event.
+
+    Defaults to `up.network.config.badResponseTime`.
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.

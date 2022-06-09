@@ -1438,6 +1438,21 @@ describe('up.network', function() {
           })
         }))
 
+        it('honors an up.request({ badResponseTime }) option', asyncSpec(function(next) {
+          let lateListener = jasmine.createSpy('up:request:late listener')
+          up.on('up:request:late', lateListener)
+
+          up.request({ url: '/foo', badResponseTime: 70 })
+
+          next.after(40, function() {
+            expect(lateListener).not.toHaveBeenCalled()
+          })
+
+          next.after(60, function() {
+            expect(lateListener).toHaveBeenCalled()
+          })
+        }))
+
         it('does not emit an up:request:late event for background requests', asyncSpec(function(next) {
           next(() => {
             // A background request doesn't make us busy.
