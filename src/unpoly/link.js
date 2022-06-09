@@ -341,6 +341,7 @@ up.link = (function() {
     parser.booleanOrString('clearCache')
     parser.booleanOrString('revalidate')
     parser.booleanOrString('abort')
+    parser.boolean('abortable')
     parser.boolean('background')
     parser.string('contentType')
 
@@ -1029,6 +1030,11 @@ up.link = (function() {
 
   @param [up-abort='target']
     Whether to [abort existing requests](/aborting-requests) before rendering.
+
+  @param [up-abortable='true']
+    Whether this request may be aborted by other requests targeting the same fragments or layer.
+
+    See [aborting requests](/aborting-requests) for details.
 
   @param [up-background='false']
     Whether this request will load in the background.

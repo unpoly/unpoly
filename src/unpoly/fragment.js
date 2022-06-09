@@ -687,7 +687,9 @@ up.fragment = (function() {
     See [aborting requests](/aborting-requests) for details and a list of options.
 
   @param {boolean} [options.abortable=true]
-    Whether this request may be aborted through another `up.render({ abort })` or `up.fragment.abort()`.
+    Whether this request may be aborted by other requests targeting the same fragments or layer.
+
+    See [aborting requests](/aborting-requests) for details.
 
   @param {boolean} [options.background=false]
     Whether this request will load in the background.
