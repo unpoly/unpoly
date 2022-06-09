@@ -38,14 +38,21 @@ up.Request.Queue = class Queue {
   promoteToForeground(request) {
     if (request.background) {
       request.background = false
+
+      // If the request has been loading longer than its badResponseTime, we have
+      // already ignored its up:request:late event. Hence we schedule another check.
       this.scheduleSlowTimer(request)
     }
   }
 
   scheduleSlowTimer(request) {
+    // In case the request was loading in the background before it was promoted to
+    // the foreground, the request may have less time left than request.badResponseTime.
+    let timeUntilLate = Math.max(request.badResponseTime - request.queueAge, 0)
+
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @checkSlow().
-    u.timer(request.badResponseTime, () => this.checkSlow())
+    u.timer(timeUntilLate, () => this.checkSlow())
   }
 
   getMaxConcurrency() {
