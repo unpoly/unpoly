@@ -728,10 +728,10 @@ up.fragment = (function() {
   @param {Object} [options.context]
     An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.
 
-  @param {boolean} [options.keep=true]
+  @param {boolean} [options.useKeep=true]
     Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
 
-  @param {boolean} [options.hungry=true]
+  @param {boolean} [options.useHungry=true]
     Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
 
   @param {boolean|string|Element|Function} [options.scroll]

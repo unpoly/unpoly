@@ -364,11 +364,11 @@ describe 'up.radio', ->
           expect('.hungry').toHaveText('new hungry')
 
 
-      it 'does not update [up-hungry] elements with { hungry: false } option', asyncSpec (next) ->
+      it 'does not update [up-hungry] elements with { useHungry: false } option', asyncSpec (next) ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        up.navigate('.target', url: '/path', hungry: false)
+        up.navigate('.target', url: '/path', useHungry: false)
 
         next =>
           @respondWith

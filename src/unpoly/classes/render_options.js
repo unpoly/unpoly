@@ -3,8 +3,8 @@ const u = up.util
 up.RenderOptions = (function() {
 
   const GLOBAL_DEFAULTS = {
-    hungry: true,
-    keep: true,
+    useHungry: true,
+    useKeep: true,
     source: true,
     saveScroll: true,
     abort: 'target',

@@ -250,11 +250,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   //
   // @param {Element} options.oldElement
   // @param {Element} options.newElement
-  // @param {boolean} options.keep
+  // @param {boolean} options.useKeep
   // @param {boolean} options.descendantsOnly
   findKeepPlan(options) {
-    // Going back in history uses keep: false
-    if (!options.keep) { return; }
+    console.log("options.useKeep is %o", options.useKeep)
+
+    if (!options.useKeep) { return }
+
+    console.log("will match keep")
 
     const { oldElement, newElement } = options
 
@@ -301,7 +304,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   // Returns an array of keepPlans.
   transferKeepableElements(step) {
     const keepPlans = []
-    if (step.keep) {
+    if (step.useKeep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
         let keepPlan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
@@ -361,7 +364,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     // Only when we have a match in the required selectors, we
     // append the optional steps for [up-hungry] elements.
-    if (this.options.hungry) {
+    if (this.options.useHungry) {
       this.addHungrySteps()
     }
 

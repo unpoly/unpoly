@@ -5,8 +5,8 @@ describe 'up.RenderOptions', ->
     it 'sets global defaults', ->
       givenOptions = {}
       options = up.RenderOptions.preprocess(givenOptions)
-      expect(options.hungry).toBe(true)
-      expect(options.keep).toBe(true)
+      expect(options.useHungry).toBe(true)
+      expect(options.useKeep).toBe(true)
       expect(options.source).toBe(true)
       expect(options.abort).toBe('target')
 
@@ -67,10 +67,10 @@ describe 'up.RenderOptions', ->
         expect(options.history).toBeFalsy()
 
     it 'overrides defaults with given options', ->
-      givenOptions = { navigate: false, hungry: false, source: '/other-source' }
+      givenOptions = { navigate: false, useHungry: false, source: '/other-source' }
       options = up.RenderOptions.preprocess(givenOptions)
 
-      expect(options.hungry).toBe(false)
+      expect(options.useHungry).toBe(false)
       expect(options.source).toBe('/other-source')
 
     describe 'with { preload: true }', ->
@@ -118,8 +118,8 @@ describe 'up.RenderOptions', ->
       givenOptions = {}
       options = preprocessAndDerive(givenOptions)
 
-      expect(options.hungry).toBe(true)
-      expect(options.keep).toBe(true)
+      expect(options.useHungry).toBe(true)
+      expect(options.useKeep).toBe(true)
       expect(options.source).toBe(true)
 
     describe 'with { navigate: true }', ->

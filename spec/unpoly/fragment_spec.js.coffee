@@ -4957,7 +4957,7 @@ describe 'up.fragment', ->
           next =>
             expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
 
-        it 'updates an [up-keep] element with { keep: false } option', asyncSpec (next) ->
+        it 'updates an [up-keep] element with { useKeep: false } option', asyncSpec (next) ->
           $container = $fixture('.container')
           $container.html """
             old-before
@@ -4966,7 +4966,7 @@ describe 'up.fragment', ->
             """
 
           up.render '.container',
-            keep: false
+            useKeep: false
             document: """
               <div class='container'>
                 new-before
