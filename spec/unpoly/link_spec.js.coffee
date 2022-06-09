@@ -685,6 +685,16 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.background).toBe(true)
 
+      it 'parses an [up-use-keep] attribute', ->
+        link = fixture('a[href="/foo"][up-use-keep="false"]')
+        options = up.link.followOptions(link)
+        expect(options.useKeep).toBe(false)
+
+      it 'parses an [up-use-hungry] attribute', ->
+        link = fixture('a[href="/foo"][up-use-hungry="false"]')
+        options = up.link.followOptions(link)
+        expect(options.useHungry).toBe(false)
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->

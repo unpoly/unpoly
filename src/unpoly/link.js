@@ -399,6 +399,8 @@ up.link = (function() {
     parser.string('fragment')
     parser.string('document')
     parser.parse(e.callbackAttr, 'onFinished')
+    parser.boolean('useKeep')
+    parser.boolean('useHungry')
 
     // Layer options
     parser.boolean('peel')
@@ -1066,6 +1068,12 @@ up.link = (function() {
   @param [up-context]
     A JSON object that will be merged into the [context](/context)
     of the current layer once the fragment is rendered.
+
+  @param [up-use-keep='true']
+    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
+
+  @param [up-use-hungry='true']
+    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
 
   @param [up-scroll='auto']
     How to scroll after the new fragment was rendered.
