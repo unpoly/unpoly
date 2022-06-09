@@ -14,6 +14,11 @@ Various changes
 - Rework history handling
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
+      - Is this maybe a more complex saveState / restoreState concept that stores more than one thing:
+        - scroll position
+        - focus
+        - selection
+        - user defined state
 
 If we're launching V3
 ---------------------
