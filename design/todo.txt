@@ -7,11 +7,6 @@ Various changes
 
 - Consider whether we're version 2.7 or 3.0 => I think 3.0
 - Update layer location after replaceState() (https://github.com/unpoly/unpoly/issues/388)
-- Allow to restrict [up-hungry] to an updated fragment scope
-  - [up-hungry][up-if-layer="any"]
-    - Rename from [up-layer="any"]
-  - [up-hungry][up-if-target=".foo"]
-    - Checks whether the targeted fragment's subtree includes a .foo (that's how we do it in ...-if-main too)
 - Consider sending :late und :recover events for every request (Breaking change)
   - New event property { request }
   - Support up.network.isLate() to help implement progress bars
@@ -20,6 +15,7 @@ Various changes
 - Rework history handling
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
+- Consider renaming { hungry, keep } to { useHungry, useKeep } so we can have [up-use-hungry] and [up-use-keep]
 
 If we're launching V3
 ---------------------

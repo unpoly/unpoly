@@ -1403,6 +1403,13 @@ up.fragment = (function() {
     return selector.subtree(element)
   }
 
+  /*-
+  Returns whether the given `element` or one of its descendants match the given `selector`.
+
+  @param {Element} element
+  @param {string} selector
+  @internal
+  */
   function contains(element, selector) {
     return getSubtree(element, selector).length > 0
   }

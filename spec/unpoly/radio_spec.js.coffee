@@ -385,72 +385,6 @@ describe 'up.radio', ->
           expect('.target').toHaveText('new target')
           expect('.hungry').toHaveText('old hungry')
 
-      it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', ->
-        up.layer.config.openDuration = 0
-        up.layer.config.closeDuration = 0
-
-        $fixture('.outside').text('old outside').attr('up-hungry', true)
-
-        closeEventHandler = jasmine.createSpy('close event handler')
-        up.on('up:layer:dismiss', closeEventHandler)
-
-        up.layer.open fragment: """
-          <div class='inside'>
-            old inside
-          </div>
-          """
-
-        expect(up.layer.isOverlay()).toBe(true)
-
-        up.render
-          target: '.inside',
-          document: """
-            <div class="outside">
-              new outside
-            </div>
-            <div class='inside'>
-              new inside
-            </div>
-            """,
-          layer: 'front'
-
-        expect(closeEventHandler).not.toHaveBeenCalled()
-        expect($('.inside')).toHaveText('new inside')
-        expect($('.outside')).toHaveText('old outside')
-
-      it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-if-layer=any]', ->
-        up.layer.config.openDuration = 0
-        up.layer.config.closeDuration = 0
-
-        $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
-
-        closeEventHandler = jasmine.createSpy('close event handler')
-        up.on('up:layer:dismiss', closeEventHandler)
-
-        up.layer.open fragment: """
-          <div class='inside'>
-            old inside
-          </div>
-          """
-
-        expect(up.layer.isOverlay()).toBe(true)
-
-        up.render
-          target: '.inside',
-          document: """
-            <div class="outside">
-              new outside
-            </div>
-            <div class='inside'>
-              new inside
-            </div>
-            """,
-          layer: 'front'
-
-        expect(closeEventHandler).not.toHaveBeenCalled()
-        expect($('.inside')).toHaveText('new inside')
-        expect($('.outside')).toHaveText('new outside')
-
       it 'does not update an [up-hungry] element if it was contained by the original fragment', asyncSpec (next) ->
         container = fixture('.container')
         e.affix(container, '.child[up-hungry]')
@@ -470,6 +404,156 @@ describe 'up.radio', ->
         next ->
           expect(insertedSpy.calls.count()).toBe(1)
           expect(insertedSpy.calls.argsFor(0)[0].target).toBe(document.querySelector('.container'))
+
+      describe 'restriction of layer', ->
+
+        it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', ->
+          up.layer.config.openDuration = 0
+          up.layer.config.closeDuration = 0
+
+          $fixture('.outside').text('old outside').attr('up-hungry', true)
+
+          closeEventHandler = jasmine.createSpy('close event handler')
+          up.on('up:layer:dismiss', closeEventHandler)
+
+          up.layer.open fragment: """
+            <div class='inside'>
+              old inside
+            </div>
+            """
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          up.render
+            target: '.inside',
+            document: """
+              <div class="outside">
+                new outside
+              </div>
+              <div class='inside'>
+                new inside
+              </div>
+              """,
+            layer: 'front'
+
+          expect(closeEventHandler).not.toHaveBeenCalled()
+          expect($('.inside')).toHaveText('new inside')
+          expect($('.outside')).toHaveText('old outside')
+
+        it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-if-layer=any]', ->
+          up.layer.config.openDuration = 0
+          up.layer.config.closeDuration = 0
+
+          $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+
+          closeEventHandler = jasmine.createSpy('close event handler')
+          up.on('up:layer:dismiss', closeEventHandler)
+
+          up.layer.open fragment: """
+            <div class='inside'>
+              old inside
+            </div>
+            """
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          up.render
+            target: '.inside',
+            document: """
+              <div class="outside">
+                new outside
+              </div>
+              <div class='inside'>
+                new inside
+              </div>
+              """,
+            layer: 'front'
+
+          expect(closeEventHandler).not.toHaveBeenCalled()
+          expect($('.inside')).toHaveText('new inside')
+          expect($('.outside')).toHaveText('new outside')
+
+      describe 'restriction of target', ->
+
+        it 'lets user restrict which updates to piggy-back onto with [up-if-target]', asyncSpec (next) ->
+          $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-target', '.target')
+          $fixture('.target').text('old target')
+          $fixture('.other').text('old target')
+
+          up.navigate('.other', url: '/other')
+
+          next ->
+            jasmine.respondWith """
+              <div class="other">
+                new other
+              </div>
+              <div class="hungry">
+                new hungry
+              </div>
+            """
+
+          next ->
+            expect('.other').toHaveText('new other')
+            expect('.hungry').toHaveText('old hungry')
+            expect('.target').toHaveText('old target')
+
+            up.navigate('.target', url: '/target')
+
+          next ->
+            jasmine.respondWith """
+              <div class="target">
+                new target
+              </div>
+              <div class="hungry">
+                new hungry
+              </div>
+            """
+
+          next ->
+            expect('.target').toHaveText('new target')
+            expect('.hungry').toHaveText('new hungry')
+
+        it 'considers an [up-if-target] condition met if the actual target *contains* the [up-if-target] selector', asyncSpec (next) ->
+          $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-target', '.target')
+          $container = $fixture('.target-container')
+          $fixture('.target').text('old target').appendTo($container)
+          $fixture('.other').text('old target')
+
+          up.navigate('.other', url: '/other')
+
+          next ->
+            jasmine.respondWith """
+              <div class="other">
+                new other
+              </div>
+              <div class="hungry">
+                new hungry
+              </div>
+            """
+
+          next ->
+            expect('.other').toHaveText('new other')
+            expect('.hungry').toHaveText('old hungry')
+            expect('.target').toHaveText('old target')
+
+            up.navigate('.target-container', url: '/target-container')
+
+          next ->
+            jasmine.respondWith """
+              <div class="target-container">
+                <div class="target">
+                  new target
+                </div>
+              </div>
+              <div class="hungry">
+                new hungry
+              </div>
+            """
+
+          next ->
+            expect('.target').toHaveText('new target')
+            expect('.hungry').toHaveText('new hungry')
+
 
     describe '[up-poll]', ->
 

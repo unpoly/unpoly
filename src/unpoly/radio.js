@@ -66,17 +66,24 @@ up.radio = (function() {
     return withSuffix.join(',')
   }
 
-  function hungrySolutions(layer) {
+  function hungrySolutions({ layer, targetElements }) {
     let anyLayerSelector = '[up-if-layer=any]'
     let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
     let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
     let hungries = hungriesOnTargetedLayer.concat(hungriesOnAnyLayer)
-    return u.filterMap(hungries, (element) => {
-      let target = up.fragment.tryToTarget(element)
-      if (target) {
-        return { target, element }
+    return u.filterMap(hungries, (hungryElement) => {
+      let hungryTarget = up.fragment.tryToTarget(hungryElement)
+      if (hungryTarget) {
+
+        let targetRestriction = hungryElement.getAttribute('up-if-target')
+        if (!targetRestriction || up.util.some(targetElements, (targetElement) => up.fragment.contains(targetElement, targetRestriction)) {
+          return {
+            target: hungryTarget,
+            element: hungryElement
+          }
+        }
       } else {
-        up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+        up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', hungryElement)
       }
     })
   }
@@ -99,8 +106,18 @@ up.radio = (function() {
     By default only hungry elements on the targeted layer are updated.
     To match a hungry element when updating *any* layer, set this attribute to `[up-layer=any]`.
 
-    Even with `[up-layer=any]` hungry elements are only rendered when updating an existinhg layer.
+    Even with `[up-layer=any]` hungry elements are only rendered when updating an existing layer.
     Hungry elements are never rendered for responses that [open a new overlay](/opening-overlays).
+  @param [up-if-target='*']
+    Only piggy-back on updates with the given target selector.
+
+    For instance, you want to auto-update a [canonical link element](https://en.wikipedia.org/wiki/Canonical_link_element),
+    but only if the [main element](/main) was updated:
+
+    ```html
+    <link rel="canonical" href="..." up-hungry up-if-target=":main">
+    ```
+
   @param [up-transition]
     The transition to use when this element is updated.
   @stable
