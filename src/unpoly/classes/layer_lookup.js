@@ -18,7 +18,7 @@ up.LayerLookup = class LayerLookup {
     this.values = u.splitValues(options.layer)
 
     this.origin = options.origin
-    this.baseLayer = options.baseLayer || this.stack.current
+    this.baseLayer = options.baseLayer || this.originLayer() || this.stack.current
 
     if (u.isString(this.baseLayer)) {
       // The { baseLayer } option may itself be a string like "parent".

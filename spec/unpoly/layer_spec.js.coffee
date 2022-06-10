@@ -1346,6 +1346,17 @@ describe 'up.layer', ->
           up.layer.normalizeOptions(options)
           expect(options).toEqual jasmine.objectContaining(baseLayer: up.layer.root)
 
+        it "saves the origin's layer to { baseLayer } when clicking on a link with [up-layer] attribute in a background layer (bugfix)", ->
+          origin = fixture('a[up-layer=new][href="/foo"]', text: 'link in background')
+          up.layer.open({ content: 'overlay content' })
+          expect(up.layer.isOverlay()).toBe(true)
+
+          options = { origin }
+
+          up.layer.normalizeOptions(options)
+          expect(options).toEqual jasmine.objectContaining(baseLayer: up.layer.root)
+
+
       describe 'for a { layer } string', ->
 
         it 'does not resolve the { layer } string, since that might resolve to multiple laters layer', ->
@@ -1462,6 +1473,40 @@ describe 'up.layer', ->
           expect(up.layer.count).toBe(2)
           expect(up.layer.isOverlay()).toBe(true)
           expect(up.layer.current).toHaveText('overlay text')
+
+      it "does not fail when, with a popup overlay open, user clicks on a preloaded, popup-opening link in the background layer (bugfix)", asyncSpec (next) ->
+        up.link.config.preloadDelay = 10
+        oneLink = up.hello fixture('a[up-target=".target"][up-layer="new popup"][href="/one"][up-preload]', text: 'open one')
+        twoLink = up.hello fixture('a[up-target=".target"][up-layer="new popup"][href="/two"][up-preload]', text: 'open two')
+
+        next ->
+          Trigger.hoverSequence(oneLink)
+
+        next ->
+          Trigger.click(oneLink)
+
+        next.after 30, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWithSelector('.target', text: 'content one')
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('content one')
+
+          Trigger.hoverSequence(twoLink)
+
+        next.after 30, ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          Trigger.click(twoLink)
+
+        next ->
+
+          jasmine.respondWithSelector('.target', text: 'content two')
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('content two')
 
       describe 'history', ->
 
