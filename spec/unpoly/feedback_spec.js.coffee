@@ -11,7 +11,7 @@ describe 'up.feedback', ->
   describe 'unobtrusive behavior', ->
 
     describe '[up-nav]', ->
-      
+
       replaceURL = (url) ->
         # Don't use up.history.replace() since that fires up:location:changed
         # which up.feedback listens to.
@@ -182,7 +182,7 @@ describe 'up.feedback', ->
         up.hello(container)
         expect(link).toHaveClass('up-current')
 
-      it 'marks a link as .up-current if it links to a #hash and the current URL only has a matching path without a #hash (bugfixxx)', ->
+      it 'marks a link as .up-current if it links to a #hash and the current URL only has a matching path without a #hash (bugfix)', ->
         replaceURL('/bar')
         container = fixture('.container')
         nav = e.affix(container, 'div[up-nav]')
