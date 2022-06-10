@@ -679,7 +679,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   set location(location) {
-    const previousLocation = this.savedLocation
+    const previousLocation = this.location
     location = up.history.normalizeURL(location)
 
     if (previousLocation !== location) {

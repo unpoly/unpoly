@@ -405,6 +405,31 @@ describe 'up.link', ->
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('#hash')
 
+        it 'does add additional history entries when the user clicks a link, changes the URL with history.replaceState(), then clicks the same link again (bugfix)', asyncSpec (next) ->
+          up.history.config.enabled = true
+          up.fragment.config.navigateOptions.history = true
+
+          fixture('.target', text: 'old text')
+          link = fixture('a[href="/link-path"][up-target=".target"]')
+
+          up.follow(link)
+
+          next ->
+            jasmine.respondWithSelector('.target', text: 'new text')
+
+          next ->
+            expect('.target').toHaveText('new text')
+            expect(location.pathname).toEqual('/link-path')
+
+            history.replaceState({}, '', '/user-path')
+
+            expect(location.pathname).toEqual('/user-path')
+
+            up.follow(link)
+
+          next ->
+            expect(location.pathname).toEqual('/link-path')
+
       describe 'scrolling', ->
 
         describe 'with { scroll: "target" }', ->
