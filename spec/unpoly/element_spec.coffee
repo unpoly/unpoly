@@ -1046,7 +1046,7 @@ describe 'up.element', ->
       expect(element).toBeVisible()
 
     it 'restores the { display } property the element had before hiding', ->
-      element = fixture('div', style: { display: 'flex '})
+      element = fixture('div', style: { display: 'flex'})
       expect(getComputedStyle(element).display).toBe('flex')
       up.element.hide(element)
       expect(element).not.toBeVisible()
