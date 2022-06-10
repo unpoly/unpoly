@@ -8,6 +8,15 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+2.6.1
+-----
+
+This is a maintenance release including two changes:
+
+- `input[up-switch]` and `up.element.hide()` now hides elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
+- Fix a bug where, with a popup overlay already open, the user clicked on a preloaded, popup-opening link in the background layer, the second popup would not open.
+
+
 2.6.0
 -----
 
