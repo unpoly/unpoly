@@ -6,7 +6,6 @@ Various changes
 ---------------
 
 - Consider whether we're version 2.7 or 3.0 => I think 3.0
-- Update layer location after replaceState() (https://github.com/unpoly/unpoly/issues/388)
 - Consider sending :late und :recover events for every request (Breaking change)
   - New event property { request }
   - Support up.network.isLate() to help implement progress bars
@@ -14,11 +13,15 @@ Various changes
 - Rework history handling
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
-      - Is this maybe a more complex saveState / restoreState concept that stores more than one thing:
-        - scroll position
-        - focus
-        - selection
-        - user defined state
+
+- New up:location:restore event
+  - event.location
+  - event.previousLocation ?
+  - Users can prevent this event and do their own rendering
+
+- up:location:changed event should have { location } prop, not { url }
+  - This is already done in up:layer:location:changed
+
 
 If we're launching V3
 ---------------------
@@ -228,6 +231,8 @@ Docs
 Icebox
 ======
 
+- Should up:click set up.layer.current ?
+  - It would be more convenient, but it's only relevant for popups or backdrop-less modals. This is rare.
 - New onTransitioned() callback to take some load off from onFinished()
 - Move scroll positions into state
   - This gets rid of the other up.Cache usage
