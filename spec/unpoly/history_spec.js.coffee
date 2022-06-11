@@ -128,6 +128,7 @@ describe 'up.history', ->
         next =>
           expect(destructorSpy).toHaveBeenCalled()
 
+      it ''
 
     describe '[up-back]', ->
 

@@ -1647,7 +1647,7 @@ describe 'up.form', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+            expect(window).not.toHaveUnhandledRejections()
 
         it 'updates a given selector when an [up-fail-target] is given', asyncSpec (next) ->
           $form = $fixture('form.my-form[action="/path"][up-target=".target"][up-fail-target=".errors"]').text('old form text')
@@ -2040,7 +2040,7 @@ describe 'up.form', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+            expect(window).not.toHaveUnhandledRejections()
 
         # https://github.com/unpoly/unpoly/issues/336
         it 'validates a input[type=date] on blur instead of change, as browser date pickers often emit `change` when any date component changes', asyncSpec (next) ->

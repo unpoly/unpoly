@@ -23,7 +23,7 @@ describe('up.error', function() {
 
       u.task(() => promiseState(mutedPromise).then(function(result) {
         expect(result.state).toBe('fulfilled')
-        if (REJECTION_EVENTS_SUPPORTED) { expect(window).not.toHaveUnhandledRejections() }
+        expect(window).not.toHaveUnhandledRejections()
         done()
       }))
     })
@@ -35,7 +35,7 @@ describe('up.error', function() {
 
       u.task(() => promiseState(mutedPromise).then(function(result) {
         expect(result.state).toBe('fulfilled')
-        if (REJECTION_EVENTS_SUPPORTED) { expect(window).not.toHaveUnhandledRejections() }
+        expect(window).not.toHaveUnhandledRejections()
         done()
       }))
     })
@@ -47,7 +47,7 @@ describe('up.error', function() {
 
       u.task(() => promiseState(mutedPromise).then(function(result) {
         expect(result.state).toBe('fulfilled')
-        if (REJECTION_EVENTS_SUPPORTED) { expect(window).not.toHaveUnhandledRejections() }
+        expect(window).not.toHaveUnhandledRejections()
         done()
       }))
     })

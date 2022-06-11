@@ -1,9 +1,6 @@
 UNHANDLED_REJECTIONS = []
 
 beforeAll ->
-  # IE11 does not support this event.
-  window.REJECTION_EVENTS_SUPPORTED = ("onunhandledrejection" of window)
-
   window.addEventListener 'unhandledrejection', (event) ->
     UNHANDLED_REJECTIONS.push(event)
 

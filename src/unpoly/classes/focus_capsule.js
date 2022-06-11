@@ -22,7 +22,7 @@ function focusedElementWithin(scopeElement) {
 
 up.FocusCapsule = class FocusCapsule extends up.Record {
   keys() {
-    return ['selector', 'oldElement'].concat(PRESERVE_KEYS)
+    return ['target', 'oldElement'].concat(PRESERVE_KEYS)
   }
 
   restore(scope, options) {
@@ -32,7 +32,7 @@ up.FocusCapsule = class FocusCapsule extends up.Record {
       return
     }
 
-    let rediscoveredElement = e.get(scope, this.selector)
+    let rediscoveredElement = e.get(scope, this.target)
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
       transferProps(this, rediscoveredElement)
@@ -44,11 +44,14 @@ up.FocusCapsule = class FocusCapsule extends up.Record {
 
   static preserveWithin(oldElement) {
     let focusedElement = focusedElementWithin(oldElement)
-    if (focusedElement) {
-      const plan = { oldElement, selector: up.fragment.toTarget(focusedElement) }
-      transferProps(focusedElement, plan)
-      return new (this)(plan)
-    }
+    if (!focusedElement) return
+
+    let target = up.fragment.tryToTarget(focusedElement)
+    if (!target) return
+
+    const plan = { oldElement, target }
+    transferProps(focusedElement, plan)
+    return new this(plan)
   }
 
   wasLost() {

@@ -1154,7 +1154,7 @@ describe 'up.link', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+            expect(window).not.toHaveUnhandledRejections()
 
 
         it 'uses the [up-target] selector for a successful response', asyncSpec (next) ->
@@ -1945,7 +1945,7 @@ describe 'up.link', ->
 
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
-          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+          expect(window).not.toHaveUnhandledRejections()
 
       it 'aborts a preload request if the user stops hovering before the response was received', asyncSpec (next) ->
         up.link.config.preloadDelay = 10
@@ -2103,7 +2103,7 @@ describe 'up.link', ->
 
           # Since there isn't anyone who could handle the rejection inside
           # the event handler, our handler mutes the rejection.
-          expect(window).not.toHaveUnhandledRejections() if REJECTION_EVENTS_SUPPORTED
+          expect(window).not.toHaveUnhandledRejections()
 
       describe 'exemptions from preloading', ->
 

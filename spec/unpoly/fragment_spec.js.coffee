@@ -4066,7 +4066,25 @@ describe 'up.fragment', ->
             """)
 
             next ->
+              expect('.focused').toHaveText('new focused')
               expect('.focused').toBeFocused()
+
+          it 'does not crash if the focused element is not targetable (bugfix)', asyncSpec (next) ->
+            container = fixture('.container')
+            oldFocused = e.affix(container, 'div[tabindex=0]', text: 'old focused')
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container', focus: 'keep', document: """
+              <div class="container">
+                <div tabindex="0">new focused</div>
+              </div>
+            """)
+
+            next ->
+              expect('div[tabindex]').toHaveText('new focused')
+              expect('div[tabindex]').not.toBeFocused()
+              expect(window).not.toHaveUnhandledRejections()
 
           it 'preserves focus of an element within the changed fragment when updating inner HTML with { content } (bugfix)', asyncSpec (next) ->
             container = fixture('.container')
@@ -4088,7 +4106,7 @@ describe 'up.fragment', ->
               baaaaaaaaaaam
               quuuuuuuuuuux
             """
-            oldFocused = e.affix(container, 'textarea[wrap=off][rows=3][cols=6]', text: longText)
+            oldFocused = e.affix(container, 'textarea[name=prose][wrap=off][rows=3][cols=6]', text: longText)
 
             oldFocused.selectionStart = 10
             oldFocused.selectionEnd = 11
@@ -4102,7 +4120,7 @@ describe 'up.fragment', ->
             expect(oldFocused.scrollTop).toBeAround(12, 2)
             expect(oldFocused.scrollLeft).toBeAround(13, 2)
 
-            up.render('.container', focus: 'keep', content: "<textarea wrap='off' rows='3' cols='6'>#{longText}</textarea>")
+            up.render('.container', focus: 'keep', content: "<textarea name='prose' wrap='off' rows='3' cols='6'>#{longText}</textarea>")
 
             next ->
               textarea = document.querySelector('.container textarea')
