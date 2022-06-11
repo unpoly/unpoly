@@ -5,9 +5,9 @@ describe 'up.history', ->
 
   beforeEach ->
     up.history.config.enabled = true
-  
+
   describe 'JavaScript functions', ->
-    
+
     describe 'up.history.replace', ->
 
       it 'should have tests'
@@ -288,7 +288,7 @@ describe 'up.history', ->
 
         events = []
         up.on 'up:location:changed', (event) ->
-          events.push [event.reason, event.url]
+          events.push [event.reason, event.location]
 
         normalize = up.history.normalizeURL
 

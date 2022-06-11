@@ -19,9 +19,6 @@ Various changes
   - event.previousLocation ?
   - Users can prevent this event and do their own rendering
 
-- up:location:changed event should have { location } prop, not { url }
-  - This is already done in up:layer:location:changed
-
 
 If we're launching V3
 ---------------------

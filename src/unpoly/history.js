@@ -165,10 +165,10 @@ up.history = (function() {
   @param {string} url
   @internal
   */
-  function replace(url, options = {}) {
-    url = normalizeURL(url)
-    if (manipulate('replaceState', url) && (options.event !== false)) {
-      emit('up:location:changed', {url, reason: 'replace', log: `Replaced state for ${url}`})
+  function replace(location, options = {}) {
+    location = normalizeURL(location)
+    if (manipulate('replaceState', location) && (options.event !== false)) {
+      emitLocationChanged({ location, reason: 'replace', log: `Replaced state for ${location}` })
     }
   }
 
@@ -191,11 +191,17 @@ up.history = (function() {
     The URL for the history entry to be added.
   @experimental
   */
-  function push(url) {
-    url = normalizeURL(url)
-    if (!isLocation(url) && manipulate('pushState', url)) {
-      up.emit('up:location:changed', {url, reason: 'push', log: `Advanced to location ${url}`})
+  function push(location) {
+    location = normalizeURL(location)
+    if (!isLocation(location) && manipulate('pushState', location)) {
+      emitLocationChanged({ location, reason: 'push', log: `Advanced to location ${location}` })
     }
+  }
+
+  function emitLocationChanged(props) {
+    let event = up.event.build('up:location:changed', props)
+    up.migrate?.renamedProperty?.(event, 'url', 'location')
+    up.emit(event)
   }
 
   /*-
@@ -212,7 +218,7 @@ up.history = (function() {
   However, a `up:layer:location:changed` will be emitted even if the address bar did not change.
 
   @event up:location:changed
-  @param {string} event.url
+  @param {string} event.location
     The URL for the history entry after the change.
   @param {string} event.reason
     The action that caused this change in [history state](https://developer.mozilla.org/en-US/docs/Web/API/History/state).
@@ -238,17 +244,17 @@ up.history = (function() {
   async function restoreStateOnPop(state) {
     if (state?.up) {
       // The earlier URL has now been restored by the browser. This cannot be prevented.
-      let url = currentLocation()
+      let location = currentLocation()
 
       await up.render({
-        url,
+        url: location,
         history: true,
         // (1) While the browser has already restored the earlier URL, we must still
         //     pass it to render() so the current layer can track the new URL.
         // (2) Since we're passing the current URL, up.history.push() will not add another state.
         // (2) Pass the current URL to ensure that this exact URL is being rendered
         //     and not something derived from the up.Response.
-        location: url,
+        location,
         // Don't replace elements in a modal that might still be open
         // We will close all overlays and update the root layer.
         peel: true,
@@ -259,8 +265,7 @@ up.history = (function() {
         // Since the URL was already changed by the browser, don't save scroll state.
         saveScroll: false
       })
-      url = currentLocation()
-      emit('up:location:changed', {url, reason: 'pop', log: `Restored location ${url}`})
+      emit('up:location:changed', { location, reason: 'pop', log: `Restored location ${location}` })
     } else {
       up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
     }
