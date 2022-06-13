@@ -15,7 +15,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   processPrimitive(opt) {
     switch (opt) {
       case 'keep':
-        return this.restoreFocus()
+        return this.restoreFocusFromCapsule()
       case 'target':
       case true:
         return this.focusElement(this.fragment)
@@ -53,7 +53,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
     }
   }
 
-  restoreFocus() {
+  restoreFocusFromCapsule() {
     return this.focusCapsule?.restore(this.fragment, PREVENT_SCROLL_OPTIONS)
   }
 

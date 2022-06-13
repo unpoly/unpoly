@@ -152,6 +152,133 @@ describe 'up.history', ->
 
           expect(main).toHaveText('manually restored content')
 
+      describe 'scroll restoration', ->
+
+        afterEach ->
+          $('.viewport').remove()
+
+        it 'restores the scroll position of viewports when the user hits the back button', asyncSpec (next) ->
+          longContentHTML = """
+            <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
+              <div class="content" style="height: 1000px"></div>
+            </div>
+          """
+
+          respond = => @respondWith(longContentHTML)
+
+          $viewport = $(longContentHTML).appendTo(document.body)
+
+          waitForBrowser = 100
+
+          up.viewport.config.viewportSelectors = ['.viewport']
+          up.history.config.restoreTargets = ['.viewport']
+
+          up.history.replace('/scroll-restauration-spec')
+
+          up.navigate('.content', url: '/test-one', history: true)
+
+          next.after waitForBrowser, =>
+            respond()
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-one')
+            $viewport.scrollTop(50)
+            up.navigate('.content', url: '/test-two', history: true)
+
+          next.after waitForBrowser, =>
+            respond()
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-two')
+            $('.viewport').scrollTop(150)
+            up.navigate('.content', url: '/test-three', history: true)
+
+          next.after waitForBrowser, =>
+            respond()
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-three')
+            $('.viewport').scrollTop(250)
+            history.back()
+
+          next.after waitForBrowser, =>
+            respond() # we need to respond since we've never requested /test-two with the popTarget
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-two')
+            expect($('.viewport').scrollTop()).toBe(150)
+            history.back()
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-one') # cannot delay the browser from restoring the URL on pop
+            respond() # we need to respond since we've never requested /test-one with the popTarget
+
+          next.after waitForBrowser, =>
+            expect($('.viewport').scrollTop()).toBe(50)
+            history.forward()
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-two')
+            # No need to respond since we requested /test-two with the popTarget
+            # when we went backwards
+            expect($('.viewport').scrollTop()).toBe(150)
+            history.forward()
+
+          next.after waitForBrowser, =>
+            expect(location.href).toMatchURL('/test-three') # cannot delay the browser from restoring the URL on pop
+            respond() # we need to respond since we've never requested /test-three with the popTarget
+
+          next.after waitForBrowser, =>
+            expect($('.viewport').scrollTop()).toBe(250)
+
+        it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', asyncSpec (next) ->
+          up.history.config.restoreTargets = ['.container']
+
+          html = """
+            <div class="container">
+              <div class="viewport1" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
+                <div class="content1" style="height: 5000px">content1</div>
+              </div>
+              <div class="viewport2" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
+                <div class="content2" style="height: 5000px">content2</div>
+              </div>
+            </div>
+          """
+
+          respond = => @respondWith(html)
+
+          $screen = $fixture('.screen')
+          $screen.html(html)
+
+          up.navigate('.content1, .content2', url: '/one', reveal: false, history: true)
+
+          next =>
+            respond()
+
+          next =>
+            $('.viewport1').scrollTop(3000)
+            $('.viewport2').scrollTop(3050)
+            expect('.viewport1').toBeScrolledTo(3000)
+            expect('.viewport2').toBeScrolledTo(3050)
+
+            up.navigate('.content1, .content2', url: '/two', reveal: false, history: true)
+
+          next =>
+            respond()
+
+          next.after 50, =>
+            expect(location.href).toMatchURL('/two')
+            history.back()
+
+          next.after 100, =>
+            # we need to respond since we've never requested the original URL with the popTarget
+            respond()
+
+          next =>
+            expect('.viewport1').toBeScrolledTo(3000)
+            expect('.viewport2').toBeScrolledTo(3050)
+
+
     describe '[up-back]', ->
 
       it 'sets an [up-href] attribute to the previous URL and sets the up-scroll attribute to "scroll"', ->
@@ -167,133 +294,6 @@ describe 'up.history', ->
       it 'does not overwrite an existing up-href or up-restore-scroll attribute'
 
       it 'does not set an up-href attribute if there is no previous URL'
-
-    describe 'scroll restoration', ->
-
-      afterEach ->
-        $('.viewport').remove()
-
-      it 'restores the scroll position of viewports when the user hits the back button', asyncSpec (next) ->
-        longContentHTML = """
-          <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
-            <div class="content" style="height: 1000px"></div>
-          </div>
-        """
-
-        respond = => @respondWith(longContentHTML)
-
-        $viewport = $(longContentHTML).appendTo(document.body)
-
-        waitForBrowser = 100
-
-        up.viewport.config.viewportSelectors = ['.viewport']
-        up.history.config.restoreTargets = ['.viewport']
-
-        up.history.replace('/scroll-restauration-spec')
-
-        up.navigate('.content', url: '/test-one', history: true)
-
-        next.after waitForBrowser, =>
-          respond()
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-one')
-          $viewport.scrollTop(50)
-          up.navigate('.content', url: '/test-two', history: true)
-
-        next.after waitForBrowser, =>
-          respond()
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-two')
-          $('.viewport').scrollTop(150)
-          up.navigate('.content', url: '/test-three', history: true)
-
-        next.after waitForBrowser, =>
-          respond()
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-three')
-          $('.viewport').scrollTop(250)
-          history.back()
-
-        next.after waitForBrowser, =>
-          respond() # we need to respond since we've never requested /test-two with the popTarget
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-two')
-          expect($('.viewport').scrollTop()).toBe(150)
-          history.back()
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-one') # cannot delay the browser from restoring the URL on pop
-          respond() # we need to respond since we've never requested /test-one with the popTarget
-
-        next.after waitForBrowser, =>
-          expect($('.viewport').scrollTop()).toBe(50)
-          history.forward()
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-two')
-          # No need to respond since we requested /test-two with the popTarget
-          # when we went backwards
-          expect($('.viewport').scrollTop()).toBe(150)
-          history.forward()
-
-        next.after waitForBrowser, =>
-          expect(location.href).toMatchURL('/test-three') # cannot delay the browser from restoring the URL on pop
-          respond() # we need to respond since we've never requested /test-three with the popTarget
-
-        next.after waitForBrowser, =>
-          expect($('.viewport').scrollTop()).toBe(250)
-
-      it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', asyncSpec (next) ->
-        up.history.config.restoreTargets = ['.container']
-
-        html = """
-          <div class="container">
-            <div class="viewport1" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
-              <div class="content1" style="height: 5000px">content1</div>
-            </div>
-            <div class="viewport2" up-viewport style="width: 100px; height: 100px; overflow-y: scroll">
-              <div class="content2" style="height: 5000px">content2</div>
-            </div>
-          </div>
-        """
-
-        respond = => @respondWith(html)
-
-        $screen = $fixture('.screen')
-        $screen.html(html)
-
-        up.navigate('.content1, .content2', url: '/one', reveal: false, history: true)
-
-        next =>
-          respond()
-
-        next =>
-          $('.viewport1').scrollTop(3000)
-          $('.viewport2').scrollTop(3050)
-          expect('.viewport1').toBeScrolledTo(3000)
-          expect('.viewport2').toBeScrolledTo(3050)
-
-          up.navigate('.content1, .content2', url: '/two', reveal: false, history: true)
-
-        next =>
-          respond()
-
-        next.after 50, =>
-          expect(location.href).toMatchURL('/two')
-          history.back()
-
-        next.after 100, =>
-          # we need to respond since we've never requested the original URL with the popTarget
-          respond()
-
-        next =>
-          expect('.viewport1').toBeScrolledTo(3000)
-          expect('.viewport2').toBeScrolledTo(3050)
-
 
     describe 'events', ->
 

@@ -13,11 +13,7 @@ Various changes
 - Rework history handling
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
-
-- New up:location:restore event
-  - event.location
-  - event.previousLocation ?
-  - Users can prevent this event and do their own rendering
+    - Also save Scroll and Focus when opening a new layer
 
 
 If we're launching V3
