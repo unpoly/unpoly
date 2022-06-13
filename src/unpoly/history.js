@@ -241,41 +241,100 @@ up.history = (function() {
     return { up: {} }
   }
 
-  async function restoreStateOnPop(state) {
-    if (state?.up) {
-      // The earlier URL has now been restored by the browser. This cannot be prevented.
-      let location = currentLocation()
-
-      await up.render({
-        url: location,
-        history: true,
-        // (1) While the browser has already restored the earlier URL, we must still
-        //     pass it to render() so the current layer can track the new URL.
-        // (2) Since we're passing the current URL, up.history.push() will not add another state.
-        // (2) Pass the current URL to ensure that this exact URL is being rendered
-        //     and not something derived from the up.Response.
-        location,
-        // Don't replace elements in a modal that might still be open
-        // We will close all overlays and update the root layer.
-        peel: true,
-        layer: 'root',
-        target: config.restoreTargets,
-        cache: true,
-        scroll: 'restore',
-        // Since the URL was already changed by the browser, don't save scroll state.
-        saveScroll: false
-      })
-      emit('up:location:changed', { location, reason: 'pop', log: `Restored location ${location}` })
-    } else {
-      up.puts('pop', 'Ignoring a state not pushed by Unpoly (%o)', state)
+  function restoreStateOnPop(state) {
+    if (!state?.up) {
+      up.puts('pop', 'Ignoring a history state not owned by Unpoly')
+      return
     }
+
+    let location = currentLocation()
+
+    if (up.emit('up:location:restore', { location, log: `Restoring location ${location}` }).defaultPrevented) {
+      return
+    }
+
+    up.render({
+      // The browser has already restored the URL, but hasn't changed content
+      // four our synthetic history state. We're now fetching the content for the restored URL.
+      url: location,
+      target: config.restoreTargets,
+
+      // The browser won't let us prevent the state restoration, so we're
+      // rendering whatever the server sends us.
+      fail: false,
+
+      history: true,
+      // (1) While the browser has already restored the earlier URL, we must still
+      //     pass it to render() so the current layer can track the new URL.
+      // (2) Since we're passing the current URL, up.history.push() will not add another state.
+      // (2) Pass the current URL to ensure that this exact URL is being rendered
+      //     and not something derived from the up.Response.
+      location,
+
+      // Don't replace elements in a modal that might still be open
+      // We will close all overlays and update the root layer.
+      peel: true,
+      layer: 'root',
+
+      // We won't usually have a cache hit for config.restoreTargets ('body')
+      // since most earlier cache entries are for a main target. But it doesn't hurt to try.
+      cache: true,
+
+      // We already saved scroll positions in onPop()
+      saveScroll: false,
+      scroll: 'restore',
+    })
   }
 
+  /*-
+  This event is emitted when the user has navigated to another history entry, usually by pressing the back button.
+
+  ### Default restoration behavior
+
+  By default Unpoly will:
+
+  - Close all overlays.
+  - Fetch the content for the restored history entry's URL.
+  - Render the restored content into the `<body>` element. You may prefer other selectors by configuring `up.history.config.restoreTargets`.
+  - Restore earlier scroll position for the history entry.
+
+  ### Custom restoration behavior
+
+  Listeners may prevent `up:location:restore` and substitute their own restoration behavior:
+
+  ```js
+  up.on('up:location:restore', function(event) {
+    event.preventDefault()
+    document.body.innerText = `Restored content for ${event.location}!`
+  })
+  ```
+
+  Preventing the event will *not* prevent the browser from restoring the URL in the address bar.
+
+  Custom restoration code should avoid pushing new history entries.
+
+  @event up:location:restore
+  @param {string} event.location
+    The URL for the restored history entry.
+  @param event.preventDefault()
+    Prevent Unpoly from restoring content for this history entry.
+
+    Preventing the event will *not* prevent the browser from restoring the URL in the address bar.
+  @stable
+  */
+
   function onPop(event) {
+    // The earlier URL has now been restored by the browser. This cannot be prevented.
     trackCurrentLocation()
-    up.viewport.saveScroll({location: previousLocation})
-    const { state } = event
-    restoreStateOnPop(state)
+    emitLocationChanged({ location, reason: 'pop', log: `Navigated to history entry ${location}` })
+
+    // Since scroll positions are per layer, and since we're going to blow up all
+    // overlays in restoreStateOnPop(), we only save positions when we're on the root layer.
+    if (up.layer.isRoot()) {
+      up.viewport.saveScroll({ location: previousLocation })
+    }
+
+    restoreStateOnPop(event.state)
   }
 
   function emit(...args) {

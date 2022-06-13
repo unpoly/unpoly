@@ -128,7 +128,29 @@ describe 'up.history', ->
         next =>
           expect(destructorSpy).toHaveBeenCalled()
 
-      it ''
+      it 'emits an up:location:restore event that users can prevent and substitute their own restoration logic', asyncSpec (next) ->
+        waitForBrowser = 100
+        main = fixture('main#main', text: 'original content')
+        up.history.config.restoreTargets = [':main']
+        restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake -> main.innerText = 'manually restored content'
+        up.on('up:location:restore', restoreListener)
+
+        up.history.push("/page1")
+
+        next ->
+          up.history.push("/page2")
+
+        next ->
+          expect(up.history.location).toMatchURL('/page2')
+          expect(restoreListener).not.toHaveBeenCalled()
+
+          history.back()
+
+        next.after waitForBrowser, ->
+          expect(up.history.location).toMatchURL('/page1')
+          expect(restoreListener).toHaveBeenCalled()
+
+          expect(main).toHaveText('manually restored content')
 
     describe '[up-back]', ->
 
@@ -287,11 +309,11 @@ describe 'up.history', ->
             </div>
             """
 
+        normalize = up.history.normalizeURL
+
         events = []
         up.on 'up:location:changed', (event) ->
-          events.push [event.reason, event.location]
-
-        normalize = up.history.normalizeURL
+          events.push [event.reason, normalize(event.location)]
 
         up.navigate('.content', url: '/foo', history: true)
 

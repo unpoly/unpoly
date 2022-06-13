@@ -19,8 +19,6 @@ Various changes
   - event.previousLocation ?
   - Users can prevent this event and do their own rendering
 
-- FocusCapsule should not crash when focus in in an untargetable element
-
 
 If we're launching V3
 ---------------------
