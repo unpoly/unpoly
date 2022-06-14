@@ -66,7 +66,7 @@ you may append `-if-main` to any of the string options in this list.
 E.g. `'reset-if-main'` will reset focus positions, but only if a main target is updated.
 
 To only focus when the focus was lost with the old fragment,
-you may append `-if-list` to any of the string options in this list.
+you may append `-if-lost` to any of the string options in this list.
 
 E.g. `'target-if-lost'` will focus the new fragment, but only if the update caused focus
 to be lost.
