@@ -150,10 +150,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             ...step,
             beforeStart() {
               up.fragment.markAsDestroying(step.oldElement)
-              console.log("[%s] beforeStart: marked %o as destroying", me.uid, step.oldElement)
             },
             afterInsert: () => {
-              console.log("[%s] afterInsert", me.uid)
               this.responseDoc.finalizeElement(step.newElement)
 
               step.keepPlans.forEach(this.reviveKeepable)
@@ -257,11 +255,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   // @param {boolean} options.useKeep
   // @param {boolean} options.descendantsOnly
   findKeepPlan(options) {
-    console.log("options.useKeep is %o", options.useKeep)
-
     if (!options.useKeep) { return }
-
-    console.log("will match keep")
 
     const { oldElement, newElement } = options
 
