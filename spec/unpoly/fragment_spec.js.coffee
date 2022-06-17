@@ -1528,6 +1528,31 @@ describe 'up.fragment', ->
               expect(children[2]).toHaveText('old element2Child1')
               expect(children[3]).toHaveText('new text')
 
+          it 'allows ambiguous target derivation if it becomes clear given an origin', asyncSpec (next) ->
+            root = fixture('.element#root')
+            one = e.affix(root, '.element', text: 'old one')
+            two = e.affix(root, '.element', text: 'old two')
+            childOfTwo = e.affix(two, '.origin')
+            three = e.affix(root, '.element', text: 'old three')
+
+            up.render(two, origin: childOfTwo, content: 'new text')
+
+            next =>
+              elements = document.querySelectorAll('.element')
+              expect(elements.length).toBe(4)
+
+              # While #root is an ancestor, two was closer
+              expect(elements[0]).toMatchSelector('#root')
+
+              # One is a sibling of two
+              expect(elements[1]).toHaveText('old one')
+
+              # Two is the closest match around the origin (childOfTwo)
+              expect(elements[2]).toHaveText('new text')
+
+              # Three is a sibling of three
+              expect(elements[3]).toHaveText('old three')
+
           it 'rediscovers the { origin } in the new content and prefers matching an element closest to the rediscovered origin', ->
             root = fixture('.element#root')
             one = e.affix(root, '.element', text: 'old one')
@@ -1575,29 +1600,29 @@ describe 'up.fragment', ->
             expect(elements[1]).toHaveText('new one')
             expect(elements[2]).toHaveText('old three')
 
-          it 'considers an Element argument to be the origin if no { origin } is given', asyncSpec (next) ->
-            root = fixture('.element#root')
-            one = e.affix(root, '.element', text: 'old one')
-            two = e.affix(root, '.element', text: 'old two')
-            three = e.affix(root, '.element', text: 'old three')
-
-            up.render(two, content: 'new text')
-
-            next =>
-              elements = document.querySelectorAll('.element')
-              expect(elements.length).toBe(4)
-
-              # While #root is an ancestor, two was closer
-              expect(elements[0]).toMatchSelector('#root')
-
-              # One is a sibling of two
-              expect(elements[1]).toHaveText('old one')
-
-              # Two is the closest match around the origin (childOfTwo)
-              expect(elements[2]).toHaveText('new text')
-
-              # Three is a sibling of three
-              expect(elements[3]).toHaveText('old three')
+#          it 'considers an Element argument to be the origin if no { origin } is given', asyncSpec (next) ->
+#            root = fixture('.element#root')
+#            one = e.affix(root, '.element', text: 'old one')
+#            two = e.affix(root, '.element', text: 'old two')
+#            three = e.affix(root, '.element', text: 'old three')
+#
+#            up.render(two, content: 'new text')
+#
+#            next =>
+#              elements = document.querySelectorAll('.element')
+#              expect(elements.length).toBe(4)
+#
+#              # While #root is an ancestor, two was closer
+#              expect(elements[0]).toMatchSelector('#root')
+#
+#              # One is a sibling of two
+#              expect(elements[1]).toHaveText('old one')
+#
+#              # Two is the closest match around the origin (childOfTwo)
+#              expect(elements[2]).toHaveText('new text')
+#
+#              # Three is a sibling of three
+#              expect(elements[3]).toHaveText('old three')
 
 
         describe 'non-standard selector extensions', ->
@@ -3105,7 +3130,16 @@ describe 'up.fragment', ->
           next.after 200, ->
             expect(onFinishedSpy.calls.count()).toBe(1)
 
-        it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next)->
+        it 'marks the old element as .up-destroying before compilers are called', asyncSpec (next) ->
+          element = fixture('.element', id: 'old', text: 'old text')
+          isMarkedSpy = jasmine.createSpy()
+          up.compiler('.element', (element) -> isMarkedSpy(document.querySelector('.element#old').matches('.up-destroying')))
+          up.render(target: '.element', document: '<div class="element" id="new">new text</div>', transition: 'cross-fade', duration: 70)
+          next.after 35, ->
+            expect('.element').toHaveText('new text')
+            expect(isMarkedSpy).toHaveBeenCalledWith(true)
+
+        it 'attaches the new element to the DOM before compilers are called, so they can see their parents and trigger bubbling events', asyncSpec (next) ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
           spy = jasmine.createSpy('parent spy')
@@ -5982,13 +6016,11 @@ describe 'up.fragment', ->
         expect(up.fragment.toTarget(element)).toBe('meta[name="csrf-token"]')
 
       it "uses the tag name of a unique element", ->
-        element = fixture('body')
-        expect(up.fragment.toTarget(element)).toBe("body")
+        expect(up.fragment.toTarget(document.body)).toBe("body")
 
       it "uses the tag name of a unique element even if it has a class", ->
         document.body.classList.add('some-custom-class')
-        element = fixture('body')
-        expect(up.fragment.toTarget(element)).toBe("body")
+        expect(up.fragment.toTarget(document.body)).toBe("body")
         document.body.classList.remove('some-custom-class')
 
       it 'uses "link[rel=canonical]" for such a link', ->

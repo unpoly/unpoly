@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.history', ->
@@ -151,6 +152,49 @@ describe 'up.history', ->
           expect(restoreListener).toHaveBeenCalled()
 
           expect(main).toHaveText('manually restored content')
+
+#      describe 'focus restoration', ->
+#
+#        it 'restores element focus when the user hits the back button', asyncSpec (next) ->
+#          waitForBrowser = 100
+#          up.history.config.restoreTargets = [':main']
+#          main = fixture('main')
+#          element = e.affix(main, 'input[name=email]')
+#          element.focus()
+#
+#          up.history.replace('/focus-path1')
+#
+#          expect(element).toBeFocused()
+#
+#          next ->
+#            up.navigate(url: '/focus-path2', target: 'main')
+#
+#          next ->
+#            expect(jasmine.Ajax.requests.count()).toBe(1)
+#
+#            debugger
+#
+#            jasmine.respondWithSelector('main input[name=other]')
+#
+#          next ->
+#            expect(document).toHaveSelector('input[name=other]')
+#            otherInput = document.querySelector('input[name=other]')
+#            expect(otherInput).not.toBeFocused()
+#
+#            otherInput.focus()
+#            expect(otherInput).toBeFocused()
+#
+#            history.back()
+#
+#          next.after waitForBrowser, ->
+#            expect(jasmine.Ajax.requests.count()).toBe(2)
+#
+#          next ->
+#            jasmine.respondWithSelector('main input[name=email]')
+#
+#          next ->
+#            expect(document).toHaveSelector('input[name=email]')
+#            expect('input[name=email]').toBeFocused()
 
       describe 'scroll restoration', ->
 

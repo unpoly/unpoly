@@ -11,6 +11,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.context = options.context
     // up.fragment.expandTargets() was already called by up.Change.FromContent
     this.steps = up.fragment.parseTargetSteps(this.target, this.options)
+    this.uid = Math.random()
   }
 
   getPreflightProps() {
@@ -143,13 +144,16 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           this.transferKeepableElements(step)
 
           const parent = step.oldElement.parentNode
+          let me = this
 
           const morphOptions = {
             ...step,
             beforeStart() {
               up.fragment.markAsDestroying(step.oldElement)
+              console.log("[%s] beforeStart: marked %o as destroying", me.uid, step.oldElement)
             },
             afterInsert: () => {
+              console.log("[%s] afterInsert", me.uid)
               this.responseDoc.finalizeElement(step.newElement)
 
               step.keepPlans.forEach(this.reviveKeepable)
@@ -390,7 +394,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Find all [up-hungry] elements matching our layer and targetElements.
     const hungrySolutions = up.radio.hungrySolutions({
       layer: this.layer,
-      targetElements: this.getTargetElements()
+      targetElements: this.getTargetElements(),
+      origin: this.options.origin
     })
 
     for (let { element: oldElement, target: selector } of hungrySolutions) {

@@ -265,7 +265,12 @@ up.form = (function() {
     options = parseDestinationOptions(form, options, parserOptions)
 
     let parser = new up.OptionsParser(form, options, parserOptions)
-    parser.string('failTarget', { default: up.fragment.toTarget(form) })
+
+    // We should usually be able to derive a target selector since form[action] is a default
+    // deriver. In cases when we cannot, we should usually update a main target since
+    // submitting is navigation, and { fallback: true } is a navigation default.
+    parser.string('failTarget', { default: up.fragment.tryToTarget(form) })
+
     parser.booleanOrString('disable')
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
@@ -758,16 +763,18 @@ up.form = (function() {
       let group = field.closest(groupSelector)
       if (group) {
         let goodDerivedGroupTarget = up.fragment.tryToTarget(group)
+        let goodDerivedFieldTarget = up.fragment.tryToTarget(field)
         // Most forms have multiple groups with no identifying attributes, e.g. <div up-form-group>.
         // Hence we use a :has() selector to identify the form group by the selector
         // of the contained field, which usually has an identifying [name] or [id] attribute.
-        let groupHasFieldTarget = (group !== field) && `${groupSelector}:has(${up.fragment.tryToTarget(field)})`
-        let target = goodDerivedGroupTarget || groupHasFieldTarget || groupSelector
-
-        return {
-          target,
-          element: group,
-          origin: field
+        let groupHasFieldTarget = goodDerivedFieldTarget && (group !== field) && `${groupSelector}:has(${goodDerivedFieldTarget})`
+        let target = goodDerivedGroupTarget || groupHasFieldTarget
+        if (target) {
+          return {
+            target,
+            element: group,
+            origin: field
+          }
         }
       }
     })

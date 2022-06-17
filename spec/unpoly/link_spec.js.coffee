@@ -1814,7 +1814,7 @@ describe 'up.link', ->
       it 'does nothing when the user clicks on an input in the expanded area', asyncSpec (next) ->
         $area = $fixture('div[up-expand]')
         $expandedLink = $area.affix('a[href="/expanded-path"][up-follow]')
-        $input = $area.affix('input[type=text]')
+        $input = $area.affix('input[name=email][type=text]')
         up.hello($area)
         followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence($input)

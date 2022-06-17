@@ -14,6 +14,17 @@ Various changes
   - Refocus the element before the state change
     - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
     - Also save Scroll and Focus when opening a new layer
+- Replace up.rails by accepting methods / conform from data attributes in options parser
+- Polling in case of failure
+  - When the server did not send an update (e.g. 404) we should keep polling
+
+
+Good Target Rework
+------------------
+
+- Consider only using good targets in findGroupSolution()
+  - Test
+- Default Fail Target for forms should just be the main target (instead of an exception)
 
 
 If we're launching V3
@@ -27,6 +38,7 @@ If we're launching V3
   - v3 would stay on "latest"
 - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
 - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
+
 
 
 

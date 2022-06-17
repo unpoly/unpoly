@@ -43,6 +43,8 @@ up.error = (function() {
     return build(`Cannot apply change: ${change} (${reason})`)
   })
 
+  const cannotParseSelector = errorInterface('up.CannotParseSelector')
+
   function emitGlobal(error) {
     // Emit an ErrorEvent on window.onerror for exception tracking tools
     const { message } = error
@@ -119,6 +121,7 @@ up.error = (function() {
     emitGlobal,
     isCritical,
     muteUncriticalRejection,
+    cannotParseSelector
   }
 })()
 

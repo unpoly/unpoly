@@ -144,9 +144,12 @@ up.fragment = (function() {
       'main',
       '[up-main]',
       upTagName,
-      'link[rel=canonical]',
+      'link[rel]',
       '*[name]',
       'form[action]',
+      'a[up-method][href]',
+      'a[data-method][href]',
+      'a[href]',
       '[class]',
       'form',
     ],
@@ -1324,7 +1327,7 @@ up.fragment = (function() {
     //     the descendants of rootElement.
     // (3) up.fragment.all(selector) should find selector within the current layer.
     // (4) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
-    let selector = parseSelector(selectorString, root, options)
+    let selector = buildSelector(selectorString, root, options)
     return selector.descendants(root || document)
   }
 
@@ -1399,7 +1402,7 @@ up.fragment = (function() {
   @experimental
   */
   function getSubtree(element, selector, options = {}) {
-    selector = parseSelector(selector, element, options)
+    selector = buildSelector(selector, element, options)
     return selector.subtree(element)
   }
 
@@ -1435,7 +1438,7 @@ up.fragment = (function() {
   */
   function closest(element, selector, options) {
     element = e.get(element)
-    selector = parseSelector(selector, element, options)
+    selector = buildSelector(selector, element, options)
     return selector.closest(element)
   }
 
@@ -1650,6 +1653,11 @@ up.fragment = (function() {
   - The element's `[class]` names, ignoring `up.fragment.config.badTargetClasses`.
   - The element's tag name
 
+  TODO: Update the list above
+  TODO: Document up.fragment.config.targetDerivers
+  TODO: Explain that the selector must be unique
+  TODO: Explain new { origin } option
+
   ### Example
 
   ```js
@@ -1660,10 +1668,11 @@ up.fragment = (function() {
   @function up.fragment.toTarget
   @param {string|Element|jQuery}
     The element for which to create a selector.
+  @param {Element} [options.origin]
   @stable
   */
-  function toTarget(element) {
-    return tryToTarget(element) || cannotTarget(element)
+  function toTarget(element, options) {
+    return tryToTarget(element, options) || cannotTarget(element)
   }
 
   function isTargetable(element) {
@@ -1678,70 +1687,103 @@ up.fragment = (function() {
     throw up.error.cannotTarget(untargetableMessage(element))
   }
 
-  function tryToTarget(element) {
+  function tryToTarget(element, options) {
     return u.findResult(config.targetDerivers, function(deriver) {
-      if (u.isFunction(deriver)) {
-        return deriver(element)
-      } else if (element.matches(deriver)) {
-        // Now that we know that a deriver is applicable to our element, we're using
-        // the element's tag name and attribute to form a more specific target.
-        // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
+      let target = deriveTarget(element, deriver)
 
-        let parsed = up.element.parseSelector(deriver)
-
-        if (parsed.length === 1) {
-          let { tagName, id, classNames, attributes } = parsed[0]
-          let result = ''
-
-          if (tagName === '*') {
-            // In a deriver '*' means to include the actual tag name in the target-
-            result += e.tagName(element)
-          } else if (tagName) {
-            // If a deriver contains an actual tag name like 'main' it becomes
-            // part of the target selector.
-            result += tagName
-          }
-
-          for (let className of classNames) {
-            result += e.classSelector(className)
-          }
-
-          if (id) {
-            result += e.idSelector(id)
-          }
-
-          for (let attributeName in attributes) {
-            // If a deriver contains an attribute value (e.g. '[rel=canonical]') we use that for the target.
-            // If the deriver has a value-less attribute (e.g. '[rel]') we use the actual attribute value from the element.
-            let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)
-
-            if (attributeName === 'id') {
-              // We allow a deriver '[id]' to apply to all elements with an ID.
-              // However, we want to use an ID selector ('#foo') instead of an attribute selector ('[id=foo]').
-              result += e.idSelector(attributeValue)
-            } else if (attributeName === 'class') {
-              // We allow a deriver '[class]' to apply to all elements with a class.
-              // However, we want to (1) filter class against config.badTargetClasses and
-              // (2) use an class selector ('.foo') instead of an attribute selector ('[class=foo]').
-              for (let goodClass of goodClassesForTarget(element)) {
-                result += e.classSelector(goodClass)
-              }
-            } else {
-              result += e.attributeSelector(attributeName, attributeValue)
-            }
-          }
-
-          return result
-        } else {
-          // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
-          // It's also not common to see such selectors configured in config.targetDerivers.
-          // Hence we just return the matching deriver.
-          return deriver
-        }
+      if (target && isGoodTarget(target, element, options)) {
+        return target
       }
     })
   }
 
+  function deriveTarget(element, deriver) {
+    if (u.isFunction(deriver)) {
+      return deriver(element)
+    } else if (element.matches(deriver)) {
+      try {
+        // Now that we know that a deriver is applicable to our element, we're using
+        // the element's tag name and attribute to form a more specific target.
+        // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
+        return deriveTargetFromPattern(element, deriver)
+      } catch (e) {
+        if (up.error.cannotParseSelector.is(e)) {
+          // This error can be thrown for two reasons:
+          // (1) up.element.parseSelector() cannot parse the given string
+          // (2) up.element.parseSelector() parses a selector with a depth > 1.
+          return deriver
+        } else {
+          throw e
+        }
+      }
+    }
+  }
+
+  function deriveTargetFromPattern(element, deriver) {
+    // Now that we know that a deriver is applicable to our element, we're using
+    // the element's tag name and attribute to form a more specific target.
+    // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
+
+    let { includePath, excludeRaw } = up.element.parseSelector(deriver)
+
+    if (includePath.length !== 1) {
+      // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
+      // It's also not common to see such selectors configured in config.targetDerivers.
+      // Hence we just return the matching deriver.
+      throw up.error.cannotParseSelector(deriver)
+    }
+
+    let { tagName, id, classNames, attributes } = includePath[0]
+    let result = ''
+
+    if (tagName === '*') {
+      // In a deriver '*' means to include the actual tag name in the target-
+      result += e.tagName(element)
+    } else if (tagName) {
+      // If a deriver contains an actual tag name like 'main' it becomes
+      // part of the target selector.
+      result += tagName
+    }
+
+    for (let className of classNames) {
+      result += e.classSelector(className)
+    }
+
+    if (id) {
+      result += e.idSelector(id)
+    }
+
+    for (let attributeName in attributes) {
+      // If a deriver contains an attribute value (e.g. '[rel=canonical]') we use that for the target.
+      // If the deriver has a value-less attribute (e.g. '[rel]') we use the actual attribute value from the element.
+      let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)
+
+      if (attributeName === 'id') {
+        // We allow a deriver '[id]' to apply to all elements with an ID.
+        // However, we want to use an ID selector ('#foo') instead of an attribute selector ('[id=foo]').
+        result += e.idSelector(attributeValue)
+      } else if (attributeName === 'class') {
+        // We allow a deriver '[class]' to apply to all elements with a class.
+        // However, we want to (1) filter class against config.badTargetClasses and
+        // (2) use an class selector ('.foo') instead of an attribute selector ('[class=foo]').
+        for (let goodClass of goodClassesForTarget(element)) {
+          result += e.classSelector(goodClass)
+        }
+      } else {
+        result += e.attributeSelector(attributeName, attributeValue)
+      }
+    }
+
+    if (excludeRaw) {
+      result += excludeRaw
+    }
+
+    return result
+  }
+
+  function isGoodTarget(target, element, options = {}) {
+    return e.isDetached(element) || up.fragment.get(target, { layer: element, ...options }) === element
+  }
 
   /*-
   Sets an unique identifier for this element.
@@ -1837,7 +1879,7 @@ up.fragment = (function() {
           targets.unshift(layer.getFirstSwappableElement())
         }
       } else if (u.isElementish(target)) {
-        expanded.push(toTarget(target))
+        expanded.push(toTarget(target, options))
       } else if (u.isString(target)) {
         expanded.push(resolveOriginReference(target, options))
       } else {
@@ -1849,7 +1891,7 @@ up.fragment = (function() {
     return u.uniq(expanded)
   }
 
-  function parseSelector(selector, element, options = {}) {
+  function buildSelector(selector, element, options = {}) {
     const filters = []
 
     if (!options.destroying) {
@@ -2132,7 +2174,7 @@ up.fragment = (function() {
     if (u.isElement(selector)) {
       return element.matches(toTarget(selector))
     } else {
-      selector = parseSelector(selector, element, options)
+      selector = buildSelector(selector, element, options)
       return selector.matches(element)
     }
   }

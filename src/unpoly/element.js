@@ -410,14 +410,14 @@ up.element = (function() {
   @stable
   */
   function createFromSelector(selector, attrs) {
-    let parsedDepths = parseSelector(selector)
+    let { includePath } = parseSelector(selector)
 
     let rootElement
     let depthElement
     let previousElement
 
-    for (let parsedDepth of parsedDepths) {
-      let { tagName, id, classNames, attributes } = parsedDepth
+    for (let includeSegment of includePath) {
+      let { tagName, id, classNames, attributes } = includeSegment
 
       if (!tagName || tagName === '*') {
         tagName = 'div'
@@ -476,16 +476,21 @@ up.element = (function() {
   ### Example
 
   ```js
-  up.element.parseSelector('.content > form[action="/"]')
-  => [
-      { classNames: ['.content'],
-        attributes: []
-      },
-      { tagName: 'form',
-        classNames: [],
-        attributes: { action: "/" }
-      }
-    ]
+  up.element.parseSelector('.content > form[action="/"]:not(.bar)')
+  => {
+       include: [
+         { classNames: ['.content'],
+           attributes: {}
+         },
+         { tagName: 'form',
+           classNames: [],
+           attributes: { action: "/" }
+         }
+       ],
+       exclude: {
+         raw: ".bar"
+       }
+     }
   ```
 
   @function up.element.parseSelector
@@ -496,14 +501,22 @@ up.element = (function() {
     // Attribute values might contain spaces, and then we would incorrectly
     // split depths at that space.
     const attrValues = []
-    const selectorWithoutAttrValues = selector.replace(/\[([\w-]+)(?:[~|^$*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
+
+    let excludeRaw
+
+    const includeRaw = selector.replace(/:not\([^)]+\)/, function(match) {
+      excludeRaw = match
+      return ''
+    })
+
+    const includeSelectorWithoutAttrValues = includeRaw.replace(/\[([\w-]+)(?:[~|^$*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
       attrValues.push(attrValue || '')
       return `[${attrName}]`
     })
 
-    const depths = selectorWithoutAttrValues.split(/[ >]+/)
+    const includeSegments = includeSelectorWithoutAttrValues.split(/[ >]+/)
 
-    return depths.map(function(depthSelector) {
+    let includePath = includeSegments.map(function(depthSelector) {
       let parsed = {
         tagName: null,
         classNames: [],
@@ -541,6 +554,12 @@ up.element = (function() {
 
       return parsed
     })
+
+    return {
+      includePath,
+      includeRaw,
+      excludeRaw,
+    }
   }
 
   /*-
