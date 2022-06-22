@@ -1514,16 +1514,6 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given value is truthy.
-
-  @function up.util.isTruthy
-  @internal
-  */
-  function isTruthy(object) {
-    return !!object
-  }
-
-  /*-
   Sets the given callback as both fulfillment and rejection handler for the given promise.
 
   [Unlike `promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
@@ -1983,7 +1973,6 @@ up.util = (function() {
     evalOption,
     evalAutoOption,
     flatten,
-    isTruthy,
     newDeferred,
     always,
     asyncify,
