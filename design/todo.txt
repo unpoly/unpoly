@@ -25,8 +25,11 @@ Various changes
   - However now it just does nothing if positions cannot be restored!
   - Whether or not we have saved positions is not under the caller's control
   - In JS we could pass { scroll: ['restore', 'reset'] } but that's not possible for HTML callers
+    - Also we don't do this in up.history.onPop()
   - Same for [up-scroll="focus"]
   - We could offer [up-scroll="restore main"] but then it would no longer work with descendant selectors
+    - Or any other selectors with spaces in it, e.g. [some-attr="foo bar"]
+    - [up-scroll="restore or main"]
 
 Good Target Rework
 ------------------
