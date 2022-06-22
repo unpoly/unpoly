@@ -38,8 +38,6 @@ up.Response = class Response extends up.Record {
 
   This is usually the requested URL, or the final URL after the server redirected.
 
-  On Internet Explorer 11 this property is only set when the server sends an `X-Up-Location` header.
-
   @property up.Response#url
   @param {string} url
   @stable
