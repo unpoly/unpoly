@@ -71,7 +71,6 @@ up.browser = (function() {
     }
   })
 
-  // IE11: Use the browser.cookies API instead.
   function popCookie(name) {
     let value = document.cookie.match(new RegExp(name+"=(\\w+)"))?.[1]
     if (value) {
