@@ -284,13 +284,6 @@ up.util = (function() {
     }
   }
 
-  function eachIterator(iterator, callback) {
-    let entry
-    while ((entry = iterator.next()) && !entry.done) {
-      callback(entry.value)
-    }
-  }
-
   /*-
   Returns whether the given argument is `null`.
 
@@ -1978,7 +1971,6 @@ up.util = (function() {
     options: newOptions,
     parseArgIntoOptions,
     each,
-    eachIterator,
     map,
     flatMap,
     mapObject,
