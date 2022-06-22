@@ -33,7 +33,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
         return this.restore()
       case 'hash':
         return this.hash && up.viewport.revealHash(this.hash, this.attributes())
-      case 'target': case 'reveal': case true:
+      case 'target':
+      case 'reveal':
+      case true:
         return this.revealElement(this.fragment)
       default:
         if (u.isString(opt)) {
@@ -47,7 +49,8 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   revealElement(element) {
-    return up.reveal(element, this.attributes())
+    up.reveal(element, this.attributes())
+    return true
   }
 
   revealSelector(selector) {
@@ -66,7 +69,8 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   reset() {
-    return up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
+    up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
+    return true
   }
 
   restore() {

@@ -7,6 +7,7 @@ up.RenderOptions = (function() {
     useKeep: true,
     source: true,
     saveScroll: true,
+    saveFocus: true,
     abort: 'target',
     revalidate: 'auto',
   }

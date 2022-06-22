@@ -453,31 +453,36 @@ up.viewport = (function() {
   }
 
   /*-
-  Saves the top scroll positions of all viewports in the current layer.
+  Saves scroll positions for later restoration.
 
   The scroll positions will be associated with the current URL.
-  They can later be restored by calling [`up.viewport.restoreScroll()`](/up.viewport.restoreScroll)
-  at the same URL, or by following a link with an [`[scroll="restore"]`](/scroll-option#restoring-scroll-positions)
+  They can later be restored by calling `up.viewport.restoreScroll()`
+  at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scroll-option#restoring-scroll-positions)
   attribute.
 
   Unpoly automatically saves scroll positions before [navigating](/navigation).
-  You will rarely need to call this function yourself.
 
   @function up.viewport.saveScroll
+  @param {Element|Array<Element>} [viewport]
+    The viewports for which to save scroll positions.
+
+    Defaults to all viewports within the given layer.
   @param {string} [options.location]
     The URL for which to save scroll positions.
-    If omitted, the current browser location is used.
-  @param {string} [options.layer]
+
+    If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
+  @param {string} [options.layer = 'current']
     The layer for which to save scroll positions.
+
     If omitted, positions for the current layer will be saved.
   @experimental
   */
   function saveScroll(...args) {
     const [viewports, options] = parseOptions(args)
-    const url = options.location || options.layer.location
-    if (url) {
+    const location = options.location || options.layer.location
+    if (location) {
       const tops = getScrollTopsForSave(viewports)
-      options.layer.lastScrollTops.set(url, tops)
+      options.layer.lastScrollTops.set(location, tops)
     }
   }
 
@@ -508,25 +513,113 @@ up.viewport = (function() {
   }
 
   /*-
-  Restores [previously saved](/up.viewport.saveScroll) scroll positions of viewports
-  viewports configured in `up.viewport.config.viewportSelectors`.
+  Restores [previously saved](/up.viewport.saveScroll) scroll positions.
 
   Unpoly automatically restores scroll positions when the user presses the back button.
-  You can disable this behavior by setting [`up.history.config.restoreScroll = false`](/up.history.config).
 
   @function up.viewport.restoreScroll
-  @param {Element} [viewport]
-  @param {up.Layer|string} [options.layer]
+  @param {Element|Array<Element>} [viewport]
+    The viewports for which to restore scroll positions.
+
+    Defaults to all viewports within the given layer.
+  @param {up.Layer|string} [options.layer='current']
     The layer on which to restore scroll positions.
+  @param {string} [options.location]
+    The URL for which to restore scroll positions.
+
+    If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
+  @return {boolean|undefined}
+    Returns `true` if scroll positions could be restored.
   @experimental
   */
   function restoreScroll(...args) {
     const [viewports, options] = parseOptions(args)
-    const url = options.layer.location
-    const scrollTopsForURL = options.layer.lastScrollTops.get(url) || {}
-    up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions for URL %s to %o', url, scrollTopsForURL)
-    setScrollTops(viewports, scrollTopsForURL)
-    return up.migrate.formerlyAsync?.('up.viewport.restoreScroll()')
+    const { location } = options.layer
+    const locationScrollTops = options.layer.lastScrollTops.get(location)
+    if (locationScrollTops) {
+      up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions to %o', locationScrollTops)
+      setScrollTops(viewports, locationScrollTops)
+      return true
+    }
+  }
+
+  /*-
+  Saves focus-related state for later restoration.
+
+  Saved state includes:
+
+  - Which element is focused.
+  - The cursor position within a focused input element.
+  - The selection range within a focused input element.
+  - The scroll position within a focused input element.
+
+  State can only be preserved if the focused element has a [derivable target selector](/up.fragment.toTarget).
+
+  Saved state will be associated with the given layer's location.
+  It can later be restored by calling `up.viewport.restoreScroll()`
+  at the same location, or by following a link with an [`[up-focus="restore"]`](/focus-option#restoring-focus)
+  attribute to that same location.
+
+  Unpoly automatically saves focus-related state before [navigating](/navigation).
+
+  @function up.viewport.saveFocus
+  @param {Element|Array<Element>} [viewport]
+    The viewports for which to save focus state.
+
+    Defaults to all viewports within the given layer.
+  @param {string} [options.location]
+    The URL for which to save focus state.
+
+    If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
+  @param {string} [options.layer = 'current']
+    The layer for which to save scroll positions.
+
+    If omitted, state for the current layer will be saved.
+  @experimental
+  */
+  function saveFocus(options = {}) {
+    const layer = up.layer.get(options)
+    const location = options.location || layer.location
+    if (location) {
+      const focusCapsule = up.FocusCapsule.preserveCurrent()
+      layer.lastFocusCapsules.set(location, focusCapsule)
+    }
+  }
+
+  /*-
+  Restores [previously saved](/up.viewport.saveFocus) focus-related state.
+
+  Unpoly automatically restores focus-related state when the user presses the back button.
+
+  @function up.viewport.restoreFocus
+  @param {Element|Array<Element>} [viewport]
+    The viewports for which to restore focus-related state..
+
+    Defaults to all viewports within the given layer.
+  @param {up.Layer|string} [options.layer='current']
+    The layer on which to restore focus-related state.
+  @param {string} [options.location]
+    The URL for which to restore focus-related state.
+
+    If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
+  @return {boolean|undefined}
+    Returns `true` if focus state could be restored.
+  @experimental
+  */
+  function restoreFocus(options = {}) {
+    const layer = up.layer.get(options)
+    const location = options.location || layer.location
+    const locationCapsule = options.layer.lastFocusCapsules.get(location)
+    if (locationCapsule) {
+      up.puts('up.viewport.restoreFocus()', 'Restoring focus to "%s"', locationCapsule.target)
+
+      // The capsule returns `true` if we could rediscover and focus the previous element.
+      return locationCapsule.restore()
+    }
+  }
+
+  function newStateCache() {
+    return new up.Cache({ size: 30, key: up.history.normalizeURL })
   }
 
   function parseOptions(args) {
@@ -825,11 +918,14 @@ up.viewport = (function() {
     saveScroll,
     restoreScroll,
     resetScroll,
+    saveFocus,
+    restoreFocus,
     anchoredRight,
     absolutize,
     focus: doFocus,
     tryFocus,
     makeFocusable,
+    newStateCache
   }
 })()
 

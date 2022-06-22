@@ -4278,6 +4278,10 @@ describe 'up.fragment', ->
             next ->
               expect('.container .element').toBeFocused()
 
+        describe 'with { focus: "restore" }', ->
+
+          it 'restores earlier focus-related state at this location'
+
         describe 'with { focus: "auto" }', ->
 
           it 'focuses a main target', asyncSpec (next) ->

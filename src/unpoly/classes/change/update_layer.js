@@ -66,6 +66,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       up.viewport.saveScroll({ layer: this.layer })
     }
 
+    if (this.options.saveFocus) {
+      up.viewport.saveFocus({ layer: this.layer })
+    }
+
     if (this.options.peel) {
       // Layer#peel() will manipulate the stack sync.
       // We don't wait for the peeling animation to finish.
@@ -438,7 +442,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         //
         // We might need to preserve focus in a fragment that is not the first step.
         // However, only a single step can include the focused element, or none.
-        this.focusCapsule ||= up.FocusCapsule.preserveWithin(step.oldElement)
+        this.focusCapsule ||= up.FocusCapsule.preserveWithin(step.oldElement, { supportLost: true })
       }
     })
   }
