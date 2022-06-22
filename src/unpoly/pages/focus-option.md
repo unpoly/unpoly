@@ -11,11 +11,11 @@ When [navigating](/navigation) Unpoly will default to
 
 ### Focusing the fragment
 
-Pass `'target`' to focus the new fragment.
+Pass `{ focus: 'target' }` to focus the new fragment.
 
 ### Focusing the current layer
 
-Pass `'layer`' to focus the [layer](/up.layer) of the updated fragment.
+Pass `{ focus: 'layer' }` to focus the [layer](/up.layer) of the updated fragment.
 
 ### Focusing another element
 
@@ -27,13 +27,25 @@ If the element isn't already focusable, Unpoly will give it an `[tabindex=-1]` a
 
 ### Preserving focus
 
-Pass `'keep'` to preserve focus-related element properties.
+Pass `{ focus: 'keep' }` to preserve focus-related state through a fragment update.
 
-When the focused fragment is rediscovered in the new content, the following properties are preserved:
+For instance, when a focused `<input>` element is swapped out with a new fragment,
+`{ focus: 'keep' }` will cause the same input to be focused after the update.  
 
-- Cursor position ("Caret")
-- Selection range
-- Scroll position (X/Y)
+The following properties are preserved:
+
+- Which element is focused.
+- The cursor position within a focused input element.
+- The selection range within a focused input element.
+- The scroll position within a focused input element.
+
+### Restoring scroll positions
+
+Pass `{ focus: 'restore' }` to restore an previously [saved focus state](/up.viewport.saveFocus)
+for the updated layer's URL.
+
+Unpoly will automatically save focus-related state before a fragment update.
+You may disable this behavior with `{ saveFocus: false }`.
 
 ### Resetting focus to the layer
 
@@ -79,6 +91,12 @@ Pass an array of focus option and Unpoly will use the first applicable value.
 
 E.g. `['hash', 'reset']` will first try to an element mathing the `#hash` in the URL.
 If the URL has no `#hash`, focus positions will be reset.
+
+In an `[up-focus]` attribute you may separate scroll options with an `or`:
+
+```html
+<a href="/path#section" up-follow up-focus="hash or reset">Link label</a> 
+```
 
 ### Automatic focus logic
 

@@ -815,8 +815,9 @@ describe 'up.radio', ->
 
         makeLayers(2)
         expect(up.layer.isOverlay()).toBe(true)
-        element = up.layer.root.affix('.element[up-poll][up-interval=2]')
+        element = up.layer.root.affix('.unread[up-poll][up-interval=2]')
         registerFixture(element) # make sure this element is destroyed after the example
+
         up.hello(element) # start polling
 
         next.after 20, ->

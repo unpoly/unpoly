@@ -10,7 +10,7 @@ describe 'up.form', ->
 
       it 'returns a list of form fields within the given element', ->
         form = fixture('form')
-        textField = e.affix(form, 'input[type=text]')
+        textField = e.affix(form, 'input[name=email][type=text]')
         select = e.affix(form, 'select')
         results = up.form.fields(form)
         expect(results).toMatchList([textField, select])
@@ -27,22 +27,22 @@ describe 'up.form', ->
 
       it 'ignores fields outside the given form', ->
         form1 = fixture('form')
-        form1Field = e.affix(form1, 'input[type=text]')
+        form1Field = e.affix(form1, 'input[name=email][type=text]')
         form2 = fixture('form')
-        form2Field = e.affix(form2, 'input[type=text]')
+        form2Field = e.affix(form2, 'input[name=email][type=text]')
         results = up.form.fields(form1)
         expect(results).toMatchList([form1Field])
 
       it "includes fields outside the form with a [form] attribute matching the given form's ID", ->
         form = fixture('form#form-id')
-        insideField = e.affix(form, 'input[type=text]')
-        outsideField = fixture('input[type=text][form=form-id]')
+        insideField = e.affix(form, 'input[name=email][type=text]')
+        outsideField = fixture('input[name=password][type=text][form=form-id]')
         results = up.form.fields(form)
         expect(results).toMatchList([insideField, outsideField])
 
       it "does not return duplicate fields if a field with a matching [form] attribute is also a child of the form", ->
         form = fixture('form#form-id')
-        field = e.affix(form, 'input[type=text][form=form-id]')
+        field = e.affix(form, 'input[name=email][type=text][form=form-id]')
         results = up.form.fields(form)
         expect(results).toMatchList([field])
 
@@ -61,7 +61,7 @@ describe 'up.form', ->
         ))
 
       it 'returns the form if no closer group exists', ->
-        form = fixture('form')
+        form = fixture('form#foo-form')
         container = e.affix(form, 'div')
         input = e.affix(container, 'input[name=foo]')
 
@@ -69,18 +69,18 @@ describe 'up.form', ->
 
         expect(groupSolution).toEqual(jasmine.objectContaining(
           element: form,
-          target: 'form'
+          target: '#foo-form'
         ))
 
       it 'does not append a :has(...) if the given element is already a group', ->
         form = fixture('form')
-        group = e.affix(form, '[up-form-group]')
+        group = e.affix(form, '#group[up-form-group]')
 
         groupSolution = up.form.groupSolution(group)
 
         expect(groupSolution).toEqual(jasmine.objectContaining(
           element: group,
-          target: '[up-form-group]'
+          target: '#group'
         ))
 
     describe 'up.form.submitButtons()', ->
@@ -90,7 +90,7 @@ describe 'up.form', ->
         submitButton = e.affix(form, 'button[type=submit]')
         submitInput = e.affix(form, 'input[type=submit]')
         otherButton = e.affix(form, 'button[type=reset]')
-        otherInput = e.affix(form, 'input[type=text]')
+        otherInput = e.affix(form, 'input[name=text-field][type=text]')
 
         result = up.form.submitButtons(form)
         expect(result).toEqual(jasmine.arrayWithExactContents([submitButton, submitInput]))
@@ -864,7 +864,7 @@ describe 'up.form', ->
             expect(up.history.location).toMatchURL('/other-path')
 
         it "submits the form's source URL if the form has no [action] attribute", asyncSpec (next) ->
-          form = fixture('form[up-source="/form-source"]')
+          form = fixture('form#form[up-source="/form-source"]')
 
           up.submit(form)
 
@@ -1043,8 +1043,8 @@ describe 'up.form', ->
         expect(options.method).toEqual('GET')
 
       it "parses the form's [up-disable] attribute", ->
-        formWithDisable = fixture('form[up-disable=true]')
-        formWithoutDisable = fixture('form[up-disable=false]')
+        formWithDisable = fixture('form.with-disable[up-disable=true]')
+        formWithoutDisable = fixture('form.without-disable[up-disable=false]')
         expect(up.form.submitOptions(formWithDisable).disable).toBe(true)
         expect(up.form.submitOptions(formWithoutDisable).disable).toBe(false)
 
@@ -1373,7 +1373,7 @@ describe 'up.form', ->
 
       it "disables the form's fields", ->
         form = fixture('form')
-        textField = e.affix(form, 'input[type=text]')
+        textField = e.affix(form, 'input[name=email][type=text]')
         selectField = e.affix(form, 'select')
         expect(textField).not.toBeDisabled()
         expect(selectField).not.toBeDisabled()
@@ -1387,8 +1387,8 @@ describe 'up.form', ->
         form = fixture('form')
         container1 = e.affix(form, 'div')
         container2 = e.affix(form, 'div')
-        fieldInContainer1 = e.affix(container1, 'input[type=text]')
-        fieldInContainer2 = e.affix(container2, 'input[type=text]')
+        fieldInContainer1 = e.affix(container1, 'input[name=email][type=text]')
+        fieldInContainer2 = e.affix(container2, 'input[name=password][type=text]')
 
         up.form.disable(container2)
 
@@ -1409,7 +1409,7 @@ describe 'up.form', ->
 
       it "sets focus on the form if focus was lost from the disabled element", ->
         form = fixture('form')
-        field = e.affix(form, 'input[type=text]')
+        field = e.affix(form, 'input[name=email][type=text]')
         field.focus()
         expect(field).toBeFocused()
 
@@ -1421,7 +1421,7 @@ describe 'up.form', ->
       it "sets focus on the closest form group if focus was lost from the disabled element", ->
         form = fixture('form')
         group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[type=text]')
+        field = e.affix(group, 'input[name=email][type=text]')
         field.focus()
         expect(field).toBeFocused()
 
@@ -1433,7 +1433,7 @@ describe 'up.form', ->
       it "sets focus on the form group closest to the previously focused field when disabling the entire form", ->
         form = fixture('form')
         group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[type=text]')
+        field = e.affix(group, 'input[name=email][type=text]')
         field.focus()
         expect(field).toBeFocused()
 
@@ -1444,7 +1444,7 @@ describe 'up.form', ->
 
       it "does not change focus if focus wasn't lost", ->
         form = fixture('form')
-        fieldOutsideForm = fixture('input[type=text]')
+        fieldOutsideForm = fixture('input[name=email][type=text]')
         fieldOutsideForm.focus()
         expect(fieldOutsideForm).toBeFocused()
 
@@ -1454,7 +1454,7 @@ describe 'up.form', ->
 
       it 'returns a function that re-enables the fields that were disabled', ->
         form = fixture('form')
-        field = e.affix(form, 'input[type=text]')
+        field = e.affix(form, 'input[name=email][type=text]')
         expect(field).not.toBeDisabled()
 
         reenable = up.form.disable(form)
@@ -1467,7 +1467,7 @@ describe 'up.form', ->
 
       it 'does not enable initially disabled functions when the re-enablement function is called', ->
         form = fixture('form')
-        field = e.affix(form, 'input[type=text][disabled]')
+        field = e.affix(form, 'input[name=email][type=text][disabled]')
         expect(field).toBeDisabled()
 
         reenable = up.form.disable(form)
@@ -1480,8 +1480,8 @@ describe 'up.form', ->
 
       it 'can be called multiple times on the same field, and keeps the field disabled until all re-enablement functions have been called', ->
         form = fixture('form')
-        field1 = e.affix(form, 'input[type=text]')
-        field2 = e.affix(form, 'input[type=text][disabled]')
+        field1 = e.affix(form, 'input[name=email][type=text]')
+        field2 = e.affix(form, 'input[name=password][type=text][disabled]')
         expect(field1).not.toBeDisabled()
         expect(field2).toBeDisabled()
 
@@ -2438,6 +2438,7 @@ describe 'up.form', ->
           @$fooOption = @$select.affix('option[value="foo"]').text('Foo')
           @$barOption = @$select.affix('option[value="bar"]').text('Bar')
           @$bazOption = @$select.affix('option[value="baz"]').text('Baz')
+          @$phraseOption = @$select.affix('option[value="Some phrase"]').text('Some phrase')
 
         it "shows the target element iff its up-show-for attribute contains the select value", asyncSpec (next) ->
           $target = $fixture('.target[up-show-for="something bar other"]')
@@ -2498,6 +2499,19 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
+
+        it "shows the target element iff its up-show-for attribute contains the select value encoded as a JSON array", asyncSpec (next) ->
+          $target = $fixture('.target')
+          $target.attr('up-show-for', '["Some phrase"]')
+          up.hello(@$select)
+
+          next =>
+            expect($target).toBeHidden()
+            @$select.val('Some phrase')
+            Trigger.change(@$select)
+
+          next =>
+            expect($target).toBeVisible()
 
       describe 'on a checkbox', ->
 

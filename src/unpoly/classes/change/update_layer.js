@@ -11,6 +11,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.context = options.context
     // up.fragment.expandTargets() was already called by up.Change.FromContent
     this.steps = up.fragment.parseTargetSteps(this.target, this.options)
+    this.uid = Math.random()
   }
 
   getPreflightProps() {
@@ -63,6 +64,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     if (this.options.saveScroll) {
       up.viewport.saveScroll({ layer: this.layer })
+    }
+
+    if (this.options.saveFocus) {
+      up.viewport.saveFocus({ layer: this.layer })
     }
 
     if (this.options.peel) {
@@ -143,6 +148,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           this.transferKeepableElements(step)
 
           const parent = step.oldElement.parentNode
+          let me = this
 
           const morphOptions = {
             ...step,
@@ -253,11 +259,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   // @param {boolean} options.useKeep
   // @param {boolean} options.descendantsOnly
   findKeepPlan(options) {
-    console.log("options.useKeep is %o", options.useKeep)
-
     if (!options.useKeep) { return }
-
-    console.log("will match keep")
 
     const { oldElement, newElement } = options
 
@@ -390,7 +392,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Find all [up-hungry] elements matching our layer and targetElements.
     const hungrySolutions = up.radio.hungrySolutions({
       layer: this.layer,
-      targetElements: this.getTargetElements()
+      targetElements: this.getTargetElements(),
+      origin: this.options.origin
     })
 
     for (let { element: oldElement, target: selector } of hungrySolutions) {
@@ -439,7 +442,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         //
         // We might need to preserve focus in a fragment that is not the first step.
         // However, only a single step can include the focused element, or none.
-        this.focusCapsule ||= up.FocusCapsule.preserveWithin(step.oldElement)
+        this.focusCapsule ||= up.FocusCapsule.preserveWithin(step.oldElement, { supportLost: true })
       }
     })
   }

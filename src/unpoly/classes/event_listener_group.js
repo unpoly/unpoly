@@ -76,7 +76,7 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
     }
 
     // Event names are given in all arg variants
-    let eventTypes = u.splitValues(args.shift())
+    let eventTypes = u.parseTokens(args.shift())
     let fixTypes = up.migrate.fixEventTypes
     if (fixTypes) {
       eventTypes = fixTypes(eventTypes)

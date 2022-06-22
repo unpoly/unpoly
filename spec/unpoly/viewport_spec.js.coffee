@@ -596,13 +596,20 @@ describe 'up.viewport', ->
           expect(@rootViewport.scrollTop).toBe(10)
           expect(@overlayViewport.scrollTop).toBe(0)
 
-      it "scrolls a viewport to the top (and does not crash) if no previous scroll position is known", ->
+      it "returns true if a previous scroll position is known and could be restored", ->
+        $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
+        $content = $viewport.affix('.content').css(height: '1000px')
+        up.hello($viewport)
+        up.viewport.saveScroll()
+        expect(up.viewport.restoreScroll()).toBe(true)
+
+      it "does not scroll and returns a faley value if no previous scroll position is known", ->
         $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         $viewport.scrollTop(70)
 
-        up.viewport.restoreScroll()
-        expect($viewport.scrollTop()).toEqual(0)
+        expect(up.viewport.restoreScroll()).toBeFalsy()
+        expect($viewport.scrollTop()).toEqual(70)
 
     describe 'up.viewport.rootOverflowElement()', ->
 

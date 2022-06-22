@@ -284,13 +284,6 @@ up.util = (function() {
     }
   }
 
-  function eachIterator(iterator, callback) {
-    let entry
-    while ((entry = iterator.next()) && !entry.done) {
-      callback(entry.value)
-    }
-  }
-
   /*-
   Returns whether the given argument is `null`.
 
@@ -1521,16 +1514,6 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given value is truthy.
-
-  @function up.util.isTruthy
-  @internal
-  */
-  function isTruthy(object) {
-    return !!object
-  }
-
-  /*-
   Sets the given callback as both fulfillment and rejection handler for the given promise.
 
   [Unlike `promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
@@ -1541,47 +1524,6 @@ up.util = (function() {
   */
   function always(promise, callback) {
     return promise.then(callback, callback)
-  }
-
-//  mutedFinally = (promise, callback) ->
-//    # Use finally() instead of always() so we don't accidentally
-//    # register a rejection handler, which would prevent an "Uncaught in Exception" error.
-//    finallyDone = promise.finally(callback)
-//
-//    # Since finally's return value is itself a promise with the same state
-//    # as `promise`, we don't want to see "Uncaught in Exception".
-//    # If we didn't do this, we couldn't mute rejections in `promise`:
-//    #
-//    #     promise = new Promise(...)
-//    #     promise.finally(function() { ... })
-//    #     up.util.muteRejection(promise) // has no effect
-//    muteRejection(finallyDone)
-//
-//    # Return the original promise and *not* finally's return value.
-//    return promise
-
-  /*-
-  Registers an empty rejection handler with the given promise.
-  This prevents browsers from printing "Uncaught (in promise)" to the error
-  console when the promise is rejected.
-
-  This is helpful for event handlers where it is clear that no rejection
-  handler will be registered:
-
-      up.on('submit', 'form[up-target]', (event, $form) => {
-        promise = up.submit($form)
-        up.util.muteRejection(promise)
-      })
-
-  Does nothing if passed a missing value.
-
-  @function up.util.muteRejection
-  @param {Promise|undefined|null} promise
-  @return {Promise}
-  @internal
-  */
-  function muteRejection(promise) {
-    return promise?.catch(noop)
   }
 
   /*-
@@ -1724,28 +1666,25 @@ up.util = (function() {
     return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
   }
 
-  function splitValues(value, separator = ' ') {
+  const PARSE_TOKEN_PATTERNS = {
+    'space/or': /\s+(?:or\s+)?/,
+    'or': /\s+or\s+/,
+    'comma': /\s*,\s*/
+  }
+
+  function parseTokens(value, options = {}) {
     if (isString(value)) {
-      value = value.split(separator)
-      value = map(value, v => v.trim())
-      value = filterList(value, isPresent)
-      return value
+      value = value.trim()
+      if (options.json && /^\[.*]$/.test(value)) {
+        return JSON.parse(value)
+      } else {
+        let separator = options.separator || 'space/or'
+        let pattern = PARSE_TOKEN_PATTERNS[separator]
+        return value.split(pattern)
+      }
     } else {
       return wrapList(value)
     }
-  }
-
-  function endsWith(string, search) {
-    return string.substring(string.length - search.length) === search
-  }
-
-  function simpleEase(x) {
-    // easing: http://fooplot.com/?lang=de#W3sidHlwZSI6MCwiZXEiOiJ4PDAuNT8yKngqeDp4Kig0LXgqMiktMSIsImNvbG9yIjoiIzEzRjIxNyJ9LHsidHlwZSI6MCwiZXEiOiJzaW4oKHheMC43LTAuNSkqcGkpKjAuNSswLjUiLCJjb2xvciI6IiMxQTUyRUQifSx7InR5cGUiOjEwMDAsIndpbmRvdyI6WyItMS40NyIsIjEuNzgiLCItMC41NSIsIjEuNDUiXX1d
-    // easing nice: sin((x^0.7-0.5)*pi)*0.5+0.5
-    // easing performant: x < 0.5 ? 2*x*x : x*(4 - x*2)-1
-    // https://jsperf.com/easings/1
-    // Math.sin((Math.pow(x, 0.7) - 0.5) * Math.PI) * 0.5 + 0.5
-    return x < 0.5 ? 2*x*x : (x*(4 - (x*2)))-1
   }
 
   function wrapValue(constructor, ...args) {
@@ -1920,29 +1859,7 @@ up.util = (function() {
   @internal
   */
   function sprintf(message, ...args) {
-    return sprintfWithFormattedArgs(identity, message, ...args)
-  }
-
-  /*-
-  @function up.util.sprintfWithFormattedArgs
-  @internal
-  */
-  function sprintfWithFormattedArgs(formatter, message, ...args) {
-    if (!message) { return ''; }
-
-    let i = 0
-    return message.replace(SPRINTF_PLACEHOLDERS, function() {
-      let arg = args[i]
-      arg = formatter(stringifyArg(arg))
-      i += 1
-      return arg
-    })
-  }
-
-  // Remove with IE11.
-  // When removed we can also remove muteRejection(), as this is the only caller.
-  function allSettled(promises) {
-    return Promise.all(map(promises, muteRejection))
+    return message.replace(SPRINTF_PLACEHOLDERS, () => stringifyArg(args.shift()))
   }
 
   function negate(fn) {
@@ -1993,7 +1910,6 @@ up.util = (function() {
     options: newOptions,
     parseArgIntoOptions,
     each,
-    eachIterator,
     map,
     flatMap,
     mapObject,
@@ -2057,21 +1973,17 @@ up.util = (function() {
     evalOption,
     evalAutoOption,
     flatten,
-    isTruthy,
     newDeferred,
     always,
-    muteRejection,
     asyncify,
     isBasicObjectProperty,
     isCrossOrigin,
     task: queueTask,
     microtask: queueMicrotask,
     isEqual,
-    splitValues,
-    endsWith,
+    parseTokens,
     wrapList,
     wrapValue,
-    simpleEase,
     uid,
     upperCaseFirst,
     lowerCaseFirst,
@@ -2083,9 +1995,7 @@ up.util = (function() {
     camelToKebabCase,
     nullToUndefined,
     sprintf,
-    sprintfWithFormattedArgs,
     renameKeys,
-    allSettled,
     negate,
     memoizeMethod
     // groupBy,

@@ -15,7 +15,11 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   processPrimitive(opt) {
     switch (opt) {
       case 'keep':
+        // Try to keep the focus from before the fragment update.
         return this.restoreFocusFromCapsule()
+      case 'restore':
+        // Restore the focus we saved at a previous visit the current location.
+        return this.restorePreviousFocusForLocation()
       case 'target':
       case true:
         return this.focusElement(this.fragment)
@@ -57,11 +61,14 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
     return this.focusCapsule?.restore(this.fragment, PREVENT_SCROLL_OPTIONS)
   }
 
+  restorePreviousFocusForLocation() {
+    return up.viewport.restoreFocus({ layer: this.layer })
+  }
+
   autofocus() {
     let autofocusElement = e.subtree(this.fragment, '[autofocus]')[0]
     if (autofocusElement) {
-      up.focus(autofocusElement, PREVENT_SCROLL_OPTIONS)
-      return true
+      return this.focusElement(autofocusElement)
     }
   }
 
@@ -80,4 +87,5 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   wasFocusLost() {
     return this.focusCapsule?.wasLost()
   }
+
 }

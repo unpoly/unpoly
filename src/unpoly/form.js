@@ -265,7 +265,12 @@ up.form = (function() {
     options = parseDestinationOptions(form, options, parserOptions)
 
     let parser = new up.OptionsParser(form, options, parserOptions)
-    parser.string('failTarget', { default: up.fragment.toTarget(form) })
+
+    // We should usually be able to derive a target selector since form[action] is a default
+    // deriver. In cases when we cannot, we should usually update a main target since
+    // submitting is navigation, and { fallback: true } is a navigation default.
+    parser.string('failTarget', { default: up.fragment.tryToTarget(form) })
+
     parser.booleanOrString('disable')
 
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
@@ -758,16 +763,18 @@ up.form = (function() {
       let group = field.closest(groupSelector)
       if (group) {
         let goodDerivedGroupTarget = up.fragment.tryToTarget(group)
+        let goodDerivedFieldTarget = up.fragment.tryToTarget(field)
         // Most forms have multiple groups with no identifying attributes, e.g. <div up-form-group>.
         // Hence we use a :has() selector to identify the form group by the selector
         // of the contained field, which usually has an identifying [name] or [id] attribute.
-        let groupHasFieldTarget = (group !== field) && `${groupSelector}:has(${up.fragment.tryToTarget(field)})`
-        let target = goodDerivedGroupTarget || groupHasFieldTarget || groupSelector
-
-        return {
-          target,
-          element: group,
-          origin: field
+        let groupHasFieldTarget = goodDerivedFieldTarget && (group !== field) && `${groupSelector}:has(${goodDerivedFieldTarget})`
+        let target = goodDerivedGroupTarget || groupHasFieldTarget
+        if (target) {
+          return {
+            target,
+            element: group,
+            origin: field
+          }
         }
       }
     })
@@ -1004,20 +1011,24 @@ up.form = (function() {
 
     let hideValues = target.getAttribute('up-hide-for')
     if (hideValues) {
-      hideValues = u.splitValues(hideValues)
+      hideValues = parseSwitchTokens(hideValues)
       show = u.intersect(fieldValues, hideValues).length === 0
     } else {
       let showValues = target.getAttribute('up-show-for')
       // If the target has neither up-show-for or up-hide-for attributes,
       // assume the user wants the target to be visible whenever anything
       // is checked or entered.
-      showValues = showValues ? u.splitValues(showValues) : [':present', ':checked']
+      showValues = showValues ? parseSwitchTokens(showValues) : [':present', ':checked']
       show = u.intersect(fieldValues, showValues).length > 0
     }
 
     e.toggle(target, show)
     target.classList.add('up-switched')
   })
+
+  function parseSwitchTokens(str) {
+    return u.parseTokens(str, { json: true })
+  }
 
   function findSwitcherForTarget(target) {
     const form = getContainer(target)
@@ -1397,12 +1408,14 @@ up.form = (function() {
   /*-
   Show or hide elements when a form field is set to a given value.
 
-  When the controlling form field gets an `up-switch` attribute, and that form field is nested inside a `<form>`
-  parent, the targets elements must also be inside that same `<form>` parent.
+  The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
+  attributes to indicate for which values they should be shown or hidden.
+
+  The `[up-switch]` element and its target elements must be inside the same `<form>`.
 
   ### Example: Select options
 
-  The controlling form field gets an `up-switch` attribute with a selector for the elements to show or hide:
+  The controlling form field gets an `[up-switch]` attribute with a selector for the elements to show or hide:
 
   ```html
   <select name="advancedness" up-switch=".target">
@@ -1413,7 +1426,7 @@ up.form = (function() {
   ```
 
   The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
-  attributes to indicate for which values they should be shown or hidden:
+  attributes to indicate for which values they should be shown or hidden.
 
   ```html
   <div class="target" up-show-for="basic">
@@ -1441,7 +1454,7 @@ up.form = (function() {
   </div>
   ```
 
-  You can also use the pseudo-values `:blank` to match an empty input value,
+  You may also use the pseudo-values `:blank` to match an empty input value,
   or `:present` to match a non-empty input value:
 
   ```html
@@ -1454,7 +1467,7 @@ up.form = (function() {
 
   ### Example: Checkbox
 
-  For checkboxes you can match against the pseudo-values `:checked` or `:unchecked`:
+  For checkboxes you may match against the pseudo-values `:checked` or `:unchecked`:
 
   ```html
   <input type="checkbox" name="flag" up-switch=".target">
@@ -1468,7 +1481,7 @@ up.form = (function() {
   </div>
   ```
 
-  Of course you can also match against the `value` property of the checkbox element:
+  You may also match against the `[value]` attribute of the checkbox element:
 
   ```html
   <input type="checkbox" name="flag" value="active" up-switch=".target">
@@ -1498,6 +1511,26 @@ up.form = (function() {
   </div>
   ```
 
+  ### Example: Values containing spaces
+
+  If your values might contain spaces, you may also serialize them as a JSON array:
+
+  ```html
+  <select name='advancedness' up-switch='.target'>
+    <option value='John Doe'>John Doe</option>
+    <option value='Jane Doe'>Jane Doe</option>
+    <option value='Max Mustermann'>Max Mustermann</option>
+  </select>
+
+  <div class='target' up-show-for='["John Doe", "Jane Doe"]'>
+    You selected John or Jane Doe
+  </div>
+
+  <div class='target' up-hide-for='["Max Mustermann"]'>
+    You selected Max Mustermann
+  </div>
+  ```
+
   @selector input[up-switch]
   @param up-switch
     A CSS selector for elements whose visibility depends on this field's value.
@@ -1512,6 +1545,8 @@ up.form = (function() {
   @selector [up-show-for]
   @param [up-show-for]
     A space-separated list of input values for which this element should be shown.
+
+    If your values might contain spaces, you may also serialize them as a JSON array.
   @stable
   */
 
@@ -1523,6 +1558,8 @@ up.form = (function() {
   @selector [up-hide-for]
   @param [up-hide-for]
     A space-separated list of input values for which this element should be hidden.
+
+    If your values might contain spaces, you may also serialize them as a JSON array.
   @stable
   */
   up.compiler('[up-switch]', (switcher) => {

@@ -425,6 +425,7 @@ up.link = (function() {
     // Viewport options
     parser.booleanOrString('focus')
     parser.boolean('saveScroll')
+    parser.boolean('saveFocus')
     parser.booleanOrString('scroll')
     parser.boolean('revealTop')
     parser.number('revealMax')
@@ -1081,7 +1082,7 @@ up.link = (function() {
     See [scroll option](/scroll-option) for a list of allowed values.
 
   @param [up-save-scroll]
-    Whether to save scroll positions before updating the fragment.
+    Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
 
     Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scroll-option#restoring-scroll-positions).
 
@@ -1089,6 +1090,11 @@ up.link = (function() {
     What to focus after the new fragment was rendered.
 
     See [focus option](/focus-option) for a list of allowed values.
+
+  @param [up-save-focus]
+    Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
+
+    Saved scroll positions can later be restored with [`[up-focus=restore]`](/focus-option#restoring-focus).
 
   @param [up-confirm]
     A message the user needs to confirm before fragments are updated.

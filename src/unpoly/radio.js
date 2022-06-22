@@ -66,15 +66,14 @@ up.radio = (function() {
     return withSuffix.join(',')
   }
 
-  function hungrySolutions({ layer, targetElements }) {
+  function hungrySolutions({ layer, targetElements, origin }) {
     let anyLayerSelector = '[up-if-layer=any]'
     let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
     let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
     let hungries = hungriesOnTargetedLayer.concat(hungriesOnAnyLayer)
     return u.filterMap(hungries, (hungryElement) => {
-      let hungryTarget = up.fragment.tryToTarget(hungryElement)
+      let hungryTarget = up.fragment.tryToTarget(hungryElement, { origin })
       if (hungryTarget) {
-
         let targetRestriction = hungryElement.getAttribute('up-if-target')
         if (!targetRestriction || up.util.some(targetElements, (targetElement) => up.fragment.contains(targetElement, targetRestriction))) {
           return {

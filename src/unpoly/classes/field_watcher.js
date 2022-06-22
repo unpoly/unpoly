@@ -101,7 +101,7 @@ up.FieldWatcher = class FieldWatcher {
       // We also process a { disable } option from [up-disable] or [up-watch-disable]
       // attrs so callbacks don't have to handle this.
       if (u.some(callbackReturnValues, u.isPromise)) {
-        let callbackDone = u.allSettled(callbackReturnValues)
+        let callbackDone = Promise.allSettled(callbackReturnValues)
         up.form.disableWhile(callbackDone, fieldOptions)
         await callbackDone
       }

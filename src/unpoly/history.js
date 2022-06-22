@@ -280,9 +280,11 @@ up.history = (function() {
       // since most earlier cache entries are for a main target. But it doesn't hurt to try.
       cache: true,
 
-      // We already saved scroll positions in onPop()
+      // We already saved view state in onPop()
       saveScroll: false,
-      scroll: 'restore',
+      scroll: ['restore', 'auto'],
+      saveFocus: false,
+      focus: ['restore', 'auto'],
     })
   }
 
@@ -328,11 +330,8 @@ up.history = (function() {
     trackCurrentLocation()
     emitLocationChanged({ location, reason: 'pop', log: `Navigated to history entry ${location}` })
 
-    // Since scroll positions are per layer, and since we're going to blow up all
-    // overlays in restoreStateOnPop(), we only save positions when we're on the root layer.
-    if (up.layer.isRoot()) {
-      up.viewport.saveScroll({ location: previousLocation })
-    }
+    up.viewport.saveFocus({ location: previousLocation })
+    up.viewport.saveScroll({ location: previousLocation })
 
     restoreStateOnPop(event.state)
   }

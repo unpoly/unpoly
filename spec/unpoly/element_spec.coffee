@@ -1056,3 +1056,45 @@ describe 'up.element', ->
       expect(element).toBeVisible()
       expect(getComputedStyle(element).display).toBe('flex')
 
+
+  describe 'up.element.parseSelector()', ->
+
+    it 'parses a selector with tag name, IDs, classes and attributes', ->
+      parsed = up.element.parseSelector('tag-name#id.klass[attr=value]')
+
+      expect(parsed.includePath).toEqual([{
+        tagName: 'tag-name',
+        id: 'id'
+        classNames: ['klass'],
+        attributes: { attr: 'value' }
+      }])
+
+    it 'parses a descendant selector', ->
+      parsed = up.element.parseSelector('.content > form[action="/"]')
+
+      expect(parsed.includePath).toEqual([
+        {
+          tagName: null,
+          id: null,
+          classNames: ['content'],
+          attributes: {}
+        },
+        {
+          tagName: 'form',
+          id: null,
+          classNames: [],
+          attributes: { action: "/" }
+        },
+      ])
+
+    it 'parses a :not() suffix', ->
+      parsed = up.element.parseSelector('.foo:not(.bar)')
+
+      expect(parsed.includePath).toEqual([{
+        tagName: null,
+        id: null,
+        classNames: ['foo'],
+        attributes: {}
+      }])
+
+      expect(parsed.excludeRaw).toEqual(':not(.bar)')

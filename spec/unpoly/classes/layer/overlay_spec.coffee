@@ -314,7 +314,7 @@ describe 'up.Layer.Overlay', ->
         expect(@dismisser).toBeFocused()
 
     it 'recaptures focus outside the overlay', asyncSpec (next) ->
-      rootInput = fixture('input[type=text]')
+      rootInput = fixture('input[name=email][type=text]')
       rootInput.focus()
       expect(rootInput).toBeFocused()
 
@@ -332,9 +332,9 @@ describe 'up.Layer.Overlay', ->
     it 'does not trap focus within a foreign overlay', asyncSpec (next) ->
       up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
 
-      rootInput = fixture('input[type=text]')
+      rootInput = fixture('input[name=email][type=text]')
       foreignOverlay = fixture('.foreign-overlay')
-      foreignInput = e.affix(foreignOverlay, 'input[type=text]')
+      foreignInput = e.affix(foreignOverlay, 'input[name=email][type=text]')
       foreignInput.focus()
       expect(foreignInput).toBeFocused()
 

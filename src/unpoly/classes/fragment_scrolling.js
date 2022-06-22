@@ -13,13 +13,8 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
     ])
   }
 
-  process(opt) {
-    // If no option can be applied, return a fulfilled promise to
-    // satisfy our signature as an async function.
-    return super.process(opt) || Promise.resolve()
-  }
-
   processPrimitive(opt) {
+    console.log("processing %o", opt)
     switch (opt) {
       case 'reset':
         // If the user has passed { scroll: 'top' } we scroll to the top all
@@ -33,7 +28,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
         return this.restore()
       case 'hash':
         return this.hash && up.viewport.revealHash(this.hash, this.attributes())
-      case 'target': case 'reveal': case true:
+      case 'target':
+      case 'reveal':
+      case true:
         return this.revealElement(this.fragment)
       default:
         if (u.isString(opt)) {
@@ -47,7 +44,8 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   revealElement(element) {
-    return up.reveal(element, this.attributes())
+    up.reveal(element, this.attributes())
+    return true
   }
 
   revealSelector(selector) {
@@ -66,7 +64,8 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   reset() {
-    return up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
+    up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
+    return true
   }
 
   restore() {

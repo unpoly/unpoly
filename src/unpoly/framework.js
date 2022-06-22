@@ -127,10 +127,6 @@ up.framework = (function() {
   ```
   You may then call `up.boot()` to manually boot Unpoly at a later time.
 
-  ### Browser support
-
-  To use this feature in Internet Explorer 11 you need a polyfill for `document.currentScript`.
-
   @selector script[up-boot=manual]
   @experimental
   */

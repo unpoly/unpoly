@@ -372,14 +372,6 @@ up.protocol = (function() {
   and the response's URL changed from the request's URL, Unpoly will assume a redirect and set the
   method to `GET`.
 
-  ### Internet Explorer 11
-
-  There is an edge case on Internet Explorer 11, where Unpoly cannot detect the final URL after a redirect.
-  You can fix this edge case by delivering `X-Up-Location` and `X-Up-Method` headers with the *last* response
-  in a series of redirects.
-
-  The **simplest implementation** is to set these headers for every request.
-
   ### Example
 
   ```http

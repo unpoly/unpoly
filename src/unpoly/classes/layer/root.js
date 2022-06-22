@@ -11,7 +11,7 @@ up.Layer.Root = class Root extends up.Layer {
     //    For instance, take a look how up.Change.CloseLayer emits the up:layer:dismiss
     //    event first on `@layer.element`, then on `document`.
     //    Also `document` is not really an element, just an event target.
-    // 2. We want but cannot use <body> element. Since Unpoly boots before
+    // 2. We might want but cannot use <body> element. Since Unpoly boots before
     //    the DOM is ready, document.body is still undefined. We also cannot delay
     //    booting until the DOM is ready, since by then all user-defined event listeners
     //    and compilers will have registered.
@@ -19,8 +19,10 @@ up.Layer.Root = class Root extends up.Layer {
     //    on Chrome, Firefox, IE11, Safari.
     // 4. A nice benefit of using <html> is that up.fragment.get('html', layer: 'root')
     //    will yield a result.
+    // 5. Also it's nice that elements in the <head> also belong to the root layer.
+    //    Otherwise they would not belong to any layer.
     //
-    // We always return the current <body> instead of caching it,
+    // We always return the current <html> instead of caching it,
     // since the developer might replace it with a new version.
     return e.root
   }

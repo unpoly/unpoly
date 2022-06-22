@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.history', ->
@@ -151,6 +152,42 @@ describe 'up.history', ->
           expect(restoreListener).toHaveBeenCalled()
 
           expect(main).toHaveText('manually restored content')
+
+      describe 'focus restoration', ->
+
+        it 'restores element focus when the user hits the back button', asyncSpec (next) ->
+          waitForBrowser = 100
+          up.fragment.config.mainTargets = ['main']
+          up.history.config.restoreTargets = [':main']
+          main = fixture('main')
+          link = e.affix(main, 'a[href="/focus-path2"][up-follow]', text: 'link label')
+
+          up.history.replace('/focus-path1')
+
+          next ->
+            Trigger.clickSequence(link)
+
+          next ->
+            expect(link).toBeFocused()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            jasmine.respondWithSelector('main', text: 'new text')
+
+          next ->
+            expect('main').toHaveText('new text')
+            expect('main').toBeFocused()
+
+            history.back()
+
+          next.after waitForBrowser, ->
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+
+          next ->
+            jasmine.respondWithSelector('main a[href="/focus-path2"]')
+
+          next ->
+            expect(document).toHaveSelector('main a[href="/focus-path2"]')
+            expect('a[href="/focus-path2"]').toBeFocused()
 
       describe 'scroll restoration', ->
 

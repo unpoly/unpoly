@@ -32,9 +32,6 @@ up.element.createFromHtml = function(...args) {
 /*-
 Removes the given element from the DOM tree.
 
-If you don't need IE11 support you may also use the built-in
-[`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/remove) to the same effect.
-
 Note that `up.element.remove()` does *not* run [destructor functions](/up.destructor)
 on the given elements. For this use `up.destroy()`.
 
@@ -95,9 +92,6 @@ up.element.closest = function(element, selector) {
 Replaces the given old element with the given new element.
 
 The old element will be removed from the DOM tree.
-
-If you don't need IE11 support you may also use the built-in
-[`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/replaceWith) to the same effect.
 
 @function up.element.replace
 @param {Element} oldElement

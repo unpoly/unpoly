@@ -82,14 +82,16 @@ up.Layer = class Layer extends up.Record {
       'history',
       'mode',
       'context',
-      'lastScrollTops'
+      'lastScrollTops',
+      'lastFocusCapsules',
     ]
   }
 
   defaults() {
     return {
       context: {}, // To reset root
-      lastScrollTops: new up.Cache({size: 30, key: up.history.normalizeURL})
+      lastScrollTops: up.viewport.newStateCache(),
+      lastFocusCapsules: up.viewport.newStateCache()
     }
   }
 

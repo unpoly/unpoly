@@ -311,10 +311,9 @@ up.Params = class Params {
   }
 
   addAllFromFormData(formData) {
-    // IE11: Remove eachIterator and just use for .. of
-    u.eachIterator(formData.entries(), value => {
+    for (let value of formData.entries()) {
       this.add(...value)
-    })
+    }
   }
 
   /*-
@@ -427,7 +426,7 @@ up.Params = class Params {
   }
 
   isArrayKey(key) {
-    return u.endsWith(key, '[]')
+    return key.endsWith('[]')
   }
 
   [u.isBlank.key]() {

@@ -652,55 +652,6 @@ describe 'up.util', ->
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
 
-    describe 'up.util.muteRejection', ->
-
-      it 'returns a promise that fulfills when the given promise fulfills', (done) ->
-        fulfilledPromise = Promise.resolve()
-        mutedPromise = up.util.muteRejection(fulfilledPromise)
-
-        u.task ->
-          promiseState(mutedPromise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
-            done()
-
-      it 'returns a promise that fulfills when the given promise rejects', (done) ->
-        rejectedPromise = Promise.reject()
-        mutedPromise = up.util.muteRejection(rejectedPromise)
-
-        u.task ->
-          promiseState(mutedPromise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
-            done()
-
-      it 'does not leave an unhandled rejection when the given promise rejects', (done) ->
-        rejectGivenPromise = null
-        givenPromise = new Promise (resolve, reject) ->
-          rejectGivenPromise = reject
-
-        mutedPromise = up.util.muteRejection(givenPromise)
-
-        u.task ->
-          rejectGivenPromise()
-
-          u.task ->
-            promiseState(mutedPromise).then (result) ->
-              expect(result.state).toEqual('fulfilled')
-              expect(window).not.toHaveUnhandledRejections()
-              done()
-
-    describe 'up.util.simpleEase', ->
-
-      it 'returns 0 for 0', ->
-        expect(up.util.simpleEase(0)).toBe(0)
-
-      it 'returns 1 for 1', ->
-        expect(up.util.simpleEase(1)).toBe(1)
-
-      it 'returns steadily increasing values between 0 and 1', ->
-        expect(up.util.simpleEase(0.25)).toBeAround(0.25, 0.2)
-        expect(up.util.simpleEase(0.50)).toBeAround(0.50, 0.2)
-        expect(up.util.simpleEase(0.75)).toBeAround(0.75, 0.2)
-
     describe 'up.util.timer', ->
 
       it 'calls the given function after waiting the given milliseconds', (done) ->
@@ -1849,6 +1800,84 @@ describe 'up.util', ->
         expect(obj.bar()).toBe('bar return value')
         expect(obj.bar()).toBe('bar return value')
         expect(barSpy.calls.count()).toBe(1)
+
+    describe 'up.util.parseTokens()', ->
+
+      it 'parses tokens separated by a space', ->
+        str = 'foo bar baz'
+        tokens = up.util.parseTokens(str)
+        expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+      it 'parses tokens separated by " or "', ->
+        str = "foo or bar or baz"
+        tokens = up.util.parseTokens(str)
+        expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+      it 'trims whitespace', ->
+        str = " foo \t  bar   or   baz   \n"
+        tokens = up.util.parseTokens(str)
+        expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+      it 'does not parse a JSON array', ->
+        str = '["foo", "bar"]'
+        tokens = up.util.parseTokens(str)
+        expect(tokens).toEqual ['["foo",', '"bar"]']
+
+      it 'returns an array unchanged', ->
+        array = ['foo', 'bar']
+        tokens = up.util.parseTokens(array)
+        expect(tokens).toEqual ['foo', 'bar']
+
+      describe 'with { json: true }', ->
+
+        it 'parses the string as JSON if it is enclosed in square brackets', ->
+          str = '["foo", "bar"]'
+          tokens = up.util.parseTokens(str, json: true)
+          expect(tokens).toEqual ['foo', 'bar']
+
+        it 'parses the string as JSON if it is enclosed in square brackets after whitespace', ->
+          str = '  \n["foo", "bar"] \t\n '
+          tokens = up.util.parseTokens(str, json: true)
+          expect(tokens).toEqual ['foo', 'bar']
+
+        it "parses the string as space-separated tokens if it isn't enclosed in square brackets", ->
+          str = '[foo bar baz'
+          tokens = up.util.parseTokens(str, json: true)
+          expect(tokens).toEqual ['[foo', 'bar', 'baz']
+
+      describe 'with { separator: "or" }', ->
+
+        it 'parses tokens separated by " or "', ->
+          str = 'foo or bar or baz'
+          tokens = up.util.parseTokens(str)
+          expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+        it 'trims whitespace', ->
+          str = '\n foo   or \t bar  or \n baz  '
+          tokens = up.util.parseTokens(str)
+          expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+        it 'does not consider plain whitespace to be a separator', ->
+          str = 'foo bar baz'
+          tokens = up.util.parseTokens(str, separator: 'or')
+          expect(tokens).toEqual ['foo bar baz']
+
+      describe 'with { separator: "comma" }', ->
+
+        it 'parses tokens separated by a comma', ->
+          str = 'foo, bar, baz'
+          tokens = up.util.parseTokens(str, separator: 'comma')
+          expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+        it 'trims whitespace', ->
+          str = '\n foo   , \t bar  , \n baz  '
+          tokens = up.util.parseTokens(str, separator: 'comma')
+          expect(tokens).toEqual ['foo', 'bar', 'baz']
+
+        it 'does not parse tokens separated by " or "', ->
+          str = 'foo or bar or baz'
+          tokens = up.util.parseTokens(str, separator: 'comma')
+          expect(tokens).toEqual ['foo or bar or baz']
 
     describe 'up.util.evalOption()', ->
 
