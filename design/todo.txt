@@ -30,6 +30,10 @@ Various changes
   - We could offer [up-scroll="restore main"] but then it would no longer work with descendant selectors
     - Or any other selectors with spaces in it, e.g. [some-attr="foo bar"]
     - [up-scroll="restore or main"]
+- unpoly-rails
+  - No longer send X-Up-Location with every response
+- Replace up.util.endsWith() with String.prototype.endsWith()
+
 
 Good Target Rework
 ------------------
