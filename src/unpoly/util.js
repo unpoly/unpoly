@@ -1724,12 +1724,22 @@ up.util = (function() {
     return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
   }
 
-  function splitValues(value, separator = ' ') {
+  const PARSE_TOKEN_PATTERNS = {
+    'space/or': /\s+(?:or\s+)?/,
+    'or': /\s+or\s+/,
+    'comma': /\s*,\s*/
+  }
+
+  function parseTokens(value, options = {}) {
     if (isString(value)) {
-      value = value.split(separator)
-      value = map(value, v => v.trim())
-      value = filterList(value, isPresent)
-      return value
+      value = value.trim()
+      if (options.json && /^\[.*]$/.test(value)) {
+        return JSON.parse(value)
+      } else {
+        let separator = options.separator || 'space/or'
+        let pattern = PARSE_TOKEN_PATTERNS[separator]
+        return value.split(pattern)
+      }
     } else {
       return wrapList(value)
     }
@@ -2042,7 +2052,7 @@ up.util = (function() {
     task: queueTask,
     microtask: queueMicrotask,
     isEqual,
-    splitValues,
+    parseTokens,
     endsWith,
     wrapList,
     wrapValue,

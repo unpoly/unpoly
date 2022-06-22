@@ -2438,6 +2438,7 @@ describe 'up.form', ->
           @$fooOption = @$select.affix('option[value="foo"]').text('Foo')
           @$barOption = @$select.affix('option[value="bar"]').text('Bar')
           @$bazOption = @$select.affix('option[value="baz"]').text('Baz')
+          @$phraseOption = @$select.affix('option[value="Some phrase"]').text('Some phrase')
 
         it "shows the target element iff its up-show-for attribute contains the select value", asyncSpec (next) ->
           $target = $fixture('.target[up-show-for="something bar other"]')
@@ -2498,6 +2499,19 @@ describe 'up.form', ->
 
           next =>
             expect($target).toBeHidden()
+
+        it "shows the target element iff its up-show-for attribute contains the select value encoded as a JSON array", asyncSpec (next) ->
+          $target = $fixture('.target')
+          $target.attr('up-show-for', '["Some phrase"]')
+          up.hello(@$select)
+
+          next =>
+            expect($target).toBeHidden()
+            @$select.val('Some phrase')
+            Trigger.change(@$select)
+
+          next =>
+            expect($target).toBeVisible()
 
       describe 'on a checkbox', ->
 

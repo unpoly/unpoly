@@ -84,7 +84,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     } else if (this.dismissable === false) {
       this.dismissable = []
     } else {
-      this.dismissable = u.splitValues(this.dismissable)
+      this.dismissable = u.parseTokens(this.dismissable)
     }
 
     if (this.acceptLocation) {

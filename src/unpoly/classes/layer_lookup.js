@@ -15,7 +15,7 @@ up.LayerLookup = class LayerLookup {
       up.layer.normalizeOptions(options)
     }
 
-    this.values = u.splitValues(options.layer)
+    this.values = u.parseTokens(options.layer)
 
     this.origin = options.origin
     this.baseLayer = options.baseLayer || this.originLayer() || this.stack.current

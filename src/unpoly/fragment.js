@@ -1933,7 +1933,7 @@ up.fragment = (function() {
     let defaultPlacement = options.defaultPlacement || 'swap'
 
     let steps = []
-    let simpleSelectors = u.splitValues(target, ',')
+    let simpleSelectors = u.parseTokens(target, { separator: 'comma' })
 
     for (let selector of simpleSelectors) {
       if (selector === ':none') continue
