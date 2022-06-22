@@ -652,42 +652,6 @@ describe 'up.util', ->
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
 
-    describe 'up.util.muteRejection', ->
-
-      it 'returns a promise that fulfills when the given promise fulfills', (done) ->
-        fulfilledPromise = Promise.resolve()
-        mutedPromise = up.util.muteRejection(fulfilledPromise)
-
-        u.task ->
-          promiseState(mutedPromise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
-            done()
-
-      it 'returns a promise that fulfills when the given promise rejects', (done) ->
-        rejectedPromise = Promise.reject()
-        mutedPromise = up.util.muteRejection(rejectedPromise)
-
-        u.task ->
-          promiseState(mutedPromise).then (result) ->
-            expect(result.state).toEqual('fulfilled')
-            done()
-
-      it 'does not leave an unhandled rejection when the given promise rejects', (done) ->
-        rejectGivenPromise = null
-        givenPromise = new Promise (resolve, reject) ->
-          rejectGivenPromise = reject
-
-        mutedPromise = up.util.muteRejection(givenPromise)
-
-        u.task ->
-          rejectGivenPromise()
-
-          u.task ->
-            promiseState(mutedPromise).then (result) ->
-              expect(result.state).toEqual('fulfilled')
-              expect(window).not.toHaveUnhandledRejections()
-              done()
-
     describe 'up.util.timer', ->
 
       it 'calls the given function after waiting the given milliseconds', (done) ->

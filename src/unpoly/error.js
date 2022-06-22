@@ -83,7 +83,7 @@ up.error = (function() {
 
   /*-
   Registers an empty rejection handler in case the given promise
-  rejects with an AbortError or a failed up.Response.
+  rejects with an uncritical error.
 
   This prevents browsers from printing "Uncaught (in promise)" to the error
   console when the promise is rejected.
@@ -94,9 +94,17 @@ up.error = (function() {
   ```js
   up.on('submit', 'form[up-target]', (event, form) => {
     promise = up.submit(form)
-    up.util.muteRejection(promise)
+    up.error.muteUncriticalRejection(promise)
   })
   ```
+
+  Uncriticial errors include:
+
+  - `AbortError`
+  - A failed `up.Response`
+  - A failed `up.RenderResult`
+
+  Other types of errors will not be muted.
 
   @function up.error.muteUncriticalRejection
   @param {Promise} promise

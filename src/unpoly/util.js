@@ -1536,47 +1536,6 @@ up.util = (function() {
     return promise.then(callback, callback)
   }
 
-//  mutedFinally = (promise, callback) ->
-//    # Use finally() instead of always() so we don't accidentally
-//    # register a rejection handler, which would prevent an "Uncaught in Exception" error.
-//    finallyDone = promise.finally(callback)
-//
-//    # Since finally's return value is itself a promise with the same state
-//    # as `promise`, we don't want to see "Uncaught in Exception".
-//    # If we didn't do this, we couldn't mute rejections in `promise`:
-//    #
-//    #     promise = new Promise(...)
-//    #     promise.finally(function() { ... })
-//    #     up.util.muteRejection(promise) // has no effect
-//    muteRejection(finallyDone)
-//
-//    # Return the original promise and *not* finally's return value.
-//    return promise
-
-  /*-
-  Registers an empty rejection handler with the given promise.
-  This prevents browsers from printing "Uncaught (in promise)" to the error
-  console when the promise is rejected.
-
-  This is helpful for event handlers where it is clear that no rejection
-  handler will be registered:
-
-      up.on('submit', 'form[up-target]', (event, $form) => {
-        promise = up.submit($form)
-        up.util.muteRejection(promise)
-      })
-
-  Does nothing if passed a missing value.
-
-  @function up.util.muteRejection
-  @param {Promise|undefined|null} promise
-  @return {Promise}
-  @internal
-  */
-  function muteRejection(promise) {
-    return promise?.catch(noop)
-  }
-
   /*-
   @function up.util.newDeferred
   @internal
@@ -1913,12 +1872,6 @@ up.util = (function() {
     return message.replace(SPRINTF_PLACEHOLDERS, () => stringifyArg(args.shift()))
   }
 
-  // Remove with IE11.
-  // When removed we can also remove muteRejection(), as this is the only caller.
-  function allSettled(promises) {
-    return Promise.all(map(promises, muteRejection))
-  }
-
   function negate(fn) {
     return function(...args) {
       return !fn(...args)
@@ -2033,7 +1986,6 @@ up.util = (function() {
     isTruthy,
     newDeferred,
     always,
-    muteRejection,
     asyncify,
     isBasicObjectProperty,
     isCrossOrigin,
@@ -2055,7 +2007,6 @@ up.util = (function() {
     nullToUndefined,
     sprintf,
     renameKeys,
-    allSettled,
     negate,
     memoizeMethod
     // groupBy,
