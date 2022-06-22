@@ -10,29 +10,10 @@ Various changes
   - New event property { request }
   - Support up.network.isLate() to help implement progress bars
   - I think this means moving the event logic to up.Response
-- Rework history handling
-  - Refocus the element before the state change
-    - We could make up.FocusCapsule work without an actual element (which we cannot store in history state)
-    - Also save Scroll and Focus when opening a new layer
-- Replace up.rails by accepting methods / conform from data attributes in options parser
 - Polling in case of failure
   - When the server did not send an update (e.g. 404) we should keep polling
-- Focus preservation
-  - focus: restore
-  - Do we want to expose up.viewport.saveFocus() and up.viewport.restoreFocus()?
-    => yes
-- Earlier [up-scroll="restore"] would restore scroll positions or otherwise reset
-  - However now it just does nothing if positions cannot be restored!
-  - Whether or not we have saved positions is not under the caller's control
-  - In JS we could pass { scroll: ['restore', 'reset'] } but that's not possible for HTML callers
-    - Also we don't do this in up.history.onPop()
-  - Same for [up-scroll="focus"]
-  - We could offer [up-scroll="restore main"] but then it would no longer work with descendant selectors
-    - Or any other selectors with spaces in it, e.g. [some-attr="foo bar"]
-    - [up-scroll="restore or main"]
 - unpoly-rails
   - No longer send X-Up-Location with every response
-- Replace up.util.endsWith() with String.prototype.endsWith()
 
 
 Good Target Rework
@@ -40,7 +21,6 @@ Good Target Rework
 
 - Consider only using good targets in findGroupSolution()
   - Test
-- Default Fail Target for forms should just be the main target (instead of an exception)
 
 
 If we're launching V3
@@ -52,6 +32,7 @@ If we're launching V3
 - Make an 2.x-stable branch for unpoly
 - We need a separate Algolia index for v2
   - v3 would stay on "latest"
+  - use that index in unpoly-site/2.x-stable
 - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
 - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
 
@@ -428,3 +409,5 @@ Decisions
     => Also we need to call it at different times
     => Also the auto options work differently, e.g. if there is an [autoscroll] element in the new fragment
     => We might offer a shortcut like [up-view] and [up-save-view] as a shortcut to set both at once
+- Replace up.rails by accepting methods / conform from data attributes in options parser
+  => This wouldn't work in scenarios where both Rails UJS and Unpoly were active
