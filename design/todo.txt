@@ -8,12 +8,17 @@ Various changes
 - Consider whether we're version 2.7 or 3.0 => I think 3.0
 - Consider sending :late und :recover events for every request (Breaking change)
   - New event property { request }
-  - Support up.network.isLate() to help implement progress bars
   - I think this means moving the event logic to up.Response
+  - Support up.network.isLate() to help implement progress bars
+    - Delegate to up.Request.Queue
 - Polling in case of failure
   - When the server did not send an update (e.g. 404) we should keep polling
-- unpoly-rails
-  - No longer send X-Up-Location with every response
+
+
+unpoly-rails
+------------
+
+- No longer send X-Up-Location with every response
 
 
 Good Target Rework
