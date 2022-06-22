@@ -426,7 +426,7 @@ up.Params = class Params {
   }
 
   isArrayKey(key) {
-    return u.endsWith(key, '[]')
+    return key.endsWith('[]')
   }
 
   [u.isBlank.key]() {

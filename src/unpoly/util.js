@@ -1738,10 +1738,6 @@ up.util = (function() {
     }
   }
 
-  function endsWith(string, search) {
-    return string.substring(string.length - search.length) === search
-  }
-
   function wrapValue(constructor, ...args) {
     return (args[0] instanceof constructor) ? args[0] : new constructor(...args)
   }
@@ -2045,7 +2041,6 @@ up.util = (function() {
     microtask: queueMicrotask,
     isEqual,
     parseTokens,
-    endsWith,
     wrapList,
     wrapValue,
     uid,
