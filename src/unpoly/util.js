@@ -1911,23 +1911,7 @@ up.util = (function() {
   @internal
   */
   function sprintf(message, ...args) {
-    return sprintfWithFormattedArgs(identity, message, ...args)
-  }
-
-  /*-
-  @function up.util.sprintfWithFormattedArgs
-  @internal
-  */
-  function sprintfWithFormattedArgs(formatter, message, ...args) {
-    if (!message) { return ''; }
-
-    let i = 0
-    return message.replace(SPRINTF_PLACEHOLDERS, function() {
-      let arg = args[i]
-      arg = formatter(stringifyArg(arg))
-      i += 1
-      return arg
-    })
+    return message.replace(SPRINTF_PLACEHOLDERS, () => stringifyArg(args.shift()))
   }
 
   // Remove with IE11.
@@ -2073,7 +2057,6 @@ up.util = (function() {
     camelToKebabCase,
     nullToUndefined,
     sprintf,
-    sprintfWithFormattedArgs,
     renameKeys,
     allSettled,
     negate,
