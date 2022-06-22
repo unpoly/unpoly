@@ -12,13 +12,17 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
   }
 
   process(opt) {
-    // Expose this additional method so subclasses can implement default values.
-    return this.tryProcess(opt)
+    let preprocessed = this.preprocess(opt)
+    return this.tryProcess(preprocessed)
+  }
+
+  preprocess(opt) {
+    return u.parseTokens(opt, { separator: 'or' })
   }
 
   tryProcess(opt) {
     if (u.isArray(opt)) {
-      return u.find(opt, opt => this.tryProcess(opt))
+      return this.processArray(opt)
     }
 
     if (u.isFunction(opt)) {
@@ -41,6 +45,10 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
     }
 
     return this.processPrimitive(opt)
+  }
+
+  processArray(array) {
+    return u.find(array, opt => this.tryProcess(opt))
   }
 
   resolveCondition(condition) {

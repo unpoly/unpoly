@@ -1823,6 +1823,11 @@ describe 'up.util', ->
         tokens = up.util.parseTokens(str)
         expect(tokens).toEqual ['["foo",', '"bar"]']
 
+      it 'returns an array unchanged', ->
+        array = ['foo', 'bar']
+        tokens = up.util.parseTokens(array)
+        expect(tokens).toEqual ['foo', 'bar']
+
       describe 'with { json: true }', ->
 
         it 'parses the string as JSON if it is enclosed in square brackets', ->

@@ -282,9 +282,9 @@ up.history = (function() {
 
       // We already saved view state in onPop()
       saveScroll: false,
-      scroll: 'restore',
+      scroll: ['restore', 'auto'],
       saveFocus: false,
-      focus: 'restore',
+      focus: ['restore', 'auto'],
     })
   }
 

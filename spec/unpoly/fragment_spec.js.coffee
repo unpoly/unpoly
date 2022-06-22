@@ -2406,6 +2406,16 @@ describe 'up.fragment', ->
                 expect('.element').toHaveText(/new text/)
                 done()
 
+          it 'updates the next layer in an "or"-separated list of alternative layer names', (done) ->
+            fixture('.element', text: 'old text')
+            promise = up.render('.element', layer: 'parent or root', content: 'new text')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toEqual('fulfilled')
+                expect('.element').toHaveText(/new text/)
+                done()
+
       describe 'with { history } option', ->
 
         beforeEach ->
@@ -3286,13 +3296,14 @@ describe 'up.fragment', ->
 
       describe 'scrolling', ->
 
-        mockReveal = ->
+        mockRevealBeforeEach = ->
           beforeEach ->
             @revealedHTML = []
             @revealedText = []
             @revealOptions = {}
 
             @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
+              console.log("!!! mocked reveal called with %o", element)
               @revealedHTML.push element.outerHTML
               @revealedText.push element.textContent.trim()
               @revealOptions = options
@@ -3300,7 +3311,7 @@ describe 'up.fragment', ->
 
         describe 'with { scroll: false }', ->
 
-          mockReveal()
+          mockRevealBeforeEach()
 
           it 'does not scroll', asyncSpec (next) ->
             fixture('.target')
@@ -3318,7 +3329,7 @@ describe 'up.fragment', ->
 
         describe 'with { scroll: "target" }', ->
 
-          mockReveal()
+          mockRevealBeforeEach()
 
           it 'scrolls to the new element that is inserted into the DOM', asyncSpec (next) ->
             fixture('.target')
@@ -3402,7 +3413,7 @@ describe 'up.fragment', ->
 
         describe 'with { scroll: "hash" }', ->
 
-          mockReveal()
+          mockRevealBeforeEach()
 
           it "scrolls to the top of an element with the ID the location's #hash", asyncSpec (next) ->
             fixture('.target')
@@ -3482,10 +3493,31 @@ describe 'up.fragment', ->
             next =>
               expect(@revealMock).not.toHaveBeenCalled()
 
+        describe 'with an array of { scroll } options', ->
+
+          mockRevealBeforeEach()
+
+          it 'tries each option until one succeeds', asyncSpec (next) ->
+            fixture('.container')
+            up.render('.container', scroll: ['hash', '.element', '.container'], content: "<div class='element'>element text</div>")
+
+            next =>
+              expect(@revealedText).toEqual ['element text']
+
+        describe 'with a string of "or"-separated { scroll } options', ->
+
+          mockRevealBeforeEach()
+
+          it 'tries each option until one succeeds', asyncSpec (next) ->
+            fixture('.container')
+            up.render('.container', scroll: 'hash or .element or .container', content: "<div class='element'>element text</div>")
+
+            next =>
+              expect(@revealedText).toEqual ['element text']
 
         describe 'when the server responds with an error code', ->
 
-          mockReveal()
+          mockRevealBeforeEach()
 
           it 'ignores the { scroll } option', asyncSpec (next) ->
             fixture('.target', text: 'target text')
@@ -3538,7 +3570,7 @@ describe 'up.fragment', ->
 
         describe 'with { scrollBehavior } option', ->
 
-          mockReveal()
+          mockRevealBeforeEach()
 
           it 'animates the revealing when prepending an element', asyncSpec (next) ->
             fixture('.element', text: 'version 1')
@@ -4274,6 +4306,15 @@ describe 'up.fragment', ->
           it 'tries each option until one succeeds', asyncSpec (next) ->
             fixture('.container')
             up.render('.container', focus: ['autofocus', '.element', '.container'], content: "<div class='element'>element</div>")
+
+            next ->
+              expect('.container .element').toBeFocused()
+
+        describe 'with a string with "or"-separated { focus } options', ->
+
+          it 'tries each option until one succeeds', asyncSpec (next) ->
+            fixture('.container')
+            up.render('.container', focus: ['autofocus or .element or .container'], content: "<div class='element'>element</div>")
 
             next ->
               expect('.container .element').toBeFocused()
