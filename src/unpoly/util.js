@@ -1739,15 +1739,6 @@ up.util = (function() {
     return string.substring(string.length - search.length) === search
   }
 
-  function simpleEase(x) {
-    // easing: http://fooplot.com/?lang=de#W3sidHlwZSI6MCwiZXEiOiJ4PDAuNT8yKngqeDp4Kig0LXgqMiktMSIsImNvbG9yIjoiIzEzRjIxNyJ9LHsidHlwZSI6MCwiZXEiOiJzaW4oKHheMC43LTAuNSkqcGkpKjAuNSswLjUiLCJjb2xvciI6IiMxQTUyRUQifSx7InR5cGUiOjEwMDAsIndpbmRvdyI6WyItMS40NyIsIjEuNzgiLCItMC41NSIsIjEuNDUiXX1d
-    // easing nice: sin((x^0.7-0.5)*pi)*0.5+0.5
-    // easing performant: x < 0.5 ? 2*x*x : x*(4 - x*2)-1
-    // https://jsperf.com/easings/1
-    // Math.sin((Math.pow(x, 0.7) - 0.5) * Math.PI) * 0.5 + 0.5
-    return x < 0.5 ? 2*x*x : (x*(4 - (x*2)))-1
-  }
-
   function wrapValue(constructor, ...args) {
     return (args[0] instanceof constructor) ? args[0] : new constructor(...args)
   }
@@ -2071,7 +2062,6 @@ up.util = (function() {
     endsWith,
     wrapList,
     wrapValue,
-    simpleEase,
     uid,
     upperCaseFirst,
     lowerCaseFirst,

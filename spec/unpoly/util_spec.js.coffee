@@ -688,19 +688,6 @@ describe 'up.util', ->
               expect(window).not.toHaveUnhandledRejections()
               done()
 
-    describe 'up.util.simpleEase', ->
-
-      it 'returns 0 for 0', ->
-        expect(up.util.simpleEase(0)).toBe(0)
-
-      it 'returns 1 for 1', ->
-        expect(up.util.simpleEase(1)).toBe(1)
-
-      it 'returns steadily increasing values between 0 and 1', ->
-        expect(up.util.simpleEase(0.25)).toBeAround(0.25, 0.2)
-        expect(up.util.simpleEase(0.50)).toBeAround(0.50, 0.2)
-        expect(up.util.simpleEase(0.75)).toBeAround(0.75, 0.2)
-
     describe 'up.util.timer', ->
 
       it 'calls the given function after waiting the given milliseconds', (done) ->
