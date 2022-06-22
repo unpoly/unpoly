@@ -515,6 +515,9 @@ up.viewport = (function() {
   /*-
   Restores [previously saved](/up.viewport.saveScroll) scroll positions.
 
+  If no earlier scroll position is known, scroll positions are not changed
+  and `false` is returned.
+
   Unpoly automatically restores scroll positions when the user presses the back button.
 
   @function up.viewport.restoreScroll
@@ -528,8 +531,8 @@ up.viewport = (function() {
     The URL for which to restore scroll positions.
 
     If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
-  @return {boolean|undefined}
-    Returns `true` if scroll positions could be restored.
+  @return {boolean}
+    Returns whether if scroll positions could be restored.
   @experimental
   */
   function restoreScroll(...args) {
@@ -537,9 +540,11 @@ up.viewport = (function() {
     const { location } = options.layer
     const locationScrollTops = options.layer.lastScrollTops.get(location)
     if (locationScrollTops) {
-      up.puts('up.viewport.restoreScroll()', 'Restoring scroll positions to %o', locationScrollTops)
       setScrollTops(viewports, locationScrollTops)
+      up.puts('up.viewport.restoreScroll()', 'Restored scroll positions to %o', locationScrollTops)
       return true
+    } else {
+      return false
     }
   }
 
@@ -602,19 +607,20 @@ up.viewport = (function() {
     The URL for which to restore focus-related state.
 
     If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
-  @return {boolean|undefined}
-    Returns `true` if focus state could be restored.
+  @return {boolean}
+    Returns whether focus state could be restored.
   @experimental
   */
   function restoreFocus(options = {}) {
     const layer = up.layer.get(options)
     const location = options.location || layer.location
     const locationCapsule = options.layer.lastFocusCapsules.get(location)
-    if (locationCapsule) {
-      up.puts('up.viewport.restoreFocus()', 'Restoring focus to "%s"', locationCapsule.target)
-
-      // The capsule returns `true` if we could rediscover and focus the previous element.
-      return locationCapsule.restore()
+    // The capsule returns `true` if we could rediscover and focus the previous element.
+    if (locationCapsule && locationCapsule.restore()) {
+      up.puts('up.viewport.restoreFocus()', 'Restored focus to "%s"', locationCapsule.target)
+      return true
+    } else {
+      return false
     }
   }
 

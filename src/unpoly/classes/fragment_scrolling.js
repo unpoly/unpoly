@@ -14,7 +14,6 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   processPrimitive(opt) {
-    console.log("processing %o", opt)
     switch (opt) {
       case 'reset':
         // If the user has passed { scroll: 'top' } we scroll to the top all

@@ -603,7 +603,7 @@ describe 'up.viewport', ->
         up.viewport.saveScroll()
         expect(up.viewport.restoreScroll()).toBe(true)
 
-      it "does not scroll and returns a faley value if no previous scroll position is known", ->
+      it "does not scroll and returns a falsey value if no previous scroll position is known", ->
         $viewport = $fixture('#viewport[up-viewport]').css(height: '100px', overflowY: 'scroll')
         $content = $viewport.affix('.content').css(height: '1000px')
         $viewport.scrollTop(70)

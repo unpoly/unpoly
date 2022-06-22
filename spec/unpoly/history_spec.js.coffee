@@ -268,6 +268,45 @@ describe 'up.history', ->
           next.after waitForBrowser, =>
             expect($('.viewport').scrollTop()).toBe(250)
 
+        it 'resets the scroll position of no earlier scroll position is known', asyncSpec (next) ->
+          longContentHTML = """
+            <div class="viewport" style="width: 100px; height: 100px; overflow-y: scroll">
+              <div class="content" style="height: 1000px">text</div>
+            </div>
+          """
+
+          respond = -> jasmine.respondWith(longContentHTML)
+
+          $viewport = $(longContentHTML).appendTo(document.body)
+
+          waitForBrowser = 100
+
+          up.viewport.config.viewportSelectors = ['.viewport']
+          up.history.config.restoreTargets = ['.viewport']
+
+          up.history.replace('/restore-path1')
+
+          up.navigate('.content', url: '/restore-path2', history: true)
+
+          next ->
+            respond()
+
+          next ->
+            expect(location.href).toMatchURL('/restore-path2')
+            $('.viewport').scrollTop(50)
+
+            # Emulate a cache miss
+            up.layer.root.lastScrollTops.clear()
+
+            history.back()
+
+          next.after waitForBrowser, ->
+            respond()
+
+          next ->
+            expect(location.href).toMatchURL('/restore-path1')
+            expect($('.viewport').scrollTop()).toBe(0)
+
         it 'restores the scroll position of two viewports marked with [up-viewport], but not configured in up.viewport.config (bugfix)', asyncSpec (next) ->
           up.history.config.restoreTargets = ['.container']
 
