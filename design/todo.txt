@@ -2,18 +2,6 @@ TODOs for next release
 ======================
 
 
-Various changes
----------------
-
-- Consider whether we're version 2.7 or 3.0 => I think 3.0
-- Consider sending :late und :recover events for every request (Breaking change)
-  - New event property { request }
-  - I think this means moving the event logic to up.Response
-  - Support up.network.isLate() to help implement progress bars
-    - Delegate to up.Request.Queue
-
-
-
 Offline / rework caching
 ------------------------
 
@@ -126,10 +114,6 @@ This way we can keep using cached content if we're offline.
     - This one is preventable
   - When done emit an event up:fragment:revalidated with the new up.RenderResult
 
-- Deal with li-fi
-  - [up-timeout]
-  - { timeout } option for up.render() and up.request()
-  - up.network.config.timeout = 90_000
 
 
 Docs
