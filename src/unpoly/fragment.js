@@ -1783,7 +1783,7 @@ up.fragment = (function() {
           result += e.classSelector(goodClass)
         }
       } else {
-        result += e.attributeSelector(attributeName, attributeValue)
+        result += e.attrSelector(attributeName, attributeValue)
       }
     }
 

@@ -863,9 +863,9 @@ up.viewport = (function() {
     if (hash = pureHash(hash)) {
       const selector = [
         // Match an <* id="hash">
-        e.attributeSelector('id', hash),
+        e.attrSelector('id', hash),
         // Match an <a name="hash">
-        'a' + e.attributeSelector('name', hash)
+        'a' + e.attrSelector('name', hash)
       ].join(',')
       return f.get(selector, options)
     }

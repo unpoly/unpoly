@@ -100,7 +100,7 @@ up.link = (function() {
   const ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]']
 
   function combineFollowableSelectors(elementSelectors, attributeSelectors) {
-    return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attributeSelector => elementSelector + attributeSelector))
+    return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attrSelector => elementSelector + attrSelector))
   }
 
   /*-

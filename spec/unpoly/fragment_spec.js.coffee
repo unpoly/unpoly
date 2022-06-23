@@ -3952,7 +3952,7 @@ describe 'up.fragment', ->
           $container = $fixture('.container')
           up.hello($container)
 
-          # Need to pass a { target } and not use { fragment }, since e.toSelector() ignores
+          # Need to pass a { target } and not use { fragment }, since up.fragment.toTarget() ignores
           # classes and only returns the tag name for singleton elements.
           up.render('.container', document: '<div class="container">new text</div>')
 

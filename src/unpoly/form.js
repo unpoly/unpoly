@@ -124,7 +124,7 @@ up.form = (function() {
     // element that are associated with the form (through <input form="id-of-form">, which
     // is an HTML feature.)
     if (root.matches('form[id]')) {
-      const outsideFieldSelector = fieldSelector(e.attributeSelector('form', root.getAttribute('id')))
+      const outsideFieldSelector = fieldSelector(e.attrSelector('form', root.getAttribute('id')))
       const outsideFields = up.fragment.all(outsideFieldSelector, { layer: root })
       fields.push(...outsideFields)
       fields = u.uniq(fields)
@@ -954,7 +954,7 @@ up.form = (function() {
     } else if (field.matches('input[type=radio]')) {
       const form = getContainer(field)
       const groupName = field.getAttribute('name')
-      const checkedButton = form.querySelector(`input[type=radio]${e.attributeSelector('name', groupName)}:checked`)
+      const checkedButton = form.querySelector(`input[type=radio]${e.attrSelector('name', groupName)}:checked`)
       if (checkedButton) {
         meta = ':checked'
         value = checkedButton.value

@@ -154,3 +154,18 @@ up.element.toggleClass = function(element, klass, newPresent) {
   }
 }
 
+/*-
+Returns a CSS selector that matches the given element as good as possible.
+
+Alias for `up.fragment.toTarget()`.
+
+@function up.element.toSelector
+@param {string|Element|jQuery}
+  The element for which to create a selector.
+@deprecated
+  Use `up.fragment.toTarget()` instead.
+*/
+up.element.toSelector = function(...args) {
+  up.migrate.deprecated('up.element.toSelector()', 'up.fragment.toTarget()')
+  return up.fragment.toTarget(...args)
+}

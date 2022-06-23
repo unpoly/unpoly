@@ -322,7 +322,7 @@ up.element = (function() {
   @internal
   */
   function metaContent(name) {
-    const selector = "meta" + attributeSelector('name', name)
+    const selector = "meta" + attrSelector('name', name)
     return first(selector)?.getAttribute('content')
   }
 
@@ -621,22 +621,7 @@ up.element = (function() {
     return element
   }
 
-  /*-
-  Returns a CSS selector that matches the given element as good as possible.
-
-  Alias for `up.fragment.toTarget()`.
-
-  @function up.element.toSelector
-  @param {string|Element|jQuery}
-    The element for which to create a selector.
-  @stable
-  */
-  function toSelector(...args) {
-    return up.fragment.toTarget(...args)
-  }
-
   const SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
-  const SINGLETON_PATTERN = new RegExp('\\b(' + SINGLETON_TAG_NAMES.join('|') + ')\\b', 'i')
 
   /*-
   @function up.element.isSingleton
@@ -644,19 +629,15 @@ up.element = (function() {
   */
   const isSingleton = up.mockable(element => element.matches(SINGLETON_TAG_NAMES.join(',')))
 
-  function isSingletonSelector(selector) {
-    return SINGLETON_PATTERN.test(selector)
-  }
-
   function elementTagName(element) {
     return element.tagName.toLowerCase()
   }
 
   /*-
-  @function up.element.attributeSelector
+  @function up.element.attrSelector
   @internal
   */
-  function attributeSelector(attribute, value) {
+  function attrSelector(attribute, value) {
     value = value.replace(/"/g, '\\"')
     // We could get away with omitting the quotes for simple alphanumeric strings,
     // but e.g. not for a string with quotes or spaces or a string that is all numbers.
@@ -664,15 +645,11 @@ up.element = (function() {
     return `[${attribute}="${value}"]`
   }
 
-  function trueAttributeSelector(attribute) {
-    return `[${attribute}]:not([${attribute}=false])`
-  }
-
   function idSelector(id) {
     if (id.match(/^[a-z0-9\-_]+$/i)) {
       return `#${id}`
     } else {
-      return attributeSelector('id', id)
+      return attrSelector('id', id)
     }
   }
 
@@ -1273,13 +1250,10 @@ up.element = (function() {
     setAttrs, // practical
     setTemporaryAttrs,
     affix, // practical for element creation
-    toSelector, // practical
     idSelector,
     classSelector,
     isSingleton, // internal
-    isSingletonSelector,
-    attributeSelector, // internal
-    trueAttributeSelector,
+    attrSelector, // internal
     tagName: elementTagName,
     createDocumentFromHTML, // internal
     createFromHTML, // practical for element creation
