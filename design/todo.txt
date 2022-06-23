@@ -11,36 +11,7 @@ Various changes
   - I think this means moving the event logic to up.Response
   - Support up.network.isLate() to help implement progress bars
     - Delegate to up.Request.Queue
-- Polling in case of failure
-  - When the server did not send an update (e.g. 404) we should keep polling
-
-
-unpoly-rails
-------------
-
-- No longer send X-Up-Location with every response
-
-
-Good Target Rework
-------------------
-
-- Consider only using good targets in findGroupSolution()
-  - Test
-
-
-If we're launching V3
----------------------
-
-- We don't need anything from Ops
-  - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
-- Make an 2.x-stable branch for unpoly-site
-- Make an 2.x-stable branch for unpoly
-- We need a separate Algolia index for v2
-  - v3 would stay on "latest"
-  - use that index in unpoly-site/2.x-stable
-- Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
-- Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
-
+- Consider reverting: up:request:late: Consider the time a promoted request was loading in the background
 
 
 
@@ -239,6 +210,21 @@ Docs
     - if we stop auto-set it to auto, otherwise stop parsing this
 
 
+If we're launching V3
+---------------------
+
+- We don't need anything from Ops
+  - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
+- Make an 2.x-stable branch for unpoly-site
+- Make an 2.x-stable branch for unpoly
+- We need a separate Algolia index for v2
+  - v3 would stay on "latest"
+  - use that index in unpoly-site/2.x-stable
+- Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
+- Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
+
+
+
 
 Icebox
 ======
@@ -416,3 +402,5 @@ Decisions
     => We might offer a shortcut like [up-view] and [up-save-view] as a shortcut to set both at once
 - Replace up.rails by accepting methods / conform from data attributes in options parser
   => This wouldn't work in scenarios where both Rails UJS and Unpoly were active
+- No longer send X-Up-Location with every response
+  => No we should keep sending it, as this excludes redirect-forwarded up-params
