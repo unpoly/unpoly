@@ -586,8 +586,6 @@ up.network = (function() {
 
   The network is also considered busy while requests are [loading in the background](/up.request#options.background).
 
-  @see up.network.isIdle
-
   @function up.network.isBusy
   @return {boolean}
   @stable
@@ -595,19 +593,6 @@ up.network = (function() {
   function isBusy() {
     return queue.isBusy()
   }
-
-  /*-
-   Returns whether Unpoly is *not* currently loading a [request](/up.request).
-
-   The network is also considered [busy](/up.network.isBusy()) while requests are [loading in the background](/up.request#options.background).
-
-   @see up.network.isBusy
-
-   @function up.network.isIdle
-   @return {boolean}
-   @stable
-   */
-  const isIdle = u.negate(isBusy)
 
   /*-
   Makes a full-page request, replacing the entire browser environment with a new page from the server response.
@@ -952,7 +937,6 @@ up.network = (function() {
   return {
     request: makeRequest,
     cache,
-    isIdle,
     isBusy,
     isSafeMethod,
     config,

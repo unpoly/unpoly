@@ -51,7 +51,7 @@ up.Change.FromOptions = class FromOptions extends up.Change {
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.options
 
-    if (!abort || up.network.isIdle()) return
+    if (!abort || !up.network.isBusy()) return
 
     let { targetElements, layer, origin } = this.change.getPreflightProps()
 

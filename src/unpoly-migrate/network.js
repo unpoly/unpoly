@@ -94,6 +94,23 @@ up.migrate.preprocessAbortArgs = function(args) {
 }
 
 /*-
+Returns whether Unpoly is *not* currently loading a [request](/up.request).
+
+The network is also considered [busy](/up.network.isBusy()) while requests are [loading in the background](/up.request#options.background).
+
+@see up.network.isBusy
+
+@function up.network.isIdle
+@return {boolean}
+@deprecated
+  Use `!up.network.isBusy()` instead.
+*/
+up.network.isIdle = function() {
+  up.migrate.deprecated('up.network.isIdle()', '!up.network.isBusy()')
+  return !up.network.isBusy()
+}
+
+/*-
 @class up.Request
 */
 
