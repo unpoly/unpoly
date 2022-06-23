@@ -582,7 +582,11 @@ up.network = (function() {
   }
 
   /*-
-  Returns whether Unpoly is currently waiting for a [request](/up.request) to finish.
+  Returns whether Unpoly is currently loading a [request](/up.request).
+
+  The network is also considered busy while requests are [loading in the background](/up.request#options.background).
+
+  @see up.network.isIdle
 
   @function up.network.isBusy
   @return {boolean}
@@ -593,7 +597,11 @@ up.network = (function() {
   }
 
   /*-
-   Returns whether Unpoly is *not* currently waiting for a [request](/up.request) to finish.
+   Returns whether Unpoly is *not* currently loading a [request](/up.request).
+
+   The network is also considered [busy](/up.network.isBusy()) while requests are [loading in the background](/up.request#options.background).
+
+   @see up.network.isBusy
 
    @function up.network.isIdle
    @return {boolean}
