@@ -5969,7 +5969,7 @@ describe 'up.fragment', ->
         makeLayers(2)
 
         next ->
-          rootElement = up.layer.get(0).affix('.foo.in-root')
+          rootElement = fixture('.foo.in-root')
           overlayElement = up.layer.get(1).affix('.foo.in-overlay')
 
           up.hello(rootElement)
