@@ -9,7 +9,7 @@ up.Request.Queue = class Queue {
   reset() {
     this.queuedRequests = []
     this.currentRequests = []
-    this.emittedSlow = false
+    this.emittedLate = false
   }
 
   get allRequests() {
@@ -51,8 +51,8 @@ up.Request.Queue = class Queue {
     let timeUntilLate = Math.max(request.badResponseTime - request.queueAge, 0)
 
     // We may have multiple timers running concurrently.
-    // Nonethess we don't emit duplicate events due to the check in @checkSlow().
-    u.timer(timeUntilLate, () => this.checkSlow())
+    // Nonethess we don't emit duplicate events due to the check in @checkLate().
+    u.timer(timeUntilLate, () => this.checkLate())
   }
 
   getMaxConcurrency() {
@@ -106,7 +106,7 @@ up.Request.Queue = class Queue {
     }
 
     // Check if we can emit up:request:recover after a previous up:request:late event.
-    this.checkSlow()
+    this.checkLate()
 
     u.microtask(() => this.poke())
   }
@@ -140,13 +140,13 @@ up.Request.Queue = class Queue {
     }
   }
 
-  checkSlow() {
-    const currentSlow = this.isSlow()
+  checkLate() {
+    const currentLate = this.isLate()
 
-    if (this.emittedSlow !== currentSlow) {
-      this.emittedSlow = currentSlow
+    if (this.emittedLate !== currentLate) {
+      this.emittedLate = currentLate
 
-      if (currentSlow) {
+      if (currentLate) {
         up.emit('up:request:late', { log: 'Server is slow to respond' })
       } else {
         up.emit('up:request:recover', { log: 'Slow requests were loaded' })
@@ -154,11 +154,11 @@ up.Request.Queue = class Queue {
     }
   }
 
-  isSlow() {
+  isLate() {
     const allForegroundRequests = u.reject(this.allRequests, 'background')
 
-    // If badResponseTime is 200, we're scheduling the checkSlow() timer after 200 ms.
-    // The request must be slow when checkSlow() is called, or we will never look
+    // If badResponseTime is 200, we're scheduling the checkLate() timer after 200 ms.
+    // The request must be slow when checkLate() is called, or we will never look
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
