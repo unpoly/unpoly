@@ -30,7 +30,8 @@ Changes tracked until 2022-06-22:
 - Revalidation
 - Longer cache times
 - Expire vs. Evict
-- Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`. Deprecated `X-Up-Reload-From-Time`.
+- Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`.
+- Deprecated `X-Up-Reload-From-Time`.
 - Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
 
 ### Forms from hell
