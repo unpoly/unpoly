@@ -11,7 +11,7 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Next
 ====
 
-Changes tracked until 2021-05-30:
+Changes tracked until 2022-06-08:
 
 
 ### Fragment aborting
@@ -30,23 +30,14 @@ Changes tracked until 2021-05-30:
 - Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`. Deprecated `X-Up-Reload-From-Time`.
 - Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
 
-### Disable forms
-
-- Disabling busy forms with `[up-disable]`
-  - Buttons
-  - Entire form
-  - Arbitrary selectors
-
 ### Forms from hell
 
 - Fixing forms from hell with stacked [up-validate]
 - Live validatation while typing
-
-
-### Better feedback
-
-- .up-loading / aria-busy
-
+- Disabling busy forms with `[up-disable]`
+  - Buttons
+  - Entire form
+  - Arbitrary selectors
 
 ### Watch / observe
 
@@ -61,17 +52,23 @@ Changes tracked until 2021-05-30:
 - Date input validated on blur
 - Can configure custom up.form.config.inputEvents/changeEvents
 
+
 ### Quality of life
 
 (Maybe extract individual sections here)
 
+- .up-loading / aria-busy
 - Background requests
   - Deprioritized
   - Doesn't trigger progress bar
   - Slow polling responses no longer trigger progress bar  
+  - You can also set { badResponseTime }
+  - up.network.config.badResponseTime can now be a Function(up.Request): number
 - The log shows which user interaction triggered an event chain
 - Optional targets with :maybe
-- Allow to consider [up-hungry] elements for updates to any layer with [up-layer=any]
+- Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
+- Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
+  - Example: Canonical link
 - Listeners to up:fragment:loaded can force failure options by setting event.renderOptions.fail
 - Allow to customize response failure with up.network.config.fail
 - up.form.submitButtons()
@@ -79,9 +76,25 @@ Changes tracked until 2021-05-30:
   - Change up.form.config.validateTargets to up.form.config.groupSelectors
 - Play nice with overlays from other libraries (up.layer.config.foreignOverlaySelectors)
 - Stylable [hidden]
+- Support FormData everywhere
 
+
+### Strict target derivation
+
+- Don't use tagNames
+- Configurable derivers
+- Derived targets are verified to match the derivee
+- Don't poll elements with a weak selector
+- Don't hungry elements with a weak selector
+- up.fragment.isTargetable()
+
+  
 ### Small things
 
+- [up-poll]: Don't swallow fatal errors
+- [up-poll]: Log reasons why we won't poll
+- up.fragment.matches(Element, Element)
+- Log when a guard event was prevented
 - New concurrency default 6 (3 while reducing requests)
 - Keep polling on slow connections, but slower
   - up.radio.config.pollIntervalScale
@@ -108,6 +121,7 @@ Changes tracked until 2021-05-30:
 
 ### IE11 removal
 
+- Native smooth scrolling
 - Remove up.util.assign()
 - Remove up.util.values()
 - Kill IE11: Remove up.element.remove()
