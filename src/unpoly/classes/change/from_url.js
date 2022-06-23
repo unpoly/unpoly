@@ -115,7 +115,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       }
     } else {
       // value is up.error.aborted() or another fatal error that can never
-      // be used as a fragment update. At this point up:request:aborted or up:request:fatal
+      // be used as a fragment update. At this point up:request:aborted or up:request:offline
       // have already been emitted by up.Request.
       throw response
     }

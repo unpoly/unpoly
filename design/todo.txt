@@ -63,7 +63,7 @@ This way we can keep using cached content if we're offline.
 - Rework up.Request
   - Rename up:request:fatal to up:request:offline
     - No { retry } function here. We could offer this one day, but then we need many options from https://www.npmjs.com/package/axios-retry
-    - Offer up:fragment:offline
+  - Offer up:fragment:offline
     - event.renderOptions
     - Offer an event.retry() method
       - This makes another render pass

@@ -531,7 +531,7 @@ up.Request = class Request extends up.Record {
     // Hence we ignore the passed ProgressEvent and use our own error message.
     const log = 'Fatal error during request'
     this.deferred.reject(up.error.failed(log))
-    this.emit('up:request:fatal', { log })
+    this.emit('up:request:offline', { log })
   }
 
   onXHRTimeout() {

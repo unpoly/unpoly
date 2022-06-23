@@ -1405,7 +1405,7 @@ describe('up.network', function() {
         beforeEach(function() {
           up.network.config.badResponseTime = 0
           this.events = []
-          u.each(['up:request:load', 'up:request:loaded', 'up:network:late', 'up:network:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) => {
+          u.each(['up:request:load', 'up:request:loaded', 'up:network:late', 'up:network:recover', 'up:request:offline', 'up:request:aborted'], (eventType) => {
             up.on(eventType, () => {
               this.events.push(eventType)
             })
@@ -1682,7 +1682,7 @@ describe('up.network', function() {
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
-              'up:request:fatal',
+              'up:request:offline',
               'up:network:recover'
             ])
           })

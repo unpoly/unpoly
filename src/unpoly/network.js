@@ -866,7 +866,7 @@ up.network = (function() {
   Note that this event will also be emitted when the server signals an
   error with an HTTP status like `500`. Only if the request
   encounters a fatal error (like a loss of network connectivity),
-  [`up:request:fatal`](/up:request:fatal) is emitted instead.
+  [`up:request:offline`](/up:request:offline) is emitted instead.
 
   The event is emitted on the layer that caused the request.
 
@@ -902,7 +902,7 @@ up.network = (function() {
 
   The event is emitted on the layer that caused the request.
 
-  @event up:request:fatal
+  @event up:request:offline
 
   @param {up.Request} event.request
     The failed request.

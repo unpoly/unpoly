@@ -98,7 +98,7 @@ To configure a custom handling of unexpected content, use the `up:fragment:loade
 ## Handling fatal network errors
 
 When a request encounters fatal error like a timeout or loss of network connectivity, Unpoly
-will emit `up:request:fatal` and not render.
+will emit `up:request:offline` and not render.
 
 Because there never was a server response, `up:fragment:loaded` will *not* be emitted in this case.
 
