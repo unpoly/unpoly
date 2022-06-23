@@ -622,7 +622,25 @@ describe 'up.radio', ->
         next.after 250, ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
-      it 'keeps polling if a request failed', asyncSpec (next) ->
+      it 'keeps polling if the server responds with a 304 Not Modified status', asyncSpec (next) ->
+        up.radio.config.pollInterval = 250
+
+        up.hello(fixture('.element[up-poll][up-source="/source"]'))
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after 250, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWith(status: 304, responseText: '')
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        next.after 250, ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+
+      it 'keeps polling if a request failed with a network issue', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(up.error.failed('network error'))
 
@@ -633,6 +651,24 @@ describe 'up.radio', ->
 
         next.after 75, ->
           expect(reloadSpy.calls.count()).toBe(2)
+
+      it 'keeps polling if the server responds with a 404 Not Found error', asyncSpec (next) ->
+        up.radio.config.pollInterval = 250
+
+        up.hello(fixture('.element[up-poll][up-source="/source"]'))
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        next.after 250, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWith(status: 404, responseText: 'Not found')
+
+        next.after 50, ->
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        next.after 250, ->
+          expect(jasmine.Ajax.requests.count()).toBe(2)
 
       it 'does not reload if the tab is hidden', asyncSpec (next) ->
         up.radio.config.pollInterval = 50
