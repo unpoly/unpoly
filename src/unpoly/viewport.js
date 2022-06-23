@@ -558,7 +558,7 @@ up.viewport = (function() {
   - The selection range within a focused input element.
   - The scroll position within a focused input element.
 
-  State can only be preserved if the focused element has a [derivable target selector](/up.fragment.toTarget).
+  State can only be preserved if the focused element is [targetable](/up.fragment.isTargetable).
 
   Saved state will be associated with the given layer's location.
   It can later be restored by calling `up.viewport.restoreScroll()`

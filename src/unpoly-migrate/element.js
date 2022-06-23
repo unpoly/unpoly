@@ -142,7 +142,7 @@ Adds or removes the given class from the given element.
 
   If omitted, the class will be added if missing and removed if present.
 @deprecated
-  USe [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) instead.
+  Use [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) instead.
 */
 up.element.toggleClass = function(element, klass, newPresent) {
   const list = element.classList

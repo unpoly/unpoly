@@ -6068,11 +6068,16 @@ describe 'up.fragment', ->
         expect(up.fragment.toTarget(document.body)).toBe("body")
         document.body.classList.remove('some-custom-class')
 
+      it 'does not use the tag name of a non-unique element', ->
+        div = fixture('div')
+        deriveTarget = -> up.fragment.toTarget(div)
+        expect(deriveTarget).toThrowError(/cannot derive/i)
+
       it 'uses "link[rel=canonical]" for such a link', ->
         link = fixture('link.some-class[rel="canonical"][href="/foo"]')
         expect(up.fragment.toTarget(link)).toBe('link[rel="canonical"]')
 
-      it 'uses "up-modal-viewport" for such a link, so that viewport can get a key to save scrollTops', ->
+      it 'uses "up-modal-viewport" for such an element, so that viewport can get a key to save scrollTops', ->
         link = fixture('up-modal-viewport')
         expect(up.fragment.toTarget(link)).toBe('up-modal-viewport')
 
@@ -6085,6 +6090,28 @@ describe 'up.fragment', ->
         element = fixture('input')
         element.setAttribute('name', 'foo"bar')
         expect(up.fragment.toTarget(element)).toBe('input[name="foo\\"bar"]')
+
+      it 'lets users configure custom deriver patterns in up.fragment.config.targetDerivers', ->
+        element = fixture('div.foo[custom-attr=value]')
+        expect(up.fragment.toTarget(element)).toBe('.foo')
+
+        up.fragment.config.targetDerivers.unshift('*[custom-attr]')
+
+        expect(up.fragment.toTarget(element)).toBe('div[custom-attr="value"]')
+
+      it 'lets users configure custom deriver functions in up.fragment.config.targetDerivers', ->
+        element = fixture('div.foo[custom-attr=value]')
+        expect(up.fragment.toTarget(element)).toBe('.foo')
+
+        up.fragment.config.targetDerivers.unshift (element) -> e.attrSelector('custom-attr', element.getAttribute('custom-attr'))
+
+        expect(up.fragment.toTarget(element)).toBe('[custom-attr="value"]')
+
+      it "does not use a derived target if it matches a different element first", ->
+        element1 = fixture('div#foo.foo')
+        element2 = fixture('div#foo.bar')
+
+        expect(up.fragment.toTarget(element2)).toBe('.bar')
 
     describe 'up.fragment.expandTargets', ->
 
