@@ -12,6 +12,9 @@ Various changes
   - Support up.network.isLate() to help implement progress bars
     - Delegate to up.Request.Queue
 - Consider reverting: up:request:late: Consider the time a promoted request was loading in the background
+- Target verification as a config option?
+  - up.fragment.config.verifyDerivedTarget
+  - Do we even have tests for verification?
 
 
 
