@@ -479,7 +479,7 @@ up.Request = class Request extends up.Record {
   load() {
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
-    if (this.state !== 'new') { return }
+    if (this.state !== 'new') return
     this.state = 'loading'
 
     // Convert from XHR's callback-based API to up.Request's promise-based API
@@ -529,14 +529,12 @@ up.Request = class Request extends up.Record {
   onXHRError() {
     // Neither XHR nor fetch() provide any meaningful error message.
     // Hence we ignore the passed ProgressEvent and use our own error message.
-    const log = 'Fatal error during request'
-    this.deferred.reject(up.error.failed(log))
-    this.emit('up:request:offline', { log })
+    this.setOfflineState('Network error')
   }
 
   onXHRTimeout() {
     // We treat a timeout like a client-side abort (which it is).
-    this.setAbortedState('Requested timed out')
+    this.setAbortedState('Timeout')
   }
 
   onXHRAbort() {
@@ -578,27 +576,28 @@ up.Request = class Request extends up.Record {
   }
 
   setAbortedState(reason) {
-    if ((this.state !== 'new') && (this.state !== 'loading')) { return; }
-    this.state = 'aborted'
+    if (this.isSettled()) return
 
-    let message = this.abortMessage(reason)
-    this.emit('up:request:aborted', { log: message })
+    let message = 'Aborted request to ' + this.description + (reason ? ':' + reason : '')
+    this.state = 'aborted'
     this.deferred.reject(up.error.aborted(message))
+    this.emit('up:request:aborted', { log: message })
 
     // Return true so callers know we didn't return early without actually aborting anything.
     return true
   }
 
-  abortMessage(reason) {
-    let message = `Aborted request to ${this.description}`
-    if (reason) {
-      message += `: ${reason}`
-    }
-    return message
+  setOfflineState(reason) {
+    if (this.isSettled()) return
+
+    let message = 'Cannot load request to ' + this.description + (reason ? ':' + reason : '')
+    this.state = 'offline'
+    this.deferred.reject(up.error.offline(message))
+    this.emit('up:request:offline', { log: message })
   }
 
   respondWith(response) {
-    if (this.state !== 'loading') { return; }
+    if (this.state !== 'loading') return
     this.state = 'loaded'
 
     if (response.ok) {
@@ -606,6 +605,10 @@ up.Request = class Request extends up.Record {
     } else {
       return this.deferred.reject(response)
     }
+  }
+
+  isSettled() {
+    return (this.state !== 'new') && (this.state !== 'loading')
   }
 
   csrfHeader() {

@@ -247,7 +247,7 @@ describe('up.network', function() {
 
       describe('error handling', function() {
 
-        it('rejects with up.Failed when there was a network error', function(done) {
+        it('rejects with up.Offline when there was a network error', function(done) {
           const request = up.request('/url')
 
           u.task(() => {
@@ -255,8 +255,8 @@ describe('up.network', function() {
 
             promiseState(request).then(function (result) {
               expect(result.state).toEqual('rejected')
-              expect(result.value.name).toEqual('up.Failed')
-              expect(result.value.name).toEqual('up.Failed')
+              expect(result.value.name).toEqual('up.Offline')
+              expect(result.value.message).toMatch(/Network error/i)
               done()
             })
           })

@@ -37,6 +37,8 @@ up.error = (function() {
     return build(message || 'Aborted')
   })
 
+  const offline = errorInterface('up.Offline')
+
   const notImplemented = errorInterface('up.NotImplemented')
 
   const cannotApply = errorInterface('up.CannotApply', (change, reason) => {
@@ -123,6 +125,7 @@ up.error = (function() {
     fail,
     failed,
     aborted,
+    offline,
     cannotApply,
     notImplemented,
     cannotTarget,
