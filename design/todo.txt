@@ -11,10 +11,6 @@ Various changes
   - I think this means moving the event logic to up.Response
   - Support up.network.isLate() to help implement progress bars
     - Delegate to up.Request.Queue
-- Consider reverting: up:request:late: Consider the time a promoted request was loading in the background
-- Target verification as a config option?
-  - up.fragment.config.verifyDerivedTarget
-  - Do we even have tests for verification?
 
 
 
@@ -407,3 +403,5 @@ Decisions
   => This wouldn't work in scenarios where both Rails UJS and Unpoly were active
 - No longer send X-Up-Location with every response
   => No we should keep sending it, as this excludes redirect-forwarded up-params
+- Consider reverting: up:request:late: Consider the time a promoted request was loading in the background
+  => For this we would need to track when a request was promoted to the foreground
