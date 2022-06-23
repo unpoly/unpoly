@@ -664,15 +664,6 @@ describe 'up.event', ->
         next ->
           expect(callback).toHaveBeenCalled()
 
-      it 'runs the given callback when IE/Edge emits a KeyboardEvent with { key: "Esc" } instead of { key: "Escape" }', asyncSpec (next) ->
-          callback = jasmine.createSpy()
-          up.event.onEscape(callback)
-          element = fixture('.element')
-          Trigger.keySequence(element, 'Esc')
-
-          next ->
-            expect(callback).toHaveBeenCalled()
-
       it 'does not run the given callback when the user presses another key', asyncSpec (next) ->
         callback = jasmine.createSpy()
         up.event.onEscape(callback)

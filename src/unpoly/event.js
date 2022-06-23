@@ -419,23 +419,10 @@ The parsed data will be passed to your event handler as a third argument:
   */
   function onEscape(listener) {
     return on('keydown', function(event) {
-      if (wasEscapePressed(event)) {
+      if (event.key === 'Escape') {
         return listener(event)
       }
     })
-  }
-
-  /*-
-  Returns whether the given keyboard event involved the ESC key.
-
-  @function up.util.wasEscapePressed
-  @param {Event} event
-  @internal
-  */
-  function wasEscapePressed(event) {
-    const { key } = event
-    // IE/Edge use 'Esc', other browsers use 'Escape'
-    return (key === 'Escape') || (key === 'Esc')
   }
 
   /*-
