@@ -296,7 +296,7 @@ describe('up.network', function() {
 
         describe('with { timeout } option', function() {
 
-          it('rejects with AbortError when the request times out', function(done) {
+          it('rejects with up.Offline when the request times out', function(done) {
             const request = up.request('/url')
 
             u.task(() => {
@@ -305,7 +305,8 @@ describe('up.network', function() {
 
               promiseState(request).then(function (result) {
                 expect(result.state).toEqual('rejected')
-                expect(result.value.name).toEqual('AbortError')
+                expect(result.value.name).toEqual('up.Offline')
+                expect(result.value.message).toMatch(/time ?out/i)
                 done()
               })
             })
@@ -1626,7 +1627,7 @@ describe('up.network', function() {
             expect(this.events).toEqual([
               'up:request:load',
               'up:network:late',
-              'up:request:aborted',
+              'up:request:offline',
               'up:network:recover'
             ])
           })

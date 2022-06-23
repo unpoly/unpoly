@@ -533,8 +533,10 @@ up.Request = class Request extends up.Record {
   }
 
   onXHRTimeout() {
-    // We treat a timeout like a client-side abort (which it is).
-    this.setAbortedState('Timeout')
+    // We used to treat timeouts like a client-side abort. While this is technically
+    // what happens, it is more practical for users to consider a timeout like a failed
+    // connection that we can retry with up.render({ onOffline }) etc.
+    this.setOfflineState('Timeout')
   }
 
   onXHRAbort() {
