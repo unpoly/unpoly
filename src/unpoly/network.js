@@ -92,6 +92,11 @@ up.network = (function() {
 
     The value is given in milliseconds.
 
+  @param {number|undefined} [config.timeout=90_000]
+    A default [timeout](/up.request#options.timeout) for [requests](/up.request) in milliseconds.
+
+    Set `undefined` to not use a timeout.
+
   @param {boolean|Function(up.Response): boolean} [config.fail]
     Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 

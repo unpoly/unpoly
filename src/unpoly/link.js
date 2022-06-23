@@ -345,6 +345,7 @@ up.link = (function() {
     parser.boolean('background')
     parser.string('contentType')
     parser.number('badResponseTime')
+    parser.number('timeout')
 
     return options
   }
@@ -1052,6 +1053,11 @@ up.link = (function() {
     an `up:network:late` event.
 
     Defaults to `up.network.config.badResponseTime`.
+
+  @param [up-timeout]
+    The number of milliseconds after which this request fails with a timeout.
+
+    Defaults to `up.network.config.timeout`.
 
   @param [up-layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.

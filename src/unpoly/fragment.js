@@ -713,6 +713,11 @@ up.fragment = (function() {
 
     Defaults to `up.network.config.badResponseTime`.
 
+  @param {number} [options.timeout]
+    The number of milliseconds after which this request fails with a timeout.
+
+    Defaults to `up.network.config.timeout`.
+
   @param {Element|jQuery} [options.origin]
     The element that triggered the change.
 

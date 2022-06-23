@@ -296,7 +296,8 @@ up.Request = class Request extends up.Record {
     return {
       state: 'new',
       abortable: true,
-      headers: {}
+      headers: {},
+      timeout: up.network.config.timeout
     }
   }
 

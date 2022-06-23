@@ -294,19 +294,29 @@ describe('up.network', function() {
           })
         })
 
-        it('rejects with AbortError when the request times out', function(done) {
-          const request = up.request('/url')
+        describe('with { timeout } option', function() {
 
-          u.task(() => {
-            jasmine.clock().install(); // required by responseTimeout()
-            this.lastRequest().responseTimeout()
+          it('rejects with AbortError when the request times out', function(done) {
+            const request = up.request('/url')
 
-            promiseState(request).then(function (result) {
-              expect(result.state).toEqual('rejected')
-              expect(result.value.name).toEqual('AbortError')
-              done()
+            u.task(() => {
+              jasmine.clock().install(); // required by responseTimeout()
+              this.lastRequest().responseTimeout()
+
+              promiseState(request).then(function (result) {
+                expect(result.state).toEqual('rejected')
+                expect(result.value.name).toEqual('AbortError')
+                done()
+              })
             })
           })
+
+          it('uses a default timeout from up.network.config.timeout', function() {
+            up.network.config.timeout = 456789
+            const request = up.request('/url')
+            expect(request.timeout).toBe(456789)
+          })
+
         })
 
       })
