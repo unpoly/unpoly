@@ -90,36 +90,58 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   onRequestSettled(response) {
     if (response instanceof up.Response) {
-      this.response = response
-
-      // Allow listeners to inspect the response and either prevent the fragment change
-      // or manipulate change options. An example for when this is useful is a maintenance
-      // page with its own layout, that cannot be loaded as a fragment and must be loaded
-      // with a full page load.
-      this.request.assertEmitted('up:fragment:loaded', {
-        callback: this.options.onLoaded,
-        response: this.response,
-        renderOptions: this.options,
-        log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description]
-      })
-
-      // Listeners to up:fragment:loaded may have changed renderOptions.fail
-      // to force success or failure options.
-      response.fail = this.options.fail
-
-      if (response.ok) {
-        return this.updateContentFromResponse(this.options)
-      } else {
-        up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
-        throw this.updateContentFromResponse(this.deriveFailOptions())
-      }
+      return this.onRequestSettledWithResponse(response)
     } else {
-      // value is up.error.aborted() or another fatal error that can never
+      // Value is up.error.aborted(), up.error.offline or another fatal error that can never
       // be used as a fragment update. At this point up:request:aborted or up:request:offline
       // have already been emitted by up.Request.
-      throw response
+      return this.onRequestSettledWithError(response)
     }
   }
+
+  onRequestSettledWithResponse(response) {
+    this.response = response
+
+    // Allow listeners to inspect the response and either prevent the fragment change
+    // or manipulate change options. An example for when this is useful is a maintenance
+    // page with its own layout, that cannot be loaded as a fragment and must be loaded
+    // with a full page load.
+    this.request.assertEmitted('up:fragment:loaded', {
+      callback: this.options.onLoaded,
+      response: this.response,
+      renderOptions: this.options,
+      log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description]
+    })
+
+    // Listeners to up:fragment:loaded may have changed renderOptions.fail
+    // to force success or failure options.
+    response.fail = this.options.fail
+
+    if (response.ok) {
+      return this.updateContentFromResponse(this.options)
+    } else {
+      up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
+      throw this.updateContentFromResponse(this.deriveFailOptions())
+    }
+  }
+
+  onRequestSettledWithError(error) {
+    if (up.error.offline.is(error)) {
+      this.request.emit('up:fragment:offline', {
+        callback: this.options.onOffline,
+        response: this.response,
+        renderOptions: this.options,
+        retry: () => up.render(this.options),
+        log: ['Cannot load fragment from %s: %s', this.request.description, error.reason]
+      })
+    }
+
+    // Even if an { onOffline } callback retries, we still fail the initial render() call.
+    // We also cannot check if the user has retried, since { onOffline } might render a
+    // notification and retry some time later (async).
+    throw error
+  }
+
 
   updateContentFromResponse(finalRenderOptions) {
     // The response might carry some updates for our change options,

@@ -745,7 +745,7 @@ describe 'up.fragment', ->
 
         describe 'when there is a network issue', ->
 
-          it "doesn't crash and rejects the returned promise", (done) ->
+          it "doesn't crash and rejects the returned promise with up.Offline", (done) ->
             fixture('.target')
             promise = up.render('.target', url: '/path')
 
@@ -755,8 +755,79 @@ describe 'up.fragment', ->
                 @lastRequest().responseError()
                 u.task =>
                   promiseState(promise).then (result) =>
-                    expect(result.state).toEqual('rejected')
+                    expect(result.state).toBe('rejected')
+                    expect(result.value.name).toBe('up.Offline')
                     done()
+
+          it 'emits an up:fragment:offline event with access to { request } and { renderOptions }', asyncSpec (next) ->
+            listener = jasmine.createSpy('up:fragment:offline listener')
+            up.on('up:fragment:offline', listener)
+
+            fixture('.target')
+            up.render('.target', url: '/other-path')
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+            next ->
+              expect(listener).toHaveBeenCalled()
+              event = listener.calls.argsFor(0)[0]
+              expect(event.type).toBe('up:fragment:offline')
+              expect(event.request).toEqual(jasmine.any(up.Request))
+              expect(event.renderOptions.target).toMatchURL('.target')
+              expect(event.renderOptions.url).toMatchURL('/other-path')
+
+          it 'calls an { onOffline } listener with an up:fragment:offline event', asyncSpec (next) ->
+            listener = jasmine.createSpy('onOffline callback')
+
+            fixture('.target')
+            up.render('.target', url: '/other-path', onOffline: listener)
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+            next ->
+              expect(listener).toHaveBeenCalled()
+              event = listener.calls.argsFor(0)[0]
+              expect(event.type).toBe('up:fragment:offline')
+
+          it 'allows up:fragment:offline listeners to retry the rendering by calling event.retry()', asyncSpec (next) ->
+            listener = jasmine.createSpy('onOffline callback')
+
+            fixture('.target', text: 'old text')
+            up.render('.target', url: '/other-path', onOffline: listener)
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+            next ->
+              expect('.target').toHaveText('old text')
+              expect(listener.calls.count()).toBe(1)
+              event = listener.calls.argsFor(0)[0]
+              event.retry()
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(2)
+
+              jasmine.respondWithSelector('.target', text: 'new text')
+
+            next ->
+              # The listener was not called again
+              expect(listener.calls.count()).toBe(1)
+
+              expect('.target').toHaveText('new text')
 
         describe 'up:fragment:loaded event', ->
 
