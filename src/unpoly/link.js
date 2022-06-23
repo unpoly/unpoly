@@ -1044,12 +1044,12 @@ up.link = (function() {
     Whether this request will load in the background.
 
     Background requests deprioritized over foreground requests.
-    Background requests also won't emit `up:request:late` events and won't trigger
+    Background requests also won't emit `up:network:late` events and won't trigger
     the [progress bar](/up.network.config#config.progressBar).
 
   @param [up-bad-response-time]
     The number of milliseconds after which this request can cause
-    an `up:request:late` event.
+    an `up:network:late` event.
 
     Defaults to `up.network.config.badResponseTime`.
 

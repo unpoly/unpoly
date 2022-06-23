@@ -10,8 +10,10 @@ up.migrate.renamedEvent('up:proxy:received', 'up:request:loaded');  // renamed i
 up.migrate.renamedEvent('up:proxy:loaded',   'up:request:loaded');  // renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:fatal',    'up:request:fatal');   // renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:aborted',  'up:request:aborted'); // renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:slow',     'up:request:late');    // renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:recover',  'up:request:recover'); // renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:slow',     'up:network:late');    // renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:recover',  'up:network:recover'); // renamed in 1.0.0
+up.migrate.renamedEvent('up:request:late',   'up:network:late');    // renamed in 3.0.0
+up.migrate.renamedEvent('up:request:recover', 'up:network:recover'); // renamed in 3.0.0
 
 const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
 Object.defineProperty(up.network.config, 'preloadDelay', {
@@ -151,7 +153,7 @@ up.Response.prototype.isError = function() {
 
 function mayHaveCustomIndicator() {
   const listeners = up.EventListener.allNonDefault(document)
-  return u.find(listeners, listener => listener.eventType === 'up:request:late')
+  return u.find(listeners, listener => listener.eventType === 'up:network:late')
 }
 
 const progressBarDefault = up.network.config.progressBar
@@ -159,7 +161,7 @@ const progressBarDefault = up.network.config.progressBar
 function disableProgressBarIfCustomIndicator() {
   up.network.config.progressBar = function() {
     if (mayHaveCustomIndicator()) {
-      up.migrate.warn('Disabled the default progress bar as may have built a custom loading indicator with your up:request:late listener. Please set up.network.config.progressBar to true or false.')
+      up.migrate.warn('Disabled the default progress bar as may have built a custom loading indicator with your up:network:late listener. Please set up.network.config.progressBar to true or false.')
       return false
     } else {
       return progressBarDefault

@@ -197,11 +197,11 @@ describe 'up.radio', ->
         next.after defaultInterval, ->
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-      it 'does not emit up:request:late if the server is slow to respond', asyncSpec (next) ->
+      it 'does not emit up:network:late if the server is slow to respond', asyncSpec (next) ->
         element = up.hello(fixture('.element'))
         up.network.config.badResponseTime = 20
-        lateListener = jasmine.createSpy('up:request:late listener')
-        up.on('up:request:late', lateListener)
+        lateListener = jasmine.createSpy('up:network:late listener')
+        up.on('up:network:late', lateListener)
 
         up.radio.startPolling(element, { interval: 5 })
 

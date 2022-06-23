@@ -40,7 +40,7 @@ up.Request.Queue = class Queue {
       request.background = false
 
       // If the request has been loading longer than its badResponseTime, we have
-      // already ignored its up:request:late event. Hence we schedule another check.
+      // already ignored its up:network:late event. Hence we schedule another check.
       this.scheduleSlowTimer(request)
     }
   }
@@ -105,7 +105,7 @@ up.Request.Queue = class Queue {
       up.network.registerAliasForRedirect(request, responseOrError)
     }
 
-    // Check if we can emit up:request:recover after a previous up:request:late event.
+    // Check if we can emit up:network:recover after a previous up:network:late event.
     this.checkLate()
 
     u.microtask(() => this.poke())
@@ -147,9 +147,9 @@ up.Request.Queue = class Queue {
       this.emittedLate = currentLate
 
       if (currentLate) {
-        up.emit('up:request:late', { log: 'Server is slow to respond' })
+        up.emit('up:network:late', { log: 'Server is slow to respond' })
       } else {
-        up.emit('up:request:recover', { log: 'Slow requests were loaded' })
+        up.emit('up:network:recover', { log: 'Slow requests were loaded' })
       }
     }
   }

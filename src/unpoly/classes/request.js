@@ -233,7 +233,7 @@ up.Request = class Request extends up.Record {
   Whether this request is loading in the background.
 
   Background requests deprioritized over foreground requests.
-  Background requests also won't emit `up:request:late` events and won't trigger
+  Background requests also won't emit `up:network:late` events and won't trigger
   the [progress bar](/up.network.config#config.progressBar).
 
   @property up.Request#background
@@ -243,7 +243,7 @@ up.Request = class Request extends up.Record {
 
   /*-
   The number of milliseconds after which this request can cause
-  an `up:request:late` event.
+  an `up:network:late` event.
 
   Defaults to `up.network.config.badResponseTime`.
 
@@ -360,7 +360,7 @@ up.Request = class Request extends up.Record {
     // (1) We want to set the default after all other properties are initialized,
     //     in case up.network.config.badResponseTime is a function that inspects this request.
     // (2) We want to set the default once and then keep the value immutable. Otherwise
-    //     the timer logic for up:request:late/:recover gets inconvenient edge cases.
+    //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
   }
 

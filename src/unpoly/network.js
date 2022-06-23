@@ -16,7 +16,7 @@ Unpoly's `up.request()` has a number of convenience features:
 - Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
   For example, when updating a [fragment](/up.fragment), the fragment's selector is automatically sent
   as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
-- Useful events like `up:request:loaded` or `up:request:late` are emitted throughout the request/response
+- Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response
   lifecycle.
 - When too many requests are sent concurrently, excessive requests are [queued](/up.network.config#config.concurrency).
   This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
@@ -26,7 +26,7 @@ Unpoly's `up.request()` has a number of convenience features:
 
 @see up.request
 @see up.Response
-@see up:request:late
+@see up:network:late
 
 @module up.network
 */
@@ -82,7 +82,7 @@ up.network = (function() {
     The value is given in milliseconds. Lower is better.
 
   @param {number|Function(up.Request): number} [config.badResponseTime=400]
-    How long the proxy waits until emitting the [`up:request:late` event](/up:request:late).
+    How long the proxy waits until emitting the [`up:network:late` event](/up:network:late).
 
     Requests exceeding this response time will also cause a [progress bar](/up.network.config#config.progressBar)
     to appear at the top edge of the screen.
@@ -163,11 +163,11 @@ up.network = (function() {
     ```
 
   @param {boolean|Function(): boolean} [config.progressBar]
-    Whether to show a progress bar for [late requests](/up:request:late).
+    Whether to show a progress bar for [late requests](/up:network:late).
 
     The progress bar is implemented as a single `<up-progress-bar>` element.
     Unpoly will automatically insert and remove this element as requests
-    are [late](/up:request:late) or [recovered](/up:request:recover).
+    are [late](/up:network:late) or [recovered](/up:network:recover).
 
     The default appearance is a simple blue bar at the top edge of the screen.
     You may customize the style using CSS:
@@ -470,12 +470,12 @@ up.network = (function() {
     Whether this request will load in the background.
 
     Background requests deprioritized over foreground requests.
-    Background requests also won't emit `up:request:late` events and won't trigger
+    Background requests also won't emit `up:network:late` events and won't trigger
     the [progress bar](/up.network.config#config.progressBar).
 
   @param {number} [options.badResponseTime]
     The number of milliseconds after which this request can cause
-    an `up:request:late` event.
+    an `up:network:late` event.
 
     Defaults to `up.network.config.badResponseTime`.
 
@@ -510,15 +510,15 @@ up.network = (function() {
       up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
 
       // Check if we need to upgrade a cached background request to a foreground request.
-      // This might affect whether we're going to emit an up:request:late event further
+      // This might affect whether we're going to emit an up:network:late event further
       // down. Consider this case:
       //
       // - User preloads a request (1). We have a cache miss and connect to the network.
-      //   This will never trigger `up:request:late`, because we only track foreground requests.
+      //   This will never trigger `up:network:late`, because we only track foreground requests.
       // - User loads the same request (2) in the foreground (no preloading).
       //   We have a cache hit and receive the earlier request that is still preloading.
-      //   Now we *should* trigger `up:request:late`.
-      // - The request (1) finishes. This triggers `up:request:recover`.
+      //   Now we *should* trigger `up:network:late`.
+      // - The request (1) finishes. This triggers `up:network:recover`.
       if (!request.preload) {
         queue.promoteToForeground(cachedRequest)
       }
@@ -758,25 +758,25 @@ up.network = (function() {
   are taking long to finish.
 
   By default Unpoly will wait 400 ms for an AJAX request to finish
-  before emitting `up:request:late`. You may configure this delay like this:
+  before emitting `up:network:late`. You may configure this delay like this:
 
   ```js
   up.network.config.badResponseTime = 1000 // milliseconds
   ```
 
-  Once all responses have been received, an [`up:request:recover`](/up:request:recover)
+  Once all responses have been received, an [`up:network:recover`](/up:network:recover)
   will be emitted.
 
   Note that if additional requests are made while Unpoly is already busy
-  waiting, **no** additional `up:request:late` events will be triggered.
+  waiting, **no** additional `up:network:late` events will be triggered.
 
   ### Loading indicators
 
-  By default the `up:request:late` event will cause a [progress bar](/up.network.config#config.progressBar)
+  By default the `up:network:late` event will cause a [progress bar](/up.network.config#config.progressBar)
   to appear at the top edge of the screen.
 
-  If you don't like the default progress bar, you can [listen](/up.on) to the `up:request:late`
-  and [`up:request:recover`](/up:request:recover) events to implement a custom
+  If you don't like the default progress bar, you can [listen](/up.on) to the `up:network:late`
+  and [`up:network:recover`](/up:network:recover) events to implement a custom
   loading indicator that appears during long-running requests.
 
   To build a custom loading indicator, please an element like this in your application layout:
@@ -799,25 +799,25 @@ up.network = (function() {
     hide()
 
     return [
-      up.on('up:request:late', show),
-      up.on('up:request:recover', hide)
+      up.on('up:network:late', show),
+      up.on('up:network:recover', hide)
     ]
   })
   ```
 
-  @event up:request:late
+  @event up:network:late
   @stable
   */
 
   /*-
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
-  have [taken long to finish](/up:request:late), but have finished now.
+  have [taken long to finish](/up:network:late), but have finished now.
 
-  See [`up:request:late`](/up:request:late) for more documentation on
+  See [`up:network:late`](/up:network:late) for more documentation on
   how to use this event for implementing a spinner that shows during
   long-running requests.
 
-  @event up:request:recover
+  @event up:network:recover
   @stable
   */
 
@@ -930,8 +930,8 @@ up.network = (function() {
     progressBar?.conclude()
   }
 
-  up.on('up:request:late', onLate)
-  up.on('up:request:recover', onRecover)
+  up.on('up:network:late', onLate)
+  up.on('up:network:recover', onRecover)
   up.on('up:framework:reset', reset)
 
   return {

@@ -18,7 +18,7 @@ Unpoly's own events are documented in their respective modules, for example:
 | `up:link:follow`      | `up.link`          |
 | `up:form:submit`      | `up.form`          |
 | `up:layer:open`       | `up.layer`         |
-| `up:request:late`     | `up.network`       |
+| `up:network:late`     | `up.network`       |
 
 @see up.on
 @see up.emit

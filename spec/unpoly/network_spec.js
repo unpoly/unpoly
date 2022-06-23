@@ -1390,21 +1390,21 @@ describe('up.network', function() {
         })
       })
 
-      describe('up:request:late and up:request:recover events', function() {
+      describe('up:network:late and up:network:recover events', function() {
 
         beforeEach(function() {
           up.network.config.badResponseTime = 0
           this.events = []
-          u.each(['up:request:load', 'up:request:loaded', 'up:request:late', 'up:request:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) => {
+          u.each(['up:request:load', 'up:request:loaded', 'up:network:late', 'up:network:recover', 'up:request:fatal', 'up:request:aborted'], (eventType) => {
             up.on(eventType, () => {
               this.events.push(eventType)
             })
           })
         })
 
-        it('emits an up:request:late event if the server takes too long to respond', asyncSpec(function(next) {
-          let lateListener = jasmine.createSpy('up:request:late listener')
-          up.on('up:request:late', lateListener)
+        it('emits an up:network:late event if the server takes too long to respond', asyncSpec(function(next) {
+          let lateListener = jasmine.createSpy('up:network:late listener')
+          up.on('up:network:late', lateListener)
 
           up.network.config.badResponseTime = 70
 
@@ -1420,8 +1420,8 @@ describe('up.network', function() {
         }))
 
         it('allows to configure request-specific response times as a function in up.network.config.badResponseTime', asyncSpec(function(next) {
-          let lateListener = jasmine.createSpy('up:request:late listener')
-          up.on('up:request:late', lateListener)
+          let lateListener = jasmine.createSpy('up:network:late listener')
+          up.on('up:network:late', lateListener)
 
           let badResponseTimeFn = jasmine.createSpy('badResponseTime').and.callFake((request) => request.url === '/foo' ? 70 : 0)
           up.network.config.badResponseTime = badResponseTimeFn
@@ -1439,8 +1439,8 @@ describe('up.network', function() {
         }))
 
         it('honors an up.request({ badResponseTime }) option', asyncSpec(function(next) {
-          let lateListener = jasmine.createSpy('up:request:late listener')
-          up.on('up:request:late', lateListener)
+          let lateListener = jasmine.createSpy('up:network:late listener')
+          up.on('up:network:late', lateListener)
 
           up.request({ url: '/foo', badResponseTime: 70 })
 
@@ -1453,7 +1453,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('does not emit an up:request:late event for background requests', asyncSpec(function(next) {
+        it('does not emit an up:network:late event for background requests', asyncSpec(function(next) {
           next(() => {
             // A background request doesn't make us busy.
             up.request({url: '/foo', cache: true, background: true})
@@ -1466,19 +1466,19 @@ describe('up.network', function() {
           })
 
           next(() => {
-            // The same request in the foreground does trigger up:request:late.
+            // The same request in the foreground does trigger up:network:late.
             up.request({url: '/foo', cache: true})
           })
 
           next.after(10, () => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late'
+              'up:network:late'
             ])
           })
 
           next(() => {
-            // The response resolves both promises and emits up:request:recover.
+            // The response resolves both promises and emits up:network:recover.
             jasmine.Ajax.requests.at(0).respondWith({
               status: 200,
               contentType: 'text/html',
@@ -1489,14 +1489,14 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late',
+              'up:network:late',
               'up:request:loaded',
-              'up:request:recover'
+              'up:network:recover'
             ])
           })
         }))
 
-        it('can delay the up:request:late event to prevent flickering of spinners', asyncSpec(function(next) {
+        it('can delay the up:network:late event to prevent flickering of spinners', asyncSpec(function(next) {
           next(() => {
             up.network.config.badResponseTime = 50
             up.request({url: '/foo'})
@@ -1517,7 +1517,7 @@ describe('up.network', function() {
           next.after(200, () => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late'
+              'up:network:late'
             ])
           })
 
@@ -1528,14 +1528,14 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late',
+              'up:network:late',
               'up:request:loaded',
-              'up:request:recover'
+              'up:network:recover'
             ])
           })
         }))
 
-        it('does not emit up:request:recover if a delayed up:request:late was never emitted due to a fast response', asyncSpec(function(next) {
+        it('does not emit up:network:recover if a delayed up:network:late was never emitted due to a fast response', asyncSpec(function(next) {
           next(() => {
             up.network.config.badResponseTime = 200
             up.request({url: '/foo'})
@@ -1563,7 +1563,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('emits up:request:recover if a request returned but failed with an error code', asyncSpec(function(next) {
+        it('emits up:network:recover if a request returned but failed with an error code', asyncSpec(function(next) {
           next(() => {
             up.request({url: '/foo'})
           })
@@ -1571,7 +1571,7 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late'
+              'up:network:late'
             ])
           })
 
@@ -1586,14 +1586,14 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late',
+              'up:network:late',
               'up:request:loaded',
-              'up:request:recover'
+              'up:network:recover'
             ])
           })
         }))
 
-        it('emits up:request:recover if a request timed out', asyncSpec(function(next) {
+        it('emits up:network:recover if a request timed out', asyncSpec(function(next) {
           up.network.config.badResponseTime = 10
 
           next(() => {
@@ -1603,7 +1603,7 @@ describe('up.network', function() {
           next.after(50, () => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late'
+              'up:network:late'
             ])
           })
 
@@ -1615,14 +1615,14 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late',
+              'up:network:late',
               'up:request:aborted',
-              'up:request:recover'
+              'up:network:recover'
             ])
           })
         }))
 
-        it('emits up:request:recover if a request was aborted', asyncSpec(function(next) {
+        it('emits up:network:recover if a request was aborted', asyncSpec(function(next) {
           up.network.config.badResponseTime = 10
 
           next(() => {
@@ -1632,7 +1632,7 @@ describe('up.network', function() {
           next.after(100, () => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late'
+              'up:network:late'
             ])
           })
 
@@ -1643,14 +1643,14 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late',
+              'up:network:late',
               'up:request:aborted',
-              'up:request:recover'
+              'up:network:recover'
             ])
           })
         }))
 
-        it('emits up:request:recover if a request failed fatally', asyncSpec(function(next) {
+        it('emits up:network:recover if a request failed fatally', asyncSpec(function(next) {
           up.network.config.badResponseTime = 10
 
           next(() => {
@@ -1660,7 +1660,7 @@ describe('up.network', function() {
           next.after(100, () => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late'
+              'up:network:late'
             ])
           })
 
@@ -1671,9 +1671,9 @@ describe('up.network', function() {
           next(() => {
             expect(this.events).toEqual([
               'up:request:load',
-              'up:request:late',
+              'up:network:late',
               'up:request:fatal',
-              'up:request:recover'
+              'up:network:recover'
             ])
           })
         }))
@@ -1687,7 +1687,7 @@ describe('up.network', function() {
           expect(request.cache).toBe(true)
         })
 
-        it('sets { background: true } since preloading should be prioritized and not trigger up:request:late', function() {
+        it('sets { background: true } since preloading should be prioritized and not trigger up:network:late', function() {
           let request = up.request('/foo', { preload: true })
           expect(request.background).toBe(true)
         })
@@ -2168,15 +2168,15 @@ describe('up.network', function() {
 
       if (up.migrate.loaded) {
 
-        it('does not show a progress bar when an up:request:late listener is registered', asyncSpec(function(next) {
+        it('does not show a progress bar when an up:network:late listener is registered', asyncSpec(function(next) {
           up.network.config.badResponseTime = 30
-          up.on('up:request:late', () => console.log("custom loading indicator"))
+          up.on('up:network:late', () => console.log("custom loading indicator"))
           up.request('/slow')
 
           next.after(100, () => expect(document).not.toHaveSelector('up-progress-bar'))
         }))
 
-        it('shows a progress bar when no up:request:late listener is registered', asyncSpec(function(next) {
+        it('shows a progress bar when no up:network:late listener is registered', asyncSpec(function(next) {
           up.network.config.badResponseTime = 10
           up.request('/slow')
 
@@ -2185,11 +2185,11 @@ describe('up.network', function() {
 
       } else {
 
-        it('shows a progress bar even when an up:request:late listener is registered', asyncSpec(function(next) {
+        it('shows a progress bar even when an up:network:late listener is registered', asyncSpec(function(next) {
           up.network.config.badResponseTime = 10
           up.request('/slow')
 
-          up.on('up:request:late', () => console.log("custom loading indicator"))
+          up.on('up:network:late', () => console.log("custom loading indicator"))
 
           next.after(100, () => expect(document).toHaveSelector('up-progress-bar'))
         }))
