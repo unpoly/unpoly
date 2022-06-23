@@ -11,22 +11,25 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Next
 ====
 
-Changes tracked until 2022-06-08:
+Changes tracked until 2022-06-22:
 
 
 ### Fragment aborting
 
-- up.fragment.abort(), up:fragment:aborted, up.fragment.onAborted()
-- Rename { solo } to { abort }
-- Remove up.request({ solo }) option
 - { abort: 'target' } as new default everywhere (navigation or not)
+- New High Level API to abort requests targeting a screen region
+  - up.fragment.abort(), up:fragment:aborted, up.fragment.onAborted()
+- Rename { solo } to { abort }
+- [up-abortable], { abortable } option
+  - Preloading is no longer abortable by default
+- Remove up.request({ solo }) option
 - Abort unfinished requests targeting a fragment that is updated or destroyed
 
 ### Remorseless caching
 
 - Revalidation
 - Longer cache times
-- Expire vs. Exict
+- Expire vs. Evict
 - Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`. Deprecated `X-Up-Reload-From-Time`.
 - Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
 
@@ -38,12 +41,14 @@ Changes tracked until 2022-06-08:
   - Buttons
   - Entire form
   - Arbitrary selectors
+  - Also works with [up-validate] and [up-watch]
+    - As [up-watch-disable]
 
 ### Watch / observe
 
 - up.observe() => up.watch()
 - [up-observe] => [up-watch]
-- Abort delayed watcher callbacks when the form is submitted
+- Abort pending validations and watcher callbacks when the form is submitted (or the fragment is otherwise aborted)
 - Don't run delayed callbacks when the watched field was removed from the DOM during the delay
 - Don't run delayed callbacks when the watched field was aborted from the DOM during the delay (e.g. by submit)
 - up.form.config.inputEvent, up.form.config.changeEvent
@@ -51,38 +56,51 @@ Changes tracked until 2022-06-08:
 - input[up-watch-event]
 - Date input validated on blur
 - Can configure custom up.form.config.inputEvents/changeEvents
+- Custom { event, feedback, delay, disable } options for validation and observing, default at form and overridable per-field
 
 
 ### Quality of life
 
 (Maybe extract individual sections here)
 
+- Allow to attach data to element's using standard HTML5 [data-*] attributes (in addition to [up-data])
 - .up-loading / aria-busy
 - Background requests
   - Deprioritized
   - Doesn't trigger progress bar
   - Slow polling responses no longer trigger progress bar  
-  - You can also set { badResponseTime }
+  - You can also set { badResponseTime }, [up-bad-response-time]
   - up.network.config.badResponseTime can now be a Function(up.Request): number
 - The log shows which user interaction triggered an event chain
 - Optional targets with :maybe
 - Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
 - Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
   - Example: Canonical link
-- Listeners to up:fragment:loaded can force failure options by setting event.renderOptions.fail
+- Listeners to up:fragment:loaded can force failure by setting event.renderOptions.fail
 - Allow to customize response failure with up.network.config.fail
+  - Default is `(response) => (response.status < 200 || response.status > 299) && response.status !== 304 }`
 - up.form.submitButtons()
-- New experimental features up.form.group(), [up-form-group]; Also configure [up-form-group] instead of [up-fieldset]
+- New experimental features up.form.group(), [up-form-group]
+  - Also configure [up-form-group] instead of [up-fieldset]
   - Change up.form.config.validateTargets to up.form.config.groupSelectors
 - Play nice with overlays from other libraries (up.layer.config.foreignOverlaySelectors)
 - Stylable [hidden]
 - Support FormData everywhere
 
 
+### A11Y
+
+- Focus is saved automatically and restored when navigating through history
+  - up.viewport.saveFocus(), up.viewport.restoreFocus() 
+- Allow to pass multiple or-separated strategies in [up-focus] and [up-scroll] 
+- Focus followable links, so they behave link standard links
+
+
 ### Strict target derivation
 
-- Don't use tagNames
+- Don't use tagNames except for unique elements
 - Configurable derivers
+- Smarter default derivers
 - Derived targets are verified to match the derivee
 - Don't poll elements with a weak selector
 - Don't hungry elements with a weak selector
@@ -91,6 +109,10 @@ Changes tracked until 2022-06-08:
   
 ### Small things
 
+- When a request is scheduled and aborted within the same microtask, it no longer touches the network
+- Support values with spaces for [up-show-for] and [up-hide-for]; Space-separated token lists also allow " or " as a separator (closes #78)
+- render({ keep }) => { useKeep }
+- render({ hungry }) => { useHungry }
 - [up-poll]: Don't swallow fatal errors
 - [up-poll]: Log reasons why we won't poll
 - up.fragment.matches(Element, Element)
@@ -108,7 +130,6 @@ Changes tracked until 2022-06-08:
 - When rendering content from an { origin }, rediscover origin element in server response and prefer matching fragments closest to that
 - Log when nothing is rendered
 - Log when we're rendering a failed response using fail-prefixed options
-- Focus a[up-instant] links on mousedown, so they behave link standard links
 - Fix up.watch() crashing with inputs outside of a form (seems to be valid HTML)
 - Fix a bug where up.fragment.get(selector, { layer: 0 }) will always match in the current layer instead of root
 - Fix a up where unpoly-migrate would not rewrite the deprecated { reveal } option when navigating
@@ -118,12 +139,19 @@ Changes tracked until 2022-06-08:
 - Support ::before and ::after pseudos (double colon)
 - Stop polling when the fragment is aborted
 - Support FormData everywhere we support up.Params
+- Fix: Clicking links twice will not update location when the browser history API is used in between (closes #388)
+- Rename up:location:changed event's { url } prop to { location }
 
 ### IE11 removal
 
+- much internal code removed
+- Unpoly will no longer boot on IE11 or legacy Edge (EdgeHTML)
 - Native smooth scrolling
+  - Scroll API no longer returns promises  
 - Remove up.util.assign()
 - Remove up.util.values()
+- Remove up.util.isSettled()
+- Remove up.util.endsWith()
 - Kill IE11: Remove up.element.remove()
 - Kill IE11: Remove up.element.matches()
 - Kill IE11: Remove up.element.closest()
