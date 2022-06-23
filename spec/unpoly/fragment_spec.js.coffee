@@ -6107,11 +6107,28 @@ describe 'up.fragment', ->
 
         expect(up.fragment.toTarget(element)).toBe('[custom-attr="value"]')
 
-      it "does not use a derived target if it matches a different element first", ->
+      it "does not use a derived target that would match a different element", ->
         element1 = fixture('div#foo.foo')
         element2 = fixture('div#foo.bar')
 
         expect(up.fragment.toTarget(element2)).toBe('.bar')
+
+      it "uses a derived target that would match a different element with up.fragment.config.verifyDerivedTarget = false", ->
+        element1 = fixture('div#foo.foo')
+        element2 = fixture('div#foo.bar')
+
+        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+        expect(up.fragment.toTarget(element2)).toBe('.bar')
+
+        up.fragment.config.verifyDerivedTarget = false
+        expect(up.fragment.toTarget(element2)).toBe('#foo')
+
+      it "uses a derived target that would match a different element if the given element is detached", ->
+        element1 = fixture('div#foo.foo')
+        element2 = up.element.createFromSelector('div#foo.bar')
+
+        expect(up.fragment.config.verifyDerivedTarget).toBe(true)
+        expect(up.fragment.toTarget(element2)).toBe('#foo')
 
     describe 'up.fragment.expandTargets', ->
 

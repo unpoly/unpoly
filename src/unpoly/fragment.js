@@ -64,13 +64,17 @@ up.fragment = (function() {
 
     This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
-  @param {Array<string|Function<Element>: string|undefined
+  @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
+    TODO: Docs
 
   @param {Array<string|RegExp>} [config.badTargetClasses]
     An array of class names that should be ignored when
     [deriving a target selector from a fragment](/up.fragment.toTarget).
 
     The class names may also be passed as a regular expression.
+
+  @param {Array<string|Function<Element>: string|undefined>} [config.verifyDerivedTarget]
+    TODO: Docs
 
   @param {Object} [config.navigateOptions]
     An object of default options to apply when [navigating](/navigation).
@@ -153,6 +157,8 @@ up.fragment = (function() {
       '[class]',
       'form',
     ],
+
+    verifyDerivedTarget: true,
 
     // These defaults will be set to both success and fail options
     // if { navigate: true } is given.
@@ -1795,7 +1801,7 @@ up.fragment = (function() {
   }
 
   function isGoodTarget(target, element, options = {}) {
-    return e.isDetached(element) || up.fragment.get(target, { layer: element, ...options }) === element
+    return e.isDetached(element) || !config.verifyDerivedTarget || up.fragment.get(target, { layer: element, ...options }) === element
   }
 
   /*-
