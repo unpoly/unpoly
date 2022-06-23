@@ -1680,6 +1680,14 @@ up.fragment = (function() {
     return tryToTarget(element, options) || cannotTarget(element)
   }
 
+  /*-
+  TODO: Docs
+
+  @function up.fragment.isTargetable
+  @param {Element} element
+  @return {boolean}
+  @experimental
+  */
   function isTargetable(element) {
     return !!tryToTarget(element)
   }
