@@ -72,11 +72,35 @@ describe 'up.form', ->
           target: '#foo-form'
         ))
 
+      it 'returns the form if a good selector can be derived from neither group nor input', ->
+        form = fixture('form#foo-form')
+        container = e.affix(form, '[up-form-group]')
+        input = e.affix(container, 'input')
+
+        groupSolution = up.form.groupSolution(input)
+
+        expect(groupSolution).toEqual(jasmine.objectContaining(
+          element: form,
+          target: '#foo-form'
+        ))
+
       it 'does not append a :has(...) if the given element is already a group', ->
         form = fixture('form')
         group = e.affix(form, '#group[up-form-group]')
 
         groupSolution = up.form.groupSolution(group)
+
+        expect(groupSolution).toEqual(jasmine.objectContaining(
+          element: group,
+          target: '#group'
+        ))
+
+      it 'does not append a :has(...) for the input if the group already has a good selector itself', ->
+        form = fixture('form')
+        group = e.affix(form, '#group[up-form-group]')
+        input = e.affix(group, 'input[name=foo]')
+
+        groupSolution = up.form.groupSolution(input)
 
         expect(groupSolution).toEqual(jasmine.objectContaining(
           element: group,
