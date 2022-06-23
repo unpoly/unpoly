@@ -4314,7 +4314,7 @@ describe 'up.fragment', ->
 
           it 'tries each option until one succeeds', asyncSpec (next) ->
             fixture('.container')
-            up.render('.container', focus: ['autofocus or .element or .container'], content: "<div class='element'>element</div>")
+            up.render('.container', focus: 'autofocus or .element or .container', content: "<div class='element'>element</div>")
 
             next ->
               expect('.container .element').toBeFocused()
