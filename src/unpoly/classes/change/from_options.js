@@ -7,23 +7,34 @@ up.Change.FromOptions = class FromOptions extends up.Change {
     super(options)
   }
 
-  execute() {
-    // Convert thrown errors into rejected promises.
-    // Convert non-promise values into a resolved promise.
-    return u.asyncify(() => {
-      this.guardRender()
-
-      if (this.options.url) {
-        let onRequest = (request) => this.handleAbortOption(request)
-        this.change = new up.Change.FromURL({ ...this.options, onRequest })
+  async execute() {
+    try {
+      let result = await this.makeChange()
+      options.onRendered?.(result)
+      return result
+    } catch (error) {
+      if (error instanceof up.RenderResult) {
+        options.onRendered?.(error)
       } else {
-        // No need to give feedback as local changes are sync.
-        this.change = new up.Change.FromContent(this.options)
-        this.handleAbortOption()
+        options.onError?.(error)
       }
+      throw error
+    }
+  }
 
-      return this.change.execute()
-    })
+  makeChange() {
+    this.guardRender()
+
+    if (this.options.url) {
+      let onRequest = (request) => this.handleAbortOption(request)
+      this.change = new up.Change.FromURL({ ...this.options, onRequest })
+    } else {
+      // No need to give feedback as local changes are sync.
+      this.change = new up.Change.FromContent(this.options)
+      this.handleAbortOption()
+    }
+
+    return this.change.execute()
   }
 
   guardRender() {

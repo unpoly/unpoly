@@ -121,7 +121,9 @@ up.Change.FromURL = class FromURL extends up.Change {
       return this.updateContentFromResponse(this.options)
     } else {
       up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
-      throw this.updateContentFromResponse(this.deriveFailOptions())
+      let renderResult = this.updateContentFromResponse(this.deriveFailOptions())
+      renderResult.ok = false
+      return renderResult
     }
   }
 

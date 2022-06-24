@@ -1555,16 +1555,6 @@ up.util = (function() {
 //    catch error
 //      Promise.reject(error)
 
-  function asyncify(block) {
-    // The side effects of this should be sync, otherwise we could
-    // just do `Promise.resolve().then(block)`.
-    try {
-      return Promise.resolve(block())
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }
-
 //  sum = (list, block) ->
 //    block = iteratee(block)
 //    totalValue = 0
@@ -1975,7 +1965,6 @@ up.util = (function() {
     flatten,
     newDeferred,
     always,
-    asyncify,
     isBasicObjectProperty,
     isCrossOrigin,
     task: queueTask,

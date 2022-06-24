@@ -38,17 +38,27 @@ up.RenderResult = class RenderResult extends up.Record {
   @experimental
   */
 
+  /*-
+  TODO: Docs
+
+  @property up.RenderResult#ok
+  @param {boolean} ok
+  @experimental
+  */
+
   keys() {
     return [
       'fragments',
       'layer',
       'target',
+      'ok'
     ]
   }
 
   defaults() {
     return {
-      fragments: []
+      fragments: [],
+      ok: true,
     }
   }
 

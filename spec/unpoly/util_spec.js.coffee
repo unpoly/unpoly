@@ -1699,25 +1699,6 @@ describe 'up.util', ->
         result = up.util.escapeHTML('before<script>after')
         expect(result).toEqual('before&lt;script&gt;after')
 
-    describe 'up.util.asyncify()', ->
-
-      it 'calls the given function synchronously', ->
-        callback = jasmine.createSpy('callback')
-        up.util.asyncify(callback)
-        expect(callback).toHaveBeenCalled()
-
-      it "returns a fulfilled promise for the given function's return value", (done) ->
-        callback = -> return Promise.resolve('return value')
-        up.util.asyncify(callback).then (value) ->
-          expect(value).toEqual('return value')
-          done()
-
-      it 'returns a rejected promise if the given function throws an error', (done) ->
-        callback = -> throw 'an error'
-        up.util.asyncify(callback).catch (error) ->
-          expect(error).toEqual('an error')
-          done()
-
     describe 'up.util.memoizeMethod()', ->
 
       it "caches a function property's return value", ->
