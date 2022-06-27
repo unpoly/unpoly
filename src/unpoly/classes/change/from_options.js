@@ -10,13 +10,17 @@ up.Change.FromOptions = class FromOptions extends up.Change {
   async execute() {
     try {
       let result = await this.makeChange()
-      options.onRendered?.(result)
+      result.options.onRendered?.(result)
       return result
     } catch (error) {
       if (error instanceof up.RenderResult) {
-        options.onRendered?.(error)
+        const result = error
+        // We call result.options.onRendered() instead of options.onRendered()
+        // as this will call the correct options.onRendered() or onFailRendered()
+        // depending on options.failOptions.
+        result.options.onRendered?.(result)
       } else {
-        options.onError?.(error)
+        this.options.onError?.(error)
       }
       throw error
     }

@@ -832,7 +832,7 @@ up.form = (function() {
 
   @function up.validate
   @param {string|Element|jQuery} target
-    TODO
+    TODO: Docs
   @param {Object} [options]
     Additional [submit options](/up.submit#options) that should be used for
     submitting the form for validation.
@@ -868,12 +868,11 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.formGroup = true]
     TODO
   @return {Promise<up.RenderResult>}
-    A promise that fulfills when the server-side
-    validation is received and the form was updated.
+    A promise that fulfills when the server-side validation is received
+    and the form was updated.
 
-    The promise also fulfills if the server sends matching
-    HTML under an [error code](/failed-responses).
-    It will reject if there is a fatal network error, or if no targets could be matched.
+    The promise will reject if the server sends an error status,
+    if there is a network issue, or if targets could not be matched.
   @stable
   */
   function validate(...args) {
@@ -1276,18 +1275,22 @@ up.form = (function() {
   ```ruby
   class UsersController < ApplicationController
 
-    * This action handles POST /users
+    # This action handles POST /users
     def create
       user_params = params[:user].permit(:email, :password)
       @user = User.new(user_params)
+
       if request.headers['X-Up-Validate']
-        @user.valid?  # run validations, but don't save to the database
-        render 'form' # render form with error messages
-      elsif @user.save?
+        # Run validations, but don't save to the database
+        status = @user.valid? ? :ok : :bad_request
+        # Render form with error messages
+        render 'form', status: status
+      elsif @user.save
         sign_in @user
       else
         render 'form', status: :bad_request
       end
+
     end
 
   end

@@ -25,7 +25,7 @@ up.FormValidator = class FormValidator {
 
   watchField(field) {
     let { event } = this.originOptions(field)
-    up.on(field, event, () => this.validate({ origin: field }))
+    up.on(field, event, () => up.error.muteUncriticalRejection(this.validate({ origin: field })))
   }
 
   validate(options = {}) {
@@ -119,8 +119,11 @@ up.FormValidator = class FormValidator {
     clearTimeout(this.nextRenderTimer)
   }
 
-  // noinspection ES6MissingAwait
-  async renderDirtySolutions() {
+  renderDirtySolutions() {
+    up.error.muteUncriticalRejection(this.doRenderDirtySolutions())
+  }
+
+  async doRenderDirtySolutions() {
     // Remove solutions for elements that were detached while we were waiting for the timer.
     this.dirtySolutions = u.reject(this.dirtySolutions, (solution) => e.isDetached(solution.element) || e.isDetached(solution.origin))
     if (!this.dirtySolutions.length || this.rendering) {
@@ -163,8 +166,13 @@ up.FormValidator = class FormValidator {
     options.focus = 'keep'
 
     // The protocol doesn't define whether the validation results in a status code.
-    // Hence we use the same options for both success and failure.
-    options.fail = false
+    // Some backends might want to communicate a failed validation, others might not.
+    // In any case we render the same targets for both success and failure.
+    //
+    // In cases when the server does respond with an error status, we still want to
+    // reject the up.validate() promise. Hence we use { failOptions: false } instead of
+    // { fail: false }.
+    options.failOptions = false
 
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
@@ -201,8 +209,6 @@ up.FormValidator = class FormValidator {
 
     try {
       // Resolve all promises we have handed out for the now-rendered solutions.
-      // Since we passed { fail: false } above we will always fulfill for a matchable
-      // HTML response, but still reject for fatal errors (e.g. connectivity loss).
       renderingPromise.resolve(up.render(options))
       await renderingPromise
     } finally {

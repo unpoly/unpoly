@@ -2,6 +2,24 @@ TODOs for next release
 ======================
 
 
+Various Changes
+---------------
+
+- What is FragmentResult#fragments when fragments are kept?
+  => I think these should be missing from the up.RenderResult
+- up.validate() should reject if the server responds with an error code
+  => Already implemented
+  => Test
+- Replace up:fragment:inserted with onRendered(RenderResult)
+- failure callbacks should be onFailFinished, onFailRendered
+  - switch prefixes
+  - also for parsing
+  - test this
+  - Document this
+- Remove up:fragment:kept event without replacement
+- up.CannotApply => up.CannotMatch
+
+
 Offline / rework caching
 ------------------------
 
@@ -82,8 +100,8 @@ This way we can keep using cached content if we're offline.
   - { onOffline } callback should still fire
 
 - Ensure we have all the render callbacks
-  - [up-on-aborted], { onAborted }
   - [up-on-offline], { onOffline }
+    - This must be a RenderOptions::PREFLIGHT_KEY
   - Docs at [up-follow] and up.render()
 
 - New topic page for "offline"
@@ -118,6 +136,12 @@ This way we can keep using cached content if we're offline.
 
 Docs
 ----
+
+### New cache
+
+- up:fragment:offline
+  - event.retry(options)
+
 
 ### Target derivation
 
@@ -166,6 +190,8 @@ Docs
 
 ### Other docs
 
+- Document up.render({ fail })
+- Document a[up-follow][up-fail])
 - Consider replacing type|undefined with type? in all type comments
 - Go through TODO
 - Go through visibilities *if* we're doing 3.0
@@ -389,3 +415,5 @@ Decisions
   => No we should keep sending it, as this excludes redirect-forwarded up-params
 - Consider reverting: up:request:late: Consider the time a promoted request was loading in the background
   => For this we would need to track when a request was promoted to the foreground
+- Do we trigger onFinished when preloading?
+  => No, users can use the promise or onLoaded()

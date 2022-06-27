@@ -1432,11 +1432,8 @@ up.util = (function() {
   @internal
   */
   function sequence(functions) {
-    // No need for an expensive map() if we're passed a single function.
-    if (functions.length === 1) {
-      return functions[0]
-    }
-    return () => map(functions, fn => fn())
+    functions = compact(functions)
+    return (...args) => map(functions, fn => fn(...args))
   }
 
 //  ###**

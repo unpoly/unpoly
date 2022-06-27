@@ -1516,7 +1516,7 @@ describe 'up.fragment', ->
               expect('.foo').toHaveText('new foo')
               expect('.bar').toHaveText('new bar')
 
-          it 'does not impede the render pass if the :maybe target is missing from the response', (done) ->
+          it 'does not impede the render pass if the :maybe target is missing from the response', asyncSpec (next) ->
             fixture('.foo', text: 'old foo')
             fixture('.bar', text: 'old bar')
 
@@ -1524,13 +1524,15 @@ describe 'up.fragment', ->
               <div class="bar">new bar</div>
             """
 
-            promiseState(promise).then ({ state }) ->
+            next ->
+              next.await promiseState(promise)
+
+            next ({ state }) ->
               expect(state).toBe('fulfilled')
               expect('.foo').toHaveText('old foo')
               expect('.bar').toHaveText('new bar')
-              done()
 
-          it 'does not impede the render pass if the :maybe target is missing from the current page', (done) ->
+          it 'does not impede the render pass if the :maybe target is missing from the current page', asyncSpec (next) ->
             fixture('.bar', text: 'old bar')
 
             promise = up.render '.foo:maybe, .bar', document: """
@@ -1538,11 +1540,13 @@ describe 'up.fragment', ->
               <div class="bar">new bar</div>
             """
 
-            promiseState(promise).then ({ state }) ->
+            next ->
+              next.await promiseState(promise)
+
+            next ({ state }) ->
               expect(state).toBe('fulfilled')
               expect(document).not.toHaveSelector('.foo')
               expect('.bar').toHaveText('new bar')
-              done()
 
           it 'allows to combine :maybe and :after pseudo-selectors'
 
@@ -3374,7 +3378,6 @@ describe 'up.fragment', ->
             @revealOptions = {}
 
             @revealMock = spyOn(up, 'reveal').and.callFake (element, options) =>
-              console.log("!!! mocked reveal called with %o", element)
               @revealedHTML.push element.outerHTML
               @revealedText.push element.textContent.trim()
               @revealOptions = options

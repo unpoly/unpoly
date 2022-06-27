@@ -10,6 +10,7 @@ up.RenderOptions = (function() {
     saveFocus: true,
     abort: 'target',
     revalidate: 'auto',
+    failOptions: true,
   }
 
   const PRELOAD_OVERRIDES = {
@@ -36,6 +37,7 @@ up.RenderOptions = (function() {
     'origin',
     'baseLayer',
     'fail',
+    'onError',
   ]
 
   // These properties are used between success options and fail options.
@@ -149,11 +151,25 @@ up.RenderOptions = (function() {
   }
 
   function deriveFailOptions(preprocessedOptions) {
-    return {
-      ...preprocessedOptions.defaults,
-      ...u.pick(preprocessedOptions, SHARED_KEYS),
-      ...failOverrides(preprocessedOptions),
-      ...{ isFailOptions: true }
+    if (preprocessedOptions.failOptions) {
+      return {
+        ...preprocessedOptions.defaults,
+        // Only a few keys are shared between success and failure cases.
+        ...u.pick(preprocessedOptions, SHARED_KEYS),
+        ...failOverrides(preprocessedOptions),
+        // We sometimes want to log that fail-prefixed options were used, to alert the
+        // user of the fact that there are different option sets for success and failure.
+        ...{ failPrefixForced: true }
+      }
+    } else {
+      return {
+        // Use all the sucess options.
+        ...preprocessedOptions,
+        // We still allow to override individual options.
+        // This is relevant for up.validate() which does not use fail options,
+        // but lets users still override individual options for the failure case.
+        ...failOverrides(preprocessedOptions),
+      }
     }
   }
 

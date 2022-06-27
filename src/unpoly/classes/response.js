@@ -107,6 +107,14 @@ up.Response = class Response extends up.Record {
   @experimental
   */
 
+  /*-
+  Returns whether the server responded with a 2xx HTTP status.
+
+  @property up.Response#ok
+  @param {boolean} ok
+  @stable
+  */
+
   keys() {
     return [
       'method',

@@ -115,16 +115,13 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
     // to force success or failure options.
-    response.fail = this.options.fail
+    let fail = u.evalOption(this.options.fail, this.response) ?? !response.ok
 
-    if (response.ok) {
-      return this.updateContentFromResponse(this.options)
-    } else {
-      up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
-      let renderResult = this.updateContentFromResponse(this.deriveFailOptions())
-      renderResult.ok = false
-      return renderResult
+    if (fail) {
+      throw this.updateContentFromResponse(this.deriveFailOptions())
     }
+
+    return this.updateContentFromResponse(this.options)
   }
 
   onRequestSettledWithError(error) {
@@ -133,19 +130,25 @@ up.Change.FromURL = class FromURL extends up.Change {
         callback: this.options.onOffline,
         response: this.response,
         renderOptions: this.options,
-        retry: () => up.render(this.options),
-        log: ['Cannot load fragment from %s: %s', this.request.description, error.reason]
+        retry: (retryOptions) => up.render({ ...this.options, ...retryOptions }),
+        log: ['Cannot load fragment from %s: %s', this.request.description, error.reason],
       })
     }
 
-    // Even if an { onOffline } callback retries, we still fail the initial render() call.
-    // We also cannot check if the user has retried, since { onOffline } might render a
-    // notification and retry some time later (async).
+    // (1) Even if an { onOffline } callback retries, we still fail the initial render() call
+    //    We cannot check if the user has retried, since { onOffline } might render a
+    //    notification and retry some time later (async).
+    //
+    // (2) up.Offline errors also run { onError } callbacks.
     throw error
   }
 
 
   updateContentFromResponse(finalRenderOptions) {
+    if (finalRenderOptions.failPrefixForced) {
+      up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
+    }
+
     // The response might carry some updates for our change options,
     // like a server-set location, or server-sent events.
     this.augmentOptionsFromResponse(finalRenderOptions)

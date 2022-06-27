@@ -527,6 +527,10 @@ The parsed data will be passed to your event handler as a third argument:
     up.emit(element, forkedEvent)
   }
 
+  // function addCallback(options, property, newCallback) {
+  //   options[property] = u.sequence([options[property], newCallback])
+  // }
+
 //  abortable = ->
 //    signal = document.createElement('up-abort-signal')
 //    abort = -> up.emit(signal, 'abort')
@@ -546,7 +550,8 @@ The parsed data will be passed to your event handler as a third argument:
     halt,
     isUnmodified,
     fork,
-    keyModifiers
+    keyModifiers,
+    // addCallback,
   }
 })()
 

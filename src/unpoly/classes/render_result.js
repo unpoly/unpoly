@@ -35,14 +35,18 @@ up.RenderResult = class RenderResult extends up.Record {
 
   @property up.RenderResult#target
   @param {string} target
-  @experimental
+  @stable
   */
 
   /*-
-  TODO: Docs
+  The [render](/up.render) options used to produce this result.
 
-  @property up.RenderResult#ok
-  @param {boolean} ok
+  If this result was produced from a [failed response](/failed-response),
+  [`fail` prefixes](/failed-response#rendering-failed-responses-differently)
+  have been removed from the render options.
+
+  @property up.RenderResult#options
+  @param {string} options
   @experimental
   */
 
@@ -51,25 +55,31 @@ up.RenderResult = class RenderResult extends up.Record {
       'fragments',
       'layer',
       'target',
-      'ok'
+      'options',
     ]
   }
 
   defaults() {
     return {
       fragments: [],
-      ok: true,
     }
   }
 
+  /*-
+  Whether this render pass did not result in any fragments being rendered.
+
+  There are some cases where we did not render any fragment:
+
+  - Server sent HTTP status `304 Not Modified` (especially when reloading)
+  - Server sent HTTP status `204 No Content`
+  - The target selector was set to `':none'` by either client or server.
+  - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
+
+  @function up.RenderResult#isNone
+  @return {boolean}
+  @experimental
+  */
   isNone() {
-    // There are some cases where we did not render any fragment:
-    //
-    // - Server sent HTTP status `304 Not Modified` (especially when reloading)
-    // - Server sent HTTP status `204 No Content`
-    // - Target was :none (can be set by both client and server)
-    // - Server sent `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer`, although the server
-    //   may send an optional body in case the response is used on the root layer.
     return !this.fragments.length
   }
 }
