@@ -118,7 +118,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       this.abortWhenLayerClosed()
 
       // Run callback for callers that need to know when animations are done.
-      return this.onFinished(renderResult)
+      this.onFinished(renderResult)
     })
 
     // Don't wait for animations to finish.
