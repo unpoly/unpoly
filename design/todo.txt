@@ -10,7 +10,7 @@ Various Changes
 - up.validate() should reject if the server responds with an error code
   => Already implemented
   => Test
-- Replace up:fragment:inserted with onRendered(RenderResult)
+- Replace up:fragment:inserted with onResult(RenderResult)
 - failure callbacks should be onFailFinished, onFailRendered
   - switch prefixes
   - also for parsing
@@ -18,6 +18,8 @@ Various Changes
   - Document this
 - Remove up:fragment:kept event without replacement
 - up.CannotApply => up.CannotMatch
+- Rename "finished" to "concluded"
+- Consider whether up.validate() promises should wait until no more solutions are pending
 
 
 Offline / rework caching
