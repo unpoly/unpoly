@@ -5,9 +5,9 @@ $ = jQuery
 describe 'up.motion', ->
 
   u = up.util
-  
+
   describe 'JavaScript functions', ->
-  
+
     describe 'up.animate', ->
 
       it 'animates the given element', (done) ->
@@ -476,7 +476,7 @@ describe 'up.motion', ->
           oldDims = $old[0].getBoundingClientRect()
 
           transition = (oldElement, newElement, options) ->
-            up.morph(oldElement, newElement, 'cross-fade', options)
+            return up.morph(oldElement, newElement, 'cross-fade', options)
 
           up.morph($old, $new, transition, duration: 400, easing: 'linear')
 
@@ -543,7 +543,7 @@ describe 'up.motion', ->
     describe 'up.transition', ->
 
       it 'should have tests'
-      
+
     describe 'up.animation', ->
 
       it 'should have tests'

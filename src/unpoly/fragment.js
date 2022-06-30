@@ -792,10 +792,10 @@ up.fragment = (function() {
     In particular:
 
     - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
-    - A [cached response](#options.cache) was [verified with the server](/up.fragment.config#config.autoRevalidate).
+    - A [cached response](#options.cache) was [revalidated with the server](/up.fragment.config#config.autoRevalidate).
       If the server has responded with new content, this content has also been rendered.
 
-  @return {Promise<up.RenderResult>}
+  @return {up.RenderJob}
     A promise that fulfills when the page has been updated.
 
     If the update is animated, the promise will be resolved *before* the existing element was
@@ -810,7 +810,7 @@ up.fragment = (function() {
   */
   const render = up.mockable((...args) => {
     let options = parseTargetAndOptions(args)
-    return new up.Change.FromOptions(options).execute()
+    return new up.RenderJob(options)
   })
 
   /*-
@@ -836,7 +836,7 @@ up.fragment = (function() {
     [´{ target }` option](/up.render#options.target).
   @param {Object} [options]
     See options for `up.render()`.
-  @return {Promise<up.RenderResult>}
+  @return {up.RenderJob}
     A promise that fulfills when the page has been updated.
 
     For details, see return value for `up.render()`.
@@ -2302,7 +2302,7 @@ up.fragment = (function() {
 
     // An element can be passed as first argument (public API) or as { target } option.
     // There's also an internal API that { target } can be an array of elements.
-    // This is used by up.Change.FromOptions.
+    // This is used by up.RenderJob.
     if (options.target) {
       // If we're given an element or selector, we abort all requests
       // targeting that subtree.

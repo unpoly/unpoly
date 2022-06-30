@@ -402,6 +402,59 @@ describe 'up.fragment', ->
           expect(result.layer).toBe(up.layer.root)
           done()
 
+      describe 'compilations', ->
+
+        it 'runs compilers for matching elements in the new content'
+
+        describe 'when a compiler throws an error', ->
+
+          allowGlobalErrors()
+
+          it 'rejects the up.render() promise', (done) ->
+            crashingCompiler = jasmine.createSpy('compiler').and.throwError(new Error("error from crashing compiler"))
+            up.compiler '.element', crashingCompiler
+            fixture('.element', text: 'old text')
+
+            promise = up.render({ fragment: '<div class="element">new text</div>' })
+
+            u.task ->
+              expect(crashingCompiler).toHaveBeenCalled()
+              expect('.element').toHaveText('new text')
+
+              promiseState(promise).then ({ state, value }) ->
+                expect(state).toBe('rejected')
+                expect(value).toBeError('up.CannotCompile', /errors while compiling/i)
+                done()
+
+          it 'rejects the up.render().finished promise', (done) ->
+            crashingCompiler = jasmine.createSpy('compiler').and.throwError(new Error("error from crashing compiler"))
+            up.compiler '.element', crashingCompiler
+            element = fixture('.element', text: 'old text')
+
+            promise = up.render({ fragment: '<div class="element">new text</div>' }).finished
+
+            u.task ->
+              expect(crashingCompiler).toHaveBeenCalled()
+              expect('.element').toHaveText('new text')
+
+              promiseState(promise).then ({ state, value }) ->
+                expect(state).toBe('rejected')
+                expect(value).toBeError('up.CannotCompile', /errors while compiling/i)
+                done()
+
+          it 'calls an { onError } callback', asyncSpec (next) ->
+            crashingCompiler = jasmine.createSpy('compiler').and.throwError(new Error("error from crashing compiler"))
+            errorCallback = jasmine.createSpy('onError callback')
+            up.compiler '.element', crashingCompiler
+            element = fixture('.element', text: 'old text')
+
+            promise = up.render({ fragment: '<div class="element">new text</div>', onError: errorCallback })
+
+            next ->
+              expect(crashingCompiler).toHaveBeenCalled()
+              expect('.element').toHaveText('new text')
+              expect(errorCallback).toHaveBeenCalledWith(jasmine.objectContaining(name: 'up.CannotCompile'))
+
       describe 'with { url } option', ->
 
         it 'replaces the given selector with the same selector from a freshly fetched page', asyncSpec (next) ->
@@ -3107,6 +3160,24 @@ describe 'up.fragment', ->
 
           expect($element).toBeAttached()
 
+        it 'fulfills render().finished promise after the element has been removed from the DOM', (done) ->
+          $parent = $fixture('.parent')
+          $element = $parent.affix('.element.v1').text('v1')
+
+          testElementAttachment = ->
+            expect($element).toBeDetached()
+            done()
+
+          job = up.render('.element',
+            document: '<div class="element v2">v2</div>',
+            transition: 'cross-fade',
+            duration: 50,
+          )
+
+          job.finished.then(testElementAttachment)
+
+          expect($element).toBeAttached()
+
         it 'runs an { onFinished } callback once when updating multiple elements', asyncSpec (next) ->
           fixture('.foo')
           fixture('.bar')
@@ -3641,7 +3712,6 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['origin text']
 
-
         describe 'with { scrollBehavior } option', ->
 
           mockRevealBeforeEach()
@@ -3703,7 +3773,7 @@ describe 'up.fragment', ->
             next => $viewport.scrollTop(10)
             next => up.render('.element', url: '/foo', scroll: 'restore', history: true)
             next => respond()
-            next => expect($viewport.scrollTop()).toEqual(65)
+            next => expect($viewport.scrollTop()).toBeAround(65, 1)
 
       describe 'execution of scripts', ->
 
@@ -5044,12 +5114,69 @@ describe 'up.fragment', ->
             next ->
               expect('.target').toHaveText('verified text')
 
-          it 'delays { onFinished } until the fragment was verified'
+          it 'delays { onFinished } callback until the fragment was verified', asyncSpec (next) ->
+            finishedCallback = jasmine.createSpy('finished callback')
 
-          it 'calls { onFinished } with the verified up.RenderResult'
+            up.render('.target', { url: '/cached-path', cache: true, onFinished: finishedCallback })
 
-          it 'calls { onFinished } with the cached zo.RenderResult if revalidation responded with 304 Not Modified'
+            next ->
+              expect('.target').toHaveText('cached text')
+              expect(finishedCallback).not.toHaveBeenCalled()
 
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.respondWithSelector('.target', text: 'verified text')
+
+            next ->
+              expect(up.network.isBusy()).toBe(false)
+              expect('.target').toHaveText('verified text')
+              expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+
+          it 'delays up.render().finished promise until the fragment was verified', asyncSpec (next) ->
+            finishedCallback = jasmine.createSpy('finished callback')
+
+            job = up.render('.target', { url: '/cached-path', cache: true })
+            job.finished.then(finishedCallback)
+
+            next ->
+              expect('.target').toHaveText('cached text')
+              expect(finishedCallback).not.toHaveBeenCalled()
+
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.respondWithSelector('.target', text: 'verified text')
+
+            next ->
+              expect(up.network.isBusy()).toBe(false)
+              expect('.target').toHaveText('verified text')
+              expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+
+          it 'rejects up.render().finished promise if the revalidation failed', asyncSpec (next) ->
+            jasmine.clock().install()
+            finishedCallback = jasmine.createSpy('finished callback')
+            finishedFailedCallback = jasmine.createSpy('finished callback')
+
+            job = up.render('.target', { url: '/cached-path', cache: true })
+            job.finished.then(finishedCallback, finishedFailedCallback)
+
+            next ->
+              expect('.target').toHaveText('cached text')
+              expect(finishedCallback).not.toHaveBeenCalled()
+              expect(finishedFailedCallback).not.toHaveBeenCalled()
+
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.lastRequest().responseTimeout()
+
+            next ->
+              expect(up.network.isBusy()).toBe(false)
+              expect('.target').toHaveText('cached text')
+              expect(finishedCallback).not.toHaveBeenCalled()
+              expect(finishedFailedCallback).toHaveBeenCalled()
+
+          it 'fulfills up.render().finished promise with the cached up.RenderResult if revalidation responded with 304 Not Modified'
+
+          it 'calls { onFinished } with the cached up.RenderResult if revalidation responded with 304 Not Modified'
 
     describe 'handling of [up-keep] elements', ->
 

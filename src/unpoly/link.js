@@ -319,7 +319,7 @@ up.link = (function() {
     Unpoly to render a fragment without side-effects like updating history
     or scrolling.
 
-  @return {Promise<up.RenderResult>}
+  @return {up.RenderJob}
     A promise that will be fulfilled when the link destination
     has been loaded and rendered.
 

@@ -369,6 +369,7 @@ up.motion = (function() {
     applyConfig(options)
 
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    // This also unwraps jQuery collections.
     oldElement = up.fragment.get(oldElement)
     newElement = up.fragment.get(newElement)
 
@@ -382,11 +383,14 @@ up.motion = (function() {
     const beforeDetach = u.pluckKey(options, 'beforeDetach') || u.noop
     const afterDetach = u.pluckKey(options, 'afterDetach') || u.noop
     // Callback to scroll newElement into position before we start the enter animation.
-    const scrollNew = u.pluckKey(options, 'scrollNew') || u.asyncNoop
+    const scrollNew = u.pluckKey(options, 'scrollNew') || u.noop
 
     beforeStart()
 
     if (willMorph) {
+      // If morph() is called from inside a transition function we
+      // (1) don't want to track it again and
+      // (2) don't want to create additional absolutized bounds
       if (motionController.isActive(oldElement) && (options.trackMotion === false)) {
         return transitionFn(oldElement, newElement, options)
       }
@@ -399,6 +403,13 @@ up.motion = (function() {
       const oldRemote = up.viewport.absolutize(oldElement, {
         // Because the insertion will shift elements visually, we must delay insertion
         // until absolutize() has measured the bounding box of the old element.
+        //
+        // After up.viewport.absolutize() the DOM tree will look like this:
+        //
+        //     <new-element></new-element>
+        //     <up-bounds>
+        //        <old-element><old-element>
+        //     </up-bounds>
         afterMeasure() {
           e.insertBefore(oldElement, newElement)
           afterInsert()
@@ -406,10 +417,8 @@ up.motion = (function() {
       })
 
       const trackable = async function() {
-        // (1) Scroll newElement into position before we start the enter animation.
-        // (2) The return value of scrollNew() may or may not be a promise, so we convert
-        //     it to a promise by wrapping it in Promise.resolve().
-        await scrollNew()
+        // Scroll newElement into position before we start the enter animation.
+        scrollNew()
 
         // Since we have scrolled the viewport (containing both oldElement and newElement),
         // we must shift the old copy so it looks like it it is still sitting
@@ -433,7 +442,7 @@ up.motion = (function() {
       swapElementsDirectly(oldElement, newElement)
       afterInsert()
       afterDetach()
-      return scrollNew()
+      scrollNew()
     }
   }
 

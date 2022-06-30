@@ -1211,8 +1211,20 @@ up.element = (function() {
   @return {boolean}
   @stable
   */
-  function isDetached(element) {
-    return  (element !== document) && !getRoot().contains(element)
+  let isDetached = u.negate(isAttached)
+
+  /*-
+  Returns whether the given element is attached to the DOM tree.
+
+  @see up.element.isDetached
+
+  @function up.element.isAttached
+  @param {Element} element
+  @return {boolean}
+  @stable
+  */
+  function isAttached(element) {
+    return element === document || getRoot().contains(element)
   }
 
   /*-
@@ -1282,6 +1294,7 @@ up.element = (function() {
     upAttrs,
     toggleAttr,
     isDetached,
+    isAttached,
     addTemporaryClass,
     setTemporaryAttr,
     cleanJQuery,

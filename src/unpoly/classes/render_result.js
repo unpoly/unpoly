@@ -1,7 +1,8 @@
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
 
-It is returned by functions like `up.render()` or `up.navigate()`:
+Functions like `up.render()`, `up.follow()` or `up.submit()` return a promise
+that resolve with an `up.RenderResult`:
 
 ```js
 let result = await up.render('.target', content: 'foo')
@@ -47,7 +48,34 @@ up.RenderResult = class RenderResult extends up.Record {
 
   @property up.RenderResult#options
   @param {string} options
-  @experimental
+  @internal
+  */
+
+  /*-
+  A promise that settles when no further DOM changes will be caused by this render pass.
+
+  In particular:
+
+  - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
+  - A [cached response](#options.cache) was [revalidated with the server](/up.fragment.config#config.autoRevalidate).
+    If the server has responded with new content, this content has also been rendered.
+
+  The promise resolves to an `up.RenderResult` for the effective fragments that were updated and are currently attached to the DOM.
+  If cache revalidation has rendered new content, the `up.RenderResult` will contain the fragments from both render passes that
+  are still attached to the DOM.
+
+  The promise will reject if the server sends an error status,
+  if there is a network issue, or if targets could not be matched.
+
+  ### Example
+
+  ```js
+  let result = await up.render({ url: '/path' }).finished
+  console.log(result.fragments)
+
+  @property up.RenderResult#finished
+  @param {Promise<up.RenderResult>}
+  ```
   */
 
   keys() {
@@ -56,6 +84,7 @@ up.RenderResult = class RenderResult extends up.Record {
       'layer',
       'target',
       'options',
+      'finished',
     ]
   }
 
@@ -81,5 +110,12 @@ up.RenderResult = class RenderResult extends up.Record {
   */
   isNone() {
     return !this.fragments.length
+  }
+
+  update(otherResult) {
+    this.fragments = this.fragments.concat(otherResult.fragments).filter(up.element.isAttached)
+    this.target = otherResult.target
+    this.layer = otherResult.layer
+    this.finished = otherResult.finished
   }
 }

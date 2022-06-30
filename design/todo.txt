@@ -32,6 +32,7 @@ Various Changes
 ---------------
 
 - Consider whether up.validate() promises should wait until no more solutions are pending
+- Allow late registrations of compilers and macros without priority
 
 
 Offline / rework caching
@@ -150,6 +151,11 @@ This way we can keep using cached content if we're offline.
 
 Docs
 ----
+
+### Render rework
+
+- Document up.render().finished
+
 
 ### New cache
 

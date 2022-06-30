@@ -264,6 +264,15 @@ describe 'up.syntax', ->
           expect(compilerBefore).toHaveBeenCalled()
           expect(compilerAfter).toHaveBeenCalled()
 
+        it 'throws an error', ->
+          crashingCompiler = -> throw new Error("error from crashing compiler")
+
+          up.compiler '.element', crashingCompiler
+
+          element = fixture('.element')
+
+          hello = -> up.hello(element)
+          expect(hello).toThrowError(/errors while compiling/i)
 
         it 'reports caught exceptions to window.onerror to support exception notification tools', ->
           crashingCompiler = -> throw new Error("error from crashing compiler")

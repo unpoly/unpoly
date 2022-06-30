@@ -22,6 +22,9 @@ describe 'up.Layer.Drawer', ->
 
     describe 'positioning', ->
 
+      beforeEach ->
+        up.motion.config.enabled = false
+
       it 'hugs the left edge of the screen with { position: "left" }', ->
         up.layer.open(mode: 'drawer', content: 'drawer content', position: 'left')
         expect(up.layer.isOverlay()).toBe(true)

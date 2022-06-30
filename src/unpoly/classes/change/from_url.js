@@ -75,7 +75,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
   }
 
-  // This is required by up.Change.FromOptions to handle { abort: 'target' }.
+  // This is required by up.RenderJob to handle { abort: 'target' }.
   getPreflightProps() {
     return this.getRequestAttrs()
   }
@@ -143,7 +143,6 @@ up.Change.FromURL = class FromURL extends up.Change {
     throw error
   }
 
-
   updateContentFromResponse(finalRenderOptions) {
     if (finalRenderOptions.failPrefixForced) {
       up.puts('up.render()', 'Rendering failed response using fail-prefixed options (https://unpoly.com/failed-responses)')
@@ -153,13 +152,19 @@ up.Change.FromURL = class FromURL extends up.Change {
     // like a server-set location, or server-sent events.
     this.augmentOptionsFromResponse(finalRenderOptions)
 
-    if (up.fragment.shouldRevalidate(this.request, this.response, finalRenderOptions)) {
-      // Copy the given options, as we're going to override the { onFinished } prop.
-      let originalRenderOptions = u.copy(finalRenderOptions)
-      finalRenderOptions.onFinished = (renderResult) => this.revalidate(renderResult, originalRenderOptions)
+    let result = new up.Change.FromContent(finalRenderOptions).execute()
+    result.finished = this.finish(result, finalRenderOptions)
+    return result
+  }
+
+  async finish(renderResult, originalRenderOptions) {
+    renderResult = await renderResult.finished
+
+    if (up.fragment.shouldRevalidate(this.request, this.response, originalRenderOptions)) {
+      renderResult = await this.revalidate(renderResult, originalRenderOptions)
     }
 
-    return new up.Change.FromContent(finalRenderOptions).execute()
+    return renderResult
   }
 
   async revalidate(renderResult, originalRenderOptions) {
@@ -170,10 +175,11 @@ up.Change.FromURL = class FromURL extends up.Change {
       up.puts('up.render()', 'Revalidating cached response for target "%s"', target)
       let verifyResult = await up.reload(renderResult.target, {
         ...originalRenderOptions,
-        layer: renderResult.layer,
+        layer: renderResult.layer, // if the original render opened a layer, we now update it
+        onFinished: null, // we're delaying the finish event here
         scroll: false,
         focus: 'keep',
-        transition: false, // oferring something like { verifyTransition } would mean we need to delay { onFinished } even further
+        transition: false, // offerring something like { verifyTransition } would mean we need to delay { onFinished } even further
         cache: false, // this implies { revalidate: false }
         confirm: false,
         feedback: false,
@@ -188,8 +194,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       }
     }
 
-    // Call the original { onFinished } callback provided by the user.
-    originalRenderOptions.onFinished?.(renderResult)
+    return renderResult
   }
 
   augmentOptionsFromResponse(renderOptions) {

@@ -4,5 +4,12 @@ $ = jQuery
 beforeEach ->
   jasmine.addMatchers
     toBeError: (util, customEqualityTesters) ->
-      compare: (actual, message) ->
-        pass: (actual instanceof Error) && (!message || (message instanceof RegExp && message.test(actual.message)) || actual.message == message)
+      compare: (actual, args...) ->
+        if args.length == 2
+          [name, message] = args
+        else
+          message = args[0]
+
+        pass: (actual instanceof Error) &&
+          (!name || (actual.name == name)) &&
+          (!message || (message instanceof RegExp && message.test(actual.message)) || actual.message == message)

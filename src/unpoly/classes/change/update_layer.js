@@ -114,18 +114,24 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       target: this.target,
     })
 
-    Promise.all(swapPromises).then(() => {
-      this.abortWhenLayerClosed()
-
-      // Run callback for callers that need to know when animations are done.
-      this.onFinished(renderResult)
-    })
+    renderResult.finished = this.finish(swapPromises, renderResult)
 
     // Don't wait for animations to finish.
     return renderResult
   }
 
-  async executeStep(step) {
+  async finish(swapPromises, renderResult) {
+    await Promise.all(swapPromises)
+
+    // If our layer was closed while animations are running, don't finish
+    // and reject with an AbortError.
+    this.abortWhenLayerClosed()
+
+    // Resolve second promise for callers that need to know when animations are done.
+    return renderResult
+  }
+
+  executeStep(step) {
     // Remember where the element came from to support up.reload(element).
     this.setMeta(step)
 
@@ -139,8 +145,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
           this.handleFocus(step.oldElement, step)
 
-          // Our caller expects a promise
-          await this.handleScroll(step.oldElement, step)
+          this.handleScroll(step.oldElement, step)
+
+          return
 
         } else {
           // This needs to happen before up.syntax.clean() below.
@@ -148,7 +155,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           this.transferKeepableElements(step)
 
           const parent = step.oldElement.parentNode
-          let me = this
 
           const morphOptions = {
             ...step,
@@ -179,18 +185,17 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             scrollNew: () => {
               this.handleFocus(step.newElement, step)
               // up.morph() expects { scrollNew } to return a promise.
-              return this.handleScroll(step.newElement, step)
+              this.handleScroll(step.newElement, step)
             }
           }
 
-          await up.morph(
+          return up.morph(
             step.oldElement,
             step.newElement,
             step.transition,
             morphOptions
           )
         }
-        break
       }
       case 'content': {
         let oldWrapper = e.wrapChildren(step.oldElement)
@@ -204,13 +209,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           newElement: newWrapper,
           focus: false
         }
-        await this.executeStep(wrapperStep)
+        this.executeStep(wrapperStep)
 
         e.unwrap(newWrapper)
         // Unwrapping will destroy focus, so we need to handle it again.
-        await this.handleFocus(step.oldElement, step)
+        this.handleFocus(step.oldElement, step)
 
-        break
+        return
       }
       case 'before':
       case 'after': {
@@ -234,16 +239,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         // Reveal element that was being prepended/appended.
         // Since we will animate (not morph) it's OK to allow animation of scrolling
         // if options.scrollBehavior is given.
-        await this.handleScroll(wrapper, step)
+        this.handleScroll(wrapper, step)
 
         // Since we're adding content instead of replacing, we'll only
         // animate newElement instead of morphing between oldElement and newElement
-        await up.animate(wrapper, step.transition, step)
-
-        // Remove the wrapper now that is has served it purpose
-        e.unwrap(wrapper)
-
-        break
+        return up.animate(wrapper, step.transition, step).then(() => e.unwrap(wrapper))
       }
       default: {
         up.fail('Unknown placement: %o', step.placement)

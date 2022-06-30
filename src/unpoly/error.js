@@ -30,6 +30,8 @@ up.error = (function() {
 
   const cannotTarget = errorInterface('up.CannotTarget')
 
+  const cannotCompile = errorInterface('up.CannotCompile')
+
   const failed = errorInterface('up.Failed')
 
   // Emulate the exception that aborted fetch() would throw
@@ -127,6 +129,7 @@ up.error = (function() {
     aborted,
     offline,
     cannotApply,
+    cannotCompile,
     notImplemented,
     cannotTarget,
     emitGlobal,

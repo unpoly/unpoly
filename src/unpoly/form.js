@@ -217,7 +217,7 @@ up.form = (function() {
 
     Setting this to `false` will disable most defaults.
 
-  @return {Promise<up.RenderResult>}
+  @return {up.RenderJob}
     A promise that will be fulfilled when the server response was rendered.
 
   @stable
@@ -867,7 +867,7 @@ up.form = (function() {
     Defaults to the form's `[up-watch-feedback]` or `[up-feedback]` attribute.
   @param {string|Element|jQuery} [options.formGroup = true]
     TODO
-  @return {Promise<up.RenderResult>}
+  @return {up.RenderJob}
     A promise that fulfills when the server-side validation is received
     and the form was updated.
 

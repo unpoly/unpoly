@@ -5,10 +5,13 @@ up.MotionController = class MotionController {
 
   constructor(name) {
     this.activeClass = `up-${name}`
-    this.dataKey = `up-${name}-finished`
     this.selector = `.${this.activeClass}`
     this.finishEvent = `up:${name}:finish`
+
+    // Track the number of finish() calls for testing
     this.finishCount = 0
+
+    // Track the number of active clusters. If no clusters are active, we can early return in finish().
     this.clusterCount = 0
   }
 
@@ -32,7 +35,7 @@ up.MotionController = class MotionController {
   @return {Promise}
     A promise that fulfills when the animation ends.
   */
-  async startFunction(cluster, startMotion, memory = {}) {
+  startFunction(cluster, startMotion, memory = {}) {
     cluster = e.list(cluster)
 
     // Some motions might reject after starting. E.g. a scrolling animation
@@ -41,47 +44,23 @@ up.MotionController = class MotionController {
     // has setteld, regardless of whether it was resolved or rejected.
     const mutedAnimator = () => up.error.muteUncriticalRejection(startMotion())
 
-    // Callers can pass an options hash `memory` in which we store a { trackMotion }
+    // Callers can pass an options hash `{ memory }` in which we store a { trackMotion }
     // property. With this we can prevent tracking the same motion multiple times.
     // This is an issue when composing a transition from two animations, or when
     // using another transition from within a transition function.
     memory.trackMotion = memory.trackMotion ?? up.motion.isEnabled()
+
     if (memory.trackMotion === false) {
-      // Since we don't want recursive tracking or finishing, we could run
-      // the animator() now. However, since the else branch is async, we push
-      // the animator into the microtask queue to be async as well.
-      await u.microtask(mutedAnimator)
+      return mutedAnimator()
     } else {
       memory.trackMotion = false
-      await this.finish(cluster)
+      this.finish(cluster)
+      this.markCluster(cluster)
       let promise = this.whileForwardingFinishEvent(cluster, mutedAnimator)
-      // Attach the modified promise to the cluster's elements
-      this.markCluster(cluster, promise)
       promise = promise.then(() => this.unmarkCluster(cluster))
       // Return the original promise that is still running
-      return await promise
+      return promise
     }
-  }
-
-  /*-
-  Finishes all animations in the given elements' ancestors and
-  descendants, then calls `motion.start()`.
-
-  Also listens to `this.finishEvent` on the given elements.
-  When this event is observed, calls `motion.finish()`.
-
-  @function startMotion
-  @param {Element|List<Element>} cluster
-  @param {up.Motion} motion
-  @param {Object} [memory.trackMotion=true]
-  */
-  startMotion(cluster, motion, memory = {}) {
-    const start = () => motion.start()
-    const finish = () => motion.finish()
-    const unbindFinish = up.on(cluster, this.finishEvent, finish)
-    let promise = this.startFunction(cluster, start, memory)
-    promise = promise.then(unbindFinish)
-    return promise
   }
 
   /*-
@@ -93,10 +72,14 @@ up.MotionController = class MotionController {
   */
   finish(elements) {
     this.finishCount++
-    if ((this.clusterCount === 0) || !up.motion.isEnabled()) { return Promise.resolve(); }
+    if ((this.clusterCount === 0) || !up.motion.isEnabled()) { return }
     elements = this.expandFinishRequest(elements)
-    const allFinished = u.map(elements, this.finishOneElement.bind(this))
-    return Promise.all(allFinished)
+
+    for (let element of elements) {
+      this.finishOneElement(element)
+    }
+
+    return up.migrate.formerlyAsync?.('up.motion.finish()')
   }
 
   expandFinishRequest(elements) {
@@ -118,11 +101,6 @@ up.MotionController = class MotionController {
     // the animation and resolve their promise. All built-ins like
     // `up.animate()` or `up.morph()` behave that way.
     this.emitFinishEvent(element)
-
-    // If animating code ignores the event, we cannot force the animation to
-    // finish from here. We will wait for the animation to end naturally before
-    // starting the next animation.
-    return this.whenElementFinished(element)
   }
 
   emitFinishEvent(element, eventAttrs = {}) {
@@ -130,26 +108,19 @@ up.MotionController = class MotionController {
     return up.emit(this.finishEvent, eventAttrs)
   }
 
-  whenElementFinished(element) {
-    // There are some cases related to element ghosting where an element
-    // has the class, but not the data value. In that case simply return
-    // a resolved promise.
-    return element[this.dataKey] || Promise.resolve()
-  }
-
-  markCluster(cluster, promise) {
+  markCluster(cluster) {
     this.clusterCount++
-    for (let element of cluster) {
-      element.classList.add(this.activeClass)
-      element[this.dataKey] = promise
-    }
+    this.toggleActive(cluster, true)
   }
 
   unmarkCluster(cluster) {
     this.clusterCount--
+    this.toggleActive(cluster, false)
+  }
+
+  toggleActive(cluster, isActive) {
     for (let element of cluster) {
-      element.classList.remove(this.activeClass)
-      delete element[this.dataKey]
+      element.classList.toggle(this.activeClass, isActive)
     }
   }
 

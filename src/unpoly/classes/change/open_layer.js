@@ -88,12 +88,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
     up.hello(this.layer.element, { layer: this.layer, origin: this.origin })
 
-    let renderResult = new up.RenderResult({
-      layer: this.layer,
-      fragments: [this.content],
-      target: this.target
-    })
-
     // The server may trigger multiple signals that may cause the layer to close:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -109,16 +103,14 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this.handleScroll()
 
-    this.layer.startOpenAnimation().then(() => {
-      // A11Y: Place the focus on the overlay element and setup a focus circle.
-      // However, don't change focus if the layer has been closed while the animation was running.
-      if (this.layer.isOpen()) {
-        this.handleFocus()
-      }
 
-      // Run callbacks for callers that need to know when animations are done.
-      this.onFinished(renderResult)
+    let renderResult = new up.RenderResult({
+      layer: this.layer,
+      fragments: [this.content],
+      target: this.target,
     })
+
+    renderResult.finished = this.finish(renderResult)
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
     // This is a good time for listeners to manipulate the overlay optics.
@@ -134,6 +126,20 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //     layer = await up.layer.open(...)
     //
     // Don't wait to animations to finish:
+    return renderResult
+  }
+
+  async finish(renderResult) {
+    await this.layer.startOpenAnimation()
+
+    // Don't change focus if the layer has been closed while the animation was running.
+    this.abortWhenLayerClosed()
+
+    // A11Y: Place the focus on the overlay element and setup a focus circle.
+    // However, don't change focus if the layer has been closed while the animation was running.
+    this.handleFocus()
+
+    // Resolve second promise for callers that need to know when animations are done.
     return renderResult
   }
 

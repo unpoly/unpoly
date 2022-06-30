@@ -34,7 +34,7 @@ up.CompilerPass = class CompilerPass {
     })
 
     if (this.errors.length) {
-      throw up.error.failed('Errors while compiling', { errors: this.errors })
+      throw up.error.cannotCompile('Errors while compiling', { errors: this.errors })
     }
   }
 

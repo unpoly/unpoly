@@ -1,28 +1,55 @@
 const u = up.util
 
-up.Change.FromOptions = class FromOptions extends up.Change {
+/*-
+TODO: Docs
+
+@class up.RenderJob
+@parent up.fragment
+*/
+up.RenderJob = class RenderJob {
 
   constructor(options) {
-    options = up.RenderOptions.preprocess(options)
-    super(options)
+    this.options = up.RenderOptions.preprocess(options)
+    this.rendered = this.execute()
   }
 
   async execute() {
     try {
       let result = await this.makeChange()
-      result.options.onRendered?.(result)
+      this.runResultCallbacks(result)
       return result
     } catch (error) {
       if (error instanceof up.RenderResult) {
-        const result = error
-        // We call result.options.onRendered() instead of options.onRendered()
-        // as this will call the correct options.onRendered() or onFailRendered()
-        // depending on options.failOptions.
-        result.options.onRendered?.(result)
+        this.runResultCallbacks(error)
       } else {
         this.options.onError?.(error)
       }
       throw error
+    }
+  }
+
+  runResultCallbacks(result) {
+    // We call result.options.onRendered() instead of this.options.onRendered()
+    // as this will call the correct options.onRendered() or onFailRendered()
+    // depending on options.failOptions.
+    result.options.onRendered?.(result)
+    result.finished.then(result.options.onFinished)
+  }
+
+  get finished() {
+    return this.awaitFinished()
+  }
+
+  async awaitFinished() {
+    try {
+      let result = await this.rendered
+      return await result.finished
+    } catch (error) {
+      if (error instanceof up.RenderResult) {
+        throw await error.finished
+      } else {
+        throw error
+      }
     }
   }
 
@@ -89,6 +116,11 @@ up.Change.FromOptions = class FromOptions extends up.Change {
       // (2) Abort requests targeting a given element element
       up.fragment.abort(abort, { ...abortOptions, layer, origin })
     }
+  }
+
+  static {
+    // A request is also a promise ("thenable") for its initial render pass.
+    u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this.rendered })
   }
 
 }
