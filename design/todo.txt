@@ -2,23 +2,35 @@ TODOs for next release
 ======================
 
 
-Various Changes
----------------
+Render lifecycle
+----------------
 
 - What is FragmentResult#fragments when fragments are kept?
   => I think these should be missing from the up.RenderResult
 - up.validate() should reject if the server responds with an error code
   => Already implemented
   => Test
-- Replace up:fragment:inserted with onResult(RenderResult)
+- Replace up:fragment:inserted with a single onRendered(RenderResult), but no event
+  - onRendered is already implemented, but untested
+- The second { onRendered } should be { onRevalidated }
+  - Maybe mark the result as #revalidated and run a differnet result callback
 - failure callbacks should be onFailFinished, onFailRendered
   - switch prefixes
   - also for parsing
   - test this
   - Document this
+  - if we want to be pendantic we need to migrate failOnFinished because that already exists now
 - Remove up:fragment:kept event without replacement
 - up.CannotApply => up.CannotMatch
-- Rename "finished" to "concluded"
+- Build up.RenderResult#merge()
+  - We may no longer need isNone() after that
+- Reconsider up.RenderResult#options => renderOptions
+  - Or maybe not offer this at all as public API, since we're manipulating this for verification
+-
+
+Various Changes
+---------------
+
 - Consider whether up.validate() promises should wait until no more solutions are pending
 
 
@@ -240,6 +252,7 @@ If we're launching V3
 Icebox
 ======
 
+- Rename "finished" to "concluded"
 - Should up:click set up.layer.current ?
   - It would be more convenient, but it's only relevant for popups or backdrop-less modals. This is rare.
 - New onTransitioned() callback to take some load off from onFinished()
