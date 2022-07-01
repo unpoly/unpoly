@@ -476,7 +476,7 @@ describe 'up.fragment', ->
             expect('.middle').toHaveText('new-middle')
             expect('.after').toHaveText('old-after')
 
-        it 'returns a promise that will be fulfilled once the server response was received and the fragments were swapped', asyncSpec (next) ->
+        it 'returns a promise that fulfills the server response was received and the fragments were swapped', asyncSpec (next) ->
           fixture('.target')
 
           resolution = jasmine.createSpy()
@@ -490,6 +490,20 @@ describe 'up.fragment', ->
 
           next =>
             expect(resolution).toHaveBeenCalled()
+            expect($('.target')).toHaveText('new-text')
+
+        it 'runs an { onRendered } callback when the server response was received and the fragments were swapped', asyncSpec (next) ->
+          fixture('.target')
+
+          callback = jasmine.createSpy('onRendered callback')
+          up.render('.target', url: '/path', onRendered: callback)
+
+          next =>
+            expect(callback).not.toHaveBeenCalled()
+            @respondWithSelector('.target', text: 'new-text')
+
+          next =>
+            expect(callback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
             expect($('.target')).toHaveText('new-text')
 
         it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
@@ -685,6 +699,28 @@ describe 'up.fragment', ->
                   expect(state).toBe('rejected')
                   expect(value).toMatch(/No target selector given for failed responses/i)
                   done()
+
+          it 'runs an onFailRendered callback', asyncSpec (next) ->
+            fixture('.success-target', text: 'old text')
+            fixture('.failure-target', text: 'old text')
+            onRendered = jasmine.createSpy('onRendered callback')
+            onFailRendered = jasmine.createSpy('onFailRendered callback')
+
+            up.render('.success-target', { url: '/path', failTarget: '.failure-target', onRendered, onFailRendered })
+
+            next ->
+              expect(onRendered).not.toHaveBeenCalled()
+              expect(onFailRendered).not.toHaveBeenCalled()
+
+            next ->
+              jasmine.respondWithSelector('.failure-target', status: 500, text: 'new text')
+
+            next ->
+              expect('.success-target').toHaveText('old text')
+              expect('.failure-target').toHaveText('new text')
+
+              expect(onRendered).not.toHaveBeenCalled()
+              expect(onFailRendered).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
 
           describe 'with { fail } option', ->
 
