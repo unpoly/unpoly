@@ -25,12 +25,21 @@ prefix the option with `fail`:
 up.render({
   url: '/action',
   method: 'post',
-  target: '.content',   // when submission succeeds update '.content'
-  failTarget: 'form',   // when submission fails update the form
-  scroll: 'auto',       // when submission succeeds use default scroll behavior
-  failScroll: '.errors' // when submission fails scroll to the error messages
+  target: '.content',              // when submission succeeds update '.content'
+  failTarget: 'form',              // when submission fails update the form
+  scroll: 'auto',                  // when submission succeeds use default scroll behavior
+  failScroll: '.errors',           // when submission fails scroll to the error messages
+  onRendered: () => { ... },       // when submission succeeds run this callback
+  onFailedRendered: () => { ... }, // when submission fails run this other callback
 })
 ```
+
+Options that are used before the request is made (like `{ url, method, confirm }`) do not
+have a `fail`-prefixed variant.  Some options (like `{ history, fallback }`) are used for
+both successful and failed responses, but may be overriden with a fail-prefixed variant
+(e.g. `{ history: true, failHistory: false }`. Options related to layers, scrolling or focus are never shared.
+
+Note that event handlers still begin with `on` for failed responses, so `{ onRendered }` becomes `{ onFailRendered }`.
 
 When using Unpoly's HTML attributes with [links](/up.link) or [forms](/up.form)
 you may infix an attribute with `fail`:
@@ -45,11 +54,6 @@ you may infix an attribute with `fail`:
 </form>
 ```
 
-Options that are used before the request is made (like `{ url, method, confirm }`) do not
-have a `fail`-prefixed variant. Some options (like `{ history, fallback }`) are used for both
-successful and failed responses, but may be overriden with a fail-prefixed variant
-(e.g. `{ history: true, failHistory: false }`. Options related to layers, scrolling or
-focus are never shared.
 
 ### Ignoring HTTP error codes
 

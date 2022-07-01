@@ -1671,19 +1671,19 @@ describe 'up.util', ->
         up.util.renameKeys(source, upcase)
         expect(source).toEqual { foo: 1  }
 
-    describe 'up.util.unprefixCamelCase', ->
-
-      it 'returns the given key without the given prefixed', ->
-        result = up.util.unprefixCamelCase('prefixFoo', 'prefix')
-        expect(result).toEqual('foo')
-
-      it 'returns undefined if the given key is not prefixed with the given prefix', ->
-        result = up.util.unprefixCamelCase('foo', 'prefix')
-        expect(result).toBeUndefined()
-
-      it 'returns undefined if the given prefix is the full given key', ->
-        result = up.util.unprefixCamelCase('prefix', 'prefix')
-        expect(result).toBeUndefined()
+#    describe 'up.util.unprefixCamelCase', ->
+#
+#      it 'returns the given key without the given prefixed', ->
+#        result = up.util.unprefixCamelCase('prefixFoo', 'prefix')
+#        expect(result).toEqual('foo')
+#
+#      it 'returns undefined if the given key is not prefixed with the given prefix', ->
+#        result = up.util.unprefixCamelCase('foo', 'prefix')
+#        expect(result).toBeUndefined()
+#
+#      it 'returns undefined if the given prefix is the full given key', ->
+#        result = up.util.unprefixCamelCase('prefix', 'prefix')
+#        expect(result).toBeUndefined()
 
     describe 'up.util.escapeHTML', ->
 

@@ -5174,6 +5174,28 @@ describe 'up.fragment', ->
               expect(finishedCallback).not.toHaveBeenCalled()
               expect(finishedFailedCallback).toHaveBeenCalled()
 
+          it 'runs a callback { onRevalidated } instead of { onRendered } for the second render pass', asyncSpec (next) ->
+            onRendered = jasmine.createSpy('onRendered callback')
+            onRevalidated = jasmine.createSpy('onRevalidated callback')
+
+            up.render('.target', { url: '/cached-path', cache: true, onRendered, onRevalidated })
+
+            next ->
+              expect('.target').toHaveText('cached text')
+              expect(up.network.isBusy()).toBe(true)
+
+              expect(onRendered.calls.count()).toBe(1)
+              expect(onRevalidated.calls.count()).toBe(0)
+
+              jasmine.respondWithSelector('.target', text: 'verified text')
+
+            next ->
+              expect(onRendered.calls.count()).toBe(1)
+              expect(onRevalidated.calls.count()).toBe(1)
+
+              expect(up.network.isBusy()).toBe(false)
+              expect('.target').toHaveText('verified text')
+
           it 'fulfills up.render().finished promise with the cached up.RenderResult if revalidation responded with 304 Not Modified'
 
           it 'calls { onFinished } with the cached up.RenderResult if revalidation responded with 304 Not Modified'
@@ -6141,6 +6163,10 @@ describe 'up.fragment', ->
       it 'returns undefined for the key "fail"', ->
         result = up.fragment.successKey('fail')
         expect(result).toBeUndefined()
+
+      it 'prioritizes the prefix "on", converting onFailFoo to onFoo', ->
+        result = up.fragment.successKey('onFailFoo')
+        expect(result).toEqual('onFoo')
 
     describe 'up.hello()', ->
 

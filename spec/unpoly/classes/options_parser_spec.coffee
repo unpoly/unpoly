@@ -6,7 +6,7 @@ describe 'up.OptionsParser', ->
   describe '#parse', ->
 
     stringAttr = (element, attr) ->
-      element.getAttribute(attr)    
+      element.getAttribute(attr)
 
     it 'keeps the given key from the observed options', ->
       element = fixture('.element')
@@ -95,7 +95,7 @@ describe 'up.OptionsParser', ->
         expect(options.foo).toBe(1)
         expect(options.failFoo).toBe(2)
 
-      it 'writes a fail-prefixed option from the observed element', ->
+      it 'writes a [up-fail] prefixed option from the observed element', ->
         element = fixture('.element')
         element.setAttribute('up-foo', 'success value')
         element.setAttribute('up-fail-foo', 'failure value')
@@ -120,6 +120,26 @@ describe 'up.OptionsParser', ->
         parser.parse(stringAttr, 'foo', default: 'default value')
         expect(options.foo).toBe('default value')
         expect(options.failFoo).toBe('default value')
+
+      describe 'on-prefixed event handlers', ->
+
+        it 'uses an onFail-prefixed option from the observed options', ->
+          element = fixture('.element')
+          options = { onFoo: 1, onFailFoo: 2 }
+          parser = new up.OptionsParser(element, options, fail: true)
+          parser.parse(stringAttr, 'foo')
+          expect(options.onFoo).toBe(1)
+          expect(options.onFailFoo).toBe(2)
+
+        it 'writes an [up-on-fail] prefixed option from the observed element', ->
+          element = fixture('.element')
+          element.setAttribute('up-on-foo', 'success value')
+          element.setAttribute('up-on-fail-foo', 'failure value')
+          options = {}
+          parser = new up.OptionsParser(element, options, fail: true)
+          parser.parse(stringAttr, 'onFoo')
+          expect(options.onFoo).toBe('success value')
+          expect(options.onFailFoo).toBe('failure value')
 
     describe 'with parser-wide { closest: true } option', ->
 

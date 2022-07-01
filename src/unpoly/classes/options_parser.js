@@ -106,8 +106,13 @@ up.OptionsParser = class OptionsParser {
   }
 
   deriveFailAttrName(attr) {
-    if (attr.indexOf(this.attrPrefix) === 0) {
-      return `${this.attrPrefix}fail-${attr.slice(3)}`
+    return this.deriveFailAttrNameForPrefix(attr, this.attrPrefix + 'on-') ||
+      this.deriveFailAttrNameForPrefix(attr, this.attrPrefix)
+  }
+
+  deriveFailAttrNameForPrefix(attr, prefix) {
+    if (attr.startsWith(prefix)) {
+      return `${prefix}fail-${attr.substring(prefix.length)}`
     }
   }
 

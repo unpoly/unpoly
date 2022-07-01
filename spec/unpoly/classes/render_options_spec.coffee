@@ -169,3 +169,10 @@ describe 'up.RenderOptions', ->
       expect(options.mode).toBe('popup')
       expect(options.source).toBe('/fail-source')
 
+    it 'prioritizes the prefix "on" over "fail", converting onFailCallback to onCallback', ->
+      fn = ->
+      givenOptions = { onFailRendered: fn }
+      options = preprocessAndDerive(givenOptions)
+
+      expect(options.onRendered).toBe(fn)
+

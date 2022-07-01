@@ -1641,20 +1641,38 @@ up.fragment = (function() {
     return navigate({...options, url})
   }
 
-  function successKey(key) {
-    return u.unprefixCamelCase(key, 'fail')
-  }
+  const KEY_PATTERN = /^(onFail|on|fail)?(.+)$/
 
-  function failKey(key) {
-    if (!isFailKey(key)) {
-      return u.prefixCamelCase(key, 'fail')
+  function successKey(key) {
+    let match = KEY_PATTERN.exec(key)
+    if (match) {
+      let [_, prefix, suffix] = match
+
+      switch (prefix) {
+        case 'onFail':
+          return 'on' + u.upperCaseFirst(suffix)
+        case 'fail':
+          return u.lowerCaseFirst(suffix)
+      }
+
+      // Return undefined for prefixes "on" and undefined
     }
   }
 
-  const FAIL_KEY_PATTERN = /^fail[A-Z]/
+  function failKey(key) {
+    let match = KEY_PATTERN.exec(key)
+    if (match) {
+      let [_, prefix, suffix] = match
 
-  function isFailKey(key) {
-    return FAIL_KEY_PATTERN.test(key)
+      switch (prefix) {
+        case 'on':
+          return 'onFail' + u.upperCaseFirst(suffix)
+        case undefined:
+          return 'fail' + u.upperCaseFirst(suffix)
+      }
+
+      // Return undefined for prefixes "onFail" and "fail"
+    }
   }
 
   /*-
@@ -2457,7 +2475,6 @@ up.fragment = (function() {
     emitKept: emitFragmentKept,
     successKey,
     failKey,
-    isFailKey,
     expandTargets,
     resolveOrigin: resolveOriginReference,
     toTarget,

@@ -1741,17 +1741,17 @@ up.util = (function() {
     return str.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
   }
 
-  function prefixCamelCase(str, prefix) {
-    return prefix + upperCaseFirst(str)
-  }
-
-  function unprefixCamelCase(str, prefix) {
-    const pattern = new RegExp('^' + prefix + '(.+)$')
-    let match = str.match(pattern)
-    if (match) {
-      return lowerCaseFirst(match[1])
-    }
-  }
+  // function prefixCamelCase(str, prefix) {
+  //   return prefix + upperCaseFirst(str)
+  // }
+  //
+  // function unprefixCamelCase(str, prefix) {
+  //   const pattern = new RegExp('^' + prefix + '(.+)$')
+  //   let match = str.match(pattern)
+  //   if (match) {
+  //     return lowerCaseFirst(match[1])
+  //   }
+  // }
 
   function lowerCaseFirst(str) {
     return str[0].toLowerCase() + str.slice(1)
@@ -1933,8 +1933,8 @@ up.util = (function() {
     isOptions,
     isArray,
     isFormData,
-    isNodeList,
-    isArguments,
+    // isNodeList,
+    // isArguments,
     isList,
     isRegExp,
     timer: scheduleTimer,
@@ -1976,8 +1976,8 @@ up.util = (function() {
     getter: defineGetter,
     delegate: defineDelegates,
     reverse,
-    prefixCamelCase,
-    unprefixCamelCase,
+    // prefixCamelCase,
+    // unprefixCamelCase,
     camelToKebabCase,
     nullToUndefined,
     sprintf,
