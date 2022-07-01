@@ -26,7 +26,8 @@ Render lifecycle
   - We may no longer need isNone() after that
 - Reconsider up.RenderResult#options => renderOptions
   - Or maybe not offer this at all as public API, since we're manipulating this for verification
--
+- Reconsider how many lifecycle callbacks we want to parse from links
+
 
 Various Changes
 ---------------
@@ -155,6 +156,8 @@ Docs
 ### Render rework
 
 - Document up.render().finished
+- New callbacks
+- Possibly new page for lifecycle chart
 
 
 ### New cache
