@@ -69,11 +69,26 @@ up.migrate = (function() {
     renamedEvents[oldType] = newType
   }
 
+  // Maps old event type to new event type
+  const removedEvents = {}
+
+  function removedEvent(type, replacementExpression = null) {
+    removedEvents[type] = replacementExpression
+  }
+
   function fixEventType(eventType) {
     let newEventType = renamedEvents[eventType]
     if (newEventType) {
       warn(`Event ${eventType} has been renamed to ${newEventType}`)
       return newEventType
+    } else if (eventType in removedEvents) {
+      let message = `Event ${eventType} has been removed`
+      let replacementExpression = removedEvents[eventType]
+      if (replacementExpression) {
+        message += `. Use ${replacementExpression} instead.`
+      }
+      warn(message)
+      return eventType
     } else {
       return eventType
     }
@@ -132,6 +147,7 @@ up.migrate = (function() {
     renamedAttribute,
     formerlyAsync,
     renamedEvent,
+    removedEvent,
     fixEventTypes,
     fixKey,
     warn,
