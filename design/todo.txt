@@ -5,8 +5,6 @@ TODOs for next release
 Render lifecycle
 ----------------
 
-- What is FragmentResult#fragments when fragments are kept?
-  => I think these should be missing from the up.RenderResult
 - up.validate() should reject if the server responds with an error code
   => Already implemented
   => Test
