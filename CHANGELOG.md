@@ -27,7 +27,7 @@ Changes tracked until 2022-06-22:
 
 ### Remorseless caching
 
-- Revalidation
+- Revalidation renders a second time
 - Longer cache times
 - Expire vs. Evict
 - Tracking `Last-Modified`, `E-Tag`. Echo as `If-Modified-Since`, `If-None-Match`.
