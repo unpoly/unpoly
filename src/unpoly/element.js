@@ -811,14 +811,18 @@ up.element = (function() {
     parent.removeChild(wrapper)
   }
 
-  function wrapChildren(element, wrapperSelector = 'up-wrapper') {
+  function wrapChildren(element) {
     let childNode
-    const wrapper = createFromSelector(wrapperSelector)
+    const wrapper = document.createElement('up-wrapper')
     while ((childNode = element.firstChild)) {
       wrapper.appendChild(childNode)
     }
     element.appendChild(wrapper)
     return wrapper
+  }
+
+  function isWrapper(element) {
+    return element.matches('up-wrapper')
   }
 
 //  ###**
@@ -1278,6 +1282,7 @@ up.element = (function() {
     setMissingAttr, // internal
     unwrap, // practical for jQuery migration
     wrapChildren,
+    isWrapper,
     // presentAttr: presentAttr # experimental
     attr: stringAttr,
     booleanAttr, // it's practical, but i cannot find a good name. people might expect it to cast to number, too. but i don't need that for my own code. maybe booleanAttr?

@@ -106,21 +106,20 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
-    const swapPromises = this.steps.map(step => this.executeStep(step))
-
-    let renderResult = new up.RenderResult({
+    this.renderResult = new up.RenderResult({
       layer: this.layer,
-      fragments: u.map(this.steps, 'newElement'),
       target: this.target,
     })
 
-    renderResult.finished = this.finish(swapPromises, renderResult)
+    const swapPromises = this.steps.map(step => this.executeStep(step))
+
+    this.renderResult.finished = this.finish(swapPromises)
 
     // Don't wait for animations to finish.
-    return renderResult
+    return this.renderResult
   }
 
-  async finish(swapPromises, renderResult) {
+  async finish(swapPromises) {
     await Promise.all(swapPromises)
 
     // If our layer was closed while animations are running, don't finish
@@ -128,7 +127,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.abortWhenLayerClosed()
 
     // Resolve second promise for callers that need to know when animations are done.
-    return renderResult
+    return this.renderResult
+  }
+
+  addToResult(fragment) {
+    let newFragments = fragment.matches('up-wrapper') ? fragment.children : [fragment]
+    this.renderResult.fragments.push(...newFragments)
   }
 
   executeStep(step) {
@@ -147,7 +151,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
           this.handleScroll(step.oldElement, step)
 
-          return
+          // Don't add kept fragment to this.renderResult.
+
+          return Promise.resolve()
 
         } else {
           // This needs to happen before up.syntax.clean() below.
@@ -170,6 +176,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
               // to step.newElement, leaving a clone in their old DOM Position.
               // up.hello() is aware of step.keepPlans and will not compile kept elements a second time.
               up.hello(step.newElement, step)
+
+              this.addToResult(step.newElement)
             },
             beforeDetach: () => {
               // In the case of [up-keep] descendants, keepable elements have been replaced
@@ -209,13 +217,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
           newElement: newWrapper,
           focus: false
         }
-        this.executeStep(wrapperStep)
 
-        e.unwrap(newWrapper)
-        // Unwrapping will destroy focus, so we need to handle it again.
-        this.handleFocus(step.oldElement, step)
+        return this.executeStep(wrapperStep).then(() => {
+          e.unwrap(newWrapper)
+          // Unwrapping will destroy focus, so we need to handle it again.
+          // Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
+          this.handleFocus(step.oldElement, step)
+        })
 
-        return
       }
       case 'before':
       case 'after': {
@@ -233,6 +242,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
         this.responseDoc.finalizeElement(wrapper)
         up.hello(wrapper, step)
+
+        this.addToResult(wrapper)
 
         this.handleFocus(wrapper, step)
 

@@ -1284,6 +1284,20 @@ describe 'up.fragment', ->
           next =>
             expect('.target').toHaveText('new text')
 
+        it 'returns an up.RenderResult with the new children', (done) ->
+          fixture('.target', text: 'old text')
+
+          promise = up.render('.target', content: """
+            <div class="child1">child1</div>
+            <div class="child2">child2</div>
+          """)
+
+          promise.then (result) ->
+            expect(result.fragments.length).toBe(2)
+            expect(result.fragments[0]).toMatchSelector('.child1')
+            expect(result.fragments[1]).toMatchSelector('.child2')
+            done()
+
         it 'replaces the given selector with a matching element that has the inner HTML from the given { content } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
           content = e.createFromSelector('div', text: 'new text')
@@ -1559,6 +1573,21 @@ describe 'up.fragment', ->
               expect(children.length).toBe(2)
               expect(children[0]).toHaveText('old')
               expect(children[1]).toHaveText('new')
+
+          it 'returns an up.RenderResult with only the appended elements', (done) ->
+            target = fixture('.target')
+            e.affix(target, '.child', text: 'old')
+            promise = up.render('.target:after', document: """
+              <div class='target'>
+                <div class='child'>new</div>
+              </div>
+              """
+            )
+
+            promise.then (result) ->
+              expect(result.fragments.length).toBe(1)
+              expect(result.fragments[0]).toMatchSelector('.child')
+              done()
 
           it "lets the developer choose between replacing/prepending/appending for each selector", asyncSpec (next) ->
             fixture('.before', text: 'old-before')
@@ -5312,6 +5341,30 @@ describe 'up.fragment', ->
 
           next =>
             expect(squish($('.container').text())).toEqual('new-before old-inside new-after')
+
+        it 'omits a kept element from the returned up.RenderResult', (done) ->
+          $container = $fixture('.container')
+          $container.affix('.before').text('old-before')
+          $container.affix('.middle[up-keep]').text('old-middle')
+          $container.affix('.after').text('old-after')
+
+          promise = up.render('.before, .middle', document: """
+            <div class='container'>
+              <div class='before'>new-before</div>
+              <div class='middle' up-keep>new-middle</div>
+              <div class='after'>new-after</div>
+            </div>
+          """)
+
+          promise.then (result) ->
+            expect($('.before')).toHaveText('new-before')
+            expect($('.middle')).toHaveText('old-middle') # was kept
+            expect($('.after')).toHaveText('old-after')
+
+            expect(result.fragments.length).toBe(1)
+            expect(result.fragments[0]).toMatchSelector('.before')
+
+            done()
 
         it 'updates an [up-keep] element with { useKeep: false } option', asyncSpec (next) ->
           $container = $fixture('.container')
