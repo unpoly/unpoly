@@ -13,13 +13,6 @@ function transferProps(from, to) {
   }
 }
 
-function focusedElementWithin(scopeElement) {
-  const focusedElement = document.activeElement
-  if (e.isInSubtree(scopeElement, focusedElement)) {
-    return focusedElement
-  }
-}
-
 up.FocusCapsule = class FocusCapsule extends up.Record {
   keys() {
     return ['target', 'oldElement'].concat(PRESERVE_KEYS)
@@ -47,7 +40,7 @@ up.FocusCapsule = class FocusCapsule extends up.Record {
   }
 
   static preserveWithin(oldElement, options) {
-    let focusedElement = focusedElementWithin(oldElement)
+    let focusedElement = up.viewport.focusedElementWithin(oldElement)
     return this.preserveElement(focusedElement, options)
   }
 
@@ -82,6 +75,6 @@ up.FocusCapsule = class FocusCapsule extends up.Record {
       up.fail('FocusCapsule does not support #wasLost()')
     }
 
-    return !focusedElementWithin(this.oldElement)
+    return !up.viewport.focusedElementWithin(this.oldElement)
   }
 }

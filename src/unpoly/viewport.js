@@ -881,6 +881,13 @@ up.viewport = (function() {
     return value?.replace(/^#/, '')
   }
 
+  function focusedElementWithin(scopeElement) {
+    const focusedElement = document.activeElement
+    if (e.isInSubtree(scopeElement, focusedElement)) {
+      return focusedElement
+    }
+  }
+
   let userScrolled = false
   up.on('scroll', { once: true, beforeBoot: true }, () => userScrolled = true)
 
@@ -931,7 +938,8 @@ up.viewport = (function() {
     focus: doFocus,
     tryFocus,
     makeFocusable,
-    newStateCache
+    newStateCache,
+    focusedElementWithin
   }
 })()
 

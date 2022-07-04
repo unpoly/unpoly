@@ -1543,7 +1543,7 @@ describe 'up.form', ->
 
   describe 'unobtrusive behavior', ->
 
-    describe 'form[up-target]', ->
+    describe 'form[up-submit]', ->
 
       it 'submits the form with AJAX and replaces the [up-target] selector', asyncSpec (next) ->
         up.history.config.enabled = true
@@ -1792,6 +1792,67 @@ describe 'up.form', ->
             request = @lastRequest()
             expect(request.url).toMatchURL('/button-path')
             expect(request.method).toBe('POST')
+
+      describe 'origin of submission', ->
+
+        lastOrigin = -> up.render.calls.mostRecent().args[0].origin
+
+        beforeEach ->
+          spyOn(up, 'render').and.returnValue(Promise.resolve(new up.RenderResult()))
+
+        it 'sets the origin to the clicked submit button', ->
+          form = fixture('form[action="/path"][up-submit]')
+          submitButton1 = e.affix(form, 'input[type="submit"]')
+          submitButton2 = e.affix(form, 'input[type="submit"]')
+          up.hello(form)
+
+          Trigger.clickSequence(submitButton2)
+
+          expect(lastOrigin()).toBe(submitButton2)
+
+        describe 'when the form is submitted with the enter key or receives a synthetic submit event', ->
+
+          it 'sets the origin to a focused field within the form', ->
+            form = fixture('form[action="/path"][up-submit]')
+            input = e.affix(form, 'input[type=text[name=foo]')
+            submitButton = e.affix(form, 'input[type="submit"]')
+            up.hello(form)
+
+            input.focus()
+
+            Trigger.submit(form)
+
+            expect(lastOrigin()).toBe(input)
+
+          it 'sets the origin to the first submit button if no field is focused', ->
+            form = fixture('form[action="/path"][up-submit]')
+            input = e.affix(form, 'input[type=text[name=foo]')
+            submitButton = e.affix(form, 'input[type="submit"]')
+            up.hello(form)
+
+            Trigger.submit(form)
+
+            expect(lastOrigin()).toBe(submitButton)
+
+          it 'does not set the origin to a focused field outside the form', ->
+            form = fixture('form[action="/path"][up-submit]')
+            inputOutsideForm = fixture('input[type=text[name=foo]')
+            submitButton = e.affix(form, 'input[type="submit"]')
+            up.hello(form)
+
+            inputOutsideForm.focus()
+
+            Trigger.submit(form)
+
+            expect(lastOrigin()).not.toBe(inputOutsideForm)
+
+        it 'sets the origin to the form if the form has neither submit button nor focused field', ->
+          form = fixture('form[action="/path"][up-submit]')
+          up.hello(form)
+
+          Trigger.submit(form)
+
+          expect(lastOrigin()).toBe(form)
 
       describe 'handling of up.form.config.submitSelectors', ->
 

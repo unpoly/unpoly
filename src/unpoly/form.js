@@ -157,8 +157,8 @@ up.form = (function() {
   */
   function submittingButton(form) {
     const selector = submitButtonSelector()
-    const focusedElement = document.activeElement
-    if (focusedElement && focusedElement.matches(selector) && form.contains(focusedElement)) {
+    const focusedElement = up.viewport.focusedElementWithin(form)
+    if (focusedElement && focusedElement.matches(selector)) {
       return focusedElement
     } else {
       // If no button is focused, we assume the first button in the form.
@@ -216,6 +216,16 @@ up.form = (function() {
     Whether this fragment update is considered [navigation](/navigation).
 
     Setting this to `false` will disable most defaults.
+
+  @param {Element} [options.origin]
+    The element that triggered the form submission.
+
+    This defaults to the first applicable:
+
+    - An element within the form that was focused when the form was submitted (e.g. when the user presses `Enter` inside a text field)
+    - The [button clicked to submit the form](/up:form:submit#event.submitButton).
+    - The first submit button
+    - The `<form>` element
 
   @return {up.RenderJob}
     A promise that will be fulfilled when the server response was rendered.
@@ -279,6 +289,8 @@ up.form = (function() {
       params: options.params,
       log: 'Submitting form'
     })
+
+    options.origin ||= up.viewport.focusedElementWithin(form) || options.submitButton || form
 
     // Now that we have extracted everything form-specific into options, we can call
     // up.link.followOptions(). This will also parse the myriads of other options
@@ -472,7 +484,6 @@ up.form = (function() {
         // that override [method] and [action] attribute from the <form> element.
         options.method ||= submitButton.getAttribute('formmethod')
         options.url ||= submitButton.getAttribute('formaction')
-        options.origin ||= submitButton
       }
 
       // We had any { params } option to the params that we got from the form.
@@ -527,6 +538,9 @@ up.form = (function() {
     The [form parameters](/up.Params) that will be send as the form's request payload.
   @param {Element} [event.submitButton]
     The button used to submit the form.
+
+    If no button was pressed directly (e.g. the user pressed `Enter` inside a focused text field),
+    this returns the first submit button.
   @param {Object} event.renderOptions
     An object with [render options](/up.render) for the fragment update.
 
