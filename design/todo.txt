@@ -10,17 +10,11 @@ Render lifecycle
 - up.validate() should reject if the server responds with an error code
   => Already implemented
   => Test
-- Replace up:fragment:inserted with a single onRendered(RenderResult), but no event
-  - onRendered is already implemented, but untested
-- The second { onRendered } should be { onRevalidated }
-  - Maybe mark the result as #revalidated and run a differnet result callback
-- failure callbacks should be onFailFinished, onFailRendered
-  - switch prefixes
-  - also for parsing
-  - test this
-  - Document this
-  - if we want to be pendantic we need to migrate failOnFinished because that already exists now
-- Remove up:fragment:kept event without replacement
+- Remove unused events
+  - Remove up:fragment:inserted without replacement
+  - Remove up:fragment:destroyed without replacement
+  - Remove up:fragment:kept event without replacement
+- Move hello() to up.syntax
 - up.CannotApply => up.CannotMatch
 - Build up.RenderResult#merge()
   - We may no longer need isNone() after that
@@ -156,7 +150,7 @@ Docs
 ### Render rework
 
 - Document up.render().finished
-- New callbacks
+- Document all lifecycle callbacks for up.render() (JS) and a[up-follow] (HTML)
 - Possibly new page for lifecycle chart
 
 
