@@ -978,23 +978,6 @@ up.fragment = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
-  during a page update.
-
-  Event listeners can inspect the discarded update through `event.newElement`
-  and `event.newData` and then modify the preserved element when necessary.
-
-  @event up:fragment:kept
-  @param {Element} event.target
-    The fragment that has been kept.
-  @param {Element} event.newFragment
-    The discarded fragment.
-  @param {Object} event.newData
-    The [data](/data) attached to the discarded fragment.
-  @stable
-  */
-
-  /*-
   Manually compiles a page fragment that has been inserted into the DOM
   by external code.
 
@@ -1034,69 +1017,26 @@ up.fragment = (function() {
     // so they won't be compiled a second time.
     const keepPlans = options.keepPlans || []
     const skip = keepPlans.map(function (plan) {
-      emitFragmentKept(plan)
+      up.migrate.emitFragmentKept?.(plan)
       return plan.oldElement // the kept element
     })
 
     up.syntax.compile(element, { skip, layer: options.layer })
-    emitFragmentInserted(element, options)
+    up.migrate.emitFragmentInserted?.(element, options)
 
     return element
-  }
-
-  /*-
-  When any page fragment has been [inserted or updated](/up.replace),
-  this event is [emitted](/up.emit) on the fragment.
-
-  If you're looking to run code when a new fragment matches
-  a selector, use `up.compiler()` instead.
-
-  ### Example
-
-  ```js
-  up.on('up:fragment:inserted', function(event, fragment) {
-    console.log("Looks like we have a new %o!", fragment)
-  })
-  ```
-
-  @event up:fragment:inserted
-  @param {Element} event.target
-    The fragment that has been inserted or updated.
-  @stable
-  */
-  function emitFragmentInserted(element, options) {
-    return up.emit(element, 'up:fragment:inserted', {
-      log: ['Inserted fragment %o', element],
-      origin: options.origin
-    })
   }
 
   function emitFragmentKeep(keepPlan) {
     const log = ['Keeping fragment %o', keepPlan.oldElement]
     const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', ['newFragment', 'newData'])
-    return emitFromKeepPlan(keepPlan, 'up:fragment:keep', {log, callback})
-  }
 
-  function emitFragmentKept(keepPlan) {
-    const log = ['Kept fragment %o', keepPlan.oldElement]
-    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', {log})
-  }
-
-  function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
-    const keepable = keepPlan.oldElement
-
-    const event = up.event.build(eventType, {
+    return up.emit(keepPlan.oldElement, 'up:fragment:kept', {
       newFragment: keepPlan.newElement,
-      newData: keepPlan.newData
+      newData: keepPlan.newData,
+      log,
+      callback,
     })
-
-    return up.emit(keepable, event, emitDetails)
-  }
-
-  function emitFragmentDestroyed(fragment, options) {
-    const log = options.log ?? ['Destroyed fragment %o', fragment]
-    const parent = options.parent || document
-    return up.emit(parent, 'up:fragment:destroyed', {fragment, parent, log})
   }
 
   function isDestroying(element) {
@@ -1535,23 +1475,6 @@ up.fragment = (function() {
     element.classList.add('up-destroying')
     element.setAttribute('aria-hidden', 'true')
   }
-
-  /*-
-  This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
-
-  If the destruction is animated, this event is emitted after the animation has ended.
-
-  The event is emitted on the parent element of the fragment that was removed.
-
-  @event up:fragment:destroyed
-  @param {Element} event.fragment
-    The detached element that has been removed from the DOM.
-  @param {Element} event.parent
-    The former parent element of the fragment that has now been detached from the DOM.
-  @param {Element} event.target
-    The former parent element of the fragment that has now been detached from the DOM.
-  @stable
-  */
 
   /*-
   Replaces the given element with a fresh copy fetched from the server.
@@ -2469,10 +2392,7 @@ up.fragment = (function() {
     hello,
     visit,
     markAsDestroying: markFragmentAsDestroying,
-    emitInserted: emitFragmentInserted,
-    emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
-    emitKept: emitFragmentKept,
     successKey,
     failKey,
     expandTargets,

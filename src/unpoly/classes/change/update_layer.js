@@ -141,7 +141,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         if (keepPlan) {
           // Since we're keeping the element that was requested to be swapped,
           // there is nothing left to do here, except notify event listeners.
-          up.fragment.emitKept(keepPlan)
+          up.migrate.emitFragmentKept?.(keepPlan)
 
           this.handleFocus(step.oldElement, step)
 

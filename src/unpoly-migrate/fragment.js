@@ -175,3 +175,88 @@ up.migrate.postprocessReloadOptions = function(options) {
 
   options.headers[up.protocol.headerize('reloadFromTime')] = legacyHeader
 }
+
+up.migrate.emitFragmentInserted = function(element, options) {
+  return up.emit(element, 'up:fragment:inserted', {
+    log: ['Inserted fragment %o', element],
+    origin: options.origin
+  })
+}
+
+up.migrate.removedEvent('up:fragment:inserted', 'compiler or MutationObserver')
+
+/*-
+When any page fragment has been [inserted or updated](/up.replace),
+this event is [emitted](/up.emit) on the fragment.
+
+If you're looking to run code when a new fragment matches
+a selector, use `up.compiler()` instead.
+
+### Example
+
+```js
+up.on('up:fragment:inserted', function(event, fragment) {
+  console.log("Looks like we have a new %o!", fragment)
+})
+```
+
+@event up:fragment:inserted
+@param {Element} event.target
+  The fragment that has been inserted or updated.
+@deprecated
+  Use a [compiler](/up.compiler) or [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) instead.
+*/
+
+up.migrate.emitFragmentDestroyed = function(fragment, options) {
+  const log = options.log ?? ['Destroyed fragment %o', fragment]
+  const parent = options.parent || document
+  return up.emit(parent, 'up:fragment:destroyed', {fragment, parent, log})
+}
+
+up.migrate.removedEvent('up:fragment:destroyed', 'destructor or MutationObserver')
+
+/*-
+This event is [emitted](/up.emit) after a page fragment was [destroyed](/up.destroy) and removed from the DOM.
+
+If the destruction is animated, this event is emitted after the animation has ended.
+
+The event is emitted on the parent element of the fragment that was removed.
+
+@event up:fragment:destroyed
+@param {Element} event.fragment
+  The detached element that has been removed from the DOM.
+@param {Element} event.parent
+  The former parent element of the fragment that has now been detached from the DOM.
+@param {Element} event.target
+  The former parent element of the fragment that has now been detached from the DOM.
+@deprecated
+  Use a [destructor](/up.destructor) or [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) instead.
+*/
+
+up.migrate.emitFragmentKept = function(keepPlan) {
+  return up.emit(keepPlan.oldElement, 'up:fragment:kept', {
+    newFragment: keepPlan.newElement,
+    newData: keepPlan.newData,
+    log: ['Kept fragment %o', keepPlan.oldElement]
+  })
+}
+
+up.migrate.removedEvent('up:fragment:kept')
+
+/*-
+This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
+during a page update.
+
+Event listeners can inspect the discarded update through `event.newElement`
+and `event.newData` and then modify the preserved element when necessary.
+
+@event up:fragment:kept
+@param {Element} event.target
+  The fragment that has been kept.
+@param {Element} event.newFragment
+  The discarded fragment.
+@param {Object} event.newData
+  The [data](/data) attached to the discarded fragment.
+@deprecated
+  This event has been removed without replacement.
+*/

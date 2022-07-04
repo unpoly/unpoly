@@ -3381,29 +3381,30 @@ describe 'up.fragment', ->
 
         describe 'when up.morph() is called from a transition function', ->
 
-          it "does not emit multiple replacement events (bugfix)", (done) ->
-            $element = $fixture('.element').text('old content')
+          if up.migrate.loaded
+            it "does not emit multiple replacement events (bugfix)", (done) ->
+              $element = $fixture('.element').text('old content')
 
-            transition = (oldElement, newElement, options) ->
-              up.morph(oldElement, newElement, 'cross-fade', options)
+              transition = (oldElement, newElement, options) ->
+                up.morph(oldElement, newElement, 'cross-fade', options)
 
-            destroyedListener = jasmine.createSpy('listener to up:fragment:destroyed')
-            up.on 'up:fragment:destroyed', destroyedListener
-            insertedListener = jasmine.createSpy('listener to up:fragment:inserted')
-            up.on 'up:fragment:inserted', insertedListener
+              destroyedListener = jasmine.createSpy('listener to up:fragment:destroyed')
+              up.on 'up:fragment:destroyed', destroyedListener
+              insertedListener = jasmine.createSpy('listener to up:fragment:inserted')
+              up.on 'up:fragment:inserted', insertedListener
 
-            testListenerCalls = ->
-              expect(destroyedListener.calls.count()).toBe(1)
-              expect(insertedListener.calls.count()).toBe(1)
-              done()
+              testListenerCalls = ->
+                expect(destroyedListener.calls.count()).toBe(1)
+                expect(insertedListener.calls.count()).toBe(1)
+                done()
 
-            up.render(
-              fragment: '<div class="element">new content</div>',
-              transition: transition,
-              duration: 50,
-              easing: 'linear'
-              onFinished: testListenerCalls
-            )
+              up.render(
+                fragment: '<div class="element">new content</div>',
+                transition: transition,
+                duration: 50,
+                easing: 'linear'
+                onFinished: testListenerCalls
+              )
 
           it "does not compile the element multiple times (bugfix)", (done) ->
             $element = $fixture('.element').text('old content')
@@ -4078,20 +4079,21 @@ describe 'up.fragment', ->
 
       describe 'destruction of old element', ->
 
-        it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
-          $parent = $fixture('.parent')
-          $element = $parent.affix('.element.v1').text('v1')
-          expect($element).toBeAttached()
+        if up.migrate.loaded
+          it 'emits an up:fragment:destroyed event on the former parent element after the element has been removed from the DOM', (done) ->
+            $parent = $fixture('.parent')
+            $element = $parent.affix('.element.v1').text('v1')
+            expect($element).toBeAttached()
 
-          spy = jasmine.createSpy('event listener')
-          $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
-            spy(event.target, event.fragment, up.specUtil.isDetached($element))
+            spy = jasmine.createSpy('event listener')
+            $parent[0].addEventListener 'up:fragment:destroyed', (event) ->
+              spy(event.target, event.fragment, up.specUtil.isDetached($element))
 
-          extractDone = up.render('.element', document: '<div class="element v2">v2</div>')
+            extractDone = up.render('.element', document: '<div class="element v2">v2</div>')
 
-          extractDone.then ->
-            expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
-            done()
+            extractDone.then ->
+              expect(spy).toHaveBeenCalledWith($parent[0], $element[0], true)
+              done()
 
         it 'calls destructors on the old element', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
@@ -5369,21 +5371,22 @@ describe 'up.fragment', ->
             next =>
               expect($('.keeper')).toHaveText('old-inside')
 
-          it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", asyncSpec (next) ->
-            insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
-            keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
-            up.on('up:fragment:kept', keptListener)
-            up.on('up:fragment:inserted', insertedListener)
-            $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-            up.render '.keeper', document: "<div class='keeper new' up-keep>new-inside</div>"
+          if up.migrate.loaded
+            it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", asyncSpec (next) ->
+              insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
+              keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
+              up.on('up:fragment:kept', keptListener)
+              up.on('up:fragment:inserted', insertedListener)
+              $keeper = $fixture('.keeper[up-keep]').text('old-inside')
+              up.render '.keeper', document: "<div class='keeper new' up-keep>new-inside</div>"
 
-            next =>
-              expect(insertedListener).not.toHaveBeenCalled()
-              expect(keptListener).toHaveBeenCalledWith(
-                jasmine.objectContaining(newFragment: jasmine.objectContaining(className: 'keeper new')),
-                $keeper[0],
-                jasmine.anything()
-              )
+              next =>
+                expect(insertedListener).not.toHaveBeenCalled()
+                expect(keptListener).toHaveBeenCalledWith(
+                  jasmine.objectContaining(newFragment: jasmine.objectContaining(className: 'keeper new')),
+                  $keeper[0],
+                  jasmine.anything()
+                )
 
         it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
@@ -5622,26 +5625,27 @@ describe 'up.fragment', ->
           next => up.render fragment: "<div class='keeper' up-keep>version 3</div>"
           next => expect($('.keeper')).toHaveText('version 3')
 
-        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on the targeted parent parent', asyncSpec (next) ->
-          insertedListener = jasmine.createSpy()
-          up.on('up:fragment:inserted', insertedListener)
-          keptListener = jasmine.createSpy()
-          up.on('up:fragment:kept', keptListener)
+        if up.migrate.loaded
+          it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on the targeted parent parent', asyncSpec (next) ->
+            insertedListener = jasmine.createSpy()
+            up.on('up:fragment:inserted', insertedListener)
+            keptListener = jasmine.createSpy()
+            up.on('up:fragment:kept', keptListener)
 
-          $container = $fixture('.container')
-          $container.html """
-            <div class="keeper" up-keep></div>
-            """
-
-          up.render fragment: """
-            <div class='container'>
+            $container = $fixture('.container')
+            $container.html """
               <div class="keeper" up-keep></div>
-            </div>
-            """
+              """
 
-          next =>
-            expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container')[0], jasmine.anything())
-            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
+            up.render fragment: """
+              <div class='container'>
+                <div class="keeper" up-keep></div>
+              </div>
+              """
+
+            next =>
+              expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container')[0], jasmine.anything())
+              expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
 
         it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', asyncSpec (next) ->
           keptListener = jasmine.createSpy()
@@ -5918,22 +5922,23 @@ describe 'up.fragment', ->
           expect($element).toBeDetached()
           expect(onFinished).toHaveBeenCalled()
 
-      # up.destroy
-      it 'emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', asyncSpec (next) ->
-        $parent = $fixture('.parent')
-        $element = $parent.affix('.element')
-        expect($element).toBeAttached()
-
-        listener = jasmine.createSpy('event listener')
-
-        $parent[0].addEventListener('up:fragment:destroyed', listener)
-
-        up.destroy($element, animation: 'fade-out', duration: 30)
-
-        next ->
-          expect(listener).toHaveBeenCalled()
-          expect($element).toMatchSelector('.up-destroying')
+      if up.migrate.loaded
+        # up.destroy
+        it 'emits an up:fragment:destroyed event on the former parent element after the element was marked as .up-destroying and started its close animation', asyncSpec (next) ->
+          $parent = $fixture('.parent')
+          $element = $parent.affix('.element')
           expect($element).toBeAttached()
+
+          listener = jasmine.createSpy('event listener')
+
+          $parent[0].addEventListener('up:fragment:destroyed', listener)
+
+          up.destroy($element, animation: 'fade-out', duration: 30)
+
+          next ->
+            expect(listener).toHaveBeenCalled()
+            expect($element).toMatchSelector('.up-destroying')
+            expect($element).toBeAttached()
 
       it 'removes element-related data from the global jQuery cache (bugfix)', asyncSpec (next) ->
         $element = $fixture('.element')
@@ -6214,17 +6219,18 @@ describe 'up.fragment', ->
         up.hello(element)
         expect(compiler).toHaveBeenCalledWith(element, jasmine.anything())
 
-      it 'emits an up:fragment:inserted event', ->
-        compiler = jasmine.createSpy('compiler')
-        target = fixture('.element')
-        origin = fixture('.origin')
-        listener = jasmine.createSpy('up:fragment:inserted listener')
-        target.addEventListener('up:fragment:inserted', listener)
+      if up.migrate.loaded
+        it 'emits an up:fragment:inserted event', ->
+          compiler = jasmine.createSpy('compiler')
+          target = fixture('.element')
+          origin = fixture('.origin')
+          listener = jasmine.createSpy('up:fragment:inserted listener')
+          target.addEventListener('up:fragment:inserted', listener)
 
-        up.hello(target, { origin })
+          up.hello(target, { origin })
 
-        expectedEvent = jasmine.objectContaining({ origin, target })
-        expect(listener).toHaveBeenCalledWith(expectedEvent)
+          expectedEvent = jasmine.objectContaining({ origin, target })
+          expect(listener).toHaveBeenCalledWith(expectedEvent)
 
       it "sets up.layer.current to the given element's layer while compilers are running", asyncSpec (next) ->
         layerSpy = jasmine.createSpy('layer spy')

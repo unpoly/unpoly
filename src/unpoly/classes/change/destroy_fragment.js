@@ -55,7 +55,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   }
 
   emitDestroyed() {
-    // Emits up:fragment:destroyed.
-    up.fragment.emitDestroyed(this.element, { parent: this.parent, log: this.log })
+    // Emits deprecated up:fragment:destroyed event.
+    up.migrate.emitFragmentDestroyed?.(this.element, { parent: this.parent, log: this.log })
   }
 }
