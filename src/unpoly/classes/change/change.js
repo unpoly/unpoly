@@ -6,8 +6,8 @@ up.Change = class Change {
     this.options = options
   }
 
-  cannotApply(reason) {
-    return up.error.cannotApply(this, reason)
+  cannotMatch(reason) {
+    return up.error.cannotMatch(this, reason)
   }
 
   execute() {

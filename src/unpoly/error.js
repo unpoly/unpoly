@@ -43,7 +43,7 @@ up.error = (function() {
 
   const notImplemented = errorInterface('up.NotImplemented')
 
-  const cannotApply = errorInterface('up.CannotApply', (change, reason) => {
+  const cannotMatch = errorInterface('up.CannotMatch', (change, reason) => {
     return build(`Cannot apply change: ${change} (${reason})`)
   })
 
@@ -128,7 +128,7 @@ up.error = (function() {
     failed,
     aborted,
     offline,
-    cannotApply,
+    cannotMatch,
     cannotCompile,
     notImplemented,
     cannotTarget,

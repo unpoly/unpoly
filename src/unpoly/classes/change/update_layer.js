@@ -15,7 +15,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   getPreflightProps() {
-    // This will throw up.error.cannotApply() if { target } cannot
+    // This will throw up.error.cannotMatch() if { target } cannot
     // be found in { layer }.
     this.matchPreflight()
 
@@ -354,7 +354,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       if (step.oldElement) {
         return true
       } else if (!step.maybe) {
-        throw this.cannotApply(`Could not find element "${this.target}" in current page`)
+        throw this.cannotMatch(`Could not find element "${this.target}" in current page`)
       }
     })
 
@@ -377,7 +377,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       if (step.newElement) {
         return true
       } else if (!step.maybe) {
-        throw this.cannotApply(`Could not find element "${this.target}" in server response`)
+        throw this.cannotMatch(`Could not find element "${this.target}" in server response`)
       }
     })
 
