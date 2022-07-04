@@ -10,16 +10,7 @@ Render lifecycle
 - up.validate() should reject if the server responds with an error code
   => Already implemented
   => Test
-- Remove unused events
-  - Remove up:fragment:inserted without replacement
-  - Remove up:fragment:destroyed without replacement
-  - Remove up:fragment:kept event without replacement
-- Move hello() to up.syntax
 - up.CannotApply => up.CannotMatch
-- Build up.RenderResult#merge()
-  - We may no longer need isNone() after that
-- Reconsider up.RenderResult#options => renderOptions
-  - Or maybe not offer this at all as public API, since we're manipulating this for verification
 - Reconsider how many lifecycle callbacks we want to parse from links
 
 
