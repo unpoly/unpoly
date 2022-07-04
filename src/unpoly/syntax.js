@@ -342,6 +342,9 @@ up.syntax = (function() {
   Registers a function to be called when the given element
   is [destroyed](/up.destroy).
 
+  An alternative way to register a destructor function is to
+  [`return` it from your compiler function](/up.compiler#cleaning-up-after-yourself).
+
   ### Example
 
   ```js
@@ -351,9 +354,6 @@ up.syntax = (function() {
     up.destructor(element, () => clearInterval(update))
   })
   ```
-
-  An alternative way to register a destructor function is to
-  [`return` it from your compiler function](/up.compiler#cleaning-up-after-yourself).
 
   @function up.destructor
   @param {Element} element
