@@ -539,6 +539,14 @@ describe 'up.motion', ->
               expect($new).toBeAttached()
               expect($new).toHaveOpacity(1.0)
 
+          it 'returns a fulfilled promise', (done) ->
+            $old = $fixture('.old').text('old content')
+            $new = $fixture('.new').text('new content')
+            promise = up.morph($old, $new, noneTransition, duration: 1000)
+
+            promiseState(promise).then ({state}) ->
+              expect(state).toBe('fulfilled')
+              done()
 
     describe 'up.transition', ->
 

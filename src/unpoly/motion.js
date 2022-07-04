@@ -444,6 +444,9 @@ up.motion = (function() {
       afterInsert()
       afterDetach()
       scrollNew()
+
+      // Satisfy our signature as an async function.
+      return Promise.resolve()
     }
   }
 
