@@ -17,6 +17,7 @@ Any HTTP status other than 2xx or 304 is considered a failed response.
 
 A common use case for this is [form submissions](/up.form), where a successful response
 should display a follow-up screen, but a failed response should re-render the form with validation errors.
+A good HTTP status code for an invalid form submission is [400 (Bad Request)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400).
 
 To use a different [render option](/up.render) for a failed server response,
 prefix the option with `fail`:
