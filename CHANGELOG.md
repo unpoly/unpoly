@@ -11,19 +11,20 @@ You may browse a formatted and hyperlinked version of this file at <https://unpo
 Next
 ====
 
-Changes tracked until 2022-06-22:
+Changes tracked until 2022-07-06:
 
 
 ### Fragment aborting
 
 - { abort: 'target' } as new default everywhere (navigation or not)
-- New High Level API to abort requests targeting a screen region
-  - up.fragment.abort(), up:fragment:aborted, up.fragment.onAborted()
 - Rename { solo } to { abort }
 - [up-abortable], { abortable } option
   - Preloading is no longer abortable by default
 - Remove up.request({ solo }) option
 - Abort unfinished requests targeting a fragment that is updated or destroyed
+- New High Level API to abort requests targeting a screen region
+  - up.fragment.abort(), up:fragment:aborted, up.fragment.onAborted()
+  - Polling stops when the fragment is aborted
 
 ### Remorseless caching
 
@@ -107,7 +108,6 @@ Changes tracked until 2022-06-22:
   - Also configure [up-form-group] instead of [up-fieldset]
   - Change up.form.config.validateTargets to up.form.config.groupSelectors
 - Play nice with overlays from other libraries (up.layer.config.foreignOverlaySelectors)
-- Stylable [hidden]
 - Support FormData everywhere
 
 
@@ -165,7 +165,6 @@ Changes tracked until 2022-06-22:
 - Fix a memory leak where swapping an element did not clear internal jQuery caches
 - Support prepending with :before and appending with :after for up.render({ content }) and up.render({ fragment })
 - Support ::before and ::after pseudos (double colon)
-- Stop polling when the fragment is aborted
 - Support FormData everywhere we support up.Params
 - Fix: Clicking links twice will not update location when the browser history API is used in between (closes #388)
 - Rename up:location:changed event's { url } prop to { location }
