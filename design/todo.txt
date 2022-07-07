@@ -11,10 +11,12 @@ Render lifecycle
 - Reconsider how many lifecycle callbacks we want to parse from links
 
 
+
 Various Changes
 ---------------
 
 - Allow late registrations of compilers and macros without priority
+- We documented up.network.config.timeout, but the config prop is not set!
 
 
 Offline / rework caching
@@ -57,6 +59,7 @@ This way we can keep using cached content if we're offline.
     - This way users can easily excempt a troublesome request from auto-revalidation, e.g. a blank form
     - It can now default to (response) => response.stale
       - We do keep revalidating with reduced requests. Bad connections shouldn't impact correctness.
+      - We no longer need to check whether a response was cached, yet?
 
 - "Clearing" the cache is now "expiring" the cache
   - Rework X-Up-Clear-Cache
@@ -78,14 +81,6 @@ This way we can keep using cached content if we're offline.
 - Rework up.Request
   - Rename up:request:fatal to up:request:offline
     - No { retry } function here. We could offer this one day, but then we need many options from https://www.npmjs.com/package/axios-retry
-  - Offer up:fragment:offline
-    - event.renderOptions
-    - Offer an event.retry() method
-      - This makes another render pass
-      - This still fails the original render
-      - Document as @experimental
-  - Timeouts should be considered "offline", not "aborted"
-    - Although timeouts are really client-side aborting, it's more useful to us to consider a timeouted resource to be offline
 
 - Imperative eviction
   - Introduce X-Up-Evict-Cache
@@ -144,6 +139,7 @@ Docs
 ### New cache
 
 - up:fragment:offline
+  - experimental
   - event.retry(options)
 
 
