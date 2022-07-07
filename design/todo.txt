@@ -195,6 +195,12 @@ Docs
 
 ### Other docs
 
+- Consider documenting errors
+  - up.CannotCompile
+  - up.CannotMatch
+  - up.Offline
+  - AbortError
+  - Possibly use a new @error tag since it's not really a @class that we can check with instanceof
 - Document up.render({ fail })
 - Document a[up-follow][up-fail])
 - Consider replacing type|undefined with type? in all type comments
