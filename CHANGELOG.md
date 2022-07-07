@@ -34,6 +34,15 @@ Changes tracked until 2022-06-22:
 - Deprecated `X-Up-Reload-From-Time`.
 - Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
 
+### Offline handling
+
+- Have default timeout of 90 seconds; Add up.render({ timeout }) and a[up-timeout] options
+- Rename up:request:fatal to up:request:offline
+- Treat timeouts as "offline" instead of client-side abort
+- up:fragment:offline, { onOffline }, event.retry()
+- [up-on-offline] ?
+- 
+
 ### Forms from hell
 
 - Fixing forms from hell with stacked [up-validate]
@@ -44,6 +53,15 @@ Changes tracked until 2022-06-22:
   - Arbitrary selectors
   - Also works with [up-validate] and [up-watch]
     - As [up-watch-disable]
+
+### Improved render API
+
+- More lifecycle callbacks
+  - onError()
+  - onRendered()
+- up.RenderResult#ok
+- up.RenderJob
+- up.RenderJob.finished
 
 ### Watch / observe
 
@@ -89,18 +107,21 @@ Changes tracked until 2022-06-22:
 - Support FormData everywhere
 
 
-### A11Y
+### A11Y / Viewport
 
 - Focus is saved automatically and restored when navigating through history
   - up.viewport.saveFocus(), up.viewport.restoreFocus() 
 - Allow to pass multiple or-separated strategies in [up-focus] and [up-scroll] 
 - Focus followable links, so they behave link standard links
+- Allow to pass alternate strategies when scroll position could not be restored (e.g. { scroll: ['restore', 'main' ] }). Earlier unknown scroll positions would also cause reset.
+- up.viewport.restoreScroll returns whether scroll positions coould be restored
+- Scroll API (up.reveal(), up.restoreScroll()) no longer returns promises
 
 
 ### Strict target derivation
 
 - Don't use tagNames except for unique elements
-- Configurable derivers
+- Configurable derivers in up.fragment.config.targetDerivers
 - Smarter default derivers
 - Derived targets are verified to match the derivee
 - Don't poll elements with a weak selector
@@ -142,6 +163,8 @@ Changes tracked until 2022-06-22:
 - Support FormData everywhere we support up.Params
 - Fix: Clicking links twice will not update location when the browser history API is used in between (closes #388)
 - Rename up:location:changed event's { url } prop to { location }
+- up.network.isIdle() has been deprecated. Use !up.network.isBusy() instead.
+- Rename up:request:late => up:network:late, up:request:recover => up:network:recover. We may eventually re-introduce up:request:late and up:request:recover for individual requests (but not now).
 
 ### IE11 removal
 
@@ -160,6 +183,8 @@ Changes tracked until 2022-06-22:
 - Kill IE11: Remove up.element.all()
 - Kill IE11: Remove up.element.toggleClass()
 - Kill IE11: Remove up.util.arrayToSet() and up.util.setToArray()
+- Remove support for non-standard { key: 'Esc' } in keyboard events
+- Remove much internal code 
 
 
 2.6.1
