@@ -9,13 +9,11 @@ Render lifecycle
   => Already implemented
   => Test
 - Reconsider how many lifecycle callbacks we want to parse from links
-- Submitting a form with `Enter` from within a field should name the field as origin (not the submit button)
 
 
 Various Changes
 ---------------
 
-- Consider whether up.validate() promises should wait until no more solutions are pending
 - Allow late registrations of compilers and macros without priority
 
 
@@ -245,6 +243,8 @@ If we're launching V3
 Icebox
 ======
 
+- Consider whether up.validate() promises should wait until no more solutions are pending
+  => No, we would need to merge RenderResult#target in some meaningful way
 - Rename "finished" to "concluded"
 - Should up:click set up.layer.current ?
   - It would be more convenient, but it's only relevant for popups or backdrop-less modals. This is rare.
