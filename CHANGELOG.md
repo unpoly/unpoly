@@ -59,9 +59,13 @@ Changes tracked until 2022-06-22:
 - More lifecycle callbacks
   - onError()
   - onRendered()
+  - onRevalidated()
+  - (sync with lifecycle graph)
+- Prefer prefix "on" over "fail" for event listeners, e.g. failOnFinished becomes onFailFinished 
 - up.RenderResult#ok
 - up.RenderJob
 - up.RenderJob.finished
+- up.RenderResult#fragments only contains new fragments, but not kept elements or wrappers when appending/prepending or using { content }
 
 ### Watch / observe
 
@@ -131,6 +135,8 @@ Changes tracked until 2022-06-22:
   
 ### Small things
 
+- Submitting a form by pressing Enter within a focused field sets that field as the { origin }
+- Custom animation and transition functions must instantly (synchronously) settle when observing up:motion:finish 
 - When a request is scheduled and aborted within the same microtask, it no longer touches the network
 - Support values with spaces for [up-show-for] and [up-hide-for]; Space-separated token lists also allow " or " as a separator (closes #78)
 - render({ keep }) => { useKeep }
