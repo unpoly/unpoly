@@ -17,38 +17,14 @@ You can also go from v1 to v3 directly.
 
 Changes tracked until 2022-07-06.
 
-### Concurrent updates to the same fragment
-
-- History
-  - Unpoly 1 aborted nothing on navigation, leading to race conditions
-  - Unpoly 2 aborted everything on navigataion, which sometimes killed background requests (e.g. big navigation menu preloading)
-  - Unpoly 3 aborts the targeted fragment.
-- Rename { solo } to { abort }
-- { abort: 'target' } as new default everywhere (navigation or not)
-- Fragment updates may excempt themselves from being aborted
-  - [up-abortable], { abortable } option
-- Abort requests targeting a screen region
-  - up.fragment.abort()
-- React to a fragment being aborted
-  - Unpoly emits up:fragment:aborted on aborted fragments
-  - up.fragment.onAborted(fragment, callback) to react when an ancestor is aborted on our layer
-  - Examples for onAborted() from Unpoly's own code
-    - Polling stops when the fragment is aborted
-    - Pending validations or observe callbacks are aborted when the observed field is aborted
-- Less important changes
-  - Unfinished requests targeting a fragment that is now updated or destroyed are aborted automatically
-  - Remove up.request({ solo }) option
-  - Preloading is no longer abortable by default
-
 
 ### Cache revalidation ("eternal cache")
 
-- Revalidation renders a second time
+- After rendering stale content from the cache, Unpoly automatically renders a second time
+  - stale-while-revalidate pattern
 - New sweet spot
   - Longer cache times
   - Always fresh content
-- Revalidation happens after up.render() settles.
-  - await up.render(..).finished
 - Expire vs. Evict
   - config.cacheExpireAge  15 seconds (down from 5 minutes in Unpoly 2.6)
   - config.cacheEvictAge   90 minutes
@@ -66,19 +42,49 @@ Changes tracked until 2022-07-06.
 - Imperative eviction
   - Introduce X-Up-Evict-Cache
   - Introduce up.cache.evict(pattern)
+- Revalidation happens after up.render() settles.
+  - await up.render(..).finished
+- Do we render more?
+  - As much as a web app without caching
+  - As much as an Unpoly 2 app with short cache expiry time
+    - And we can optimnize it with ...
 - Smaller changes
   - up.link.cacheState(link)
   - up.fragment.config.autoRevalidate = (response) => response.stale
 
 
-### Standard cache headers
+### Skip rendering unchanged content
 
-- Unpoly now remembers the `Last-Modified` and `E-Tag` headers a fragment was delivered with.
-  - Automatically set as [up-time], [up-etag] attributes
-  - Users can also set these attributes manually in their views, to use different etags for individually reloadable fragments 
+- Unpoly now remembers the standard `Last-Modified` and `E-Tag` headers a fragment was delivered with.
 - When a fragment is reloaded, these props are sent as `If-Modified-Since` or `If-None-Match` request headers.
-- Deprecated `X-Up-Reload-From-Time`.
 - Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
+  - Frameworks often have nice sugar for this, e.g. stale? and fresh_when in Rails 
+- Sidebar for Rails users
+  - Use of stale? for member action 
+      def show
+        load_post
+        fresh_when @post
+      end
+
+  - This will render 304 Not Modified for fresh caches
+    This will produce an ETag from (1) class name (2) @post.id (3) @post.updated_at (4) the view template (5) current flashes
+  - Use of stale? for collection action
+      def index
+        load_posts
+        fresh_when @posts
+      end
+
+      This will render 304 Not Modified for fresh caches
+      This will produce an ETag from (1) class name (2) scope conditions (3) @posts.maximum(:updated_at) (4) the view template (5) current flashes
+  - Custom etaggers
+        class ApplicationController < ActionController::BAse
+          etagger { current_user&.id }
+        end
+  - rack-steady_etag
+- Less important
+  - Response headers are set as [up-time], [up-etag] attributes on updated fragment
+    - Users can also set these attributes manually in their views, to use different etags for individually reloadable fragments
+    - Deprecated `X-Up-Reload-From-Time`.
 
 
 ### Offline handling
@@ -88,22 +94,58 @@ Changes tracked until 2022-07-06.
   - up:fragment:offline, { onOffline }, event.retry()
   - [up-on-offline]
   - <a href="..." up-on-offline="if (confirm('Retry'?) event.retry()">Post bid</a>
+  - Or globally:
+        up.on('up:fragment:offline', (event) => if (confirm('Retry'?) event.retry())
+        (possibly stack this) 
 - Handling "Lie-Fi"
+  - We're effectively offline but don't register a disconnection 
+    - Edge of mobile cell
+    - Tunnel
+    - Noisy Wi-fi
   - Have default timeout of 90 seconds
   - Add up.render({ timeout }) and a[up-timeout] options
   - Treat timeouts as "offline" instead of client-side abort
-- The new cache
+- Expired pages remain accessible while offline
   - Cached content will remain navigatable for 90 minutes
     - (revalidation will fail) 
   - Clicking uncached content will not change the page and trigger onOffline() 
+- Limitations 
+  - The cache is still in-memory and dies with the browser tab
+  - To fill up the cache the device must be online for the first part of the session
   - For a full offline experience (content with empty cache) we recommend a service worker or [UpUp](https://www.talater.com/upup/) (name coincidental)
 
 
-### Forms where everything depends on everything
-- 
-- Multiple [up-validate] targets are batched into a single render pass with multiple targets
-  - Duplicate or nested targets are consolidated
-  - Show example (activity form)
+### Concurrent updates to the same fragment
+
+- History
+  - Unpoly 1 aborted nothing on navigation, leading to race conditions
+  - Unpoly 2 aborted everything on navigataion, which sometimes killed background requests (e.g. big navigation menu preloading)
+  - Unpoly 3 aborts the targeted fragment.
+- { abort: 'target' } as new default render option (navigation or not)
+- Abort requests targeting a screen region
+  - This will cancel all requests targeting .region or descendants when the link is clicked (and a second time when .region is updated):
+    - <a href="..." up-target=".region">
+  - Programmatically:
+    - up.fragment.abort(region)
+  - Example from /aborting-requests
+- React to a fragment being aborted
+  - up.fragment.onAborted(fragment, callback) to react when fragment or its ancestor is aborted on our layer
+    - This will stop the timer if the link is targeted or destroyed while waiting:
+      up.compiler('a[auto-follow]', function(link) {
+      let timer = setTimeout(() => up.follow(link), 5000)
+      up.fragment.onAborted(link, () => clearTimeout(timer))
+      })
+    - Destruction or update always aborts
+  - Examples for onAborted() from Unpoly's own code
+    - Polling stops when the fragment is aborted
+    - Pending validations are aborted when the observed field is aborted
+- Fragment updates may excempt themselves from being aborted
+  - [up-abortable=false], { abortable: false } option
+  - Programmatic preloading with up.link.preload() is no longer abortable by default
+    - up.compiler('a.huge-navigation-opener', up.link.preload)
+- Less important changes
+  - Rename { solo } to { abort }
+  - Remove up.request({ solo }) option
 
 
 ### Preventing concurrent form interaction
@@ -113,6 +155,55 @@ Changes tracked until 2022-07-06.
   - Submit buttons (`form[up-disable="button"])
   - Arbitrary selectors  (`form[up-disable=".money-fields"])
   - Fields marked with [up-validate] and [up-observe] can also disable other fields while loading
+    - <select up-validate=".employees" up-watch-disable=".employees">
+
+
+### Forms where everything depends on everything
+
+- We can solve this with [up-disable]. This prevents concurrent modification.
+- In cases where we don't want to disable, there is a second solution
+- Multiple [up-validate] targets are batched into a single render pass with multiple targets
+  - Duplicate or nested targets are consolidated
+  - Only one concurrent request
+  - Show example (activity form)
+- Form will eventually show a consistent state, regardless how fast the user clicks or how slow the network is
+
+#### Example
+
+<h1>Buy parcel stamps</h1>
+
+```
+<form method="post" action="/purchases">
+  <select name="continent" up-validate="[name=country]">...</select>
+  <select name="country" up-validate="[name=price]">...</select>
+  <input name="weight" up-validate="[name=price]"> kg
+  <output name="price">23 €</output>
+  <button>Buy stamps</button>
+</form>
+```
+
+Unpoly 2:
+
+- User changes continent
+- Request targeting `[name=country]` starts
+- User changes weight
+- Request targeting `[name=price]` starts
+- User changes continent again
+- Request targeting `[name=country]` starts
+- Responses arrive in random order
+
+
+Unpoly 3:
+
+- User changes continent
+- Request targeting `[name=country]` starts
+- User changes weight
+- User changes continent again
+- Response for `[name=country]` received
+- Request targeting `[name=price], [name=country]` starts (single request, multiple targets)
+- Response for `[name=price], [name=country]` received
+
+
 
 
 ### Watch / observe rework
@@ -120,29 +211,29 @@ Changes tracked until 2022-07-06.
 - up.observe() => up.watch()
 - [up-observe] => [up-watch]
 - Custom { event, feedback, delay, disable } options for validation and observing, default at form and overridable per-field
-  - Live validation while typing
-    - <input type="email" name="email" up-keep up-watch-event="input">
-  - Can configure custom up.form.config.inputEvents/changeEvents
-    - Date input validated on blur
+
+
+
+```
+<form method="post" action="/purchases">
+  <select name="continent" up-validate="[name=country]" up-watch-disable="[name=country]">...</select>
+  <select name="country" up-validate="[name=price]">...</select>
+  <input name="weight" up-validate="[name=price]" up-watch-event="input"> kg
+  <output name="price">23 €</output>
+  <button>Buy stamps</button>
+</form>
+```
+
 - Fix concurrency issues
   - Don't run delayed callbacks when the watched field was removed from the DOM during the delay (e.g. user navigates away)
   - Don't run delayed callbacks when the watched field was aborted from the DOM during the delay (e.g. by submit)
+- 
 - Less important config improvements
   - up.form.config.inputEvent
   - up.form.config.changeEvent
   - up.form.config.observeDelay => inputDelay
-
-  
-### More render callbacks
-
-- onError()
-- onRendered()
-- onRevalidated()
-- onOffline()
-- await up.render().finished
-- Parse callbacks from link or form attributes
-- focus(), scroll()
-- Show lifecycle.xml diagram
+  - Can configure custom up.form.config.inputEvents/changeEvents
+    - Date input validated on blur
 
 
 ## More control over the progress bar
@@ -192,6 +283,33 @@ Changes tracked until 2022-07-06.
   - Don't steal focus
 
 
+### Optional targets
+
+- Optional targets with :maybe
+
+
+### Hungry modifiers
+
+- Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
+  - Example: Flashes in Layout
+- Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
+  - Example: Canonical link
+
+
+### More render callbacks
+
+- onError()
+- onRendered()
+- onRevalidated()
+- onOffline()
+- await up.render().finished
+- focus(), scroll()
+- Show lifecycle.xml diagram
+- Less important changes
+  - All callbacks are loaded from link or form attributes
+
+
+
 ### Strict target derivation
 
 - Unpoly often needs to derive a target selector from an element. This sometimes produced the wrong target.  
@@ -206,6 +324,22 @@ Changes tracked until 2022-07-06.
   - You should probably fix this, but also up.fragment.config.verifyDerivedTarget = false
 
 
+    up.fragment.config.targetDerivers = [
+      '[up-id]',      // [up-id="foo"]
+      '[id]',         // #foo
+      'html',         // html
+      'head',         // head
+      'body',         // body
+      'main',         // main
+      '[up-main]',    // [up-main="root"]
+      'link[rel]',    // link[rel="canonical"]
+      '*[name]',      // input[name="email"]
+      'form[action]', // form[action="/users"]
+      'a[href]',      // a[href="/users/"]
+      '[class]',      // .foo
+    ],
+
+
 ### Detect failure when server sends wrong HTTP status
 
 - Unpoly requires servers to send an HTTP error code to signal failure. E.g. an invalid form should render with HTTP 400 (Bad Request).
@@ -213,15 +347,6 @@ Changes tracked until 2022-07-06.
 - Listeners to up:fragment:loaded can force failure by setting event.renderOptions.fail
 - Allow to customize response failure with up.network.config.fail
   - Default is `(response) => (response.status < 200 || response.status > 299) && response.status !== 304 }`
-
-
-### Optional target rework
-
-- Optional targets with :maybe
-- Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
-  - Example: Flashes in Layout
-- Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
-  - Example: Canonical link
   
   
 ### Focus restoration
@@ -267,7 +392,7 @@ Changes tracked until 2022-07-06.
 - Allow to pass alternate strategies when scroll position could not be restored (e.g. { scroll: ['restore', 'main' ] }). Earlier unknown scroll positions would also cause reset.
 - up.viewport.restoreScroll returns whether scroll positions coould be restored
 - Scroll API (up.reveal(), up.restoreScroll()) no longer returns promises
-- Prefer prefix "on" over "fail" for event listeners, e.g. failOnFinished becomes onFailFinished
+- Prefer prefix "on" over "fail" for event listeners that handle [failed responses](/failed-responses), e.g. failOnFinished becomes onFailFinished
 - up.RenderResult#fragments only contains new fragments, but not kept elements or wrappers when appending/prepending or using { content }
 - Form structure
   - up.form.submitButtons()
@@ -278,7 +403,9 @@ Changes tracked until 2022-07-06.
 - Submitting a form by pressing Enter within a focused field sets that field as the { origin }
 - Custom animation and transition functions must instantly (synchronously) settle when observing up:motion:finish
 - When a request is scheduled and aborted within the same microtask, it no longer touches the network
-- Support values with spaces for [up-show-for] and [up-hide-for]; Space-separated token lists also allow " or " as a separator (closes #78)
+- Support values with spaces for [up-show-for] and [up-hide-for] (#78)
+  - Encode as JSON array, e.g. `<element up-show-for='["John Doe", "Jane Doe"]'>`
+- Space-separated token lists also allow " or " as a separator
 - render({ keep }) => { useKeep }
 - render({ hungry }) => { useHungry }
 - [up-poll]: Don't swallow fatal errors
