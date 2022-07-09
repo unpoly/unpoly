@@ -199,7 +199,8 @@ up.network = (function() {
     autoCache(request) { return request.isSafe(); },
     clearCache(request, _response) { return !request.isSafe(); },
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
-    progressBar: true
+    progressBar: true,
+    timeout: 90_000,
   }))
 
   const queue = new up.Request.Queue()
