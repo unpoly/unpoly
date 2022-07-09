@@ -725,6 +725,26 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.timeout).toBe(20000)
 
+      it 'parses the HTTP method from an [up-method] attribute', ->
+        link = fixture('a[href="/foo"][up-method="patch"]')
+        options = up.link.followOptions(link)
+        expect(options.method).toBe('PATCH')
+
+      it 'parses the HTTP method from a [data-method] attribute so Rails users can set a method with link_to(..., { method }) option', ->
+        link = fixture('a[href="/foo"][data-method="patch"]')
+        options = up.link.followOptions(link)
+        expect(options.method).toBe('PATCH')
+
+      it 'parses a confirmation prompt message from an [up-confirm] message', ->
+        link = fixture('a[href="/foo"][up-confirm="Really follow?"]')
+        options = up.link.followOptions(link)
+        expect(options.confirm).toBe('Really follow?')
+
+      it 'parses a confirmation prompt message from a [data-confirm] attribute so Rails users can set a message with link_to(..., { confirm }) option', ->
+        link = fixture('a[href="/foo"][data-confirm="Really follow?"]')
+        options = up.link.followOptions(link)
+        expect(options.confirm).toBe('Really follow?')
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->
