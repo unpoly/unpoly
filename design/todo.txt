@@ -17,6 +17,9 @@ Various Changes
 
 - Allow late registrations of compilers and macros without priority
 - We documented up.network.config.timeout, but the config prop is not set!
+- a[data-method][href] is not a good deriver when we migrate those to [up-method]
+  - We could stop migrating [data] attributes *if* Unpoly was always loaded before Rails UJS
+  => Make loaded Rails UJS a boot issue
 
 
 Offline / rework caching
