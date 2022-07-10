@@ -5,9 +5,6 @@ TODOs for next release
 Render lifecycle
 ----------------
 
-- up.validate() should reject if the server responds with an error code
-  => Already implemented
-  => Test
 - Reconsider how many lifecycle callbacks we want to parse from links
 
 
@@ -15,7 +12,6 @@ Render lifecycle
 Various Changes
 ---------------
 
-- Allow late registrations of compilers and macros without priority
 
 
 Offline / rework caching
@@ -244,8 +240,10 @@ If we're launching V3
 Icebox
 ======
 
+- Allow late registrations of compilers and macros without priority
+  => OK for compilers, but what about macros? They have an intrinsic priority (before all compilers)
 - Consider whether up.validate() promises should wait until no more solutions are pending
-  => No, we would need to merge RenderResult#target in some meaningful way
+  => We would need to merge RenderResult#target in some meaningful way
 - Rename "finished" to "concluded"
 - Should up:click set up.layer.current ?
   - It would be more convenient, but it's only relevant for popups or backdrop-less modals. This is rare.
