@@ -22,6 +22,12 @@ window.asyncSpec = (args...) ->
 
     queue = []
 
+    # The position in `queue` that we're currently running.
+    playbackCursor = 0
+    # The position in `queue` after which `next()` will insert a new task.
+    # We track it separately of playbackCursor because
+    # (1) Most specs insert many tasks before starting playback
+    # (2) At runtime a task may insert more than one new task
     insertCursor = 0
 
     log = (args...) ->
@@ -67,6 +73,7 @@ window.asyncSpec = (args...) ->
 
     runBlockAsyncThenPoke = (blockOrPromise, previousValue) ->
       log('runBlockAsync')
+
       # On plan-level people will usually pass a function returning a promise.
       # During runtime people will usually pass a promise to delay the next step.
       promise = if u.isPromise(blockOrPromise) then blockOrPromise else blockOrPromise(previousValue)
@@ -74,10 +81,10 @@ window.asyncSpec = (args...) ->
       promise.catch (e) -> fail(e)
 
     pokeQueue = (previousValue) ->
-      if entry = queue[runtimeCursor]
-        log('Playing task at index %d', runtimeCursor)
-        runtimeCursor++
-        insertCursor++
+      if entry = queue[playbackCursor]
+        log('Playing task at index %d', playbackCursor)
+        playbackCursor++
+        insertCursor = playbackCursor
 
         timing = entry[0]
         block = entry[1]
@@ -103,5 +110,4 @@ window.asyncSpec = (args...) ->
         log('calling done()')
         done()
 
-    runtimeCursor = insertCursor = 0
     pokeQueue()

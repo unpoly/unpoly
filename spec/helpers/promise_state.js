@@ -24,7 +24,7 @@ window.raceThenables = function(promises) {
 }
 
 window.promiseState = function(promise) {
-  var uniqueValue = window['Symbol'] ? Symbol('unique') : Math.random().toString(36)
+  let uniqueValue = Symbol('unique')
 
   function notifyPendingOrResolved(value) {
     if (value === uniqueValue) {
@@ -38,7 +38,7 @@ window.promiseState = function(promise) {
     return Promise.resolve({ state: 'rejected', value: reason })
   }
 
-  var race = [promise, Promise.resolve(uniqueValue)]
+  let race = [promise, Promise.resolve(uniqueValue)]
 
   return raceThenables(race).then(notifyPendingOrResolved, notifyRejected)
 }

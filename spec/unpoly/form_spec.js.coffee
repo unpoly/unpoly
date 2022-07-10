@@ -1186,6 +1186,61 @@ describe 'up.form', ->
         next ->
           expect(validateListener).toHaveBeenCalled()
 
+      it 'returns a Promise that fulfills when the server responds to validation with an 200 OK status code', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        element = e.affix(form, '.element', text: 'old text')
+
+        promise = up.validate(element)
+
+        next ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+
+          next.await promiseState(promise)
+
+        next ({ state }) ->
+          expect(state).toBe('pending')
+
+        next ->
+          jasmine.respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+          next.await promiseState(promise)
+
+        next ({ state, value }) ->
+          expect(state).toBe('fulfilled')
+          expect(value).toEqual(jasmine.any(up.RenderResult))
+
+      it 'returns a Promise that rejects when the server responds to validation with an error code', asyncSpec (next) ->
+        form = fixture('form[action=/form]')
+        element = e.affix(form, '.element', text: 'old text')
+
+        promise = up.validate(element)
+
+        next ->
+          expect('.element').toHaveText('old text')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+
+          next.await promiseState(promise)
+
+        next ({ state }) ->
+          expect(state).toBe('pending')
+
+        next ->
+          jasmine.respondWithSelector('.element', text: 'new text', status: 400)
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+          next.await promiseState(promise)
+
+        next ({ state, value }) ->
+          expect(state).toBe('rejected')
+          expect(value).toEqual(jasmine.any(up.RenderResult))
+
+
       describe 'request sequence', ->
 
         it 'only sends a single concurrent request and queues new validations while a validation request is in flight', asyncSpec (next) ->
