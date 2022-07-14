@@ -291,7 +291,7 @@ up.fragment = (function() {
   The attribute value is the time of the most recent message:
 
   ```html
-  <div class="messages" up-time="December 24th, 13:51:46 GMT" up-poll>
+  <div class="messages" up-time="Wed, 21 Oct 2015 07:28:00 GMT" up-poll>
   ...
   </div>
   ```
@@ -299,7 +299,7 @@ up.fragment = (function() {
   When reloading Unpoly will send the `[up-time]` as an [`If-Modified-Since`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since) header:
 
   ```http
-  If-Modified-Since: December 24th, 13:51:46 GMT
+  If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
   ```
 
   The server can compare the time from the request with the time of the last data update.
