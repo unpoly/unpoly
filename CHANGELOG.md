@@ -18,6 +18,28 @@ You can also go from v1 to v3 directly.
 Changes tracked until 2022-07-06.
 
 
+### Big topic: Concurrency
+
+- User clicking faster than the server can respond
+- Multiple requests targeting the same fragment
+- Forms where everything depends on everything else
+- Responses arrive in different order than requests were sent
+- Multiple users working on the same backend data (stale caches)
+- User losing connection while requests are in flight
+- Lie-Fi (spotty Wi-Fi, EDGE, tunnel)
+
+### Secondary topic: Quality of life
+
+- Optional targets
+- More control over [up-hungry]
+- Shorter data attributes
+- More render callbacks
+- Strict target derivation
+- Better feedback
+- Log separated by interactions
+- Foreign overlays
+
+
 ### Cache revalidation ("eternal cache")
 
 - After rendering stale content from the cache, Unpoly automatically renders a second time
@@ -28,29 +50,28 @@ Changes tracked until 2022-07-06.
 - Expire vs. Evict
   - config.cacheExpireAge  15 seconds (down from 5 minutes in Unpoly 2.6)
   - config.cacheEvictAge   90 minutes
-- up.fragment.config.autoRevalidate
-- "Clearing" the cache is now "expiring" the cache
-  - Rework X-Up-Clear-Cache
-    - Rename to X-Up-Expire-Cache
-    - Migrate old header
-    - Remove X-Up-Expire-Clache: false
-  - Rename up.network.config.clearCache to up.network.config.expireCache
-  - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
-  - Rename [up-clear-cache] to [up-expire-cache]
-  - Rename up.render({ clearCache }) to { expireCache })
-  - Rename up.request({ clearCache }) to { expireCache })
-- Imperative eviction
-  - Introduce X-Up-Evict-Cache
-  - Introduce up.cache.evict(pattern)
 - Revalidation happens after up.render() settles.
   - await up.render(..).finished
 - Do we render more?
   - As much as a web app without caching
   - As much as an Unpoly 2 app with short cache expiry time
     - And we can optimnize it with ...
-- Smaller changes
-  - up.link.cacheState(link)
-  - up.fragment.config.autoRevalidate = (response) => response.stale
+- Less important changes
+  - "Clearing" the cache is now "expiring" the cache
+    - Rework X-Up-Clear-Cache
+      - Rename to X-Up-Expire-Cache
+      - Migrate old header
+      - Remove X-Up-Expire-Clache: false
+    - Rename up.network.config.clearCache to up.network.config.expireCache
+    - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
+    - Rename [up-clear-cache] to [up-expire-cache]
+    - Rename up.render({ clearCache }) to { expireCache })
+    - Rename up.request({ clearCache }) to { expireCache })
+  - Imperative eviction
+    - Introduce X-Up-Evict-Cache
+    - Introduce up.cache.evict(pattern)
+    - up.link.cacheState(link)
+    - up.fragment.config.autoRevalidate = (response) => response.stale
 
 
 ### Skip rendering unchanged content
@@ -81,38 +102,13 @@ Changes tracked until 2022-07-06.
           etagger { current_user&.id }
         end
   - rack-steady_etag
+- Reloading is effectively free
+- This is super relevant for [up-poll] users
 - Less important
   - Response headers are set as [up-time], [up-etag] attributes on updated fragment
     - Users can also set these attributes manually in their views, to use different etags for individually reloadable fragments
     - Deprecated `X-Up-Reload-From-Time`.
 
-
-### Offline handling
-
-- Handling disconnection
-  - Rename up:request:fatal to up:request:offline
-  - up:fragment:offline, { onOffline }, event.retry()
-  - [up-on-offline]
-  - <a href="..." up-on-offline="if (confirm('Retry'?) event.retry()">Post bid</a>
-  - Or globally:
-        up.on('up:fragment:offline', (event) => if (confirm('Retry'?) event.retry())
-        (possibly stack this) 
-- Handling "Lie-Fi"
-  - We're effectively offline but don't register a disconnection 
-    - Edge of mobile cell
-    - Tunnel
-    - Noisy Wi-fi
-  - Have default timeout of 90 seconds
-  - Add up.render({ timeout }) and a[up-timeout] options
-  - Treat timeouts as "offline" instead of client-side abort
-- Expired pages remain accessible while offline
-  - Cached content will remain navigatable for 90 minutes
-    - (revalidation will fail) 
-  - Clicking uncached content will not change the page and trigger onOffline() 
-- Limitations 
-  - The cache is still in-memory and dies with the browser tab
-  - To fill up the cache the device must be online for the first part of the session
-  - For a full offline experience (content with empty cache) we recommend a service worker or [UpUp](https://www.talater.com/upup/) (name coincidental)
 
 
 ### Concurrent updates to the same fragment
@@ -143,6 +139,7 @@ Changes tracked until 2022-07-06.
   - [up-abortable=false], { abortable: false } option
   - Programmatic preloading with up.link.preload() is no longer abortable by default
     - up.compiler('a.huge-navigation-opener', up.link.preload)
+  - Opting out { abort: false }
 - Less important changes
   - Rename { solo } to { abort }
   - Remove up.request({ solo }) option
@@ -154,8 +151,9 @@ Changes tracked until 2022-07-06.
   - Entire form (default)
   - Submit buttons (`form[up-disable="button"])
   - Arbitrary selectors  (`form[up-disable=".money-fields"])
-  - Fields marked with [up-validate] and [up-observe] can also disable other fields while loading
-    - <select up-validate=".employees" up-watch-disable=".employees">
+- 
+- Fields marked with [up-validate] and [up-watch] (former `[up-disable]`) can also disable other fields while loading
+  - <select up-validate=".employees" up-watch-disable=".employees">
 
 
 ### Forms where everything depends on everything
@@ -167,6 +165,7 @@ Changes tracked until 2022-07-06.
   - Only one concurrent request
   - Show example (activity form)
 - Form will eventually show a consistent state, regardless how fast the user clicks or how slow the network is
+
 
 #### Example
 
@@ -190,7 +189,7 @@ Unpoly 2:
 - Request targeting `[name=price]` starts
 - User changes continent again
 - Request targeting `[name=country]` starts
-- Responses arrive in random order
+- Responses arrive and render in random order
 
 
 Unpoly 3:
@@ -199,9 +198,9 @@ Unpoly 3:
 - Request targeting `[name=country]` starts
 - User changes weight
 - User changes continent again
-- Response for `[name=country]` received
+- Response for `[name=country]` received and rendered
 - Request targeting `[name=price], [name=country]` starts (single request, multiple targets)
-- Response for `[name=price], [name=country]` received
+- Response for `[name=price], [name=country]` received and rendered
 
 
 
@@ -224,16 +223,123 @@ Unpoly 3:
 </form>
 ```
 
-- Fix concurrency issues
-  - Don't run delayed callbacks when the watched field was removed from the DOM during the delay (e.g. user navigates away)
-  - Don't run delayed callbacks when the watched field was aborted from the DOM during the delay (e.g. by submit)
-- 
+
 - Less important config improvements
+- 
+  - Fix concurrency issues
+    - Don't run delayed callbacks when the watched field was removed from the DOM during the delay (e.g. user navigates away)
+    - Don't run delayed callbacks when the watched field was aborted from the DOM during the delay (e.g. by submit)
   - up.form.config.inputEvent
   - up.form.config.changeEvent
   - up.form.config.observeDelay => inputDelay
   - Can configure custom up.form.config.inputEvents/changeEvents
     - Date input validated on blur
+
+
+### Handling connection loss
+
+- Handling disconnection
+  - Rename up:request:fatal to up:request:offline
+  - up:fragment:offline, { onOffline }, event.retry()
+  - [up-on-offline]
+  - <a href="..." up-on-offline="if (confirm('Retry'?) event.retry()">Post bid</a>
+  - Or globally:
+    up.on('up:fragment:offline', (event) => if (confirm('Retry'?)) event.retry())
+    (possibly stack this)
+- Handling "Lie-Fi"
+  - We're effectively offline but don't register a disconnection
+    - EDGE
+    - Car drives into tunnel
+    - Noisy Wi-fi
+  - Have default timeout of 90 seconds
+  - Add up.render({ timeout }) and a[up-timeout] options
+  - Treat timeouts as "offline" instead of client-side abort
+- Expired pages remain accessible while offline
+  - Cached content will remain navigatable for 90 minutes
+    - (revalidation will fail)
+  - Clicking uncached content will not change the page and trigger onOffline()
+- Limitations: This is not offline (yet)
+  - The cache is still in-memory and dies with the browser tab
+  - To fill up the cache the device must be online for the first part of the session
+  - For a full offline experience (content with empty cache) we recommend a service worker or [UpUp](https://www.talater.com/upup/) (name coincidental)
+
+
+
+
+
+
+### Optional targets
+
+- Optional targets with :maybe
+
+
+### More control over [up-hungry]
+
+- Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
+  - Example: Flashes in Layout
+- Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
+  - Example: Canonical link
+
+
+
+### Shorter data attributes
+
+- Simple data key/values can now be attached to an element using standard HTML5 [data-*] attributes (in addition to [up-data])
+- up.compiler((element, data) => ...) is sourced from both [data-*] attributes and [up-data]
+- These three elements produce the same compiler data:
+  - <div up-data='{ "foo": "one", "bar": "two" }'></div>
+  - <div data-foo='one' data-bar='two'></div>
+  - <div up-data='{ "foo": "one" }' data-bar='bar'></div>
+- Note that [data-*] attributes are always strings
+
+
+
+
+### Better feedback
+
+- Targeted fragments get an `.up-loading` class. This lets you highlight the part of the screen that's loading.
+- Targeted fragments get an [aria-busy] attribute (A11y, use with [aria-live])
+
+  <a href="/path" up-target=".target">
+  <div class="target">old text</div>
+
+  <a href="/path" up-target=".target" up-active>
+  <div class="target" class="up-loading" aria-busy>old text</div>
+
+  <a href="/path" up-target=".target">
+  <div class="target">new text</div>
+
+### Log separated by interactions
+
+- The log shows which user interaction triggered an event chain
+- Screenshot
+
+### Foreign overlays
+
+Sometimes bad things happend when an overlay from a third party library ("foreign overlay") is opened from an [Unpoly overlay](https://unpoly.com/up.layer):
+
+- Clicking a foreign overlay closes an Unpoly overlay
+- Unpoly steals focus from a foreign overlay
+
+This happens when foreign overlays look "on top" visually (`z-index: 99999999999`), but their elements attach to the `<body>`. For Unpoly this looks like content on the root layer.  This be fixed by attaching the foreign overlay to the correct Unpoly layer.
+
+Unpoly 3 now ships a more comprehensive solution for this: `up.layer.config.foreignOverlaySelectors`.
+
+Unpoly will no longer have opinions over foreign overlays
+
+Example from `unpoly-bootstrap5.js`:
+
+```js
+up.layer.config.foreignOverlaySelectors.push(
+'.modal',
+'.popover',
+'.dropdown-menu'
+)
+```
+
+Less important:
+- Unpoly 2.6 already shipped a half-fix for this, making re-attaching to the correct layer unnecessary.
+
 
 
 ## More control over the progress bar
@@ -247,53 +353,6 @@ Unpoly 3:
 - Custom response times
   - You can also set { badResponseTime }, [up-bad-response-time]
   - up.network.config.badResponseTime can now be a Function(up.Request): number
-
-
-### Shorter data attributes
-
-- Simple data key/values can now be attached to an element using standard HTML5 [data-*] attributes (in addition to [up-data])
-- up.compiler((element, data) => ...) is sourced from both [data-*] attributes and [up-data]
-- These are now the same: 
-  - <div up-data='{ "foo": "one", "bar": "two" }'></div>
-  - <div data-foo='one' data-bar='two'></div>
-  - <div up-data='{ "foo": "one" }' data-bar='bar'></div>
-- Note that [data-*] attributes are always strings
-
-
-### Better feedback
-
-- Targeted fragments get an .up-loading class. This lets you highlight the part of the screen that's loading.
-- Targeted fragments get an [aria-busy] attribute (A11y, use with [aria-live])
-
-
-### Log separated by interactions
-
-- The log shows which user interaction triggered an event chain
-
-
-### Foreign overlays
-
-- Foreign overlays that overlay visually, but attach to body.
-  - Unpoly considers such an overlay part of the root layer. Clicking on it would close an *Unpoly* overlay.
-  - Can be fixed by attaching the foreign overlay to the correct layer
-- Unpoly 2.6 already shipped a fixed for many instances of this, making re-attaching to the correct layer
-- There is now a comprehensive solution with up.layer.config.foreignOverlaySelectors
-- Unpoly will no longer have opinions over foreign overlays
-  - Don't consider them to be "outside" closers
-  - Don't steal focus
-
-
-### Optional targets
-
-- Optional targets with :maybe
-
-
-### Hungry modifiers
-
-- Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
-  - Example: Flashes in Layout
-- Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
-  - Example: Canonical link
 
 
 ### More render callbacks
