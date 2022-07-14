@@ -153,6 +153,9 @@ Docs
 
 ### Watch/validate rework
 
+- Document { disable } and [up-disable] option for up.submit(), form[up-submit]
+  - Maybe even for up.render()
+  - Maybe even for a[up-follow]
 - Consider consolidating docs for
   - input[up-watch]/form[up-watch] as well as
   - input[up-validate]/form[up-validate]
@@ -233,6 +236,7 @@ If we're launching V3
   - use that index in unpoly-site/2.x-stable
 - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
 - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
+- *Maybe* have a pre.unpoly.com
 
 
 
