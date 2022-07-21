@@ -402,7 +402,7 @@ Less important:
 ### Detect failure when server sends wrong HTTP status
 
 - Unpoly requires servers to send an HTTP error code to signal failure. E.g. an invalid form should render with HTTP 400 (Bad Request).
-  Misconfigured server endpoints will send HTTP 200 (OK) for everything. This is not always easy fo fix, e.g. when screens are rendered by libraries outside your control.
+  Misconfigured server endpoints will send HTTP 200 (OK) for everything. This is not always easy to fix, e.g. when screens are rendered by libraries outside your control.
 - Listeners to up:fragment:loaded can force failure by setting event.renderOptions.fail
 - Allow to customize response failure with up.network.config.fail
   - Default is `(response) => (response.status < 200 || response.status > 299) && response.status !== 304 }`
@@ -425,27 +425,26 @@ Less important:
 
 ### IE11 removal
 
-- Unpoly will no longer boot on IE11 or [legacy Edge (EdgeHTML)](https://en.wikipedia.org/wiki/EdgeHTML)
-- Native smooth scrolling
-  - Scroll API no longer returns promises  
+- Unpoly 3 will no longer boot on IE11 or [legacy Edge (EdgeHTML)](https://en.wikipedia.org/wiki/EdgeHTML)
+- If you need to support IE11, use Unpoly 2
 - Remove up.util.assign()
 - Remove up.util.values()
-- Remove up.util.isSettled()
-- Remove up.util.endsWith()
 - Remove up.element.remove()
 - Remove up.element.matches()
 - Remove up.element.closest()
 - Remove up.element.replace()
 - Remove up.element.all()
 - Remove up.element.toggleClass()
-- Remove up.util.arrayToSet()
-- Remove up.util.setToArray()
+- Native smooth scrolling
+  - Scroll API no longer returns promises
 - Remove support for non-standard { key: 'Esc' } in keyboard events
 - Remove much internal code 
 
 
 ### Small things
 
+- You can render nothing by responding with 304 Not Modified or 204 No Content
+- Rendering functions now reject with an error when a compiler throws an error
 - Focus followable `a[up-instant]` links, so they behave link standard links
 - Allow to pass multiple or-separated strategies in `[up-focus]` and `[up-scroll]` attributes, e.g. `[up-focus="hash or :main"]
 - Allow to pass alternate strategies when scroll position could not be restored (e.g. { scroll: ['restore', 'main' ] }). Earlier unknown scroll positions would also cause reset.
