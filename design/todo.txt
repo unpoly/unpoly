@@ -6,11 +6,19 @@ Render lifecycle
 ----------------
 
 - Reconsider how many lifecycle callbacks we want to parse from links
+- Consider whether onOffline() callbacks should be able to substitute an up.Response
+  - For this we would need to publish the up.Response constructor
+  - Do we really need this if people can just up.render() with different content?
+- Consider replacing unpoly-es5.js with unpoly-legacy.js or unpoly-es6.js
 
 
 
-Various Changes
+Various changes
 ---------------
+
+- It makes no sense to set [aria-busy] on a loading fragment.
+  - This would only be helpful for [aria-live] regions where we make multiple async changes and want to announce them at once
+  - In Unpoly's case the entire fragment pops into existence as one
 
 
 
@@ -222,6 +230,7 @@ Docs
   - { revealSnap }
   - { scrollBehavior }
     - if we stop auto-set it to auto, otherwise stop parsing this
+- Redirect renamed pages, e.g. /server-errors is now /failed-responses
 
 
 If we're launching V3
