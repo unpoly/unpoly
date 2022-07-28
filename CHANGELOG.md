@@ -8,8 +8,8 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.0.0
------
+3.0.0 (WIP)
+-----------
 
 Very few changes not covered by unpoly-migrate.js.
 Upgrade from v2 to v3 will be much smoother than going from v1 to v2.
@@ -80,29 +80,7 @@ Changes tracked until 2022-07-06.
 - When a fragment is reloaded, these props are sent as `If-Modified-Since` or `If-None-Match` request headers.
 - Server can render nothing by sending status 304 (Not Modified) or status 204 (No Content)
   - Frameworks often have nice sugar for this, e.g. stale? and fresh_when in Rails 
-- Sidebar for Rails users
-  - Use of stale? for member action 
-      def show
-        load_post
-        fresh_when @post
-      end
-
-  - This will render 304 Not Modified for fresh caches
-    This will produce an ETag from (1) class name (2) @post.id (3) @post.updated_at (4) the view template (5) current flashes
-  - Use of stale? for collection action
-      def index
-        load_posts
-        fresh_when @posts
-      end
-
-      This will render 304 Not Modified for fresh caches
-      This will produce an ETag from (1) class name (2) scope conditions (3) @posts.maximum(:updated_at) (4) the view template (5) current flashes
-  - Custom etaggers
-        class ApplicationController < ActionController::BAse
-          etagger { current_user&.id }
-        end
-  - rack-steady_etag
-- Reloading is effectively free
+- Reloading is effectively free with conditional request support
 - This is super relevant for [up-poll] users
 - Less important
   - Response headers are set as [up-time], [up-etag] attributes on updated fragment
@@ -167,65 +145,12 @@ Changes tracked until 2022-07-06.
 - Form will eventually show a consistent state, regardless how fast the user clicks or how slow the network is
 
 
-#### Example
-
-<h1>Buy parcel stamps</h1>
-
-```
-<form method="post" action="/purchases">
-  <select name="continent" up-validate="[name=country]">...</select>
-  <select name="country" up-validate="[name=price]">...</select>
-  <input name="weight" up-validate="[name=price]"> kg
-  <output name="price">23 €</output>
-  <button>Buy stamps</button>
-</form>
-```
-
-Unpoly 2:
-
-- User changes continent
-- Request targeting `[name=country]` starts
-- User changes weight
-- Request targeting `[name=price]` starts
-- User changes continent again
-- Request targeting `[name=country]` starts
-- Responses arrive and render in random order
-
-
-Unpoly 3:
-
-- User changes continent
-- Request targeting `[name=country]` starts
-- User changes weight
-- User changes continent again
-- Response for `[name=country]` received and rendered
-- Request targeting `[name=price], [name=country]` starts (single request, multiple targets)
-- Response for `[name=price], [name=country]` received and rendered
-
-
-
-
 ### Watch / observe rework
 
 - up.observe() => up.watch()
 - [up-observe] => [up-watch]
 - Custom { event, feedback, delay, disable } options for validation and observing, default at form and overridable per-field
-
-
-
-```
-<form method="post" action="/purchases">
-  <select name="continent" up-validate="[name=country]" up-watch-disable="[name=country]">...</select>
-  <select name="country" up-validate="[name=price]">...</select>
-  <input name="weight" up-validate="[name=price]" up-watch-event="input"> kg
-  <output name="price">23 €</output>
-  <button>Buy stamps</button>
-</form>
-```
-
-
 - Less important config improvements
-- 
   - Fix concurrency issues
     - Don't run delayed callbacks when the watched field was removed from the DOM during the delay (e.g. user navigates away)
     - Don't run delayed callbacks when the watched field was aborted from the DOM during the delay (e.g. by submit)
@@ -263,11 +188,6 @@ Unpoly 3:
   - To fill up the cache the device must be online for the first part of the session
   - For a full offline experience (content with empty cache) we recommend a service worker or [UpUp](https://www.talater.com/upup/) (name coincidental)
 
-
-
-
-
-
 ### Optional targets
 
 - Optional targets with :maybe
@@ -281,7 +201,6 @@ Unpoly 3:
   - Example: Canonical link
 
 
-
 ### Shorter data attributes
 
 - Simple data key/values can now be attached to an element using standard HTML5 [data-*] attributes (in addition to [up-data])
@@ -293,21 +212,10 @@ Unpoly 3:
 - Note that [data-*] attributes are always strings
 
 
-
-
 ### Better feedback
 
 - Targeted fragments get an `.up-loading` class. This lets you highlight the part of the screen that's loading.
-- Targeted fragments get an [aria-busy] attribute (A11y, use with [aria-live])
 
-  <a href="/path" up-target=".target">
-  <div class="target">old text</div>
-
-  <a href="/path" up-target=".target" up-active>
-  <div class="target" class="up-loading" aria-busy>old text</div>
-
-  <a href="/path" up-target=".target">
-  <div class="target">new text</div>
 
 ### Log separated by interactions
 
