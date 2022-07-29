@@ -392,7 +392,7 @@ up.link = (function() {
     parser.boolean('fail')
     options.origin ||= link
     parser.boolean('navigate', {default: true})
-    parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
+    parser.string('confirm')
     parser.string('target')
     parser.booleanOrString('fallback')
     parser.parse(((link, attrName) => e.callbackAttr(link, attrName, ['request', 'response', 'renderOptions'])), 'onLoaded'); // same

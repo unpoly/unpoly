@@ -208,18 +208,7 @@ up.framework = (function() {
     if (document.compatMode === 'BackCompat') {
       return 'Browser is in quirks mode (missing DOCTYPE?)'
     }
-
-    if (isRails()) {
-      return 'Unpoly must be loaded before rails-ujs'
-    }
   }
-
-  function isRails() {
-    return window._rails_loaded || // current rails-ujs integrated with Rails 5.2+
-      window.Rails ||              // legacy rails/rails-ujs gem
-      window.jQuery?.rails         // legacy rails/jquery-ujs gem
-  }
-
 
   return {
     onEvaled,

@@ -88,6 +88,7 @@ require('./unpoly/link')
 require('./unpoly/form')
 require('./unpoly/feedback')
 require('./unpoly/radio')
+require('./unpoly/rails')
 
 up.framework.onEvaled()
 
