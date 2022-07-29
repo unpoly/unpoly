@@ -151,8 +151,6 @@ up.fragment = (function() {
       'link[rel]',
       '*[name]',
       'form[action]',
-      'a[up-method][href]',
-      'a[data-method][href]',
       'a[href]',
       '[class]',
       'form',
