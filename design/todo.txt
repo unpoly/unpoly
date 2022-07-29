@@ -22,6 +22,16 @@ Various changes
 - I always get the error "Unpoly must be loaded before rails-ujs"
 - Popups need text-align: left again
 - Test that { fallback: true } is also used for failTarget
+- Default Deriver could match this ([property] instead of [name]): <meta property="og:title" content="Main Title">
+
+
+
+unpoly-rails
+------------
+
+- Consider tracking headers into Vary
+  - If I check for the absence of X-Up-Version and don't optimize, should I set Vary?
+    - I think so!
 
 
 
@@ -200,12 +210,14 @@ Docs
 
 ### Other docs
 
+- Config props should be child nodes in unpoly-site's browser
 - Consider documenting errors
   - up.CannotCompile
   - up.CannotMatch
   - up.Offline
   - AbortError
   - Possibly use a new @error tag since it's not really a @class that we can check with instanceof
+    - But it could be a class if we no longer compile down to
 - Document up.render({ fail })
 - Document a[up-follow][up-fail])
 - Consider replacing type|undefined with type? in all type comments
