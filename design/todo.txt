@@ -22,6 +22,9 @@ Various changes
 - Popups need text-align: left again
 - Test that { fallback: true } is also used for failTarget
 - Default Deriver could match this ([property] instead of [name]): <meta property="og:title" content="Main Title">
+- Maybe honor `Vary` from the server
+- Test and document that listeners to up:layer:accept may set or change acceptance values
+- Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 
 
 
