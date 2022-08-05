@@ -109,7 +109,7 @@ up.syntax = (function() {
 
   If we didn't clean up after ourselves, we would have many ticking intervals
   operating on detached DOM elements after we have created and removed a couple
-  of `<clock>` elements.
+  of `.current-time` elements.
 
   An alternative way to register a destructor function is `up.destructor()`.
 
