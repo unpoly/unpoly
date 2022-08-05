@@ -16,6 +16,8 @@ Render lifecycle
 Various changes
 ---------------
 
+- Can we use [up-keep] within [up-hungry]?
+  - https://sepia-shadow-paper.glitch.me/
 - It makes no sense to set [aria-busy] on a loading fragment.
   - This would only be helpful for [aria-live] regions where we make multiple async changes and want to announce them at once
   - In Unpoly's case the entire fragment pops into existence as one
@@ -25,6 +27,8 @@ Various changes
 - Maybe honor `Vary` from the server
 - Test and document that listeners to up:layer:accept may set or change acceptance values
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
+- Investigate why bundle size went up from 43.5 to 47.9
+- There are still docs about up.element.matches()
 
 
 
@@ -263,6 +267,9 @@ If we're launching V3
 - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
 - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
 - *Maybe* have a pre.unpoly.com
+- The README says "Unpoly 2"
+  - Needs to say Unpoly 3
+  - Needs to link to 2.x-stable branch
 
 
 
