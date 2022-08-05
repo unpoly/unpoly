@@ -16,8 +16,12 @@ Render lifecycle
 Various changes
 ---------------
 
+- Why don't we always set focus: 'keep'?
+  - Also why is this not a part of config.autoFocus ?
+    - before target-if-lost
 - Can we use [up-keep] within [up-hungry]?
   - https://sepia-shadow-paper.glitch.me/
+  - It looks like addHungrySteps() does not inherit { keep } (now { useKeep })
 - It makes no sense to set [aria-busy] on a loading fragment.
   - This would only be helpful for [aria-live] regions where we make multiple async changes and want to announce them at once
   - In Unpoly's case the entire fragment pops into existence as one
