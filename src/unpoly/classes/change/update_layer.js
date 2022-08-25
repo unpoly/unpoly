@@ -11,7 +11,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.context = options.context
     // up.fragment.expandTargets() was already called by up.Change.FromContent
     this.steps = up.fragment.parseTargetSteps(this.target, this.options)
-    this.uid = Math.random()
+    // this.uid = Math.random()
   }
 
   getPreflightProps() {
