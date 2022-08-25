@@ -9,6 +9,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.layer = options.layer
     this.target = options.target
     this.context = options.context
+    this.useKeep = options.useKeep
     // up.fragment.expandTargets() was already called by up.Change.FromContent
     this.steps = up.fragment.parseTargetSteps(this.target, this.options)
     // this.uid = Math.random()
@@ -267,10 +268,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   //
   // @param {Element} options.oldElement
   // @param {Element} options.newElement
-  // @param {boolean} options.useKeep
   // @param {boolean} options.descendantsOnly
   findKeepPlan(options) {
-    if (!options.useKeep) { return }
+    if (!this.useKeep) { return }
 
     const { oldElement, newElement } = options
 
@@ -317,7 +317,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   // Returns an array of keepPlans.
   transferKeepableElements(step) {
     const keepPlans = []
-    if (step.useKeep) {
+    if (this.useKeep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
         let keepPlan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
