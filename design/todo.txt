@@ -34,7 +34,6 @@ Various changes
   - https://sepia-shadow-paper.glitch.me/
   - It looks like addHungrySteps() does not inherit { keep } (now { useKeep })
 - Test that { fallback: true } is also used for failTarget
-- Test and document that listeners to up:layer:accept may set or change acceptance values
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 
 

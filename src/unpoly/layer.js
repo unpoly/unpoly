@@ -1070,7 +1070,7 @@ up.layer = (function() {
   */
 
   /*-
-  This event is emitted before a layer is [accepted](/closing-overlays).
+  This event is emitted *before* a layer is [accepted](/closing-overlays).
 
   The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
 
@@ -1079,6 +1079,8 @@ up.layer = (function() {
     The layer that is about to close.
   @param {Element} [event.value]
     The overlay's [acceptance value](/closing-overlays#overlay-result-values).
+
+    Listeners may replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
   @param event.preventDefault()
@@ -1087,7 +1089,7 @@ up.layer = (function() {
   */
 
   /*-
-  This event is emitted after a layer was [accepted](/closing-overlays).
+  This event is emitted *after* a layer was [accepted](/closing-overlays).
 
   The event is emitted on the [layer's](/up.layer.element) when the close animation
   is starting. If the layer has no close animaton and was already removed from the DOM,
@@ -1097,7 +1099,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {Element} [event.value]
-    The overlay's [acceptance value](/closing-overlays#overlay-result-values).
+    The overlay's final [acceptance value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that has caused the layer to close.
   @stable
@@ -1116,7 +1118,7 @@ up.layer = (function() {
   */
 
   /*-
-  This event is emitted before a layer is [dismissed](/closing-overlays).
+  This event is emitted *before* a layer is [dismissed](/closing-overlays).
 
   The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
 
@@ -1125,6 +1127,8 @@ up.layer = (function() {
     The layer that is about to close.
   @param {Element} [event.value]
     The overlay's [dismissal value](/closing-overlays#overlay-result-values).
+
+    Listeners may replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
   @param event.preventDefault()
@@ -1133,7 +1137,7 @@ up.layer = (function() {
   */
 
   /*-
-  This event is emitted after a layer was [dismissed](/closing-overlays).
+  This event is emitted *after* a layer was [dismissed](/closing-overlays).
 
   The event is emitted on the [layer's](/up.layer.element) when the close animation
   is starting. If the layer has no close animaton and was already removed from the DOM,
@@ -1143,7 +1147,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {Element} [event.value]
-    The overlay's [dismissal value](/closing-overlays#overlay-result-values).
+    The overlay's final [dismissal value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that has caused the layer to close.
   @stable

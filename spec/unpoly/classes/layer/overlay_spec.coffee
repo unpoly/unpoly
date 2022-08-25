@@ -164,11 +164,29 @@ describe 'up.Layer.Overlay', ->
       next.after 600, ->
         expect(document).not.toHaveSelector('up-modal')
 
-    describe 'cancelation', ->
+    describe 'events', ->
 
-      it 'lets an event handler cancel the acceptance and throws an AbortError', ->
+      it 'emits an up:layer:accept event with the acceptance value'
+
+      it 'lets an up:layer:accept event handler mutate the acceptance value'
+
+      it 'lets an up:layer:accept event handler replace the acceptance value', ->
         makeLayers(2)
+        expect(up.layer.count).toBe(2)
 
+        acceptListener = (event) -> event.value = 'replaced'
+        acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+
+        up.layer.current.on('up:layer:accept', acceptListener)
+        up.layer.current.on('up:layer:accepted', acceptedListener)
+
+        up.layer.current.accept('original')
+
+        expect(acceptedListener).toHaveBeenCalled()
+        expect(acceptedListener.calls.argsFor(0)[0].value).toBe('replaced')
+
+      it 'lets an up:layer:accept event handler cancel the acceptance and throws an AbortError', ->
+        makeLayers(2)
         expect(up.layer.count).toBe(2)
 
         up.layer.current.on 'up:layer:accept', (event) -> event.preventDefault()
@@ -178,10 +196,6 @@ describe 'up.Layer.Overlay', ->
         expect(accept).toAbort()
 
         expect(up.layer.count).toBe(2)
-
-    describe 'events', ->
-
-      it 'should have examples'
 
   describe '#dismiss()', ->
 
