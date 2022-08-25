@@ -18,9 +18,6 @@ Render lifecycle
 ----------------
 
 - Reconsider how many lifecycle callbacks we want to parse from links
-- Replace unpoly-es5.js with unpoly-es
-- Consider replacing unpoly.es5.js with unpoly.es6.js *or* remove it entirely
-  - We need at least classes to subclass errors
 
 
 Various changes
@@ -30,11 +27,10 @@ Various changes
 - Why don't we always set focus: 'keep'?
   - Also why is this not a part of config.autoFocus ?
     - before target-if-lost
-- Can we use [up-keep] within [up-hungry]?
-  - https://sepia-shadow-paper.glitch.me/
-  - It looks like addHungrySteps() does not inherit { keep } (now { useKeep })
 - Test that { fallback: true } is also used for failTarget
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
+- Consider replacing unpoly.es5.js with unpoly.es6.js *or* remove it entirely
+  - We need at least classes to subclass errors
 
 
 unpoly-rails
