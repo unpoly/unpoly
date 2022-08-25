@@ -149,6 +149,7 @@ up.fragment = (function() {
       '[up-main]',
       upTagName,
       'link[rel]',
+      'meta[property]',
       '*[name]',
       'form[action]',
       'a[href]',

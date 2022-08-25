@@ -37,7 +37,6 @@ Various changes
   - This would only be helpful for [aria-live] regions where we make multiple async changes and want to announce them at once
   - In Unpoly's case the entire fragment pops into existence as one
 - Test that { fallback: true } is also used for failTarget
-- Default Deriver could match this ([property] instead of [name]): <meta property="og:title" content="Main Title">
 - Test and document that listeners to up:layer:accept may set or change acceptance values
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 - There are still docs about up.element.matches()

@@ -6376,6 +6376,11 @@ describe 'up.fragment', ->
         element = fixture('meta[name="csrf-token"]')
         expect(up.fragment.toTarget(element)).toBe('meta[name="csrf-token"]')
 
+      it "refers to meta tags by both tag name and [property] attribute", ->
+        # Yes, OpenGraph uses [property] instead of [name]: https://ogp.me/
+        element = fixture('meta[property="og:title"]')
+        expect(up.fragment.toTarget(element)).toBe('meta[property="og:title"]')
+
       it "uses the tag name of a unique element", ->
         expect(up.fragment.toTarget(document.body)).toBe("body")
 
