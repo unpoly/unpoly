@@ -1,21 +1,32 @@
-TODOs for next release
-======================
+TODOs after V3
+==============
+
+- up:feedback:start / up:feedback:stop
+  - On the layer, not an individual element
+  - Needs to have reference to origin and targetElements
+- Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
+- Allow [up-emit] for buttons
+- Honor `Vary` for cache keys (hard!)
+- Do we want an up:fragment:hungry event?
+
+
+TODOs for V3
+============
 
 
 Render lifecycle
 ----------------
 
 - Reconsider how many lifecycle callbacks we want to parse from links
-- Consider whether onOffline() callbacks should be able to substitute an up.Response
-  - For this we would need to publish the up.Response constructor
-  - Do we really need this if people can just up.render() with different content?
-- Consider replacing unpoly-es5.js with unpoly-legacy.js or unpoly-es6.js
-
+- Replace unpoly-es5.js with unpoly-es
+- Consider replacing unpoly.es5.js with unpoly.es6.js *or* remove it entirely
+  - We need at least classes to subclass errors
 
 
 Various changes
 ---------------
 
+- FragmentFocus: Suffix if-lost does not work for secondary fragments
 - Why don't we always set focus: 'keep'?
   - Also why is this not a part of config.autoFocus ?
     - before target-if-lost
@@ -28,12 +39,9 @@ Various changes
 - Popups need text-align: left again
 - Test that { fallback: true } is also used for failTarget
 - Default Deriver could match this ([property] instead of [name]): <meta property="og:title" content="Main Title">
-- Maybe honor `Vary` from the server
 - Test and document that listeners to up:layer:accept may set or change acceptance values
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
-- Investigate why bundle size went up from 43.5 to 47.9
 - There are still docs about up.element.matches()
-
 
 
 unpoly-rails
@@ -227,7 +235,7 @@ Docs
   - up.Offline
   - AbortError
   - Possibly use a new @error tag since it's not really a @class that we can check with instanceof
-    - But it could be a class if we no longer compile down to
+    - But it could be a class if we no longer compile down to ES5
 - Document up.render({ fail })
 - Document a[up-follow][up-fail])
 - Consider replacing type|undefined with type? in all type comments
@@ -258,8 +266,8 @@ Docs
 - Redirect renamed pages, e.g. /server-errors is now /failed-responses
 
 
-If we're launching V3
----------------------
+V3 Launch
+---------
 
 - We don't need anything from Ops
   - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
@@ -274,7 +282,8 @@ If we're launching V3
 - The README says "Unpoly 2"
   - Needs to say Unpoly 3
   - Needs to link to 2.x-stable branch
-
+- Submit to to https://github.com/github/release-radar/
+- Open heads-up issues for server integration maintainers
 
 
 
