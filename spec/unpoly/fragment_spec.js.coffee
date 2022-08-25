@@ -658,6 +658,27 @@ describe 'up.fragment', ->
               expect('.success-target').toHaveText('old success text')
               expect('.failure-target').toHaveText('new failure text')
 
+          describe 'with { fallback } option', ->
+
+            it 'updates a fallback target if the { failTarget } cannot be matched', asyncSpec (next) ->
+              fixture('.fallback', text: 'old fallback text')
+              fixture('.success-target', text: 'old success text')
+              fixture('.failure-target', text: 'old failure text')
+
+              up.render('.success-target', url: '/path', failTarget: '.failure-target', fallback: '.fallback')
+
+              next =>
+                @respondWith
+                  status: 500
+                  responseText: """
+                    <div class="fallback">new fallback text</div>
+                    <div class="success-target">new success text</div>
+                  """
+
+              next =>
+                expect('.success-target').toHaveText('old success text')
+                expect('.fallback').toHaveText('new fallback text')
+
           it 'does update a fragment if the server sends an XHTML content-type instead of text/html', asyncSpec (next) ->
             fixture('.target', text: 'old text')
 
