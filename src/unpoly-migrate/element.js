@@ -62,7 +62,7 @@ use `up.fragment.matches()` instead.
 @deprecated
   Use [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches) instead.
 */
-up.util.matches = function(element, selector) {
+up.element.matches = function(element, selector) {
   up.migrate.deprecated('up.element.matches()', 'Element#matches()')
   return element.matches(selector)
 }

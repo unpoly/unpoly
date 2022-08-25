@@ -172,10 +172,6 @@ describe 'up.element', ->
         result = up.element.matches(element, '.bar')
         expect(result).toBe(false)
 
-      it 'does not crash if the given "element" is a document', ->
-        result = up.element.matches(document, '.foo')
-        expect(result).toBeFalsy()
-
   describe 'up.element.subtree()', ->
 
     it 'returns all descendants of the given root matching the given selector', ->
