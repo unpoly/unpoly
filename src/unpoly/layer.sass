@@ -277,6 +277,10 @@ up-popup
   &[size=full] &
     width: 100%
 
+  // The up-popup[align=right] attribute right-aligns the text because HTML.
+  // We reset the text alignment to left.
+  text-align: left
+
 up-popup-content
   @extend %overlay-content
 
