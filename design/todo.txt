@@ -33,9 +33,6 @@ Various changes
 - Can we use [up-keep] within [up-hungry]?
   - https://sepia-shadow-paper.glitch.me/
   - It looks like addHungrySteps() does not inherit { keep } (now { useKeep })
-- It makes no sense to set [aria-busy] on a loading fragment.
-  - This would only be helpful for [aria-live] regions where we make multiple async changes and want to announce them at once
-  - In Unpoly's case the entire fragment pops into existence as one
 - Test that { fallback: true } is also used for failTarget
 - Test and document that listeners to up:layer:accept may set or change acceptance values
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189

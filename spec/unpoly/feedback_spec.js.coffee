@@ -322,14 +322,13 @@ describe 'up.feedback', ->
 
     describe '.up-loading', ->
 
-      it 'gives the loading element an .up-loading class and [aria-busy=true] attribute', asyncSpec (next) ->
+      it 'gives the loading element an .up-loading class', asyncSpec (next) ->
         fixture('.target')
 
         up.render('.target', url: '/path', feedback: true)
 
         next ->
           expect('.target').toHaveClass('up-loading')
-          expect('.target').toHaveAttribute('aria-busy', 'true')
 
       it 'does not assign the .up-loading class when preloading', asyncSpec (next) ->
         fixture('.target')
@@ -338,7 +337,6 @@ describe 'up.feedback', ->
 
         next ->
           expect('.target').not.toHaveClass('up-loading')
-          expect('.target').not.toHaveAttribute('aria-busy')
 
       it 'does not assign the .up-loading class without a { feedback } option', asyncSpec (next) ->
         fixture('.target')
@@ -347,23 +345,20 @@ describe 'up.feedback', ->
 
         next ->
           expect('.target').not.toHaveClass('up-loading')
-          expect('.target').not.toHaveAttribute('aria-busy')
 
-      it 'removes the .up-loading class and [aria-busy] attribute when the fragment was updated', asyncSpec (next) ->
+      it 'removes the .up-loading class when the fragment was updated', asyncSpec (next) ->
         fixture('.target')
 
         up.render('.target', url: '/path', feedback: true)
 
         next ->
           expect('.target').toHaveClass('up-loading')
-          expect('.target').toHaveAttribute('aria-busy', 'true')
 
           jasmine.respondWithSelector('.target', text: 'new text')
 
         next ->
           expect('.target').toHaveText('new text')
           expect('.target').not.toHaveClass('up-loading')
-          expect('.target').not.toHaveAttribute('aria-busy')
 
       it 'removes the .up-loading class when another fragment was updated due to a failed response', asyncSpec (next) ->
         fixture('.target')

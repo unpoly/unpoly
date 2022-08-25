@@ -37,11 +37,7 @@ to convey the highlighted link to assistive technologies:
 ```
 
 When the user clicks on the `/bar` link, the link will receive the [`.up-active`](/a.up-active) class while it is waiting
-for the server to respond.
-
-The targeted fragment (the `<main>` element) gets the `.up-loading` class.
-We also assign an [`[aria-busy]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-busy) attribute
-to convey the pending update to assistive technologies:
+for the server to respond. The targeted fragment (the `<main>` element) gets the `.up-loading` class:
 
 ```
 <nav up-nav>
@@ -49,7 +45,7 @@ to convey the pending update to assistive technologies:
   <a href="/bar" up-follow class="up-active">Bar</a>
 </div>
 
-<main class="up-loading" aria-busy="true">
+<main class="up-loading">
   Foo content
 </main>
 ```
@@ -245,10 +241,7 @@ up.feedback = (function() {
   }
   ```
 
-  Loading fragments also get an [`[aria-busy=true]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-busy) attribute
-  to convey the pending update to assistive technologies.
-
-  The `.up-loading` class and `[aria-busy]` attribute will be removed when the fragment was updated.
+  The `.up-loading` class will be removed once the fragment was updated.
 
   ### Example
 
@@ -269,7 +262,7 @@ up.feedback = (function() {
   While the request is loading, the targeted element has the `.up-loading` class:
 
   ```html
-  <div class="foo up-loading" aria-busy="busy">
+  <div class="foo up-loading">
     Old content
   </div>
   ```
@@ -345,7 +338,6 @@ up.feedback = (function() {
 
     for (let targetElement of request.targetElements) {
       clean(e.addTemporaryClass(targetElement, CLASS_LOADING))
-      clean(e.setTemporaryAttr(targetElement, 'aria-busy', 'true'))
     }
   }
 
