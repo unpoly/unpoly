@@ -53,11 +53,16 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
 
   emitCloseEvent() {
     // The close event is emitted on the layer that is about to close.
-    return this.layer.emit(
+    let event = this.layer.emit(
       this.buildEvent(`up:layer:${this.verb}`), {
       callback: this.layer.callback(`on${u.upperCaseFirst(this.verb)}`),
       log: [`Will ${this.verb} ${this.layer} with value %o`, this.value]
     })
+
+    // Allow an event listener to replace event.value with a new value.
+    this.value = event.value
+
+    return event
   }
 
   emitClosedEvent(formerParent) {
