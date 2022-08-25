@@ -29,7 +29,7 @@ describe 'up.Layer.Popup', ->
 
       popupRect = popup.element.getBoundingClientRect()
       originRect = origin.getBoundingClientRect()
-      
+
       return { origin, popup, popupRect, originRect }
 
     it 'repositions when the window is resized', asyncSpec (next) ->
@@ -72,6 +72,11 @@ describe 'up.Layer.Popup', ->
 
         expect(popupRect.left).toBe(originRect.left + originRect.width - popupRect.width - 20)
         expect(popupRect.top).toBe(originRect.bottom + 10)
+
+      it 'left-aligns text inside the popup (bugfix)', ->
+        { popup } = openPopup(position: 'bottom', align: 'right')
+
+        expect(getComputedStyle(popup.element).textAlign).toBe('left')
 
     describe 'with { position: "bottom", align: "center"}', ->
 

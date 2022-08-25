@@ -36,7 +36,6 @@ Various changes
 - It makes no sense to set [aria-busy] on a loading fragment.
   - This would only be helpful for [aria-live] regions where we make multiple async changes and want to announce them at once
   - In Unpoly's case the entire fragment pops into existence as one
-- Popups need text-align: left again
 - Test that { fallback: true } is also used for failTarget
 - Default Deriver could match this ([property] instead of [name]): <meta property="og:title" content="Main Title">
 - Test and document that listeners to up:layer:accept may set or change acceptance values
