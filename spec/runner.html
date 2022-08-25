@@ -18,7 +18,7 @@
       let canModernJS = ('noModule' in document.createElement('script'))
       let useModernJS = canModernJS && !/(\?|&)es=5($|\?|&)/.test(location.search)
 
-      insertScript(useModernJS ? '/dist/unpoly.js' : '/dist/unpoly.es5.js')
+      insertScript(useModernJS ? '/dist/unpoly.js' : '/dist/unpoly.es6.js')
 
       if (/(\?|&)jquery=1($|\?|&)/.test(location.search)) {
         insertScript('https://code.jquery.com/jquery-3.6.0.js')
@@ -28,7 +28,7 @@
         insertScript('/dist/unpoly-migrate.js')
       }
 
-      insertScript(useModernJS ? '/dist/specs.js' : '/dist/specs.es5.js')
+      insertScript(useModernJS ? '/dist/specs.js' : '/dist/specs.es6.js')
     </script>
 
 <!--    <script>-->

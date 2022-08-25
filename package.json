@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test": "node spec/app.js",
-    "build": "webpack --config ./webpack/production.js && gzip --keep --force dist/unpoly.es5.min.js dist/unpoly.min.js",
+    "build": "webpack --config ./webpack/production.js && gzip --keep --force dist/unpoly.es6.min.js dist/unpoly.min.js",
     "dev": "npx nf start --procfile Procfile.dev",
     "watch-dev": "webpack --watch --config ./webpack/development.js",
     "build-dev": "webpack --config ./webpack/development.js",

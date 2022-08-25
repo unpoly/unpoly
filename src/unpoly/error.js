@@ -124,7 +124,6 @@ up.error = (function() {
   }
 
   return {
-    fail,
     failed,
     aborted,
     offline,
@@ -132,10 +131,11 @@ up.error = (function() {
     cannotCompile,
     notImplemented,
     cannotTarget,
+    cannotParseSelector,
+    fail,
     emitGlobal,
     isCritical,
     muteUncriticalRejection,
-    cannotParseSelector
   }
 })()
 

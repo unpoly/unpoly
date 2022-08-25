@@ -3,8 +3,8 @@ const { unpoly, unpolyMigrate, unpolyBootstrap } = require('./entries.js')
 module.exports = [
   unpoly({ es: 'modern', min: false }),
   unpoly({ es: 'modern', min: true }),
-  unpoly({ es: 'es5', min: false }),
-  unpoly({ es: 'es5', min: true }),
+  unpoly({ es: 'es6', min: false }),
+  unpoly({ es: 'es6', min: true }),
   unpolyMigrate({ min: false }),
   unpolyMigrate({ min: true }),
   unpolyBootstrap({ version: 3, min: false }),
