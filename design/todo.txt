@@ -32,15 +32,6 @@ Various changes
   - We need at least classes to subclass errors
 
 
-unpoly-rails
-------------
-
-- Consider tracking headers into Vary
-  - If I check for the absence of X-Up-Version and don't optimize, should I set Vary?
-    - I think so!
-
-
-
 Offline / rework caching
 ------------------------
 
