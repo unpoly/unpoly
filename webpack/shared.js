@@ -1,9 +1,25 @@
 const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ESLintPlugin = require('eslint-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 
 function minify(doMinify) {
-  return { mode: doMinify ? 'production' : 'none' }
+  return {
+    mode: doMinify ? 'production' : 'none',
+    optimization: {
+      minimize: doMinify,
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: { // https://github.com/terser/terser#minify-options
+            compress: { // https://github.com/terser/terser#compress-options
+              passes: 3,
+              ecma: 2020,
+            },
+          }
+        })
+      ]
+    }
+  }
 }
 
 function file(srcPath, output) {
