@@ -142,7 +142,7 @@ up.layer = (function() {
   @param {string} config.overlay.dismissAriaLabel
     The accessibility label for the dismiss icon in the top-right corner.
 
-  @param {string|boolean} config.overlay.history='auto'
+  @param {string|boolean} [config.overlay.history='auto']
     Whether the layer's location or title will be visible in the browser's
     address bar and window title.
 
