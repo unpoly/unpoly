@@ -561,7 +561,7 @@ up.Request = class Request extends up.Record {
       console.log('Request was aborted.')
     }
   }
-gh
+
   request.abort()
   ```
 
