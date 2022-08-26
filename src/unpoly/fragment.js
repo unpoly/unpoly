@@ -1725,7 +1725,7 @@ up.fragment = (function() {
   }
 
   function cannotTarget(element) {
-    throw up.error.cannotTarget(untargetableMessage(element))
+    throw new up.CannotTarget(untargetableMessage(element))
   }
 
   function tryToTarget(element, options) {
@@ -1748,7 +1748,7 @@ up.fragment = (function() {
         // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
         return deriveTargetFromPattern(element, deriver)
       } catch (e) {
-        if (up.error.cannotParseSelector.is(e)) {
+        if (e instanceof up.CannotParse) {
           // This error can be thrown for two reasons:
           // (1) up.element.parseSelector() cannot parse the given string
           // (2) up.element.parseSelector() parses a selector with a depth > 1.
@@ -1771,7 +1771,7 @@ up.fragment = (function() {
       // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
       // It's also not common to see such selectors configured in config.targetDerivers.
       // Hence we just return the matching deriver.
-      throw up.error.cannotParseSelector(deriver)
+      throw new up.CannotParse(deriver)
     }
 
     let { tagName, id, classNames, attributes } = includePath[0]

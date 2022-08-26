@@ -96,7 +96,7 @@ up.browser = (function() {
   function assertConfirmed(options) {
     const confirmed = !options.confirm || window.confirm(options.confirm)
     if (!confirmed) {
-      throw up.error.aborted('User canceled action')
+      throw new up.AbortError('User canceled action')
     }
     return true
   }

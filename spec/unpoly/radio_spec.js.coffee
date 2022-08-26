@@ -663,7 +663,7 @@ describe 'up.radio', ->
 
       it 'keeps polling if a request failed with a network issue', asyncSpec (next) ->
         up.radio.config.pollInterval = 75
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(up.error.failed('network error'))
+        reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(new up.Failed('network error'))
 
         up.hello(fixture('.element[up-poll]'))
 

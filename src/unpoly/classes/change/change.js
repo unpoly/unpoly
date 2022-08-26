@@ -11,7 +11,7 @@ up.Change = class Change {
   }
 
   execute() {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   onFinished(renderResult) {

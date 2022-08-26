@@ -169,7 +169,7 @@ up.Change.FromContent = class FromContent extends up.Change {
         return fn(plan)
       } catch (error) {
         // Re-throw any unexpected type of error
-        if (!up.error.cannotMatch.is(error)) {
+        if (!(error instanceof up.CannotMatch)) {
           throw error
         }
       }

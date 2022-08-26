@@ -582,7 +582,7 @@ up.Request = class Request extends up.Record {
 
     let message = 'Aborted request to ' + this.description + (reason ? ':' + reason : '')
     this.state = 'aborted'
-    this.deferred.reject(up.error.aborted(message))
+    this.deferred.reject(new up.AbortError(message))
     this.emit('up:request:aborted', { log: message })
 
     // Return true so callers know we didn't return early without actually aborting anything.
@@ -594,7 +594,7 @@ up.Request = class Request extends up.Record {
 
     let message = 'Cannot load request to ' + this.description + (reason ? ':' + reason : '')
     this.state = 'offline'
-    this.deferred.reject(up.error.offline(message))
+    this.deferred.reject(new up.Offline(message))
     this.emit('up:request:offline', { log: message })
   }
 

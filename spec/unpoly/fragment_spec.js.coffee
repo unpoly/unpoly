@@ -978,7 +978,7 @@ describe 'up.fragment', ->
 
                 promiseState(changePromise).then (result) ->
                   expect(result.state).toEqual('rejected')
-                  expect(up.error.aborted.is(result.value)).toBe(true)
+                  expect(result.value).toBeAbortError()
 
                   done()
 

@@ -165,7 +165,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   accept() {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   /*-
@@ -189,7 +189,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   dismiss() {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   /*-
@@ -376,7 +376,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   getFirstSwappableElement() {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   /*-
@@ -699,11 +699,11 @@ up.Layer = class Layer extends up.Record {
   }
 
   static selector(_part) {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   toString() {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   /*-

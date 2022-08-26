@@ -82,7 +82,7 @@ up.RenderJob = class RenderJob {
       if (up.emit(guardEvent, { target: this.options.origin }).defaultPrevented) {
         let message = `Rendering was prevented by ${guardEvent.type} listener`
         up.puts('up.render()', message)
-        throw up.error.aborted(message)
+        throw new up.AbortError(message)
       }
     }
 
