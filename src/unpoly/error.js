@@ -1,6 +1,30 @@
-up.error = (function() {
+const u = up.util
 
-  const u = up.util
+class SimpleError extends Error {
+  constructor(message, props = {}) {
+    super(message)
+    u.assign(this, props)
+    this.name ||= "up." + this.constructor.name
+  }
+}
+
+up.Failed = class Failed extends SimpleError {}
+up.Offline = class Offline extends SimpleError {}
+up.CannotMatch = class CannotMatch extends SimpleError {}
+up.CannotCompile = class CannotCompile extends SimpleError {}
+up.CannotTarget = class CannotTarget extends SimpleError {}
+up.CannotParse = class CannotParse extends SimpleError {}
+up.NotImplemented = class NotImplemented extends SimpleError {}
+up.Aborted = class Aborted extends SimpleError {
+  constructor(message) {
+    if (u.isArray(message)) {
+      message = u.sprintf(...message)
+    }
+    super(message, { name: 'AbortError' })
+  }
+}
+
+up.error = (function() {
 
   function build(message, props = {}) {
     if (u.isArray(message)) {
