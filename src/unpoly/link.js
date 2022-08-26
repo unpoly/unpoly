@@ -516,7 +516,7 @@ up.link = (function() {
     link = up.fragment.get(link)
 
     if (!shouldPreload()) {
-      return up.error.failed.async('Link preloading is disabled')
+      return Promise.reject(new up.Failed('Link preloading is disabled'))
     }
 
     const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})

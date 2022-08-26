@@ -92,7 +92,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     if (response instanceof up.Response) {
       return this.onRequestSettledWithResponse(response)
     } else {
-      // Value is up.error.aborted(), up.error.offline or another fatal error that can never
+      // Value is up.AbortError, up.Offline or another fatal error that can never
       // be used as a fragment update. At this point up:request:aborted or up:request:offline
       // have already been emitted by up.Request.
       return this.onRequestSettledWithError(response)
@@ -125,7 +125,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   onRequestSettledWithError(error) {
-    if (up.error.offline.is(error)) {
+    if (error instanceof up.Offline) {
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
         response: this.response,

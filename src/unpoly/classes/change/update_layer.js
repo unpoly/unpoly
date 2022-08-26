@@ -16,8 +16,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   getPreflightProps() {
-    // This will throw up.error.cannotMatch() if { target } cannot
-    // be found in { layer }.
+    // This will throw up.CannotMatch if { target } cannot be found in { layer }.
     this.matchPreflight()
 
     return {
@@ -103,7 +102,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // - Update the location to a URL for which { acceptLocation } or { dismissLocation }
     //   will close the layer.
     //
-    // Note that @handleLayerChangeRequests() also throws an up.error.aborted
+    // Note that @handleLayerChangeRequests() also throws an up.AbortError
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 

@@ -60,7 +60,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     if (this.emitOpenEvent().defaultPrevented) {
       // We cannot use @abortWhenLayerClosed() here,
       // because the layer is not even in the stack yet.
-      throw up.error.aborted('Open event was prevented')
+      throw new up.AbortError('Open event was prevented')
     }
 
     // Make sure that the baseLayer layer doesn't already have a child layer.
@@ -95,7 +95,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // - Update the location to a URL for which { acceptLocation } or { dismissLocation }
     //   will close the layer.
     //
-    // Note that @handleLayerChangeRequests() also calls throws an up.error.aborted
+    // Note that @handleLayerChangeRequests() also calls throws an up.AbortError
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 

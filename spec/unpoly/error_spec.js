@@ -41,7 +41,7 @@ describe('up.error', function() {
     })
 
     it('mutes a rejected promise if the rejection value is an AbortError', function(done) {
-      const abortError = up.error.aborted('User aborted')
+      const abortError = new up.AbortError('User aborted')
       const promise = Promise.reject(abortError)
       const mutedPromise = up.error.muteUncriticalRejection(promise)
 

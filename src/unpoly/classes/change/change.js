@@ -7,11 +7,11 @@ up.Change = class Change {
   }
 
   cannotMatch(reason) {
-    return up.error.cannotMatch(this, reason)
+    throw new up.CannotMatch(reason)
   }
 
   execute() {
-    throw up.error.notImplemented()
+    throw new up.NotImplemented()
   }
 
   onFinished(renderResult) {

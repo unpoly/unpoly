@@ -1,54 +1,5 @@
 up.error = (function() {
 
-  const u = up.util
-
-  function build(message, props = {}) {
-    if (u.isArray(message)) {
-      message = u.sprintf(...message)
-    }
-    const error = new Error(message)
-    Object.assign(error, props)
-    return error
-  }
-
-  // Custom error classes is hard when we transpile to ES5.
-  // Hence we create a class-like construct.
-  // See https://webcodr.io/2018/04/why-custom-errors-in-javascript-with-babel-are-broken/
-  function errorInterface(name, init = build) {
-    const fn = function(...args) {
-      const error = init(...args)
-      error.name = name
-      return error
-    }
-
-    fn.is = error => error.name === name
-
-    fn.async = (...args) => Promise.reject(fn(...args))
-
-    return fn
-  }
-
-  const cannotTarget = errorInterface('up.CannotTarget')
-
-  const cannotCompile = errorInterface('up.CannotCompile')
-
-  const failed = errorInterface('up.Failed')
-
-  // Emulate the exception that aborted fetch() would throw
-  const aborted = errorInterface('AbortError', (message) => {
-    return build(message || 'Aborted')
-  })
-
-  const offline = errorInterface('up.Offline')
-
-  const notImplemented = errorInterface('up.NotImplemented')
-
-  const cannotMatch = errorInterface('up.CannotMatch', (change, reason) => {
-    return build(`Cannot apply change: ${change} (${reason})`)
-  })
-
-  const cannotParseSelector = errorInterface('up.CannotParseSelector')
-
   function emitGlobal(error) {
     // Emit an ErrorEvent on window.onerror for exception tracking tools
     const { message } = error
@@ -78,7 +29,7 @@ up.error = (function() {
   */
   function fail(...args) {
     // Yes, we pass the message plus all substitution vars as an array in the first arg slot.
-    throw up.error.failed(args)
+    throw new up.Failed(args)
   }
 
   function isCritical(error) {
@@ -124,14 +75,6 @@ up.error = (function() {
   }
 
   return {
-    failed,
-    aborted,
-    offline,
-    cannotMatch,
-    cannotCompile,
-    notImplemented,
-    cannotTarget,
-    cannotParseSelector,
     fail,
     emitGlobal,
     isCritical,

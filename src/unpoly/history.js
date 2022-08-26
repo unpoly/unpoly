@@ -336,11 +336,6 @@ up.history = (function() {
     restoreStateOnPop(event.state)
   }
 
-  function emit(...args) {
-    const historyLayer = u.find(up.layer.stack.reversed(), 'history')
-    return historyLayer.emit(...args)
-  }
-
   function register() {
     window.addEventListener('popstate', onPop)
 

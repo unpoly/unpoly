@@ -1,5 +1,4 @@
 const e = up.element
-const u = up.util
 
 up.FragmentPolling = class FragmentPolling {
 
