@@ -105,12 +105,13 @@ up.fragment = (function() {
 
     See [focus option](/focus-option) for a list of allowed values.
 
-    The default configuration tries, in this order:
+    The default configuration tries the following strategies, in this order:
 
     - Focus a `#hash` in the URL.
     - Focus an `[autofocus]` element in the new fragment.
-    - If focus was lost with the old fragment, focus the new fragment.
     - If updating a [main target](/up-main), focus the new fragment.
+    - If focus was lost with the old fragment, re-focus a [similar](/up.fragment.toTarget) element.
+    - If focus was lost with the old fragment, focus the new fragment.
 
   @param {boolean} [config.runScripts=false]
     Whether to execute `<script>` tags in updated fragments.
@@ -174,7 +175,7 @@ up.fragment = (function() {
     matchAroundOrigin: true,
     runScripts: false,
     autoHistoryTargets: [':main'],
-    autoFocus: ['hash', 'autofocus', 'main-if-main', 'target-if-lost'],
+    autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
     autoRevalidate: (response) => (response.age > 15 * 1000) && !up.network.shouldReduceRequests(),
   }))

@@ -39,7 +39,7 @@ The following properties are preserved:
 - The selection range within a focused input element.
 - The scroll position within a focused input element.
 
-### Restoring scroll positions
+### Restoring focus
 
 Pass `{ focus: 'restore' }` to restore an previously [saved focus state](/up.viewport.saveFocus)
 for the updated layer's URL.
@@ -105,8 +105,9 @@ This is the default when [navigating](/navigation).
 
 - Focus a `#hash` in the URL.
 - Focus an `[autofocus]` element in the new fragment.
-- If focus was lost with the old fragment, focus the new fragment.
 - If updating a [main target](/up-main), focus the new fragment.
+- If focus was lost with the old fragment, re-focus a [similar](/up.fragment.toTarget) element.
+- If focus was lost with the old fragment, focus the new fragment.
 
 You may configure this logic in `up.fragment.config.autoFocus`.
 
