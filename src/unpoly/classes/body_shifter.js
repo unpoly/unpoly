@@ -10,12 +10,12 @@ const e = up.element
 up.BodyShifter = class BodyShifter {
 
   constructor() {
-    this.unshiftFns = []
-    this.reset()
+    this._unshiftFns = []
+    this.#reset()
   }
 
-  reset() {
-    this.unshiftNow()
+  #reset() {
+    this.#unshiftNow()
     this.shiftCount = 0
   }
 
@@ -36,7 +36,7 @@ up.BodyShifter = class BodyShifter {
     // Note that some devices don't show a vertical scrollbar at rest for a viewport, even
     // when it can be scrolled.
     const overflowElement = up.viewport.rootOverflowElement()
-    this.changeStyle(overflowElement, {overflowY: 'hidden'})
+    this.#changeStyle(overflowElement, {overflowY: 'hidden'})
 
     // If the scrollbar never took space away from the main viewport's client width,
     // we do not need to run the code below that would pad it on the right.
@@ -51,29 +51,29 @@ up.BodyShifter = class BodyShifter {
     const bodyRightPadding = e.styleNumber(body, 'paddingRight')
     const bodyRightShift = scrollbarWidth + bodyRightPadding
 
-    this.changeStyle(body, {paddingRight: bodyRightShift})
+    this.#changeStyle(body, {paddingRight: bodyRightShift})
 
     for (let anchor of up.viewport.anchoredRight()) {
       const elementRight = e.styleNumber(anchor, 'right')
       const elementRightShift = scrollbarWidth + elementRight
-      this.changeStyle(anchor, {right: elementRightShift})
+      this.#changeStyle(anchor, {right: elementRightShift})
     }
   }
 
-  changeStyle(element, styles) {
-    this.unshiftFns.push(e.setTemporaryStyle(element, styles))
+  #changeStyle(element, styles) {
+    this._unshiftFns.push(e.setTemporaryStyle(element, styles))
   }
 
   unshift() {
     this.shiftCount--
     if (this.shiftCount == 0) {
-      this.unshiftNow()
+      this.#unshiftNow()
     }
   }
 
-  unshiftNow() {
+  #unshiftNow() {
     let unshiftFn
-    while (unshiftFn = this.unshiftFns.pop()) {
+    while (unshiftFn = this._unshiftFns.pop()) {
       unshiftFn()
     }
   }
