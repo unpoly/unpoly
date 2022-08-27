@@ -19,15 +19,14 @@ Render lifecycle
 ----------------
 
 - Reconsider how many lifecycle callbacks we want to parse from links
+  - Benchmark up.link.followOptions()
 
 
 Various changes
 ---------------
 
-- FragmentFocus: Suffix if-lost does not work for secondary fragments
-- Why don't we always set focus: 'keep'?
-  - Also why is this not a part of config.autoFocus ?
-    - before target-if-lost
+- FragmentFocus: Suffix if-lost does not work for secondary fragments?
+  - It *may*, since the FocusCapsule is created for the oldElement that has focus
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 
 
