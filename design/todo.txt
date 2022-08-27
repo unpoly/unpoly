@@ -8,6 +8,7 @@ TODOs after V3
 - Allow [up-emit] for buttons
 - Honor `Vary` for cache keys (hard!)
 - Do we want an up:fragment:hungry event?
+- Experiment with property mangling vs. public API
 
 
 TODOs for V3
@@ -23,21 +24,11 @@ Render lifecycle
 Various changes
 ---------------
 
-- Refactor errors
-  - up.Aborted should just be AbortError
 - FragmentFocus: Suffix if-lost does not work for secondary fragments
 - Why don't we always set focus: 'keep'?
   - Also why is this not a part of config.autoFocus ?
     - before target-if-lost
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
-- Consider replacing unpoly.es5.js with unpoly.es6.js *or* remove it entirely
-  - We need at least classes to subclass errors
-- Terser options
-  - Experiment with { ecma } option
-  - We may need to set optimization.minimize and optimization.minimizer
-    - https://webpack.js.org/plugins/terser-webpack-plugin/
-    - https://webpack.js.org/configuration/optimization/#optimizationminimizer
-    - Defaults: https://github.com/webpack/webpack/blob/9fcaa243573005d6fdece9a3f8d89a0e8b399613/lib/config/defaults.js#L1159-L1174
 
 
 Offline / rework caching
