@@ -9,6 +9,7 @@ TODOs after V3
 - Honor `Vary` for cache keys (hard!)
 - Do we want an up:fragment:hungry event?
 - Experiment with property mangling vs. public API
+- Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 
 
 TODOs for V3
@@ -18,8 +19,10 @@ TODOs for V3
 Render lifecycle
 ----------------
 
-- Reconsider how many lifecycle callbacks we want to parse from links
-  - Benchmark up.link.followOptions()
+- Check if we parse all lifecycle callbacks from links
+- guide.js:5137 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'onRendered')
+    at RenderJob.runResultCallbacks (guide.js:5137:28)
+    at RenderJob.execute (guide.js:5120:22)
 
 
 Various changes
@@ -27,7 +30,6 @@ Various changes
 
 - FragmentFocus: Suffix if-lost does not work for secondary fragments?
   - It *may*, since the FocusCapsule is created for the oldElement that has focus
-- Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 
 
 Offline / rework caching
@@ -451,3 +453,9 @@ Decisions
   => For this we would need to track when a request was promoted to the foreground
 - Do we trigger onFinished when preloading?
   => No, users can use the promise or onLoaded()
+- Reconsider how many lifecycle callbacks we want to parse from links
+  - Benchmark up.link.followOptions()
+    - console.time('parse'); for (var i = 0; i < 10000; i++) { up.link.followOptions(link) }; console.timeEnd('parse')
+    - VM481:1 parse: 1091.6689453125 ms
+    => It takes 0.1 ms
+    => This is not a performance issue
