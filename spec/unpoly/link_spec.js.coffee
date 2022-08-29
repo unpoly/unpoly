@@ -910,6 +910,20 @@ describe 'up.link', ->
         next ->
           expect('.target').toHaveText('old text')
 
+      it 'does not call an { onRendered } callback', asyncSpec (next) ->
+        onRendered = jasmine.createSpy('{ onRendered } callback')
+        fixture('.target')
+        link = fixture('a[up-href="/path"][up-target=".target"]')
+
+        up.link.preload(link, { onRendered })
+
+        next ->
+          jasmine.respondWithSelector('.target')
+
+        next ->
+          expect(onRendered).not.toHaveBeenCalled()
+          expect(window).not.toHaveUnhandledRejections()
+
       describe 'for an [up-target] link', ->
 
         it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->

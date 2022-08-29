@@ -10,6 +10,9 @@ TODOs after V3
 - Do we want an up:fragment:hungry event?
 - Experiment with property mangling vs. public API
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
+- This always passes: expect(window).not.toHaveUnhandledRejections()
+  - All rejections seem to be delayed until the test ends
+  - Maybe a Jasmine issue?
 
 
 TODOs for V3
@@ -20,9 +23,6 @@ Render lifecycle
 ----------------
 
 - Check if we parse all lifecycle callbacks from links
-- guide.js:5137 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'onRendered')
-    at RenderJob.runResultCallbacks (guide.js:5137:28)
-    at RenderJob.execute (guide.js:5120:22)
 
 
 Various changes

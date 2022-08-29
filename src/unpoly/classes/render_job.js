@@ -19,21 +19,25 @@ up.RenderJob = class RenderJob {
       this.runResultCallbacks(result)
       return result
     } catch (error) {
-      if (error instanceof up.RenderResult) {
-        this.runResultCallbacks(error)
-      } else {
-        this.options.onError?.(error)
-      }
+      this.runResultCallbacks(error) || this.options.onError?.(error)
       throw error
     }
   }
 
   runResultCallbacks(result) {
-    // We call result.options.onRendered() instead of this.options.onRendered()
-    // as this will call the correct options.onRendered() or onFailRendered()
-    // depending on options.failOptions.
-    result.options.onRendered?.(result)
-    result.finished.then(result.options.onFinished)
+    // There may be multiple reasons why `result` is not an up.RenderResult:
+    //
+    // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
+    // (2) No fragment could be matches (return value is up.CannotMatch)
+    // (3) We're preloading (return value is up.Request)
+    if (result instanceof up.RenderResult) {
+      // We call result.options.onRendered() instead of this.options.onRendered()
+      // as this will call the correct options.onRendered() or onFailRendered()
+      // depending on options.failOptions.
+      result.options.onRendered?.(result)
+      result.finished.then(result.options.onFinished)
+      return true
+    }
   }
 
   get finished() {
