@@ -586,7 +586,9 @@ up.viewport = (function() {
     const layer = up.layer.get(options)
     const location = options.location || layer.location
     if (location) {
-      const focusCapsule = up.FocusCapsule.preserveCurrent()
+      const focusCapsule = up.FocusCapsule.preserve(layer)
+      // `focusCapsule` may be undefined if `layer` did not have focus.
+      // In that case we nullify a previously known capsule for `location`.
       layer.lastFocusCapsules.set(location, focusCapsule)
     }
   }
@@ -616,7 +618,7 @@ up.viewport = (function() {
     const location = options.location || layer.location
     const locationCapsule = options.layer.lastFocusCapsules.get(location)
     // The capsule returns `true` if we could rediscover and focus the previous element.
-    if (locationCapsule && locationCapsule.restore()) {
+    if (locationCapsule && locationCapsule.restore(layer)) {
       up.puts('up.viewport.restoreFocus()', 'Restored focus to "%s"', locationCapsule.target)
       return true
     } else {
@@ -939,7 +941,7 @@ up.viewport = (function() {
     tryFocus,
     makeFocusable,
     newStateCache,
-    focusedElementWithin
+    focusedElementWithin,
   }
 })()
 

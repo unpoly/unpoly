@@ -805,10 +805,12 @@ up.element = (function() {
   @internal
   */
   function unwrap(wrapper) {
-    const parent = wrapper.parentNode
-    const wrappedNodes = u.toArray(wrapper.childNodes)
-    u.each(wrappedNodes, wrappedNode => parent.insertBefore(wrappedNode, wrapper))
-    parent.removeChild(wrapper)
+    preservingFocus(function() {
+      const parent = wrapper.parentNode
+      const wrappedNodes = u.toArray(wrapper.childNodes)
+      u.each(wrappedNodes, wrappedNode => parent.insertBefore(wrappedNode, wrapper))
+      parent.removeChild(wrapper)
+    })
   }
 
   function wrapChildren(element) {
@@ -823,6 +825,17 @@ up.element = (function() {
 
   function isWrapper(element) {
     return element.matches('up-wrapper')
+  }
+
+  function preservingFocus(fn) {
+    const oldFocusElement = document.activeElement
+    try {
+      return fn()
+    } finally {
+      if (oldFocusElement && oldFocusElement !== document.activeElement) {
+        oldFocusElement.focus({ preventScroll: true })
+      }
+    }
   }
 
 //  ###**

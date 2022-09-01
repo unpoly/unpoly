@@ -16,7 +16,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
     switch (opt) {
       case 'keep':
         // Try to keep the focus from before the fragment update.
-        return this.restoreFocusFromCapsule()
+        return this.restoreLostFocus()
       case 'restore':
         // Restore the focus we saved at a previous visit the current location.
         return this.restorePreviousFocusForLocation()
@@ -52,13 +52,13 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
 
   focusSelector(selector) {
     let match = this.findSelector(selector)
-    if (match) {
-      return this.focusElement(match)
-    }
+    return this.focusElement(match)
   }
 
-  restoreFocusFromCapsule() {
-    return this.focusCapsule?.restore(this.fragment, PREVENT_SCROLL_OPTIONS)
+  restoreLostFocus() {
+    if (this.wasFocusLost()) {
+      return this.focusCapsule?.restore(this.layer, PREVENT_SCROLL_OPTIONS)
+    }
   }
 
   restorePreviousFocusForLocation() {
@@ -66,15 +66,17 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   autofocus() {
-    let autofocusElement = e.subtree(this.fragment, '[autofocus]')[0]
+    let autofocusElement = this.fragment && e.subtree(this.fragment, '[autofocus]')[0]
     if (autofocusElement) {
       return this.focusElement(autofocusElement)
     }
   }
 
   focusElement(element) {
-    up.focus(element, { force: true, ...PREVENT_SCROLL_OPTIONS })
-    return true
+    if (element) {
+      up.focus(element, { force: true, ...PREVENT_SCROLL_OPTIONS })
+      return true
+    }
   }
 
   focusHash() {
@@ -85,7 +87,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   wasFocusLost() {
-    return this.focusCapsule?.wasLost()
+    return !this.layer.hasFocus()
   }
 
 }

@@ -53,14 +53,17 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
 
   resolveCondition(condition) {
     if (condition === 'main') {
-      return up.fragment.contains(this.fragment, ':main')
+      return this.fragment && up.fragment.contains(this.fragment, ':main')
     }
   }
 
   findSelector(selector) {
     const lookupOpts = { layer: this.layer, origin: this.origin }
+
+    let matchWithinFragment = this.fragment && up.fragment.get(this.fragment, selector, lookupOpts)
     // Prefer selecting a descendant of @fragment, but if not possible search through @fragment's entire layer
-    let match = up.fragment.get(this.fragment, selector, lookupOpts) || up.fragment.get(selector, lookupOpts)
+    let match = matchWithinFragment || up.fragment.get(selector, lookupOpts)
+
     if (match) {
       return match
     } else {

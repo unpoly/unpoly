@@ -111,16 +111,30 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       target: this.target,
     })
 
-    const swapPromises = this.steps.map(step => this.executeStep(step))
+    // We swap fragments in reverse order for two reasons:
+    //
+    // (1) Only the first step will process focus. Other steps may cause focus loss
+    //     (when they're swapping a fragment with focus), causing an option like
+    //     { focus: 'main-if-lost' } to not satisfy the "lost" condition.
+    // (2) Only the first step will scroll. However other steps may change
+    //     the viewport height through element insertions.
+    this.steps.reverse()
 
-    this.renderResult.finished = this.finish(swapPromises)
+    const motionEndPromises = this.steps.map(step => this.executeStep(step))
+    this.renderResult.finished = this.finish(motionEndPromises)
+
+    // When rendering nothing we still want to proess { focus, scroll } options.
+    if (!this.steps.length) {
+      this.handleFocus(null, this.options)
+      this.handleScroll(null, this.options)
+    }
 
     // Don't wait for animations to finish.
     return this.renderResult
   }
 
-  async finish(swapPromises) {
-    await Promise.all(swapPromises)
+  async finish(motionEndPromises) {
+    await Promise.all(motionEndPromises)
 
     // If our layer was closed while animations are running, don't finish
     // and reject with an AbortError.
@@ -132,7 +146,11 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
   addToResult(fragment) {
     let newFragments = fragment.matches('up-wrapper') ? fragment.children : [fragment]
-    this.renderResult.fragments.push(...newFragments)
+
+    // Since we're executing steps in reverse order we prepend the new fragment
+    // to the beginning of the array. This way the elements will be in the order
+    // that the user named them in their { target }.
+    this.renderResult.fragments.unshift(...newFragments)
   }
 
   executeStep(step) {
@@ -192,7 +210,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             },
             scrollNew: () => {
               this.handleFocus(step.newElement, step)
-              // up.morph() expects { scrollNew } to return a promise.
               this.handleScroll(step.newElement, step)
             }
           }
@@ -220,7 +237,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
         return this.executeStep(wrapperStep).then(() => {
           e.unwrap(newWrapper)
-          // Unwrapping will destroy focus, so we need to handle it again.
+          // Unwrapping may destroy focus, so we need to handle it again.
           // Since we never inserted step.newElement (only its children), we handle focus on step.oldElement.
           this.handleFocus(step.oldElement, step)
         })
@@ -445,37 +462,37 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
       if ((step.placement === 'swap') || (step.placement === 'content')) {
         // We cannot animate scrolling when we're morphing between two elements.
-        step.scrollBehavior = 'auto'
+        // The placements 'append', 'prepend' animate (instead of morphing) and can allow scrolling.
+        step.scrollBehavior = 'instant'
 
         // Store the focused element's selector, scroll position and selection range in an up.FocusCapsule
         // for later restoration.
-        //
-        // We might need to preserve focus in a fragment that is not the first step.
-        // However, only a single step can include the focused element, or none.
-        this.focusCapsule ||= up.FocusCapsule.preserveWithin(step.oldElement, { supportLost: true })
       }
     })
+
+    this.focusCapsule = up.FocusCapsule.preserve(this.layer)
+
   }
 
-  handleFocus(fragment, step) {
+  handleFocus(fragment, options) {
     const fragmentFocus = new up.FragmentFocus({
-      ...step,
+      ...options,
       fragment,
       layer: this.layer,
       focusCapsule: this.focusCapsule,
       autoMeans: up.fragment.config.autoFocus,
     })
-    return fragmentFocus.process(step.focus)
+    return fragmentFocus.process(options.focus)
   }
 
-  handleScroll(fragment, step) {
+  handleScroll(fragment, options) {
     const scrolling = new up.FragmentScrolling({
-      ...step,
+      ...options,
       fragment,
       layer: this.layer,
       autoMeans: up.fragment.config.autoScroll
     })
-    return scrolling.process(step.scroll)
+    return scrolling.process(options.scroll)
   }
 
   hasAutoHistory() {
@@ -491,4 +508,3 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
 }
-

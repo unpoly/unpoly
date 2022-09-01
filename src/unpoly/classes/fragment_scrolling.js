@@ -43,15 +43,15 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   revealElement(element) {
-    up.reveal(element, this.attributes())
-    return true
+    if (element) {
+      up.reveal(element, this.attributes())
+      return true
+    }
   }
 
   revealSelector(selector) {
     let match = this.findSelector(selector)
-    if (match) {
-      return this.revealElement(match)
-    }
+    return this.revealElement(match)
   }
 
   revealLayer() {
@@ -63,11 +63,13 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   }
 
   reset() {
+    // With { around: undefined }, resetScroll() resets all viewports in { layer }
     up.viewport.resetScroll({ ...this.attributes(), around: this.fragment })
     return true
   }
 
   restore() {
+    // With { around: undefined }, restoreScroll() restores all viewports in { layer }
     return up.viewport.restoreScroll({ ...this.attributes(), around: this.fragment })
   }
 }

@@ -3830,7 +3830,7 @@ describe 'up.fragment', ->
               scrollBehavior: 'smooth'
             )
             next =>
-              expect(@revealOptions.scrollBehavior).toEqual('auto')
+              expect(@revealOptions.scrollBehavior).toEqual('instant')
 
         describe 'with { scroll: "restore" } option', ->
 
@@ -3860,6 +3860,28 @@ describe 'up.fragment', ->
             next => up.render('.element', url: '/foo', scroll: 'restore', history: true)
             next => respond()
             next => expect($viewport.scrollTop()).toBeAround(65, 1)
+
+        describe 'when rendering nothing', ->
+
+          mockRevealBeforeEach()
+
+          it 'still processes a { scroll } option', ->
+            fixture('.other', text: 'other')
+
+            fixture('main', text: 'main')
+            expect('main').not.toBeFocused()
+
+            up.render(':none', scroll: 'main', document: '<div></div>')
+
+            expect(@revealedText).toEqual ['main']
+
+          it 'does not crash with { scroll: "target" }', (done) ->
+            promise = up.render(':none', scroll: 'target', document: '<div></div>')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toBe('fulfilled')
+                done()
 
       describe 'execution of scripts', ->
 
@@ -4293,6 +4315,20 @@ describe 'up.fragment', ->
             next =>
               expect('.foo-bar').toBeFocused()
 
+        describe 'with { focus: "main" }', ->
+
+          it 'focuses the main element', asyncSpec (next) ->
+            main = fixture('main')
+            e.affix(main, 'form.foo-bar')
+            up.render focus: 'main', fragment: """
+              <form class='foo-bar'>
+                <input>
+              </form>
+            """
+
+            next =>
+              expect('main').toBeFocused()
+
         describe 'with { focus: "hash" }', ->
 
           it 'focuses the target of a URL #hash', asyncSpec (next) ->
@@ -4515,6 +4551,23 @@ describe 'up.fragment', ->
             next ->
               expect('.container').toBeFocused()
 
+          it 'focuses the target if the focus was lost within a secondary fragment in a multi-fragment update', asyncSpec (next) ->
+            element1 = fixture('#element1[tabindex=0]')
+            element2 = fixture('#element2[tabindex=0]')
+            element2.focus()
+
+            expect(element2).toBeFocused()
+
+            up.render '#element1, #element2', focus: 'target-if-lost', document: """
+              <div>
+                <div id="element1" tabindex='0'>new element1</div>
+                <div id="element2" tabindex='0'>new element2</div>
+              </div>
+            """
+
+            next ->
+              expect('#element1').toBeFocused()
+
           it 'does not focus the target if an element outside the updating fragment was focused', asyncSpec (next) ->
             container = fixture('.container')
             child = e.affix(container, '.child')
@@ -4639,6 +4692,23 @@ describe 'up.fragment', ->
               expect('.focused').toHaveText('new focused')
               expect('.focused').toBeFocused()
 
+        describe 'when rendering nothing', ->
+
+          it 'still processes a { focus } option', ->
+            fixture('main')
+            expect('main').not.toBeFocused()
+
+            up.render(':none', focus: 'main', document: '<div></div>')
+
+            expect('main').toBeFocused()
+
+          it 'does not crash with { focus: "target" }', (done) ->
+            promise = up.render(':none', focus: 'target', document: '<div></div>')
+
+            u.task ->
+              promiseState(promise).then (result) ->
+                expect(result.state).toBe('fulfilled')
+                done()
 
       describe 'with { guardEvent } option', ->
 

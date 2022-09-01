@@ -742,5 +742,11 @@ up.Layer = class Layer extends up.Record {
   [u.isEqual.key](other) {
     return (this.constructor === other.constructor) && (this.element === other.element)
   }
+
+  hasFocus() {
+    let focusedElement = document.activeElement
+    return focusedElement !== document.body && this.element.contains(focusedElement)
+  }
+
 }
 

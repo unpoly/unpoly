@@ -13,6 +13,7 @@ TODOs after V3
 - This always passes: expect(window).not.toHaveUnhandledRejections()
   - All rejections seem to be delayed until the test ends
   - Maybe a Jasmine issue?
+- Can we get rid of the afterMeasure() callback?
 
 
 TODOs for V3
@@ -27,9 +28,6 @@ Render lifecycle
 
 Various changes
 ---------------
-
-- FragmentFocus: Suffix if-lost does not work for secondary fragments?
-  - It *may*, since the FocusCapsule is created for the oldElement that has focus
 
 
 Offline / rework caching
@@ -433,6 +431,7 @@ Decisions
       - [up-highlight]
       - [up-locus]
       - [up-present]
+      - [up-light]
       - [up-shine]
       - [up-state]   (seltsam: up-state=".element")
       - [up-point]
