@@ -27,11 +27,13 @@ There are some exceptions when links will still make a full page load under this
 
 ### Following all links on `mousedown`
 
-To follow all links on `mousedown` instead of `click` without an [`[up-instant]`](/a-up-instant) attribute:
+To follow links on `mousedown` instead of `click` without an [`[up-instant]`](/a-up-instant) attribute:
 
 ```js
 up.link.config.instantSelectors.push('a[href]')
 ```
+
+Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an [`[up-follow]`](/a-up-follow) attribute or by configuring `up.link.config.followSelectors`.
 
 There are some exceptions when links still activate on `click` under this setting:
 

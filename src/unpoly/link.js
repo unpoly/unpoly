@@ -139,6 +139,9 @@ up.link = (function() {
     You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
     See [Handling all links and forms](/handling-everything).
 
+    Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an
+    [`[up-follow]`](/a-up-follow) attribute or by configuring `up.link.config.followSelectors`.
+
   @param {Array<string>} config.noInstantSelectors
     Exceptions to `config.followSelectors`.
 
