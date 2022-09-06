@@ -186,6 +186,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         confirm: false,
         feedback: false,
         abort: false,
+        // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
 
       // A well-behaved server will respond with "304 Not Modified" if the reload

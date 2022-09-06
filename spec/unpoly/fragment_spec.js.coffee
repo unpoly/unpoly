@@ -5355,11 +5355,11 @@ describe 'up.fragment', ->
 
             next ->
               expect('.target').toHaveText('cached text')
-              expect(up.network.isBusy()).toBe(true)
 
               expect(onRendered.calls.count()).toBe(1)
               expect(onRevalidated.calls.count()).toBe(0)
 
+              expect(up.network.isBusy()).toBe(true)
               jasmine.respondWithSelector('.target', text: 'verified text')
 
             next ->
@@ -5368,6 +5368,24 @@ describe 'up.fragment', ->
 
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('verified text')
+
+          it 'does not re-emit a { guardEvent } for the second render pass', asyncSpec (next) ->
+            guardEventListener = jasmine.createSpy('guard event listener')
+            guardEvent = up.event.build('my:guard')
+            up.on('my:guard', guardEventListener)
+
+            up.render('.target', { url: '/cached-path', cache: true, guardEvent })
+
+            next ->
+              expect('.target').toHaveText('cached text')
+              expect(guardEventListener.calls.count()).toBe(1)
+
+              expect(up.network.isBusy()).toBe(true)
+              jasmine.respondWithSelector('.target', text: 'verified text')
+
+            next ->
+              expect('.target').toHaveText('verified text')
+              expect(guardEventListener.calls.count()).toBe(1)
 
           it 'fulfills up.render().finished promise with the cached up.RenderResult if revalidation responded with 304 Not Modified'
 

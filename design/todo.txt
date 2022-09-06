@@ -131,11 +131,6 @@ This way we can keep using cached content if we're offline.
   - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
   - Add up.cache.evict(pattern)
 
-- Revalidation logic uses no/wrong guardEvents
-  - Delete existing guardEvents when revalidating
-  - Test that original guard event is not fired another time
-
-
 
 Docs
 ----
