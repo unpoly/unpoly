@@ -1012,6 +1012,32 @@ describe 'up.link', ->
           next =>
             expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
+      describe 'aborting', ->
+
+        it 'is not abortable by default', asyncSpec (next) ->
+          link = fixture('a[href="/path"][up-target=".target"]')
+          up.link.preload(link)
+
+          next ->
+            expect(up.network.isBusy()).toBe(true)
+
+            up.fragment.abort()
+
+          next ->
+            expect(up.network.isBusy()).toBe(true)
+
+        it 'is abortable with { abortable: true }', asyncSpec (next) ->
+          link = fixture('a[href="/path"][up-target=".target"]')
+          up.link.preload(link, abortable: true)
+
+          next ->
+            expect(up.network.isBusy()).toBe(true)
+
+            up.fragment.abort()
+
+          next ->
+            expect(up.network.isBusy()).toBe(false)
+
   describe 'unobtrusive behavior', ->
 
     describe 'a[up-target]', ->

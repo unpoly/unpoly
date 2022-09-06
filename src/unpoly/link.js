@@ -503,7 +503,7 @@ up.link = (function() {
     The element or selector whose destination should be preloaded.
   @param {Object} options
     See options for `up.follow()`.
-  @param {boolean} [options.abortable=true]
+  @param {boolean} [options.abortable=false]
     Whether the preload request may be aborted when the user [navigates](/navigation)
     or when `up.fragment.abort()` is called.
 
@@ -523,7 +523,12 @@ up.link = (function() {
     }
 
     const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})
-    return follow(link, { ...options, guardEvent, preload: true })
+    return follow(link, {
+      abortable: false,
+      ...options,
+      guardEvent,
+      preload: true
+    })
   }
 
   function shouldPreload() {
