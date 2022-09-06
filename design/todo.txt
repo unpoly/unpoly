@@ -40,6 +40,9 @@ This way we can keep using cached content if we're offline.
 ### TODOs
 
 - Update up.Request.Cache
+  - We do not need to support the concept of "stale" here.
+    - The cache does not differentiate between stale and fresh entries at all.
+    - All that "stale" does is trigger revalidation in up.fragment
   - Rename #expiry => #evictAge
   - Introduce up.network.config.cacheEvictAge for use in Request.Cache
     - Default is 90 minutes
@@ -48,12 +51,14 @@ This way we can keep using cached content if we're offline.
   - With our long cache eviction background tabs could hog a lot of memory
     - Have a slow timeout that evicts old entries
       - Every 10 minutes would be slower than our test suite runs
-  - We should really use the age of the response, not the time the request was cached (entry#timestamp in the current implementation)
+      - Or reset interval with Cache#reset()
+  - Force-evict by LRU
+    - LRU timestamp is updated by #get()
+  - All mentions of "clear" should be renamed to "evict"
+  - MAYBE: We should really use the age of the response, not the time the request was cached (entry#timestamp in the current implementation)
     - have up.Request#responseAge which is 0 while there is no response, then delegates to up.Response#age
     - For this we need to track our { response } and also delegate in #followState(otherRequest)
-  - Force-evict by LRU
-    - Updates by #get()
-  - We do not need to support the concept of "stale" here
+    - Or just use entry#timestamp
 
 - Rename up.network.config.cacheExpiry to up.network.config.cacheExpireAge
   - New default is 15 seconds (down from 5 minutes in Unpoly 2.6)
@@ -83,19 +88,20 @@ This way we can keep using cached content if we're offline.
   - Rename up.render({ clearCache }) to { expireCache })
   - Rename up.request({ clearCache }) to { expireCache })
 
+- unpoly-rails
+  - remove up.cache.keep
+  - Rename up.cache.clear to up.ache.expire
+
 - Update docs for confusing network config props
   - autoCache(request)      autoCache            "should we use the cache for a request with { cache: 'auto' }?"
   - expireCache(request)    "should we expire the entire cache or a pattern`"                (used to be clearCache)
   - cacheExpireAge          "how long is a cached response fresh"?                           (used to be cacheExpiry)
   - cacheEvictAge           "when do we remove an response from the cache entirely?"
 
-- Rework up.Request
-  - Rename up:request:fatal to up:request:offline
-    - No { retry } function here. We could offer this one day, but then we need many options from https://www.npmjs.com/package/axios-retry
-
 - Imperative eviction
   - Introduce X-Up-Evict-Cache
   - Introduce up.cache.evict(pattern)
+    - This delegates to up.Cache like up.cache.clear() used to do
 
 - Test that being offline will still cause a stale cached response to render
   - Only the revalidation should fail with up:request:offline
@@ -107,16 +113,13 @@ This way we can keep using cached content if we're offline.
     - This must be a RenderOptions::PREFLIGHT_KEY
   - Docs at [up-follow] and up.render()
 
-- New topic page for "offline"
-  - Document how to build an "you're offline. retry?" toast:
-    - <a up-follow up-offline="if (confirm('Offline, retry?') event.retry()">
-  - Explain that the initial request requires a service worker like the one from UpUp (no relation)
-
 - up.link.cacheState(link)
-  - Returns null, "fresh" or "stale"
-  - Or do we need additional properties { response }, { clearAge }, { staleAge }?
-  - Or just return the up.Response? It already has the properties above :)
-  - What do we return when the request is in flight? => null
+  - Return any known up.Respone for the given link
+    - It already has useful properties { evictAge }, { expireAge }?
+    - We may eventually offer up.Response#revalidate()
+  - Return null while the request is in flight
+  - It will be hard to do implement this without actually calling up.link.follow() and up.render(), since e.g. the target choice is hard and part of the cache key
+    - Make this an early return in up.Change.FromURL, like with options.preload
 
 - Update up.link.preload()
   - up.link.preload() should not abortable by default
@@ -129,11 +132,8 @@ This way we can keep using cached content if we're offline.
   - Add up.cache.evict(pattern)
 
 - Revalidation logic uses no/wrong guardEvents
-  - Test that original guard event is not fired another time
   - Delete existing guardEvents when revalidating
-  - Use a new guardEvent up:fragment:revalidate
-    - This one is preventable
-  - When done emit an event up:fragment:revalidated with the new up.RenderResult
+  - Test that original guard event is not fired another time
 
 
 
@@ -201,6 +201,17 @@ Docs
 - Document that X-Up-Validate may contain :unknown
 - Explain and test [up-validate] usage for radio buttons
 - [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
+
+
+### Offline
+
+- New topic page for "offline"
+- Explain how Unpoly reacts when accessing an offline resource
+  - Stale content is updated, but not revalidated
+  - Content frame is kept
+- Document how to build an "you're offline. retry?" toast:
+  - <a up-follow up-offline="if (confirm('Offline, retry?') event.retry()">
+- Explain that the initial request requires a service worker like the one from UpUp (no relation)
 
 
 ### Other docs
@@ -458,3 +469,6 @@ Decisions
     - VM481:1 parse: 1091.6689453125 ms
     => It takes 0.1 ms
     => This is not a performance issue
+- Find a scenario where it's better to read the etag from [etag] instead of response.etag
+  - This should not matter for revalidation after a swap
+  - When reloading an arbitrary fragment, an earlier response may not be available
