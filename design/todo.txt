@@ -14,6 +14,14 @@ TODOs after V3
   - All rejections seem to be delayed until the test ends
   - Maybe a Jasmine issue?
 - Can we get rid of the afterMeasure() callback?
+- up.link.cacheState(link)
+  - Return any known up.Respone for the given link
+    - It already has useful properties { evictAge }, { expireAge }?
+    - We may eventually offer up.Response#revalidate()
+  - Return null while the request is in flight
+    => Or do we want an up.CacheState that also returns here?
+  - It will be hard to do implement this without actually calling up.link.follow() and up.render(), since e.g. the target choice is hard and part of the cache key
+    - Make this an early return in up.Change.FromURL, like with options.preload
 
 
 TODOs for V3
@@ -38,6 +46,9 @@ Also we could get away with *never* cleaning the cache (just expiration).
 This way we can keep using cached content if we're offline.
 
 ### TODOs
+
+- Test if browsers honor cache keys for XHR requests
+  - We can override it for fetch()
 
 - Update up.Request.Cache
   - We do not need to support the concept of "stale" here.
@@ -88,10 +99,6 @@ This way we can keep using cached content if we're offline.
   - Rename up.render({ clearCache }) to { expireCache })
   - Rename up.request({ clearCache }) to { expireCache })
 
-- unpoly-rails
-  - remove up.cache.keep
-  - Rename up.cache.clear to up.ache.expire
-
 - Update docs for confusing network config props
   - autoCache(request)      autoCache            "should we use the cache for a request with { cache: 'auto' }?"
   - expireCache(request)    "should we expire the entire cache or a pattern`"                (used to be clearCache)
@@ -112,19 +119,6 @@ This way we can keep using cached content if we're offline.
   - [up-on-offline], { onOffline }
     - This must be a RenderOptions::PREFLIGHT_KEY
   - Docs at [up-follow] and up.render()
-
-- up.link.cacheState(link)
-  - Return any known up.Respone for the given link
-    - It already has useful properties { evictAge }, { expireAge }?
-    - We may eventually offer up.Response#revalidate()
-  - Return null while the request is in flight
-  - It will be hard to do implement this without actually calling up.link.follow() and up.render(), since e.g. the target choice is hard and part of the cache key
-    - Make this an early return in up.Change.FromURL, like with options.preload
-
-- Update up.link.preload()
-  - up.link.preload() should not abortable by default
-    - Document { abortable: false } option
-  - Test that up.link.preload() will not preload a resource that is already cached
 
 - Update unpoly-rails
   - Remove up.cache.keep
