@@ -65,8 +65,8 @@ This way we can keep using cached content if we're offline.
       - Or reset interval with Cache#reset()
   - Force-evict by LRU
     - LRU timestamp is updated by #get()
-  - All mentions of "clear" should be renamed to "evict"
-  - MAYBE: We should really use the age of the response, not the time the request was cached (entry#timestamp in the current implementation)
+  - Inside up.Request.Cache all mentions of "clear" should be renamed to "evict"
+  - MAYBE: To judge the age of a response, we should really use the age of the response, not the time the request was cached (entry#timestamp in the current implementation)
     - have up.Request#responseAge which is 0 while there is no response, then delegates to up.Response#age
     - For this we need to track our { response } and also delegate in #followState(otherRequest)
     - Or just use entry#timestamp
@@ -77,9 +77,8 @@ This way we can keep using cached content if we're offline.
 
 - New response props
   - @internal up.Response#expireAge (returns up.network.config.cacheExpireAge(response)
-  - @internal up.Response#evictAge  (returns up.network.config.cacheEvictAge(response)
   - @stable up.Response#fresh (#age <= #expireAge)
-  - @stable up.Response#stale (#age <= #evictAge)
+  - @stable up.Response#stale (#age >= #expireAge)
 
 - Revalidate on stale responses
   - Keep up.fragment.config.autoRevalidate
@@ -92,7 +91,7 @@ This way we can keep using cached content if we're offline.
   - Rework X-Up-Clear-Cache
     - Rename to X-Up-Expire-Cache
     - Migrate old header
-    - Remove X-Up-Expire-Clache: false
+    - Remove X-Up-Expire-Clache: false ("up.cache.keep")
   - Rename up.network.config.clearCache to up.network.config.expireCache
   - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
   - Rename [up-clear-cache] to [up-expire-cache]
