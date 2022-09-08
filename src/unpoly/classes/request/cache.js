@@ -6,8 +6,8 @@ up.Request.Cache = class Cache extends up.Cache {
     return up.network.config.cacheSize
   }
 
-  expiryMillis() {
-    return up.network.config.cacheExpiry
+  evictAge() {
+    return up.network.config.cacheEvictAge
   }
 
   normalizeStoreKey(request) {

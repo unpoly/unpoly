@@ -681,7 +681,7 @@ describe('up.network', function() {
       describe('with { cache } option', function() {
 
         it('caches server responses for the configured duration', asyncSpec(function(next) {
-          up.network.config.cacheExpiry = 200; // 1 second for test
+          up.network.config.cacheEvictAge = 200; // 1 second for test
 
           const responses = []
           const trackResponse = response => responses.push(response.text)
@@ -754,8 +754,8 @@ describe('up.network', function() {
           expect({url: '/url#bar'}).toBeCached()
         })
 
-        it("does not cache responses if config.cacheExpiry is 0", asyncSpec(function(next) {
-          up.network.config.cacheExpiry = 0
+        it("does not cache responses if config.cacheEvictAge is 0", asyncSpec(function(next) {
+          up.network.config.cacheEvictAge = 0
           next(() => up.request({url: '/foo', cache: true}))
           next(() => up.request({url: '/foo', cache: true}))
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
@@ -770,7 +770,7 @@ describe('up.network', function() {
 
         it('does not limit the number of cache entries if config.cacheSize is undefined')
 
-        it('never discards old cache entries if config.cacheExpiry is undefined')
+        it('never discards old cache entries if config.cacheEvictAge is undefined')
 
         it('respects a config.cacheSize setting', asyncSpec(function(next) {
             up.network.config.cacheSize = 2

@@ -267,7 +267,7 @@ describe 'up.link', ->
 
           up.fragment.config.navigateOptions.history = true
 
-          up.network.config.cacheExpiry = 0
+          up.network.config.cacheEvictAge = 0
 
           waitForBrowser = 150
 
@@ -338,7 +338,7 @@ describe 'up.link', ->
 
           up.fragment.config.navigateOptions.history = true
 
-          up.network.config.cacheExpiry = 0
+          up.network.config.cacheEvictAge = 0
 
           waitForBrowser = 150
 

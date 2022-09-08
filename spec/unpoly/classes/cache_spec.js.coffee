@@ -23,7 +23,7 @@ describe 'up.Cache', ->
       jasmine.clock().install()
       jasmine.clock().mockDate(new Date())
 
-      store = new up.Cache(expiry: 100)
+      store = new up.Cache(evictAge: 100)
       store.set('foo', 'value of foo')
 
       jasmine.clock().tick(80)

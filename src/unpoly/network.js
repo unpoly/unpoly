@@ -64,10 +64,10 @@ up.network = (function() {
 
     If the size is exceeded, the oldest responses will be dropped from the cache.
 
-  @param {number} [config.cacheExpiry=300000]
-    The number of milliseconds until a cached response expires.
+  @param {number} [config.cacheEvictAge=5_400_000]
+    The number of milliseconds until a cached response is discarded.
 
-    Defaults to 5 minutes.
+    Defaults to 90 minutes.
 
   @param {number} [config.badDownlink=0.6]
     The connection's minimum effective bandwidth estimate required
@@ -190,6 +190,7 @@ up.network = (function() {
     wrapMethod: true,
     cacheSize: 70,
     cacheExpiry: 1000 * 60 * 15,
+    cacheEvictAge: 1000 * 60 * 90,
     // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     badDownlink: 0.6,

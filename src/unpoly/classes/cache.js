@@ -11,7 +11,7 @@ up.Cache = class Cache {
   @param {number|Function(): number} [config.size]
     Maximum number of cache entries.
     Set to `undefined` to not limit the cache size.
-  @param {number|Function(): number} [config.expiry]
+  @param {number|Function(): number} [config.evictAge]
     The number of milliseconds after which a cache entry
     will be discarded.
   @param {Function(entry): string} [config.key]
@@ -36,8 +36,8 @@ up.Cache = class Cache {
     return u.evalOption(this.config.size)
   }
 
-  expiryMillis() {
-    return u.evalOption(this.config.expiry)
+  evictAge() {
+    return u.evalOption(this.config.evictAge)
   }
 
   normalizeStoreKey(key) {
@@ -49,7 +49,9 @@ up.Cache = class Cache {
   }
 
   isEnabled() {
-    return (this.maxSize() !== 0) && (this.expiryMillis() !== 0)
+    // If the user has a maximum size or evict age of zero,
+    // we no longer store *any* entries.
+    return (this.maxSize() !== 0) && (this.evictAge() !== 0)
   }
 
   clear() {
@@ -63,7 +65,7 @@ up.Cache = class Cache {
   each(fn) {
     u.each(this.keys(), key => {
       const entry = this.store.get(key)
-      fn(key, entry.value, entry.timestamp)
+      fn(key, entry.value, entry.createdAt)
     })
   }
 
@@ -73,11 +75,11 @@ up.Cache = class Cache {
     }
 
     let oldestKey
-    let oldestTimestamp
-    this.each(function(key, request, timestamp) {
-      if (!oldestTimestamp || (oldestTimestamp > timestamp)) {
+    let oldestCreatedAt
+    this.each(function(key, request, createdAt) {
+      if (!oldestCreatedAt || (oldestCreatedAt > createdAt)) {
         oldestKey = key
-        oldestTimestamp = timestamp
+        oldestCreatedAt = createdAt
       }
     })
 
@@ -92,14 +94,10 @@ up.Cache = class Cache {
   }
 
   alias(oldKey, newKey) {
-    const value = this.get(oldKey, {silent: true})
+    const value = this.get(oldKey)
     if (u.isDefined(value)) {
       this.set(newKey, value)
     }
-  }
-
-  timestamp() {
-    return (new Date()).valueOf()
   }
 
   set(key, value) {
@@ -107,7 +105,7 @@ up.Cache = class Cache {
       this.makeRoomForAnotherEntry()
       const storeKey = this.normalizeStoreKey(key)
       const entry = {
-        timestamp: this.timestamp(),
+        createdAt: new Date(),
         value
       }
       this.store.set(storeKey, entry)
@@ -119,11 +117,11 @@ up.Cache = class Cache {
     this.store.remove(storeKey)
   }
 
-  isFresh(entry) {
-    const millis = this.expiryMillis()
-    if (millis) {
-      const timeSinceTouch = this.timestamp() - entry.timestamp
-      return timeSinceTouch < millis
+  isUsable(entry) {
+    const evictAge = this.evictAge()
+    if (evictAge) {
+      const timeSinceTouch = new Date() - entry.createdAt
+      return timeSinceTouch < evictAge
     } else {
       return true
     }
@@ -133,7 +131,7 @@ up.Cache = class Cache {
     const storeKey = this.normalizeStoreKey(key)
     let entry = this.store.get(storeKey)
     if (entry) {
-      if (this.isFresh(entry)) {
+      if (this.isUsable(entry)) {
         return entry.value
       } else {
         this.remove(key)
