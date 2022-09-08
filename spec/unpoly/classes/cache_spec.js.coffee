@@ -23,7 +23,7 @@ describe 'up.Cache', ->
       jasmine.clock().install()
       jasmine.clock().mockDate(new Date())
 
-      store = new up.Cache(expiry: 100, logPrefix: 'cache')
+      store = new up.Cache(expiry: 100)
       store.set('foo', 'value of foo')
 
       jasmine.clock().tick(80)
@@ -36,7 +36,7 @@ describe 'up.Cache', ->
 
     it 'removes the oldest item if setting a new item would exceed the cache size', ->
       jasmine.clock().install()
-      store = new up.Cache(size: 2, logPrefix: 'cache')
+      store = new up.Cache(size: 2)
 
       store.set('foo', 'value of foo')
       jasmine.clock().tick(10)
