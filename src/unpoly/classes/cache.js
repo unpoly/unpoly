@@ -14,8 +14,6 @@ up.Cache = class Cache {
   @param {number|Function(): number} [config.expiry]
     The number of milliseconds after which a cache entry
     will be discarded.
-  @param {string} [config.logPrefix]
-    A prefix for log entries printed by this cache object.
   @param {Function(entry): string} [config.key]
     A function that takes an argument and returns a string key
     for storage. If omitted, `toString()` is called on the argument.
@@ -58,17 +56,10 @@ up.Cache = class Cache {
     this.store.clear()
   }
 
-  log(...args) {
-    if (this.config.logPrefix) {
-      args[0] = `[${this.config.logPrefix}] ${args[0]}`
-      up.puts('up.Cache', ...args)
-    }
-  }
-
   keys() {
     return this.store.keys()
   }
-    
+
   each(fn) {
     u.each(this.keys(), key => {
       const entry = this.store.get(key)
@@ -99,7 +90,7 @@ up.Cache = class Cache {
     const maxSize = this.maxSize()
     return !maxSize || (this.size() < maxSize)
   }
-      
+
   alias(oldKey, newKey) {
     const value = this.get(oldKey, {silent: true})
     if (u.isDefined(value)) {
@@ -138,19 +129,15 @@ up.Cache = class Cache {
     }
   }
 
-  get(key, options = {}) {
+  get(key) {
     const storeKey = this.normalizeStoreKey(key)
     let entry = this.store.get(storeKey)
     if (entry) {
       if (this.isFresh(entry)) {
-        if (!options.silent) { this.log("Cache hit for '%s'", key); }
         return entry.value
       } else {
-        if (!options.silent) { this.log("Discarding stale cache entry for '%s'", key); }
         this.remove(key)
       }
-    } else {
-      if (!options.silent) { this.log("Cache miss for '%s'", key); }
     }
   }
 }
