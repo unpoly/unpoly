@@ -811,7 +811,7 @@ up.layer = (function() {
     The new overlay's [context](/up.layer.context) object, encoded as JSON.
 
   @param [up-position]
-    The position of the popup relative to the `{ origin }` element that opened
+    The position of the popup relative to the `origin` element that opened
     the overlay.
 
     Supported values are `top`,  `right`,  `bottom` and  `left`.
@@ -819,7 +819,7 @@ up.layer = (function() {
     See [popup position](/customizing-overlays#popup-position).
 
   @param [up-align]
-    The alignment of the popup within its `{ position }`.
+    The alignment of the popup within its `position`.
 
     Supported values are `top`,  `right`, `center`, `bottom` and  `left`.
 
