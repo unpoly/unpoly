@@ -296,7 +296,7 @@ describe 'up.history', ->
             $('.viewport').scrollTop(50)
 
             # Emulate a cache miss
-            up.layer.root.lastScrollTops.clear()
+            up.layer.root.lastScrollTops.evict()
 
             history.back()
 

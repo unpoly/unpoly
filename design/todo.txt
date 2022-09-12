@@ -1,6 +1,7 @@
 TODOs after V3
 ==============
 
+- [up-disable-for="..."] [up-enable-for="..."]
 - up:feedback:start / up:feedback:stop
   - On the layer, not an individual element
   - Needs to have reference to origin and targetElements
@@ -47,80 +48,13 @@ This way we can keep using cached content if we're offline.
 
 ### TODOs
 
-- Test if browsers honor cache keys for XHR requests
-  - We can override it for fetch()
-
-- Update up.Request.Cache
-  - We do not need to support the concept of "stale" here.
-    - The cache does not differentiate between stale and fresh entries at all.
-    - All that "stale" does is trigger revalidation in up.fragment
-  - Rename #expiry => #evictAge
-  - Introduce up.network.config.cacheEvictAge for use in Request.Cache
-    - Default is 90 minutes
-    - Maybe have a lower default when navigator.deviceMemory is known and < 2 GB
-  - Evict entries when >= up.network.config.cacheEvictAge
-  - With our long cache eviction background tabs could hog a lot of memory
-    - Have a slow timeout that evicts old entries
-      - Every 10 minutes would be slower than our test suite runs
-      - Or reset interval with Cache#reset()
-  - Force-evict by LRU
-    - LRU timestamp is updated by #get()
-  - Inside up.Request.Cache all mentions of "clear" should be renamed to "evict"
-  - MAYBE: To judge the age of a response, we should really use the age of the response, not the time the request was cached (entry#timestamp in the current implementation)
-    - have up.Request#responseAge which is 0 while there is no response, then delegates to up.Response#age
-    - For this we need to track our { response } and also delegate in #followState(otherRequest)
-    - Or just use entry#timestamp
-
-- Rename up.network.config.cacheExpiry to up.network.config.cacheExpireAge
-  - New default is 15 seconds (down from 5 minutes in Unpoly 2.6)
-  - Some users have reduced this to 10 seconds or so
-
-- New response props
-  - @internal up.Response#expireAge (returns up.network.config.cacheExpireAge(response)
-  - @stable up.Response#fresh (#age <= #expireAge)
-  - @stable up.Response#stale (#age >= #expireAge)
-
-- Revalidate on stale responses
-  - Keep up.fragment.config.autoRevalidate
-    - This way users can easily excempt a troublesome request from auto-revalidation, e.g. a blank form
-    - It can now default to (response) => response.stale
-      - We do keep revalidating with reduced requests. Bad connections shouldn't impact correctness.
-      - We no longer need to check whether a response was cached, yet?
-
-- "Clearing" the cache is now "expiring" the cache
-  - Rework X-Up-Clear-Cache
-    - Rename to X-Up-Expire-Cache
-    - Migrate old header
-    - Remove X-Up-Expire-Clache: false ("up.cache.keep")
-  - Rename up.network.config.clearCache to up.network.config.expireCache
-  - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
-  - Rename [up-clear-cache] to [up-expire-cache]
-  - Rename up.render({ clearCache }) to { expireCache })
-  - Rename up.request({ clearCache }) to { expireCache })
-
-- Update docs for confusing network config props
-  - autoCache(request)      autoCache            "should we use the cache for a request with { cache: 'auto' }?"
-  - expireCache(request)    "should we expire the entire cache or a pattern`"                (used to be clearCache)
-  - cacheExpireAge          "how long is a cached response fresh"?                           (used to be cacheExpiry)
-  - cacheEvictAge           "when do we remove an response from the cache entirely?"
-
-- Imperative eviction
-  - Introduce X-Up-Evict-Cache
-  - Introduce up.cache.evict(pattern)
-    - This delegates to up.Cache like up.cache.clear() used to do
-
 - Test that being offline will still cause a stale cached response to render
   - Only the revalidation should fail with up:request:offline
   - { onFinished } callback should not fire (It should already work that way)
   - { onOffline } callback should still fire
 
-- Ensure we have all the render callbacks
-  - [up-on-offline], { onOffline }
-    - This must be a RenderOptions::PREFLIGHT_KEY
-  - Docs at [up-follow] and up.render()
-
 - Update unpoly-rails
-  - Remove up.cache.keep
+  - Change up.cache.keep to up.cache.expire(false) and X-Up-Expire-Cache: false
   - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
   - Add up.cache.evict(pattern)
 
@@ -133,13 +67,22 @@ Docs
 - Document up.render().finished
 - Document all lifecycle callbacks for up.render() (JS) and a[up-follow] (HTML)
 - Possibly new page for lifecycle chart
+- up.network.config.fail
 
 
-### New cache
+### New cache / revalidation
 
-- up:fragment:offline
-  - experimental
-  - event.retry(options)
+- New doc page explaining caching
+  - On by default
+  - Cache revalidation
+  - expire vs. evict
+  - Migrate existing text in up.network (h2 "Caching")
+  - Migrate existing text in up.request (there are links to up.request#caching)
+- up.render({ cache })
+- up.render({ cache: 'auto' })
+- up.request({ cache })
+- up.request({ cache: 'auto' })
+- a[up-follow][up-cache="auto"]
 
 
 ### Target derivation
@@ -169,7 +112,7 @@ Docs
   - [up-autosubmit] needs a params note saying that that attributes for [up-watch] may be used
   - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
   - Explain that they can be set either on the form or on an input
-- New obserrve options are not documented everywhere
+- New observe options are not documented everywhere
   - form[up-autosubmit]
   - input[up-autsubmit]
   - input[up-watch]
@@ -194,6 +137,14 @@ Docs
 ### Offline
 
 - New topic page for "offline"
+- a[up-follow][up-on-offline]
+- up.render({ onOffline })
+- up.request({ onOffline })
+
+- up:fragment:offline
+  - experimental
+  - event.retry(options)
+    - Is there a test for that?
 - Explain how Unpoly reacts when accessing an offline resource
   - Stale content is updated, but not revalidated
   - Content frame is kept
@@ -460,3 +411,8 @@ Decisions
 - Find a scenario where it's better to read the etag from [etag] instead of response.etag
   - This should not matter for revalidation after a swap
   - When reloading an arbitrary fragment, an earlier response may not be available
+- Test if browsers honor cache keys for XHR requests
+  - Yes, it honors Cache-Control: max-age=...
+  - We can override it for fetch()
+- With our long cache eviction background tabs could hog a lot of memory
+  => No, since we also limit the number of cache entries to the cache never exceeds some MB

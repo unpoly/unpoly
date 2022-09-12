@@ -17,6 +17,7 @@ require('./unpoly/errors/offline')
 
 require('./unpoly/classes/record')
 require('./unpoly/classes/config')
+require('./unpoly/classes/log_config')
 require('./unpoly/classes/cache')
 require('./unpoly/classes/rect')
 
@@ -77,8 +78,6 @@ require('./unpoly/classes/response')
 require('./unpoly/classes/response_doc')
 require('./unpoly/classes/reveal_motion')
 require('./unpoly/classes/selector')
-require('./unpoly/classes/store/memory')
-require('./unpoly/classes/store/session')
 require('./unpoly/classes/tether')
 require('./unpoly/classes/url_pattern')
 

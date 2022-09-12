@@ -736,6 +736,13 @@ describe('up.network', function() {
           })
         }))
 
+        it('does not cache responses with a non-200 status code', asyncSpec(function(next) {
+          next(() => up.request({url: '/foo', cache: true}))
+          next(() => this.respondWith({status: 500, contentType: 'text/html', responseText: 'foo'}))
+          next(() => up.request({url: '/foo', cache: true}))
+          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+        }))
+
         it('reuses a request with the same URL but a different #hash', function() {
           const request1 = up.request({url: '/url#foo', cache: true})
           expect(request1.hash).toEqual('#foo')
@@ -754,14 +761,14 @@ describe('up.network', function() {
           expect({url: '/url#bar'}).toBeCached()
         })
 
-        it("does not cache responses if config.cacheEvictAge is 0", asyncSpec(function(next) {
+        it("does not cache responses if config.cacheEvictAge is 0 xxx", asyncSpec(function(next) {
           up.network.config.cacheEvictAge = 0
           next(() => up.request({url: '/foo', cache: true}))
           next(() => up.request({url: '/foo', cache: true}))
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
         }))
 
-        it("does not cache responses if config.cacheSize is 0", asyncSpec(function(next) {
+        it("does not cache responses if config.cacheSize is 0 xxx", asyncSpec(function(next) {
           up.network.config.cacheSize = 0
           next(() => up.request({url: '/foo', cache: true}))
           next(() => up.request({url: '/foo', cache: true}))
@@ -772,12 +779,12 @@ describe('up.network', function() {
 
         it('never discards old cache entries if config.cacheEvictAge is undefined')
 
-        it('respects a config.cacheSize setting', asyncSpec(function(next) {
+        it('respects a config.cacheSize setting xxx', asyncSpec(function(next) {
             up.network.config.cacheSize = 2
             next(() => up.request({url: '/foo', cache: true}))
-            next(() => up.request({url: '/bar', cache: true}))
-            next(() => up.request({url: '/baz', cache: true}))
-            next(() => up.request({url: '/foo', cache: true}))
+            next.after(2, () => up.request({url: '/bar', cache: true}))
+            next.after(2, () => up.request({url: '/baz', cache: true}))
+            next.after(2, () => up.request({url: '/foo', cache: true}))
             next(() => expect(jasmine.Ajax.requests.count()).toEqual(4))
           })
         )
@@ -921,50 +928,242 @@ describe('up.network', function() {
         }))
       })
 
-      describe('cache clearing', function() {
+      describe('cache eviction', function() {
 
-        it('clears the cache when passed { clearCache: true }', asyncSpec(function(next) {
-          up.request({url: '/foo', cache: true})
-          expect({url: '/foo'}).toBeCached()
+        it('evicts all cache entries with { evictCache: true }', asyncSpec(function (next) {
+          up.request({ url: '/foo', cache: true })
+          expect({ url: '/foo' }).toBeCached()
 
-          up.request({url: '/bar', clearCache: true})
+          up.request({ url: '/bar', evictCache: true })
 
           next(() => {
             this.respondWith('foo')
           })
 
           next(() => {
+            expect({ url: '/foo' }).not.toBeCached()
+            expect({ url: '/bar' }).not.toBeCached()
+          })
+        }))
+
+        it('keeps this new request in the cache with { cache: true, evictCache: true }', asyncSpec(function (next) {
+          up.request({ url: '/foo', cache: true })
+          expect({ url: '/foo' }).toBeCached()
+
+          up.request({ url: '/bar', cache: true, evictCache: true })
+
+          next(() => {
+            this.respondWith('foo')
+          })
+
+          next(() => {
+            expect({ url: '/foo' }).not.toBeCached()
+            expect({ url: '/bar' }).toBeCached()
+          })
+        }))
+
+        it('accepts an URL pattern as { evictCache } option', asyncSpec(function (next) {
+          up.request({ url: '/foo/1', cache: true })
+          up.request({ url: '/foo/2', cache: true })
+          up.request({ url: '/bar/1', cache: true })
+
+          expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+
+          up.request({ url: '/other', evictCache: '/foo/*' })
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo'
+            })
+          })
+
+          next(function () {
+            expect({ url: '/foo/1' }).not.toBeCached()
+            expect({ url: '/foo/2' }).not.toBeCached()
+            expect({ url: '/bar/1' }).toBeCached()
+          })
+        }))
+
+        it('accepts an function as { evictCache } option', asyncSpec(function(next) {
+          up.request({ url: '/foo/1', cache: true })
+          up.request({ url: '/foo/2', cache: true })
+          up.request({ url: '/bar/1', cache: true })
+
+          expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+
+          let evictCache = (request) => request.url.indexOf('/foo/') === 0
+          up.request({ url: '/other', evictCache })
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo'
+            })
+          })
+
+          next(function () {
+            expect({ url: '/foo/1' }).not.toBeCached()
+            expect({ url: '/foo/2' }).not.toBeCached()
+            expect({ url: '/bar/1' }).toBeCached()
+          })
+        }))
+
+        it('lets the server send an URL pattern as X-Up-Evict-Cache response header', asyncSpec(function(next) {
+          up.request({ url: '/foo/1', cache: true })
+          up.request({ url: '/foo/2', cache: true })
+          up.request({ url: '/bar/1', cache: true })
+
+          expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+
+          up.request({ url: '/other' })
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo',
+              responseHeaders: { 'X-Up-Evict-Cache': '/foo/*' }
+            })
+          })
+
+          next(function () {
+            expect({ url: '/foo/1' }).not.toBeCached()
+            expect({ url: '/foo/2' }).not.toBeCached()
+            expect({ url: '/bar/1' }).toBeCached()
+          })
+        }))
+
+        it('evicts the entire cache if the server responds with an X-Up-Evict-Cache: * header', asyncSpec(function(next) {
+          up.request({url: '/foo', cache: true})
+          up.request({url: '/bar', cache: true})
+          expect({url: '/foo'}).toBeCached()
+          expect({url: '/bar'}).toBeCached()
+
+          up.request({url: '/baz'})
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo',
+              responseHeaders: {'X-Up-Evict-Cache': '*'}
+            })
+          })
+
+          next(function() {
             expect({url: '/foo'}).not.toBeCached()
             expect({url: '/bar'}).not.toBeCached()
           })
         }))
 
-        it('keeps this new request in the cache with { cache: true, clearCache: true }', asyncSpec(function(next) {
-          up.request({url: '/foo', cache: true})
-          expect({url: '/foo'}).toBeCached()
 
-          up.request({url: '/bar', cache: true, clearCache: true})
+        it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', asyncSpec(function (next) {
+          up.network.config.evictCache = function (request, response) {
+            expect(request).toEqual(jasmine.any(up.Request))
+            expect(response).toEqual(jasmine.any(up.Response))
+
+            if (request.url === '/baz') {
+              return '/foo'
+            }
+          }
+
+          up.request({ url: '/foo', cache: true })
+          up.request({ url: '/bar', cache: true })
+          up.request({ url: '/baz', cache: true })
+
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/baz' }).toBeCached()
+
+          next(() => jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' }))
+
+          next(function () {
+            expect({ url: '/foo' }).toBeCached()
+            expect({ url: '/bar' }).toBeCached()
+            expect({ url: '/baz' }).toBeCached()
+
+            jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
+          })
+
+          next(function () {
+            expect({ url: '/foo' }).toBeCached()
+            expect({ url: '/bar' }).toBeCached()
+            expect({ url: '/baz' }).toBeCached()
+
+            jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
+          })
+
+          next(function () {
+            // Only the URL pattern returned by config.evictCache() is evicted
+            expect({ url: '/foo' }).not.toBeCached()
+            expect({ url: '/bar' }).toBeCached()
+            expect({ url: '/baz' }).toBeCached()
+          })
+        }))
+
+      })
+
+      describe('cache expiration', function() {
+
+        it('expires all cache entries with { expireCache: true }', asyncSpec(function (next) {
+          up.request({ url: '/foo', cache: true })
+          expect({ url: '/foo' }).toBeCached()
+
+          up.request({ url: '/bar', expireCache: true })
 
           next(() => {
             this.respondWith('foo')
           })
 
           next(() => {
-            expect({url: '/foo'}).not.toBeCached()
-            expect({url: '/bar'}).toBeCached()
+            expect({ url: '/foo' }).toBeExpired()
           })
         }))
 
-        it('accepts an URL pattern as { clearCache } option', asyncSpec(function(next) {
-          up.request({url: '/foo/1', cache: true})
-          up.request({url: '/foo/2', cache: true})
-          up.request({url: '/bar/1', cache: true})
+        it('keeps a fresh cache entry for this new request with { cache: true, expireCache: true }', asyncSpec(function (next) {
+          up.request({ url: '/foo', cache: true })
+          expect({ url: '/foo' }).toBeCached()
 
-          expect({url: '/foo/1'}).toBeCached()
-          expect({url: '/foo/2'}).toBeCached()
-          expect({url: '/bar/1'}).toBeCached()
+          up.request({ url: '/bar', cache: true, expireCache: true })
 
-          up.request({url: '/other', clearCache: '/foo/*'})
+          next(() => {
+            this.respondWith('bar')
+          })
+
+          next(() => {
+            expect({ url: '/foo' }).toBeExpired()
+            expect({ url: '/bar' }).toBeCached()
+            expect({ url: '/bar' }).not.toBeExpired()
+          })
+        }))
+
+        it('accepts an URL pattern as { expireCache } option', asyncSpec(function (next) {
+          up.request({ url: '/foo/1', cache: true })
+          up.request({ url: '/foo/2', cache: true })
+          up.request({ url: '/bar/1', cache: true })
+
+          expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+
+          up.request({ url: '/other', expireCache: '/foo/*' })
 
           next(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(4)
@@ -975,26 +1174,25 @@ describe('up.network', function() {
               responseText: 'foo'
             })
           })
-          // responseHeaders: { 'X-Up-Clear-Cache': '/foo/*' }
 
-          next(function() {
-            expect({url: '/foo/1'}).not.toBeCached()
-            expect({url: '/foo/2'}).not.toBeCached()
-            expect({url: '/bar/1'}).toBeCached()
+          next(function () {
+            expect({ url: '/foo/1' }).toBeExpired()
+            expect({ url: '/foo/2' }).toBeExpired()
+            expect({ url: '/bar/1' }).not.toBeExpired()
           })
         }))
 
-        it('accepts an function as { clearCache } option', asyncSpec(function(next) {
-          up.request({url: '/foo/1', cache: true})
-          up.request({url: '/foo/2', cache: true})
-          up.request({url: '/bar/1', cache: true})
+        it('accepts an function as { expireCache } option', asyncSpec(function(next) {
+          up.request({ url: '/foo/1', cache: true })
+          up.request({ url: '/foo/2', cache: true })
+          up.request({ url: '/bar/1', cache: true })
 
-          expect({url: '/foo/1'}).toBeCached()
-          expect({url: '/foo/2'}).toBeCached()
-          expect({url: '/bar/1'}).toBeCached()
+          expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
 
-          let clearCache = (request) => request.url.indexOf('/foo/') === 0
-          up.request({ url: '/other', clearCache })
+          let expireCache = (request) => request.url.indexOf('/foo/') === 0
+          up.request({ url: '/other', expireCache })
 
           next(() => {
             expect(jasmine.Ajax.requests.count()).toEqual(4)
@@ -1005,20 +1203,118 @@ describe('up.network', function() {
               responseText: 'foo'
             })
           })
-          // responseHeaders: { 'X-Up-Clear-Cache': '/foo/*' }
+
+          next(function () {
+            expect({ url: '/foo/1' }).toBeExpired()
+            expect({ url: '/foo/2' }).toBeExpired()
+            expect({ url: '/bar/1' }).not.toBeExpired()
+          })
+        }))
+
+        it('lets the server send an URL pattern as X-Up-Expire-Cache response header', asyncSpec(function(next) {
+          up.request({ url: '/foo/1', cache: true })
+          up.request({ url: '/foo/2', cache: true })
+          up.request({ url: '/bar/1', cache: true })
+
+          expect({ url: '/foo/1' }).toBeCached()
+          expect({ url: '/foo/2' }).toBeCached()
+          expect({ url: '/bar/1' }).toBeCached()
+
+          up.request({ url: '/other' })
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(4)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo',
+              responseHeaders: { 'X-Up-Expire-Cache': '/foo/*' }
+            })
+          })
+
+          next(function () {
+            expect({ url: '/foo/1' }).toBeExpired()
+            expect({ url: '/foo/2' }).toBeExpired()
+            expect({ url: '/bar/1' }).not.toBeExpired()
+          })
+        }))
+
+        it('expires the entire cache if the server responds with an X-Up-Expire-Cache: * header', asyncSpec(function(next) {
+          up.request({url: '/foo', cache: true})
+          up.request({url: '/bar', cache: true})
+          expect({url: '/foo'}).toBeCached()
+          expect({url: '/bar'}).toBeCached()
+
+          up.request({url: '/baz'})
+
+          next(() => {
+            expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+            this.respondWith({
+              status: 200,
+              contentType: 'text/html',
+              responseText: 'foo',
+              responseHeaders: {'X-Up-Expire-Cache': '*'}
+            })
+          })
 
           next(function() {
-            expect({url: '/foo/1'}).not.toBeCached()
-            expect({url: '/foo/2'}).not.toBeCached()
-            expect({url: '/bar/1'}).toBeCached()
+            expect({url: '/foo'}).toBeExpired()
+            expect({url: '/bar'}).toBeExpired()
+          })
+        }))
+
+
+        it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', asyncSpec(function (next) {
+          up.network.config.expireCache = function (request, response) {
+            expect(request).toEqual(jasmine.any(up.Request))
+            expect(response).toEqual(jasmine.any(up.Response))
+
+            if (request.url === '/baz') {
+              return '/foo'
+            }
+          }
+
+          up.request({ url: '/foo', cache: true })
+          up.request({ url: '/bar', cache: true })
+          up.request({ url: '/baz', cache: true })
+
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/bar' }).toBeCached()
+          expect({ url: '/baz' }).toBeCached()
+
+          next(() => jasmine.Ajax.requests.at(0).respondWith({ status: 200, responseText: 'foo response' }))
+
+          next(function () {
+            expect({ url: '/foo' }).not.toBeExpired()
+            expect({ url: '/bar' }).not.toBeExpired()
+            expect({ url: '/baz' }).not.toBeExpired()
+
+            jasmine.Ajax.requests.at(1).respondWith({ status: 200, responseText: 'bar response' })
+          })
+
+          next(function () {
+            expect({ url: '/foo' }).not.toBeExpired()
+            expect({ url: '/bar' }).not.toBeExpired()
+            expect({ url: '/baz' }).not.toBeExpired()
+
+            jasmine.Ajax.requests.at(2).respondWith({ status: 200, responseText: 'baz response' })
+          })
+
+          next(function () {
+            // Only the URL pattern returned by config.expireCache() is exppired
+            expect({ url: '/foo' }).toBeExpired()
+            expect({ url: '/bar' }).not.toBeExpired()
+            expect({ url: '/baz' }).not.toBeExpired()
           })
         }))
 
         u.each(['POST', 'PUT', 'DELETE'], function (unsafeMethod) {
 
-          it(`clears the entire cache if a ${unsafeMethod} request is made`, asyncSpec(function(next) {
-            const safeRequestAttrs = {method: 'GET', url: '/foo', cache: true}
-            const unsafeRequestAttrs = {method: unsafeMethod, url: '/foo'}
+          it(`expires the entire cache if a ${unsafeMethod} request is made`, asyncSpec(function(next) {
+            const safeRequestAttrs = { method: 'GET', url: '/foo', cache: true }
+            const unsafeRequestAttrs = { method: unsafeMethod, url: '/foo' }
 
             up.request(safeRequestAttrs)
 
@@ -1037,13 +1333,13 @@ describe('up.network', function() {
             })
 
             next(() => {
-              expect(safeRequestAttrs).not.toBeCached()
+              expect(safeRequestAttrs).toBeExpired()
             })
           }))
 
-          it(`does not clear the cache if a ${unsafeMethod} request is made with { clearCache: false }`, asyncSpec(function(next) {
+          it(`does notexpireclear the cache if a ${unsafeMethod} request is made with { expireCache: false }`, asyncSpec(function(next) {
             const safeRequestAttrs = {method: 'GET', url: '/foo', cache: true}
-            const unsafeRequestAttrs = {method: unsafeMethod, url: '/foo', clearCache: false}
+            const unsafeRequestAttrs = {method: unsafeMethod, url: '/foo', expireCache: false}
 
             up.request(safeRequestAttrs)
 
@@ -1062,11 +1358,11 @@ describe('up.network', function() {
             })
 
             next(() => {
-              expect(safeRequestAttrs).toBeCached()
+              expect(safeRequestAttrs).not.toBeExpired()
             })
           }))
 
-          it(`does not clear the cache the server responds to an ${unsafeMethod} request with X-Up-Clear-Cache: false`, asyncSpec(function(next) {
+          it(`does not expire the cache the server responds to an ${unsafeMethod} request with X-Up-Expire-Cache: false`, asyncSpec(function(next) {
             const safeRequestAttrs = {method: 'GET', url: '/foo', cache: true}
             const unsafeRequestAttrs = {method: unsafeMethod, url: '/foo', cache: true}
 
@@ -1083,121 +1379,18 @@ describe('up.network', function() {
             })
 
             next(() => {
-              this.respondWith('foo', {responseHeaders: {'X-Up-Clear-Cache': 'false'}})
+              this.respondWith('foo', {responseHeaders: {'X-Up-Expire-Cache': 'false'}})
             })
 
             next(() => {
-              expect(safeRequestAttrs).toBeCached()
+              expect(safeRequestAttrs).not.toBeExpired()
             })
           }))
         })
 
-        it('does not cache responses with a non-200 status code (even with { cache: true })', asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => this.respondWith({status: 500, contentType: 'text/html', responseText: 'foo'}))
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
-
-        it('clears the cache if the server responds with an X-Up-Clear-Cache: * header', asyncSpec(function(next) {
-          up.request({url: '/foo', cache: true})
-          up.request({url: '/bar', cache: true})
-          expect({url: '/foo'}).toBeCached()
-          expect({url: '/bar'}).toBeCached()
-
-          up.request({url: '/baz'})
-
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(3)
-
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo',
-              responseHeaders: {'X-Up-Clear-Cache': '*'}
-            })
-          })
-
-          next(function() {
-            expect({url: '/foo'}).not.toBeCached()
-            expect({url: '/bar'}).not.toBeCached()
-          })
-        }))
-
-        it('lets the server send an URL pattern as X-Up-Clear-Cache response header', asyncSpec(function(next) {
-          up.request({url: '/foo/1', cache: true})
-          up.request({url: '/foo/2', cache: true})
-          up.request({url: '/bar/1', cache: true})
-
-          expect({url: '/foo/1'}).toBeCached()
-          expect({url: '/foo/2'}).toBeCached()
-          expect({url: '/bar/1'}).toBeCached()
-
-          up.request({url: '/other'})
-
-          next(() => {
-            expect(jasmine.Ajax.requests.count()).toEqual(4)
-
-            this.respondWith({
-              status: 200,
-              contentType: 'text/html',
-              responseText: 'foo',
-              responseHeaders: {'X-Up-Clear-Cache': '/foo/*'}
-            })
-          })
-
-          next(function() {
-            expect({url: '/foo/1'}).not.toBeCached()
-            expect({url: '/foo/2'}).not.toBeCached()
-            expect({url: '/bar/1'}).toBeCached()
-          })
-        }))
-
-        it('defaults to a rule in up.network.config.clearCache() if neither request nor server set a { clearCache } option', asyncSpec(function(next) {
-          up.network.config.clearCache = function (request, response) {
-            expect(request).toEqual(jasmine.any(up.Request))
-            expect(response).toEqual(jasmine.any(up.Response))
-
-            if (request.url === '/baz') {
-              return '/foo'
-            }
-          }
-
-          up.request({url: '/foo', cache: true})
-          up.request({url: '/bar', cache: true})
-          up.request({url: '/baz', cache: true})
-
-          expect({url: '/foo'}).toBeCached()
-          expect({url: '/bar'}).toBeCached()
-          expect({url: '/baz'}).toBeCached()
-
-          next(() => jasmine.Ajax.requests.at(0).respondWith({status: 200, responseText: 'foo response'}))
-
-          next(function() {
-            expect({url: '/foo'}).toBeCached()
-            expect({url: '/bar'}).toBeCached()
-            expect({url: '/baz'}).toBeCached()
-
-            jasmine.Ajax.requests.at(1).respondWith({status: 200, responseText: 'bar response'})
-          })
-
-          next(function() {
-            expect({url: '/foo'}).toBeCached()
-            expect({url: '/bar'}).toBeCached()
-            expect({url: '/baz'}).toBeCached()
-
-            jasmine.Ajax.requests.at(2).respondWith({status: 200, responseText: 'bar response'})
-          })
-
-          next(function() {
-            // Only the URL pattern returned by config.clearCache() is cleared
-            expect({url: '/foo'}).not.toBeCached()
-            expect({url: '/bar'}).toBeCached()
-            expect({url: '/baz'}).toBeCached()
-          })
-        }))
-
       })
+
+
 
       describe('method wrapping', function() {
 
@@ -1953,12 +2146,12 @@ describe('up.network', function() {
       it('does nothing if the given request is not cached')
     })
 
-    describe('up.cache.clear()', function() {
+    describe('up.cache.evict()', function() {
 
       it('removes all cache entries', function() {
         up.request({url: '/foo', cache: true})
         expect({url: '/foo'}).toBeCached()
-        up.cache.clear()
+        up.cache.evict()
         expect({url: '/foo'}).not.toBeCached()
       })
 
@@ -1970,7 +2163,7 @@ describe('up.network', function() {
         expect({url: '/foo/2'}).toBeCached()
         expect({url: '/bar/1'}).toBeCached()
 
-        up.cache.clear('/foo/*')
+        up.cache.evict('/foo/*')
 
         expect({url: '/foo/1'}).not.toBeCached()
         expect({url: '/foo/2'}).not.toBeCached()

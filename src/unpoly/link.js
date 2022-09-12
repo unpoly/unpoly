@@ -341,7 +341,8 @@ up.link = (function() {
     parser.json('headers')
     parser.json('params')
     parser.booleanOrString('cache')
-    parser.booleanOrString('clearCache')
+    parser.booleanOrString('expireCache')
+    parser.booleanOrString('evictCache')
     parser.booleanOrString('revalidate')
     parser.booleanOrString('abort')
     parser.boolean('abortable')
@@ -495,7 +496,7 @@ up.link = (function() {
   /*-
   Preloads the given link.
 
-  When the link is clicked later, the response will already be [cached](/up.request#caching),
+  When the link is clicked later, the response will already be [cached](/caching),
   making the interaction feel instant.
 
   @function up.link.preload
@@ -1014,7 +1015,7 @@ up.link = (function() {
     for a list of available timing functions.
 
   @param [up-cache='auto']
-    Whether to read from and write to the [cache](/up.request#caching).
+    Whether to read from and write to the [cache](/caching).
 
     With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
     to the network. To prevent display of stale content, cached responses are
@@ -1033,13 +1034,20 @@ up.link = (function() {
 
     Also see `up.fragment.config.autoRevalidate`.
 
-  @param [up-clear-cache]
-    Whether existing [cache](/up.request#caching) entries will be cleared with this request.
+  @param [up-expire-cache]
+    Whether existing [cache](/caching) entries will be [expired](/up.cache.expire) with this request.
 
-    By default a non-GET request will clear the entire cache.
-    You may also pass a [URL pattern](/url-patterns) to only clear matching requests.
+    By default a non-GET request will expire the entire cache.
+    You may also pass a [URL pattern](/url-patterns) to only expire matching requests.
 
-    Also see [`up.request({ clearCache })`](/up.request#options.clearCache) and `up.network.config.clearCache`.
+    Also see [`up.request({ expireCache })`](/up.request#options.expireCache) and `up.network.config.expireCache`.
+
+  @param [up-evict-cache]
+    Whether existing [cache](/caching) entries will be [evicted](/up.cache.evict) with this request.
+
+    You may also pass a [URL pattern](/url-patterns) to only evict matching requests.
+
+    Also see [`up.request({ evictCache })`](/up.request#options.evictCache) and `up.network.config.evictCache`.
 
   @param [up-abort='target']
     Whether to [abort existing requests](/aborting-requests) before rendering.

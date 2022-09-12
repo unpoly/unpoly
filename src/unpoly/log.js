@@ -15,8 +15,6 @@ Unpoly can print debugging information to the [browser console](https://develope
 */
 up.log = (function() {
 
-  const sessionStore = new up.store.Session('up.log')
-
   /*-
   Configures the logging output on the developer console.
 
@@ -33,27 +31,11 @@ up.log = (function() {
     Format output using CSS.
   @stable
   */
-  const config = new up.Config(() => ({
-    enabled: sessionStore.get('enabled'),
-    banner: true,
-    format: true
-  }))
+  const config = new up.LogConfig()
 
   function reset() {
     config.reset()
   }
-
-//  ###**
-//  Prints a debugging message to the browser console.
-//
-//  @function up.log.debug
-//  @param {string} message
-//  @param {Array} ...args
-//  @internal
-//  ###
-//  printToDebug = (message, args...) ->
-//    if config.enabled && message
-//      console.debug(prefix(message), args...)
 
   /*-
   Prints a logging message to the browser console.
@@ -142,10 +124,6 @@ up.log = (function() {
 
   up.on('up:framework:reset', reset)
 
-  function setEnabled(value) {
-    sessionStore.set('enabled', value)
-    config.enabled = value
-  }
 
   /*-
   Starts printing debugging information to the developer console.
@@ -159,7 +137,7 @@ up.log = (function() {
   @stable
   */
   function enable() {
-    setEnabled(true)
+    config.enabled = true
   }
 
   /*-
@@ -171,7 +149,7 @@ up.log = (function() {
   @stable
   */
   function disable() {
-    setEnabled(false)
+    config.enabled = false
   }
 
   return {
@@ -182,7 +160,6 @@ up.log = (function() {
     config,
     enable,
     disable,
-    isEnabled() { return config.enabled },
   }
 })()
 

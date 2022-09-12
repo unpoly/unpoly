@@ -266,7 +266,8 @@ up.Request = class Request extends up.Record {
       'preload', // since up.network.request() options are sometimes wrapped in this class
       'background',
       'cache',  // since up.network.request() options are sometimes wrapped in this class
-      'clearCache',  // since up.network.request() options are sometimes wrapped in this class
+      'expireCache',  // since up.network.request() options are sometimes wrapped in this class
+      'evictCache',  // since up.network.request() options are sometimes wrapped in this class
 
       // While requests are queued or in flight we keep the layer they're targeting.
       // If that layer is closed we will cancel all pending requests targeting that layer.
@@ -397,7 +398,7 @@ up.Request = class Request extends up.Record {
   }
 
   followState(sourceRequest) {
-    u.delegate(this, ['deferred', 'state', 'preload'], () => sourceRequest)
+    u.delegate(this, ['deferred', 'state', 'preload', 'expired'], () => sourceRequest)
   }
 
   normalizeForCaching() {
@@ -646,7 +647,8 @@ up.Request = class Request extends up.Record {
       dismissLayer: up.protocol.dismissLayerFromXHR(this.xhr),
       eventPlans: up.protocol.eventPlansFromXHR(this.xhr),
       context: up.protocol.contextFromXHR(this.xhr),
-      clearCache: up.protocol.clearCacheFromXHR(this.xhr),
+      expireCache: up.protocol.expireCacheFromXHR(this.xhr),
+      evictCache: up.protocol.evictCacheFromXHR(this.xhr),
       fail: this.fail,
     }
 

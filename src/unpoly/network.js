@@ -115,10 +115,19 @@ up.network = (function() {
 
     By default Unpoly will auto-cache requests with safe HTTP methods.
 
-  @param {Function(up.Request, up.Response)} config.clearCache
-    Whether to [clear the cache](/up.cache.clear) after the given request and response.
+  @param {Function(up.Request, up.Response): boolean|string} config.expireCache
+    Whether to [expire](/up.cache.expire) the [cache](/caching) after the given request and response.
 
-    By default Unpoly will clear the entire cache after a request with an unsafe HTTP method.
+    By default Unpoly will expire the entire cache after a request with an [unsafe](/up.Request.prototype.isSafe) HTTP method.
+
+    The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be expired.
+
+  @param {Function(up.Request, up.Response): boolean|string} [config.evictCache=false]
+    Whether to [evict](/up.cache.evict) the [cache](/caching) after the given request and response.
+
+    By default Unpoly will not evict cache entries when a request is made.
+
+    The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be evicted.
 
   @param {Array<string>|Function(up.Request): Array<string>} [config.requestMetaKeys]
     An array of request property names
@@ -172,7 +181,7 @@ up.network = (function() {
 
     The progress bar is implemented as a single `<up-progress-bar>` element.
     Unpoly will automatically insert and remove this element as requests
-    are [late](/up:network:late) or [recovered](/up:network:recover).
+    are [late](/up:network:late) or [recoveredup:network:recover).
 
     The default appearance is a simple blue bar at the top edge of the screen.
     You may customize the style using CSS:
@@ -189,16 +198,17 @@ up.network = (function() {
     concurrency() { return shouldReduceRequests() ? 3 : 6 },
     wrapMethod: true,
     cacheSize: 70,
-    cacheExpiry: 1000 * 60 * 15,
-    cacheEvictAge: 1000 * 60 * 90,
+    cacheExpireAge: 15 * 1000,
+    cacheEvictAge: 90 * 60 * 1000,
     // 2G 66th percentile: RTT >= 1400 ms, downlink <=  70 Kbps
     // 3G 50th percentile: RTT >=  270 ms, downlink <= 700 Kbps
     badDownlink: 0.6,
     badRTT: 750,
     badResponseTime: 400,
     fail(response) { return (response.status < 200 || response.status > 299) && response.status !== 304 },
-    autoCache(request) { return request.isSafe(); },
-    clearCache(request, _response) { return !request.isSafe(); },
+    autoCache(request) { return request.isSafe() },
+    expireCache(request, _response) { return !request.isSafe() },
+    evictCache: false,
     requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true,
     timeout: 90_000,
@@ -244,26 +254,43 @@ up.network = (function() {
   */
 
   /*-
-  Removes all [cache](/up.request#caching) entries.
+  Discards [cache](/caching) entries.
 
   To only remove some cache entries, pass a [URL pattern](/url-patterns):
 
   ```js
-  up.cache.clear('/users/*')
+  up.cache.evict('/users/*')
   ```
 
-  ### Other reasons the cache may clear
+  The server may also evict cache entries by sending an [`X-Up-Evict-Cache`](/X-Up-Evict-Cache) header.
 
-  By default Unpoly automatically clears the entire cache whenever it processes
-  a request with an non-GET HTTP method. To customize this rule, use `up.network.config.clearCache`.
-
-  The server may also clear the cache by sending an [`X-Up-Clear-Cache`](/X-Up-Clear-Cache) header.
-
-  @function up.cache.clear
+  @function up.cache.evict
   @param {string} [pattern]
-    A [URL pattern](/url-patterns) matching cache entries that should be cleared.
+    A [URL pattern](/url-patterns) matching cache entries that should be discarded.
 
-    If omitted, the entire cache is cleared.
+    If omitted, the entire cache is evicted.
+  @stable
+  */
+
+  /*-
+  Marks [cache](/caching) entries.
+
+  To only remove some cache entries, pass a [URL pattern](/url-patterns):
+
+  ```js
+  up.cache.evict('/users/*')
+  ```
+
+  The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
+
+  By default Unpoly automatically expires the entire cache whenever it processes
+  a request with an non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
+
+  @function up.cache.evict
+  @param {string} [pattern]
+    A [URL pattern](/url-patterns) matching cache entries that should be discarded.
+
+    If omitted, the entire cache is evicted.
   @stable
   */
 
@@ -315,7 +342,7 @@ up.network = (function() {
     abortRequests()
     queue.reset()
     config.reset()
-    cache.clear()
+    cache.evict()
     progressBar?.destroy()
     progressBar = null
   }
@@ -394,7 +421,7 @@ up.network = (function() {
     to the query parameters.
 
   @param {boolean} [options.cache=false]
-    Whether to read from and write to the [cache](/up.request#caching).
+    Whether to read from and write to the [cache](/caching).
 
     With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
     to the network. If no cached response exists, Unpoly will make a request and cache
@@ -405,13 +432,20 @@ up.network = (function() {
 
     With `{ cache: false }` (the default) Unpoly will always make a network request.
 
-  @param {boolean|string} [options.clearCache]
-    Whether to [clear](/up.cache.clear) the [cache](/up.cache.get) after this request.
+  @param {boolean|string} [options.expireCache]
+    Whether to [evict](/up.cache.expire) the [cache](/caching) after this request.
 
-    Defaults to the result of `up.network.config.clearCache`, which
-    defaults to clearing the entire cache after a non-GET request.
+    Defaults to the result of `up.network.config.expireCache`, which
+    defaults to expiring the entire cache after a non-GET request.
 
-    You may also pass a [URL pattern](/url-patterns) to only uncache matching responses.
+    You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
+
+  @param {boolean|string} [options.evictCache]
+    Whether to [evict](/up.cache.evict) the [cache](/caching) after this request.
+
+    Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
+
+    You may also pass a [URL pattern](/url-patterns) to only evict matching responses.
 
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
@@ -563,27 +597,38 @@ up.network = (function() {
     }
 
     return u.always(request, function(response) {
-      // Three places can request the cache to be cleared or kept:
-      // (1) The server via X-Up-Clear-Cache header, found in response.clearCache
-      // (2) The interaction via { clearCache } option, found in request.clearCache
-      // (3) The default in up.network.config.clearCache({ request, response })
-      let clearCache = response.clearCache ?? request.clearCache ?? config.clearCache(request, response)
-      if (clearCache) {
-        cache.clear(clearCache)
+      // Three places can request the cache to be expired or kept fresh:
+      //
+      // (1) The server via X-Up-Expire-Cache header, found in response.expireCache
+      // (2) The interaction via { expireCache } option, found in request.expireCache
+      // (3) The default in up.network.config.expireCache({ request, response })
+      let expireCache = response.expireCache ?? request.expireCache ?? u.evalOption(config.expireCache, request, response)
+      if (expireCache) {
+        cache.expire(expireCache, { except: request })
+      }
+
+      // Three places can request the cache to be evicted:
+      //
+      // (1) The server via X-Up-Evict-Cache header, found in response.evictCache
+      // (2) The interaction via { evictCache } option, found in request.evictCache
+      // (3) The default in up.network.config.evictCache({ request, response })
+      let evictCache = response.evictCache ?? request.evictCache ?? u.evalOption(config.evictCache, request, response)
+      if (evictCache) {
+        cache.evict(evictCache, { except: request })
       }
 
       // (1) Re-cache a cacheable request in case we cleared the cache above
       // (2) An un-cacheable request should still update an existing cache entry
       //     (written by a earlier, cacheable request with the same cache key)
       //     since the later response will be fresher.
-      if (request.willCache() || cache.get(request)) {
+      if (cache.get(request)) {
         cache.set(request, request)
       }
 
       if (!response.ok) {
         // Uncache failed requests. We have no control over the server,
         // and another request with the same properties might succeed.
-        cache.remove(request)
+        cache.evict(request)
       }
     })
   }

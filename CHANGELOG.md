@@ -71,7 +71,7 @@ Changes tracked until 2022-07-06.
     - Introduce X-Up-Evict-Cache
     - Introduce up.cache.evict(pattern)
     - up.link.cacheState(link)
-    - up.fragment.config.autoRevalidate = (response) => response.stale
+    - up.fragment.config.autoRevalidate = (response) => response.expired
 
 
 ### Skip rendering unchanged content

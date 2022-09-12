@@ -177,7 +177,7 @@ up.fragment = (function() {
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
-    autoRevalidate: (response) => (response.age > 15 * 1000) && !up.network.shouldReduceRequests(),
+    autoRevalidate: (response) => response.expired,
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -668,7 +668,7 @@ up.fragment = (function() {
     for a list of available timing functions.
 
   @param {boolean} [options.cache]
-    Whether to read from and write to the [cache](/up.request#caching).
+    Whether to read from and write to the [cache](/caching).
 
     With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
     to the network. If no cached response exists, Unpoly will make a request and cache
@@ -681,13 +681,22 @@ up.fragment = (function() {
 
     Also see `up.fragment.config.autoRevalidate`.
 
-  @param {boolean|string} [options.clearCache]
-    Whether existing [cache](/up.request#caching) entries will be [cleared](/up.cache.clear) with this request.
+  @param {boolean|string} [options.expireCache]
+    Whether existing [cache](/caching) entries will be [expired](/up.cache.expire) with this request.
 
-    Defaults to the result of `up.network.config.clearCache`, which
-    defaults to clearing the entire cache after a non-GET request.
+    Defaults to the result of `up.network.config.expireCache`, which
+    defaults to `true` for [unsafe](/up.Request.prototype.isSafe] requests.
 
-    To only uncache some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
+    To only expire some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
+    You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
+
+  @param {boolean|string} [options.evictCache]
+    Whether existing [cache](/caching) entries will be [evicted](/up.cache.evict) with this request.
+
+    Defaults to the result of `up.network.config.evictCache`, which
+    defaults to `false`.
+
+    To only evict some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {boolean|string|Function(request): boolean} [options.abort='target']

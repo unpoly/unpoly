@@ -1,5 +1,3 @@
-const e = up.element
-
 const PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
 function transferProps(from, to) {

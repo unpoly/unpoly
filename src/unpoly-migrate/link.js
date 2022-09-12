@@ -12,6 +12,7 @@ up.migrate.parseFollowOptions = function(parser) {
   parser.boolean('resetScroll'); // legacy option for { scroll: 'top' }
   parser.boolean('restoreScroll'); // legacy option for { scroll: 'restore' }
   parser.booleanOrString('historyVisible'); // short-lived legacy option for { history }
+  parser.booleanOrString('clearCache'); // legacy option for { expireCache }
 }
 
 /*-

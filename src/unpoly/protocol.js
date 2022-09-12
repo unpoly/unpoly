@@ -210,76 +210,74 @@ up.protocol = (function() {
   @stable
   */
 
-  function parseClearCacheValue(value) {
-    switch (value) {
-      case 'true':
-        return true
-      case 'false':
-        return false
-      default:
-        return value
+  function parseModifyCacheValue(value) {
+    if (value === 'false') {
+      return false
+    } else {
+      return value
     }
   }
 
-  function clearCacheFromXHR(xhr) {
-    return extractHeader(xhr, 'clearCache', parseClearCacheValue)
+  function evictCacheFromXHR(xhr) {
+    return extractHeader(xhr, 'evictCache', parseModifyCacheValue)
   }
 
   /*-
-  The server may send this optional response header to control which previously cached responses should be [uncached](/up.cache.clear) after this response.
+  The server may send this optional response header to control which previously [cached](/caching)
+  responses should be [evited](/up.cache.evict) after this response.
 
-  The value of this header is a [URL pattern](/url-patterns) matching responses that should be uncached.
+  The value of this header is a [URL pattern](/url-patterns) matching responses that should be evicted.
 
-  For example, to uncache all responses to URLs starting with `/notes/`:
+  For example, to expire all responses to URLs starting with `/notes/`:
 
   ```http
-  X-Up-Clear-Cache: /notes/*
+  X-Up-Evict-Cache: /notes/*
+  ```
+
+  To evict all cache entries:
+
+  ```http
+  X-Up-Evict-Cache: *
+  ```
+
+  @header X-Up-Evict-Cache
+  @stable
+  */
+
+
+  function expireCacheFromXHR(xhr) {
+    return extractHeader(xhr, 'expireCache') || up.migrate.clearCacheFromXHR?.(xhr)
+  }
+
+  /*-
+  The server may send this optional response header to control which previously [cached](/caching)
+  responses should be [expired](/up.cache.expire) after this response.
+
+  The value of this header is a [URL pattern](/url-patterns) matching responses that should be expired.
+
+  For example, to expire all responses to URLs starting with `/notes/`:
+
+  ```http
+  X-Up-Expire-Cache: /notes/*
+  ```
+
+  To expire all cache entries:
+
+  ```http
+  X-Up-Expire-Cache: *
   ```
 
   ### Overriding the client-side default
 
-  If the server does not send an `X-Up-Clear-Cache` header, Unpoly will [clear the entire cache](/up.network.config#config.clearCache) after a non-GET request.
+  If the server does not send an `X-Up-Expire-Cache` header, Unpoly will [expire the entire cache](/up.network.config#config.expireCache) after a non-GET request.
 
-  You may force Unpoly to *keep* the cache after a non-GET request:
-
-  ```http
-  X-Up-Clear-Cache: false
-  ```
-
-  You may also force Unpoly to *clear* the cache after a GET request:
+  You may force Unpoly to keep the cache fresh after a non-GET request:
 
   ```http
-  X-Up-Clear-Cache: *
+  X-Up-Expire-Cache: false
   ```
 
-  @header X-Up-Clear-Cache
-  @stable
-  */
-
-  /*-
-  This request header contains a timestamp of an existing fragment that is being [reloaded](/up.reload).
-
-  The timestamp must be explicitly set by the user as an `[up-time]` attribute on the fragment.
-  It should indicate the time when the fragment's underlying data was last changed.
-
-  See `[up-time]` for a detailed example.
-
-  ### Format
-
-  The time is encoded is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
-
-  For instance, a modification date of December 23th, 1:40:18 PM UTC would produce the following header:
-
-  ```http
-  X-Up-Target: .unread-count
-  X-Up-Reload-From-Time: 1608730818
-  ```
-
-  If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Time: 0`).
-
-  @header X-Up-Reload-From-Time
-  @deprecated
-    Use the standard [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) header instead.
+  @header X-Up-Expire-Cache
   @stable
   */
 
@@ -816,7 +814,8 @@ up.protocol = (function() {
     contextFromXHR,
     dismissLayerFromXHR,
     eventPlansFromXHR,
-    clearCacheFromXHR,
+    expireCacheFromXHR,
+    evictCacheFromXHR,
     csrfHeader,
     csrfParam,
     csrfToken,

@@ -129,7 +129,8 @@ up.Response = class Response extends up.Record {
       'dismissLayer',
       'eventPlans',
       'context',
-      'clearCache',
+      'expireCache',
+      'evictCache',
       'headers', // custom headers to for synthetic reponses without { xhr } property
       'loadedAt',
       'fail',
@@ -249,6 +250,19 @@ up.Response = class Response extends up.Record {
   get age() {
     let now = new Date()
     return now - this.loadedAt
+  }
+
+  /*-
+  Returns whether this [cached](/caching) response has expired.
+
+  Content rendered from an expired response is [revalidated](/caching#revalidation) with the server.
+
+  @property up.Response#expired
+  @param {boolean} expired
+  @experimental
+  */
+  get expired() {
+    return this.age > up.network.config.cacheExpireAge || this.request.expired
   }
 
 }

@@ -30,9 +30,12 @@ Object.defineProperty(up.network.config, 'preloadDelay', {
 
 up.migrate.renamedProperty(up.network.config, 'maxRequests', 'concurrency')
 up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
+up.migrate.renamedProperty(up.network.config, 'cacheExpiry', 'cacheExpireAge')
+up.migrate.renamedProperty(up.network.config, 'clearCache', 'expireCache')
 
 up.migrate.handleRequestOptions = function(options) {
   up.migrate.fixKey(options, 'data', 'params')
+  up.migrate.fixKey(options, 'clearCache', 'expireCache')
 
   if (options.solo) {
     up.migrate.warn('The option up.request({ solo }) has been removed. Use up.network.abort() or up.fragment.abort() instead.')
@@ -73,15 +76,28 @@ up.ajax = function(...args) {
 }
 
 /*-
-Removes all cache entries.
+Expires all cache entries.
 
 @function up.proxy.clear
 @deprecated
-  Use `up.cache.clear()` instead.
+  Use `up.cache.expire()` instead.
 */
 up.network.clear = function() {
-  up.migrate.deprecated('up.proxy.clear()', 'up.cache.clear()')
-  up.cache.clear()
+  up.migrate.deprecated('up.proxy.clear()', 'up.cache.expire()')
+  up.cache.expire()
+}
+
+/*-
+Expires cache entries.
+
+@function up.cache.clear
+@deprecated
+  Use `up.cache.expire()` instead.
+*/
+up.Request.Cache.prototype.clear = function(...args) {
+  // up.cache is an up.Request.Cache instance
+  up.migrate.deprecated('up.cache.clear()', 'up.cache.expire()')
+  this.expire(...args)
 }
 
 up.network.preload = function(...args) {

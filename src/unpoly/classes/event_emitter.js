@@ -43,7 +43,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
   }
 
   logEmission() {
-    if (!up.log.isEnabled()) { return; }
+    if (!up.log.config.enabled) { return }
 
     let message = this.log
     let messageArgs

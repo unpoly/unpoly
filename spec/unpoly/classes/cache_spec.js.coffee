@@ -35,7 +35,9 @@ describe 'up.Cache', ->
   describe '#set', ->
 
     it 'removes the oldest item if setting a new item would exceed the cache size', ->
+      # There must be at least 1 ms between adding cache entries, or first-in-first-out won't work
       jasmine.clock().install()
+      jasmine.clock().mockDate(new Date())
       store = new up.Cache(size: 2)
 
       store.set('foo', 'value of foo')
@@ -48,26 +50,17 @@ describe 'up.Cache', ->
       expect(store.get('bar')).toEqual('value of bar')
       expect(store.get('baz')).toEqual('value of baz')
 
-  describe '#keys', ->
+  describe '#evict', ->
 
-    it 'returns an array of keys in the store', ->
-      store = new up.Cache()
-      store.set('foo', 'value of foo')
-      store.set('bar', 'value of bar')
+    it 'removes all entries from the store', ->
+      cache = new up.Cache()
+      cache.set('foo', 'value of foo')
+      cache.set('bar', 'value of bar')
 
-      expect(store.keys().sort()).toEqual ['bar', 'foo']
+      cache.evict()
 
-  describe '#clear', ->
-
-    it 'removes all keys from the store', ->
-      store = new up.Cache()
-      store.set('foo', 'value of foo')
-      store.set('bar', 'value of bar')
-
-      store.clear()
-
-      expect(store.get('foo')).toBeUndefined()
-      expect(store.get('bar')).toBeUndefined()
+      expect(cache.get('foo')).toBeUndefined()
+      expect(cache.get('bar')).toBeUndefined()
 
   describe '#remove', ->
 
