@@ -482,6 +482,11 @@ up.Request = class Request extends up.Record {
     if (this.state !== 'new') return
     this.state = 'loading'
 
+    // If someone expired this link while it was waiting in the queue (e.g. through
+    // expiring everyhing with up.cache.expire(), it now becomes fresh through the
+    // act of loading.
+    this.expired = false
+
     // Convert from XHR's callback-based API to up.Request's promise-based API
     this.xhr = new up.Request.XHRRenderer(this).buildAndSend({
       onload:    () => this.onXHRLoad(),
