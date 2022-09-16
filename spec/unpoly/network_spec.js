@@ -761,14 +761,14 @@ describe('up.network', function() {
           expect({url: '/url#bar'}).toBeCached()
         })
 
-        it("does not cache responses if config.cacheEvictAge is 0 xxx", asyncSpec(function(next) {
+        it("does not cache responses if config.cacheEvictAge is 0", asyncSpec(function(next) {
           up.network.config.cacheEvictAge = 0
           next(() => up.request({url: '/foo', cache: true}))
           next(() => up.request({url: '/foo', cache: true}))
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
         }))
 
-        it("does not cache responses if config.cacheSize is 0 xxx", asyncSpec(function(next) {
+        it("does not cache responses if config.cacheSize is 0", asyncSpec(function(next) {
           up.network.config.cacheSize = 0
           next(() => up.request({url: '/foo', cache: true}))
           next(() => up.request({url: '/foo', cache: true}))
@@ -779,7 +779,7 @@ describe('up.network', function() {
 
         it('never discards old cache entries if config.cacheEvictAge is undefined')
 
-        it('respects a config.cacheSize setting xxx', asyncSpec(function(next) {
+        it('respects a config.cacheSize setting', asyncSpec(function(next) {
             up.network.config.cacheSize = 2
             next(() => up.request({url: '/foo', cache: true}))
             next.after(2, () => up.request({url: '/bar', cache: true}))

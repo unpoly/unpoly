@@ -939,6 +939,67 @@ describe 'up.fragment', ->
 
               expect('.target').toHaveText('new text')
 
+          it 'does not call an { onFinished } handler', asyncSpec (next) ->
+            listener = jasmine.createSpy('onFinished callback')
+
+            fixture('.target')
+            up.render('.target', url: '/other-path', onFinished: listener)
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+            next ->
+              expect(listener).not.toHaveBeenCalled()
+
+          describe 'when there is an expired cache entry', ->
+
+            beforeEach (done) ->
+              fixture('.target', text: 'old text')
+
+              request = up.request('/path', target: '.target', cache: true)
+
+              u.task ->
+                jasmine.respondWithSelector('.target', text: 'expired text')
+
+              u.task ->
+                expect(request).toBeCached()
+                expect(request).not.toBeExpired()
+
+                up.cache.expire(request)
+
+                expect(request).toBeExpired()
+
+                done()
+
+            it 'renders the expired content', asyncSpec (next) ->
+              up.render('.target', url: '/path', cache: true)
+
+              next ->
+                expect('.target').toHaveText('expired text')
+
+            it 'calls an { onOffline } instead of { onFinished } after revalidation fails', asyncSpec (next) ->
+              onOffline = jasmine.createSpy('onOffline handler')
+              onFinished = jasmine.createSpy('onFinished handler')
+              up.render('.target', { url: '/path', cache: true, onOffline, onFinished })
+
+              next ->
+                expect(up.network.isBusy()).toBe(true)
+                expect(onFinished).not.toHaveBeenCalled()
+                expect(onOffline).not.toHaveBeenCalled()
+
+                expect('.target').toHaveText('expired text')
+                expect(up.network.isBusy()).toBe(true)
+
+                jasmine.lastRequest().responseError()
+
+              next ->
+                expect(onFinished).not.toHaveBeenCalled()
+                expect(onOffline).toHaveBeenCalled()
+
         describe 'up:fragment:loaded event', ->
 
           it 'emits an up:fragment:loaded event that contains information about the request, response and render options', asyncSpec (next) ->

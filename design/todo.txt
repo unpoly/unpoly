@@ -48,11 +48,6 @@ This way we can keep using cached content if we're offline.
 
 ### TODOs
 
-- Test that being offline will still cause a stale cached response to render
-  - Only the revalidation should fail with up:request:offline
-  - { onFinished } callback should not fire (It should already work that way)
-  - { onOffline } callback should still fire
-
 - Update unpoly-rails
   - Change up.cache.keep to up.cache.expire(false) and X-Up-Expire-Cache: false
   - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
