@@ -475,7 +475,6 @@ up.Request = class Request extends up.Record {
 
     this.onQueued?.(this)
   }
-    // @signal?.addEventListener('abort', => @abort())
 
   load() {
     // If the request was aborted before it was sent (e.g. because it was queued)
