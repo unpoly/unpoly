@@ -26,12 +26,12 @@ prefix the option with `fail`:
 up.render({
   url: '/action',
   method: 'post',
-  target: '.content',              // when submission succeeds update '.content'
-  failTarget: 'form',              // when submission fails update the form
-  scroll: 'auto',                  // when submission succeeds use default scroll behavior
-  failScroll: '.errors',           // when submission fails scroll to the error messages
-  onRendered: () => { ... },       // when submission succeeds run this callback
-  onFailedRendered: () => { ... }, // when submission fails run this other callback
+  target: '.content',            // when submission succeeds update '.content'
+  failTarget: 'form',            // when submission fails update the form
+  scroll: 'auto',                // when submission succeeds use default scroll behavior
+  failScroll: '.errors',         // when submission fails scroll to the error messages
+  onRendered: () => { ... },     // when submission succeeds run this callback
+  onFailRendered: () => { ... }, // when submission fails run this other callback
 })
 ```
 

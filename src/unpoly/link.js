@@ -958,7 +958,7 @@ up.link = (function() {
   @param [up-fail]
     Whether the server response should be considered failed.
 
-    By default any HTTP status code other than 2xx or 304 is considered an error code.
+    By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error code.
 
     For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. `[up-fail-target]`.
     See [handling server errors](/failed-responses) for details.
