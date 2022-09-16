@@ -39,20 +39,6 @@ Various changes
 ---------------
 
 
-Offline / rework caching
-------------------------
-
-Our cache terminology is now inconsistent with what's standard in HTTP specs and browsers.
-Also we could get away with *never* cleaning the cache (just expiration).
-This way we can keep using cached content if we're offline.
-
-### TODOs
-
-- Update unpoly-rails
-  - Change up.cache.keep to up.cache.expire(false) and X-Up-Expire-Cache: false
-  - Rename up.cache.clear(pattern) to up.cache.expire(pattern)
-  - Add up.cache.evict(pattern)
-
 
 Docs
 ----
