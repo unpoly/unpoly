@@ -1,42 +1,35 @@
 TODOs after V3
 ==============
 
-- [up-disable-for="..."] [up-enable-for="..."]
+- Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
 - up:feedback:start / up:feedback:stop
   - On the layer, not an individual element
   - Needs to have reference to origin and targetElements
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
 - Honor `Vary` for cache keys (hard!)
-- Do we want an up:fragment:hungry event?
+- Do we want a preventable up:fragment:hungry event?
+- Do we want a preventable up:request:reuse event?
 - Experiment with property mangling vs. public API
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 - This always passes: expect(window).not.toHaveUnhandledRejections()
   - All rejections seem to be delayed until the test ends
   - Maybe a Jasmine issue?
 - Can we get rid of the afterMeasure() callback?
-- up.link.cacheState(link)
-  - Return any known up.Respone for the given link
-    - It already has useful properties { evictAge }, { expireAge }?
-    - We may eventually offer up.Response#revalidate()
-  - Return null while the request is in flight
-    => Or do we want an up.CacheState that also returns here?
-  - It will be hard to do implement this without actually calling up.link.follow() and up.render(), since e.g. the target choice is hard and part of the cache key
-    - Make this an early return in up.Change.FromURL, like with options.preload
 
 
 TODOs for V3
 ============
 
 
-Render lifecycle
-----------------
-
-- Check if we parse all lifecycle callbacks from links
-
 
 Various changes
 ---------------
+
+- Test with other browsers
+  - Firefox
+  - Edge
+  - Safari
 
 
 
@@ -45,10 +38,24 @@ Docs
 
 ### Render rework
 
+- Possibly new page for lifecycle chart
+  - This could explain when a promise settles vs. when everything is finished
 - Document up.render().finished
 - Document all lifecycle callbacks for up.render() (JS) and a[up-follow] (HTML)
-- Possibly new page for lifecycle chart
-- up.network.config.fail
+  - onOffline is not parsed or documented anywhere
+    - a[up-follow][up-on-offline]
+    - parse in up.link.followOptions
+    - up.render({ onOffline })
+    - up.request({ onOffline })
+  - onRendered is not parsed or documented anywhere
+    - up.render({ onRendered })
+    - parse in up.link.followOptions
+    - a[up-follow][up-on-rendered]
+  - onRendered is not parsed or documented anywhere
+    - up.render({ onRendered })
+    - parse in up.link.followOptions
+    - a[up-follow][up-on-rendered]
+  - up:fragment:offline is not documented
 
 
 ### New cache / revalidation
@@ -64,6 +71,7 @@ Docs
 - up.request({ cache })
 - up.request({ cache: 'auto' })
 - a[up-follow][up-cache="auto"]
+- Point existing links to new /caching page
 
 
 ### Target derivation
@@ -84,35 +92,33 @@ Docs
 - Document { disable } and [up-disable] option for up.submit(), form[up-submit]
   - Maybe even for up.render()
   - Maybe even for a[up-follow]
-- Consider consolidating docs for
+- Consider consolidating docs that are currently documented separately for input/form, so it's only "within the container"
   - input[up-watch]/form[up-watch] as well as
   - input[up-validate]/form[up-validate]
+    - Explain [up-validate] usage for radio buttons
   - input[up-autosubmit]/form[up-autosubmit]
-  - ... so it's only "within the container"
-- [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
+  - Fix Links
+  - Update .htaccess
+- New watch options [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
+  - Document at [up-watch]
+  - [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
   - [up-autosubmit] needs a params note saying that that attributes for [up-watch] may be used
   - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
   - Explain that they can be set either on the form or on an input
-- New observe options are not documented everywhere
-  - form[up-autosubmit]
-  - input[up-autsubmit]
-  - input[up-watch]
-  - form[up-watch]
 - Docs for up.validate()
   - { feedback, disable, delay, event }
-  - Explain that you can use it both on containers and individual fields
 - New watch() and validate() options
   - { feedback, disable, delay, event }
+  - Explain that you can use it both on containers and individual fields
 - Document all the ways we prevent concurrency
   - In up.watch()
   - In up.validate()
   - Document that multiple [up-validate] requests are merged into a single request
 - Test and Document that we can use live validation like this:
   <input up-keep up-validate up-watch-event="input">
-- Document that X-Up-Validate may contain multiple names
-- Document that X-Up-Validate may contain :unknown
-- Explain and test [up-validate] usage for radio buttons
-- [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
+- X-Up-Validate header
+  - Document that X-Up-Validate may contain multiple names
+  - Document that X-Up-Validate may contain :unknown
 
 
 ### Offline
@@ -137,30 +143,20 @@ Docs
 ### Other docs
 
 - Config props should be child nodes in unpoly-site's browser
-- Consider documenting errors
-  - up.CannotCompile
-  - up.CannotMatch
-  - up.Offline
-  - AbortError
-  - Possibly use a new @error tag since it's not really a @class that we can check with instanceof
-    - But it could be a class if we no longer compile down to ES5
-- Document up.render({ fail })
-- Document a[up-follow][up-fail])
 - Consider replacing type|undefined with type? in all type comments
+  - Test that a `?` may be part of a type in the parser
 - Go through TODO
-- Go through visibilities *if* we're doing 3.0
+- Go through visibilities
 - Consider a new page for defaults
+  - I know no better @parent than up.util :/
   - Explain that most opts are opt-in
   - Explain navigation defaults
   - Explain config objects
   - Explain auto-Configs
-- Missing doc for up.render({ clearCache }) (but we do document [up-clear-cache])
-- Document { abort } option and [up-abort] everywhere
 - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic
-- Consider a new page for caching and revalidation
 - up.form.config.inputEvents
 - up.form.config.changeEvents
 - up.form.config.inputDelay
@@ -170,8 +166,10 @@ Docs
   - { revealPadding }
   - { revealSnap }
   - { scrollBehavior }
-    - if we stop auto-set it to auto, otherwise stop parsing this
+    - Explain that this is currently only supported for prepending and appending
+  - Also attributes for a[up-follow]
 - Redirect renamed pages, e.g. /server-errors is now /failed-responses
+  - Make a diff of src/unpoly/pages
 
 
 V3 Launch
@@ -339,6 +337,13 @@ Icebox
 - Doc page about "Fragments from local HTML"
   - link from [up-document], [up-fragment], [up-content], { document, fragment, content }.
 - Warn when registering compiler in [up-] namespace
+- Consider documenting errors
+  - But what would be the @parent ?
+  - up.CannotCompile
+  - up.CannotMatch
+  - up.Offline
+  - up.AbortError
+    - has { name: 'AbortError' }
 
 
 Decisions
@@ -397,3 +402,13 @@ Decisions
   - We can override it for fetch()
 - With our long cache eviction background tabs could hog a lot of memory
   => No, since we also limit the number of cache entries to the cache never exceeds some MB
+- up.link.cacheState(link) to people can build .offline classes themselves
+  => Users can already use up.cache.get
+  => We could clean up Request#state and publish this for more goodness
+  - Return any known up.Respone for the given link
+    - It already has useful properties { evictAge }, { expireAge }?
+    - We may eventually offer up.Response#revalidate()
+  - Return null while the request is in flight
+    => Or do we want an up.CacheState that also returns here?
+  - It will be hard to do implement this without actually calling up.link.follow() and up.render(), since e.g. the target choice is hard and part of the cache key
+    - Make this an early return in up.Change.FromURL, like with options.preload
