@@ -90,6 +90,7 @@ Docs
 ### Watch/validate rework
 
 - Document { disable } and [up-disable] option for up.submit(), form[up-submit]
+  - The /disable-option page is there, but still empty
   - Maybe even for up.render()
   - Maybe even for a[up-follow]
 - Consider consolidating docs that are currently documented separately for input/form, so it's only "within the container"
@@ -168,8 +169,7 @@ Docs
   - { scrollBehavior }
     - Explain that this is currently only supported for prepending and appending
   - Also attributes for a[up-follow]
-- Redirect renamed pages, e.g. /server-errors is now /failed-responses
-  - Make a diff of src/unpoly/pages
+
 
 
 V3 Launch
