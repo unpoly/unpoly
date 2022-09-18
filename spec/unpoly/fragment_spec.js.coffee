@@ -5448,11 +5448,56 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('verified text')
               expect(guardEventListener.calls.count()).toBe(1)
 
-          it 'fulfills up.render().finished promise with the cached up.RenderResult if revalidation responded with 304 Not Modified'
+          describe 'if revalidation responded with 304 Not Modified', ->
 
-          it 'calls { onFinished } with the cached up.RenderResult if revalidation responded with 304 Not Modified'
+            it 'calls { onRevalidated } with an empty up.RenderResult', asyncSpec (next) ->
+              onRevalidated = jasmine.createSpy('onRevalidated handler')
+              up.render('.target', { url: '/cached-path', cache: true, onRevalidated })
 
-    describe 'handling of [up-keep] elements', ->
+              next ->
+                expect('.target').toHaveText('cached text')
+
+                expect(up.network.isBusy()).toBe(true)
+                jasmine.respondWith(status: 304)
+
+              next ->
+                expect('.target').toHaveText('cached text')
+                expect(onRevalidated).toHaveBeenCalled()
+
+                result = onRevalidated.calls.argsFor(0)[0]
+                expect(result).toEqual(jasmine.any(up.RenderResult))
+                expect(result.none).toBe(true)
+                expect(result.fragments.length).toBe(0)
+
+            it 'fulfills up.render().finished promise with the cached up.RenderResult from the first render pass'
+
+            it 'calls { onFinished } with the cached up.RenderResult from the first render pass', asyncSpec (next) ->
+              onFinished = jasmine.createSpy('onFinished handler')
+              onRendered = jasmine.createSpy('onRendered handler')
+              up.render('.target', { url: '/cached-path', cache: true, onRendered, onFinished })
+
+              next ->
+                expect('.target').toHaveText('cached text')
+                expect(onRendered).toHaveBeenCalled()
+
+                renderedResult = onRendered.calls.argsFor(0)[0]
+                expect(renderedResult).toEqual(jasmine.any(up.RenderResult))
+                expect(renderedResult.none).toBe(false)
+                expect(renderedResult.fragments[0]).toMatchSelector('.target')
+
+                expect(up.network.isBusy()).toBe(true)
+                jasmine.respondWith(status: 304)
+
+              next ->
+                expect('.target').toHaveText('cached text')
+                expect(onFinished).toHaveBeenCalled()
+
+                finishedResult = onFinished.calls.argsFor(0)[0]
+                expect(finishedResult).toEqual(jasmine.any(up.RenderResult))
+                expect(finishedResult.none).toBe(false)
+                expect(finishedResult.fragments[0]).toMatchSelector('.target')
+
+            describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->
           if u.isString(string)

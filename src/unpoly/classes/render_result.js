@@ -104,11 +104,11 @@ up.RenderResult = class RenderResult extends up.Record {
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
 
-  @function up.RenderResult#isNone
-  @return {boolean}
+  @property up.RenderResult#none
+  @param {boolean} none
   @experimental
   */
-  isNone() {
+  get none() {
     return !this.fragments.length
   }
 

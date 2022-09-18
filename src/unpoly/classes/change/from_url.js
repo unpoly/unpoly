@@ -192,7 +192,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       // A well-behaved server will respond with "304 Not Modified" if the reload
       // produced the same E-tag or Last-Modified timestamp. In that case we keep
       // the original up.RenderResult.
-      if (!verifyResult.isNone()) {
+      if (!verifyResult.none) {
         renderResult = verifyResult
       }
     }
