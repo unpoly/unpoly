@@ -16,6 +16,10 @@ TODOs after V3
   - All rejections seem to be delayed until the test ends
   - Maybe a Jasmine issue?
 - Can we get rid of the afterMeasure() callback?
+- Support { scroll: 'keep' }
+  - Similiar to { focus: 'keep' }
+  - Store scrollTops around a viewport in UpdateLayer
+  - Possibly refactor tops to up.ScrollTopsCapsule
 
 
 TODOs for V3
@@ -51,10 +55,10 @@ Docs
     - up.render({ onRendered })
     - parse in up.link.followOptions
     - a[up-follow][up-on-rendered]
-  - onRendered is not parsed or documented anywhere
-    - up.render({ onRendered })
+  - onRevalidated is not parsed or documented anywhere
+    - up.render({ onRevalidated })
     - parse in up.link.followOptions
-    - a[up-follow][up-on-rendered]
+    - a[up-follow][up-on-revalidated]
   - up:fragment:offline is not documented
 
 
