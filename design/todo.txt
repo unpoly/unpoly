@@ -10,6 +10,7 @@ TODOs after V3
 - Honor `Vary` for cache keys (hard!)
 - Do we want a preventable up:fragment:hungry event?
 - Do we want a preventable up:request:reuse event?
+  - Maybe even :reused since there is no :loaded for cached requests
 - Experiment with property mangling vs. public API
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 - This always passes: expect(window).not.toHaveUnhandledRejections()
@@ -40,6 +41,18 @@ Various changes
 Docs
 ----
 
+### New/reworked pages overview
+
+/caching
+/disconnects
+/fragment-placement => /targeting-fragments
+/target-derivation
+/disable-option
+/watch-tuning ?
+/defaults or /options
+/render-lifecycle (maybe)
+
+
 ### Render rework
 
 - Possibly new page for lifecycle chart
@@ -60,6 +73,7 @@ Docs
     - parse in up.link.followOptions
     - a[up-follow][up-on-revalidated]
   - up:fragment:offline is not documented
+    - Link from up:request:offline
 
 
 ### New cache / revalidation
@@ -78,19 +92,6 @@ Docs
 - Point existing links to new /caching page
 
 
-### Target derivation
-
-- Possibly own page
-- Document which features require targetable elements
-  - up.render(Element)
-  - up.reload(Element)
-  - [up-poll]
-  - [up-hungry]
-  - up.radio.config.hungrySelectors
-    - Note that the configured selector will be re-derived
-  - [up-viewport]
-  - Also document [up-id] on these elements
-
 ### Watch/validate rework
 
 - Document { disable } and [up-disable] option for up.submit(), form[up-submit]
@@ -104,6 +105,7 @@ Docs
   - input[up-autosubmit]/form[up-autosubmit]
   - Fix Links
   - Update .htaccess
+- Rework [up-validate] so it talks more generically about dynamic forms rendered on the server
 - New watch options [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
   - Document at [up-watch]
   - [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
@@ -145,6 +147,22 @@ Docs
 - Explain that the initial request requires a service worker like the one from UpUp (no relation)
 
 
+
+### Target derivation
+
+- Possibly own page
+  - Document which features require targetable elements
+    - up.render(Element)
+    - up.reload(Element)
+    - [up-poll]
+    - [up-hungry]
+    - up.radio.config.hungrySelectors
+      - Note that the configured selector will be re-derived
+    - [up-viewport]
+    - Also document [up-id] on these elements
+  - Redirect links to up.fragment.toTarget
+
+
 ### Other docs
 
 - Config props should be child nodes in unpoly-site's browser
@@ -158,7 +176,11 @@ Docs
   - Explain navigation defaults
   - Explain config objects
   - Explain auto-Configs
-- Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
+  - Explain that you can often override renderOptions in event handlers
+- Targeting content
+  - Rename /fragment-placement to /targeting-fragments
+  - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
+  - Include or link to /target-derivation
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic

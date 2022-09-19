@@ -23,6 +23,7 @@ Unpoly's `up.request()` has a number of convenience features:
 - A very concise API requiring zero boilerplate code.
 
 @see aborting-requests
+@see disconnects
 
 @see up.request
 @see up.Response
