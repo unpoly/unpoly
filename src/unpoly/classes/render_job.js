@@ -34,7 +34,7 @@ up.RenderJob = class RenderJob {
       // We call result.options.onRendered() instead of this.options.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
       // depending on options.failOptions.
-      result.options.onRendered?.(result)
+      if (!result.none) result.options.onRendered?.(result)
       result.finished.then(result.options.onFinished)
       return true
     }

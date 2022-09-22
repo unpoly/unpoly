@@ -55,8 +55,8 @@ up.OptionsParser = class OptionsParser {
     this.parse(e.jsonAttr, key, keyOptions)
   }
 
-  callback(key, keyOptions) {
-    let exposedKeys = { keyOptions }
+  callback(key, keyOptions = {}) {
+    let { exposedKeys } = keyOptions
     let parser = (link, attr) => e.callbackAttr(link, attr, exposedKeys)
     this.parse(parser, key, keyOptions)
   }

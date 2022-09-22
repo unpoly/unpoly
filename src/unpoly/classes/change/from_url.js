@@ -176,8 +176,6 @@ up.Change.FromURL = class FromURL extends up.Change {
       let verifyResult = await up.reload(renderResult.target, {
         ...originalRenderOptions,
         layer: renderResult.layer, // if the original render opened a layer, we now update it
-        onRendered: originalRenderOptions.onRevalidated,
-        onFailRendered: originalRenderOptions.onFailRevalidated,
         onFinished: null, // we're delaying the finish event here
         scroll: false,
         focus: 'keep',

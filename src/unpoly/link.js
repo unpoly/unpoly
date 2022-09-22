@@ -408,8 +408,8 @@ up.link = (function() {
     // Lifecycle options
     parser.callback('onLoaded', { exposedKeys: ['request', 'response', 'renderOptions'] })
     parser.callback('onRendered')
-    parser.callback('onRevalidated')
     parser.callback('onFinished')
+    // parser.parse(e.callbackAttr, 'onFinished')
     parser.callback('onOffline') // not a request option!
     parser.callback('onError') // not a request option!
 

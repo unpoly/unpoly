@@ -1248,6 +1248,20 @@ describe 'up.fragment', ->
             next (result) ->
               expect(result.state).toBe('fulfilled')
 
+          it 'does not call on { onRendered } callback', asyncSpec (next) ->
+            fixture('.one', text: 'old one')
+            fixture('.two', text: 'old two')
+
+            onRendered = jasmine.createSpy('onRendered callback')
+            up.render({ target: '.one', url: '/path', onRendered })
+
+            next ->
+              jasmine.respondWith(status: 304, responseText: '')
+
+            next ->
+              expect('.one').toHaveText('old one')
+              expect(onRendered).not.toHaveBeenCalled()
+
         describe 'when the server sends an X-Up-Target header', ->
 
           it 'renders the server-provided target', asyncSpec (next) ->
@@ -1278,25 +1292,40 @@ describe 'up.fragment', ->
               expect('.two').toHaveText('old content')
               expect('.three').toHaveText('new content')
 
-          it 'does not require a response body and succeeds when the server sends X-Up-Target: :none', asyncSpec (next) ->
-            fixture('.one', text: 'old one')
-            fixture('.two', text: 'old two')
+          describe 'when the server sends X-Up-Target: :none', ->
 
-            promise = up.render(target: '.one', url: '/path')
+            it 'does not require a response body and succeeds', asyncSpec (next) ->
+              fixture('.one', text: 'old one')
+              fixture('.two', text: 'old two')
 
-            next =>
-              @respondWith(responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain')
+              promise = up.render(target: '.one', url: '/path')
 
-            next ->
-              expect('.one').toHaveText('old one')
-              expect('.two').toHaveText('old two')
+              next =>
+                @respondWith(responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain')
 
-              next.await promiseState(promise)
+              next ->
+                expect('.one').toHaveText('old one')
+                expect('.two').toHaveText('old two')
 
-            next (result) ->
-              expect(result.state).toBe('fulfilled')
-              expect(result.value).toEqual(jasmine.any(up.RenderResult))
-              expect(result.value.fragments).toEqual []
+                next.await promiseState(promise)
+
+              next (result) ->
+                expect(result.state).toBe('fulfilled')
+                expect(result.value).toEqual(jasmine.any(up.RenderResult))
+                expect(result.value.fragments).toEqual []
+
+            it 'does not call an { onRendered } callback', asyncSpec (next) ->
+              fixture('.one', text: 'old one')
+
+              onRendered = jasmine.createSpy('onRendered callback')
+              up.render({ target: '.one', url: '/path', onRendered })
+
+              next ->
+                jasmine.respondWith(responseHeaders: { 'X-Up-Target': ':none' }, responseText: '', contentType: 'text/plain')
+
+              next ->
+                expect('.one').toHaveText('old one')
+                expect(onRendered).not.toHaveBeenCalled()
 
           it 'lets the server sends an abstract target like :main', asyncSpec (next) ->
             fixture('.one', text: 'old content')
@@ -5408,24 +5437,21 @@ describe 'up.fragment', ->
               expect(finishedCallback).not.toHaveBeenCalled()
               expect(finishedFailedCallback).toHaveBeenCalled()
 
-          it 'runs a callback { onRevalidated } instead of { onRendered } for the second render pass', asyncSpec (next) ->
+          it 'runs the { onRendered } a second time for the second render pass', asyncSpec (next) ->
             onRendered = jasmine.createSpy('onRendered callback')
-            onRevalidated = jasmine.createSpy('onRevalidated callback')
 
-            up.render('.target', { url: '/cached-path', cache: true, onRendered, onRevalidated })
+            up.render('.target', { url: '/cached-path', cache: true, onRendered })
 
             next ->
               expect('.target').toHaveText('cached text')
 
               expect(onRendered.calls.count()).toBe(1)
-              expect(onRevalidated.calls.count()).toBe(0)
 
               expect(up.network.isBusy()).toBe(true)
               jasmine.respondWithSelector('.target', text: 'verified text')
 
             next ->
-              expect(onRendered.calls.count()).toBe(1)
-              expect(onRevalidated.calls.count()).toBe(1)
+              expect(onRendered.calls.count()).toBe(2)
 
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('verified text')
@@ -5450,24 +5476,20 @@ describe 'up.fragment', ->
 
           describe 'if revalidation responded with 304 Not Modified', ->
 
-            it 'calls { onRevalidated } with an empty up.RenderResult', asyncSpec (next) ->
-              onRevalidated = jasmine.createSpy('onRevalidated handler')
-              up.render('.target', { url: '/cached-path', cache: true, onRevalidated })
+            it 'does not call { onRendered } a second time', asyncSpec (next) ->
+              onRendered = jasmine.createSpy('onRendered handler')
+              up.render('.target', { url: '/cached-path', cache: true, onRendered })
 
               next ->
+                expect(onRendered.calls.count()).toBe(1)
                 expect('.target').toHaveText('cached text')
 
                 expect(up.network.isBusy()).toBe(true)
                 jasmine.respondWith(status: 304)
 
               next ->
+                expect(onRendered.calls.count()).toBe(1)
                 expect('.target').toHaveText('cached text')
-                expect(onRevalidated).toHaveBeenCalled()
-
-                result = onRevalidated.calls.argsFor(0)[0]
-                expect(result).toEqual(jasmine.any(up.RenderResult))
-                expect(result.none).toBe(true)
-                expect(result.fragments.length).toBe(0)
 
             it 'fulfills up.render().finished promise with the cached up.RenderResult from the first render pass'
 

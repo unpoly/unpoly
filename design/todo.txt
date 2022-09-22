@@ -2,6 +2,7 @@ TODOs after V3
 ==============
 
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
+  - Or should we have an [up-switch-for] and [up-switch-effect]?
 - up:feedback:start / up:feedback:stop
   - On the layer, not an individual element
   - Needs to have reference to origin and targetElements
@@ -72,10 +73,8 @@ Docs
     - up.render({ onRendered })
     - parse in up.link.followOptions
     - a[up-follow][up-on-rendered]
-  - onRevalidated is not parsed or documented anywhere
-    - up.render({ onRevalidated })
-    - parse in up.link.followOptions
-    - a[up-follow][up-on-revalidated]
+    - explain that it may be called twice with revalidation
+    - explain that it's not called when no content is rendered
   - onError is not parsed or documented anywhere
     - up.render({ onError })
     - parse in up.link.followOptions
