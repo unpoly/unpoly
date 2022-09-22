@@ -36,6 +36,11 @@ Various changes
   - Edge
   - Safari
 
+- Render callbacks seem weird
+  - How to use { onRevalidated } when it might not even be called?
+  - Wouldn't we rather want to call { onRendered } twice?
+    - This would effectively be a better { onInserted } (since it's after scroll/focus)
+    - In the SPA world it would feel natural to "render" multiple time
 
 
 Docs
@@ -63,7 +68,6 @@ Docs
     - a[up-follow][up-on-offline]
     - parse in up.link.followOptions
     - up.render({ onOffline })
-    - up.request({ onOffline })
   - onRendered is not parsed or documented anywhere
     - up.render({ onRendered })
     - parse in up.link.followOptions
@@ -72,8 +76,10 @@ Docs
     - up.render({ onRevalidated })
     - parse in up.link.followOptions
     - a[up-follow][up-on-revalidated]
-  - up:fragment:offline is not documented
-    - Link from up:request:offline
+  - onError is not parsed or documented anywhere
+    - up.render({ onError })
+    - parse in up.link.followOptions
+    - a[up-follow][up-on-error]
 
 
 ### New cache / revalidation
@@ -165,6 +171,10 @@ Docs
 
 ### Other docs
 
+- onError
+  - consider a full try / catch example in /failed-respoinses
+  - /failed-responses should also explain onError
+- config.pollIntervalScale
 - Config props should be child nodes in unpoly-site's browser
 - Consider replacing type|undefined with type? in all type comments
   - Test that a `?` may be part of a type in the parser

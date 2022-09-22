@@ -677,8 +677,8 @@ up.network = (function() {
   - The connection's effective round-trip time is longer than `up.network.config.badRTT`.
   - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
 
-  By default Unpoly will disable [preloading](/a-up-preload) and [polling](/up-poll) if requests
-  should be avoided.
+  By default Unpoly will disable [preloading](/a-up-preload) and [poll](/up-poll)
+  [less often](/up.network.config.pollIntervalScale) if requests should be avoided.
 
   @function up.network.shouldReduceRequests
   @return {boolean}
@@ -914,7 +914,7 @@ up.network = (function() {
   Note that this event will also be emitted when the server signals an
   error with an HTTP status like `500`. Only if the request
   encounters a fatal error (like a loss of network connectivity),
-  [`up:request:offline`](/up:request:offline) is emitted instead.
+  `up:request:offline` is emitted instead.
 
   The event is emitted on the layer that caused the request.
 
@@ -942,13 +942,15 @@ up.network = (function() {
 
   /*-
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  encounters fatal error like a timeout or loss of network connectivity.
+  encounters fatal error like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
 
   Note that this event will *not* be emitted when the server produces an
   error message with an HTTP status like `500`. When the server can produce
   any response, [`up:request:loaded`](/up:request:loaded) is emitted instead.
 
   The event is emitted on the layer that caused the request.
+
+  To effectively [handle disconnects while rendering](/disconnects), use the `up:fragment:offline` event instead.
 
   @event up:request:offline
 

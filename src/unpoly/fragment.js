@@ -882,6 +882,8 @@ up.fragment = (function() {
   Instead of preventing the update, listeners may also access the `event.renderOptions` object
   to mutate options to the `up.render()` call that will process the server response.
 
+  The event is emitted on the targeted layer.
+
   @event up:fragment:loaded
 
   @param event.preventDefault()
@@ -898,7 +900,38 @@ up.fragment = (function() {
 
   @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
+
   @stable
+  */
+
+  /*-
+  This event is emitted when the device loses its network connection while [rendering](/up.render) content.
+
+  Listeners may decide how to handle the connection loss. E.g. you may choose to display an error, or to offer a button that retries the failed request.
+  See [handling disconnects](/disconnects) for more details and examples.
+
+  The event is emitted on the targeted layer.
+
+  @event up:fragment:offline
+
+  @param {up.Request} event.request
+    The original request to the server.
+
+  @param {Object} event.renderOptions
+    Options for the `up.render()` call that has caused the failed request.
+
+  @param {Function(Object): Promise<up.RenderResult>} event.retry()
+    Retry the render pass with the same options.
+
+    You may pass an object to override individual properties from the original render options.
+
+    Retrying causes a second render pass with its own async `up.RenderResult`.
+    The promise from the original render pass has already been rejected when `up:fragment:offline` is emitted.
+
+  @param {Element} [event.origin]
+    The link or form element that caused the fragment update.
+
+  @experimental
   */
 
   /*-

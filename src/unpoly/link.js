@@ -399,13 +399,19 @@ up.link = (function() {
     parser.string('confirm', { attr: ['up-confirm', 'data-confirm'] })
     parser.string('target')
     parser.booleanOrString('fallback')
-    parser.parse(((link, attrName) => e.callbackAttr(link, attrName, ['request', 'response', 'renderOptions'])), 'onLoaded'); // same
     parser.string('content')
     parser.string('fragment')
     parser.string('document')
-    parser.parse(e.callbackAttr, 'onFinished')
     parser.boolean('useKeep')
     parser.boolean('useHungry')
+
+    // Lifecycle options
+    parser.callback('onLoaded', { exposedKeys: ['request', 'response', 'renderOptions'] })
+    parser.callback('onRendered')
+    parser.callback('onRevalidated')
+    parser.callback('onFinished')
+    parser.callback('onOffline') // not a request option!
+    parser.callback('onError') // not a request option!
 
     // Layer options
     parser.boolean('peel')
