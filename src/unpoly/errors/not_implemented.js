@@ -1,2 +1,2 @@
-up.NotImplemented = class NotImplemented extends up.Failed {
+up.NotImplemented = class NotImplemented extends up.Error {
 }

@@ -1,2 +1,2 @@
-up.CannotMatch = class CannotMatch extends up.Failed {
+up.CannotMatch = class CannotMatch extends up.Error {
 }

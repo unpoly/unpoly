@@ -60,7 +60,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     if (this.emitOpenEvent().defaultPrevented) {
       // We cannot use @abortWhenLayerClosed() here,
       // because the layer is not even in the stack yet.
-      throw new up.AbortError('Open event was prevented')
+      throw new up.Aborted('Open event was prevented')
     }
 
     // Make sure that the baseLayer layer doesn't already have a child layer.

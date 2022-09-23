@@ -36,12 +36,7 @@ Various changes
   - Firefox
   - Edge
   - Safari
-
-- Render callbacks seem weird
-  - How to use { onRevalidated } when it might not even be called?
-  - Wouldn't we rather want to call { onRendered } twice?
-    - This would effectively be a better { onInserted } (since it's after scroll/focus)
-    - In the SPA world it would feel natural to "render" multiple time
+- After being redirected, assume method = GET
 
 
 Docs

@@ -38,7 +38,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
   assertEmitted() {
     const event = this.emit()
     if (event.defaultPrevented) {
-      throw new up.AbortError(`Event ${event.type} was prevented`)
+      throw new up.Aborted(`Event ${event.type} was prevented`)
     }
   }
 

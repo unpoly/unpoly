@@ -1,2 +1,2 @@
-up.CannotCompile = class CannotCompile extends up.Failed {
+up.CannotCompile = class CannotCompile extends up.Error {
 }

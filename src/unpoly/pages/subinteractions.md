@@ -18,7 +18,7 @@ Imagine a simple application that manages *projects* and *companies*:
 
 The application could look like this:
 
-![Screenshot of a CRUD interface](/images/api/crud-companies-projects.png){:width='500'}
+![Screenshot of a CRUD interface](images/crud-companies-projects.png){:width='500'}
 
 The follow case illustrates the problems with a sequential screen flow:
 
@@ -40,7 +40,7 @@ We can improve this flow with a *subinteraction*:
 
 The diagram illustrates the difference between the two control flows:
 
-![Differences between sequential screen flow and subinteractions](/images/api/subinteraction-flow.svg){:width='500'}
+![Differences between sequential screen flow and subinteractions](images/subinteraction-flow.svg){:width='500'}
 
 
 Starting a subinteraction

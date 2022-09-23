@@ -29,7 +29,7 @@ up.error = (function() {
   */
   function fail(...args) {
     // Yes, we pass the message plus all substitution vars as an array in the first arg slot.
-    throw new up.Failed(args)
+    throw new up.Error(args)
   }
 
   function isCritical(error) {

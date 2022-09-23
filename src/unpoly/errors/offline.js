@@ -1,2 +1,2 @@
-up.Offline = class Offline extends up.Failed {
+up.Offline = class Offline extends up.Error {
 }

@@ -436,7 +436,7 @@ describe 'up.feedback', ->
 
       it 'removes .up-active when a link with [up-confirm] was not confirmed', asyncSpec (next) ->
         $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
-        spyOn(up.browser, 'assertConfirmed').and.throwError(new up.AbortError('User aborted'))
+        spyOn(up.browser, 'assertConfirmed').and.throwError(new up.Aborted('User aborted'))
 
         Trigger.clickSequence($link)
 

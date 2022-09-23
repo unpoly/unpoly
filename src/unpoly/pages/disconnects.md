@@ -3,7 +3,7 @@ Handling disconnects
 
 In a vanilla HTML document, clicking a link while offline will replace your app with a standard error screen, no questions asked:
 
-![Browser error when offline](/images/api/browser-offline.png){:width='500'}
+![Browser error when offline](images/browser-offline.png){:width='500'}
 
 Interacting with an Unpoly-enhanced [link](/a-up-follow) or [form](/form-up-submit) while offline will *not* change the page. Instead Unpoly lets you define your own disconnect handling. E.g. you may choose to display an error, or to offer a button that retries the failed request. Also Unpoly can [still render cached content while offline](#expired-pages-remain-accessible-while-offline).
 

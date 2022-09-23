@@ -1,4 +1,4 @@
-up.Failed = class Failed extends Error {
+up.Error = class Error extends window.Error {
   constructor(message, props = {}) {
     if (Array.isArray(message)) {
       message = up.util.sprintf(...message)

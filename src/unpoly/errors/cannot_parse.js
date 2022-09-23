@@ -1,2 +1,2 @@
-up.CannotParse = class CannotParse extends up.Failed {
+up.CannotParse = class CannotParse extends up.Error {
 }

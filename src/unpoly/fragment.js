@@ -26,6 +26,7 @@ a server-rendered web application:
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see navigation
+@see render-hooks
 @see focus-option
 @see csp
 
@@ -498,6 +499,12 @@ up.fragment = (function() {
 
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
+
+  ### Hooking into the render process
+
+  Your code may hook into specific stages of the rendering process. This allows you to modify the rendered result or handle error cases.
+
+  See [render hooks](/render-hooks) for details.
 
   ### Concurrency
 

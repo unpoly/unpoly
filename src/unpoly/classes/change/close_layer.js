@@ -22,7 +22,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     up.browser.assertConfirmed(this.options)
 
     if (this.emitCloseEvent().defaultPrevented && this.preventable) {
-      throw new up.AbortError('Close event was prevented')
+      throw new up.Aborted('Close event was prevented')
     }
 
     // Abort all pending requests targeting the layer we're now closing.

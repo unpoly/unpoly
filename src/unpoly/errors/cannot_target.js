@@ -1,2 +1,2 @@
-up.CannotTarget = class CannotTarget extends up.Failed {
+up.CannotTarget = class CannotTarget extends up.Error {
 }

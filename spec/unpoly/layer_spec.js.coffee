@@ -1736,7 +1736,7 @@ describe 'up.layer', ->
           [root, overlay] = makeLayers(2)
           confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake (options) ->
             if options.confirm
-              throw new up.AbortError('User aborted')
+              throw new up.Aborted('User aborted')
           link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
 
           Trigger.clickSequence(link)

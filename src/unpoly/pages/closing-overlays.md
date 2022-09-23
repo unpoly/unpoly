@@ -16,7 +16,7 @@ When closing an [overlay](/up.layer), Unpoly distinguishes between two kinds clo
 1. **Accepting** an overlay (user picks a value, confirms with "OK", etc.), optionally with a value
 2. **Dismissing** an overlay (user clicks "Cancel", "X", presses `ESC`, clicks on the background)
 
-![Different ways to close a modal overlay](/images/api/close-intent.png){:width='600'}
+![Different ways to close a modal overlay](images/close-intent.png){:width='600'}
 
 Accepting an overlay will usually continue a larger interaction in the parent layer.
 Dismissal usually means cancelation. When you're waiting for a [subinteraction](/subinteractions)
