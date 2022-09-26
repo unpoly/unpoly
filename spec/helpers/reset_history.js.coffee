@@ -2,13 +2,15 @@ u = up.util
 $ = jQuery
 
 beforeAll ->
-  @hrefBeforeSuite = location.href
-  @titleBeforeSuite = document.title
+  jasmine.locationBeforeSuite = location.href
+  jasmine.titleBeforeSuite = document.title
 
 afterAll ->
-  if up.history.config.enabled
-    history.replaceState?({ fromResetPathHelper: true }, '', @hrefBeforeSuite)
-    document.title = @titleBeforeSuite
+  # Webkit ignores replaceState() calls after 100 calls / 30 sec.
+  # Hence we only call it when the history was actually changed.
+  if up.history.config.enabled && !up.util.matchURLs(location.href, jasmine.locationBeforeSuite)
+    history.replaceState?({ fromResetPathHelper: true }, '', jasmine.locationBeforeSuite)
+    document.title = jasmine.titleBeforeSuite
 
 beforeEach ->
   # Webkit ignores replaceState() calls after 100 calls / 30 sec.
@@ -16,8 +18,8 @@ beforeEach ->
   up.history.config.enabled = false
 
   # Store original URL and title so specs may use it
-  @locationBeforeExample = location.href
-  @titleBeforeExample = document.title
+  jasmine.locationBeforeExample = location.href
+  jasmine.titleBeforeExample = document.title
 
 afterEach ->
   up.viewport.root.scrollTop = 0

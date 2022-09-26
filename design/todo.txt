@@ -38,7 +38,6 @@ Various changes
   - Firefox
   - Edge
   - Safari
-- After being redirected, assume method = GET
 
 
 Docs
@@ -220,6 +219,7 @@ V3 Launch
   - Needs to link to 2.x-stable branch
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
+- Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
 
 
 

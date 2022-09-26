@@ -199,6 +199,8 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   augmentOptionsFromResponse(renderOptions) {
+    // Also see preprocessing of server response in up.Request#extractResponseFromXHR().
+
     const responseURL = this.response.url
     let serverLocation = responseURL
 

@@ -1035,7 +1035,7 @@ describe 'up.fragment', ->
 
               u.task =>
                 expect('.target').toHaveText('old text')
-                expect(location.href).toMatchURL(@locationBeforeExample)
+                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
                 promiseState(changePromise).then (result) ->
                   expect(result.state).toEqual('rejected')
@@ -2740,7 +2740,7 @@ describe 'up.fragment', ->
             fixture('.target')
             up.render('.target', url: '/path', method: 'post', history: true)
             next => @respondWithSelector('.target')
-            next => expect(location.href).toMatchURL(@locationBeforeExample)
+            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it "detects a redirect's new URL when the server sets an X-Up-Location header", asyncSpec (next) ->
             fixture('.target')
@@ -2748,13 +2748,31 @@ describe 'up.fragment', ->
             next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
             next => expect(location.href).toMatchURL('/other-path')
 
+          it 'assumes a redirect to GET when the response URL does not match the request URL', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/endpoint', history: true, method: 'post')
+            next -> jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/redirect-path' })
+            next -> expect(location.href).toMatchURL('/redirect-path')
+
+          it 'does not assume a redirect to GET when the response URL matches the request URL', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/endpoint', history: true, method: 'post')
+            next -> jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/endpoint' })
+            next -> expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+
+          it 'does not assume a redirect to GET when the server sends an X-Up-Method header', asyncSpec (next) ->
+            fixture('.target')
+            up.render('.target', url: '/endpoint', history: true, method: 'post')
+            next -> jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/redirect-path', 'X-Up-Method': 'post' })
+            next -> expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+
           it "preserves the #hash when the server sets an X-Up-Location header (like a vanilla form submission would do in the browser)", asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/path#hash', history: true)
             next => @respondWithSelector('.target', responseHeaders: { 'X-Up-Location': '/other-path' })
             next => expect(location.href).toMatchURL('/other-path#hash')
 
-          it 'adds a history entry after non-GET requests if the response includes a { X-Up-Method: "get" } header (will happen after a redirect)', asyncSpec (next) ->
+          it 'adds a history entry after non-GET requests if the response includes a `X-Up-Method: GET` header (will happen after a redirect)', asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/requested-path', method: 'post', history: true)
             next =>
@@ -2770,19 +2788,19 @@ describe 'up.fragment', ->
             fixture('.target')
             up.render('.target', url: '/path', method: 'post', failTarget: '.target', history: true)
             next => @respondWithSelector('.target', status: 500)
-            next => expect(location.href).toMatchURL(@locationBeforeExample)
+            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/path', history: false)
             next => @respondWithSelector('.target')
-            next => expect(location.href).toMatchURL(@locationBeforeExample)
+            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it 'does not add a history entry without a { history } option', asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/path')
             next => @respondWithSelector('.target')
-            next => expect(location.href).toMatchURL(@locationBeforeExample)
+            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it 'adds params from a { params } option to the URL of a GET request', asyncSpec (next) ->
             fixture('.target')
@@ -2794,13 +2812,13 @@ describe 'up.fragment', ->
             fixture('.target')
             up.render('.target', url: '/path', history: false)
             next => @respondWithSelector('.target')
-            next => expect(location.href).toMatchURL(@locationBeforeExample)
+            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it 'does not add a history entry with { location: false } option', asyncSpec (next) ->
             fixture('.target')
             up.render('.target', url: '/path', location: false)
             next => @respondWithSelector('.target')
-            next => expect(location.href).toMatchURL(@locationBeforeExample)
+            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           describe 'with { history: "auto" }', ->
 
@@ -2849,7 +2867,7 @@ describe 'up.fragment', ->
                 @respondWithSelector('.target')
                 next.await(promise)
               next =>
-                expect(location.href).toMatchURL(@locationBeforeExample)
+                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
             it 'adds a history when at least fragment of a multi-fragment update is a main target', asyncSpec (next) ->
               up.fragment.config.mainTargets = ['.bar']
@@ -2939,7 +2957,7 @@ describe 'up.fragment', ->
               next =>
                 expect(up.layer.isOverlay()).toBe(true)
                 # Browser location is unchanged, but the overlay still needs its internal location
-                expect(location.href).toMatchURL(@locationBeforeExample)
+                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
                 expect(up.layer.location).toMatchURL('/original-layer-url')
 
                 expect(listener.calls.count()).toBe(1)
@@ -2948,7 +2966,7 @@ describe 'up.fragment', ->
 
               next =>
                 # Browser location is unchanged, but the overlay still needs its internal location
-                expect(location.href).toMatchURL(@locationBeforeExample)
+                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
                 expect(up.layer.location).toMatchURL('/next-layer-url')
 
                 # Listener was called again, as we're tracking changes to the layer's { location } prop

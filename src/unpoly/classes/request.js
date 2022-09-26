@@ -667,8 +667,8 @@ up.Request = class Request extends up.Record {
       // Unfortunately we cannot ask the XHR object for its response method.
       // The server may use the custom X-Up-Method for that. If that header is missing
       // AND the URLs changed between request and response, we assume GET.
-      if (!methodFromResponse && !u.matchURLs(responseAttrs.url, urlFromResponse)) {
-        methodFromResponse = 'GET'
+      if (!u.matchURLs(this.url, urlFromResponse)) {
+        methodFromResponse ||= 'GET'
       }
 
       responseAttrs.url = urlFromResponse

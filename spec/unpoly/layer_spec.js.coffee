@@ -1602,7 +1602,7 @@ describe 'up.layer', ->
           next =>
             expect(up.layer.count).toBe(2)
             expect(up.layer.history).toBe(false)
-            expect(up.history.location).toMatchURL(@locationBeforeExample)
+            expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
 
         it 'lets the link override the mode config with an [up-history] attribute', asyncSpec (next) ->
           fixture('.target')
@@ -1617,7 +1617,7 @@ describe 'up.layer', ->
           next =>
             expect(up.layer.count).toBe(2)
             expect(up.layer.history).toBe(false)
-            expect(up.history.location).toMatchURL(@locationBeforeExample)
+            expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
 
     describe '[up-accept]', ->
 
