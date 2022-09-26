@@ -27,8 +27,7 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 
 @see navigation
 @see render-hooks
-@see focus-option
-@see csp
+@see target-derivation
 
 @see up.render
 @see up.navigate

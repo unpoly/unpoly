@@ -26,6 +26,8 @@ There are existing implementations for various web frameworks:
 - [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
 - [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
 
+@see csp
+
 @module up.protocol
 */
 up.protocol = (function() {

@@ -13,6 +13,7 @@ Also see documentation for the [scroll option](/scroll-option) and [focus option
 
 @see scroll-option
 @see scroll-tuning
+@see focus-option
 
 @see up.reveal
 @see [up-fixed=top]

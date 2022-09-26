@@ -6,7 +6,7 @@ This page outlines various ways to place new fragments in your existing DOM tree
 
 ### Swapping fragments
 
-Pass a CSS selector like `{ target: '.content' }` to replace an existing element
+Pass a CSS selector like `{ target: '.foo' }` to replace an existing element
 with a new version, usually fetched from the server via HTTP.
 
 The server may return additional HTML, but only the element matching the selector is used.
