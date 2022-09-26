@@ -22,6 +22,8 @@ TODOs after V3
   - Similiar to { focus: 'keep' }
   - Store scrollTops around a viewport in UpdateLayer
   - Possibly refactor tops to up.ScrollTopsCapsule
+- Check that the target (and all non-successful target attempts) are visible in the log
+  - Possibly highlight
 
 
 TODOs for V3
@@ -46,7 +48,6 @@ Docs
 
 /caching
 /disconnects
-/fragment-placement => /targeting-fragments
 /target-derivation
 /disable-option
 /watch-tuning ?
@@ -182,7 +183,6 @@ Docs
   - Explain auto-Configs
   - Explain that you can often override renderOptions in event handlers
 - Targeting content
-  - Rename /fragment-placement to /targeting-fragments
   - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
   - Include or link to /target-derivation
 - Document django-forms-dynamic for [up-validate]
