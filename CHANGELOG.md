@@ -55,7 +55,7 @@ Changes tracked until 2022-07-06.
 - Do we render more?
   - As much as a web app without caching
   - As much as an Unpoly 2 app with short cache expiry time
-    - And we can optimnize it with ...
+    - And we can optimize it with ...
 - Less important changes
   - "Clearing" the cache is now "expiring" the cache
     - Rework X-Up-Clear-Cache
@@ -98,7 +98,7 @@ Changes tracked until 2022-07-06.
 - { abort: 'target' } as new default render option (navigation or not)
 - Abort requests targeting a screen region
   - This will cancel all requests targeting .region or descendants when the link is clicked (and a second time when .region is updated):
-    - <a href="..." up-target=".region">
+    - `<a href="..." up-target=".region">`
   - Programmatically:
     - up.fragment.abort(region)
   - Example from /aborting-requests
@@ -131,7 +131,7 @@ Changes tracked until 2022-07-06.
   - Arbitrary selectors  (`form[up-disable=".money-fields"])
 - 
 - Fields marked with [up-validate] and [up-watch] (former `[up-disable]`) can also disable other fields while loading
-  - <select up-validate=".employees" up-watch-disable=".employees">
+  - `<select up-validate=".employees" up-watch-disable=".employees">`
 
 
 ### Forms where everything depends on everything
@@ -167,7 +167,7 @@ Changes tracked until 2022-07-06.
   - Rename up:request:fatal to up:request:offline
   - up:fragment:offline, { onOffline }, event.retry()
   - [up-on-offline]
-  - <a href="..." up-on-offline="if (confirm('Retry'?) event.retry()">Post bid</a>
+  - `<a href="..." up-on-offline="if (confirm('Retry'?) event.retry()">Post bid</a>`
   - Or globally:
     up.on('up:fragment:offline', (event) => if (confirm('Retry'?)) event.retry())
     (possibly stack this)
@@ -206,9 +206,9 @@ Changes tracked until 2022-07-06.
 - Simple data key/values can now be attached to an element using standard HTML5 [data-*] attributes (in addition to [up-data])
 - up.compiler((element, data) => ...) is sourced from both [data-*] attributes and [up-data]
 - These three elements produce the same compiler data:
-  - <div up-data='{ "foo": "one", "bar": "two" }'></div>
-  - <div data-foo='one' data-bar='two'></div>
-  - <div up-data='{ "foo": "one" }' data-bar='bar'></div>
+  - `<div up-data='{ "foo": "one", "bar": "two" }'></div>`
+  - `<div data-foo='one' data-bar='two'></div>`
+  - `<div up-data='{ "foo": "one" }' data-bar='bar'></div>`
 - Note that [data-*] attributes are always strings
 
 
@@ -736,7 +736,7 @@ If you are using Elixir / Phoenix, the new protocol is already implemented by th
 
 Please use [`unpoly-migrate.js`](/changes/upgrading) for a very smooth upgrade process from Unpoly 0.x or 1.x to Unpoly 2.0.
 
-By loading <code>unpoly-migrate.js</code>, calls to most old APIs will be forwarded to the new version. A deprecation notice will be logged to your browser console. This way you can upgrade Unpoly, revive your application with a few changes, then replace deprecated API calls under green tests.
+By loading `<code>unpoly-migrate.js</code>`, calls to most old APIs will be forwarded to the new version. A deprecation notice will be logged to your browser console. This way you can upgrade Unpoly, revive your application with a few changes, then replace deprecated API calls under green tests.
 
 There's a short list of changes that we cannot fix with aliases.
 
@@ -818,7 +818,7 @@ new modal ("layer") implementation will implement all best practices for accessi
 This is a maintenance release while we're getting ready for [the next major version of Unpoly](https://groups.google.com/forum/#!topic/unpoly/FDdVjxbjNLg).
 
 - Fix a bug where [`up.destroy()`](/up.destroy) wouldn't clean up the global jQuery cache. This is only relevant when using Unpoly together with jQuery.
-- Fields outside a <form> are now recognized when they have a matching [form] attribute (fixes #85)
+- Fields outside a `<form>` are now recognized when they have a matching [form] attribute (fixes #85)
 - [`up.form.fields()`](/up.form.fields) now accepts a jQuery collection as a first argument, as was already documented.
 
 
