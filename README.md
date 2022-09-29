@@ -1,10 +1,10 @@
-[Unpoly 1](https://unpoly.com)
+[Unpoly 1](https://v1.unpoly.com/)
 ======
 
 Unobtrusive JavaScript framework for server-side applications
 -------------------------------------------------------------
 
-[Unpoly](https://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
+[Unpoly](https://v1.unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
 
 This repository is home to both the Unpoly JavaScript code and its (optional) bindings for Ruby on Rails (`unpoly-rails` gem).
 
@@ -12,9 +12,9 @@ This repository is home to both the Unpoly JavaScript code and its (optional) bi
 Getting started
 ---------------
 
-- See [unpoly.com](https://unpoly.com) for more information and JavaScript API documentation.
-- See [`CHANGELOG.md`](https://github.com/unpoly/unpoly/blob/master/CHANGELOG.md) for notable changes.
-- See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/master/README_RAILS.md) documentation of the Rails bindings.
+- See [unpoly.com](https://v1.unpoly.com) for more information and JavaScript API documentation.
+- See [`CHANGELOG.md`](https://github.com/unpoly/unpoly/blob/1.x-stable/CHANGELOG.md) for notable changes.
+- See [`README_RAILS.md`](https://github.com/unpoly/unpoly/blob/1.x-stable/README_RAILS.md) documentation of the Rails bindings.
 
 
 Development
@@ -78,9 +78,8 @@ If you have done this process a few times and know what you're doing, you can ca
 
 After you have published all release channels, remember to:
 
-1. Deploy to [unpoly.com](https://unpoly.com/)
-2. Deploy to [v1.unpoly.com](https://unpoly.com/)
-3. Send a message to the [E-mail group](https://groups.google.com/group/unpoly) with the title "Unpoly X.Y.Z released". You can copy the relevant CHANGELOG part from [here](http://localhost:4567/changes_google_groups).
+1. Deploy to [v1.unpoly.com](https://v1.unpoly.com/)
+2. Send a message to [discussions](https://github.com/unpoly/unpoly/discussions) with the title "Unpoly 1.x.y released". You can copy the relevant CHANGELOG part from [here](http://localhost:4567/changes_google_groups).
 
 
 Credits
