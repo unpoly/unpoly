@@ -6,8 +6,6 @@ Unobtrusive JavaScript framework for server-side applications
 
 [Unpoly](https://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
 
-This branch tracks the current major version, Unpoly 2.x. If you're looking for the code of Unpoly 0.x or 1.x, use the [`1.x-stable`](https://github.com/unpoly/unpoly/tree/1.x-stable) branch.
-
 
 Getting started
 ---------------
