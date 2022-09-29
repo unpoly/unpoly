@@ -4,15 +4,15 @@
 Unobtrusive JavaScript framework for server-side applications
 -------------------------------------------------------------
 
-[Unpoly](https://unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
+[Unpoly](https://v2.unpoly.com) enables fast and flexible frontends with minimal changes to your server-side code.
 
 
 Getting started
 ---------------
 
-- See [unpoly.com](https://unpoly.com) for guides and documentation.
-- See [installation instructions](https://unpoly.com/install) for many different package managers and languages.
-- See [notable changes](https://unpoly.com/changes).
+- See [v2.unpoly.com](https://v2.unpoly.com) for guides and documentation.
+- See [installation instructions](https://v2.unpoly.com/install) for many different package managers and languages.
+- See [notable changes](https://v2.unpoly.com/changes).
 
 
 Development
