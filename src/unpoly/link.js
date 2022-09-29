@@ -1041,7 +1041,7 @@ up.link = (function() {
     Also see `up.fragment.config.autoRevalidate`.
 
   @param [up-expire-cache]
-    Whether existing [cache](/caching) entries will be [expired](/up.cache.expire) with this request.
+    Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
 
     By default a non-GET request will expire the entire cache.
     You may also pass a [URL pattern](/url-patterns) to only expire matching requests.
@@ -1049,7 +1049,7 @@ up.link = (function() {
     Also see [`up.request({ expireCache })`](/up.request#options.expireCache) and `up.network.config.expireCache`.
 
   @param [up-evict-cache]
-    Whether existing [cache](/caching) entries will be [evicted](/up.cache.evict) with this request.
+    Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) with this request.
 
     You may also pass a [URL pattern](/url-patterns) to only evict matching requests.
 

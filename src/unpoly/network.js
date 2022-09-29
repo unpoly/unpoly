@@ -117,14 +117,14 @@ up.network = (function() {
     By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods.
 
   @param {Function(up.Request, up.Response): boolean|string} config.expireCache
-    Whether to [expire](/up.cache.expire) the [cache](/caching) after the given request and response.
+    Whether to [expire](/caching#expiration) the [cache](/caching) after the given request and response.
 
     By default Unpoly will expire the entire cache after a request with an [unsafe](/up.Request.prototype.isSafe) HTTP method.
 
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be expired.
 
   @param {Function(up.Request, up.Response): boolean|string} [config.evictCache=false]
-    Whether to [evict](/up.cache.evict) the [cache](/caching) after the given request and response.
+    Whether to [evict](/caching#eviction) the [cache](/caching) after the given request and response.
 
     By default Unpoly will not evict cache entries when a request is made.
 
@@ -255,7 +255,7 @@ up.network = (function() {
   */
 
   /*-
-  Discards [cache](/caching) entries.
+  [Evicts](/caching#eviction) responses in the [cache](/caching).
 
   To only remove some cache entries, pass a [URL pattern](/url-patterns):
 
@@ -267,19 +267,19 @@ up.network = (function() {
 
   @function up.cache.evict
   @param {string} [pattern]
-    A [URL pattern](/url-patterns) matching cache entries that should be discarded.
+    A [URL pattern](/url-patterns) matching cache entries that should be removed.
 
     If omitted, the entire cache is evicted.
   @stable
   */
 
   /*-
-  Marks [cache](/caching) entries.
+  [Expires](/caching#expiration) entries in the [cache](/caching).
 
-  To only remove some cache entries, pass a [URL pattern](/url-patterns):
+  To only expire some cache entries, pass a [URL pattern](/url-patterns):
 
   ```js
-  up.cache.evict('/users/*')
+  up.cache.expire('/users/*')
   ```
 
   The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
@@ -287,11 +287,11 @@ up.network = (function() {
   By default Unpoly automatically expires the entire cache whenever it processes
   a request with an non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
 
-  @function up.cache.evict
+  @function up.cache.expire
   @param {string} [pattern]
-    A [URL pattern](/url-patterns) matching cache entries that should be discarded.
+    A [URL pattern](/url-patterns) matching cache entries that should be expire.
 
-    If omitted, the entire cache is evicted.
+    If omitted, the entire cache is expired.
   @stable
   */
 
@@ -323,20 +323,6 @@ up.network = (function() {
   @param {up.Request} request
     The request to cache. The cache is also a promise for the response.
   @internal
-  */
-
-  /*-
-  Manually removes the given request from the [cache](/caching).
-
-  You can also [configure](/up.network.config) when
-  cache entries expire automatically.
-
-  @function up.cache.remove
-  @param {Object} requestOptions
-    The request options for which to remove cached requests.
-
-    See `options` for `up.request()` for documentation.
-  @experimental
   */
 
   function reset() {
@@ -432,7 +418,7 @@ up.network = (function() {
     With `{ cache: false }` (the default) Unpoly will always make a network request.
 
   @param {boolean|string} [options.expireCache]
-    Whether to [evict](/up.cache.expire) the [cache](/caching) after this request.
+    Whether to [expire](/caching#expiration) the [cache](/caching) after this request.
 
     Defaults to the result of `up.network.config.expireCache`, which
     defaults to expiring the entire cache after a non-GET request.
@@ -440,7 +426,7 @@ up.network = (function() {
     You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
 
   @param {boolean|string} [options.evictCache]
-    Whether to [evict](/up.cache.evict) the [cache](/caching) after this request.
+    Whether to [evict](/caching#eviction) the [cache](/caching) after this request.
 
     Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
 

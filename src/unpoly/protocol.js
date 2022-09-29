@@ -226,7 +226,7 @@ up.protocol = (function() {
 
   /*-
   The server may send this optional response header to control which previously [cached](/caching)
-  responses should be [evited](/up.cache.evict) after this response.
+  responses should be [evicted](/caching#eviction) after this response.
 
   The value of this header is a [URL pattern](/url-patterns) matching responses that should be evicted.
 
@@ -253,7 +253,7 @@ up.protocol = (function() {
 
   /*-
   The server may send this optional response header to control which previously [cached](/caching)
-  responses should be [expired](/up.cache.expire) after this response.
+  responses should be [expired](/caching#expiration) after this response.
 
   The value of this header is a [URL pattern](/url-patterns) matching responses that should be expired.
 

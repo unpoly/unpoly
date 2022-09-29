@@ -689,7 +689,7 @@ up.fragment = (function() {
     Also see `up.fragment.config.autoRevalidate`.
 
   @param {boolean|string} [options.expireCache]
-    Whether existing [cache](/caching) entries will be [expired](/up.cache.expire) with this request.
+    Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
 
     Defaults to the result of `up.network.config.expireCache`, which
     defaults to `true` for [unsafe](/up.Request.prototype.isSafe] requests.
@@ -698,7 +698,7 @@ up.fragment = (function() {
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
   @param {boolean|string} [options.evictCache]
-    Whether existing [cache](/caching) entries will be [evicted](/up.cache.evict) with this request.
+    Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) with this request.
 
     Defaults to the result of `up.network.config.evictCache`, which
     defaults to `false`.

@@ -3,9 +3,9 @@ Caching
 
 Unpoly caches responses, allowing instant access to pages that the user has already visited this session.
 
-Cached pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [disconnect](/disconnects).
-
 To ensure that the user never sees stale content, cached content is [revalidated with the server](#revalidation).
+
+Cached pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [disconnect](/disconnects).
 
 
 Enabling caching
@@ -62,19 +62,43 @@ Cached content automatically expires after 15 seconds. This can be configured in
 
 After expiring cached content is kept in the cache, but will trigger [revalidation](#revalidation) when used. Expired pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [connection loss](/disconnects).
 
-When the user makes a non-GET request (usually a form submission), the entire cache is expired by default. The assumption is that a non-GET request will change data on the server, so all cache entries should be revalidated. There are multiple was to override this behavior:
+
+### Expiring content after an interaction
+
+`GET` requests don't expire any content by default. When the user makes a non-`GET` request (usually a form submission with `POST`), the *entire cache* is expired. The assumption here is that a non-GET request will change data on the server, so all cache entries should be [revalidated](#revalidation).
+
+There are multiple ways to override this behavior:
 
 - Pass an [`{ expireCache }`](/up.render#options.expireCache) option to the rendering function
 - Set an [`[up-expire-cache]`](/up.render#options.expireCache) attribute on a link or form
 - Send an `X-Up-Expire-Cache` response header from the server
-- Configure a new default in `up.network.config.expireCache`
-
-Your JavaScript may also imperatively expire cache entries through the `up.cache.expire()` function.
+- Configure which requests should cause expiration in `up.network.config.expireCache`
+- Imperatively expire cache entries through the `up.cache.expire()` function
 
 
 Eviction
 --------
 
+Instead of expiring content you may also *evict* content to erase it from the cache.
+
+In practice you will often prefer *expiration* over *eviction*. Expired content remains available during a connection loss and for instant navigation, while [revalidation](#revalidation) ensures the user always sees a fresh revision. Evicted content on the other hand is gone from the cache entirely, and a new network request is needed to access it again.
+
+### Evicting content after an interaction
+
+One use case for eviction is when it is not acceptable for the user to see a brief flash of stale content before [revalidation](#revalidation) finishes. You can do so in multiple ways:
+
+- Pass an [`{ evictCache }`](/up.render#options.evictCache) option to the rendering function
+- Set an [`[up-evict-cache]`](/up.render#options.evictCache) attribute on a link or form
+- Send an `X-Up-Evict-Cache` response header from the server
+- Configure which requests should cause eviction in `up.network.config.evictCache`
+- Imperatively evict cache entries through the `up.cache.evict()` function
+
+### Capping memory usage
+
+To limit the memory required to hold its cache, Unpoly evicts cached content in the following ways:
+
+- Unpoly evicts cache entries after 90 minutes. This can be configured in `up.network.config.cacheEvictAge`.
+- The cache holds up to 70 responses. When this limit is reached, the oldest responses are evicted. This can be configured in `up.network.config.cacheSize`.
 
 
 

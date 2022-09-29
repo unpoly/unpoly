@@ -13,7 +13,7 @@ up.migrate.clearCacheFromXHR = function(xhr) {
 }
 
 /*-
-The server may send this optional response header to control which previously cached responses should be [expired](/up.cache.expire) after this response.
+The server may send this optional response header to control which previously cached responses should be [expired](/caching#expiration) after this response.
 
 The value of this header is a [URL pattern](/url-patterns) matching responses that should be expired.
 
