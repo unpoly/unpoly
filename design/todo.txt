@@ -38,6 +38,8 @@ Various changes
   - Firefox
   - Edge
   - Safari
+- autosubmit should not move focus
+  - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
 
 
 Docs
@@ -165,6 +167,10 @@ Docs
 
 ### Other docs
 
+- Replace ASCII art with picture for aborting-requests.md#aborting-conflicting-requests
+- Fragment Placement
+  - alternatives with ` or `
+  - where else is ` or ` supported?
 - onError
   - consider a full try / catch example in /failed-respoinses
   - /failed-responses should also explain onError
