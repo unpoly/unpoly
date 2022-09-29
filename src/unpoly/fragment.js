@@ -26,6 +26,7 @@ a server-rendered web application:
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see navigation
+@see caching
 @see render-hooks
 @see target-derivation
 

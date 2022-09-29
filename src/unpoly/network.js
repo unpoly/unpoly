@@ -12,7 +12,7 @@ communication with your server-side app.
 While you can use the browser's native `fetch()` function,
 Unpoly's `up.request()` has a number of convenience features:
 
-- Requests may be [cached](/up.request#options.cache) to reuse responses and enable [preloading](/a-up-preload).
+- Requests may be [cached](/caching) to reuse responses and enable [preloading](/a-up-preload).
 - Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
   For example, when updating a [fragment](/up.fragment), the fragment's selector is automatically sent
   as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
@@ -65,7 +65,7 @@ up.network = (function() {
 
     If the size is exceeded, the oldest responses will be dropped from the cache.
 
-  @param {number} [config.cacheEvictAge=5_400_000]
+  @param {number} [config.cacheEvictAge=90*60*1000]
     The number of milliseconds until a cached response is discarded.
 
     Defaults to 90 minutes.
@@ -114,7 +114,7 @@ up.network = (function() {
   @param {Function(up.Request): boolean} [config.autoCache]
     Whether to cache the given request with `{ cache: 'auto' }`.
 
-    By default Unpoly will auto-cache requests with safe HTTP methods.
+    By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods.
 
   @param {Function(up.Request, up.Response): boolean|string} config.expireCache
     Whether to [expire](/up.cache.expire) the [cache](/caching) after the given request and response.
@@ -222,7 +222,7 @@ up.network = (function() {
   let progressBar = null
 
   /*-
-  Returns an earlier request [matching](/up.network.config#config.requestMetaKeys) the given request options.
+  Returns a [cached](/caching) request [matching](/up.network.config#config.requestMetaKeys) the given request options.
 
   Returns `undefined` if the given request is not currently cached.
 
@@ -296,7 +296,7 @@ up.network = (function() {
   */
 
   /*-
-  Makes the cache assume that `newRequest` has the same response as the
+  Makes the [cache](/caching) assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
   Unpoly uses this internally when the user redirects from `/old` to `/new`.
@@ -311,7 +311,7 @@ up.network = (function() {
   */
 
   /*-
-  Manually stores a request in the cache.
+  Manually stores a request in the [cache](/caching).
 
   Future calls to `up.request()` will try to re-use this request before
   making a new request.
@@ -326,7 +326,7 @@ up.network = (function() {
   */
 
   /*-
-  Manually removes the given request from the cache.
+  Manually removes the given request from the [cache](/caching).
 
   You can also [configure](/up.network.config) when
   cache entries expire automatically.
@@ -394,12 +394,10 @@ up.network = (function() {
 
   ### Caching
 
-  You may cache responses by passing a `{ cache }` option. Responses for a cached
+  You may [cache](/caching) responses by passing a `{ cache }` option. Responses for a cached
   request will resolve instantly.
 
-  By default the cache cleared after making a request with an unsafe HTTP method.
-
-  You can configure caching with the [`up.network.config`](/up.network.config) property.
+  See [Caching](/caching) for more details and examples.
 
   @function up.request
 
