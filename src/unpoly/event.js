@@ -48,7 +48,7 @@ up.event = (function() {
   [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener):
 
   - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
-  - The event target is automatically passed as a second argument.
+  - The [event target](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) is automatically passed as a second argument.
   - Your event listener will not be called when Unpoly has not [booted](/up.boot) in an unsupported browser
   - You may register a listener to multiple events by passing a space-separated list of event name (e.g. `"click mousedown"`)
   - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/up.util.isList) of elements.

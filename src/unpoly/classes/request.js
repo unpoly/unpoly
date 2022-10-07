@@ -60,7 +60,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The CSS selector targeted by this request.
+  The CSS selector [targeted](/targeting-fragments) by this request.
 
   The selector will be sent as an `X-Up-Target` header.
 
@@ -70,8 +70,8 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The CSS selector targeted by this request in case the server responds
-  with an [error code](/failed-responses).
+  The CSS selector [targeted](/targeting-fragments) by this request in case
+  the server responds with an [error code](/failed-responses).
 
   The selector will be sent as an `X-Up-Fail-Target` header.
 

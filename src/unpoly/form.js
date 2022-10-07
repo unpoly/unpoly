@@ -639,7 +639,7 @@ up.form = (function() {
   @return {Function()}
     A destructor function that unsubscribes the watcher when called.
 
-    Watching will stop automatically when the targeted fields are
+    Watching will stop automatically when the observed fields are
     [destroyed](/up.destroy).
   @stable
   */
@@ -686,7 +686,7 @@ up.form = (function() {
   @return {Function()}
     A destructor function that unsubscribes the watcher when called.
 
-    Autosubmitting will stop automatically when the targeted fields are removed from the DOM.
+    Autosubmitting will stop automatically when the observed fields are removed from the DOM.
   @stable
   */
   function autosubmit(target, options) {
@@ -701,6 +701,8 @@ up.form = (function() {
   Returns the [form group](/up-form-group) for the given element.
 
   Form groups may be nested. This function returns the closest group around the given element.
+
+  To configure which elements consitute a form group, use `up.form.config.groupSelectors`.
 
   ### Example
 
@@ -821,7 +823,7 @@ up.form = (function() {
   ### Multiple validations are batched together
 
   Multiple calls of `up.validate()` within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
-  are batched into a single request. For instance, the following will send a single request targeting `.foo, .bar`:
+  are batched into a single request. For instance, the following will send a single request [targeting](/targeting-fragments) `.foo, .bar`:
 
   ```js
   up.validate('.foo')
@@ -886,7 +888,7 @@ up.form = (function() {
     and the form was updated.
 
     The promise will reject if the server sends an error status,
-    if there is a network issue, or if targets could not be matched.
+    if there is a network issue, or if [targets](/targeting-fragments) could not be matched.
   @stable
   */
   function validate(...args) {
@@ -992,7 +994,7 @@ up.form = (function() {
   }
 
   /*-
-  Shows or hides a target selector depending on the value.
+  Shows or hides a selector depending on the value of a form field.
 
   See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
 
@@ -1028,7 +1030,7 @@ up.form = (function() {
       show = u.intersect(fieldValues, hideValues).length === 0
     } else {
       let showValues = target.getAttribute('up-show-for')
-      // If the target has neither up-show-for or up-hide-for attributes,
+      // If the target has neither [up-show-for] or [up-hide-for] attributes,
       // assume the user wants the target to be visible whenever anything
       // is checked or entered.
       showValues = showValues ? parseSwitchTokens(showValues) : [':present', ':checked']
@@ -1077,10 +1079,10 @@ up.form = (function() {
   By default Unpoly will follow forms if the element has
   one of the following attributes:
 
-  - `[up-submit]`
-  - `[up-target]`
-  - `[up-layer]`
-  - `[up-transition]`
+  - [`[up-submit]`](/form-up-submit)
+  - [`[up-target]`](/a-up-follow#up-target)
+  - [`[up-layer]`](/a-up-follow#up-layer)
+  - [`[up-transition]`](/a-up-transition)
 
   To consider other selectors to be submittable, see `up.form.config.submitSelectors`.
 
@@ -1103,15 +1105,16 @@ up.form = (function() {
   /*-
   Submits this form via JavaScript and updates a fragment with the server response.
 
-  The server response is searched for the selector given in `up-target`.
-  The selector content is then [replaced](/up.replace) in the current page.
+  The server must render an element matching the [target selector](/targeting-fragments) from the `[up-target]` attribute.
+  A matching element in the current page is then swapped with the new element from the server response.
+  The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
 
   The programmatic variant of this is the [`up.submit()`](/up.submit) function.
 
   ### Example
 
   ```html
-  <form method="post" action="/users" up-submit>
+  <form method="post" action="/users" up-submit up-target=".content">
     ...
   </form>
   ```
@@ -1189,8 +1192,11 @@ up.form = (function() {
   @params-note
     All attributes for `a[up-follow]` may be used.
 
+  @param [up-target]
+    The [target selector](/targeting-fragments) to update for a successful form submission.
+
   @param [up-fail-target]
-    The CSS selector to update when the server responds with an error code.
+    The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
     Defaults to the form element itself.
 
@@ -1339,7 +1345,7 @@ up.form = (function() {
   form will be updated.
 
   You can also override what to update by setting the `[up-validate]`
-  attribute to a CSS selector:
+  attribute to a [target selector](/targeting-fragments):
 
   ```html
   <input type="text" name="email" up-validate=".email-errors">
@@ -1375,9 +1381,9 @@ up.form = (function() {
 
   @selector input[up-validate]
   @param [up-validate]
-    The CSS selector to update with the server response.
+    The [target selector](/targeting-fragments) to update with the server response.
 
-    This defaults the closest form group around the validating field.
+    Defaults the closest form group around the validating field.
   @param [up-watch-event='change']
     The event type that causes validation.
 
@@ -1407,7 +1413,7 @@ up.form = (function() {
 
   @selector form[up-validate]
   @param up-validate
-    The CSS selector to update with the server response.
+    The [target selector](/targeting-fragments) to update with the server response.
 
     This defaults to the closest [form group](/up-form-group)
     around the validating field.
@@ -1425,10 +1431,10 @@ up.form = (function() {
   /*-
   Show or hide elements when a form field is set to a given value.
 
-  The target elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
+  The observed elements can use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
   attributes to indicate for which values they should be shown or hidden.
 
-  The `[up-switch]` element and its target elements must be inside the same `<form>`.
+  The `[up-switch]` element and its observed elements must be inside the same `<form>`.
 
   ### Example: Select options
 
@@ -1461,7 +1467,7 @@ up.form = (function() {
 
   ### Example: Text field
 
-  The controlling `<input>` gets an `up-switch` attribute with a selector for the elements to show or hide:
+  The controlling `<input>` gets an `[up-switch]` attribute with a selector for the elements to show or hide:
 
   ```html
   <input type="text" name="user" up-switch=".target">

@@ -37,7 +37,7 @@ to convey the highlighted link to assistive technologies:
 ```
 
 When the user clicks on the `/bar` link, the link will receive the [`.up-active`](/a.up-active) class while it is waiting
-for the server to respond. The targeted fragment (the `<main>` element) gets the `.up-loading` class:
+for the server to respond. The [targeted](/targeting-fragments) fragment (the `<main>` element) gets the `.up-loading` class:
 
 ```
 <nav up-nav>
@@ -223,14 +223,14 @@ up.feedback = (function() {
 
   ### Related
 
-  If you're looking to style the targeted fragment, use the `.up-loading` class.
+  If you're looking to style the [targeted](/targeting-fragments) fragment, use the `.up-loading` class.
 
   @selector a.up-active
   @stable
   */
 
   /*-
-  Targeted fragments are assigned the `.up-loading` class while waiting for the server response.
+  [Targeted fragments](/targeting-fragments) are assigned the `.up-loading` class while waiting for the server response.
 
   Consider styling loading fragments in your CSS to improve the perceived responsiveness
   of your user interface:

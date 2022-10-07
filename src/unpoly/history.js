@@ -150,16 +150,16 @@ up.history = (function() {
   }
 
   /*-
-  Replaces the current history entry and updates the
-  browser's location bar with the given URL.
+  Replaces the current history entry and updates the browser's location bar with the given URL.
 
   When the user navigates to the replaced history entry at a later time,
-  Unpoly will [`replace`](/up.replace) the document body with
-  the body from that URL.
+  Unpoly will update the `<body>` element with the `<body>` fetched from the restored URL.
 
-  Note that functions like [`up.replace()`](/up.replace) or
-  [`up.submit()`](/up.submit) will automatically update the
-  browser's location bar for you.
+  To update a fragment other than body, configure `up.history.config.restoreTargets`.
+
+  Note that [navigating](/navigation) functions like `up.follow()` or `up.submit()`
+  will automatically update the browser's location bar for you. This can be disabled with
+  an [`{ history: false }`](/up.render#options.history) option.
 
   @function up.history.replace
   @param {string} url
@@ -297,7 +297,8 @@ up.history = (function() {
 
   - Close all overlays.
   - Fetch the content for the restored history entry's URL.
-  - Render the restored content into the `<body>` element. You may prefer other selectors by configuring `up.history.config.restoreTargets`.
+  - Render the restored content into the `<body>` element. You may prefer other [targets](/targeting-fragments)
+    by configuring `up.history.config.restoreTargets`.
   - Restore earlier scroll position for the history entry.
 
   ### Custom restoration behavior

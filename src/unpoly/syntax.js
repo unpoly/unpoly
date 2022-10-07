@@ -62,7 +62,7 @@ up.syntax = (function() {
   ```
 
   The compiler function will be called once for each matching element when
-  the page loads, or when a matching fragment is [inserted](/up.replace) later.
+  the page loads, or when a matching fragment is rendered later.
 
   ### Integrating JavaScript libraries
 

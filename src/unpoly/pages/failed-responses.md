@@ -8,7 +8,7 @@ Some example for failed responses are:
 - A form submission fails due to invalid user input. The server re-renders the form with validation errors.
 - The server renders unexpected content, like a login screen or a maintenance page.
 - The server-side app crashes with an HTTP 500 server error.
-- The request is aborted by a second request targeting the same fragment.
+- The request is [aborted](/aborting-requests) by a second request [targeting](/targeting-fragments) the same fragment.
 
 ## Rendering failed responses differently
 
@@ -65,7 +65,7 @@ to be successful, even with a HTTP 4xx or 5xx status code.
 
 By default any HTTP 2xx or 304 status code will be considered successful, and any other status code will be considered failed. This behavior can be customized. For instance, you can fail a response if it contains a given header or body text.
 
-The following configuration will fail all responses with an `X-Unauthorized` header.
+The following configuration will fail all responses with an `X-Unauthorized` header:
 
 ```js
 let badStatus = up.network.config.fail

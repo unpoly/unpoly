@@ -99,7 +99,7 @@ up.layer = (function() {
     Defaults for all layer modes.
 
   @param {Array<string>} config.any.mainTargets
-    An array of CSS selectors matching default render targets.
+    An array of CSS selectors matching default [render targets](/targeting-fragments).
 
     This is an alias for `up.fragment.config.mainTargets`.
 
@@ -109,6 +109,8 @@ up.layer = (function() {
     Inherits from `up.layer.config.any`.
 
   @param {object} config.root.mainTargets
+    An array of CSS selectors matching default [render targets](/targeting-fragments)
+    for the [root layer](/layer-terminology), but not for overlays.
 
   @param {object} config.overlay
     Defaults for all [overlays](/layer-terminology).

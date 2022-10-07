@@ -13,7 +13,7 @@ To animate the scroll motion, pass `{ scrollBehavior: 'smooth' }.`
 To *not* animate the scrolling, pass `{ scrollBehavior: 'instant' }` (the default).
 
 When swapping a fragment with a new version of itself, the scroll motion cannot be animated.
-You *can* animate the scroll motion when [prepending, appending](/fragment-placement]
+You *can* animate the scroll motion when [prepending, appending](/targeting-fragments#appending-or-prepending-content)
 or [destroying](/up.destroy) a fragment.
 
 

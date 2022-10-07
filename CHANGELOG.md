@@ -619,7 +619,7 @@ This step will allow Unpoly to use modern web APIs and reduce its bundle size ev
 
 ### Other changes
 
-- When going back in history, Unpoly reloads the `body` instead of the `:main` element. You can customize this behavior in `up.history.config.restoreTargets`.
+- When going back in history, Unpoly reloads the `<body>` instead of the `:main` element. You can customize this behavior in `up.history.config.restoreTargets`.
 - The function `up.util.times()` has been deprecated. Use a classic [`for`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for) statement instead.
 - The function `up.Params.wrap()` has been removed without replacement.
 - Unpoly no longer loads when the browser is in quirks mode.
@@ -1963,7 +1963,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - [Modals](/up.modal) no longer create an `.up-modal` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
 - [Popups](/up.popup) no longer create an `.up-popup` element when the server returns a non-200 status and the `{ failTarget }` is replaced instead
 - Improve performance when updating fragments without transitions
-- When updating the `body` element with a transition, that transition is now silently ignored instead of throwing an error.
+- When updating the `<body>` element with a transition, that transition is now silently ignored instead of throwing an error.
 - [`up.util.resolvedPromise()`](/up.util.resolvedPromise) now accepts arguments which will become the resolution values.
 - [`up.util.resolvedDeferred()`](/up.util.resolvedDeferred) now accepts arguments which will become the resolution values.
 - New utility method [`up.util.rejectedPromise()`](/up.util.rejectedPromise).
@@ -2254,7 +2254,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - New experimental function [`up.modal.flavor()`](/up.modal.flavor) to register modal variants (like drawers).
 - Fix a bug where [compilers](/up.compiler) and [macros](/up.macro) with higher priorities were executed last (instead of first like it says in the docs).
 - Fix a bug that would occur if two compiled elements, that were nested within each other, would raise an error if the outer element was destroyed and both compilers have destructor functions.
-- Fix a bug where replacing the `body` tag would raise an error if any element in the old `<body>` had a destructor function.
+- Fix a bug where replacing the `<body>` element would raise an error if any element in the old `<body>` had a destructor function.
 - The promise returned by [`up.replace()`](/up.replace) now waits for transitions to complete before resolving
 - Fix a bug where an error would be shown when opening a modal while another modal was still loading
 - Fix a bug where two popups would be shown when opening a popup while another popup was still loading
@@ -2605,7 +2605,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
   explicit selector is given.
 - Forms with `file` inputs will now cause forms to fall back to a standard submission without AJAX.
   In a future release we will be able to submit file inputs via AJAX.
-- The [request cache](/up.proxy) now reuses responses for `body` and `html` when asked for other selectors.
+- The [request cache](/up.proxy) now reuses responses for `<body>` and `<html>` when asked for other selectors.
 - Server responses can now change the document title by including an `X-Up-Title` header.
 
 

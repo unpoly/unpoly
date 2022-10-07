@@ -66,7 +66,7 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the CSS selector targeted for a successful fragment update.
+  This request header contains the [target selector](/targeting-fragments) for a successful fragment update.
 
   Server-side code is free to optimize its response by only rendering HTML
   that matches the selector. For example, you might prefer to not render an
@@ -118,7 +118,7 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the CSS selector targeted for a failed fragment update.
+  This request header contains the [target selector](/targeting-fragments) for a failed fragment update.
 
   A fragment update is considered *failed* if the server responds with a status code other than 2xx,
   but still renders HTML.

@@ -14,7 +14,7 @@ Unpoly's `up.request()` has a number of convenience features:
 
 - Requests may be [cached](/caching) to reuse responses and enable [preloading](/a-up-preload).
 - Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
-  For example, when updating a [fragment](/up.fragment), the fragment's selector is automatically sent
+  For example, when [updating a fragment](/targeting-fragments), the target selector is automatically sent
   as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
 - Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response
   lifecycle.
@@ -104,12 +104,14 @@ up.network = (function() {
     By default Unpoly will consider any status code other than HTTP 2xx or 304 to represent a failed response.
     You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
 
-    The following configuration will fail all responses with an `X-Unauthorized` header.
+    The following configuration will fail all responses with an `X-Unauthorized` header:
 
     ```js
     let badStatus = up.network.config.fail
     up.network.config.fail = (response) => badStatus(response) || response.getHeader('X-Unauthorized')
     ```
+
+    Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
 
   @param {Function(up.Request): boolean} [config.autoCache]
     Whether to cache the given request with `{ cache: 'auto' }`.

@@ -1,8 +1,8 @@
 require('./viewport.sass')
 
 /*-
-Scrolling
-=========
+Scrolling and focus
+===================
 
 The `up.viewport` module controls the scroll position and focus within scrollable containers ("viewports").
 
@@ -32,6 +32,11 @@ up.viewport = (function() {
   @property up.viewport.config
   @param {Array} [config.viewportSelectors]
     An array of CSS selectors that match viewports.
+
+    By default this contains the `[up-viewport]` attribute.
+
+    Matching elements must have a [derivable target selector](/target-derivation).
+
   @param {Array} [config.fixedTop]
     An array of CSS selectors that find elements fixed to the
     top edge of the screen (using `position: fixed`).
@@ -725,11 +730,13 @@ up.viewport = (function() {
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
-  instead of scrolling `<body>`. As an alternative you can also push a selector
+  instead of scrolling the `<body>` element. As an alternative you can also push a selector
   matching your custom viewport to the `up.viewport.config.viewportSelectors` array.
 
-  [`up.reveal()`](/up.reveal) will always try to scroll the viewport closest
-  to the element that is being revealed. By default this is the `<body>` element.
+  When [scrolling](/scroll-option) Unpoly will always scroll the viewport closest
+  to the updated element. By default this is the `<body>` element.
+
+  Elements with the `[up-viewport]` attribute must also have a [derivable target selector](/target-derivation).
 
   ### Example
 

@@ -664,7 +664,7 @@ up.element = (function() {
 
   /*-
   Always creates a full document with a <html> root, even if the given `html`
-  is only a fragment.
+  string only contains a fragment.
 
   @function up.element.createDocumentFromHTML
   @internal
@@ -674,7 +674,7 @@ up.element = (function() {
   }
 
   /*-
-  Creates an element from the given HTML fragment.
+  Creates an element from the given HTML fragment string.
 
   Use `up.hello()` to activate JavaScript behavior within the created element.
 

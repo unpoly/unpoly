@@ -22,7 +22,14 @@ up.radio = (function() {
     An array of CSS selectors that is replaced whenever a matching element is found in a response.
     These elements are replaced even when they were not targeted directly.
 
-    By default this contains the [`[up-hungry]`](/up-hungry) attribute.
+    By default this contains the `[up-hungry]` attribute.
+
+    The configured selectors will be used to find hungry elements in the current page.
+    For each matching element a target will be [derived](/target-derivation) from that
+    specific element. E.g. when you configure `up.fragment.config.hungrySelectors.push('input')`,
+    a given input will be targeted with its derived selector (like `input[name=email]`).
+
+    For this to work hungry elements [must have a derivable target selector](/up-hungry#hungry-fragments-must-have-a-derivable-target).
 
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll] interval in milliseconds.
@@ -89,14 +96,33 @@ up.radio = (function() {
 
   /*-
   Elements with an `[up-hungry]` attribute are updated whenever the server
-  sends a matching element, even if the element isn't targeted.
-
-  Use cases for this are unread message counters or notification flashes.
-  Such elements often live in the layout, outside of the content area that is
-  being replaced.
+  sends a matching element, even if the element isn't [targeted](/targeting-fragments).
 
   When an `[up-hungry]` element does not match in the server response,
   the element will not be updated.
+
+  ### Use cases
+
+  Common use cases for `[up-hungry]` are elements live in the application layout,
+  outside of the fragment that is typically being targeted. Some examples:
+
+  - Unread message counters
+  - Notification flashes
+  - Page-specific subnavigation
+
+  Instead of explicitly including these elements in every target selector
+  (e.g. `<a up-target=".content, .flashes:maybe">`) we can mark it as `[up-hungry]`.
+  Unpoly will then automatically include it in other target selectors.
+
+  ### Hungry elements must have a derivable target
+
+  When an `[up-hungry]` fragment piggy-backs on another fragment update, Unpoly
+  will [derive a target selector](/target-derivation) for the hungry element.
+
+  For this to work the hungry element must have an [identifying attribute](/target-derivation#derivation-patterns),
+  like an `[id]` or a unique `[class]` attribute.
+
+  When no good target can be derived, the hungry element is excluded from the update.
 
   @selector [up-hungry]
   @param [up-if-layer='current']
@@ -108,7 +134,7 @@ up.radio = (function() {
     Even with `[up-layer=any]` hungry elements are only rendered when updating an existing layer.
     Hungry elements are never rendered for responses that [open a new overlay](/opening-overlays).
   @param [up-if-target='*']
-    Only piggy-back on updates with the given target selector.
+    Only piggy-back on updates that swap an element matching the given [target selector](/targeting-fragments).
 
     For instance, you want to auto-update a [canonical link element](https://en.wikipedia.org/wiki/Canonical_link_element),
     but only if the [main element](/main) was updated:
@@ -117,8 +143,10 @@ up.radio = (function() {
     <link rel="canonical" href="..." up-hungry up-if-target=":main">
     ```
 
+    The hungry element will also be updated when swapping an *ancestor* of an element matching the given target selector.
+
   @param [up-transition]
-    The transition to use when this element is updated.
+    The [animated transition](/a-up-transition) to apply when this element is updated.
   @stable
   */
 

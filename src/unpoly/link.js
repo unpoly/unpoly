@@ -70,7 +70,7 @@ With these [`[up-target]`](/a-up-follow#up-target) annotations Unpoly only updat
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
-@see fragment-placement
+@see targeting-fragments
 @see handling-everything
 @see failed-responses
 
@@ -126,8 +126,9 @@ up.link = (function() {
 
     - Links with an `[up-follow=false]` attribute.
     - Links with a cross-origin `[href]`.
-    - Links with a `[target]` attribute (to target an iframe or open new browser tab).
-    - Links with a `[rel=download]` attribute.
+    - Links with a [`[target]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-target) attribute
+      (to target an iframe or open new browser tab).
+    - Links with a [`[download]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-download) attribute.
     - Links with an `[href]` attribute starting with `javascript:`.
     - Links with an `[href="#"]` attribute that don't also have local HTML
       in an `[up-document]`, `[up-fragment]` or `[up-content]` attribute.
@@ -840,7 +841,7 @@ up.link = (function() {
 
   ### Advanced fragment changes
 
-  See [fragment placement](/fragment-placement) for advanced use cases
+  See [fragment placement](/targeting-fragments) for advanced use cases
   like updating multiple fragments or appending content to an existing element.
 
   ### Short notation
@@ -886,7 +887,7 @@ up.link = (function() {
     `[up-document]` or `[up-content]` attribute.
 
   @param [up-target]
-    The CSS selector to update.
+    The [target selector](/targeting-fragments) to update.
 
     If omitted a [main target](/up-main) will be rendered.
 
@@ -920,7 +921,7 @@ up.link = (function() {
     A JSON object with additional request headers.
 
     Note that Unpoly will by default send a number of custom request headers.
-    E.g. the `X-Up-Target` header includes the targeted CSS selector.
+    E.g. the `X-Up-Target` header includes the [target selector](/targeting-fragments).
     See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
   @param [up-content]
@@ -933,8 +934,8 @@ up.link = (function() {
     A string of HTML comprising *only* the new fragment's
     [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
 
-    The `[up-target]` selector will be derived from the root element in the given
-    HTML:
+    The `[up-target]` selector will be [derived](/target-derivation) from
+    the root element in the given HTML:
 
     ```html
     <!-- This will update .foo -->
@@ -1002,12 +1003,12 @@ up.link = (function() {
   @param [up-transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 
-    If you are [prepending or appending content](/fragment-placement#appending-or-prepending-content),
+    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending-content),
     use the `[up-animation]` attribute instead.
 
   @param [up-animation]
     The name of an [animation](/up.motion) to reveal a new fragment when
-    [prepending or appending content](/fragment-placement#appending-or-prepending-content).
+    [prepending or appending content](/targeting-fragments#appending-or-prepending-content).
 
     If you are replacing content (the default), use the `[up-transition]` attribute instead.
 
@@ -1036,7 +1037,8 @@ up.link = (function() {
     Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param [up-revalidate='auto']
-    Whether to reload the targeted fragment after it was rendered from a cached response.
+    Whether to reload the [targeted fragment](/targeting-fragments)
+    after it was rendered from a cached response.
 
     Also see `up.fragment.config.autoRevalidate`.
 
@@ -1214,10 +1216,12 @@ up.link = (function() {
 
   ### Example
 
-      <div class="notification" up-expand>
-        Record was saved!
-        <a href="/records">Close</a>
-      </div>
+  ```html
+  <div class="notification" up-expand>
+    Record was saved!
+    <a href="/records">Close</a>
+  </div>
+  ```
 
   In the example above, clicking anywhere within `.notification` element
   would [follow](/up.follow) the *Close* link.
@@ -1225,13 +1229,15 @@ up.link = (function() {
   ### Elements with multiple contained links
 
   If a container contains more than one link, you can set the value of the
-  `up-expand` attribute to a CSS selector to define which link should be expanded:
+  `[up-expand]` attribute to a CSS selector to define which link should be expanded:
 
-      <div class="notification" up-expand=".close">
-        Record was saved!
-        <a class="details" href="/records/5">Details</a>
-        <a class="close" href="/records">Close</a>
-      </div>
+  ```html
+  <div class="notification" up-expand=".close">
+    Record was saved!
+    <a class="details" href="/records/5">Details</a>
+    <a class="close" href="/records">Close</a>
+  </div>
+  ```
 
   ### Limitations
 
@@ -1273,7 +1279,7 @@ up.link = (function() {
   making the interaction feel instant.
 
   Preloading a link will *not* [abort](/up.fragment.abort) pending requests
-  targeting the same fragments. Only when the link is clicked later
+  [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
   conflicting requests are aborted.
 
   @selector a[up-preload]

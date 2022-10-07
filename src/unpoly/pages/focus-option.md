@@ -106,7 +106,7 @@ This is the default when [navigating](/navigation).
 - Focus a `#hash` in the URL.
 - Focus an `[autofocus]` element in the new fragment.
 - If updating a [main target](/up-main), focus the new fragment.
-- If focus was lost with the old fragment, re-focus a [similar](/up.fragment.toTarget) element.
+- If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
 - If focus was lost with the old fragment, focus the new fragment.
 
 You may configure this logic in `up.fragment.config.autoFocus`.

@@ -32,7 +32,7 @@ up.RenderResult = class RenderResult extends up.Record {
   */
 
   /*-
-  The target selector rendered.
+  The [target selector](/targeting-fragments) that was rendered.
 
   @property up.RenderResult#target
   @param {string} target

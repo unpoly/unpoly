@@ -12,7 +12,7 @@ The `up.fragment` module offers a high-level JavaScript API to work with DOM ele
 A fragment is an element with some additional properties that are useful in the context of
 a server-rendered web application:
 
-- Fragments are [identified by a CSS selector](/up.fragment.toTarget), like a `.class` or `#id`.
+- Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
 - Fragments are usually updated by a [link](/a-up-follow) for [form](/form-up-submit) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
 - As fragments enter the page they are automatically [compiled](/up.compiler) to activate JavaScript behavior.
@@ -54,9 +54,9 @@ up.fragment = (function() {
   @property up.fragment.config
 
   @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
-    An array of CSS selectors matching default render targets.
+    An array of CSS selectors matching default [render targets](/targeting-fragments).
 
-    When no other render target is given, Unpoly will update the first selector matching both
+    When no explicit target is given, Unpoly will update the first selector matching both
     the current page and the server response.
 
     When [navigating](/navigation) to a main target, Unpoly will automatically
@@ -65,12 +65,14 @@ up.fragment = (function() {
 
     This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
-  @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
+    Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
+
+  @param {Array<string|Function<Element>: string?: string|undefined>} [config.targetDerivers]
     TODO: Docs
 
   @param {Array<string|RegExp>} [config.badTargetClasses]
     An array of class names that should be ignored when
-    [deriving a target selector from a fragment](/up.fragment.toTarget).
+    [deriving a target selector from a fragment](/target-derivation).
 
     The class names may also be passed as a regular expression.
 
@@ -87,7 +89,8 @@ up.fragment = (function() {
     matching the given target selector in the link's [layer](/up.layer).
 
   @param {Array<string>} [config.autoHistoryTargets]
-    When an updated fragments contain an element matching one of the given CSS selectors, history will be updated with `{ history: 'auto' }`.
+    When an updated fragments contain an element matching one of the given [target selectors](/targeting-fragments),
+    history will be updated with `{ history: 'auto' }`.
 
     By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
 
@@ -111,7 +114,7 @@ up.fragment = (function() {
     - Focus a `#hash` in the URL.
     - Focus an `[autofocus]` element in the new fragment.
     - If updating a [main target](/up-main), focus the new fragment.
-    - If focus was lost with the old fragment, re-focus a [similar](/up.fragment.toTarget) element.
+    - If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
     - If focus was lost with the old fragment, focus the new fragment.
 
   @param {boolean} [config.runScripts=false]
@@ -120,11 +123,11 @@ up.fragment = (function() {
     Scripts will load asynchronously, with no guarantee of execution order.
 
     If you set this to `true`, mind that the `<body>` element is a default
-    [main target](/up-main). If you are including your global application scripts
-    at the end of your `<body>`
-    for performance reasons, swapping the `<body>` will re-execute these scripts.
-    In that case you must configure a different main target that does not include
-    your application scripts.
+    [main target](/main. If you are including your global application scripts
+    at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute
+    these scripts. In that case you can [configure a different main target](/up.fragment.config#config.mainTargets)
+    or [move your scripts to the `<head>` with a `[defer]` attribute](https://makandracards.com/makandra/504104-you-should-probably-load-your-javascript-with-script-defer),
+    which is even better for performance.
 
   @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
     Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
@@ -447,11 +450,11 @@ up.fragment = (function() {
   /*-
   Replaces elements on the current page with matching elements from a server response or HTML string.
 
-  The current and new elements must both match the same CSS selector.
+  The current and new elements must both match the same [target selector](/targeting-fragments).
   The selector is either given as `{ target }` option,
   or a [main target](/up-main) is used as default.
 
-  See the [fragment placement](/fragment-placement) selector for many examples for how you can target content.
+  See [Targeting Fragments](/targeting-fragments) for many examples for how you can target content.
 
   This function has many options to enable scrolling, focus, request cancelation and other side
   effects. These options are all disabled by default and must be opted into one-by-one. To enable
@@ -476,7 +479,7 @@ up.fragment = (function() {
   <div class="two">old two</div>
   ```
 
-  We now replace the second `<div>` by targeting its CSS class:
+  We now replace the second `<div>` by [targeting](/targeting-fragments) its CSS class:
 
   ```js
   up.render({ target: '.two', url: '/new' })
@@ -508,7 +511,7 @@ up.fragment = (function() {
 
   ### Concurrency
 
-  Unfinished requests targeting the updated fragment or its descendants are [aborted](/aborting-requests).
+  Unfinished requests [targeting](/targeting-fragments) the updated fragment or its descendants are [aborted](/aborting-requests).
   You may control this behavior using the [`{ abort }`](#options.abort) option.
 
   ### Events
@@ -522,12 +525,12 @@ up.fragment = (function() {
   @function up.render
 
   @param {string|Element|jQuery|Array<string>} [target]
-    The CSS selector to update.
+    The [target selector](/targeting-fragments) to update.
 
     If omitted a [main target](/up-main) will be rendered.
 
     You may also pass a DOM element or jQuery element here, in which case a selector
-    will be [inferred from the element attributes](/up.fragment.toTarget). The given element
+    will be [inferred from the element attributes](/target-derivation). The given element
     will also be used as [`{ origin }`](#options.origin) for the fragment update.
 
     You may also pass an array of selector alternatives. The first selector
@@ -537,18 +540,20 @@ up.fragment = (function() {
     a [´{ target }`](#options.target) option..
 
   @param {string|Element|jQuery|Array<string>} [options.target]
-    The CSS selector to update.
+    The [target selector](/targeting-fragments) to update.
 
     See documentation for the [`target`](#target) parameter.
 
   @param {string|boolean} [options.fallback=false]
-    Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
+    Specifies behavior if the [target selector](/targeting-fragments) is missing from the current page or the server response.
 
     If set to a CSS selector string, Unpoly will attempt to replace that selector instead.
 
     If set to `true` Unpoly will attempt to replace a [main target](/up-main) instead.
 
     If set to `false` Unpoly will immediately reject the render promise.
+
+    Also see [Dealing with missing targets](/targeting-fragments#dealing-with-missing-targets).
 
   @param {boolean} [options.navigate=false]
     Whether this fragment update is considered [navigation](/navigation).
@@ -577,7 +582,7 @@ up.fragment = (function() {
     An object with additional request headers.
 
     Note that Unpoly will by default send a number of custom request headers.
-    E.g. the `X-Up-Target` header includes the targeted CSS selector.
+    E.g. the `X-Up-Target` header includes the [targeted](/targeting-fragments) CSS selector.
     See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
   @param {string|Element} [options.content]
@@ -587,7 +592,7 @@ up.fragment = (function() {
   @param {string|Element} [options.fragment]
     A string of HTML comprising *only* the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
 
-    The `{ target }` selector will be derived from the root element in the given
+    The `{ target }` selector will be [derived](/target-derivation) from the root element in the given
     HTML:
 
     ```js
@@ -605,12 +610,12 @@ up.fragment = (function() {
     A string of HTML containing the new fragment.
 
     The string may contain other HTML, but only the element matching the
-    `{ target }` selector will be extracted and placed into the page.
+    [target selector](/targeting-fragments) will be extracted and placed into the page.
     Other elements will be discarded.
 
     If your HTML string comprises only the new fragment, consider the [`{ fragment }`](#options.fragment)
     option instead. With `{ fragment }` you don't need to pass a `{ target }`, since
-    Unpoly can derive it from the root element in the given HTML.
+    Unpoly can [derive](/target-derivation) it from the root element in the given HTML.
 
     If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
     consider the [`{ content }`](#options.content) option.
@@ -631,7 +636,7 @@ up.fragment = (function() {
 
     If set to `'auto'` history will be updated if the `{ target }` matches
     a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-    [main targets](/up-main).
+    [main targets](/main).
 
     If set to `false`, the history will remain unchanged.
 
@@ -656,12 +661,12 @@ up.fragment = (function() {
   @param {string} [options.transition]
     The name of an [transition](/up.motion) to morph between the old and few fragment.
 
-    If you are [prepending or appending content](/fragment-placement#appending-or-prepending-content),
+    If you are [prepending or appending content](/targeting-fragments#appending-or-prepending-content),
     use the `{ animation }` option instead.
 
   @param {string} [options.animation]
     The name of an [animation](/up.motion) to reveal a new fragment when
-    [prepending or appending content](/fragment-placement#appending-or-prepending-content).
+    [prepending or appending content](/targeting-fragments#appending-or-prepending-content).
 
     If you are replacing content (the default), use the `{ transition }` option instead.
 
@@ -712,7 +717,8 @@ up.fragment = (function() {
     See [aborting requests](/aborting-requests) for details and a list of options.
 
   @param {boolean} [options.abortable=true]
-    Whether this request may be aborted by other requests targeting the same fragments or layer.
+    Whether this request may be aborted by other requests [targeting](/targeting-fragments)
+    the same fragments or layer.
 
     See [aborting requests](/aborting-requests) for details.
 
@@ -738,9 +744,9 @@ up.fragment = (function() {
     The element that triggered the change.
 
     When multiple elements in the current page match the `{ target }`,
-    Unpoly will replace an element in the [origin's vicinity](/fragment-placement).
+    Unpoly will replace an element in the [origin's proximity](/targeting-fragments#resolving-ambiguous-selectors).
 
-    The origin's selector will be substituted for `:origin` in a target selector.
+    The origin's selector will be substituted for `:origin` in a [target selector](/targeting-fragments).
 
   @param {string|up.Layer|Element} [options.layer='origin current']
     The [layer](/up.layer) in which to match and render the fragment.
@@ -840,12 +846,12 @@ up.fragment = (function() {
 
   @function up.navigate
   @param {string|Element|jQuery} [target]
-    The CSS selector to update.
+    The [target selector](/targeting-fragments) to update.
 
-    If omitted a [main target](/up-main) will be rendered.
+    If omitted a [main target](/main) will be rendered.
 
     You can also pass a DOM element or jQuery element here, in which case a selector
-    will be [inferred from the element attributes](/up.fragment.toTarget). The given element
+    will be [derived from the element attributes](/target-derivation). The given element
     will also be set as the `{ origin }` option.
 
     Instead of passing the target as the first argument, you may also pass it as
@@ -942,7 +948,7 @@ up.fragment = (function() {
   */
 
   /*-
-  Elements with an `up-keep` attribute will be persisted during
+  Elements with an `[up-keep]` attribute will be persisted during
   [fragment updates](/up.fragment).
 
   The element you're keeping should have an umambiguous class name, ID or `[up-id]`
@@ -964,9 +970,9 @@ up.fragment = (function() {
 
   Unpoly will **only** keep an existing element if:
 
-  - The existing element has an `up-keep` attribute
-  - The response contains an element matching the CSS selector of the existing element
-  - The matching element *also* has an `up-keep` attribute
+  - The existing element has an `[up-keep]` attribute
+  - The response contains an element matching the [derived target](/target-derivation) of the existing element
+  - The matching element *also* has an `[up-keep]` attribute
   - The [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element
   is not prevented by a event listener.
 
@@ -987,7 +993,7 @@ up.fragment = (function() {
   ```
 
   If we don't want to solve this on the client, we can achieve the same effect
-  on the server. By setting the value of the `up-keep` attribute we can
+  on the server. By setting the value of the `[up-keep]` attribute we can
   define the CSS selector used for matching elements.
 
   ```html
@@ -998,7 +1004,12 @@ up.fragment = (function() {
   element will be destroyed and replaced by a fragment from the response.
 
   @selector [up-keep]
-  @param up-on-keep
+  @param [up-keep]
+    The [target selector](/targeting-fragments) used to find a matching element in the new content.
+
+    If omitted a target [derived](/target-derivation) from this element will be used.
+
+  @param [up-on-keep]
     Code to run before an existing element is kept during a page update.
 
     The code may use the variables `event` (see `up:fragment:keep`),
@@ -1155,7 +1166,7 @@ up.fragment = (function() {
   const isNotDestroying = u.negate(isDestroying)
 
   /*-
-  Returns the first fragment matching the given selector.
+  Returns the first fragment matching the given CSS selector.
 
   This function differs from `document.querySelector()` and `up.element.get()`:
 
@@ -1200,9 +1211,10 @@ up.fragment = (function() {
   Assume the following HTML:
 
   ```html
-  <div class="element"></div>
   <div class="element">
-  <a href="..."></a>
+  </div>
+  <div class="element">
+    <a href="..."></a>
   </div>
   ```
 
@@ -1308,7 +1320,7 @@ up.fragment = (function() {
   const CSS_HAS_SUFFIX_PATTERN = /:has\(([^)]+)\)$/
 
   /*-
-  Returns all elements matching the given selector, but
+  Returns all elements matching the given CSS selector, but
   ignores elements that are being [destroyed](/up.destroy) or that are being
   removed by a [transition](/up.morph).
 
@@ -1433,7 +1445,7 @@ up.fragment = (function() {
   If a `:maybe` selector is not found in the current page or the server response,
   Unpoly will skip rendering the fragment instead of throwing an error.
 
-  When [updating multiple fragments](/fragment-placement#updating-multiple-fragments)
+  When [updating multiple fragments](/targeting-fragments#updating-multiple-fragments)
   you may combine required and optional selectors in a single target string.
 
   ### Example
@@ -1725,7 +1737,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Returns a CSS selector that matches the given element as good as possible.
+  [Derives a CSS selector](/target-derivation) that matches the given element as good as possible.
 
   To build the selector, the following element properties are used in decreasing
   order of priority:
@@ -1738,7 +1750,7 @@ up.fragment = (function() {
 
   TODO: Update the list above
   TODO: Document up.fragment.config.targetDerivers
-  TODO: Explain that the selector must be unique
+  TODO: Explain that the selector must match the derivee
   TODO: Explain new { origin } option
 
   ### Example
@@ -1759,7 +1771,7 @@ up.fragment = (function() {
   }
 
   /*-
-  TODO: Docs
+  Returns whether Unpoly can [derive a target selector](/target-derivation) for the given element.
 
   @function up.fragment.isTargetable
   @param {Element} element
@@ -1879,12 +1891,11 @@ up.fragment = (function() {
   /*-
   Sets an unique identifier for this element.
 
-  This identifier is used by `up.fragment.toTarget()`
+  This identifier is used in [target derivation](/target-derivation)
   to create a CSS selector that matches this element precisely.
 
-  If the element already has other attributes that make a good identifier,
-  like a good `[id]` or `[class]` attribute, it is not necessary to
-  also set `[up-id]`.
+  If the element already has [other attributes that make a good identifier](/target-derivation#derivation-patterns),
+  like a good `[id]` or `[class]` attribute, it is not necessary to also set `[up-id]`.
 
   ### Example
 
@@ -1898,7 +1909,7 @@ up.fragment = (function() {
 
   ```js
   up.fragment.toTarget(element)
-  // returns 'a'
+  // throws error: up.CannotTarget
   ```
 
   We can improve this by assigning an `[up-id]`:
@@ -2061,7 +2072,7 @@ up.fragment = (function() {
   }
 
   /*-
-  A pseudo-selector that matches the layer's main target.
+  A pseudo-selector that matches the layer's main [target](/targeting-fragments).
 
   Main targets are default render targets.
   When no other render target is given, Unpoly will try to find and replace a main target.
@@ -2075,6 +2086,8 @@ up.fragment = (function() {
 
   You may configure main target selectors in `up.fragment.config.mainTargets`.
 
+  Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
+
   ### Example
 
   ```js
@@ -2086,11 +2099,13 @@ up.fragment = (function() {
   */
 
   /*-
-  Updates this element when no other render target is given.
+  Marks this element as the dominant content element of your application layout.
+
+  Unpoly will update a main element when no more specific render target is given.
 
   ### Example
 
-  Many links simply replace the main content element in your application layout.
+  Many links simply replace the dominant content element in your application layout.
 
   Unpoly lets you mark this elements as a default target using the `[up-main]` attribute:
 
@@ -2120,14 +2135,7 @@ up.fragment = (function() {
   <a href="/foo" up-target=".profile">...</a>
   ```
 
-  Instead of assigning `[up-main]` you may also configure an existing selector in `up.fragment.config.mainTargets`:
-
-  ```js
-  up.fragment.config.mainTargets.push('.layout--content')
-  ```
-
-  Overlays can use different main targets
-  ---------------------------------------
+  ### Overlays can use different main targets
 
   Overlays often use a different default selector, e.g. to exclude a navigation bar.
 
@@ -2147,7 +2155,17 @@ up.fragment = (function() {
   </body>
   ```
 
-  Instead of assigning `[up-main]` you may also configure layer-specific targets in `up.layer.config`:
+  ### Using existing elements as main targets
+
+  Instead of the `[up-main]` attribute you may also use the standard [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element.
+
+  You may also configure an existing selector in `up.fragment.config.mainTargets`:
+
+  ```js
+  up.fragment.config.mainTargets.push('.layout--content')
+  ```
+
+  You may configure layer-specific targets in `up.layer.config`:
 
   ```js
   up.layer.config.popup.mainTargets.push('.menu')              // for popup overlays
@@ -2166,7 +2184,9 @@ up.fragment = (function() {
   */
 
   /*-
-  To make a server request without changing a fragment, use the `:none` selector.
+  To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments).
+
+  Note that even with a target other than `:none`, the server can still decide to render nothing by responding with HTTP status `304 Not Modified` or `204 No Content`.
 
   ### Example
 
@@ -2179,7 +2199,7 @@ up.fragment = (function() {
   */
 
   /*-
-  Your target selectors may use this pseudo-selector
+  Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to reference the element that triggered the change.
 
   The origin element is automatically set to a link that is being [followed](/a-up-follow)
@@ -2187,7 +2207,7 @@ up.fragment = (function() {
   programmatically through `up.render()` you may pass an origin element as an `{ origin }` option.
 
   Even without using an `:origin` reference, the
-  [origin is considered](/fragment-placement#interaction-origin-is-considered)
+  [origin is considered](/targeting-fragments#resolving-ambiguous-selectors)
   when matching fragments in the current page.
 
   ### Shorthand
@@ -2202,7 +2222,7 @@ up.fragment = (function() {
   */
 
   /*-
-  Your target selectors may use this pseudo-selector
+  Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to replace the layer's topmost swappable element.
 
   The topmost swappable element is the first child of the layer's container element.
@@ -2225,13 +2245,13 @@ up.fragment = (function() {
   */
 
   /*-
-  Returns whether the given element matches the given CSS selector.
+  Returns whether the given element matches the given CSS selector or other element.
 
   Other than [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches)
   this function supports non-standard selectors like `:main` or `:layer`.
 
   Instead of a selector you may also pass a second element. In that case
-  the function returns whether both elements match the same [derived target](/up.fragment.toTarget).
+  the function returns whether both elements match the same [derived target](/target-derivation).
 
   ### Examples
 
@@ -2249,7 +2269,7 @@ up.fragment = (function() {
     The selector or element to match.
 
     When an element is passed, returns whether `element` matches
-    the [target derived](/up.fragment.toTarget) from `selector`. .
+    the [target derived](/target-derivation) from `selector`. .
   @param {string|up.Layer} [options.layer]
     The layer for which to match.
 
@@ -2274,23 +2294,6 @@ up.fragment = (function() {
     return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
 
-  // function callbackWhileAlive(element, callback) {
-  //   element = e.get(element)
-  //   let aborted = false
-  //   let layer = up.layer.get(element)
-  //   let unsubscribe = layer.on('up:fragment:abort', function({ target } ) {
-  //     if (target.contains(element)) aborted = true
-  //   })
-  //   return function() {
-  //     unsubscribe()
-  //     if (!e.isDetached(element) && !aborted) callback()
-  //   }
-  // }
-  //
-  // function scheduleTimer(element, millis, callback) {
-  //   return u.timer(millis, callbackWhileAlive(element, callback))
-  // }
-
   /*-
   [Aborts requests](/aborting-requests) targeting a fragment or layer.
 
@@ -2302,8 +2305,8 @@ up.fragment = (function() {
 
   ### Aborting requests targeting a fragment
 
-  To abort requests targeting an element or its descendants, pass a reference or CSS selector
-  for that element:
+  To abort pending requests [targeting](/targeting-fragments) an element or its descendants,
+  pass a reference or CSS selector for that element:
 
   ```js
   up.fragment.abort(element)
