@@ -30,16 +30,35 @@ TODOs for V3
 ============
 
 
+State transfer
+--------------
+
+- Test if we can preserve element.upPolling in data
+
+
+
 
 Various changes
 ---------------
 
+- Support Wizards
+  - Validate should succeed/fail based on error code
+    - Possibly use same target for both?
+    => Would not help since we only look at a single step
 - Test with other browsers
   - Firefox
   - Edge
   - Safari
 - autosubmit should not move focus
   - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
+- Do we want to support ` or ` in targets?
+  - Is there any case other than [up-target], where we already have [up-fallback] ?
+- Should { focus: 'keep' } be a global, non-navigation render default?
+- up.RenderResult#fragment returns first fragment
+- Hungry elements should not be included when no good selector can be derived
+  - Log in that case
+  - Add a test
+
 
 
 Docs
@@ -92,6 +111,10 @@ Docs
 - up.request({ cache: 'auto' })
 - a[up-follow][up-cache="auto"]
 - Point existing links to new /caching page
+- Protocol headers
+  - ETag / If-None-Match
+  - Last-Modified / If-Modified-Since
+  - Link from places where we talk about `304 Not Modified` or `204 No Content`
 
 
 ### Watch/validate rework
@@ -161,7 +184,8 @@ Docs
     - up.radio.config.hungrySelectors
       - Note that the configured selector will be re-derived
     - [up-viewport]
-    - Also document [up-id] on these elements
+    - On the doc pages for these elements
+      - Link to derivation
   - Redirect links to up.fragment.toTarget
 
 
@@ -188,7 +212,7 @@ Docs
   - Explain auto-Configs
   - Explain that you can often override renderOptions in event handlers
 - Targeting content
-  - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/fragment-placement verlinken
+  - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/targeting-fragments verlinken
   - Include or link to /target-derivation
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09

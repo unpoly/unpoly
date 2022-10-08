@@ -145,10 +145,17 @@ up.FormValidator = class FormValidator {
     let dirtyOrigins = u.map(dirtySolutions, 'origin')
     let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
     let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
+    let dataMap = {}
+    for (let solution of dirtySolutions) {
+      let data = u.pluckKey(solution.renderOptions, 'data')
+      if (data) {
+        dataMap[solution.target] = data
+      }
+    }
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // Merge together all render options for all origins.
-    let options = u.merge(this.formDefaults, ...dirtyRenderOptionsList)
+    let options = u.merge(this.formDefaults, ...dirtyRenderOptionsList, { dataMap })
 
     // Update the collected targets of all solutions.
     options.target = u.map(dirtySolutions, 'target').join(', ')

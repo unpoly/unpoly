@@ -137,9 +137,34 @@ console.log("This is %o who is %o years old", data.name, data.age)
 ```
 
 
-## Accessing an element's data programmatically
+## Accessing data programmatically
 
 Use `up.data(element)` to retrieve an object with the given element's data.
+
+
+## Preserving data through reloads
+
+When [reloading](/up.reload) or [validating](/up.validate) an element,
+you may keep an existing data object by passing it as a [`{ data }`](/up.render#options.data) option.
+
+In the example below, `data.counter` is increased by `1` for every compiler pass,
+regardless of what the server renders into `[up-data]`:
+
+```js
+up.compiler('.element', function(element, data) {
+  data.counter ??= 1 // set initial state
+  console.log("Counter is", data.counter) // logs 1, 2, 3, ...
+  data.counter++
+  element.addEventListener('click', function() {
+    up.reload(element, { data })
+  })
+})
+```
+
+To keep an entire element, you may also use `[up-keep]`.
+The `up:fragment:keep` and `up:fragment:kept` events let you inspect the old and new element
+with its old and new data. You may then decide whether to keep the existing element or to
+swap it with the new version.
 
 
 @page data

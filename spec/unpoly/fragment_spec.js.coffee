@@ -6439,6 +6439,57 @@ describe 'up.fragment', ->
             expect(@lastRequest().url).toMatchURL('/source')
             expect(@lastRequest().requestHeaders['If-None-Match']).toBeUndefined()
 
+      describe 'with { data } option', ->
+
+        it 'lets the user forward data to compilers of the new element', asyncSpec (next) ->
+          dataSpy = jasmine.createSpy('data spy')
+
+          up.compiler '.element', (element, data) ->
+            dataSpy(data)
+            element.addEventListener 'click', up.reload(element, { data })
+
+          element = fixture('.element', 'data-foo': 'a', 'up-source': '/source')
+          up.hello(element)
+
+          expect(dataSpy.calls.count()).toBe(1)
+          expect(dataSpy.calls.argsFor(0)[0].foo).toBe('a')
+
+          Trigger.click(element)
+
+          next ->
+            jasmine.respondWithSelector('.element', 'data-foo': 'b', 'data-bar': 'c')
+
+          next ->
+            expect(dataSpy.calls.count()).toBe(2)
+            expect(dataSpy.calls.argsFor(1)[0].foo).toBe('a')
+
+            # Non-overridden props are still visible
+            expect(dataSpy.calls.argsFor(1)[0].bar).toBe('c')
+
+      describe 'with { keepData: true } option', ->
+
+        it "compiles the new element with the old element's data", asyncSpec (next) ->
+          dataSpy = jasmine.createSpy('data spy')
+
+          up.compiler '.element', (element, data) ->
+            dataSpy(data)
+            element.addEventListener 'click', up.reload(element, { keepData: true })
+
+          element = fixture('.element', 'data-foo': 'a', 'up-source': '/source')
+          up.hello(element)
+
+          expect(dataSpy.calls.count()).toBe(1)
+          expect(dataSpy.calls.argsFor(0)[0].foo).toBe('a')
+
+          Trigger.click(element)
+
+          next ->
+            jasmine.respondWithSelector('.element', 'data-foo': 'b')
+
+          next ->
+            expect(dataSpy.calls.count()).toBe(2)
+            expect(dataSpy.calls.argsFor(1)[0].foo).toBe('a')
+
       it "reloads the layer's main element if no selector is given", asyncSpec (next) ->
         up.fragment.config.mainTargets = ['.element']
 
@@ -6542,13 +6593,12 @@ describe 'up.fragment', ->
       it 'emits an up:fragment:inserted event', ->
         compiler = jasmine.createSpy('compiler')
         target = fixture('.element')
-        origin = fixture('.origin')
         listener = jasmine.createSpy('up:fragment:inserted listener')
         target.addEventListener('up:fragment:inserted', listener)
 
         up.hello(target, { origin })
 
-        expectedEvent = jasmine.objectContaining({ origin, target })
+        expectedEvent = jasmine.objectContaining({ target })
         expect(listener).toHaveBeenCalledWith(expectedEvent)
 
       it "sets up.layer.current to the given element's layer while compilers are running", asyncSpec (next) ->

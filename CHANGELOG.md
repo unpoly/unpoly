@@ -201,7 +201,7 @@ Changes tracked until 2022-07-06.
   - Example: Canonical link
 
 
-### Shorter data attributes
+### Data attributes
 
 - Simple data key/values can now be attached to an element using standard HTML5 [data-*] attributes (in addition to [up-data])
 - up.compiler((element, data) => ...) is sourced from both [data-*] attributes and [up-data]
@@ -210,6 +210,8 @@ Changes tracked until 2022-07-06.
   - `<div data-foo='one' data-bar='two'></div>`
   - `<div up-data='{ "foo": "one" }' data-bar='bar'></div>`
 - Note that [data-*] attributes are always strings
+- When reloading or validating, data can be forwarded with `{ data }` or `{ keepData: true }`
+- `[up-poll]` gets new attribute `[up-keep-data]` to preserve data of the polling fragment
 
 
 ### Better feedback

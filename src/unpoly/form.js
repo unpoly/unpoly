@@ -883,6 +883,13 @@ up.form = (function() {
     Defaults to the form's `[up-watch-feedback]` or `[up-feedback]` attribute.
   @param {string|Element|jQuery} [options.formGroup = true]
     TODO
+  @param {Object} [options.data]
+    Overrides properties from the new fragment's `[up-data]`
+    with the given [data object](/data).
+  @param {boolean} [options.keepData]
+    [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
+
+    Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
   @return {up.RenderJob}
     A promise that fulfills when the server-side validation is received
     and the form was updated.

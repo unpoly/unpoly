@@ -328,8 +328,13 @@ up.syntax = (function() {
   Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
 
   @function up.syntax.compile
+  @param {Element} target
   @param {Array<Element>} [options.skip]
     A list of elements whose subtrees should not be compiled.
+  @param {Object} [options.data]
+    Override data for `target`
+  @param {Object} [options.data]
+    Object mapping selectors to data-override in subtree of `target`.
   @internal
   */
   function compile(fragment, options) {
@@ -395,6 +400,8 @@ up.syntax = (function() {
 
   Returns an empty object if the element has no attached data.
 
+  Multiple `up.data()` calls for the same object always return the same object reference.
+
   ### Use with `[up-data]`
 
   You have an element with JSON data serialized into an `[up-data]` attribute:
@@ -434,6 +441,8 @@ up.syntax = (function() {
     The [data](/data) attached to the element.
 
     Returns an empty object if the element has no attached data.
+
+    Multiple `up.data()` calls for the same object always return the same object reference.
   @stable
   */
 
@@ -491,30 +500,36 @@ up.syntax = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
 
+    return element.upData ||= buildData(element)
+  }
+
+  function buildData(element) {
     // up.on(document) and up.on(window) may call this with a non-element.
     if (!element.getAttribute) {
       return {}
     }
 
-    let { dataset } = element
-    let jsonString = element.getAttribute('up-data')
+    let rawJSON = element.getAttribute('up-data')
+    let parsedJSON
 
-    // If we don't have [up-data] we don't need to construct a Proxy.
-    if (!jsonString) {
-      return dataset
+    if (rawJSON) {
+      parsedJSON = JSON.parse(rawJSON)
+
+      // If the [up-data] JSON isn't an object then we cannot offer live merging
+      // of [up-data] and [data-...] attributes.
+      //
+      // It would be better to parse this lazily, but I don't want to pay
+      // the bytes for a second Proxy handler when dealing with this edge case.
+      if (!u.isOptions(parsedJSON)) {
+        return parsedJSON
+      }
     }
 
-    // If the [up-data] JSON isn't an object then we cannot offer live merging
-    // of [up-data] and [data-...] attributes.
-    //
-    // It would be better to parse this lazily, but I don't want to pay
-    // the bytes for a second Proxy handler when dealing with this edge case.
-    if (!jsonString.startsWith('{')) {
-      return JSON.parse(jsonString)
+    return {
+      ...element.dataset,
+      ...parsedJSON,
+      ...element.upCompileData,
     }
-
-    let handler = new up.FragmentDataProxyHandler(jsonString)
-    return new Proxy(dataset, handler)
   }
 
   /*

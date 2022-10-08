@@ -282,6 +282,9 @@ up.radio = (function() {
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
+  @param [up-keep-data]
+    [Preserve](/data#preserving-data-through-reloads) the polling fragment's
+    [data object](/data) through reloads.
   @param [up-source]
     The URL from which to reload the fragment.
 

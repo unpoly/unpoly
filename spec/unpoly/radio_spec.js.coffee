@@ -895,3 +895,32 @@ describe 'up.radio', ->
           expect(jasmine.Ajax.requests.count()).toBe(0)
           expect(warnSpy).toHaveBeenCalled()
           expect(warnSpy.calls.argsFor(0)[1]).toMatch(/ignoring untargetable fragment/i)
+
+      describe 'with [up-keep-data] attribute', ->
+
+        it "persists the polling element's data through reloading", asyncSpec (next) ->
+          counterSpy = jasmine.createSpy(counterSpy)
+
+          up.compiler '.element', (element, data) ->
+            counterSpy(data.counter)
+            data.counter++
+
+          element = fixture('.element'
+            'up-poll': '',
+            'up-data': JSON.stringify(counter: 5),
+            'up-keep-data': '',
+            'up-interval': '30'
+          )
+          up.hello(element)
+
+          expect(counterSpy.calls.count()).toBe(1)
+          expect(counterSpy.calls.argsFor(0)[0]).toBe(5)
+
+          next.after 80, ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            jasmine.respondWithSelector('.element', 'up-data': JSON.stringify(counter: 99))
+
+          next ->
+            expect(counterSpy.calls.count()).toBe(2)
+            expect(counterSpy.calls.argsFor(1)[0]).toBe(6)

@@ -1077,12 +1077,11 @@ up.fragment = (function() {
 
   @function up.hello
   @param {Element|jQuery} element
-  @param {Element|jQuery} [options.origin]
   @return {Element}
     The compiled element
   @stable
   */
-  function hello(element, options = {}) {
+  function hello(element, { keepPlans, layer, data } = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = getSmart(element)
 
@@ -1092,14 +1091,13 @@ up.fragment = (function() {
     //
     // We will also pass an array of kept child elements to up.hello() as { skip }
     // so they won't be compiled a second time.
-    const keepPlans = options.keepPlans || []
-    const skip = keepPlans.map(function (plan) {
+    const skip = (keepPlans || []).map((plan) => {
       emitFragmentKept(plan)
       return plan.oldElement // the kept element
     })
 
-    up.syntax.compile(element, { skip, layer: options.layer })
-    emitFragmentInserted(element, options)
+    up.syntax.compile(element, { layer, data, skip })
+    emitFragmentInserted(element)
 
     return element
   }
@@ -1124,10 +1122,9 @@ up.fragment = (function() {
     The fragment that has been inserted or updated.
   @stable
   */
-  function emitFragmentInserted(element, options) {
+  function emitFragmentInserted(element) {
     return up.emit(element, 'up:fragment:inserted', {
       log: ['Inserted fragment %o', element],
-      origin: options.origin
     })
   }
 
@@ -1650,6 +1647,13 @@ up.fragment = (function() {
   @param {string} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
+  @param {Object} [options.data]
+    Overrides properties from the new fragment's `[up-data]`
+    with the given [data object](/data).
+  @param {boolean} [options.keepData]
+    [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
+
+    Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
   @param {string} [options.navigate=false]
     Whether the reloading constitutes a [user navigation](/navigation).
   @stable
@@ -1660,6 +1664,9 @@ up.fragment = (function() {
     const element = getSmart(options.target, options)
     options.url ||= sourceOf(element)
     options.headers = u.merge(options.headers, conditionalHeaders(element))
+    if (options.keepData || e.booleanAttr(element, 'up-keep-data')) {
+      options.data = up.data(element)
+    }
     up.migrate.postprocessReloadOptions?.(options)
     return render(options)
   }
@@ -2269,7 +2276,7 @@ up.fragment = (function() {
     The selector or element to match.
 
     When an element is passed, returns whether `element` matches
-    the [target derived](/target-derivation) from `selector`. .
+    the [target derived](/target-derivation) from `selector`.
   @param {string|up.Layer} [options.layer]
     The layer for which to match.
 
@@ -2283,7 +2290,8 @@ up.fragment = (function() {
   function matches(element, selector, options = {}) {
     element = e.get(element)
     if (u.isElement(selector)) {
-      return element.matches(toTarget(selector))
+      let target = tryToTarget(selector)
+      return target && element.matches(target)
     } else {
       selector = buildSelector(selector, element, options)
       return selector.matches(element)

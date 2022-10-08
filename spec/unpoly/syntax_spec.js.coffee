@@ -228,16 +228,12 @@ describe 'up.syntax', ->
           expect(data.foo).toBeUndefined()
           expect('foo' of data).toBe(false)
 
-        it 'delays JSON parsing until the first access', ->
-          parseSpy = spyOn(JSON, 'parse').and.callThrough()
-          element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
-          data = up.syntax.data(element)
+      it 'returns the same object for repeated calls, so we can use it as a state store', ->
+        element = fixture('.element')
+        data1 = up.syntax.data(element)
+        data2 = up.syntax.data(element)
 
-          expect(JSON.parse).not.toHaveBeenCalled()
-
-          expect(data.foo).toBe('foo value')
-
-          expect(JSON.parse).toHaveBeenCalled()
+        expect(data1).toBe(data2)
 
     describe 'up.syntax.compile', ->
 
