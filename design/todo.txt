@@ -24,6 +24,8 @@ TODOs after V3
   - Possibly refactor tops to up.ScrollTopsCapsule
 - Check that the target (and all non-successful target attempts) are visible in the log
   - Possibly highlight
+- Do we want to support ` or ` in targets?
+  - Is there any case other than [up-target], where we already have [up-fallback] ?
 
 
 TODOs for V3
@@ -34,29 +36,25 @@ State transfer
 --------------
 
 - Test if we can preserve element.upPolling in data
-
+- Test that multiple consolidates up.validate() calls can each forward their own { data }
+- up.data(): More explitly test that forwarded data overrides both JSON and data-keys
 
 
 
 Various changes
 ---------------
 
-- Support Wizards
-  - Validate should succeed/fail based on error code
-    - Possibly use same target for both?
-    => Would not help since we only look at a single step
+- Now that we have a { data } option we can no longer rewrite legacy data option, at least not in renderOptions
 - Test with other browsers
   - Firefox
   - Edge
   - Safari
 - autosubmit should not move focus
   - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
-- Do we want to support ` or ` in targets?
-  - Is there any case other than [up-target], where we already have [up-fallback] ?
 - Should { focus: 'keep' } be a global, non-navigation render default?
 - up.RenderResult#fragment returns first fragment
 - Hungry elements should not be included when no good selector can be derived
-  - Log in that case
+  - Write to log in that case
   - Add a test
 
 
