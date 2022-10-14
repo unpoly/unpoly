@@ -5,6 +5,10 @@ describe 'up.Request', ->
 
   describe 'constructor', ->
 
+    it 'initializes a XMLHttpRequest instance', ->
+      request = new up.Request(url: '/foo', preload: true, cache: false)
+      expect(request.xhr).toEqual(jasmine.any(XMLHttpRequest))
+
     it 'force-enables caching when preloading', ->
       request = new up.Request(url: '/foo', preload: true, cache: false)
       expect(request.cache).toBe(true)

@@ -10,7 +10,7 @@ up.Request.XHRRenderer = class XHRRenderer {
   }
 
   buildAndSend(handlers) {
-    this.xhr = new XMLHttpRequest()
+    this.xhr = this.request.xhr ?? new XMLHttpRequest()
 
     // We copy params since we will modify them below.
     // This would confuse API clients and cache key logic in up.network.

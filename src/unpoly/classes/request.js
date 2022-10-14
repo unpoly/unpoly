@@ -309,6 +309,12 @@ up.Request = class Request extends up.Record {
     }
   }
 
+  get xhr() {
+    // Initialize the xhr request on first access,
+    // so listeners on up:request:send events have a chance to access the xhr.
+    return this._xhr ??= new XMLHttpRequest()
+  }
+
   followState(sourceRequest) {
     u.delegate(this, ['deferred', 'state', 'preload'], () => sourceRequest)
   }
@@ -398,7 +404,7 @@ up.Request = class Request extends up.Record {
     this.state = 'loading'
 
     // Convert from XHR's callback-based API to up.Request's promise-based API
-    this.xhr = new up.Request.XHRRenderer(this).buildAndSend({
+    new up.Request.XHRRenderer(this).buildAndSend({
       onload:    () => this.onXHRLoad(),
       onerror:   () => this.onXHRError(),
       ontimeout: () => this.onXHRTimeout(),
@@ -500,8 +506,8 @@ up.Request = class Request extends up.Record {
   abort() {
     // setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call setAbortedState() a second time, without a message.
-    if (this.setAbortedState() && this.xhr) {
-      this.xhr.abort()
+    if (this.setAbortedState() && this._xhr) {
+      this._xhr.abort()
     }
   }
 
