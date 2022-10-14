@@ -5523,7 +5523,7 @@ describe 'up.fragment', ->
                 renderedResult = onRendered.calls.argsFor(0)[0]
                 expect(renderedResult).toEqual(jasmine.any(up.RenderResult))
                 expect(renderedResult.none).toBe(false)
-                expect(renderedResult.fragments[0]).toMatchSelector('.target')
+                expect(renderedResult.fragment).toMatchSelector('.target')
 
                 expect(up.network.isBusy()).toBe(true)
                 jasmine.respondWith(status: 304)
@@ -5535,7 +5535,7 @@ describe 'up.fragment', ->
                 finishedResult = onFinished.calls.argsFor(0)[0]
                 expect(finishedResult).toEqual(jasmine.any(up.RenderResult))
                 expect(finishedResult.none).toBe(false)
-                expect(finishedResult.fragments[0]).toMatchSelector('.target')
+                expect(finishedResult.fragment).toMatchSelector('.target')
 
             describe 'handling of [up-keep] elements', ->
 

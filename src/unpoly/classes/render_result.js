@@ -112,6 +112,20 @@ up.RenderResult = class RenderResult extends up.Record {
     return !this.fragments.length
   }
 
+  /*-
+  Returns the inserted fragment.
+
+  When [multiple fragments](/targeting-fragments#updating-multiple-fragments) were inserted, the first fragment is returned.
+  To get a list of all inserted fragments, use the [`{ fragments }`](/up.RenderResult.prototype.fragments) property.
+
+  @property up.RenderResult#fragment
+  @param {Element} fragment
+  @stable
+  */
+  get fragment() {
+    return this.fragments[0]
+  }
+
   update(otherResult) {
     this.fragments = this.fragments.concat(otherResult.fragments).filter(up.element.isAttached)
     this.target = otherResult.target

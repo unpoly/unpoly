@@ -91,16 +91,15 @@ up.FragmentPolling = class FragmentPolling {
     this.abortable = oldAbortable
   }
 
-  onReloadSuccess(result) {
+  onReloadSuccess({ fragment }) {
     // Transfer this instance to the new fragment.
     // We can remove this in case we don't implement forced start/stop.
-    let newFragment = result.fragments[0]
-    if (newFragment) {
+    if (fragment) {
       // No need to scheduleReload() in this branch:
       // (1) Either the new fragment also has an [up-poll] and we have already
       //     started in #onPollAttributeObserved().
       // (2) Or we are force-started and we will start in #onFragmentSwapped().
-      this.onFragmentSwapped(newFragment)
+      this.onFragmentSwapped(fragment)
     } else {
       // The server may have opted to not send an update, e.g. if there is no fresher content.
       // In that case we try again in the next interval.
