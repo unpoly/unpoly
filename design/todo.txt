@@ -48,13 +48,10 @@ Various changes
   - Firefox
   - Edge
   - Safari
-- autosubmit should not move focus
-  - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
-- Should { focus: 'keep' } be a global, non-navigation render default?
-- up.RenderResult#fragment returns first fragment
-- Hungry elements should not be included when no good selector can be derived
-  - Write to log in that case
-  - Add a test
+- Focus
+  - autosubmit should not move focus
+    - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
+  - Should { focus: 'keep' } be a global, non-navigation render default?
 
 
 
