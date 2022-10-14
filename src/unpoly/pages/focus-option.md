@@ -6,8 +6,8 @@ a `{ focus }` option or `[up-focus]` attribute.
 
 Changing the focus will make a screen reader start reading from the focused position.
 
-When [navigating](/navigation) Unpoly will default to
-[`{ focus: 'auto' }`](#automatic-focus-logic).
+When rendering without navigation Unpoly will default to [`{ focus: 'keep' }`](#preserving-focus).\
+When [navigating](/navigation) Unpoly will default to [`{ focus: 'auto' }`](#automatic-focus-logic).
 
 ### Focusing the fragment
 
@@ -19,7 +19,15 @@ Pass `{ focus: 'layer' }` to focus the [layer](/up.layer) of the updated fragmen
 
 ### Focusing another element
 
-Pass a CSS selector string to focus a matching element.
+Pass a CSS selector string to focus a matching element:
+
+```js
+up.render({
+  target: '.content',
+  url: '/advanced-search',
+  focus: 'input[type=search]'
+})
+```
 
 From JavaScript you may also pass the `Element` object that should be focused.
 
@@ -47,40 +55,33 @@ for the updated layer's URL.
 Unpoly will automatically save focus-related state before a fragment update.
 You may disable this behavior with `{ saveFocus: false }`.
 
-### Resetting focus to the layer
-
-Pass `'layer'` to focus the container element of the updated [layer](/up.layer).
-
-### Restoring focus positions
-
-Pass `'reset'` to restore the last known focus positions for the updated layer's URL.
-
-Unpoly will automatically save focus positions before a fragment update.
-You may disable this behavior with `{ saveFocus: false }`.
-
 ### Revealing the URL's `#hash` target
 
-Pass `'hash'` to focus the element matching the `#hash` in the URL.
+Pass `{ focus: 'hash' }` to focus the element matching the `#hash` in the URL.
 
 ### Revealing the main element
 
-Pass `'main'` to reveal the updated layer's [main element](/up-main).
+Pass `{ focus: 'main' }` to reveal the updated layer's [main element](/up-main).
 
 ### Don't focus
 
-Pass `false` to keep all focus positions.
+Pass `{ focus: false }` to not actively manipulate focus.
+
+Note that even with `{ focus: false }` the focus may change during a fragment update. For instance, when a fragment contains focus and is then swapped, focus will revert to the `<body>` element.
+
+To actively try and preserve focus, use [`{ focus: 'keep' }`](#preserving-focus) instead.
 
 ### Conditional focusing
 
 To only focus when a [main target](/up-main) is updated,
 you may append `-if-main` to any of the string options in this list.
 
-E.g. `'reset-if-main'` will reset focus positions, but only if a main target is updated.
+E.g. `{ focus: 'reset-if-main' }` will reset focus positions, but only if a main target is updated.
 
 To only focus when the focus was lost with the old fragment,
 you may append `-if-lost` to any of the string options in this list.
 
-E.g. `'target-if-lost'` will focus the new fragment, but only if the update caused focus
+E.g. `{ focus: 'target-if-lost' }` will focus the new fragment, but only if the update caused focus
 to be lost.
 
 To implement other conditions, [pass a function](#custom-focus-logic) instead.
@@ -89,7 +90,7 @@ To implement other conditions, [pass a function](#custom-focus-logic) instead.
 
 Pass an array of focus option and Unpoly will use the first applicable value.
 
-E.g. `['hash', 'reset']` will first try to an element mathing the `#hash` in the URL.
+E.g. `{ focus: ['hash', 'reset'] }` will first try to an element mathing the `#hash` in the URL.
 If the URL has no `#hash`, focus positions will be reset.
 
 In an `[up-focus]` attribute you may separate scroll options with an `or`:
@@ -100,7 +101,7 @@ In an `[up-focus]` attribute you may separate scroll options with an `or`:
 
 ### Automatic focus logic
 
-Pass `'auto'` to try a sequence of focus strategies that works for most cases.
+Pass `{ focus: 'auto' }` to try a sequence of focus strategies that works for most cases.
 This is the default when [navigating](/navigation).
 
 - Focus a `#hash` in the URL.
@@ -119,9 +120,9 @@ The function will be called with the updated fragment and an options object.
 The function is expected to either:
 
 - Focus the viewport to the desired position. Focusing must not change
-  scroll positions, since scrolling is governed by a separate `{ scroll }` option.
-  Both `Element#focus()` and `up.focus()` accept a `{ preventScroll: true }` option
-  to prevent scrolling.
+  scroll positions, since scrolling is governed by a separate [`{ scroll }` option](/scroll-option).
+  Both [`Element#focus()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) and `up.focus()`
+  accept a `{ preventScroll: true }` option to prevent scrolling.
 - Return one of the focus options in this list
 - Do nothing
 

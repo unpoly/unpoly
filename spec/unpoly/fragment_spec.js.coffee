@@ -4800,6 +4800,25 @@ describe 'up.fragment', ->
               expect('.focused').toHaveText('new focused')
               expect('.focused').toBeFocused()
 
+
+        describe 'without a { focus } option', ->
+
+          it 'preserves focus of an element within the changed fragment', asyncSpec (next) ->
+            container = fixture('.container')
+            oldFocused = e.affix(container, '.focused[tabindex=0]', text: 'old focused')
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container', document: """
+              <div class="container">
+                <div class="focused" tabindex="0">new focused</div>
+              </div>
+            """)
+
+            next ->
+              expect('.focused').toHaveText('new focused')
+              expect('.focused').toBeFocused()
+
         describe 'when rendering nothing', ->
 
           it 'still processes a { focus } option', ->
