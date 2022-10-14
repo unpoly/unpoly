@@ -1406,6 +1406,39 @@ describe 'up.form', ->
             expect(barField).not.toBeDisabled()
             expect(bazField).not.toBeDisabled()
 
+        it 'honors the { data } option of each batched validation', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          fooField = e.affix(form, 'input[name=foo]')
+          barField = e.affix(form, 'input[name=bar]')
+
+          fooDataSpy = jasmine.createSpy("spy for foo's data")
+          barDataSpy = jasmine.createSpy("spy for bar's data")
+
+          up.compiler 'input[name=foo]', (element, data) =>
+            fooDataSpy(data)
+
+          up.compiler 'input[name=bar]', (element, data) =>
+            barDataSpy(data)
+
+          up.validate(fooField, data: { key: 1 }, formGroup: false)
+          up.validate(barField, data: { key: 2 }, formGroup: false)
+
+          next ->
+            expect(fooDataSpy).not.toHaveBeenCalled()
+            expect(barDataSpy).not.toHaveBeenCalled()
+
+            jasmine.respondWith """
+              <form action="/path">
+                <input name='foo'>
+                <input name='bar'>
+                <input name='baz'>
+              </form>
+            """
+
+          next ->
+            expect(fooDataSpy).toHaveBeenCalledWith(key: 1)
+            expect(barDataSpy).toHaveBeenCalledWith(key: 2)
+
     describe 'up.form.parseValidateArgs()', ->
 
       it 'parses [String]', ->

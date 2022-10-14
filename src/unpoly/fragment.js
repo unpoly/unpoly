@@ -1077,11 +1077,14 @@ up.fragment = (function() {
 
   @function up.hello
   @param {Element|jQuery} element
+  @param {Object} [options.data]
+    Overrides properties from the new fragment's `[up-data]`
+    with the given [data object](/data).
   @return {Element}
     The compiled element
   @stable
   */
-  function hello(element, { keepPlans, layer, data } = {}) {
+  function hello(element, { keepPlans, layer, data, dataMap } = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = getSmart(element)
 
@@ -1096,7 +1099,7 @@ up.fragment = (function() {
       return plan.oldElement // the kept element
     })
 
-    up.syntax.compile(element, { layer, data, skip })
+    up.syntax.compile(element, { layer, data, dataMap, skip })
     emitFragmentInserted(element)
 
     return element
