@@ -768,6 +768,38 @@ up.Request = class Request extends up.Record {
     }
   }
 
+  /*-
+  An `up.Request` is also a promise for the server response.
+
+  A request is *fulfilled* with an `up.Response` when the server sends a response
+  with a status code of 2xx or 304.
+
+  The promise will reject for responses with a failed HTTP status,
+  when the request is [aborted](/aborting-requests) or when there is
+  [network issue](/disconnects).
+
+  ### Example
+
+  ```js
+  try {
+    let response = await up.request('foo')
+    console.log('Successful response:', response.text)
+  } catch (error) {
+    if (error instanceof up.Request) {
+      console.log('Response with error code:', response.text)
+    } else {
+      console.log("Other error during request: ", error)
+    }
+  }
+  ```
+
+  @function up.Request#then
+  @param {Function(up.Response)} onFulfilled
+  @param {Function(up.Response|Error)} onRejected
+  @return {Promise<up.Response>}
+    A promise that fulfills when the server response was fully loaded.
+  @stable
+  */
   static {
     // A request is also a promise ("thenable") for its response.
     u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this.deferred })
