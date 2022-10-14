@@ -48,10 +48,7 @@ Various changes
   - Firefox
   - Edge
   - Safari
-- Focus
-  - autosubmit should not move focus
-    - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
-  - Should { focus: 'keep' } be a global, non-navigation render default?
+- Should { focus: 'keep' } be a global, non-navigation render default?
 
 
 
