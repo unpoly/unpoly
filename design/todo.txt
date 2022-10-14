@@ -126,6 +126,7 @@ Docs
   - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
   - Explain that they can be set either on the form or on an input
 - Docs for up.validate()
+  - Document the many ways to target an element (see up.form.parseValidateArgs)
   - { feedback, disable, delay, event }
 - New watch() and validate() options
   - { feedback, disable, delay, event }
