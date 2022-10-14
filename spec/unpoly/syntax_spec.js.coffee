@@ -103,13 +103,13 @@ describe 'up.syntax', ->
         expect(args[1]).toBeJQuery()
         expect(args[1]).toEqual($element)
 
-    describe 'up.syntax.data', ->
+    describe 'up.data', ->
 
       describe 'when the element has an [up-data] attribute', ->
 
         it 'parses an object value serialized as JSON', ->
           element = fixture('.element', 'up-data': '{ "foo": 1, "bar": 2 }')
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
           expect(data.foo).toBe(1)
@@ -117,13 +117,13 @@ describe 'up.syntax', ->
 
         it 'parses an array value serialized as JSON', ->
           element = fixture('.element', 'up-data': '["foo", "bar"]')
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data).toEqual(['foo', 'bar'])
 
         it 'parses a string value serialized as JSON', ->
           element = fixture('.element', 'up-data': '"foo"')
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data).toBe('foo')
 
@@ -131,21 +131,21 @@ describe 'up.syntax', ->
 
         it 'returns a blank object', ->
           element = fixture('.element')
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(typeof data).toBe('object')
           expect(Object.keys(data)).toBeBlank()
 
         it "returns access to the element's vanilla [data-] attributes", ->
           element = fixture('.element', 'data-foo': 'foo value', 'data-bar': 'bar value')
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data.foo).toBe('foo value')
           expect(data.bar).toBe('bar value')
 
         it 'allows to access [data-] attribute with camelCase keys', ->
           element = fixture('.element', 'data-foo-bar': 'value')
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data.fooBar).toBe('value')
 
@@ -153,20 +153,20 @@ describe 'up.syntax', ->
 
         it 'returns an object with properties from both', ->
           element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data.foo).toBe('foo value')
           expect(data.bar).toBe('bar value')
 
         it 'allows to access [data-] attribute with camelCase keys', ->
           element = fixture('.element', 'data-foo-bar': 'value1', 'up-data': JSON.stringify(baz: 'value2'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data.fooBar).toBe('value1')
 
         it 'supports the `in` operator', ->
           element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           # The `in` operator is `of` in CoffeeScript
           # See https://makandracards.com/makandra/52454
@@ -176,19 +176,19 @@ describe 'up.syntax', ->
 
         it 'supports Object.keys()', ->
           element = fixture('.element', 'data-foo': 'foo value', 'up-data': JSON.stringify(bar: 'bar value'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(Object.keys(data)).toEqual(jasmine.arrayWithExactContents(['foo', 'bar']))
 
         it 'prefers properties from [up-data]', ->
           element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           expect(data.foo).toBe('b')
 
         it 'allows to override a property from a [data-] attribute', ->
           element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           data.foo = 'new a'
 
@@ -196,7 +196,7 @@ describe 'up.syntax', ->
 
         it 'allows to override a property from [up-data]', ->
           element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           data.foo = 'overridden'
 
@@ -204,7 +204,7 @@ describe 'up.syntax', ->
 
         it 'allows to delete a property from a [data-] attribute', ->
           element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(bar: 'b'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           data.foo = 'overridden'
 
@@ -212,7 +212,7 @@ describe 'up.syntax', ->
 
         it 'allows to delete a property from [up-data]', ->
           element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(foo: 'b'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           delete data.foo
 
@@ -221,19 +221,39 @@ describe 'up.syntax', ->
 
         it 'allows to delete a property from a [data-] attribute', ->
           element = fixture('.element', 'data-foo': 'a', 'up-data': JSON.stringify(bar: 'b'))
-          data = up.syntax.data(element)
+          data = up.data(element)
 
           delete data.foo
 
           expect(data.foo).toBeUndefined()
           expect('foo' of data).toBe(false)
 
+      describe 'when the element was compiled with a { data } option', ->
+
+        it 'overrides properties from a [data-] attribute', ->
+          element = fixture('.element', 'data-foo': 'a', 'data-bar': 'b')
+          up.hello(element, data: { bar: 'c' })
+
+          data = up.data(element)
+
+          expect(data).toEqual(foo: 'a', bar: 'c')
+
+        it 'overrides properties from an [up-data] attribute', ->
+          element = fixture('.element', 'up-data': JSON.stringify(foo: 'a', bar: 'b'))
+          up.hello(element, data: { bar: 'c' })
+
+          data = up.data(element)
+
+          expect(data).toEqual(foo: 'a', bar: 'c')
+
       it 'returns the same object for repeated calls, so we can use it as a state store', ->
         element = fixture('.element')
-        data1 = up.syntax.data(element)
-        data2 = up.syntax.data(element)
+        data1 = up.data(element)
+        data2 = up.data(element)
 
         expect(data1).toBe(data2)
+
+
 
     describe 'up.syntax.compile', ->
 

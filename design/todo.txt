@@ -37,7 +37,6 @@ State transfer
 
 - Test if we can preserve element.upPolling in data
 - Test that multiple consolidates up.validate() calls can each forward their own { data }
-- up.data(): More explitly test that forwarded data overrides both JSON and data-keys
 
 
 
