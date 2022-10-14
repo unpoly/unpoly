@@ -1577,6 +1577,23 @@ describe('up.network', function() {
           })
         })
 
+        it('allows up:request:load listeners to access the xhr request object', function (done) {
+          const listener = jasmine.createSpy('listener').and.callFake(function (event) {
+            expect(jasmine.Ajax.requests.count()).toEqual(0)
+            expect(event.request.xhr).toBeDefined()
+          })
+
+          up.on('up:request:load', listener)
+
+          up.request('/path1', {method: 'post'})
+
+          u.task(() => {
+            expect(listener.calls.count()).toBe(1)
+            expect(jasmine.Ajax.requests.count()).toEqual(1)
+            done()
+          })
+        })
+
         describe('event target', function() {
           it('is emitted on the layer that triggered the event', asyncSpec(function(next) {
             makeLayers(3)
