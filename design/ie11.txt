@@ -8,12 +8,6 @@ Quick wins: Deprecate in unpoly-migrate.js and remove from unpoly.js
 Quick wins: Removals
 --------------------
 
-- Do we want to replace ScrollMotion / RevealMotion with native { behavior: 'smooth' }?
-  - I think so
-  - Chrome's behavior for parallel scrolling is simply that the later call overrides the scroll target for the earlier call
-  - We don't get a promise for the scrolling, but do we really need that?
-  - We can no longer control the scroll duration. This would be fine, just document it.
-
 
 More work required
 ------------------
