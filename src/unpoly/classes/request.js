@@ -366,6 +366,12 @@ up.Request = class Request extends up.Record {
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
   }
 
+  get xhr() {
+    // Initialize the xhr request on first access,
+    // so listeners on up:request:send events have a chance to access the xhr.
+    return this._xhr ??= new XMLHttpRequest()
+  }
+
   /*-
   Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
 
@@ -577,8 +583,8 @@ up.Request = class Request extends up.Record {
   abort({ reason } = {}) {
     // setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call setAbortedState() a second time, without a message.
-    if (this.setAbortedState(reason) && this.xhr) {
-      this.xhr.abort()
+    if (this.setAbortedState(reason) && this._xhr) {
+      this._xhr.abort()
     }
   }
 
