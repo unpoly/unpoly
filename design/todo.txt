@@ -44,7 +44,7 @@ State transfer
 Various changes
 ---------------
 
-- Now that we have a { data } option we can no longer rewrite legacy data option, at least not in renderOptions
+- Now that we have a { data } option we can no longer rewrite legacy up.request({ data }) option
 - Test with other browsers
   - Firefox
   - Edge
