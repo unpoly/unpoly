@@ -494,7 +494,7 @@ up.Request = class Request extends up.Record {
     this.expired = false
 
     // Convert from XHR's callback-based API to up.Request's promise-based API
-    this.xhr = new up.Request.XHRRenderer(this).buildAndSend({
+    new up.Request.XHRRenderer(this).buildAndSend({
       onload:    () => this.onXHRLoad(),
       onerror:   () => this.onXHRError(),
       ontimeout: () => this.onXHRTimeout(),
