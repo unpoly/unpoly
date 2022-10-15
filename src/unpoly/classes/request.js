@@ -366,6 +366,11 @@ up.Request = class Request extends up.Record {
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
   }
 
+  /*-
+  Returns the underlying XMLHttpRequest instance.
+
+  @property up.Request#xhr
+  */
   get xhr() {
     // Initialize the xhr request on first access,
     // so listeners on up:request:send events have a chance to access the xhr.
