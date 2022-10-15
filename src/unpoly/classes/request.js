@@ -367,9 +367,10 @@ up.Request = class Request extends up.Record {
   }
 
   /*-
-  Returns the underlying XMLHttpRequest instance.
+  Returns the underlying `XMLHttpRequest` instance.
 
   @property up.Request#xhr
+  @param {XMLHttpRequest} xhr
   @stable
   */
   get xhr() {
