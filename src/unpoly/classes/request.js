@@ -370,6 +370,7 @@ up.Request = class Request extends up.Record {
   Returns the underlying XMLHttpRequest instance.
 
   @property up.Request#xhr
+  @stable
   */
   get xhr() {
     // Initialize the xhr request on first access,
