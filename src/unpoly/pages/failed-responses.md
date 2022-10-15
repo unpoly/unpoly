@@ -116,4 +116,13 @@ A promise for an aborted request will reject with an `up.AbortError`.
 
 [By default](/up.render#options.abort) Unpoly will abort a request when a second request targets the same fragment.
 
+
+## Detecting a failed response programmatically
+
+Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return a promise that rejects when the server
+sends a failed response, or when there is another error.
+
+See [render error handling example](/render-hooks#full-error-handling-example).
+
+
 @page failed-responses

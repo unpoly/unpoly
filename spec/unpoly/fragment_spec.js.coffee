@@ -4800,6 +4800,25 @@ describe 'up.fragment', ->
               expect('.focused').toHaveText('new focused')
               expect('.focused').toBeFocused()
 
+
+        describe 'without a { focus } option', ->
+
+          it 'preserves focus of an element within the changed fragment', asyncSpec (next) ->
+            container = fixture('.container')
+            oldFocused = e.affix(container, '.focused[tabindex=0]', text: 'old focused')
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            up.render('.container', document: """
+              <div class="container">
+                <div class="focused" tabindex="0">new focused</div>
+              </div>
+            """)
+
+            next ->
+              expect('.focused').toHaveText('new focused')
+              expect('.focused').toBeFocused()
+
         describe 'when rendering nothing', ->
 
           it 'still processes a { focus } option', ->
@@ -5523,7 +5542,7 @@ describe 'up.fragment', ->
                 renderedResult = onRendered.calls.argsFor(0)[0]
                 expect(renderedResult).toEqual(jasmine.any(up.RenderResult))
                 expect(renderedResult.none).toBe(false)
-                expect(renderedResult.fragments[0]).toMatchSelector('.target')
+                expect(renderedResult.fragment).toMatchSelector('.target')
 
                 expect(up.network.isBusy()).toBe(true)
                 jasmine.respondWith(status: 304)
@@ -5535,7 +5554,7 @@ describe 'up.fragment', ->
                 finishedResult = onFinished.calls.argsFor(0)[0]
                 expect(finishedResult).toEqual(jasmine.any(up.RenderResult))
                 expect(finishedResult.none).toBe(false)
-                expect(finishedResult.fragments[0]).toMatchSelector('.target')
+                expect(finishedResult.fragment).toMatchSelector('.target')
 
             describe 'handling of [up-keep] elements', ->
 

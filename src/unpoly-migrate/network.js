@@ -34,7 +34,6 @@ up.migrate.renamedProperty(up.network.config, 'cacheExpiry', 'cacheExpireAge')
 up.migrate.renamedProperty(up.network.config, 'clearCache', 'expireCache')
 
 up.migrate.handleRequestOptions = function(options) {
-  up.migrate.fixKey(options, 'data', 'params')
   up.migrate.fixKey(options, 'clearCache', 'expireCache')
 
   if (options.solo) {

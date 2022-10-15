@@ -36,26 +36,16 @@ State transfer
 --------------
 
 - Test if we can preserve element.upPolling in data
-- Test that multiple consolidates up.validate() calls can each forward their own { data }
-- up.data(): More explitly test that forwarded data overrides both JSON and data-keys
 
 
 
 Various changes
 ---------------
 
-- Now that we have a { data } option we can no longer rewrite legacy data option, at least not in renderOptions
 - Test with other browsers
   - Firefox
   - Edge
   - Safari
-- autosubmit should not move focus
-  - https://makandra.slack.com/archives/C02KGPZDE/p1664287171380039
-- Should { focus: 'keep' } be a global, non-navigation render default?
-- up.RenderResult#fragment returns first fragment
-- Hungry elements should not be included when no good selector can be derived
-  - Write to log in that case
-  - Add a test
 
 
 
@@ -136,6 +126,7 @@ Docs
   - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
   - Explain that they can be set either on the form or on an input
 - Docs for up.validate()
+  - Document the many ways to target an element (see up.form.parseValidateArgs)
   - { feedback, disable, delay, event }
 - New watch() and validate() options
   - { feedback, disable, delay, event }
@@ -232,6 +223,7 @@ Docs
 V3 Launch
 ---------
 
+- Track CHANGELOG with changes done since the V3 presentation
 - We don't need anything from Ops
   - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
 - Make an 2.x-stable branch for unpoly-site

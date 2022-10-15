@@ -1,7 +1,25 @@
 const u = up.util
 
 /*-
-TODO: Docs
+A queued render task.
+
+Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return an `up.RenderJob`.
+Callers can inspect the job's [options](/up.Request.prototype.options) or [`await` its completion](/render-hooks#running-code-after-rendering).
+
+See [render hooks](/render-hooks) for examples for awaiting rendering completion
+and how to handle errors.
+
+## Example
+
+```
+let job = up.render('.foo', url: '/users')
+console.log(job.options.target) // logs ".foo"
+console.log(job.options.url) // logs "/users"
+let renderResult = await job // fragments were updated
+console.log(renderResult.fragment) // logs the updated fragment
+let finalResult = await job.finished // animations are done and cached content was revlidated
+console.log(finalResult.fragment) // logs the revalidated fragment
+```
 
 @class up.RenderJob
 @parent up.fragment
@@ -12,6 +30,14 @@ up.RenderJob = class RenderJob {
     this.options = up.RenderOptions.preprocess(options)
     this.rendered = this.execute()
   }
+
+  /*-
+  The [render options](/up.render) for this job.
+
+  @property up.RenderJob#options
+  @param {Object} options
+  @stable
+  */
 
   async execute() {
     try {
@@ -24,12 +50,13 @@ up.RenderJob = class RenderJob {
     }
   }
 
+
   runResultCallbacks(result) {
     // There may be multiple reasons why `result` is not an up.RenderResult:
     //
     // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
-    // (2) No fragment could be matches (return value is up.CannotMatch)
-    // (3) We're preloading (return value is up.Request)
+    // (2) No fragment could be matched (return value is up.CannotMatch)
+    // (3) We're preloading (early return value is up.Request)
     if (result instanceof up.RenderResult) {
       // We call result.options.onRendered() instead of this.options.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
@@ -40,6 +67,20 @@ up.RenderJob = class RenderJob {
     }
   }
 
+  /*-
+  A promise that fulfills when fragments were updated, [animations](/up.motion) have concluded and
+  cached content was [revalidated](/caching#revalidation).
+
+  The promise will reject when the server responds with a [failed HTTP status](/failed-responses),
+  when any request is [aborted](/aborting-requests) or when there is [network issue](/disconnects).
+
+  See [render hooks](/render-hooks) for examples for awaiting rendering completion.
+
+  @property up.RenderJob#finished
+  @param {Promise<up.RenderResult>}
+    The [revalidated]((/caching#revalidation)) render result.
+  @stable
+  */
   get finished() {
     return this.awaitFinished()
   }
@@ -122,6 +163,26 @@ up.RenderJob = class RenderJob {
     }
   }
 
+  /*-
+  An `up.RenderJob` is also a promise for its completion.
+
+  A request is *fulfilled* with an `up.RenderResult` when a fragment
+  was updated from a successful server response.
+
+  The promise will reject for responses with a [failed HTTP status](/failed-responses),
+  when the request is [aborted](/aborting-requests) or when there is
+  [network issue](/disconnects).
+
+  See [render hooks](/render-hooks) for examples for awaiting rendering completion
+  and how to handle errors.
+
+  @function up.RenderJob#then
+  @param {Function(up.Response)} onFulfilled
+  @param {Function(up.Response|Error)} onRejected
+  @return {Promise<up.Response>}
+    A promise that fulfills when a fragment was updated from a successful server response.
+  @stable
+  */
   static {
     // A request is also a promise ("thenable") for its initial render pass.
     u.delegate(this.prototype, ['then', 'catch', 'finally'], function() { return this.rendered })
