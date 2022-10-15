@@ -10,7 +10,7 @@ up.Request.XHRRenderer = class XHRRenderer {
   }
 
   buildAndSend(handlers) {
-    this.xhr = this.request.xhr
+    const xhr = this.request.xhr
 
     // We copy params since we will modify them below.
     // This would confuse API clients and cache key logic in up.network.
@@ -18,24 +18,26 @@ up.Request.XHRRenderer = class XHRRenderer {
 
     // IE11 explodes it we're setting an undefined timeout property
     if (this.request.timeout) {
-      this.xhr.timeout = this.request.timeout
+      xhr.timeout = this.request.timeout
     }
 
     // The XMLHttpRequest method must be opened before we can add headers to it.
-    this.xhr.open(this.getMethod(), this.request.url)
+    xhr.open(this.getMethod(), this.request.url)
 
-    // Add information about the response's intended use so the server may
+    // Add information about the response's intended use, so the server may
     // customize or shorten its response.
     const metaProps = this.request.metaProps()
     for (let key in metaProps) {
-      this.addHeader(
+      this.constructor.addHeader(
+        xhr,
         up.protocol.headerize(key),
         metaProps[key]
       )
     }
 
     for (let header in this.request.headers) {
-      this.addHeader(
+      this.constructor.addHeader(
+        xhr,
         header,
         this.request.headers[header]
       )
@@ -43,23 +45,21 @@ up.Request.XHRRenderer = class XHRRenderer {
 
     let csrfHeader, csrfToken
     if ((csrfHeader = this.request.csrfHeader()) && (csrfToken = this.request.csrfToken())) {
-      this.addHeader(csrfHeader, csrfToken)
+      this.constructor.addHeader(xhr, csrfHeader, csrfToken)
     }
 
-    this.addHeader(up.protocol.headerize('version'), up.version)
+    this.constructor.addHeader(xhr, up.protocol.headerize('version'), up.version)
 
     // The { contentType } will be missing in case of a FormData payload.
     // In this case the browser will choose a content-type with MIME boundary,
     // like: multipart/form-data; boundary=----WebKitFormBoundaryHkiKAbOweEFUtny8
     let contentType = this.getContentType()
     if (contentType) {
-      this.addHeader('Content-Type', contentType)
+      this.constructor.addHeader(xhr, 'Content-Type', contentType)
     }
 
-    Object.assign(this.xhr, handlers)
-    this.xhr.send(this.getPayload())
-
-    return this.xhr
+    Object.assign(xhr, handlers)
+    xhr.send(this.getPayload())
   }
 
   getMethod() {
@@ -87,11 +87,11 @@ up.Request.XHRRenderer = class XHRRenderer {
     return this.payload
   }
 
-  addHeader(header, value) {
+  static addHeader(xhr, header, value) {
     if (u.isOptions(value) || u.isArray(value)) {
       value = JSON.stringify(value)
     }
-    this.xhr.setRequestHeader(header, value)
+    xhr.setRequestHeader(header, value)
   }
 
   finalizePayload() {
