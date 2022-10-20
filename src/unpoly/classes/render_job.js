@@ -4,7 +4,7 @@ const u = up.util
 A queued render task.
 
 Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return an `up.RenderJob`.
-Callers can inspect the job's [options](/up.Request.prototype.options) or [`await` its completion](/render-hooks#running-code-after-rendering).
+Callers can inspect the job's [options](/up.RenderJob.prototype.options) or [`await` its completion](/render-hooks#running-code-after-rendering).
 
 See [render hooks](/render-hooks) for examples for awaiting rendering completion
 and how to handle errors.
@@ -78,7 +78,7 @@ up.RenderJob = class RenderJob {
 
   @property up.RenderJob#finished
   @param {Promise<up.RenderResult>}
-    The [revalidated]((/caching#revalidation)) render result.
+    The [revalidated](/caching#revalidation) render result.
   @stable
   */
   get finished() {

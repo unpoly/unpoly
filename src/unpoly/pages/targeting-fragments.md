@@ -175,7 +175,7 @@ Sometimes there are multiple components with the same selector on the page:
 <div class="card">...</div>
 ```
 
-While you can [set `[id]` attributes to uniquely identify an element on the page](/target-derivation.md), this may not be necessary. When an ambiguous selector like `.card` matches more than one element, Unpoly will prefer to match a fragment in the *proximity* of the a link or form that the user interacted with. If there is no match in the proximity, Unpoly will update the first match in the [layer](/up.layer).
+While you can [set `[id]` attributes to uniquely identify an element on the page](/target-derivation), this may not be necessary. When an ambiguous selector like `.card` matches more than one element, Unpoly will prefer to match a fragment in the *proximity* of the a link or form that the user interacted with. If there is no match in the proximity, Unpoly will update the first match in the [layer](/up.layer).
 
 Note that when rendering programmatically, you can pass the interaction's origin element as [`{ origin }`](/up.render#options.origin) option.
 

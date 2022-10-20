@@ -26,7 +26,6 @@ a server-rendered web application:
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see navigation
-@see caching
 @see render-hooks
 @see target-derivation
 
@@ -68,7 +67,15 @@ up.fragment = (function() {
     Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
 
   @param {Array<string|Function<Element>: string?: string|undefined>} [config.targetDerivers]
-    TODO: Docs
+    An array of [target derivation patterns](/target-derivation#derivation-patterns)
+    used to [guess a target selector](/target-derivation) for an element.
+
+    For instance, a pattern pattern `'a[href]'` is applicable to all `<a href="...">` elements.
+    It produces a target like `a[href="/users"]`.
+
+    If your deriver can't be expressed in a pattern string, you may also add a function that
+    accepts an `Element` and returns a target selector, if applicable. If the function
+    is not applicable it may return `undefined`. In that case the next pattern will be tried.
 
   @param {Array<string|RegExp>} [config.badTargetClasses]
     An array of class names that should be ignored when
@@ -76,8 +83,13 @@ up.fragment = (function() {
 
     The class names may also be passed as a regular expression.
 
-  @param {Array<string|Function<Element>: string|undefined>} [config.verifyDerivedTarget]
-    TODO: Docs
+  @param {boolean} [config.verifyDerivedTarget=true]
+    Whether [derived targets](/target-derivation) must match the element to be applicable.
+
+    When verification is disabled, the first applicable [derivation pattern](/target-derivation#derivation-patterns)
+    will be used, even if the produced target would match another element on the page.
+
+    Also see [Derived target verification](/target-derivation#derived-target-verification).
 
   @param {Object} [config.navigateOptions]
     An object of default options to apply when [navigating](/navigation).
@@ -697,7 +709,7 @@ up.fragment = (function() {
     Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
 
     Defaults to the result of `up.network.config.expireCache`, which
-    defaults to `true` for [unsafe](/up.Request.prototype.isSafe] requests.
+    defaults to `true` for [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) requests.
 
     To only expire some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
     You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
@@ -802,20 +814,53 @@ up.fragment = (function() {
     and the targeted element an `.up-loading` class
     while loading content.
 
+  @param {Object} [options.data]
+    Overrides properties from the new fragment's `[up-data]`
+    with the given [data object](/data).
+
   @param {Function(Event)} [options.onLoaded]
     A callback that will be run when when the server responds with new HTML,
     but before the HTML is rendered.
 
     The callback argument is a preventable `up:fragment:loaded` event.
 
-  @param {Function()} [options.onFinished]
+  @param {Function(up.RenderResult)} [options.onRendered]
+    A function to call when Unpoly has updated fragments.
+
+    When rendering expired content, [revalidation](/caching#revalidation) may render a second time.
+    In this case the `{ onRendered }` callback will only be called after the initial render pass.
+
+    Also see [Running code after rendering](/render-hooks#running-code-after-rendering).
+
+  @param {Function(up.RenderResult)} [options.onFinished]
     A function to call when no further DOM changes will be caused by this render pass.
 
     In particular:
 
     - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
-    - A [cached response](#options.cache) was [revalidated with the server](/up.fragment.config#config.autoRevalidate).
+    - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
       If the server has responded with new content, this content has also been rendered.
+
+    The callback argument is the last `up.RenderResult` that updated a fragment.
+    If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
+    second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+    it is the result from the initial render pass.
+
+    Also see [Awaiting postprocessing](/render-hooks#awaiting-postprocessing).
+
+  @param {Function(Event)} [options.onOffline]
+    A callback that will be run when when the fragment could not be loaded
+    due to a [disconnect or timeout](/disconnect).
+
+    The callback argument is a preventable `up:fragment:offline` event.
+
+  @param {Function(Error)} [options.onError]
+    A callback that will be run when when any error is thrown during the rendering process.
+
+    The callback is also called when the render pass fails due to [network issues](/disconnects),
+    or [aborts](/aborting-requests).
+
+    Also see [Handling errors](/render-hooks#handling-errors).
 
   @return {up.RenderJob}
     A promise that fulfills when the page has been updated.
@@ -2414,8 +2459,9 @@ up.fragment = (function() {
     let testFnWithAbortable = (request) => request.abortable && testFn(request)
     up.network.abort(testFnWithAbortable, { ...options, reason })
 
-    // Emit an event so other async code can choose to abort itself,
-    // e.g. timers waiting for a delay.
+    // We *always* emit an `up:fragment:aborted` event, even when there is no
+    // request being aborted. This event serves for *any* async code that may want
+    // to abort itself, e.g. timers waiting for a delay.
     for (let element of elements) {
       // Some effort has invested to log about aborting only when necessary:
       //

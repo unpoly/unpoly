@@ -114,7 +114,7 @@ up.migrate.preprocessAbortArgs = function(args) {
 /*-
 Returns whether Unpoly is *not* currently loading a [request](/up.request).
 
-The network is also considered [busy](/up.network.isBusy()) while requests are [loading in the background](/up.request#options.background).
+The network is also considered [busy](/up.network.isBusy) while requests are [loading in the background](/up.request#options.background).
 
 @see up.network.isBusy
 

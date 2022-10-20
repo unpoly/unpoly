@@ -29,7 +29,7 @@ Cache entries are only considered *fresh* for [15 seconds](/up.network.config#co
 
 This means when re-visiting pages Unpoly often renders twice:
 
-1. A first render pass from the cache (which may be expired)
+1. An initial render pass from the cache (which may be expired)
 2. A second render pass from the server (which is always fresh)
 
 
@@ -38,7 +38,7 @@ This means when re-visiting pages Unpoly often renders twice:
 You can enable revalidation with `{ revalidate: 'auto' }`, which revalidates [expired](/up.network.config#config.cacheExpireAge) cache entries. You can configure this default:
 
 ```js
-up.network.config.cacheExpireAge = 20_000 // expire ater 20 seconds
+up.network.config.cacheExpireAge = 20_000 // expire after 20 seconds
 up.fragment.config.autoRevalidate = (response) => response.expired
 ```
 
@@ -47,20 +47,22 @@ When [navigating](/navigation) the `{ revalidate: 'auto' }` is already set by [d
 To force revalidation regardless of cache age, pass `{ revalidate: true }`.
 
 
-### Faster revalidation with conditional requests
+### When nothing changed
 
 Your server-side app may support [conditional HTTP requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests) to speed up the requests Unpoly makes when reloading the fragment that is being revalidated.
 
-When rendering HTML your server may send [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) response headers. When reloading Unpoly echoes these headers as `If-Modified-Since` or `If-None-Match` request headers. Your server can match these headers against the underlying data before rendering. When the data hasn't changed, your server can send an empty response with HTTP status `304 Not Modified` or `204 No Content`. This dramatically reduces the time required to produce a revalidation response for unchanged content.
+When rendering HTML your server may send [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) response headers. When reloading Unpoly echoes these headers as `If-Modified-Since` or `If-None-Match` request headers.
+
+Your server can match these headers against the underlying data before rendering. When the data hasn't changed, your server can send an empty response with HTTP status `304 Not Modified` or `204 No Content`. This dramatically reduces the time required to produce a revalidation response for unchanged content.
 
 
 
 Expiration
 ----------
 
-Cached content automatically expires after 15 seconds. This can be configured in `up.network.config.cacheExpireAge`. The configured age should cover the average time between [preloading](/a-up-preload) and following a link.
+Cached content automatically expires after 15 seconds. This can be configured in `up.network.config.cacheExpireAge`. The configured age should at least cover the average time between [preloading](/a-up-preload) and following a link.
 
-After expiring cached content is kept in the cache, but will trigger [revalidation](#revalidation) when used. Expired pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [connection loss](/disconnects).
+After expiring, cached content is kept in the cache, but will trigger [revalidation](#revalidation) when used. Expired pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [connection loss](/disconnects).
 
 
 ### Expiring content after an interaction

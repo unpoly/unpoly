@@ -333,8 +333,8 @@ up.syntax = (function() {
     A list of elements whose subtrees should not be compiled.
   @param {Object} [options.data]
     Override data for `target`
-  @param {Object} [options.data]
-    Object mapping selectors to data-override in subtree of `target`.
+  @param {Object} [options.dataMap]
+    An object mapping selectors to data-override in subtree of `target`.
   @internal
   */
   function compile(fragment, options) {

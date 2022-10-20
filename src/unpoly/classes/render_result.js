@@ -57,15 +57,18 @@ up.RenderResult = class RenderResult extends up.Record {
   In particular:
 
   - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
-  - A [cached response](#options.cache) was [revalidated with the server](/up.fragment.config#config.autoRevalidate).
+  - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
     If the server has responded with new content, this content has also been rendered.
 
-  The promise resolves to an `up.RenderResult` for the effective fragments that were updated and are currently attached to the DOM.
-  If cache revalidation has rendered new content, the `up.RenderResult` will contain the fragments from both render passes that
-  are still attached to the DOM.
+  The promise resolves to the last `up.RenderResult` that updated a fragment.
+  If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
+  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+  it is the result from the initial render pass.
 
   The promise will reject if the server sends an error status,
   if there is a network issue, or if targets could not be matched.
+
+  Also see [Awaiting postprocessing](/render-hooks#awaiting-postprocessing).
 
   ### Example
 

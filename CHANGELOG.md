@@ -384,7 +384,7 @@ Less important:
 - Log when we're rendering a failed response using fail-prefixed options
 - New concurrency default 6 (3 while reducing requests)
 - Keep polling on slow connections, but slower
-  - up.radio.config.pollIntervalScale
+  - up.radio.config.stretchPollInterval
 - Native smooth scrolling
   - up.viewport.config.scrollSpeed removed
   - up.reveal() no longer returns a promise

@@ -30,14 +30,21 @@ In HTML you can set an `[up-on-rendered]` attribute on a [link](/a-up-follow) or
 
 ### Awaiting postprocessing
 
-After the `up.render()` promise fulfills the fragments may still change further through [animation](/up.motion) or [revalidation](/caching#revalidation). To run code when animations have concluded and cached content was revalidated, use the `up.render().finished` promise:
+After the `up.render()` promise fulfills the fragments may still change further through [animation](/up.motion) or [revalidation](/caching#revalidation).
+To run code when animations have concluded and cached content was revalidated, use the [`up.render().finished`](/up.RenderJob.prototype.finished) promise:
 
 ```js
 let result = await up.render({ target: '.target', url: '/path' }).finished
 console.log("Final fragments: ", result.fragments)
 ```
 
-The `up.render().finished` promise rejects when there is any error during the initial render pass or during revalidation.
+
+The `up.render().finished` promise resolves to the last `up.RenderResult` that updated a fragment.
+If revalidation re-rendered the fragment, it is the result from the
+second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+it is the result from the initial render pass.
+
+The promise rejects when there is any error during the initial render pass or during revalidation.
 
 Instead of a promise you may also pass an [`{ onFinished }`](/up.render#options.onRendered) callback.\
 In HTML you can set an `[up-on-finished]` attribute on a [link](/a-up-follow) or [form](/form-up-submit).
@@ -80,23 +87,22 @@ For a full list of available options see [`up.render() parameters`](/up.render#p
 
 ## Handling errors
 
-The promises returned by `up.render()` and `up.render().finished` reject if any error is thrown during rendering, or if the server responds with an [HTTP error code](/failed-responses).
+The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJob.prototype.finished) reject if any error is thrown during rendering, or if the server responds with an [HTTP error code](/failed-responses).
 
 You may handle the following error cases:
 
-| Error case | Hook | Type |
-| ---- | ---- | ------- |
-| Server responds with [non-200 HTTP status](/failed-responses) | [fail-prefixed options](/failed-responses) | Options |
-| Server responds with [non-200 HTTP status](/failed-responses) | `up.RenderResult` (thrown) | Error |
-| Disconnect or timeout | `up.Offline` | Error |
-| Disconnect or timeout| [`{ onOffline }`](/up.render#options.onOffline) | Callback |
-| Disconnect or timeout | `up:fragment:offline` | Event |
-| Target selector not found | `up.CannotMatch` | Error |
-| Compiler throws error | `up.CannotCompile` | Error |
-| Fragment update was [aborted](/aborting-requests) | [`{ onAborted }`](/up.render#options.onAborted) | Callback |
-| Fragment update was [aborted](/aborting-requests) | `up.AbortError` | Error |
-| Fragment update was [aborted](/aborting-requests) | `up:fragment:aborted` | Event |
-| Any error thrown while rendering | [`{ onError }`](/up.render#options.onError) | Callback |
+| Error case                                                                         | Hook | Type |
+|------------------------------------------------------------------------------------| ---- | ------- |
+| Server responds with [non-200 HTTP status](/failed-responses)                      | [fail-prefixed options](/failed-responses) | Options |
+| Server responds with [non-200 HTTP status](/failed-responses)                      | `up.RenderResult` (thrown) | Error |
+| Disconnect or timeout                                                              | `up.Offline` | Error |
+| Disconnect or timeout                                                              | [`{ onOffline }`](/up.render#options.onOffline) | Callback |
+| Disconnect or timeout                                                              | `up:fragment:offline` | Event |
+| Target selector not found                                                          | `up.CannotMatch` | Error |
+| Compiler throws error                                                              | `up.CannotCompile` | Error |
+| Fragment update was [aborted](/aborting-requests)                                  | `up.AbortError` | Error |
+| Fragment update was [aborted](/aborting-requests)                                  | `up:fragment:aborted` | Event |
+| Any error thrown while rendering<br><small>(including disconnect or abort)</small> | [`{ onError }`](/up.render#options.onError) | Callback |
 
 
 ### Full error handling example

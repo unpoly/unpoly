@@ -3,16 +3,16 @@ Target derivation
 
 Unpoly often needs to guess a CSS selector that will [match an element](/targeting-fragments). This is called *target derivation*.
 
-Popular features that must derive targets are `[up-poll]`, `[up-hungry]`, `[up-viewport]`, [`up.reload(Element)`](/up.reload) and [`up.render(Element)`](/up.render()).
-
+In the example below Unpoly derives a target selector for an element that is being reloaded:
 
 ```js
 let element = document.querySelector('#foo')
-
 up.reload(element) // Derives the target '#foo' from the given element
 ```
 
-To build a good selector, the element needs an identifying property that distinguishes it from other elements on the same [layer](/up.layer). The most important properties that Unpoly looks for are the following:
+Popular features that must derive targets are `[up-poll]`,  `[up-hungry]`, `[up-viewport]`, [`up.reload(Element)`](/up.reload) and [`up.render(Element)`](/up.render).
+
+To build a good selector, the element needs an **identifying property** that distinguishes it from other elements on the same [layer](/up.layer). The most important properties that Unpoly looks for are the following:
 
 - The element's `[id]` or `[up-id]` attribute
 - The tag name of a page-unique element (`<html>`, `<head>`, `<body>`, `<main>`)
@@ -50,6 +50,11 @@ up.fragment.config.targetDerivers = [
 ]
 ```
 
+Only applicable pattern will produce a target. E.g. the pattern `'link[rel]'` only applies to `<link rel="...">` elements and will be ignored for anything else.
+
+Note how any attribute in a pattern is expanded to include an element's actual attribute value. E.g. the pattern `a[href]` produces a target like `a[href="/users"]`.
+Similarily the asterisk (`*`) will be expanded to the element's actual tag name. 
+
 If your deriver can't be expressed in a pattern string, you may also push a `Function(Element): string?`.
 
 
@@ -57,11 +62,11 @@ If your deriver can't be expressed in a pattern string, you may also push a `Fun
 Derived target verification
 ---------------------------
 
-Unpoly verifies if a derived targets will actually match the element. If another element is matched, the next pattern in `up.fragment.config.targetDerivers` is tried.
+Unpoly verifies if a derived targets will actually match the element. If another element is matched, the next applicable pattern in `up.fragment.config.targetDerivers` is tested.
 
 If no pattern produces a matching target, an error `up.CannotTarget` is thrown. In such cases consider setting an `[id]` attribute, or configure a new [derivation pattern](#derivation-patterns).
 
-Target verification may be [disabled](/up.fragment.config#condfig.verifyDerivedTarget), which is almost always a bad idea.
+Target verification may be [disabled](/up.fragment.config#config.verifyDerivedTarget), which is almost always a bad idea.
 
 
 Deriving a target programmatically
@@ -74,9 +79,9 @@ element = up.element.createFromHTML('<span class="klass">...</span>')
 selector = up.fragment.toTarget(element) // returns '.klass'
 ```
 
-If no [verified](#derived-target-derivation) target can be derived, an error `up.CannotTarget` is thrown.
+If no [verified](#derived-target-verification) target can be derived, an error `up.CannotTarget` is thrown.
 
-To test if a target
+To test if a selector can be derived from a target, use `up.fragment.isTargetable()`.
 
 
 @page target-derivation

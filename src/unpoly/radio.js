@@ -32,10 +32,14 @@ up.radio = (function() {
     For this to work hungry elements [must have a derivable target selector](/up-hungry#hungry-fragments-must-have-a-derivable-target).
 
   @param {number} [config.pollInterval=30000]
-    The default [polling](/up-poll] interval in milliseconds.
+    The default [polling](/up-poll) interval in milliseconds.
 
-  @param {Function(number): number} [config.pollIntervalScale]
-    TODO: Docs
+  @param {Function(number): number} [config.stretchPollInterval]
+    Adjusts the given [polling](/up-poll) interval before it is used.
+
+    On a good network connection this returns the given interval unchanged.
+    On a [poor connection](https://unpoly.com/up.network.shouldReduceRequests) it returns
+    the double interval, causing Unpoly to poll at half the frequency.
 
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
@@ -60,7 +64,7 @@ up.radio = (function() {
   const config = new up.Config(() => ({
     hungrySelectors: ['[up-hungry]'],
     pollInterval: 30000,
-    pollIntervalScale: (interval) => interval * (up.network.shouldReduceRequests() ? 2 : 1),
+    stretchPollInterval: (interval) => interval * (up.network.shouldReduceRequests() ? 2 : 1),
     pollEnabled: 'auto',
   }))
 

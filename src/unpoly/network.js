@@ -22,6 +22,7 @@ Unpoly's `up.request()` has a number of convenience features:
   This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
 - A very concise API requiring zero boilerplate code.
 
+@see caching
 @see aborting-requests
 @see disconnects
 
@@ -113,15 +114,29 @@ up.network = (function() {
 
     Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
 
+  @param {number} [config.cacheExpireAge=15_000]
+    The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](#revalidation) when used.
+
+    The configured age should at least cover the average time between [preloading](/a-up-preload) and following a link.
+
+    Defaults to 15 seconds.
+
+  @param {number} [config.cacheEvictAge=15_000]
+    The number of milliseconds after which a cache entry is [evicted](/caching#eviction).
+
+    In practice you will often prefer [*expiration*](/caching#expiration) over *eviction*.
+
+    Defaults to 90 minutes.
+
   @param {Function(up.Request): boolean} [config.autoCache]
-    Whether to cache the given request with `{ cache: 'auto' }`.
+    Whether to [cache](/caching) the given request with `{ cache: 'auto' }`.
 
     By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods.
 
   @param {Function(up.Request, up.Response): boolean|string} config.expireCache
     Whether to [expire](/caching#expiration) the [cache](/caching) after the given request and response.
 
-    By default Unpoly will expire the entire cache after a request with an [unsafe](/up.Request.prototype.isSafe) HTTP method.
+    By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
 
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be expired.
 
@@ -664,7 +679,7 @@ up.network = (function() {
   - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
 
   By default Unpoly will disable [preloading](/a-up-preload) and [poll](/up-poll)
-  [less often](/up.network.config.pollIntervalScale) if requests should be avoided.
+  [less often](/up.radio.config.stretchPollInterval) if requests should be avoided.
 
   @function up.network.shouldReduceRequests
   @return {boolean}

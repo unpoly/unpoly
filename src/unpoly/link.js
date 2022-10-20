@@ -1145,11 +1145,23 @@ up.link = (function() {
 
     With a strict Content Security Policy [additional rules apply](/csp).
 
+  @param [up-on-rendered]
+    A JavaScript snippet that is called when Unpoly has updated fragments.
+
+    When rendering expired content, [revalidation](/caching#revalidation) may render a second time.
+    In this case the `{ onRendered }` callback will only be called after the initial render pass.
+
+    With a strict Content Security Policy [additional rules apply](/csp).
+
+    Also see [Running code after rendering](/render-hooks#running-code-after-rendering).
+
   @param [up-on-finished]
     A JavaScript snippet that is called when all animations have concluded and
     elements were removed from the DOM tree.
 
     With a strict Content Security Policy [additional rules apply](/csp).
+
+    Also see [Awaiting postprocessing](/render-hooks#awaiting-postprocessing).
 
   @stable
   */

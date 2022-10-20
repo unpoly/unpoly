@@ -135,6 +135,9 @@ up.Change.FromURL = class FromURL extends up.Change {
       })
     }
 
+    // `error` might also be an `up.Aborted`. In that case we do *not* emit `up:fragment:aborted`
+    // event here. This is already done by `up.fragment.abort()`.
+
     // (1) Even if an { onOffline } callback retries, we still fail the initial render() call
     //    We cannot check if the user has retried, since { onOffline } might render a
     //    notification and retry some time later (async).
