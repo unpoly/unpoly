@@ -164,7 +164,8 @@ up.Response = class Response extends up.Record {
 
   @function up.Response#getHeader
   @param {string} name
-  @return {string|undefined} value
+  @return {string|undefined}
+    The value of the header.
   @experimental
   */
   getHeader(name) {
