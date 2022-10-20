@@ -28,7 +28,7 @@ up.Request.XHRRenderer = class XHRRenderer {
     // customize or shorten its response.
     const metaProps = this.request.metaProps()
     for (let key in metaProps) {
-      this.constructor.addHeader(
+      this.addHeader(
         xhr,
         up.protocol.headerize(key),
         metaProps[key]
@@ -36,7 +36,7 @@ up.Request.XHRRenderer = class XHRRenderer {
     }
 
     for (let header in this.request.headers) {
-      this.constructor.addHeader(
+      this.addHeader(
         xhr,
         header,
         this.request.headers[header]
@@ -45,17 +45,17 @@ up.Request.XHRRenderer = class XHRRenderer {
 
     let csrfHeader, csrfToken
     if ((csrfHeader = this.request.csrfHeader()) && (csrfToken = this.request.csrfToken())) {
-      this.constructor.addHeader(xhr, csrfHeader, csrfToken)
+      this.addHeader(xhr, csrfHeader, csrfToken)
     }
 
-    this.constructor.addHeader(xhr, up.protocol.headerize('version'), up.version)
+    this.addHeader(xhr, up.protocol.headerize('version'), up.version)
 
     // The { contentType } will be missing in case of a FormData payload.
     // In this case the browser will choose a content-type with MIME boundary,
     // like: multipart/form-data; boundary=----WebKitFormBoundaryHkiKAbOweEFUtny8
     let contentType = this.getContentType()
     if (contentType) {
-      this.constructor.addHeader(xhr, 'Content-Type', contentType)
+      this.addHeader(xhr, 'Content-Type', contentType)
     }
 
     Object.assign(xhr, handlers)
@@ -87,7 +87,7 @@ up.Request.XHRRenderer = class XHRRenderer {
     return this.payload
   }
 
-  static addHeader(xhr, header, value) {
+  addHeader(xhr, header, value) {
     if (u.isOptions(value) || u.isArray(value)) {
       value = JSON.stringify(value)
     }
