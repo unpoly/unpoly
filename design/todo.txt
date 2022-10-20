@@ -41,6 +41,7 @@ Various changes
   - Edge
   - Safari
 - Remove up:fragment:kept event
+- Should we send optional targets in X-Up-Target ?
 
 
 Docs
