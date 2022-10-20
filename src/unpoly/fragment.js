@@ -1077,9 +1077,15 @@ up.fragment = (function() {
 
   @function up.hello
   @param {Element|jQuery} element
+  @param {Object} [options.layer]
+    An existing `up.Layer` object can be passed to prevent re-lookup.
+    @internal
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
+  @param {Object} [options.dataMap]
+    An object mapping selectors to `options.data`.
+    @internal
   @return {Element}
     The compiled element
   @stable
