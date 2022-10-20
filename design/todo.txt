@@ -42,6 +42,9 @@ Various changes
   - Safari
 - Remove up:fragment:kept event
 - Should we send optional targets in X-Up-Target ?
+  - As :maybe?
+  - As a separate header?
+- Should we delete options.data if a fallback is loaded?
 
 
 Docs
@@ -209,9 +212,14 @@ Docs
   - Also attributes for a[up-follow]
 
 
+V3.pre launch
+-------------
 
-V3 Launch
----------
+- This would need a separate Algolia index, *or* disable full text search for pre.
+
+
+V3 final Launch
+---------------
 
 - Track CHANGELOG with changes done since the V3 presentation
 - We don't need anything from Ops
