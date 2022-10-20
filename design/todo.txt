@@ -26,17 +26,11 @@ TODOs after V3
   - Possibly highlight
 - Do we want to support ` or ` in targets?
   - Is there any case other than [up-target], where we already have [up-fallback] ?
+- Should animations force painting?
 
 
 TODOs for V3
 ============
-
-
-State transfer
---------------
-
-- Test if we can preserve element.upPolling in data
-
 
 
 Various changes
@@ -46,28 +40,23 @@ Various changes
   - Firefox
   - Edge
   - Safari
-
+- Remove up:fragment:kept event
 
 
 Docs
 ----
 
-### New/reworked pages overview
-
-/caching
-/disconnects
-/target-derivation
-/disable-option
 /watch-tuning ?
-/defaults or /options
-/render-lifecycle (maybe)
 
 
 ### Render rework
 
-- Possibly new page for lifecycle chart
-  - This could explain when a promise settles vs. when everything is finished
-- Document up.render().finished
+- up.RenderJob
+  - Document that it is a promise for first render pass
+    - Like in up.Request
+  - Prop #options
+  - Prop #finished
+  - In /render-hooks, links to up.RenderJob.prototype.finished
 - Document all lifecycle callbacks for up.render() (JS) and a[up-follow] (HTML)
   - onOffline is not parsed or documented anywhere
     - a[up-follow][up-on-offline]
@@ -120,7 +109,7 @@ Docs
   - Update .htaccess
 - Rework [up-validate] so it talks more generically about dynamic forms rendered on the server
 - New watch options [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
-  - Document at [up-watch]
+  - Document at [up-watch] or new /watch-tuning page
   - [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
   - [up-autosubmit] needs a params note saying that that attributes for [up-watch] may be used
   - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
@@ -462,3 +451,5 @@ Decisions
     => Or do we want an up.CacheState that also returns here?
   - It will be hard to do implement this without actually calling up.link.follow() and up.render(), since e.g. the target choice is hard and part of the cache key
     - Make this an early return in up.Change.FromURL, like with options.preload
+- Test if we can preserve element.upPolling (or at least the { forceState }) through up.reload({ data })
+  => It's hard since there's the case that the server no longer responds with [up-poll], but we want to keep polling when forceStarted
