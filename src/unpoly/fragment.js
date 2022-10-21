@@ -542,8 +542,8 @@ up.fragment = (function() {
     If omitted a [main target](/up-main) will be rendered.
 
     You may also pass a DOM element or jQuery element here, in which case a selector
-    will be [inferred from the element attributes](/target-derivation). The given element
-    will also be used as [`{ origin }`](#options.origin) for the fragment update.
+    will be [derived](/target-derivation).
+    The given element will also be used as [`{ origin }`](#options.origin) for the fragment update.
 
     You may also pass an array of selector alternatives. The first selector
     matching in both old and new content will be used.
@@ -1694,8 +1694,9 @@ up.fragment = (function() {
   @param {string|Element|Array<Element>|jQuery} [target]
     The element that should be reloaded.
 
-    If omitted, an element matching a selector in `up.fragment.config.mainTargets`
-    will be reloaded.
+    If omitted, an element matching a selector in `up.fragment.config.mainTargets` will be reloaded.
+
+    When an `Element` object is passed, a target selector will be [derived](/target-derivation).
   @param {Object} [options]
     See options for `up.render()`.
   @param {string} [options.url]

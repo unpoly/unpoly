@@ -251,6 +251,10 @@ up.radio = (function() {
   </div>
   ```
 
+  ### Controlling the target selector
+
+  A target selector will be [derived](/target-derivation) from the polling element.
+
   ### Skipping updates on the client
 
   Client-side code may skip an update by preventing an `up:fragment:poll` event
