@@ -5,10 +5,6 @@ describe 'up.Request', ->
 
   describe 'constructor', ->
 
-    it 'force-enables caching when preloading', ->
-      request = new up.Request(url: '/foo', preload: true, cache: false)
-      expect(request.cache).toBe(true)
-
     describe '{ layer } option', ->
 
       it 'sets the { context } from that layer'

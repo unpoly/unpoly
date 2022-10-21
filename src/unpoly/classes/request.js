@@ -320,15 +320,7 @@ up.Request = class Request extends up.Record {
   constructor(options) {
     super(options)
 
-    this.params = new up.Params(this.params); // copies, which we want
-
-    if (this.preload) {
-      // Preloading requires caching.
-      this.cache = true
-
-      // Preloading is always in the background.
-      this.background = true
-    }
+    this.params = new up.Params(this.params) // copies, which we want
 
     if (this.wrapMethod == null) { this.wrapMethod = up.network.config.wrapMethod }
 

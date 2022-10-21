@@ -82,6 +82,8 @@ describe 'up.RenderOptions', ->
         expect(options.abort).toBe(false)
         expect(options.confirm).toBe(false)
         expect(options.feedback).toBe(false)
+        expect(options.cache).toBe(true)
+        expect(options.background).toBe(true)
 
         # Other options are left unchanged
         expect(options.url).toBe('/path')

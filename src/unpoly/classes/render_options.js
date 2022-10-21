@@ -17,7 +17,9 @@ up.RenderOptions = (function() {
   const PRELOAD_OVERRIDES = {
     abort: false,
     confirm: false,
-    feedback: false
+    feedback: false,
+    cache: true,
+    background: true,
   }
 
   // These properties are used before the request is sent.

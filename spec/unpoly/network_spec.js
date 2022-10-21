@@ -1901,20 +1901,6 @@ describe('up.network', function() {
 
       })
 
-      describe('with { preload: true }', function() {
-
-        it('sets { cache: true } since preloading requires caching', function() {
-          let request = up.request('/foo', { preload: true })
-          expect(request.cache).toBe(true)
-        })
-
-        it('sets { background: true } since preloading should be prioritized and not trigger up:network:late', function() {
-          let request = up.request('/foo', { preload: true })
-          expect(request.background).toBe(true)
-        })
-
-      })
-
     })
 
     if (up.migrate.loaded) {
