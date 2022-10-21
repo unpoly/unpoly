@@ -326,8 +326,6 @@ Icebox
   - This would be the first feature that goes beyond "navigation is just a preset"
   - People might expect history changes to trigger this
   - Maybe think about this more
-- Allow to prevent Unpoly's state restoration handling with a preventable up:history:restore
-  - We're currently forwarding an event up:history:restore to up:location:changed, but that was never public API
 - Replace up.hello() and up.syntax.clean() to MutationObserver()
 - Do we want to serialize all actions in a form?
   - up-sequence="form"

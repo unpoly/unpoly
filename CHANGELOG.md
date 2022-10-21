@@ -353,6 +353,8 @@ Less important:
 
 ### Small things
 
+- Polling is no longer disabled on poor connections. Instead there is up.radio.config.stretchPollInterval.
+- Preventable up:location:restore
 - You can render nothing by responding with 304 Not Modified or 204 No Content
 - Rendering functions now reject with an error when a compiler throws an error
 - Focus followable `a[up-instant]` links, so they behave link standard links
