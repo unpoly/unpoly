@@ -939,6 +939,31 @@ describe 'up.fragment', ->
 
               expect('.target').toHaveText('new text')
 
+          it 'allows up:fragment:offline listeners to override render options when retrying', asyncSpec (next) ->
+            listener = jasmine.createSpy('onOffline callback')
+
+            fixture('.target', text: 'old text')
+            fixture('.override-target', text: 'old text')
+
+            up.render('.target', url: '/other-path', onOffline: listener)
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(1)
+
+              expect(listener).not.toHaveBeenCalled()
+
+              jasmine.lastRequest().responseError()
+
+            next ->
+              expect('.target').toHaveText('old text')
+              expect(listener.calls.count()).toBe(1)
+              event = listener.calls.argsFor(0)[0]
+              event.retry(target: '.override-target')
+
+            next ->
+              expect(jasmine.Ajax.requests.count()).toBe(2)
+              expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.override-target')
+
           it 'does not call an { onFinished } handler', asyncSpec (next) ->
             listener = jasmine.createSpy('onFinished callback')
 
