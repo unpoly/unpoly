@@ -739,11 +739,11 @@ up.fragment = (function() {
 
     Background requests deprioritized over foreground requests.
     Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/up.network.config#config.progressBar).
+    the [progress bar](/loading-indicators#progress-bar).
 
   @param {number} [options.badResponseTime]
     The number of milliseconds after which this request can cause
-    an `up:network:late` event.
+    an `up:network:late` event and show the [progress bar](/loading-indicators#progress-bar).
 
     Defaults to `up.network.config.badResponseTime`.
 
@@ -850,14 +850,14 @@ up.fragment = (function() {
 
   @param {Function(Event)} [options.onOffline]
     A callback that will be run when when the fragment could not be loaded
-    due to a [disconnect or timeout](/disconnect).
+    due to a [disconnect or timeout](/network-issues).
 
     The callback argument is a preventable `up:fragment:offline` event.
 
   @param {Function(Error)} [options.onError]
     A callback that will be run when when any error is thrown during the rendering process.
 
-    The callback is also called when the render pass fails due to [network issues](/disconnects),
+    The callback is also called when the render pass fails due to [network issues](/network-issues),
     or [aborts](/aborting-requests).
 
     Also see [Handling errors](/render-hooks#handling-errors).
@@ -966,7 +966,7 @@ up.fragment = (function() {
   This event is emitted when the device loses its network connection while [rendering](/up.render) content.
 
   Listeners may decide how to handle the connection loss. E.g. you may choose to display an error, or to offer a button that retries the failed request.
-  See [handling disconnects](/disconnects) for more details and examples.
+  See [handling connection loss](/network-issues#disconnects) for more details and examples.
 
   The event is emitted on the targeted layer.
 

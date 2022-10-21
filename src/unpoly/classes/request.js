@@ -781,7 +781,7 @@ up.Request = class Request extends up.Record {
 
   The promise will reject for responses with a failed HTTP status,
   when the request is [aborted](/aborting-requests) or when there is
-  [network issue](/disconnects).
+  [network issue](/network-issues).
 
   ### Example
 

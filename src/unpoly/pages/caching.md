@@ -5,7 +5,7 @@ Unpoly caches responses, allowing instant access to pages that the user has alre
 
 To ensure that the user never sees stale content, cached content is [revalidated with the server](#revalidation).
 
-Cached pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [disconnect](/disconnects).
+Cached pages also [remain accessible](/network-issues#offline-cache) after a [disconnect](/network-issues#disconnects).
 
 
 Enabling caching
@@ -62,7 +62,7 @@ Expiration
 
 Cached content automatically expires after 15 seconds. This can be configured in `up.network.config.cacheExpireAge`. The configured age should at least cover the average time between [preloading](/a-up-preload) and following a link.
 
-After expiring, cached content is kept in the cache, but will trigger [revalidation](#revalidation) when used. Expired pages also [remain accessible](/disconnects#expired-pages-remain-accessible-while-offline) after a [connection loss](/disconnects).
+After expiring, cached content is kept in the cache, but will trigger [revalidation](#revalidation) when used. Expired pages also [remain accessible](/network-issues#offline-cache) after a [connection loss](/network-issues#disconnects).
 
 
 ### Expiring content after an interaction

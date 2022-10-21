@@ -145,11 +145,6 @@ up.viewport = (function() {
 
     When set to `'smooth'`, this will scroll smoothly to the new position.
 
-  @param {number}[options.speed]
-    The speed of the scrolling motion when scrolling with `{ behavior: 'smooth' }`.
-
-    Defaults to `up.viewport.config.scrollSpeed`.
-
   @param {number} [options.padding]
     The desired padding between the revealed element and the
     closest [viewport](/up.viewport) edge (in pixels).

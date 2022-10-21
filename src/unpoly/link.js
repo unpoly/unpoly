@@ -506,6 +506,13 @@ up.link = (function() {
   When the link is clicked later, the response will already be [cached](/caching),
   making the interaction feel instant.
 
+  You may use this function to programmatically populate the cache
+  with pages the user is likely to click or requires
+  [accessible while offline](/network-issues#offline-cache).
+
+  Preload requests are considered [background requests](/up.render#options.background)
+  and will not show the [progress bar](/loading-indicators#progress-bar).
+
   @function up.link.preload
   @param {string|Element|jQuery} link
     The element or selector whose destination should be preloaded.
@@ -1070,7 +1077,7 @@ up.link = (function() {
 
     Background requests deprioritized over foreground requests.
     Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/up.network.config#config.progressBar).
+    the [progress bar](/loading-indicators#progress-bar).
 
   @param [up-bad-response-time]
     The number of milliseconds after which this request can cause
@@ -1290,9 +1297,12 @@ up.link = (function() {
   When the link is clicked later the response will already be cached,
   making the interaction feel instant.
 
-  Preloading a link will *not* [abort](/up.fragment.abort) pending requests
+  Preloading a link will *not* [abort](/aborting-requests) pending requests
   [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
   conflicting requests are aborted.
+
+  Preload requests are considered [background requests](/up.render#options.background)
+  and will not show the [progress bar](/loading-indicators#progress-bar).
 
   @selector a[up-preload]
   @param [up-preload-delay]

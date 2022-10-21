@@ -23,8 +23,9 @@ Unpoly's `up.request()` has a number of convenience features:
 - A very concise API requiring zero boilerplate code.
 
 @see caching
+@see loading-indicators
 @see aborting-requests
-@see disconnects
+@see network-issues
 
 @see up.request
 @see up.Response
@@ -48,7 +49,7 @@ up.network = (function() {
     You might find it useful to set a concurrency of `1` in end-to-end tests
     to prevent race conditions.
 
-    By default Unpoly allows 6 concurrent requests. While [reducing requests](/up.network.shouldReduceRequests)
+    By default Unpoly allows 6 concurrent requests. Under [low bandwidth](/network-issues#low-bandwidth)
     the default is lowered to 3. Your browser may impose additional concurrency
     limits  regardless of what you configure here.
 
@@ -77,16 +78,24 @@ up.network = (function() {
 
     The value is given in megabits per second. Higher is better.
 
+    Bandwidth estimation is currently [only supported in Chromium-based browsers](https://caniuse.com/mdn-api_networkinformation_downlink).
+
   @param {number} [config.badRTT=0.6]
-    The connection's maximum effective round-trip time required
+    The connection's maximum effective [round-trip time](https://en.wikipedia.org/wiki/Round-trip_delay) required
     to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
 
     The value is given in milliseconds. Lower is better.
 
-  @param {number|Function(up.Request): number} [config.badResponseTime=400]
-    How long the proxy waits until emitting the [`up:network:late` event](/up:network:late).
+    Note that round-trip time only describes the time for a signal to be sent and acknowledged ("ping time").
+    It does not include the time it takes for your server to calculate and render a response.
+    For this configure `up.network.config.badResponseTime`.
 
-    Requests exceeding this response time will also cause a [progress bar](/up.network.config#config.progressBar)
+    Round-trip time detection is currently [only supported in Chromium-based browsers](https://caniuse.com/mdn-http_headers_rtt).
+
+  @param {number|Function(up.Request): number} [config.badResponseTime=400]
+    How long to wait before emitting the [`up:network:late` event](/up:network:late).
+
+    Requests exceeding this response time will also cause a [progress bar](/loading-indicators#progress-bar)
     to appear at the top edge of the screen.
 
     This metric is *not* considered for the decision to
@@ -115,7 +124,7 @@ up.network = (function() {
     Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
 
   @param {number} [config.cacheExpireAge=15_000]
-    The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](#revalidation) when used.
+    The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](/caching#revalidation) when used.
 
     The configured age should at least cover the average time between [preloading](/a-up-preload) and following a link.
 
@@ -195,20 +204,8 @@ up.network = (function() {
     ```
 
   @param {boolean|Function(): boolean} [config.progressBar]
-    Whether to show a progress bar for [late requests](/up:network:late).
-
-    The progress bar is implemented as a single `<up-progress-bar>` element.
-    Unpoly will automatically insert and remove this element as requests
-    are [late](/up:network:late) or [recoveredup:network:recover).
-
-    The default appearance is a simple blue bar at the top edge of the screen.
-    You may customize the style using CSS:
-
-    ```css
-    up-progress-bar {
-      background-color: red;
-    }
-    ```
+    Whether to show a [progress bar](/loading-indicators#progress-bar)
+    for [late requests](#config.badResponseTime).
 
   @stable
   */
@@ -514,7 +511,7 @@ up.network = (function() {
 
     Background requests deprioritized over foreground requests.
     Background requests also won't emit `up:network:late` events and won't trigger
-    the [progress bar](/up.network.config#config.progressBar).
+    the [progress bar](/loading-indicators#progress-bar).
 
   @param {number} [options.badResponseTime]
     The number of milliseconds after which this request can cause
@@ -674,12 +671,11 @@ up.network = (function() {
 
   We assume the user wants to avoid requests if either of following applies:
 
-  - The user has enabled data saving in their browser ("Lite Mode" in Chrome for Android).
   - The connection's effective round-trip time is longer than `up.network.config.badRTT`.
   - The connection's effective bandwidth estimate is less than `up.network.config.badDownlink`.
 
-  By default Unpoly will disable [preloading](/a-up-preload) and [poll](/up-poll)
-  [less often](/up.radio.config.stretchPollInterval) if requests should be avoided.
+  When Unpoly detects a slow connection, [some defaults are changed](/network-issues#low-bandwidth)
+  to more effectively use the client's limited network resources.
 
   @function up.network.shouldReduceRequests
   @return {boolean}
@@ -692,10 +688,8 @@ up.network = (function() {
     if (netInfo) {
       // API for NetworkInformation#downlink: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink
       // API for NetworkInformation#rtt:      https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/rtt
-      // API for NetworkInformation#saveData: https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/saveData
-      return netInfo.saveData ||
-        (netInfo.rtt      && (netInfo.rtt      > config.badRTT)) ||
-        (netInfo.downlink && (netInfo.downlink < config.badDownlink))
+      return (netInfo.rtt      && (netInfo.rtt      > config.badRTT)) ||
+             (netInfo.downlink && (netInfo.downlink < config.badDownlink))
     }
   }
 
@@ -809,7 +803,7 @@ up.network = (function() {
 
   /*-
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
-  are taking long to finish.
+  are taking long to finish loading.
 
   By default Unpoly will wait 400 ms for an AJAX request to finish
   before emitting `up:network:late`. You may configure this delay like this:
@@ -824,40 +818,7 @@ up.network = (function() {
   Note that if additional requests are made while Unpoly is already busy
   waiting, **no** additional `up:network:late` events will be triggered.
 
-  ### Loading indicators
-
-  By default the `up:network:late` event will cause a [progress bar](/up.network.config#config.progressBar)
-  to appear at the top edge of the screen.
-
-  If you don't like the default progress bar, you can [listen](/up.on) to the `up:network:late`
-  and [`up:network:recover`](/up:network:recover) events to implement a custom
-  loading indicator that appears during long-running requests.
-
-  To build a custom loading indicator, please an element like this in your application layout:
-
-  ```html
-  <loading-indicator>Please wait!</loading-indicator>
-  ```
-
-  Now add a [compiler](/up.compiler) that hides the `<loading-indicator>` element
-  while there are no long-running requests:
-
-  ```js
-  // Disable the default progress bar
-  up.network.config.progressBar = false
-
-  up.compiler('loading-indicator', function(indicator) {
-    function show() { up.element.show(indicator) }
-    function hide() { up.element.hide(indicator) }
-
-    hide()
-
-    return [
-      up.on('up:network:late', show),
-      up.on('up:network:recover', hide)
-    ]
-  })
-  ```
+  Also see [Loading indicators](/loading-indicators).
 
   @event up:network:late
   @stable
@@ -951,7 +912,7 @@ up.network = (function() {
 
   The event is emitted on the layer that caused the request.
 
-  To effectively [handle disconnects while rendering](/disconnects), use the `up:fragment:offline` event instead.
+  To effectively [handle disconnects while rendering](/network-issues#disconnects), use the `up:fragment:offline` event instead.
 
   @event up:request:offline
 

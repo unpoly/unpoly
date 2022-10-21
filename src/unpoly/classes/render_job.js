@@ -72,7 +72,7 @@ up.RenderJob = class RenderJob {
   cached content was [revalidated](/caching#revalidation).
 
   The promise will reject when the server responds with a [failed HTTP status](/failed-responses),
-  when any request is [aborted](/aborting-requests) or when there is [network issue](/disconnects).
+  when any request is [aborted](/aborting-requests) or when there is [network issue](/network-issues).
 
   See [render hooks](/render-hooks) for examples for awaiting rendering completion.
 
@@ -171,7 +171,7 @@ up.RenderJob = class RenderJob {
 
   The promise will reject for responses with a [failed HTTP status](/failed-responses),
   when the request is [aborted](/aborting-requests) or when there is
-  [network issue](/disconnects).
+  [network issue](/network-issues).
 
   See [render hooks](/render-hooks) for examples for awaiting rendering completion
   and how to handle errors.

@@ -29,7 +29,7 @@ up.radio = (function() {
     specific element. E.g. when you configure `up.fragment.config.hungrySelectors.push('input')`,
     a given input will be targeted with its derived selector (like `input[name=email]`).
 
-    For this to work hungry elements [must have a derivable target selector](/up-hungry#hungry-fragments-must-have-a-derivable-target).
+    For this to work hungry elements [must have a derivable target selector](/up-hungry#derivable-target-required).
 
   @param {number} [config.pollInterval=30000]
     The default [polling](/up-poll) interval in milliseconds.
@@ -38,8 +38,8 @@ up.radio = (function() {
     Adjusts the given [polling](/up-poll) interval before it is used.
 
     On a good network connection this returns the given interval unchanged.
-    On a [poor connection](https://unpoly.com/up.network.shouldReduceRequests) it returns
-    the double interval, causing Unpoly to poll at half the frequency.
+    On a [poor connection](/network-issues#low-bandwidth) it returns
+    the doubled interval, causing Unpoly to poll at half as frequently.
 
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
@@ -48,13 +48,14 @@ up.radio = (function() {
 
     - The browser tab is in the foreground
     - The fragment's layer is the [frontmost layer](/up.layer.front).
-    - We should not [avoid optional requests](/up.network.shouldReduceRequests)
 
     When set to `true`, Unpoly will always allow polling.
 
     When set to `false`, Unpoly will never allow polling.
 
-    You may also pass a function that accepts the polling fragment and returns `true`, `false` or `'auto'`.
+    To enable polling on a case-by-case basis, you may also pass a function that accepts the polling
+    fragment and returns `true`, `false` or `'auto'`. As an alternative you may also skip a
+    polling update by preventing the `up:fragment:poll` event.
 
     When an update is skipped due to polling being disabled,
     Unpoly will try to poll again after the configured interval.
@@ -118,7 +119,7 @@ up.radio = (function() {
   (e.g. `<a up-target=".content, .flashes:maybe">`) we can mark it as `[up-hungry]`.
   Unpoly will then automatically include it in other target selectors.
 
-  ### Hungry elements must have a derivable target
+  ### Hungry fragments must have a derivable target {#derivable-target-required}
 
   When an `[up-hungry]` fragment piggy-backs on another fragment update, Unpoly
   will [derive a target selector](/target-derivation) for the hungry element.
@@ -281,11 +282,21 @@ up.radio = (function() {
   - Client-side code has called `up.radio.stopPolling()` with the polling element.
   - Polling was [disabled globally](/up.radio.config#config.pollEnabled).
 
+  ### Polling under low bandwidth
+
+  When Unpoly detects a [poor network connection](/network-issues#low-bandwidth),
+  the polling frequency is halfed.
+
+  This can be configured in `up.radio.config.stretchPollInterval`.
+
   @selector [up-poll]
   @param [up-interval]
     The reload interval in milliseconds.
 
     Defaults to `up.radio.config.pollInterval`.
+
+    Under [low bandiwdth](/network-issues#low-bandwidth) the given interval
+    will be scaled through `up.radio.config.stretchPollInterval`.
   @param [up-keep-data]
     [Preserve](/data#preserving-data-through-reloads) the polling fragment's
     [data object](/data) through reloads.
