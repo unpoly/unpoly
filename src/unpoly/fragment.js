@@ -819,7 +819,7 @@ up.fragment = (function() {
     with the given [data object](/data).
 
   @param {Function(Event)} [options.onLoaded]
-    A callback that will be run when when the server responds with new HTML,
+    A callback that will be run when the server responds with new HTML,
     but before the HTML is rendered.
 
     The callback argument is a preventable `up:fragment:loaded` event.
@@ -849,13 +849,13 @@ up.fragment = (function() {
     Also see [Awaiting postprocessing](/render-hooks#awaiting-postprocessing).
 
   @param {Function(Event)} [options.onOffline]
-    A callback that will be run when when the fragment could not be loaded
+    A callback that will be run when the fragment could not be loaded
     due to a [disconnect or timeout](/network-issues).
 
     The callback argument is a preventable `up:fragment:offline` event.
 
   @param {Function(Error)} [options.onError]
-    A callback that will be run when when any error is thrown during the rendering process.
+    A callback that will be run when any error is thrown during the rendering process.
 
     The callback is also called when the render pass fails due to [network issues](/network-issues),
     or [aborts](/aborting-requests).
@@ -1184,7 +1184,7 @@ up.fragment = (function() {
 
   function emitFragmentKeep(keepPlan) {
     const log = ['Keeping fragment %o', keepPlan.oldElement]
-    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', ['newFragment', 'newData'])
+    const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
     return emitFromKeepPlan(keepPlan, 'up:fragment:keep', {log, callback})
   }
 

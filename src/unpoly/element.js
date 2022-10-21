@@ -989,11 +989,11 @@ up.element = (function() {
     }
   }
 
-  function callbackAttr(link, attr, exposedKeys = []) {
+  function callbackAttr(link, attr, { exposedKeys = [], mainKey = 'event' } = {}) {
     let code = link.getAttribute(attr)
     if (code) {
       // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
-      const callback = up.NonceableCallback.fromString(code).toFunction('event', ...exposedKeys)
+      const callback = up.NonceableCallback.fromString(code).toFunction(mainKey, ...exposedKeys)
       // Emulate the behavior of the `onclick` attribute,
       // where `this` refers to the clicked element.
       return function(event) {

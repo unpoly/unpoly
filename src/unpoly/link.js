@@ -407,12 +407,11 @@ up.link = (function() {
     parser.boolean('useHungry')
 
     // Lifecycle options
-    parser.callback('onLoaded', { exposedKeys: ['request', 'response', 'renderOptions'] })
-    parser.callback('onRendered')
-    parser.callback('onFinished')
-    // parser.parse(e.callbackAttr, 'onFinished')
-    parser.callback('onOffline') // not a request option!
-    parser.callback('onError') // not a request option!
+    parser.callback('onLoaded')
+    parser.callback('onRendered', { mainKey: 'result' })
+    parser.callback('onFinished', { mainKey: 'result' })
+    parser.callback('onOffline', { mainKey: 'error' }) // not a request option!
+    parser.callback('onError', { mainKey: 'error' }) // not a request option!
 
     // Layer options
     parser.boolean('peel')
@@ -1145,30 +1144,53 @@ up.link = (function() {
     while loading and rendering content.
 
   @param [up-on-loaded]
-    A JavaScript snippet that is called when when the server responds with new HTML,
+    A JavaScript snippet that is executed when the server responds with new HTML,
     but before the HTML is rendered.
 
-    The callback argument is a preventable `up:fragment:loaded` event.
-
-    With a strict Content Security Policy [additional rules apply](/csp).
+    Within the snippet `event` will reference a preventable `up:fragment:loaded` event.
 
   @param [up-on-rendered]
-    A JavaScript snippet that is called when Unpoly has updated fragments.
+    A JavaScript snippet that is executed when Unpoly has updated fragments.
+
+    Within the snippet `result` will reference an `up.RenderResult`.
 
     When rendering expired content, [revalidation](/caching#revalidation) may render a second time.
-    In this case the `{ onRendered }` callback will only be called after the initial render pass.
-
-    With a strict Content Security Policy [additional rules apply](/csp).
+    In this case the `[up-on-rendered]` callback will only be called after the initial render pass.
 
     Also see [Running code after rendering](/render-hooks#running-code-after-rendering).
 
   @param [up-on-finished]
-    A JavaScript snippet that is called when all animations have concluded and
-    elements were removed from the DOM tree.
+    A JavaScript snippet that is execvuted when no further DOM changes will be caused by this render pass.
 
-    With a strict Content Security Policy [additional rules apply](/csp).
+    In particular:
+
+    - [Animations](/up.motion) have concluded and [transitioned](https://unpoly.com/a-up-transition) elements were removed from the DOM tree.
+    - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
+      If the server has responded with new content, this content has also been rendered.
+
+    Within the snippet `result` will reference the last `up.RenderResult`
+    that updated a fragment.
+    If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
+    second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+    it is the result from the initial render pass.
 
     Also see [Awaiting postprocessing](/render-hooks#awaiting-postprocessing).
+
+  @param [up-on-offline]
+    A JavaScript snippet that is executed when the fragment could not be loaded
+    due to a [disconnect or timeout](/network-issues).
+
+    Within the snippet `error` will reference an `up.Offline` error.
+
+  @param {Function(Error)} [options.onError]
+    A JavaScript snippet that is run when any error is thrown during the rendering process.
+
+    Within the snippet `error` will reference an `Error` object.
+
+    The callback is also called when the render pass fails due to [network issues](/network-issues),
+    or [aborts](/aborting-requests).
+
+    Also see [Handling errors](/render-hooks#handling-errors).
 
   @stable
   */
