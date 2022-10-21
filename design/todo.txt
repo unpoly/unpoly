@@ -27,6 +27,7 @@ TODOs after V3
 - Do we want to support ` or ` in targets?
   - Is there any case other than [up-target], where we already have [up-fallback] ?
 - Should animations force painting?
+  - I don't understand how the transitions work when we set both the first and final frame in the same JavaScript task
 
 
 TODOs for V3
@@ -45,65 +46,41 @@ Various changes
   - As :maybe?
   - As a separate header?
 - Should we delete options.data if a fallback is loaded?
+- Is it practical that we don't call { onRendered } for an empty response?
+  - This is asymetrical to onFinished
+  - This makes it hard to use onRendered as a substitution for awaiting the render promise
+  - The only benefit really is that we don't have to check result.fragment
 
 
 Docs
 ----
 
-/watch-tuning ?
-
 
 ### Render rework
 
-- up.RenderJob
-  - Document that it is a promise for first render pass
-    - Like in up.Request
-  - Prop #options
-  - Prop #finished
-  - In /render-hooks, links to up.RenderJob.prototype.finished
-- Document all lifecycle callbacks for up.render() (JS) and a[up-follow] (HTML)
-  - onOffline is not parsed or documented anywhere
-    - a[up-follow][up-on-offline]
-    - parse in up.link.followOptions
-    - up.render({ onOffline })
-  - onRendered is not parsed or documented anywhere
-    - up.render({ onRendered })
-    - parse in up.link.followOptions
-    - a[up-follow][up-on-rendered]
-    - explain that it may be called twice with revalidation
-    - explain that it's not called when no content is rendered
-  - onError is not parsed or documented anywhere
-    - up.render({ onError })
-    - parse in up.link.followOptions
-    - a[up-follow][up-on-error]
-
+- Decide and document whether { onRendered } is called for empty responses (see above)
 
 ### New cache / revalidation
 
 - New doc page explaining caching
-  - On by default
-  - Cache revalidation
-  - expire vs. evict
   - Migrate existing text in up.network (h2 "Caching")
   - Migrate existing text in up.request (there are links to up.request#caching)
-- up.render({ cache })
-- up.render({ cache: 'auto' })
-- up.request({ cache })
-- up.request({ cache: 'auto' })
-- a[up-follow][up-cache="auto"]
-- Point existing links to new /caching page
 - Protocol headers
   - ETag / If-None-Match
   - Last-Modified / If-Modified-Since
   - Link from places where we talk about `304 Not Modified` or `204 No Content`
 
 
-### Watch/validate rework
+### Disabling
 
 - Document { disable } and [up-disable] option for up.submit(), form[up-submit]
   - The /disable-option page is there, but still empty
   - Maybe even for up.render()
   - Maybe even for a[up-follow]
+
+
+### Watch/validate rework
+
 - Consider consolidating docs that are currently documented separately for input/form, so it's only "within the container"
   - input[up-watch]/form[up-watch] as well as
   - input[up-validate]/form[up-validate]
@@ -133,55 +110,16 @@ Docs
 - X-Up-Validate header
   - Document that X-Up-Validate may contain multiple names
   - Document that X-Up-Validate may contain :unknown
-
-
-### Offline
-
-- New topic page for "offline"
-- a[up-follow][up-on-offline]
-- up.render({ onOffline })
-- up.request({ onOffline })
-
-- up:fragment:offline
-  - experimental
-  - event.retry(options)
-    - Is there a test for that?
-- Explain how Unpoly reacts when accessing an offline resource
-  - Stale content is updated, but not revalidated
-  - Content frame is kept
-- Document how to build an "you're offline. retry?" toast:
-  - <a up-follow up-offline="if (confirm('Offline, retry?') event.retry()">
-- Explain that the initial request requires a service worker like the one from UpUp (no relation)
-
-
-
-### Target derivation
-
-- Possibly own page
-  - Document which features require targetable elements
-    - up.render(Element)
-    - up.reload(Element)
-    - [up-poll]
-    - [up-hungry]
-    - up.radio.config.hungrySelectors
-      - Note that the configured selector will be re-derived
-    - [up-viewport]
-    - On the doc pages for these elements
-      - Link to derivation
-  - Redirect links to up.fragment.toTarget
+- up.form.config.inputEvents
+- up.form.config.changeEvents
+- up.form.config.inputDelay
 
 
 ### Other docs
 
+- Go through all the module index pages. Many of these are now a poor copy of a doc @page.
 - Replace ASCII art with picture for aborting-requests.md#aborting-conflicting-requests
-- Fragment Placement
-  - alternatives with ` or `
-  - where else is ` or ` supported?
-- onError
-  - consider a full try / catch example in /failed-respoinses
-  - /failed-responses should also explain onError
-- config.pollIntervalScale
-- Config props should be child nodes in unpoly-site's browser
+- Where do we support ` or ` separated lists and need to document it?
 - Consider replacing type|undefined with type? in all type comments
   - Test that a `?` may be part of a type in the parser
 - Go through TODO
@@ -193,16 +131,11 @@ Docs
   - Explain config objects
   - Explain auto-Configs
   - Explain that you can often override renderOptions in event handlers
-- Targeting content
-  - Überall wo [up-target] oder { target } dokumentiert ist nach https://unpoly.com/targeting-fragments verlinken
-  - Include or link to /target-derivation
+    - This is already explained in /render-hooks
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic
-- up.form.config.inputEvents
-- up.form.config.changeEvents
-- up.form.config.inputDelay
-- Missing docs for render options
+- Missing docs for scrolling-related render options
   - { revealTop }
   - { revealMax }
   - { revealPadding }
@@ -216,6 +149,7 @@ V3.pre launch
 -------------
 
 - This would need a separate Algolia index, *or* disable full text search for pre.
+  - We do we name things "latest" when we scope by version?
 
 
 V3 final Launch
