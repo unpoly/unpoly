@@ -46,26 +46,16 @@ Various changes
   - As :maybe?
   - As a separate header?
 - Should we delete options.data if a fallback is loaded?
-- Is it practical that we don't call { onRendered } for an empty response?
-  - This is asymetrical to onFinished
-  - This makes it hard to use onRendered as a substitution for awaiting the render promise
-  - The only benefit really is that we don't have to check result.fragment
 
 
 Docs
 ----
 
 
-### Render rework
-
-- Decide and document whether { onRendered } is called for empty responses (see above)
-
 ### New cache / revalidation
 
-- New doc page explaining caching
-  - Migrate existing text in up.network (h2 "Caching")
-  - Migrate existing text in up.request (there are links to up.request#caching)
 - Protocol headers
+  - We may need a page like /rendering-nothing or /skipping-updates, since we're repeating ourselves regarding 304 / 204 / X-Up-Target: :none again and again
   - ETag / If-None-Match
   - Last-Modified / If-Modified-Since
   - Link from places where we talk about `304 Not Modified` or `204 No Content`

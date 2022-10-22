@@ -40,7 +40,7 @@ up.RenderResult = class RenderResult extends up.Record {
   */
 
   /*-
-  The [render](/up.render) options used to produce this result.
+  The effective [render](/up.render) options used to produce this result.
 
   If this result was produced from a [failed response](/failed-response),
   [`fail` prefixes](/failed-response#rendering-failed-responses-differently)

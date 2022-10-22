@@ -1154,8 +1154,11 @@ up.link = (function() {
 
     Within the snippet `result` will reference an `up.RenderResult`.
 
-    When rendering expired content, [revalidation](/caching#revalidation) may render a second time.
-    In this case the `[up-on-rendered]` callback will only be called after the initial render pass.
+    The snippet will be called zero, one or two times:
+
+    - When the server rendered an empty response, no fragments are updated. `[up-on-rendered]` is not called.
+    - When the server rendered a matching fragment, it will be updated on the page. `[up-on-rendered]` is called with the [result](/up.RenderResult).
+    - When [revalidation](/caching#revalidation) renders a second time, `[up-on-rendered]` is called again with the final result.
 
     Also see [Running code after rendering](/render-hooks#running-code-after-rendering).
 

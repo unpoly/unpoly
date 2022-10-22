@@ -827,8 +827,11 @@ up.fragment = (function() {
   @param {Function(up.RenderResult)} [options.onRendered]
     A function to call when Unpoly has updated fragments.
 
-    When rendering expired content, [revalidation](/caching#revalidation) may render a second time.
-    In this case the `{ onRendered }` callback will only be called after the initial render pass.
+    This callback may be called zero, one or two times:
+
+    - When the server rendered an empty response, no fragments are updated. `{ onRendered }` is not called.
+    - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
+    - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
     Also see [Running code after rendering](/render-hooks#running-code-after-rendering).
 

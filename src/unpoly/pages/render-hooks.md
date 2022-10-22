@@ -15,7 +15,35 @@ await up.render({ url: '/path', target: '.target' })
 console.log("Updated fragment is", document.querySelector('.target'))
 ```
 
-Instead of a promise you may also pass an [`{ onRendered }`](/up.render#options.onRendered) callback.
+### Awaiting postprocessing
+
+After the `up.render()` promise fulfills the fragments may still change further through [animation](/up.motion) or [revalidation](/caching#revalidation).
+To run code when animations have concluded and cached content was revalidated, use the [`up.render().finished`](/up.RenderJob.prototype.finished) promise:
+
+```js
+let result = await up.render({ target: '.target', url: '/path' }).finished
+console.log("Final fragments: ", result.fragments)
+```
+
+The `up.render().finished` promise resolves to the last `up.RenderResult` that updated a fragment.
+If revalidation re-rendered the fragment, it is the result from the
+second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+it is the result from the initial render pass.
+
+The promise rejects when there is any error during the initial render pass or during revalidation.
+
+Instead of awaiting a promise you may also pass an [`{ onFinished }`](/up.render#options.onRendered) callback.\
+In HTML you can set an `[up-on-finished]` attribute on a [link](/a-up-follow) or [form](/form-up-submit).
+
+
+### Running code after each render pass
+
+To run code after every render pass, use the [`{ onRendered }`](/up.render#options.onRendered) callback.
+This callback may be called zero, one or two times:
+
+- When the server rendered an empty response, no fragments are updated. `{ onRendered }` is not called.
+- When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
+- When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
 In HTML you can set an `[up-on-rendered]` attribute on a [link](/a-up-follow) or [form](/form-up-submit):
 
@@ -28,38 +56,16 @@ In HTML you can set an `[up-on-rendered]` attribute on a [link](/a-up-follow) or
 </a>
 ```
 
-### Awaiting postprocessing
-
-After the `up.render()` promise fulfills the fragments may still change further through [animation](/up.motion) or [revalidation](/caching#revalidation).
-To run code when animations have concluded and cached content was revalidated, use the [`up.render().finished`](/up.RenderJob.prototype.finished) promise:
-
-```js
-let result = await up.render({ target: '.target', url: '/path' }).finished
-console.log("Final fragments: ", result.fragments)
-```
-
-
-The `up.render().finished` promise resolves to the last `up.RenderResult` that updated a fragment.
-If revalidation re-rendered the fragment, it is the result from the
-second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
-it is the result from the initial render pass.
-
-The promise rejects when there is any error during the initial render pass or during revalidation.
-
-Instead of a promise you may also pass an [`{ onFinished }`](/up.render#options.onRendered) callback.\
-In HTML you can set an `[up-on-finished]` attribute on a [link](/a-up-follow) or [form](/form-up-submit).
-
-
 
 ## Inspecting the render result
 
-The `up.render()` promise resolves to an `up.RenderResult` object. You may inspect this issue
-about
+Both `up.render()` and `up.render().finished` promises resolve to an `up.RenderResult` object. You may query this object for the effective results of each render pass:
 
 ```js
 let result = await up.render({ url: '/path', target: '.target', failTarget: '.errors' })
 console.log("Updated layer: ", result.layer)
 console.log("Updated fragments: ", result.fragments)
+console.log("Effective option used: ", result.options)
 ```
 
 
