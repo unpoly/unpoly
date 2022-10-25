@@ -382,7 +382,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   Returns whether the given `element` is contained by this layer.
 
-  Note that this will always return `false` for elements in [descendant](/up.Layer.prototype.descendants) overlays,
+  This function will always return `false` for elements in [descendant](/up.Layer.prototype.descendants) overlays,
   even if the descendant overlay's element is nested into the DOM tree of this layer.
 
   @function up.Layer#contains

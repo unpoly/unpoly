@@ -72,9 +72,10 @@ up.history = (function() {
   The returned URL is an absolute pathname like `"/path"` without a hostname or port.
   It will include a `#hash` fragment and query string, if present.
 
-  Note that if the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
-  the browser's address bar will show the location of an ancestor layer.
-  To get the location of the current layer, use `up.layer.location`.
+  > [NOTE]
+  > If the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
+  > the browser's address bar will show the location of an ancestor layer.
+  > To get the location of the current layer, use `up.layer.location`.
 
   @property up.history.location
   @param {string} location
@@ -157,9 +158,10 @@ up.history = (function() {
 
   To update a fragment other than body, configure `up.history.config.restoreTargets`.
 
-  Note that [navigating](/navigation) functions like `up.follow()` or `up.submit()`
-  will automatically update the browser's location bar for you. This can be disabled with
-  an [`{ history: false }`](/up.render#options.history) option.
+  > [TIP]
+  > [Navigating](/navigation) functions like `up.follow()` or `up.submit()`
+  > will automatically update the browser's location bar for you. This can be disabled with
+  > an [`{ history: false }`](/up.render#options.history) option.
 
   @function up.history.replace
   @param {string} url
@@ -364,10 +366,11 @@ up.history = (function() {
   /*-
   Changes the link's destination so it points to the previous URL.
 
-  Note that this will *not* call `location.back()`, but will set
-  the link's `[up-href]` attribute to the actual, previous URL.
-
   If no previous URL is known, the link will not be changed.
+
+  > [NOTE]
+  > Clicking an `a[up-back]` will *not* call [`history.back()`](https://developer.mozilla.org/en-US/docs/Web/API/History/back).
+  > Instead the link's `[up-href]` attribute will be set to the actual, previous URL.
 
   ### Example
 

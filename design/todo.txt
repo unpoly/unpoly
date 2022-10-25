@@ -46,10 +46,17 @@ Various changes
   - As :maybe?
   - As a separate header?
 - Should we delete options.data if a fallback is loaded?
+  - This would also be true for other options, like a selector in focus/scroll
+  - We would sometimes need to guess, e.g. { focus: ':main' } may also be a good default for a fallback
 
 
 Docs
 ----
+
+## General
+
+- Rename "Focus option" to "Controlling focus" and /focus
+- Rename "Scroll option" to "Scrolling" and /scrolling
 
 
 ### New cache / revalidation
@@ -64,6 +71,10 @@ Docs
 ### Disabling
 
 - Document { disable } and [up-disable] option for up.submit(), form[up-submit]
+  - Subsection for [watch-disable]
+    - Say that it inherits
+    - Say that we can override in groups
+    - Say that we can override yet again per input
   - The /disable-option page is there, but still empty
   - Maybe even for up.render()
   - Maybe even for a[up-follow]
@@ -79,6 +90,8 @@ Docs
   - Fix Links
   - Update .htaccess
 - Rework [up-validate] so it talks more generically about dynamic forms rendered on the server
+  - Repaints a fragment within a form, to retrieve validation errors or update dependent fields.
+- Document that [up-validate] reacts on `change` unless `[up-watch-event]` is set
 - New watch options [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
   - Document at [up-watch] or new /watch-tuning page
   - [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
@@ -91,6 +104,10 @@ Docs
 - New watch() and validate() options
   - { feedback, disable, delay, event }
   - Explain that you can use it both on containers and individual fields
+  - Explain config options
+    - up.form.config.inputEvents
+    - up.form.config.changeEvents
+    - up.form.config.inputDelay
 - Document all the ways we prevent concurrency
   - In up.watch()
   - In up.validate()

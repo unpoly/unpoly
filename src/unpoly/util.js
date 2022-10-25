@@ -338,9 +338,11 @@ up.util = (function() {
   /*-
   Returns whether the given argument is neither `undefined` nor `null`.
 
-  Note that empty strings or zero *are* considered to be "given".
-
   For the opposite of `up.util.isGiven()` see [`up.util.isMissing()`](/up.util.isMissing).
+
+  > [IMPORTANT]
+  > Unpoly's concept of "given" does not correspond to JavaScript's concept of [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy).
+  > Empty strings or the number zero are not truthy, but *are* considered to be "given".
 
   @function up.util.isGiven
   @param object
@@ -411,11 +413,12 @@ up.util = (function() {
   }
   ```
 
-  Note that the protocol method is not actually named `'up.util.isBlank.key'`.
-  Instead it is named after the *value* of the `up.util.isBlank.key` property.
-  To do so, the code sample above is using a
-  [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
-  in square brackets.
+  > [NOTE]
+  > The protocol method is not actually named `'up.util.isBlank.key'`.
+  > Instead it is named after the *value* of the `up.util.isBlank.key` property.
+  > To do so, the code sample above is using a
+  > [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
+  > in square brackets.
 
   We may now use `Account` instances with `up.util.isBlank()`:
 
@@ -775,11 +778,12 @@ up.util = (function() {
   }
   ```
 
-  Note that the protocol method is not actually named `'up.util.copy.key'`.
-  Instead it is named after the *value* of the `up.util.copy.key` property.
-  To do so, the code sample above is using a
-  [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
-  in square brackets.
+  > [NOTE]
+  > The protocol method is not actually named `'up.util.copy.key'`.
+  > Instead it is named after the *value* of the `up.util.copy.key` property.
+  > To do so, the code sample above is using a
+  > [computed property name](https://medium.com/front-end-weekly/javascript-object-creation-356e504173a8)
+  > in square brackets.
 
   We may now use `Account` instances with `up.util.copy()`:
 

@@ -534,7 +534,7 @@ up.protocol = (function() {
   the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
   the response's HTML content.
 
-  If you know that an overlay will be closed don't want to render HTML,
+  If you know that an overlay will be closed and don't want to render HTML,
   have the server change the render target to `:none`:
 
   ```http
@@ -584,7 +584,7 @@ up.protocol = (function() {
   the `X-Up-Dismiss-Layer` header is ignored and the fragment is updated with
   the response's HTML content.
 
-  If you know that an overlay will be closed don't want to render HTML,
+  If you know that an overlay will be closed and don't want to render HTML,
   have the server change the render target to `:none`:
 
   ```http

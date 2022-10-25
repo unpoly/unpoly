@@ -28,8 +28,8 @@ up.browser = (function() {
   When `pushState`  (e.g. through [`up.follow()`](/up.follow)), it will gracefully
   fall back to a full page load.
 
-  Note that Unpoly will not use `pushState` if the initial page was loaded with
-  a request method other than GET.
+  > [NOTE]
+  > Unpoly will not use `pushState` if the initial page was loaded with a request method other than GET.
 
   @function up.browser.canPushState
   @return {boolean}

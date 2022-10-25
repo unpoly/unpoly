@@ -32,8 +32,9 @@ up.element.createFromHtml = function(...args) {
 /*-
 Removes the given element from the DOM tree.
 
-Note that `up.element.remove()` does *not* run [destructor functions](/up.destructor)
-on the given elements. For this use `up.destroy()`.
+> [IMPORTANT]
+> This function *not* run [destructor functions](/up.destructor)
+> on the removed elements. For this use `up.destroy()`.
 
 @function up.element.remove
 @param {Element} element

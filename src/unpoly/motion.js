@@ -675,7 +675,8 @@ up.motion = (function() {
   [Follows](/a-up-follow) this link and swaps in the new fragment
   with an animated transition.
 
-  Note that transitions are not possible when replacing the `<body>` element.
+  > [NOTE]
+  > Transitions are not possible when replacing the `<body>` element.
 
   ### Example
 

@@ -1311,7 +1311,7 @@ up.fragment = (function() {
   up.fragment.get('.element .inner', { origin: link }) // returns the second .inner
   ```
 
-  Note that when the link's `.element` container does not have a child `.inner`,
+  Only when the link's `.element` container does not have a child `.inner`,
   Unpoly will search the entire layer for `.element .inner`.
 
   ### Similar features
@@ -2249,9 +2249,11 @@ up.fragment = (function() {
   */
 
   /*-
-  To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments).
+  To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments) target.
 
-  Note that even with a target other than `:none`, the server can still decide to render nothing by responding with HTTP status `304 Not Modified` or `204 No Content`.
+  > [NOTE]
+  > Even with a target other than `:none`, the server can still decide to render nothing by
+  > responding with HTTP status `304 Not Modified` or `204 No Content`.
 
   ### Example
 

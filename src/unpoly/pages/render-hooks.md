@@ -73,18 +73,18 @@ console.log("Effective option used: ", result.options)
 
 Functions like `up.render()` and `up.follow()` offer numerous options and [events](/up.event) that allow you to control the render process.
 
-| Intent                                | Hook                               | Type               |
-| ------------------------------------- | ---------------------------------- | ------------------ |
-| Inspect response before rendering     | [`{ onLoaded }`](/up.render#options.onLoaded) | Callback           |
-| Inspect response before rendering     | `up:fragment:loaded`               | Event              | 
-| Modify new elements                   | `up.compiler()`                    | Component registry |
+| Intent                                | Hook                                              | Type               |
+| ------------------------------------- |---------------------------------------------------| ------------------ |
+| Inspect response before rendering     | [`{ onLoaded }`](/up.render#options.onLoaded)     | Callback           |
+| Inspect response before rendering     | `up:fragment:loaded`                              | Event              | 
+| Modify new elements                   | `up.compiler()`                                   | Component registry |
 | Modify new elements                   | [`{ onRendered }`](/up.render#options.onRendered) | Callback           |
-| Modify new elements                   | `up:fragment:inserted`              | Event              |
-| Preserve elements within a fragment   | `[up-keep]`                        | HTML attribute     |
-| Control scrolling                     | [`{ scroll }`](/scroll-option)     | Option             |
-| Control focus                         | [`{ focus }`](/focus-option)       | Option             |
-| Control concurrency                   | [`{ abort }`](/aborting-requests)  | Option             |
-| Control concurrency                   | [`{ disable }`](/disable-option)   | Option             |
+| Modify new elements                   | `up:fragment:inserted`                            | Event              |
+| Preserve elements within a fragment   | `[up-keep]`                                       | HTML attribute     |
+| Control scrolling                     | [`{ scroll }`](/scroll-option)                    | Option             |
+| Control focus                         | [`{ focus }`](/focus-option)                      | Option             |
+| Control concurrency                   | [`{ abort }`](/aborting-requests)                 | Option             |
+| Control concurrency                   | [`{ disable }`](/disabling-forms)                 | Option             |
 
 For a full list of available options see [`up.render() parameters`](/up.render#parameters) and the [lifecycle diagram](#lifecycle-diagram) below.
 

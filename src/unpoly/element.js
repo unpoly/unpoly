@@ -219,9 +219,10 @@ up.element = (function() {
   }
   ```
 
-  Note that any overriding selector must have a [specificity of `(0, 2, 0)`](https://polypane.app/css-specificity-calculator/#selector=.element%5Bhidden%5D).
-  Also all rules should be defined with [`!important`](https://www.w3schools.com/css/css_important.asp) to override other
-  styles defined on that element.
+  > [IMPORTANT]
+  > Any overriding selector must have a [specificity of `(0, 2, 0)`](https://polypane.app/css-specificity-calculator/#selector=.element%5Bhidden%5D).
+  > Also all rules should be defined with [`!important`](https://www.w3schools.com/css/css_important.asp) to override other
+  > styles defined on that element.
 
   @selector [hidden]
   @experimental

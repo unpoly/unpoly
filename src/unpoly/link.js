@@ -64,7 +64,8 @@ with an `up-target` attribute:
 </nav>
 ```
 
-Note that instead of `article` you can use any other CSS selector like `#main .article`.
+> [NOTE]
+> Instead of `article` you can use any other CSS selector like `#main .article`.
 
 With these [`[up-target]`](/a-up-follow#up-target) annotations Unpoly only updates the targeted part of the screen.
 The JavaScript environment will persist and the user will not see a white flash while the
@@ -1233,10 +1234,10 @@ up.link = (function() {
   AJAX request will be triggered right way, the interaction will
   appear faster.
 
-  Note that using `[up-instant]` will prevent a user from canceling a
-  click by moving the mouse away from the link. However, for
-  navigation actions this isn't needed. E.g. popular operation
-  systems switch tabs on `mousedown` instead of `click`.
+  > [INFO]
+  > With `[up-instant]` users can no longer cancel a click by dragging the pressed mouse away from the link.
+  > However, for navigation actions this isn't needed. E.g. many operation systems switch tabs on `mousedown`
+  > instead of `click`.
 
   ### Example
 

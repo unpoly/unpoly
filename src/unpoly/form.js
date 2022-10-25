@@ -4,7 +4,9 @@ Forms
 
 The `up.form` module helps you work with non-trivial forms.
 
-@see disable-option
+@see validating-forms
+@see reacting-to-form-changes
+@see disabling-forms
 
 @see form[up-submit]
 @see form[up-validate]
@@ -217,6 +219,16 @@ up.form = (function() {
 
     Setting this to `false` will disable most defaults.
 
+  @param {string|Element} [options.failTarget]
+    The [target selector](/targeting-fragments) to update when the server responds with an error code.
+
+    Defaults to the form element itself.
+
+    @see failed-responses
+
+  @param {boolean|string} [options.disable]
+    Whether to [disable form controls](/disabling-forms) while the form is submitting.
+
   @param {Element} [options.origin]
     The element that triggered the form submission.
 
@@ -345,8 +357,7 @@ up.form = (function() {
     //
     // 1. Passed as explicit `up.watch({ disable })` option
     // 2. Attribute for the watch intent (e.g. `[up-watch-disable]` at the input or form)
-    // 3. Default config for this watch() intent (e.g. `up.form.config.watchOptions.disable`).
-    // 4. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
+    // 3. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
     parser.boolean('feedback')
     parser.booleanOrString('disable')
     parser.string('event')
@@ -354,6 +365,8 @@ up.form = (function() {
 
     let config = up.form.config
     if (options.event === 'input') {
+      // Expand the event name via the map in `up.form.config.inputEvents`.
+      // This way we can fix components
       options.event = u.evalOption(config.inputEvents, field)
       options.delay ??= config.inputDelay
     } else if (options.event === 'change') {
@@ -622,7 +635,7 @@ up.form = (function() {
     The callback will not run if the watched field is [destroyed](/up.destroy) or
     [aborted](/up.fragment.abort) while waiting for the delay.
   @param {boolean|string} [options.disable]
-    Whether to [disable fields](/disable-option) while an async callback is running.
+    Whether to [disable fields](/disabling-forms) while an async callback is running.
 
     Defaults to the input or form's `[up-watch-disable]` or `[up-disable]` attribute.
   @param {Function(value, name): string} onChange
@@ -749,7 +762,7 @@ up.form = (function() {
   working with complex form. For instance, when [validating](/input-up-validate) a field,
   Unpoly will re-render the closest form group around that field.
 
-  By default Unpoly will also consider a `fieldset` or `label` around a field to be a form group.
+  By default Unpoly will also consider a `<fieldset>` or `<label>` around a field to be a form group.
   You can configure this in `up.form.config.groupSelectors`.
 
   ### Example
@@ -873,7 +886,7 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.origin]
     TODO
   @param {string|Element|jQuery} [options.disable]
-    Whether to [disable fields](/disable-option) while validation is running.
+    Whether to [disable fields](/disabling-forms) while validation is running.
 
     Defaults to the closest `[up-watch-disable]` or `[up-disable]` attribute on either
     the input or its form.
@@ -1169,14 +1182,17 @@ up.form = (function() {
 
   See [handling server errors](/failed-responses) for details.
 
-  Note that you can also use
-  [`input[up-validate]`](/input-up-validate) to perform server-side
-  validations while the user is completing fields.
+  > [TIP]
+  > You can also use [`input[up-validate]`](/input-up-validate) to perform server-side
+  > validations while the user is completing fields.
+
 
   ### Giving feedback while the form is processing
 
   The `<form>` element will be assigned a CSS class [`.up-active`](/form.up-active) while
-  the submission is loading.
+  the submission is loading. The form's target will be assigned an `.up-loading` class.
+
+  Also see [Disabling form controls while processing](/disabling-forms).
 
   ### Short notation
 
@@ -1210,22 +1226,7 @@ up.form = (function() {
     @see failed-responses
 
   @param [up-disable]
-    Whether to [disable fields](/disable-option) while the form is submitting.
-
-  @param [up-watch-disable]
-    Whether to [disable fields](/disable-option) while the form is
-    [validating](/input-up-validate) or running [`[up-watch]`](/input-up-watch) callbacks.
-
-    Defaults to the form's `[up-disable]` attribute.
-
-  @param [up-feedback]
-    Whether to give [navigation feedback](/disable-option) while the form is submitting.
-
-  @param [up-watch-feedback]
-    Whether to give [navigation feedback](/disable-option) while the form is
-    [validating](/input-up-validate) or running [`[up-watch]`](/input-up-watch) callbacks.
-
-    Defaults to the form's `[up-feedback]` attribute.
+    Whether to [disable form controls](/disabling-forms) while the form is submitting.
 
   @stable
   */
@@ -1258,13 +1259,15 @@ up.form = (function() {
   ```html
   <form action="/users">
 
-    <label>
-      E-mail: <input type="text" name="email" />
-    </label>
+    <fieldset>
+      <label for="email">E-mail</label>
+      <input type="text" id="email" name="email" />
+    </fieldset>
 
-    <label>
-      Password: <input type="password" name="password" />
-    </label>
+    <fieldset>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" />
+    </fieldset>
 
     <button type="submit">Register</button>
 
@@ -1279,20 +1282,22 @@ up.form = (function() {
   ```html
   <form action="/users">
 
-    <label>
-      E-mail: <input type="text" name="email" up-validate />
-    </label>
+    <fieldset>
+      <label for="email" up-validate>E-mail</label>
+      <input type="text" id="email" name="email" />
+    </fieldset>
 
-    <label>
-      Password: <input type="password" name="password" up-validate />
-    </label>
+    <fieldset>
+      <label for="password" up-validate>Password</label>
+      <input type="password" id="password" name="password" />
+    </fieldset>
 
     <button type="submit">Register</button>
 
   </form>
   ```
 
-  Whenever a field with `up-validate` changes, the form is POSTed to
+  Whenever a field with `[up-validate]` changes, the form is POSTed to
   `/users` with an additional `X-Up-Validate` HTTP header.
   When seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
@@ -1323,26 +1328,28 @@ up.form = (function() {
   end
   ```
 
-  Note that if you're using the `unpoly-rails` gem you can simply say `up.validate?`
-  instead of manually checking for `request.headers['X-Up-Validate']`.
+  > [TIP]
+  > If you're using the `unpoly-rails` gem you can simply say `up.validate?`
+  > instead of manually checking for `request.headers['X-Up-Validate']`.
 
   The server now renders an updated copy of the form with eventual validation errors:
 
   ```ruby
   <form action="/users">
 
-    <label class="has-error">
-      E-mail: <input type="text" name="email" value="foo@bar.com" />
-      Has already been taken!
-    </label>
+    <fieldset class="has-error">
+      <label for="email" up-validate>E-mail</label>
+      <input type="text" id="email" name="email" value="foo@bar.com" />
+      <div class="error">E-mail has already been taken!</div>
+    </fieldset>
 
-    <button type="submit">Register</button>
+    ...
 
   </form>
   ```
 
-  The `<label>` around the e-mail field is now updated to have the `.has-error`
-  class and display the validation message.
+  The [form group](/up-form-group) (`<fieldset>`) around the e-mail field is now updated to have the `.has-error`
+  class and display the validation message (`<div class="error">`).
 
   ### How validation results are displayed
 
@@ -1356,7 +1363,7 @@ up.form = (function() {
 
   ```html
   <input type="text" name="email" up-validate=".email-errors">
-  <span class="email-errors"></span>
+  <div class="email-errors"></div>
   ```
 
   ### Updating dependent fields
@@ -1403,7 +1410,7 @@ up.form = (function() {
     For most events there is no default delay.
     Only when observing the `input` event the default is `up.form.config.inputDelay`.
   @param [up-watch-disable]
-    Whether to [disable fields](/disable-option) while validation is running.
+    Whether to [disable fields](/disabling-forms) while validation is running.
 
     Defaults to the form's `[up-watch-disable]` or `[up-disable]` attribute.
   @param [up-watch-feedback]
@@ -1426,9 +1433,9 @@ up.form = (function() {
     around the validating field.
   @stable
   */
-  up.compiler(validatingFieldSelector, function(field) {
-    let validator = up.FormValidator.forElement(field)
-    validator.watchField(field)
+  up.compiler(validatingFieldSelector, function(fieldOrForm) {
+    let validator = up.FormValidator.forElement(fieldOrForm)
+    validator.watchContainer(fieldOrForm)
   })
 
   function validatingFieldSelector() {
@@ -1621,8 +1628,7 @@ up.form = (function() {
   <input name="query" up-watch="showSuggestions(value)">
   ```
 
-  Note that the parameter name in the markup must be called `value` or it will not work.
-  The parameter name can be called whatever you want in the JavaScript, however.
+  In the snippet `value` refers to the input's changed value.
 
   Also note that the function must be declared on the `window` object to work, like so:
 
@@ -1673,7 +1679,7 @@ up.form = (function() {
     When observing the `input` event the default is  `up.form.config.inputDelay`.
     For other events there is no default delay.
   @param [up-watch-disable]
-    Whether to [disable fields](/disable-option) while an async callback is running.
+    Whether to [disable fields](/disabling-fields) while an async callback is running.
 
     Defaults to the form's `[up-watch-disable]` or `[up-disable]` attribute.
   @stable

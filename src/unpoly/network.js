@@ -240,7 +240,8 @@ up.network = (function() {
 
   Returns `undefined` if the given request is not currently cached.
 
-  Note that `up.request()` will only write to the cache with `{ cache: true }`.
+  > [IMPORTANT]
+  > `up.request()` and `up.render()` will only write to the cache when a [`{ cache }`](/up.request#options.cache) option is set.
 
   ### Example
 
@@ -815,8 +816,9 @@ up.network = (function() {
   Once all responses have been received, an [`up:network:recover`](/up:network:recover)
   will be emitted.
 
-  Note that if additional requests are made while Unpoly is already busy
-  waiting, **no** additional `up:network:late` events will be triggered.
+  > [IMPORTANT]
+  > If additional requests are made while Unpoly is already busy  waiting,
+  > **no** additional `up:network:late` events will be emitted.
 
   Also see [Loading indicators](/loading-indicators).
 
@@ -906,9 +908,10 @@ up.network = (function() {
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters fatal error like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
 
-  Note that this event will *not* be emitted when the server produces an
-  error message with an HTTP status like `500`. When the server can produce
-  any response, [`up:request:loaded`](/up:request:loaded) is emitted instead.
+  > [NOTE]
+  > This event will *not* be emitted when the server produces an
+  > error message with an HTTP status like `500`. When the server can produce
+  > any response, [`up:request:loaded`](/up:request:loaded) is emitted instead.
 
   The event is emitted on the layer that caused the request.
 

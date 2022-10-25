@@ -23,9 +23,9 @@ up.FormValidator = class FormValidator {
     this.nextRenderPromise = u.newDeferred()
   }
 
-  watchField(field) {
-    let { event } = this.originOptions(field)
-    up.on(field, event, () => up.error.muteUncriticalRejection(this.validate({ origin: field })))
+  watchContainer(fieldOrForm) {
+    let { event } = this.originOptions(fieldOrForm)
+    up.on(fieldOrForm, event, () => up.error.muteUncriticalRejection(this.validate({ origin: fieldOrForm })))
   }
 
   validate(options = {}) {
