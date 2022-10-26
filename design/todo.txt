@@ -48,6 +48,8 @@ Various changes
 - Should we delete options.data if a fallback is loaded?
   - This would also be true for other options, like a selector in focus/scroll
   - We would sometimes need to guess, e.g. { focus: ':main' } may also be a good default for a fallback
+- Try to a 'hash' strategy in overlays
+  - Also update focus @page
 
 
 Docs

@@ -1,13 +1,23 @@
-Focus option
-=============
+Controlling focus
+=================
+
+When you update the page you should think about placing the [focus](https://en.wikipedia.org/wiki/Focus_(computing)).
+
+Changing the focus will generally make a screen reader start reading from the focused position. Placing the focus on new content can help make your app accessible to users with vision or motor impairments, or to users that prefer the keyboard over the mouse.
+
+
+Focus strategies
+----------------
 
 When updating a fragment you may control how Unpoly moves focus by passing
 a `{ focus }` option or `[up-focus]` attribute.
 
-Changing the focus will make a screen reader start reading from the focused position.
+### Defaults
 
-When rendering without navigation Unpoly will default to [`{ focus: 'keep' }`](#preserving-focus).\
-When [navigating](/navigation) Unpoly will default to [`{ focus: 'auto' }`](#automatic-focus-logic).
+When you don't pass a `{ focus }` option, Unpoly has some defaults:
+
+- When rendering without navigation Unpoly will default to [`{ focus: 'keep' }`](#preserving-focus). This will preserve focus in updated fragments. 
+- When [navigating](/navigation) Unpoly will default to [`{ focus: 'auto' }`](#automatic-focus-logic). In most cases this focuses the new fragment.
 
 ### Focusing the fragment
 
@@ -19,7 +29,7 @@ Pass `{ focus: 'layer' }` to focus the [layer](/up.layer) of the updated fragmen
 
 ### Focusing another element
 
-Pass a CSS selector string to focus a matching element:
+Pass a CSS selector string to focus a matching element:https://en.wikipedia.org/wiki/Focus_(computing)
 
 ```js
 up.render({
@@ -125,5 +135,37 @@ The function is expected to either:
   accept a `{ preventScroll: true }` option to prevent scrolling.
 - Return one of the focus options in this list
 - Do nothing
+
+
+Focus in overlays
+-----------------
+
+### When an overlay is opened
+
+When opening an [overlay](/up.layer) the first applicable strategy will be used:
+
+- Focus an `[autofocus]` element in the new overlay.
+- Focus the overlay element.
+
+
+### Focus is trapped within an overlay
+
+Moving the focus outside the overlay will immediately re-focus it. This prevents keyboard users from accidentally skipping to content from other layers.
+
+Occasionally the focus trap may conflict with overlays opened by overlays opened by other JavaScript libraries. You can address this by configuring `up.layer.config.foreignOverlaySelectors`.
+
+
+### When an overlay is updated
+
+When updating a fragment within an existing overlay, all [focus strategies](#focus-strategies) above can be used. 
+
+
+### When an overlay is closed
+
+When an overlay is closed, the link that originally opened the overlay is re-focused.
+
+Ihe layer was [opened programmatically](/up.layer.open) without an `{ origin }` option, the origin link is unknown. In that case the the parent layer is focused.
+
+
 
 @page focus-option
