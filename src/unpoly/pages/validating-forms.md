@@ -23,12 +23,12 @@ Re-rendering completed form groups
 
   <fieldset>
     <label for="email" up-validate>E-mail</label>
-    <input type="text" id="email" name="email" />
+    <input type="text" id="email" name="email">
   </fieldset>
 
   <fieldset>
     <label for="password" up-validate>Password</label>
-    <input type="password" id="password" name="password" />
+    <input type="password" id="password" name="password">
   </fieldset>
 
   <button type="submit">Register</button>

@@ -50,12 +50,13 @@ Various changes
   - We would sometimes need to guess, e.g. { focus: ':main' } may also be a good default for a fallback
 - Try to a 'hash' strategy in overlays
   - Also update focus @page
+- Consider moving [up-etag], [up-time] and related functions to up.protocol
 
 
 Docs
 ----
 
-## General
+### General
 
 
 ### New cache / revalidation
@@ -65,6 +66,9 @@ Docs
   - ETag / If-None-Match
   - Last-Modified / If-Modified-Since
   - Link from places where we talk about `304 Not Modified` or `204 No Content`
+  - Link from up.reload()
+- Rework [up-time] now that we have /skipping-updates
+- Rework
 
 
 ### Disabling

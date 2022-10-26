@@ -49,11 +49,9 @@ To force revalidation regardless of cache age, pass `{ revalidate: true }`.
 
 ### When nothing changed
 
-Your server-side app may support [conditional HTTP requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests) to speed up the requests Unpoly makes when reloading the fragment that is being revalidated.
+Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
-When rendering HTML your server may send [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) response headers. When reloading Unpoly echoes these headers as `If-Modified-Since` or `If-None-Match` request headers.
-
-Your server can match these headers against the underlying data before rendering. When the data hasn't changed, your server can send an empty response with HTTP status `304 Not Modified` or `204 No Content`. This dramatically reduces the time required to produce a revalidation response for unchanged content.
+By supporting [conditional HTTP requests](/skipping-rendering) you can quickly produce an empty revalidation response for unchanged content.
 
 
 

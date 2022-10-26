@@ -1690,8 +1690,9 @@ up.fragment = (function() {
 
   ### Skipping updates when nothing changed
 
-  You may use the `[up-time]` attribute to avoid rendering unchanged HTML when reloading
-  a fragment. See `[up-time]` for a detailed example.
+  Your server-side app is not required to re-render a request if there are no changes to the cached content.
+
+  By supporting [conditional HTTP requests](/skipping-rendering) you can quickly produce an empty response for unchanged content.
 
   @function up.reload
   @param {string|Element|Array<Element>|jQuery} [target]
@@ -1804,19 +1805,7 @@ up.fragment = (function() {
   /*-
   [Derives a CSS selector](/target-derivation) that matches the given element as good as possible.
 
-  To build the selector, the following element properties are used in decreasing
-  order of priority:
-
-  - The element's `[up-id]` attribute
-  - The element's `[id]` attribute
-  - The element's `[name]` attribute
-  - The element's `[class]` names, ignoring `up.fragment.config.badTargetClasses`.
-  - The element's tag name
-
-  TODO: Update the list above
-  TODO: Document up.fragment.config.targetDerivers
-  TODO: Explain that the selector must match the derivee
-  TODO: Explain new { origin } option
+  If no target can be derived and [verified](/target-derivation#derived-target-verification), an error `up.CannotTarget` is thrown.
 
   ### Example
 
@@ -1826,7 +1815,7 @@ up.fragment = (function() {
   ```
 
   @function up.fragment.toTarget
-  @param {string|Element|jQuery}
+  @param {Element} element
     The element for which to create a selector.
   @param {Element} [options.origin]
   @stable
@@ -2160,7 +2149,7 @@ up.fragment = (function() {
   ```
 
   @selector :main
-  @experimental
+  @stable
   */
 
   /*-

@@ -105,13 +105,9 @@ up.protocol = (function() {
 
   ### Rendering nothing
 
-  If the server wants to render nothing they can do one of the following:
+  The server may send an `X-Up-Target: :none` response header with an empty body to skip the current render pass.
 
-  - Send a header `X-Up-Target: :none`.
-  - Send a HTTP status `204 No Content`.
-  - Send a HTTP status `304 Not Modified`.
-
-  In all of these cases no response body is required.
+  Also see [Skipping rendering](/skipping-rendering).
 
   @header X-Up-Target
   @stable
@@ -701,7 +697,7 @@ up.protocol = (function() {
     Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
 
     ```html
-    <meta name="csrf-param" content="authenticity_token" />
+    <meta name="csrf-param" content="authenticity_token">
     ```
 
   @param {string|Function(): string} [config.csrfToken]

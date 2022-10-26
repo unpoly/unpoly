@@ -13,8 +13,9 @@ define additional viewports by giving the CSS property `{ overflow-y: scroll }` 
 @see scroll-tuning
 @see focus
 
-@see up.reveal
+@see [up-viewport]
 @see [up-fixed=top]
+@see up.reveal
 
 @module up.viewport
 */
