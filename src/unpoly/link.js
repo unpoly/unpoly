@@ -1116,22 +1116,22 @@ up.link = (function() {
   @param [up-scroll='auto']
     How to scroll after the new fragment was rendered.
 
-    See [scroll option](/scroll-option) for a list of allowed values.
+    See [Scrolling](/scrolling) for a list of allowed values.
 
   @param [up-save-scroll]
     Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
 
-    Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scroll-option#restoring-scroll-positions).
+    Saved scroll positions can later be restored with [`[up-scroll=restore]`](/scrolling#restoring-scroll-positions).
 
   @param [up-focus='auto']
     What to focus after the new fragment was rendered.
 
-    See [focus option](/focus-option) for a list of allowed values.
+    See [Controlling focus](/focus) for a list of allowed values.
 
   @param [up-save-focus]
     Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
 
-    Saved scroll positions can later be restored with [`[up-focus=restore]`](/focus-option#restoring-focus).
+    Saved scroll positions can later be restored with [`[up-focus=restore]`](/focus#restoring-focus).
 
   @param [up-confirm]
     A message the user needs to confirm before fragments are updated.

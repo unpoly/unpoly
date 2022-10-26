@@ -57,9 +57,6 @@ Docs
 
 ## General
 
-- Rename "Focus option" to "Controlling focus" and /focus
-- Rename "Scroll option" to "Scrolling" and /scrolling
-
 
 ### New cache / revalidation
 
@@ -347,8 +344,8 @@ Decisions
       - E.g. we want to focus the main element, but reset scroll.
       - This could also be fixed by revealSnap ?
     - These are eerily similar:
-      - https://unpoly.com/scroll-option
-      - https://unpoly.com/focus-option
+      - https://unpoly.com/scrolling
+      - https://unpoly.com/focus
       - The -if-lost suffix can only pertain to focus
     - What would be the name for such an attribute?
       - [up-spotlight]

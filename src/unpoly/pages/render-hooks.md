@@ -81,8 +81,8 @@ Functions like `up.render()` and `up.follow()` offer numerous options and [event
 | Modify new elements                   | [`{ onRendered }`](/up.render#options.onRendered) | Callback           |
 | Modify new elements                   | `up:fragment:inserted`                            | Event              |
 | Preserve elements within a fragment   | `[up-keep]`                                       | HTML attribute     |
-| Control scrolling                     | [`{ scroll }`](/scroll-option)                    | Option             |
-| Control focus                         | [`{ focus }`](/focus-option)                      | Option             |
+| Control scrolling                     | [`{ scroll }`](/scrolling)                        | Option             |
+| Control focus                         | [`{ focus }`](/focus)                             | Option             |
 | Control concurrency                   | [`{ abort }`](/aborting-requests)                 | Option             |
 | Control concurrency                   | [`{ disable }`](/disabling-forms)                 | Option             |
 

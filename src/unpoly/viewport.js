@@ -9,11 +9,9 @@ The `up.viewport` module controls the scroll position and focus within scrollabl
 The default viewport for any web application is the main document. An application may
 define additional viewports by giving the CSS property `{ overflow-y: scroll }` to any `<div>`.
 
-Also see documentation for the [scroll option](/scroll-option) and [focus option](/focus-option).
-
-@see scroll-option
+@see scrolling
 @see scroll-tuning
-@see focus-option
+@see focus
 
 @see up.reveal
 @see [up-fixed=top]
@@ -458,7 +456,7 @@ up.viewport = (function() {
 
   The scroll positions will be associated with the current URL.
   They can later be restored by calling `up.viewport.restoreScroll()`
-  at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scroll-option#restoring-scroll-positions)
+  at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scrolling#restoring-scroll-positions)
   attribute.
 
   Unpoly automatically saves scroll positions before [navigating](/navigation).
@@ -563,7 +561,7 @@ up.viewport = (function() {
 
   Saved state will be associated with the given layer's location.
   It can later be restored by calling `up.viewport.restoreScroll()`
-  at the same location, or by following a link with an [`[up-focus="restore"]`](/focus-option#restoring-focus)
+  at the same location, or by following a link with an [`[up-focus="restore"]`](/focus#restoring-focus)
   attribute to that same location.
 
   Unpoly automatically saves focus-related state before [navigating](/navigation).
@@ -728,7 +726,7 @@ up.viewport = (function() {
   instead of scrolling the `<body>` element. As an alternative you can also push a selector
   matching your custom viewport to the `up.viewport.config.viewportSelectors` array.
 
-  When [scrolling](/scroll-option) Unpoly will always scroll the viewport closest
+  When [scrolling](/scrolling) Unpoly will always scroll the viewport closest
   to the updated element. By default this is the `<body>` element.
 
   Elements with the `[up-viewport]` attribute must also have a [derivable target selector](/target-derivation).

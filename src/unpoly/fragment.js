@@ -59,7 +59,7 @@ up.fragment = (function() {
     the current page and the server response.
 
     When [navigating](/navigation) to a main target, Unpoly will automatically
-    [reset scroll positions](/scroll-option) and
+    [reset scroll positions](/scrolling#automatic-focus-logic) and
     [update the browser history](/up.render#options.history).
 
     This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
@@ -109,7 +109,7 @@ up.fragment = (function() {
   @param {boolean|string|Function(Element)} [config.autoScroll]
     How to scroll after updating a fragment with `{ scroll: 'auto' }`.
 
-    See [scroll option](/scroll-option) for a list of allowed values.
+    See [Scrolling](/scrolling) for a list of allowed values.
 
     The default configuration tries, in this order:
 
@@ -119,7 +119,7 @@ up.fragment = (function() {
   @param {boolean|string|Function(Element)} [config.autoFocus]
     How to focus when updating a fragment with `{ focus: 'auto' }`.
 
-    See [focus option](/focus-option) for a list of allowed values.
+    See [Controlling focus](/focus) for a list of allowed values.
 
     The default configuration tries the following strategies, in this order:
 
@@ -785,22 +785,22 @@ up.fragment = (function() {
   @param {boolean|string|Element|Function} [options.scroll]
     How to scroll after the new fragment was rendered.
 
-    See [scroll option](/scroll-option) for a list of allowed values.
+    See [Scrolling](/scrolling) for a list of allowed values.
 
   @param {boolean} [options.saveScroll=true]
     Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
 
-    Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scroll-option#restoring-scroll-positions).
+    Saved scroll positions can later be restored with [`{ scroll: 'restore' }`](/scrolling#restoring-scroll-positions).
 
   @param {boolean|string|Element|Function} [options.focus]
     What to focus after the new fragment was rendered.
 
-    See [focus option](/focus-option) for a list of allowed values.
+    See [Controlling focus](/focus) for a list of allowed values.
 
   @param {boolean} [options.saveFocus=true]
     Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
 
-    Saved focus state can later be restored with [`{ focus: 'restore' }`](/focus-option#restoring-focus).
+    Saved focus state can later be restored with [`{ focus: 'restore' }`](/focus#restoring-focus).
 
   @param {string} [options.confirm]
     A message the user needs to confirm before fragments are updated.

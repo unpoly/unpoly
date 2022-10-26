@@ -98,4 +98,4 @@ The function is expected to either:
 
 See [tuning the scroll behavior](/scroll-tuning) for additional scroll-related options.
 
-@page scroll-option
+@page scrolling

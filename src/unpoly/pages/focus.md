@@ -130,7 +130,7 @@ The function will be called with the updated fragment and an options object.
 The function is expected to either:
 
 - Focus the viewport to the desired position. Focusing must not change
-  scroll positions, since scrolling is governed by a separate [`{ scroll }` option](/scroll-option).
+  scroll positions, since scrolling is governed by a separate [`{ scroll }` option](/scrolling).
   Both [`Element#focus()`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) and `up.focus()`
   accept a `{ preventScroll: true }` option to prevent scrolling.
 - Return one of the focus options in this list
@@ -167,5 +167,4 @@ When an overlay is closed, the link that originally opened the overlay is re-foc
 Ihe layer was [opened programmatically](/up.layer.open) without an `{ origin }` option, the origin link is unknown. In that case the the parent layer is focused.
 
 
-
-@page focus-option
+@page focus

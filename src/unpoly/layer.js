@@ -451,7 +451,7 @@ up.layer = (function() {
   @param {Element} [options.origin]
     The link element that caused this overlay to open.
 
-    The origin [will be re-focused](/focus-option#focus-in-overlays) when the overlay closes.
+    The origin [will be re-focused](/focus#focus-in-overlays) when the overlay closes.
 
   @param {Function(Event)} [options.onOpened]
     A function that is called when the overlay was inserted into the DOM.

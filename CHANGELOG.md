@@ -636,7 +636,7 @@ This step will allow Unpoly to use modern web APIs and reduce its bundle size ev
 - Unpoly now shows a [progress bar](/up.network.config#config.progressBar) that appears for [late requests](/up:request:late).
   The progress bar is enabled by default. If you're using [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading), the progress bar is disabled if you have an `up:request:late` listener, assuming that you have built a custom loading indicator.
 - For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
-- [Layer configuration](/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/scroll-option) and [`{ focus }`](/focus-option). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/up.fragment.config#config.navigateOptions).
+- [Layer configuration](/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/scrolling) and [`{ focus }`](/focus). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/up.fragment.config#config.navigateOptions).
 - Links with an [`[up-instant]`](/a-up-instant) attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/a-up-follow) attribute.
 
 
@@ -697,7 +697,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 #### Accessibility
 
 - New overlays are focused automatically and trap focus in a cycle. Closing the overlay re-focuses the link that opened it.
-- Focus is automatically managed when rendering major new content. A new [`[up-focus]` attribute](/focus-option) allows
+- Focus is automatically managed when rendering major new content. A new [`[up-focus]` attribute](/focus) allows
   you to explicitly move the user's focus as you update fragments.
 - Keyboard navigation is supported everywhere.
 - Focus, selection and scroll positions are preserved within an updated fragment.
@@ -714,7 +714,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 - The [log](/up.log) output is more much more compact and has a calmer formatting.
 - New fragments are no longer revealed by default. Instead Unpoly scrolls to the top when the [main target](/up-main) has changed, but does not scroll otherwise.
 - History is no longer changed by default. Instead Unpoly updates history only when a [main target](/up-main) has changed.
-- All scroll-related options have been unified in a single [`[up-scroll]` attribute](/scroll-option).
+- All scroll-related options have been unified in a single [`[up-scroll]` attribute](/scrolling).
 - Many optimizations have been made to preserve bandwidth on slow connections. For example, Unpoly stops [preloading](/up-preload) and [polling](/up-poll) whenthe connection has high latency or low throughput.
 - The client-side cache can be carefully managed by both the client and server.
 - Unpoly 1 had many functions for updating fragments (`up.replace()`, `up.extract()`, `up.modal.extract()`, etc.). Unpoly 2 has unified these into a single function `up.render()`.
