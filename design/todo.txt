@@ -31,7 +31,7 @@ TODOs after V3
 
 
 TODOs for V3
-============
+============When the server n
 
 
 Various changes
@@ -57,6 +57,12 @@ Docs
 ----
 
 ### General
+
+- Render hooks should have entry about skipping rendering
+  - Link to @page
+  - Interrupt up:fragment:loaded
+
+- Skipping rendering should talk that you can preventDefault() on all events up to up:fragment:loaded
 
 
 ### New cache / revalidation

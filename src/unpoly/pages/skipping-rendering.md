@@ -1,7 +1,7 @@
-Skipping rendering
-==================
+Skipping unnecessary rendering
+==============================
 
-Your server-side app may skip a render pass if there is nothing to update.
+Your app may skip a render pass if there is nothing to update.
 
 
 Rendering nothing
@@ -9,32 +9,29 @@ Rendering nothing
 
 If the server wants to render nothing they can do one of the following:
 
-- Send a header [`X-Up-Target: :none`](/X-Up-Target).
+- Send a response header [`X-Up-Target: :none`](/X-Up-Target).
 - Send a HTTP status [`204 No Content`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204).
 - Send a HTTP status [`304 Not Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304).
 
-In all of these cases no response body is required.
-
+No response body is required.
 
 Conditional requests
 --------------------
 
-[Conditional requests]((https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)) is an [old HTTP feature](https://datatracker.ietf.org/doc/html/rfc7232).
-It lets browser ask for content newer than a known modification time, or content different from a known content hash.
+[Conditional requests]((https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)) is an [HTTP feature](https://datatracker.ietf.org/doc/html/rfc7232).
+It lets a client request content that is newer than a known modification time, or different from a known content hash.
 
 Unpoly uses conditional requests for [reloading](/up.reload), [cache revalidation](/caching#revalidating) and [polling](/up-poll).
 By observing HTTP headers, your server can quickly produce an empty response for unchanged content.
+This saves CPU time and reduces the bandwidth cost for a
+request/response exchange to ~1 KB (1 packet).
 
-### Protocol
-
-When rendering HTML your server may send [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) response headers.
-
-When reloading Unpoly echoes these headers as `If-Modified-Since` or `If-None-Match` request headers.
-
-Your server can match these headers against the underlying data before rendering. When the data hasn't changed, your server can send an empty response with HTTP status `304 Not Modified` or `204 No Content`. 
+> [IMPORTANT]
+> Supporting conditional requests is entirely optional.
+> If your backend does not honor conditional request headers, can still use features like [polling](/up-poll) or [cache revalidation](/caching#revalidating).
 
 
-### Requesting content changed from a known content hash
+### Requesting content changed from a known content hash {#etag-condition}
 
 In this example the browser updates a fragment with a [target](/targeting-fragments) from a URL `/messages`. For this it makes the following HTTP request:
 
@@ -85,7 +82,7 @@ HTTP/1.1 304 Not Modified
 ```
 
 
-### Requesting content newer than a known modification time
+### Requesting content newer than a known modification time {#time-condition}
 
 In this example the browser updates a fragment with a [target](/targeting-fragments) from a URL `/messages`. For this it makes the following HTTP request:
 
@@ -136,7 +133,7 @@ Servers can use both `Last-Modified` and `ETag`, but `ETag` always takes precede
 It's easier to mix in additional data into an `ETag`, e.g. the ID of the logged in user or the currently deployed commit hash.
 
 
-### Setting versions per-fragment
+### Multiple versions on the same page {#fragment-versions}
 
 TODO: Rewrite
 
@@ -147,6 +144,18 @@ reloading. Unpoly will automatically send these values as `If-Modified-Since` or
 If the server has no more recent changes, it may skip the update by responding
 with an HTTP status `304 Not Modified`.
 
+
+## Partially rendering a response
+
+The response may include a full HTML document, but only the [targeted fragment](/targeting-fragments)
+will be updated on the page. Other elements from the response will be discarded.
+
+Within the targeted fragment, child elements may elect to not be re-rendered using the `[up-keep]` attribute.
+
+
+## Preventing a render pass
+
+You can [prevent or interrupt](/render-hooks#preventing-a-render-pass) a render pass by calling `event.preventDefault()` on an event like `up:link:follow` or `up:fragment:loaded`.
 
 
 @page skipping-rendering

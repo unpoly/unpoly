@@ -102,8 +102,8 @@ up.RenderResult = class RenderResult extends up.Record {
 
   There are some cases where we did not render any fragment:
 
-  - Server sent HTTP status `304 Not Modified` (especially when reloading)
-  - Server sent HTTP status `204 No Content`
+  - Server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/sjipping-rendering).
+  - Server sent HTTP status `204 No Content`.
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
 

@@ -162,7 +162,8 @@ To make a server request without changing a fragment, target the `:none` selecto
 <a href="/ping" up-target=":none">Ping server</a>
 ```
 
-When a target selector like `.content` is used, the server can still decide to render nothing by responding with HTTP status `304 Not Modified` or `204 No Content`. The render pass will succeed, but no element will be changed.
+> [TIP]
+> Event when a specific target like `.content` is used, the server can still decide to [render nothing](/skipping-rendering#rendering-nothing).
 
 
 ## Resolving ambiguous selectors
@@ -254,5 +255,15 @@ up.render({ url: '/path', target: '.content', fallback: true })
 ```
 
 Falling back to the main target is the default when [navigating](/navigation). Therefore you don't need to include an empty `[up-fallback]` attribute with your links and forms, which are considered navigation by default.
+
+
+## Changing the target in-flight
+
+The server may elect to render a different target by seting an `X-Up-Target` response header.
+
+Events like `up:link:follow`, `up:form:submit` and `up:fragment:loaded` also let you change the target
+by setting `event.renderOptions.target`.
+See [Changing options before rendering](/targeting-fragments#changing-options-before-rendering) for an example.
+
 
 @page targeting-fragments

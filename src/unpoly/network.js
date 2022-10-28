@@ -111,7 +111,7 @@ up.network = (function() {
   @param {boolean|Function(up.Response): boolean} [config.fail]
     Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
 
-    By default Unpoly will consider any status code other than HTTP 2xx or 304 to represent a failed response.
+    By default Unpoly will consider any status code other than HTTP 2xx or [304](/skipping-rendering#rendering-nothing) to represent a failed response.
     You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
 
     The following configuration will fail all responses with an `X-Unauthorized` header:

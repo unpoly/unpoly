@@ -27,6 +27,7 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 
 @see navigation
 @see render-hooks
+@see skipping-rendering
 @see target-derivation
 
 @see up.render
@@ -283,67 +284,13 @@ up.fragment = (function() {
   Sets the time when the fragment's underlying data was last changed.
 
   This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
-  a fragment. This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
-  request/response exchange to **~1 KB**.
+  a fragment.
 
   Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
   from a response with a `Last-Modified` header.
 
-  ## Example
-
-  Let's say we display a list of recent messages.
-  We use the `[up-poll]` attribute to reload the `.messages` fragment every 30 seconds:
-
-  ```html
-  <div class="messages" up-poll>
-  ...
-  </div>
-  ```
-
-  The list is now always up to date. But most of the time there will not be new messages,
-  and we waste resources sending the same unchanged HTML from the server.
-
-  We can improve this by setting an `[up-time]` attribute and the message list.
-  The attribute value is the time of the most recent message:
-
-  ```html
-  <div class="messages" up-time="Wed, 21 Oct 2015 07:28:00 GMT" up-poll>
-  ...
-  </div>
-  ```
-
-  When reloading Unpoly will send the `[up-time]` as an [`If-Modified-Since`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since) header:
-
-  ```http
-  If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
-  ```
-
-  The server can compare the time from the request with the time of the last data update.
-  If no more recent data is available, the server can skip rendering and
-  send with an empty `304 Not Modified` response.
-
-  Here is an example for a Ruby on Rails backend, expanded for clarity:
-
-  ```ruby
-  class MessagesController < ApplicationController
-
-    def index
-      @messages = current_user.messages
-
-      # Set response's Last-Modified header
-      response.last_modified = @messages.maximum(:updated_at)
-
-      # Compare response's Last-Modified header with request's If-Modified-Since header.
-      if request.fresh?(response)
-        head :not_modified
-      else
-        @messages = @messages.order(time: :desc).to_a
-        render 'index'
-      end
-    end
-
-  end
-  ```
+  See [Requesting content newer than a known modification time](/skipping-rendering#time-condition)
+  for a full example.
 
   @selector [up-time]
   @param {string} up-time
@@ -361,66 +308,13 @@ up.fragment = (function() {
   Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
 
   This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
-  a fragment. This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
-  request/response exchange to **~1 KB**.
+  a fragment.
 
   Unpoly will automatically set an `[up-etag]` attribute when a fragment was rendered
   from a response with a `ETag` header.
 
-  ## Example
-
-  Let's say we display a stock symbol with its current trading price.  We use the `[up-poll]` attribute to reload the `.stock` fragment every 30 seconds:
-
-  ```html
-  <div class="stock" up-poll>
-    Name: Games Workshop Group PLC
-    Price: 119.05 USD
-  </div>
-  ```
-
-  The view is now always up to date. But most of the time there will not be a change in price,
-  and we waste resources sending the same unchanged HTML from the server.
-
-  We can improve this by setting an `[up-etag]` attribute on the fragment.
-  The attribute value is an [entity tag](https://en.wikipedia.org/wiki/HTTP_ETag) for the underlying data:
-
-  ```html
-  <!-- Double quotes are part of an ETag -->
-  <div class="stock" up-time="W/&quot;stock/mwfk/20211129140459&quot;" up-poll>
-    ...
-  </div>
-  ```
-
-  When reloading Unpoly will send the `[up-etag]` as an [`If-None-Match`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match) header:
-
-  ```http
-  If-None-Match: W/"stock/mwfk/20211129140459"
-  ```
-
-  The server can compare the ETag from the request with the ETag of the underlying data.
-  If no more recent data is available, the server can skip rendering and
-  send with an empty `304 Not Modified` response.
-
-  Here is an example for a Ruby on Rails backend, expanded for clarity:
-
-  ```ruby
-  class MessagesController < ApplicationController
-
-    def index
-      # Set response's Last-Modified header
-      response.etag = current_user.cache_key_with_version
-
-      # Compare response's ETag header with request's If-None-Match header.
-      if request.fresh?(response)
-        head :not_modified
-      else
-        @messages = current_user.messages.order(time: :desc).to_a
-        render 'index'
-      end
-    end
-
-  end
-  ```
+  See [ Requesting content changed from a known content hash](/skipping-rendering#etag-condition)
+  for a full example.
 
   @selector [up-etag]
   @param {string} up-etag
@@ -829,7 +723,7 @@ up.fragment = (function() {
 
     This callback may be called zero, one or two times:
 
-    - When the server rendered an empty response, no fragments are updated. `{ onRendered }` is not called.
+    - When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
     - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
     - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
@@ -2238,11 +2132,10 @@ up.fragment = (function() {
   */
 
   /*-
-  To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments) target.
+  To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments).
 
   > [NOTE]
-  > Even with a target other than `:none`, the server can still decide to render nothing by
-  > responding with HTTP status `304 Not Modified` or `204 No Content`.
+  > Even with a target other than `:none`, the server can still decide to [skip the render pass](/skipping-rendering#rendering-nothing).
 
   ### Example
 
@@ -2251,7 +2144,7 @@ up.fragment = (function() {
   ```
 
   @selector :none
-  @experimental
+  @stable
   */
 
   /*-

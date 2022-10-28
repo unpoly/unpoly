@@ -13,7 +13,7 @@ Some example for failed responses are:
 ## Rendering failed responses differently
 
 You may pass different render options for server responses with an error code, which we will call *failed* responses below.
-Any HTTP status other than 2xx or 304 is considered a failed response.
+Any HTTP status other than 2xx or [304](/skipping-rendering#rendering-nothing) is considered a failed response.
 
 A common use case for this is [form submissions](/up.form), where a successful response
 should display a follow-up screen, but a failed response should re-render the form with validation errors.
@@ -63,7 +63,7 @@ to be successful, even with a HTTP 4xx or 5xx status code.
 
 ### Customizing failure detection
 
-By default any HTTP 2xx or 304 status code will be considered successful, and any other status code will be considered failed. This behavior can be customized. For instance, you can fail a response if it contains a given header or body text.
+By default any HTTP 2xx or [304](/skipping-rendering#rendering-nothing)) status code will be considered successful, and any other status code will be considered failed. This behavior can be customized. For instance, you can fail a response if it contains a given header or body text.
 
 The following configuration will fail all responses with an `X-Unauthorized` header:
 

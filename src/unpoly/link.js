@@ -972,7 +972,7 @@ up.link = (function() {
   @param [up-fail]
     Whether the server response should be considered failed.
 
-    By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error code.
+    By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or [304](/skipping-rendering#rendering-nothing) is considered an error code.
 
     For failed responses Unpoly will use attributes prefixed with `up-fail`, e.g. `[up-fail-target]`.
     See [handling server errors](/failed-responses) for details.
@@ -1157,7 +1157,7 @@ up.link = (function() {
 
     The snippet will be called zero, one or two times:
 
-    - When the server rendered an empty response, no fragments are updated. `[up-on-rendered]` is not called.
+    - When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `[up-on-rendered]` is not called.
     - When the server rendered a matching fragment, it will be updated on the page. `[up-on-rendered]` is called with the [result](/up.RenderResult).
     - When [revalidation](/caching#revalidation) renders a second time, `[up-on-rendered]` is called again with the final result.
 

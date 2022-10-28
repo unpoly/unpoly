@@ -41,7 +41,7 @@ In HTML you can set an `[up-on-finished]` attribute on a [link](/a-up-follow) or
 To run code after every render pass, use the [`{ onRendered }`](/up.render#options.onRendered) callback.
 This callback may be called zero, one or two times:
 
-- When the server rendered an empty response, no fragments are updated. `{ onRendered }` is not called.
+- When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
 - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
 - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
@@ -144,6 +144,25 @@ try {
 Note how we use a `fail`-prefixed render option `{ failTarget }` to update a different fragment in case the server responds with an error code. See [handling failed responses](/failed-responses) for more details on handling server responses with an error code.
 
 
+Preventing a render pass
+------------------------
+
+The [render lifecycle](#lifecycle-diagram) emits many events that you can prevent by calling `event.preventDefault()`. When these events are prevented, the render process will abort and no elements will be changed. Focus and scroll positions will be kept. The `up.render()` promise will reject with an `up.AbortError`.
+
+The most important preventable events are:
+
+- `up:link:follow`
+- `up:form:submit`
+- `up:form:validate`
+- `up:fragment:poll`
+- `up:fragment:loaded`
+
+> [TIP]
+> The last preventable event is `up:fragment:loaded`. It is emitted after a response is loaded but before any elements were changed.
+
+Also see [Skipping unnecessary rendering](/skipping-rendering).
+
+
 Changing options before rendering
 ---------------------------------
 
@@ -161,7 +180,7 @@ up.on('up:link:follow', 'form a', function(event, link) {
 ```
 
 If you have compilers that only set default attributes, consider using a single event listener that manipulates `event.renderOptions`. It's much leaner than a compiler, which needs to be called for every new fragment.
-
+]()
 ### Advanced example
 
 Assume we give a new attribute `[require-session]` to links that require a signed-in user:
@@ -190,10 +209,13 @@ up.on('up:link:follow', 'a[require-session]', async function(event) {
 ```
 
 
+
+
+
 Lifecycle diagram
 -----------------
 
-The diagram below attempts to visualize the sequence of render steps, edge cases and error cases.
+The diagram below attempts to visualize the sequence of render steps, edge cases and error states.
 
 ![Render lifecycle diagram](images/render-lifecycle.svg){:width='900'}
 

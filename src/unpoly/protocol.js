@@ -10,11 +10,12 @@ There is an **optional** protocol your server may use to exchange additional inf
 when Unpoly is [updating fragments](/up.link). The protocol mostly works by adding
 additional HTTP headers (like `X-Up-Target`) to requests and responses.
 
-While the protocol can help you optimize performance and handle some edge cases,
-implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
-that uses Unpoly on the frontend and doesn't even have an active server component.
+> [IMPORTANT]
+> While the protocol can help you optimize performance and handle some edge cases,
+> implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
+> that uses Unpoly on the frontend and doesn't even have an active server component.
 
-### Existing implementations
+## Existing implementations
 
 You should be able to implement the protocol in a very short time.
 
