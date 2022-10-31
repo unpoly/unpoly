@@ -24,7 +24,7 @@ It lets a client request content that is newer than a known modification time, o
 Unpoly uses conditional requests for [reloading](/up.reload), [cache revalidation](/caching#revalidating) and [polling](/up-poll).
 By observing HTTP headers, your server can quickly produce an empty response for unchanged content.
 This saves CPU time and reduces the bandwidth cost for a
-request/response exchange to ~1 KB (1 packet).
+request/response exchange to about 1 KB.
 
 > [IMPORTANT]
 > Supporting conditional requests is entirely optional.

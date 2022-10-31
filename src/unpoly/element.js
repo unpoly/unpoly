@@ -6,7 +6,7 @@ DOM helpers
 
 The `up.element` module offers functions for DOM manipulation and traversal.
 
-It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser).
+It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.framework.isSupported).
 
 @module up.element
 */

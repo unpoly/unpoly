@@ -269,7 +269,7 @@ up.radio = (function() {
 
   When polling a fragment periodically we want to avoid rendering unchanged content.
   This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
-  request/response exchange to **~1 KB**.
+  request/response exchange to about 1 KB (1 packet).
 
   See [Skipping rendering](/skipping-rendering) for more details and examples.
 

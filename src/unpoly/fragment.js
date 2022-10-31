@@ -1357,7 +1357,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Your target selectors may use this pseudo-selector
+  Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to replace an element with an descendant matching the given selector.
 
   ### Example
@@ -1375,13 +1375,11 @@ up.fragment = (function() {
 
   ### Compatibility
 
-  `:has()` is supported by target selectors like `a[up-target]` and `up.render({ target })`.
-
   As a [level 4 CSS selector](https://drafts.csswg.org/selectors-4/#relational),
-  `:has()` [has yet to be implemented](https://caniuse.com/#feat=css-has)
+  `:has()` is [currrently being implemented](https://caniuse.com/#feat=css-has)
   in native browser functions like [`document.querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll).
 
-  You can also use [`:has()` in jQuery](https://api.jquery.com/has-selector/).
+  Unpoly polyfills `:has()` so you can use it in [target selectors](/targeting-fragments) in all [supported browsers](/up.framework.isSupported).
 
   @selector :has()
   @stable
