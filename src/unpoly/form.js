@@ -4,7 +4,7 @@ Forms
 
 The `up.form` module helps you work with non-trivial forms.
 
-@see validating-forms
+@see validation
 @see reacting-to-form-changes
 @see disabling-forms
 
@@ -1145,7 +1145,7 @@ up.form = (function() {
   it will usually re-render the form with validation errors.
 
   For Unpoly to be able to detect a failed form submission, the form must be re-rendered with a non-200 HTTP status code.
-  We recommend to use either 400 (bad request) or 422 (unprocessable entity). In a Ruby on Rails app
+  We recommend to use 422 (unprocessable entity). In a Ruby on Rails app
   this would look like this:
 
   ```ruby
@@ -1157,8 +1157,8 @@ up.form = (function() {
       if @user.save?
         sign_in @user
       else
-        # Signal a failed form submission with an HTTP 400 status
-        render 'form', status: :bad_request
+        # Signal a failed form submission with an HTTP 422 status
+        render 'form', status: :unprocessable_entity
       end
     end
 
@@ -1304,23 +1304,30 @@ up.form = (function() {
 
   In Ruby on Rails the processing action should behave like this:
 
+  ```js
+  foo()
+  bar() // mark-line
+  baz()
+  ```
+
+
   ```ruby
   class UsersController < ApplicationController
 
     # This action handles POST /users
     def create
-      user_params = params[:user].permit(:email, :password)
+      user_params = params.require(:user).permit(:email, :password)
       @user = User.new(user_params)
 
-      if request.headers['X-Up-Validate']
+      if request.headers['X-Up-Validate'] # mark-line
         # Run validations, but don't save to the database
-        status = @user.valid? ? :ok : :bad_request
+        status = @user.valid? ? :ok : :unprocessable_entity
         # Render form with error messages
         render 'form', status: status
       elsif @user.save
         sign_in @user
       else
-        render 'form', status: :bad_request
+        render 'form', status: :unprocessable_entity
       end
 
     end
@@ -1390,13 +1397,13 @@ up.form = (function() {
   ```
 
   In order to update the `department` field in addition to the `employee` field, you could say
-  `up-validate="&, [name=employee]"`, or simply `up-validate="form"` to update the entire form.
+  `[up-validate="&, [name=employee]]"`, or simply `[up-validate="form"]` to update the entire form.
 
   @selector input[up-validate]
   @param [up-validate]
     The [target selector](/targeting-fragments) to update with the server response.
 
-    Defaults the closest form group around the validating field.
+    Defaults the closest [form group](/up-form-group) around the validating field.
   @param [up-watch-event='change']
     The event type that causes validation.
 

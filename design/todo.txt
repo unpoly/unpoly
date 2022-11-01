@@ -31,7 +31,7 @@ TODOs after V3
 
 
 TODOs for V3
-============When the server n
+============
 
 
 Various changes
@@ -51,6 +51,10 @@ Various changes
 - Try to a 'hash' strategy in overlays
   - Also update focus @page
 - Consider moving [up-etag], [up-time] and related functions to up.protocol
+- Rename up.form.config
+  .changeEvents => watchChangeEvents
+  .inputEvents => watchInputEvents
+  .inputDelay => watchInputDelay
 
 
 Docs

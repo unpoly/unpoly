@@ -155,7 +155,7 @@ up.protocol = (function() {
       if @user.save?
         sign_in @user
       else
-        render 'form', status: :bad_request
+        render 'form', status: :unprocessable_entity
       end
     end
 
