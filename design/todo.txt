@@ -45,16 +45,14 @@ Various changes
 - Should we send optional targets in X-Up-Target ?
   - As :maybe?
   - As a separate header?
-- Should we delete options.data if a fallback is loaded?
-  - This would also be true for other options, like a selector in focus/scroll
-  - We would sometimes need to guess, e.g. { focus: ':main' } may also be a good default for a fallback
-- Try to a 'hash' strategy in overlays
+- Try to have a 'hash' strategy in overlays
   - Also update focus @page
 - Consider moving [up-etag], [up-time] and related functions to up.protocol
-- Rename up.form.config
-  .changeEvents => watchChangeEvents
-  .inputEvents => watchInputEvents
-  .inputDelay => watchInputDelay
+- Rename up.form.config watch options so they talk about watching
+  - e.g. up.form.config.changeEvents sounds like this might also work for up.on()
+  - up.form.config.changeEvents => watchChangeEvents
+  - up.form.config.inputEvents => watchInputEvents
+  - up.form.config.inputDelay => watchInputDelay
 
 
 Docs
@@ -407,3 +405,7 @@ Decisions
     - Make this an early return in up.Change.FromURL, like with options.preload
 - Test if we can preserve element.upPolling (or at least the { forceState }) through up.reload({ data })
   => It's hard since there's the case that the server no longer responds with [up-poll], but we want to keep polling when forceStarted
+- Should we delete options.data if a fallback is loaded?
+  - This would also be true for other options, like a selector in focus/scroll
+  - We would sometimes need to guess, e.g. { focus: ':main' } may also be a good default for a fallback
+  => I think this is not a real case since we're not going to use { data } together with { fallback }

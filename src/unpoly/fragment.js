@@ -896,7 +896,7 @@ up.fragment = (function() {
   The element you're keeping should have an umambiguous class name, ID or `[up-id]`
   attribute so Unpoly can find its new position within the page update.
 
-  Emits events [`up:fragment:keep`](/up:fragment:keep) and [`up:fragment:kept`](/up:fragment:kept).
+  Emits the [`up:fragment:keep`](/up:fragment:keep) event.
 
   ### Example
 
@@ -980,23 +980,6 @@ up.fragment = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when an existing element has been [kept](/up-keep)
-  during a page update.
-
-  Event listeners can inspect the discarded update through `event.newElement`
-  and `event.newData` and then modify the preserved element when necessary.
-
-  @event up:fragment:kept
-  @param {Element} event.target
-    The fragment that has been kept.
-  @param {Element} event.newFragment
-    The discarded fragment.
-  @param {Object} event.newData
-    The [data](/data) attached to the discarded fragment.
-  @stable
-  */
-
-  /*-
   Manually compiles a page fragment that has been inserted into the DOM
   by external code.
 
@@ -1037,15 +1020,11 @@ up.fragment = (function() {
     element = getSmart(element)
 
     // Callers may pass descriptions of child elements that were [kept](/up-keep)
-    // as { options.keepPlans }. For these elements up.hello() emits an event
-    // up:fragment:kept instead of up:fragment:inserted.
+    // as { options.keepPlans }. For these elements up.hello() won't emit up:fragment:inserted.
     //
     // We will also pass an array of kept child elements to up.hello() as { skip }
     // so they won't be compiled a second time.
-    const skip = (keepPlans || []).map((plan) => {
-      emitFragmentKept(plan)
-      return plan.oldElement // the kept element
-    })
+    const skip = u.map(keepPlans || [], 'oldElement')
 
     up.syntax.compile(element, { layer, data, dataMap, skip })
     emitFragmentInserted(element)
@@ -1083,11 +1062,6 @@ up.fragment = (function() {
     const log = ['Keeping fragment %o', keepPlan.oldElement]
     const callback = e.callbackAttr(keepPlan.oldElement, 'up-on-keep', { exposedKeys: ['newFragment', 'newData'] })
     return emitFromKeepPlan(keepPlan, 'up:fragment:keep', {log, callback})
-  }
-
-  function emitFragmentKept(keepPlan) {
-    const log = ['Kept fragment %o', keepPlan.oldElement]
-    return emitFromKeepPlan(keepPlan, 'up:fragment:kept', {log})
   }
 
   function emitFromKeepPlan(keepPlan, eventType, emitDetails) {
@@ -2473,7 +2447,6 @@ up.fragment = (function() {
     emitInserted: emitFragmentInserted,
     emitDestroyed: emitFragmentDestroyed,
     emitKeep: emitFragmentKeep,
-    emitKept: emitFragmentKept,
     successKey,
     failKey,
     expandTargets,

@@ -279,8 +279,8 @@ describe 'up.radio', ->
         hungry = fixture('#hungry[up-hungry]')
         child = e.affix(hungry, '#child[up-keep]', text: 'old child')
 
-        keptListener = jasmine.createSpy('up:fragment:kept listener')
-        up.on('up:fragment:kept', keptListener)
+        keepListener = jasmine.createSpy('up:fragment:keep listener')
+        up.on('up:fragment:keep', keepListener)
 
         up.render '#target', document: """
           <div id="target">new target</div>
@@ -293,7 +293,7 @@ describe 'up.radio', ->
         expect('#target').toHaveText('new target')
         expect('#child').toHaveText('old child')
 
-        expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), child, jasmine.anything())
+        expect(keepListener).toHaveBeenCalledWith(jasmine.anything(), child, jasmine.anything())
 
       it "does not reload an hungry element if it has a weak selector", asyncSpec (next) ->
         $fixture('div[up-hungry]').text('old hungry')

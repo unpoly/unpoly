@@ -5738,17 +5738,17 @@ describe 'up.fragment', ->
             next =>
               expect($('.keeper')).toHaveText('old-inside')
 
-          it "only emits an event up:fragment:kept, but not an event up:fragment:inserted", asyncSpec (next) ->
+          it "only emits an event up:fragment:keep, but not an event up:fragment:inserted", asyncSpec (next) ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
-            keptListener = jasmine.createSpy('subscriber to up:fragment:kept')
-            up.on('up:fragment:kept', keptListener)
+            keepListener = jasmine.createSpy('subscriber to up:fragment:keep')
+            up.on('up:fragment:keep', keepListener)
             up.on('up:fragment:inserted', insertedListener)
             $keeper = $fixture('.keeper[up-keep]').text('old-inside')
             up.render '.keeper', document: "<div class='keeper new' up-keep>new-inside</div>"
 
             next =>
               expect(insertedListener).not.toHaveBeenCalled()
-              expect(keptListener).toHaveBeenCalledWith(
+              expect(keepListener).toHaveBeenCalledWith(
                 jasmine.objectContaining(newFragment: jasmine.objectContaining(className: 'keeper new')),
                 $keeper[0],
                 jasmine.anything()
@@ -5948,7 +5948,7 @@ describe 'up.fragment', ->
             expect($keeper).toHaveText('new-text')
             expect(destructor).toHaveBeenCalled()
 
-        it 'lets listeners inspect a new element before discarding through properties on an up:fragment:keep event', asyncSpec (next) ->
+        it 'emits an up:fragment:keep event that lets listeners inspect the new element and its data', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           listener = jasmine.createSpy('event listener')
           $keeper[0].addEventListener('up:fragment:keep', listener)
@@ -5961,6 +5961,21 @@ describe 'up.fragment', ->
                 target: $keeper[0]
               )
             )
+
+        it 'emits an up:fragment:keep with { newData: {} } if the new element had no up-data value', asyncSpec (next) ->
+          keepListener = jasmine.createSpy()
+          up.on('up:fragment:keep', keepListener)
+          $container = $fixture('.container')
+          $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+          up.render '.keeper', document: """
+            <div class='container'>
+              <div class='keeper' up-keep>new-inside</div>
+            </div>
+          """
+
+          next =>
+            expect($('.keeper')).toHaveText('old-inside')
+            expect(keepListener).toEqual(jasmine.anything(), $('.keeper'), {})
 
         it 'allows to define a listener in an [up-on-keep] attribute', asyncSpec (next) ->
           keeper = fixture('.keeper[up-keep][up-on-keep="this.onKeepSpy(this, newFragment, newData)"]', text: 'old-inside')
@@ -5991,11 +6006,11 @@ describe 'up.fragment', ->
           next => up.render fragment: "<div class='keeper' up-keep>version 3</div>"
           next => expect($('.keeper')).toHaveText('version 3')
 
-        it 'emits an up:fragment:kept event on a kept element and up:fragment:inserted on the targeted parent parent', asyncSpec (next) ->
+        it 'emits an up:fragment:keep event on a keepable element and up:fragment:inserted on the targeted parent', asyncSpec (next) ->
           insertedListener = jasmine.createSpy()
           up.on('up:fragment:inserted', insertedListener)
-          keptListener = jasmine.createSpy()
-          up.on('up:fragment:kept', keptListener)
+          keepListener = jasmine.createSpy()
+          up.on('up:fragment:keep', keepListener)
 
           $container = $fixture('.container')
           $container.html """
@@ -6010,42 +6025,11 @@ describe 'up.fragment', ->
 
           next =>
             expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container')[0], jasmine.anything())
-            expect(keptListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
+            expect(keepListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
 
-        it 'emits an up:fragment:kept event on a kept element with a newData property corresponding to the up-data attribute value of the discarded element', asyncSpec (next) ->
-          keptListener = jasmine.createSpy()
-          up.on 'up:fragment:kept', (event) -> keptListener(event.target, event.newData)
-          $container = $fixture('.container')
-          $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
-
-          up.render fragment: """
-            <div class='container'>
-              <div class='keeper' up-keep up-data='{ "foo": "bar" }'>new-inside</div>
-            </div>
-          """
-
-          next =>
-            expect($('.keeper')).toHaveText('old-inside')
-            expect(keptListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ 'foo': 'bar' }))
-
-        it 'emits an up:fragment:kept with { newData: {} } if the discarded element had no up-data value', asyncSpec (next) ->
-          keptListener = jasmine.createSpy()
-          up.on('up:fragment:kept', keptListener)
-          $container = $fixture('.container')
-          $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
-          up.render '.keeper', document: """
-            <div class='container'>
-              <div class='keeper' up-keep>new-inside</div>
-            </div>
-          """
-
-          next =>
-            expect($('.keeper')).toHaveText('old-inside')
-            expect(keptListener).toEqual(jasmine.anything(), $('.keeper'), {})
-
-        it 'reuses the same element and emits up:fragment:kept during multiple extractions', asyncSpec (next) ->
-          keptListener = jasmine.createSpy()
-          up.on 'up:fragment:kept', (event) -> keptListener(event.target, event.newData)
+        it 'reuses the same element and emits up:fragment:keep during multiple extractions', asyncSpec (next) ->
+          keepListener = jasmine.createSpy()
+          up.on 'up:fragment:keep', (event) -> keepListener(event.target, event.newData)
           $container = $fixture('.container')
           $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
@@ -6065,8 +6049,8 @@ describe 'up.fragment', ->
           next =>
             $keeper = $('.keeper')
             expect($keeper).toHaveText('old-inside')
-            expect(keptListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value1' }))
-            expect(keptListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value2' }))
+            expect(keepListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value1' }))
+            expect(keepListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value2' }))
 
         it "doesn't let the discarded element appear in a transition", (done) ->
           up.motion.config.enabled = true

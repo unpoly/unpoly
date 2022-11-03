@@ -162,7 +162,7 @@ up.compiler('.element', function(element, data) {
 ```
 
 To keep an entire element, you may also use `[up-keep]`.
-The `up:fragment:keep` and `up:fragment:kept` events let you inspect the old and new element
+The `up:fragment:keep` event lets you inspect the old and new element
 with its old and new data. You may then decide whether to keep the existing element or to
 swap it with the new version.
 

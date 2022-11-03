@@ -175,3 +175,5 @@ up.migrate.postprocessReloadOptions = function(options) {
 
   options.headers[up.protocol.headerize('reloadFromTime')] = legacyHeader
 }
+
+up.migrate.removedEvent('up:fragment:kept')
