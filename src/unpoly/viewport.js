@@ -156,14 +156,7 @@ up.viewport = (function() {
 
     Defaults to `up.viewport.config.revealSnap`.
 
-  @return {Promise}
-    A promise that fulfills when the element is revealed.
-
-    When the scrolling is animated with `{ behavior: 'smooth' }`, the promise
-    fulfills when the animation is finished.
-
-    When the scrolling is not animated, the promise will fulfill
-    in the next [microtask](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
+  @return {undefined}
 
   @stable
   */
@@ -183,7 +176,7 @@ up.viewport = (function() {
     const motion = new up.RevealMotion(element, options)
     motion.start()
 
-    return up.migrate.formerlyAsync?.('up.reveal()')
+    return up.migrate.formerlyAsync?.('up.reveal()') || true
   }
 
   /*-
@@ -252,7 +245,9 @@ up.viewport = (function() {
 
   ### Example
 
-      up.revealHash('#chapter2')
+  ```js
+  up.revealHash('#chapter2')
+  ```
 
   @function up.viewport.revealHash
   @param {string} hash

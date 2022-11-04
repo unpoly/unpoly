@@ -474,14 +474,27 @@ describe 'up.viewport', ->
         up.viewport.revealHash('#hash')
         next => expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
 
-      it 'does not change the scroll position if no element or anchor matches the given #hash', asyncSpec (next) ->
-        fixture('.high', style: { height: '10000px' }) # Ensure we have a vertical scroll bar
-        revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
-        up.viewport.root.scrollTop = 50
-        up.viewport.revealHash('#hash')
-        next =>
-          # Assert that we did not change the scroll position
-          expect(up.viewport.root.scrollTop).toBe(50)
+      it 'returns a truthy value so up.FragmentScrolling knows that scrolling succeeded', ->
+        fixture('#hash')
+        result = up.viewport.revealHash('#hash')
+        expect(result).toBeTruthy()
+
+      describe 'if no element or anchor matches the given #hash', ->
+
+        it 'does not change the scroll position', asyncSpec (next) ->
+          fixture('.high', style: { height: '10000px' }) # Ensure we have a vertical scroll bar
+          revealSpy = spyOn(up, 'reveal')
+          up.viewport.root.scrollTop = 50
+          up.viewport.revealHash('#hash')
+          next ->
+            expect(revealSpy).not.toHaveBeenCalled()
+            # Assert that we did not change the scroll position
+            expect(up.viewport.root.scrollTop).toBe(50)
+
+        it 'returns a falsy value so up.FragmentScrolling knows it needs to try the next option', ->
+          fixture('.high', style: { height: '10000px' }) # Ensure we have a vertical scroll bar
+          result = up.viewport.revealHash('#hash')
+          expect(result).toBeFalsy()
 
     describe 'up.viewport.subtree()', ->
 
