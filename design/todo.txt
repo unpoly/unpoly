@@ -28,6 +28,11 @@ TODOs after V3
   - Is there any case other than [up-target], where we already have [up-fallback] ?
 - Should animations force painting?
   - I don't understand how the transitions work when we set both the first and final frame in the same JavaScript task
+- Should we send optional targets in X-Up-Target ?
+  - As :maybe?
+    - This would mean we need to parse [up-hungry] elements before the request
+  - As a separate header?
+  => I think it's :maybe and then update unpoly-rails so target? and any_target? ignore the :maybe
 
 
 TODOs for V3
@@ -41,9 +46,6 @@ Various changes
   - Firefox
   - Edge
   - Safari
-- Should we send optional targets in X-Up-Target ?
-  - As :maybe?
-  - As a separate header?
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
 - Rename up.form.config watch options so they talk about watching
