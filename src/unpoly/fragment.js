@@ -786,15 +786,12 @@ up.fragment = (function() {
     Also see [Handling errors](/render-hooks#handling-errors).
 
   @return {up.RenderJob}
-    A promise that fulfills when the page has been updated.
+    A promise that fulfills with an `up.RenderResult` once the page has been updated.
 
     If the update is animated, the promise will be resolved *before* the existing element was
     removed from the DOM tree. The old element will be marked with the `.up-destroying` class
     and removed once the animation finishes. To run code after the old element was removed,
     pass an `{ onFinished }` callback.
-
-    The promise will fulfill with an `up.RenderResult` that contains
-    references to the updated fragments and layer.
 
   @stable
   */
@@ -827,7 +824,7 @@ up.fragment = (function() {
   @param {Object} [options]
     See options for `up.render()`.
   @return {up.RenderJob}
-    A promise that fulfills when the page has been updated.
+    A promise that fulfills with an `up.RenderResult` once the page has been updated.
 
     For details, see return value for `up.render()`.
   @stable
@@ -1569,7 +1566,8 @@ up.fragment = (function() {
   ### Example
 
   ```js
-  up.on('new-mail', function() { up.reload('.inbox') })
+  let { fragment } = await up.reload('.inbox')
+  console.log("New .inbox element: ", fragment)
   ```
 
   ### Controlling the URL that is reloaded
@@ -1584,29 +1582,40 @@ up.fragment = (function() {
 
   Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
-  By supporting [conditional HTTP requests](/skipping-rendering) you can quickly produce an empty response for unchanged content.
+  By supporting [conditional HTTP requests](/skipping-rendering#conditional-requests) you can quickly produce an empty response for unchanged content.
 
   @function up.reload
+
   @param {string|Element|Array<Element>|jQuery} [target]
     The element that should be reloaded.
 
     If omitted, an element matching a selector in `up.fragment.config.mainTargets` will be reloaded.
 
     When an `Element` object is passed, a target selector will be [derived](/target-derivation).
+
   @param {Object} [options]
     See options for `up.render()`.
+
   @param {string} [options.url]
     The URL from which to reload the fragment.
     This defaults to the URL from which the fragment was originally loaded.
+
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
+
   @param {boolean} [options.keepData]
     [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
 
     Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
+
   @param {string} [options.navigate=false]
     Whether the reloading constitutes a [user navigation](/navigation).
+
+  @return {up.RenderJob}
+    A promise that fulfills with an `up.RenderResult` once the fragment
+    has been reloaded and rendered.
+
   @stable
   */
   function reload(...args) {
@@ -1649,11 +1658,17 @@ up.fragment = (function() {
   ```
 
   @function up.visit
+
   @param {string} url
     The URL to visit.
+
   @param {Object} [options]
     See options for `up.render()`.
-  @param {up.Layer|string|number} [options.layer='current']
+
+  @return {up.RenderJob}
+    A promise that fulfills with an `up.RenderResult`
+    once the destination was loaded and rendered.
+
   @stable
   */
   function visit(url, options) {

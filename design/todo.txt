@@ -57,18 +57,19 @@ Various changes
 Docs
 ----
 
+### Ideas for new topic pages
+
+- Polling
+
+
+
 ### General
 
 
 ### New cache / revalidation
 
 - Protocol headers
-  - Own doc page for ETag / If-None-Match
-  - Own doc page Last-Modified / If-Modified-Since
-  - Link from places where we talk about `304 Not Modified` or `204 No Content`
   - Link from up.reload()
-- Rework [up-time] now that we have /skipping-updates
-- Rework [up-etag] now that we have /skipping-updates
 
 
 ### Disabling

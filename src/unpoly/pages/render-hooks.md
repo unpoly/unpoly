@@ -3,7 +3,7 @@ Render hooks
 
 You may hook into specific stages of the rendering process in order to change the result or handle error cases.
 
-The techniques below apply to all functions that render, most notably `up.render()`, `up.follow()` and `up.submit()`. For brevity we only use `up.render()` in examples. Most callbacks also have an equivalent HTML attribute for use in [links](/a-up-follow) or [forms](/form-up-submit), e.g. `[up-on-loaded]` for `{ onLoaded }`.
+The techniques below apply to all functions that render, most notably `up.render()`, `up.follow()`, `up.submit()` and `up.reload()`. For brevity we only use `up.render()` in examples. Most callbacks also have an equivalent HTML attribute for use in [links](/a-up-follow) or [forms](/form-up-submit), e.g. `[up-on-loaded]` for `{ onLoaded }`.
 
 
 ## Running code after rendering

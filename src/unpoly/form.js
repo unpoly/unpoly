@@ -240,7 +240,8 @@ up.form = (function() {
     - The `<form>` element
 
   @return {up.RenderJob}
-    A promise that will be fulfilled when the server response was rendered.
+    A promise that fulfills with an `up.RenderResult`
+    once the server response was loaded and rendered.
 
   @stable
   */

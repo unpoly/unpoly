@@ -325,7 +325,7 @@ up.link = (function() {
     or scrolling.
 
   @return {up.RenderJob}
-    A promise that will be fulfilled when the link destination
+    A promise that fulfills with an `up.RenderResult` once the link destination
     has been loaded and rendered.
 
   @stable

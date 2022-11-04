@@ -3,7 +3,7 @@ const u = up.util
 /*-
 A queued render task.
 
-Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return an `up.RenderJob`.
+Rendering functions like `up.render()` or `up.submit()` return an `up.RenderJob`.
 Callers can inspect the job's [options](/up.RenderJob.prototype.options) or [`await` its completion](/render-hooks#running-code-after-rendering).
 
 See [render hooks](/render-hooks) for examples for awaiting rendering completion
@@ -166,10 +166,10 @@ up.RenderJob = class RenderJob {
   /*-
   An `up.RenderJob` is also a promise for its completion.
 
-  A request is *fulfilled* with an `up.RenderResult` when a fragment
+  The promise is *fulfilled* with an `up.RenderResult` when a fragment
   was updated from a successful server response.
 
-  The promise will reject for responses with a [failed HTTP status](/failed-responses),
+  The promise will *reject* for responses with a [failed HTTP status](/failed-responses),
   when the request is [aborted](/aborting-requests) or when there is
   [network issue](/network-issues).
 
@@ -177,10 +177,10 @@ up.RenderJob = class RenderJob {
   and how to handle errors.
 
   @function up.RenderJob#then
-  @param {Function(up.Response)} onFulfilled
-  @param {Function(up.Response|Error)} onRejected
-  @return {Promise<up.Response>}
-    A promise that fulfills when a fragment was updated from a successful server response.
+  @param {Function(up.RenderResult)} onFulfilled
+  @param {Function(up.RenderResult|Error)} onRejected
+  @return {Promise<up.RenderResult>}
+    A promise that fulfills with an `up.RenderResult` once the page has been updated.
   @stable
   */
   static {
