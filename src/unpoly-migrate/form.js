@@ -5,7 +5,7 @@
 up.migrate.renamedProperty(up.form.config, 'fields', 'fieldSelectors')
 up.migrate.renamedProperty(up.form.config, 'submitButtons', 'submitButtonSelectors')
 up.migrate.renamedProperty(up.form.config, 'validateTargets', 'groupSelectors')
-up.migrate.renamedProperty(up.form.config, 'observeDelay', 'inputDelay')
+up.migrate.renamedProperty(up.form.config, 'observeDelay', 'watchInputDelay')
 
 up.migrate.migratedFormGroupSelectors = function() {
   return up.form.config.groupSelectors.map((originalSelector) => {

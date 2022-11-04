@@ -64,7 +64,7 @@ Validating after change
 - Submits form to its `[action]` with an `X-Up-Validate` header
 - Same response, just don't serialize
 - Example controller
-- By default `[up-validate]` validates on `change`. Customize with `[up-watch-event]` or `up.form.config.changeEvents`.
+- By default `[up-validate]` validates on `change`. Customize with `[up-watch-event]` or `up.form.config.watchChangeEvents`.
 
 
 

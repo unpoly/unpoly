@@ -154,10 +154,10 @@ Changes tracked until 2022-07-06.
   - Fix concurrency issues
     - Don't run delayed callbacks when the watched field was removed from the DOM during the delay (e.g. user navigates away)
     - Don't run delayed callbacks when the watched field was aborted from the DOM during the delay (e.g. by submit)
-  - up.form.config.inputEvent
-  - up.form.config.changeEvent
-  - up.form.config.observeDelay => inputDelay
-  - Can configure custom up.form.config.inputEvents/changeEvents
+  - up.form.config.watchInputEvent
+  - up.form.config.watchIhangeEvent
+  - up.form.config.observeDelay => watchInputDelay
+  - Can configure custom up.form.config.watchInputEvents/watchChangeEvents
     - Date input validated on blur
 
 

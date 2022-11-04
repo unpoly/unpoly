@@ -48,12 +48,6 @@ Various changes
   - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
-- Rename up.form.config watch options so they talk about watching
-  - e.g. up.form.config.changeEvents sounds like this might also work for up.on()
-  - up.form.config.changeEvents => watchChangeEvents
-  - up.form.config.inputEvents => watchInputEvents
-  - up.form.config.inputDelay => watchInputDelay
-- Do not log interactions while the log is disabled
 
 
 Docs
@@ -125,9 +119,9 @@ Docs
   - { feedback, disable, delay, event }
   - Explain that you can use it both on containers and individual fields
   - Explain config options
-    - up.form.config.inputEvents
-    - up.form.config.changeEvents
-    - up.form.config.inputDelay
+    - up.form.config.watchInputEvents
+    - up.form.config.watchChangeEvents
+    - up.form.config.watchInputDelay
 - Document all the ways we prevent concurrency
   - In up.watch()
   - In up.validate()
@@ -137,9 +131,9 @@ Docs
 - X-Up-Validate header
   - Document that X-Up-Validate may contain multiple names
   - Document that X-Up-Validate may contain :unknown
-- up.form.config.inputEvents
-- up.form.config.changeEvents
-- up.form.config.inputDelay
+- up.form.config.watchInputEvents
+- up.form.config.watchChangeEvents
+- up.form.config.watchInputDelay
 
 
 ### Other docs

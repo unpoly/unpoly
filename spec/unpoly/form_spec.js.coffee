@@ -122,7 +122,7 @@ describe 'up.form', ->
     describe 'up.watch()', ->
 
       beforeEach ->
-        up.form.config.inputDelay = 0
+        up.form.config.watchInputDelay = 0
 
       # Actually we only need `input`, but we want to notice
       # if another script manually triggers `change` on the element.
@@ -512,20 +512,20 @@ describe 'up.form', ->
 
         expect(options.event).toBe('my:event')
 
-      it 'expands [up-watch-event="change"] into up.form.config.changeEvents', ->
+      it 'expands [up-watch-event="change"] into up.form.config.watchChangeEvents', ->
         form = fixture('form')
         field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="change"]')
-        up.form.config.changeEvents = ['change', 'blur']
+        up.form.config.watchChangeEvents = ['change', 'blur']
 
         options = {}
         up.form.watchOptions(field, options)
 
         expect(options.event).toEqual ['change', 'blur']
 
-      it 'expands [up-watch-event="input"] into up.form.config.inputEvents', ->
+      it 'expands [up-watch-event="input"] into up.form.config.watchInputEvents', ->
         form = fixture('form')
         field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="input"]')
-        up.form.config.inputEvents = ['custom:event']
+        up.form.config.watchInputEvents = ['custom:event']
 
         options = {}
         up.form.watchOptions(field, options)
@@ -1973,7 +1973,7 @@ describe 'up.form', ->
     describe 'input[up-autosubmit]', ->
 
       beforeEach ->
-        up.form.config.inputDelay = 0
+        up.form.config.watchInputDelay = 0
 
       it 'submits the form when a change is observed in the given form field', asyncSpec (next) ->
         $form = $fixture('form')
@@ -2004,7 +2004,7 @@ describe 'up.form', ->
     describe 'form[up-autosubmit]', ->
 
       beforeEach ->
-        up.form.config.inputDelay = 0
+        up.form.config.watchInputDelay = 0
 
       it 'submits the form when a change is observed in any of its fields', asyncSpec (next) ->
         $form = $fixture('form[up-autosubmit]')

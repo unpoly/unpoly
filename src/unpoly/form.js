@@ -27,13 +27,13 @@ up.form = (function() {
 
   @property up.form.config
 
-  @param {number} [config.inputDelay=0]
+  @param {number} [config.watchInputDelay=0]
     TODO: Docs
 
-  @param {string} [config.inputEvents]
+  @param {string} [config.watchInputEvents]
     TODO: Docs
 
-  @param {string} [config.changeEvents]
+  @param {string} [config.watchChangeEvents]
     TODO: Docs
 
   @param {Array<string>} [config.submitSelectors]
@@ -74,11 +74,11 @@ up.form = (function() {
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
     // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
-    inputEvents: ['input', 'change'],
-    inputDelay: 0,
+    watchInputEvents: ['input', 'change'],
+    watchInputDelay: 0,
     // Date inputs trigger `change` when editing a single date component
     // https://github.com/unpoly/unpoly/issues/336
-    changeEvents: (field) => field.matches('input[type=date]') ? ['blur'] : ['change'],
+    watchChangeEvents: (field) => field.matches('input[type=date]') ? ['blur'] : ['change'],
   }))
 
   function fullSubmitSelector() {
@@ -352,7 +352,7 @@ up.form = (function() {
     //
     // Users can configure app-wide defaults:
     //
-    // 		up.form.config.inputDelay = 100
+    // 		up.form.config.watchInputDelay = 100
     //
     // Summing up, we get an option like { disable } through the following priorities:
     //
@@ -366,12 +366,12 @@ up.form = (function() {
 
     let config = up.form.config
     if (options.event === 'input') {
-      // Expand the event name via the map in `up.form.config.inputEvents`.
+      // Expand the event name via the map in `up.form.config.watchInputEvents`.
       // This way we can fix components
-      options.event = u.evalOption(config.inputEvents, field)
-      options.delay ??= config.inputDelay
+      options.event = u.evalOption(config.watchInputEvents, field)
+      options.delay ??= config.watchInputDelay
     } else if (options.event === 'change') {
-      options.event = u.evalOption(config.changeEvents, field)
+      options.event = u.evalOption(config.watchChangeEvents, field)
     }
 
     options.origin ||= field
@@ -627,10 +627,10 @@ up.form = (function() {
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
     You may pass multiple event types as a space-separated string or as an array.
-  @param {number} [options.delay=up.form.config.inputDelay]
+  @param {number} [options.delay]
     The number of miliseconds to wait between an observed event and running the callback.
 
-    When observing the `input` event the default is  `up.form.config.inputDelay`.
+    When observing the `input` event the default is  `up.form.config.watchInputDelay`.
     For other events there is no default delay.
 
     The callback will not run if the watched field is [destroyed](/up.destroy) or
@@ -883,7 +883,7 @@ up.form = (function() {
     The number of miliseconds to wait between an observed event and validating.
 
     For most events there is no default delay.
-    Only when observing the `input` event the default is `up.form.config.inputDelay`.
+    Only when observing the `input` event the default is `up.form.config.watchInputDelay`.
   @param {string|Element|jQuery} [options.origin]
     TODO
   @param {string|Element|jQuery} [options.disable]
@@ -1415,7 +1415,7 @@ up.form = (function() {
     The number of miliseconds to wait between an observed event and validating.
 
     For most events there is no default delay.
-    Only when observing the `input` event the default is `up.form.config.inputDelay`.
+    Only when observing the `input` event the default is `up.form.config.watchInputDelay`.
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while validation is running.
 
@@ -1683,7 +1683,7 @@ up.form = (function() {
   @param [up-watch-delay]
     The number of miliseconds to wait between an observed event and running the callback.
 
-    When observing the `input` event the default is  `up.form.config.inputDelay`.
+    When observing the `input` event the default is  `up.form.config.watchInputDelay`.
     For other events there is no default delay.
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-fields) while an async callback is running.
