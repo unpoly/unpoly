@@ -84,9 +84,11 @@ up.log = (function() {
   }
 
   function printUserEvent(event) {
-    event = event.originalEvent || event
-    let color = '#5566cc'
-    printToStreamStyled('log', event.type, `color: white; border-color: ${color}; background-color: ${color}`, 'Interaction on %o', event.target)
+    if (config.enabled) {
+      event = event.originalEvent || event
+      let color = '#5566cc'
+      printToStreamStyled('log', event.type, `color: white; border-color: ${color}; background-color: ${color}`, 'Interaction on %o', event.target)
+    }
   }
 
   function printBanner() {
