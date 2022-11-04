@@ -239,14 +239,21 @@ up.fragment = (function() {
   }
 
   /*-
-  Returns a `Date` for the last modification time of the content in the given element.
+  Returns the last modification time of the content in the given element.
 
   The last modification time corresponds to the `Last-Modified` header in the response that
   rendered the fragment. Alternatively the `[up-time]` attribute of the element or an ancestor is used.
 
+  When the fragment is reloaded,
+  its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
+  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+
   @function up.fragment.time
   @param {Element} element
   @return {Date|undefined}
+    The fragment's last modification time.
+
+    Return `undefined` if the fragment was rendered without a modification time.
   @experimental
   */
   function timeOf(element) {
@@ -262,15 +269,53 @@ up.fragment = (function() {
   }
 
   /*-
+  Sets the time when the fragment's underlying data was last changed.
+
+  When the fragment is reloaded,
+  its known modification time is sent as an `If-Modified-Since` request header.
+  The server may check the header and decide to [skip rendering](/skipping-rendering).
+  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+
+  ### How `[up-etag]` attributes are set
+
+  Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
+  from a response with a `Last-Modified` header. When a fragment was rendered without such a header,
+  Unpoly will set `[up-time=false]` to indicate that its modification time is unknown.
+
+  A large response may contain multiple fragments that are later reloaded individually
+  and should each have their own modification time. In this case the server may also also render multiple
+  fragments with each their own `[up-time]` attribute.
+  See [Individual versions per fragment](/skipping-rendering#fragment-versions) for an example.
+
+  @selector [up-time]
+  @param {string} up-time
+    The time when the element's underlying data was last changed.
+
+    The value can either be a Unix timestamp (e.g. `"1445412480"`)
+    or an [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
+
+    You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
+    when reloading this fragment.
+  @experimental
+  */
+
+  /*-
   Returns the [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) of the content in the given element.
 
-  The ETag corresponds to the [`ETag`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
-  header in the response that rendered the fragment.
-  Alternatively the `[up-etag]` attribute of the element or an ancestor is used.
+  The ETag corresponds to the [`ETag` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
+  in the response that rendered the fragment. Alternatively the `[up-etag]` attribute of the element
+  or an ancestor is used.
+
+  When the fragment is reloaded,
+  its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
+  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
 
   @function up.fragment.etag
   @param {Element} element
   @return {string|undefined}
+    The fragment's ETag.
+
+    Return `undefined` if the fragment was rendered without an ETag.
   @experimental
   */
   function etagOf(element) {
@@ -281,40 +326,21 @@ up.fragment = (function() {
   }
 
   /*-
-  Sets the time when the fragment's underlying data was last changed.
-
-  This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
-  a fragment.
-
-  Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
-  from a response with a `Last-Modified` header.
-
-  See [Requesting content newer than a known modification time](/skipping-rendering#time-condition)
-  for a full example.
-
-  @selector [up-time]
-  @param {string} up-time
-    The time when the element's underlying data was last changed.
-
-    The value can either be a Unix timestamp (e.g. `"1445412480"`)
-    or an RFC 1123 time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
-
-    You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
-    when reloading this fragment.
-  @experimental
-  */
-
-  /*-
   Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
 
-  This can be used to avoid rendering unchanged HTML when [reloading](/up.reload)
-  a fragment.
+  ETags can be used to skip unnecessary rendering of unchanged content.\
+  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+
+  ### How `[up-etag]` attributes are set
 
   Unpoly will automatically set an `[up-etag]` attribute when a fragment was rendered
-  from a response with a `ETag` header.
+  from a response with a `ETag` header. When a fragment was rendered without such a header,
+  Unpoly will set `[up-etag=false]` to indicate that its ETag is unknown.
 
-  See [ Requesting content changed from a known content hash](/skipping-rendering#etag-condition)
-  for a full example.
+  A large response may contain multiple fragments that are later reloaded individually
+  and should each have their own ETag. In this case the server may also also render multiple
+  fragments with each their own `[up-etag]` attribute.
+  See [Individual versions per fragment](/skipping-rendering#fragment-versions) for an example.
 
   @selector [up-etag]
   @param {string} up-etag

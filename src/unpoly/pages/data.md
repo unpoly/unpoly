@@ -24,7 +24,8 @@ up.compiler('.user', function(element, data) {
 })
 ```
 
-Note how `data.age` is a string in the example above. Data attributes always have string values.
+> [important]
+> Data attributes always have string values. In the example above `data.age` is a string.
 
 Data attributes with multiple, dash-separated words in their name can be accessed with `camelCase` keys:
 
@@ -66,7 +67,9 @@ up.compiler('.google-map', function(element, pins) {
 })
 ```
 
-You may set `[up-data]` to any JSON-serializable value, like an object:
+Note how `[up-data]` allows us to a attach a multitude of value types, like arrays (`pins`), objects (`pin`) and numbers (`ping.lat`).
+
+The topmost expression may be any JSON-serializable value, like an object:
 
 ```html
 <span class='user' up-data='{ "name": "Bob", "age": 18 }'>Bob</span>

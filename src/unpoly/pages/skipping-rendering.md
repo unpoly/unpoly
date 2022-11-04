@@ -133,16 +133,39 @@ Servers can use both `Last-Modified` and `ETag`, but `ETag` always takes precede
 It's easier to mix in additional data into an `ETag`, e.g. the ID of the logged in user or the currently deployed commit hash.
 
 
-### Multiple versions on the same page {#fragment-versions}
+### Individual versions per fragment {#fragment-versions}
 
-TODO: Rewrite
+A large response may contain multiple fragments that are later reloaded individually
+and should each have their own ETag or modification time. In this case the server may render each fragment
+with its own `[up-etag]` or `[up-time]` attribute:
 
-To achieve this, assign `[up-time]` or `[up-etag]` attributes to the fragment you're
-reloading. Unpoly will automatically send these values as `If-Modified-Since` or
-`If-None-Match` headers when reloading.
+```html
+<div class='messages' up-time='Wed, 21 Oct 2015 07:28:00 GMT'>
+  <div class='message' id='message1'>...</div>
+  <div class='message' id='message2'>...</div>
+</div>
 
-If the server has no more recent changes, it may skip the update by responding
-with an HTTP status `304 Not Modified`.
+<div class='recent-posts' up-time='Thu, 3 Nov 2022 15:35:02 GMT'>
+  <div class='post' id='post1'>...</div>
+  <div class='post' id='post2'>...</div>
+</div>
+```
+
+When a fragment is reloaded Unpoly will use the version from the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+`[up-etag]` or `[up-time]` attribute:
+
+```js
+up.reload('.messages')     // If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
+up.reload('.recent-posts') // If-Modified-Since: Thu, 3 Nov 2022 15:35:02 GMT
+up.reload('#post1')        // If-Modified-Since: Thu, 3 Nov 2022 15:35:02 GMT
+```
+
+The server may send additional `ETag` or `Last-Modified` response headers. However this is optional and will only be used for fragments that don't have a close `[up-etag]` or `[up-time]` attribute.
+
+
+### Removing versions for a fragment
+
+To prevent a fragment from inheriting a version from an ancestor, assign it an `[up-etag=false]` or `[up-time=false]` attribute. 
 
 
 ## Partially rendering a response

@@ -262,8 +262,8 @@ Falling back to the main target is the default when [navigating](/navigation). T
 The server may elect to render a different target by seting an `X-Up-Target` response header.
 
 Events like `up:link:follow`, `up:form:submit` and `up:fragment:loaded` also let you change the target
-by setting `event.renderOptions.target`.
-See [Changing options before rendering](/targeting-fragments#changing-options-before-rendering) for an example.
+by setting `event.renderOptions.target` to a new selector.
+See [Changing options before rendering](/render-hooks#changing-options-before-rendering) for an example.
 
 
 @page targeting-fragments

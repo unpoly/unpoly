@@ -209,6 +209,100 @@ up.protocol = (function() {
   @stable
   */
 
+  /*-
+  This response header contains a hash identifying the content in the response body.
+
+  Typically, the ETag value is a hash of the underlying data that was rendered,
+  or a hash of the data's last modification time.
+
+  ETags can be used to prevent unnecessary re-rendering of unchanged content.
+  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+
+  ### Format
+
+  A (weak) ETag typically looks like this:
+
+  ```http
+  ETag: W/"55e4d42a148795d9f25f89d4"
+  ```
+
+  For more information about an ETag's format, see
+  [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [RFC 7232](https://www.rfc-editor.org/rfc/rfc7232#section-2.3).
+
+  ### Alternatives
+
+  Instead of sending this header, the server may also render fragments with `[up-etag]` attributes.
+
+  @header ETag
+  @experimental
+  */
+
+  /*-
+  This request header contains the ETag of a fragment that is being reloaded.
+
+  The server can use the header value to prevent unnecessary re-rendering of unchanged content.
+  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+
+  The header is only set when Unpoly knows theETag of the loading fragment.
+  For this the fragment must have been rendered with an `ETag` response header or `[up-etag]` attribute.
+
+  ### Format
+
+  The `If-None-Match` header uses the same format as the `ETag` header:
+
+  ```http
+  If-None-Match: W/"55e4d42a148795d9f25f89d4"
+  ```
+
+  @header If-None-Match
+  @experimental
+  */
+
+  /*-
+  This response header contains the time when the content in the response body was last modified.
+
+  Last modification times can be used to prevent unnecessary re-rendering of unchanged content.
+  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+
+  ### Format
+
+  The header value is a date/time in [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) format:
+
+  ```http
+  Last-Modified: Wed, 15 Nov 2000 13:11:22 GMT
+  ```
+
+  For a readable description of the time format, see [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified).
+
+  ### Alternatives
+
+  Instead of sending this header, the server may also render fragments with `[up-time]` attributes.
+
+  @header Last-Modified
+  @experimental
+  */
+
+  /*-
+  This request header contains the last modification time of a fragment that is being reloaded.
+
+  The server can use the header value to prevent unnecessary re-rendering of unchanged content.
+  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+
+  The header is only set when Unpoly knows the last modification time of the loading fragment.
+  For this the fragment must have been rendered with an `Last-Modified` response header or `[up-time]` attribute.
+
+  ### Format
+
+  The header value is a date/time in [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) format:
+
+  ```http
+  If-Modified-Since: Wed, 15 Nov 2000 13:11:22 GMT
+  ```
+
+  @header If-Modified-Since
+  @experimental
+  */
+
   function parseModifyCacheValue(value) {
     if (value === 'false') {
       return false

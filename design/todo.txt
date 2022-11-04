@@ -41,18 +41,17 @@ Various changes
   - Firefox
   - Edge
   - Safari
-- Remove up:fragment:kept event
 - Should we send optional targets in X-Up-Target ?
   - As :maybe?
   - As a separate header?
 - Try to have a 'hash' strategy in overlays
-  - Also update focus @page
-- Consider moving [up-etag], [up-time] and related functions to up.protocol
+  - Also update doc page /focus
 - Rename up.form.config watch options so they talk about watching
   - e.g. up.form.config.changeEvents sounds like this might also work for up.on()
   - up.form.config.changeEvents => watchChangeEvents
   - up.form.config.inputEvents => watchInputEvents
   - up.form.config.inputDelay => watchInputDelay
+- Do not log interactions while the log is disabled
 
 
 Docs
@@ -409,3 +408,6 @@ Decisions
   - This would also be true for other options, like a selector in focus/scroll
   - We would sometimes need to guess, e.g. { focus: ':main' } may also be a good default for a fallback
   => I think this is not a real case since we're not going to use { data } together with { fallback }
+- Consider moving [up-etag], [up-time] and related functions to up.protocol
+  => While there's some merit to that, we would need to rename up.fragment.etag() to up.protocol.fragmentETag() etc.
+  => What's with up.fragment.source()?
