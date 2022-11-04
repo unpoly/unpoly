@@ -60,10 +60,24 @@ Docs
 ### Ideas for new topic pages
 
 - Polling
-
+- Preloading
+  - (Currently sitting in a[up-preload])
+  - On Hover
+  - Programmatically
+- Enhancing elements with JavaScript
+  - (Currently sitting in up.compiler)
+- Predefined animations
+- Custom animations
 
 
 ### General
+
+- Finish /reacting-to-form-changes
+- Finish /validation
+- Rename "Scroll option" to "Scrolling"
+- History in overlays
+  - Always know their location, even if it might not be visible
+  - Explain that your should always render full pages
 
 
 ### New cache / revalidation
