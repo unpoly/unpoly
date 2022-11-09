@@ -38,6 +38,10 @@ TODOs after V3
 TODOs for V3
 ============
 
+- Clarify `this` in [up-watch] callback (#442)
+  - I think this should be whatever element has the [up-watch] attribute
+  - This can also be an entire form or a container of inputs
+
 
 Various changes
 ---------------
