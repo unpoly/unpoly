@@ -680,7 +680,7 @@ up.form = (function() {
   function watchCallbackFromElement(element) {
     let rawCallback = element.getAttribute('up-watch')
     if (rawCallback) {
-      return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name')
+      return up.NonceableCallback.fromString(rawCallback).toFunction('value', 'name').bind(element)
     }
   }
 
@@ -1719,7 +1719,7 @@ up.form = (function() {
   | Name     | Type      | Description                           |
   | -------- | --------- | ------------------------------------- |
   | `value`  | `string`  | The current value of the field        |
-  | `this`   | `Element` | The form field                        |
+  | `this`   | `Element` | The form element                      |
   | `$field` | `jQuery`  | The form field as a jQuery collection |
 
   @selector form[up-watch]

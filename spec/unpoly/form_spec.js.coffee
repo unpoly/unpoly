@@ -2041,13 +2041,13 @@ describe 'up.form', ->
       it 'calls the JavaScript code in the attribute value when a change is observed in the field', asyncSpec (next) ->
         $form = $fixture('form')
         window.watchCallbackSpy = jasmine.createSpy('watch callback')
-        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(value, name)"]')
+        $field = $form.affix('input[name="input-name"][value="old-value"][up-watch="window.watchCallbackSpy(this, value, name)"]')
         up.hello($form)
         $field.val('new-value')
         Trigger.change($field)
 
         next =>
-          expect(window.watchCallbackSpy).toHaveBeenCalledWith('new-value', 'input-name')
+          expect(window.watchCallbackSpy).toHaveBeenCalledWith($field.get(0), 'new-value', 'input-name')
 
       it 'runs the callback only once for multiple changes in the same task', asyncSpec (next) ->
         $form = $fixture('form')
@@ -2114,7 +2114,7 @@ describe 'up.form', ->
 
       it 'runs the JavaScript code in the attribute value when a change is observed in any contained field', asyncSpec (next) ->
         window.watchCallbackSpy = jasmine.createSpy('watch callback')
-        form = fixture('form[up-watch="window.watchCallbackSpy(value, name)"]')
+        form = fixture('form[up-watch="window.watchCallbackSpy(this, value, name)"]')
         field1 = e.affix(form, 'input[name="field1"][value="field1-old-value"]')
         field2 = e.affix(form, 'input[name="field2"][value="field2-old-value"]')
         up.hello(form)
@@ -2123,7 +2123,7 @@ describe 'up.form', ->
 
         next =>
           expect(window.watchCallbackSpy.calls.allArgs()).toEqual [
-            ['field1-new-value', 'field1']
+            [form, 'field1-new-value', 'field1']
           ]
 
           field2.value = 'field2-new-value'
@@ -2131,8 +2131,8 @@ describe 'up.form', ->
 
         next =>
           expect(window.watchCallbackSpy.calls.allArgs()).toEqual [
-            ['field1-new-value', 'field1'],
-            ['field2-new-value', 'field2']
+            [form, 'field1-new-value', 'field1'],
+            [form, 'field2-new-value', 'field2']
           ]
 
       describe 'with [up-watch-event] modifier', ->
