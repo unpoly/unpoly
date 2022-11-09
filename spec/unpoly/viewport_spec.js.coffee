@@ -278,6 +278,20 @@ describe 'up.viewport', ->
               (2 * 5)      # obstruction top and bottom paddings
             )
 
+        it 'ignores a bottom-fixed obstruction that is not visible (bugfix)', asyncSpec (next) ->
+          bottomNav = fixture('[up-fixed=bottom]', style: {
+            position: 'fixed'
+            bottom: '0'
+            left: '0'
+            right: '0'
+            height: '100px'
+            display: 'none'
+          })
+
+          up.reveal(@$elements[1])
+
+          expect(document.scrollingElement.scrollTop).toBe(50)
+
         it 'does not crash when called with a CSS selector (bugfix)', ->
           up.reveal('.container', { behavior: 'instant' })
           expect(true).toBe(true)
