@@ -41,6 +41,13 @@ TODOs for V3
 - Clarify `this` in [up-watch] callback (#442)
   - I think this should be whatever element has the [up-watch] attribute
   - This can also be an entire form or a container of inputs
+- New callbacks are not up.NonceableCallbacks
+  - .onLoaded
+  - .onRendered
+  - .onFinished
+  - .onOffline
+  - .onError
+  - Make sure that `this` is still bound to the element (this is currently done by e.callbackAttr)
 
 
 Various changes
@@ -52,6 +59,8 @@ Various changes
   - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
+- Error "Viewport has no visible area" is triggered when an up-fixed=bottom is not visible
+  => Allgemein nur Obstructions abziehen, die sichtbar sind
 
 
 Docs
@@ -66,8 +75,8 @@ Docs
   - Programmatically
 - Enhancing elements with JavaScript
   - (Currently sitting in up.compiler)
-- Predefined animations
-- Custom animations
+- Options
+- HTML vs Programmatic
 
 
 ### General
@@ -75,9 +84,11 @@ Docs
 - Finish /reacting-to-form-changes
 - Finish /validation
 - Rename "Scroll option" to "Scrolling"
-- History in overlays
-  - Always know their location, even if it might not be visible
-  - Explain that your should always render full pages
+- When history is updated
+  - History in overlays
+    - Always know their location, even if it might not be visible
+    - Explain that your should always render full pages
+  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
 
 
 ### New cache / revalidation
