@@ -1,0 +1,43 @@
+# These Apache directives are included in the .htaccess for unpoly.com (repo unpoly-site)
+
+RedirectPermanent /up-dash /a-up-dash
+RedirectPermanent /up-instant /a-up-instant
+RedirectPermanent /up-preload /a-up-preload
+RedirectPermanent /up-active /a.up-active
+RedirectPermanent /up-current /a.up-current
+RedirectPermanent /up-nav-a.up-current /a.up-current
+RedirectPermanent /up-autosubmit /form-up-autosubmit
+RedirectPermanent /up-observe /form-up-observe
+RedirectPermanent /up-validate /input-up-validate
+RedirectPermanent /up-back /a-up-back
+RedirectPermanent /up-switch /input-up-switch
+RedirectPermanent /select-up-switch /input-up-switch
+RedirectPermanent /up.proxy /up.network
+RedirectPermanent /up.layout /up.viewport
+RedirectPermanent /up.layout.config /up.viewport.config
+RedirectPermanent /up.dom /up.fragment
+RedirectPermanent /up.dom.config /up.fragment.config
+RedirectPermanent /up.syntax.data /up.data
+RedirectPermanent /up.bus /up.event
+RedirectPermanent /up.bus.onEscape /up.event.onEscape
+RedirectPermanent /up.params /up.Params
+
+RedirectPermanent /up.layer.context /up.context
+
+RedirectPermanent /up.cache /caching
+RedirectPermanent /a-up-target /a-up-follow
+RedirectPermanent /form-up-target /form-up-follow
+RedirectPermanent /form-up-observe /form-up-watch
+RedirectPermanent /input-up-observe /input-up-watch
+RedirectPermanent /up.observe /up.watch
+
+RedirectPermanent /server-errors /failed-responses
+RedirectPermanent /offline /disconnects
+RedirectPermanent /handling-disconnects /disconnects
+RedirectPermanent /cache /caching
+RedirectPermanent /targeting-elements /targeting-fragments
+
+RedirectPermanent /focus-option /focus
+RedirectPermanent /scroll-option /scrolling
+RedirectPermanent /validating /validation
+RedirectPermanent /validations /validation
