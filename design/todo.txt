@@ -35,12 +35,10 @@ TODOs after V3
   => I think it's :maybe and then update unpoly-rails so target? and any_target? ignore the :maybe
 
 
+
 TODOs for V3
 ============
 
-- Clarify `this` in [up-watch] callback (#442)
-  - I think this should be whatever element has the [up-watch] attribute
-  - This can also be an entire form or a container of inputs
 - New callbacks are not up.NonceableCallbacks
   - .onLoaded
   - .onRendered
@@ -48,7 +46,6 @@ TODOs for V3
   - .onOffline
   - .onError
   - Make sure that `this` is still bound to the element (this is currently done by e.callbackAttr)
-
 
 Various changes
 ---------------
@@ -92,6 +89,12 @@ Docs
     - Always know their location, even if it might not be visible
     - Explain that your should always render full pages
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
+- History restoration / Back button
+  - Will collapse layers
+    - Pages should work in both
+    - Subnavigations make it easy
+    - You can disable layer history
+  - Customize restoration behavior
 
 
 ### New cache / revalidation
@@ -195,6 +198,9 @@ V3 final Launch
 ---------------
 
 - Track CHANGELOG with changes done since the V3 presentation
+  - Exclude changes we shipped as maintenance release 2.7.x
+- Fix deploy targets for 2.x-stable@unpoly-site
+  - This should only have a v2 target, and it should deploy to v2.unpoly.com
 - We don't need anything from Ops
   - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
 - Make an 2.x-stable branch for unpoly-site
