@@ -8,7 +8,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-2.7.0
+2.7.1
 -----
 
 This is a maintenance release to bridge the time until [Unpoly 3](https://github.com/unpoly/unpoly/discussions/407) is fully documented. This release includes the following changes:
