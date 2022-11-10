@@ -29,6 +29,28 @@ module Unpoly
         'Version ' + version
       end
 
+      def confirm(message)
+        print "#{message} [y/N] "
+        reply = STDIN.gets.strip.downcase
+        unless reply == 'y'
+          puts "Aborted."
+          exit
+        end
+      end
+
+      FILE_GLOBS = %w[
+        package.json
+        unpoly*.js
+        unpoly*.css
+        README.md
+        CHANGELOG.md
+        LICENSE
+      ]
+
+      def paths
+        FILE_GLOBS.flat_map { |glob| Dir.glob("dist/#{glob}") }
+      end
+
     end
   end
 end
@@ -54,12 +76,7 @@ namespace :release do
     puts
     puts "Continuing will make a fresh build and publish a new version to npm."
     puts
-    puts "Continue now? [y/N] "
-    reply = STDIN.gets.strip.downcase
-    unless reply == 'y'
-      puts "Aborted."
-      exit
-    end
+    Unpoly::Release.confirm("Continue now?")
   end
 
   desc 'Remind user to update unpoly.com'
@@ -91,8 +108,10 @@ namespace :release do
     end
 
     staging_dir = 'tmp/npm-staging'
+    FileUtils.rm_rf(staging_dir, secure: true)
     FileUtils.mkpath(staging_dir)
-    puts "Building NPM package in #{staging_dir}"
+
+    puts "Building NPM package in #{staging_dir} ..."
     # All contents of our package are either copied or symlinked in dist/.
     # This enables us to both to:
     #
@@ -100,7 +119,12 @@ namespace :release do
     # (2) reference the dist folder as a local npm package during development.
 
     # Copy files in dist folder while following symbolic links
-    Unpoly::Release.run("cp --recursive --dereference --force dist/* #{staging_dir}")
+    Unpoly::Release.run("cp --recursive --dereference --force #{Unpoly::Release.paths.join(' ')} #{staging_dir}")
+    puts
+    Unpoly::Release.run("tree #{staging_dir}")
+    puts
+    Unpoly::Release.confirm("Do the package contents look good?")
+
     Dir.chdir(staging_dir) do
       Unpoly::Release.run("npm publish --tag #{npm_tag}")
     end
