@@ -297,7 +297,7 @@ describe 'up.viewport', ->
           up.reveal(@$elements[1])
 
           next ->
-            expect(document.scrollingElement.scrollTop).toBe(50)
+            expect(up.viewport.root.scrollTop).toBe(50)
 
         it 'scrolls the viewport to the first row if the element if the element is higher than the viewport', asyncSpec (next) ->
           @$elements[0].css(height: '1000px')
