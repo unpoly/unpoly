@@ -76,6 +76,9 @@ Docs
 - Enhancing elements with JavaScript
   - (Currently sitting in up.compiler)
 - Options
+  - Everything is opt-in
+  - Navigation enables a set of new defaults
+  - JavaScript options override HTML attributes
 - HTML vs Programmatic
 
 
