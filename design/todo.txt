@@ -33,19 +33,12 @@ TODOs after V3
     - This would mean we need to parse [up-hungry] elements before the request
   - As a separate header?
   => I think it's :maybe and then update unpoly-rails so target? and any_target? ignore the :maybe
-
+- Reconciliation of <head> elements
 
 
 TODOs for V3
 ============
 
-- New callbacks are not up.NonceableCallbacks
-  - .onLoaded
-  - .onRendered
-  - .onFinished
-  - .onOffline
-  - .onError
-  - Make sure that `this` is still bound to the element (this is currently done by e.callbackAttr)
 
 Various changes
 ---------------
@@ -56,8 +49,34 @@ Various changes
   - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
-- Error "Viewport has no visible area" is triggered when an up-fixed=bottom is not visible
-  => Allgemein nur Obstructions abziehen, die sichtbar sind
+- New callbacks are not up.NonceableCallbacks
+  - .onLoaded  (is
+  - .onRendered
+  - .onFinished (is)
+  - .onOffline
+  - .onError
+  - Make sure that `this` is still bound to the element (this is currently done by e.callbackAttr)
+- up.animation() example returns no promise
+- Target derivation for link[rel] with a [type]
+  - <link rel="alternate" type="application/atom+xml">
+  - <link rel="icon" type="image/x-icon">
+- Target derivation should ignore :not()
+  - e.g. link[rel]:not([rel=stylesheet])
+- Do we need [up-hungry][up-if-history] instead of [up-if-target]?
+- Consider changing the default up.fragment.config.runScripts to `true`
+- Consider allowing dynamic recompile for async compilers without priorities
+  - Collect multiple in a microtask
+- Maybe we can simpliy e.contains() to just `document.contains(document.body)`
+- Reconsider why we don't call onRender() for empty updates
+  - We do still update scroll and focus, even for empty responses
+  - We will update more in the future with head merging
+  - There is no other hook for "after $things changed"
+- Expose up.fragment.config.renderOptions
+- Add link[rel] derivers that can exist multiple times
+  'link[rel=preconnect][href]',
+  'link[rel=preload][href]',
+  'link[rel=prefetch][href]',
+
 
 
 Docs
@@ -76,7 +95,21 @@ Docs
   - Everything is opt-in
   - Navigation enables a set of new defaults
   - JavaScript options override HTML attributes
+  - config option
+  - auto-options
 - HTML vs Programmatic
+  - JavaScript options override HTML attributes
+- When history is updated
+  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
+  - History in overlays
+    - Always know their location, even if it might not be visible
+    - Explain that your should always render full pages
+- History restoration / Back button
+  - Will collapse layers
+    - Pages should work in both
+    - Subnavigations make it easy
+    - You can disable layer history
+  - Customize restoration behavior
 
 
 ### General
@@ -84,17 +117,6 @@ Docs
 - Finish /reacting-to-form-changes
 - Finish /validation
 - Rename "Scroll option" to "Scrolling"
-- When history is updated
-  - History in overlays
-    - Always know their location, even if it might not be visible
-    - Explain that your should always render full pages
-  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
-- History restoration / Back button
-  - Will collapse layers
-    - Pages should work in both
-    - Subnavigations make it easy
-    - You can disable layer history
-  - Customize restoration behavior
 
 
 ### New cache / revalidation
@@ -122,7 +144,7 @@ Docs
   - input[up-validate]/form[up-validate]
     - Explain [up-validate] usage for radio buttons
   - input[up-autosubmit]/form[up-autosubmit]
-  - Fix Links
+  - Fix links
   - Update .htaccess
 - Rework [up-validate] so it talks more generically about dynamic forms rendered on the server
   - Repaints a fragment within a form, to retrieve validation errors or update dependent fields.
@@ -446,3 +468,5 @@ Decisions
 - Consider moving [up-etag], [up-time] and related functions to up.protocol
   => While there's some merit to that, we would need to rename up.fragment.etag() to up.protocol.fragmentETag() etc.
   => What's with up.fragment.source()?
+- [up-hungry][up-placement]
+  => This only makes sence when we have some form of deduping
