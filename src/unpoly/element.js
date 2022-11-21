@@ -993,12 +993,16 @@ up.element = (function() {
   function callbackAttr(link, attr, { exposedKeys = [], mainKey = 'event' } = {}) {
     let code = link.getAttribute(attr)
     if (code) {
-      // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
+      // Users can prefix a CSP nonce like this: <a href="/path" up-on-loaded="nonce-kO52Iphm8B alert()">
+      // In up.ResponseDoc#finalizeElement() we have rewritten the attribute nonce to the current page's nonce
+      // IFF the attribute nonce matches the fragment response's nonce.
       const callback = up.NonceableCallback.fromString(code).toFunction(mainKey, ...exposedKeys)
-      // Emulate the behavior of the `onclick` attribute,
-      // where `this` refers to the clicked element.
       return function(event) {
+        // Allow callbacks to refer to an exposed property directly instead of through `event.value`.
         const exposedValues = Object.values(u.pick(event, exposedKeys))
+
+        // Emulate the behavior of the `onclick` attribute,
+        // where `this` refers to the clicked element.
         return callback.call(link, event, ...exposedValues)
       }
     }
