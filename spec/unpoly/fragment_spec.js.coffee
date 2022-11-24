@@ -4020,8 +4020,15 @@ describe 'up.fragment', ->
 
         beforeEach ->
           window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+          @linkedScriptPath = "/spec/files/linked_script.js?cache-buster=#{Math.random().toString()}"
 
-        describe 'inline scripts', ->
+        afterEach ->
+          delete window.scriptTagExecuted
+
+        describe 'with up.fragment.config.runScripts = false', ->
+
+          beforeEach ->
+            up.fragment.config.runScripts = false
 
           it 'does not execute inline script tags', asyncSpec (next) ->
             fixture('.target', text: 'old text')
@@ -4059,57 +4066,6 @@ describe 'up.fragment', ->
               expect(document).not.toHaveSelector('.target script')
               expect('.target').toHaveVisibleText('before after')
 
-          describe 'with up.fragment.config.runScripts = true', ->
-
-            it 'executes inline script tags inside the updated fragment', asyncSpec (next) ->
-              up.fragment.config.runScripts = true
-
-              fixture('.target', text: 'old text')
-
-              up.render fragment: """
-                <div class="target">
-                  new text
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
-                </div>
-                """
-
-              next.after 100, =>
-                expect(window.scriptTagExecuted).toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).toHaveSelector('.target script')
-                expect('.target').toHaveVisibleText(/new text/)
-
-            it 'does not execute inline script tags outside the updated fragment', asyncSpec (next) ->
-              up.fragment.config.runScripts = true
-
-              fixture('.target', text: 'old text')
-
-              up.render target: '.target', document: """
-                <div class="before">
-                  <script type="text/javascript">
-                    window.scriptTagExecuted()
-                  </script>
-                </div>
-                <div class="target">
-                  new text
-                </div>
-                """
-
-              next.after 100, =>
-                expect(window.scriptTagExecuted).not.toHaveBeenCalled()
-                expect(document).toHaveSelector('.target')
-                expect(document).not.toHaveSelector('.target script')
-                expect('.target').toHaveVisibleText('new text')
-
-
-        describe 'linked scripts', ->
-
-          beforeEach ->
-            # Add a cache-buster to each path so the browser cache is guaranteed to be irrelevant
-            @linkedScriptPath = "/spec/files/linked_script.js?cache-buster=#{Math.random().toString()}"
-
           it 'does not execute linked scripts to prevent re-inclusion of javascript inserted before the closing body tag', asyncSpec (next) ->
             fixture('.target')
             up.render fragment: """
@@ -4123,9 +4079,50 @@ describe 'up.fragment', ->
               expect(document).toHaveSelector('.target')
               expect(document).not.toHaveSelector('.target script')
 
-          it 'executes linked scripts with up.fragment.config.runScripts = true', asyncSpec (next) ->
+        describe 'with up.fragment.config.runScripts = true (default)', ->
+
+          beforeEach ->
             up.fragment.config.runScripts = true
 
+          it 'executes inline script tags inside the updated fragment', asyncSpec (next) ->
+            fixture('.target', text: 'old text')
+
+            up.render fragment: """
+              <div class="target">
+                new text
+                <script type="text/javascript">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).toHaveSelector('.target script')
+              expect('.target').toHaveVisibleText(/new text/)
+
+          it 'does not execute inline script tags outside the updated fragment', asyncSpec (next) ->
+            fixture('.target', text: 'old text')
+
+            up.render target: '.target', document: """
+              <div class="before">
+                <script type="text/javascript">
+                  window.scriptTagExecuted()
+                </script>
+              </div>
+              <div class="target">
+                new text
+              </div>
+              """
+
+            next.after 100, =>
+              expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+              expect(document).toHaveSelector('.target')
+              expect(document).not.toHaveSelector('.target script')
+              expect('.target').toHaveVisibleText('new text')
+
+          it 'executes linked scripts', asyncSpec (next) ->
             fixture('.target')
             up.render fragment: """
               <div class="target">

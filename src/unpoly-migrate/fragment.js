@@ -177,3 +177,21 @@ up.migrate.postprocessReloadOptions = function(options) {
 }
 
 up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
+
+let runScripts = up.fragment.config.runScripts
+let runScriptsSet = false
+Object.defineProperty(up.fragment.config, 'runScripts', {
+  get() {
+    return runScripts
+  },
+  set(value) {
+    runScripts = value
+    runScriptsSet = true
+  }
+})
+
+up.on('up:framework:boot', function() {
+  if (!runScriptsSet) {
+    up.migrate.warn('Scripts within fragments are now executed. Configure up.fragment.config.runScripts to remove this warning.')
+  }
+})

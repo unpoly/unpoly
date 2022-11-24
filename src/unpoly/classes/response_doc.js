@@ -11,9 +11,7 @@ up.ResponseDoc = class ResponseDoc {
     // See http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring .
     this.noscriptWrapper = new up.HTMLWrapper('noscript')
 
-    // We strip <script> tags from the HTML.
-    // If you need a fragment update to call JavaScript code, call it from a compiler
-    // or set `up.fragment.config.runScripts = true`.
+    // With !up.fragment.config.runScripts we strip <script> tags from the HTML.
     this.scriptWrapper = new up.HTMLWrapper('script')
 
     this.root =

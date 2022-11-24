@@ -130,12 +130,12 @@ up.fragment = (function() {
     - If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element.
     - If focus was lost with the old fragment, focus the new fragment.
 
-  @param {boolean} [config.runScripts=false]
+  @param {boolean} [config.runScripts=true]
     Whether to execute `<script>` tags in updated fragments.
 
     Scripts will load asynchronously, with no guarantee of execution order.
 
-    If you set this to `true`, mind that the `<body>` element is a default
+    Note that the `<body>` element is a default
     [main target](/main. If you are including your global application scripts
     at the end of your `<body>` for performance reasons, swapping the `<body>` will re-execute
     these scripts. In that case you can [configure a different main target](/up.fragment.config#config.mainTargets)
@@ -190,7 +190,7 @@ up.fragment = (function() {
     },
 
     matchAroundOrigin: true,
-    runScripts: false,
+    runScripts: true,
     autoHistoryTargets: [':main'],
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
