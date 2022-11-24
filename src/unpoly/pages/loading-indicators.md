@@ -8,7 +8,9 @@ Progress bar
 ------------
 
 By default [late responses](/up:network:late) event will cause an animated
-[progress bar](/loading-indicators#progress-bar) to appear at the top edge of the screen.
+progress bar to appear at the top edge of the screen:
+
+![Progress bar animation](images/progress-bar.gif)
 
 The progress bar can be disabled with `up.network.config.progressBar`.
 
