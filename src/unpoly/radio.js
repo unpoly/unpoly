@@ -103,8 +103,9 @@ up.radio = (function() {
   Elements with an `[up-hungry]` attribute are updated whenever the server
   sends a matching element, even if the element isn't [targeted](/targeting-fragments).
 
-  When an `[up-hungry]` element does not match in the server response,
-  the element will not be updated.
+  Hungry elements are optional in the same way as `:maybe` targets.
+  When an `[up-hungry]` element does not match in the server response, the element will not be updated,
+  but no error is thrown.
 
   ### Use cases
 
@@ -114,20 +115,38 @@ up.radio = (function() {
   - Unread message counters
   - Notification flashes
   - Page-specific subnavigation
+  - [Canonical link elements](https://en.wikipedia.org/wiki/Canonical_link_element) in the `<head>`.
 
-  Instead of explicitly including these elements in every target selector
-  (e.g. `<a up-target=".content, .flashes:maybe">`) we can mark it as `[up-hungry]`.
-  Unpoly will then automatically include it in other target selectors.
+  Instead of explicitly including such elements in every [target selector](/targeting-fragments)
+  (e.g. `.content, .flashes:maybe`) we can mark as `[up-hungry]`.
+  They will then be added to target selectors automatically.
 
-  ### Hungry fragments must have a derivable target {#derivable-target-required}
+  ### Derivable target required {#derivable-target-required}
 
   When an `[up-hungry]` fragment piggy-backs on another fragment update, Unpoly
   will [derive a target selector](/target-derivation) for the hungry element.
 
   For this to work the hungry element must have an [identifying attribute](/target-derivation#derivation-patterns),
   like an `[id]` or a unique `[class]` attribute.
-
   When no good target can be derived, the hungry element is excluded from the update.
+
+  ### Behavior with multiple layers
+
+  By default only hungry elements on the targeted layer are updated.
+  To match a hungry element when updating *any* layer, set an [`[up-layer=any]`](#up-if-layer) attribute.
+
+  Hungry fragments are not updated for requests that [open a new overlay](#opening-overlays).
+  Subsequent requests within that new overlay *do* update hungry fragments.
+
+  ### Disabling
+
+  By default hungry fragments are processed for all updates of the current layer.
+  You can control or disable the processing of hungry fragments using one of the following methods:
+
+  - Using an `[up-if-layer]` attribute on the hungry fragment
+  - Using an `[up-if-target]` attribute on the hungry fragment
+  - Rendering with [`{ useHungry }`](/up.render#options.useHungry) option
+  - Setting an [`[up-use-hungry]`](/a-up-follow#up-use-hungry) attribute on the link or form
 
   @selector [up-hungry]
   @param [up-if-layer='current']
