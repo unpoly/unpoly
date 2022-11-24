@@ -74,29 +74,29 @@ up.radio = (function() {
     config.reset()
   }
 
-  function hungrySelector(suffix = '') {
-    let withSuffix = config.hungrySelectors.map((selector) => selector + suffix)
-    return withSuffix.join(',')
-  }
-
   function hungrySolutions({ layer, history, origin }) {
-    let anyLayerSelector = '[up-if-layer=any]'
-    let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
-    let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
-    let hungries = hungriesOnTargetedLayer.concat(hungriesOnAnyLayer)
-    return u.filterMap(hungries, (hungryElement) => {
-      let hungryTarget = up.fragment.tryToTarget(hungryElement, { origin })
-      if (hungryTarget) {
-        let ifHistory = e.booleanAttr(hungryElement, 'up-if-history')
-        if (!ifHistory || history) {
-          return {
-            target: hungryTarget,
-            element: hungryElement
-          }
-        }
-      } else {
-        up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', hungryElement)
+    let hungrySelector = config.hungrySelectors.join(', ')
+    let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
+
+    return u.filterMap(hungries, (element) => {
+      let target = up.fragment.tryToTarget(element, { origin })
+
+      if (!target) {
+        up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+        return
       }
+
+      let ifHistory = e.booleanAttr(element, 'up-if-history')
+      if (ifHistory && !history) {
+        return
+      }
+
+      let ifLayer = e.attr(element, 'up-if-layer')
+      if (ifLayer !== 'any' && layer !== up.layer.get(element)) {
+        return
+      }
+
+      return { target, element }
     })
   }
 
