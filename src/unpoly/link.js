@@ -1148,12 +1148,22 @@ up.link = (function() {
     A JavaScript snippet that is executed when the server responds with new HTML,
     but before the HTML is rendered.
 
-    Within the snippet `event` will reference a preventable `up:fragment:loaded` event.
+    The snippet runs in the following scope:
+
+    | Expression | Value                                         |
+    |------------|-----------------------------------------------|
+    | `this`     | The link being followed                       |
+    | `event`    | A preventable `up:fragment:loaded` event      |
 
   @param [up-on-rendered]
     A JavaScript snippet that is executed when Unpoly has updated fragments.
 
-    Within the snippet `result` will reference an `up.RenderResult`.
+    The snippet runs in the following scope:
+
+    | Expression | Value                                                |
+    |------------|------------------------------------------------------|
+    | `this`     | The link being followed                              |
+    | `result`   | The `up.RenderResult` for the respective render pass |
 
     The snippet will be called zero, one or two times:
 
@@ -1172,9 +1182,12 @@ up.link = (function() {
     - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
       If the server has responded with new content, this content has also been rendered.
 
-    Within the snippet `result` will reference the last `up.RenderResult`
-    that updated a fragment.
-    If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
+    | Expression | Value                                                                  |
+    |------------|------------------------------------------------------------------------|
+    | `this`     | The link being followed                                                |
+    | `result`   | The `up.RenderResult` for the last render pass that updated a fragment |
+
+    If [revalidation](/caching#revalidation) re-rendered the fragment, `result` describes updates from the
     second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
     it is the result from the initial render pass.
 
@@ -1184,12 +1197,18 @@ up.link = (function() {
     A JavaScript snippet that is executed when the fragment could not be loaded
     due to a [disconnect or timeout](/network-issues).
 
-    Within the snippet `error` will reference an `up.Offline` error.
+    | Expression | Value                                         |
+    |------------|-----------------------------------------------|
+    | `this`     | The link being followed                       |
+    | `error`    | An `up.Offline` error                         |
 
-  @param {Function(Error)} [options.onError]
+  @param [up-on-error]
     A JavaScript snippet that is run when any error is thrown during the rendering process.
 
-    Within the snippet `error` will reference an `Error` object.
+    | Expression | Value                                         |
+    |------------|-----------------------------------------------|
+    | `this`     | The link being followed                       |
+    | `error`    | An `Error` object                             |
 
     The callback is also called when the render pass fails due to [network issues](/network-issues),
     or [aborts](/aborting-requests).
