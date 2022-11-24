@@ -106,6 +106,7 @@ up.RenderResult = class RenderResult extends up.Record {
   - Server sent HTTP status `204 No Content`.
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
+    This [closes an overlay](/closing-overlays#closing-from-the-server) before content is rendered.
 
   @property up.RenderResult#none
   @param {boolean} none
