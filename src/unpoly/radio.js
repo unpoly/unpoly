@@ -12,6 +12,7 @@ This package contains functionality to passively receive updates from the server
 up.radio = (function() {
 
   const u = up.util
+  const e = up.element
 
   /*-
   Configures defaults for passive updates.
@@ -78,7 +79,7 @@ up.radio = (function() {
     return withSuffix.join(',')
   }
 
-  function hungrySolutions({ layer, targetElements, origin }) {
+  function hungrySolutions({ layer, history, origin }) {
     let anyLayerSelector = '[up-if-layer=any]'
     let hungriesOnTargetedLayer = up.fragment.all(hungrySelector(`:not(${anyLayerSelector})`), { layer })
     let hungriesOnAnyLayer = up.fragment.all(hungrySelector(anyLayerSelector), { layer: 'any' })
@@ -86,8 +87,8 @@ up.radio = (function() {
     return u.filterMap(hungries, (hungryElement) => {
       let hungryTarget = up.fragment.tryToTarget(hungryElement, { origin })
       if (hungryTarget) {
-        let targetRestriction = hungryElement.getAttribute('up-if-target')
-        if (!targetRestriction || up.util.some(targetElements, (targetElement) => up.fragment.contains(targetElement, targetRestriction))) {
+        let ifHistory = e.booleanAttr(hungryElement, 'up-if-history')
+        if (!ifHistory || history) {
           return {
             target: hungryTarget,
             element: hungryElement

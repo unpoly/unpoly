@@ -235,7 +235,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        up.navigate('.target', url: '/path')
+        up.render('.target', url: '/path')
 
         next =>
           @respondWith """
@@ -258,7 +258,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        promise = up.navigate('.target', url: '/path')
+        promise = up.render('.target', url: '/path')
 
         next =>
           @respondWith """
@@ -300,7 +300,7 @@ describe 'up.radio', ->
         $fixture('.target').text('old target')
         warnSpy = spyOn(up, 'warn')
 
-        up.navigate('.target', url: '/path')
+        up.render('.target', url: '/path')
 
         next =>
           @respondWith """
@@ -359,7 +359,7 @@ describe 'up.radio', ->
         $fixture('.target').text('old target')
         $fixture('.fail-target').text('old fail target')
 
-        up.navigate('.target', url: '/path', failTarget: '.fail-target')
+        up.render('.target', url: '/path', failTarget: '.fail-target')
 
         next =>
           @respondWith
@@ -389,7 +389,7 @@ describe 'up.radio', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
 
-        up.navigate('.target', url: '/path', useHungry: false)
+        up.render('.target', url: '/path', useHungry: false)
 
         next =>
           @respondWith
@@ -426,7 +426,7 @@ describe 'up.radio', ->
           expect(insertedSpy.calls.count()).toBe(1)
           expect(insertedSpy.calls.argsFor(0)[0].target).toBe(document.querySelector('.container'))
 
-      describe 'restriction of layer', ->
+      describe 'restriction by layer', ->
 
         it 'only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', ->
           up.layer.config.openDuration = 0
@@ -494,36 +494,18 @@ describe 'up.radio', ->
           expect($('.inside')).toHaveText('new inside')
           expect($('.outside')).toHaveText('new outside')
 
-      describe 'restriction of target', ->
+      describe 'restriction by history', ->
 
-        it 'lets user restrict which updates to piggy-back onto with [up-if-target]', asyncSpec (next) ->
-          $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-target', '.target')
-          $fixture('.target').text('old target')
-          $fixture('.other').text('old target')
+        it 'only updates a hungry fragment when updating history with [up-if-history]', asyncSpec (next) ->
+          $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-history', '')
+          $fixture('.target').text('target version 1')
 
-          up.navigate('.other', url: '/other')
-
-          next ->
-            jasmine.respondWith """
-              <div class="other">
-                new other
-              </div>
-              <div class="hungry">
-                new hungry
-              </div>
-            """
-
-          next ->
-            expect('.other').toHaveText('new other')
-            expect('.hungry').toHaveText('old hungry')
-            expect('.target').toHaveText('old target')
-
-            up.navigate('.target', url: '/target')
+          up.render('.target', url: '/other')
 
           next ->
             jasmine.respondWith """
               <div class="target">
-                new target
+                target version 2
               </div>
               <div class="hungry">
                 new hungry
@@ -531,40 +513,15 @@ describe 'up.radio', ->
             """
 
           next ->
-            expect('.target').toHaveText('new target')
-            expect('.hungry').toHaveText('new hungry')
-
-        it 'considers an [up-if-target] condition met if the actual target *contains* the [up-if-target] selector', asyncSpec (next) ->
-          $fixture('.hungry[up-hungry]').text('old hungry').attr('up-if-target', '.target')
-          $container = $fixture('.target-container')
-          $fixture('.target').text('old target').appendTo($container)
-          $fixture('.other').text('old target')
-
-          up.navigate('.other', url: '/other')
-
-          next ->
-            jasmine.respondWith """
-              <div class="other">
-                new other
-              </div>
-              <div class="hungry">
-                new hungry
-              </div>
-            """
-
-          next ->
-            expect('.other').toHaveText('new other')
+            expect('.target').toHaveText('target version 2')
             expect('.hungry').toHaveText('old hungry')
-            expect('.target').toHaveText('old target')
 
-            up.navigate('.target-container', url: '/target-container')
+            up.render('.target', url: '/target', history: true)
 
           next ->
             jasmine.respondWith """
-              <div class="target-container">
-                <div class="target">
-                  new target
-                </div>
+              <div class="target">
+                target version 3
               </div>
               <div class="hungry">
                 new hungry
@@ -572,9 +529,8 @@ describe 'up.radio', ->
             """
 
           next ->
-            expect('.target').toHaveText('new target')
+            expect('.target').toHaveText('target version 3')
             expect('.hungry').toHaveText('new hungry')
-
 
     describe '[up-poll]', ->
 

@@ -86,12 +86,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     Object.assign(this.layer.context, this.context)
 
-    if (this.options.history === 'auto') {
-      this.options.history = this.hasAutoHistory()
-    }
-
     // Change history before compilation, so new fragments see the new location.
-    if (this.options.history) {
+    if (this.hasHistory()) {
       this.layer.updateHistory(this.options)
     }
 
@@ -418,7 +414,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Find all [up-hungry] elements matching our layer and targetElements.
     const hungrySolutions = up.radio.hungrySolutions({
       layer: this.layer,
-      targetElements: this.getTargetElements(),
+      history: this.hasHistory(),
       origin: this.options.origin
     })
 
@@ -494,15 +490,22 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return scrolling.process(options.scroll)
   }
 
+  hasHistory() {
+    return u.evalAutoOption(this.options.history, this.hasAutoHistory.bind(this))
+  }
+
   hasAutoHistory() {
+    // We update the history with { history: 'auto' } when at least
+    // one targeted fragment has auto-history.
     const oldFragments = u.map(this.steps, 'oldElement')
-    return u.some(oldFragments, oldFragment => up.fragment.hasAutoHistory(oldFragment))
+    return u.some(oldFragments, up.fragment.hasAutoHistory)
   }
 
   static {
     u.memoizeMethod(this.prototype, [
       'matchPreflight',
       'matchPostflight',
+      'hasHistory',
     ])
   }
 
