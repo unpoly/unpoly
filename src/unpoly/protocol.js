@@ -854,7 +854,10 @@ up.protocol = (function() {
       'up-on-accepted',
       'up-on-dismissed',
       'up-on-loaded',
+      'up-on-rendered',
       'up-on-finished',
+      'up-on-error',
+      'up-on-offlne',
     ],
   }))
 

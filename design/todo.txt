@@ -49,34 +49,28 @@ Various changes
   - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
-- New callbacks are not up.NonceableCallbacks
-  - .onLoaded  (is
-  - .onRendered
-  - .onFinished (is)
-  - .onOffline
-  - .onError
-  - Make sure that `this` is still bound to the element (this is currently done by e.callbackAttr)
 - up.animation() example returns no promise
 - Target derivation for link[rel] with a [type]
   - <link rel="alternate" type="application/atom+xml">
   - <link rel="icon" type="image/x-icon">
-- Target derivation should ignore :not()
-  - e.g. link[rel]:not([rel=stylesheet])
+  => Add link[rel][type]
+- Target derivation for link[rel] with an [href] that can exist multiple times
+  - link[rel=preconnect][href]
+  - link[rel=preload][href]
+  - link[rel=prefetch][href]
 - Do we need [up-hungry][up-if-history] instead of [up-if-target]?
+  => I know no use case for [up-if-target] other than link[rel=canonical]
 - Consider changing the default up.fragment.config.runScripts to `true`
 - Consider allowing dynamic recompile for async compilers without priorities
   - Collect multiple in a microtask
-- Maybe we can simpliy e.contains() to just `document.contains(document.body)`
+- IE11: Maybe we can simpliy e.contains() to just `document.contains(document.body)`
 - Reconsider why we don't call onRender() for empty updates
   - We do still update scroll and focus, even for empty responses
+    - Maybe even location?
   - We will update more in the future with head merging
   - There is no other hook for "after $things changed"
-- Expose up.fragment.config.renderOptions
-- Add link[rel] derivers that can exist multiple times
-  'link[rel=preconnect][href]',
-  'link[rel=preload][href]',
-  'link[rel=prefetch][href]',
-
+    - But nothing changed after an empty render? At least not in the DOM.
+  => If we change this we need to simplify docs for onRender and up-on-render
 
 
 Docs
@@ -97,7 +91,9 @@ Docs
   - JavaScript options override HTML attributes
   - config option
   - auto-options
-- HTML vs Programmatic
+- HTML vs. JavaScript APIs
+  - Most options in up.render() can also be set via an attribute
+    - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
   - JavaScript options override HTML attributes
 - When history is updated
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
@@ -117,6 +113,7 @@ Docs
 - Finish /reacting-to-form-changes
 - Finish /validation
 - Rename "Scroll option" to "Scrolling"
+- Maybe mention history events in /render-hooks
 
 
 ### New cache / revalidation
@@ -225,8 +222,6 @@ V3 final Launch
   - This should only have a v2 target, and it should deploy to v2.unpoly.com
 - We don't need anything from Ops
   - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
-- Make an 2.x-stable branch for unpoly-site
-- Make an 2.x-stable branch for unpoly
 - We need a separate Algolia index for v2
   - v3 would stay on "latest"
   - use that index in unpoly-site/2.x-stable
@@ -239,6 +234,7 @@ V3 final Launch
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
 - Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
+- Schedule Tweets for new doc pages
 
 
 
@@ -470,3 +466,6 @@ Decisions
   => What's with up.fragment.source()?
 - [up-hungry][up-placement]
   => This only makes sence when we have some form of deduping
+- Consider exposing up.fragment.config.renderOptions
+  => Wait until there is a use case
+  => Maybe we also need this to be a function?
