@@ -49,7 +49,6 @@ Various changes
   - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
-- up.animation() example returns no promise
 - Target derivation for link[rel] with a [type]
   - <link rel="alternate" type="application/atom+xml">
   - <link rel="icon" type="image/x-icon">

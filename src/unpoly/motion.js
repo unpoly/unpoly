@@ -512,16 +512,17 @@ up.motion = (function() {
   Here is the definition of the pre-defined `cross-fade` animation:
 
   ```js
-  up.transition('cross-fade', (oldElement, newElement, options) ->
-    Promise.all([
+  up.transition('cross-fade', function(oldElement, newElement, options) {
+    return Promise.all([
       up.animate(oldElement, 'fade-out', options),
       up.animate(newElement, 'fade-in', options)
     ])
-  )
+  })
   ```
 
-  It is recommended that your transitions use [`up.animate()`](/up.animate),
-  passing along the `options` that were passed to you.
+  For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
+  we recomend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
+  passing along your `options` and returning the result.
 
   If you choose to *not* use `up.animate()` and roll your own
   logic instead, your code must honor the following contract:
@@ -555,13 +556,13 @@ up.motion = (function() {
   ```js
   up.animation('fade-in', function(element, options) {
     element.style.opacity = 0
-    up.animate(element, { opacity: 1 }, options)
+    return up.animate(element, { opacity: 1 }, options)
   })
   ```
 
-  It is recommended that your definitions always end by calling
-  calling [`up.animate()`](/up.animate) with an object argument, passing along
-  the `options` that were passed to you.
+  For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
+  we recomend that your definitions end by calling calling [`up.animate()`](/up.animate) with an object argument,
+  passing along your `options` and returning the result.
 
   If you choose to *not* use `up.animate()` and roll your own
   animation code instead, your code must honor the following contract:
