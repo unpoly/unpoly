@@ -197,7 +197,7 @@ Changes tracked until 2022-07-06.
 
 - Allow to consider [up-hungry] elements for updates to any layer with [up-if-layer=any]
   - Example: Flashes in Layout
-- Allow to consider [up-hungry] elements for updates to some targets with [up-if-target]
+- Allow to consider [up-hungry] elements for updates that update history with [up-if-history]
   - Example: Canonical link
 
 

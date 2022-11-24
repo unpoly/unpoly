@@ -57,9 +57,6 @@ Various changes
   - link[rel=preconnect][href]
   - link[rel=preload][href]
   - link[rel=prefetch][href]
-- Do we need [up-hungry][up-if-history] instead of [up-if-target]?
-  => I know no use case for [up-if-target] other than link[rel=canonical]
-  => The code to support ifHistory is considerably shorter
 - Consider changing the default up.fragment.config.runScripts to `true`
 - Consider allowing dynamic recompile for async compilers without priorities
   - Collect multiple in a microtask

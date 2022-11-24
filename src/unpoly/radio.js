@@ -145,7 +145,7 @@ up.radio = (function() {
   You can control or disable the processing of hungry fragments using one of the following methods:
 
   - Using an `[up-if-layer]` attribute on the hungry fragment
-  - Using an `[up-if-target]` attribute on the hungry fragment
+  - Using an `[up-if-history]` attribute on the hungry fragment
   - Rendering with [`{ useHungry }`](/up.render#options.useHungry) option
   - Setting an [`[up-use-hungry]`](/a-up-follow#up-use-hungry) attribute on the link or form
 
@@ -158,17 +158,15 @@ up.radio = (function() {
 
     Even with `[up-layer=any]` hungry elements are only rendered when updating an existing layer.
     Hungry elements are never rendered for responses that [open a new overlay](/opening-overlays).
-  @param [up-if-target='*']
-    Only piggy-back on updates that swap an element matching the given [target selector](/targeting-fragments).
+  @param [up-if-history]
+    Only piggy-back on updates that update the browser history.
 
     For instance, you want to auto-update a [canonical link element](https://en.wikipedia.org/wiki/Canonical_link_element),
-    but only if the [main element](/main) was updated:
+    but only if we're changing history entries:
 
     ```html
-    <link rel="canonical" href="..." up-hungry up-if-target=":main">
+    <link rel="canonical" href="..." up-hungry up-if-history>
     ```
-
-    The hungry element will also be updated when swapping an *ancestor* of an element matching the given target selector.
 
   @param [up-transition]
     The [animated transition](/a-up-transition) to apply when this element is updated.
