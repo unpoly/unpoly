@@ -1226,16 +1226,6 @@ up.element = (function() {
   }
 
   /*-
-  Returns whether the given element has been removed from the DOM tree.
-
-  @function up.element.isDetached
-  @param {Element} element
-  @return {boolean}
-  @stable
-  */
-  let isDetached = u.negate(isAttached)
-
-  /*-
   Returns whether the given element is attached to the DOM tree.
 
   @see up.element.isDetached
@@ -1246,8 +1236,18 @@ up.element = (function() {
   @stable
   */
   function isAttached(element) {
-    return element === document || getRoot().contains(element)
+    return document.contains(element)
   }
+
+  /*-
+  Returns whether the given element has been removed from the DOM tree.
+
+  @function up.element.isDetached
+  @param {Element} element
+  @return {boolean}
+  @stable
+  */
+  let isDetached = u.negate(isAttached)
 
   /*-
   Cleans up internal jQuery caches for the given element.

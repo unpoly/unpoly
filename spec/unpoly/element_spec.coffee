@@ -1094,3 +1094,33 @@ describe 'up.element', ->
       }])
 
       expect(parsed.excludeRaw).toEqual(':not(.bar)')
+
+  describe 'up.element.isAttached()', ->
+
+    it 'returns true for the document', ->
+      result = up.element.isAttached(document)
+      expect(result).toBe(true)
+
+    it 'returns true for the <html> element', ->
+      result = up.element.isAttached(document.documentElement)
+      expect(result).toBe(true)
+
+    it 'returns true for the <body> element', ->
+      result = up.element.isAttached(document.body)
+      expect(result).toBe(true)
+
+    it 'returns true for an attached element', ->
+      element = fixture('.foo')
+      result = up.element.isAttached(element)
+      expect(result).toBe(true)
+
+    it 'returns false for a detached element', ->
+      element = document.createElement('div')
+      result = up.element.isAttached(element)
+      expect(result).toBe(false)
+
+    it 'returns false for a once-attached that was removed', ->
+      element = fixture('.foo')
+      element.remove()
+      result = up.element.isAttached(element)
+      expect(result).toBe(false)

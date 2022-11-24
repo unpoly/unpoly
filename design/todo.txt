@@ -57,16 +57,15 @@ Various changes
   - link[rel=preconnect][href]
   - link[rel=preload][href]
   - link[rel=prefetch][href]
-- Consider changing the default up.fragment.config.runScripts to `true`
 - Consider allowing dynamic recompile for async compilers without priorities
   - Collect multiple in a microtask
-- IE11: Maybe we can simpliy e.contains() to just `document.contains(document.body)`
 - Reconsider why we don't call onRender() for empty updates
   - We do still update scroll and focus, even for empty responses
     - Maybe even location?
   - We will update more in the future with head merging
   - There is no other hook for "after $things changed"
     - But nothing changed after an empty render? At least not in the DOM.
+  => If we render without fallback we still need to check if up.RenderResult#fragment is defined
   => If we change this we need to simplify docs for onRender and up-on-render
 
 
