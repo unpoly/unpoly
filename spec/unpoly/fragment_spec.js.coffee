@@ -6798,6 +6798,19 @@ describe 'up.fragment', ->
         expect(up.fragment.config.verifyDerivedTarget).toBe(true)
         expect(up.fragment.toTarget(element2)).toBe('#foo')
 
+      it 'distinguishes between types of link[rel=alternate]', ->
+        atomLink = fixture('link[rel=alternate][type="application/atom+xml"][ref="/atom.xml"]')
+        rssLink = fixture('link[rel=alternate][type="application/rss+xml"][href="/feed.rss"]')
+        expect(up.fragment.toTarget(atomLink)).toBe('link[rel="alternate"][type="application/atom+xml"]')
+        expect(up.fragment.toTarget(rssLink)).toBe('link[rel="alternate"][type="application/rss+xml"]')
+
+      it 'distinguishes between multiple link[rel=preload] elements with different [href] attributes', ->
+        preloadFoo = fixture('link[rel="preload"][href="/foo"]')
+        preloadBar = fixture('link[rel="preload"][href="/bar"]')
+
+        expect(up.fragment.toTarget(preloadFoo)).toBe('link[rel="preload"][href="/foo"]')
+        expect(up.fragment.toTarget(preloadBar)).toBe('link[rel="preload"][href="/bar"]')
+
     describe 'up.fragment.expandTargets', ->
 
       beforeEach ->
