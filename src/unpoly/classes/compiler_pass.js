@@ -1,19 +1,10 @@
 const u = up.util
-const e = up.element
 
 up.CompilerPass = class CompilerPass {
 
-  constructor(root, compilers, { skip, layer, data, dataMap } = {}) {
+  constructor(root, compilers, { layer, data, dataMap } = {}) {
     this.root = root
     this.compilers = compilers
-
-    // Exclude all elements that are descendants of the subtrees we want to keep.
-    // The exclusion process is very expensive (in one case compiling 100 slements
-    // took 1.5s because of this). That's why we only do it if (1) options.skip
-    // was given and (2) there is an [up-keep] element in root.
-    if (skip?.length && this.root.querySelector('[up-keep]')) {
-      this.skip = skip
-    }
 
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Ddefault to the current layer in case the user manually compiles a detached element.
@@ -26,7 +17,6 @@ up.CompilerPass = class CompilerPass {
   }
 
   run() {
-    up.puts('up.hello()', "Compiling fragment %o", this.root)
     // If we're compiling a fragment in a background layer, we want
     // up.layer.current to resolve to that background layer, not the front layer.
     this.layer.asCurrent(() => {
@@ -59,11 +49,11 @@ up.CompilerPass = class CompilerPass {
   }
 
   runCompiler(compiler) {
-    const matches = this.select(compiler.selector)
+    const matches = this.selectOnce(compiler)
     if (!matches.length) { return; }
 
     if (!compiler.isDefault) {
-      up.puts('up.hello()', 'Compiling "%s" on %d element(s)', compiler.selector, matches.length)
+      up.puts('up.hello()', 'Compiling %d× "%s" on %s', matches.length, compiler.selector, this.layer)
     }
 
     if (compiler.batch) {
@@ -133,21 +123,18 @@ up.CompilerPass = class CompilerPass {
   }
 
   select(selector) {
-    let matches = e.subtree(this.root, u.evalOption(selector))
-    if (this.skip) {
-      matches = u.reject(matches, (match) => this.isInSkippedSubtree(match))
-    }
-    return matches
+    return up.fragment.subtree(this.root, u.evalOption(selector), { layer: this.layer } )
   }
 
-  isInSkippedSubtree(element) {
-    let parent
-    if (u.contains(this.skip, element)) {
-      return true
-    } else if ((parent = element.parentElement)) {
-      return this.isInSkippedSubtree(parent)
-    } else {
-      return false
-    }
+  selectOnce(compiler) {
+    let matches = this.select(compiler.selector)
+    return u.filter(matches, (element) => {
+      let appliedCompilers = (element.upAppliedCompilers ||= new Set())
+      if (!appliedCompilers.has(compiler)) {
+        appliedCompilers.add(compiler)
+        return true
+      }
+    })
   }
+
 }

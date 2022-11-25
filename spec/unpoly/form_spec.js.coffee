@@ -1420,13 +1420,13 @@ describe 'up.form', ->
           up.compiler 'input[name=bar]', (element, data) =>
             barDataSpy(data)
 
+          expect(fooDataSpy.calls.argsFor(0)[0]).toEqual({})
+          expect(barDataSpy.calls.argsFor(0)[0]).toEqual({})
+
           up.validate(fooField, data: { key: 1 }, formGroup: false)
           up.validate(barField, data: { key: 2 }, formGroup: false)
 
           next ->
-            expect(fooDataSpy).not.toHaveBeenCalled()
-            expect(barDataSpy).not.toHaveBeenCalled()
-
             jasmine.respondWith """
               <form action="/path">
                 <input name='foo'>
@@ -1436,8 +1436,11 @@ describe 'up.form', ->
             """
 
           next ->
-            expect(fooDataSpy).toHaveBeenCalledWith(key: 1)
-            expect(barDataSpy).toHaveBeenCalledWith(key: 2)
+            expect(fooDataSpy.calls.count()).toBe(2)
+            expect(fooDataSpy.calls.argsFor(1)[0]).toEqual(key: 1)
+
+            expect(barDataSpy.calls.count()).toBe(2)
+            expect(barDataSpy.calls.argsFor(1)[0]).toEqual(key: 2)
 
     describe 'up.form.parseValidateArgs()', ->
 

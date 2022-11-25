@@ -117,6 +117,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.steps.reverse()
 
     const motionEndPromises = this.steps.map(step => this.executeStep(step))
+
     this.renderResult.finished = this.finish(motionEndPromises)
 
     // When rendering nothing we still want to proess { focus, scroll } options.

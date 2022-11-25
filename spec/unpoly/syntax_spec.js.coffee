@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.syntax', ->
@@ -21,11 +22,81 @@ describe 'up.syntax', ->
         expect(observeElement).not.toHaveBeenCalledWith($otherChild[0])
         expect(observeElement).toHaveBeenCalledWith($child[0])
 
-      it 'prints a message when a compiler is registered after booting, explaining that the compiler will only run for future fragments', ->
-        spyOn(up, 'puts').and.callThrough()
-        up.compiler('.foo', u.noop)
-        expect(up.puts).toHaveBeenCalled()
-        expect(up.puts.calls.argsFor(0)[1]).toMatch(/will run for future fragments/i)
+      it 'allows to compilers to have priorities of their own (higher priority is run first)', ->
+        traces = []
+        up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+        up.compiler '.element', { priority: 2 }, -> traces.push('bar')
+        up.compiler '.element', { priority: 0 }, -> traces.push('baz')
+        up.hello(fixture('.element'))
+        expect(traces).toEqual ['bar', 'foo', 'baz']
+
+      describe 'when a compiler is registered after booting', ->
+
+        describe 'with { priority }', ->
+
+          it 'prints a message explaining that the compiler will only run for future fragments', ->
+            spyOn(up, 'puts').and.callThrough()
+            up.compiler('.foo', { priority: 10 }, u.noop)
+            expect(up.puts).toHaveBeenCalled()
+            expect(up.puts.calls.argsFor(0)[1]).toMatch(/will run for future fragments/i)
+
+          it 'runs the compiler for future fragments, but not for current fragments (even if they match)', ->
+            spy = jasmine.createSpy('compiler')
+            element1 = up.hello fixture('.element')
+            up.compiler('.element', { priority: 10 }, (element) -> spy(element))
+
+            expect(spy).not.toHaveBeenCalled()
+
+            element2 = up.hello fixture('.element')
+
+            expect(spy).toHaveBeenCalledWith(element2)
+
+        describe 'without { priority }', ->
+
+          it 'prints no message explaining when the compiler will run', ->
+            spyOn(up, 'puts').and.callThrough()
+            up.compiler('.foo', u.noop)
+            expect(up.puts).not.toHaveBeenCalled()
+
+          it 'compiles current fragments', ->
+            spy = jasmine.createSpy('compiler')
+            element1 = up.hello fixture('.element')
+            up.compiler('.element', (element) -> spy(element))
+
+            expect(spy).toHaveBeenCalledWith(element1)
+
+          it 'compiles current fragments on other layers', ->
+            rootElement = fixture('.foo')
+            makeLayers(2)
+            overlayElement = up.layer.affix('.foo')
+
+            expect(document.querySelectorAll('.foo').length).toBe(2)
+
+            spy = jasmine.createSpy('compiler')
+            up.compiler('.foo', (element) -> spy(element))
+
+            expect(spy.calls.count()).toBe(2)
+            expect(spy.calls.argsFor(0)[0]).toBe(rootElement)
+            expect(spy.calls.argsFor(1)[0]).toBe(overlayElement)
+
+          it 'does not compile elements twice if the new fragment contains a <script> that defines a new compiler', ->
+            container = fixture('.container')
+            element = e.affix(container, '.element', text: 'old text')
+
+            window.compileSpy = jasmine.createSpy('compile spy')
+
+            up.render fragment: """
+              <div class="container">
+                <div class="element">new text</div>
+                <script>
+                  up.compiler('.element', (element) => window.compileSpy(element))
+                </script>
+              </div>
+            """
+
+            expect(window.compileSpy.calls.count()).toBe(1)
+
+            delete window.compileSpy
 
     describe 'up.$compiler', ->
 

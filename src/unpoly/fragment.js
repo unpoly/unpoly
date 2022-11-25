@@ -1013,19 +1013,37 @@ up.fragment = (function() {
   All registered [compilers](/up.compiler) and [macros](/up.macro) will be called
   with matches in the given `element`.
 
-  **As long as you manipulate the DOM using Unpoly, you will never
-  need to call `up.hello()`.** You only need to use `up.hello()` if the
-  DOM is manipulated without Unpoly' involvement, e.g. by setting
+  The [`up:fragment:inserted`](/up:fragment:inserted) event is emitted on the compiled element.
+
+  ### Unpoly automatically calls `up.hello()`
+
+  When the page is manipulated using Unpoly functions or HTML selectors,
+  Unpoly will automatically call `up.hello()` on new fragments:
+
+  ```js
+  let link = document.querySelector('a[href]')
+  let { fragment } = await up.follow(link)
+  // fragment is already compiled
+  ```
+
+  You only ever need to use `up.hello()` if the
+  DOM is manipulated without Unpoly's involvement, e.g. by setting
   the `innerHTML` property:
 
-  ```html
+  ```js
   element = document.createElement('div')
   element.innerHTML = '... HTML that needs to be activated ...'
   up.hello(element)
   ```
 
-  This function emits the [`up:fragment:inserted`](/up:fragment:inserted)
-  event.
+  ### Recompiling elements
+
+  It is safe to call `up.hello()` multiple times with the same elements.
+
+  In particular every compiler function is guaranteed to only run once for each matching element.
+
+  If a new compiler is [registered after initial compilation](/up.compiler#registering-compilers-after-booting),
+  that new compiler is automatically run on current elements.
 
   @function up.hello
   @param {Element|jQuery} element
@@ -1042,18 +1060,12 @@ up.fragment = (function() {
     The compiled element
   @stable
   */
-  function hello(element, { keepPlans, layer, data, dataMap } = {}) {
+  function hello(element, { layer, data, dataMap } = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = getSmart(element)
 
-    // Callers may pass descriptions of child elements that were [kept](/up-keep)
-    // as { options.keepPlans }. For these elements up.hello() won't emit up:fragment:inserted.
-    //
-    // We will also pass an array of kept child elements to up.hello() as { skip }
-    // so they won't be compiled a second time.
-    const skip = u.map(keepPlans || [], 'oldElement')
-
-    up.syntax.compile(element, { layer, data, dataMap, skip })
+    up.puts('up.hello()', "Compiling fragment %o", element)
+    up.syntax.compile(element, { layer, data, dataMap })
     emitFragmentInserted(element)
 
     return element
@@ -1420,7 +1432,8 @@ up.fragment = (function() {
     The parent element for the search.
   @param {string} selector
     The CSS selector to match.
-  @param {up.Layer|string|Element} [options.layer]
+  @param {up.Layer|string|Element} [options.layer = 'current]
+    The layer in whicht to match.
   @return {NodeList<Element>|Array<Element>}
     A list of all matching elements.
   @experimental

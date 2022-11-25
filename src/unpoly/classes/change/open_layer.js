@@ -73,6 +73,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     up.layer.stack.push(this.layer)
 
     this.layer.createElements(this.content)
+
     this.layer.setupHandlers()
 
     // Change history before compilation, so new fragments see the new location.
@@ -102,7 +103,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Don't wait for the open animation to finish.
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this.handleScroll()
-
 
     let renderResult = new up.RenderResult({
       layer: this.layer,
