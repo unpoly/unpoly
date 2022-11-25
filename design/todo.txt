@@ -104,6 +104,7 @@ Docs
     - Subnavigations make it easy
     - You can disable layer history
   - Customize restoration behavior
+- Split JavaScript
 
 
 ### General

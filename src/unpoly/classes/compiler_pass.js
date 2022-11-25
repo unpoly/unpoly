@@ -1,19 +1,10 @@
 const u = up.util
-const e = up.element
 
 up.CompilerPass = class CompilerPass {
 
-  constructor(root, compilers, { skip, layer, data, dataMap } = {}) {
+  constructor(root, compilers, { layer, data, dataMap } = {}) {
     this.root = root
     this.compilers = compilers
-
-    // Exclude all elements that are descendants of the subtrees we want to keep.
-    // The exclusion process is very expensive (in one case compiling 100 slements
-    // took 1.5s because of this). That's why we only do it if (1) options.skip
-    // was given and (2) there is an [up-keep] element in root.
-    if (skip?.length && this.root.querySelector('[up-keep]')) {
-      this.skip = skip
-    }
 
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Ddefault to the current layer in case the user manually compiles a detached element.
@@ -77,7 +68,6 @@ up.CompilerPass = class CompilerPass {
   }
 
   compileOneElement(compiler, element) {
-    console.debug("!!! is %o jquery %o", compiler.selector, compiler.jQuery)
     const elementArg = compiler.jQuery ? up.browser.jQuery(element) : element
     const compileArgs = [elementArg]
     // Do not retrieve and parse [up-data] unless the compiler function
@@ -133,11 +123,7 @@ up.CompilerPass = class CompilerPass {
   }
 
   select(selector) {
-    let matches = up.fragment.subtree(this.root, u.evalOption(selector), { layer: this.layer } )
-    if (this.skip) {
-      matches = u.reject(matches, (match) => this.isInSkippedSubtree(match))
-    }
-    return matches
+    return up.fragment.subtree(this.root, u.evalOption(selector), { layer: this.layer } )
   }
 
   selectOnce(compiler) {
@@ -151,14 +137,4 @@ up.CompilerPass = class CompilerPass {
     })
   }
 
-  isInSkippedSubtree(element) {
-    let parent
-    if (u.contains(this.skip, element)) {
-      return true
-    } else if ((parent = element.parentElement)) {
-      return this.isInSkippedSubtree(parent)
-    } else {
-      return false
-    }
-  }
 }

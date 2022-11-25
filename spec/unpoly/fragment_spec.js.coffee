@@ -6659,6 +6659,25 @@ describe 'up.fragment', ->
           expect(compileFn).not.toThrowError()
           expect(layerSpy.calls.argsFor(0)[0]).toBe up.layer.current
 
+      it 'does not re-compile elements when called multiple times', ->
+        compiler = jasmine.createSpy('compiler')
+        up.compiler('.element', compiler)
+        element = fixture('.element')
+
+        up.hello(element)
+        up.hello(element)
+        expect(compiler.calls.count()).toBe(1)
+
+      it 'does not re-compile elements when their compiler is compiled afterwards', ->
+        compiler = jasmine.createSpy('compiler')
+        up.compiler('.element', compiler)
+        container = fixture('.container')
+        element = e.affix(container, '.element')
+
+        up.hello(element)
+        up.hello(container)
+        expect(compiler.calls.count()).toBe(1)
+
     describe 'up.fragment.toTarget', ->
 
       it "prefers using the element's 'up-id' attribute to using the element's ID", ->

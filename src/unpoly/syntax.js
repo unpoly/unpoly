@@ -33,7 +33,6 @@ up.syntax = (function() {
 
   let registeredCompilers = []
   let registeredMacros = []
-  let ignoringLateCompilersStack = 0
 
   /*-
   Registers a function to be called when an element with
@@ -297,8 +296,6 @@ up.syntax = (function() {
   function buildCompiler(args) {
     let [selector, options, callback] = parseCompilerArgs(args)
 
-    console.debug("!!! building compiler %o with jQuery %o", selector, options.jQuery)
-
     options = u.options(options, {
       selector,
       isDefault: up.framework.evaling,
@@ -320,11 +317,9 @@ up.syntax = (function() {
 
     if (up.framework.booted) {
       if (newCompiler.priority === 0) {
-        //if (!ignoringLateCompilersStack) {
-          for (let layer of up.layer.stack) {
-            compile(layer.element, { layer, compilers: [newCompiler] })
-          }
-        //}
+        for (let layer of up.layer.stack) {
+          compile(layer.element, { layer, compilers: [newCompiler] })
+        }
       } else {
         up.puts('up.compiler()', 'Compiler %s was registered after booting Unpoly. Compiler will run for future fragments only.', newCompiler.selector)
       }
@@ -547,14 +542,6 @@ up.syntax = (function() {
     }
   }
 
-  function ignoringLateCompilers(fn) {
-    ignoringLateCompilersStack++
-    try {
-      return fn()
-    } finally {
-      ignoringLateCompilersStack--
-    }
-  }
 
   /*
   Resets the list of registered compiler directives to the
@@ -576,7 +563,6 @@ up.syntax = (function() {
     compile,
     clean,
     data: readData,
-    preventingCompile: ignoringLateCompilers,
   }
 })()
 

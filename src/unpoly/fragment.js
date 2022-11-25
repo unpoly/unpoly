@@ -1042,19 +1042,12 @@ up.fragment = (function() {
     The compiled element
   @stable
   */
-  function hello(element, { keepPlans, layer, data, dataMap } = {}) {
+  function hello(element, { layer, data, dataMap } = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = getSmart(element)
 
-    // Callers may pass descriptions of child elements that were [kept](/up-keep)
-    // as { options.keepPlans }. For these elements up.hello() won't emit up:fragment:inserted.
-    //
-    // We will also pass an array of kept child elements to up.hello() as { skip }
-    // so they won't be compiled a second time.
-    const skip = u.map(keepPlans || [], 'oldElement')
-
     up.puts('up.hello()', "Compiling fragment %o", element)
-    up.syntax.compile(element, { layer, data, dataMap, skip })
+    up.syntax.compile(element, { layer, data, dataMap })
     emitFragmentInserted(element)
 
     return element

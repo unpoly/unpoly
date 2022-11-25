@@ -72,9 +72,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this.layer = this.buildLayer()
     up.layer.stack.push(this.layer)
 
-    up.syntax.preventingCompile(() => {
-      this.layer.createElements(this.content)
-    })
+    this.layer.createElements(this.content)
 
     this.layer.setupHandlers()
 
