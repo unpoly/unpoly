@@ -26,7 +26,6 @@ up.CompilerPass = class CompilerPass {
   }
 
   run() {
-    up.puts('up.hello()', "Compiling fragment %o", this.root)
     // If we're compiling a fragment in a background layer, we want
     // up.layer.current to resolve to that background layer, not the front layer.
     this.layer.asCurrent(() => {
@@ -59,11 +58,11 @@ up.CompilerPass = class CompilerPass {
   }
 
   runCompiler(compiler) {
-    const matches = this.select(compiler.selector)
+    const matches = this.selectOnce(compiler)
     if (!matches.length) { return; }
 
     if (!compiler.isDefault) {
-      up.puts('up.hello()', 'Compiling "%s" on %d element(s)', compiler.selector, matches.length)
+      up.puts('up.hello()', 'Compiling %d× "%s" on %s', matches.length, compiler.selector, this.layer)
     }
 
     if (compiler.batch) {
@@ -78,6 +77,7 @@ up.CompilerPass = class CompilerPass {
   }
 
   compileOneElement(compiler, element) {
+    console.debug("!!! is %o jquery %o", compiler.selector, compiler.jQuery)
     const elementArg = compiler.jQuery ? up.browser.jQuery(element) : element
     const compileArgs = [elementArg]
     // Do not retrieve and parse [up-data] unless the compiler function
@@ -133,11 +133,22 @@ up.CompilerPass = class CompilerPass {
   }
 
   select(selector) {
-    let matches = e.subtree(this.root, u.evalOption(selector))
+    let matches = up.fragment.subtree(this.root, u.evalOption(selector), { layer: this.layer } )
     if (this.skip) {
       matches = u.reject(matches, (match) => this.isInSkippedSubtree(match))
     }
     return matches
+  }
+
+  selectOnce(compiler) {
+    let matches = this.select(compiler.selector)
+    return u.filter(matches, (element) => {
+      let appliedCompilers = (element.upAppliedCompilers ||= new Set())
+      if (!appliedCompilers.has(compiler)) {
+        appliedCompilers.add(compiler)
+        return true
+      }
+    })
   }
 
   isInSkippedSubtree(element) {

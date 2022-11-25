@@ -116,7 +116,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     //     the viewport height through element insertions.
     this.steps.reverse()
 
-    const motionEndPromises = this.steps.map(step => this.executeStep(step))
+    // @@@ Block from here
+    const motionEndPromises = up.syntax.preventingCompile(() => {
+      return this.steps.map(step => this.executeStep(step))
+    })
+    // @@@ To here
+
     this.renderResult.finished = this.finish(motionEndPromises)
 
     // When rendering nothing we still want to proess { focus, scroll } options.

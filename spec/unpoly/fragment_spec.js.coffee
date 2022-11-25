@@ -3518,7 +3518,8 @@ describe 'up.fragment', ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
           spy = jasmine.createSpy('parent spy')
-          up.$compiler '.element', ($element) -> spy($element.text(), $element.parent())
+          up.$compiler '.element', ($element) ->
+            spy($element.text(), $element.parent())
           up.render
             fragment: '<div class="element">new text</div>',
             transition: 'cross-fade',
@@ -3597,6 +3598,8 @@ describe 'up.fragment', ->
             compiler = jasmine.createSpy('compiler')
             up.$compiler '.element', compiler
 
+            expect(compiler.calls.count()).toBe(1)
+
             extractDone = up.render(
               fragment: '<div class="element">new content</div>',
               transition: transition,
@@ -3605,20 +3608,19 @@ describe 'up.fragment', ->
             )
 
             extractDone.then ->
-              expect(compiler.calls.count()).toBe(1)
+              expect(compiler.calls.count()).toBe(2)
               done()
 
           it "does not call destructors multiple times (bugfix)", (done) ->
-            $element = $fixture('.element').text('old content')
-
-            transition = (oldElement, newElement, options) ->
-              up.morph(oldElement, newElement, 'cross-fade', options)
-
             destructor = jasmine.createSpy('destructor')
             up.$compiler '.element', (element) ->
               return destructor
 
+            $element = $fixture('.element').text('old content')
             up.hello($element)
+
+            transition = (oldElement, newElement, options) ->
+              up.morph(oldElement, newElement, 'cross-fade', options)
 
             testDestructorCalls = ->
               expect(destructor.calls.count()).toBe(1)

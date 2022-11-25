@@ -31,8 +31,9 @@ up.syntax = (function() {
     '[data-confirm]': -400,  // converts [data-conform] to [up-confirm] only if link has followable [up-*] attributes
   }
 
-  let compilers = []
-  let macros = []
+  let registeredCompilers = []
+  let registeredMacros = []
+  let ignoringLateCompilersStack = 0
 
   /*-
   Registers a function to be called when an element with
@@ -141,7 +142,7 @@ up.syntax = (function() {
   */
   function registerCompiler(...args) {
     const compiler = buildCompiler(args)
-    return insertCompiler(compilers, compiler)
+    return insertCompiler(registeredCompilers, compiler)
   }
 
   /*-
@@ -177,8 +178,7 @@ up.syntax = (function() {
     @stable
   */
   function registerJQueryCompiler(...args) {
-    const compiler = registerCompiler(...args)
-    compiler.jQuery = true
+    registerCompiler(...args, { jQuery: true })
   }
 
   /*-
@@ -238,7 +238,7 @@ up.syntax = (function() {
       macro.priority ||= detectSystemMacroPriority(macro.selector) ||
         up.fail('Unregistered priority for system macro %o', macro.selector)
     }
-    return insertCompiler(macros, macro)
+    return insertCompiler(registeredMacros, macro)
   }
 
   /*-
@@ -273,9 +273,7 @@ up.syntax = (function() {
   @stable
   */
   function registerJQueryMacro(...args) {
-    const macro = registerMacro(...args)
-    macro.jQuery = true
-    return macro
+    registerMacro(...args, { jQuery: true })
   }
 
   function detectSystemMacroPriority(macroSelector) {
@@ -289,14 +287,18 @@ up.syntax = (function() {
   }
 
   const parseCompilerArgs = function(args) {
+    const defaults = u.extractOptions(args)
     const selector = args.shift()
     const callback = args.pop()
-    const options = u.extractOptions(args)
+    const options = { ...defaults, ...u.extractOptions(args) }
     return [selector, options, callback]
   }
 
   function buildCompiler(args) {
     let [selector, options, callback] = parseCompilerArgs(args)
+
+    console.debug("!!! building compiler %o with jQuery %o", selector, options.jQuery)
+
     options = u.options(options, {
       selector,
       isDefault: up.framework.evaling,
@@ -309,16 +311,25 @@ up.syntax = (function() {
   }
 
   function insertCompiler(queue, newCompiler) {
-    if (up.framework.booted) {
-      up.puts('up.compiler()', 'Compiler %s was registered after booting Unpoly. Compiler will run for future fragments.', newCompiler.selector)
-    }
-
     let existingCompiler
     let index = 0
     while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
       index += 1
     }
     queue.splice(index, 0, newCompiler)
+
+    if (up.framework.booted) {
+      if (newCompiler.priority === 0) {
+        //if (!ignoringLateCompilersStack) {
+          for (let layer of up.layer.stack) {
+            compile(layer.element, { layer, compilers: [newCompiler] })
+          }
+        //}
+      } else {
+        up.puts('up.compiler()', 'Compiler %s was registered after booting Unpoly. Compiler will run for future fragments only.', newCompiler.selector)
+      }
+    }
+
     return newCompiler
   }
 
@@ -335,11 +346,15 @@ up.syntax = (function() {
     Override data for `target`
   @param {Object} [options.dataMap]
     An object mapping selectors to data-override in subtree of `target`.
+  @param {Object} [options.compilers]
+    A list of compilers to use.
+
+    Defaults to all registered macros and compilers.
   @internal
   */
   function compile(fragment, options) {
-    const orderedCompilers = macros.concat(compilers)
-    const pass = new up.CompilerPass(fragment, orderedCompilers, options)
+    let compilers = options.compilers || registeredMacros.concat(registeredCompilers)
+    const pass = new up.CompilerPass(fragment, compilers, options)
     pass.run()
   }
 
@@ -532,13 +547,22 @@ up.syntax = (function() {
     }
   }
 
+  function ignoringLateCompilers(fn) {
+    ignoringLateCompilersStack++
+    try {
+      return fn()
+    } finally {
+      ignoringLateCompilersStack--
+    }
+  }
+
   /*
   Resets the list of registered compiler directives to the
   moment when the framework was booted.
   */
   function reset() {
-    compilers = u.filter(compilers, 'isDefault')
-    macros = u.filter(macros, 'isDefault')
+    registeredCompilers = u.filter(registeredCompilers, 'isDefault')
+    registeredMacros = u.filter(registeredMacros, 'isDefault')
   }
 
   up.on('up:framework:reset', reset)
@@ -551,7 +575,8 @@ up.syntax = (function() {
     destructor: registerDestructor,
     compile,
     clean,
-    data: readData
+    data: readData,
+    preventingCompile: ignoringLateCompilers,
   }
 })()
 

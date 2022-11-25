@@ -1053,6 +1053,7 @@ up.fragment = (function() {
     // so they won't be compiled a second time.
     const skip = u.map(keepPlans || [], 'oldElement')
 
+    up.puts('up.hello()', "Compiling fragment %o", element)
     up.syntax.compile(element, { layer, data, dataMap, skip })
     emitFragmentInserted(element)
 
@@ -1420,7 +1421,8 @@ up.fragment = (function() {
     The parent element for the search.
   @param {string} selector
     The CSS selector to match.
-  @param {up.Layer|string|Element} [options.layer]
+  @param {up.Layer|string|Element} [options.layer = 'current]
+    The layer in whicht to match.
   @return {NodeList<Element>|Array<Element>}
     A list of all matching elements.
   @experimental
