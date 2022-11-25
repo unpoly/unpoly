@@ -49,8 +49,15 @@ Various changes
   - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
+- Maybe auto-submit should not navigate by default
 - Consider allowing dynamic recompile for async compilers without priorities
   - Collect multiple in a microtask
+  => THis is hard:
+     - A fragment contains a <script> with a compiler
+     - That compiler is now run on *all* layers, including the new fragment
+     - That compiler is now added to registeredCompilers
+     - That compiler will run a second time with up.hello()+
+  => Track per Element a Set of compiler functions (or UIDs) that have run on it
 - Reconsider why we don't call onRender() for empty updates
   - We do still update scroll and focus, even for empty responses
     - Maybe even location?
@@ -59,6 +66,9 @@ Various changes
     - But nothing changed after an empty render? At least not in the DOM.
   => If we render without fallback we still need to check if up.RenderResult#fragment is defined
   => If we change this we need to simplify docs for onRender and up-on-render
+- Can we move up.hello() to up.syntax?
+  - Also doc references
+- Should onLoaded be a preflight key?
 
 
 Docs
