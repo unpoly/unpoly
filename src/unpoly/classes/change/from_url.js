@@ -107,7 +107,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     // page with its own layout, that cannot be loaded as a fragment and must be loaded
     // with a full page load.
     this.request.assertEmitted('up:fragment:loaded', {
-      callback: this.options.onLoaded,
+      callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
       response: this.response,
       renderOptions: this.options,
       log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description]

@@ -1035,8 +1035,8 @@ describe 'up.fragment', ->
 
             up.render(target: '.target', url: '/url', location: '/location-from-option', peel: false, origin: origin)
 
-            next =>
-              @respondWith('<div class="target">text from server</div>')
+            next ->
+              jasmine.respondWithSelector('.target', text: 'text from server')
 
             next ->
               expect(event).toBeGiven()
@@ -1109,6 +1109,37 @@ describe 'up.fragment', ->
               expect('.two').toHaveText('old two')
               expect('.three').toHaveText('new three')
 
+          it 'allows to pass a listener for just one render pass using { onLoaded } option', asyncSpec (next) ->
+            origin = fixture('.origin')
+            fixture('.target')
+            event = undefined
+            onLoaded = (e) -> event = e
+
+            up.render({ target: '.target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
+
+            next ->
+              jasmine.respondWithSelector('.target', text: 'text from server')
+
+            next ->
+              expect(event).toBeGiven()
+              expect(event.request).toEqual(jasmine.any(up.Request))
+              expect(event.request.url).toMatchURL('/url')
+
+          it 'runs an { onLoaded } listener for failed responses (there is no { onFailLoaded })', asyncSpec (next) ->
+            origin = fixture('.origin')
+            fixture('.target')
+            event = undefined
+            onLoaded = (e) -> event = e
+
+            up.render({ target: '.target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
+
+            next ->
+              jasmine.respondWithSelector('.target', text: 'error from server', status: 500)
+
+            next ->
+              expect(event).toBeGiven()
+              expect(event.request).toEqual(jasmine.any(up.Request))
+              expect(event.request.url).toMatchURL('/url')
 
         describe 'when the server sends an X-Up-Events header', ->
 
