@@ -35,6 +35,12 @@ TODOs after V3
   => I think it's :maybe and then update unpoly-rails so target? and any_target? ignore the :maybe
 - Reconciliation of <head> elements
 
+- Maybe auto-submit should not navigate by default
+  - How to restore this?
+  - up-navigate ?
+  - up-watch-navigate ?
+  - up-autosubmit-navigate ?
+  - Is it cool that search results would no longer get a URL update?
 
 TODOs for V3
 ============
@@ -43,13 +49,8 @@ TODOs for V3
 Various changes
 ---------------
 
-- Test with other browsers
-  - Firefox
-  - Edge
-  - Safari
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
-- Maybe auto-submit should not navigate by default
 - Reconsider why we don't call onRender() for empty updates
   - We do still update scroll and focus, even for empty responses
     - Maybe even location?
@@ -60,7 +61,9 @@ Various changes
   => If we change this we need to simplify docs for onRender and up-on-render
 - Can we move up.hello() to up.syntax?
   - Also doc references
-- Should onLoaded be a preflight key?
+- Expose up.fragment.config.renderOptions
+  - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revaliate: 'auto' }, users may want to deactivate
+
 
 
 Docs
@@ -211,6 +214,10 @@ V3.pre launch
 V3 final Launch
 ---------------
 
+- Test with other browsers
+  - Firefox
+  - Edge
+  - Safari
 - Track CHANGELOG with changes done since the V3 presentation
   - Exclude changes we shipped as maintenance release 2.7.x
 - Fix deploy targets for 2.x-stable@unpoly-site
@@ -461,6 +468,3 @@ Decisions
   => What's with up.fragment.source()?
 - [up-hungry][up-placement]
   => This only makes sence when we have some form of deduping
-- Consider exposing up.fragment.config.renderOptions
-  => Wait until there is a use case
-  => Maybe we also need this to be a function?
