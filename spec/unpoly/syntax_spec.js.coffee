@@ -324,11 +324,79 @@ describe 'up.syntax', ->
 
         expect(data1).toBe(data2)
 
+    describe 'up.hello', ->
 
+      it 'calls compilers with the given element', ->
+        compiler = jasmine.createSpy('compiler')
+        up.compiler('.element', compiler)
+        element = fixture('.element')
 
-    describe 'up.syntax.compile', ->
+        up.hello(element)
+        expect(compiler).toHaveBeenCalledWith(element, jasmine.anything())
+
+      it 'emits an up:fragment:inserted event', ->
+        compiler = jasmine.createSpy('compiler')
+        target = fixture('.element')
+        listener = jasmine.createSpy('up:fragment:inserted listener')
+        target.addEventListener('up:fragment:inserted', listener)
+
+        up.hello(target, { origin })
+
+        expectedEvent = jasmine.objectContaining({ target })
+        expect(listener).toHaveBeenCalledWith(expectedEvent)
+
+      it "sets up.layer.current to the given element's layer while compilers are running", asyncSpec (next) ->
+        layerSpy = jasmine.createSpy('layer spy')
+        up.compiler('.foo', -> layerSpy(up.layer.current))
+        makeLayers(2)
+
+        next ->
+          rootElement = fixture('.foo.in-root')
+          overlayElement = up.layer.get(1).affix('.foo.in-overlay')
+
+          up.hello(rootElement)
+          up.hello(overlayElement)
+
+          expect(layerSpy.calls.count()).toBe(2)
+
+          expect(layerSpy.calls.argsFor(0)[0]).toBe up.layer.get(0)
+          expect(layerSpy.calls.argsFor(1)[0]).toBe up.layer.get(1)
+
+      it 'keeps up.layer.current and does not crash when compiling a detached element (bugfix)', asyncSpec (next) ->
+        layerSpy = jasmine.createSpy('layer spy')
+        up.compiler('.foo', -> layerSpy(up.layer.current))
+        makeLayers(2)
+
+        next ->
+          expect(up.layer.current.isOverlay()).toBe(true)
+
+          element = up.element.createFromSelector('.foo')
+          compileFn = -> up.hello(element)
+
+          expect(compileFn).not.toThrowError()
+          expect(layerSpy.calls.argsFor(0)[0]).toBe up.layer.current
+
+      it 'does not re-compile elements when called multiple times', ->
+        compiler = jasmine.createSpy('compiler')
+        up.compiler('.element', compiler)
+        element = fixture('.element')
+
+        up.hello(element)
+        up.hello(element)
+        expect(compiler.calls.count()).toBe(1)
+
+      it 'does not re-compile elements when their compiler is compiled afterwards', ->
+        compiler = jasmine.createSpy('compiler')
+        up.compiler('.element', compiler)
+        container = fixture('.container')
+        element = e.affix(container, '.element')
+
+        up.hello(element)
+        up.hello(container)
+        expect(compiler.calls.count()).toBe(1)
 
       it "sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer"
+
 
       describe 'when a compiler throws an error', ->
 

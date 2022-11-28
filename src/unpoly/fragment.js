@@ -35,7 +35,6 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 @see up.destroy
 @see up.reload
 @see up.fragment.get
-@see up.hello
 
 @module up.fragment
 */
@@ -1006,70 +1005,6 @@ up.fragment = (function() {
   @stable
   */
 
-  /*-
-  Manually compiles a page fragment that has been inserted into the DOM
-  by external code.
-
-  All registered [compilers](/up.compiler) and [macros](/up.macro) will be called
-  with matches in the given `element`.
-
-  The [`up:fragment:inserted`](/up:fragment:inserted) event is emitted on the compiled element.
-
-  ### Unpoly automatically calls `up.hello()`
-
-  When the page is manipulated using Unpoly functions or HTML selectors,
-  Unpoly will automatically call `up.hello()` on new fragments:
-
-  ```js
-  let link = document.querySelector('a[href]')
-  let { fragment } = await up.follow(link)
-  // fragment is already compiled
-  ```
-
-  You only ever need to use `up.hello()` if the
-  DOM is manipulated without Unpoly's involvement, e.g. by setting
-  the `innerHTML` property:
-
-  ```js
-  element = document.createElement('div')
-  element.innerHTML = '... HTML that needs to be activated ...'
-  up.hello(element)
-  ```
-
-  ### Recompiling elements
-
-  It is safe to call `up.hello()` multiple times with the same elements.
-
-  In particular every compiler function is guaranteed to only run once for each matching element.
-
-  If a new compiler is [registered after initial compilation](/up.compiler#registering-compilers-after-booting),
-  that new compiler is automatically run on current elements.
-
-  @function up.hello
-  @param {Element|jQuery} element
-  @param {Object} [options.layer]
-    An existing `up.Layer` object can be passed to prevent re-lookup.
-    @internal
-  @param {Object} [options.data]
-    Overrides properties from the new fragment's `[up-data]`
-    with the given [data object](/data).
-  @param {Object} [options.dataMap]
-    An object mapping selectors to `options.data`.
-    @internal
-  @return {Element}
-    The compiled element
-  @stable
-  */
-  function hello(element, { layer, data, dataMap } = {}) {
-    // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    element = getSmart(element)
-
-    up.puts('up.hello()', "Compiling fragment %o", element)
-    up.syntax.compile(element, { layer, data, dataMap })
-    emitFragmentInserted(element)
-
-    return element
-  }
 
   /*-
   When any page fragment has been [inserted or updated](/up.replace),
@@ -2475,9 +2410,9 @@ up.fragment = (function() {
   }
 
   up.on('up:framework:boot', function() {
-    const {body} = document
-    body.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
-    hello(body)
+    const { documentElement } = document
+    documentElement.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
+    up.hello(documentElement)
 
     if (!up.browser.canPushState()) {
       return up.warn('Cannot push history changes. Next fragment update will load in a new page.')
@@ -2499,7 +2434,6 @@ up.fragment = (function() {
     contains,
     closest,
     source: sourceOf,
-    hello,
     visit,
     markAsDestroying: markFragmentAsDestroying,
     emitInserted: emitFragmentInserted,
@@ -2528,7 +2462,6 @@ up.reload = up.fragment.reload
 up.destroy = up.fragment.destroy
 up.render = up.fragment.render
 up.navigate = up.fragment.navigate
-up.hello = up.fragment.hello
 up.visit = up.fragment.visit
 
 /*-

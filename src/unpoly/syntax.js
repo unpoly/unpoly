@@ -10,6 +10,7 @@ The `up.syntax` package lets you pair HTML elements with JavaScript behavior.
 @see up.compiler
 @see [up-data]
 @see up.macro
+@see up.hello
 
 @module up.syntax
 */
@@ -44,10 +45,7 @@ up.syntax = (function() {
   You should migrate your [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
   callbacks to compilers. This will make sure they run both at page load and
   when a new fragment is inserted later.
-  See [Making JavaScripts work with fragment updates](/legacy-scripts) for advice
-  on migrating legacy scripts.
-
-  It will also organize your JavaScript snippets by selector.
+  See [Migrating legacy JavaScripts](/legacy-scripts) for advice on migrating legacy applications.
 
   ### Example
 
@@ -404,6 +402,78 @@ up.syntax = (function() {
   }
 
   /*-
+  Manually compiles a page fragment that has been inserted into the DOM
+  by external code.
+
+  All registered [compilers](/up.compiler) and [macros](/up.macro) will be called
+  with matches in the given `element`.
+
+  The [`up:fragment:inserted`](/up:fragment:inserted) event is emitted on the compiled element.
+
+  ### Unpoly automatically calls `up.hello()`
+
+  When the page is manipulated using Unpoly functions or HTML selectors,
+  Unpoly will automatically call `up.hello()` on new fragments:
+
+  ```js
+  let link = document.querySelector('a[href]')
+  let { fragment } = await up.follow(link)
+  // The fragment is already compiled. No need to call up.hello().
+  ```
+
+  You only ever need to use `up.hello()` after creating DOM elements without Unpoly's involvement, for example:
+
+  - Creating elements with `document.createElement()`.
+  - Setting the `innerHTML` property on an existing element
+  - Parsing HTML into elements using browser APIs like `DOMParser()`.
+  - Elements created by other libraries
+
+  In this case compilers will *not* run automatically  and some of Unpoly's own HTML selectors will not be active.
+  We can address this by manually calling `up.hello()` on new elements:
+
+  ```js
+  let element = document.createElement('div')
+  element.innerHTML = '...'
+  // The element is not compiled yet. We must compile it manually:
+  up.hello(element)
+  ```
+
+  ### Recompiling elements
+
+  It is safe to call `up.hello()` multiple times with the same elements.
+
+  In particular every compiler function is guaranteed to only run once for each matching element.
+
+  If a new compiler is registered after initial compilation,
+  that new compiler is [run automatically on current elements](/up.compiler#registering-compilers-after-booting).
+
+  @function up.hello
+  @param {Element|jQuery} element
+  @param {Object} [options.layer]
+    An existing `up.Layer` object can be passed to prevent re-lookup.
+    @internal
+  @param {Object} [options.data]
+    Overrides properties from the new fragment's `[up-data]`
+    with the given [data object](/data).
+  @param {Object} [options.dataMap]
+    An object mapping selectors to `options.data`.
+    @internal
+  @return {Element}
+    The compiled element
+  @stable
+  */
+  function hello(element, { layer, data, dataMap } = {}) {
+    // If passed a selector, up.fragment.get() will prefer a match on the current layer.
+    element = up.fragment.get(element)
+
+    up.puts('up.hello()', "Compiling fragment %o", element)
+    compile(element, { layer, data, dataMap })
+    up.fragment.emitInserted(element)
+
+    return element
+  }
+
+  /*-
   Runs any destructor on the given fragment and its descendants in the same layer.
 
   Unlike [`up.destroy()`](/up.destroy), this does not emit any events
@@ -573,7 +643,7 @@ up.syntax = (function() {
     $compiler: registerJQueryCompiler,
     $macro: registerJQueryMacro,
     destructor: registerDestructor,
-    compile,
+    hello,
     clean,
     data: readData,
   }
@@ -585,3 +655,4 @@ up.destructor = up.syntax.destructor
 up.macro = up.syntax.macro
 up.$macro = up.syntax.$macro
 up.data = up.syntax.data
+up.hello = up.syntax.hello
