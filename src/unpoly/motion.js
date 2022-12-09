@@ -1,7 +1,7 @@
 /*-
 Animation
 =========
-  
+
 When you [update a page fragment](/up.link) you can animate the change.
 
 You can add an attribute [`[up-transition]`](/a-up-transition) to your
@@ -323,10 +323,10 @@ up.motion = (function() {
   | `none`       | A transition that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
 
   You can define additional named transitions using [`up.transition()`](/up.transition).
-  
+
   You can also compose a transition from two [named animations](/up.animation).
   separated by a slash character (`/`):
-  
+
   - `move-to-bottom/fade-in`
   - `move-to-left/move-from-top`
 
@@ -364,7 +364,7 @@ up.motion = (function() {
   @return {Promise}
     A promise that fulfills when the transition ends.
   @stable
-  */  
+  */
   function morph(oldElement, newElement, transitionObject, options) {
     options = u.options(options)
     applyConfig(options)
@@ -540,7 +540,7 @@ up.motion = (function() {
   ```js
   up.animation('fade-in', function(element, options) {
     element.style.opacity = 0
-    up.animate(element, { opacity: 1 }, options)
+    return up.animate(element, { opacity: 1 }, options)
   })
   ```
 
