@@ -173,8 +173,8 @@ up.motion = (function() {
   @param {string|Function(element, options): Promise|Object} animation
     Can either be:
 
-    - The animation's name
-    - A function performing the animation
+    - The name of a [registered](/up.animation) animation
+    - A function performing the animation (same contract as a function passed to `up.animation()`)
     - An object of CSS attributes describing the last frame of the animation (using kebeb-case property names)
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
@@ -354,7 +354,11 @@ up.motion = (function() {
     The target element that will remain in the DOM once the transition finished.
 
     It should be detached before calling `up.morph()`.
-  @param {Function(oldElement, newElement)|string} transition
+  @param {Function(oldElement, newElement, options)|string} transition
+    Can either be:
+
+    - The name of a [registered](/up.transition) transition
+    - A function performing the transition (same contract as a function passed to `up.transition()`)
   @param {number} [options.duration=300]
     The duration of the animation, in milliseconds.
   @param {string} [options.easing='ease']
