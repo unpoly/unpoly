@@ -543,7 +543,7 @@ up.motion = (function() {
 
   @function up.transition
   @param {string} name
-  @param {Function(oldElement, newElement, options): Promise|Array} transition
+  @param {Function(oldElement, newElement, options): Promise} transition
   @stable
   */
   function registerTransition(name, transition) {

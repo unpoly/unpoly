@@ -808,9 +808,9 @@ up.fragment = (function() {
 
   `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
   regarding scrolling, focus, request cancelation and [many other side effects](/navigation).
+  To update a fragment without side effects, use `up.render()`.
 
-  Instead of calling `up.navigate()` you may also call `up.render({ navigate: true }`) option
-  for the same effect.
+  Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.
 
   @function up.navigate
   @param {string|Element|jQuery} [target]
@@ -824,6 +824,8 @@ up.fragment = (function() {
 
     Instead of passing the target as the first argument, you may also pass it as
     [´{ target }` option](/up.render#options.target).
+  @param {string} [options.url]
+    The URL to navigate to.
   @param {Object} [options]
     See options for `up.render()`.
   @return {up.RenderJob}
