@@ -49,6 +49,11 @@ TODOs after V3
   - up.destructor() could detect if an element is destroyed and run the destructor immediately?
     - What's the performance impact?
       - !element.isConnected && element.closest('.up-destroyed') ?
+- There was a case where { origin } should look inside an origin:
+    up.render('.day_menu_dish_autocomplete .day_menu_dish_autocomplete--suggestions', {
+      origin: titleInput,
+      url: '/day_menus/suggestions'
+    })
 
 TODOs for V3
 ============
@@ -74,7 +79,8 @@ Various changes
   - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revaliate: 'auto' }, users may want to deactivate
 - { params } prop for up:form:submit, up:form:validate ?
 - IE11: Replace isAttached / isDetached with Element#isConnected
-
+- What do we log when no replacement target is available?
+- Try out revalidation
 
 
 Docs
@@ -127,6 +133,7 @@ Docs
 - Have we documented places where we may separate options with " or "?
   - focus
   - scroll
+- Document how to disable revalidation
 
 
 ### New cache / revalidation
