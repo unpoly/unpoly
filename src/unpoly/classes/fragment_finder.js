@@ -16,17 +16,9 @@ up.FragmentFinder = class FragmentFinder {
   }
 
   findAroundOrigin() {
-    if (this.origin && up.fragment.config.matchAroundOrigin && this.isOriginAttached()) {
+    if (this.origin && up.fragment.config.matchAroundOrigin && this.origin.isConnected) {
       return this.findClosest() || this.findInVicinity()
     }
-  }
-
-  getDocumentRoot() {
-    return this.externalRoot || document.documentElement
-  }
-
-  isOriginAttached() {
-    return this.getDocumentRoot().contains(this.origin)
   }
 
   findClosest() {

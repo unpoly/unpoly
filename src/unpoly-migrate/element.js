@@ -170,3 +170,33 @@ up.element.toSelector = function(...args) {
   up.migrate.deprecated('up.element.toSelector()', 'up.fragment.toTarget()')
   return up.fragment.toTarget(...args)
 }
+
+/*-
+Returns whether the given element is attached to the DOM tree.
+
+@see up.element.isDetached
+
+@function up.element.isAttached
+@param {Element} element
+@return {boolean}
+@deprecated
+  Use `element.isConnected` instead.
+*/
+up.element.isAttached = function(element) {
+  up.migrate.deprecated('up.element.isAttached()', 'element.isConnected')
+  return element.isConnected
+}
+
+/*-
+Returns whether the given element has been removed from the DOM tree.
+
+@function up.element.isDetached
+@param {Element} element
+@return {boolean}
+@deprecated
+  User `!element.isConnected` instead.
+*/
+up.element.isDetached = function(element) {
+  up.migrate.deprecated('up.element.isDetached()', '!element.isConnected')
+  return !element.isConnected
+}

@@ -1800,7 +1800,7 @@ up.fragment = (function() {
   }
 
   function isGoodTarget(target, element, options = {}) {
-    return e.isDetached(element) || !config.verifyDerivedTarget || up.fragment.get(target, { layer: element, ...options }) === element
+    return !element.isConnected || !config.verifyDerivedTarget || up.fragment.get(target, { layer: element, ...options }) === element
   }
 
   /*-
@@ -1915,10 +1915,12 @@ up.fragment = (function() {
       filters.push(isNotDestroying)
     }
 
-    let detachedElementGiven = element && e.isDetached(element)
+    // If we're given an element that is detached *or* from another document
+    // (think up.ResponseDoc) we are not filtering by element layer.
+    let elementOutsideDocumentGiven = element && !document.contains(element)
     let expandTargetLayer
 
-    if (detachedElementGiven || options.layer === 'any') {
+    if (elementOutsideDocumentGiven || options.layer === 'any') {
       expandTargetLayer = up.layer.root
     } else {
       // Some up.fragment function center around an element, like closest() or matches().

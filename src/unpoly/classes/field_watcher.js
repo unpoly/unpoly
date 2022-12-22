@@ -47,7 +47,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   isAnyFieldAttached() {
-    return u.some(this.fields, (field) => !e.isDetached(field))
+    return u.some(this.fields, 'isConnected')
   }
 
   scheduleValues(values, event, fieldOptions) {

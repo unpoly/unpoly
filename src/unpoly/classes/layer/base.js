@@ -557,7 +557,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   isDetached() {
-    return e.isDetached(this.element)
+    return !this.element.isConnected
   }
 
   saveHistory() {

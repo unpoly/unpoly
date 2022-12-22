@@ -13,8 +13,7 @@ up.specUtil = do ->
   ###
   isDetached = (element) ->
     element = e.get(element)
-    # This is by far the fastest way to do this
-    not $.contains(document.documentElement, element)
+    !element.isConnected
 
   isAttached = (element) ->
     !isDetached(element)

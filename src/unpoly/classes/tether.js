@@ -45,7 +45,7 @@ up.Tether = class Tether {
   }
 
   isDetached() {
-    return e.isDetached(this.parent) || e.isDetached(this.anchor)
+    return !this.parent.isConnected || !this.anchor.isConnected
   }
 
   sync() {

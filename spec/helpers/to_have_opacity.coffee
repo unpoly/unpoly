@@ -9,7 +9,7 @@ beforeEach ->
         element = e.get(element)
         result = {}
 
-        if up.element.isAttached(element)
+        if element.isConnected
           actualOpacity = e.styleNumber(element, 'opacity')
           result.pass =  Math.abs(expectedOpacity - actualOpacity) <= tolerance
           unless result.pass

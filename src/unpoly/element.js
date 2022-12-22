@@ -1226,30 +1226,6 @@ up.element = (function() {
   }
 
   /*-
-  Returns whether the given element is attached to the DOM tree.
-
-  @see up.element.isDetached
-
-  @function up.element.isAttached
-  @param {Element} element
-  @return {boolean}
-  @stable
-  */
-  function isAttached(element) {
-    return document.contains(element)
-  }
-
-  /*-
-  Returns whether the given element has been removed from the DOM tree.
-
-  @function up.element.isDetached
-  @param {Element} element
-  @return {boolean}
-  @stable
-  */
-  let isDetached = u.negate(isAttached)
-
-  /*-
   Cleans up internal jQuery caches for the given element.
 
   As a side effect the element is removed from the DOM.
@@ -1316,8 +1292,6 @@ up.element = (function() {
     isVisible, // practical
     upAttrs,
     toggleAttr,
-    isDetached,
-    isAttached,
     addTemporaryClass,
     setTemporaryAttr,
     cleanJQuery,

@@ -69,7 +69,7 @@ up.LinkPreloader = class LinkPreloader {
 
   preloadNow(event, link) {
     // Don't preload if the link was removed from the DOM while we were waiting for the timer.
-    if (e.isDetached(link)) {
+    if (!link.isConnected) {
       this.reset()
       return
     }

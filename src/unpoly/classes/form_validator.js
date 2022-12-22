@@ -125,7 +125,7 @@ up.FormValidator = class FormValidator {
 
   async doRenderDirtySolutions() {
     // Remove solutions for elements that were detached while we were waiting for the timer.
-    this.dirtySolutions = u.reject(this.dirtySolutions, (solution) => e.isDetached(solution.element) || e.isDetached(solution.origin))
+    this.dirtySolutions = u.filter(this.dirtySolutions, ({ element, origin }) => element.isConnected && origin.isConnected)
     if (!this.dirtySolutions.length || this.rendering) {
       return
     }

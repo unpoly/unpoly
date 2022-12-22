@@ -131,7 +131,7 @@ up.RenderResult = class RenderResult extends up.Record {
   }
 
   update(otherResult) {
-    this.fragments = this.fragments.concat(otherResult.fragments).filter(up.element.isAttached)
+    this.fragments = u.filter(this.fragments.concat(otherResult.fragments), 'isConnected')
     this.target = otherResult.target
     this.layer = otherResult.layer
     this.finished = otherResult.finished

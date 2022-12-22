@@ -28,7 +28,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
   dispatchEvent() {
     this.target.dispatchEvent(this.event)
 
-    if (this.ensureBubbles && e.isDetached(this.target)) {
+    if (this.ensureBubbles && !this.target.isConnected) {
       document.dispatchEvent(this.event)
     }
 
