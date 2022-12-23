@@ -77,9 +77,6 @@ Various changes
   => Do we see onRender() as "something happened" or as "elements changed"?
 - Expose up.fragment.config.renderOptions
   - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revaliate: 'auto' }, users may want to deactivate
-- { params } prop for up:form:submit, up:form:validate ?
-- IE11: Replace isAttached / isDetached with Element#isConnected
-- What do we log when no replacement target is available?
 - Try out revalidation
 
 
@@ -490,3 +487,4 @@ Decisions
   => What's with up.fragment.source()?
 - [up-hungry][up-placement]
   => This only makes sence when we have some form of deduping
+- What do we log when no replacement target is available? => up.render() throws an error
