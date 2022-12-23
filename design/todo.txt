@@ -67,8 +67,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- Try out revalidation
-
 
 Docs
 ----
@@ -112,6 +110,7 @@ Docs
 - Finish /reacting-to-form-changes
 - Finish /validation
 - Rename "Scroll option" to "Scrolling"
+  - Also the page title
 - Maybe mention history events in /render-hooks
 - Animation-related attributes should show:
   - Where a list of predefined animations can be found
@@ -246,6 +245,9 @@ V3 final Launch
 - Open heads-up issues for server integration maintainers
 - Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
 - Schedule Tweets for new doc pages
+- Demo app
+  - Upgrade to unpoly3
+  - Redeploy
 
 
 
