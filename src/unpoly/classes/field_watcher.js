@@ -9,14 +9,12 @@ up.FieldWatcher = class FieldWatcher {
     this.fields = fields
     this.options = options
     this.batch = options.batch
-    this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable'] }) : {} // TODO: Also parse [up-sequence] when we get it
     this.unbindFns = []
   }
 
   fieldOptions(field) {
     let options = u.copy(this.options)
-    let defaults = { event: 'input', ...this.formDefaults }
-    return up.form.watchOptions(field, options, { defaults })
+    return up.form.watchOptions(field, options, { defaults: { event: 'input' } })
   }
 
   start() {

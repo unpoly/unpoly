@@ -285,7 +285,7 @@ up.form = (function() {
   */
   function submitOptions(form, options, parserOptions) {
     form = getForm(form)
-    options = parseDestinationOptions(form, options, parserOptions)
+    options = destinationOptions(form, options, parserOptions)
 
     let parser = new up.OptionsParser(form, options, parserOptions)
 
@@ -299,8 +299,8 @@ up.form = (function() {
     // The guardEvent will also be assigned an { renderOptions } property in up.render()
     options.guardEvent ||= up.event.build('up:form:submit', {
       submitButton: options.submitButton,
-      params: options.params,
-      log: 'Submitting form'
+      log: 'Submitting form',
+      params: options.params
     })
 
     options.origin ||= up.viewport.focusedElementWithin(form) || options.submitButton || form
@@ -313,27 +313,37 @@ up.form = (function() {
     return options
   }
 
-  function watchOptions(field, options, parserOptions) {
-    let parser = new up.OptionsParser(field, options, { closest: true, attrPrefix: 'up-watch-', ...parserOptions })
+  function watchBaseOptions(form, options) {
+    options = u.options(options)
+    let parser = new up.OptionsParser(form, options)
+    parser.boolean('feedback')
+    parser.booleanOrString('disable')
+    return options
+  }
+
+  function watchOptions(field, options, parserOptions = {}) {
+    options = u.options(options)
 
     // Computing the effective options for a given field is pretty involved,
-    // as there are multiple layers of defaults.
+    // as there are multiple layers of defaults. In increasing priority these are:
     //
-    // Form-wide options are also used for watchers:
+    // Users can configure app-wide defaults for some options:
+    //
+    // 		up.form.config.watchInputDelay = 100
+    //
+    // Form-wide options (without [up-watch-...] prefix) are also used for watchers:
     //
     // 		<form up-disable="true">
     // 			<input up-autosubmit>
     // 		</form>
     //
-    // Form-wide defaults are not parsed by this function, but merged in by up.FormValidator or up.FieldWatcher.
-    //
-    // Form-wide options can be overridden at the input level:
+    // Form-wide options can be overridden at the input level, using [up-watch-...] prefixed attributes:
     //
     // 		<form up-disable="true">
     // 			<input up-autosubmit up-watch-disable="false">
     // 		</form>
     //
-    // Forms can configure a separate option for all watchers:
+    // Forms can configure separate, [up-watch-...] prefixed defaults for all watchers:
     //
     // 		<form up-disable="true" up-watch-disable="false">
     // 			<input up-autosubmit>
@@ -350,15 +360,15 @@ up.form = (function() {
     // 			</div>
     // 		</form>
     //
-    // Users can configure app-wide defaults:
+    // Programmatic callers may also override all attributes by passing an options hash:
     //
-    // 		up.form.config.watchInputDelay = 100
-    //
-    // Summing up, we get an option like { disable } through the following priorities:
-    //
-    // 1. Passed as explicit `up.watch({ disable })` option
-    // 2. Attribute for the watch intent (e.g. `[up-watch-disable]` at the input or form)
-    // 3. The option the form would use for regular submission (e.g. `[up-disable]` at the form), if applicable.
+    //    up.validate(field, { disable: true })
+
+    let form = getForm(field)
+    parserOptions.defaults = { ...parserOptions.defaults, ...watchBaseOptions(form) }
+
+    let parser = new up.OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-watch-' })
+
     parser.boolean('feedback')
     parser.booleanOrString('disable')
     parser.string('event')
@@ -475,7 +485,7 @@ up.form = (function() {
   // This was extracted from submitOptions().
   // Validation needs to submit a form without options intended for the final submission,
   // like [up-scroll], [up-confirm], etc.
-  function parseDestinationOptions(form, options, parserOptions) {
+  function destinationOptions(form, options, parserOptions) {
     options = u.options(options)
     form = getForm(form)
     const parser = new up.OptionsParser(form, options, parserOptions)
@@ -483,27 +493,25 @@ up.form = (function() {
     parser.string('contentType', { attr: ['enctype', 'up-content-type'] })
     parser.json('headers')
 
-    parser.process('params', function() {
-      // Parse params from form fields.
-      const params = up.Params.fromForm(form)
+    // Parse params from form fields.
+    const params = up.Params.fromForm(form)
 
-      const submitButton = submittingButton(form)
-      if (submitButton) {
-        options.submitButton = submitButton
-        // Submit buttons with a [name] attribute will add to the params.
-        // Note that addField() will only add an entry if the given button has a [name] attribute.
-        params.addField(submitButton)
+    const submitButton = submittingButton(form)
+    if (submitButton) {
+      options.submitButton = submitButton
+      // Submit buttons with a [name] attribute will add to the params.
+      // Note that addField() will only add an entry if the given button has a [name] attribute.
+      params.addField(submitButton)
 
-        // Submit buttons may have [formmethod] and [formaction] attribute
-        // that override [method] and [action] attribute from the <form> element.
-        options.method ||= submitButton.getAttribute('formmethod')
-        options.url ||= submitButton.getAttribute('formaction')
-      }
+      // Submit buttons may have [formmethod] and [formaction] attribute
+      // that override [method] and [action] attribute from the <form> element.
+      options.method ||= submitButton.getAttribute('formmethod')
+      options.url ||= submitButton.getAttribute('formaction')
+    }
 
-      // We had any { params } option to the params that we got from the form.
-      params.addAll(options.params)
-      options.params = params
-    })
+    // We had any { params } option to the params that we got from the form.
+    params.addAll(options.params)
+    options.params = params
 
     // Parse the form element's { url, method } *after* parsing the submit button.
     // The submit button's [formmethod] and [formaction] attributes have precedence.
@@ -550,6 +558,8 @@ up.form = (function() {
     The `<form>` element that will be submitted.
   @param {up.Params} event.params
     The [form parameters](/up.Params) that will be send as the form's request payload.
+
+    Listeners may inspect and modify params before they are sent.
   @param {Element} [event.submitButton]
     The button used to submit the form.
 
@@ -960,6 +970,10 @@ up.form = (function() {
   @event up:form:validate
   @param {Element} event.target
     The form that is being validated.
+  @param {up.Params} event.params
+    The [form parameters](/up.Params) that will be send as the form's request payload.
+
+    Listeners may inspect and modify params before they are sent.
   @param {Element} event.fields
     The form fields that triggered this validation pass.
 
@@ -1804,6 +1818,7 @@ up.form = (function() {
     config,
     submit,
     submitOptions,
+    destinationOptions,
     watchOptions,
     isSubmittable,
     watch,

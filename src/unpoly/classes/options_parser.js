@@ -16,12 +16,6 @@ up.OptionsParser = class OptionsParser {
   @param {Object} parserOptions.defaults
     An object of default key/values if an option can neither be found in `options`
     nor can be parsed from `element`.
-  @param {Array<string>} parserOptions.only
-    An allowlist of option properties that should be parsed.
-
-    This is a performance optimization for fewer DOM accesses.
-    There is no guarantee that only these properties will be returned by functions
-    like `up.form.submitOptions()`.
   */
   constructor(element, options, parserOptions = {}) {
     this.options = options
@@ -30,9 +24,6 @@ up.OptionsParser = class OptionsParser {
     this.closest = parserOptions.closest
     this.attrPrefix = parserOptions.attrPrefix || 'up-'
     this.defaults = parserOptions.defaults || {}
-    if (parserOptions.only) {
-      this.only = new Set(parserOptions.only)
-    }
   }
 
   string(key, keyOptions) {
@@ -61,10 +52,6 @@ up.OptionsParser = class OptionsParser {
   }
 
   parse(attrValueFn, key, keyOptions = {}) {
-    if (!this.isKeyAllowed(key)) {
-      return
-    }
-
     const attrNames = u.wrapList(keyOptions.attr ?? this.attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
@@ -89,16 +76,6 @@ up.OptionsParser = class OptionsParser {
     if (this.fail && (failKey = up.fragment.failKey(key))) {
       const failAttrNames = u.compact(u.map(attrNames, (attrName) => this.deriveFailAttrName(attrName)))
       this.parse(attrValueFn, failKey, { ... keyOptions, attr: failAttrNames })
-    }
-  }
-
-  isKeyAllowed(key) {
-    return !this.only || this.only.has(key)
-  }
-
-  process(key, fn) {
-    if (this.isKeyAllowed(key)) {
-      fn()
     }
   }
 

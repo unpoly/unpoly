@@ -135,32 +135,35 @@ describe 'up.form', ->
           describe "when the input receives a #{eventType} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
-              $input = $fixture('input[name="input-name"][value="old-value"]')
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.watch($input, callback)
-              $input.val('new-value')
-              Trigger[eventType]($input)
-              Trigger[eventType]($input)
+              up.watch(input, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              Trigger[eventType](input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
-              $input = $fixture('input[name="input-name"][value="old-value"]')
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.watch($input, callback)
-              Trigger[eventType]($input)
+              up.watch(input, callback)
+              Trigger[eventType](input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
             describe 'with { delay } option', ->
 
               it 'debounces the callback', asyncSpec (next) ->
-                $input = $fixture('input[name="input-name"][value="old-value"]')
+                form = fixture('form')
+                input = e.affix(form, 'input[name="input-name"][value="old-value"]')
                 callback = jasmine.createSpy('change callback')
-                up.watch($input, { delay: 200 }, callback)
-                $input.val('new-value-1')
-                Trigger[eventType]($input)
+                up.watch(input, { delay: 200 }, callback)
+                input.value = 'new-value-1'
+                Trigger[eventType](input)
 
                 next.after 100, ->
                   # 100 ms after change 1: We're still waiting for the 200ms delay to expire
@@ -170,14 +173,14 @@ describe 'up.form', ->
                   # 300 ms after change 1: The 200ms delay has expired
                   expect(callback.calls.count()).toEqual(1)
                   expect(callback.calls.mostRecent().args[0]).toEqual('new-value-1')
-                  $input.val('new-value-2')
-                  Trigger[eventType]($input)
+                  input.value = 'new-value-2'
+                  Trigger[eventType](input)
 
                 next.after 80, ->
                   # 80 ms after change 2: We change again, resetting the delay
                   expect(callback.calls.count()).toEqual(1)
-                  $input.val('new-value-3')
-                  Trigger[eventType]($input)
+                  input.value = 'new-value-3'
+                  Trigger[eventType](input)
 
                 next.after 170, ->
                   # 250 ms after change 2, which was superseded by change 3
@@ -191,7 +194,8 @@ describe 'up.form', ->
                   expect(callback.calls.mostRecent().args[0]).toEqual('new-value-3')
 
               it 'does not run the callback if the field was detached during the delay', asyncSpec (next) ->
-                input = fixture('input[name="input-name"][value="old-value"]')
+                form = fixture('form')
+                input = e.affix(form, 'input[name="input-name"][value="old-value"]')
                 callback = jasmine.createSpy('watcher callback')
                 up.watch(input, { delay: 150 }, callback)
                 input.value = 'new-value'
@@ -204,7 +208,8 @@ describe 'up.form', ->
                   expect(callback).not.toHaveBeenCalled()
 
               it 'does not run the callback if the field was aborted during the delay', asyncSpec (next) ->
-                container = fixture('.container')
+                form = fixture('form')
+                container = e.affix(form, '.container')
                 input = e.affix(container, 'input[name="input-name"][value="old-value"]')
                 callback = jasmine.createSpy('watcher callback')
                 up.watch(input, { delay: 150 }, callback)
@@ -218,20 +223,21 @@ describe 'up.form', ->
                   expect(callback).not.toHaveBeenCalled()
 
             it 'delays a callback if a previous async callback is taking long to execute', asyncSpec (next) ->
-              $input = $fixture('input[name="input-name"][value="old-value"]')
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callbackCount = 0
               callback = ->
                 callbackCount += 1
                 return up.specUtil.promiseTimer(100)
-              up.watch($input, { delay: 1 }, callback)
-              $input.val('new-value-1')
-              Trigger[eventType]($input)
+              up.watch(input, { delay: 1 }, callback)
+              input.value = 'new-value-1'
+              Trigger[eventType](input)
 
               next.after 30, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackCount).toEqual(1)
-                $input.val('new-value-2')
-                Trigger[eventType]($input)
+                input.value = 'new-value-2'
+                Trigger[eventType](input)
 
               next.after 30, ->
                 # Second callback is triggerd, but waits for first callback to complete
@@ -242,27 +248,28 @@ describe 'up.form', ->
                 expect(callbackCount).toEqual(2)
 
             it 'only runs the last callback when a previous long-running callback has been delaying multiple callbacks', asyncSpec (next) ->
-              $input = $fixture('input[name="input-name"][value="old-value"]')
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
 
               callbackArgs = []
               callback = (value, field) ->
                 callbackArgs.push(value)
                 return up.specUtil.promiseTimer(100)
 
-              up.watch($input, { delay: 1 }, callback)
-              $input.val('new-value-1')
-              Trigger[eventType]($input)
+              up.watch(input, { delay: 1 }, callback)
+              input.value = 'new-value-1'
+              Trigger[eventType](input)
 
               next.after 10, ->
                 # Callback has been called and takes 100 ms to complete
                 expect(callbackArgs).toEqual ['new-value-1']
-                $input.val('new-value-2')
-                Trigger[eventType]($input)
+                input.value = 'new-value-2'
+                Trigger[eventType](input)
 
               next.after 10, ->
                 expect(callbackArgs).toEqual ['new-value-1']
-                $input.val('new-value-3')
-                Trigger[eventType]($input)
+                input.value = 'new-value-3'
+                Trigger[eventType](input)
 
               next.after 100, ->
                 expect(callbackArgs).toEqual ['new-value-1', 'new-value-3']
@@ -507,8 +514,7 @@ describe 'up.form', ->
         container = e.affix(form, 'div[up-watch-event="my:event"]')
         field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        options = {}
-        up.form.watchOptions(field, options)
+        options = up.form.watchOptions(field)
 
         expect(options.event).toBe('my:event')
 
@@ -517,8 +523,7 @@ describe 'up.form', ->
         field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="change"]')
         up.form.config.watchChangeEvents = ['change', 'blur']
 
-        options = {}
-        up.form.watchOptions(field, options)
+        options = up.form.watchOptions(field)
 
         expect(options.event).toEqual ['change', 'blur']
 
@@ -527,10 +532,50 @@ describe 'up.form', ->
         field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="input"]')
         up.form.config.watchInputEvents = ['custom:event']
 
-        options = {}
-        up.form.watchOptions(field, options)
+        options = up.form.watchOptions(field)
 
         expect(options.event).toEqual ['custom:event']
+
+      it 'parses [up-disable] and [up-feedback] options from the form', ->
+        form = fixture('form[up-disable=true][up-feedback=true]')
+        field = e.affix(form, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining(disable: true, feedback: true))
+
+      it 'accepts a parser option { defaults } with defaults that can be overridden with any attribute or option', ->
+        form = fixture('form[up-disable=false]')
+        field = e.affix(form, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true }})
+
+        expect(options).toEqual(jasmine.objectContaining(disable: false, feedback: true))
+
+      it 'prioritizes form[up-watch-disable] and form[up-watch-feedback] over form[up-disable] and form[up-feedback]', ->
+        form = fixture('form[up-disable=true][up-watch-disable=false][up-feedback=true][up-watch-feedback=false]')
+        field = e.affix(form, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining(disable: false, feedback: false))
+
+      it 'prioritizes the closest [up-watch-] prefixed attribute', ->
+        form = fixture('form[up-watch-delay=1000]')
+        container = e.affix(form, 'div[up-watch-delay=500]')
+        field = e.affix(container, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining(delay: 500))
+
+      it 'overrides all attributes with the given options hash', ->
+        form = fixture('form[up-watch-delay=1000]')
+        field = e.affix(form, 'input[type="text"][name="foo"]')
+
+        options = up.form.watchOptions(field, { delay: 300 })
+
+        expect(options).toEqual(jasmine.objectContaining(delay: 300))
 
     describe 'up.submit()', ->
 
@@ -1083,9 +1128,9 @@ describe 'up.form', ->
 
     describe 'up.validate()', ->
 
-      it 'emits an up:form:validate event instead of an up:form:submit event', asyncSpec (next) ->
+      it 'emits an up:form:validate event with information about the validation pass', asyncSpec (next) ->
         form = fixture('form[action=/path]')
-        input = e.affix(form, 'input[name=foo]')
+        input = e.affix(form, 'input[name=foo][value=foo-value]')
         submitListener = jasmine.createSpy('up:form:submit listener')
         validateListener = jasmine.createSpy('up:form:validate listener')
         up.on('up:form:submit', submitListener)
@@ -1096,7 +1141,25 @@ describe 'up.form', ->
         next ->
           expect(submitListener).not.toHaveBeenCalled()
           expect(validateListener).toHaveBeenCalled()
-          expect(validateListener.calls.argsFor(0)[0]).toBeEvent('up:form:validate', fields: [input])
+          validateEvent = validateListener.calls.argsFor(0)[0]
+          expect(validateEvent).toBeEvent('up:form:validate')
+          expect(validateEvent.fields).toEqual([input])
+          expect(validateEvent.params).toMatchParams(foo: 'foo-value')
+
+      it 'lets up:form:validate listeners mutate params before submission', asyncSpec (next) ->
+        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+        input = e.affix(form, 'input[name="foo"][value="one"]')
+
+        listener = (event) ->
+          expect(event.params.get('foo')).toBe("one")
+          event.params.set('foo', 'two')
+
+        up.on('up:form:validate', listener)
+
+        up.validate(input)
+
+        next ->
+          expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
 
       it 'validates the given element', asyncSpec (next) ->
         form = fixture('form[action=/form]')
@@ -1378,6 +1441,24 @@ describe 'up.form', ->
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="foo"]), [up-form-group]:has(input[name="baz"])')
+
+        it 'picks up changed field values between multiple up.validate() calls (bugfix)', asyncSpec (next) ->
+          form = fixture('form[action=/path][method=post]')
+          fooGroup = e.affix(form, '[up-form-group]')
+          fooField = e.affix(fooGroup, 'input[name=foo]')
+          barGroup = e.affix(form, '[up-form-group]')
+          barField = e.affix(barGroup, 'input[name=bar]')
+
+          fooField.value = 'one'
+          up.validate(fooField)
+
+          barField.value = 'two'
+          up.validate(barField)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+            expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'one', bar: 'two' })
+
 
         it 'honors the { disable } option of each batched validation', asyncSpec (next) ->
           form = fixture('form[action=/path][up-watch-disable=":origin"]')
@@ -1681,6 +1762,23 @@ describe 'up.form', ->
         expect(submitEvent.params.get('field1')).toEqual('value1')
         expect(submitEvent.params.get('field2')).toEqual('value2')
         expect(submitEvent.submitButton).toBe(submitButton)
+
+      it 'lets up:form:submit listeners mutate params before submission', asyncSpec (next) ->
+        form = fixture('form[action="/form-target"][method="put"][up-target=".response"]')
+        e.affix(form, 'input[name="foo"][value="one"]')
+        submitButton = e.affix(form, 'input[type="submit"]')
+
+        listener = (event) ->
+          expect(event.params.get('foo')).toBe("one")
+          event.params.set('foo', 'two')
+
+        up.on('up:form:submit', listener)
+
+        Trigger.clickSequence(submitButton)
+
+        next ->
+          expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
+
 
       it 'allows to refer to the origin as "&" in the target selector', asyncSpec (next) ->
         $form = $fixture('form.my-form[action="/form-target"][up-target="form:has(&)"]').text('old form text')
@@ -2182,7 +2280,7 @@ describe 'up.form', ->
       describe 'when a selector is given', ->
 
         it "submits the input's form when the input is changed, adding an 'X-Up-Validate' header, and then replaces the selector", asyncSpec (next) ->
-          $form = $fixture('form[action="/path/to"]')
+          $form = $fixture('form[action="/path/to"][method=post]')
           $group = $("""
             <div class="field-group">
               <input name="user" value="judy" up-validate=".field-group">
@@ -2197,6 +2295,7 @@ describe 'up.form', ->
           next =>
             request = @lastRequest()
             expect(request.requestHeaders['X-Up-Validate']).toEqual('user')
+            expect(request.data()).toMatchParams({ user: 'carl' })
             expect(request.requestHeaders['X-Up-Target']).toEqual('.field-group')
 
             @respondWith

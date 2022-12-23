@@ -5,7 +5,6 @@ up.FormValidator = class FormValidator {
 
   constructor(form) {
     this.form = form
-    this.formDefaults = form ? up.form.submitOptions(form, {}, { only: ['feedback', 'disable', 'contentType', 'headers', 'params', 'url', 'method'] }) : {}
     this.dirtySolutions = []
     this.nextRenderTimer = null
     this.rendering = false
@@ -40,7 +39,7 @@ up.FormValidator = class FormValidator {
       || this.getFieldSolution(options)
       || this.getElementSolution(options.origin)
 
-    solution.renderOptions = { ...this.formDefaults, ...this.originOptions(solution.origin), ...options }
+    solution.renderOptions = this.originOptions(solution.origin, options)
 
     // Resolve :origin selector here. We can't delegate to up.render({ origin })
     // as that only takes a single origin, even with multiple targets.
@@ -102,9 +101,7 @@ up.FormValidator = class FormValidator {
   }
 
   originOptions(element, overrideOptions) {
-    let defaults = { event: 'change', ...this.formDefaults }
-    let closestOptions = up.form.watchOptions(element, {}, { defaults })
-    return { ...this.formDefaults, ...closestOptions, ...overrideOptions }
+    return up.form.watchOptions(element, overrideOptions, { defaults: { event: 'change' } })
   }
 
   scheduleNextRender() {
@@ -155,7 +152,11 @@ up.FormValidator = class FormValidator {
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // Merge together all render options for all origins.
-    let options = u.merge(this.formDefaults, ...dirtyRenderOptionsList, { dataMap })
+    let options = u.merge(
+      ...dirtyRenderOptionsList,
+      { dataMap },
+      up.form.destinationOptions(this.form),
+    )
 
     // Update the collected targets of all solutions.
     options.target = u.map(dirtySolutions, 'target').join(', ')
@@ -188,7 +189,11 @@ up.FormValidator = class FormValidator {
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
-    options.guardEvent = up.event.build('up:form:validate', { fields: dirtyFields, log: 'Validating form' })
+    options.guardEvent = up.event.build('up:form:validate', {
+      fields: dirtyFields,
+      log: 'Validating form',
+      params: options.params
+    })
 
     // We don't render concurrently. If additional fields want to validate
     // while our request is in flight, they add to a new @dirtySolutions array.
