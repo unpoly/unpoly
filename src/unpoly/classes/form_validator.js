@@ -48,7 +48,7 @@ up.FormValidator = class FormValidator {
     return solution
   }
 
-  getFieldSolution({ origin, ... options }) {
+  getFieldSolution({ origin, ...options }) {
     if (up.form.isField(origin)) {
       return this.getValidateAttrSolution(origin) || this.getFormGroupSolution(origin, options)
     }
