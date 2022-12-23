@@ -1319,13 +1319,6 @@ up.form = (function() {
 
   In Ruby on Rails the processing action should behave like this:
 
-  ```js
-  foo()
-  bar() // mark-line
-  baz()
-  ```
-
-
   ```ruby
   class UsersController < ApplicationController
 
