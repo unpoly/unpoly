@@ -34,7 +34,6 @@ TODOs after V3
   - As a separate header?
   => I think it's :maybe and then update unpoly-rails so target? and any_target? ignore the :maybe
 - Reconciliation of <head> elements
-
 - Maybe auto-submit should not navigate by default
   - How to restore this?
   - up-navigate ?
@@ -54,6 +53,12 @@ TODOs after V3
       origin: titleInput,
       url: '/day_menus/suggestions'
     })
+- Expose up.fragment.config.renderOptions
+  - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revalidate: 'auto' }, users may want to deactivate
+- Try to have a 'hash' strategy in overlays
+  - Also update doc page /focus
+
+
 
 TODOs for V3
 ============
@@ -62,21 +67,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- Try to have a 'hash' strategy in overlays
-  - Also update doc page /focus
-- Reconsider why we don't call onRender() for empty updates
-  - Pro: Call it for every pass
-    - We do still update scroll and focus, even for empty responses
-      - Maybe even location?
-    - We will update more in the future with head merging
-    - There is no other hook for "after $things changed"
-      - But nothing changed after an empty render? At least not in the DOM.
-    - We can simplify docs for onRender and up-on-render
-  - Con: Keep it like now
-    - If we render without fallback we still need to check if up.RenderResult#fragment is defined
-  => Do we see onRender() as "something happened" or as "elements changed"?
-- Expose up.fragment.config.renderOptions
-  - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revaliate: 'auto' }, users may want to deactivate
 - Try out revalidation
 
 
@@ -488,3 +478,16 @@ Decisions
 - [up-hungry][up-placement]
   => This only makes sence when we have some form of deduping
 - What do we log when no replacement target is available? => up.render() throws an error
+- Reconsider why we don't call onRendered() for empty updates
+  - Pro: Call it for every pass
+    - We do still update scroll and focus, even for empty responses
+      - Maybe even location?
+    - We will update more in the future with head merging
+    - There is no other hook for "after $things changed"
+      - But nothing changed after an empty render? At least not in the DOM.
+    - We can simplify docs for onRender and up-on-render
+  - Con: Keep it like now
+    - If we render without fallback we still need to check if up.RenderResult#fragment is defined
+    - It will be super rare that the first render pass does not return anything.
+      - However, we would *always* get empty onRendered calls for revalidation
+  => Keep it, but improve docs
