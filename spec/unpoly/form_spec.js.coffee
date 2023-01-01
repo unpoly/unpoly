@@ -536,29 +536,13 @@ describe 'up.form', ->
 
         expect(options.event).toEqual ['custom:event']
 
-      it 'parses [up-disable] and [up-feedback] options from the form', ->
-        form = fixture('form[up-disable=true][up-feedback=true]')
-        field = e.affix(form, 'input[type="text"][name="foo"]')
-
-        options = up.form.watchOptions(field)
-
-        expect(options).toEqual(jasmine.objectContaining(disable: true, feedback: true))
-
       it 'accepts a parser option { defaults } with defaults that can be overridden with any attribute or option', ->
-        form = fixture('form[up-disable=false]')
+        form = fixture('form[up-watch-disable=false]')
         field = e.affix(form, 'input[type="text"][name="foo"]')
 
         options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true }})
 
         expect(options).toEqual(jasmine.objectContaining(disable: false, feedback: true))
-
-      it 'prioritizes form[up-watch-disable] and form[up-watch-feedback] over form[up-disable] and form[up-feedback]', ->
-        form = fixture('form[up-disable=true][up-watch-disable=false][up-feedback=true][up-watch-feedback=false]')
-        field = e.affix(form, 'input[type="text"][name="foo"]')
-
-        options = up.form.watchOptions(field)
-
-        expect(options).toEqual(jasmine.objectContaining(disable: false, feedback: false))
 
       it 'prioritizes the closest [up-watch-] prefixed attribute', ->
         form = fixture('form[up-watch-delay=1000]')
@@ -755,7 +739,7 @@ describe 'up.form', ->
           up.on 'up:request:load', ({ request }) -> requests.push(request)
 
           container = fixture('.container')
-          form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable]')
+          form = e.affix(container, 'form[method="post"][action="/endpoint"][up-target=".container"][up-disable][up-watch-disable]')
           input = e.affix(form, 'input[name=email]')
           up.validate(input)
 

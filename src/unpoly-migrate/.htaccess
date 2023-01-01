@@ -27,8 +27,10 @@ RedirectPermanent /up.layer.context /up.context
 RedirectPermanent /up.cache /caching
 RedirectPermanent /a-up-target /a-up-follow
 RedirectPermanent /form-up-target /form-up-follow
-RedirectPermanent /form-up-observe /form-up-watch
-RedirectPermanent /input-up-observe /input-up-watch
+RedirectPermanent /form-up-observe /up-watch
+RedirectPermanent /input-up-observe /up-watch
+RedirectPermanent /form-up-autosubmit /up-autosubmit
+RedirectPermanent /input-up-autosubmit /up-autosubmit
 RedirectPermanent /up.observe /up.watch
 
 RedirectPermanent /server-errors /failed-responses

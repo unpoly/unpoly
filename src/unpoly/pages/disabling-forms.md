@@ -52,11 +52,10 @@ Instead of targeting form controls directly, you may also pass a selector for a 
 ### Disabling fields while watching
 
 Unpoly has a number of features that watch a form for changes, like `[up-validate]`, `[up-watch]` or `[up-autosubmit]`.
+You may disable form elements while a watcher is processing by setting an `[up-watch-disable]` attribute on a field, on the `<form>` or on any container that contains fields.
 
-These features will also honor an `[up-disable]` attribute while processing.
-You can override this by setting an `[up-watch-disable]` attribute on the `<form>` or any container or form field.
+See [watch options](/watch-options) for details.
 
-To not disable fields while watching, set `[up-watch-disable=false]` on the `<form>`. 
 
 
 @page disabling-forms

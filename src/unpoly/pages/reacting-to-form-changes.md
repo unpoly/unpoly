@@ -40,6 +40,11 @@ See `[up-switch]`.
 
 
 
+Automatically submitting a form on changes
+-------------------------------------------
+
+See `[up-autosubmit]`.
+
 
 Watching for changes programmatically
 ------------------------------------

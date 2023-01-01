@@ -67,6 +67,22 @@ TODOs for V3
 Various changes
 ---------------
 
+- When watching: Is it really useful that a field (and not a form) gets .up-active?
+  - E.g. a watcher on some input submits a form, the form is not considered .up-active :(
+  - The whole issue was introduced by making the origin the field instead of the form
+  - To style a working form we would need to style form.up-active, form:has(.up-active)
+  - We could consider to feedback the form if the origin is an input, or a non-link within a form
+  - Or up.submit() sets { feedbackElement }
+    - However up.validate() does not go through up.submit()
+- It is a little weird that up.validate('input') will update the input, not the form group
+  - However, up.validate(input) *will* update the form group
+  - All other Unpoly functions accept either selector or element as a first argument, with the same result
+  - We could consider changing parseValidateArg() so
+    - up.validate('.foo') resolves to up.validate(origin: get('.foo')) instead
+    - Users who want to update a target verbatim can still stay either:
+      - up.validate({ target: '.foo' })            - or -
+      - up.validate('.foo', { formGroup: false })
+
 
 Docs
 ----
@@ -172,6 +188,7 @@ Docs
   - In up.watch()
   - In up.validate()
   - Document that multiple [up-validate] requests are merged into a single request
+- Document that up.watch() needs to return a promise so Unpoly can (1) prevent concurrency (2) honor [up-feedback] (3) honor [up-disable]
 - Test and Document that we can use live validation like this:
   <input up-keep up-validate up-watch-event="input">
 - X-Up-Validate header
