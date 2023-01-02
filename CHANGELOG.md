@@ -17,6 +17,11 @@ You can also go from v1 to v3 directly.
 
 Changes tracked until 2022-07-06.
 
+### Unsorted
+
+- data, keepData, dataMap
+
+
 
 ### Big topic: Concurrency
 
@@ -428,7 +433,7 @@ This is the last release with support for Internet Explorer 11. Future releases 
 
 This is a maintenance release including two changes:
 
-- `input[up-switch]` and `up.element.hide()` now hides elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
+- `[up-switch]` and `up.element.hide()` now hides elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
 - Fix a bug where, with a popup overlay already open, the user clicked on a preloaded, popup-opening link in the background layer, the second popup would not open.
 
 
@@ -1931,8 +1936,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- Elements with [`up-show-for`](/up-show-for) and [`up-hide-for`](/up-hide-for) attributes
-  can now be inserted dynamically after its controlling [`up-switch`](/input-up-switch) field has been
+- Elements with `up-show-for` and `up-hide-for` attributes
+  can now be inserted dynamically after its controlling `[up-switch]` field has been
   compiled.
 - Unpoly no longer strips a trailing slash in the current URL during startup
 
