@@ -2506,6 +2506,24 @@ describe 'up.form', ->
           next =>
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
+        it 'allows to update multiple fragments', asyncSpec (next) ->
+          form = fixture('form')
+          departmentGroup = e.affix(form, 'fieldset.department')
+          departmentField = e.affix(departmentGroup, 'input[name=department][up-validate=".position, .employee"]')
+          positionGroup = e.affix(form, 'fieldset.position')
+          positionField = e.affix(positionGroup, 'input[name=position]')
+          employeeGroup = e.affix(form, 'fieldset.employee')
+          employeeField = e.affix(employeeGroup, 'input[name=employee]')
+
+          up.hello(form)
+
+          departmentField.value = "engineering"
+          Trigger.change(departmentField)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.position, .employee')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('department')
+
       describe 'when no selector is given', ->
 
         it 'automatically finds a form group around the input field and only updates that', asyncSpec (next) ->

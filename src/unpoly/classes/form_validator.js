@@ -27,75 +27,75 @@ up.FormValidator = class FormValidator {
   }
 
   validate(options = {}) {
-    let solution = this.getSolution(options)
-    this.dirtySolutions.push(solution)
+    let solutions = this.getSolutions(options)
+    this.dirtySolutions.push(...solutions)
     this.scheduleNextRender()
     return this.nextRenderPromise
   }
 
-  getSolution(options) {
-    let solution = this.getTargetSelectorSolution(options)
-      || this.getFieldSolution(options)
-      || this.getElementSolution(options.origin)
+  getSolutions(options) {
+    let solutions = this.getTargetSelectorSolutions(options)
+      || this.getFieldSolutions(options)
+      || this.getElementSolutions(options.origin)
 
-    solution.renderOptions = this.originOptions(solution.origin, options)
+    for (let solution of solutions) {
+      solution.renderOptions = this.originOptions(solution.origin, options)
 
-    // Resolve :origin selector here. We can't delegate to up.render({ origin })
-    // as that only takes a single origin, even with multiple targets.
-    solution.target = up.fragment.resolveOrigin(solution.target, solution)
+      // Resolve :origin selector here. We can't delegate to up.render({ origin })
+      // as that only takes a single origin, even with multiple targets.
+      solution.target = up.fragment.resolveOrigin(solution.target, solution)
+    }
 
-    return solution
+    return solutions
   }
 
-  getFieldSolution({ origin, ...options }) {
+  getFieldSolutions({ origin, ...options }) {
     if (up.form.isField(origin)) {
-      return this.getValidateAttrSolution(origin) || this.getFormGroupSolution(origin, options)
+      return this.getValidateAttrSolutions(origin) || this.getFormGroupSolutions(origin, options)
     }
   }
 
-  getFormGroupSolution(field, { formGroup = true }) {
+  getFormGroupSolutions(field, { formGroup = true }) {
     if (!formGroup) return
 
     let solution = up.form.groupSolution(field)
     if (solution) {
       up.puts('up.validate()', 'Validating form group of field %o', field)
-      return solution
+      return [solution]
     }
   }
 
-  getTargetSelectorSolution({ target, origin }) {
-    if (u.isString(target)) {
+  getTargetSelectorSolutions({ target, origin }) {
+    if (u.isString(target) && target) {
       up.puts('up.validate()', 'Validating target "%s"', target)
-      const element = up.fragment.get(target, { origin })
-      return { target, element, origin }
+      let simpleSelectors = up.fragment.splitTarget(target)
+      return simpleSelectors.map((function(simpleSelector) {
+        return {
+          element: up.fragment.get(simpleSelector, { origin }),
+          target: simpleSelector,
+          origin
+        }
+      })
     }
   }
 
-  getElementSolution(element) {
+  getElementSolutions(element) {
     up.puts('up.validate()', 'Validating element %o', element)
-    return {
+    return [{
       element,
       target: up.fragment.toTarget(element),
       origin: element
-    }
+    }]
   }
 
-  getValidateAttrSolution(field) {
+  getValidateAttrSolutions(field) {
     // In case of radio buttons the [up-validate] attribute will
     // be set on a container containing the entire radio button group.
     let containerWithAttr = field.closest('[up-validate]')
 
     if (containerWithAttr) {
       let target = containerWithAttr.getAttribute('up-validate')
-
-      if (target) {
-        up.puts('up.validate()', 'Validating [up-validate] target "%s" from field %o', target, field)
-        return {
-          target,
-          element: up.fragment.get(target, { origin: field }),
-          origin: field
-        }
-      }
+      return this.getTargetSelectorSolutions({ target, origin: field })
     }
   }
 

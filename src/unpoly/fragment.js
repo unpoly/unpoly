@@ -1947,11 +1947,15 @@ up.fragment = (function() {
     return new up.Selector(expandedTargets, filters)
   }
 
+  function splitTarget(target) {
+    return u.parseTokens(target, { separator: 'comma' })
+  }
+
   function parseTargetSteps(target, options = {}) {
     let defaultPlacement = options.defaultPlacement || 'swap'
 
     let steps = []
-    let simpleSelectors = u.parseTokens(target, { separator: 'comma' })
+    let simpleSelectors = splitTarget(target)
 
     for (let selector of simpleSelectors) {
       if (selector === ':none') continue
@@ -2461,6 +2465,7 @@ up.fragment = (function() {
     shouldRevalidate,
     abort,
     onAborted,
+    splitTarget,
     parseTargetSteps,
     // timer: scheduleTimer
   }
