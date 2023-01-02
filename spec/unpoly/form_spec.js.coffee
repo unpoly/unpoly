@@ -1213,7 +1213,7 @@ describe 'up.form', ->
           up.validate('.credentials')
 
           next ->
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.credentials')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email password')
 
 
@@ -1347,7 +1347,7 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
 
-        it "updates a different target found in the element's [up-target] attribute", asyncSpec (next) ->
+        it "updates a different target found in the element's [up-validate] attribute", asyncSpec (next) ->
           form = fixture('form[action=/form]')
           group = e.affix(form, '[up-form-group]')
           field = e.affix(group, 'input[name=email][up-validate=".other-target"]')
