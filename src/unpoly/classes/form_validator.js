@@ -1,5 +1,4 @@
 const u = up.util
-const e = up.element
 
 up.FormValidator = class FormValidator {
 
@@ -142,13 +141,7 @@ up.FormValidator = class FormValidator {
     let dirtyOrigins = u.map(dirtySolutions, 'origin')
     let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
     let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
-    let dataMap = {}
-    for (let solution of dirtySolutions) {
-      let data = u.pluckKey(solution.renderOptions, 'data')
-      if (data) {
-        dataMap[solution.target] = data
-      }
-    }
+    let dataMap = this.buildDataMap(dirtySolutions)
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // Merge together all render options for all origins.
@@ -229,6 +222,24 @@ up.FormValidator = class FormValidator {
       // If no pending solutions are found, the method will return immediately.
       this.renderDirtySolutions()
     }
+  }
+
+  buildDataMap(solutions) {
+    let dataMap = {}
+
+    for (let solution of solutions) {
+      let data = u.pluckKey(solution.renderOptions, 'data')
+      let keepData = u.pluckKey(solution.renderOptions, 'keepData')
+      if (keepData) {
+        data = up.data(solution.element)
+      }
+
+      if (data) {
+        dataMap[solution.target] = data
+      }
+    }
+
+    return dataMap
   }
 
   static forElement(element) {

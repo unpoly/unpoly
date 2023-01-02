@@ -11,7 +11,7 @@ The `up.form` module helps you work with non-trivial forms.
 
 @see form[up-submit]
 @see form[up-validate]
-@see input[up-switch]
+@see [up-switch]
 @see [up-autosubmit]
 
 @module up.form
@@ -687,7 +687,7 @@ up.form = (function() {
     The object's keys are the names of the changed fields.
     The object's values are the values of the changed fields.
   @param {string|Array<string>} [options.event='input']
-    Which event to observe.
+    The types of event to observe.
 
     See [which events to watch](/watch-options#which-events-to-watch).
   @param {number} [options.delay]
@@ -861,34 +861,57 @@ up.form = (function() {
     })
   }
 
+
   /*-
-  Performs a server-side validation of a form field.
+  Render a new form state from its current field values.
 
-  `up.validate()` submits the given field's form with an additional `X-Up-Validate`
-  HTTP header. Upon seeing this header, the server is expected to validate (but not save)
-  the form submission and render a new copy of the form with validation errors.
+  Typical use cases are to [show validation errors](/validation#validating-after-change) after a field was changed
+  or to update forms where one field depends on the value of another.
 
-  Unpoly will re-render the closest [form group](/up-form-group) around the validating field.
+  `up.validate()` submits the given element's form with an additional `X-Up-Validate`
+  HTTP header. Upon seeing this header, the server is expected to validate (but not commit)
+  the form submission and render a new form state. See [this example](/up-validate#example)
+  for control flow on the server.
 
-  The unobtrusive variant of this is the [`input[up-validate]`](/input-up-validate) selector.
-  TODO: You can use up.validate() and `[up-validate]` within the same form. Their updates
-  will be batched together.
+  To automatically update a form after a field was changed, use the the `[up-validate]` attribute.
+  You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
+  will be [batched together](#batching) to prevent race conditions.
 
+  ### Controlling what is updated
 
-  ### Examples
+  `up.validate()` always submits the entire form with its current field values to the form's
+  `[action]` path. Typically only a fragment of the form is updated with the response.
+  This minimizes the chance for loss of transient state like scroll positions, cursor selection
+  or user input while the request is in flight.
+
+  Passing a form field will update the closest [form group](/up-form-group) around the field:
 
   ```js
-  // Update the form group around the email field
   up.validate('input[name=email]')
+  ```
 
-  // Update a form element matching `.preview`
+  If the given field has an `[up-validate]` attribute with a custom target selector, that selector
+  will be updated instead.
+
+  You may also update arbitrary elements within the form:
+
+  ```js
   up.validate('.preview')
   ```
 
-  ### Multiple validations are batched together
+  You may also choose to re-render an entire form.
+  In this case it is recommended to [disable fields](/disabling-forms) while rendering.
+  This prevents the loss of user input made while the request is in flight:
 
-  Multiple calls of `up.validate()` within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
-  are batched into a single request. For instance, the following will send a single request [targeting](/targeting-fragments) `.foo, .bar`:
+  ```js
+  up.validate('form', { disable: true })
+  ```
+
+  ### Multiple validations are batched together {#batching}
+
+  In order to prevent race conditions, multiple calls of `up.validate()` within the same
+  [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) are consolidated into a single request.
+  For instance, the following will send a single request [targeting](/targeting-fragments) `.foo, .bar`:
 
   ```js
   up.validate('.foo')
@@ -912,41 +935,38 @@ up.form = (function() {
   ```
 
   @function up.validate
-  @param {string|Element|jQuery} target
-    TODO: Docs
-  @param {Object} [options]
-    Additional [submit options](/up.submit#options) that should be used for
-    submitting the form for validation.
+  @param {string|Element|jQuery} element
+    The field or fragment that should be rendered on the server.
 
-    You may pass this `options` object to supplement or override the defaults
-    from `up.submit()`.
-  @param {string|Element|jQuery} [options.target]
-    The element that will be [updated](/up.render) with the validation results.
+    Sxee [controlling what is updated](#controlling-what-is-updated).
+  @param {string} [options.target=element]
+    The [target selector](/targeting-fragments) to render.
 
-    TODO describe default
+    By default the given `element` will be rendered.
+    If `element` is a field, its form group or `[up-validate]` target will be rendered.
+  @param {string|Element|jQuery} [options.formGroup = true]
+    Whether, when a field is given as `element`,
+    the field's closest [form group](/up-form-group) should be targeted.
+  @param {Element} [options.origin=element]
+    The element or field that caused this validation pass.
+
+    The names of all fields contained within the origin will be passed as an `X-Up-Validate` request header.
   @param {string|Array<string>} [options.event='change']
-    The event type that causes validation.
+    The event types to observe.
 
-    Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
-
-    You may pass multiple event types as a space-separated string or as an array.
+    See [which events to watch](/watch-options#which-events-to-watch).
   @param {string|Element|jQuery} [options.delay]
     The number of miliseconds to wait between an observed event and validating.
 
-    For most events there is no default delay.
-    Only when observing the `input` event the default is `up.form.config.watchInputDelay`.
-  @param {string|Element|jQuery} [options.origin]
-    TODO
+    See [debouncing callbacks](/watch-options#debouncing-callbacks).
   @param {string|Element|jQuery} [options.disable]
-    Whether to [disable fields](/disabling-forms) while validation is running.
+    Whether to disable fields while waiting for the server response.
 
-    Defaults to the closest `[up-watch-disable]` attribute.
+    See [disabling fields while processing](/watch-options#disabling-fields-while-processing).
   @param {string|Element|jQuery} [options.feedback]
-    Whether to give [navigation feedback](/up.feedback) while validating.
+    Whether to show navigation feedback while waiting for the server response.
 
-    Defaults to the closest `[up-watch-feedback]` attribute.
-  @param {string|Element|jQuery} [options.formGroup = true]
-    TODO
+    See [showing feedback while processing](/watch-options#showing-feedback-while-processing).
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
@@ -954,54 +974,38 @@ up.form = (function() {
     [Preserve](/data#preserving-data-through-reloads) the reloaded fragment's [data object](/data).
 
     Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
+  @param {Object} [options]
+    Additional [render options](up.render#parameters) for the validation request.
   @return {up.RenderJob}
     A promise that fulfills when the server-side validation is received
     and the form was updated.
 
     The promise will reject if the server sends an error status,
-    if there is a network issue, or if [targets](/targeting-fragments) could not be matched.
+    if there is a [network issue](/network-issues), or if [targets](/targeting-fragments)
+    could not be matched.
   @stable
   */
   function validate(...args) {
-    let options = parseValidateArgs(args)
+    let options = parseValidateArgs(...args)
     let validator = up.FormValidator.forElement(options.origin)
     return validator.validate(options)
   }
 
   /*-
-  Parses the many signatures of `up.validate()`:
+  Parses the many signatures of `up.validate()`.
 
-  | Signature                                                 | parseValidateArgs()                                   | Solution by up.FormValidator |
-  |-----------------------------------------------------------|-------------------------------------------------------|------------------------------|
-  | up.validate(input)                                        | { origin: input }                                     | { target: validateAttr(input) || groupTarget(input), origin: input  } |
-  | up.validate(element)                                      | { origin: element }                                   | { target: fragmentTarget(element), origin: element }   |
-  | up.validate(input, { target: '.other' })                  | { target: '.other', origin: input }                   | { target: '.other', origin: input } |
-  | up.validate(input, { target: '.other', origin: element }) | { target: '.other', origin: element }                 | { target: '.other', origin: element } |
-  | up.validate('input#email')                                | { target: 'input#email', origin: get('input#email') } | { target: 'input#email', origin: get('input#email') } |
-  | up.validate('input#email', { origin: element })           | { target: 'input#email', origin: element }            | { target: 'input#email', origin: element } |
-  | up.validate('input#email', { target: '.other' })          | { target: '.other', origin: get('.other') }           |  |
-  | up.validate({ target: '.other' })                         | { target: '.other', origin: get('.other') }           |  |
-
-  Any signature *must* contain an { origin }. We use it to look up the responsible up.FormValidator.
+  See specs for examples.
 
   @function up.form.parseValidateArgs
   @internal
   */
-  function parseValidateArgs(args) {
+  function parseValidateArgs(originOrTarget, ...args) {
     const options = u.extractOptions(args)
 
-    if (args.length) {
-
-      if (u.isString(args[0])) {
-        options.target ||= args[0]
-      } else if (u.isElement(args[0])) {
-        // Call variant: up.validate(inputElement, { target: '.container:has(&)' })
-        options.origin ||= args[0]
-      }
-    }
-
-    if (u.isString(options.target)) {
-      options.origin ||= up.fragment.get(options.target, options)
+    if (options.origin) {
+      options.target ||= up.fragment.toTarget(originOrTarget)
+    } else {
+      options.origin ||= up.fragment.get(originOrTarget)
     }
 
     return options
@@ -1014,7 +1018,7 @@ up.form = (function() {
   @param {Element} event.target
     The form that is being validated.
   @param {up.Params} event.params
-    The [form parameters](/up.Params) that will be send as the form's request payload.
+    The [form parameters](/up.Params) that will be sent as the form's request payload.
 
     Listeners may inspect and modify params before they are sent.
   @param {Element} event.fields
@@ -1074,7 +1078,7 @@ up.form = (function() {
   /*-
   Shows or hides a selector depending on the value of a form field.
 
-  See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+  See `[up-switch]` for more documentation and examples.
 
   This function does not currently have a very useful API outside
   of our use for `up-switch`'s UJS behavior, that's why it's currently
@@ -1460,6 +1464,9 @@ up.form = (function() {
 
     Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
 
+    If setting this to 'input' we also recommend to use `[up-keep]` to prevent
+    loss of user input while the request is in flight.
+
     You may pass multiple event types as a space-separated string.
   @param [up-watch-delay]
     The number of miliseconds to wait between an observed event and validating.
@@ -1469,11 +1476,11 @@ up.form = (function() {
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while validation is running.
 
-    Defaults to the form's `[up-watch-disable]` or `[up-disable]` attribute.
+    Defaults to the closest `[up-watch-disable]` attribute.
   @param [up-watch-feedback]
     Whether to give [navigation feedback](/up.feedback) while validating.
 
-    Defaults to the form's `[up-watch-feedback]` or `[up-feedback]` attribute.
+    Defaults to the closest `[up-watch-feedback]` attribute.
   @stable
   */
 
@@ -1625,16 +1632,16 @@ up.form = (function() {
   </div>
   ```
 
-  @selector input[up-switch]
+  @selector [up-switch]
   @param up-switch
     A CSS selector for elements whose visibility depends on this field's value.
   @stable
   */
 
   /*-
-  Only shows this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
+  Only shows this element if an input field with `[up-switch]` has one of the given values.
 
-  See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+  See `[up-switch]` for more documentation and examples.
 
   @selector [up-show-for]
   @param [up-show-for]
@@ -1645,9 +1652,9 @@ up.form = (function() {
   */
 
   /*-
-  Hides this element if an input field with [`[up-switch]`](/input-up-switch) has one of the given values.
+  Hides this element if an input field with `[up-switch]` has one of the given values.
 
-  See [`input[up-switch]`](/input-up-switch) for more documentation and examples.
+  See `[up-switch]` for more documentation and examples.
 
   @selector [up-hide-for]
   @param [up-hide-for]
@@ -1842,7 +1849,6 @@ up.form = (function() {
     isSubmittable,
     watch,
     validate,
-    parseValidateArgs,
     autosubmit,
     fieldSelector,
     fields: findFields,

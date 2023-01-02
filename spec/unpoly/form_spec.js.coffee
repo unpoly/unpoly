@@ -1145,148 +1145,276 @@ describe 'up.form', ->
         next ->
           expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
 
-      it 'validates the given element', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        element = e.affix(form, '.element')
+      it 'allows to override the { data } for the new element', asyncSpec (next) ->
+        form = fixture('form[action="/path"]')
+        e.affix(form, '.element', 'up-data': JSON.stringify(key: 'one'), text: 'old text')
 
-        up.validate(element)
+        expect(up.data('.element')).toEqual(key: 'one')
 
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
-
-      it 'validates the element matching the given CSS selector', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        element = e.affix(form, '.element')
-
-        up.validate('.element')
+        up.validate('.element', data: { key: 'two' })
 
         next ->
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
 
-      it 'validates the closest form group around the given field', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[name=email]')
-
-        up.validate(field)
-
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
-
-      it 'updates a different target with { target } option', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[name=email]')
-        otherTarget = e.affix(form, '.other-target')
-
-        up.validate(field, { target: '.other-target' })
-
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
-
-      it 'does not seek a form group around the given field with { formGroup: false }', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        group = e.affix(form, '[up-form-group]')
-        field = e.affix(group, 'input[name=email]')
-
-        up.validate(field, { formGroup: false })
-
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('input[name="email"]')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
-
-      it 'does not seek a form group around the given non-field element', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        group = e.affix(form, '[up-form-group]')
-        element = e.affix(group, '.element')
-
-        up.validate(element)
-
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
-
-      it 'validates all fields within the given container', asyncSpec (next) ->
-        form = fixture('form[action=/path]')
-        container = e.affix(form, '.container')
-        input1 = e.affix(container, 'input[name=foo]')
-        input2 = e.affix(container, 'input[name=bar]')
-        input3 = e.affix(form, 'input[name=baz]')
-
-        up.validate(container)
-
-        next ->
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.container')
-
-      it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
-        form = fixture('form[action=/path] input[name=foo]')
-        validateListener = jasmine.createSpy('up:form:validate listener')
-        up.on('up:form:validate', validateListener)
-
-        up.validate(form)
-
-        next ->
-          expect(validateListener).toHaveBeenCalled()
-
-      it 'returns a Promise that fulfills when the server responds to validation with an 200 OK status code', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        element = e.affix(form, '.element', text: 'old text')
-
-        promise = up.validate(element)
-
-        next ->
-          expect('.element').toHaveText('old text')
-          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
-
-          next.await promiseState(promise)
-
-        next ({ state }) ->
-          expect(state).toBe('pending')
-
-        next ->
           jasmine.respondWithSelector('.element', text: 'new text')
 
         next ->
           expect('.element').toHaveText('new text')
+          expect(up.data('.element')).toEqual({ key: 'two' })
 
-          next.await promiseState(promise)
+      it 'allows to transfer data with { keepData }', asyncSpec (next) ->
+        form = fixture('form[action="/path"]')
+        e.affix(form, '.element', 'up-data': JSON.stringify(key: 'one'), text: 'old text')
 
-        next ({ state, value }) ->
-          expect(state).toBe('fulfilled')
-          expect(value).toEqual(jasmine.any(up.RenderResult))
+        expect(up.data('.element')).toEqual(key: 'one')
 
-      it 'returns a Promise that rejects when the server responds to validation with an error code', asyncSpec (next) ->
-        form = fixture('form[action=/form]')
-        element = e.affix(form, '.element', text: 'old text')
-
-        promise = up.validate(element)
+        up.validate('.element', keepData: true)
 
         next ->
-          expect('.element').toHaveText('old text')
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
 
-          next.await promiseState(promise)
-
-        next ({ state }) ->
-          expect(state).toBe('pending')
-
-        next ->
-          jasmine.respondWithSelector('.element', text: 'new text', status: 400)
+          jasmine.respondWithSelector('.element', text: 'new text')
 
         next ->
           expect('.element').toHaveText('new text')
+          expect(up.data('.element')).toEqual({ key: 'one' })
 
-          next.await promiseState(promise)
+      describe 'with a CSS selector matching a non-field element', ->
 
-        next ({ state, value }) ->
-          expect(state).toBe('rejected')
-          expect(value).toEqual(jasmine.any(up.RenderResult))
+        it 'validates the element', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element')
+          field = e.affix(form, 'input[name=email]')
 
+          up.validate('.element')
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+
+        it 'allows to provide an origin field for X-Up-Validate with { origin } option', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element')
+          field = e.affix(form, 'input[name=email]')
+
+          up.validate('.element', origin: field)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'lists all contained fields in the X-Up-Validate header', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.credentials')
+          e.affix(element, 'input[name=email]')
+          e.affix(element, 'input[name=password]')
+          e.affix(form, 'input[name=company]')
+
+          up.validate('.credentials')
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email password')
+
+
+      describe 'with a CSS selector matching a field', ->
+
+        it 'validates the closest form group', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email]')
+
+          up.validate('input[name=email]')
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'updates a different target with { target } option', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email]')
+          otherTarget = e.affix(form, '.other-target')
+
+          up.validate('input[name=email]', { target: '.other-target' })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'does not seek a form group with { formGroup: false }', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name="email"]')
+
+          up.validate('input[name="email"]', { formGroup: false })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('input[name="email"]')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+      describe 'with a non-field element', ->
+
+        it 'validates a target derived from the element', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element')
+          field = e.affix(form, 'input[name=email]')
+
+          up.validate(element)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+
+        it 'allows to provide an origin field for X-Up-Validate with { origin } option', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element')
+          field = e.affix(form, 'input[name=email]')
+
+          up.validate(element, origin: field)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'names all contained field in X-Up-Validate header', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          container = e.affix(form, '.container')
+          input1 = e.affix(container, 'input[name=foo]')
+          input2 = e.affix(container, 'input[name=bar]')
+          input3 = e.affix(form, 'input[name=baz]')
+
+          up.validate(container)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.container')
+
+        it 'may be called with an entire form (bugfix)', asyncSpec (next) ->
+          form = fixture('form[action=/path] input[name=foo]')
+          validateListener = jasmine.createSpy('up:form:validate listener')
+          up.on('up:form:validate', validateListener)
+
+          up.validate(form)
+
+          next ->
+            expect(validateListener).toHaveBeenCalled()
+
+        it 'does not seek a form group', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          element = e.affix(group, '.element')
+
+          up.validate(element)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+
+      describe 'with a field element', ->
+
+        it 'validates the closest form group', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email]')
+
+          up.validate(field)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'does not seek a form group with { formGroup: false }', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email]')
+
+          up.validate(field, { formGroup: false })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('input[name="email"]')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'updates a different target with { target } option', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email]')
+          otherTarget = e.affix(form, '.other-target')
+
+          up.validate(field, { target: '.other-target' })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it "updates a different target found in the element's [up-target] attribute", asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          group = e.affix(form, '[up-form-group]')
+          field = e.affix(group, 'input[name=email][up-validate=".other-target"]')
+          otherTarget = e.affix(form, '.other-target')
+
+          up.validate(field)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+      describe 'return value', ->
+
+        it 'returns a Promise that fulfills when the server responds to validation with an 200 OK status code', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element', text: 'old text')
+
+          promise = up.validate(element)
+
+          next ->
+            expect('.element').toHaveText('old text')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+
+            next.await promiseState(promise)
+
+          next ({ state }) ->
+            expect(state).toBe('pending')
+
+          next ->
+            jasmine.respondWithSelector('.element', text: 'new text')
+
+          next ->
+            expect('.element').toHaveText('new text')
+
+            next.await promiseState(promise)
+
+          next ({ state, value }) ->
+            expect(state).toBe('fulfilled')
+            expect(value).toEqual(jasmine.any(up.RenderResult))
+
+
+        it 'returns a Promise that rejects when the server responds to validation with an error code', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          element = e.affix(form, '.element', text: 'old text')
+
+          promise = up.validate(element)
+
+          next ->
+            expect('.element').toHaveText('old text')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+
+            next.await promiseState(promise)
+
+          next ({ state }) ->
+            expect(state).toBe('pending')
+
+          next ->
+            jasmine.respondWithSelector('.element', text: 'new text', status: 400)
+
+          next ->
+            expect('.element').toHaveText('new text')
+
+            next.await promiseState(promise)
+
+          next ({ state, value }) ->
+            expect(state).toBe('rejected')
+            expect(value).toEqual(jasmine.any(up.RenderResult))
 
       describe 'request sequence', ->
 
@@ -1507,48 +1635,6 @@ describe 'up.form', ->
             expect(barDataSpy.calls.count()).toBe(2)
             expect(barDataSpy.calls.argsFor(1)[0]).toEqual(key: 2)
 
-    describe 'up.form.parseValidateArgs()', ->
-
-      it 'parses [String]', ->
-        foo = fixture('.foo')
-        options = up.form.parseValidateArgs(['.foo'])
-        expect(options).toEqual(target: '.foo', origin: foo)
-
-      it 'parses [String, { origin: Element }]', ->
-        foo = fixture('.foo')
-        bar = fixture('.bar')
-        options = up.form.parseValidateArgs(['.foo', origin: bar])
-        expect(options).toEqual(target: '.foo', origin: bar)
-
-      it 'parses [String, { target: String }], preferring the { target } attribute for backwards compatibility', ->
-        foo = fixture('.foo')
-        bar = fixture('.bar')
-        options = up.form.parseValidateArgs(['.foo', target: '.bar'])
-        expect(options).toEqual(target: '.bar', origin: bar)
-
-      it 'parses [{ target: String }]', ->
-        foo = fixture('.foo')
-        options = up.form.parseValidateArgs([{ target: '.foo' }])
-        expect(options).toEqual(target: '.foo', origin: foo)
-
-      it 'parses [Element]', ->
-        foo = fixture('.foo')
-        options = up.form.parseValidateArgs([foo])
-        expect(options).toEqual(origin: foo)
-
-      it 'parses [Element, { target: String }]', ->
-        foo = fixture('.foo')
-        bar = fixture('.bar')
-        options = up.form.parseValidateArgs([foo, { target: '.bar' }])
-        expect(options).toEqual(origin: foo, target: '.bar')
-
-      it 'parses [Element, { target: String, origin: Element }]', ->
-        foo = fixture('.foo')
-        bar = fixture('.bar')
-        baz = fixture('.baz')
-        options = up.form.parseValidateArgs([foo, { target: '.bar', origin: baz }])
-        expect(options).toEqual(origin: baz, target: '.bar')
-
     describe 'up.form.disable()', ->
 
       it "disables the form's fields", ->
@@ -1696,6 +1782,30 @@ describe 'up.form', ->
         reenable()
 
         expect(field).not.toBeDisabled()
+
+    describe 'up.form.isSubmittable()', ->
+
+      it 'returns true for a form with [up-submit]', ->
+        form = fixture('form[action="/path"][up-submit]')
+        expect(up.form.isSubmittable(form)).toBe(true)
+
+      it 'returns true for a form that matches up.form.config.submitSelectors', ->
+        up.form.config.submitSelectors.push('form')
+        form = fixture('form[action="/path"]')
+        expect(up.form.isSubmittable(form)).toBe(true)
+
+      it 'returns true for a form that will be handled by Unpoly', ->
+        form = fixture('form[action="/path"][up-submit]')
+        expect(up.form.isSubmittable(form)).toBe(true)
+
+      it 'returns false for a form that will be handled by the browser', ->
+        form = fixture('form[action="/path"]')
+        expect(up.form.isSubmittable(form)).toBe(false)
+
+      it 'returns false for a form that explicitly opted out of being handled by Unpoly with [up-submit=false]', ->
+        up.form.config.submitSelectors.push('form')
+        form = fixture('form[action="/path"][up-submit=false]')
+        expect(up.form.isSubmittable(form)).toBe(false)
 
   describe 'unobtrusive behavior', ->
 

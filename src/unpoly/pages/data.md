@@ -135,14 +135,14 @@ The data will be passed to your event handler as a third argument:
 
 ```js
 up.on('click', '.user', function(event, element, data) {
-console.log("This is %o who is %o years old", data.name, data.age)
+  console.log("This is %o who is %o years old", data.name, data.age)
 })
 ```
 
 
 ## Accessing data programmatically
 
-Use `up.data(element)` to retrieve an object with the given element's data.
+Use [`up.data(element)`](/up-data) to retrieve an object with the given element's data.
 
 
 ## Preserving data through reloads
@@ -156,7 +156,7 @@ regardless of what the server renders into `[up-data]`:
 ```js
 up.compiler('.element', function(element, data) {
   data.counter ??= 1 // set initial state
-  console.log("Counter is", data.counter) // logs 1, 2, 3, ...
+  console.log('Counter is', data.counter) // logs 1, 2, 3, ...
   data.counter++
   element.addEventListener('click', function() {
     up.reload(element, { data })
