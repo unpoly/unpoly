@@ -8,7 +8,8 @@ RedirectPermanent /up-current /a.up-current
 RedirectPermanent /up-nav-a.up-current /a.up-current
 RedirectPermanent /up-autosubmit /form-up-autosubmit
 RedirectPermanent /up-observe /form-up-observe
-RedirectPermanent /up-validate /input-up-validate
+RedirectPermanent /input-up-validate /up-validate
+RedirectPermanent /form-up-validate /up-validate
 RedirectPermanent /up-back /a-up-back
 RedirectPermanent /input-up-switch /up-switch
 RedirectPermanent /select-up-switch /up-switch

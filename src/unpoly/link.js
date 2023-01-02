@@ -1260,7 +1260,9 @@ up.link = (function() {
 
   ### Example
 
-      <a href="/users" up-follow up-instant>User list</a>
+  ```html
+  <a href="/users" up-follow up-instant>User list</a>
+  ```
 
   ### Accessibility
 

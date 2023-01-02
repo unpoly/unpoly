@@ -67,6 +67,7 @@ TODOs for V3
 Various changes
 ---------------
 
+- [up-validate] no longer supports multiple targets
 - When watching: Is it really useful that a field (and not a form) gets .up-active?
   - E.g. a watcher on some input submits a form, the form is not considered .up-active :(
   - The whole issue was introduced by making the origin the field instead of the form
@@ -74,14 +75,6 @@ Various changes
   - We could consider to feedback the form if the origin is an input, or a non-link within a form
   - Or up.submit() sets { feedbackElement }
     - However up.validate() does not go through up.submit()
-- It is a little weird that up.validate('input') will update the input, not the form group
-  - However, up.validate(input) *will* update the form group
-  - All other Unpoly functions accept either selector or element as a first argument, with the same result
-  - We could consider changing parseValidateArg() so
-    - up.validate('.foo') resolves to up.validate(origin: get('.foo')) instead
-    - Users who want to update a target verbatim can still stay either:
-      - up.validate({ target: '.foo' })            - or -
-      - up.validate('.foo', { formGroup: false })
 
 
 Docs
@@ -123,7 +116,7 @@ Docs
 
 ### General
 
-- Finish /reacting-to-form-changes
+- Finish /dependent-fields
 - Finish /validation
 - Rename "Scroll option" to "Scrolling"
   - Also the page title

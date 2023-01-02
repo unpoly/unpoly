@@ -512,7 +512,7 @@ This is a maintenance release while we're working on the next major feature upda
 
 - The event `up:form:submit` has a new property `{ submitButton }`. It points to the `<button>` or `<input>` element used to submit the form, if the form was submitted with a button.
 - The event `up:form:submit` has a new property `{ params }`. It points to an editable `up.Params` object for the form's data payload.
-- Fix a bug where [`[up-validate]`](/input-up-validate) would use form attributes intended for the final form submission, like `[up-scroll]` or `[up-confirm]`.
+- Fix a bug where `[up-validate]` would use form attributes intended for the final form submission, like `[up-scroll]` or `[up-confirm]`.
 - Fix a bug where an [`.up-current`](/a.up-current) class would sometimes match an `[up-alias]` pattern in the middle of the current URL. This happened when `[up-alias]` contained multiple patterns and the last pattern is a prefix (e.g. `/foo/*`).
 - New option `up.log.config.format` lets you disable colors from log messages (thanks @stefanfisk!).
 - Elements with `[up-keep]` are now preserved when going back/forward in history (#293).
@@ -864,9 +864,9 @@ This release also exposes some convenience functions and selectors:
 - New experimental function [`up.event.halt()`](/up.event.halt). It prevents the event from bubbling up the DOM.
   It also prevents other event handlers bound on the same element. It also prevents the event's default action.
 - New experimental function [`up.form.fields()`](/up.form.fields).  It returns a list of form fields within the given element.
-- The selector [`form[up-validate]`](/form-up-validate) is now supported. It performs
-  [server-side validation](/input-up-validate) when any fieldset within this form changes. Previously only the variant
-  [`input[up-validate]`](/input-up-validate) was supported.
+- The selector [`form[up-validate]`](/up-validate) is now supported. It performs
+  [server-side validation](/up-validate) when any fieldset within this form changes. Previously only the variant
+  `input[up-validate]` was supported.
 
 
 0.60.3
@@ -2167,7 +2167,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 - Fix a bug where absolutely positioned elements would be offset incorrectly during transitions
 - Fix a bug where inserted elements were not revealed within their viewport
-- When [validating](/input-up-validate) a form with transitions, transitions are no longer applied
+- When [validating](/up-validate) a form with transitions, transitions are no longer applied
 
 
 ### Breaking changes
@@ -2616,7 +2616,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Compatible changes
 
 - Support for server-side live validation of forms
-  using the [`[up-validate]`](/input-up-validate) selector.
+  using the [`[up-validate]`](/up-validate) selector.
 - Support for [non-standard CSS selectors from jQuery](https://api.jquery.com/category/selectors/),
   such as [`:has`](http://api.jquery.com/has-selector/) or [`:visible`](http://api.jquery.com/visible-selector/).
 - Allow to refer to the current element as `&` in target selectors. This is useful

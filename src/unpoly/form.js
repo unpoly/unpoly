@@ -5,14 +5,15 @@ Forms
 The `up.form` module helps you work with non-trivial forms.
 
 @see validation
-@see reacting-to-form-changes
-@see watch-options
+@see dependent-fields
 @see disabling-forms
+@see watch-options
 
 @see form[up-submit]
-@see form[up-validate]
+@see [up-validate]
 @see [up-switch]
 @see [up-autosubmit]
+@see up.watch
 
 @module up.form
 */
@@ -543,7 +544,7 @@ up.form = (function() {
 
   The event is emitted on the `<form>` element.
 
-  When the form is being [validated](/input-up-validate), this event is not emitted.
+  When the form is being [validated](/up-validate), this event is not emitted.
   Instead an `up:form:validate` event is emitted.
 
   ### Changing render options
@@ -737,7 +738,7 @@ up.form = (function() {
   }
 
   /*-
-  [Watches](/up.watch) a field or form and submits the form when a value changes.
+  Automatically submits a form when a field changes.
 
   The unobtrusive variant of this is the [`[up-autosubmit]`](/form-up-autosubmit) attribute.
 
@@ -811,7 +812,7 @@ up.form = (function() {
 
   You are not required to use form groups to [submit forms through Unpoly](/form-up-submit).
   However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
-  working with complex form. For instance, when [validating](/input-up-validate) a field,
+  working with complex form. For instance, when [validating](/up-validate) a field,
   Unpoly will re-render the closest form group around that field.
 
   By default Unpoly will also consider a `<fieldset>` or `<label>` around a field to be a form group.
@@ -1012,7 +1013,7 @@ up.form = (function() {
   }
 
   /*-
-  This event is emitted before a form is being [validated](/input-up-validate).
+  This event is emitted before a form is being [validated](/up-validate).
 
   @event up:form:validate
   @param {Element} event.target
@@ -1203,6 +1204,8 @@ up.form = (function() {
 
   ### Handling validation errors
 
+  TODO: Move this to /validation
+
   When a server-side web application was unable to save the form due to invalid params,
   it will usually re-render the form with validation errors.
 
@@ -1245,7 +1248,7 @@ up.form = (function() {
   See [handling server errors](/failed-responses) for details.
 
   > [TIP]
-  > You can also use [`input[up-validate]`](/input-up-validate) to perform server-side
+  > You can also use the `[up-validate]` attribute to perform server-side
   > validations while the user is completing fields.
 
 
@@ -1305,14 +1308,18 @@ up.form = (function() {
   })
 
   /*-
+  Renders a new form state when a field changes.
+
   When a form field with this attribute is changed, the form is validated on the server
   and is updated with validation messages.
 
   To validate the form, Unpoly will submit the form with an additional `X-Up-Validate` HTTP header.
-  When seeing this header, the server is expected to validate (but not save)
+  When seeing this header, the server is expected to validate (but not commit)
   the form submission and render a new copy of the form with validation errors.
 
-  The programmatic variant of this is the [`up.validate()`](/up.validate) function.
+  The cause validation from JavaScript, use the [`up.validate()`](/up.validate) function.
+  You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
+  will be [batched together](/up.validate#batching) to prevent race conditions.
 
   ### Example
 
@@ -1345,12 +1352,12 @@ up.form = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label>
+      <label for="email" up-validate>E-mail</label> <!-- mark-line -->
       <input type="text" id="email" name="email">
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label>
+      <label for="password" up-validate>Password</label> <!-- mark-line -->
       <input type="password" id="password" name="password">
     </fieldset>
 
@@ -1399,18 +1406,18 @@ up.form = (function() {
   ```html
   <form action="/users">
 
-    <fieldset class="has-error">
+    <fieldset>
       <label for="email" up-validate>E-mail</label>
       <input type="text" id="email" name="email" value="foo@bar.com">
-      <div class="error">E-mail has already been taken!</div>
+      <div class="error">E-mail has already been taken!</div> <!-- mark-line -->
     </fieldset>
 
     ...
   </form>
   ```
 
-  The [form group](/up-form-group) (`<fieldset>`) around the e-mail field is now updated to have the `.has-error`
-  class and display the validation message (`<div class="error">`).
+  The [form group](/up-form-group) around the e-mail field (`<fieldset>`) is now updated to
+  show the validation message (`<div class="error">`).
 
   ### How validation results are displayed
 
@@ -1454,7 +1461,7 @@ up.form = (function() {
   In order to update the `department` field in addition to the `employee` field, you could say
   `[up-validate="&, [name=employee]]"`, or simply `[up-validate="form"]` to update the entire form.
 
-  @selector input[up-validate]
+  @selector [up-validate]
   @param [up-validate]
     The [target selector](/targeting-fragments) to update with the server response.
 
@@ -1481,20 +1488,6 @@ up.form = (function() {
     Whether to give [navigation feedback](/up.feedback) while validating.
 
     Defaults to the closest `[up-watch-feedback]` attribute.
-  @stable
-  */
-
-  /*-
-  Validates this form on the server when any field changes and shows validation errors.
-
-  See `input[up-validate]` for detailed documentation.
-
-  @selector form[up-validate]
-  @param up-validate
-    The [target selector](/targeting-fragments) to update with the server response.
-
-    This defaults to the closest [form group](/up-form-group)
-    around the validating field.
   @stable
   */
   up.compiler(validatingFieldSelector, function(fieldOrForm) {
@@ -1781,7 +1774,7 @@ up.form = (function() {
   up.compiler('[up-watch]', (formOrField) => watch(formOrField))
 
   /*-
-  [Watches](/up-watch) form fields and submits the form when a value changes.
+  Automatically submits a form when a field changes.
 
   The programmatic variant of this is the [`up.autosubmit()`](/up.autosubmit) function.
 

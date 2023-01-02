@@ -510,11 +510,11 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the `[name]` of a [form field being validated](/input-up-validate).
+  This request header contains the `[name]` of a [form field being validated](/up-validate).
 
   When seeing this header, the server is expected to validate (but not save)
   the form submission and render a new copy of the form with validation errors.
-  See the documentation for [`input[up-validate]`](/input-up-validate) for more information
+  See the documentation for `[up-validate]` for more information
   on how server-side validation works in Unpoly.
 
   The server is free to respond with any HTTP status code, regardless of the validation result.
