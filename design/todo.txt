@@ -227,6 +227,8 @@ Docs
   - { scrollBehavior }
     - Explain that this is currently only supported for prepending and appending
   - Also attributes for a[up-follow]
+- data, keepData, dataMap
+- Go through v3 slides and see if we have missed anything or can re-use illustrations
 
 
 V3.pre launch
