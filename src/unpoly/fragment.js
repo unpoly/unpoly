@@ -1676,13 +1676,17 @@ up.fragment = (function() {
   ```
 
   @function up.fragment.toTarget
-  @param {Element} element
+  @param {Element|string} element
     The element for which to create a selector.
+
+    When a string is given, it is returned unchanged.
   @param {Element} [options.origin]
+    The origin used to [resolve an ambiguous selector](/targeting-fragments#resolving-ambiguous-selectors)
+    during [target verification](/target-derivation#derived-target-verification).
   @stable
   */
   function toTarget(element, options) {
-    return tryToTarget(element, options) || cannotTarget(element)
+    return u.presence(element, u.isString) || tryToTarget(element, options) || cannotTarget(element)
   }
 
   /*-

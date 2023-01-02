@@ -6792,6 +6792,9 @@ describe 'up.fragment', ->
         expect(up.fragment.toTarget(preloadFoo)).toBe('link[rel="preload"][href="/foo"]')
         expect(up.fragment.toTarget(preloadBar)).toBe('link[rel="preload"][href="/bar"]')
 
+      it 'returns a given string unchanged', ->
+        expect(up.fragment.toTarget('.foo')).toBe('.foo')
+
     describe 'up.fragment.expandTargets', ->
 
       beforeEach ->
