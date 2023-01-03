@@ -1,5 +1,5 @@
-Disabling form controls while processing
-========================================
+Disabling forms while processing
+================================
 
 You may disable form fields and buttons during submission, by passing a `{ disable }` option or `[up-disable]` attribute.
 
