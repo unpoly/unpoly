@@ -67,7 +67,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- [up-validate] no longer supports multiple targets
 - When watching: Is it really useful that a field (and not a form) gets .up-active?
   - E.g. a watcher on some input submits a form, the form is not considered .up-active :(
   - The whole issue was introduced by making the origin the field instead of the form
@@ -75,6 +74,7 @@ Various changes
   - We could consider to feedback the form if the origin is an input, or a non-link within a form
   - Or up.submit() sets { feedbackElement }
     - However up.validate() does not go through up.submit()
+- Upgrade a non-trivial app like SF from Unpoly 2 to 3
 
 
 Docs
@@ -260,6 +260,8 @@ V3 final Launch
 - Demo app
   - Upgrade to unpoly3
   - Redeploy
+- Do a podcast
+- Fix unpoly3-slides
 
 
 

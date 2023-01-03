@@ -46,8 +46,8 @@ We can implement this form with three `[up-validate]` attributes and no addition
 ```
 
 When a field is changed, Unpoly will automatically submit the form with an additional `X-Up-Validate`
-HTTP header. Upon seeing this header, the server is expected to render a new form state from its current
-form values. See [this example](/up-validate#example) for control flow on the server.
+HTTP header. Upon seeing this header, the server is expected to render a new form state from the
+form values in the request parameters. See [this example](/up-validate#example) for control flow on the server.
 
 When the server responds with the re-rendered form state, Unpoly will update the
 [target selector](/targeting-fragments) from the changed field's `[up-validate]` attribute.

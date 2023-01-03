@@ -864,7 +864,8 @@ up.form = (function() {
 
 
   /*-
-  Render a new form state from its current field values.
+  Render a new form state from its current field values, to show validation errors or
+  update [dependent fields](/dependent-fields).
 
   Typical use cases are to [show validation errors](/validation#validating-after-change) after a field was changed
   or to update forms where one field depends on the value of another.
@@ -1308,20 +1309,21 @@ up.form = (function() {
   })
 
   /*-
-  Renders a new form state when a field changes.
+  Renders a new form state when a field changes, to show validation errors or
+  update [dependent fields](/dependent-fields).
 
-  When a form field with this attribute is changed, the form is validated on the server
-  and is updated with validation messages.
+  When a form field with an `[up-validate]` attribute is changed, the form is submitted to the server
+  which is expected to render a new form state from its current field values.
+  The [form group](/up-form-group) around the changed field is updated with the server response.
 
-  To validate the form, Unpoly will submit the form with an additional `X-Up-Validate` HTTP header.
-  When seeing this header, the server is expected to validate (but not commit)
-  the form submission and render a new copy of the form with validation errors.
-
-  The cause validation from JavaScript, use the [`up.validate()`](/up.validate) function.
+  To re-render form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
   You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
-  will be [batched together](/up.validate#batching) to prevent race conditions.
+  will be [batched together](/up.validate#batching) in order to prevent race conditions.
 
-  ### Example
+  TODO: Validate Full form
+  TODO: Validating radio
+
+  ## Marking fields for validation
 
   Let's look at a standard registration form that asks for an e-mail and password:
 
@@ -1343,21 +1345,25 @@ up.form = (function() {
   </form>
   ```
 
-  When the user changes the `email` field, we want to validate that
-  the e-mail address is valid and still available. Also we want to
-  change the `password` field for the minimum required password length.
-  We can do this by giving both fields an `up-validate` attribute:
+  We have some data constraints that we want to validate as the user is filling in fields:
+
+  - When the user changes the `email` field, we want to validate that the e-mail address
+    is formatted correctly and is still available.
+  - When the user changes the `password` field, we want to validate
+    the minimum password length.
+
+  We can implement this by giving both fields an `[up-validate]` attribute:
 
   ```html
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label> <!-- mark-line -->
+      <label for="email" up-validate>E-mail</label> <!-- mark-word: up-validate -->
       <input type="text" id="email" name="email">
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label> <!-- mark-line -->
+      <label for="password" up-validate>Password</label> <!-- mark-word: up-validate -->
       <input type="password" id="password" name="password">
     </fieldset>
 
@@ -1366,29 +1372,46 @@ up.form = (function() {
   </form>
   ```
 
-  Whenever a field with `[up-validate]` changes, the form is POSTed to
-  `/users` with an additional `X-Up-Validate` HTTP header.
-  When seeing this header, the server is expected to validate (but not save)
-  the form submission and render a new copy of the form with validation errors.
+  Whenever a field with `[up-validate]` changes, the form is submitted to its `[action]` path
+  with an additional `X-Up-Validate` HTTP header.
 
-  In Ruby on Rails the processing action should behave like this:
+  For example, after changing the `email` field:
+
+  ```http
+  POST /users HTTP/1.1
+  X-Up-Validate: email
+  X-Up-Target: fieldset:has(#email)
+  Content-Type: application/x-www-form-urlencoded
+
+  email=foo%40bar.com&password=secret
+  ```
+
+  ## Backend protocol
+
+  Upon seeing an `X-Up-Validate` header, the server is expected to validate (but not commit)
+  the form submission and render a new form state from the request parameters.
+
+  This requires a change in the backend that handles the form's `[action]` path.
+  Until now the backend had to handle two cases:
+
+  1. The form was submitted with valid data. We create a new account and sign in the user.
+  2. The form submission failed due to an invalid email or password. We re-render the form with error messages..
+
+  A [Ruby on Rails](https://rubyonrails.org/) backend action would look like this:
 
   ```ruby
   class UsersController < ApplicationController
 
-    # This action handles POST /users
     def create
+      # Instantiate model from request parameters
       user_params = params.require(:user).permit(:email, :password)
       @user = User.new(user_params)
 
-      if request.headers['X-Up-Validate'] # mark-line
-        # Run validations, but don't save to the database
-        status = @user.valid? ? :ok : :unprocessable_entity
-        # Render form with error messages
-        render 'form', status: status
-      elsif @user.save
+      if @user.save
+        # Form is submitted successfully
         sign_in @user
       else
+        # Form submission failed
         render 'form', status: :unprocessable_entity
       end
 
@@ -1397,11 +1420,40 @@ up.form = (function() {
   end
   ```
 
-  > [TIP]
-  > If you're using the `unpoly-rails` gem you can simply say `up.validate?`
-  > instead of manually checking for `request.headers['X-Up-Validate']`.
+  To honor the validation protocol, our backend needs to handle a third case:
 
-  The server now renders an updated copy of the form with eventual validation errors:
+  <ol start="3">
+    <li>When seeing an `X-Up-Validate` header, render a new form state from request parameters</li>
+  </ol>
+
+  In our example backend above, this change could look like this:
+
+  ```ruby
+  class UsersController < ApplicationController
+
+    def create
+      # Instantiate model from request parameters
+      user_params = params.require(:user).permit(:email, :password)
+      @user = User.new(user_params)
+
+      if request.headers['X-Up-Validate'] # mark-line
+        @user.validate # mark-line
+        render 'form' # mark-line
+      elsif @user.save
+        # Form is submitted successfully
+        sign_in @user
+      else
+        # Form submission failed
+        render 'form', status: :unprocessable_entity
+      end
+
+    end
+
+  end
+  ```
+
+  Upon seeing an `X-Up-Validate` hader, the server now renders a new state form from request parameters,
+  showing eventual validation errors and updating [dependent fields](/dependent-fields):
 
   ```html
   <form action="/users">
@@ -1412,14 +1464,15 @@ up.form = (function() {
       <div class="error">E-mail has already been taken!</div> <!-- mark-line -->
     </fieldset>
 
-    ...
+    <fieldset>
+      <label for="password" up-validate>Password</label>
+      <input type="password" id="password" name="password" value="secret">
+      <div class="error">Password is too short!</div> <!-- mark-line -->
+    </fieldset>
   </form>
   ```
 
-  The [form group](/up-form-group) around the e-mail field (`<fieldset>`) is now updated to
-  show the validation message (`<div class="error">`).
-
-  ### How validation results are displayed
+  ## How validation results are displayed
 
   Although the server will usually respond to a validation with a complete,
   fresh copy of the form, Unpoly will only update the closest [form group](/up-form-group)
@@ -1434,32 +1487,12 @@ up.form = (function() {
   <div class="email-errors"></div>
   ```
 
-  ### Updating dependent fields
+  ## Updating dependent fields
 
-  The `[up-validate]` behavior is also a great way to partially update a form
+  The `[up-validate]` attribute is a useful tool to partially update a form
   when one fields depends on the value of another field.
 
-  Let's say you have a form with one `<select>` to pick a department (sales, engineering, ...)
-  and another `<select>` to pick an employeee from the selected department:
-
-  ```html
-  <form action="/contracts">
-    <select name="department">...</select> <!-- options for all departments -->
-    <select name="employeed">...</select> <!-- options for employees of selected department -->
-  </form>
-  ```
-
-  The list of employees needs to be updated as the appartment changes:
-
-  ```html
-  <form action="/contracts">
-    <select name="department" up-validate="[name=employee]">...</select>
-    <select name="employee">...</select>
-  </form>
-  ```
-
-  In order to update the `department` field in addition to the `employee` field, you could say
-  `[up-validate="&, [name=employee]]"`, or simply `[up-validate="form"]` to update the entire form.
+  See [dependent fields](/dependent-fields) for more details and examples.
 
   @selector [up-validate]
   @param [up-validate]
@@ -1467,27 +1500,21 @@ up.form = (function() {
 
     Defaults the closest [form group](/up-form-group) around the validating field.
   @param [up-watch-event='change']
-    The event type that causes validation.
+    The event types to observe.
 
-    Common values are [`'input'` or `'change'`](https://javascript.info/events-change-input).
-
-    If setting this to 'input' we also recommend to use `[up-keep]` to prevent
-    loss of user input while the request is in flight.
-
-    You may pass multiple event types as a space-separated string.
+    See [which events to watch](/watch-options#which-events-to-watch).
   @param [up-watch-delay]
     The number of miliseconds to wait between an observed event and validating.
 
-    For most events there is no default delay.
-    Only when observing the `input` event the default is `up.form.config.watchInputDelay`.
+    See [debouncing callbacks](/watch-options#debouncing-callbacks).
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while validation is running.
 
-    Defaults to the closest `[up-watch-disable]` attribute.
+    See [disabling fields while processing](/watch-options#disabling-fields-while-processing).
   @param [up-watch-feedback]
     Whether to give [navigation feedback](/up.feedback) while validating.
 
-    Defaults to the closest `[up-watch-feedback]` attribute.
+    See [showing feedback while processing](/watch-options#showing-feedback-while-processing).
   @stable
   */
   up.compiler(validatingFieldSelector, function(fieldOrForm) {
