@@ -57,6 +57,7 @@ TODOs after V3
   - Now that we have *some* opinion about the defaults { abort: 'target', focus: 'keep', revalidate: 'auto' }, users may want to deactivate
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
+- Use native `:has` where available
 
 
 
@@ -75,6 +76,8 @@ Various changes
   - Or up.submit() sets { feedbackElement }
     - However up.validate() does not go through up.submit()
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
+- up.watch() should pass on a { origin } option to render options
+  - Make sure that [up-autosubmit] sets that origin
 
 
 Docs

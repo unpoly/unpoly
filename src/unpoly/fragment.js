@@ -2126,25 +2126,84 @@ up.fragment = (function() {
 
   /*-
   Your [target selectors](/targeting-fragments) may use this pseudo-selector
-  to reference the element that triggered the change.
+  to reference the origin element that triggered the change.
 
-  The origin element is automatically set to a link that is being [followed](/a-up-follow)
-  or form that is being [submitted](/form-up-submit). When updating fragments
-  programmatically through `up.render()` you may pass an origin element as an `{ origin }` option.
+  The origin element is automatically set for many actions, for example:
 
-  Even without using an `:origin` reference, the
-  [origin is considered](/targeting-fragments#resolving-ambiguous-selectors)
-  when matching fragments in the current page.
+  | Action                                | Origin element      |
+  |---------------------------------------|---------------------|
+  | [Submitting a form](/form-up-submit)  | The focused element *or* the submit button used *or* the form |
+  | [Following a link](/a-up-follow)      | The link |
+  | [Preloading a link](/a-up-preload)    | The link |
+  | [Validating a field](/up-validate)    | The changed field |
+
+  The `:origin` placeholder will be replaced with a target [derived](/target-derivation)
+  from the origin element.
+
+  ### Example
+
+  Below we see two links that will each update the `<div>` next to them.
+  This requires a rather verbose `[up-target]` attribute:
+
+  ```html
+  <a href="/tasks/1" up-target="a[href='/tasks/1'] + div">Show task 1</a> <!-- mark-phrase "a[href='/tasks/1'] + div" -->
+  <div>Task 1 will appear here</div
+
+  <a href="/tasks/2" up-target="a[href='/tasks/2'] + div">Show task 2</a> <!-- mark-phrase "a[href='/tasks/2'] + div" -->
+  <div>Task 2 will appear here</div
+  ```
+
+  We can simplify the `[up-target]` by referencing the followed link by `:origin`:
+
+  ```html
+  <a href="/tasks/1" up-target=":origin + div">Show task 1</a> <!-- mark-phrase ":origin + div" -->
+  <div>Task 1 will appear here</div
+
+  <a href="/tasks/2" up-target=":origin + div">Show task 2</a> <!-- mark-phrase ":origin + div" -->
+  <div>Task 2 will appear here</div
+  ```
 
   ### Shorthand
 
   Instead of `:origin` you may also use the ampersand character (`&`).
 
-  You may be familiar with the ampersand from the [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)
-  CSS preprocessor.
+  In the [example above](#example) this would look like this:
+
+  ```html
+  <a href="/tasks/1" up-target="& + div">Show task 1</a> <!-- mark-phrase "& + div" -->
+  <div>Task 1 will appear here</div
+
+  <a href="/tasks/2" up-target="& + div">Show task 2</a> <!-- mark-phrase "& + div" -->
+  <div>Task 2 will appear here</div
+  ```
+
+  ### Setting the origin programmatically
+
+  When updating fragments programmatically through functions like `up.render()`
+  you may pass an origin element as an `{ origin }` option:
+
+  ```js
+  element.addEventListener('click', function(event) {
+    up.render('.preview', { origin: element })
+  })
+  ```
+
+  You do not need to pass an `{ origin }` for functions that already have a
+  natural origin:
+
+  ```js
+  up.follow(link) // link will be set as { origin }
+  ```
+
+  Ensuring an origin is set may improve the precision of fragment lookup, even if
+  a [target selector](/targeting-fragments) doesn't contain an `:origin` reference.
+  In the example above, Unpoly would prefer to match `.preview` in the
+  [vicinity](/targeting-fragments#resolving-ambiguous-selectors) of the origin.
+  If no origin is known, Unpoly will always match the first `.preview` in the
+  current [layer](/up.layer).
 
   @selector :origin
-  @experimental
+  @stable
   */
 
   /*-

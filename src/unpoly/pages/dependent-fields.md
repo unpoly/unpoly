@@ -23,17 +23,17 @@ We can implement this form with three `[up-validate]` attributes and no addition
 <form method="post" action="/purchases">
   <fieldset>
     <label for="content">Continent</label>
-    <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark-word: up-validate -->
+    <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark-phrase "up-validate" -->
   </fieldset>
   
   <fieldset>
     <label for="country">Country</label>
-    <select name="country" id="country" up-validate="#price">...</select> <!-- mark-word: up-validate -->
+    <select name="country" id="country" up-validate="#price">...</select> <!-- mark-phrase "up-validate" -->
   </fieldset>
   
   <fieldset>
     <label for="weight">Weight</label>
-    <input name="weight" id="weight" up-validate="#price"> kg <!-- mark-word: up-validate -->
+    <input name="weight" id="weight" up-validate="#price"> kg <!-- mark-phrase "up-validate" -->
   </fieldset>
   
   <fieldset>
@@ -102,7 +102,7 @@ If you prefer to completely prevent user input during validation, give the form 
 `[up-watch-disable]` attribute. This will disable all form fields while validation requests are in flight: 
 
 ```html
-<form method="post" action="/purchases" up-watch-disable> <!-- mark-word: up-watch-disable -->
+<form method="post" action="/purchases" up-watch-disable> <!-- mark-phrase "up-watch-disable" -->
   ...
 </form>
 ```

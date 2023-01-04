@@ -1358,12 +1358,12 @@ up.form = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label> <!-- mark-word: up-validate -->
+      <label for="email" up-validate>E-mail</label> <!-- mark-phrase "up-validate" -->
       <input type="text" id="email" name="email">
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label> <!-- mark-word: up-validate -->
+      <label for="password" up-validate>Password</label> <!-- mark-phrase "up-validate" -->
       <input type="password" id="password" name="password">
     </fieldset>
 
@@ -1375,7 +1375,9 @@ up.form = (function() {
   Whenever a field with `[up-validate]` changes, the form is submitted to its `[action]` path
   with an additional `X-Up-Validate` HTTP header.
 
-  For example, after changing the `email` field:
+  ## Backend protocol
+
+  After changing the `email` field in the registration form above, the following request would be sent:
 
   ```http
   POST /users HTTP/1.1
@@ -1386,18 +1388,16 @@ up.form = (function() {
   email=foo%40bar.com&password=secret
   ```
 
-  ## Backend protocol
-
   Upon seeing an `X-Up-Validate` header, the server is expected to validate (but not commit)
   the form submission and render a new form state from the request parameters.
 
-  This requires a change in the backend that handles the form's `[action]` path.
-  Until now the backend had to handle two cases:
+  This requires a change in the backend code that handles the form's `[action]` path.
+  Until now the backend only had to handle two cases:
 
   1. The form was submitted with valid data. We create a new account and sign in the user.
   2. The form submission failed due to an invalid email or password. We re-render the form with error messages..
 
-  A [Ruby on Rails](https://rubyonrails.org/) backend action would look like this:
+  A [Ruby on Rails](https://rubyonrails.org/) implementation would look like this:
 
   ```ruby
   class UsersController < ApplicationController
@@ -1411,7 +1411,7 @@ up.form = (function() {
         # Form is submitted successfully
         sign_in @user
       else
-        # Form submission failed
+        # Submission failed
         render 'form', status: :unprocessable_entity
       end
 
@@ -1443,7 +1443,7 @@ up.form = (function() {
         # Form is submitted successfully
         sign_in @user
       else
-        # Form submission failed
+        # Submission failed
         render 'form', status: :unprocessable_entity
       end
 
@@ -1479,12 +1479,21 @@ up.form = (function() {
   around the validating field. If the form is not structured into groups, the entire
   form will be updated.
 
-  You can also override what to update by setting the `[up-validate]`
-  attribute to a [target selector](/targeting-fragments):
+  ### Updating a different fragment
+
+  If you don't want to update the field's form group, you can set the `[up-validate]`
+  attribute to any [target selector](/targeting-fragments):
 
   ```html
-  <input type="text" name="email" up-validate=".email-errors">
+  <input type="text" name="email" up-validate=".email-errors"> <!-- mark-phrase ".email-errors" -->
   <div class="email-errors"></div>
+  ```
+
+  You may also [update multiple fragments](/targeting-fragments#updating-multiple-fragments)
+  by separating their target selectors with a comma:
+
+  ```html
+  <input type="text" name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
   ```
 
   ## Updating dependent fields
@@ -1493,6 +1502,19 @@ up.form = (function() {
   when one fields depends on the value of another field.
 
   See [dependent fields](/dependent-fields) for more details and examples.
+
+
+  Preventing race conditions
+  --------------------------
+
+  TODO
+
+
+  Validating multiple fields
+  --------------------------
+
+  :origin
+
 
   @selector [up-validate]
   @param [up-validate]
