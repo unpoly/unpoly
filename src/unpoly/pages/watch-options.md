@@ -1,14 +1,18 @@
 Watch options
 =============
 
+When watching a form for changes, you can configure how to observe events
+and process callbacks.
+
+The options shown below apply to all features that watch form fields:
+
+| HTML              | JavaScript        | Purpose                              |
+|-------------------|-------------------|--------------------------------------|
+| `[up-watch]`      | `up.watch()`      | Run a callback after change          |
+| `[up-validate]`   | `up.validate()`   | Render a new form state after change |
+| `[up-autosubmit]` | `up.autosubmit()` | Submit a form after change           |
 
 
-- `[up-watch]`
-- `up.watch()`
-- `[up-validate]`
-- `up.validate()`
-- `[up-autosubmit]`
-- `up.autosubmit()`
 
 The closest attribute is honored
 --------------------------------
@@ -16,7 +20,7 @@ The closest attribute is honored
 Forms can configure [up-watch-...] prefixed defaults for all watchers:
 
 ```html
-<form up-disable="true" up-watch-disable="false">
+<form up-watch-disable="false">
   <input up-autosubmit>
 </form>
 ```
@@ -24,7 +28,7 @@ Forms can configure [up-watch-...] prefixed defaults for all watchers:
 Form-wide options can be overridden at the input level:
 
 ```html
-<form up-disable="true">
+<form up-watch-disable="true">
   <input up-autosubmit up-watch-disable="false">
 </form>
 ```
@@ -35,7 +39,7 @@ The closest attribute around the changed field is honored.
 This is particularly useful for a group of radio buttons:
 
 ```html
-<form up-disable="true">
+<form>
   <fieldset up-watch-disable="false">
     <input type="radio" name="kind" value="0">
     <input type="radio" name="kind" value="1">
@@ -93,7 +97,9 @@ Disabling fields while working
 - For this to work the callback must return a promise
 - By default all fields in a form are disabled.
 - To [only disable some form controls](/disabling-forms#disabling-some-controls-only),
-  set the value of [up-disable] to any selector that matches fields or buttons.
+  set the value of [up-watch-disable] to any selector that matches fields or buttons.
+
+To disable fields while submitting (instead of while watching), use [`[up-disable]`](/disabling-forms-while-working) instead.
 
 
 Showing feedback while working
@@ -107,6 +113,7 @@ Targeted fragments get .up-loading.
 - Use `[up-watch-feedback]` or `{ feedback }` option.
 - For this to work the callback must return a promise
 
+To show feedback fields while submitting (instead of while watching), use [`[up-feedback]`](/disabling-forms-while-working) instead.
 
 
 @page watch-options

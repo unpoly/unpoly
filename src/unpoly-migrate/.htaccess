@@ -44,3 +44,5 @@ RedirectPermanent /focus-option /focus
 RedirectPermanent /scroll-option /scrolling
 RedirectPermanent /validating /validation
 RedirectPermanent /validations /validation
+RedirectPermanent /disable /disabling-forms
+RedirectPermanent /disabling /disabling-forms

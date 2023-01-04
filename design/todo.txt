@@ -75,6 +75,8 @@ Various changes
   - We could consider to feedback the form if the origin is an input, or a non-link within a form
   - Or up.submit() sets { feedbackElement }
     - However up.validate() does not go through up.submit()
+  - !!! The form.up-active docs are now completely wrong, as there is rarely a case when
+    the form gets the .up-active class. It is always the focused field or the used submit button.
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
 - up.watch() should pass on a { origin } option to render options
   - Make sure that [up-autosubmit] sets that origin

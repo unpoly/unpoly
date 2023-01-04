@@ -1260,7 +1260,8 @@ up.form = (function() {
   The `<form>` element will be assigned a CSS class [`.up-active`](/form.up-active) while
   the submission is loading. The form's target will be assigned an `.up-loading` class.
 
-  Also see [Disabling form controls while working](/disabling-forms).
+  Also see [Navigation feedback](/up.feedback) and [Disabling form controls while working](/disabling-forms).
+
 
   ### Short notation
 
@@ -1916,7 +1917,7 @@ up.form = (function() {
   </form>
   ```
 
-  ### Watching multiple fields
+  ### Auto-submitting multiple fields
 
   You can set `[up-autosubmit]` on any element to submit the form when a contained field changes.
 

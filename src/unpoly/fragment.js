@@ -737,6 +737,8 @@ up.fragment = (function() {
     and the targeted element an `.up-loading` class
     while loading content.
 
+    See [navigation feedback](/up.feedback).
+
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).

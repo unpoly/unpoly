@@ -1141,8 +1141,10 @@ up.link = (function() {
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
   @param [up-feedback='true']
-    Whether to give the link an `.up-active` class
-    while loading and rendering content.
+    Whether to give the link an `.up-active` class and the targeted element an `.up-loading` class
+    while loading content.
+
+    See [navigation feedback](/up.feedback).
 
   @param [up-on-loaded]
     A JavaScript snippet that is executed when the server responds with new HTML,
