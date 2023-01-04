@@ -35,7 +35,7 @@ up.form = (function() {
   @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents]
     An array of events to substitute if [watching the `input` event](/watch-options#which-events-to-watch).
 
-    This can be used to watch [misbehaving fields](/watch-options#dealing-with-misbehaving-fields)
+    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
     that don't emit the [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event)
     as its value is being edited.
 
@@ -48,7 +48,7 @@ up.form = (function() {
   @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents]
     An array of events to substitute if [watching the `change` event](/watch-options#which-events-to-watch).
 
-    This can be used to watch [misbehaving fields](/watch-options#dealing-with-misbehaving-fields)
+    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
     that don't emit the [standard `change` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
     after its value was changed.
 
@@ -653,7 +653,7 @@ up.form = (function() {
   ```js
   up.watch('input.query', function(value, name, options) {
     let url = '/search?query=' + escapeURIFragment(value)
-    return up.render('.results', { url, ...options })
+    return up.render('.results', { url, ...options }) // mark-phrase "return"
   })
   ```
 
@@ -767,7 +767,7 @@ up.form = (function() {
   By default a form group is a `<fieldset>` element or any container with an `[up-form-group]` attribute.
   This can be configured in `up.form.config.groupSelectors`.
 
-  Form groups may be nested. This function returns the closest group around the given element.
+  Form groups may be nested. This function returns the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) group around the given element.
   If no closer group is found, the `<form>` element is returned.
 
   ### Example
@@ -813,7 +813,8 @@ up.form = (function() {
   You are not required to use form groups to [submit forms through Unpoly](/form-up-submit).
   However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
   working with complex form. For instance, when [validating](/up-validate) a field,
-  Unpoly will re-render the closest form group around that field.
+  Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+  form group around that field.
 
   By default Unpoly will also consider a `<fieldset>` or `<label>` around a field to be a form group.
   You can configure this in `up.form.config.groupSelectors`.

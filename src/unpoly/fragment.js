@@ -212,7 +212,7 @@ up.fragment = (function() {
   Returns the URL the given element was retrieved from.
 
   If the given element was never directly updated, but part of a larger fragment update,
-  the closest known source of an ancestor element is returned.
+  the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) known source of an ancestor element is returned.
 
   ### Example
 
@@ -1119,7 +1119,8 @@ up.fragment = (function() {
   ```
 
   When processing an event for the `<a href"...">` you can pass the link element
-  as `{ origin }` to match the closest element in the link's ancestry:
+  as `{ origin }` to match the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+  element in the link's ancestry:
 
   ```js
   let link = event.target

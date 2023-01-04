@@ -79,7 +79,7 @@ Various changes
     the form gets the .up-active class. It is always the focused field or the used submit button.
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
 - up.watch() should pass on a { origin } option to render options
-  - Make sure that [up-autosubmit] sets that origin
+  - Make sure that [up-autosubmit] sets and forwards that origin
 
 
 Docs
@@ -121,7 +121,8 @@ Docs
 
 ### General
 
-- Finish /dependent-fields
+- Unify a.up-active and form.up-active to just ".up-active"
+  - Now that other elements can also have this
 - Finish /validation
 - Rename "Scroll option" to "Scrolling"
   - Also the page title
