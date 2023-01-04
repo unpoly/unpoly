@@ -35,12 +35,14 @@ You can tell Unpoly to handle all forms.
 </form>
 ```
 
+Backend must respond with error code. 
+
 Response with 422 (unprocessable entity):
 
 ```html
 <form action="/users">
 
-  <fieldset class="has-error"> <!-- mark-line -->
+  <fieldset>
     <label for="email" up-validate>E-mail</label>
     <input type="text" id="email" name="email">
     <div class="error">E-mail has already been taken!</div> <!-- mark-line -->

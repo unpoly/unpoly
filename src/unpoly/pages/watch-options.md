@@ -85,16 +85,18 @@ until the callback concludes and then run it again with the latest field values.
 
 
 
-Disabling fields while processing
+Disabling fields while working
 ---------------------------------
 
 - You can disable form fields during async processing
 - Use `[up-watch-disable]` or `{ disable }` option.
 - For this to work the callback must return a promise
+- By default all fields in a form are disabled.
+- To [only disable some form controls](/disabling-forms#disabling-some-controls-only),
+  set the value of [up-disable] to any selector that matches fields or buttons.
 
 
-
-Showing feedback while processing
+Showing feedback while working
 ---------------------------------
 
 - You can disable form fields during async processing

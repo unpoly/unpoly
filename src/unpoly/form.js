@@ -698,7 +698,7 @@ up.form = (function() {
   @param {boolean|string} [options.disable]
     Whether to disable fields while an async callback is running.
 
-    See [disabling fields while processing](/watch-options#disabling-fields-while-processing).
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param {Function(value, name, options): Promise|undefined} callback
     The callback to run when the field's value changes.
 
@@ -936,6 +936,8 @@ up.form = (function() {
   up.validate('form')
   ```
 
+  Also see [preventing race conditions](/dependent-fields#preventing-race-conditions).
+
   @function up.validate
   @param {string|Element|jQuery} element
     The field or fragment that should be rendered on the server.
@@ -964,11 +966,11 @@ up.form = (function() {
   @param {string|Element|jQuery} [options.disable]
     Whether to disable fields while waiting for the server response.
 
-    See [disabling fields while processing](/watch-options#disabling-fields-while-processing).
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param {string|Element|jQuery} [options.feedback]
     Whether to show navigation feedback while waiting for the server response.
 
-    See [showing feedback while processing](/watch-options#showing-feedback-while-processing).
+    See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
@@ -1258,7 +1260,7 @@ up.form = (function() {
   The `<form>` element will be assigned a CSS class [`.up-active`](/form.up-active) while
   the submission is loading. The form's target will be assigned an `.up-loading` class.
 
-  Also see [Disabling form controls while processing](/disabling-forms).
+  Also see [Disabling form controls while working](/disabling-forms).
 
   ### Short notation
 
@@ -1312,18 +1314,18 @@ up.form = (function() {
   Renders a new form state when a field changes, to show validation errors or
   update [dependent fields](/dependent-fields).
 
+
   When a form field with an `[up-validate]` attribute is changed, the form is submitted to the server
   which is expected to render a new form state from its current field values.
   The [form group](/up-form-group) around the changed field is updated with the server response.
 
-  To re-render form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
-  You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
-  will be [batched together](/up.validate#batching) in order to prevent race conditions.
+  > [NOTE]
+  > `[up-validate]` is a tool to implement highly dynamic forms that must update
+  > *as the user is completing fields*.\
+  > If you only need to [validate forms after submission](/validation#validating-after-submission),
+  > you don't need `[up-validate]`.
 
-  TODO: Validate Full form
-  TODO: Validating radio
-
-  ## Marking fields for validation
+  ### Marking fields for validation
 
   Let's look at a standard registration form that asks for an e-mail and password:
 
@@ -1352,6 +1354,26 @@ up.form = (function() {
   - When the user changes the `password` field, we want to validate
     the minimum password length.
 
+  If validation fails we want to show validation errors using the following HTML:
+
+    ```html
+  <form action="/users">
+
+    <fieldset>
+      <label for="email" up-validate>E-mail</label>
+      <input type="text" id="email" name="email" value="foo@bar.com">
+      <div class="error">E-mail has already been taken!</div> <!-- mark-line -->
+    </fieldset>
+
+    <fieldset>
+      <label for="password" up-validate>Password</label>
+      <input type="password" id="password" name="password" value="secret">
+      <div class="error">Password is too short!</div> <!-- mark-line -->
+    </fieldset>
+
+  </form>
+  ```
+
   We can implement this by giving both fields an `[up-validate]` attribute:
 
   ```html
@@ -1375,9 +1397,10 @@ up.form = (function() {
   Whenever a field with `[up-validate]` changes, the form is submitted to its `[action]` path
   with an additional `X-Up-Validate` HTTP header.
 
-  ## Backend protocol
+  ### Backend protocol
 
-  After changing the `email` field in the registration form above, the following request would be sent:
+  When the user changes the `email` field in the registration form above,
+  the following request willbe sent:
 
   ```http
   POST /users HTTP/1.1
@@ -1423,7 +1446,7 @@ up.form = (function() {
   To honor the validation protocol, our backend needs to handle a third case:
 
   <ol start="3">
-    <li>When seeing an `X-Up-Validate` header, render a new form state from request parameters</li>
+    <li>When seeing an <code>X-Up-Validate</code> header, render a new form state from request parameters</li>
   </ol>
 
   In our example backend above, this change could look like this:
@@ -1469,17 +1492,25 @@ up.form = (function() {
       <input type="password" id="password" name="password" value="secret">
       <div class="error">Password is too short!</div> <!-- mark-line -->
     </fieldset>
+
   </form>
   ```
 
-  ## How validation results are displayed
+  ### How validation results are displayed
 
-  Although the server will usually respond to a validation with a complete,
-  fresh copy of the form, Unpoly will only update the closest [form group](/up-form-group)
-  around the validating field. If the form is not structured into groups, the entire
+  `[up-validate]` always submits the entire form with its current field values to the form's
+  `[action]` path. Typically only a fragment of the form is updated with the response.
+  This minimizes the chance for loss of transient state like scroll positions, cursor selection
+  or user input while the request is in flight.
+
+  By default Unpoly will only update the closest [form group](/up-form-group)
+  around the validating field. The [example above](#marking-fields-for-validation),
+  after changing the `email` field, only the `<fieldset>` around the field will be updated.
+
+  If the form is not structured into groups, the entire
   form will be updated.
 
-  ### Updating a different fragment
+  #### Updating a different fragment
 
   If you don't want to update the field's form group, you can set the `[up-validate]`
   attribute to any [target selector](/targeting-fragments):
@@ -1496,7 +1527,7 @@ up.form = (function() {
   <input type="text" name="email" up-validate=".email-errors, .base-errors"> <!-- mark-phrase ".email-errors, .base-errors" -->
   ```
 
-  ## Updating dependent fields
+  ### Updating dependent fields
 
   The `[up-validate]` attribute is a useful tool to partially update a form
   when one fields depends on the value of another field.
@@ -1504,16 +1535,64 @@ up.form = (function() {
   See [dependent fields](/dependent-fields) for more details and examples.
 
 
-  Preventing race conditions
-  --------------------------
+  ### Preventing race conditions
 
-  TODO
+  Custom dynamic form implementations will often exhibit race conditions, e.g. when the user
+  is quickly changing fields while requests are still in flight.
+  Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
+  regardless of how fast the user clicks or how slow the network is.
+
+  See [preventing race conditions](/dependent-fields#preventing-race-conditions) for more details.
 
 
-  Validating multiple fields
-  --------------------------
+  ### Validating multiple fields
 
-  :origin
+  You can set `[up-validate]` on any element to validate *all contained fields* on change.
+
+  In the [example above](#example), instead of setting `[up-validate]` on each individual `<input>`,
+  we can also set it on the `<form>`:
+
+  ```html
+  <form action="/users" up-validate> <!-- mark-phrase "up-validate" -->
+
+    <fieldset>
+      <label for="email" up-validate>E-mail</label>
+      <input type="text" id="email" name="email">
+    </fieldset>
+
+    <fieldset>
+      <label for="password" up-validate>Password</label>
+      <input type="password" id="password" name="password">
+    </fieldset>
+
+    <button type="submit">Register</button>
+
+  </form>
+  ```
+
+ #### Validating radio buttons
+
+  Multiple radio buttons with the same `[name]` produce a single value for the form.
+
+  To watch radio buttons group, use the `[up-validate]` attribute on an
+  element that contains all radio button elements with a given name:
+
+  ```html
+  <fieldset up-validate>
+    <input type="radio" name="format" value="html"> HTML format
+    <input type="radio" name="format" value="pdf"> PDF format
+    <input type="radio" name="format" value="txt"> Text format
+  </fieldset>
+  ```
+
+
+
+  ### Programmatic validation
+
+  To update form fragments from your JavaScript, use the [`up.validate()`](/up.validate) function.
+  You may combine `[up-validate]` and `up.validate()` within the same form. Their updates
+  will be [batched together](/up.validate#batching) in order to
+  [prevent race conditions](/dependent-fields#preventing-race-conditions).
 
 
   @selector [up-validate]
@@ -1532,11 +1611,11 @@ up.form = (function() {
   @param [up-watch-disable]
     Whether to [disable fields](/disabling-forms) while validation is running.
 
-    See [disabling fields while processing](/watch-options#disabling-fields-while-processing).
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param [up-watch-feedback]
     Whether to give [navigation feedback](/up.feedback) while validating.
 
-    See [showing feedback while processing](/watch-options#showing-feedback-while-processing).
+    See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @stable
   */
   up.compiler(validatingFieldSelector, function(fieldOrForm) {
@@ -1771,8 +1850,7 @@ up.form = (function() {
 
   #### Watching radio buttons
 
-  Multiple radio buttons with the same `[name]` (a radio button group)
-  produce a single value for the form.
+  Multiple radio buttons with the same `[name]` produce a single value for the form.
 
   To watch radio buttons group, use the `[up-watch]` attribute on an
   element that contains all radio button elements with a given name:
@@ -1812,11 +1890,11 @@ up.form = (function() {
   @param [up-watch-disable]
     Whether to disable fields while an async callback is running.
 
-    See [disabling fields while processing](/watch-options#disabling-fields-while-processing).
+    See [disabling fields while working](/watch-options#disabling-fields-while-working).
   @param [up-watch-feedback]
     Whether to show navigation feedback while an async callback is running.
 
-    See [showing feedback while processing](/watch-options#showing-feedback-while-processing).
+    See [showing feedback while working](/watch-options#showing-feedback-while-working).
   @stable
   */
 

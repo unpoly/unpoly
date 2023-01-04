@@ -82,6 +82,7 @@ regardless of how fast the user clicks or how slow the network is. In particular
   Additional validations are queued until the current validation request has loaded.
 - Multiple updates from `[up-validate]` or `up.validate()`
   are [batched](/up.validate#batching) into a single request with multiple targets.
+- When one of the target elements is an ancestor of another target, Unpoly will only request the ancestor.
 - If the user submits the form while validation requests are still in flight,
   the validation requests are [aborted](/aborting-requests).
 
@@ -109,6 +110,6 @@ If you prefer to completely prevent user input during validation, give the form 
 
 You may also assign `[up-watch-disable]` to individual fields, or any element that contains fields.
 
-Also see [disabling fields while processing](/watch-options#disabling-fields-while-processing).
+Also see [disabling fields while working](/watch-options#disabling-fields-while-working).
 
 @page dependent-fields
