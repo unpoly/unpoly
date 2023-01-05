@@ -149,6 +149,7 @@ Use [`up.data(element)`](/up-data) to retrieve an object with the given element'
 
 When [reloading](/up.reload) or [validating](/up.validate) an element,
 you may keep an existing data object by passing it as a [`{ data }`](/up.render#options.data) option.
+As a shortcut may also pass `{ keepData: true }`.
 
 In the example below, `data.counter` is increased by `1` for every compiler pass,
 regardless of what the server renders into `[up-data]`:

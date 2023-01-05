@@ -42,6 +42,8 @@ up.radio = (function() {
     On a [poor connection](/network-issues#low-bandwidth) it returns
     the doubled interval, causing Unpoly to poll at half as frequently.
 
+    @experimental
+
   @param {boolean|string|Function(Element)} [config.pollEnabled=true]
     Whether Unpoly will follow instructions to poll fragments, like the `[up-poll]` attribute.
 
@@ -168,6 +170,7 @@ up.radio = (function() {
     <link rel="canonical" href="..." up-hungry up-if-history>
     ```
 
+    @experimental
   @param [up-transition]
     The [animated transition](/a-up-transition) to apply when this element is updated.
   @stable
@@ -317,6 +320,8 @@ up.radio = (function() {
   @param [up-keep-data]
     [Preserve](/data#preserving-data-through-reloads) the polling fragment's
     [data object](/data) through reloads.
+
+    @experimental
   @param [up-source]
     The URL from which to reload the fragment.
 

@@ -455,6 +455,7 @@ up.syntax = (function() {
   @param {Object} [options.data]
     Overrides properties from the new fragment's `[up-data]`
     with the given [data object](/data).
+    @experimental
   @param {Object} [options.dataMap]
     An object mapping selectors to `options.data`.
     @internal

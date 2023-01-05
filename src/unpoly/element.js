@@ -689,6 +689,10 @@ up.element = (function() {
   ```
 
   @function up.element.createFromHTML
+  @param {string} html
+    A string of HTML from which to create the element.
+
+    The given HTML must have a single tag at its root or an error is thrown.
   @stable
   */
   function createFromHTML(html) {
@@ -838,24 +842,6 @@ up.element = (function() {
       }
     }
   }
-
-//  ###**
-//  Returns the value of the given attribute on the given element, if the value is [present](/up.util.isPresent).
-//
-//  Returns `undefined` if the attribute is not set, or if it is set to an empty string.
-//
-//  @function up.element.presentAttr
-//  @param {Element} element
-//    The element from which to retrieve the attribute value.
-//  @param {string} attribute
-//    The attribute name.
-//  @return {string|undefined}
-//    The attribute value, if present.
-//  @experimental
-//  ###
-//  presentAttr = (element, attribute) ->
-//    value = element.getAttribute(attribute)
-//    u.presence(value)
 
   /*-
   Returns the given `attribute` value for the given `element`.

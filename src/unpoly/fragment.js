@@ -670,6 +670,8 @@ up.fragment = (function() {
 
     Defaults to `up.network.config.badResponseTime`.
 
+    @experimental
+
   @param {number} [options.timeout]
     The number of milliseconds after which this request fails with a timeout.
 
@@ -702,8 +704,12 @@ up.fragment = (function() {
   @param {boolean} [options.useKeep=true]
     Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
 
+    @experimental
+
   @param {boolean} [options.useHungry=true]
     Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
+
+    @experimental
 
   @param {boolean|string|Element|Function} [options.scroll]
     How to scroll after the new fragment was rendered.
@@ -2341,6 +2347,8 @@ up.fragment = (function() {
   @param {up.Request} [options.except]
     A request that should not be aborted, even if it matches
     the conditions above.
+
+    @experimental
   @experimental
   */
   function abort(...args) {

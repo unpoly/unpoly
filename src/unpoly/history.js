@@ -226,6 +226,8 @@ up.history = (function() {
     The action that caused this change in [history state](https://developer.mozilla.org/en-US/docs/Web/API/History/state).
 
     The value of this property is either `'push'`, `'pop'` or `'replace'`.
+
+    @experimental
   @stable
   */
 

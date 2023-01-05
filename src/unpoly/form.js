@@ -690,6 +690,8 @@ up.form = (function() {
 
     The object's keys are the names of the changed fields.
     The object's values are the values of the changed fields.
+
+    @experimental
   @param {string|Array<string>} [options.event='input']
     The types of event to observe.
 
@@ -1034,6 +1036,8 @@ up.form = (function() {
 
     When multiple fields are validating within the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/),
     Unpoly will make a single validation request with multiple targets.
+
+    @experimental
   @param {Object} event.renderOptions
     An object with [render options](/up.render) for the fragment update
     that will show the validation results.

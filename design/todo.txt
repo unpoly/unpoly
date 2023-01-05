@@ -78,85 +78,20 @@ Docs
 
 ### General
 
-- Finish /validation
 - Have we documented places where we may separate options with " or "?
   - focus
   - scroll
 - Consider removing all tagnames from public selectors
 
 
-### Disabling
-
-- Document { disable } and [up-disable] option for up.submit(), form[up-submit]
-  - Subsection for [watch-disable]
-    - Say that it inherits
-    - Say that we can override in groups
-    - Say that we can override yet again per input
-  - The /disable-option page is there, but still empty
-  - Maybe even for up.render()
-  - Maybe even for a[up-follow]
-
-
-### Watch/validate rework
-
-- Consider consolidating docs that are currently documented separately for input/form, so it's only "within the container"
-  - input[up-watch]/form[up-watch] as well as
-  - input[up-validate]/form[up-validate]
-    - Explain [up-validate] usage for radio buttons
-  - input[up-autosubmit]/form[up-autosubmit]
-  - Fix links
-  - Update .htaccess
-- Rework [up-validate] so it talks more generically about dynamic forms rendered on the server
-  - Repaints a fragment within a form, to retrieve validation errors or update dependent fields.
-- Document that [up-validate] reacts on `change` unless `[up-watch-event]` is set
-- New watch options [up-watch-feedback], [up-watch-disable],  [up-watch-delay],  [up-watch-event]
-  - Document at [up-watch] or new /watch-tuning page
-  - [up-watch-delay] attribute should always be optional; Explain how it often defaults to up.form.config.watchInputDelay
-  - [up-autosubmit] needs a params note saying that that attributes for [up-watch] may be used
-  - [up-validate] needs a params note saying that that attributes for [up-watch] may be used
-  - Explain that they can be set either on the form or on an input
-- Docs for up.validate()
-  - Document the many ways to target an element (see up.form.parseValidateArgs)
-  - { feedback, disable, delay, event }
-- New watch() and validate() options
-  - { feedback, disable, delay, event }
-  - Explain that you can use it both on containers and individual fields
-  - Explain config options
-    - up.form.config.watchInputEvents
-    - up.form.config.watchChangeEvents
-    - up.form.config.watchInputDelay
-- Document all the ways we prevent concurrency
-  - In up.watch()
-  - In up.validate()
-  - Document that multiple [up-validate] requests are merged into a single request
-- Document that up.watch() needs to return a promise so Unpoly can (1) prevent concurrency (2) honor [up-feedback] (3) honor [up-disable]
-- Test and Document that we can use live validation like this:
-  <input up-keep up-validate up-watch-event="input">
-- X-Up-Validate header
-  - Document that X-Up-Validate may contain multiple names
-  - Document that X-Up-Validate may contain :unknown
-- up.form.config.watchInputEvents
-- up.form.config.watchChangeEvents
-- up.form.config.watchInputDelay
-
-
 ### Other docs
 
 - Go through all the module index pages. Many of these are now a poor copy of a doc @page.
 - Replace ASCII art with picture for aborting-requests.md#aborting-conflicting-requests
-- Where do we support ` or ` separated lists and need to document it?
 - Consider replacing type|undefined with type? in all type comments
   - Test that a `?` may be part of a type in the parser
 - Go through TODO
-- Go through visibilities
-- Consider a new page for defaults
-  - I know no better @parent than up.util :/
-  - Explain that most opts are opt-in
-  - Explain navigation defaults
-  - Explain config objects
-  - Explain auto-Configs
-  - Explain that you can often override renderOptions in event handlers
-    - This is already explained in /render-hooks
+- Go through @experimental visibilities
 - Document django-forms-dynamic for [up-validate]
   - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
   - https://github.com/dabapps/django-forms-dynamic
@@ -168,7 +103,6 @@ Docs
   - { scrollBehavior }
     - Explain that this is currently only supported for prepending and appending
   - Also attributes for a[up-follow]
-- data, keepData, dataMap
 - Go through v3 slides and see if we have missed anything or can re-use illustrations
 
 
@@ -181,7 +115,7 @@ Docs
   - Programmatically
 - Enhancing elements with JavaScript
   - (Currently sitting in up.compiler)
-- Options
+- Options and defaults
   - Everything is opt-in
   - Navigation enables a set of new defaults
   - config option
@@ -189,6 +123,8 @@ Docs
   - Most options in up.render() can also be set via an attribute
     - JavaScript options override HTML attributes
     - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
+  - Explain that you can often override renderOptions in event handlers
+    - This is already explained in /render-hooks
 - How history is updated
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
   - History in overlays

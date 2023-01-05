@@ -189,6 +189,7 @@ up.link = (function() {
     A list of CSS selectors matching elements that should behave like links or buttons.
 
     @see [up-clickable]
+    @experimental
   @stable
   */
   const config = new up.Config(() => ({
@@ -242,6 +243,7 @@ up.link = (function() {
   @function isFollowDisabled
   @param {Element} link
   @return {boolean}
+  @internal
   */
   function isFollowDisabled(link) {
     return link.matches(config.noFollowSelectors.join(',')) || u.isCrossOrigin(link)
@@ -522,6 +524,7 @@ up.link = (function() {
     Whether the preload request may be aborted when the user [navigates](/navigation)
     or when `up.fragment.abort()` is called.
 
+    @experimental
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
@@ -1072,6 +1075,8 @@ up.link = (function() {
 
     See [aborting requests](/aborting-requests) for details.
 
+    @experimental
+
   @param [up-background='false']
     Whether this request will load in the background.
 
@@ -1084,6 +1089,8 @@ up.link = (function() {
     an `up:network:late` event.
 
     Defaults to `up.network.config.badResponseTime`.
+
+    @experimental
 
   @param [up-timeout]
     The number of milliseconds after which this request fails with a timeout.
@@ -1107,11 +1114,17 @@ up.link = (function() {
     A JSON object that will be merged into the [context](/context)
     of the current layer once the fragment is rendered.
 
+    @experimental
+
   @param [up-use-keep='true']
     Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
 
+    @experimental
+
   @param [up-use-hungry='true']
     Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
+
+    @experimental
 
   @param [up-scroll='auto']
     How to scroll after the new fragment was rendered.

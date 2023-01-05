@@ -69,6 +69,8 @@ up.viewport = (function() {
 
     You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
     a maximum height in pixel. Each given rectangle has properties `{ top, right, buttom, left, width, height }`.
+
+    @experimental
   @param {number} [config.revealTop=false]
     Whether to always scroll a [revealing](/up.reveal) element to the top.
 
@@ -194,6 +196,8 @@ up.viewport = (function() {
 
   @param {boolean} [options.force=false]
     Whether to force focus even if `element` would otherwise not be a focusable element.
+
+    @experimental
 
   @experimental
   */
@@ -527,7 +531,7 @@ up.viewport = (function() {
 
     If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
   @return {boolean}
-    Returns whether if scroll positions could be restored.
+    Returns whether scroll positions could be restored.
   @experimental
   */
   function restoreScroll(...args) {

@@ -234,7 +234,7 @@ up.protocol = (function() {
   Instead of sending this header, the server may also render fragments with `[up-etag]` attributes.
 
   @header ETag
-  @experimental
+  @stable
   */
 
   /*-
@@ -255,7 +255,7 @@ up.protocol = (function() {
   ```
 
   @header If-None-Match
-  @experimental
+  @stable
   */
 
   /*-
@@ -279,7 +279,7 @@ up.protocol = (function() {
   Instead of sending this header, the server may also render fragments with `[up-time]` attributes.
 
   @header Last-Modified
-  @experimental
+  @stable
   */
 
   /*-
@@ -300,7 +300,7 @@ up.protocol = (function() {
   ```
 
   @header If-Modified-Since
-  @experimental
+  @stable
   */
 
   function parseModifyCacheValue(value) {
@@ -856,8 +856,8 @@ up.protocol = (function() {
     ```
 
   @param {string} [config.methodParam='_method']
-    The name of request parameter containing the original request method when Unpoly needs to wrap
-    the method.
+    The name of request parameter containing the original request method when Unpoly needs to
+    [wrap](/up.network.config#config.wrapMethod) the method.
 
     Methods must be wrapped when making a [full page request](/up.network.loadPage) with a methods other
     than GET or POST. In this case Unpoly will make a POST request with the original request method

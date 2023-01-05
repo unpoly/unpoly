@@ -334,6 +334,8 @@ The parsed data will be passed to your event handler as a third argument:
     A message to print to the [log](/up.log) when the event is emitted.
 
     Pass `false` to not log this event emission.
+
+    @experimental
   @param {Element|jQuery} [props.target=document]
     The element on which the event is triggered.
 

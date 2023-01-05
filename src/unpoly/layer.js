@@ -340,7 +340,7 @@ up.layer = (function() {
       }
     }
 
-    if (!options.context) { options.context = {}; }
+    if (!options.context) { options.context = {} }
 
     // Remember the layer that was current when the request was made,
     // so changes with `{ layer: 'new' }` will know what to stack on.
@@ -512,6 +512,8 @@ up.layer = (function() {
 
   @param {Object} [options.context={}]
     The initial [context](/up.layer.context) object for the new overlay.
+
+    @experimental
 
   @param {string} [options.position]
     The position of the popup relative to the `{ origin }` element that opened
@@ -812,6 +814,8 @@ up.layer = (function() {
 
   @param [up-context]
     The new overlay's [context](/up.layer.context) object, encoded as JSON.
+
+    @experimental
 
   @param [up-position]
     The position of the popup relative to the `{ origin }` element that opened

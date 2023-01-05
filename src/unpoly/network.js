@@ -80,6 +80,8 @@ up.network = (function() {
 
     Bandwidth estimation is currently [only supported in Chromium-based browsers](https://caniuse.com/mdn-api_networkinformation_downlink).
 
+    @experimental
+
   @param {number} [config.badRTT=0.6]
     The connection's maximum effective [round-trip time](https://en.wikipedia.org/wiki/Round-trip_delay) required
     to prevent Unpoly from [reducing requests](/up.network.shouldReduceRequests).
@@ -91,6 +93,8 @@ up.network = (function() {
     For this configure `up.network.config.badResponseTime`.
 
     Round-trip time detection is currently [only supported in Chromium-based browsers](https://caniuse.com/mdn-http_headers_rtt).
+
+    @experimental
 
   @param {number|Function(up.Request): number} [config.badResponseTime=400]
     How long to wait before emitting the [`up:network:late` event](/up:network:late).
@@ -520,6 +524,8 @@ up.network = (function() {
 
     Defaults to `up.network.config.badResponseTime`.
 
+    @experimental
+
   @return {up.Request}
     An object with information about the request.
 
@@ -766,6 +772,8 @@ up.network = (function() {
     The reason will be set as the `AbortError`'s message.
   @param {up.Request} [options.except]
     An `up.Request` that should not be aborted even if it matches the given `condition`.
+
+    @experimental
   @stable
   */
   function abortRequests(...args) {
