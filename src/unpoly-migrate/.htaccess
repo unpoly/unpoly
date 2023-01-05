@@ -46,6 +46,7 @@ RedirectPermanent /targeting-elements /targeting-fragments
 RedirectPermanent /focus-option /focus
 RedirectPermanent /scroll-option /scrolling
 RedirectPermanent /validating /validation
+RedirectPermanent /validating-forms /validation
 RedirectPermanent /validations /validation
 RedirectPermanent /disable /disabling-forms
 RedirectPermanent /disabling /disabling-forms

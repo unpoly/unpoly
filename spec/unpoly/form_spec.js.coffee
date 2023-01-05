@@ -1938,6 +1938,26 @@ describe 'up.form', ->
           expect(jasmine.Ajax.requests.count()).toBe(0)
           expect(form).toHaveBeenDefaultSubmitted()
 
+      it 'does not submit the form while a HTML5 validation is violated', asyncSpec (next) ->
+        submitSpy = up.submit.mock().and.returnValue(u.unresolvablePromise())
+
+        form = fixture('form[action="/form-target"][up-submit]')
+        input = e.affix(form, 'input[type=text][name=title][required]')
+        submitButton = e.affix(form, 'input[type="submit"]')
+
+        up.hello(form)
+
+        Trigger.clickSequence(submitButton)
+
+        next ->
+          expect(submitSpy).not.toHaveBeenCalled()
+
+          input.value = 'foo'
+          Trigger.clickSequence(submitButton)
+
+        next ->
+          expect(submitSpy).toHaveBeenCalled()
+
       describe 'when the server responds with an error code', ->
 
         it 'replaces the form instead of the [up-target] selector', asyncSpec (next) ->

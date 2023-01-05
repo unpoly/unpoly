@@ -1208,61 +1208,15 @@ up.form = (function() {
 
   ### Handling validation errors
 
-  TODO: Move this to /validation
+  When the form could not be submitted due to invalid user input,
+  Unpoly can re-render the form with validation errors.
 
-  When a server-side web application was unable to save the form due to invalid params,
-  it will usually re-render the form with validation errors.
-
-  For Unpoly to be able to detect a failed form submission, the form must be re-rendered with a non-200 HTTP status code.
-  We recommend to use 422 (unprocessable entity). In a Ruby on Rails app
-  this would look like this:
-
-  ```ruby
-  class UsersController < ApplicationController
-
-    def create
-      user_params = params.require(:user).permit(:email, :password)
-      @user = User.new(user_params)
-      if @user.save?
-        sign_in @user
-      else
-        # Signal a failed form submission with an HTTP 422 status
-        render 'form', status: :unprocessable_entity
-      end
-    end
-
-  end
-  ```
-
-  If your server-side code cannot communicate status codes like that,
-  you may [customize Unpoly's failure detection](/up.network.config#config.fail).
-
-  You may define different option for the failure case by infixing an attribute with `fail`:
-
-  ```html
-  <form method="post" action="/action"
-    up-target=".content"
-    up-fail-target="form"
-    up-scroll="auto"
-    up-fail-scroll=".errors">
-    ...
-  </form>
-  ```
-
-  See [handling server errors](/failed-responses) for details.
-
-  > [TIP]
-  > You can also use the `[up-validate]` attribute to perform server-side
-  > validations while the user is completing fields.
+  See [validating forms](/validation) for details and examples.
 
 
-  ### Giving feedback while the form is processing
+  ### Showing that the form is processing
 
-  The `<form>` element will be assigned a CSS class [`.up-active`](/form.up-active) while
-  the submission is loading. The form's target will be assigned an `.up-loading` class.
-
-  Also see [Navigation feedback](/up.feedback) and [Disabling form controls while working](/disabling-forms).
-
+  See [navigation feedback](/up.feedback) and [disabling form controls while working](/disabling-forms).
 
   ### Short notation
 
@@ -1316,10 +1270,13 @@ up.form = (function() {
   Renders a new form state when a field changes, to show validation errors or
   update [dependent fields](/dependent-fields).
 
-
   When a form field with an `[up-validate]` attribute is changed, the form is submitted to the server
   which is expected to render a new form state from its current field values.
   The [form group](/up-form-group) around the changed field is updated with the server response.
+
+  This gives the user quick feedback whether their change is valid,
+  without the need to scroll for error messages or to backtrack to
+  fields completed earlier.
 
   > [NOTE]
   > `[up-validate]` is a tool to implement highly dynamic forms that must update
@@ -1329,7 +1286,9 @@ up.form = (function() {
 
   ### Marking fields for validation
 
-  Let's look at a standard registration form that asks for an e-mail and password:
+  Let's look at a standard registration form that asks for an e-mail and password.
+  The form is organized into [form groups](/up-form-group) of labels, inputs and
+  an optional error message:
 
   ```html
   <form action="/users">
@@ -1356,7 +1315,9 @@ up.form = (function() {
   - When the user changes the `password` field, we want to validate
     the minimum password length.
 
-  If validation fails we want to show validation errors using the following HTML:
+  If validation fails we want to show validation errors *as soon as the user blurs the field*.
+
+  We're going to render validation errors using the following HTML:
 
     ```html
   <form action="/users">
@@ -1420,7 +1381,7 @@ up.form = (function() {
   Until now the backend only had to handle two cases:
 
   1. The form was submitted with valid data. We create a new account and sign in the user.
-  2. The form submission failed due to an invalid email or password. We re-render the form with error messages..
+  2. The form submission failed due to an invalid email or password. We re-render the form with error messages.
 
   A [Ruby on Rails](https://rubyonrails.org/) implementation would look like this:
 
@@ -1537,6 +1498,11 @@ up.form = (function() {
   See [dependent fields](/dependent-fields) for more details and examples.
 
 
+  ### Validating while typing
+
+  @include validating-while-typing
+
+
   ### Preventing race conditions
 
   Custom dynamic form implementations will often exhibit race conditions, e.g. when the user
@@ -1545,7 +1511,6 @@ up.form = (function() {
   regardless of how fast the user clicks or how slow the network is.
 
   See [preventing race conditions](/dependent-fields#preventing-race-conditions) for more details.
-
 
   ### Validating multiple fields
 
@@ -1586,8 +1551,6 @@ up.form = (function() {
     <input type="radio" name="format" value="txt"> Text format
   </fieldset>
   ```
-
-
 
   ### Programmatic validation
 

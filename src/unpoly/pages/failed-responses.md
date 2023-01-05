@@ -45,7 +45,7 @@ Note that event handlers still begin with `on` for failed responses, so `{ onRen
 When using Unpoly's HTML attributes with [links](/up.link) or [forms](/up.form)
 you may infix an attribute with `fail`:
 
-```html
+```text
 <form method="post" action="/action"
   up-target=".content"      <!-- when submission succeeds update '.content' -->
   up-fail-target="form"     <!-- when submission fails update the form -->
@@ -54,6 +54,8 @@ you may infix an attribute with `fail`:
   ...
 </form>
 ```
+
+Also see [validating forms](/validation).
 
 
 ### Ignoring HTTP error codes
