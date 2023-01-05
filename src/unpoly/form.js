@@ -29,35 +29,6 @@ up.form = (function() {
 
   @property up.form.config
 
-  @param {number} [config.watchInputDelay=0]
-    TODO: Docs
-
-  @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents]
-    An array of events to substitute if [watching the `input` event](/watch-options#which-events-to-watch).
-
-    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
-    that don't emit the [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event)
-    as its value is being edited.
-
-    It's OK to name multiple events that may result in the same change (e.g. `['keydown', 'keyup']`).
-    Unpoly guarantees the callback is only run once per changed value.
-
-    Instead of configuring an array of event types, you may also set a function that accepts
-    a form field and returns an array of event types to watch for that field.
-
-  @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents]
-    An array of events to substitute if [watching the `change` event](/watch-options#which-events-to-watch).
-
-    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
-    that don't emit the [standard `change` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
-    after its value was changed.
-
-    It's OK to name multiple events that may result in the same change (e.g. `['change', 'blur']`).
-    Unpoly guarantees the callback is only run once per changed value.
-
-    Instead of configuring an array of event types, you may also set a function that accepts
-    a form field and returns an array of event types to watch for that field.
-
   @param {Array<string>} [config.submitSelectors]
     An array of CSS selectors matching forms that will be [submitted through Unpoly](/form-up-submit).
 
@@ -85,6 +56,38 @@ up.form = (function() {
 
   @param {string} [config.submitButtonSelectors]
     An array of CSS selectors that represent submit buttons, such as `input[type=submit]`.
+
+  @param {number} [config.watchInputDelay=0]
+    The number of milliseconds to [wait before running a watcher callback](/watch-options#debouncing-callbacks).
+
+    This default delay is only applied when [watching the `input` event](/watch-options#which-events-to-watch).
+    There is no default delay when watching other types of events.
+
+  @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents]
+    An array of events to substitute if [watching the `input` event](/watch-options#which-events-to-watch).
+
+    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
+    that don't emit the [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event)
+    as its value is being edited.
+
+    It's OK to name multiple events that may result in the same change (e.g. `['keydown', 'keyup']`).
+    Unpoly guarantees the callback is only run once per changed value.
+
+    Instead of configuring an array of event types, you may also set a function that accepts
+    a form field and returns an array of event types to watch for that field.
+
+  @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents]
+    An array of events to substitute if [watching the `change` event](/watch-options#which-events-to-watch).
+
+    This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
+    that don't emit the [standard `change` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
+    after its value was changed.
+
+    It's OK to name multiple events that may result in the same change (e.g. `['change', 'blur']`).
+    Unpoly guarantees the callback is only run once per changed value.
+
+    Instead of configuring an array of event types, you may also set a function that accepts
+    a form field and returns an array of event types to watch for that field.
 
   @stable
    */
