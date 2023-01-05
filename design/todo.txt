@@ -80,6 +80,7 @@ Various changes
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
 - up.watch() should pass on a { origin } option to render options
   - Make sure that [up-autosubmit] sets and forwards that origin
+- Split JavaScript => Do this after asset reconciliation
 
 
 Docs
@@ -97,25 +98,22 @@ Docs
 - Options
   - Everything is opt-in
   - Navigation enables a set of new defaults
-  - JavaScript options override HTML attributes
   - config option
   - auto-options
-- HTML vs. JavaScript APIs
   - Most options in up.render() can also be set via an attribute
+    - JavaScript options override HTML attributes
     - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
-  - JavaScript options override HTML attributes
 - When history is updated
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
   - History in overlays
     - Always know their location, even if it might not be visible
     - Explain that your should always render full pages
-- History restoration / Back button
-  - Will collapse layers
-    - Pages should work in both
-    - Subnavigations make it easy
-    - You can disable layer history
-  - Customize restoration behavior
-- Split JavaScript
+  - History restoration / Back button
+    - Will collapse layers
+      - Pages should work in both
+      - Subnavigations make it easy
+      - You can disable layer history
+    - Customize restoration behavior
 - Move predefined animations / transitions from up.animate() and up.morph() to their own topic pages
 
 
