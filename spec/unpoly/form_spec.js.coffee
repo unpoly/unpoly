@@ -2196,6 +2196,22 @@ describe 'up.form', ->
         next.after 100, =>
           expect(submitSpy.calls.count()).toBe(3)
 
+      it 'calls up.submit() with render options parsed from the watched element', asyncSpec (next) ->
+        submitSpy = up.submit.mock()
+
+        form = fixture('form')
+        input = e.affix(form, 'input[name=email][up-autosubmit][up-watch-feedback=false]')
+        up.hello(form)
+
+        input.value = "other"
+        Trigger.change(input)
+
+        next ->
+          expect(submitSpy).toHaveBeenCalledWith(
+            input,
+            jasmine.objectContaining({ origin: input, feedback: false })
+          )
+
     describe 'form[up-autosubmit]', ->
 
       beforeEach ->

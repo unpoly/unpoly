@@ -141,7 +141,7 @@ up.form = (function() {
   @experimental
   */
   function findFields(root) {
-    root = e.get(root); // unwrap jQuery
+    root = e.get(root) // unwrap jQuery
     let fields = e.subtree(root, fieldSelector())
 
     // If findFields() is called with an entire form, gather fields outside the form
@@ -676,11 +676,11 @@ up.form = (function() {
   ```
 
   @function up.watch
-  @param {string|Element|Array<Element>|jQuery} elements
-    The form fields that will be watched.
+  @param {Element|jQuery} element
+    The form field that will be watched.
 
-    You can pass one or more fields, a `<form>` or any container that contains form fields.
-    The callback will be run if any of the given fields change.
+    You can pass a field, a `<form>` or any container that contains form fields.
+    The callback will be run if any of the contained fields change.
   @param {boolean} [options.batch=false]
     If set to `true`, the `onChange` callback will receive multiple
     detected changes in a [single diff object as its argument](#batching-changes).
@@ -754,7 +754,7 @@ up.form = (function() {
   @stable
   */
   function autosubmit(target, options) {
-    return watch(target, options, () => submit(target))
+    return watch(target, options, (_value, _name, renderOptions) => submit(target, renderOptions))
   }
 
   function getGroupSelectors() {
