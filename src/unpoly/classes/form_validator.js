@@ -69,7 +69,7 @@ up.FormValidator = class FormValidator {
     if (u.isString(target) && target) {
       up.puts('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = up.fragment.splitTarget(target)
-      return simpleSelectors.map((function(simpleSelector) {
+      return simpleSelectors.map(function(simpleSelector) {
         return {
           element: up.fragment.get(simpleSelector, { origin }),
           target: simpleSelector,
