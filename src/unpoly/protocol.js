@@ -510,32 +510,62 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the `[name]` of a [form field being validated](/up-validate).
+  This request header contains the names of the [form fields being validated](/up-validate).
 
-  When seeing this header, the server is expected to validate (but not save)
-  the form submission and render a new copy of the form with validation errors.
+  When seeing this header, the server is [expected](/up-validate#backend-protocol)
+  to validate (but not save) the form submission and render a new form state with validation errors.
   See the documentation for `[up-validate]` for more information
   on how server-side validation works in Unpoly.
 
-  The server is free to respond with any HTTP status code, regardless of the validation result.
-  Unpoly will always consider a validation request to be successful, even if the
-  server responds with a non-200 status code. This is in contrast to [regular form submissions](/form-up-submit),
-  [where a non-200 status code will often update a different element](/failed-responses).
-
   ### Example
 
-  Assume we have an auto-validating form field:
+  Let's look at a registration form that uses `[up-validate]` to validate form groups
+  as the user completes fields:
 
   ```html
-  <fieldset>
-    <input name="email" up-validate>
-  </fieldset>
+  <form action="/users">
+
+    <fieldset>
+      <label for="email" up-validate>E-mail</label> <!-- mark-phrase "up-validate" -->
+      <input type="text" id="email" name="email">
+    </fieldset>
+
+    <fieldset>
+      <label for="password" up-validate>Password</label> <!-- mark-phrase "up-validate" -->
+      <input type="password" id="password" name="password">
+    </fieldset>
+
+    <button type="submit">Register</button>
+
+  </form>
   ```
 
-  When the input is changed, Unpoly will submit the form with an additional header:
+  When the `email` input is changed, Unpoly will submit the form with an
+  additional `X-Up-Validate` header:
 
-  ```html
+  ```http
   X-Up-Validate: email
+  X-Up-Target: fieldset:has(#email)
+  ```
+
+  ### Batched validations
+
+  If multiple validations are [batched](/up.validate#batching) into a single request,
+  `X-Up-Validate` contains a space-separated list of all validating field names:
+
+  ```http
+  X-Up-Validate: email password
+  X-Up-Target: fieldset:has(#password)
+  ```
+
+  ### When no origin field is known
+
+  When `up.validate()` is called with a non-field element, Unpoly might not know
+  which element triggered the validation. In that case the header value will be `:unknown`:
+
+  ```http
+  X-Up-Validate: :unknown
+  X-Up-Target: .preview
   ```
 
   @header X-Up-Validate
