@@ -61,9 +61,25 @@ Since the new URL is `/bar`, the [`.up-current`](/a.up-current) class has been m
 </main>
 ```
 
+### Enabling navigation feedback
+
+Navigation feedback is enabled per default when [navigating](/navigation).
+
+When rendering without navigation, you may enable feedback by setting an
+[`[up-feedback]`](/a-up-follow#up-feedback) attribute or by passing a
+[`{ feedback }`](/up.render#options.feedback) option:
+
+```js
+up.render('.preview', { url: '/preview', feedback: true })
+```
+
+When watching fields you may [show navigation feedback](/watch-options#showing-feedback-while-working)
+while an async callback is running.
+
+
 @see [up-nav]
 @see a.up-current
-@see a.up-active
+@see .up-active
 @see .up-loading
 
 @module up.feedback
@@ -182,19 +198,10 @@ up.feedback = (function() {
   }
 
   /*-
-  Links that are being [followed](/a-up-follow)
-  are assigned the `.up-active` class while waiting for the server response.
+  While rendering [with navigation feedback](/up.feedback#enabling-navigation-feedback), the `.up-active` class is added to the [origin](/origin)
+  element that triggered the change.
 
-  Consider styling active links in your CSS to improve the perceived responsiveness
-  of your user interface:
-
-  ```css
-  a.up-active {
-    background-color: yellow;
-  }
-  ```
-
-  The `.up-active` attribute will be removed when the link is done loading.
+  The `.up-active` class is removed once the new content has been loaded and rendered.
 
   ### Example
 
@@ -218,27 +225,40 @@ up.feedback = (function() {
   <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
   ```
 
-  ### Related
+  ### Default origins
 
-  If you're looking to style the [targeted](/targeting-fragments) fragment, use the `.up-loading` class.
+  The origin element is set automatically for many actions, for example:
 
-  @selector a.up-active
+  @include default-origins
+
+  When rendering from JavaScript, you may set the origin by passing an
+  [`{ origin }`](/origin#setting-the-origin-programmatically) option.
+
+  ### Styling active elements
+
+  To improve the perceived responsiveness of your user interface,
+  consider highlighting active links and submit buttons in your CSS:
+
+  ```css
+  a.up-active,
+  input[type=submit].up-active,
+  button[type=submit].up-active  {
+    outline: 2px solid blue;
+  }
+  ```
+
+  If you're looking to style the [targeted](/targeting-fragments) fragment, use the `.up-loading` class
+  instead.
+
+  @selector .up-active
   @stable
   */
 
   /*-
-  [Targeted fragments](/targeting-fragments) are assigned the `.up-loading` class while waiting for the server response.
+  While rendering [with navigation feedback](/up.feedback#enabling-navigation-feedback),
+  [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
 
-  Consider styling loading fragments in your CSS to improve the perceived responsiveness
-  of your user interface:
-
-  ```css
-  .up-loading {
-    opacity: 0.6;
-  }
-  ```
-
-  The `.up-loading` class will be removed once the fragment was updated.
+  The `.up-loading` class is removed once the fragment was updated.
 
   ### Example
 
@@ -272,53 +292,21 @@ up.feedback = (function() {
   </div>
   ```
 
-  ### Related
+  ### Styling targeted fragments
 
-  If you're looking to style the link that targeted the fragment, use the [`.up-active`](/a.up-active) class.
+  To improve the perceived responsiveness
+  of your user interface, cnsider styling loading fragments in your CSS:
+
+  ```css
+  .up-loading {
+    opacity: 0.6;
+  }
+  ```
+
+  If you're looking to style the link that targeted the fragment, use the
+  [`.up-active`](/a.up-active) class instead.
 
   @selector .up-loading
-  @stable
-  */
-
-  /*-
-  Forms that are currently [loading through Unpoly](/form-up-submit)
-  are assigned the `.up-active` class automatically.
-  Style `.up-active` in your CSS to improve the perceived responsiveness
-  of your user interface.
-
-  The `.up-active` class will be removed as soon as the response to the
-  form submission has been received.
-
-  To block user input while the form is submitting, see
-  [disabling forms while working](/disabling-forms).
-
-  ### Example
-
-  We have a form:
-
-  ```html
-  <form up-target=".foo">
-    <button type="submit">Submit</button>
-  </form>
-  ```
-
-  The user clicks on the submit button. While the form is being submitted
-  and waiting for the server to respond, the form has the `up-active` class:
-
-  ```html
-  <form up-target=".foo" class="up-active">
-    <button type="submit">Submit</button>
-  </form>
-  ```
-
-  Once the link destination has loaded and rendered, the `.up-active` class
-  is removed.
-
-  ### Related
-
-  If you're looking to style the targeted fragment, use the `.up-loading` class.
-
-  @selector form.up-active
   @stable
   */
 
@@ -379,7 +367,8 @@ up.feedback = (function() {
   </div>
   ```
 
-  If the browser location changes to `/bar`, the first link automatically loses its `.up-current` class. Now the second link is marked as `.up-current`:
+  If the browser location changes to `/bar`, the first link automatically loses its `.up-current` class.
+  Now the second link is marked as `.up-current`:
 
   ```html
   <div up-nav>

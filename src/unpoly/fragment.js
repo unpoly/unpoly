@@ -2131,17 +2131,14 @@ up.fragment = (function() {
   Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to reference the origin element that triggered the change.
 
-  The origin element is automatically set for many actions, for example:
-
-  | Action                                | Origin element      |
-  |---------------------------------------|---------------------|
-  | [Submitting a form](/form-up-submit)  | The focused element *or* the submit button used *or* the form |
-  | [Following a link](/a-up-follow)      | The link |
-  | [Preloading a link](/a-up-preload)    | The link |
-  | [Validating a field](/up-validate)    | The changed field |
-
   The `:origin` placeholder will be replaced with a target [derived](/target-derivation)
   from the origin element.
+
+  ### Default origins
+
+  The origin element is automatically set for many actions, for example:
+
+  @include default-origins
 
   ### Example
 
@@ -2198,12 +2195,13 @@ up.fragment = (function() {
   up.follow(link) // link will be set as { origin }
   ```
 
-  Ensuring an origin is set may improve the precision of fragment lookup, even if
-  a [target selector](/targeting-fragments) doesn't contain an `:origin` reference.
-  In the example above, Unpoly would prefer to match `.preview` in the
-  [vicinity](/targeting-fragments#resolving-ambiguous-selectors) of the origin.
-  If no origin is known, Unpoly will always match the first `.preview` in the
-  current [layer](/up.layer).
+  > [TIP]
+  > Ensuring an origin is set may improve the precision of fragment lookup, even if
+  > a [target selector](/targeting-fragments) doesn't contain an `:origin` reference.
+  > In the example above, Unpoly would prefer to match `.preview` in the
+  > [vicinity](/targeting-fragments#resolving-ambiguous-selectors) of the origin.
+  > If no origin is known, Unpoly will always match the first `.preview` in the
+  > current [layer](/up.layer).
 
   @selector :origin
   @stable
