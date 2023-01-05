@@ -63,7 +63,12 @@ For this to work you must also include the `<meta name="csp-nonce">` tag in the 
 To provide the nonce through another method, configure `up.protocol.config.cspNonce`.
 
 When responding to a fragment update, you may use a CSP nonce unique to that latest response.
-You do *not* need to reuse the nonce of the initial page that booted Unpoly. Neither to you need to update the `<meta>` tag with the latest nonce.
+You do *not* need to reuse the nonce of the initial page that booted Unpoly.
+Neither to you need to update the `<meta>` tag with the latest nonce.
+
+> [TIP]
+> If you're using the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem you can prefix a nonce
+> using the [`up.safe_callback()`](https://github.com/unpoly/unpoly-rails#allowing-callbacks-with-a-strict-csp) helper.
 
 
 ### Solution 3: Relax your CSP

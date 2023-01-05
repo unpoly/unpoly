@@ -1,5 +1,5 @@
-Scroll option
-=============
+Scrolling
+=========
 
 When updating a fragment you may control how Unpoly scrolls the page by passing
 a `{ scroll }` option or `[up-scroll]` attribute.

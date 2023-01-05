@@ -44,6 +44,7 @@ RedirectPermanent /cache /caching
 RedirectPermanent /targeting-elements /targeting-fragments
 
 RedirectPermanent /focus-option /focus
+RedirectPermanent /focusing /focus
 RedirectPermanent /scroll-option /scrolling
 RedirectPermanent /validating /validation
 RedirectPermanent /validating-forms /validation

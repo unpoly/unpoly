@@ -42,9 +42,13 @@ up.network.config.cacheExpireAge = 20_000 // expire after 20 seconds
 up.fragment.config.autoRevalidate = (response) => response.expired
 ```
 
-When [navigating](/navigation) the `{ revalidate: 'auto' }` is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of revalidation while navigating, pass a  [`{ revalidate: false }`](/up.render#options.revalidate) option (JavaScript), set an [`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute (HTML) or configure `up.fragment.config.autoRevalidate`.
-
 To force revalidation regardless of cache age, pass `{ revalidate: true }`.
+
+When [navigating](/navigation) the `{ revalidate: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of revalidation while navigating, there are several methods:
+
+- Pass a  [`{ revalidate: false }`](/up.render#options.revalidate) option (JavaScript)
+- Set an [`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute (HTML)
+- Configure `up.fragment.config.navigateOptions.revalidate = false`
 
 
 ### When nothing changed

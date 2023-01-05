@@ -141,8 +141,8 @@ up.protocol = (function() {
   validation errors) or succeeded (to update the `[up-target]` selector).
 
   For Unpoly to be able to detect a failed form submission, the response must be
-  return a non-2xx HTTP status code. We recommend to use either
-  400 (bad request) or 422 (unprocessable entity).
+  return a non-2xx HTTP status code. We recommend to use
+  [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Entity).
 
   To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
 
@@ -243,7 +243,7 @@ up.protocol = (function() {
   The server can use the header value to prevent unnecessary re-rendering of unchanged content.
   See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
 
-  The header is only set when Unpoly knows theETag of the loading fragment.
+  The header is only set when Unpoly knows the ETag of the loading fragment.
   For this the fragment must have been rendered with an `ETag` response header or `[up-etag]` attribute.
 
   ### Format

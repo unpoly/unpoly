@@ -17,7 +17,8 @@ Any HTTP status other than 2xx or [304](/skipping-rendering#rendering-nothing) i
 
 A common use case for this is [form submissions](/up.form), where a successful response
 should display a follow-up screen, but a failed response should re-render the form with validation errors.
-A good HTTP status code for an invalid form submission is [400 (Bad Request)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400).
+A good HTTP status code for an invalid form submission is
+[422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Entity).
 
 To use a different [render option](/up.render) for a failed server response,
 prefix the option with `fail`:
@@ -86,8 +87,8 @@ up.on('up:fragment:loaded', function(event) {
 
 ### Local content cannot fail
 
-When the updated fragment content is not requested from a `{ url }`, but rather passed as a
-HTML string, the update is always considered successful.
+When the updated fragment content is not requested from a `{ url }`, but rather passed as an
+HTML string (`{ document, fragment, content }`), the update is always considered successful.
 
 
 ## Handling unexpected content
