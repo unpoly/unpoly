@@ -155,6 +155,25 @@ describe 'up.form', ->
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
+            it 'forwards render options parsed from the DOM as a callback argument', asyncSpec (next) ->
+              callback = jasmine.createSpy('up.watch() callback')
+
+              form = fixture('form')
+              input = e.affix(form, 'input[name=email][up-watch-feedback=false]')
+              up.hello(form)
+
+              up.watch(input, callback)
+
+              input.value = "other"
+              Trigger.change(input)
+
+              next ->
+                expect(callback).toHaveBeenCalledWith(
+                  'other',
+                  'email',
+                  jasmine.objectContaining({ origin: input, feedback: false })
+                )
+
             describe 'with { delay } option', ->
 
               it 'debounces the callback', asyncSpec (next) ->
