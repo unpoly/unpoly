@@ -59,6 +59,7 @@ TODOs after V3
   - Also update doc page /focus
 - Use native `:has` where available
 - Split JavaScript => Do this after asset reconciliation
+- input.setCustomValidity() should block submission
 
 
 
@@ -69,74 +70,19 @@ TODOs for V3
 Various changes
 ---------------
 
-- When watching: Is it really useful that a field (and not a form) gets .up-active?
-  - E.g. a watcher on some input submits a form, the form is not considered .up-active :(
-  - The whole issue was introduced by making the origin the field instead of the form
-  - To style a working form we would need to style form.up-active, form:has(.up-active)
-  - We could consider to feedback the form if the origin is an input, or a non-link within a form
-  - Or up.submit() sets { feedbackElement }
-    - However up.validate() does not go through up.submit()
-  - !!! The form.up-active docs are now completely wrong, as there is rarely a case when
-    the form gets the .up-active class. It is always the focused field or the used submit button.
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
 
 
 Docs
 ----
 
-### Ideas for new topic pages
-
-- Polling
-- Preloading
-  - (Currently sitting in a[up-preload])
-  - On Hover
-  - Programmatically
-- Enhancing elements with JavaScript
-  - (Currently sitting in up.compiler)
-- Options
-  - Everything is opt-in
-  - Navigation enables a set of new defaults
-  - config option
-  - auto-options
-  - Most options in up.render() can also be set via an attribute
-    - JavaScript options override HTML attributes
-    - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
-- When history is updated
-  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
-  - History in overlays
-    - Always know their location, even if it might not be visible
-    - Explain that your should always render full pages
-  - History restoration / Back button
-    - Will collapse layers
-      - Pages should work in both
-      - Subnavigations make it easy
-      - You can disable layer history
-    - Customize restoration behavior
-- Move predefined animations / transitions from up.animate() and up.morph() to their own topic pages
-
-
 ### General
 
-- Unify a.up-active and form.up-active to just ".up-active"
-  - Now that other elements can also have this
 - Finish /validation
-- Rename "Scroll option" to "Scrolling"
-  - Also the page title
-- Maybe mention history events in /render-hooks
-- Animation-related attributes should show:
-  - Where a list of predefined animations can be found
-  - Where a list of predefined transitions can be found
-- csp should have a tip box for up.safe_callback
 - Have we documented places where we may separate options with " or "?
   - focus
   - scroll
-- Document how to disable revalidation
-
-
-### New cache / revalidation
-
-- Protocol headers
-  - Link from up.reload()
+- Consider removing all tagnames from public selectors
 
 
 ### Disabling
@@ -226,6 +172,51 @@ Docs
 - Go through v3 slides and see if we have missed anything or can re-use illustrations
 
 
+### Ideas for new topic pages
+
+- Polling
+- Preloading
+  - (Currently sitting in a[up-preload])
+  - On Hover
+  - Programmatically
+- Enhancing elements with JavaScript
+  - (Currently sitting in up.compiler)
+- Options
+  - Everything is opt-in
+  - Navigation enables a set of new defaults
+  - config option
+  - auto-options
+  - Most options in up.render() can also be set via an attribute
+    - JavaScript options override HTML attributes
+    - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
+- How history is updated
+  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
+  - History in overlays
+    - Always know their location, even if it might not be visible
+    - Explain that your should always render full pages
+  - History restoration / Back button
+    - Will collapse layers
+      - Pages should work in both
+      - Subnavigations make it easy
+      - You can disable layer history
+    - Customize restoration behavior
+- Move predefined animations / transitions from up.animate() and up.morph() to their own topic pages
+  - predefined-animations
+  - predefined-transitions
+  - Link new pages
+    - From [up-transition] attributes
+    - From [up-animation] attributes
+    - From up.animate()
+    - From up.morph()
+    - From up.animation()
+    - From up.transition()
+- Rendering from strings
+  - { document }
+  - { fragment }
+  - { content }
+
+
+
 V3.pre launch
 -------------
 
@@ -307,6 +298,7 @@ Icebox
       <input up-validate up-keep up-watch-event="input">
   - <input up-live-validate>
   - It's weird for users who don't target the input. They may expect to just override the event.
+  - We would need to make keepable selectors configurable to include this one
 - We could support this with more pseudo-class selectors like :form-group and :submit-button
   - :submit-button is hard to build origin-aware => It could just be a substitution with :is() / :-moz-any() & :-webkit-any()
   - :form-group is also supper hard to support in a selector like ".foo, :form-group, :bar" due to the way we hacked :has()
