@@ -37,25 +37,17 @@ The default is `{ abort: 'target' }`, which aborts all requests targeting
 fragments within *your* targeted fragments. Requests targeting other fragments are not aborted.
 
 To visualize the effects of `{ abort: 'target' }`, observe the layout below.
-The screen is split into a sidebar (`side`) and a content area (`main`). Contained within
-`main` is a smaller fragment `box`.
+The screen is split into a sidebar (`#side`) and a content area (`#main`). Contained within
+`#main` is a smaller fragment `#box`.
 
-
-```text
-+------+-------------+
-| side |    main     |
-|      | +---------+ |
-|      | |   box   | |
-|      | +---------+ |
-+------+-------------+
-```
+![Layout with #side, #main and #box fragments](images/side-main-box.svg){:width='350'}
 
 In this layout rendering with `{ abort: 'target' }` has the following effect:
 
-- Concurrent requests targeting `side` and `main` will not abort each other.
-- When two requests target `main`, the first request will be aborted by the second request.
-- Rendering `main` will abort an earlier request targeting `box`.
-- Rendering `box` will *not* abort an earlier request targeting `main`.
+- Concurrent requests targeting `#side` and `#main` will not abort each other.
+- When two requests target `#main`, the first request will be aborted by the second request.
+- Rendering `#main` will abort an earlier request targeting `#box`.
+- Rendering `#box` will *not* abort an earlier request targeting `#main`.
 
 ## Preventing requests from being aborted
 
