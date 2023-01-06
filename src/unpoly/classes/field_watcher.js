@@ -53,7 +53,7 @@ up.FieldWatcher = class FieldWatcher {
     let delay = u.evalOption(fieldOptions.delay, event)
     this.currentTimer = u.timer(delay, () => {
       this.currentTimer = null
-      if (this.isAnyFieldAttached()) { // TODO: Docs and changelog for this new feature
+      if (this.isAnyFieldAttached()) {
         this.scheduledFieldOptions = fieldOptions
         this.requestCallback()
       } else {

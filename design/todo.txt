@@ -87,8 +87,6 @@ Docs
 ### Other docs
 
 - Go through all the module index pages. Many of these are now a poor copy of a doc @page.
-- Replace ASCII art with picture for aborting-requests.md#aborting-conflicting-requests
-- Go through TODO
 - Missing docs for scrolling-related render options
   - { revealTop }
   - { revealMax }
@@ -97,7 +95,10 @@ Docs
   - { scrollBehavior }
     - Explain that this is currently only supported for prepending and appending
   - Also attributes for a[up-follow]
-- Go through v3 slides and see if we have missed anything or can re-use illustrations
+- Go through v3 slides and see if
+  - we have missed anything
+  - can re-use illustrations
+  - need to fix things in the slides that have since changed
 
 
 ### Ideas for new topic pages
