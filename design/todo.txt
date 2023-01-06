@@ -87,14 +87,6 @@ Docs
 ### Other docs
 
 - Go through all the module index pages. Many of these are now a poor copy of a doc @page.
-- Missing docs for scrolling-related render options
-  - { revealTop }
-  - { revealMax }
-  - { revealPadding }
-  - { revealSnap }
-  - { scrollBehavior }
-    - Explain that this is currently only supported for prepending and appending
-  - Also attributes for a[up-follow]
 - Go through v3 slides and see if
   - we have missed anything
   - can re-use illustrations

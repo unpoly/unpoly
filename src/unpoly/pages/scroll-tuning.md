@@ -33,7 +33,7 @@ of an obstructing layout element to the `up.viewport.config.fixedTop` or
 
 ### Snapping to the screen edge
 
-When [revealing](/up.reveal) an element near the top edge of the viewport,
+When [revealing](/up.reveal) an element near the top edge of a viewport's scroll buffer,
 you often want to scroll to the very top for aesthetic reasons. For example, if you reveal a navigation
 bar that sits 50px below the top logo, you probably want to scroll to zero (instead of 50) pixels.
 
@@ -68,7 +68,7 @@ You may change this default in `up.viewport.config.revealMax`.
 
 ### Revealing with padding
 
-To add space between a [revealed](/up.reveal) element and the closest viewport edge,
+To leave space between a [revealed](/up.reveal) element and the closest viewport edge,
 pass a pixel value as `{ revealPadding }` option.
 
 The default is `{ revealPadding: 0 }`.

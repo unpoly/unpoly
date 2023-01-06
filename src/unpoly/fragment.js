@@ -701,20 +701,29 @@ up.fragment = (function() {
   @param {Object} [options.context]
     An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.
 
-  @param {boolean} [options.useKeep=true]
-    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
-
-    @experimental
-
-  @param {boolean} [options.useHungry=true]
-    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
-
-    @experimental
-
   @param {boolean|string|Element|Function} [options.scroll]
     How to scroll after the new fragment was rendered.
 
-    See [Scrolling](/scrolling) for a list of allowed values.
+    See [scrolling](/scrolling) for a list of allowed values.
+
+  @param {string} [options.scrollBehavior='instant']
+    Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
+    when [prepending or appending](/targeting-fragments#appending-or-prepending-content) content.
+
+  @param {number} [options.revealSnap]
+    When to [snap to the top](/scroll-tuning#snapping-to-the-screen-edge)
+    when scrolling to an element near the top edge of the viewport's scroll buffer.
+
+  @param {number} [options.revealTop]
+    When to [move a revealed element to the top](/scroll-tuning#moving-revealed-elements-to-the-top)
+    when scrolling to an element.
+
+  @param {string} [options.revealPadding]
+    How much [space to leave to the closest viewport edge](/scroll-tuning#revealing-with-padding)
+    when scrolling to an element.
+
+  @param {string} [options.revealMax]
+    How many pixel lines of [high element to reveal](/scroll-tuning#revealing-with-padding) when scrolling to an element.
 
   @param {boolean} [options.saveScroll=true]
     Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.
@@ -795,6 +804,16 @@ up.fragment = (function() {
     or [aborts](/aborting-requests).
 
     Also see [Handling errors](/render-hooks#handling-errors).
+
+  @param {boolean} [options.useKeep=true]
+    Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragment.
+
+    @experimental
+
+  @param {boolean} [options.useHungry=true]
+    Whether [`[up-hungry]`](/up-hungry) elements outside the updated fragment will also be updated.
+
+    @experimental
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the page has been updated.
