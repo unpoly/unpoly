@@ -1417,7 +1417,7 @@ up.fragment = (function() {
     The matching element.
 
     Returns `null` or `undefined` if no element matches in the same layer.
-  @experimental
+  @stable
   */
   function closest(element, selector, options) {
     element = e.get(element)
