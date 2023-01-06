@@ -1445,6 +1445,10 @@ up.form = (function() {
   end
   ```
 
+  > [TIP]
+  > If you're using Python with Django, you may find the [`django-forms-dynamic`](https://github.com/dabapps/django-forms-dynamic)
+  > package useful to implement this pattern.
+
   The server is free to respond with any HTTP status code, regardless of the validation result.
   Unpoly will always consider a validation request to be successful, even if the
   server responds with a non-200 status code.
