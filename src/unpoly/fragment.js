@@ -66,7 +66,7 @@ up.fragment = (function() {
 
     Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
 
-  @param {Array<string|Function<Element>: string?: string|undefined>} [config.targetDerivers]
+  @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
     An array of [target derivation patterns](/target-derivation#derivation-patterns)
     used to [guess a target selector](/target-derivation) for an element.
 
