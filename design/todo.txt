@@ -88,13 +88,7 @@ Docs
 
 - Go through all the module index pages. Many of these are now a poor copy of a doc @page.
 - Replace ASCII art with picture for aborting-requests.md#aborting-conflicting-requests
-- Consider replacing type|undefined with type? in all type comments
-  - Test that a `?` may be part of a type in the parser
 - Go through TODO
-- Go through @experimental visibilities
-- Document django-forms-dynamic for [up-validate]
-  - https://twitter.com/j4mie/status/1471610935924215815?t=KtCISFJXz3kEMoc6C3y4UQ&s=09
-  - https://github.com/dabapps/django-forms-dynamic
 - Missing docs for scrolling-related render options
   - { revealTop }
   - { revealMax }
