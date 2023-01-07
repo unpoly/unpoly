@@ -92,13 +92,14 @@ Docs
 
 ### Ideas for new topic pages
 
-- Polling
 - Preloading
   - (Currently sitting in a[up-preload])
   - On Hover
   - Programmatically
 - Enhancing elements with JavaScript
   - (Currently sitting in up.compiler)
+  - Explain that there is only one DOMContentLoaded event
+  => This could also be the new up.syntax page
 - Options and defaults
   - Everything is opt-in
   - Navigation enables a set of new defaults

@@ -8,6 +8,11 @@ The `up.element` module offers functions for DOM manipulation and traversal.
 
 It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.framework.isSupported).
 
+> [IMPORTANT]
+> `up.element` is a low-level API to work with DOM elements.
+> For a high-level API that is aware of [layers](/up.layer) and [animating fragments](/up.motion),
+> use `up.fragment`.
+
 @module up.element
 */
 up.element = (function() {

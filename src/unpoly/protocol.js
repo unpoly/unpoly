@@ -2,11 +2,7 @@
 Server protocol
 ===============
 
-You rarely need to change server-side code to use Unpoly. You don't need
-to provide a JSON API, or add extra routes for AJAX requests. The server simply renders
-a series of full HTML pages, like it would without Unpoly.
-
-There is an **optional** protocol your server may use to exchange additional information
+Unpoly has an **optional** protocol your server may implement to exchange additional information
 when Unpoly is [updating fragments](/up.link). The protocol mostly works by adding
 additional HTTP headers (like `X-Up-Target`) to requests and responses.
 

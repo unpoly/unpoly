@@ -8,6 +8,10 @@ Unpoly can print debugging information to the [browser console](https://develope
 - When we're [making requests to the network](/up.request)
 - Which [compilers](/up.syntax) are applied to which elements
 
+By default only errors are logged. You can enable debug logging through `up.log.enable()`:
+
+![Screenshot of Unpoly logging to the browser console](images/log-interaction-event.png){:width='800'}
+
 @see up.log.enable
 @see up.log.disable
 

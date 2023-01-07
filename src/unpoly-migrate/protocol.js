@@ -1,3 +1,7 @@
+/*-
+@module up.protocol
+*/
+
 up.migrate.clearCacheFromXHR = function(xhr) {
   let value = xhr.getResponseHeader('X-Up-Clear-Cache')
 
