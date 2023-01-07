@@ -78,9 +78,6 @@ Docs
 
 ### General
 
-- Have we documented places where we may separate options with " or "?
-  - focus
-  - scroll
 - Consider removing all tagnames from public selectors
 
 
