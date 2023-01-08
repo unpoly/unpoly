@@ -4,7 +4,11 @@ Animation
 
 When you [update a page fragment](/up.link) you can animate the change.
 
-You can add an attribute [`[up-transition]`](/a-up-transition) to your
+### Transitions vs. animations
+
+When we morph between an old and a new element, we call it a *transition*.
+
+For instance, you may add an [`[up-transition]`](/a-up-transition) attribute to your
 links or forms to smoothly fade out the old element while fading in the new element:
 
 ```html
@@ -15,9 +19,6 @@ links or forms to smoothly fade out the old element while fading in the new elem
 </a>
 ```
 
-### Transitions vs. animations
-
-When we morph between an old and a new element, we call it a *transition*.
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.
 
@@ -41,6 +42,9 @@ and [predefined animations](/up.animate#named-animations).
 You can define custom animations using `up.transition()` and
 `up.animation()`.
 
+
+@see predefined-animations
+@see predefined-transitions
 @see motion-tuning
 
 @see a[up-transition]
@@ -130,19 +134,7 @@ up.motion = (function() {
 
   ### Named animations
 
-  The following animations are pre-defined:
-
-  | `fade-in`          | Changes the element's opacity from 0% to 100% |
-  | `fade-out`         | Changes the element's opacity from 100% to 0% |
-  | `move-to-top`      | Moves the element upwards until it exits the screen at the top edge |
-  | `move-from-top`    | Moves the element downwards from beyond the top edge of the screen until it reaches its current position |
-  | `move-to-bottom`   | Moves the element downwards until it exits the screen at the bottom edge |
-  | `move-from-bottom` | Moves the element upwards from beyond the bottom edge of the screen until it reaches its current position |
-  | `move-to-left`     | Moves the element leftwards until it exists the screen at the left edge  |
-  | `move-from-left`   | Moves the element rightwards from beyond the left edge of the screen until it reaches its current position |
-  | `move-to-right`    | Moves the element rightwards until it exists the screen at the right edge  |
-  | `move-from-right`  | Moves the element leftwards from beyond the right  edge of the screen until it reaches its current position |
-  | `none`             | An animation that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
+  Unpoly ships with a number of [predefined animations](/predefined-animations)
 
   You can define additional named animations using [`up.animation()`](/up.animation).
 
@@ -291,7 +283,9 @@ up.motion = (function() {
   to instantly settle their promises when this event is observed on the
   animating element.
 
-  Animations started by `up.animate()` already handle this event.
+  > [IMPORTANT]
+  > The `up:motion:finish` event does **not** signal the end of an animation.
+  > For this see [awaiting postprocessing](/render-hooks#awaiting-postprocessing).
 
   @event up:motion:finish
   @param {Element} event.target
@@ -313,22 +307,10 @@ up.motion = (function() {
 
   ### Named transitions
 
-  The following transitions are pre-defined:
-
-  | `cross-fade` | Fades out the first element. Simultaneously fades in the second element. |
-  | `move-up`    | Moves the first element upwards until it exits the screen at the top edge. Simultaneously moves the second element upwards from beyond the bottom edge of the screen until it reaches its current position. |
-  | `move-down`  | Moves the first element downwards until it exits the screen at the bottom edge. Simultaneously moves the second element downwards from beyond the top edge of the screen until it reaches its current position. |
-  | `move-left`  | Moves the first element leftwards until it exists the screen at the left edge. Simultaneously moves the second element leftwards from beyond the right  edge of the screen until it reaches its current position. |
-  | `move-right` | Moves the first element rightwards until it exists the screen at the right edge. Simultaneously moves the second element rightwards from beyond the left edge of the screen until it reaches its current position. |
-  | `none`       | A transition that has no visible effect. Sounds useless at first, but can save you a lot of `if` statements. |
+  Unpoly ships with a number of [predefined transitions](/predefined-transitions).
 
   You can define additional named transitions using [`up.transition()`](/up.transition).
 
-  You can also compose a transition from two [named animations](/up.animation).
-  separated by a slash character (`/`):
-
-  - `move-to-bottom/fade-in`
-  - `move-to-left/move-from-top`
 
   ### Implementation details
 
@@ -524,6 +506,8 @@ up.motion = (function() {
   })
   ```
 
+  ### Callback contract
+
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
   we recomend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
   passing along your `options` and returning the result.
@@ -555,6 +539,8 @@ up.motion = (function() {
   /*-
   Defines a named animation.
 
+  ### Example
+
   Here is the definition of the pre-defined `fade-in` animation:
 
   ```js
@@ -563,6 +549,8 @@ up.motion = (function() {
     return up.animate(element, { opacity: 1 }, options)
   })
   ```
+
+  ### Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
   we recomend that your definitions end by calling calling [`up.animate()`](/up.animate) with an object argument,

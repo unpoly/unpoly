@@ -911,7 +911,7 @@ In the example below, changing the `email` input would only validate the first f
 ------
 
 - When user does not confirm an [`[up-confirm]`](/a-up-target#up-confirm) link,
-  the link's [`.up-active`](/a.up-active) class is now removed (fixes #89)
+  the link's `.up-active` class is now removed (fixes #89)
 
 
 0.60.0
@@ -2326,7 +2326,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - Calling [`up.motion.finish()`](/up.motion.finish) without arguments will now
   complete all animations and transitions on the screen.
 - Fix a bug where [`up.motion.finish()`](/up.motion.finish) would not cancel CSS transitions that were still in progress.
-- Fix a bug where [`up-active`](/a.up-active) classes where not removed from links when the destination
+- Fix a bug where `.up-active` classes where not removed from links when the destination
   was already [preloaded](/up.preload).
 
 

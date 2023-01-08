@@ -748,7 +748,7 @@ up.fragment = (function() {
     If the user does not confirm the render promise will reject and no fragments will be updated.
 
   @param {boolean|Element} [options.feedback]
-    Whether to give the [`{ origin }`](#options.origin) element an [`.up-active`](/a.up-active) class
+    Whether to give the [`{ origin }`](#options.origin) element an `.up-active` class
     and the targeted element an `.up-loading` class
     while loading content.
 

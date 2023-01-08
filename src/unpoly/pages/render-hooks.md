@@ -98,17 +98,18 @@ The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJo
 You may handle the following error cases:
 
 | Error case                                                                         | Hook | Type |
-|------------------------------------------------------------------------------------| ---- | ------- |
-| Server responds with [non-200 HTTP status](/failed-responses)                      | [fail-prefixed options](/failed-responses) | Options |
-| Server responds with [non-200 HTTP status](/failed-responses)                      | `up.RenderResult` (thrown) | Error |
-| Disconnect or timeout                                                              | `up.Offline` | Error |
-| Disconnect or timeout                                                              | [`{ onOffline }`](/up.render#options.onOffline) | Callback |
-| Disconnect or timeout                                                              | `up:fragment:offline` | Event |
-| Target selector not found                                                          | `up.CannotMatch` | Error |
-| Compiler throws error                                                              | `up.CannotCompile` | Error |
-| Fragment update was [aborted](/aborting-requests)                                  | `up.AbortError` | Error |
-| Fragment update was [aborted](/aborting-requests)                                  | `up:fragment:aborted` | Event |
-| Any error thrown while rendering<br><small>(including disconnect or abort)</small> | [`{ onError }`](/up.render#options.onError) | Callback |
+|------------------------------------------------------------------------------------| -- | ------- |
+| Server responds with [non-200 HTTP status](/failed-responses) | [fail-prefixed options](/failed-responses) | Options |
+| Server responds with [non-200 HTTP status](/failed-responses) | `up.RenderResult` (thrown) | Error |
+| Disconnect or timeout                                         | `up.Offline` | Error |
+| Disconnect or timeout                                         | [`{ onOffline }`](/up.render#options.onOffline) | Callback |
+| Disconnect or timeout                                         | `up:fragment:offline` | Event |
+| Target selector not found                                     | `up.CannotMatch` | Error |
+| Compiler throws error                                         | `up.CannotCompile` | Error |
+| Fragment update was [aborted](/aborting-requests)             | `up.AbortError` | Error |
+| Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted` | Event |
+| Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError) | Callback |
+| Any error thrown while rendering                              | `up.Error` | Error superclass |
 
 
 ### Full error handling example

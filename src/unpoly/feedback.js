@@ -33,7 +33,7 @@ to convey the highlighted link to assistive technologies:
 </nav>
 ```
 
-When the user clicks on the `/bar` link, the link will receive the [`.up-active`](/a.up-active) class while it is waiting
+When the user clicks on the `/bar` link, the link will receive the `.up-active` class while it is waiting
 for the server to respond. The [targeted](/targeting-fragments) fragment (the `<main>` element) gets the `.up-loading` class:
 
 ```
@@ -47,7 +47,7 @@ for the server to respond. The [targeted](/targeting-fragments) fragment (the `<
 </main>
 ```
 
-Once the response is received the [`.up-active`](/a.up-active) and `.up-loading` classes are removed.
+Once the response is received the `.up-active` and `.up-loading` classes are removed.
 Since the new URL is `/bar`, the [`.up-current`](/a.up-current) class has been moved to the "Bar" link.
 
 ```html
@@ -225,6 +225,9 @@ up.feedback = (function() {
   <a href="/foo" up-follow class="up-current" aria-current="page">Foo</a>
   ```
 
+  > [NOTE]
+  > Links do *not* need an `[up-nav]` container to get the `.up-active` class while loading.
+
   ### Default origins
 
   The origin element is set automatically for many actions, for example:
@@ -304,7 +307,7 @@ up.feedback = (function() {
   ```
 
   If you're looking to style the link that targeted the fragment, use the
-  [`.up-active`](/a.up-active) class instead.
+  `.up-active` class instead.
 
   @selector .up-loading
   @stable

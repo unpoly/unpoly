@@ -6,21 +6,28 @@ const u = up.util
 Network requests
 ================
 
-Unpoly ships with an optimized HTTP client for fast and effective
-communication with your server-side app.
+This package implements an optimized HTTP client
+that is used for all requests made through Unpoly.
 
-While you can use the browser's native `fetch()` function,
-Unpoly's `up.request()` has a number of convenience features:
+The HTTP client offers many quality-of-life improvements, for example:
 
-- Requests may be [cached](/caching) to reuse responses and enable [preloading](/a-up-preload).
+- Requests may be [cached](/caching) to re-use responses and enable [preloading](/a-up-preload).
+  Cached content is [revalidated](/caching#revalidation) after rendering, so the user never
+  sees stale content.
+- You may [handle network issues](/network-issues), such as disconnects, flaky connections or low bandwidth.
+- A [progress bar](/loading-indicators) is shown when requests take too long to finish.
+  You may also implement a [custom loading indicator](/loading-indicators#custom-loading-indicators).
+- When two requests [target](/targeting-fragments) the same element,
+  Unpoly will [abort the earlier request](/aborting-requests).
 - Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
   For example, when [updating a fragment](/targeting-fragments), the target selector is automatically sent
   as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
-- Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response
-  lifecycle.
+- Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response lifecycle.
 - When too many requests are sent concurrently, excessive requests are [queued](/up.network.config#config.concurrency).
   This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
-- A very concise API requiring zero boilerplate code.
+
+Unpoly's HTTP client is used automatically when rendering, e.g. when [following a link](/a-up-follow)
+or [submitting a form](/form-up-submit). To use the client from your own JavaScripts, use `up.request()`.
 
 @see caching
 @see loading-indicators
