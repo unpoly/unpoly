@@ -737,7 +737,7 @@ up.layer = (function() {
     Passing `true` or `false` will enable or disable all dismiss controls.
 
   @param [up-animation]
-    The name of the opening animation.
+    The [name](/predefined-animations) of the opening animation.
 
   @param [up-on-opened]
     A JavaScript snippet that is called when the overlay was inserted into the DOM.
@@ -860,7 +860,7 @@ up.layer = (function() {
   @param [up-confirm]
     A message the user needs to confirm before the layer is closed.
   @param [up-animation]
-    The overlay's close animation.
+    The [name](/predefined-animations) of the overlay's close animation.
 
     Defaults to overlay's [preconfigured close animation](/up.layer.config).
   @param [up-duration]

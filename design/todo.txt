@@ -83,7 +83,6 @@ Docs
 
 ### Other docs
 
-- Go through all the module index pages. Many of these are now a poor copy of a doc @page.
 - Go through v3 slides and see if
   - we have missed anything
   - can re-use illustrations
@@ -96,10 +95,6 @@ Docs
   - (Currently sitting in a[up-preload])
   - On Hover
   - Programmatically
-- Enhancing elements with JavaScript
-  - (Currently sitting in up.compiler)
-  - Explain that there is only one DOMContentLoaded event
-  => This could also be the new up.syntax page
 - Options and defaults
   - Everything is opt-in
   - Navigation enables a set of new defaults
@@ -121,16 +116,6 @@ Docs
       - Subnavigations make it easy
       - You can disable layer history
     - Customize restoration behavior
-- Move predefined animations / transitions from up.animate() and up.morph() to their own topic pages
-  - predefined-animations
-  - predefined-transitions
-  - Link new pages
-    - From [up-transition] attributes
-    - From [up-animation] attributes
-    - From up.animate()
-    - From up.morph()
-    - From up.animation()
-    - From up.transition()
 - Rendering from strings
   - { document }
   - { fragment }

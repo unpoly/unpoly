@@ -685,7 +685,7 @@ up.motion = (function() {
   @params-note
     All attributes for `a[up-follow]` may also be used.
   @param [up-transition]
-    The name of a [predefined transition](/up.morph#named-transitions).
+    The [name of a transition](/predefined-transitions).
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
@@ -711,7 +711,7 @@ up.motion = (function() {
   @params-note
     All attributes for `form[up-submit]` may also be used.
   @param [up-transition]
-    The name of a [predefined transition](/up.morph#named-transitions).
+    The [name of a transition](/predefined-transitions).
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 

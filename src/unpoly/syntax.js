@@ -4,6 +4,13 @@ Custom JavaScript
 
 The `up.syntax` package lets you pair HTML elements with JavaScript behavior.
 
+### Migrating existing JavaScript code
+
+Unpoly encourages you to migrate all your custom JavaScript from `DOMContentLoaded`
+callbacks to [compilers](/up.compiler). This will make sure they run both at page load and
+when a new fragment is inserted later. See [Migrating legacy JavaScripts](/legacy-scripts)
+for details.
+
 @see data
 @see legacy-scripts
 
