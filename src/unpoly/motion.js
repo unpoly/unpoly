@@ -4,7 +4,7 @@ Animation
 
 When you [update a page fragment](/up.link) you can animate the change.
 
-### Transitions vs. animations
+### Transitions
 
 When we morph between an old and a new element, we call it a *transition*.
 
@@ -18,6 +18,8 @@ links or forms to smoothly fade out the old element while fading in the new elem
   Show users
 </a>
 ```
+
+### Animations
 
 In contrast, when we animate a new element without simultaneously removing an
 old element, we call it an *animation*.

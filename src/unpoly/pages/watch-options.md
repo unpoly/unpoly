@@ -115,7 +115,7 @@ To [only disable some form controls](/disabling-forms#disabling-some-controls-on
 set the value of `[up-watch-disable]` to any selector that matches fields or buttons.
 
 > [TIP]
-> To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms-while-working) instead.
+> To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms) instead.
 
 
 Showing feedback while working
@@ -138,7 +138,7 @@ When you don't write the callback manually (`up.autosubmit()`, `up.validate()`) 
 worry about returning a promise.
 
 > [TIP]
-To show navigation feedback while *submitting* (instead of while watching), use [`[up-feedback]`](/disabling-forms-while-working) instead.
+To show navigation feedback while *submitting* (instead of while watching), use [`[up-feedback]`](/disabling-forms) instead.
 
 
 Setting options for multiple fields

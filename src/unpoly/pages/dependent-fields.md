@@ -47,7 +47,8 @@ We can implement this form with three `[up-validate]` attributes and no addition
 
 When a field is changed, Unpoly will automatically submit the form with an additional `X-Up-Validate`
 HTTP header. Upon seeing this header, the server is expected to render a new form state from the
-form values in the request parameters. See [this example](/up-validate#example) for control flow on the server.
+form values in the request parameters. See [this example](/up-validate#backend-protocol)
+for control flow on the server.
 
 When the server responds with the re-rendered form state, Unpoly will update the
 [target selector](/targeting-fragments) from the changed field's `[up-validate]` attribute.
@@ -86,7 +87,7 @@ regardless of how fast the user clicks or how slow the network is. In particular
 - If the user submits the form while validation requests are still in flight,
   the validation requests are [aborted](/aborting-requests).
 
-Let's walk through a challenging scenario using the [postage form example](/#declaring-dependencies) above:
+Let's walk through a challenging scenario using the [postage form example](#declaring-dependencies) above:
 
 - User selects a continent. A request for the country select is sent, but takes a while to load.
 - User inputs a parcel weight. Because a request is still in flight, no additional request is sent.

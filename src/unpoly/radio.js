@@ -27,7 +27,7 @@ up.radio = (function() {
 
     The configured selectors will be used to find hungry elements in the current page.
     For each matching element a target will be [derived](/target-derivation) from that
-    specific element. E.g. when you configure `up.fragment.config.hungrySelectors.push('input')`,
+    specific element. E.g. when you configure `up.radio.config.hungrySelectors.push('input')`,
     a given input will be targeted with its derived selector (like `input[name=email]`).
 
     For this to work hungry elements [must have a derivable target selector](/up-hungry#derivable-target-required).
@@ -138,7 +138,7 @@ up.radio = (function() {
   By default only hungry elements on the targeted layer are updated.
   To match a hungry element when updating *any* layer, set an [`[up-layer=any]`](#up-if-layer) attribute.
 
-  Hungry fragments are not updated for requests that [open a new overlay](#opening-overlays).
+  Hungry fragments are not updated for requests that [open a new overlay](/opening-overlays).
   Subsequent requests within that new overlay *do* update hungry fragments.
 
   ### Disabling

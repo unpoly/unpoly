@@ -606,7 +606,7 @@ up.form = (function() {
   - The callback's execution frequency can be [debounced](/watch-options#debouncing-callbacks)
   - Guarantees that [only one async callback is running concurrently](#async-callbacks).
 
-  The unobtrusive variant of this is the [`[up-watch]`](/input-up-watch) attribute.
+  The unobtrusive variant of this is the `[up-watch]` attribute.
 
   ### Example
 
@@ -745,7 +745,7 @@ up.form = (function() {
   /*-
   Automatically submits a form when a field changes.
 
-  The unobtrusive variant of this is the [`[up-autosubmit]`](/form-up-autosubmit) attribute.
+  The unobtrusive variant of this is the `[up-autosubmit]` attribute.
 
   @function up.autosubmit
   @param {string|Element|jQuery} target
@@ -873,12 +873,12 @@ up.form = (function() {
   Render a new form state from its current field values, to show validation errors or
   update [dependent fields](/dependent-fields).
 
-  Typical use cases are to [show validation errors](/validation#validating-after-change) after a field was changed
-  or to update forms where one field depends on the value of another.
+  Typical use cases are to [show validation errors](/validation#validating-after-changing-a-field)
+  after a field was changed or to update forms where one field depends on the value of another.
 
   `up.validate()` submits the given element's form with an additional `X-Up-Validate`
   HTTP header. Upon seeing this header, the server is expected to validate (but not commit)
-  the form submission and render a new form state. See [this example](/up-validate#example)
+  the form submission and render a new form state. See [this example](/up-validate#backend-protocol)
   for control flow on the server.
 
   To automatically update a form after a field was changed, use the the `[up-validate]` attribute.
@@ -985,7 +985,7 @@ up.form = (function() {
 
     Properties from the new fragment's `[up-data]`  are overridden with the old fragment's `[up-data]`.
   @param {Object} [options]
-    Additional [render options](up.render#parameters) for the validation request.
+    Additional [render options](/up.render#parameters) for the validation request.
   @return {up.RenderJob}
     A promise that fulfills when the server-side validation is received
     and the form was updated.
@@ -1531,8 +1531,8 @@ up.form = (function() {
 
   You can set `[up-validate]` on any element to validate *all contained fields* on change.
 
-  In the [example above](#example), instead of setting `[up-validate]` on each individual `<input>`,
-  we can also set it on the `<form>`:
+  In the [example above](#marking-fields-for-validation),
+  instead of setting `[up-validate]` on each individual `<input>`, we can also set it on the `<form>`:
 
   ```html
   <form action="/users" up-validate> <!-- mark-phrase "up-validate" -->

@@ -7,7 +7,6 @@ RedirectPermanent /a.up-active /up-active
 RedirectPermanent /form.up-active /up-active
 RedirectPermanent /up-current /a.up-current
 RedirectPermanent /up-nav-a.up-current /a.up-current
-RedirectPermanent /up-autosubmit /form-up-autosubmit
 RedirectPermanent /up-observe /form-up-observe
 RedirectPermanent /input-up-validate /up-validate
 RedirectPermanent /form-up-validate /up-validate

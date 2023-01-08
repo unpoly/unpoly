@@ -1861,7 +1861,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- [Validating forms](https://unpoly.com/input-up-validate) will no longer change the scroll position.
+- [Validating forms](/up-validate) will no longer change the scroll position.
 
 
 0.36.1
@@ -1879,9 +1879,9 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- The [`[up-observe]`](/up-observe) attribute can now be set on a `<form>` to run a function if any
+- The `[up-observe]` attribute can now be set on a `<form>` to run a function if any
   contained input field changes.
-- Fix a bug where [`[up-autosubmit]`](/form-up-autosubmit) didn't honor an `[up-delay]` attribute if
+- Fix a bug where `[up-autosubmit]` didn't honor an `[up-delay]` attribute if
   used on a form.
 - When [submitting a form](/form-up-target), the `name` and `value` of the submit button is now included with the form parameters.
 - [Going back in history](/up.history) after a [fragment update](/up.link) now always restores elements the page layer, never a selector in [modals](/up.modal) or [popups](/up.popup).

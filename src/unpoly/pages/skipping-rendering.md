@@ -18,17 +18,17 @@ No response body is required.
 Conditional requests
 --------------------
 
-[Conditional requests]((https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)) is an [HTTP feature](https://datatracker.ietf.org/doc/html/rfc7232).
+[Conditional requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests) is an [HTTP feature](https://datatracker.ietf.org/doc/html/rfc7232).
 It lets a client request content that is newer than a known modification time, or different from a known content hash.
 
-Unpoly uses conditional requests for [reloading](/up.reload), [cache revalidation](/caching#revalidating) and [polling](/up-poll).
+Unpoly uses conditional requests for [reloading](/up.reload), [cache revalidation](/caching#revalidation) and [polling](/up-poll).
 By observing HTTP headers, your server can quickly produce an empty response for unchanged content.
 This saves CPU time and reduces the bandwidth cost for a
 request/response exchange to about 1 KB.
 
 > [IMPORTANT]
 > Supporting conditional requests is entirely optional.
-> If your backend does not honor conditional request headers, can still use features like [polling](/up-poll) or [cache revalidation](/caching#revalidating).
+> If your backend does not honor conditional request headers, can still use features like [polling](/up-poll) or [cache revalidation](/caching#revalidation).
 
 
 ### Requesting content changed from a known content hash {#etag-condition}
@@ -66,7 +66,7 @@ After rendering, Unpoly remembers the `ETag` headers in an `[up-etag]` attribute
 </div>
 ```
 
-When Unpoly [reloads](/up.reload), [revalidates](/caching#revalidating) or [polls](/up-poll) the fragment, it echoes the earlier content hash in an `If-None-Match` header:
+When Unpoly [reloads](/up.reload), [revalidates](/caching#revalidation) or [polls](/up-poll) the fragment, it echoes the earlier content hash in an `If-None-Match` header:
 
 ```http
 GET /messages HTTP/1.1
@@ -110,7 +110,7 @@ After rendering, Unpoly remembers the `Last-Modified` header in an `[up-time]` a
 </div>
 ```
 
-When Unpoly [reloads](/up.reload), [revalidates](/caching#revalidating) or [polls](/up-poll) the fragment, it echoes the earlier modification time in an `If-Modified-Since` header:
+When Unpoly [reloads](/up.reload), [revalidates](/caching#revalidation) or [polls](/up-poll) the fragment, it echoes the earlier modification time in an `If-Modified-Since` header:
 
 ```http
 GET /messages HTTP/1.1
