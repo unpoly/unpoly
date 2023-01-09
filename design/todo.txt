@@ -71,6 +71,11 @@ Various changes
 ---------------
 
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
+- Consider removing support for '&'
+  - Cannot be found by search
+  - Requires additional code
+  - Would require a separate up.fragment.resolveOrigin function in unpoly-migrate
+- Maybe ship empty unpoly.es5.js und unpoly.es5.min.js that just say to use ES6
 
 
 Docs
@@ -78,6 +83,7 @@ Docs
 
 ### General
 
+- Finish the CHANGELOG so we can publish v3-pre
 - Consider removing all tagnames from public selectors
 
 
@@ -128,6 +134,12 @@ V3.pre launch
 
 - This would need a separate Algolia index, *or* disable full text search for pre.
   - We do we name things "latest" when we scope by version?
+    - The Capistrano targets are called v1, v2, v3
+    - The Algolia indexes are called unpoly-site_v2, unpoly-site_v3
+    - We keep the .htaccess saying v1*.unpoly.com is never indexed
+    - At the day we launch v3, we only change the DNS
+      - unpoly.com becomes a CNAME for v3.unpoly.com
+      - how do we get v3 to redirect to unpoly.com?
 
 
 V3 final Launch
