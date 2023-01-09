@@ -843,7 +843,7 @@ up.form = (function() {
   ```
 
   @selector [up-form-group]
-  @experimental
+  @stable
   */
 
   function findGroupSolution(field) {
