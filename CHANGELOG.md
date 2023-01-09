@@ -15,14 +15,36 @@ Very few changes not covered by unpoly-migrate.js.
 Upgrade from v2 to v3 will be much smoother than going from v1 to v2.
 You can also go from v1 to v3 directly.
 
-Changes tracked until 2022-07-06.
+Changes tracked until 2023-01-09.
 
 ### Unsorted
 
 - data, keepData, dataMap
 - In form, .up-active is given to the button or field that triggered the submission/validation, not the form
 - unpoly.es5.js is now unpoly.es6.js
-
+- up.validate() now rejects when the server responds with an error code
+- up.fragment.toTarget() works for OpenGraph tags, which use meta[property] instead of meta[name]
+- Listeners to up:layer:accept/dismiss may mutate or replace acceptance/dismissal values
+- Allow to use [up-keep] within [up-hungry] elements (reported by @foobear)
+- Error superclass up.Error
+- { focus: 'auto' } tries to preserve focus
+- Process { focus, scroll } when rendering nothing
+- Fix a bug where focus loss was not detected when it occurred in a secondary fragment in a multi-fragment update
+- up.link.preload() is no longer abortable by default
+- Add up.RenderResult#fragment to return the first updated fragments
+- Rendering without navigation will now preserve focus by default
+- Make request.xhr object available to up:request:load event listeners
+- Remove up:fragment:kept event
+- up.emit: Only print user events when the log is enabled
+- The `this` in an [up-watch] callback is now always bound to the element that has the attribute (fixes #442
+- Revealing Ignore obstructions that are not visible
+- Change default of up.fragment.config.runScripts to true
+- Compilers registered after booting automatically run on current elements
+- up.hello() is now idempotent
+- Remove up.element.isAttached(), up.element.isDetached()
+- Expose { params } prop for up:form:validate event
+- up.fragment.toTarget(string) returns the string unchanged
+- up.fragment.closest() is now stable
 
 ### Big topic: Concurrency
 
