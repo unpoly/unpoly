@@ -1891,14 +1891,20 @@ up.fragment = (function() {
     return u.filter(element.classList, isGood)
   }
 
-  function resolveOriginReference(target, options = {}) {
-    const {origin} = options
+  function resolveOriginReference(target, { origin } = {}) {
+    // We skip over attribute selector, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
+    let pattern = new RegExp(e.ATTR_SELECTOR_PATTERN.source + '|&|:origin\\b', 'g')
 
-    return target.replace(/&|:origin\b/, function (match) {
-      if (origin) {
-        return toTarget(origin)
+    return target.replace(pattern, function(match) {
+      if (match === ':origin' || match === '&') {
+        if (origin) {
+          return toTarget(origin)
+        } else {
+          up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
+        }
       } else {
-        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
+        // Skip over attribute selector, which may contain an ampersand
+        return match
       }
     })
   }

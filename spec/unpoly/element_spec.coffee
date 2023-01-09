@@ -1065,6 +1065,11 @@ describe 'up.element', ->
         attributes: { attr: 'value' }
       }])
 
+    it 'unescapes quotes in attribute values', ->
+      parsed = up.element.parseSelector('[attr="foo\\"bar"]')
+
+      expect(parsed.includePath[0].attributes).toEqual({ attr: 'foo"bar' })
+
     it 'parses a descendant selector', ->
       parsed = up.element.parseSelector('.content > form[action="/"]')
 

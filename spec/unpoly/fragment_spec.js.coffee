@@ -6842,7 +6842,7 @@ describe 'up.fragment', ->
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
         expect(expanded).toEqual ['.before', '#foo .child', '.after']
 
-      it "it expands '&' to a selector for { origin }", ->
+      it "expands the ampersand character '&' to a selector for { origin }", ->
         targets = ['.before', '& .child', '.after']
         origin = fixture('#foo')
         up.layer.config.root.mainTargets = [':layer']
@@ -6854,6 +6854,27 @@ describe 'up.fragment', ->
         up.layer.config.root.mainTargets = ['.foo']
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root)
         expect(expanded).toEqual ['.foo']
+
+    describe 'up.fragment.resolveOrigin()', ->
+
+      it "it expands ':origin' to a selector for { origin }", ->
+        origin = fixture('#foo')
+        resolved = up.fragment.resolveOrigin('.before :origin .after', origin: origin)
+        expect(resolved).toEqual '.before #foo .after'
+
+      it "expands the ampersand character '&' to a selector for { origin }", ->
+        origin = fixture('#foo')
+        resolved = up.fragment.resolveOrigin('.before & .after', origin: origin)
+        expect(resolved).toEqual '.before #foo .after'
+
+      it "ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", ->
+        resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
+        expect(resolved).toEqual 'a[href="/foo?a=1&b=2"]'
+
+      it "it expands ':origin' to a selector for { origin } if the origin's target is an attribute selector (bugfix)'", ->
+        origin = fixture('a[href="/foo"]')
+        resolved = up.fragment.resolveOrigin('.before :origin .after', origin: origin)
+        expect(resolved).toEqual '.before a[href="/foo"] .after'
 
     describe 'up.fragment.config.mainTargets', ->
 

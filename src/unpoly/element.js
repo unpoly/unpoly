@@ -445,7 +445,7 @@ up.element = (function() {
 
       for (let attributeName in attributes) {
         let attributeValue = attributes[attributeName]
-        depthElement.setAttribute(attributeName, attributeValue)
+        depthElement.setAttribute(attributeName, attributeValue || '')
       }
 
       previousElement?.appendChild(depthElement)
@@ -503,11 +503,6 @@ up.element = (function() {
   @internal
   */
   function parseSelector(selector) {
-    // Extract attribute values before we do anything else.
-    // Attribute values might contain spaces, and then we would incorrectly
-    // split depths at that space.
-    const attrValues = []
-
     let excludeRaw
 
     const includeRaw = selector.replace(/:not\([^)]+\)/, function(match) {
@@ -515,10 +510,10 @@ up.element = (function() {
       return ''
     })
 
-    const includeSelectorWithoutAttrValues = includeRaw.replace(/\[([\w-]+)(?:[~|^$*]?=(["'])?([^\2\]]*?)\2)?\]/g, function(_match, attrName, _quote, attrValue) {
-      attrValues.push(attrValue || '')
-      return `[${attrName}]`
-    })
+    // Extract attribute values before we match the string.
+    // Attribute values might contain spaces, and then we would incorrectly
+    // split depths at that space.
+    const [includeSelectorWithoutAttrValues, attrValues] = removeAttrSelectorValues(includeRaw)
 
     const includeSegments = includeSelectorWithoutAttrValues.split(/[ >]+/)
 
@@ -548,8 +543,8 @@ up.element = (function() {
       // If we have stripped out attrValues at the beginning of the function,
       // they have been replaced with the attribute name only (as "[name]").
       if (attrValues.length) {
-        depthSelector = depthSelector.replace(/\[([\w-]+)\]/g, function(_match, attrName) {
-          parsed.attributes[attrName] = attrValues.shift()
+        depthSelector = replaceAttrSelectors(depthSelector, function({ name }) {
+          parsed.attributes[name] = attrValues.shift()
           return ''
         })
       }
@@ -566,6 +561,26 @@ up.element = (function() {
       includeRaw,
       excludeRaw,
     }
+  }
+
+  const ATTR_SELECTOR_PATTERN = /\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/g
+
+  function replaceAttrSelectors(string, replacement) {
+    return string.replace(ATTR_SELECTOR_PATTERN, function(_match, name, operator, quote, value) {
+      if (value) {
+        value = value.replace(/\\([\\"'])/, '$1')
+      }
+      return replacement({ name, operator, quote, value })
+    })
+  }
+
+  function removeAttrSelectorValues(selector) {
+    let values = []
+    selector = replaceAttrSelectors(selector, function({ name, value }) {
+      values.push(value)
+      return `[${name}]`
+    })
+    return [selector, values]
   }
 
   /*-
@@ -644,11 +659,15 @@ up.element = (function() {
   @internal
   */
   function attrSelector(attribute, value) {
-    value = value.replace(/"/g, '\\"')
-    // We could get away with omitting the quotes for simple alphanumeric strings,
-    // but e.g. not for a string with quotes or spaces or a string that is all numbers.
-    // Better add the quotes in all cases.
-    return `[${attribute}="${value}"]`
+    if (u.isGiven(value)) {
+      value = value.replace(/"/g, '\\"')
+      // We could get away with omitting the quotes for simple alphanumeric strings,
+      // but e.g. not for a string with quotes or spaces or a string that is all numbers.
+      // Better add the quotes in all cases.
+      return `[${attribute}="${value}"]`
+    } else {
+      return `[${attribute}]`
+    }
   }
 
   function idSelector(id) {
@@ -1286,6 +1305,7 @@ up.element = (function() {
     addTemporaryClass,
     setTemporaryAttr,
     cleanJQuery,
-    parseSelector
+    parseSelector,
+    ATTR_SELECTOR_PATTERN,
   }
 })()
