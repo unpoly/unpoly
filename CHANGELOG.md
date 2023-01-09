@@ -21,7 +21,7 @@ Changes tracked until 2022-07-06.
 
 - data, keepData, dataMap
 - In form, .up-active is given to the button or field that triggered the submission/validation, not the form
-
+- unpoly.es5.js is now unpoly.es6.js
 
 
 ### Big topic: Concurrency
