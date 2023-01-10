@@ -128,7 +128,7 @@ describe 'up.form', ->
       # if another script manually triggers `change` on the element.
       defaultChangeEvents = ['input', 'change']
 
-      describe 'when the first argument is a form field', ->
+      describe 'with a field element', ->
 
         u.each defaultChangeEvents, (eventType) ->
 
@@ -348,7 +348,7 @@ describe 'up.form', ->
                 expect(callback).toHaveBeenCalled()
                 expect(input).not.toBeDisabled()
 
-        describe 'when the first argument is a checkbox', ->
+        describe 'with a checkbox', ->
 
           it 'runs the callback when the checkbox changes its checked state', asyncSpec (next) ->
             $form = $fixture('form')
@@ -385,113 +385,136 @@ describe 'up.form', ->
               expect($checkbox.is(':checked')).toBe(false)
               expect(callback.calls.count()).toEqual(2)
 
-        describe 'when the first argument is a radio button group', ->
+      describe 'with an element containing a radio button group', ->
 
-          it 'runs the callback when the group changes its selection', asyncSpec (next) ->
-            $form = $fixture('form')
-            $group = $form.affix('div')
-            $radio1 = $group.affix('input[type="radio"][name="group"][value="1"]')
-            $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
-            callback = jasmine.createSpy('change callback')
-            up.watch($group, callback)
+        it 'runs the callback when the group changes its selection', asyncSpec (next) ->
+          $form = $fixture('form')
+          $group = $form.affix('div')
+          $radio1 = $group.affix('input[type="radio"][name="group"][value="1"]')
+          $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
+          callback = jasmine.createSpy('change callback')
+          up.watch($group, callback)
+          expect($radio1.is(':checked')).toBe(false)
+
+          Trigger.clickSequence($radio1)
+
+          next =>
+            expect($radio1.is(':checked')).toBe(true)
+            expect(callback.calls.count()).toEqual(1)
+            # Trigger.clickSequence($radio2)
+            $radio1[0].checked = false
+            $radio2[0].checked = true
+            Trigger.change($radio2)
+
+          next =>
             expect($radio1.is(':checked')).toBe(false)
+            expect(callback.calls.count()).toEqual(2)
 
-            Trigger.clickSequence($radio1)
+        it "runs the callbacks when a radio button is selected or deselected by clicking a label in the group", asyncSpec (next) ->
+          $form = $fixture('form')
+          $group = $form.affix('div')
+          $radio1 = $group.affix('input#radio1[type="radio"][name="group"][value="1"]')
+          $radio1Label = $group.affix('label[for="radio1"]').text('label 1')
+          $radio2 = $group.affix('input#radio2[type="radio"][name="group"][value="2"]')
+          $radio2Label = $group.affix('label[for="radio2"]').text('label 2')
+          callback = jasmine.createSpy('change callback')
+          up.watch($group, callback)
+          expect($radio1.is(':checked')).toBe(false)
+          Trigger.clickSequence($radio1Label)
 
-            next =>
-              expect($radio1.is(':checked')).toBe(true)
-              expect(callback.calls.count()).toEqual(1)
-              # Trigger.clickSequence($radio2)
-              $radio1[0].checked = false
-              $radio2[0].checked = true
-              Trigger.change($radio2)
+          next =>
+            expect($radio1.is(':checked')).toBe(true)
+            expect(callback.calls.count()).toEqual(1)
+            Trigger.clickSequence($radio2Label)
 
-            next =>
-              expect($radio1.is(':checked')).toBe(false)
-              expect(callback.calls.count()).toEqual(2)
-
-          it "runs the callbacks when a radio button is selected or deselected by clicking a label in the group", asyncSpec (next) ->
-            $form = $fixture('form')
-            $group = $form.affix('div')
-            $radio1 = $group.affix('input#radio1[type="radio"][name="group"][value="1"]')
-            $radio1Label = $group.affix('label[for="radio1"]').text('label 1')
-            $radio2 = $group.affix('input#radio2[type="radio"][name="group"][value="2"]')
-            $radio2Label = $group.affix('label[for="radio2"]').text('label 2')
-            callback = jasmine.createSpy('change callback')
-            up.watch($group, callback)
+          next =>
             expect($radio1.is(':checked')).toBe(false)
-            Trigger.clickSequence($radio1Label)
+            expect(callback.calls.count()).toEqual(2)
 
-            next =>
-              expect($radio1.is(':checked')).toBe(true)
-              expect(callback.calls.count()).toEqual(1)
-              Trigger.clickSequence($radio2Label)
+        it "takes the group's initial selected value into account", asyncSpec (next) ->
+          $form = $fixture('form')
+          $group = $form.affix('div')
+          $radio1 = $group.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
+          $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
+          callback = jasmine.createSpy('change callback')
+          up.watch($group, callback)
+          expect($radio1.is(':checked')).toBe(true)
+          expect($radio2.is(':checked')).toBe(false)
+          Trigger.clickSequence($radio1)
 
-            next =>
-              expect($radio1.is(':checked')).toBe(false)
-              expect(callback.calls.count()).toEqual(2)
-
-          it "takes the group's initial selected value into account", asyncSpec (next) ->
-            $form = $fixture('form')
-            $group = $form.affix('div')
-            $radio1 = $group.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
-            $radio2 = $group.affix('input[type="radio"][name="group"][value="2"]')
-            callback = jasmine.createSpy('change callback')
-            up.watch($group, callback)
+          next =>
+            # Since the radio button was already checked, the click doesn't do anything
             expect($radio1.is(':checked')).toBe(true)
             expect($radio2.is(':checked')).toBe(false)
-            Trigger.clickSequence($radio1)
+            # Since the radio button was already checked, clicking it again won't trigger the callback
+            expect(callback.calls.count()).toEqual(0)
+            Trigger.clickSequence($radio2)
 
-            next =>
-              # Since the radio button was already checked, the click doesn't do anything
-              expect($radio1.is(':checked')).toBe(true)
-              expect($radio2.is(':checked')).toBe(false)
-              # Since the radio button was already checked, clicking it again won't trigger the callback
-              expect(callback.calls.count()).toEqual(0)
-              Trigger.clickSequence($radio2)
+          next =>
+            expect($radio1.is(':checked')).toBe(false)
+            expect($radio2.is(':checked')).toBe(true)
+            expect(callback.calls.count()).toEqual(1)
 
-            next =>
-              expect($radio1.is(':checked')).toBe(false)
-              expect($radio2.is(':checked')).toBe(true)
-              expect(callback.calls.count()).toEqual(1)
-
-      describe 'when the first argument is a form', ->
+      describe 'with a form element', ->
 
         u.each defaultChangeEvents, (eventType) ->
 
-          describe "when any of the form's inputs receives a #{eventType} event", ->
+          describe "when any of the form's fields receives a #{eventType} event", ->
 
             it "runs the callback if the value changed", asyncSpec (next) ->
-              $form = $fixture('form')
-              $input = $form.affix('input[name="input-name"][value="old-value"]')
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.watch($form, callback)
-              $input.val('new-value')
-              Trigger[eventType]($input)
-              Trigger[eventType]($input)
+              up.watch(form, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              Trigger[eventType](input)
               next =>
                 expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
                 expect(callback.calls.count()).toEqual(1)
 
             it "does not run the callback if the value didn't change", asyncSpec (next) ->
-              $form = $fixture('form')
-              $input = $form.affix('input[name="input-name"][value="old-value"]')
+              form = fixture('form')
+              input = e.affix(form, 'input[name="input-name"][value="old-value"]')
               callback = jasmine.createSpy('change callback')
-              up.watch($form, callback)
-              Trigger[eventType]($input)
+              up.watch(form, callback)
+              Trigger[eventType](input)
               next =>
                 expect(callback).not.toHaveBeenCalled()
 
-  #        it 'runs the callback only once when a radio button group changes its selection', ->
-  #          $form = $fixture('form')
-  #          $radio1 = $form.affix('input[type="radio"][name="group"][value="1"][checked="checked"]')
-  #          $radio2 = $form.affix('input[type="radio"][name="group"][value="2"]')
-  #          callback = jasmine.createSpy('change callback')
-  #          up.watch($form, callback)
-  #          $radio2.get(0).click()
-  #          u.task ->
-  #            expect(callback.calls.count()).toEqual(1)
+      describe 'with an element containing fields', ->
 
+        u.each defaultChangeEvents, (eventType) ->
+
+          describe "when any of the contained fields receives a #{eventType} event", ->
+
+            it "runs the callback if the value changed", asyncSpec (next) ->
+              form = fixture('form')
+              container = e.affix(form, 'div')
+              input = e.affix(container, 'input[name="input-name"][value="old-value"]')
+              callback = jasmine.createSpy('change callback')
+              up.watch(container, callback)
+
+              input.value = 'new-value'
+              Trigger[eventType](input)
+
+              next ->
+                expect(callback).toHaveBeenCalledWith('new-value', 'input-name', jasmine.anything())
+                expect(callback.calls.count()).toEqual(1)
+
+            it 'does not run the callback if a field outside the container changes', asyncSpec (next) ->
+              form = fixture('form')
+              container = e.affix(form, 'div')
+              input = e.affix(container, 'input[name="input-name"][value="old-value"]')
+              otherInput = e.affix(form, 'input[name="other"]')
+              callback = jasmine.createSpy('change callback')
+              up.watch(container, callback)
+
+              otherInput.value = 'new-value'
+              Trigger[eventType](otherInput)
+
+              next ->
+                expect(callback).not.toHaveBeenCalled()
 
       describe 'with { batch: true } options', ->
 
@@ -525,6 +548,47 @@ describe 'up.form', ->
             expect(callback.calls.mostRecent().args[0]).toEqual {
               'input2': 'input2-c'
             }
+
+    if up.migrate.loaded
+      describe 'up.observe()', ->
+
+        describe 'with an array of fields', ->
+
+          it "runs the callback if the value of any field changes", asyncSpec (next) ->
+            form = fixture('form')
+            input1 = e.affix(form, 'input[name="foo"][value="old-foo"]')
+            input2 = e.affix(form, 'input[name="bar"][value="old-bar"]')
+            callback = jasmine.createSpy('change callback')
+            up.observe([input1, input2], callback)
+
+            input1.value = 'new-foo'
+            Trigger.input(input1)
+
+            next ->
+              expect(callback.calls.count()).toEqual(1)
+              expect(callback.calls.argsFor(0)).toEqual ['new-foo', 'foo', jasmine.anything()]
+
+              input2.value = 'new-bar'
+              Trigger.input(input2)
+
+            next ->
+              expect(callback.calls.count()).toEqual(2)
+              expect(callback.calls.argsFor(1)).toEqual ['new-bar', 'bar', jasmine.anything()]
+
+          it 'does not run the callback if another field inside the same form changes', asyncSpec (next) ->
+            form = fixture('form')
+            input1 = e.affix(form, 'input[name="foo"][value="old-foo"]')
+            input2 = e.affix(form, 'input[name="bar"][value="old-bar"]')
+            input3 = e.affix(form, 'input[name="baz"][value="old-baz"]')
+
+            callback = jasmine.createSpy('change callback')
+            up.observe([input1, input2], callback)
+
+            input3.value = 'new-foo'
+            Trigger.input(input3)
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
 
     describe 'up.form.watchOptions()', ->
 
@@ -1377,6 +1441,17 @@ describe 'up.form', ->
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+      describe 'with an array of multiple elements', ->
+
+        it 'throws an error as this signature is not supported', ->
+          form = fixture('form[action=/form]')
+          field1 = e.affix(form, 'input[name=email]')
+          field2 = e.affix(form, 'input[name=password]')
+
+          validate = -> up.validate([field1, field2])
+
+          expect(validate).toThrowError()
 
       describe 'return value', ->
 
