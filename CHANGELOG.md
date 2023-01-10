@@ -45,6 +45,8 @@ Changes tracked until 2023-01-09.
 - Expose { params } prop for up:form:validate event
 - up.fragment.toTarget(string) returns the string unchanged
 - up.fragment.closest() is now stable
+- The origin in forms is now the submit button or (when watching / validating) the changed field
+  - The .up-active class is no longer set on the form element.
 
 ### Big topic: Concurrency
 
