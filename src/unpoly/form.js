@@ -634,7 +634,7 @@ up.form = (function() {
   | ---------- | --------- | ------------------------------------- |
   | `value`    | `string`  | The changed field value               |
   | `name`     | `string`  | The `[name]` of the changed field     |
-  | `options`  | `Object`  | Render options that should be passed on in case the callback [renders](/up.render) |
+  | `options`  | `Object`  | Render options for the change (`{ origin, feedback }`) |
 
   ### Watching multiple fields
 
