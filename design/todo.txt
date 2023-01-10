@@ -93,6 +93,8 @@ Docs
   - we have missed anything
   - can re-use illustrations
   - need to fix things in the slides that have since changed
+    - idempotent up.hello() is new
+    - late compiler registrations are new
 
 
 ### Ideas for new topic pages
@@ -167,7 +169,11 @@ V3 final Launch
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
 - Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
-- Schedule Tweets for new doc pages
+- Schedule Tweets
+  - For new doc pages
+  - For new features (from slides)
+  - Detecting use of deprecated APIs with automated tests
+  - Re-post wizard
 - Demo app
   - Upgrade to unpoly3
   - Redeploy
