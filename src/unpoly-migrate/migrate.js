@@ -54,6 +54,7 @@ up.migrate = (function() {
           value = mapValue(value)
         }
         element.setAttribute(newAttr, value)
+        element.removeAttribute(oldAttr)
       }
     })
   }
