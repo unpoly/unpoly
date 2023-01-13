@@ -226,11 +226,27 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     // We do our own focus logic when the user clicks an label[for].
     // If an input with the same [id] is on an ancestor layer the browser would
     // focus that (even though label and input are in different forms).
-    event.preventDefault()
+    // The browser always focuses the first input matching the ID from [for].
     let id = label.getAttribute('for')
-    let fieldSelector = e.idSelector(id)
-    let field = up.fragment.get(fieldSelector, { layer: this })
-    field.focus()
+    let fieldSelector = up.form.fieldSelector(e.idSelector(id))
+
+    let fieldsAnywhere = up.fragment.all(fieldSelector, { layer: 'any' })
+    let fieldsInLayer = up.fragment.all(fieldSelector, { layer: this })
+
+    // We would much rather not interfere with label clicking logic,
+    // and let the browser do its thing. Hence we only interfere if there
+    // are multiple matching inputs, and the first one is not in this layer.
+    if (fieldsAnywhere.length > 1 && fieldsInLayer[0] !== fieldsAnywhere[0]) {
+      event.preventDefault()
+
+      const field = fieldsInLayer[0]
+
+      field.focus()
+
+      if (field.matches('input[type=checkbox], input[type=radio]')) {
+        field.click()
+      }
+    }
   }
 
   onOutsideClicked(event, halt) {

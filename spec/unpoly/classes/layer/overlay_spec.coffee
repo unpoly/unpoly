@@ -374,42 +374,140 @@ describe 'up.Layer.Overlay', ->
         # outside our Unpoly overlay does recapture focus.
         expect(up.layer.current).toBeFocused()
 
-  describe 'labels', ->
+  describe 'label[for] when an input with that ID exists in both overlay and parent layer', ->
 
-    it 'supports label[for] when an element with the target ID also exists in the parent layer (bugfix)', asyncSpec (next) ->
-      form = """
-        <form>
-          <label for="foo">label</label>
-          <input id="foo">
-        </form>
-      """
+    describe 'for an input[type=text]', ->
 
-      makeLayers([
-        { content: form }
-        { content: form }
-      ])
+      it 'focuses the input in the same layer as the label', asyncSpec (next) ->
+        form = """
+          <form>
+            <label for="foo">label</label>
+            <input type="text" id="foo">
+          </form>
+        """
 
-      rootLabel = up.fragment.get('label', layer: 'root')
-      rootInput = up.fragment.get('#foo', layer: 'root')
-      overlayLabel = up.fragment.get('label', layer: 'overlay')
-      overlayInput = up.fragment.get('#foo', layer: 'overlay')
+        makeLayers([
+          { content: form }
+          { content: form }
+        ])
 
-      next ->
-        expect(up.layer.isOverlay()).toBe(true)
+        rootLabel = up.fragment.get('label', layer: 'root')
+        rootInput = up.fragment.get('#foo', layer: 'root')
+        overlayLabel = up.fragment.get('label', layer: 'overlay')
+        overlayInput = up.fragment.get('#foo', layer: 'overlay')
 
-        Trigger.clickSequence(overlayLabel)
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
 
-      next ->
-        expect(overlayInput).toBeFocused()
+          Trigger.clickSequence(overlayLabel)
 
-        up.layer.dismiss()
+          expect(overlayInput).toBeFocused()
 
-      next ->
-        expect(up.layer.isRoot()).toBe(true)
+          up.layer.dismiss()
 
-        Trigger.clickSequence(rootLabel)
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
 
-      next ->
-        expect(rootInput).toBeFocused()
+          Trigger.clickSequence(rootLabel)
+          expect(rootInput).toBeFocused()
 
+    describe 'for an input[type=checkbox]', ->
 
+      it 'toggles the input in the same layer as the label', asyncSpec (next) ->
+        form = """
+          <form>
+            <label for="foo">label</label>
+            <input type="checkbox" id="foo">
+          </form>
+        """
+
+        makeLayers([
+          { content: form }
+          { content: form }
+        ])
+
+        rootLabel = up.fragment.get('label', layer: 'root')
+        rootInput = up.fragment.get('#foo', layer: 'root')
+        overlayLabel = up.fragment.get('label', layer: 'overlay')
+        overlayInput = up.fragment.get('#foo', layer: 'overlay')
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+
+          Trigger.clickSequence(overlayLabel)
+          expect(overlayInput).toBeFocused()
+          expect(overlayInput).toBeChecked()
+          expect(rootInput).not.toBeChecked()
+
+          Trigger.clickSequence(overlayLabel)
+          expect(overlayInput).toBeFocused()
+          expect(overlayInput).not.toBeChecked()
+
+          up.layer.dismiss()
+
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
+
+          Trigger.clickSequence(rootLabel)
+          expect(rootInput).toBeFocused()
+          expect(rootInput).toBeChecked()
+
+          # Overlay input was not changed
+          expect(overlayInput).not.toBeChecked()
+
+    describe 'for an input[type=radio]', ->
+
+      it 'selects the input in the same layer as the label', asyncSpec (next) ->
+        form = """
+          <form>
+            <label for="format_pdf">PDF</label>
+            <input type="radio" id="format_pdf" name='format' value='pdf'>
+            <label for="format_xls">XLS</label>
+            <input type="radio" id="format_xls" name='format' value='xls'>
+          </form>
+        """
+
+        makeLayers([
+          { content: form }
+          { content: form }
+        ])
+
+        rootLabelPDF = up.fragment.get('label[for=format_pdf]', layer: 'root')
+        rootLabelXLS = up.fragment.get('label[for=format_xls]', layer: 'root')
+        rootInputPDF = up.fragment.get('#format_pdf', layer: 'root')
+        rootInputXLS = up.fragment.get('#format_xls', layer: 'root')
+        overlayLabelPDF = up.fragment.get('label[for=format_pdf]', layer: 'overlay')
+        overlayLabelXLS = up.fragment.get('label[for=format_xls]', layer: 'overlay')
+        overlayInputPDF = up.fragment.get('#format_pdf', layer: 'overlay')
+        overlayInputXLS = up.fragment.get('#format_xls', layer: 'overlay')
+
+        next ->
+          expect(up.layer.isOverlay()).toBe(true)
+
+          Trigger.clickSequence(overlayLabelPDF)
+          expect(overlayInputPDF).toBeFocused()
+          expect(overlayInputPDF).toBeChecked()
+          expect(overlayInputXLS).not.toBeChecked()
+          expect(rootInputPDF).not.toBeChecked()
+          expect(rootInputXLS).not.toBeChecked()
+
+          Trigger.clickSequence(overlayLabelXLS)
+          expect(overlayInputXLS).toBeFocused()
+          expect(overlayInputXLS).toBeChecked()
+          expect(overlayInputPDF).not.toBeChecked()
+          expect(rootInputPDF).not.toBeChecked()
+          expect(rootInputXLS).not.toBeChecked()
+
+          up.layer.dismiss()
+
+        next ->
+          expect(up.layer.isRoot()).toBe(true)
+
+          Trigger.clickSequence(rootLabelPDF)
+          expect(rootInputPDF).toBeFocused()
+          expect(rootInputPDF).toBeChecked()
+          expect(rootInputXLS).not.toBeChecked()
+
+          # Overlay inputs were not changed
+          expect(overlayInputPDF).not.toBeChecked()
+          expect(overlayInputXLS).toBeChecked()
