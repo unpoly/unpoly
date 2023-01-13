@@ -46,6 +46,7 @@ Changes tracked until 2023-01-09.
 - up.fragment.closest() is now stable
 - The origin in forms is now the submit button or (when watching / validating) the changed field
   - The .up-active class is no longer set on the form element.
+- label[for] focuses the correct field when an input with a matching ID is in another layer
 
 ### Big topic: Concurrency
 
