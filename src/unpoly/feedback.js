@@ -380,7 +380,6 @@ up.feedback = (function() {
   </div>
   ```
 
-
   ### When is a link "current"?
 
   When no [overlay](/up.layer) is open, the current location is the URL displayed
@@ -424,6 +423,8 @@ up.feedback = (function() {
 
   /*-
   When a link within an `[up-nav]` element points to the current location, it is assigned the `.up-current` class.
+
+  To set other classes on current links, configure `up.feedback.config.currentClasses`.
 
   See [`[up-nav]`](/up-nav) for more documentation and examples.
 
