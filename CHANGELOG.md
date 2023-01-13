@@ -485,7 +485,6 @@ The [polling](/up-poll) implementation was rewritten to fix many issues and edge
   - The `{ value }` property is the [overlay result value](/closing-overlays#overlay-result-values).
   - The `{ origin }` property is the element that caused the element to close.
 - When an overlay is [closed](/closing-overlays) its [result value](/closing-overlays#overlay-result-values) is now [logged](/up.log) for easier debugging.
-- Fix an issue where clicking on a `label[for]` in an overlay would focus an input in a background layer if that input had a matching `[id]` attribute.
 - Fix many issues where clicking into foreign overlays constructed other libraries would close an underlying Unpoly modal. In many cases this is no longer necessary. There are some remaining cases where Unpoly would steal focus from a foreign overlay. These can be fixed by attaching the foreign overlay to the Unpoly overlay's element. The next Unpoly version will ship a more comprehensive solution for this.
 - Published a configuration option `up.layer.config.overlay.class`. It can be used to configure a default HTML class for an overlay's container element.
 
