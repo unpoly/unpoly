@@ -75,7 +75,6 @@ Various changes
   - Cannot be found by search
   - Requires additional code
   - Would require a separate up.fragment.resolveOrigin function in unpoly-migrate
-- Maybe ship empty unpoly.es5.js und unpoly.es5.min.js that just say to use ES6
 
 
 Docs
@@ -425,3 +424,5 @@ Decisions
     - It will be super rare that the first render pass does not return anything.
       - However, we would *always* get empty onRendered calls for revalidation
   => Keep it, but improve docs
+- Maybe ship empty unpoly.es5.js und unpoly.es5.min.js that just say to use ES6
+  => Not worth the hassle
