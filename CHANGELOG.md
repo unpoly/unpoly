@@ -33,7 +33,6 @@ Changes tracked until 2023-01-09.
 - up.link.preload() is no longer abortable by default
 - Add up.RenderResult#fragment to return the first updated fragments
 - Rendering without navigation will now preserve focus by default
-- Make request.xhr object available to up:request:load event listeners
 - Remove up:fragment:kept event
 - up.emit: Only print user events when the log is enabled
 - The `this` in an [up-watch] callback is now always bound to the element that has the attribute (fixes #442
@@ -41,7 +40,7 @@ Changes tracked until 2023-01-09.
 - Change default of up.fragment.config.runScripts to true
 - Compilers registered after booting automatically run on current elements
 - up.hello() is now idempotent
-- Remove up.element.isAttached(), up.element.isDetached()
+- Remove uup.element.isDetached()
 - Expose { params } prop for up:form:validate event
 - up.fragment.toTarget(string) returns the string unchanged
 - up.fragment.closest() is now stable
