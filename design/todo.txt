@@ -60,6 +60,8 @@ TODOs after V3
 - Use native `:has` where available
 - Split JavaScript => Do this after asset reconciliation
 - input.setCustomValidity() should block submission
+- Replace symlinks in dist/ with copied files
+  - Not trivial, see hk/copy-dist-artifacts
 
 
 
@@ -86,7 +88,10 @@ Various changes
 - Remove target selector in [up-keep]
   - We're matching elements by derived target should be sufficient
   - Complicated matching/preventing can be done in [up-on-keep]
-- Replace symlinks in dist/ with copied files
+- Consider keepSelectors and noKeepSelectors
+  - Now that [up-keep] no longer has a value?
+    - Note that we do have [up-keep] hardcoded in multiple places
+- Test that changes in scroll positions and focus are preserved as revalidated content is inserted
 
 
 Docs
