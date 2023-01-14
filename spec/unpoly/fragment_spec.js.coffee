@@ -5611,7 +5611,7 @@ describe 'up.fragment', ->
                 expect(finishedResult.none).toBe(false)
                 expect(finishedResult.fragment).toMatchSelector('.target')
 
-            describe 'handling of [up-keep] elements', ->
+      describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->
           if u.isString(string)
