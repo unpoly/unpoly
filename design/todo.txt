@@ -75,6 +75,19 @@ Various changes
   - Cannot be found by search
   - Requires additional code
   - Would require a separate up.fragment.resolveOrigin function in unpoly-migrate
+- There should be a way to block rendering of a revalidation response, e.g. because a video is playing
+  - Maybe a property event.revalidating in up:fragment:loaded ?
+  - Maybe a way to mark elements as keep before rendering?
+    - This would also be up:fragment:loaded
+    - Maybe a render option { useKeep: [....] }
+      - With additional fragments to keep
+      - Could be set both in initial render and in up:fragment:loaded
+      - Would not require an [up-keep] on the other side
+- Remove target selector in [up-keep]
+  - We're matching elements by derived target should be sufficient
+  - Complicated matching/preventing can be done in [up-on-keep]
+- Does it make sense to have onKeep in render options?
+  => I find it confusing to have both { onKeep } and { useKeep } in the same functions
 
 
 Docs

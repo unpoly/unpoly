@@ -1011,6 +1011,8 @@ up.fragment = (function() {
 
     The code may use the variables `event` (see `up:fragment:keep`),
     `this` (the old fragment), `newFragment` and `newData`.
+
+    Calling `event.preventDefault()` will prevent the element from being kept.
   @stable
   */
 
@@ -1024,7 +1026,7 @@ up.fragment = (function() {
 
   @event up:fragment:keep
   @param event.preventDefault()
-    Event listeners may call this method to prevent the element from being preserved.
+    Event listeners may call this method to prevent the element from being kept.
   @param {Element} event.target
     The fragment that will be kept.
   @param {Element} event.newFragment
