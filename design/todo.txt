@@ -86,8 +86,7 @@ Various changes
 - Remove target selector in [up-keep]
   - We're matching elements by derived target should be sufficient
   - Complicated matching/preventing can be done in [up-on-keep]
-- Does it make sense to have onKeep in render options?
-  => I find it confusing to have both { onKeep } and { useKeep } in the same functions
+- Replace symlinks in dist/ with copied files
 
 
 Docs
@@ -439,3 +438,6 @@ Decisions
   => Keep it, but improve docs
 - Maybe ship empty unpoly.es5.js und unpoly.es5.min.js that just say to use ES6
   => Not worth the hassle
+- Does it make sense to have onKeep in render options?
+  => I find it confusing to have both { onKeep } and { useKeep } in the same functions
+  => Maybe we can find a way to merge it with { useKeep }
