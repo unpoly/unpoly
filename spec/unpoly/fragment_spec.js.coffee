@@ -5566,6 +5566,43 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('verified text')
               expect(guardEventListener.calls.count()).toBe(1)
 
+          it "preserves user's changes in scroll position between the first and second render pass", asyncSpec (next) ->
+            fixture('style', content: '.target { height: 50000px; background-color: red }')
+
+            up.viewport.root.scrollTop = 0
+
+            up.render('.target', { url: '/cached-path', cache: true })
+
+            next ->
+              expect('.target').toHaveText('cached text')
+
+              expect(up.network.isBusy()).toBe(true)
+
+              up.viewport.root.scrollTop = 500
+
+              jasmine.respondWithSelector('.target', text: 'verified text')
+
+            next ->
+              expect('.target').toHaveText('verified text')
+
+              expect(up.viewport.root.scrollTop).toBe(500)
+
+          it "preserves user's changes in focus between the first and second render pass", asyncSpec (next) ->
+            up.render('.target', { url: '/cached-path', cache: true })
+
+            next ->
+              expect('.target').toHaveText('cached text')
+
+              expect(up.network.isBusy()).toBe(true)
+
+              input = e.affix(document.querySelector('.target'), 'input[name=foo]')
+              input.focus()
+
+              jasmine.respondWithSelector('.target input[name=foo]')
+
+            next ->
+                expect('input[name=foo]').toBeFocused()
+
           describe 'if revalidation responded with 304 Not Modified', ->
 
             it 'does not call { onRendered } a second time', asyncSpec (next) ->
