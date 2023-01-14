@@ -1,4 +1,4 @@
-const { unpoly, unpolyMigrate, unpolyBootstrap } = require('./entries.js')
+const { unpoly, unpolyMigrate, unpolyBootstrap, artifacts } = require('./entries.js')
 
 module.exports = [
   unpoly({ es: 'modern', min: false }),
@@ -13,4 +13,5 @@ module.exports = [
   unpolyBootstrap({ version: 4, min: true }),
   unpolyBootstrap({ version: 5, min: false }),
   unpolyBootstrap({ version: 5, min: true }),
+  artifacts()
 ]

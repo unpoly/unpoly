@@ -1,4 +1,4 @@
-const { unpoly, unpolyMigrate, unpolyBootstrap, specs, jasmine } = require('./entries.js')
+const { unpoly, unpolyMigrate, unpolyBootstrap, specs, jasmine, artifacts } = require('./entries.js')
 
 module.exports = [
   unpoly({ es: 'modern', min: false }),
@@ -9,5 +9,6 @@ module.exports = [
   unpolyBootstrap({ version: 5, min: false }),
   specs({ es: 'modern', min: false }),
   specs({ es: 'es6', min: false }),
-  jasmine()
+  jasmine(),
+  artifacts()
 ]

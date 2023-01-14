@@ -2,6 +2,7 @@ const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const ESLintPlugin = require('eslint-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
+const CopyPlugin = require("copy-webpack-plugin")
 
 function minify(doMinify) {
   return {
@@ -22,7 +23,7 @@ function minify(doMinify) {
   }
 }
 
-function file(srcPath, output) {
+function entry(srcPath, output) {
   let parsedOutput = path.parse(output)
   let entryName = parsedOutput.name // foo.js => foo
   let outputFilename = parsedOutput.base
@@ -41,6 +42,24 @@ function file(srcPath, output) {
       writeToDisk: true,
     },
     cache: true
+  }
+}
+
+function copy(srcPattern, outputFolder) {
+  outputFolder = outputFolder || (__dirname + '/../dist')
+
+  return {
+    plugins: [
+      new CopyPlugin({
+        patterns: [
+          {
+            from: srcPattern,
+            to: outputFolder,
+            toType: 'dir',
+          },
+        ]
+      })
+    ]
   }
 }
 
@@ -216,9 +235,10 @@ discardStyles = function() {
 
 module.exports = {
   merge,
-  file,
+  entry,
   scriptPipeline,
   stylePipeline,
   discardStyles,
-  minify
+  minify,
+  copy,
 }
