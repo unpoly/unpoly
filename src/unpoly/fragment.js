@@ -1895,10 +1895,10 @@ up.fragment = (function() {
 
   function resolveOriginReference(target, { origin } = {}) {
     // We skip over attribute selector, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
-    let pattern = new RegExp(e.ATTR_SELECTOR_PATTERN.source + '|&|::?origin\\b', 'g')
+    let pattern = new RegExp(e.ATTR_SELECTOR_PATTERN.source + '|&|:origin\\b', 'g')
 
     return target.replace(pattern, function(match) {
-      if (match.endsWith(':origin') || match === '&') {
+      if (match === ':origin' || match === '&') {
         if (origin) {
           return toTarget(origin)
         } else {
