@@ -176,6 +176,31 @@ up.migrate.postprocessReloadOptions = function(options) {
   options.headers[up.protocol.headerize('reloadFromTime')] = legacyHeader
 }
 
+const ATTR_SELECTOR_PATTERN = /\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/g
+
+// Modern versions only support ":origin". This legacy implementation
+// also supports the old shorthand "&".
+up.migrate.resolveOrigin = function(target, { origin } = {}) {
+  // We skip over attribute selector, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
+  let pattern = new RegExp(ATTR_SELECTOR_PATTERN.source + '|&|:origin\\b', 'g')
+
+  return target.replace(pattern, function(variant) {
+    if (variant === ':origin' || variant === '&') {
+      if (variant === '&') {
+        up.migrate.deprecated("Origin shorthand '&'", ':origin')
+      }
+      if (origin) {
+        return up.fragment.toTarget(origin)
+      } else {
+        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', variant, target)
+      }
+    } else {
+      // Skip over attribute selector, which may contain an ampersand
+      return variant
+    }
+  })
+}
+
 up.migrate.removedEvent('up:fragment:kept', 'up:fragment:keep')
 
 let runScripts = up.fragment.config.runScripts

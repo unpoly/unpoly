@@ -228,8 +228,6 @@ describe 'up.fragment', ->
           results = up.fragment.all(container, '.match:has(.child)')
           expect(results).toEqual [otherMatch]
 
-      it 'resolves an & in the selector string with an selector for the { origin }'
-
       describe 'layer matching', ->
 
         beforeEach (done) ->
@@ -3750,11 +3748,11 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['other text']
 
-          it 'allows to refer to the replacement { origin } as "&" in the { reveal } selector', asyncSpec (next) ->
+          it 'allows to refer to the replacement { origin } as ":origin" in the { scroll } selector', asyncSpec (next) ->
             target = fixture('.target', text: 'target text')
             origin = fixture('.origin', text: 'origin text')
 
-            up.render('.target', url: '/path', scroll: '&', origin: origin)
+            up.render('.target', url: '/path', scroll: ':origin', origin: origin)
 
             next =>
               @respondWithSelector('.target')
@@ -3946,11 +3944,11 @@ describe 'up.fragment', ->
             next =>
               expect(@revealedText).toEqual ['other text']
 
-          it 'allows to refer to the replacement { origin } as "&" in the { failScroll } selector', asyncSpec (next) ->
+          it 'allows to refer to the replacement { origin } as ":origin" in the { failScroll } selector', asyncSpec (next) ->
             $origin = $fixture('.origin').text('origin text')
             $fixture('.target').text('old target text')
             $fixture('.fail-target').text('old fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '&', origin: $origin[0])
+            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: ':origin', origin: $origin[0])
 
             next =>
               @respondWith
@@ -6879,12 +6877,13 @@ describe 'up.fragment', ->
         expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
         expect(expanded).toEqual ['.before', '#foo .child', '.after']
 
-      it "expands the ampersand character '&' to a selector for { origin }", ->
-        targets = ['.before', '& .child', '.after']
-        origin = fixture('#foo')
-        up.layer.config.root.mainTargets = [':layer']
-        expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
-        expect(expanded).toEqual ['.before', '#foo .child', '.after']
+      if up.migrate.loaded
+        it "expands the ampersand character '&' to a selector for { origin }", ->
+          targets = ['.before', '& .child', '.after']
+          origin = fixture('#foo')
+          up.layer.config.root.mainTargets = [':layer']
+          expanded = up.fragment.expandTargets(targets, layer: up.layer.root, origin: origin)
+          expect(expanded).toEqual ['.before', '#foo .child', '.after']
 
       it 'removes duplicate selectors', ->
         targets = ['.foo', ':main']
@@ -6899,14 +6898,15 @@ describe 'up.fragment', ->
         resolved = up.fragment.resolveOrigin('.before :origin .after', origin: origin)
         expect(resolved).toEqual '.before #foo .after'
 
-      it "expands the ampersand character '&' to a selector for { origin }", ->
-        origin = fixture('#foo')
-        resolved = up.fragment.resolveOrigin('.before & .after', origin: origin)
-        expect(resolved).toEqual '.before #foo .after'
+      if up.migrate.loaded
+        it "expands the ampersand character '&' to a selector for { origin }", ->
+          origin = fixture('#foo')
+          resolved = up.fragment.resolveOrigin('.before & .after', origin: origin)
+          expect(resolved).toEqual '.before #foo .after'
 
-      it "ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", ->
-        resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
-        expect(resolved).toEqual 'a[href="/foo?a=1&b=2"]'
+        it "ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", ->
+          resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
+          expect(resolved).toEqual 'a[href="/foo?a=1&b=2"]'
 
       it "it expands ':origin' to a selector for { origin } if the origin's target is an attribute selector (bugfix)'", ->
         origin = fixture('a[href="/foo"]')

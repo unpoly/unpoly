@@ -37,10 +37,10 @@ describe 'up.link', ->
           request = @lastRequest()
           expect(request).toHaveRequestMethod('PUT')
 
-      it 'allows to refer to the link itself as "&" in the CSS selector', asyncSpec (next) ->
+      it 'allows to refer to the link itself as ":origin" in the CSS selector', asyncSpec (next) ->
         $container = $fixture('div')
-        $link1 = $('<a id="first" href="/path" up-target="&">first-link</a>').appendTo($container)
-        $link2 = $('<a id="second" href="/path" up-target="&">second-link</a>').appendTo($container)
+        $link1 = $('<a id="first" href="/path" up-target=":origin">first-link</a>').appendTo($container)
+        $link2 = $('<a id="second" href="/path" up-target=":origin">second-link</a>').appendTo($container)
         up.follow($link2)
 
         next => @respondWith '<div id="second">second-div</div>'

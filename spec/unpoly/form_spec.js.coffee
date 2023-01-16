@@ -1082,12 +1082,12 @@ describe 'up.form', ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
-          it 'allows to refer to the origin as "&" in the selector', asyncSpec (next) ->
+          it 'allows to refer to the origin as ":origin" in the selector', asyncSpec (next) ->
             $form = $fixture('form#foo-form[action="/action"][up-target="#foo-form"]')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.submit($form, scroll: '& .form-child')
+            up.submit($form, scroll: ':origin .form-child')
 
             next =>
               @respondWith """
@@ -1128,13 +1128,13 @@ describe 'up.form', ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
 
-          it 'allows to refer to the origin as "&" in the selector', asyncSpec (next) ->
+          it 'allows to refer to the origin as ":origin" in the selector', asyncSpec (next) ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.submit($form, failScroll: '& .form-child')
+            up.submit($form, failScroll: ':origin .form-child')
 
             next =>
               @respondWith
@@ -1967,9 +1967,8 @@ describe 'up.form', ->
         next ->
           expect(jasmine.lastRequest().data()['foo']).toEqual ['two']
 
-
-      it 'allows to refer to the origin as "&" in the target selector', asyncSpec (next) ->
-        $form = $fixture('form.my-form[action="/form-target"][up-target="form:has(&)"]').text('old form text')
+      it 'allows to refer to the origin as ":origin" in the target selector', asyncSpec (next) ->
+        $form = $fixture('form.my-form[action="/form-target"][up-target="form:has(:origin)"]').text('old form text')
         $submitButton = $form.affix('input.submit[type="submit"]')
         up.hello($form)
 
@@ -2098,8 +2097,8 @@ describe 'up.form', ->
             expect('.target').toHaveText('old target text')
             expect('.errors').toHaveText('new errors text')
 
-        it 'allows to refer to the origin as "&" in the [up-fail-target] selector', asyncSpec (next) ->
-          $form = $fixture('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="form:has(&)"]').text('old form text')
+        it 'allows to refer to the origin as ":origin" in the [up-fail-target] selector', asyncSpec (next) ->
+          $form = $fixture('form.my-form[action="/form-target"][up-target=".target"][up-fail-target="form:has(:origin)"]').text('old form text')
           $target = $fixture('.target').text('old target text')
 
           $submitButton = $form.affix('input.submit[type="submit"]')
@@ -2584,7 +2583,7 @@ describe 'up.form', ->
             @respondWith """
               <div class="field-group has-error">
                 <div class='error'>Username has already been taken</div>
-                <input name="user" value="judy" up-validate=".field-group:has(&)">
+                <input name="user" value="judy" up-validate=".field-group:has(:origin)">
               </div>
             """
 
@@ -2595,7 +2594,7 @@ describe 'up.form', ->
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
-              <input name="user" value="judy" up-validate=".field-group:has(&)">
+              <input name="user" value="judy" up-validate=".field-group:has(:origin)">
             </div>
           """).appendTo($form)
           up.hello($form)
@@ -2612,7 +2611,7 @@ describe 'up.form', ->
             @respondWith """
               <div class="field-group has-error">
                 <div class='error'>Username has already been taken</div>
-                <input name="user" value="judy" up-validate=".field-group:has(&)">
+                <input name="user" value="judy" up-validate=".field-group:has(:origin)">
               </div>
             """
 
@@ -2624,7 +2623,7 @@ describe 'up.form', ->
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
-              <input name="user" value="judy" up-validate=".field-group:has(&)">
+              <input name="user" value="judy" up-validate=".field-group:has(:origin)">
             </div>
           """).appendTo($form)
           up.hello($form)

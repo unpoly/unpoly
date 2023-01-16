@@ -19,6 +19,7 @@ Changes tracked until 2023-01-09.
 
 ### Unsorted
 
+- :origin shorthand & is deprecated
 - data, keepData, dataMap
 - In form, .up-active is given to the button or field that triggered the submission/validation, not the form
 - unpoly.es5.js is now unpoly.es6.js

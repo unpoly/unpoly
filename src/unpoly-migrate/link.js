@@ -38,7 +38,7 @@ This is shorthand for:
 @param [up-dash='body']
   The CSS selector to replace
 
-  Inside the CSS selector you may refer to this link as `&` ([like in Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html#parent-selector)).
+  Inside the CSS selector you may refer to this link as `:origin`.
 @deprecated
   To accelerate all links use `up.link.config.instantSelectors` and `up.link.config.preloadSelectors`.
 */

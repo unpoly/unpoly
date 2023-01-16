@@ -295,7 +295,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     let partnerSelector = e.booleanOrStringAttr(oldElement, 'up-keep')
     if (partnerSelector) {
       if (partnerSelector === true) {
-        partnerSelector = '&'
+        partnerSelector = ':origin'
       }
 
       const lookupOpts = { layer: this.layer, origin: oldElement }

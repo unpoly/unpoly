@@ -1208,8 +1208,13 @@ up.fragment = (function() {
 
     If a root element was passed as first argument, this option is ignored and the
     root element's layer is searched.
-  @param {string|Element|jQuery} [options.origin]
-    An second element or selector that can be referenced as `&` in the first selector.
+  @param {Element|jQuery} [options.origin]
+    The origin element that triggered this fragment lookup, e.g. a button that was clicked.
+
+    Unpoly will prefer to match fragments in the [vicinity](/targeting-fragments#resolving-ambiguous-selectors)
+    of the origin element.
+
+    The `selector` argument may refer to the origin as `:origin`.
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
   @stable
@@ -1304,10 +1309,12 @@ up.fragment = (function() {
     root element's layer is searched.
 
   @param {string|Element|jQuery} [options.origin]
-    An second element or selector that can be referenced as `&` in the first selector:
+    The origin element that triggered this fragment lookup, e.g. a button that was clicked.
 
-    var input = document.querySelector('input.email')
-    up.fragment.get('fieldset:has(&)', { origin: input }) // returns the <fieldset> containing input
+    Unpoly will prefer to match fragments in the [vicinity](/targeting-fragments#resolving-ambiguous-selectors)
+    of the origin element.
+
+    The `selector` argument may refer to the origin as `:origin`.
 
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
@@ -1318,12 +1325,12 @@ up.fragment = (function() {
     let selectorString = args.pop()
     const root = args[0]
 
-    // (0) up.fragment.all(element) should return an array of that element.
+    // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
     if (u.isElement(selectorString)) {
       return [selectorString]
     }
 
-    // (1) up.fragment.all(list) should return the list unchanged
+    // (1) up.fragment.all(list) or up.fragment.all(element, list) should return the list unchanged
     if (u.isList(selectorString)) {
       return selectorString
     }
@@ -1893,23 +1900,20 @@ up.fragment = (function() {
     return u.filter(element.classList, isGood)
   }
 
-  function resolveOriginReference(target, { origin } = {}) {
-    // We skip over attribute selector, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
-    let pattern = new RegExp(e.ATTR_SELECTOR_PATTERN.source + '|&|:origin\\b', 'g')
-
-    return target.replace(pattern, function(match) {
-      if (match === ':origin' || match === '&') {
-        if (origin) {
-          return toTarget(origin)
-        } else {
-          up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
-        }
+  function modernResolveOrigin(target, { origin } = {}) {
+    return target.replace(/:origin\b/, function(match) {
+      if (origin) {
+        return toTarget(origin)
       } else {
-        // Skip over attribute selector, which may contain an ampersand
-        return match
+        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
       }
     })
   }
+
+  function resolveOrigin(...args) {
+    return (up.migrate.resolveOrigin || modernResolveOrigin)(...args)
+  }
+
 
   function expandTargets(targets, options = {}) {
     const {layer} = options
@@ -1938,7 +1942,7 @@ up.fragment = (function() {
       } else if (u.isElementish(target)) {
         expanded.push(toTarget(target, options))
       } else if (u.isString(target)) {
-        expanded.push(resolveOriginReference(target, options))
+        expanded.push(resolveOrigin(target, options))
       } else {
         // @buildPlans() might call us with { target: false } or { target: nil }
         // In that case we don't add a plan.
@@ -2193,20 +2197,6 @@ up.fragment = (function() {
   <div>Task 1 will appear here</div
 
   <a href="/tasks/2" up-target=":origin + div">Show task 2</a> <!-- mark-phrase ":origin + div" -->
-  <div>Task 2 will appear here</div
-  ```
-
-  ### Shorthand
-
-  Instead of `:origin` you may also use the ampersand character (`&`).
-
-  In the [example above](#example) this would look like this:
-
-  ```html
-  <a href="/tasks/1" up-target="& + div">Show task 1</a> <!-- mark-phrase "& + div" -->
-  <div>Task 1 will appear here</div
-
-  <a href="/tasks/2" up-target="& + div">Show task 2</a> <!-- mark-phrase "& + div" -->
   <div>Task 2 will appear here</div
   ```
 
@@ -2549,7 +2539,7 @@ up.fragment = (function() {
     successKey,
     failKey,
     expandTargets,
-    resolveOrigin: resolveOriginReference,
+    resolveOrigin,
     toTarget,
     tryToTarget,
     isTargetable,

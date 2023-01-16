@@ -1306,6 +1306,5 @@ up.element = (function() {
     setTemporaryAttr,
     cleanJQuery,
     parseSelector,
-    ATTR_SELECTOR_PATTERN,
   }
 })()
