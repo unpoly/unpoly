@@ -281,7 +281,7 @@ up.Request = class Request extends up.Record {
       'failMode',    // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
-      'targetElements',
+      'fragments',
       'queuedAt',
       'wrapMethod',
       'contentType',
@@ -372,34 +372,52 @@ up.Request = class Request extends up.Record {
   }
 
   /*-
-  Returns the elements matched by this request's [target selector](/up.Request.prototype.target).
+  Returns the fragments matched by this request's [target selector](/up.Request.prototype.target).
 
-  @property up.Request#targetElements
-  @param List<Element> targetElements
+  @see up.RenderResult.prototype.fragments
+
+  @property up.Request#fragments
+  @param List<Element> fragments
   @experimental
   */
-  get targetElements() {
+  get fragments() {
     // This property is required for `up.fragment.abort()` to select requests within
     // the subtree that we're cancling.
     //
-    // We allow users to pass in pre-matched `{ targetElements }` in the constructor.
+    // We allow users to pass in pre-matched `{ fragments }` in the constructor.
     // We use this in `up.Change.FromURL` since we already know the element's we're trying
     // to replace.
     //
-    // If we haven't received a `{ targetElements }` property but did we receive a `{ target }`,
+    // If we haven't received a `{ fragments }` property but did we receive a `{ target }`,
     // we find matching elements here.
-    if (!this._targetElements && this.target) {
+    if (!this._fragments && this.target) {
       let steps = up.fragment.parseTargetSteps(this.target)
       let selectors = u.map(steps, 'selector')
       let lookupOpts = { origin: this.origin, layer: this.layer }
-      this._targetElements = u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
+      this._fragments = u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
     }
 
-    return this._targetElements
+    return this._fragments
   }
 
-  set targetElements(value) {
-    this._targetElements = value
+  set fragments(value) {
+    this._fragments = value
+  }
+
+  /*-
+  Returns the fragment matched by this request's [target selector](/up.Request.prototype.target).
+
+  When [multiple fragments](/targeting-fragments#updating-multiple-fragments) were inserted, the first fragment is returned.
+  To get a list of all inserted fragments, use the [`{ fragments }`](/up.Request.prototype.fragments) property.
+
+  @see up.RenderResult.prototype.fragment
+
+  @property up.Request#fragment
+  @param Element fragment
+  @experimental
+  */
+  get fragment() {
+    return this.fragments?.[0]
   }
 
   followState(sourceRequest) {
@@ -433,7 +451,7 @@ up.Request = class Request extends up.Record {
       // from garbage collection while the response is cached by up.network.
       this.origin = undefined
 
-      this.targetElements = undefined
+      this.fragments = undefined
     })
   }
 
@@ -736,14 +754,14 @@ up.Request = class Request extends up.Record {
   }
 
   isPartOfSubtree(subtreeElements) {
-    if (!this.targetElements || !subtreeElements) {
+    if (!this.fragments || !subtreeElements) {
       return false
     }
 
     subtreeElements = u.wrapList(subtreeElements)
 
-    return u.some(this.targetElements, function(targetElement) {
-      return u.some(subtreeElements, (subtreeElement) => subtreeElement.contains(targetElement))
+    return u.some(this.fragments, function(fragment) {
+      return u.some(subtreeElements, (subtreeElement) => subtreeElement.contains(fragment))
     })
   }
 

@@ -325,8 +325,8 @@ up.feedback = (function() {
       clean(e.addTemporaryClass(activeElement, CLASS_ACTIVE))
     }
 
-    for (let targetElement of request.targetElements) {
-      clean(e.addTemporaryClass(targetElement, CLASS_LOADING))
+    for (let fragment of request.fragments) {
+      clean(e.addTemporaryClass(fragment, CLASS_LOADING))
     }
   }
 

@@ -25,7 +25,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       context: u.merge(this.layer.context, this.context),
       origin: this.options.origin,
       target: this.bestPreflightSelector(),
-      targetElements: this.getTargetElements(),
+      fragments: this.getFragments(),
     }
   }
 
@@ -35,7 +35,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     return u.map(this.steps, 'selector').join(', ') || ':none'
   }
 
-  getTargetElements() {
+  getFragments() {
     this.matchPreflight()
 
     return u.map(this.steps, 'oldElement')
@@ -81,7 +81,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.abort !== false) {
-      up.fragment.abort(this.getTargetElements(), { reason: 'Fragment is being replaced' })
+      up.fragment.abort(this.getFragments(), { reason: 'Fragment is being replaced' })
     }
 
     Object.assign(this.layer.context, this.context)
@@ -412,7 +412,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   addHungrySteps() {
-    // Find all [up-hungry] elements matching our layer and targetElements.
+    // Find all [up-hungry] elements matching our layer and fragments.
     const hungrySolutions = up.radio.hungrySolutions({
       layer: this.layer,
       history: this.hasHistory(),

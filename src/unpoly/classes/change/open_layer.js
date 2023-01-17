@@ -32,7 +32,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
-      targetElements: u.compact([up.fragment.get(':main', { layer: this.baseLayer })]),
+      fragments: u.compact([up.fragment.get(':main', { layer: this.baseLayer })]),
     }
   }
 
