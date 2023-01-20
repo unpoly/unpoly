@@ -62,6 +62,15 @@ TODOs after V3
 - input.setCustomValidity() should block submission
 - Replace symlinks in dist/ with copied files
   - Not trivial, see hk/copy-dist-artifacts
+- Maybe a way to mark elements as keep before rendering?
+  - This would also be up:fragment:loaded
+  - Maybe a render option { useKeep: [....] }
+    - With additional fragments to keep
+    - Could be set both in initial render and in up:fragment:loaded
+    - Would not require an [up-keep] on the other side
+- Consider keepSelectors and noKeepSelectors
+  - Now that [up-keep] no longer has a value?
+    - Note that we do have [up-keep] hardcoded in multiple places
 
 
 
@@ -73,25 +82,37 @@ Various changes
 ---------------
 
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
-- Consider removing support for '&'
-  - Cannot be found by search
-  - Requires additional code
-  - Would require a separate up.fragment.resolveOrigin function in unpoly-migrate
+
 - There should be a way to block rendering of a revalidation response, e.g. because a video is playing
   - Maybe a property event.revalidating in up:fragment:loaded ?
-  - Maybe a way to mark elements as keep before rendering?
-    - This would also be up:fragment:loaded
-    - Maybe a render option { useKeep: [....] }
-      - With additional fragments to keep
-      - Could be set both in initial render and in up:fragment:loaded
-      - Would not require an [up-keep] on the other side
+    - Also document how to prevent revalidations before request, after request
+  - It would also be useful if up:fragment:loaded had a preview for the target fragments:
+    up.on('up:fragment:loaded', function(event) {
+      if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
+        event.preventDefault()
+      }
+    })
+  - Document this
+    - Also note that you can always [up-keep] elements
+    - Possibly new /revalidation
+
+- Should we offer a way to manually add etags?
+  - E.g. up.on('up:request:loaded', ({ response }) => { response.etag ||= sha1(response.body) })
+  - Should this even be a default?
+
+- Test if kept audio/video elements keep playing
+
+- Consider renaming up.Request#targetElements to up.Request#fragments for symmetry with up.RenderResult
+  - Consider publishing this, with a note that this will be cleaned out
+  - We would need to clean out a task later to be visible in up:fragment:loaded
+
 - Remove target selector in [up-keep]
   - We're matching elements by derived target should be sufficient
   - Complicated matching/preventing can be done in [up-on-keep]
-- Consider keepSelectors and noKeepSelectors
-  - Now that [up-keep] no longer has a value?
-    - Note that we do have [up-keep] hardcoded in multiple places
-- Test that changes in scroll positions and focus are preserved as revalidated content is inserted
+  - up.migrate can actually set the [up-on-keep] handler, if it does not exist
+
+- Matching in the vicinity of ancestors should use subtree, nur descendants of the ancestor
+  - In a form we should always be able to say form:has(:origin), even if the origin turns out to be the form itself
 
 
 Docs
@@ -158,6 +179,7 @@ V3.pre launch
     - At the day we launch v3, we only change the DNS
       - unpoly.com becomes a CNAME for v3.unpoly.com
       - how do we get v3 to redirect to unpoly.com?
+        - in the main branch .htaccess we redirect v??.unpoly.com to unpoly.com instead of enabling norobots
 
 
 V3 final Launch
@@ -446,3 +468,6 @@ Decisions
 - Does it make sense to have onKeep in render options?
   => I find it confusing to have both { onKeep } and { useKeep } in the same functions
   => Maybe we can find a way to merge it with { useKeep }
+- Consider up.layer.config.isolateLabels
+  => Wait until there is a use case
+  => Users can always just intercept `click` themselves
