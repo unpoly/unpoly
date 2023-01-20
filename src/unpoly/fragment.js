@@ -905,6 +905,9 @@ up.fragment = (function() {
   @param {up.Response} event.response
     The server response.
 
+  @param {boolean} [event.revalidating]
+     Whether the response contains fresh content for the purpose [cache revalidation](/cache#revalidation).
+
   @param {Element} [event.origin]
     The link or form element that caused the fragment update.
 

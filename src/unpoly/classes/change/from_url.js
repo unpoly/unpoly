@@ -110,7 +110,8 @@ up.Change.FromURL = class FromURL extends up.Change {
       callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
       response: this.response,
       renderOptions: this.options,
-      log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description]
+      revalidating: !!this.options.revalidating,
+      log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description],
     })
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
@@ -187,6 +188,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         confirm: false,
         feedback: false,
         abort: false,
+        revalidating: true, // flag will be forwarded to up:fragment:loaded
         // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
 

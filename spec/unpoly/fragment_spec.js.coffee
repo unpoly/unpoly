@@ -5646,6 +5646,44 @@ describe 'up.fragment', ->
                 expect(finishedResult.none).toBe(false)
                 expect(finishedResult.fragment).toMatchSelector('.target')
 
+          describe 'prevention', ->
+
+            it 'emits a second up:fragment:loaded event with { revalidating: true }', asyncSpec (next) ->
+              flags = []
+              up.on 'up:fragment:loaded', (event) -> flags.push(event.revalidating)
+
+              up.render('.target', { url: '/cached-path', cache: true })
+
+              next ->
+                expect('.target').toHaveText('cached text')
+                expect(up.network.isBusy()).toBe(true)
+                expect(flags).toEqual [false]
+
+                jasmine.respondWithSelector('.target', text: 'verified text')
+
+              next ->
+                expect(up.network.isBusy()).toBe(false)
+                expect('.target').toHaveText('verified text')
+                expect(flags).toEqual [false, true]
+
+            it 'lets listeners prevent insertion of revalidated content by preventing the second up:fragment:loaded event', asyncSpec (next) ->
+              up.on 'up:fragment:loaded', (event) ->
+                if event.revalidating
+                  event.preventDefault()
+
+              up.render('.target', { url: '/cached-path', cache: true })
+
+              next ->
+                expect('.target').toHaveText('cached text')
+                expect(up.network.isBusy()).toBe(true)
+
+                jasmine.respondWithSelector('.target', text: 'verified text')
+
+              next ->
+                expect(up.network.isBusy()).toBe(false)
+                expect('.target').toHaveText('cached text')
+
+
       describe 'handling of [up-keep] elements', ->
 
         squish = (string) ->

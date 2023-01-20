@@ -53,6 +53,18 @@ When [navigating](/navigation) the `{ revalidate: 'auto' }` option is already se
 - Set an [`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute (HTML)
 - Configure `up.fragment.config.navigateOptions.revalidate = false`
 
+To prevent the insertion of revalidated content *after* the server responded you may prevent the
+`up:fragment:loaded` event when it has an `{ revalidating: true }` property:
+
+```js
+up.on('up:fragment:loaded', function(event) {
+  // Don't insert fresh content if the user has started a video
+  // after the stale content was rendered.
+  if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
+    event.preventDefault()
+  }
+})
+```
 
 ### When nothing changed
 
