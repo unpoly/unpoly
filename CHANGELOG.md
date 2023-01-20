@@ -36,18 +36,20 @@ Changes tracked until 2023-01-09.
 - Rendering without navigation will now preserve focus by default
 - Remove up:fragment:kept event
 - up.emit: Only print user events when the log is enabled
-- The `this` in an [up-watch] callback is now always bound to the element that has the attribute (fixes #442
+- The `this` in an [up-watch] callback is now always bound to the element that has the attribute (fixes #442)
 - Revealing Ignore obstructions that are not visible
 - Change default of up.fragment.config.runScripts to true
 - Compilers registered after booting automatically run on current elements
 - up.hello() is now idempotent
-- Remove uup.element.isDetached()
+- Remove up.element.isDetached()
 - Expose { params } prop for up:form:validate event
 - up.fragment.toTarget(string) returns the string unchanged
 - up.fragment.closest() is now stable
 - The origin in forms is now the submit button or (when watching / validating) the changed field
   - The .up-active class is no longer set on the form element.
+  - To select an active form, style form.up-active, form:has(.up-active)
 - label[for] focuses the correct field when an input with a matching ID is in another layer
+
 
 ### Big topic: Concurrency
 
