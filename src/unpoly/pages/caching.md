@@ -44,6 +44,9 @@ up.fragment.config.autoRevalidate = (response) => response.expired
 
 To force revalidation regardless of cache age, pass `{ revalidate: true }`.
 
+
+### Disabling revalidation
+
 When [navigating](/navigation) the `{ revalidate: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of revalidation while navigating, there are several methods:
 
 - Pass a  [`{ revalidate: false }`](/up.render#options.revalidate) option (JavaScript)
