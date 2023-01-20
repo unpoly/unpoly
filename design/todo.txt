@@ -71,6 +71,10 @@ TODOs after V3
 - Consider keepSelectors and noKeepSelectors
   - Now that [up-keep] no longer has a value?
     - Note that we do have [up-keep] hardcoded in multiple places
+- Should we offer a way to manually add etags?
+  - E.g. up.on('up:request:loaded', ({ response }) => { response.etag ||= sha1(response.body) })
+  - Should this even be a default?
+  => People can already set response.headers['ETag'], although that's not documented
 
 
 
@@ -95,10 +99,6 @@ Various changes
   - Document this
     - Also note that you can always [up-keep] elements
     - Possibly new /revalidation
-
-- Should we offer a way to manually add etags?
-  - E.g. up.on('up:request:loaded', ({ response }) => { response.etag ||= sha1(response.body) })
-  - Should this even be a default?
 
 - Test if kept audio/video elements keep playing
 
