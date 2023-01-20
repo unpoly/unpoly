@@ -87,19 +87,6 @@ Various changes
 
 - Upgrade a non-trivial app like SF from Unpoly 2 to 3
 
-- There should be a way to block rendering of a revalidation response, e.g. because a video is playing
-  - Maybe a property event.revalidating in up:fragment:loaded ?
-    - Also document how to prevent revalidations before request, after request
-  - It would also be useful if up:fragment:loaded had a preview for the target fragments:
-    up.on('up:fragment:loaded', function(event) {
-      if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
-        event.preventDefault()
-      }
-    })
-  - Document this
-    - Also note that you can always [up-keep] elements
-    - Possibly new /revalidation
-
 - Test if kept audio/video elements keep playing
 
 - Consider renaming up.Request#targetElements to up.Request#fragments for symmetry with up.RenderResult
