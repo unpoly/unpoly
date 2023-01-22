@@ -897,8 +897,10 @@ up.fragment = (function() {
   @event up:fragment:loaded
 
   @param event.preventDefault()
-    Event listeners may call this method to prevent the fragment change.
+    Event listeners may call this method to prevent the loaded fragment from being inserted.
 
+    Preventing the event aborts this render pass.
+    Programmatic callers will reject with an `up.AbortError`.
   @param {up.Request} event.request
     The original request to the server.
 

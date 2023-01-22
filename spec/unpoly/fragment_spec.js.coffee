@@ -1051,14 +1051,28 @@ describe 'up.fragment', ->
             up.on('up:fragment:loaded', (e) -> e.preventDefault())
             fixture('.target', text: 'old text')
 
-            changePromise = up.render(target: '.target', url: '/url')
+            up.render(target: '.target', url: '/url')
 
-            u.task =>
-              @respondWith('new text')
+            u.task ->
+              jasmine.respondWith('new text')
 
-              u.task =>
+              u.task ->
                 expect('.target').toHaveText('old text')
                 expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+
+                done()
+
+          it 'rejects programmatic callers with an up.AbortError when the event is prevented', (done) ->
+            up.on('up:fragment:loaded', (e) -> e.preventDefault())
+            fixture('.target', text: 'old text')
+
+            changePromise = up.render(target: '.target', url: '/url')
+
+            u.task ->
+              jasmine.respondWith('new text')
+
+              u.task ->
+                expect('.target').toHaveText('old text')
 
                 promiseState(changePromise).then (result) ->
                   expect(result.state).toEqual('rejected')
@@ -1072,7 +1086,7 @@ describe 'up.fragment', ->
 
             up.on('up:fragment:loaded', (e) -> e.renderOptions.target = '.two')
 
-            changePromise = up.render(target: '.one', url: '/url')
+            up.render(target: '.one', url: '/url')
 
             next =>
               @respondWith """
