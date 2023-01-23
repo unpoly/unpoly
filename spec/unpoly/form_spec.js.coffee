@@ -1665,7 +1665,6 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo bar')
             expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'one', bar: 'two' })
 
-
         it 'honors the { disable } option of each batched validation', asyncSpec (next) ->
           form = fixture('form[action=/path][up-watch-disable=":origin"]')
           fooField = e.affix(form, 'input[name=foo]')
@@ -1692,6 +1691,36 @@ describe 'up.form', ->
             expect(fooField).not.toBeDisabled()
             expect(barField).not.toBeDisabled()
             expect(bazField).not.toBeDisabled()
+
+        it 'merges the { params } option of all batched validations', asyncSpec (next) ->
+          form = fixture('form[action=/path][method=post]')
+          fooField = e.affix(form, 'input[name=foo][value="foo-value"]')
+          barField = e.affix(form, 'input[name=bar][value="bar-value"]')
+
+          up.validate(fooField, params: { baz: 'baz-value' }, formGroup: false)
+          up.validate(barField, params: { bam: 'bam-value' }, formGroup: false)
+
+          next ->
+            debugger
+
+            expect(jasmine.lastRequest().data()).toMatchParams(
+              foo: 'foo-value',
+              bar: 'bar-value',
+              baz: 'baz-value',
+              bam: 'bam-value',
+            )
+
+        it 'merges the { headers } option of all batched validations', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          fooField = e.affix(form, 'input[name=foo]')
+          barField = e.affix(form, 'input[name=bar]')
+
+          up.validate(fooField, headers: { Baz: 'baz-value' }, formGroup: false)
+          up.validate(barField, headers: { Bam: 'bam-value' }, formGroup: false)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['Baz']).toBe('baz-value')
+            expect(jasmine.lastRequest().requestHeaders['Bam']).toBe('bam-value')
 
         it 'honors the { data } option of each batched validation', asyncSpec (next) ->
           form = fixture('form[action=/path]')

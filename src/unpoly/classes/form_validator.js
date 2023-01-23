@@ -175,9 +175,15 @@ up.FormValidator = class FormValidator {
     // { fail: false }.
     options.failOptions = false
 
+    options.params = up.Params.merge(
+      options.params, // form field params we obtained from up.form.destinationOptions() above
+      ...u.map(dirtyRenderOptionsList, 'params') // each validate() call can pass a a custom { params } option
+    )
+
+    options.headers = u.merge(...u.map(dirtyRenderOptionsList, 'headers'))
+
     // Make sure the X-Up-Validate header is present, so the server-side
     // knows that it should not persist the form submission
-    options.headers ||= {}
     options.headers[up.protocol.headerize('validate')] = dirtyNames.join(' ') || ':unknown'
 
     // The guardEvent will be be emitted on the render pass' { origin }, so the form in this case.

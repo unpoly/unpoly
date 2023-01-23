@@ -600,5 +600,14 @@ up.Params = class Params {
     return u.normalizeURL(url, { search: false })
   }
 
-}
+  static merge(...objects) {
+    return objects.reduce(
+      function(allParams, params) {
+        allParams.addAll(params)
+        return allParams
+      },
+      new up.Params()
+    )
+  }
 
+}
