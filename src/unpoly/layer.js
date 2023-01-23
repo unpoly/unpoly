@@ -582,7 +582,9 @@ up.layer = (function() {
   @param {Element} event.origin
     The link element that is opening the overlay.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the overlay from opening.
+    Prevents this overlay from opening.
+
+    Programmatic callers will reject with an `up.AbortError`.
   @stable
   */
 
@@ -1091,7 +1093,7 @@ up.layer = (function() {
   @param {Element} [event.origin]
     The element that is causing the layer to close.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the overlay from closing.
+    Prevents the overlay from closing.
   @stable
   */
 

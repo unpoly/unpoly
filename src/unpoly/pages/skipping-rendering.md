@@ -168,6 +168,26 @@ The server may send additional `ETag` or `Last-Modified` response headers. Howev
 To prevent a fragment from inheriting a version from an ancestor, assign it an `[up-etag=false]` or `[up-time=false]` attribute. 
 
 
+## Preventing rendering of loaded responses
+
+Even after the server has sent a response, you may still prevent rendering at the last second
+by canceling the `up:fragment:loaded` event.  This gives you a chance to inspect the response
+or DOM state right before a fragment would be inserted:
+
+```js
+up.on('up:fragment:loaded', function(event) {
+  // Don't insert fresh content if the user has started a video
+  // after the stale content was rendered.
+  if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
+    // Finish the render pass with no changes.
+    event.skip()
+  }
+})
+```
+
+See `up:fragment:loaded` for more examples.
+
+
 ## Partially rendering a response
 
 The response may include a full HTML document, but only the [targeted fragment](/targeting-fragments)
@@ -176,9 +196,9 @@ will be updated on the page. Other elements from the response will be discarded.
 Within the targeted fragment, child elements may elect to not be re-rendered using the `[up-keep]` attribute.
 
 
-## Preventing a render pass
+## Preventing an entire render pass
 
-You can [prevent or interrupt](/render-hooks#preventing-a-render-pass) a render pass by calling `event.preventDefault()` on an event like `up:link:follow` or `up:fragment:loaded`.
+You can [prevent or interrupt](/render-hooks#preventing-a-render-pass) a render pass by calling `event.preventDefault()` on an event like `up:link:follow` or `up:form:submit`.
 
 
 @page skipping-rendering

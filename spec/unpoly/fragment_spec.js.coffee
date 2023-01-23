@@ -1080,6 +1080,25 @@ describe 'up.fragment', ->
 
                   done()
 
+          it 'fulfills programmatic callers with an empty up.RenderResult when the event is skipped (instead of prevented)', (done) ->
+            up.on('up:fragment:loaded', (e) -> e.skip())
+            fixture('.target', text: 'old text')
+
+            changePromise = up.render(target: '.target', url: '/url')
+
+            u.task ->
+              jasmine.respondWith('new text')
+
+              u.task ->
+                expect('.target').toHaveText('old text')
+
+                promiseState(changePromise).then (result) ->
+                  expect(result.state).toEqual('fulfilled')
+                  expect(result.value).toEqual(jasmine.any(up.RenderResult))
+                  expect(result.value.none).toBe(true)
+
+                  done()
+
           it 'allows listeners to mutate up.render() options before the fragment is updated', asyncSpec (next) ->
             fixture('.one', text: 'old one')
             fixture('.two', text: 'old two')
@@ -5449,6 +5468,26 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
+          it 'does not render a second time if the revalidation response has the same text as the expired response', asyncSpec (next) ->
+            insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
+            up.on('up:fragment:inserted', insertedSpy)
+            up.render('.target', { url: '/cached-path', cache: true })
+
+            next ->
+              expect(insertedSpy.calls.count()).toBe(1)
+              target = document.querySelector('.target')
+              expect(target).toHaveText('cached text')
+              target.innerText = 'text changed on client'
+
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.respondWithSelector('.target', text: 'cached text')
+
+            next ->
+              expect(up.network.isBusy()).toBe(false)
+              expect(insertedSpy.calls.count()).toBe(1)
+              expect('.target').toHaveText('text changed on client')
+
           it 'allows to define which responses to verify in up.fragment.config.autoRevalidate'
 
           it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
@@ -5680,12 +5719,12 @@ describe 'up.fragment', ->
                 expect('.target').toHaveText('verified text')
                 expect(flags).toEqual [false, true]
 
-            it 'lets listeners prevent insertion of revalidated content by preventing the second up:fragment:loaded event', asyncSpec (next) ->
+            it 'lets listeners prevent insertion of revalidated content by *preventing* the second up:fragment:loaded event, aborting the { finished } promise', asyncSpec (next) ->
               up.on 'up:fragment:loaded', (event) ->
                 if event.revalidating
                   event.preventDefault()
 
-              up.render('.target', { url: '/cached-path', cache: true })
+              finishedPromise = up.render('.target', { url: '/cached-path', cache: true }).finished
 
               next ->
                 expect('.target').toHaveText('cached text')
@@ -5696,6 +5735,35 @@ describe 'up.fragment', ->
               next ->
                 expect(up.network.isBusy()).toBe(false)
                 expect('.target').toHaveText('cached text')
+
+                next.await(promiseState(finishedPromise))
+
+              next (result) ->
+                expect(result.state).toBe('rejected')
+                expect(result.value).toBeAbortError()
+
+            it 'lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', asyncSpec (next) ->
+              up.on 'up:fragment:loaded', (event) ->
+                if event.revalidating
+                  event.skip()
+
+              finishedPromise = up.render('.target', { url: '/cached-path', cache: true }).finished
+
+              next ->
+                expect('.target').toHaveText('cached text')
+                expect(up.network.isBusy()).toBe(true)
+
+                jasmine.respondWithSelector('.target', text: 'verified text')
+
+              next ->
+                expect(up.network.isBusy()).toBe(false)
+                expect('.target').toHaveText('cached text')
+
+                next.await(promiseState(finishedPromise))
+
+              next (result) ->
+                expect(result.state).toBe('fulfilled')
+                expect(result.value).toEqual(jasmine.any(up.RenderResult))
 
 
       describe 'handling of [up-keep] elements', ->

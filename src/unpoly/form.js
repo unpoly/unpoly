@@ -580,7 +580,7 @@ up.form = (function() {
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the form from being submitted.
+    Prevents the form from being submitted.
   @stable
   */
 
@@ -1044,8 +1044,7 @@ up.form = (function() {
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the validation request
-    being sent to the server.
+    Prevents the validation request from being sent to the server.
   @stable
   */
 

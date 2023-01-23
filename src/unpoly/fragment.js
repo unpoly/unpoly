@@ -151,6 +151,25 @@ up.fragment = (function() {
     up.fragment.config.autoRevalidate = (response) => response.age > 15_000 && !up.network.shouldReduceRequests()
     ```
 
+  @param {Function(Object): boolean} [config.skipResponse]
+    When to finishes a render pass without changes,
+    ususually to [not re-insert identical content](/skipping-rendering).
+
+    The configured function accepts an object with the same properties
+    as an `up:fragment:loaded` event.
+
+    By default Unpoly skips the following responses:
+
+    - Responses without text in their body.
+      Such responses occur when a [conditional request](/skipping-rendering#conditional-requests)
+      in answered with HTTP status `304 Not Modified` or `204 No Content`.
+    - When [revalidating](/caching#revalidation), if the expired response and fresh response
+      have the exact same text.
+
+    You may also skip responses by registering an `up:fragment:loaded` listener.
+
+    @experimental
+
   @stable
   */
   const config = new up.Config(() => ({
@@ -198,6 +217,7 @@ up.fragment = (function() {
     autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
     autoScroll: ['hash', 'layer-if-main'],
     autoRevalidate: (response) => response.expired,
+    skipResponse: defaultSkipResponse
   }))
 
   // Users who are not using layers will prefer settings default targets
@@ -206,6 +226,10 @@ up.fragment = (function() {
 
   function reset() {
     config.reset()
+  }
+
+  function defaultSkipResponse({ response, expiredResponse }) {
+    return !response.text || response.text === expiredResponse?.text
   }
 
   /*-
@@ -867,12 +891,22 @@ up.fragment = (function() {
   })
 
   /*-
-  This event is [emitted](/up.emit) when the server responds with the HTML, before
+  This event is [emitted](/up.emit) after the server response was loaded, but before
   the HTML is used to [change a fragment](/up.render).
 
+  This gives you a chance to inspect the response or DOM state right before a fragment would be inserted.
+  You may then choose to [abort](#event.preventDefault) or [skip](#event.skip) the render pass
+  to do something else instead.
+
+  The event is emitted on the targeted layer.
+
+  ### Example: Making a full page load instead
+
   Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
-  to prevent any changes to the DOM and browser history. This is useful to detect
-  an entirely different page layout (like a maintenance page or fatal server error)
+  to prevent any changes to the DOM and browser history.
+
+  This is useful to detect an entirely different page layout
+  (like a maintenance page or fatal server error)
   which should be open with a full page load:
 
   ```js
@@ -881,37 +915,123 @@ up.fragment = (function() {
 
     if (isMaintenancePage) {
       // Prevent the fragment update and don't update browser history
-      event.preventDefault()
+      event.preventDefault() // mark-line
 
       // Make a full page load for the same request.
-      event.request.loadPage()
+      event.request.loadPage() // mark-line
     }
   })
   ```
 
-  Instead of preventing the update, listeners may also access the `event.renderOptions` object
-  to mutate options to the `up.render()` call that will process the server response.
+  ### Example: Changing render options
 
-  The event is emitted on the targeted layer.
+  Instead of preventing the update, listeners may also access the `event.renderOptions` object
+  to mutate options to the `up.render()` call that will process the server response:
+
+  ```js
+  up.on('up:fragment:loaded', async function(event) {
+    // If we see an X-Course-Completed header, render the main target
+    if (event.response.headers['X-Course-Completed']) {
+      event.renderOptions.target = ':main' // mark-line
+    }
+  })
+  ```
+
+  ### Example: Do something else, then retry
+
+  You may retry a prevented fragment update later, by calling `up.render(event.renderOptions)`:
+
+  ```js
+  up.on('up:fragment:loaded', async function(event) {
+    // When we couldn't access a page since we're signed out, the server sends a header
+    if (event.response.headers['X-Session-Missing']) {
+      // Don't render the error message
+      event.preventDefault() // mark-line
+
+      // Sign in using a modal overlay
+      await up.layer.ask('/sign_in', { acceptEvent: 'app:session:created' })
+
+      // Now that we're signed in, retry the original request
+      up.render(event.renderOptions) // mark-line
+    }
+  })
+  ```
+
+  ### Example: Ignoring a revalidation response
+
+  When rendering [cached](/caching) content that is too old, Unpoly automatically reloads the fragment
+  to ensure that the user never sees expired content. This process is called [cache revalidation](/caching#revalidation).
+
+  To prevent the insertion of [revalidated](/caching#revalidation) content *after* the
+  server responded you may prevent the `up:fragment:loaded` event with an `{ revalidating: true }` property:
+
+  ```js
+  up.on('up:fragment:loaded', function(event) {
+    // Don't insert fresh content if the user has started a video
+    // after the stale content was rendered.
+    if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
+      // Finish the render pass with no changes.
+      event.skip()
+    }
+  })
+  ```
+
+  You may also compare the server response with the expired response that we're revalidating:
+
+   ```js
+   up.on('up:fragment:loaded', function(event) {
+      // Don't re-render revalidation responses that only differ in whitespace
+      if (event.revalidating && event.response.text.trim() === event.expiredResponse.text.trim()) {
+        event.skip()
+      }
+   })
+   ```
+
+
+
+
+  Also see [skipping rendering](/skipping-rendering) and `up.fragment.config.skipResponse`.
 
   @event up:fragment:loaded
 
   @param event.preventDefault()
-    Event listeners may call this method to prevent the loaded fragment from being inserted.
+    Aborts this render pass without changes.
 
-    Preventing the event aborts this render pass.
     Programmatic callers will reject with an `up.AbortError`.
+
+  @param event.skip()
+    Finishes this render pass without changes,
+    ususually to [not re-insert identical content](/skipping-rendering).
+
+    Programmatic callers will fulfill with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
+
+    @experimental
+
   @param {up.Request} event.request
     The original request to the server.
 
   @param {up.Response} event.response
-    The server response.
+    The response received from the server.
 
-  @param {boolean} [event.revalidating]
+  @param {boolean} event.revalidating
      Whether the response contains fresh content for the purpose [cache revalidation](/cache#revalidation).
+     @experimental
 
-  @param {Element} [event.origin]
-    The link or form element that caused the fragment update.
+  @param {up.Response|undefined} event.expiredResponse
+     When [revalidating](/cache#revalidation), this property is set to the expired content
+     that is being reloaded to ensure that the user never sees stale content.
+
+     You may compare the `{ response }` and `{ expiredResponse }` properties to prevent
+     [re-insertion of identical content](/skipping-rendering).
+
+     Also see `up.fragment.config.skipResponse`.
+
+     @experimental
+
+  @param {Element|undefined} event.origin
+    The link, input or form element that caused the fragment update.
+
+    If no origin element is known, this property is left `undefined`.
 
   @param {Object} event.renderOptions
     Options for the `up.render()` call that will process the server response.
@@ -1031,7 +1151,9 @@ up.fragment = (function() {
 
   @event up:fragment:keep
   @param event.preventDefault()
-    Event listeners may call this method to prevent the element from being kept.
+    Prevents the fragment from being kept.
+
+    The fragment will be replaced by `event.newFragment`.
   @param {Element} event.target
     The fragment that will be kept.
   @param {Element} event.newFragment

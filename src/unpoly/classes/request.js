@@ -548,7 +548,7 @@ up.Request = class Request extends up.Record {
   onXHRLoad() {
     const response = this.extractResponseFromXHR()
 
-    const log = ['Server responded HTTP %d to %s %s (%d characters)', response.status, this.method, this.url, response.text.length]
+    const log = 'Loaded ' + response.description
     this.emit('up:request:loaded', { request: response.request, response, log })
 
     this.respondWith(response)
@@ -575,7 +575,7 @@ up.Request = class Request extends up.Record {
   /*-
   Aborts this request.
 
-  The request's promise will reject with an error object that has `{ name: 'AbortError' }`.
+  The request's promise will reject with an `up.AbortError`.
 
   ### Example
 
@@ -585,7 +585,7 @@ up.Request = class Request extends up.Record {
   try {
     let response = await request('/path')
   } catch (result) {
-    if (result.name === 'AbortError') {
+    if (result instanceof up.AbortError) {
       console.log('Request was aborted.')
     }
   }
@@ -594,7 +594,12 @@ up.Request = class Request extends up.Record {
   ```
 
   @function up.Request#abort
-  @string [options.reason]
+  @param {string} [options.reason]
+    A message describing the reason for aborting this request.
+
+    If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
+
+    The reason will be set as the `up.AbortError`'s message.
   @experimental
   */
   abort({ reason } = {}) {

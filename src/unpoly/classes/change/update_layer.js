@@ -54,7 +54,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       // Don't log @target since that does not include hungry elements
       up.puts('up.render()', `Updating "${this.bestPreflightSelector()}" in ${this.layer}`)
     } else {
-      up.puts('up.render()', 'Nothing to render')
+      up.puts('up.render()', 'Nothing was rendered')
     }
 
     this.options.title = this.improveHistoryValue(this.options.title, this.responseDoc.getTitle())
@@ -98,7 +98,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // - Update the location to a URL for which { acceptLocation } or { dismissLocation }
     //   will close the layer.
     //
-    // Note that @handleLayerChangeRequests() also throws an `AbortError`
+    // Note that @handleLayerChangeRequests() also throws an `up.AbortError`
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests()
 
@@ -134,7 +134,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     await Promise.all(motionEndPromises)
 
     // If our layer was closed while animations are running, don't finish
-    // and reject with an AbortError.
+    // and reject with an up.AbortError.
     this.abortWhenLayerClosed()
 
     // Resolve second promise for callers that need to know when animations are done.

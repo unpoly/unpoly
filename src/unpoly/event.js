@@ -389,7 +389,7 @@ The parsed data will be passed to your event handler as a third argument:
   }
 
   /*-
-  [Emits](/up.emit) the given event and throws an `AbortError` if it was prevented.
+  [Emits](/up.emit) the given event and throws an `up.AbortError` if it was prevented.
 
   @function up.event.assertEmitted
   @param {string} eventType

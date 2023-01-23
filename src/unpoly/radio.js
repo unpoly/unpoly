@@ -347,7 +347,7 @@ up.radio = (function() {
   @param {Element} event.target
     The polling fragment.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the fragment from being reloaded.
+    Prevents the fragment from being reloaded.
   @experimental
   */
 

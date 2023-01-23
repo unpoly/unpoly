@@ -53,24 +53,30 @@ When [navigating](/navigation) the `{ revalidate: 'auto' }` option is already se
 - Set an [`[up-revalidate=false]`](/a-up-follow#up-revalidate) attribute (HTML)
 - Configure `up.fragment.config.navigateOptions.revalidate = false`
 
-To prevent the insertion of revalidated content *after* the server responded you may prevent the
-`up:fragment:loaded` event when it has an `{ revalidating: true }` property:
-
-```js
-up.on('up:fragment:loaded', function(event) {
-  // Don't insert fresh content if the user has started a video
-  // after the stale content was rendered.
-  if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
-    event.preventDefault()
-  }
-})
-```
 
 ### When nothing changed
 
 Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
 By supporting [conditional HTTP requests](/skipping-rendering#conditional-requests) you can quickly produce an empty revalidation response for unchanged content.
+
+
+### Preventing rendering of revalidation responses
+
+To discard revalidated HTML *after* the server has responded, you may prevent the
+`up:fragment:loaded` event when it has an `{ revalidating: true }` property.
+This gives you a chance to inspect the response or DOM state right before a fragment would be inserted:
+
+```js
+up.on('up:fragment:loaded', function(event) {
+  // Don't insert fresh content if the user has started a video
+  // after the stale content was rendered.
+  if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
+    // Finish the render pass with no changes.
+    event.skip()
+  }
+})
+```
 
 
 

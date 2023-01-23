@@ -101,18 +101,29 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   onRequestSettledWithResponse(response) {
     this.response = response
+    const expiredResponse = this.options.expiredResponse
 
-    // Allow listeners to inspect the response and either prevent the fragment change
-    // or manipulate change options. An example for when this is useful is a maintenance
-    // page with its own layout, that cannot be loaded as a fragment and must be loaded
-    // with a full page load.
-    this.request.assertEmitted('up:fragment:loaded', {
-      callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
+    const eventProps = {
       response: this.response,
       renderOptions: this.options,
-      revalidating: !!this.options.revalidating,
-      log: ['Loaded fragment from HTTP %s response to %s', this.response.status, this.request.description],
-    })
+      revalidating: !!expiredResponse,
+      expiredResponse,
+    }
+
+    if (up.fragment.config.skipResponse(eventProps)) {
+      this.skip()
+    } else {
+      // Allow listeners to inspect the response and either prevent the fragment change
+      // or manipulate change options. An example for when this is useful is a maintenance
+      // page with its own layout, that cannot be loaded as a fragment and must be loaded
+      // with a full page load.
+      this.request.assertEmitted('up:fragment:loaded', {
+        ...eventProps,
+        callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
+        log: ['Loaded fragment from %s', this.response.description],
+        skip: () => this.skip()
+      })
+    }
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
     // to force success or failure options.
@@ -145,6 +156,12 @@ up.Change.FromURL = class FromURL extends up.Change {
     //
     // (2) up.Offline errors also run { onError } callbacks.
     throw error
+  }
+
+  skip() {
+    up.puts('up.render()', 'Skipping ' + this.response.description)
+    this.options.target = ':none'
+    this.options.failTarget = ':none'
   }
 
   updateContentFromResponse(finalRenderOptions) {
@@ -188,7 +205,7 @@ up.Change.FromURL = class FromURL extends up.Change {
         confirm: false,
         feedback: false,
         abort: false,
-        revalidating: true, // flag will be forwarded to up:fragment:loaded
+        expiredResponse: this.response, // flag will be forwarded to up:fragment:loaded
         // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
       })
 

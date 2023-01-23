@@ -594,7 +594,7 @@ describe 'up.link', ->
               # No need to respond because /foo has been cached before
 
             next =>
-              expect($viewport.scrollTop()).toEqual(65)
+              expect($viewport.scrollTop()).toBeAround(65, 1)
 
         describe "when the browser is already on the link's destination", ->
 

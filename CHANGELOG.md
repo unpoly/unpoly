@@ -19,6 +19,9 @@ Changes tracked until 2023-01-09.
 
 ### Unsorted
 
+- up:fragment:loaded gets #skip()
+- up.fragment.config.skipResponses
+- When revalidation, not inserting equal responses
 - :origin shorthand & is deprecated
 - data, keepData, dataMap
 - In form, .up-active is given to the button or field that triggered the submission/validation, not the form

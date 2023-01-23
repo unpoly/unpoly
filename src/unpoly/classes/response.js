@@ -258,4 +258,8 @@ up.Response = class Response extends up.Record {
     return this.age > up.network.config.cacheExpireAge || this.request.expired
   }
 
+  get description() {
+    return `HTTP ${this.status} response to ${this.request.description}`
+  }
+
 }

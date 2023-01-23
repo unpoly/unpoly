@@ -498,7 +498,7 @@ up.link = (function() {
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the link from being followed.
+    Prevents the link from being followed.
   @stable
   */
 
@@ -529,7 +529,7 @@ up.link = (function() {
     A promise that will be fulfilled when the request was loaded and cached.
 
     When preloading is [disabled](/up.link.config#config.preloadEnabled) the promise
-    rejects with an `AbortError`.
+    rejects with an `up.AbortError`.
   @stable
   */
   function preload(link, options) {
@@ -563,7 +563,7 @@ up.link = (function() {
   @param {Element} event.target
     The link element that will be preloaded.
   @param event.preventDefault()
-    Event listeners may call this method to prevent the link from being preloaded.
+    Prevents the link from being preloaded.
   @stable
   */
 
