@@ -806,19 +806,16 @@ up.util = (function() {
   // Implement up.util.copy protocol for Date
   Date.prototype[copy.key] = function() { return new Date(+this); }
 
-//  ###**
-//  Returns a deep copy of the given array or object.
-//
-//  @function up.util.deepCopy
-//  @param {Object|Array} object
-//  @return {Object|Array}
-//  @internal
-//  ###
-//  deepCopy = (object) ->
-//    copy(object, true)
-
   /*-
   Creates a new object by merging together the properties from the given objects.
+
+  ### Example
+
+  ```js
+  let a = { a: '1', b: '2' }
+  let b = { b: '3', c: '4' }
+  up.util.merge(a, b) // => { a: '1', b: '3', c: '4' }
+  ```
 
   @function up.util.merge
   @param {Array<Object>} sources...

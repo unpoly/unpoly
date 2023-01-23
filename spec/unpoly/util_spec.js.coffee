@@ -1211,8 +1211,25 @@ describe 'up.util', ->
       it 'merges the given objects', ->
         obj = { a: '1', b: '2' }
         other = { b: '3', c: '4' }
-        obj = up.util.merge(obj, other)
-        expect(obj).toEqual { a: '1', b: '3', c: '4' }
+        result = up.util.merge(obj, other)
+        expect(result).toEqual { a: '1', b: '3', c: '4' }
+
+      it 'merges more than two objects', ->
+        a = { a: '1' }
+        b = { b: '2' }
+        c = { c: '3' }
+        result = up.util.merge(a, b, c)
+        expect(result).toEqual { a: '1', b: '2', c: '3' }
+
+      it 'does not mutate the first argument', ->
+        a = { a: '1' }
+        b = { b: '2' }
+        result = up.util.merge(a, b)
+        expect(a).toEqual { a: '1' }
+
+      it 'returns an empty object if called without arguments', ->
+        result = up.util.merge()
+        expect(result).toEqual({})
 
       it 'overrides (not merges) keys with object value', ->
         obj = { a: '1', b: { c: '2', d: '3' } }
