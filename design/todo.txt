@@ -77,7 +77,6 @@ TODOs after V3
   => People can already set response.headers['ETag'], although that's not documented
 
 
-
 TODOs for V3
 ============
 
@@ -85,13 +84,7 @@ TODOs for V3
 Various changes
 ---------------
 
-- Upgrade a non-trivial app like SF from Unpoly 2 to 3
-
 - Test if kept audio/video elements keep playing
-
-- Consider renaming up.Request#targetElements to up.Request#fragments for symmetry with up.RenderResult
-  - Consider publishing this, with a note that this will be cleaned out
-  - We would need to clean out a task later to be visible in up:fragment:loaded
 
 - Remove target selector in [up-keep]
   - We're matching elements by derived target should be sufficient
@@ -101,6 +94,11 @@ Various changes
 - Matching in the vicinity of ancestors should use subtree, nur descendants of the ancestor
   - In a form we should always be able to say form:has(:origin), even if the origin turns out to be the form itself
 
+- Test that [up-switch] targets are per-form
+
+- Can we use the { focus } option with batches up.validate()?
+  - Maybe merging could use mergeDefined
+
 
 Docs
 ----
@@ -109,6 +107,7 @@ Docs
 
 - Finish the CHANGELOG so we can publish v3-pre
 - Consider removing all tagnames from public selectors
+-
 
 
 ### Other docs
@@ -458,3 +457,6 @@ Decisions
 - Consider up.layer.config.isolateLabels
   => Wait until there is a use case
   => Users can always just intercept `click` themselves
+- Consider [aria-haspopup]
+  => This would require a compiler automatically setting this for [up-layer=new] links (and all shortcuts)
+  => Don't do this for performance. Delegate to apps.
