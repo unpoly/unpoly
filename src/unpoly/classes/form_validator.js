@@ -145,7 +145,7 @@ up.FormValidator = class FormValidator {
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // Merge together all render options for all origins.
-    let options = u.merge(
+    let options = u.mergeDefined(
       ...dirtyRenderOptionsList,
       { dataMap },
       up.form.destinationOptions(this.form),
@@ -164,7 +164,7 @@ up.FormValidator = class FormValidator {
 
     // In case we're replacing an input that the user is typing in,
     // preserve focus, selection and scroll positions.
-    options.focus = 'keep'
+    options.focus ??= 'keep'
 
     // The protocol doesn't define whether the validation results in a status code.
     // Some backends might want to communicate a failed validation, others might not.

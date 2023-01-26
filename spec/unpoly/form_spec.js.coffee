@@ -1692,6 +1692,30 @@ describe 'up.form', ->
             expect(barField).not.toBeDisabled()
             expect(bazField).not.toBeDisabled()
 
+        it 'honors the { focus } option of the last batched validation with a { focus } option', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          fooField = e.affix(form, 'input[name=foo]')
+          barField = e.affix(form, 'input[name=bar]')
+          bazField = e.affix(form, 'input[name=baz]')
+          validateTarget = e.affix(form, '.validate-target', text: 'old content')
+          fooFocus = e.affix(form, '.foo-focus')
+          barFocus = e.affix(form, '.bar-focus')
+
+          up.hello(form)
+
+          up.validate(fooField, { target: '.validate-target', focus: '.foo-focus' })
+          up.validate(barField, { target: '.validate-target', focus: '.bar-focus' })
+          up.validate(bazField, { target: '.validate-target' })
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.validate-target')
+
+            jasmine.respondWithSelector('.validate-target', text: 'new content')
+
+          next ->
+            expect('.validate-target').toHaveText('new content')
+            expect('.bar-focus').toBeFocused()
+
         it 'merges the { params } option of all batched validations', asyncSpec (next) ->
           form = fixture('form[action=/path][method=post]')
           fooField = e.affix(form, 'input[name=foo][value="foo-value"]')
@@ -1701,8 +1725,6 @@ describe 'up.form', ->
           up.validate(barField, params: { bam: 'bam-value' }, formGroup: false)
 
           next ->
-            debugger
-
             expect(jasmine.lastRequest().data()).toMatchParams(
               foo: 'foo-value',
               bar: 'bar-value',
