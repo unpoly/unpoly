@@ -2975,6 +2975,26 @@ describe 'up.form', ->
 
     describe '[up-switch]', ->
 
+      it 'only switches a target in the same form', ->
+        form1 = fixture('form')
+        form1Input = e.affix(form1, 'input[name="foo"][up-switch=".target"]')
+        form1Target = e.affix(form1, '.target[up-show-for="active"]')
+        up.hello(form1)
+
+        form2 = fixture('form')
+        form2Input = e.affix(form2, 'input[name="foo"][up-switch=".target"]')
+        form2Target = e.affix(form2, '.target[up-show-for="active"]')
+        up.hello(form2)
+
+        expect(form1Target).toBeHidden()
+        expect(form2Target).toBeHidden()
+
+        form2Input.value = 'active'
+        Trigger.change(form2Input)
+
+        expect(form1Target).toBeHidden()
+        expect(form2Target).toBeVisible()
+
       describe 'on a select', ->
 
         beforeEach ->
