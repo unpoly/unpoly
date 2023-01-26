@@ -134,7 +134,23 @@ up.migrate.preprocessRenderOptions = function(options) {
     delete options.fail
   }
 
-  up.migrate.fixKey(options, 'solo', 'abort')
+  let solo = u.pluckKey(options, 'solo')
+  if (u.isString(solo)) {
+    // Old { solo } option did not accept a string, but some users were passing a string as a truthy value.
+    // This would break the { abort } option, where a string is parsed a CSS selector.
+    up.migrate.warn("The up.render() option { solo } has been replaced by { abort } and { abort } no longer accepts a URL pattern. Check if you can use { abort: 'target'} or use up.network.abort(pattern) instead.")
+    options.abort = (options) => up.network.abort(solo, options)
+  } else if (u.isFunction(solo)) {
+    up.migrate.warn("The up.render() option { solo } has been replaced by { abort } and { abort } no longer accepts a Function(up.Request): boolean. Check if you can use { abort: 'target'} or use up.network.abort(fn) instead.")
+    options.abort = (options) => { up.network.abort(solo, options) }
+  } else if (solo === true) {
+    up.migrate.warn('Option { solo: true }', "{ abort: 'all' }")
+    options.abort = 'all'
+  } else if (solo === false) {
+    up.migrate.warn('Option { solo: false }', "{ abort: false }")
+    options.abort = false
+  }
+
   up.migrate.fixKey(options, 'keep', 'useKeep')
   up.migrate.fixKey(options, 'hungry', 'useHungry')
   up.migrate.fixKey(options, 'failOnFinished', 'onFailFinished')
