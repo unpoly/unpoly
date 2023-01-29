@@ -2,7 +2,9 @@
 Logging
 =======
 
-Unpoly can print debugging information to the [browser console](https://developer.chrome.com/docs/devtools/console/), e.g.:
+Unpoly can print debugging information to the [browser console](https://developer.chrome.com/docs/devtools/console/).
+
+The information in the log includes:
 
 - Which [events](/up.event) are called
 - When we're [making requests to the network](/up.request)
