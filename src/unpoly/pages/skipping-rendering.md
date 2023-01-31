@@ -15,6 +15,7 @@ If the server wants to render nothing they can do one of the following:
 
 No response body is required.
 
+
 Conditional requests
 --------------------
 
@@ -174,18 +175,34 @@ Even after the server has sent a response, you may still prevent rendering at th
 by canceling the `up:fragment:loaded` event.  This gives you a chance to inspect the response
 or DOM state right before a fragment would be inserted:
 
-```js
-up.on('up:fragment:loaded', function(event) {
-  // Don't insert fresh content if the user has started a video
-  // after the stale content was rendered.
-  if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
-    // Finish the render pass with no changes.
-    event.skip()
-  }
-})
-```
+  ```js
+  up.on('up:fragment:loaded', async function(event) {
+    if (event.response.headers['X-User-Created']) {
+      // If we see an X-User-Created header, abort the rendering pass
+      event.preventDefault()
+
+      // Show an alert instead
+      alert('The user was created successfully')
+    }
+  })
+  ```
 
 See `up:fragment:loaded` for more examples.
+
+
+### Global skipping rules
+
+To configure global rules for responses that should not be rendered, you may
+also set `up.fragment.config.skipResponse`.
+
+By default Unpoly skips the following responses:
+
+- Responses without text in their body.
+  Such responses occur when a [conditional request](#conditional-requests)
+  in answered with HTTP status `304 Not Modified` or `204 No Content`.
+- When [revalidating](/caching#revalidation), if the expired response and fresh response
+  have the exact same text.
+
 
 
 ## Partially rendering a response
@@ -193,12 +210,32 @@ See `up:fragment:loaded` for more examples.
 The response may include a full HTML document, but only the [targeted fragment](/targeting-fragments)
 will be updated on the page. Other elements from the response will be discarded.
 
-Within the targeted fragment, child elements may elect to not be re-rendered using the `[up-keep]` attribute.
+An `up:fragment:loaded` listener may mutate `event.renderOptions.target` to render a different selector.
 
 
-## Preventing an entire render pass
+### Preserving elements in a targeted fragment
 
-You can [prevent or interrupt](/render-hooks#preventing-a-render-pass) a render pass by calling `event.preventDefault()` on an event like `up:link:follow` or `up:form:submit`.
+Even when elements are re-rendered from identical HTML, they may lose client-side state.
+
+To preserve individual elements within the targeted fragment, set an `[up-keep]` attribute.
+A common use case it to preserve playback state in media elements:
+
+```html
+<article>
+  <p>Content</p>
+  <audio id="player" up-keep src="song.mp3"></audio>
+</article>
+```
+
+When [targeting](/targeting-fragments) the `<article>` fragment, the `<audio>` element and
+its playback state will be the same before and after the update. All other elements (like the `<p>`)
+will be updated with new content.
+
+
+## Preventing a render pass before it starts
+
+You can [prevent or interrupt](/render-hooks#preventing-a-render-pass) a render pass before it requests content
+by calling `event.preventDefault()` on an event like `up:link:follow` or `up:form:submit`.
 
 
 @page skipping-rendering

@@ -1,26 +1,15 @@
-const PRESERVE_KEYS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
+up.FocusCapsule = class FocusCapsule {
 
-function transferProps(from, to) {
-  for (let key of PRESERVE_KEYS) {
-    try {
-      to[key] = from[key]
-    } catch (error) {
-      // Safari throws a TypeError when accessing { selectionStart }
-      // from a focused <input type="submit">. We ignore it.
-    }
-  }
-}
-
-up.FocusCapsule = class FocusCapsule extends up.Record {
-  keys() {
-    return PRESERVE_KEYS.concat(['target'])
+  constructor(target, cursorProps) {
+    this.target = target
+    this.cursorProps = cursorProps
   }
 
   restore(layer, options) {
     let rediscoveredElement = up.fragment.get(this.target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
-      transferProps(this, rediscoveredElement)
+      up.viewport.copyCursorProps(this.cursorProps, rediscoveredElement)
       up.focus(rediscoveredElement, options)
 
       // Signals callers that we could restore.
@@ -38,10 +27,8 @@ up.FocusCapsule = class FocusCapsule extends up.Record {
     let target = up.fragment.tryToTarget(focusedElement)
     if (!target) return
 
-    const plan = { target }
-    transferProps(focusedElement, plan)
-
-    return new this(plan)
+    const cursorProps = up.viewport.copyCursorProps(focusedElement)
+    return new this(target, cursorProps)
   }
 
 }

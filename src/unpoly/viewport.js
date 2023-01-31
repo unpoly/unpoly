@@ -893,6 +893,20 @@ up.viewport = (function() {
     }
   }
 
+  const CURSOR_PROPS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
+
+  function copyCursorProps(from, to = {}) {
+    for (let key of CURSOR_PROPS) {
+      try {
+        to[key] = from[key]
+      } catch (error) {
+        // Safari throws a TypeError when accessing { selectionStart }
+        // from a focused <input type="submit">. We ignore it.
+      }
+    }
+    return to
+  }
+
   let userScrolled = false
   up.on('scroll', { once: true, beforeBoot: true }, () => userScrolled = true)
 
@@ -942,9 +956,9 @@ up.viewport = (function() {
     absolutize,
     focus: doFocus,
     tryFocus,
-    makeFocusable,
     newStateCache,
     focusedElementWithin,
+    copyCursorProps
   }
 })()
 
