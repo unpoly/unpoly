@@ -87,12 +87,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- Remove target selector in [up-keep]
-  - We're matching elements by derived target should be sufficient
-  - Complicated matching/preventing can be done in [up-on-keep]
-  - up.migrate can actually set the [up-on-keep] handler, if it does not exist
-  - Fix example in /up-keep#controlling-if-an-element-will-be-kept
-
 
 Docs
 ----
