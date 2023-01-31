@@ -166,7 +166,7 @@ up.fragment = (function() {
     - When [revalidating](/caching#revalidation), if the expired response and fresh response
       have the exact same text.
 
-    You may also skip responses by registering an `up:fragment:loaded` listener.
+    You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
 
     @experimental
 
@@ -957,40 +957,31 @@ up.fragment = (function() {
   })
   ```
 
-  ### Example: Ignoring a revalidation response
+  ### Example: Discarding a revalidation response
 
   When rendering [cached](/caching) content that is too old, Unpoly automatically reloads the fragment
   to ensure that the user never sees expired content. This process is called [cache revalidation](/caching#revalidation).
 
   To prevent the insertion of [revalidated](/caching#revalidation) content *after* the
-  server responded you may prevent the `up:fragment:loaded` event with an `{ revalidating: true }` property:
+  server responded you may prevent the `up:fragment:loaded` event with an `{ revalidating: true }` property.
+
+  The following would skip rendering a validation response if it has the same `X-Version` header as
+  the original, stale response:
 
   ```js
   up.on('up:fragment:loaded', function(event) {
-    // Don't insert fresh content if the user has started a video
-    // after the stale content was rendered.
-    if (event.revalidating && event.request.fragment.querySelector('video')?.playing) {
-      // Finish the render pass with no changes.
-      event.skip()
+    // Don't render revalidation responses that only differ in whitespace
+    if (event.revalidating) {
+      let newVersion = event.response.getHeader('X-Version')
+      let oldVersion = event.expiredResponse.getHeader('X-Version')
+      if (newVersion === oldVersion) {
+        event.skip()
+      }
     }
   })
   ```
 
-  You may also compare the server response with the expired response that we're revalidating:
-
-   ```js
-   up.on('up:fragment:loaded', function(event) {
-      // Don't re-render revalidation responses that only differ in whitespace
-      if (event.revalidating && event.response.text.trim() === event.expiredResponse.text.trim()) {
-        event.skip()
-      }
-   })
-   ```
-
-
-
-
-  Also see [skipping rendering](/skipping-rendering) and `up.fragment.config.skipResponse`.
+  Also see [skipping unnecessary rendering](/skipping-rendering).
 
   @event up:fragment:loaded
 
@@ -1004,6 +995,9 @@ up.fragment = (function() {
     ususually to [not re-insert identical content](/skipping-rendering).
 
     Programmatic callers will fulfill with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
+
+    To configure global rules for responses that should be skipped, you may
+    also use `up.fragment.config.skipResponse` instead of registering an `up:fragment:oaded` listener.
 
     @experimental
 
@@ -1073,20 +1067,25 @@ up.fragment = (function() {
   Elements with an `[up-keep]` attribute will be persisted during
   [fragment updates](/up.fragment).
 
-  The element you're keeping should have an umambiguous class name, ID or `[up-id]`
-  attribute so Unpoly can find its new position within the page update.
+  The element you're keeping must have a [derivable target selector](/target-derivation).
+  so Unpoly can find its new position within the page update.
 
   Emits the [`up:fragment:keep`](/up:fragment:keep) event.
 
   ### Example
 
-  The following `<audio>` element will be persisted through fragment
-  updates as long as the responses contain an element matching `#player`:
-
+  A common use case is to preserve the playback state of media elements:
 
   ```html
-  <audio id="player" up-keep src="song.mp3"></audio>
+  <article>
+    <p>Content</p>
+    <audio id="player" up-keep src="song.mp3"></audio>
+  </article>
   ```
+
+  When [targeting](/targeting-fragments) the `<article>` fragment, the `<audio>` element and
+  its playback state will be the same before and after the update. All other elements (like the `<p>`)
+  will be updated with new content.
 
   ### Controlling if an element will be kept
 
@@ -1124,6 +1123,14 @@ up.fragment = (function() {
 
   Now, if a response no longer contains an `<audio src="song.mp3">` tag, the existing
   element will be destroyed and replaced by a fragment from the response.
+
+  ### Limitations
+
+  - The `[up-keep]` attribute is only supported for elements within the `<body>`.
+  - If an `<audio up-keep>` or `<video up-keep>` element is a *direct* child of the `<body>`,
+    it will lose its playback state during a fragment update. To preserve its playback
+    state, insert a container element between the `<body>` and the media element.
+
 
   @selector [up-keep]
   @param [up-keep]

@@ -172,7 +172,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         } else {
           // This needs to happen before up.syntax.clean() below.
           // Otherwise we would run destructors for elements we want to keep.
-          this.transferKeepableElements(step)
+          this.preserveKeepables(step)
+
+          // TODO: Don't suppport [up-keep] for direct children of <body>
 
           const parent = step.oldElement.parentNode
 
@@ -184,7 +186,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             afterInsert: () => {
               this.responseDoc.finalizeElement(step.newElement)
 
-              step.keepPlans.forEach(this.reviveKeepable)
+              // step.keepPlans.forEach(this.reviveKeepable)
+              this.restoreKeepables(step)
 
               // In the case of [up-keep] descendants, keepable elements are now transferred
               // to step.newElement, leaving a clone in their old DOM Position.
@@ -327,24 +330,34 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
   // element in newElement and leave a visually identical clone in oldElement for a later transition.
   // Returns an array of keepPlans.
-  transferKeepableElements(step) {
+  preserveKeepables(step) {
     const keepPlans = []
     if (this.useKeep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
         let keepPlan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
-          // plan.oldElement is now keepable
-          this.hibernateKeepable(keepPlan)
-
-          // Replace keepable with its clone so it looks good in a transition between
-          // oldElement and newElement. Note that keepable will still point to the same element
-          // after the replacement, which is now detached.
+          // Replace keepable with its clone so it looks good in a transition
+          // between oldElement and newElement.
           const keepableClone = keepable.cloneNode(true)
-          keepable.replaceWith(keepableClone)
+          keepable.insertAdjacentElement('beforebegin', keepableClone)
 
-          // Since we're going to swap the entire oldElement and newElement containers afterwards,
-          // replace the matching element with keepable so it will eventually return to the DOM.
-          keepPlan.newElement.replaceWith(keepable)
+          // Attaching a viewport to another element will cause it to loose
+          // its scroll position, even if both parents are in the same document.
+          let viewports = up.viewport.subtree(keepPlan.oldElement)
+          keepPlan.revivers = viewports.map(function(viewport) {
+            let cursorProps = up.viewport.copyCursorProps(viewport)
+            return () => up.viewport.copyCursorProps(cursorProps, viewport)
+          })
+
+          // If keepable is a media element, detaching it (or attaching it to another document) would cause it
+          // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
+          // so it can remain attached while we swap fragment versions. We will move it to its place within
+          // the new fragment version once the swap is complete.
+          document.body.append(keepable)
+
+          // // Since we're going to swap the entire oldElement and newElement containers afterwards,
+          // // replace the matching element with keepable so it will eventually return to the DOM.
+          // keepPlan.newElement.replaceWith(keepable)
           keepPlans.push(keepPlan)
         }
       }
@@ -353,17 +366,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     step.keepPlans = keepPlans
   }
 
-  hibernateKeepable(keepPlan) {
-    let viewports = up.viewport.subtree(keepPlan.oldElement)
-    keepPlan.revivers = viewports.map(function(viewport) {
-      let { scrollTop, scrollLeft } = viewport
-      return () => Object.assign(viewport, { scrollTop, scrollLeft })
-    })
-  }
+  restoreKeepables(step) {
+    for (let keepPlan of step.keepPlans) {
+      keepPlan.newElement.replaceWith(keepPlan.oldElement)
 
-  reviveKeepable(keepPlan) {
-    for (let reviver of keepPlan.revivers) {
-      reviver()
+      for (let reviver of keepPlan.revivers) {
+        reviver()
+      }
     }
   }
 

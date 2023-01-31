@@ -19,6 +19,7 @@ Changes tracked until 2023-01-09.
 
 ### Unsorted
 
+- [up-keep] preserves playback state
 - up:fragment:loaded gets #skip()
 - up.fragment.config.skipResponses
 - When revalidation, not inserting equal responses

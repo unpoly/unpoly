@@ -6093,6 +6093,42 @@ describe 'up.fragment', ->
           expect(viewport).toBeAttached()
           expect(viewport.scrollTop).toBe(100)
 
+        it 'preserves the playback state of a kept media element', (done) ->
+          container = fixture('.container')
+          playerHTML = """
+            <div id="player">
+              <video width="400" controls loop muted up-keep id="video">
+                <source src="/spec/files/video.mp4" type="video/mp4">
+              </video>
+            </div>
+          """
+
+          container.innerHTML = playerHTML
+          video = container.querySelector('video')
+
+          onPlaying = ->
+            expect(video.paused).toBe(false)
+
+            # Playback state is only lost when the update is form a URL (== async?),
+            # not when updating from a local string (which is sync).
+            up.render(target: '#player', url: '/video2')
+
+            u.task ->
+              jasmine.respondWith(playerHTML)
+
+              u.task ->
+                expect(video).toBeAttached()
+                expect(video.paused).toBe(false)
+                expect(document.querySelectorAll('video').length).toBe(1)
+                video.addEventListener('timeupdate', done, { once: true })
+
+          expect(video.paused).toBe(true)
+
+          # We're waiting for a timeupdate event in addition to checking !video.paused
+          # since an unpaused video may not actually be playing.
+          video.addEventListener('timeupdate', onPlaying, { once: true })
+          video.play()
+
         describe 'if an [up-keep] element is itself a direct replacement target', ->
 
           it "keeps that element", asyncSpec (next) ->

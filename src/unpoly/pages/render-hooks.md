@@ -161,7 +161,7 @@ The most important preventable events are:
 > [TIP]
 > The last preventable event is `up:fragment:loaded`. It is emitted after a response is loaded but before any elements were changed.
 
-Also see [Skipping unnecessary rendering](/skipping-rendering).
+Also see [skipping unnecessary rendering](/skipping-rendering).
 
 
 Changing options before rendering

@@ -104,7 +104,7 @@ up.protocol = (function() {
 
   The server may send an `X-Up-Target: :none` response header with an empty body to skip the current render pass.
 
-  Also see [Skipping rendering](/skipping-rendering).
+  Also see [skipping unnecessary rendering](/skipping-rendering).
 
   @header X-Up-Target
   @stable
