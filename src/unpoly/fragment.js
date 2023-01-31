@@ -1073,15 +1073,22 @@ up.fragment = (function() {
   Elements with an `[up-keep]` attribute will be persisted during
   [fragment updates](/up.fragment).
 
-  The element you're keeping should have an umambiguous class name, ID or `[up-id]`
-  attribute so Unpoly can find its new position within the page update.
+  Common use cases for `[up-keep]` include:
+
+  - Elements that are expensive to [initialize](/up.compiler).
+  - Media elements (`<video>`, `<audio>`) that should retain their playback state during updates.
+  - Other elements with client-side state that is difficult to express in a URL or [data object](/data).
+
+  The element must have a [derivable target selector](/target-derivation)
+  so Unpoly can find its position within new content.
 
   Emits the [`up:fragment:keep`](/up:fragment:keep) event.
 
   ### Example
 
   The following `<audio>` element will be persisted through fragment
-  updates as long as the responses contain an element matching `#player`:
+  updates as long as the responses contain an element matching the
+  [target selector](/targeting-fragments) `#player`:
 
 
   ```html
@@ -1096,7 +1103,9 @@ up.fragment = (function() {
   - The response contains an element matching the [derived target](/target-derivation) of the existing element
   - The matching element *also* has an `[up-keep]` attribute
   - The [`up:fragment:keep`](/up:fragment:keep) event that is [emitted](/up.emit) on the existing element
-  is not prevented by a event listener.
+    is not prevented.
+  - The [`up:fragment:keep`](/up:fragment:keep) event that is passed to an [`[up-on-keep]`](#up-on-keep)
+    callback on the existing element is not prevented.
 
   Let's say we want only keep an `<audio>` element as long as it plays
   the same song (as identified by the tag's `src` attribute).
@@ -1105,32 +1114,54 @@ up.fragment = (function() {
   and preventing it if the `src` attribute of the old and new element differ:
 
   ```js
-  up.compiler('audio', function(element) {
-    element.addEventListener('up:fragment:keep', function(event) {
-      if element.getAttribute('src') !== event.newElement.getAttribute('src') {
-        event.preventDefault()
-      }
-    })
+  up.on('up:fragment:keep', 'audio', function(event) {
+    if element.getAttribute('src') !== event.newElement.getAttribute('src') {
+      event.preventDefault()
+    }
   })
   ```
 
-  If we don't want to solve this on the client, we can achieve the same effect
-  on the server. By setting the value of the `[up-keep]` attribute we can
-  define the CSS selector used for matching elements.
+  ### Updating data for kept elements
+
+  Even when keeping elements, you may reconcile its [data object](/data) with the data
+  from the new element that was discarded.
+
+  Let's say you want to display a map within an element. The center of the map
+  is encoded using an `[up-data]` attribute:
 
   ```html
-  <audio up-keep="audio[src='song.mp3']" src="song.mp3"></audio>
+  <div id='map' up-keep up-data='{ "lat": 50.86, "lng": 7.40 }'></div>
   ```
 
-  Now, if a response no longer contains an `<audio src="song.mp3">` tag, the existing
-  element will be destroyed and replaced by a fragment from the response.
+  We can initialize the map using a [compiler](/up.compiler) like this:
+
+  ```js
+  up.compiler('#map', function(element, data) {
+    var map = new google.maps.Map(element)
+    map.setCenter(data)
+  })
+  ```
+
+  While we want to preserve the map during page loads, we *do* want to pick up
+  a new center coordinate when the containing fragment is updated. We can do so by
+  listening to an `up:fragment:keep` event and observing `event.newData`:
+
+  ```js
+  up.compiler('#map', function(element, data) {
+    var map = new google.maps.Map(element)
+    map.setCenter(data)
+
+    map.addEventListener('up:fragment:keep', function(event) { // mark-line
+      map.setCenter(event.newData) // mark-line
+    }) // mark-line
+  })
+  ```
+
+  > [TIP]
+  > Instead of keeping an element and update its data you may also
+  > [preserve an element's data through reloads](/data#preserving-data-through-reloads).
 
   @selector [up-keep]
-  @param [up-keep]
-    The [target selector](/targeting-fragments) used to find a matching element in the new content.
-
-    If omitted a target [derived](/target-derivation) from this element will be used.
-
   @param [up-on-keep]
     Code to run before an existing element is kept during a page update.
 
@@ -1138,6 +1169,7 @@ up.fragment = (function() {
     `this` (the old fragment), `newFragment` and `newData`.
 
     Calling `event.preventDefault()` will prevent the element from being kept.
+    It will then be swapped with `newFragment`.
   @stable
   */
 

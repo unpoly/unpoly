@@ -19,6 +19,8 @@ Changes tracked until 2023-01-09.
 
 ### Unsorted
 
+- [up-keep] with selector is no longer supported
+- e.booleanAttr for some string returns true, not undefined
 - up:fragment:loaded gets #skip()
 - up.fragment.config.skipResponses
 - When revalidation, not inserting equal responses

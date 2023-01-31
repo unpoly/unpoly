@@ -770,11 +770,19 @@ describe 'up.element', ->
       element = up.element.createFromHTML('<div></div>')
       expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
 
-    it 'returns undefined if the attribute value cannot be cast to a boolean', ->
+    it 'returns true if the attribute value is an unknown string', ->
       element = up.element.createFromHTML('<div foo="some text"></div>')
-      expect(up.element.booleanAttr(element, 'foo')).toBeUndefined()
+      expect(up.element.booleanAttr(element, 'foo')).toBe(true)
+
+    it 'returns the raw attribute value is it is an unknown string and the third `pass` argument is true', ->
+      element = up.element.createFromHTML('<div foo="some text"></div>')
+      expect(up.element.booleanAttr(element, 'foo', true)).toBe('some text')
 
   describe 'up.element.booleanOrStringAttr', ->
+
+    it 'returns true if the attribute value is empty', ->
+      element = up.element.createFromHTML('<div foo></div>')
+      expect(up.element.booleanOrStringAttr(element, 'foo')).toBe(true)
 
     it 'returns true if the attribute value is the string "true"', ->
       element = up.element.createFromHTML('<div foo="true"></div>')

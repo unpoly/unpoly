@@ -6181,6 +6181,38 @@ describe 'up.fragment', ->
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
 
+        it "updates an element if a matching element is found in the response, but that other element has [up-keep=false]", asyncSpec (next) ->
+          barCompiler = jasmine.createSpy()
+          barDestructor = jasmine.createSpy()
+          up.$compiler '.bar', ($bar) ->
+            text = $bar.text()
+            barCompiler(text)
+            return -> barDestructor(text)
+
+          $container = $fixture('.container')
+          $container.html """
+            <div class='foo'>old-foo</div>
+            <div class='bar' up-keep>old-bar</div>
+            """
+          up.hello($container)
+
+          expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
+          expect(barDestructor.calls.allArgs()).toEqual []
+
+          up.render fragment: """
+            <div class='container'>
+              <div class='foo'>new-foo</div>
+              <div class='bar' up-keep='false'>new-bar</div>
+            </div>
+            """
+
+          next =>
+            expect($('.container .foo')).toHaveText('new-foo')
+            expect($('.container .bar')).toHaveText('new-bar')
+
+            expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
+            expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
+
         it 'moves a kept element to the ancestry position of the matching element in the response', asyncSpec (next) ->
           $container = $fixture('.container')
           $container.html """
@@ -6204,19 +6236,36 @@ describe 'up.fragment', ->
             expect($('.keeper')).toHaveText('old-inside')
             expect($('.keeper').parent()).toEqual($('.parent2'))
 
-        it 'lets developers choose a selector to match against as the value of the up-keep attribute', asyncSpec (next) ->
-          $container = $fixture('.container')
-          $container.html """
-            <div class="keeper" up-keep=".stayer"></div>
-            """
-          up.render fragment: """
-            <div class='container'>
-              <div up-keep class="stayer"></div>
-            </div>
-            """
+        - if up.migrate.loaded
+          it 'lets developers choose a selector to match against as the value of the [up-keep] attribute', ->
+            container = fixture('.container')
 
-          next =>
-            expect('.keeper').toBeAttached()
+            container.innerHTML = """
+              <audio id='player' src='foo.mp3' up-keep='[src="foo.mp3"]' data-tag='1'></audio>
+              """
+
+            up.hello(container)
+
+            expect(document.querySelector('#player').src).toMatchURL('foo.mp3')
+            expect(document.querySelector('#player').dataset.tag).toBe('1')
+
+            up.render fragment: """
+              <div class='container'>
+                <audio id='player' src='bar.mp3' up-keep='[src="bar.mp3"]' data-tag='2'></audio>
+              </div>
+              """
+
+            expect(document.querySelector('#player').src).toMatchURL('bar.mp3')
+            expect(document.querySelector('#player').dataset.tag).toBe('2')
+
+            up.render fragment: """
+              <div class='container'>
+                <audio id='player' src='bar.mp3' up-keep='[src="bar.mp3"]' data-tag='3'></audio>
+              </div>
+              """
+
+            expect(document.querySelector('#player').src).toMatchURL('bar.mp3')
+            expect(document.querySelector('#player').dataset.tag).toBe('2')
 
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')

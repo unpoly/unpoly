@@ -286,40 +286,33 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     const { oldElement, newElement } = options
 
-    // We support these attribute forms:
-    //
-    // - up-keep             => match element itself
-    // - up-keep="true"      => match element itself
-    // - up-keep="false"     => don't keep
-    // - up-keep=".selector" => match .selector
-    let partnerSelector = e.booleanOrStringAttr(oldElement, 'up-keep')
-    if (partnerSelector) {
-      if (partnerSelector === true) {
-        partnerSelector = ':origin'
+    let doKeep = e.booleanAttr(oldElement, 'up-keep')
+    // Early return if [up-keep=false]
+    if (!doKeep) { return }
+
+    let partner
+    let partnerSelector = up.fragment.toTarget(oldElement)
+    const lookupOpts = { layer: this.layer }
+
+    if (options.descendantsOnly) {
+      // Since newElement is from a freshly parsed HTML document, we could use
+      // up.element functions to match the selector. However, since we also want
+      // to use custom selectors like ":main" or "&" we use up.fragment.get().
+      partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
+    } else {
+      partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
+    }
+
+    // The partner must be matched, must be [up-keep], but not [up-keep=false]
+    if (partner && e.booleanAttr(partner, 'up-keep')) {
+      const plan = {
+        oldElement, // the element that should be kept
+        newElement: partner, // the element that would have replaced it but now does not
+        newData: up.syntax.data(partner) // the parsed up-data attribute of the element we will discard
       }
 
-      const lookupOpts = { layer: this.layer, origin: oldElement }
-
-      let partner
-      if (options.descendantsOnly) {
-        // Since newElement is from a freshly parsed HTML document, we could use
-        // up.element functions to match the selector. However, since we also want
-        // to use custom selectors like ":main" or "&" we use up.fragment.get().
-        partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
-      } else {
-        partner = up.fragment.subtree(newElement, partnerSelector, lookupOpts)[0]
-      }
-
-      if (partner && partner.matches('[up-keep]')) {
-        const plan = {
-          oldElement, // the element that should be kept
-          newElement: partner, // the element that would have replaced it but now does not
-          newData: up.syntax.data(partner) // the parsed up-data attribute of the element we will discard
-        }
-
-        if (!up.fragment.emitKeep(plan).defaultPrevented) {
-          return plan
-        }
+      if (!up.fragment.emitKeep(plan).defaultPrevented) {
+        return plan
       }
     }
   }

@@ -906,7 +906,7 @@ up.element = (function() {
   | `<div foo="">`      | `true`       |
   | `<div foo="false">` | `false`      |
   | `<div>`             | `undefined`  |
-  | `<div foo="bar">`   | `undefined`  |
+  | `<div foo="bar">`   | `true`       |
 
   @function up.element.booleanAttr
   @param {Element} element
@@ -918,6 +918,8 @@ up.element = (function() {
   @stable
   */
   function booleanAttr(element, attribute, pass) {
+    if (!element.hasAttribute(attribute)) return
+
     const value = stringAttr(element, attribute)
     switch (value) {
       case 'false': {
@@ -931,6 +933,8 @@ up.element = (function() {
       default: {
         if (pass) {
           return value
+        } else {
+          return true
         }
       }
     }
