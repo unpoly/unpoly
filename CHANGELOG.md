@@ -59,14 +59,13 @@ Unpoly 3 addresses many concurrency issues that occur in real-world production u
 - Setting the value of `[up-keep]` to a selector for matching new content is no longer supported
 
 
-### Layers
+### Layers (DONE)
 
 - Listeners to `up:layer:accept` may modify the layer's acceptance value by setting or mutating `event.value`.
 - Listeners to `up:layer:dismiss` may modify the layer's dismissal value by setting or mutating `event.value`.
 - Fix a bug where `up.fragment.get(selector, { layer: 0 })` would always match in the current layer instead of the root layer.
 
-
-#### Foreign overlays
+#### Foreign overlays (DONE)
 
 The [overlays](https://unpoly.com/up.layer) of Unpoly 2 would sometimes clash with overlays from a third party library ("foreign overlay").
 E.g. clicking a foreign overlay would closes an Unpoly overlay, or Unpoly would steal focus from a foreign overlay.
@@ -484,7 +483,7 @@ derivation has been reworked to be more strict in Unpoly 3:
 - The `up.network.isIdle()` function has been deprecated. Use `!up.network.isBusy()` instead.
 - The events `up:request:late` and `up:request:recover` were renamed to `up:network:late` and `up:network:recover` respectively. We may eventually re-introduce `up:request:late` and `up:request:recover` to support tracking individual requests (but not now).
 
-#### Detect failure when server sends wrong HTTP status (TODO)
+#### Detect failure when server sends wrong HTTP status (DONE)
 
 Unpoly requires servers to send an HTTP error code to signal failure. E.g. an invalid form should render with HTTP 400 (Bad Request).
 Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is not always easy to fix, e.g. when screens are rendered by libraries outside your control. Unpoly 3 addresses this with the following changes:
@@ -493,7 +492,7 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - You may use `up.network.config.fail` to configure a global rule for when a response is considered to have failed.
 
 
-### Migration polyfills
+### Migration polyfills (DONE)
 
 - When [`unpoly-migrate.js`](/changes/upgrading) migrates a renamed attribute, the old attribute is now removed
 - Fix a up where `unpoly-migrate.js` would not rewrite the deprecated `{ reveal }` option when navigating.
@@ -505,7 +504,7 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - All error thrown by Unpoly now inherit from `up.Error`.
 
 
-### Unpoly 2 maintenance is ending
+### Unpoly 2 maintenance is ending (DONE)
 
 - With the release of Unpoly we're ending maintenance of Unpoly 2. Expect little to no changes to Unpoly 2 in the future.
 - GitHub issues that have been fixed in Unpoly 3 will be closed.
