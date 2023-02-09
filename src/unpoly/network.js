@@ -114,6 +114,7 @@ up.network = (function() {
 
     The value is given in milliseconds.
 
+    @experimental
   @param {number|undefined} [config.timeout=90_000]
     A default [timeout](/up.request#options.timeout) for [requests](/up.request) in milliseconds.
 
