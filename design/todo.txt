@@ -90,6 +90,7 @@ Various changes
 ---------------
 
 - We do not need to reset log colors with %c = ''
+- Check if up.watch() still accepts a jquery collection (of a single element)
 
 
 Docs
