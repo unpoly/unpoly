@@ -38,13 +38,17 @@ module Unpoly
         end
       end
 
-      FILE_GLOBS = %w[
-        package.json
-        unpoly*.js
-        unpoly*.css
-        README.md
-        CHANGELOG.md
-        LICENSE
+      FILE_GLOBS = [
+        'package.json',
+        'unpoly{.js,.min.js}',
+        'unpoly.es6{.js,.min.js}',
+        'unpoly{.css,.min.css}',
+        'unpoly-migrate{.js,.min.js}',
+        'unpoly-bootstrap{3,4,5}{.js,.min.js}',
+        'unpoly-bootstrap{3,4,5}{.css,.min.css}',
+        'README.md',
+        'CHANGELOG.md',
+        'LICENSE',
       ]
 
       def paths
