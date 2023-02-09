@@ -55,11 +55,23 @@ module Unpoly
         FILE_GLOBS.flat_map { |glob| Dir.glob("dist/#{glob}") }
       end
 
+      def orphaned_paths
+        Dir.glob("dist/unpoly*{.css,.js}") - paths
+      end
+
     end
   end
 end
 
 namespace :release do
+
+  desc 'Clean build files from another major version'
+  task :clean do
+    Unpoly::Release.orphaned_paths.each do |path|
+      puts "Cleaning orphaned file: #{path}"
+      File.delete(path)
+    end
+  end
 
   desc 'Make a fresh production build'
   task :build do
@@ -135,7 +147,7 @@ namespace :release do
   end
 
   desc 'Build artifacts, confirm with user and release to npm'
-  task :process => [:build, :confirm, :push_tag, :publish_to_npm, :remind_to_update_site] do
+  task :process => [:clean, :build, :confirm, :push_tag, :publish_to_npm, :remind_to_update_site] do
   end
 
 end
