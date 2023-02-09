@@ -42,6 +42,20 @@ up.migrate = (function() {
     })
   }
 
+  function removedProperty(object, key) {
+    const warning = () => warn('Property { %s } has been removed without replacement (found in %o)', key, object)
+    Object.defineProperty(object, key, {
+      get() {
+        warning()
+        return this[key]
+      },
+      set(newValue) {
+        warning()
+        this[key] = newValue
+      }
+    })
+  }
+
   function renamedAttribute(oldAttr, newAttr, { scope, mapValue } = {}) {
     // Scope may be a selector string OR a function
     let selector = scope || `[${oldAttr}]`
@@ -148,6 +162,7 @@ up.migrate = (function() {
     deprecated,
     renamedPackage,
     renamedProperty,
+    removedProperty,
     renamedAttribute,
     formerlyAsync,
     renamedEvent,

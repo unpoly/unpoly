@@ -6,6 +6,7 @@ up.migrate.renamedPackage('layout', 'viewport')
 
 up.migrate.renamedProperty(up.viewport.config, 'viewports', 'viewportSelectors')
 up.migrate.renamedProperty(up.viewport.config, 'snap', 'revealSnap')
+up.migrate.removedProperty(up.viewport.config, 'scrollSpeed')
 
 /*-
 Returns the scrolling container for the given element.
