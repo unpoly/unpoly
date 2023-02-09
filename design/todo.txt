@@ -78,6 +78,8 @@ TODOs after V3
 - Matching in the vicinity of ancestors should use subtree, not just descendants of the ancestor
   - In a form we should always be able to say form:has(:origin) .descendant, even if the origin turns out to be the form itself
     - But :has() does not work like that?
+- [up-on-accepted-reload], { onAcceptedReload }
+- [up-on-accepted-validate], { onAcceptedValidate } (aber hier brauche ich immer einen param)
 
 
 TODOs for V3
@@ -86,6 +88,8 @@ TODOs for V3
 
 Various changes
 ---------------
+
+- We do not need to reset log colors with %c = ''
 
 
 Docs
@@ -96,6 +100,7 @@ Docs
 - Finish the CHANGELOG so we can publish v3-pre
 - Consider removing all tagnames from public selectors
 - Explain that [up-on-keep] is here for custom keep/swap decisions
+- Check if the index links to doc pages preferrably
 
 
 ### Other docs
@@ -110,6 +115,18 @@ Docs
 
 ### Ideas for new topic pages
 
+- How history is updated
+  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
+  - History in overlays
+    - Always know their location, even if it might not be visible
+    - Explain that your should always render full pages
+  - History restoration / Back button
+    - This is currently documented in up:location:restore
+    - Will collapse layers
+      - Pages should work in both
+      - Subnavigations make it easy
+      - You can disable layer history
+    - Customize restoration behavior
 - Preloading
   - (Currently sitting in a[up-preload])
   - On Hover
@@ -126,17 +143,6 @@ Docs
     - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
   - Explain that you can often override renderOptions in event handlers
     - This is already explained in /render-hooks
-- How history is updated
-  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
-  - History in overlays
-    - Always know their location, even if it might not be visible
-    - Explain that your should always render full pages
-  - History restoration / Back button
-    - Will collapse layers
-      - Pages should work in both
-      - Subnavigations make it easy
-      - You can disable layer history
-    - Customize restoration behavior
 - Rendering from strings
   - { document }
   - { fragment }
