@@ -6923,7 +6923,7 @@ describe 'up.fragment', ->
 
           up.compiler '.element', (element, data) ->
             dataSpy(data)
-            element.addEventListener 'click', up.reload(element, { data })
+            element.addEventListener 'click', -> up.reload(element, { data })
 
           element = fixture('.element', 'data-foo': 'a', 'up-source': '/source')
           up.hello(element)
@@ -6950,7 +6950,7 @@ describe 'up.fragment', ->
 
           up.compiler '.element', (element, data) ->
             dataSpy(data)
-            element.addEventListener 'click', up.reload(element, { keepData: true })
+            element.addEventListener 'click', -> up.reload(element, { keepData: true })
 
           element = fixture('.element', 'data-foo': 'a', 'up-source': '/source')
           up.hello(element)

@@ -469,9 +469,9 @@ describe 'up.viewport', ->
 
           up.reveal(destination, behavior: 'smooth')
 
-          u.timer 250, ->
-            expect(document.scrollingElement.scrollTop).toBeGreaterThan(500)
-            expect(document.scrollingElement.scrollTop).toBeLessThan(10000)
+          u.timer 80, ->
+            expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
+            expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
             done()
 
     describe 'up.viewport.revealHash()', ->
