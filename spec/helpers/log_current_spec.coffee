@@ -6,4 +6,4 @@ jasmine.getEnv().addReporter(
 beforeEach ->
   specName = jasmine.currentSpec.fullName
 
-  console.debug("%c#{specName}%c", 'color: white; background-color: #4477aa; padding: 3px 4px; border-radius: 2px; display: inline-block', '')
+  console.debug("%c#{specName}", 'color: white; background-color: #4477aa; padding: 3px 4px; border-radius: 2px; display: inline-block')
