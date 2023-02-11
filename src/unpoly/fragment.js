@@ -1105,7 +1105,7 @@ up.fragment = (function() {
   - The [`up:fragment:keep`](/up:fragment:keep) event that is passed to an [`[up-on-keep]`](#up-on-keep)
     callback on the existing element is not prevented.
 
-  Let's say we want only keep an `<audio>` element as long as it plays
+  Let's say we want only keep an `<audio up-keep>` element as long as it plays
   the same song (as identified by the tag's `src` attribute).
 
   On the client we can achieve this by listening to an `up:keep:fragment` event
@@ -1113,7 +1113,7 @@ up.fragment = (function() {
 
   ```js
   up.on('up:fragment:keep', 'audio', function(event) {
-    if element.getAttribute('src') !== event.newElement.getAttribute('src') {
+    if (element.getAttribute('src') !== event.newElement.getAttribute('src')) {
       event.preventDefault()
     }
   })
@@ -1186,6 +1186,22 @@ up.fragment = (function() {
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
   to prevent the element from being persisted. If the event is prevented, the element
   will be replaced by a fragment from the response.
+
+  ### Example
+
+  The following would only keep an `<audio up-keep>` element as long as it plays
+  the same song (as identified by the tag's `src` attribute):
+
+  ```js
+  up.on('up:fragment:keep', 'audio', function(event) {
+    if (element.getAttribute('src') !== event.newElement.getAttribute('src')) {
+      event.preventDefault()
+    }
+  })
+  ```
+
+  > [TIP]
+  > You may also define an `up:fragment:keep` listener in HTML using an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
 
   @event up:fragment:keep
   @param event.preventDefault()
