@@ -89,8 +89,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- We do not need to reset log colors with %c = ''
-- Check if up.watch() still accepts a jquery collection (of a single element)
 
 
 Docs
@@ -100,18 +98,11 @@ Docs
 
 - Finish the CHANGELOG so we can publish v3-pre
 - Consider removing all tagnames from public selectors
-- Explain that [up-on-keep] is here for custom keep/swap decisions
 - Check if the index links to doc pages preferrably
 
 
 ### Other docs
 
-- Go through v3 slides and see if
-  - we have missed anything
-  - can re-use illustrations
-  - need to fix things in the slides that have since changed
-    - idempotent up.hello() is new
-    - late compiler registrations are new
 
 
 ### Ideas for new topic pages
@@ -168,10 +159,6 @@ V3.pre launch
 V3 final Launch
 ---------------
 
-- Test with other browsers
-  - Firefox
-  - Edge
-  - Safari
 - Track CHANGELOG with changes done since the V3 presentation
   - Exclude changes we shipped as maintenance release 2.7.x
 - Fix deploy targets for 2.x-stable@unpoly-site
@@ -184,9 +171,6 @@ V3 final Launch
 - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
 - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
 - *Maybe* have a pre.unpoly.com
-- The README says "Unpoly 2"
-  - Needs to say Unpoly 3
-  - Needs to link to 2.x-stable branch
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
 - Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
@@ -459,3 +443,4 @@ Decisions
 - Consider [aria-haspopup]
   => This would require a compiler automatically setting this for [up-layer=new] links (and all shortcuts)
   => Don't do this for performance. Delegate to apps.
+- Should config.autoCache allow to cache error responses? => That's a hard question to answer
