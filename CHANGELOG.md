@@ -364,9 +364,9 @@ derivation has been reworked to be more strict in Unpoly 3:
 
 ### Dropped support for IE11 and legacy Edge ✔️
 
+- Unpoly 3 now supports [evergreen](https://stephenweiss.dev/evergreen-browsers) browsers (Chrome, Firefox, Edge) as well as last two major versions of Safari / Mobile Safari.
 - Unpoly 3 drops support for Internet Explorer 11 and [legacy Edge (EdgeHTML)](https://en.wikipedia.org/wiki/EdgeHTML).
-  - Unpoly 3 supports [evergreen](https://stephenweiss.dev/evergreen-browsers) browsers (Chrome, Firefox, Edge) as well as last two major versions of Safari / Mobile Safari.
-  - If you need to support IE11, use [Unpoly 2](https://v2.unpoly.com).
+  If you need to support IE11, use [Unpoly 2](https://v2.unpoly.com).
 - Unpoly no longer ships with an version transpiled down to ES5 (`unpoly.es5.js`). Instead there is now a ES6 version (`unpoly.es6.js`).
 
 
@@ -407,7 +407,6 @@ derivation has been reworked to be more strict in Unpoly 3:
   - To opt out of the focus saving,  `up.render({ saveFocus: false })`
   - Th explicitly *restore* focus for the current URL, use `up.viewport.restoreFocus()`.
   - To opt out of the focus restoration, use `up.render({ focus: false })`.
-    - up.viewport.restoreFocus()
 - When rendering without navigation or an explicit [focus strategy](/focus), Unpoly will now preserve focus by default.
 - Links with an `[up-instant]` attribute are now focused when being followed on `mousedown`. This is to mimic the behavior of standard links.
 - When a render pass results in no new content, the `{ focus }` option now is still processed.
@@ -420,12 +419,10 @@ derivation has been reworked to be more strict in Unpoly 3:
 - New function `up.form.submitButtons(form)` that returns a list of submit buttons in the given form.
 - New function `up.form.group(input)` that returns the form group (tuples of label, input, error, hint) for the given input element.
 - Replaced `[up-fieldset]` with `[up-form-group]`.
-- Replaced `up.form.config.validateTargets` with `up.form.config.groupSelectors`.
-  - Configured selectors must no longer contain a `:has(:origin)` suffix, as this is now added automatically when required.
+- Replaced `up.form.config.validateTargets` with `up.form.config.groupSelectors`. Configured selectors must no longer contain a `:has(:origin)` suffix, as this is now added automatically when required.
 - All functions with a `{ params }` option now also accept a `FormData` value.
-- The [up-show-for] and [up-hide-for] attributes now accept values with spacces (#78).
-  - Such values must be encoded as a JSON array, e.g. `<element up-show-for='["John Doe", "Jane Doe"]'>`
-- When submitting a form the `{ origin }` is now the element that triggered the submission
+- The [up-show-for] and [up-hide-for] attributes now accept values with spaces (#78). Such values must be encoded as a JSON array, e.g. `<element up-show-for='["John Doe", "Jane Doe"]'>`
+- When submitting a form the `{ origin }` is now the element that triggered the submission:
   - Submitting a form by pressing `Enter` within a focused field sets that field as the `{ origin }`.
   - Otherwise the used submit button is set as the `{ origin }`. 
   - When watching or validating a form field, the changed field is set as the `{ origin }`.
@@ -461,7 +458,7 @@ derivation has been reworked to be more strict in Unpoly 3:
 - You may now target the origin origin using `:origin`. The shorthand `&` has been removed.
 - When Unpoly uses the the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#resolving-ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefer matching new content closest to that.
 - Added a new property `up.RenderResult#fragment` which returns the first updated fragment.
-- The property `up.RenderResult#fragments` now now includes new fragments. It now excludes:
+- The property `up.RenderResult#fragments` now only contains newly rendered fragments. It will no longer contain:
   - [Kept](/up-keep) elements.
   - Existing fragments that got new content appended or prepended.
   - Existing fragments that had their inner HTML replaced (`{ content }`).
