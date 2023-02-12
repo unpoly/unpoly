@@ -98,6 +98,27 @@ Docs
 
 - Finish the CHANGELOG so we can publish v3-pre
 - Consider removing all tagnames from public selectors
+  - We already had to remove tag names of multiple-use attrs like [up-watch]
+  - current
+    - a[up-follow]
+    - a[up-instant]
+    - a[up-preload]
+    - form[up-submit]
+    - a[up-accept]
+    - a[up-dismiss]
+    - a[up-layer=new]
+    - a[up-transition]    \__
+    - form[up-transition] /
+    - a[up-alias]
+    - a.up-current
+    - a[up-emit]
+    - a[up-back]
+  - deprecated
+    - a[up-close]
+    - a[up-drawer]
+    - a[up-modal]
+    - a[up-popup]
+
 - Check if the index links to doc pages preferrably
 
 
