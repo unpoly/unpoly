@@ -1008,11 +1008,11 @@ up.fragment = (function() {
     The response received from the server.
 
   @param {boolean} event.revalidating
-     Whether the response contains fresh content for the purpose [cache revalidation](/cache#revalidation).
+     Whether the response contains fresh content for the purpose [cache revalidation](/caching#revalidation).
      @experimental
 
   @param {up.Response|undefined} event.expiredResponse
-     When [revalidating](/cache#revalidation), this property is set to the expired content
+     When [revalidating](/caching#revalidation), this property is set to the expired content
      that is being reloaded to ensure that the user never sees stale content.
 
      You may compare the `{ response }` and `{ expiredResponse }` properties to prevent
