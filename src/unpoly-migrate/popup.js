@@ -114,4 +114,16 @@ up.migrate.renamedEvent('up:popup:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:popup:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:popup:closed', 'up:layer:dismissed')
 
+/*-
+Clicking this link will load the destination via AJAX and open
+the given selector in a popup overlay.
+
+@selector a[up-popup]
+@params-note
+  All attributes for `a[up-layer=new]` may also be used.
+@param {string} up-popup
+  The CSS selector that will be extracted from the response and displayed in a popup overlay.
+@deprecated
+  Use `a[up-layer="new popup"]` instead.
+*/
 up.migrate.targetMacro('up-popup', { 'up-layer': 'new popup' }, () => up.migrate.deprecated('[up-popup]', '[up-layer="new popup"]'))
