@@ -80,23 +80,6 @@ TODOs after V3
     - But :has() does not work like that?
 - [up-on-accepted-reload], { onAcceptedReload }
 - [up-on-accepted-validate], { onAcceptedValidate } (aber hier brauche ich immer einen param)
-
-
-TODOs for V3
-============
-
-
-Various changes
----------------
-
-
-
-Docs
-----
-
-### General
-
-- Finish the CHANGELOG so we can publish v3-pre
 - Consider removing all tagnames from public selectors
   - We already had to remove tag names of multiple-use attrs like [up-watch]
   - current
@@ -119,11 +102,29 @@ Docs
     - a[up-modal]
     - a[up-popup]
 
-- Check if the index links to doc pages preferrably
 
+TODOs for V3
+============
+
+
+Various changes
+
+
+- Should up:layer:location:changed be emitted when the layer opens?
+
+
+
+Docs
+----
+
+### General
+
+- Finish the CHANGELOG so we can publish v3-pre
+- Check if the index links to doc pages preferrably
+- Events emitted through up.Layer#emit() must all have a { layer } prop documented
+  - e.g. up:layer:location:changed hasn't documented this
 
 ### Other docs
-
 
 
 ### Ideas for new topic pages
@@ -169,10 +170,11 @@ V3.pre launch
 - This would need a separate Algolia index, *or* disable full text search for pre.
   - We do we name things "latest" when we scope by version?
     - The Capistrano targets are called v1, v2, v3
-    - The Algolia indexes are called unpoly-site_v2, unpoly-site_v3
+    - The Algolia indexes are called unpoly-site_v2, unpoly-site_v3 or maybe even v2.unpoly.com, v3.unpoly.com
     - We keep the .htaccess saying v1*.unpoly.com is never indexed
     - At the day we launch v3, we only change the DNS
       - unpoly.com becomes a CNAME for v3.unpoly.com
+        => No, this needs to be changed in VHost
       - how do we get v3 to redirect to unpoly.com?
         - in the main branch .htaccess we redirect v??.unpoly.com to unpoly.com instead of enabling norobots
 
