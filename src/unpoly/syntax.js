@@ -120,7 +120,7 @@ up.syntax = (function() {
 
   ### Passing parameters to a compiler
 
-  See [attaching data to an element](/data).
+  See [attaching data to elements](/data).
 
   ### Registering compilers after booting
 
@@ -448,7 +448,6 @@ up.syntax = (function() {
   ### Recompiling elements
 
   It is safe to call `up.hello()` multiple times with the same elements.
-
   In particular every compiler function is guaranteed to only run once for each matching element.
 
   If a new compiler is registered after initial compilation,
@@ -590,7 +589,7 @@ up.syntax = (function() {
 
   ### Alternatives
 
-  See [attaching data to an element](/data).
+  See [attaching data to elements](/data).
 
   @selector [up-data]
   @param up-data

@@ -1,5 +1,5 @@
-Attaching data to an element
-============================
+Attaching data to elements
+==========================
 
 Unpoly lets you attach structured data to an element, to be consumed
 by a [compiler](/up.compiler) or [event handler](/up.on).
