@@ -620,6 +620,8 @@ up.layer = (function() {
 
   @param {string} event.location
     The new location URL.
+  @param {up.Layer} event.layer
+    The [layer object](/up.Layer) that had its location changed.
   @event up:layer:location:changed
   @experimental
   */

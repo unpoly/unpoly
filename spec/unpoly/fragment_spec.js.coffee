@@ -3015,7 +3015,7 @@ describe 'up.fragment', ->
                 up.render(target: '.target', location: '/new-url', content: 'new content', history: true)
 
               next ->
-                expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url' })
+                expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url', layer: up.layer.current })
 
             it 'is not emitted when the location did not change', asyncSpec (next) ->
               listener = jasmine.createSpy('event listener')
