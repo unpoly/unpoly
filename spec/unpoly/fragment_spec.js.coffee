@@ -3004,7 +3004,7 @@ describe 'up.fragment', ->
 
           describe 'up:layer:location:changed event', ->
 
-            it 'is emitted when the location changed', asyncSpec (next) ->
+            it 'is emitted when the location changed in the root layer', asyncSpec (next) ->
               history.replaceState?({}, 'original title', '/original-url')
               fixture('.target')
 
@@ -3017,25 +3017,7 @@ describe 'up.fragment', ->
               next ->
                 expect(listener.calls.argsFor(0)[0]).toBeEvent('up:layer:location:changed', { location: '/new-url', layer: up.layer.current })
 
-            it 'is not emitted when the location did not change', asyncSpec (next) ->
-              listener = jasmine.createSpy('event listener')
-              up.on('up:layer:location:changed', listener)
-
-              up.layer.open(target: '.target', location: '/original-layer-url', content: 'old overlay text')
-
-              next =>
-                expect(up.layer.isOverlay()).toBe(true)
-                expect(up.layer.location).toMatchURL('/original-layer-url')
-                expect(listener.calls.count()).toBe(1)
-
-              next ->
-                up.render(target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true)
-
-              next ->
-                expect(up.layer.current).toHaveText('new overlay text')
-                expect(listener.calls.count()).toBe(1)
-
-            it "is emitted in layers that doesn't render history", asyncSpec (next) ->
+            it "is emitted when the location changed in an overlay", asyncSpec (next) ->
               listener = jasmine.createSpy('event listener')
               up.on('up:layer:location:changed', listener)
 
@@ -3047,7 +3029,56 @@ describe 'up.fragment', ->
                 expect(location.href).toMatchURL(jasmine.locationBeforeExample)
                 expect(up.layer.location).toMatchURL('/original-layer-url')
 
+                expect(listener.calls.count()).toBe(0)
+
+                up.render(target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true)
+
+              next ->
+                expect(up.layer.current).toHaveText('new overlay text')
                 expect(listener.calls.count()).toBe(1)
+
+            it 'is not emitted when a layer is initially opened', asyncSpec (next) ->
+              listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', listener)
+
+              up.layer.open(target: '.target', location: '/original-layer-url', content: 'old overlay text')
+
+              next =>
+                expect(up.layer.isOverlay()).toBe(true)
+                expect(up.layer.location).toMatchURL('/original-layer-url')
+                expect(listener.calls.count()).toBe(0)
+
+            it 'is not emitted when the location did not change', asyncSpec (next) ->
+              listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', listener)
+
+              up.layer.open(target: '.target', location: '/original-layer-url', content: 'old overlay text')
+
+              next =>
+                expect(up.layer.isOverlay()).toBe(true)
+                expect(up.layer.location).toMatchURL('/original-layer-url')
+                expect(listener.calls.count()).toBe(0)
+
+              next ->
+                up.render(target: '.target', location: '/original-layer-url', content: 'new overlay text', history: true)
+
+              next ->
+                expect(up.layer.current).toHaveText('new overlay text')
+                expect(listener.calls.count()).toBe(0)
+
+            it "is emitted in overlays that don't render history", asyncSpec (next) ->
+              listener = jasmine.createSpy('event listener')
+              up.on('up:layer:location:changed', listener)
+
+              up.layer.open(target: '.target', location: '/original-layer-url', history: false, content: 'old overlay text')
+
+              next =>
+                expect(up.layer.isOverlay()).toBe(true)
+                # Browser location is unchanged, but the overlay still needs its internal location
+                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+                expect(up.layer.location).toMatchURL('/original-layer-url')
+
+                expect(listener.calls.count()).toBe(0)
 
                 up.render(target: '.target', location: '/next-layer-url', content: 'new overlay text', history: true)
 
@@ -3057,7 +3088,7 @@ describe 'up.fragment', ->
                 expect(up.layer.location).toMatchURL('/next-layer-url')
 
                 # Listener was called again, as we're tracking changes to the layer's { location } prop
-                expect(listener.calls.count()).toBe(2)
+                expect(listener.calls.count()).toBe(1)
 
         describe 'window title', ->
 

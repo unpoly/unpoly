@@ -684,12 +684,17 @@ up.Layer = class Layer extends up.Record {
     const previousLocation = this.location
     location = up.history.normalizeURL(location)
 
-    if (previousLocation !== location) {
+    // When opening, we always need to store the location to have an initial value.
+    if (previousLocation !== location || this.opening) {
       this.savedLocation = location
-      this.emit('up:layer:location:changed', { location, log: false })
 
       if (this.showsLiveHistory()) {
         up.history.push(location)
+      }
+
+      // When opening we never emit up:layer:location:changed.
+      if (!this.opening) {
+        this.emit('up:layer:location:changed', { location })
       }
     }
   }

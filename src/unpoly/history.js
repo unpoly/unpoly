@@ -219,6 +219,8 @@ up.history = (function() {
   will not cause the browser's address bar to be updated. In this case no `up:location:changed` event will be emitted.
   However, a `up:layer:location:changed` will be emitted even if the address bar did not change.
 
+  The `up:location:changed` event is *not* emitted when the page is loaded initially.
+
   @event up:location:changed
   @param {string} event.location
     The URL for the history entry after the change.

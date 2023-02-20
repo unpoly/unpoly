@@ -228,10 +228,11 @@ describe 'up.layer', ->
             expect(up.layer.count).toBe(2)
             expect(event.layer).toBe(up.layer.front)
             expect(event.target).toBe(up.layer.front.element)
+            expect(event.location).toMatchURL('/overlay-path')
             expect(up.layer.current).toBe(up.layer.front)
             done()
 
-          up.layer.open()
+          up.layer.open(history: true, location: '/overlay-path')
 
       describe 'focus', ->
 
@@ -288,6 +289,20 @@ describe 'up.layer', ->
               expect(up.layer.isOverlay()).toBe(true)
               expect(up.layer.history).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
+
+          it 'does not emit up:layer:location:changed when the overlay opens', asyncSpec (next) ->
+            changedListener = jasmine.createSpy('up:layer:location:changed listener')
+            up.on('up:layer:location:changed', changedListener)
+
+            up.layer.open(
+              location: '/modal-location'
+              fragment: '<div class="element">element text</div>'
+              history: true
+            )
+
+            next ->
+              expect(location.href).toMatchURL('/modal-location')
+              expect(changedListener).not.toHaveBeenCalled()
 
           it 'does not update the brower location if the layer is not the front layer', asyncSpec (next) ->
             makeLayers [
