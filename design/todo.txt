@@ -101,6 +101,9 @@ TODOs after V3
     - a[up-drawer]
     - a[up-modal]
     - a[up-popup]
+- Make accepting response available on up:layer:accepted
+  - This lets us write: up-on-accepted="up.render('.table', document: event.response.text)">
+  - Update demo app
 
 
 TODOs for V3
@@ -108,10 +111,13 @@ TODOs for V3
 
 
 Various changes
-
+---------------
 
 - Should up:layer:location:changed be emitted when the layer opens?
-
+  => No, this is a breaking change we cannot polyfill
+  - But it would be nice to have { location } as a prop on up:layer:opened
+    - We could write: up.on('up:layer:opened up:layer:location:changed', ({ location }) => trackLocation(location))
+  - Have a doc page for analytics tracking
 
 
 Docs
