@@ -87,7 +87,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-    up.hello(this.layer.element, { layer: this.layer, origin: this.origin })
+    up.hello(this.layer.element, { layer: this.layer })
 
     // The server may trigger multiple signals that may cause the layer to close:
     //
