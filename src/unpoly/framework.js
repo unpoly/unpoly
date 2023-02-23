@@ -82,6 +82,7 @@ up.framework = (function() {
       readyState = 'booting'
       up.emit('up:framework:boot', { log: false })
       readyState = 'booted'
+      up.emit('up:framework:booted', { log: false })
     } else {
       console.error("Unpoly cannot boot: %s", issue)
     }
@@ -113,6 +114,17 @@ up.framework = (function() {
       return true
     }
   }
+
+  /*-
+  This event is emitted after Unpoly has [booted](/up.boot).
+
+  For most apps this event will be emitted in the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+  as [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
+  All [compilers](/up.syntax) will already have run on the initial page content.
+
+  @event up:framework:booted
+  @experimental
+  */
 
   /*-
   Prevent Unpoly from booting automatically.

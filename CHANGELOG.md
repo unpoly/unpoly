@@ -500,6 +500,11 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - Fix a up where `unpoly-migrate.js` would not rewrite the deprecated `{ reveal }` option when navigating.
 
 
+### Framework initialization
+
+- New experimental event `up:framework:booted`. Is emitted when the framework has booted and the initial page has been compiled.
+
+
 ### Small things ✔️
 
 - The NPM package is now 800KB smaller.
