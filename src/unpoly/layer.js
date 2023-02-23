@@ -608,11 +608,6 @@ up.layer = (function() {
     The link element that is opening the overlay.
   @param {up.Layer} event.layer
     The [layer object](/up.Layer) that is opening.
-  @param {string|undefined} event.location
-    The initial location of the new overlay.
-
-    When the overlay's content was not requested from a `{ url }`, but was passed as an
-    HTML string (`{ document, fragment, content }`), `event.location` will be `undefined`.
   @stable
   */
 
@@ -623,6 +618,8 @@ up.layer = (function() {
   This event is *also* emitted when a layer [without visible history](/up.Layer.prototype.history)
   has reached a new location. If you are only interested in changes the are visible in
   the browser's address bar, observe `up:location:changed` instead.
+
+  The event is also event for location changes on the [root layer](/layer-terminology).
 
   This event is *not* emitted when an overlay is opened. For this observe `up:layer:opened` instead.
 

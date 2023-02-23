@@ -104,6 +104,7 @@ TODOs after V3
 - Make accepting response available on up:layer:accepted
   - This lets us write: up-on-accepted="up.render('.table', document: event.response.text)">
   - Update demo app
+- Test that Requests hold no references to detached elements after one task
 
 
 TODOs for V3
@@ -114,12 +115,14 @@ Various changes
 ---------------
 
 - Have a doc page for analytics tracking
+- Restore an up:booted event
+  - If we keep framework:booted we should migrate the old app:booted
+- If /analytics does not need { location } prop of up:layer:opened, remove that
 - Third meta argument for compilers
   - up.compiler(element, data, meta)
   - up.compiler(element, data, options)
   - Contains { revalidating, layer, request, response }
-  - Have a test that checks no { origin } is in there since that may block GC
-- Test that Requests hold no references to detached elements after one task
+  - Have a test that checks no { origin } or { request.fragments } is in there since that may block GC
 
 
 Docs

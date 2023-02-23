@@ -58,7 +58,7 @@ up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {
 
 @function up.ajax
 @param {string} [url]
-  The URL for the request.
+  The requested URL.
 
   Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
 @param {Object} [options]

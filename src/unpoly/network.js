@@ -415,12 +415,12 @@ up.network = (function() {
   @function up.request
 
   @param {string} [url]
-    The URL for the request.
+    The requested URL.
 
     Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
 
   @param {string} [options.url]
-    The URL for the request.
+    The requested URL.
 
   @param {string} [options.method='GET']
     The HTTP method for the request.

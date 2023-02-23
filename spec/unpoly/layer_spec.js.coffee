@@ -228,7 +228,6 @@ describe 'up.layer', ->
             expect(up.layer.count).toBe(2)
             expect(event.layer).toBe(up.layer.front)
             expect(event.target).toBe(up.layer.front.element)
-            expect(event.location).toMatchURL('/overlay-path')
             expect(up.layer.current).toBe(up.layer.front)
             done()
 

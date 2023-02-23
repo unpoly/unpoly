@@ -553,6 +553,8 @@ up.syntax = (function() {
   Unpoly will parse the JSON and pass the resulting object to any matching
   `up.compiler()` functions and `up.on()` callbacks.
 
+  To programmatically parse an `[up-data]` attribute into an object, use `up.data(element)`.
+
   ### Example
 
   A container for a [Google Map](https://developers.google.com/maps/documentation/javascript/tutorial)
@@ -579,12 +581,21 @@ up.syntax = (function() {
 
   Similarly, when an event is triggered on an element annotated with
   [`up-data`], the parsed object will be passed to any matching
-  [`up.on()`](/up.on) handlers.
+  [`up.on()`](/up.on) handlers:
 
   ```js
   up.on('click', '.google-map', function(event, element, data) {
     console.log("There are %d pins on the clicked map", data.pins.length)
   })
+  ```
+
+  You may also parse the data object programmatically using the `up.data()` function:
+
+  ```
+  let data = up.data('.google-map')
+  data[0].lat // => 48.36
+  data[0].lng // => 10.99
+  data[0].title // => 'Friedberg'
   ```
 
   ### Alternatives

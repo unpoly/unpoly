@@ -28,7 +28,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The URL for the request.
+  The requested URL.
 
   @property up.Request#url
   @param {string} url

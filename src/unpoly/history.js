@@ -7,6 +7,8 @@ The `up.history` module helps you work with the browser history.
 @see up.history.location
 @see up:location:changed
 
+@see analytics
+
 @module up.history
 */
 up.history = (function() {
@@ -220,6 +222,7 @@ up.history = (function() {
   However, a `up:layer:location:changed` will be emitted even if the address bar did not change.
 
   The `up:location:changed` event is *not* emitted when the page is loaded initially.
+  For this observe `up:framework:booted`.
 
   @event up:location:changed
   @param {string} event.location

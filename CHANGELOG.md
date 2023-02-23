@@ -68,7 +68,6 @@ Unpoly 3 addresses many concurrency issues that occur in real-world production u
 - Listeners to `up:layer:dismiss` may modify the layer's dismissal value by setting or mutating `event.value`.
 - Fix a bug where `up.fragment.get(selector, { layer: 0 })` would always match in the current layer instead of the root layer.
 - The `up:layer:location:changed` now has a property `{ layer }`. It returns the layer that had its location changed.
-- The `up:layer:opened` now has a property `{ location }`. It returns the initial location of the new overlay.
 
 #### Foreign overlays ✔️
 

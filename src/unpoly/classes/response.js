@@ -34,9 +34,9 @@ up.Response = class Response extends up.Record {
   */
 
   /*-
-  The URL used for the response.
+  The URL from which the response was loaded.
 
-  This is usually the requested URL, or the final URL after the server redirected.
+  This is usually the [requested URL](/up.Request.prototype.url), or the final URL after the server redirected.
 
   @property up.Response#url
   @param {string} url
