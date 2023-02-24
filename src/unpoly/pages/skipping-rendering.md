@@ -177,7 +177,7 @@ or DOM state right before a fragment would be inserted:
 
   ```js
   up.on('up:fragment:loaded', async function(event) {
-    if (event.response.headers['X-User-Created']) {
+    if (event.response.header('X-User-Created')) {
       // If we see an X-User-Created header, abort the rendering pass
       event.preventDefault()
 

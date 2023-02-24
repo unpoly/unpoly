@@ -150,10 +150,10 @@ up.syntax = (function() {
 
   ```js
   up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
-    console.log(meta.request.url)                    // => "/path"
-    console.log(meta.response.text.length)           // => 160232
-    console.log(meta.response.getHeader('X-Course')) // => "advanced-ruby"
-    console.log(meta.layer.mode)                     // => "root"
+    console.log(meta.request.url)                 // => "/path"
+    console.log(meta.response.text.length)        // => 160232
+    console.log(meta.response.header('X-Course')) // => "advanced-ruby"
+    console.log(meta.layer.mode)                  // => "root"
   })
   ```
 

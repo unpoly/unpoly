@@ -180,8 +180,8 @@ accepting a third argument:
 
 ```js
 up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
-  console.log(meta.response.getHeader('X-Course')) // => "advanced-ruby"
-  console.log(meta.response.getHeader('X-Page'))   // => "1"
+  console.log(meta.response.header('X-Course')) // => "advanced-ruby"
+  console.log(meta.response.header('X-Page'))   // => "1"
 })
 ```
 

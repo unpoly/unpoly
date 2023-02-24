@@ -130,7 +130,7 @@ up.network = (function() {
 
     ```js
     let badStatus = up.network.config.fail
-    up.network.config.fail = (response) => badStatus(response) || response.getHeader('X-Unauthorized')
+    up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
     ```
 
     Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).

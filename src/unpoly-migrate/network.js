@@ -155,6 +155,25 @@ up.Response.prototype.isSuccess = function() {
 }
 
 /*-
+Returns the HTTP header value with the given name.
+
+The search for the header name is case-insensitive.
+
+Returns `undefined` if the given header name was not included in the response.
+
+@function up.Response#getHeader
+@param {string} name
+@return {string|undefined}
+  The value of the header.
+@deprecated
+  Use `up.Response#header` instead.
+*/
+up.Response.prototype.getHeader = function(name) {
+  up.migrate.deprecated('up.Response#getHeader()', 'up.Response#header()')
+  return this.header(name)
+}
+
+/*-
 Returns whether the response was not [successful](/up.Response.prototype.ok).
 
 @function up.Response#isError

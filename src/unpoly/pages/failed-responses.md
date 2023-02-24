@@ -72,14 +72,14 @@ The following configuration will fail all responses with an `X-Unauthorized` hea
 
 ```js
 let badStatus = up.network.config.fail
-up.network.config.fail = (response) => badStatus(response) || response.getHeader('X-Unauthorized')
+up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
 ```
 
 You can also decide to fail a response in an `up:fragment:loaded` listener:
 
 ```js
 up.on('up:fragment:loaded', function(event) {
-  if (event.response.getHeader('X-Unauthorized')) {
+  if (event.response.header('X-Unauthorized')) {
     event.renderOptions.fail = true
   }
 })

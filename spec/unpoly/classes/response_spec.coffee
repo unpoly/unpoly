@@ -55,7 +55,7 @@ describe 'up.Response', ->
       expect(fooResponse.ok).toBe(false)
       expect(barResponse.ok).toBe(true)
 
-  describe '#getHeader()', ->
+  describe '#header()', ->
 
     it 'returns the header with the given name', asyncSpec (next) ->
       request = up.request('/foo')
@@ -65,7 +65,7 @@ describe 'up.Response', ->
         next.await(request)
 
       next (response) ->
-        expect(response.getHeader('X-Course')).toBe('ruby-basics')
+        expect(response.header('X-Course')).toBe('ruby-basics')
 
     it 'is case-insensitive', asyncSpec (next) ->
       request = up.request('/foo')
@@ -75,4 +75,17 @@ describe 'up.Response', ->
         next.await(request)
 
       next (response) ->
-        expect(response.getHeader('x-cOuRsE')).toBe('ruby-basics')
+        expect(response.header('x-cOuRsE')).toBe('ruby-basics')
+
+  if up.migrate.loaded
+    describe '#getHeader()', ->
+
+      it 'returns the header with the given name', asyncSpec (next) ->
+        request = up.request('/foo')
+
+        next ->
+          jasmine.respondWith(status: 200, responseHeaders: { 'X-Course': 'ruby-basics' })
+          next.await(request)
+
+        next (response) ->
+          expect(response.getHeader('X-Course')).toBe('ruby-basics')

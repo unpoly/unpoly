@@ -154,13 +154,13 @@ up.Response = class Response extends up.Record {
 
   Returns `undefined` if the given header name was not included in the response.
 
-  @function up.Response#getHeader
+  @function up.Response#header
   @param {string} name
   @return {string|undefined}
     The value of the header.
-  @experimental
+  @stable
   */
-  getHeader(name) {
+  header(name) {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
@@ -173,7 +173,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
   get contentType() {
-    return this.getHeader('Content-Type')
+    return this.header('Content-Type')
   }
 
   /*-
@@ -182,7 +182,7 @@ up.Response = class Response extends up.Record {
   @internal
   */
   get cspNonces() {
-    return up.protocol.cspNoncesFromHeader(this.getHeader('Content-Security-Policy'))
+    return up.protocol.cspNoncesFromHeader(this.header('Content-Security-Policy'))
   }
 
   /*-
@@ -195,7 +195,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
   get lastModified() { // eslint-disable-line getter-return
-    let header = this.getHeader('Last-Modified')
+    let header = this.header('Last-Modified')
     if (header) {
       return new Date(header)
     }
@@ -211,7 +211,7 @@ up.Response = class Response extends up.Record {
   @experimental
   */
   get etag() {
-    return this.getHeader('ETag')
+    return this.header('ETag')
   }
 
   /*-

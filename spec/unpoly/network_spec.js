@@ -91,10 +91,10 @@ describe('up.network', function() {
         })
 
         promise.then(function (response) {
-          expect(response.getHeader('foo')).toEqual('bar')
+          expect(response.header('foo')).toEqual('bar')
 
           // Lookup is case-insensitive
-          expect(response.getHeader('BAZ')).toEqual('bam')
+          expect(response.header('BAZ')).toEqual('bam')
 
           done()
         })

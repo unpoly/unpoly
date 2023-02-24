@@ -911,7 +911,7 @@ up.fragment = (function() {
 
   ```js
   up.on('up:fragment:loaded', (event) => {
-    let isMaintenancePage = event.response.getHeader('X-Maintenance')
+    let isMaintenancePage = event.response.header('X-Maintenance')
 
     if (isMaintenancePage) {
       // Prevent the fragment update and don't update browser history
@@ -944,7 +944,7 @@ up.fragment = (function() {
   ```js
   up.on('up:fragment:loaded', async function(event) {
     // When we couldn't access a page since we're signed out, the server sends a header
-    if (event.response.headers['X-Session-Missing']) {
+    if (event.response.header('X-Session-Missing')) {
       // Don't render the error message
       event.preventDefault() // mark-line
 
@@ -972,8 +972,8 @@ up.fragment = (function() {
   up.on('up:fragment:loaded', function(event) {
     // Don't render revalidation responses that only differ in whitespace
     if (event.revalidating) {
-      let newVersion = event.response.getHeader('X-Version')
-      let oldVersion = event.expiredResponse.getHeader('X-Version')
+      let newVersion = event.response.header('X-Version')
+      let oldVersion = event.expiredResponse.header('X-Version')
       if (newVersion === oldVersion) {
         event.skip()
       }
