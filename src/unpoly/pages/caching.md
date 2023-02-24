@@ -81,6 +81,24 @@ up.on('up:fragment:loaded', function(event) {
 See [skipping unnecessary rendering](/skipping-rendering) for more details and examples.
 
 
+### Detecting revalidation from a compiler
+
+Compilers with side effects may occasionally want to behave differently when the compiled element is being
+reloaded for the purpose of cache revalidation.
+
+To detect revalidation, compilers may accept a third argument with information about the current [render pass](/up.render).
+In the example below a compiler wants to [track a page view](/analytics) in a web analytics tool:
+
+```js
+up.compiler('[track-page-view]', function(element, data, meta) { // mark-phrase "meta"
+  // Don't track duplicate page views if we just reloaded for cache revalidation. 
+  if (!meta.revalidating) {
+    // Send an event to our web analytics tool.
+    trackPageView(meta.layer.location)
+  }
+})
+```
+
 
 Expiration
 ----------

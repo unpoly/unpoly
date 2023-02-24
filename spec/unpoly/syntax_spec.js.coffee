@@ -30,6 +30,72 @@ describe 'up.syntax', ->
         up.hello(fixture('.element'))
         expect(traces).toEqual ['bar', 'foo', 'baz']
 
+      describe 'with { batch } option', ->
+
+        it 'compiles all matching elements at once', ->
+          compiler = jasmine.createSpy('compiler')
+          up.compiler '.foo', { batch: true }, (elements) -> compiler(elements)
+          $container = $fixture('.container')
+          first = $container.affix('.foo.first')[0]
+          second = $container.affix('.foo.second')[0]
+          up.hello($container)
+          expect(compiler.calls.count()).toEqual(1)
+          expect(compiler).toHaveBeenCalledWith([first, second])
+
+        it 'throws an error if the batch compiler returns a destructor', ->
+          destructor = ->
+          up.compiler '.element', { batch: true }, (element) -> destructor
+          $container = $fixture('.element')
+          compile = -> up.hello($container)
+          expect(compile).toThrowError(/cannot return destructor/i)
+
+      if up.migrate.loaded
+        describe 'with { keep } option', ->
+
+          it 'adds an up-keep attribute to the fragment during compilation', ->
+
+            up.compiler '.foo', { keep: true }, ->
+            up.compiler '.bar', { }, ->
+            up.compiler '.bar', { keep: false }, ->
+            up.compiler '.bam', { keep: '.partner' }, ->
+
+            $foo = $ up.hello(fixture('.foo'))
+            $bar = $ up.hello(fixture('.bar'))
+            $baz = $ up.hello(fixture('.baz'))
+            $bam = $ up.hello(fixture('.bam'))
+
+            expect($foo.attr('up-keep')).toEqual('')
+            expect($bar.attr('up-keep')).toBeMissing()
+            expect($baz.attr('up-keep')).toBeMissing()
+            expect($bam.attr('up-keep')).toEqual('.partner')
+
+      describe 'with { priority } option', ->
+
+        it 'runs compilers with higher priority first', ->
+          traces = []
+          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+          up.compiler '.element', { priority: 2 }, -> traces.push('bar')
+          up.compiler '.element', { priority: 0 }, -> traces.push('baz')
+          up.compiler '.element', { priority: 3 }, -> traces.push('bam')
+          up.compiler '.element', { priority: -1 }, -> traces.push('qux')
+          up.hello(fixture('.element'))
+          expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux']
+
+        it 'considers priority-less compilers to be priority zero', ->
+          traces = []
+          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+          up.compiler '.element', -> traces.push('bar')
+          up.compiler '.element', { priority: -1 }, -> traces.push('baz')
+          up.hello(fixture('.element'))
+          expect(traces).toEqual ['foo', 'bar', 'baz']
+
+        it 'runs two compilers with the same priority in the order in which they were registered', ->
+          traces = []
+          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
+          up.compiler '.element', { priority: 1 }, -> traces.push('bar')
+          up.hello(fixture('.element'))
+          expect(traces).toEqual ['foo', 'bar']
+
       describe 'when a compiler is registered after booting', ->
 
         describe 'with { priority }', ->
@@ -332,7 +398,7 @@ describe 'up.syntax', ->
         element = fixture('.element')
 
         up.hello(element)
-        expect(compiler).toHaveBeenCalledWith(element, jasmine.anything())
+        expect(compiler).toHaveBeenCalledWith(element, jasmine.anything(), jasmine.anything())
 
       it 'emits an up:fragment:inserted event', ->
         compiler = jasmine.createSpy('compiler')
@@ -397,7 +463,6 @@ describe 'up.syntax', ->
 
       it "sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer"
 
-
       describe 'when a compiler throws an error', ->
 
         allowGlobalErrors()
@@ -443,8 +508,7 @@ describe 'up.syntax', ->
           expect(event).toBeEvent('error')
           expect(event.error).toBeError('error from crashing compiler')
 
-
-      describe 'passing of [up-data]', ->
+      describe 'data', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a second argument to the compiler', ->
           observeArgs = jasmine.createSpy()
@@ -477,6 +541,39 @@ describe 'up.syntax', ->
 
           expect(parseDataSpy).not.toHaveBeenCalled()
 
+        describe 'with { data } option', ->
+
+          it 'allows to override an object parsed from a [up-data] attribute', ->
+            observeArgs = jasmine.createSpy()
+            up.compiler '.child', (element, data) ->
+              observeArgs(element.className, data)
+
+            data = { key1: 'value1', key2: 'value2' }
+
+            $tag = $fixture(".child").attr('up-data', JSON.stringify(data))
+
+            up.hello($tag[0], data: { key2: 'override-value2' })
+
+            expect(observeArgs).toHaveBeenCalledWith('child', { key1: 'value1', key2: 'override-value2' })
+
+        describe 'with { dataMap } option', ->
+
+          it 'allows to override the [up-data] attribute of each matching element', ->
+            observeArgs = jasmine.createSpy()
+            up.compiler '.child', (element, data) -> observeArgs(element.id, data)
+
+            fragment = fixture('.fragment')
+            child1 = e.affix(fragment, '.child#child1', 'up-data': JSON.stringify(foo: 'default foo'))
+            child2 = e.affix(fragment, '.child#child2', 'up-data': JSON.stringify(foo: 'default foo'))
+
+            up.hello(fragment, dataMap: {
+              '#child1': { foo: 'foo for child1' },
+              '#child2': { foo: 'foo for child2' },
+            })
+
+            expect(observeArgs.calls.argsFor(0)).toEqual ['child1', foo: 'foo for child1']
+            expect(observeArgs.calls.argsFor(1)).toEqual ['child2', foo: 'foo for child2']
+
       it 'compiles multiple matching elements one-by-one', ->
         compiler = jasmine.createSpy('compiler')
         up.compiler '.foo', (element) -> compiler(element)
@@ -487,72 +584,6 @@ describe 'up.syntax', ->
         expect(compiler.calls.count()).toEqual(2)
         expect(compiler).toHaveBeenCalledWith($first[0])
         expect(compiler).toHaveBeenCalledWith($second[0])
-
-      describe 'with { batch } option', ->
-
-        it 'compiles all matching elements at once', ->
-          compiler = jasmine.createSpy('compiler')
-          up.compiler '.foo', { batch: true }, (elements) -> compiler(elements)
-          $container = $fixture('.container')
-          first = $container.affix('.foo.first')[0]
-          second = $container.affix('.foo.second')[0]
-          up.hello($container)
-          expect(compiler.calls.count()).toEqual(1)
-          expect(compiler).toHaveBeenCalledWith([first, second])
-
-        it 'throws an error if the batch compiler returns a destructor', ->
-          destructor = ->
-          up.compiler '.element', { batch: true }, (element) -> destructor
-          $container = $fixture('.element')
-          compile = -> up.hello($container)
-          expect(compile).toThrowError(/cannot return destructor/i)
-
-      if up.migrate.loaded
-        describe 'with { keep } option', ->
-
-          it 'adds an up-keep attribute to the fragment during compilation', ->
-
-            up.compiler '.foo', { keep: true }, ->
-            up.compiler '.bar', { }, ->
-            up.compiler '.bar', { keep: false }, ->
-            up.compiler '.bam', { keep: '.partner' }, ->
-
-            $foo = $ up.hello(fixture('.foo'))
-            $bar = $ up.hello(fixture('.bar'))
-            $baz = $ up.hello(fixture('.baz'))
-            $bam = $ up.hello(fixture('.bam'))
-
-            expect($foo.attr('up-keep')).toEqual('')
-            expect($bar.attr('up-keep')).toBeMissing()
-            expect($baz.attr('up-keep')).toBeMissing()
-            expect($bam.attr('up-keep')).toEqual('.partner')
-
-      describe 'with { priority } option', ->
-
-        it 'runs compilers with higher priority first', ->
-          traces = []
-          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
-          up.compiler '.element', { priority: 2 }, -> traces.push('bar')
-          up.compiler '.element', { priority: 0 }, -> traces.push('baz')
-          up.compiler '.element', { priority: 3 }, -> traces.push('bam')
-          up.compiler '.element', { priority: -1 }, -> traces.push('qux')
-          up.hello(fixture('.element'))
-          expect(traces).toEqual ['bam', 'bar', 'foo', 'baz', 'qux']
-
-        it 'considers priority-less compilers to be priority zero', ->
-          traces = []
-          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
-          up.compiler '.element', -> traces.push('bar')
-          up.compiler '.element', { priority: -1 }, -> traces.push('baz')
-          up.hello(fixture('.element'))
-          expect(traces).toEqual ['foo', 'bar', 'baz']
-
-        it 'runs two compilers with the same priority in the order in which they were registered', ->
-          traces = []
-          up.compiler '.element', { priority: 1 }, -> traces.push('foo')
-          up.compiler '.element', { priority: 1 }, -> traces.push('bar')
-          up.hello(fixture('.element'))
-          expect(traces).toEqual ['foo', 'bar']
 
     describe 'up.syntax.clean', ->
 

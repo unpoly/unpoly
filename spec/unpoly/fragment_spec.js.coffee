@@ -400,9 +400,37 @@ describe 'up.fragment', ->
           expect(result.layer).toBe(up.layer.root)
           done()
 
-      describe 'compilations', ->
+      describe 'compilation', ->
 
-        it 'runs compilers for matching elements in the new content'
+        it 'runs compilers for matching elements in the new content', ->
+          childCompiler = jasmine.createSpy('compiler')
+          up.compiler '.child', (element) -> childCompiler(element.tagName, element.className)
+
+          fixture('.fragment')
+          up.render(fragment: '<div class="fragment"><span class="child"></span></div>')
+
+          expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
+
+        it 'calls compilers with a third argument containing information about the render pass', asyncSpec (next) ->
+          compiler = jasmine.createSpy('compiler')
+          up.compiler('.element', compiler)
+
+          fixture('.element', text: 'old content')
+          up.render('.element', url: '/path')
+
+          next ->
+            jasmine.respondWithSelector('.element', text: 'new content')
+
+          next ->
+            expect('.element').toHaveText('new content')
+            expect(compiler).toHaveBeenCalledWith(
+              jasmine.any(Element),
+              jasmine.any(Object),
+              jasmine.objectContaining(
+                request: jasmine.any(up.Request),
+                response: jasmine.any(up.Response),
+                layer: up.layer.root)
+            )
 
         describe 'when a compiler throws an error', ->
 
@@ -5864,6 +5892,36 @@ describe 'up.fragment', ->
             next ->
                 expect('input[name=foo]').toBeFocused()
 
+
+          it 'calls compilers with a third argument containing { revalidating, expiredResponse } properties', asyncSpec (next) ->
+            compiler = jasmine.createSpy('compiler')
+            up.compiler('.target', compiler)
+
+            expect(compiler.calls.count()).toBe(1)
+
+            up.render('.target', { url: '/cached-path', cache: true })
+
+            next ->
+              expect('.target').toHaveText('cached text')
+              expect(compiler.calls.count()).toBe(2)
+
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.respondWithSelector('.target', text: 'validated content')
+
+            next ->
+              expect('.target').toHaveText('validated content')
+
+              expect(compiler.calls.count()).toBe(3)
+              expect(compiler.calls.mostRecent().args).toEqual [
+                jasmine.any(Element),
+                jasmine.any(Object),
+                jasmine.objectContaining(
+                  expiredResponse: jasmine.any(up.Response),
+                  revalidating: true
+                )
+              ]
+
           describe 'if revalidation responded with 304 Not Modified', ->
 
             it 'does not call { onRendered } a second time', asyncSpec (next) ->
@@ -6800,7 +6858,7 @@ describe 'up.fragment', ->
         up.destroy(detachedElement)
         expect(destructor).toHaveBeenCalled()
 
-      describe 'pending requests zzz', ->
+      describe 'pending requests', ->
 
         it 'aborts pending requests targeting the given element', (done) ->
           target = fixture('.target')

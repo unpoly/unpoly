@@ -16,11 +16,14 @@ Below you find multiple approaches to track in-page navigations.
 Choose and adapt the strategy that fits the amount of data you want to track.
 
 All code examples assume that a function `trackView(url)` is used to track a page view.
-The specific statement used differs between analytics tools. For instance, in Matomo you
+The implementation differs between analytics tools. For instance, in Matomo you
 would use:
 
 ```js
-_paq.push(['trackPageView'])
+function trackPageView(url) {
+  _paq.push(['setCustomUrl', path])
+  _paq.push(['trackPageView'])
+}
 ```
 
 ### Tracking when the address bar changes
@@ -38,7 +41,7 @@ up.on('up:location:changed', ({ location }) => trackView(location))
 This behavior is close to that of classic tracking codes from tools like Google Analytics.
 
 
-### Tracking navigation within overlays
+#### Tracking navigation within overlays
 
 Unpoly lets you render content in [multiple layers](/up.layer). However, not all overlays have [visible history](/up.Layer.prototype.history).
 When an overlay without visible history is opened or navigated to a new location, the browser's address bar will not change and no `up:location:changed` event will be emitted.
@@ -63,12 +66,68 @@ up.on('up:layer:opened', ({ layer }) => {
 ```
 
 
-### Tracking every fragment update
+### Tracking updates to major fragments
 
-[By default](/up.fragment.config#config.autoHistoryTargets) only updates of the [main element](/main) will cause the address bar.
-When a minor fragments is updated, the browser location will not change and no `up:location:changed` event will be emitted.
+Instead of observing changes of the browser's address bar, we may track a page view whenever we render a significant
+fragment.
 
-If you want to track *all* fragment updates, observe the `up:fragment:loaded` event instead:
+For example, we could decide to track a page view whenever an element with a `[track-page-view]` attribute
+is rendered:
+
+
+```html
+<main track-page-view>
+  ...
+</main>
+```
+
+We can implement this using a [compiler](/up.compiler):
+
+```js
+up.compiler('[track-page-view]', function(element, data, meta) {
+  // Don't track duplicate page views if we just reloaded for cache revalidation. 
+  if (!meta.revalidating) {
+    // Send an event to our web analytics tool.
+    trackPageView(meta.layer.location)
+  }
+})
+```
+
+> [important]
+> With a compiler you do not need to explicitly track the initial page view.
+> The compiler will be called for both the initial page and all subsequent updates.
+
+
+#### Passing custom dimensions
+
+Using a compiler makes it easy to track custom event properties ("dimensions") along with the page view.
+Encode it in an `[up-data]` attribute:
+
+```html
+<main track-page-view up-data='{ "course": "ruby-basics", "page": 1 }'> // mark-phrase up-data
+  ...
+</main>
+```
+
+The element's parsed [data object](/data) is passed to your compiler as a second argument. The compiler can
+forward the data to the `trackPageView()` function:
+
+
+```js
+up.compiler('[track-page-view]', function(element, data, meta) {
+  // Don't track duplicate page views if we just reloaded for cache revalidation. 
+  if (!meta.revalidating) {
+    // Send an event to our web analytics tool.
+    trackPageView(meta.layer.location, data) // mark-phrase "data"
+  }
+}
+```
+
+
+
+### Tracking updates to *any* fragment
+
+To track *all* fragment updates, observe the `up:fragment:loaded` event:
 
 ```js
 // Track initial page load. Your old tracking code may already do this.
@@ -84,17 +143,6 @@ up.on('up:fragment:loaded', (event) => {
 
 If you find that this listener tracks too many events, you may further filter on the [properties](/up.Request) of [`event.request`](/up:fragment:loaded#event.request).
 
-
-## Passing custom dimensions
-
-For advanced statistics you may want want to track custom event properties ("dimensions") along with the page view.
-One way to do this is to render dimension values into a custom `<meta>` tag that [automatically updates](/up-hungry) with major changes:
-
-```html
-<meta name="app:course" value="advanced-ruby" up-hungry up-if-history>
-```
-
-If you have complex dimensions you may also encode it as JSON using `[up-data]` and parse it using `up.data()`.
 
 
 @page analytics

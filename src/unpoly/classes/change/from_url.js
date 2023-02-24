@@ -101,13 +101,10 @@ up.Change.FromURL = class FromURL extends up.Change {
 
   onRequestSettledWithResponse(response) {
     this.response = response
-    const expiredResponse = this.options.expiredResponse
 
     const eventProps = {
-      response: this.response,
       renderOptions: this.options,
-      revalidating: !!expiredResponse,
-      expiredResponse,
+      ...this.compilerPassMeta()
     }
 
     if (up.fragment.config.skipResponse(eventProps)) {
@@ -134,6 +131,17 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
 
     return this.updateContentFromResponse(this.options)
+  }
+
+  compilerPassMeta() {
+    const expiredResponse = this.options.expiredResponse
+
+    return {
+      request: this.request,
+      response: this.response,
+      revalidating: !!expiredResponse,
+      expiredResponse,
+    }
   }
 
   onRequestSettledWithError(error) {
@@ -172,6 +180,10 @@ up.Change.FromURL = class FromURL extends up.Change {
     // The response might carry some updates for our change options,
     // like a server-set location, or server-sent events.
     this.augmentOptionsFromResponse(finalRenderOptions)
+
+    // When up.Change.FromContent eventually compiles fragments, the { meta } object
+    // will be passed as a third argument to compilers.
+    finalRenderOptions.meta = this.compilerPassMeta()
 
     let result = new up.Change.FromContent(finalRenderOptions).execute()
     result.finished = this.finish(result, finalRenderOptions)

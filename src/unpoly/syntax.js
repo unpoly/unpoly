@@ -118,9 +118,59 @@ up.syntax = (function() {
 
   An alternative way to register a destructor function is `up.destructor()`.
 
+  > [important]
+  > The destructor function is *not* expected to remove the element from the DOM.
+
   ### Passing parameters to a compiler
 
-  See [attaching data to elements](/data).
+  You may attach data to an element using HTML5 data attributes
+  or encoded as JSON in an `[up-data]` attribute:
+
+  ```html
+  <span class='user' up-data='{ "age": 31, "name": "Alice" }'>Alice</span>
+  ```
+
+  An object with the element's attached data will be passed to your [compilers](/up.compiler)
+  as a second argument:
+
+  ```js
+  up.compiler('.user', function(element, data) { // mark-phrase "data"
+    console.log(data.age)  // => 31
+    console.log(data.name) // => "Alice"
+  })
+  ```
+
+  See [attaching data to elements](/data) for more details and examples.
+
+  ### Accessing information about the render pass
+
+  Compilers may accept a third argument with information about the current [render pass](/up.render).
+
+  For instance, you may access information about the request or response used to load this new fragment:
+
+  ```js
+  up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
+    console.log(meta.request.url)                    // => "/path"
+    console.log(meta.response.text.length)           // => 160232
+    console.log(meta.response.getHeader('X-Course')) // => "advanced-ruby"
+    console.log(meta.layer.mode)                     // => "root"
+  })
+  ```
+
+  The following properties are available:
+
+  | Property               | Type          |                                                 | Description                                               |
+  |------------------------|---------------|-------------------------------------------------|-----------------------------------------------------------|
+  | `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
+  | `meta.booting`         | `boolean`     |                                                 | Whether we're compiling the initial page<br>(as opposed to a subsequent fragment update). |
+  | `meta.request`         | `up.Request`  | <span class="tag is_light_gray">optional</span> | The request that loaded the new fragment.                 |
+  | `meta.response`        | `up.Response` | <span class="tag is_light_gray">optional</span> | The response from which the new fragment was extracted.   |
+  | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
+  | `meta.expiredResponse` | `up.Response` | <span class="tag is_light_gray">optional</span> | When [revalidating](/caching#revalidation), the earlier response with stale content. |
+
+  > [note]
+  > Properties related to requests and responses are `undefined`
+  > when rendering from an HTML string instead of a URL.
 
   ### Registering compilers after booting
 
@@ -147,14 +197,17 @@ up.syntax = (function() {
     If set to `true` and a fragment insertion contains multiple
     elements matching `selector`, the `compiler` function is only called once
     with all these elements.
-  @param {Function(element, data)} compiler
-    The function to call when a matching element is inserted.
+  @param {Function(element, data, meta)} compiler
+    The function to call when an element matching `selector` is inserted.
 
-    The function takes the new element as the first argument.
-    Any [attached data](/data) will be passed as a second argument.
+    The function may accept up to three arguments:
+
+    1. The new element being compiled.
+    2. Any [attached data](/data).
+    3. [Information about the current render pass](#accessing-information-about-the-render-pass).
 
     The function may return a destructor function that [cleans the compiled object](#cleaning-up-after-yourself)
-    before it is removed from the DOM. The destructor is *not* expected to remove the element from the DOM.
+    before it is removed from the DOM.
   @stable
   */
   function registerCompiler(...args) {
@@ -454,7 +507,8 @@ up.syntax = (function() {
   that new compiler is [run automatically on current elements](/up.compiler#registering-compilers-after-booting).
 
   @function up.hello
-  @param {Element|jQuery} element
+  @param {Element|jQuery|string} element
+    The root element of the new page fragment.
   @param {Object} [options.layer]
     An existing `up.Layer` object can be passed to prevent re-lookup.
     @internal
@@ -465,16 +519,23 @@ up.syntax = (function() {
   @param {Object} [options.dataMap]
     An object mapping selectors to `options.data`.
     @internal
+  @param {Object} [options.meta={}]
+    An object containing information about this compiler pass.
+
+    This typically contains `{ request, response, revalidating }` properties.
+
+    It will be passed as a third [compiler](/up.compiler) argument.
+    @experimental
   @return {Element}
     The compiled element
   @stable
   */
-  function hello(element, { layer, data, dataMap } = {}) {
+  function hello(element, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    element = up.fragment.get(element)
+    element = up.fragment.get(element, options)
 
     up.puts('up.hello()', "Compiling fragment %o", element)
-    compile(element, { layer, data, dataMap })
+    compile(element, options)
     up.fragment.emitInserted(element)
 
     return element

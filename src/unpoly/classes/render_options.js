@@ -66,7 +66,7 @@ up.RenderOptions = (function() {
     'history',      // Note that regardless of setting, we only set history for reloadable responses (GET).
     'source',       // No strong opinions about that one. Wouldn't one always have a source? Might as well not be an option.
     'saveScroll',   // No strong opinions about that one. Wouldn't one always want to saveScroll? Might as wellnot be an option.
-    'navigate'      // Also set navigate defaults for fail options
+    'navigate',     // Also set navigate defaults for fail options
   ])
 
   const CONTENT_KEYS = [

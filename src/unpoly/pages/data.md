@@ -18,7 +18,7 @@ An object with all data attributes will be passed to your [compilers](/up.compil
 as a second argument:
 
 ```js
-up.compiler('.user', function(element, data) {
+up.compiler('.user', function(element, data) { // mark-phrase "data"
   console.log(data.age)  // => "18"
   console.log(data.name) // => "Bob"
 })
@@ -170,5 +170,22 @@ The `up:fragment:keep` event lets you inspect the old and new element
 with its old and new data. You may then decide whether to keep the existing element,
 swap it with the new version, or just update its data.
 
+
+## Reading response headers from a compiler
+
+When it is inconvenient to attach data to an element, you may be able to use a response header instead.
+
+Compilers may access the [response](/up.Response) from which the new fragment is loaded by
+accepting a third argument:
+
+```js
+up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
+  console.log(meta.response.getHeader('X-Course')) // => "advanced-ruby"
+  console.log(meta.response.getHeader('X-Page'))   // => "1"
+})
+```
+
+See [accessing information about the render pass](/up.compiler#accessing-information-about-the-render-pass)
+for more details.
 
 @page data

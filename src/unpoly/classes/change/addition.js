@@ -97,7 +97,7 @@ up.Change.Addition = class Addition extends up.Change {
     e.setMissingAttr(newElement, 'up-etag', etag || false)
   }
 
-  setMeta(options) {
+  setReloadAttrs(options) {
     this.setSource(options)
     this.setTime(options)
     this.setETag(options)

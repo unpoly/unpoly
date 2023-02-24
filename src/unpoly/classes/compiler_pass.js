@@ -2,17 +2,18 @@ const u = up.util
 
 up.CompilerPass = class CompilerPass {
 
-  constructor(root, compilers, { layer, data, dataMap } = {}) {
+  constructor(root, compilers, { layer, data, dataMap, meta }) {
+    // (1) If a caller has already looked up the layer we don't want to look it up again.
+    // (2) Default to the current layer in case the user manually compiles a detached element.
+    layer ||= up.layer.get(root) || up.layer.current
+
     this.root = root
     this.compilers = compilers
-
-    // (1) If a caller has already looked up the layer we don't want to look it up again.
-    // (2) Ddefault to the current layer in case the user manually compiles a detached element.
-    this.layer = layer || up.layer.get(this.root) || up.layer.current
-
+    this.layer = layer
     this.data = data
     this.dataMap = dataMap
 
+    this.meta = { layer, ...meta }
     this.errors = []
   }
 
@@ -75,7 +76,7 @@ up.CompilerPass = class CompilerPass {
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
       const data = up.syntax.data(element)
-      compileArgs.push(data)
+      compileArgs.push(data, this.meta)
     }
 
     const result = this.applyCompilerFunction(compiler, element, compileArgs)
@@ -94,7 +95,7 @@ up.CompilerPass = class CompilerPass {
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
       const dataList = u.map(elements, up.syntax.data)
-      compileArgs.push(dataList)
+      compileArgs.push(dataList, this.meta)
     }
 
     const result = this.applyCompilerFunction(compiler, elements, compileArgs)
