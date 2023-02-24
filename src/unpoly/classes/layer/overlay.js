@@ -30,7 +30,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   Returns a string like `'top'` or `'left'`.
 
   @property up.Layer#position
-  @param {Element} align
+  @param {Element} position
   @stable
   */
 
