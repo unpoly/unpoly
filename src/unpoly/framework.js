@@ -25,6 +25,17 @@ up.framework = (function() {
   let readyState = 'evaling' // evaling => configuring => booting => booted
 
   /*-
+  Whether Unpoly has finished booting.
+
+  Compilers may query this property to check if the initial page is being compiled
+  (as opposed to a subsequent fragment update).
+
+  @property up.framework.booted
+  @param {boolean} boolean
+  @experimental
+  */
+
+  /*-
   Resets Unpoly to the state when it was booted.
   All custom event handlers, animations, etc. that have been registered
   will be discarded.

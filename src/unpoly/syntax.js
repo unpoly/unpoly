@@ -162,7 +162,6 @@ up.syntax = (function() {
   | Property               | Type          |                                                 | Description                                               |
   |------------------------|---------------|-------------------------------------------------|-----------------------------------------------------------|
   | `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
-  | `meta.booting`         | `boolean`     |                                                 | Whether we're compiling the initial page<br>(as opposed to a subsequent fragment update). |
   | `meta.request`         | `up.Request`  | <span class="tag is_light_gray">optional</span> | The request that loaded the new fragment.                 |
   | `meta.response`        | `up.Response` | <span class="tag is_light_gray">optional</span> | The response from which the new fragment was extracted.   |
   | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |

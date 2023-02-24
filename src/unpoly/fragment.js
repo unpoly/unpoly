@@ -2690,7 +2690,7 @@ up.fragment = (function() {
   up.on('up:framework:boot', function() {
     const { documentElement } = document
     documentElement.setAttribute('up-source', u.normalizeURL(location.href, { hash: false }))
-    up.hello(documentElement, { meta: { booting: true }})
+    up.hello(documentElement)
 
     if (!up.browser.canPushState()) {
       return up.warn('Cannot push history changes. Next fragment update will load in a new page.')
