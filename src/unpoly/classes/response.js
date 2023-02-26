@@ -255,7 +255,10 @@ up.Response = class Response extends up.Record {
   @experimental
   */
   get expired() {
-    return this.age > up.network.config.cacheExpireAge || this.request.expired
+    return this.age > up.network.config.cacheExpireAge ||
+      // When the user calls up.cache.expire() it will expire requests, not responses.
+      // Hence we need to delegate to our request.
+      this.request.expired
   }
 
   get description() {
