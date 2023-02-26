@@ -18,6 +18,15 @@ In addition to this CHANGELOG, there is also a [slide deck](http://triskweline.d
 > **Note**: This CHANGELOG is still being written.
 > Sections with ✔️ are done. Sections with 🚧 are incomplete.
 
+
+### Untracked
+
+- Compiler meta arg
+- Response#header
+  - renamed
+  - now stable
+
+
 ### Overview ✔️
 
 #### Fixing concurrency
