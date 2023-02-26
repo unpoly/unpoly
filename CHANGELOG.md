@@ -483,6 +483,7 @@ derivation has been reworked to be more strict in Unpoly 3:
 - When calling `up.request()` manually, the request is now only associated with the current layer if either `{ origin, layer, target }` option was passed.
 - The `up.network.isIdle()` function has been deprecated. Use `!up.network.isBusy()` instead.
 - The events `up:request:late` and `up:request:recover` were renamed to `up:network:late` and `up:network:recover` respectively. We may eventually re-introduce `up:request:late` and `up:request:recover` to support tracking individual requests (but not now).
+- The property `up.Response.prototype.request` is now internal API.
 
 #### Detect failure when server sends wrong HTTP status ✔️
 

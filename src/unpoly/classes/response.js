@@ -68,7 +68,7 @@ up.Response = class Response extends up.Record {
 
   @property up.Response#request
   @param {up.Request} request
-  @experimental
+  @internal
   */
 
   /*-
