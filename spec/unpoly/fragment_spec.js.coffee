@@ -427,7 +427,6 @@ describe 'up.fragment', ->
               jasmine.any(Element),
               jasmine.any(Object),
               jasmine.objectContaining(
-                request: jasmine.any(up.Request),
                 response: jasmine.any(up.Response),
                 layer: up.layer.root)
             )
@@ -5893,7 +5892,7 @@ describe 'up.fragment', ->
                 expect('input[name=foo]').toBeFocused()
 
 
-          it 'calls compilers with a third argument containing { revalidating, expiredResponse } properties', asyncSpec (next) ->
+          it 'calls compilers with a third argument containing a { revalidating } property', asyncSpec (next) ->
             compiler = jasmine.createSpy('compiler')
             up.compiler('.target', compiler)
 
@@ -5917,7 +5916,6 @@ describe 'up.fragment', ->
                 jasmine.any(Element),
                 jasmine.any(Object),
                 jasmine.objectContaining(
-                  expiredResponse: jasmine.any(up.Response),
                   revalidating: true
                 )
               ]

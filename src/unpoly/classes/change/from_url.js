@@ -102,12 +102,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   onRequestSettledWithResponse(response) {
     this.response = response
 
-    const eventProps = {
-      renderOptions: this.options,
-      ...this.compilerPassMeta()
-    }
-
-    if (up.fragment.config.skipResponse(eventProps)) {
+    if (up.fragment.config.skipResponse(this.loadedEventProps())) {
       this.skip()
     } else {
       // Allow listeners to inspect the response and either prevent the fragment change
@@ -115,7 +110,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       // page with its own layout, that cannot be loaded as a fragment and must be loaded
       // with a full page load.
       this.request.assertEmitted('up:fragment:loaded', {
-        ...eventProps,
+        ...this.loadedEventProps(),
         callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
         log: ['Loaded fragment from %s', this.response.description],
         skip: () => this.skip()
@@ -134,11 +129,23 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   compilerPassMeta() {
-    const expiredResponse = this.options.expiredResponse
+    // (1) We only expose selected properties as to not prevent GC
+    // by compilers holding a reference to their meta arg in their close.
+    //
+    // (2) Another property { layer } will be assigned by up.hello().
+    return u.pick(this.loadedEventProps(), [
+      'revalidating',
+      'response'
+    ])
+  }
+
+  loadedEventProps() {
+    const { expiredResponse } = this.options
 
     return {
       request: this.request,
       response: this.response,
+      renderOptions: this.options,
       revalidating: !!expiredResponse,
       expiredResponse,
     }
@@ -293,6 +300,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   static {
     u.memoizeMethod(this.prototype, [
       'getRequestAttrs',
+      'loadedEventProps',
     ])
   }
 }

@@ -150,7 +150,6 @@ up.syntax = (function() {
 
   ```js
   up.compiler('.user', function(element, data, meta) { // mark-phrase "meta"
-    console.log(meta.request.url)                 // => "/path"
     console.log(meta.response.text.length)        // => 160232
     console.log(meta.response.header('X-Course')) // => "advanced-ruby"
     console.log(meta.layer.mode)                  // => "root"
@@ -162,10 +161,8 @@ up.syntax = (function() {
   | Property               | Type          |                                                 | Description                                               |
   |------------------------|---------------|-------------------------------------------------|-----------------------------------------------------------|
   | `meta.layer`           | `up.Layer`    |                                                 | The [layer](/up.layer) of the fragment being compiled.<br>This has the same value as `up.layer.current`. |
-  | `meta.request`         | `up.Request`  | <span class="tag is_light_gray">optional</span> | The request that loaded the new fragment.                 |
   | `meta.response`        | `up.Response` | <span class="tag is_light_gray">optional</span> | The response from which the new fragment was extracted.   |
   | `meta.revalidating`    | `boolean`     | <span class="tag is_light_gray">optional</span> | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation). |
-  | `meta.expiredResponse` | `up.Response` | <span class="tag is_light_gray">optional</span> | When [revalidating](/caching#revalidation), the earlier response with stale content. |
 
   > [note]
   > Properties related to requests and responses are `undefined`
