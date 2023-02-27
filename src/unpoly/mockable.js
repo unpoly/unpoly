@@ -1,9 +1,13 @@
 up.mockable = function(originalFn) {
-  let spy
-  const mockableFn = function() {
-    return (spy || originalFn).apply(null, arguments)
+  if (window.jasmine) {
+    let name = originalFn.name
+    let obj = { [name]: originalFn }
+    let mockableFn = function() {
+      return obj[name].apply(this, arguments)
+    }
+    mockableFn.mock = () => spyOn(obj, name)
+    return mockableFn
+  } else {
+    return originalFn
   }
-  mockableFn.mock = () => spy = jasmine.createSpy('mockable', originalFn)
-  document.addEventListener('up:framework:reset', () => spy = null)
-  return mockableFn
 }
