@@ -601,12 +601,12 @@ up.Layer = class Layer extends up.Record {
   }
 
   updateHistory(options) {
-    if (u.isString(options.title)) {
-      this.title = options.title
-    }
-
     if (u.isString(options.location)) {
       this.location = options.location
+    }
+
+    if (u.isString(options.title)) {
+      this.title = options.title
     }
   }
 

@@ -2275,6 +2275,32 @@ describe 'up.fragment', ->
               expect($('.container')).toHaveText('new container text')
               expect(document.title).toBe('Title from options')
 
+          it "sets document.title after calling history.pushState() to prevent mutating the old history state", asyncSpec (next) ->
+            calls = []
+            spyOnProperty(up.layer.root, 'location', 'set').and.callFake -> calls.push('set location')
+            spyOnProperty(up.layer.root, 'title', 'set').and.callFake -> calls.push('set title')
+
+            $fixture('.container').text('old container text')
+            up.render('.container', url: '/path', history: true)
+
+            next ->
+              jasmine.respondWith """
+                <html>
+                  <head>
+                    <title>Title from HTML</title>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              """
+
+            next =>
+              expect('.container').toHaveText('new container text')
+              expect(calls).toEqual ['set location', 'set title']
+
       describe 'fragment source', ->
 
         it 'remembers the source the fragment was retrieved from', asyncSpec (next) ->
