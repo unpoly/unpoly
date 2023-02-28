@@ -26,7 +26,7 @@ up.specUtil = do ->
 
   findElementContainingText = (selector, text) ->
     elements = document.querySelectorAll(selector)
-    u.find(elements, (element) -> element.innerText.contains(text))
+    u.find(elements, (element) -> element.innerText.includes(text))
 
   ###**
   @function up.util.promiseTimer

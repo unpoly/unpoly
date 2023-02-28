@@ -3789,7 +3789,7 @@ describe 'up.fragment', ->
             )
             next =>
               expect('.element').toHaveText('version 2')
-              expect('.up-ghost').toHaveLength(0)
+              expect(document.querySelectorAll('.up-ghost')).toHaveLength(0)
 
           it "replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec (next) ->
             swapDirectlySpy = up.motion.swapElementsDirectly.mock()
