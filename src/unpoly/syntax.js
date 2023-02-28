@@ -241,7 +241,7 @@ up.syntax = (function() {
     The function to call when a matching element is inserted.
 
     See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
-    @stable
+  @stable
   */
   function registerJQueryCompiler(...args) {
     registerCompiler(...args, { jQuery: true })
