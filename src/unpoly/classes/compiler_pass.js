@@ -69,8 +69,7 @@ up.CompilerPass = class CompilerPass {
   }
 
   compileOneElement(compiler, element) {
-    const elementArg = compiler.jQuery ? up.browser.jQuery(element) : element
-    const compileArgs = [elementArg]
+    const compileArgs = [element]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
@@ -88,8 +87,7 @@ up.CompilerPass = class CompilerPass {
   }
 
   compileBatch(compiler, elements) {
-    const elementsArgs = compiler.jQuery ? up.browser.jQuery(elements) : elements
-    const compileArgs = [elementsArgs]
+    const compileArgs = [elements]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.

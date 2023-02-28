@@ -8,7 +8,6 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
       'eventTypes',
       'selector',
       'callback',
-      'jQuery',
       'guard',
       'baseLayer',
       'passive',

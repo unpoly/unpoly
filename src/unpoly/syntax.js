@@ -212,42 +212,6 @@ up.syntax = (function() {
   }
 
   /*-
-  Registers a function to be called when an element with
-  the given selector is inserted into the DOM. The function is called
-  with each matching element as a
-  [jQuery object](https://learn.jquery.com/using-jquery-core/jquery-object/).
-
-  If you're not using jQuery, use `up.compiler()` instead, which calls
-  the compiler function with a native element.
-
-  ### Example
-
-  This jQuery compiler will insert the current time into a
-  `<div class='current-time'></div>`:
-
-  ```js
-  up.$compiler('.current-time', function($element) {
-    var now = new Date()
-    $element.text(now.toString())
-  })
-  ```
-
-  @function up.$compiler
-  @param {string} selector
-    The selector to match.
-  @param {Object} [options]
-    See [`options` argument for `up.compiler()`](/up.compiler#parameters).
-  @param {Function($element, data)} compiler
-    The function to call when a matching element is inserted.
-
-    See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
-  @stable
-  */
-  function registerJQueryCompiler(...args) {
-    registerCompiler(...args, { jQuery: true })
-  }
-
-  /*-
   Registers a [compiler](/up.compiler) that is run before all other compilers.
 
   A macro lets you set UJS attributes that will be compiled afterwards.
@@ -307,41 +271,6 @@ up.syntax = (function() {
     return insertCompiler(registeredMacros, macro)
   }
 
-  /*-
-  Registers a [compiler](/up.compiler) that is run before all other compilers.
-  The compiler function is called with each matching element as a
-  [jQuery object](https://learn.jquery.com/using-jquery-core/jquery-object/).
-
-  If you're not using jQuery, use `up.macro()` instead, which calls
-  the macro function with a native element.
-
-  ### Example
-
-  ```js
-  up.$macro('[content-link]', function($link) {
-    $link.attr(
-      'up-target': '.content',
-      'up-transition': 'cross-fade',
-      'up-duration':'300'
-    )
-  })
-  ```
-
-  @function up.$macro
-  @param {string} selector
-    The selector to match.
-  @param {Object} options
-    See [`options` argument for `up.compiler()`](/up.compiler#parameters).
-  @param {Function(element, data)} macro
-    The function to call when a matching element is inserted.
-
-    See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
-  @stable
-  */
-  function registerJQueryMacro(...args) {
-    registerMacro(...args, { jQuery: true })
-  }
-
   function detectSystemMacroPriority(macroSelector) {
     macroSelector = u.evalOption(macroSelector)
     for (let substr in SYSTEM_MACRO_PRIORITIES) {
@@ -368,9 +297,7 @@ up.syntax = (function() {
       isDefault: up.framework.evaling,
       priority: 0,
       batch: false,
-      jQuery: false
-    }
-    )
+    })
     return Object.assign(callback, options)
   }
 
@@ -715,8 +642,6 @@ up.syntax = (function() {
   return {
     compiler: registerCompiler,
     macro: registerMacro,
-    $compiler: registerJQueryCompiler,
-    $macro: registerJQueryMacro,
     destructor: registerDestructor,
     hello,
     clean,
@@ -725,9 +650,7 @@ up.syntax = (function() {
 })()
 
 up.compiler = up.syntax.compiler
-up.$compiler = up.syntax.$compiler
 up.destructor = up.syntax.destructor
 up.macro = up.syntax.macro
-up.$macro = up.syntax.$macro
 up.data = up.syntax.data
 up.hello = up.syntax.hello

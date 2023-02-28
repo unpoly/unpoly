@@ -29,3 +29,56 @@ up.event.nobodyPrevents = function(...args) {
   const event = up.emit(...args)
   return !event.defaultPrevented
 }
+
+/*-
+Listens to an event on `document` or a given element.
+The event handler is called with the event target as a
+[jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
+
+If you're not using jQuery, use `up.on()` instead, which calls
+event handlers with a native element.
+
+### Example
+
+```
+up.$on('click', 'a', function(event, $link) {
+  console.log("Click on a link with destination %s", $element.attr('href'))
+})
+```
+
+@function up.$on
+@param {Element|jQuery} [element=document]
+  The element on which to register the event listener.
+
+  If no element is given, the listener is registered on the `document`.
+@param {string} events
+  A space-separated list of event names to bind to.
+@param {string} [selector]
+  The selector of an element on which the event must be triggered.
+  Omit the selector to listen to all events with that name, regardless
+  of the event target.
+@param {boolean} [options.passive=false]
+  Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).
+
+  A passive event listener may not call `event.preventDefault()`.
+  This in particular may improve the frame rate when registering
+  `touchstart` and `touchmove` events.
+@param {Function(event, [element], [data])} listener
+  The listener function that should be called.
+
+  The function takes the observed element as the first argument.
+  The element's [attached data](/data) is passed as a third argument.
+@return {Function()}
+  A function that unbinds the event listeners when called.
+@deprecated
+  Use `up.on()` instead.
+*/
+up.$on = function(...definitionArgs) {
+  let callback = definitionArgs.pop()
+  up.on(...definitionArgs, function(event, element, data) {
+    let $element = jQuery(element)
+    callback.call($element, event, $element, data)
+  })
+}
+
+up.$off = up.event.off; // it's the same as up.off()

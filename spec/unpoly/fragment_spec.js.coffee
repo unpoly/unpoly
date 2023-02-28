@@ -3659,15 +3659,15 @@ describe 'up.fragment', ->
           $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
           spy = jasmine.createSpy('parent spy')
-          up.$compiler '.element', ($element) ->
-            spy($element.text(), $element.parent())
+          up.compiler '.element', (element) ->
+            spy(element.innerText, element.parentElement)
           up.render
             fragment: '<div class="element">new text</div>',
             transition: 'cross-fade',
             duration: 50
 
           next =>
-            expect(spy).toHaveBeenCalledWith('new text', $parent)
+            expect(spy).toHaveBeenCalledWith('new text', $parent.get(0))
 
         it 'reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', asyncSpec (next) ->
           $container = $fixture('.container[up-viewport]').css
@@ -3737,7 +3737,7 @@ describe 'up.fragment', ->
               up.morph(oldElement, newElement, 'cross-fade', options)
 
             compiler = jasmine.createSpy('compiler')
-            up.$compiler '.element', compiler
+            up.compiler '.element', compiler
 
             expect(compiler.calls.count()).toBe(1)
 
@@ -3754,7 +3754,7 @@ describe 'up.fragment', ->
 
           it "does not call destructors multiple times (bugfix)", (done) ->
             destructor = jasmine.createSpy('destructor')
-            up.$compiler '.element', (element) ->
+            up.compiler '.element', (element) ->
               return destructor
 
             $element = $fixture('.element').text('old content')
@@ -4440,8 +4440,8 @@ describe 'up.fragment', ->
 
         it 'calls destructors on the old element', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text())
+          up.compiler '.container', (element) ->
+            -> destructor(element.innerText)
           $container = $fixture('.container').text('old text')
           up.hello($container)
           up.render('.container', document: '<div class="container">new text</div>')
@@ -4454,8 +4454,8 @@ describe 'up.fragment', ->
           up.motion.config.enabled = true
 
           destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text())
+          up.compiler '.container', (element) ->
+            -> destructor(element.innerText)
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
@@ -4473,7 +4473,7 @@ describe 'up.fragment', ->
           # shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
           up.element.isSingleton.mock().and.callFake (element) -> element.matches('.container')
           destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', -> destructor
+          up.compiler '.container', -> destructor
           $container = $fixture('.container')
           up.hello($container)
 
@@ -4500,8 +4500,8 @@ describe 'up.fragment', ->
 
         it 'marks the old element as .up-destroying before destructors after a { transition }', (done) ->
           destructor = jasmine.createSpy('destructor')
-          up.$compiler '.container', ($element) ->
-            -> destructor($element.text(), $element.is('.up-destroying'))
+          up.compiler '.container', (element) ->
+            -> destructor(element.innerText, element.matches('.up-destroying'))
           $container = $fixture('.container').text('old text')
           up.hello($container)
 
@@ -4518,8 +4518,8 @@ describe 'up.fragment', ->
 
         it 'calls destructors while the element is still attached to the DOM, so destructors see ancestry and events bubble up', asyncSpec (next) ->
           spy = jasmine.createSpy('parent spy')
-          up.$compiler '.element', ($element) ->
-            return -> spy($element.text(), $element.parent())
+          up.compiler '.element', (element) ->
+            return -> spy(element.innerText, element.parentElement)
 
           $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
@@ -4528,14 +4528,14 @@ describe 'up.fragment', ->
           up.render(fragment: '<div class="element">new text</div>')
 
           next =>
-            expect(spy).toHaveBeenCalledWith('old text', $parent)
+            expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
 
         it 'calls destructors while the element is still attached to the DOM when also using a { transition }', (done) ->
           spy = jasmine.createSpy('parent spy')
-          up.$compiler '.element', ($element) ->
+          up.compiler '.element', (element) ->
             return ->
               # We must seek .parent in our ancestry, because our direct parent() is an .up-bounds container
-              spy($element.text(), $element.closest('.parent'))
+              spy(element.innerText, element.closest('.parent'))
 
           $parent = $fixture('.parent')
           $element = $parent.affix('.element').text('old text')
@@ -4548,7 +4548,7 @@ describe 'up.fragment', ->
           )
 
           extractDone.then ->
-            expect(spy).toHaveBeenCalledWith('old text', $parent)
+            expect(spy).toHaveBeenCalledWith('old text', $parent.get(0))
             done()
 
       describe 'focus', ->
@@ -6265,8 +6265,8 @@ describe 'up.fragment', ->
         it "removes an [up-keep] element if no matching element is found in the response", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
-          up.$compiler '.bar', ($bar) ->
-            text = $bar.text()
+          up.compiler '.bar', (bar) ->
+            text = bar.innerText
             barCompiler(text)
             return -> barDestructor(text)
 
@@ -6296,8 +6296,8 @@ describe 'up.fragment', ->
         it "updates an element if a matching element is found in the response, but that other element is no longer [up-keep]", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
-          up.$compiler '.bar', ($bar) ->
-            text = $bar.text()
+          up.compiler '.bar', (bar) ->
+            text = bar.innerText
             barCompiler(text)
             return -> barDestructor(text)
 
@@ -6328,8 +6328,8 @@ describe 'up.fragment', ->
         it "updates an element if a matching element is found in the response, but that other element has [up-keep=false]", asyncSpec (next) ->
           barCompiler = jasmine.createSpy()
           barDestructor = jasmine.createSpy()
-          up.$compiler '.bar', ($bar) ->
-            text = $bar.text()
+          up.compiler '.bar', (bar) ->
+            text = bar.innerText
             barCompiler(text)
             return -> barDestructor(text)
 
@@ -6413,7 +6413,7 @@ describe 'up.fragment', ->
 
         it 'does not compile a kept element a second time', asyncSpec (next) ->
           compiler = jasmine.createSpy('compiler')
-          up.$compiler('.keeper', compiler)
+          up.compiler('.keeper', compiler)
 
           $container = $fixture('.container')
           $container.html """
@@ -6436,8 +6436,8 @@ describe 'up.fragment', ->
 
         it 'does not lose jQuery event handlers on a kept element (bugfix)', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
-          up.$compiler '.keeper', ($keeper) ->
-            $keeper.on 'click', handler
+          up.compiler '.keeper', (keeper) ->
+            keeper.addEventListener 'click', handler
 
           $container = $fixture('.container')
           $container.html """
@@ -6462,7 +6462,7 @@ describe 'up.fragment', ->
 
         it 'does not call destructors on a kept alement', asyncSpec (next) ->
           destructor = jasmine.createSpy('destructor')
-          up.$compiler '.keeper', ($keeper) ->
+          up.compiler '.keeper', (keeper) ->
             return destructor
 
           $container = $fixture('.container')
@@ -6485,7 +6485,7 @@ describe 'up.fragment', ->
         it 'calls destructors when a kept element is eventually removed from the DOM', asyncSpec (next) ->
           handler = jasmine.createSpy('event handler')
           destructor = jasmine.createSpy('destructor')
-          up.$compiler '.keeper', ($keeper) ->
+          up.compiler '.keeper', (keeper) ->
             return destructor
 
           $container = $fixture('.container')
@@ -6750,7 +6750,7 @@ describe 'up.fragment', ->
 
       it 'calls destructors for custom elements', ->
         destructor = jasmine.createSpy('destructor')
-        up.$compiler('.element', ($element) -> destructor)
+        up.compiler('.element', (element) -> destructor)
         up.hello(fixture('.element'))
         up.destroy('.element')
         expect(destructor).toHaveBeenCalled()
@@ -6790,8 +6790,8 @@ describe 'up.fragment', ->
 
       it 'waits until an { animation } is done before calling destructors', asyncSpec (next) ->
         destructor = jasmine.createSpy('destructor')
-        up.$compiler '.container', ($element) ->
-          -> destructor($element.text())
+        up.compiler '.container', (element) ->
+          -> destructor(element.innerText)
         $container = $fixture('.container').text('old text')
         up.hello($container)
 

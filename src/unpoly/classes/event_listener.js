@@ -8,7 +8,6 @@ up.EventListener = class EventListener extends up.Record {
       'eventType',
       'selector',
       'callback',
-      'jQuery',
       'guard',
       'baseLayer',
       'passive',
@@ -79,8 +78,7 @@ up.EventListener = class EventListener extends up.Record {
     }
 
     if (element) {
-      const elementArg = this.jQuery ? up.browser.jQuery(element) : element
-      const args = [event, elementArg]
+      const args = [event, element]
 
       // Do not retrieve and parse [up-data] unless the listener function
       // expects a third argument. Note that we must pass data for an argument

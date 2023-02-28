@@ -79,13 +79,6 @@ up.browser = (function() {
     }
   }
 
-  const getJQuery = function() {
-    if (!canJQuery()) {
-      up.fail('jQuery must be published as window.jQuery')
-    }
-    return jQuery
-  }
-
   /*-
   @return {boolean}
   @function up.browser.ensureConfirmed
@@ -108,6 +101,5 @@ up.browser = (function() {
     canEval,
     assertConfirmed,
     popCookie,
-    get jQuery() { return getJQuery() },
   }
 })()

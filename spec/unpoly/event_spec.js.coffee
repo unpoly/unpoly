@@ -407,20 +407,21 @@ describe 'up.event', ->
           expect(listener.calls.count()).toBe(1)
 
 
-    describe 'up.$on', ->
+    if up.migrate.loaded
+      describe 'up.$on', ->
 
-      it 'registers a delagating event listener to the document body, which passes a jQuery-wrapped element as a second argument to the listener', asyncSpec (next) ->
-        fixture('.container[data-mark=container] .child[data-mark=child]')
-        observeClass = jasmine.createSpy()
-        up.$on 'click', '.child', (event, $element) ->
-          observeClass($element.attr('data-mark'))
+        it 'registers a delagating event listener to the document body, which passes a jQuery-wrapped element as a second argument to the listener', asyncSpec (next) ->
+          fixture('.container[data-mark=container] .child[data-mark=child]')
+          observeClass = jasmine.createSpy()
+          up.$on 'click', '.child', (event, $element) ->
+            observeClass($element.attr('data-mark'))
 
-        Trigger.click($('.container'))
-        Trigger.click($('.child'))
+          Trigger.click($('.container'))
+          Trigger.click($('.child'))
 
-        next =>
-          expect(observeClass).not.toHaveBeenCalledWith('container')
-          expect(observeClass).toHaveBeenCalledWith('child')
+          next =>
+            expect(observeClass).not.toHaveBeenCalledWith('container')
+            expect(observeClass).toHaveBeenCalledWith('child')
 
 
     describe 'up.off', ->
@@ -490,18 +491,19 @@ describe 'up.event', ->
 #        expect(offing).toThrowError(/(not|never) registered/i)
 
 
-    describe 'up.$off', ->
+    if up.migrate.loaded
+      describe 'up.$off', ->
 
-      it 'unregisters an event listener previously registered through up.$on', asyncSpec (next) ->
-        $child = $fixture('.child')
-        clickSpy = jasmine.createSpy()
-        up.$on 'click', '.child', clickSpy
-        Trigger.click($('.child'))
-        up.$off 'click', '.child', clickSpy
-        Trigger.click($('.child'))
+        it 'unregisters an event listener previously registered through up.$on', asyncSpec (next) ->
+          $child = $fixture('.child')
+          clickSpy = jasmine.createSpy()
+          up.$on 'click', '.child', clickSpy
+          Trigger.click($('.child'))
+          up.$off 'click', '.child', clickSpy
+          Trigger.click($('.child'))
 
-        next =>
-          expect(clickSpy.calls.count()).toEqual(1)
+          next =>
+            expect(clickSpy.calls.count()).toEqual(1)
 
 
     describe 'up.emit', ->

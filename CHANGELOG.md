@@ -25,6 +25,8 @@ In addition to this CHANGELOG, there is also a [slide deck](http://triskweline.d
 - Response#header
   - renamed
   - now stable
+- Deprecated up.$compiler, up.$macro
+- Deprecated up.$on
 
 
 ### Overview ✔️
