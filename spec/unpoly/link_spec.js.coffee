@@ -1,4 +1,5 @@
 u = up.util
+e = up.element
 $ = jQuery
 
 describe 'up.link', ->
@@ -10,41 +11,44 @@ describe 'up.link', ->
     describe 'up.follow', ->
 
       it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->
-        $fixture('.before').text('old-before')
-        $fixture('.middle').text('old-middle')
-        $fixture('.after').text('old-after')
-        $link = $fixture('a[href="/path"][up-target=".middle"]')
+        fixture('.before', text: 'old-before')
+        fixture('.middle', text: 'old-middle')
+        fixture('.after', text: 'old-after')
+        link = fixture('a[href="/path"][up-target=".middle"]')
 
-        up.follow($link)
+        up.follow(link)
 
-        next =>
-          @respondWith """
+        next ->
+          jasmine.respondWith """
             <div class="before">new-before</div>
             <div class="middle">new-middle</div>
             <div class="after">new-after</div>
             """
 
-        next =>
-          expect($('.before')).toHaveText('old-before')
-          expect($('.middle')).toHaveText('new-middle')
-          expect($('.after')).toHaveText('old-after')
+        next ->
+          expect('.before').toHaveText('old-before')
+          expect('.middle').toHaveText('new-middle')
+          expect('.after').toHaveText('old-after')
 
       it 'uses the method from a data-method attribute', asyncSpec (next) ->
-        $link = $fixture('a[href="/path"][data-method="PUT"]')
-        up.follow($link)
+        link = fixture('a[href="/path"][data-method="PUT"]')
+        up.follow(link)
 
-        next =>
-          request = @lastRequest()
+        next ->
+          request = jasmine.lastRequest()
           expect(request).toHaveRequestMethod('PUT')
 
       it 'allows to refer to the link itself as ":origin" in the CSS selector', asyncSpec (next) ->
-        $container = $fixture('div')
-        $link1 = $('<a id="first" href="/path" up-target=":origin">first-link</a>').appendTo($container)
-        $link2 = $('<a id="second" href="/path" up-target=":origin">second-link</a>').appendTo($container)
-        up.follow($link2)
+        container = fixture('div')
+        link1 = e.createFromHTML('<a id="first" href="/path" up-target=":origin">first-link</a>')
+        container.append(link1)
 
-        next => @respondWith '<div id="second">second-div</div>'
-        next => expect($container.text()).toBe('first-linksecond-div')
+        link2 = e.createFromHTML('<a id="second" href="/path" up-target=":origin">second-link</a>')
+        container.append(link2)
+        up.follow(link2)
+
+        next -> jasmine.respondWith '<div id="second">second-div</div>'
+        next -> expect(container).toHaveText('first-linksecond-div')
 
       it 'returns a promise with an up.RenderResult that contains information about the updated fragments and layer', asyncSpec (next) ->
         fixture('.one', text: 'old one')
@@ -109,19 +113,19 @@ describe 'up.link', ->
       describe 'events', ->
 
         it 'emits a preventable up:link:follow event', asyncSpec (next) ->
-          $link = $fixture('a[href="/destination"][up-target=".response"]')
+          link = fixture('a[href="/destination"][up-target=".response"]')
 
           listener = jasmine.createSpy('follow listener').and.callFake (event) ->
             event.preventDefault()
 
-          $link.on('up:link:follow', listener)
+          link.addEventListener('up:link:follow', listener)
 
-          up.follow($link)
+          up.follow(link)
 
           next =>
             expect(listener).toHaveBeenCalled()
             event = listener.calls.mostRecent().args[0]
-            expect(event.target).toEqual($link[0])
+            expect(event.target).toEqual(link)
 
             # No request should be made because we prevented the event
             expect(jasmine.Ajax.requests.count()).toEqual(0)
@@ -158,33 +162,33 @@ describe 'up.link', ->
           $container = $fixture('.container')
           $target = $fixture('.target').appendTo($container).text('original text')
 
-          up.follow($link1)
+          up.follow($link1.get(0))
 
           next =>
             respondWith('text from one', 'title from one')
 
           next =>
-            expect($('.target')).toHaveText('text from one')
+            expect('.target').toHaveText('text from one')
             expect(location.pathname).toEqual('/one')
             expect(document.title).toEqual('title from one')
 
-            up.follow($link2)
+            up.follow($link2.get(0))
 
           next =>
             respondWith('text from two', 'title from two')
 
           next =>
-            expect($('.target')).toHaveText('text from two')
+            expect('.target').toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
             expect(document.title).toEqual('title from two')
 
-            up.follow($link3)
+            up.follow($link3.get(0))
 
           next =>
             respondWith('text from three', 'title from three')
 
           next =>
-            expect($('.target')).toHaveText('text from three')
+            expect('.target').toHaveText('text from three')
             expect(location.pathname).toEqual('/three')
             expect(document.title).toEqual('title from three')
 
@@ -194,7 +198,7 @@ describe 'up.link', ->
             respondWith('restored text from two', 'restored title from two')
 
           next =>
-            expect($('.target')).toHaveText('restored text from two')
+            expect('.target').toHaveText('restored text from two')
             expect(location.pathname).toEqual('/two')
             expect(document.title).toEqual('restored title from two')
 
@@ -204,7 +208,7 @@ describe 'up.link', ->
             respondWith('restored text from one', 'restored title from one')
 
           next =>
-            expect($('.target')).toHaveText('restored text from one')
+            expect('.target').toHaveText('restored text from one')
             expect(location.pathname).toEqual('/one')
             expect(document.title).toEqual('restored title from one')
 
@@ -212,7 +216,7 @@ describe 'up.link', ->
 
           next.after waitForBrowser, =>
             # Since the response is cached, we don't have to respond
-            expect($('.target')).toHaveText('restored text from two')
+            expect('.target').toHaveText('restored text from two')
             expect(location.pathname).toEqual('/two')
             expect(document.title).toEqual('restored title from two')
 
@@ -283,31 +287,31 @@ describe 'up.link', ->
           $container = $fixture('.container')
           $target = $fixture('.target').appendTo($container).text('original text')
 
-          up.follow($link1)
+          up.follow($link1.get(0))
 
           next =>
             respondWith('text from one')
 
           next =>
-            expect($('.target')).toHaveText('text from one')
+            expect('.target').toHaveText('text from one')
             expect(location.pathname).toEqual('/one')
 
-            up.follow($link2)
+            up.follow($link2.get(0))
 
           next =>
             respondWith('text from two')
 
           next =>
-            expect($('.target')).toHaveText('text from two')
+            expect('.target').toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
 
-            up.follow($link2)
+            up.follow($link2.get(0))
 
           next =>
             respondWith('text from two')
 
           next =>
-            expect($('.target')).toHaveText('text from two')
+            expect('.target').toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
 
             history.back()
@@ -316,7 +320,7 @@ describe 'up.link', ->
             respondWith('restored text from one')
 
           next =>
-            expect($('.target')).toHaveText('restored text from one')
+            expect('.target').toHaveText('restored text from one')
             expect(location.pathname).toEqual('/one')
 
             history.forward()
@@ -325,7 +329,7 @@ describe 'up.link', ->
             respondWith('restored text from two')
 
           next =>
-            expect($('.target')).toHaveText('restored text from two')
+            expect('.target').toHaveText('restored text from two')
             expect(location.pathname).toEqual('/two')
 
         it 'does add additional history entries when linking to the current URL, but with a different hash', asyncSpec (next) ->
@@ -355,13 +359,13 @@ describe 'up.link', ->
           $container = $fixture('.container')
           $target = $fixture('.target').appendTo($container).text('original text')
 
-          up.follow($link1)
+          up.follow($link1.get(0))
 
           next =>
             respondWith('text from one')
 
           next =>
-            expect($('.target')).toHaveText('text from one')
+            expect('.target').toHaveText('text from one')
             expect(location.pathname).toEqual('/one')
             expect(location.hash).toEqual('')
 
@@ -371,17 +375,17 @@ describe 'up.link', ->
             respondWith('text from two')
 
           next =>
-            expect($('.target')).toHaveText('text from two')
+            expect('.target').toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('')
 
-            up.follow($link2WithHash)
+            up.follow($link2WithHash.get(0))
 
           next =>
             respondWith('text from two with hash')
 
           next =>
-            expect($('.target')).toHaveText('text from two with hash')
+            expect('.target').toHaveText('text from two with hash')
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('#hash')
 
@@ -391,7 +395,7 @@ describe 'up.link', ->
             respondWith('restored text from two')
 
           next =>
-            expect($('.target')).toHaveText('restored text from two')
+            expect('.target').toHaveText('restored text from two')
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('')
 
@@ -401,7 +405,7 @@ describe 'up.link', ->
             respondWith('restored text from two with hash')
 
           next =>
-            expect($('.target')).toHaveText('restored text from two with hash')
+            expect('.target').toHaveText('restored text from two with hash')
             expect(location.pathname).toEqual('/two')
             expect(location.hash).toEqual('#hash')
 
@@ -434,13 +438,13 @@ describe 'up.link', ->
 
         describe 'with { scroll: "target" }', ->
 
-          it 'reaveals the target fragment', asyncSpec (next) ->
+          it 'reveals the target fragment', asyncSpec (next) ->
             $link = $fixture('a[href="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.follow($link, scroll: 'target')
+            up.follow($link.get(0), scroll: 'target')
 
             next =>
               @respondWith('<div class="target">new text</div>')
@@ -452,16 +456,16 @@ describe 'up.link', ->
         describe 'with { failScroll: "target" }', ->
 
           it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
-            $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-            $target = $fixture('.target')
-            $failTarget = $fixture('.fail-target')
+            link = fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+            target = fixture('.target')
+            failTarget = fixture('.fail-target')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.follow($link, failScroll: "target")
+            up.follow(link, failScroll: "target")
 
-            next =>
-              @respondWith
+            next ->
+              jasmine.respondWith
                 status: 500,
                 responseText: """
                   <div class="fail-target">
@@ -476,16 +480,16 @@ describe 'up.link', ->
         describe 'with { scroll: string } option', ->
 
           it 'allows to reveal a different selector', asyncSpec (next) ->
-            $link = $fixture('a[href="/action"][up-target=".target"]')
-            $target = $fixture('.target')
-            $other = $fixture('.other')
+            link = fixture('a[href="/action"][up-target=".target"]')
+            target = fixture('.target')
+            other = fixture('.other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.follow($link, scroll: '.other')
+            up.follow(link, scroll: '.other')
 
-            next =>
-              @respondWith """
+            next ->
+              jasmine.respondWith """
                 <div class="target">
                   new text
                 </div>
@@ -494,22 +498,22 @@ describe 'up.link', ->
                 </div>
               """
 
-            next =>
+            next ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
           it 'ignores the { scroll } option for a failed response', asyncSpec (next) ->
-            $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-            $target = $fixture('.target')
-            $failTarget = $fixture('.fail-target')
-            $other = $fixture('.other')
+            link = fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+            target = fixture('.target')
+            failTarget = fixture('.fail-target')
+            other = fixture('.other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.follow($link, scroll: '.other', failTarget: '.fail-target')
+            up.follow(link, scroll: '.other', failTarget: '.fail-target')
 
-            next =>
-              @respondWith
+            next ->
+              jasmine.respondWith
                 status: 500,
                 responseText: """
                   <div class="fail-target">
@@ -523,18 +527,18 @@ describe 'up.link', ->
         describe 'with { failScroll } option', ->
 
           it 'reveals the given selector when the server responds with an error', asyncSpec (next) ->
-            $link = $fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
-            $target = $fixture('.target')
-            $failTarget = $fixture('.fail-target')
-            $other = $fixture('.other')
-            $failOther = $fixture('.fail-other')
+            link = fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
+            target = fixture('.target')
+            failTarget = fixture('.fail-target')
+            other = fixture('.other')
+            failOther = fixture('.fail-other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.follow($link, reveal: '.other', failScroll: '.fail-other')
+            up.follow(link, reveal: '.other', failScroll: '.fail-other')
 
-            next =>
-              @respondWith
+            next ->
+              jasmine.respondWith
                 status: 500,
                 responseText: """
                   <div class="fail-target">
@@ -545,7 +549,7 @@ describe 'up.link', ->
                   </div>
                   """
 
-            next =>
+            next ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-other')
 
@@ -563,7 +567,7 @@ describe 'up.link', ->
 
             followLink = (options = {}) ->
               $link = $viewport.find('.link')
-              up.follow($link, options)
+              up.follow($link.get(0), options)
 
             respond = (linkDestination) =>
               @respondWith """
@@ -606,16 +610,16 @@ describe 'up.link', ->
 
         it 'follows the link after the user OKs a confirmation dialog', asyncSpec (next) ->
           spyOn(window, 'confirm').and.returnValue(true)
-          $link = $fixture('a[href="/danger"][up-target=".middle"]')
-          up.follow($link, confirm: 'Do you really want to go there?')
+          link = fixture('a[href="/danger"][up-target=".middle"]')
+          up.follow(link, confirm: 'Do you really want to go there?')
 
           next =>
             expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
 
         it 'does not follow the link if the user cancels the confirmation dialog', asyncSpec (next) ->
           spyOn(window, 'confirm').and.returnValue(false)
-          $link = $fixture('a[href="/danger"][up-target=".middle"]')
-          up.follow($link, confirm: 'Do you really want to go there?')
+          link = fixture('a[href="/danger"][up-target=".middle"]')
+          up.follow(link, confirm: 'Do you really want to go there?')
 
           next =>
             expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
@@ -623,8 +627,8 @@ describe 'up.link', ->
         it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
           spyOn(up, 'render').and.returnValue(Promise.resolve())
           spyOn(window, 'confirm')
-          $link = $fixture('a[href="/danger"][up-target=".middle"]')
-          up.follow($link, confirm: '')
+          link = fixture('a[href="/danger"][up-target=".middle"]')
+          up.follow(link, confirm: '')
 
           next =>
             expect(window.confirm).not.toHaveBeenCalled()
@@ -633,8 +637,8 @@ describe 'up.link', ->
         it 'does not show a confirmation dialog when preloading', asyncSpec (next) ->
           spyOn(up, 'render').and.returnValue(Promise.resolve())
           spyOn(window, 'confirm')
-          $link = $fixture('a[href="/danger"][up-target=".middle"]')
-          up.follow($link, confirm: 'Are you sure?', preload: true)
+          link = fixture('a[href="/danger"][up-target=".middle"]')
+          up.follow(link, confirm: 'Are you sure?', preload: true)
 
           next =>
             expect(window.confirm).not.toHaveBeenCalled()
@@ -1065,7 +1069,7 @@ describe 'up.link', ->
           @respondWith('<div class="target">new text</div>')
 
         next =>
-          expect($('.target')).toHaveText('new text')
+          expect('.target').toHaveText('new text')
 
 
       it 'adds a history entry', asyncSpec (next) ->
@@ -1080,7 +1084,7 @@ describe 'up.link', ->
           @respondWith('<div class="target">new text</div>')
 
         next.after 1000, =>
-          expect($('.target')).toHaveText('new text')
+          expect('.target').toHaveText('new text')
           expect(location.pathname).toEqual('/new-path')
 
       it 'respects a X-Up-Location header that the server sends in case of a redirect', asyncSpec (next) ->
@@ -1096,7 +1100,7 @@ describe 'up.link', ->
             responseHeaders: { 'X-Up-Location': '/other/path' }
 
         next =>
-          expect($('.target')).toHaveText('new text')
+          expect('.target').toHaveText('new text')
           expect(location.pathname).toEqual('/other/path')
 
       describe 'choice of target layer', ->
@@ -1109,8 +1113,8 @@ describe 'up.link', ->
           up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
           next =>
-            expect($('.document .target')).toHaveText('old document text')
-            expect($('up-modal .target')).toHaveText('old modal text')
+            expect('.document .target').toHaveText('old document text')
+            expect('up-modal .target').toHaveText('old modal text')
 
             $linkInModal = $('up-modal-content').affix('a[href="/bar"][up-target=".target"]').text('link label')
             Trigger.clickSequence($linkInModal)
@@ -1119,8 +1123,8 @@ describe 'up.link', ->
             @respondWith '<div class="target">new text from modal link</div>'
 
           next =>
-            expect($('.document .target')).toHaveText('old document text')
-            expect($('up-modal .target')).toHaveText('new text from modal link')
+            expect('.document .target').toHaveText('old document text')
+            expect('up-modal .target').toHaveText('new text from modal link')
 
         describe 'with [up-layer] modifier', ->
 
@@ -1132,8 +1136,8 @@ describe 'up.link', ->
             up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
             next =>
-              expect($('.document .target')).toHaveText('old document text')
-              expect($('up-modal .target')).toHaveText('old modal text')
+              expect('.document .target').toHaveText('old document text')
+              expect('up-modal .target').toHaveText('old modal text')
 
               $linkInModal = $('up-modal-content').affix('a[href="/bar"][up-target=".target"][up-layer="parent"][up-peel="false"]')
               Trigger.clickSequence($linkInModal)
@@ -1142,16 +1146,16 @@ describe 'up.link', ->
               @respondWith '<div class="target">new text from modal link</div>'
 
             next =>
-              expect($('.document .target')).toHaveText('new text from modal link')
-              expect($('up-modal .target')).toHaveText('old modal text')
+              expect('.document .target').toHaveText('new text from modal link')
+              expect('up-modal .target').toHaveText('old modal text')
 
           it 'ignores [up-layer] if the server responds with an error', asyncSpec (next) ->
             $fixture('.document').affix('.target').text('old document text')
             up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
             next =>
-              expect($('.document .target')).toHaveText('old document text')
-              expect($('up-modal .target')).toHaveText('old modal text')
+              expect('.document .target').toHaveText('old document text')
+              expect('up-modal .target').toHaveText('old modal text')
 
               $linkInModal = $('up-modal-content').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-layer="parent"][up-peel="false"]')
               Trigger.clickSequence($linkInModal)
@@ -1162,16 +1166,16 @@ describe 'up.link', ->
                 status: 500
 
             next =>
-              expect($('.document .target')).toHaveText('old document text')
-              expect($('up-modal .target')).toHaveText('new failure text from modal link')
+              expect('.document .target').toHaveText('old document text')
+              expect('up-modal .target').toHaveText('new failure text from modal link')
 
           it 'allows to name a layer for a non-200 response using an [up-fail-layer] modifier', asyncSpec (next) ->
             $fixture('.document').affix('.target').text('old document text')
             up.layer.open(fragment: "<div class='target'>old modal text</div>")
 
             next =>
-              expect($('.document .target')).toHaveText('old document text')
-              expect($('up-modal .target')).toHaveText('old modal text')
+              expect('.document .target').toHaveText('old document text')
+              expect('up-modal .target').toHaveText('old modal text')
 
               $linkInModal = $('up-modal-content').affix('a[href="/bar"][up-target=".target"][up-fail-target=".target"][up-fail-layer="parent"][up-fail-peel="false"]')
               Trigger.clickSequence($linkInModal)
@@ -1182,8 +1186,8 @@ describe 'up.link', ->
                 status: 500
 
             next =>
-              expect($('.document .target')).toHaveText('new failure text from modal link')
-              expect($('up-modal .target')).toHaveText('old modal text')
+              expect('.document .target').toHaveText('new failure text from modal link')
+              expect('up-modal .target').toHaveText('old modal text')
 
       describe 'with [up-fail-target] modifier', ->
 
@@ -1199,8 +1203,8 @@ describe 'up.link', ->
             @respondWith('<div class="failure-target">new failure text</div>', status: 500)
 
           next =>
-            expect($('.success-target')).toHaveText('old success text')
-            expect($('.failure-target')).toHaveText('new failure text')
+            expect('.success-target').toHaveText('old success text')
+            expect('.failure-target').toHaveText('new failure text')
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
@@ -1214,30 +1218,30 @@ describe 'up.link', ->
             @respondWith('<div class="success-target">new success text</div>', status: 200)
 
           next =>
-            expect($('.success-target')).toHaveText('new success text')
-            expect($('.failure-target')).toHaveText('old failure text')
+            expect('.success-target').toHaveText('new success text')
+            expect('.failure-target').toHaveText('old failure text')
 
       describe 'with [up-transition] modifier', ->
 
         it 'morphs between the old and new target element', asyncSpec (next) ->
-          $fixture('.target.old')
-          $link = $fixture('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="600"][up-easing="linear"]')
-          Trigger.clickSequence($link)
+          fixture('.target.old')
+          link = fixture('a[href="/path"][up-target=".target"][up-transition="cross-fade"][up-duration="600"][up-easing="linear"]')
+          Trigger.clickSequence(link)
 
           next =>
-            @respondWith '<div class="target new">new text</div>'
+            jasmine.respondWith '<div class="target new">new text</div>'
 
           next =>
-            @$oldGhost = $('.target.old')
-            @$newGhost = $('.target.new')
-            expect(@$oldGhost).toBeAttached()
-            expect(@$newGhost).toBeAttached()
-            expect(@$oldGhost).toHaveOpacity(1, 0.15)
-            expect(@$newGhost).toHaveOpacity(0, 0.15)
+            @oldGhost = document.querySelector('.target.old')
+            @newGhost = document.querySelector('.target.new')
+            expect(@oldGhost).toBeAttached()
+            expect(@newGhost).toBeAttached()
+            expect(@oldGhost).toHaveOpacity(1, 0.15)
+            expect(@newGhost).toHaveOpacity(0, 0.15)
 
           next.after 300, =>
-            expect(@$oldGhost).toHaveOpacity(0.5, 0.15)
-            expect(@$newGhost).toHaveOpacity(0.5, 0.15)
+            expect(@oldGhost).toHaveOpacity(0.5, 0.15)
+            expect(@newGhost).toHaveOpacity(0.5, 0.15)
 
         it 'does not crash when updating a main element (fix for issue #187)', asyncSpec (next) ->
           fixture('main.target.old')
@@ -1362,7 +1366,7 @@ describe 'up.link', ->
             responseHeaders: { 'X-Up-Location': '/other/path' }
 
         next =>
-          expect($('.target')).toHaveText('new text')
+          expect('.target').toHaveText('new text')
           expect(location.pathname).toEqual(oldPathname)
 
     describe 'a[up-follow]', ->

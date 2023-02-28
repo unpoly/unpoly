@@ -458,8 +458,8 @@ describe 'up.radio', ->
             layer: 'front'
 
           expect(closeEventHandler).not.toHaveBeenCalled()
-          expect($('.inside')).toHaveText('new inside')
-          expect($('.outside')).toHaveText('old outside')
+          expect('.inside').toHaveText('new inside')
+          expect('.outside').toHaveText('old outside')
 
         it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-if-layer=any]', ->
           up.layer.config.openDuration = 0
@@ -491,8 +491,8 @@ describe 'up.radio', ->
             layer: 'front'
 
           expect(closeEventHandler).not.toHaveBeenCalled()
-          expect($('.inside')).toHaveText('new inside')
-          expect($('.outside')).toHaveText('new outside')
+          expect('.inside').toHaveText('new inside')
+          expect('.outside').toHaveText('new outside')
 
       describe 'restriction by history', ->
 

@@ -24,6 +24,10 @@ up.specUtil = do ->
   isHidden = (element) ->
     $(element).is(':hidden')
 
+  findElementContainingText = (selector, text) ->
+    elements = document.querySelectorAll(selector)
+    u.find(elements, (element) -> element.innerText.contains(text))
+
   ###**
   @function up.util.promiseTimer
   @internal
@@ -41,6 +45,8 @@ up.specUtil = do ->
   isVisible: isVisible
   isHidden: isHidden
   promiseTimer: promiseTimer
+  findElementContainingText: findElementContainingText
+
 
 
 

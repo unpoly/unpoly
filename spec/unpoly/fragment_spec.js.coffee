@@ -515,7 +515,7 @@ describe 'up.fragment', ->
 
           next =>
             expect(resolution).toHaveBeenCalled()
-            expect($('.target')).toHaveText('new-text')
+            expect('.target').toHaveText('new-text')
 
         it 'runs an { onRendered } callback when the server response was received and the fragments were swapped', asyncSpec (next) ->
           fixture('.target')
@@ -529,7 +529,7 @@ describe 'up.fragment', ->
 
           next =>
             expect(callback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
-            expect($('.target')).toHaveText('new-text')
+            expect('.target').toHaveText('new-text')
 
         it 'uses a HTTP method given as { method } option', asyncSpec (next) ->
           fixture('.target')
@@ -1608,9 +1608,9 @@ describe 'up.fragment', ->
           up.render('.middle', { document })
 
           next ->
-            expect($('.before')).toHaveText('old-before')
-            expect($('.middle')).toHaveText('new-middle')
-            expect($('.after')).toHaveText('old-after')
+            expect('.before').toHaveText('old-before')
+            expect('.middle').toHaveText('new-middle')
+            expect('.after').toHaveText('old-after')
 
         it 'derives a selector from an element given as { target } option', asyncSpec (next) ->
           target = fixture('.target', text: 'old-text')
@@ -1655,9 +1655,9 @@ describe 'up.fragment', ->
           up.render({ fragment })
 
           next ->
-            expect($('.before')).toHaveText('old-before')
-            expect($('.middle')).toHaveText('new-middle')
-            expect($('.after')).toHaveText('old-after')
+            expect('.before').toHaveText('old-before')
+            expect('.middle').toHaveText('new-middle')
+            expect('.after').toHaveText('old-after')
 
         it 'derives target and outer HTML from the given { fragment } element', asyncSpec (next) ->
           fixture('.target', text: 'old text')
@@ -1824,9 +1824,9 @@ describe 'up.fragment', ->
               <div class="after">new-after</div>
               """
             next ->
-              expect($('.before')).toHaveText('new-beforeold-before')
-              expect($('.middle')).toHaveText('new-middle')
-              expect($('.after')).toHaveText('old-afternew-after')
+              expect('.before').toHaveText('new-beforeold-before')
+              expect('.middle').toHaveText('new-middle')
+              expect('.after').toHaveText('old-afternew-after')
 
           it 'replaces multiple selectors separated with a comma', asyncSpec (next) ->
             fixture('.before', text: 'old-before')
@@ -1840,9 +1840,9 @@ describe 'up.fragment', ->
               """
 
             next ->
-              expect($('.before')).toHaveText('old-before')
-              expect($('.middle')).toHaveText('new-middle')
-              expect($('.after')).toHaveText('new-after')
+              expect('.before').toHaveText('old-before')
+              expect('.middle').toHaveText('new-middle')
+              expect('.after').toHaveText('new-after')
 
         describe 'optional targets', ->
 
@@ -2067,8 +2067,8 @@ describe 'up.fragment', ->
                 next.await(promise)
 
               next =>
-                expect($('#first span')).toHaveText('old first')
-                expect($('#second span')).toHaveText('new second')
+                expect('#first span').toHaveText('old first')
+                expect('#second span').toHaveText('new second')
 
           describe ':layer', ->
 
@@ -2130,9 +2130,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).toBeAttached()
+              expect('.inner').toBeAttached()
               expect($('.inner').text()).toContain('new inner text')
 
             next.await =>
@@ -2158,9 +2158,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).toBeAttached()
+              expect('.inner').toBeAttached()
               expect($('.inner').text()).toContain('new inner text')
 
             next.await =>
@@ -2187,10 +2187,10 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('new outer text')
               expect($('.outer').text()).toContain('old outer text')
-              expect($('.inner')).toBeAttached()
+              expect('.inner').toBeAttached()
               expect($('.inner').text()).toContain('new inner text')
 
             next.await =>
@@ -2216,10 +2216,10 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('old outer text')
               expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).toBeAttached()
+              expect('.inner').toBeAttached()
               expect($('.inner').text()).toContain('new inner text')
 
             next.await =>
@@ -2254,9 +2254,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).toBeAttached()
+              expect('.inner').toBeAttached()
               expect($('.inner').text()).toContain('new inner text')
 
             next.await =>
@@ -2287,9 +2287,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).toBeAttached()
+              expect('.inner').toBeAttached()
               expect($('.inner').text()).toContain('new inner text')
 
               expect(revealStub).toHaveBeenCalled()
@@ -2313,9 +2313,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.outer')).toBeAttached()
+              expect('.outer').toBeAttached()
               expect($('.outer').text()).toContain('new outer text')
-              expect($('.inner')).not.toBeAttached()
+              expect('.inner').not.toBeAttached()
 
             next.await =>
               promise = promiseState(replacePromise)
@@ -2338,9 +2338,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.one')).toBeAttached()
+              expect('.one').toBeAttached()
               expect($('.one').text()).toContain('new one text')
-              expect($('.two')).toBeAttached()
+              expect('.two').toBeAttached()
               expect($('.two').text()).toContain('new two text')
 
             next.await =>
@@ -2364,9 +2364,9 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.one')).toBeAttached()
+              expect('.one').toBeAttached()
               expect($('.one').text()).toContain('new one text')
-              expect($('.two')).toBeAttached()
+              expect('.two').toBeAttached()
               expect($('.two').text()).toContain('new two text')
 
             next.await =>
@@ -2388,7 +2388,7 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.one')).toBeAttached()
+              expect('.one').toBeAttached()
               expect($('.one').text()).toContain('new one text')
 
             next.await =>
@@ -2411,7 +2411,7 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.one')).toBeAttached()
+              expect('.one').toBeAttached()
               expect($('.one').text()).toMatchText('new one text old one text')
 
             next.await =>
@@ -3138,7 +3138,7 @@ describe 'up.fragment', ->
               """
 
             next =>
-              expect($('.container')).toHaveText('new container text')
+              expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from HTML')
 
           it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
@@ -3156,7 +3156,7 @@ describe 'up.fragment', ->
                   """
 
             next =>
-              expect($('.container')).toHaveText('new container text')
+              expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from header')
 
           it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
@@ -3181,7 +3181,7 @@ describe 'up.fragment', ->
                 """
 
             next =>
-              expect($('.container')).toHaveText('new container text')
+              expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from header')
 
           it "sets the document title to the response <title> with { location: false, title: true } options (bugfix)", asyncSpec (next) ->
@@ -3203,7 +3203,7 @@ describe 'up.fragment', ->
               """
 
             next =>
-              expect($('.container')).toHaveText('new container text')
+              expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from HTML')
 
           it 'does not update the document title if the response has a <title> tag inside an inline SVG image (bugfix)', asyncSpec (next) ->
@@ -3226,7 +3226,7 @@ describe 'up.fragment', ->
               """
 
             next =>
-              expect($('.container')).toHaveText('new container text')
+              expect('.container').toHaveText('new container text')
               expect(document.title).toBe(oldTitle)
 
           it "does not extract the title from the response or HTTP header with { title: false }", asyncSpec (next) ->
@@ -3273,7 +3273,7 @@ describe 'up.fragment', ->
               """
 
             next =>
-              expect($('.container')).toHaveText('new container text')
+              expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from options')
 
           it "sets document.title after calling history.pushState() to prevent mutating the old history state", asyncSpec (next) ->
@@ -3439,7 +3439,7 @@ describe 'up.fragment', ->
           up.motion.config.enabled = true
 
         it 'morphs between the old and new element', asyncSpec (next) ->
-          $fixture('.element.v1').text('version 1')
+          fixture('.element.v1', text: 'version 1')
           up.render('.element',
             document: '<div class="element v2">version 2</div>',
             transition: 'cross-fade',
@@ -3447,26 +3447,23 @@ describe 'up.fragment', ->
             easing: 'linear'
           )
 
-          $old = undefined
-          $new = undefined
+          oldElement = undefined
+          newElement = undefined
 
-          next =>
-            $old = $('.element.v1')
-            $new = $('.element.v2')
+          next ->
+            oldElement = document.querySelector('.element.v1')
+            newElement = document.querySelector('.element.v2')
 
-            expect($old).toHaveLength(1)
-            expect($old).toHaveOpacity(1.0, 0.15)
+            expect(oldElement).toHaveOpacity(1.0, 0.15)
+            expect(newElement).toHaveOpacity(0.0, 0.15)
 
-            expect($new).toHaveLength(1)
-            expect($new).toHaveOpacity(0.0, 0.15)
+          next.after 100, ->
+            expect(oldElement).toHaveOpacity(0.5, 0.3)
+            expect(newElement).toHaveOpacity(0.5, 0.3)
 
-          next.after 100, =>
-            expect($old).toHaveOpacity(0.5, 0.3)
-            expect($new).toHaveOpacity(0.5, 0.3)
-
-          next.after (100 + 70), =>
-            expect($new).toHaveOpacity(1.0, 0.1)
-            expect($old).toBeDetached()
+          next.after (100 + 70), ->
+            expect(newElement).toHaveOpacity(1.0, 0.1)
+            expect(oldElement).toBeDetached()
 
 
         it 'ignores a { transition } option when replacing a singleton element like <body>', asyncSpec (next) ->
@@ -3488,10 +3485,10 @@ describe 'up.fragment', ->
             # See that we've already immediately swapped the element and ignored the duration of 200ms
             expect(renderDone).toHaveBeenCalled()
             expect($('fake-body').length).toEqual(1)
-            expect($('fake-body')).toHaveOpacity(1.0)
+            expect('fake-body').toHaveOpacity(1.0)
 
         it 'marks the old fragment as .up-destroying during the transition', asyncSpec (next) ->
-          $fixture('.element').text('version 1')
+          fixture('.element', text: 'version 1')
           up.render(
             fragment: '<div class="element">version 2</div>',
             transition: 'cross-fade',
@@ -3499,13 +3496,11 @@ describe 'up.fragment', ->
           )
 
           next =>
-            $version1 = $('.element:contains("version 1")')
-            expect($version1).toHaveLength(1)
-            expect($version1).toHaveClass('up-destroying')
+            version1 = up.specUtil.findElementContainingText('.element', "version 1")
+            expect(version1).toHaveClass('up-destroying')
 
-            $version2 = $('.element:contains("version 2")')
-            expect($version2).toHaveLength(1)
-            expect($version2).not.toHaveClass('up-destroying')
+            version2 = up.specUtil.findElementContainingText('.element', "version 2")
+            expect(version2).not.toHaveClass('up-destroying')
 
         # render with { transition } option
         it 'runs an { onFinished } callback after the element has been removed from the DOM', (done) ->
@@ -3793,8 +3788,8 @@ describe 'up.fragment', ->
               duration: 200
             )
             next =>
-              expect($('.element')).toHaveText('version 2')
-              expect($('.up-ghost')).toHaveLength(0)
+              expect('.element').toHaveText('version 2')
+              expect('.up-ghost').toHaveLength(0)
 
           it "replaces the elements directly, since first inserting and then removing would shift scroll positions", asyncSpec (next) ->
             swapDirectlySpy = up.motion.swapElementsDirectly.mock()
@@ -3906,7 +3901,7 @@ describe 'up.fragment', ->
               # This is not possible for container-less text nodes.
               expect(@revealedHTML).toEqual ['<up-wrapper>new target text</up-wrapper>']
               # Show that the wrapper is done after the insertion.
-              expect($('up-wrapper')).not.toBeAttached()
+              expect('up-wrapper').not.toBeAttached()
 
           it 'reveals a new element that is being prepended', asyncSpec (next) ->
             fixture('.target')
@@ -3921,7 +3916,7 @@ describe 'up.fragment', ->
               # This is not possible for container-less text nodes.
               expect(@revealedHTML).toEqual ['<up-wrapper>new target text</up-wrapper>']
               # Show that the wrapper is done after the insertion.
-              expect($('up-wrapper')).not.toBeAttached()
+              expect('up-wrapper').not.toBeAttached()
 
         describe 'with { scroll: "hash" }', ->
 
@@ -6086,9 +6081,9 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('.before')).toHaveText('new-before')
-            expect($('.middle')).toHaveText('old-middle')
-            expect($('.after')).toHaveText('new-after')
+            expect('.before').toHaveText('new-before')
+            expect('.middle').toHaveText('old-middle')
+            expect('.after').toHaveText('new-after')
 
         it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
           up.fragment.config.targetDerivers.unshift('middle-element')
@@ -6112,9 +6107,9 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('before-element')).toHaveText('new-before')
-            expect($('middle-element')).toHaveText('old-middle')
-            expect($('after-element')).toHaveText('new-after')
+            expect('before-element').toHaveText('new-before')
+            expect('middle-element').toHaveText('old-middle')
+            expect('after-element').toHaveText('new-after')
 
         it 'keeps an [up-keep] element, but does replace text nodes around it', asyncSpec (next) ->
           $container = $fixture('.container')
@@ -6150,9 +6145,9 @@ describe 'up.fragment', ->
           """)
 
           promise.then (result) ->
-            expect($('.before')).toHaveText('new-before')
-            expect($('.middle')).toHaveText('old-middle') # was kept
-            expect($('.after')).toHaveText('old-after')
+            expect('.before').toHaveText('new-before')
+            expect('.middle').toHaveText('old-middle') # was kept
+            expect('.after').toHaveText('old-after')
 
             expect(result.fragments.length).toBe(1)
             expect(result.fragments[0]).toMatchSelector('.before')
@@ -6249,7 +6244,7 @@ describe 'up.fragment', ->
             up.render fragment: "<div class='keeper' up-keep>new-inside</div>"
 
             next =>
-              expect($('.keeper')).toHaveText('old-inside')
+              expect('.keeper').toHaveText('old-inside')
 
           it "only emits an event up:fragment:keep, but not an event up:fragment:inserted", asyncSpec (next) ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
@@ -6292,8 +6287,8 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('.container .foo')).toBeAttached()
-            expect($('.container .bar')).not.toBeAttached()
+            expect('.container .foo').toBeAttached()
+            expect('.container .bar').not.toBeAttached()
 
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
@@ -6324,8 +6319,8 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('.container .foo')).toHaveText('new-foo')
-            expect($('.container .bar')).toHaveText('new-bar')
+            expect('.container .foo').toHaveText('new-foo')
+            expect('.container .bar').toHaveText('new-bar')
 
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
@@ -6356,8 +6351,8 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('.container .foo')).toHaveText('new-foo')
-            expect($('.container .bar')).toHaveText('new-bar')
+            expect('.container .foo').toHaveText('new-foo')
+            expect('.container .bar').toHaveText('new-bar')
 
             expect(barCompiler.calls.allArgs()).toEqual [['old-bar'], ['new-bar']]
             expect(barDestructor.calls.allArgs()).toEqual [['old-bar']]
@@ -6382,7 +6377,7 @@ describe 'up.fragment', ->
             """
 
           next =>
-            expect($('.keeper')).toHaveText('old-inside')
+            expect('.keeper').toHaveText('old-inside')
             expect($('.keeper').parent()).toEqual($('.parent2'))
 
         - if up.migrate.loaded
@@ -6536,7 +6531,7 @@ describe 'up.fragment', ->
           """
 
           next =>
-            expect($('.keeper')).toHaveText('old-inside')
+            expect('.keeper').toHaveText('old-inside')
             expect(keepListener).toEqual(jasmine.anything(), $('.keeper'), {})
 
         it 'allows to define a listener in an [up-on-keep] attribute', asyncSpec (next) ->
@@ -6556,7 +6551,7 @@ describe 'up.fragment', ->
           $keeper = $fixture('.keeper[up-keep]').text('old-inside')
           $keeper.on 'up:fragment:keep', (event) -> event.preventDefault()
           up.render fragment: "<div class='keeper' up-keep>new-inside</div>"
-          next => expect($('.keeper')).toHaveText('new-inside')
+          next => expect('.keeper').toHaveText('new-inside')
 
         it 'lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', asyncSpec (next) ->
           $keeper = $fixture('.keeper[up-keep]').text('version 1')
@@ -6564,9 +6559,9 @@ describe 'up.fragment', ->
             event.preventDefault() if event.newFragment.textContent.trim() == 'version 3'
 
           next => up.render fragment: "<div class='keeper' up-keep>version 2</div>"
-          next => expect($('.keeper')).toHaveText('version 1')
+          next => expect('.keeper').toHaveText('version 1')
           next => up.render fragment: "<div class='keeper' up-keep>version 3</div>"
-          next => expect($('.keeper')).toHaveText('version 3')
+          next => expect('.keeper').toHaveText('version 3')
 
         it 'emits an up:fragment:keep event on a keepable element and up:fragment:inserted on the targeted parent', asyncSpec (next) ->
           insertedListener = jasmine.createSpy()
@@ -6733,7 +6728,7 @@ describe 'up.fragment', ->
         up.destroy('.element')
 
         next ->
-          expect($('.element')).not.toBeAttached()
+          expect('.element').not.toBeAttached()
 
       it 'has a sync effect', ->
         fixture('.element')

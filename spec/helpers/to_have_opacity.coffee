@@ -16,6 +16,6 @@ beforeEach ->
             result.message = u.sprintf("Expected %o to have opacity %o, but it was %o (tolerance ±%o)", element, expectedOpacity, actualOpacity, tolerance)
         else
           result.pass = false
-          result.message = u.sprintf("Expected %o to have opacity %o, element was detached", element, expectedOpacity)
+          result.message = u.sprintf("Expected %o to have opacity %o, but element was detached", element, expectedOpacity)
 
         return result
