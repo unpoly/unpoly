@@ -725,6 +725,11 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.timeout).toBe(20000)
 
+      it 'parses an [up-animation] attribute', ->
+        link = fixture('a[href="/foo"][up-animation="move-from-top"]')
+        options = up.link.followOptions(link)
+        expect(options.animation).toBe('move-from-top')
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->

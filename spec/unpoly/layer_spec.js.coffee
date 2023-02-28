@@ -198,6 +198,24 @@ describe 'up.layer', ->
           next.after 600, ->
             expect('up-modal-box').toHaveOpacity(1.0)
 
+        it 'uses a different animation with { animation } option', asyncSpec (next) ->
+          up.motion.config.enabled = true
+          spyOn(up, 'animate').and.callThrough()
+
+          up.layer.open({ animation: 'move-from-top' })
+
+          next ->
+            expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
+
+        it 'uses a different animation with { openAnimation } option', asyncSpec (next) ->
+          up.motion.config.enabled = true
+          spyOn(up, 'animate').and.callThrough()
+
+          up.layer.open({ openAnimation: 'move-from-top' })
+
+          next ->
+            expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
+
       describe 'events', ->
 
         it 'emits an up:layer:open event on the document before the new overlay opens', (done) ->
