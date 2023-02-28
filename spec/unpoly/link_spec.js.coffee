@@ -6,7 +6,7 @@ describe 'up.link', ->
   u = up.util
 
   describe 'JavaScript functions', ->
-  
+
     describe 'up.follow', ->
 
       it 'loads the given link via AJAX and replaces the response in the given target', asyncSpec (next) ->
@@ -679,6 +679,11 @@ describe 'up.link', ->
         link = fixture('a[href="/foo"][up-href="/bar"]')
         options = up.link.followOptions(link)
         expect(options.url).toEqual('/bar')
+
+      it 'parses an [up-animation] attribute', ->
+        link = fixture('a[href="/foo"][up-animation="move-from-top"]')
+        options = up.link.followOptions(link)
+        expect(options.animation).toBe('move-from-top')
 
     describe 'up.link.shouldFollowEvent', ->
 

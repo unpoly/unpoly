@@ -38,7 +38,7 @@ describe 'up.Layer.OverlayWithViewport', ->
         expect(up.layer.count).toBe(2)
         expect(destructor).not.toHaveBeenCalled()
 
-        up.layer.dismiss(animation: false)
+        up.layer.dismiss(null, animation: false)
 
       next ->
         expect(up.layer.count).toBe(1)
