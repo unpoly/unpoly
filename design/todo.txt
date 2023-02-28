@@ -108,6 +108,9 @@ TODOs after V3
 - Can layer objects nullify their { element, tether } once closed?
   => This may cause async JS to throw, if that JS wants to go through the layer shortly after closing
   => How about we do this 10 seconds after { onFinished } or so?
+- It may be nice if guardEvents see the change's getPreflightProps().fragments
+  - Either lazy with Object.definePropery() *or*, if we find that we're going to call getPreflightProps() anyway, just call it.
+  - Can we memoize getPreflightProps() in FromURL ?
 
 
 TODOs for V3
