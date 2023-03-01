@@ -5,7 +5,7 @@ up.mockable = function(originalFn) {
     let mockableFn = function() {
       return obj[name].apply(this, arguments)
     }
-    mockableFn.mock = () => spyOn(obj, name)
+    mockableFn.mock = () => spyOn(obj, name) // eslint-disable-line no-undef
     return mockableFn
   } else {
     return originalFn
