@@ -120,7 +120,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- Deprecate jQuery support
 
 
 Docs
