@@ -133,6 +133,12 @@ Docs
 - Events emitted through up.Layer#emit() must all have a { layer } prop documented
   - e.g. up:layer:location:changed hasn't documented this
 - Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
+- Example for excluding requests from caching using autoCache:
+    let defaultAutoCache = up.network.config.autoCache
+    up.network.config.autoCache = function(request) {
+      defaultAutoCache(request) && !request.url.endsWith('/edit')
+    }
+
 
 ### Other docs
 
