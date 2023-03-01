@@ -154,7 +154,17 @@ up.network = (function() {
 
     By default Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods.
 
-  @param {Function(up.Request, up.Response): boolean|string} config.expireCache
+    You may change this default to prevent auto-caching of some of your routes. For example, this will prevent auto-caching
+    of requests to URLs ending with `/edit`:
+
+    ```js
+    let defaultAutoCache = up.network.config.autoCache
+    up.network.config.autoCache = function(request) {
+      defaultAutoCache(request) && !request.url.endsWith('/edit')
+    }
+    ```
+
+  @param {Function(up.Request, up.Response): boolean|string} [config.expireCache]
     Whether to [expire](/caching#expiration) the [cache](/caching) after the given request and response.
 
     By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
@@ -164,56 +174,22 @@ up.network = (function() {
   @param {Function(up.Request, up.Response): boolean|string} [config.evictCache=false]
     Whether to [evict](/caching#eviction) the [cache](/caching) after the given request and response.
 
-    By default Unpoly will not evict cache entries when a request is made.
+    By default Unpoly will *not* evict cache entries when a request is made.
 
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be evicted.
 
   @param {Array<string>|Function(up.Request): Array<string>} [config.requestMetaKeys]
-    An array of request property names
+    An array of [request property names](/up.Request)
     that are sent to the server as [HTTP headers](/up.protocol).
-
-    The server may return an optimized response based on these properties,
-    e.g. by omitting a navigation bar that is not targeted.
-
-    ### Cacheability considerations
 
     Two requests with different `requestMetaKeys` are considered cache misses when [caching](/up.request) and
     [preloading](/a-up-preload). To **improve cacheability**, you may set
     `up.network.config.requestMetaKeys` to a shorter list of property keys.
 
-    ### Available fields
+    See [improving cache hit rates](/caching#improving-cache-hit-rates)
+    for more details and examples.
 
-    The default configuration is `['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']`.
-    This means the following properties are sent to the server:
-
-    | Request property         | Request header      |
-    |--------------------------|---------------------|
-    | `up.Request#target`      | `X-Up-Target`       |
-    | `up.Request#failTarget`  | `X-Up-Fail-Target`  |
-    | `up.Request#context`     | `X-Up-Context`      |
-    | `up.Request#failContext` | `X-Up-Fail-Context` |
-    | `up.Request#mode`        | `X-Up-Mode`         |
-    | `up.Request#failMode`    | `X-Up-Fail-Mode`    |
-
-    ### Per-route configuration
-
-    You may also configure a function that accepts an [`up.Request`](/up.Request) and returns
-    an array of request property names that are sent to the server.
-
-    With this you may send different request properties for different URLs:
-
-    ```javascript
-    up.network.config.requestMetaKeys = function(request) {
-      if (request.url == '/search') {
-        // The server optimizes responses on the /search route.
-        return ['target', 'failTarget']
-      } else {
-        // The server doesn't optimize any other route,
-        // so configure maximum cacheability.
-        return []
-      }
-    }
-    ```
+    @experimental
 
   @param {boolean|Function(): boolean} [config.progressBar]
     Whether to show a [progress bar](/loading-indicators#progress-bar)

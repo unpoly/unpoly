@@ -17,7 +17,11 @@ You can enable caching with `{ cache: 'auto' }`, which caches all responses to G
 up.network.config.autoCache = (request) => request.method === 'GET'
 ```
 
-When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of caching while navigating, pass a [`{ cache: false }`](/up.render#options.cache) option (JavaScript), set an [`[up-cache=false]`](/a-up-follow#up-cache) attribute (HTML), or configure `up.network.config.autoCache`.
+When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of caching while navigating, there are several methods:
+
+- Pass a [`{ cache: false }`](/up.render#options.cache) option (JavaScript)
+- Set an [`[up-cache=false]`](/a-up-follow#up-cache) attribute (HTML)
+- Exclude a URL from `up.network.config.autoCache`.
 
 To force caching regardless of HTTP method, pass `{ cache: true }`.
 
@@ -144,6 +148,58 @@ To limit the memory required to hold its cache, Unpoly evicts cached content in 
 
 - Unpoly evicts cache entries after 90 minutes. This can be configured in `up.network.config.cacheEvictAge`.
 - The cache holds up to 70 responses. When this limit is reached, the oldest responses are evicted. This can be configured in `up.network.config.cacheSize`.
+
+
+Improving cache hit rates
+-------------------------
+
+Servers may inspect [request headers](/up.protocol) to send different response headers to optimize responses,
+e.g. by omitting a navigation bar that is not targeted.
+
+Unpoly uses separate cache entries for [different targets](/X-Up-Target), [layer modes](/X-Up-Mode) or [layer contexts](/X-Up-Context). While this behavior is correct in case the server optimizes a response, it may cause
+unnecessary cache misses. To improve cacheability, you may reduce
+`up.network.config.requestMetaKeys` to a shorter list of property keys
+that are revealed to the server as request headers.
+
+### Available properties
+
+The default configuration is `['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']`.
+This means the following properties are sent to the server:
+
+| Request property         | Request header      |
+|--------------------------|---------------------|
+| `up.Request#target`      | `X-Up-Target`       |
+| `up.Request#failTarget`  | `X-Up-Fail-Target`  |
+| `up.Request#context`     | `X-Up-Context`      |
+| `up.Request#failContext` | `X-Up-Fail-Context` |
+| `up.Request#mode`        | `X-Up-Mode`         |
+| `up.Request#failMode`    | `X-Up-Fail-Mode`    |
+
+### Per-route configuration
+
+You may also configure a function that accepts an [`up.Request`](/up.Request) and returns
+an array of request property names that are sent to the server.
+
+With this you may send different request properties for different URLs:
+
+```javascript
+up.network.config.requestMetaKeys = function(request) {
+  if (request.url == '/search') {
+    // The server optimizes responses on the /search route.
+    return ['target', 'failTarget']
+  } else {
+    // The server doesn't optimize any other route,
+    // so configure maximum cacheability.
+    return []
+  }
+}
+```
+
+
+> [note]
+> Future versions of Unpoly may use the [`Vary`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary) header
+> to improve cache hit rates. Currently the `Vary` header is not honored by Unpoly.
+
 
 
 
