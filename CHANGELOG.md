@@ -8,7 +8,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.0.0-rc1
+3.0.0-rc2
 ---------
 
 Unpoly 3 evolves and completes existing APIs based on community feedback. 
