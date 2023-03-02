@@ -518,7 +518,6 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 
 ### Small things ✔️
 
-- The NPM package is now 800KB smaller.
 - All error thrown by Unpoly now inherit from `up.Error`.
 
 
@@ -530,10 +529,22 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - The code for Unpoly 2 can be found in the [`1.x-stable`](https://github.com/unpoly/unpoly/tree/2.x-stable) branch.
 
 
+2.7.2
+-----
+
+This is a maintenance release to bridge the time until [Unpoly 3](https://github.com/unpoly/unpoly/discussions/407) is completed. This release includes the following changes:
+
+- When pushing a history state, don't mutate the previous history state.
+- Fix a bug where the `[up-animation]` attribute could not be used to control a new overlay's opening animation.
+- The NPM package is now 800KB smaller.
+
+This is the last release with support for Internet Explorer 11. Future releases will support Chrome, Firefox, Edge and the last two majors of Safari.
+
+
 2.7.1
 -----
 
-This is a maintenance release to bridge the time until [Unpoly 3](https://github.com/unpoly/unpoly/discussions/407) is fully documented. This release includes the following changes:
+This is a maintenance release to bridge the time until [Unpoly 3](https://github.com/unpoly/unpoly/discussions/407) is completed. This release includes the following changes:
 
 - When a fragment is [revealed](/#revealing-the-fragment), [fixed elements](https://unpoly.com/up-fixed-bottom) obstructing the viewport are now ignored while the fixed element is hidden.
 - Listeners to `up:request:load` may now access the unopened `XMLHttpRequest` instance through `event.xhr`. This lets you track upload progress through [`event.xhr.upload`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/upload). (Thanks @iaddict!)
@@ -541,8 +552,6 @@ This is a maintenance release to bridge the time until [Unpoly 3](https://github
 - Listeners to `up:layer:dismiss` may change the layer's dismissal value by setting or mutating `event.value`. 
 - Fix a bug where right-aligned popups would have right-aligned text
 - Fix a bug where clicking links twice will not update location when the browser history API is used in between (#388)
-
-This is the last release with support for Internet Explorer 11. Future releases will support Chrome, Firefox, Edge and the last two majors of Safari.
 
 
 2.6.1
