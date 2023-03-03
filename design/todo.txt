@@ -120,6 +120,9 @@ TODOs for V3
 Various changes
 ---------------
 
+- Migrate: Consider warning on up-solo=false
+- Migrate: Consider warning when setting old expiry
+
 
 
 Docs
