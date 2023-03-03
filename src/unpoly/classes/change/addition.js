@@ -9,6 +9,7 @@ up.Change.Addition = class Addition extends up.Change {
     this.acceptLayer = options.acceptLayer
     this.dismissLayer = options.dismissLayer
     this.eventPlans = options.eventPlans || []
+    this.response = options.meta?.response
   }
 
   handleLayerChangeRequests() {
@@ -19,7 +20,7 @@ up.Change.Addition = class Addition extends up.Change {
 
       // A close condition { acceptLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryAcceptForLocation()
+      this.tryAcceptLayerForLocation()
       this.abortWhenLayerClosed()
 
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
@@ -28,7 +29,7 @@ up.Change.Addition = class Addition extends up.Change {
 
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryDismissForLocation()
+      this.tryDismissLayerForLocation()
       this.abortWhenLayerClosed()
     }
 
@@ -51,15 +52,23 @@ up.Change.Addition = class Addition extends up.Change {
   tryAcceptLayerFromServer() {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
     if (u.isDefined(this.acceptLayer) && this.layer.isOverlay()) {
-      this.layer.accept(this.acceptLayer)
+      this.layer.accept(this.acceptLayer, this.closeLayerOptions())
     }
+  }
+
+  tryAcceptLayerForLocation() {
+    this.layer.tryAcceptForLocation(this.closeLayerOptions())
   }
 
   tryDismissLayerFromServer() {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
     if (u.isDefined(this.dismissLayer) && this.layer.isOverlay()) {
-      this.layer.dismiss(this.dismissLayer)
+      this.layer.dismiss(this.dismissLayer, this.closeLayerOptions())
     }
+  }
+
+  tryDismissLayerForLocation() {
+    this.layer.tryDismissForLocation(this.closeLayerOptions())
   }
 
   abortWhenLayerClosed() {
@@ -101,5 +110,9 @@ up.Change.Addition = class Addition extends up.Change {
     this.setSource(options)
     this.setTime(options)
     this.setETag(options)
+  }
+
+  closeLayerOptions() {
+    return { response: this.response }
   }
 }

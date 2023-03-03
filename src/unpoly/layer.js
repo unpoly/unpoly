@@ -380,7 +380,7 @@ up.layer = (function() {
   }
 
   function closeCallbackAttr(link, attr) {
-    return e.callbackAttr(link, attr, { exposedKeys: ['layer', 'value'] })
+    return e.callbackAttr(link, attr, { exposedKeys: ['layer', 'value', 'response'] })
   }
 
   function reset() {
@@ -1105,6 +1105,12 @@ up.layer = (function() {
     The element that is causing the layer to close.
   @param event.preventDefault()
     Prevents the overlay from closing.
+  @param {up.Response} [options.response]
+    The server response that is causing this overlay to close.
+
+    Will be `undefined` if the overlay was is not closing in reaction to a server response.
+
+    @experimental
   @stable
   */
 
@@ -1122,6 +1128,12 @@ up.layer = (function() {
     The overlay's final [acceptance value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that has caused the layer to close.
+  @param {up.Response} [options.response]
+    The server response that has caused this overlay to close.
+
+    Will be `undefined` if the overlay was not closed in reaction to a server response.
+
+    @experimental
   @stable
   */
 
@@ -1151,6 +1163,12 @@ up.layer = (function() {
     Listeners may replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
+  @param {up.Response} [options.response]
+    The server response that is causing this overlay to close.
+
+    Will be `undefined` if the overlay was is not closing in reaction to a server response.
+
+    @experimental
   @param event.preventDefault()
     Event listeners may call this method to prevent the overlay from closing.
   @stable
@@ -1170,6 +1188,12 @@ up.layer = (function() {
     The overlay's final [dismissal value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
     The element that has caused the layer to close.
+  @param {up.Response} [options.response]
+    The server response that has caused this overlay to close.
+
+    Will be `undefined` if the overlay was not closed in reaction to a server response.
+
+    @experimental
   @stable
   */
 

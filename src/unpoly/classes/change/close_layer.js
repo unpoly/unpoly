@@ -9,6 +9,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     this.layer = up.layer.get(options)
     this.origin = options.origin
     this.value = options.value
+    this.response = options.response
     this.preventable = options.preventable ?? true
   }
 
@@ -91,7 +92,8 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     return up.event.build(name, {
       layer: this.layer,
       value: this.value,
-      origin: this.origin
+      origin: this.origin,
+      response: this.response,
     })
   }
 

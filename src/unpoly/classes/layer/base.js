@@ -147,8 +147,12 @@ up.Layer = class Layer extends up.Record {
     ```
   @param {string} [options.confirm]
     A message the user needs to confirm before the overlay is closed.
-  @param {boolean} [options.preventable=true]
-    Whether the closing can be prevented by an event listener.
+  @param {up.Response} [options.response]
+    The server response that caused this overlay to close.
+
+    May be left blank if the overlay was not closed in reaction to a server response.
+
+    @experimental
   @param {string|Function(Element, Object)} [options.animation]
     The [animation](/up.animate) to use for closing this layer.
 
@@ -162,6 +166,10 @@ up.Layer = class Layer extends up.Record {
     A callback that will run when the elements have been removed from the DOM.
 
     If the layer has a close animation, the callback will run after the animation has finished.
+  @param {boolean} [options.preventable=true]
+    Whether the closing can be prevented by an event listener.
+
+    @internal
   @stable
   */
   accept() {
