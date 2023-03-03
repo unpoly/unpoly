@@ -126,6 +126,13 @@ Various changes
 - Migrate: Consider warning when setting old expiry
 - When we pump JSON through a HTTP header, we must aggressively escape non-ASCII characters
 - Protocol: Every header page must have a warning that high-ASCII chars must be escaped
+- When we dump JSON that goes into a HTTP header, we must escape high-ASCII: string.replace(/[^\x00-\x7F]/g, (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0'))
+  - Context
+- When a layer reaches a close condition, should we still render [up-hungry][up-if-layer=any] elements in another layer?
+  - Would be practical for flashes
+  - Would be weird for API. Render events flying afterwards, we cannot communicate a RenderResult.
+- Can we allow await in Callbacks?
+  new AsyncFunction()
 
 
 
