@@ -89,7 +89,7 @@ up.Request.XHRRenderer = class XHRRenderer {
 
   addHeader(xhr, header, value) {
     if (u.isOptions(value) || u.isArray(value)) {
-      value = JSON.stringify(value)
+      value = u.safeStringifyJSON(value)
     }
     xhr.setRequestHeader(header, value)
   }

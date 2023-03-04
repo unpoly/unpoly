@@ -1885,6 +1885,16 @@ up.util = (function() {
     }
   }
 
+  function safeStringifyJSON(value) {
+    let json = JSON.stringify(value)
+    return escapeHighASCII(json)
+  }
+
+  function escapeHighASCII(string) {
+    let unicodeEscape = (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
+    return string.replace(/[^\x00-\x7F]/g, unicodeEscape)
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -1984,7 +1994,8 @@ up.util = (function() {
     sprintf,
     renameKeys,
     negate,
-    memoizeMethod
+    memoizeMethod,
+    safeStringifyJSON,
     // groupBy,
   }
 })();

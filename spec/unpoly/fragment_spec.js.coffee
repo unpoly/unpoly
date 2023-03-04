@@ -3386,6 +3386,16 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
             expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue'}))
 
+        it 'escapes high ASCII characters in the X-Up-Context request header so Unicode values can be transported', asyncSpec (next) ->
+          up.layer.context = { foo: 'xäy' }
+          fixture('.target')
+
+          up.render('.target', url: '/path3')
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.Ajax.requests.mostRecent().requestHeaders['X-Up-Context']).toBe('{"foo":"x\\u00e4y"}')
+
         it "sends the fail layer's context as an X-Up-Fail-Context request header", asyncSpec (next) ->
           makeLayers [
             { target: '.target', context: { rootKey: 'rootValue' }},
