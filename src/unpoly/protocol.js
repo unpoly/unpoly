@@ -77,10 +77,23 @@ up.protocol = (function() {
 
   ### Example
 
+  The user updates a fragment `.menu`.
+  Unpoly automatically includes the following request header:
+
   ```http
   X-Up-Target: .menu
-  X-Up-Fail-Target: body
   ```
+
+  The server chooses to render only the HTML for the updating fragment.
+  It responds with the following HTTP:
+
+  ```http
+  Vary: X-Up-Mode
+
+  <div class="menu">...</div>
+  ```
+
+  @include vary-header-note
 
   ### Changing the render target from the server
 
@@ -173,9 +186,24 @@ up.protocol = (function() {
 
   ### Example
 
+  The user updates a fragment `main` within a [drawer overlay](/layer-terminology).
+  Unpoly automatically includes the following request headers:
+
   ```http
   X-Up-Mode: drawer
+  X-Up-Target: main
   ```
+
+  The server chooses to render only the HTML required for the overlay.
+  It responds with the following HTTP:
+
+  ```http
+  Vary: X-Up-Mode
+
+  <main>...</main>
+  ```
+
+  @include vary-header-note
 
   @header X-Up-Mode
   @stable
@@ -382,9 +410,27 @@ up.protocol = (function() {
 
   ### Example
 
+  The current layer has a context `{ lives: 3 }`.
+  When the user updates a fragment, Unpoly automatically includes the following request headers:
+
   ```http
   X-Up-Context: { "lives": 3 }
+  X-Up-Target: main
   ```
+
+  The server may choose to render HTML based on that context, e.g. by including
+  a live counter in the response. It responds with the following HTTP:
+
+  ```http
+  Vary: X-Up-Context
+
+  <main>
+    3 lives left
+    ...
+  </main>
+  ```
+
+  @include vary-header-note
 
   ### Updating context from the server
 
