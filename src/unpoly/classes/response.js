@@ -86,7 +86,8 @@ up.Response = class Response extends up.Record {
   If the server pushed no title via HTTP header, this will be `undefined`.
 
   @property up.Response#title
-  @param {string} [title]
+  @param {string|undefined} [title]
+    The decoded title.
   @experimental
   */
 
@@ -96,8 +97,9 @@ up.Response = class Response extends up.Record {
   If the server pushed no title via HTTP header, this will be `undefined`.
 
   @property up.Response#target
-  @param {string} [target]
-  @experimental
+  @param {string|undefined} [target]
+    The decoded target.
+  @stable
   */
 
   /*-

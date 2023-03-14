@@ -147,7 +147,7 @@ describe 'up.link', ->
               status: 200
               contentType: 'text/html'
               responseText: "<div class='container'><div class='target'>#{html}</div></div>"
-              responseHeaders: { 'X-Up-Title': title }
+              responseHeaders: { 'X-Up-Title': JSON.stringify(title) }
 
   #          followAndRespond = ($link, html, title) ->
   #            promise = up.follow($link)

@@ -42,6 +42,21 @@ X-Up-Clear-Cache: false
   Use `X-Up-Expire-Cache` instead.
 */
 
+// X-Up-Title used to carry a window title as a bare string.
+// We now require it to be a JSON-encoded string so we can escape high-ASCII characters:
+// https://makandracards.com/makandra/536174-http-headers-can-only-transport-us-ascii-characters-safely
+up.migrate.titleFromXHR = function(xhr) {
+  let value = xhr.getResponseHeader('X-Up-Title')
+
+  if (value) {
+    if (value === 'false') {
+      return false
+    } else if (value[0] !== '"') {
+      up.migrate.warn('X-Up-Title must now be a JSON-encoded string')
+      return value
+    }
+  }
+}
 
 /*-
 This request header contains a timestamp of an existing fragment that is being [reloaded](/up.reload).

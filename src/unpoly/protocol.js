@@ -400,10 +400,12 @@ up.protocol = (function() {
   </html>
   ```
 
-  Upon seeing the response header, Unpoly will assign the server-provided context object to
-  the layer's context object, adding or replacing keys as needed.
+  @include unicode-header-values
 
+  Upon seeing the response header, Unpoly will merge the server-provided context object into
+  the layer's context object, adding or replacing keys as needed.
   Client-side context keys not mentioned in the response will remain unchanged.
+
   There is no explicit protocol to *remove* keys from the context, but the server may send a key
   with a `null` value to effectively remove a key.
 
@@ -489,17 +491,23 @@ up.protocol = (function() {
   /*-
   The server may set this optional response header to change the document title after a fragment update.
 
+  The title must be encoded as a JSON string.
+
   Without this header Unpoly will extract the `<title>` from the server response.
 
   This header is useful when you [optimize your response](/X-Up-Target) to not render
   the application layout unless targeted. Since your optimized response
   no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
 
+  @include unicode-header-values
+
   ### Example
 
   ```http
-  X-Up-Title: Playlist browser
+  X-Up-Title: "Playlist browser"
   ```
+
+  Note that the quotes must be included in the JSON-encoded header value.
 
   @header X-Up-Title
   @stable
@@ -583,6 +591,8 @@ up.protocol = (function() {
   The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted
   event object.
 
+  @include unicode-header-values
+
   ### Example
 
   ```http
@@ -632,6 +642,8 @@ up.protocol = (function() {
   The header value is the acceptance value serialized as a JSON object.
   To accept an overlay without value, set the header value to the string `null`.
 
+  @include unicode-header-values
+
   ### Example
 
   The response below will accept the targeted overlay with the value `{user_id: 1012 }`:
@@ -680,6 +692,8 @@ up.protocol = (function() {
 
   The header value is the dismissal value serialized as a JSON object.
   To accept an overlay without value, set the header value to the string `null`.
+
+  @include unicode-header-values
 
   ### Example
 
@@ -785,7 +799,7 @@ up.protocol = (function() {
   @internal
   */
   function titleFromXHR(xhr) {
-    return extractHeader(xhr, 'title')
+    return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', JSON.parse)
   }
 
   /*-

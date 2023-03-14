@@ -3141,32 +3141,32 @@ describe 'up.fragment', ->
               expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from HTML')
 
-          it "sets the document title to an 'X-Up-Title' header in the response", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
+          it "sets the document title to a JSON-encoded X-Up-Title header in the response", asyncSpec (next) ->
+            fixture('.container', text: 'old container text')
             up.render('.container', url: '/path', history: true)
 
-            next =>
-              @respondWith
+            next ->
+              jasmine.respondWith
                 responseHeaders:
-                  'X-Up-Title': 'Title from header'
+                  'X-Up-Title': '"Title from header"'
                 responseText: """
                   <div class='container'>
                     new container text
                   </div>
                   """
 
-            next =>
+            next ->
               expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from header')
 
           it "prefers the X-Up-Title header to the response <title>", asyncSpec (next) ->
-            $fixture('.container').text('old container text')
+            fixture('.container', text: 'old container text')
             up.render('.container', url: '/path', history: true)
 
-            next =>
-              @respondWith
+            next ->
+              jasmine.respondWith
                 responseHeaders:
-                  'X-Up-Title': 'Title from header'
+                  'X-Up-Title': '"Title from header"'
                 responseText: """
                   <html>
                     <head>
@@ -3180,9 +3180,28 @@ describe 'up.fragment', ->
                   </html>
                 """
 
-            next =>
+            next ->
               expect('.container').toHaveText('new container text')
               expect(document.title).toBe('Title from header')
+
+          if up.migrate.loaded
+            it "sets the document title to an unquoted X-Up-Title header in the response", asyncSpec (next) ->
+              fixture('.container', text: 'old container text')
+              up.render('.container', url: '/path', history: true)
+
+              next ->
+                jasmine.respondWith
+                  responseHeaders:
+                    'X-Up-Title': '"Title from header"'
+                  responseText: """
+                    <div class='container'>
+                      new container text
+                    </div>
+                    """
+
+              next ->
+                expect('.container').toHaveText('new container text')
+                expect(document.title).toBe('Title from header')
 
           it "sets the document title to the response <title> with { location: false, title: true } options (bugfix)", asyncSpec (next) ->
             $fixture('.container').text('old container text')
@@ -3237,7 +3256,7 @@ describe 'up.fragment', ->
             next =>
               @respondWith
                 responseHeaders:
-                  'X-Up-Title': 'Title from header'
+                  'X-Up-Title': '"Title from header"'
                 responseText: """
                 <html>
                   <head>
