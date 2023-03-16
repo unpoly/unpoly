@@ -688,14 +688,47 @@ up.element = (function() {
   }
 
   /*-
-  Always creates a full document with a <html> root, even if the given `html`
-  string only contains a fragment.
+  Parses a new `Document` instance from the given HTML.
 
-  @function up.element.createDocumentFromHTML
+  This function always creates a full document with a <html> root,
+  even if the given `html` string only contains a fragment.
+
+  Due to quirks in the `DOMParser` spec, `<script>` and `<noscript>`
+  elements in the returned document will be inert. To make them active,
+  use `up.element.fixScriptish()`.
+
+  @function up.element.createBrokenDocumentFromHTML
+  @param {string} html
+  @return {Document}
   @internal
   */
-  function createDocumentFromHTML(html) {
+  function createBrokenDocumentFromHTML(html) {
     return new DOMParser().parseFromString(html, 'text/html')
+  }
+
+  /*-
+  Fixes `<script>` and `<noscript>` elements in documents parsed by `up.element.createBrokenDocumentFromHTML()`.
+
+  This addresses two [quirks in the `DOMParser` spec](http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring):
+
+  1. Children of a <nonscript> tag are expected to be a verbatim text node in a scripting-capable browser.
+     However, `DOMParser` parses children into actual DOM nodes.
+     This confuses libraries that work with <noscript> tags, such as lazysizes.
+  2. <script> elements are inert and will not run code when inserted into the main `document`.
+
+  @function up.element.fixScriptish
+  @param {Element} scriptish
+    A `<script>` or `<noscript>` element.
+  @internal
+  */
+  function fixScriptish(scriptish) {
+    let clone = document.createElement(scriptish.tagName)
+    for (let { name, value } of scriptish.attributes) {
+      clone.setAttribute(name, value)
+    }
+
+    clone.textContent = scriptish.innerHTML
+    scriptish.replaceWith(clone)
   }
 
   /*-
@@ -720,8 +753,10 @@ up.element = (function() {
   @stable
   */
   function createFromHTML(html) {
-    // (1) We cannot use createDocumentFromHTML() here, since up.ResponseDoc
+    // (1) We cannot use createBrokenDocumentFromHTML() here, since up.ResponseDoc
     //     needs to create <noscript> elements, and DOMParser cannot create those.
+    //     Also it always parses a full document, and we would need to rediscover our element
+    //     root within that.
     // (2) We cannot use innerHTML on an anonymous element here, since up.ResponseDoc
     //     needs to create executable <script> elements and setting innerHTML will
     //     create intert <script> elements.
@@ -1279,7 +1314,8 @@ up.element = (function() {
     isSingleton, // internal
     attrSelector, // internal
     tagName: elementTagName,
-    createDocumentFromHTML, // internal
+    createBrokenDocumentFromHTML, // internal
+    fixScriptish,
     createFromHTML, // practical for element creation
     get root() { return getRoot() }, // internal
     paint, // internal

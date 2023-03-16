@@ -520,7 +520,7 @@ describe 'up.element', ->
       element.remove()
 
 
-  describe 'up.element.createDocumentFromHTML', ->
+  describe 'up.element.createBrokenDocumentFromHTML', ->
 
     it 'parses a string that contains a serialized HTML document', ->
       string = """
@@ -535,7 +535,7 @@ describe 'up.element', ->
         </html>
         """
 
-      element = up.element.createDocumentFromHTML(string)
+      element = up.element.createBrokenDocumentFromHTML(string)
 
       expect(element.querySelector('head title').textContent).toEqual('document title')
       expect(element.querySelector('body').getAttribute('data-env')).toEqual('production')
@@ -552,7 +552,7 @@ describe 'up.element', ->
         </html>\r
         """
 
-      $element = up.element.createDocumentFromHTML(string)
+      $element = up.element.createBrokenDocumentFromHTML(string)
       expect($element.querySelector('body')).toBeGiven()
       expect($element.querySelector('body div').textContent).toEqual('line')
 
@@ -588,7 +588,7 @@ describe 'up.element', ->
           </body>
         </html>
         """
-      element = up.element.createDocumentFromHTML(html)
+      element = up.element.createBrokenDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -600,7 +600,7 @@ describe 'up.element', ->
           </body>
         </html>
         """
-      element = up.element.createDocumentFromHTML(html)
+      element = up.element.createBrokenDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -608,7 +608,7 @@ describe 'up.element', ->
       html = """
         <h1>Full story</h1>
         """
-      element = up.element.createDocumentFromHTML(html)
+      element = up.element.createBrokenDocumentFromHTML(html)
       expect(element.querySelector("title")).toBeMissing()
       expect(element.querySelector("h1").textContent).toEqual('Full story')
 
@@ -629,6 +629,26 @@ describe 'up.element', ->
       element = up.element.createFromHTML(html)
       expect(element.tagName).toEqual('NOSCRIPT')
       expect(element.textContent).toEqual('alternative content')
+
+    it 'can create non-inert <script> tags', asyncSpec (next) ->
+      window.scriptTagExecuted = jasmine.createSpy('scriptTagExecuted')
+
+      html = """
+        <script>window.scriptTagExecuted()</script>
+        """
+
+      element = up.element.createFromHTML(html)
+
+      expect(element.tagName).toBe('SCRIPT')
+      expect(window.scriptTagExecuted).not.toHaveBeenCalled()
+
+      document.body.appendChild(element)
+
+      next.after 100, ->
+        expect(window.scriptTagExecuted).toHaveBeenCalled()
+
+        element.remove()
+        delete window.scriptTagExecuted
 
     it 'create an element when there is leading whitespace in the given string (bugfix)', ->
       html = "    <h1>Full story</h1>"

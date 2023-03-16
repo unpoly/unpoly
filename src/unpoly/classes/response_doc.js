@@ -4,20 +4,17 @@ const e = up.element
 up.ResponseDoc = class ResponseDoc {
 
   constructor(options) {
-    // We wrap <noscript> tags into a <div> because the children of a <nonscript> tag
-    // are expected to be a verbatim text node in a scripting-capable browser.
-    // However, due to rules in the DOMParser spec, the children are parsed into actual DOM nodes.
-    // This confuses libraries that work with <noscript> tags, such as lazysizes.
-    // See http://w3c.github.io/DOM-Parsing/#dom-domparser-parsefromstring .
-    this.noscriptWrapper = new up.HTMLWrapper('noscript')
-
-    // With !up.fragment.config.runScripts we strip <script> tags from the HTML.
-    this.scriptWrapper = new up.HTMLWrapper('script')
-
     this.root =
       this.parseDocument(options) ||
       this.parseFragment(options) ||
       this.parseContent(options)
+
+    // If the user doesn't want to run scripts in the new fragment, we disable all <script> elements.
+    // While <script> elements parsed by `DOMParser` are inert anyway, we also parse HTML through
+    // other methods, which do create non-inert <script> elements.
+    if (!up.fragment.config.runScripts) {
+      this.root.querySelectorAll('script').forEach((e) => e.remove())
+    }
 
     this.cspNonces = options.cspNonces
 
@@ -30,7 +27,15 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   parseDocument(options) {
-    return this.parse(options.document, e.createDocumentFromHTML)
+    let document = this.parse(options.document, e.createBrokenDocumentFromHTML)
+    if (document) {
+      // Remember that we need to fix <script> and <noscript> elements later.
+      // We could fix these elements right now for the entire document, but since we will only use
+      // a fragment, this would cause excessive work.
+      this.scriptishNeedFix = true
+
+      return document
+    }
   }
 
   parseContent(options) {
@@ -45,7 +50,6 @@ up.ResponseDoc = class ResponseDoc {
     const matchingElement = e.createFromSelector(target)
 
     if (u.isString(content)) {
-      content = this.wrapHTML(content)
       // Don't use e.createFromHTML() here, since content may be a text node.
       matchingElement.innerHTML = content
     } else {
@@ -61,7 +65,6 @@ up.ResponseDoc = class ResponseDoc {
 
   parse(value, parseFn = e.createFromHTML) {
     if (u.isString(value)) {
-      value = this.wrapHTML(value)
       value = parseFn(value)
     }
     return value
@@ -71,27 +74,15 @@ up.ResponseDoc = class ResponseDoc {
     return up.fragment.toTarget(this.root)
   }
 
-  wrapHTML(html) {
-    html = this.noscriptWrapper.wrap(html)
-
-    if (up.fragment.config.runScripts) {
-      // <script> tags instantiated by DOMParser are inert and will not run
-      // when appended. So we wrap them, then unwrap once attach. This will
-      // cause the script to run.
-      html = this.scriptWrapper.wrap(html)
-    } else {
-      html = this.scriptWrapper.strip(html)
-    }
-
-    return html
-  }
-
   getTitle() {
-    // Cache since multiple plans will query this.
-    // Use a flag so we can cache an empty result.
-    return this.root.querySelector("head title")?.textContent
+    // We query for 'head title' instead of 'title' so we won't match the <title>
+    // of an inline SVG image.
+    return this.root.querySelector('head title')?.textContent
   }
 
+  // Selects a single fragment with the given selector.
+  // Supports custom Unpoly selectors like :has() or :main.
+  // Supports origin-aware lookup priorities.
   select(selector) {
     let finder = new up.FragmentFinder({
       selector: selector,
@@ -102,17 +93,16 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   finalizeElement(element) {
-    // Restore <noscript> tags so they become available to compilers.
-    this.noscriptWrapper.unwrap(element)
-
     // Rewrite per-request CSP nonces to match that of the current page.
     up.NonceableCallback.adoptNonces(element, this.cspNonces)
 
-    // Restore <script> so they will run.
-    this.scriptWrapper.unwrap(element)
+    if (this.scriptishNeedFix) {
+      element.querySelectorAll('noscript, script').forEach(e.fixScriptish)
+    }
   }
 
   static {
+    // Cache since multiple plans will query this.
     u.memoizeMethod(this.prototype, 'getTitle')
   }
 

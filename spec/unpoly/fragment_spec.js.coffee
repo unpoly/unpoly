@@ -400,6 +400,14 @@ describe 'up.fragment', ->
           expect(result.layer).toBe(up.layer.root)
           done()
 
+      it 'preserves a verbatim "<script>" string in an element attribute (bugfix)', ->
+        fixture('#target')
+        attrValue = '<script>alert("I am valid unescaped HTML/JS")<script>'
+
+        up.render(fragment: "<div id='target' foo='#{attrValue}'></div>")
+
+        expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
+
       describe 'compilation', ->
 
         it 'runs compilers for matching elements in the new content', ->
