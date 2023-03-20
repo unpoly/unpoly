@@ -429,11 +429,14 @@ up.Request = class Request extends up.Record {
     // We want to allow up:request:loaded events etc. to still access the properties that
     // we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
     u.task(() => {
-      // While the request is still in flight, we require the target layer
+      // (1) While the request is still in flight, we require the target layer
       // to be able to cancel it when the layers gets closed. We now
       // evict this property, since response.request.layer.element will
       // prevent the layer DOM tree from garbage collection while the response
       // is cached by up.network.
+      //
+      // (2) Although we must take care to not evict attributes that are part of our #cacheKey(),
+      // we have already copied all layer-relevant properties, e.g. this.mode, this.context.
       this.layer = undefined
       this.failLayer = undefined
 
@@ -446,8 +449,6 @@ up.Request = class Request extends up.Record {
       this.fragments = undefined
     })
   }
-
-      // Don't evict properties that may be part of our @cacheKey()!
 
   extractHashFromURL() {
     let match = this.url?.match(/^([^#]*)(#.+)$/)
