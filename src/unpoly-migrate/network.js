@@ -132,6 +132,22 @@ up.network.isIdle = function() {
 @class up.Request
 */
 
+/*-
+Loads this request object as a full-page request, replacing the entire browser environment
+with a new page from the server response.
+
+The full-page request will be loaded with the [URL](/up.Request.prototype.url),
+[method](/up.Request.prototype.method) and [params](/up.Request.prototype.params)
+from this request object.
+Properties that are not possible in a full-page request (such as custom HTTP headers)
+will be ignored.
+
+Aborts all pending requests.
+
+@function up.Request#loadPage
+@deprecated
+  Use `up.Request#loadPage()` instead.
+*/
 up.Request.prototype.navigate = function() {
   up.migrate.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
   this.loadPage()
