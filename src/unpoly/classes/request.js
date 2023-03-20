@@ -222,14 +222,6 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  Whether this request is [preloading](/a-up-preload) content.
-
-  @property up.Request#preload
-  @param {boolean} [preload=false]
-  @experimental
-  */
-
-  /*-
   Whether this request is loading in the background.
 
   Background requests deprioritized over foreground requests.
@@ -421,7 +413,7 @@ up.Request = class Request extends up.Record {
   }
 
   followState(sourceRequest) {
-    u.delegate(this, ['deferred', 'state', 'preload', 'expired'], () => sourceRequest)
+    u.delegate(this, ['deferred', 'state', 'background', 'expired'], () => sourceRequest)
   }
 
   normalizeForCaching() {

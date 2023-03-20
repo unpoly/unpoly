@@ -550,7 +550,7 @@ up.network = (function() {
       //   We have a cache hit and receive the earlier request that is still preloading.
       //   Now we *should* trigger `up:network:late`.
       // - The request (1) finishes. This triggers `up:network:recover`.
-      if (!request.preload) {
+      if (!request.background) {
         queue.promoteToForeground(cachedRequest)
       }
 
@@ -568,10 +568,6 @@ up.network = (function() {
 
   // If no existing promise is available, we queue a network request.
   function queueRequest(request) {
-    if (request.preload && !request.isSafe()) {
-      up.fail('Will not preload request to %s', request.description)
-    }
-
     handleCaching(request)
 
     queue.asap(request)

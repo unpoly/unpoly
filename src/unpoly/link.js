@@ -175,15 +175,19 @@ up.link = (function() {
     The number of milliseconds to wait before [`[up-preload]`](/a-up-preload)
     starts preloading.
 
-  @param {boolean|string} [config.preloadEnabled='auto']
+  @param {boolean|string|Function(Element): boolean|string} [config.preloadEnabled='auto']
     Whether Unpoly will load [preload requests](/a-up-preload).
 
     With the default setting (`"auto"`) Unpoly will load preload requests
     unless `up.network.shouldReduceRequests()` detects a poor connection.
 
-    If set to `true`, Unpoly will always load preload links.
+    If set to `true`, Unpoly will always preload links.
 
     If set to `false`, Unpoly will never preload links.
+
+    You may also configure a function that accepts a link element and returns `true`, `false` or `'auto'`.
+
+    Regardless of what you configure here, Unpoly will only preload [links with safe methods](/up.link.isSafe).
 
   @param {Array<string>} [config.clickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
@@ -536,8 +540,9 @@ up.link = (function() {
     // If passed a selector, up.fragment.get() will match in the current layer.
     link = up.fragment.get(link)
 
-    if (!shouldPreload()) {
-      return Promise.reject(new up.Error('Link preloading is disabled'))
+    let issue = preloadIssue(link)
+    if (issue) {
+      return Promise.reject(new up.Error(issue))
     }
 
     const guardEvent = up.event.build('up:link:preload', {log: ['Preloading link %o', link]})
@@ -549,12 +554,17 @@ up.link = (function() {
     })
   }
 
-  function shouldPreload() {
+  function preloadIssue(link) {
     // Since connection.effectiveType might change during a session we need to
     // re-evaluate the value every time.
-    let goodConnection = u.negate(up.network.shouldReduceRequests)
-    return u.evalAutoOption(config.preloadEnabled, goodConnection)
+    if  (!u.evalAutoOption(config.preloadEnabled, autoPreloadEnabled, link)) {
+      return 'Preloading is disabled'
+    } else if (!isSafe(link)) {
+      return 'Will not preload an unsafe link'
+    }
   }
+
+  const autoPreloadEnabled = u.negate(up.network.shouldReduceRequests)
 
   /*-
   This event is [emitted](/up.emit) before a link is [preloaded](/a-up-preload).

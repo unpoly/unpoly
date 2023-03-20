@@ -153,6 +153,21 @@ up.Request.prototype.navigate = function() {
   this.loadPage()
 }
 
+
+/*-
+Whether this request is [preloading](/a-up-preload) content.
+
+@property up.Request#preload
+@param {boolean} [preload=false]
+@deprecated
+  Use `up.Request#background` instead.
+*/
+Object.defineProperty(up.Request.prototype, 'preload', {
+  get: function() {
+    up.migrate.deprecated('up.Request#preload', 'up.Request#background')
+  }
+})
+
 /*-
 @class up.Response
 */
