@@ -88,7 +88,7 @@ up.protocol = (function() {
   It responds with the following HTTP:
 
   ```http
-  Vary: X-Up-Mode
+  Vary: X-Up-Target
 
   <div class="menu">...</div>
   ```
