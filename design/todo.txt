@@ -113,6 +113,9 @@ TODOs after V3
   - Can we memoize getPreflightProps() in FromURL ?
 - up.validate() always submits to the first submit button
   => Is this a bug or a feature that we use the same behavior as submit would?
+- When a layer reaches a close condition, should we still render [up-hungry][up-if-layer=any] elements in another layer?
+  - Would be practical for flashes
+  - Would be weird for API. Render events flying afterwards, we cannot communicate a RenderResult.
 
 
 TODOs for V3
@@ -124,15 +127,7 @@ Various changes
 
 - Migrate: Consider warning on up-solo=false
 - Migrate: Consider warning when setting old expiry
-- When we pump JSON through a HTTP header, we must aggressively escape non-ASCII characters
-- Protocol: Every header page must have a warning that high-ASCII chars must be escaped
-- When we dump JSON that goes into a HTTP header, we must escape high-ASCII: string.replace(/[^\x00-\x7F]/g, (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0'))
-  - Context
-- When a layer reaches a close condition, should we still render [up-hungry][up-if-layer=any] elements in another layer?
-  - Would be practical for flashes
-  - Would be weird for API. Render events flying afterwards, we cannot communicate a RenderResult.
-- Can we allow await in Callbacks?
-  new AsyncFunction()
+- Decide whether to include Vary cache in V3
 
 
 
@@ -142,15 +137,12 @@ Docs
 ### General
 
 - Finish the CHANGELOG
+- Protocol / CHANGELOG: Optimizing responses must send Vary
 - Check if the index links to doc pages preferrably
 - Events emitted through up.Layer#emit() must all have a { layer } prop documented
   - e.g. up:layer:location:changed hasn't documented this
 - Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
-- Example for excluding requests from caching using autoCache:
-    let defaultAutoCache = up.network.config.autoCache
-    up.network.config.autoCache = function(request) {
-      defaultAutoCache(request) && !request.url.endsWith('/edit')
-    }
+- Document [up-href]
 
 
 ### Other docs
@@ -226,6 +218,8 @@ V3 final Launch
 - *Maybe* have a pre.unpoly.com
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
+  - Explain new / deprecated headers
+  - Explain that we should send Vary when optimizing responses
 - Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
 - Schedule Tweets
   - For new doc pages
@@ -371,7 +365,8 @@ Icebox
 - New event up:request:solo ?
 - Consider delaying appending of new layer elements until we have constructed all children https://github.com/unpoly/unpoly/discussions/314
 - Publish { onQueued }
-  - More canonic would be if up.render() returned a up.RenderRequest, which has abort().
+  - We're currently only using onQueued to get the request of a rander job, so we can abort it
+  - More canonic would be if RenderJob had an abort() method
 - Wir aborten bereits laufende [up-validate] wenn das Formular submitted, wird, aber laufende Watcher-Delays warten können danach noch Dinge tun
   - Wie wäre "submit stoppt das delay"?
   Evtl. Warnung ausbauen: "Will not watch fields without [name]"
@@ -499,3 +494,9 @@ Decisions
 - Should config.autoCache allow to cache error responses? => That's a hard question to answer
 - Get rid of response.request (which contains references to a layer), response.xhr ?
   => This is hard because up.cache.expire() expires requests, not responses. Hence up.Response delegates { expired } to its response.
+- Can we allow await in Callbacks?
+  - new AsyncFunction()
+  - This would not work trivially with the postprocessing in up.NonceableCallback
+- Returning 'auto' for default would be a good way to override configs with exceptions
+  - request.url.endsWith('/edit') ? false : 'auto'
+  - Since this already the 'autoMeans' config we cannot return 'auto' here
