@@ -35,14 +35,6 @@ up.Request.XHRRenderer = class XHRRenderer {
       )
     }
 
-    for (let header in this.request.headers) {
-      this.addHeader(
-        xhr,
-        header,
-        this.request.headers[header]
-      )
-    }
-
     let csrfHeader, csrfToken
     if ((csrfHeader = this.request.csrfHeader()) && (csrfToken = this.request.csrfToken())) {
       this.addHeader(xhr, csrfHeader, csrfToken)
@@ -56,6 +48,11 @@ up.Request.XHRRenderer = class XHRRenderer {
     let contentType = this.getContentType()
     if (contentType) {
       this.addHeader(xhr, 'Content-Type', contentType)
+    }
+
+    for (let headerName in this.request.headers) {
+      let headerValue = this.request.headers[headerName]
+      xhr.setRequestHeader(headerName, headerValue)
     }
 
     Object.assign(xhr, handlers)
@@ -87,11 +84,11 @@ up.Request.XHRRenderer = class XHRRenderer {
     return this.payload
   }
 
-  addHeader(xhr, header, value) {
+  addHeader(xhr, name, value) {
     if (u.isOptions(value) || u.isArray(value)) {
       value = u.safeStringifyJSON(value)
     }
-    xhr.setRequestHeader(header, value)
+    this.request.headers[name] = value
   }
 
   finalizePayload() {

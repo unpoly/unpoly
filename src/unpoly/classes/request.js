@@ -81,13 +81,31 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  An object of additional HTTP headers.
+  An object of HTTP headers that will be sent with this request.
 
   Unpoly will by default send a number of custom request headers.
   See `up.protocol` and `up.network.config.requestMetaKeys` for details.
 
+  @see up.Request.prototype.header
+
   @property up.Request#headers
   @param {Object} headers
+  @stable
+  */
+
+  /*-
+  Returns the HTTP request header value with the given name.
+
+  Returns `undefined` if the given header name will not be sent with this request.
+
+  > [note]
+  > For implementation reasons, the search for the header is case-sensitive.
+
+  @function up.Request#header
+  @param {string} name
+    The case-sensitive name.
+  @return {string|undefined}
+    The value of the header.
   @stable
   */
 
@@ -766,6 +784,10 @@ up.Request = class Request extends up.Record {
   get queueAge() {
     const now = new Date()
     return now - this.queuedAt
+  }
+
+  header(name) {
+    return this.headers[name]
   }
 
   static tester(condition, { except } = {}) {

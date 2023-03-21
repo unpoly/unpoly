@@ -136,3 +136,24 @@ describe 'up.Request', ->
       next (result) =>
         expect(result.state).toEqual('rejected')
         expect(result.value.name).toEqual('AbortError')
+
+  describe '#header()', ->
+
+    it 'returns the value of a header set via { headers } option', asyncSpec (next) ->
+      request = up.request('/url', headers: { 'X-Foo': 'foo-value' })
+
+      next ->
+        expect(request.header('X-Foo')).toBe('foo-value')
+
+    it 'returns the value of a header that was automatically set by Unpoly', asyncSpec (next) ->
+      request = up.request('/url', target: '.target', layer: 'root')
+
+      next ->
+        expect(request.header('X-Up-Target')).toBe('.target')
+        expect(request.header('X-Up-Mode')).toBe('root')
+
+    it 'returns a missing value if no such header was set', asyncSpec (next) ->
+      request = up.request('/url')
+
+      next ->
+        expect(request.header('X-Foo')).toBeMissing()

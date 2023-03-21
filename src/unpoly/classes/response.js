@@ -152,7 +152,7 @@ up.Response = class Response extends up.Record {
   /*-
   Returns the HTTP header value with the given name.
 
-  The search for the header name is case-insensitive.
+  The search for the header is case-insensitive.
 
   Returns `undefined` if the given header name was not included in the response.
 
