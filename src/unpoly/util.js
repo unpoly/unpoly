@@ -1505,7 +1505,7 @@ up.util = (function() {
   then [flattens](/up.util.flatten) the result into a new array.
 
   @function up.util.flatMap
-  @param {Array} array
+  @param {List|Iterator} list
   @param {Function(element)} mapping
   @return {Array}
   @experimental
