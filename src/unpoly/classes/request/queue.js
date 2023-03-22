@@ -20,10 +20,9 @@ up.Request.Queue = class Queue {
     request.runQueuedCallbacks()
     u.always(request, responseOrError => this.onRequestSettled(request, responseOrError))
 
-    // When considering whether a request is "slow", we're measing the duration between { queuedAt }
+    // When considering whether a request is "slow", we're measing the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
     // make its own check whether a request in the queue is considered slow.
-    request.queuedAt = new Date()
     this.scheduleSlowTimer(request)
     this.queueRequest(request)
     u.microtask(() => this.poke())
@@ -48,7 +47,7 @@ up.Request.Queue = class Queue {
   scheduleSlowTimer(request) {
     // In case the request was loading in the background before it was promoted to
     // the foreground, the request may have less time left than request.badResponseTime.
-    let timeUntilLate = Math.max(request.badResponseTime - request.queueAge, 0)
+    let timeUntilLate = Math.max(request.badResponseTime - request.age, 0)
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @checkLate().
@@ -84,16 +83,8 @@ up.Request.Queue = class Queue {
   }
 
   sendRequestNow(request) {
-    if (request.emit('up:request:load', { log: ['Loading %s %s', request.method, request.url] }).defaultPrevented) {
-      request.abort({ reason: 'Prevented by event listener' })
-    } else {
-      // Since up:request:load listeners may have mutated properties used in
-      // the request's cache key ({ url, method, params }), we need to normalize
-      // again. Normalizing e.g. moves the params into the URL for GET requests.
-      request.normalizeForCaching()
-
+    if (request.load()) {
       this.currentRequests.push(request)
-      request.load()
     }
   }
 
@@ -163,6 +154,6 @@ up.Request.Queue = class Queue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
 
-    return u.some(allForegroundRequests, request => request.queueAge >= (request.badResponseTime - timerTolerance))
+    return u.some(allForegroundRequests, (request) => request.age >= (request.badResponseTime - timerTolerance))
   }
 }

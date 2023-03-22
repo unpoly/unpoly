@@ -19,7 +19,7 @@ The HTTP client offers many quality-of-life improvements, for example:
   You may also implement a [custom loading indicator](/loading-indicators#custom-loading-indicators).
 - When two requests [target](/targeting-fragments) the same element,
   Unpoly will [abort the earlier request](/aborting-requests).
-- Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
+- Requests send [additional HTTP headers](/up.protocol) that the server may use to [optimize its response](/optimizing-responses).
   For example, when [updating a fragment](/targeting-fragments), the target selector is automatically sent
   as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
 - Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response lifecycle.
@@ -178,19 +178,6 @@ up.network = (function() {
 
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be evicted.
 
-  @param {Array<string>|Function(up.Request): Array<string>} [config.requestMetaKeys]
-    An array of [request property names](/up.Request)
-    that are sent to the server as [HTTP headers](/up.protocol).
-
-    Two requests with different `requestMetaKeys` are considered cache misses when [caching](/up.request) and
-    [preloading](/a-up-preload). To **improve cacheability**, you may set
-    `up.network.config.requestMetaKeys` to a shorter list of property keys.
-
-    See [improving cache hit rates](/caching#improving-cache-hit-rates)
-    for more details and examples.
-
-    @experimental
-
   @param {boolean|Function(): boolean} [config.progressBar]
     Whether to show a [progress bar](/loading-indicators#progress-bar)
     for [late requests](#config.badResponseTime).
@@ -212,7 +199,6 @@ up.network = (function() {
     autoCache(request) { return request.isSafe() },
     expireCache(request, _response) { return !request.isSafe() },
     evictCache: false,
-    requestMetaKeys: ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext'],
     progressBar: true,
     timeout: 90_000,
   }))
@@ -224,7 +210,7 @@ up.network = (function() {
   let progressBar = null
 
   /*-
-  Returns a [cached](/caching) request [matching](/up.network.config#config.requestMetaKeys) the given request options.
+  Returns a [cached](/caching) request matching the given request options.
 
   Returns `undefined` if the given request is not currently cached.
 
@@ -249,9 +235,6 @@ up.network = (function() {
     The request options to match against the cache.
 
     See `options` for `up.request()` for documentation.
-
-    The user may configure `up.network.config.requestMetaKeys` to define
-    which request options are relevant for cache matching.
   @return {up.Request|undefined}
     The cached request.
   @experimental
@@ -332,7 +315,7 @@ up.network = (function() {
     abortRequests()
     queue.reset()
     config.reset()
-    cache.evict()
+    cache.reset()
     progressBar?.destroy()
     progressBar = null
   }
@@ -438,8 +421,8 @@ up.network = (function() {
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
 
-    Note that Unpoly will by default send a number of custom request headers.
-    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+    Unpoly will by default send a number of custom request headers.
+    See `up.protocol` for details.
 
   @param {boolean} [options.wrapMethod]
     Whether to wrap non-standard HTTP methods in a POST request.
@@ -520,9 +503,7 @@ up.network = (function() {
   function makeRequest(...args) {
     const options = parseRequestOptions(args)
     const request = new up.Request(options)
-
-    useCachedRequest(request) || queueRequest(request)
-
+    processRequest(request)
     return request
   }
 
@@ -533,12 +514,16 @@ up.network = (function() {
     return options
   }
 
-  function useCachedRequest(request) {
+  function processRequest(request) {
+    useCachedRequest(request) || queueRequest(request)
+  }
+
+  function useCachedRequest(newRequest) {
     // If we have an existing promise matching this new request,
     // we use it unless `request.cache` is explicitly set to `false`.
     let cachedRequest
-    if (request.willCache() && (cachedRequest = cache.get(request))) {
-      up.puts('up.request()', 'Re-using previous request to %s %s', request.method, request.url)
+    if (newRequest.willCache() && (cachedRequest = cache.get(newRequest))) {
+      up.puts('up.request()', 'Re-using previous request to %s', newRequest.description)
 
       // Check if we need to upgrade a cached background request to a foreground request.
       // This might affect whether we're going to emit an up:network:late event further
@@ -550,7 +535,7 @@ up.network = (function() {
       //   We have a cache hit and receive the earlier request that is still preloading.
       //   Now we *should* trigger `up:network:late`.
       // - The request (1) finishes. This triggers `up:network:recover`.
-      if (!request.background) {
+      if (!newRequest.background) {
         queue.promoteToForeground(cachedRequest)
       }
 
@@ -559,8 +544,11 @@ up.network = (function() {
       // not the same object.
       //
       // What we do instead is have `request` follow the state of `cachedRequest`'s exchange.
-      request.followState(cachedRequest)
-      request.fromCache = true
+      //
+      // There is also the edge case where a cached request is still in-flight and, when the
+      // response is finally received, has a Vary header that makes it incompatible with
+      // `newRequest`. In this case we re-process `newRequest` as if it was just made.
+      cache.track(cachedRequest, newRequest, { onIncompatible: processRequest })
 
       return true
     }
@@ -576,13 +564,16 @@ up.network = (function() {
   }
 
   function handleCaching(request) {
+    // Cache the request before it is queued and loaded.
+    // This way additional requests to the same endpoint will hit and track this request.
     if (request.willCache()) {
-      // Cache the request for calls for calls with the same URL, method, params
-      // and target. See up.Request#cacheKey().
-      cache.set(request, request)
+      cache.put(request)
+      request.onLoading = () => cache.put(request)
     }
 
-    return u.always(request, function(response) {
+    // Once we receive a response we honor options/headers for eviction/expiration,
+    // even if the request was not cachable.
+    u.always(request, function(response) {
       // Three places can request the cache to be expired or kept fresh:
       //
       // (1) The server via X-Up-Expire-Cache header, found in response.expireCache
@@ -603,12 +594,12 @@ up.network = (function() {
         cache.evict(evictCache, { except: request })
       }
 
-      // (1) Re-cache a cacheable request in case we cleared the cache above
+      // (1) Re-cache a cacheable request in case we evicted the entire cache above
       // (2) An un-cacheable request should still update an existing cache entry
       //     (written by a earlier, cacheable request with the same cache key)
       //     since the later response will be fresher.
       if (cache.get(request)) {
-        cache.set(request, request)
+        cache.put(request)
       }
 
       if (!response.ok) {

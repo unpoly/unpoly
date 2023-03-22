@@ -239,33 +239,22 @@ describe 'up.history', ->
             history.back()
 
           next.after waitForBrowser, =>
-            respond() # we need to respond since we've never requested /test-two with the popTarget
-
-          next.after waitForBrowser, =>
             expect(location.href).toMatchURL('/test-two')
             expect($('.viewport').scrollTop()).toBe(150)
             history.back()
 
           next.after waitForBrowser, =>
             expect(location.href).toMatchURL('/test-one') # cannot delay the browser from restoring the URL on pop
-            respond() # we need to respond since we've never requested /test-one with the popTarget
-
-          next.after waitForBrowser, =>
             expect($('.viewport').scrollTop()).toBe(50)
             history.forward()
 
           next.after waitForBrowser, =>
             expect(location.href).toMatchURL('/test-two')
-            # No need to respond since we requested /test-two with the popTarget
-            # when we went backwards
             expect($('.viewport').scrollTop()).toBe(150)
             history.forward()
 
           next.after waitForBrowser, =>
             expect(location.href).toMatchURL('/test-three') # cannot delay the browser from restoring the URL on pop
-            respond() # we need to respond since we've never requested /test-three with the popTarget
-
-          next.after waitForBrowser, =>
             expect($('.viewport').scrollTop()).toBe(250)
 
         it 'resets the scroll position of no earlier scroll position is known', asyncSpec (next) ->
@@ -296,7 +285,7 @@ describe 'up.history', ->
             $('.viewport').scrollTop(50)
 
             # Emulate a cache miss
-            up.layer.root.lastScrollTops.evict()
+            up.layer.root.lastScrollTops.clear()
 
             history.back()
 
@@ -346,11 +335,7 @@ describe 'up.history', ->
             expect(location.href).toMatchURL('/two')
             history.back()
 
-          next.after 100, =>
-            # we need to respond since we've never requested the original URL with the popTarget
-            respond()
-
-          next =>
+          next.after 50, =>
             expect('.viewport1').toBeScrolledTo(3000)
             expect('.viewport2').toBeScrolledTo(3050)
 
@@ -374,7 +359,6 @@ describe 'up.history', ->
     describe 'events', ->
 
       it 'emits up:location:changed events as the user goes forwards and backwards through history', asyncSpec (next) ->
-        up.network.config.cacheSize = 0
         up.history.config.restoreTargets = ['.viewport']
 
         fixture('.viewport .content')
@@ -392,6 +376,8 @@ describe 'up.history', ->
           events.push [event.reason, normalize(event.location)]
 
         up.navigate('.content', url: '/foo', history: true)
+
+        tolerance = 150
 
         next =>
           respond()
@@ -426,10 +412,7 @@ describe 'up.history', ->
 
           history.back()
 
-        next.after 150, =>
-          respond()
-
-        next =>
+        next.after tolerance, =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]
@@ -440,9 +423,6 @@ describe 'up.history', ->
           history.back()
 
         next.after 150, =>
-          respond()
-
-        next =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]
@@ -454,9 +434,6 @@ describe 'up.history', ->
           history.forward()
 
         next.after 150, =>
-          respond()
-
-        next =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]
@@ -469,9 +446,6 @@ describe 'up.history', ->
           history.forward()
 
         next.after 150, =>
-          respond() # we need to respond since we've never requested /baz with the popTarget
-
-        next =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]

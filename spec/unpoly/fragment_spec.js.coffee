@@ -5331,6 +5331,20 @@ describe 'up.fragment', ->
                 expect(result.value).toBeAbortError()
                 done()
 
+          it 'aborts an existing requests targeting the same URL and element IFF not caching (bugfix)', (done) ->
+            fixture('.element')
+            change1Promise = up.render('.element', url: '/path1')
+
+            expect(up.network.queue.allRequests.length).toBe(1)
+
+            up.render('.element', url: '/path1', abort: 'target')
+
+            u.task ->
+              promiseState(change1Promise).then (result) ->
+                expect(result.state).toBe('rejected')
+                expect(result.value).toBeAbortError()
+                done()
+
           it 'aborts existing requests targeting the same element when updating from local content', (done) ->
             fixture('.element')
             change1Promise = up.render('.element', url: '/path1')
@@ -5693,7 +5707,6 @@ describe 'up.fragment', ->
         describe 'cache revalidation', ->
 
           beforeEach (done) ->
-            up.network.config.requestMetaKeys = []
             up.fragment.config.autoRevalidate = (response) => response.age >= 0
             fixture('.target', text: 'initial text')
 
@@ -5701,16 +5714,14 @@ describe 'up.fragment', ->
 
             u.microtask ->
               jasmine.respondWithSelector('.target', text: 'cached text')
-              u.microtask ->
-                request = up.request('/cached-path', { cache: true })
-                expect(request.fromCache).toBe(true)
-                done()
+              done()
 
           it 'reloads a fragment that was rendered from an older cached response', asyncSpec (next) ->
             up.render('.target', { url: '/cached-path', cache: true })
 
             next ->
               expect('.target').toHaveText('cached text')
+
               expect(up.network.isBusy()).toBe(true)
 
               jasmine.respondWithSelector('.target', text: 'verified text')

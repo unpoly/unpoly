@@ -940,9 +940,9 @@ up.link = (function() {
   @param [up-headers]
     A JSON object with additional request headers.
 
-    Note that Unpoly will by default send a number of custom request headers.
+    Unpoly will by default send a number of custom request headers.
     E.g. the `X-Up-Target` header includes the [target selector](/targeting-fragments).
-    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+    See `up.protocol` for details.
 
   @param [up-content]
     A string for the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).

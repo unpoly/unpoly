@@ -62,16 +62,18 @@ end
 ```
 
 
-Re-using interactions in an overlay, but with a variation
-----------------------------------------------------------
+Re-using interactions in an overlay, but with a variation {#reuse-interaction-with-variation}
+--------------------------------------------------------------------------------------------
 
 Context is useful when you want to re-use an existing interaction in an overlay, but make a slight variation.
 
-- Assume you want to re-use your existing contacts index for a contact picker widget.
-- The contact picker opens the context index in an overlay where the user can choose a contact.
-- In this case the contact index should show an additional message "Pick a contact for project Foo", replacing `Foo` with the actual name of the project.
+### Example
 
-We can implement such an contact picker with this ERB template:
+Assume you want to re-use your existing `/contacts` list for a contact picker widget. The contact picker opens the context index in an overlay where the user can choose a contact.
+
+In this case the contact index should show an additional message "Pick a contact for project Foo", replacing `Foo` with the actual name of the project.
+
+We can implement such an contact picker with this [ERB](https://github.com/ruby/erb) template:
 
 ```erb
 <% form_for @project do |form| %>
@@ -91,11 +93,12 @@ We can implement such an contact picker with this ERB template:
 
 Our effective contact object would now be something like `{ project: 'Hosting 2021' }`.
 
-The server can inspect the context in `/contacts/index.erb`:
+When rendering the `/contacts` the server can access the current layer context through the `X-Up-Context` header.
+It can then decide to render a different title:
 
 ```erb
 <% if up.context[:project] %>
-  Pick a contact for <%= up.context[:project] %>:
+  Pick a contact for <%= up.context[:project] %>
 <% else %>
   List of contacts
 <% end %>
@@ -104,5 +107,7 @@ The server can inspect the context in `/contacts/index.erb`:
   <li>...</li>
 <% end %>
 ```
+
+@include vary-header-note
 
 @page context

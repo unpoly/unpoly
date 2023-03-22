@@ -32,6 +32,11 @@ up.migrate.renamedProperty(up.network.config, 'maxRequests', 'concurrency')
 up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
 up.migrate.renamedProperty(up.network.config, 'cacheExpiry', 'cacheExpireAge')
 up.migrate.renamedProperty(up.network.config, 'clearCache', 'expireCache')
+up.migrate.forbiddenPropertyValue(up.network.config, 'cacheSize', 0, 'Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. To disable caching, set up.network.config.autoCache = false instead.')
+
+// Provide a default for the removed property, in case someone pushes into that.
+up.network.config.requestMetaKeys = []
+up.migrate.removedProperty(up.network.config, 'requestMetaKeys', 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.')
 
 up.migrate.handleRequestOptions = function(options) {
   up.migrate.fixKey(options, 'clearCache', 'expireCache')

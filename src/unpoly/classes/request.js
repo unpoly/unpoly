@@ -84,7 +84,7 @@ up.Request = class Request extends up.Record {
   An object of HTTP headers that will be sent with this request.
 
   Unpoly will by default send a number of custom request headers.
-  See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+  See `up.protocol` for details.
 
   @see up.Request.prototype.header
 
@@ -292,11 +292,12 @@ up.Request = class Request extends up.Record {
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
       'fragments',
-      'queuedAt',
+      'builtAt',
       'wrapMethod',
       'contentType',
       'payload',
       'onQueued',
+      'onLoading',
       'fail',
       'abortable',
       'badResponseTime',
@@ -308,7 +309,8 @@ up.Request = class Request extends up.Record {
       state: 'new',
       abortable: true,
       headers: {},
-      timeout: up.network.config.timeout
+      timeout: up.network.config.timeout,
+      builtAt: new Date(),
     }
   }
 
@@ -335,7 +337,7 @@ up.Request = class Request extends up.Record {
     if (this.wrapMethod == null) { this.wrapMethod = up.network.config.wrapMethod }
 
     // Normalize a first time to get a normalized cache key.
-    this.normalizeForCaching()
+    this.normalize()
 
     if ((this.target || this.layer || this.origin) && !options.basic) {
       const layerLookupOptions = { origin: this.origin }
@@ -366,6 +368,10 @@ up.Request = class Request extends up.Record {
     // (2) We want to set the default once and then keep the value immutable. Otherwise
     //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
+
+    // this.uid = u.uid()
+
+    this.addAutoHeaders()
   }
 
   /*-
@@ -430,11 +436,7 @@ up.Request = class Request extends up.Record {
     return this.fragments?.[0]
   }
 
-  followState(sourceRequest) {
-    u.delegate(this, ['deferred', 'state', 'background', 'expired'], () => sourceRequest)
-  }
-
-  normalizeForCaching() {
+  normalize() {
     this.method = u.normalizeMethod(this.method)
     this.extractHashFromURL()
     this.transferParamsToURL()
@@ -514,20 +516,45 @@ up.Request = class Request extends up.Record {
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
     if (this.state !== 'new') return
-    this.state = 'loading'
 
-    // If someone expired this link while it was waiting in the queue (e.g. through
-    // expiring everyhing with up.cache.expire(), it now becomes fresh through the
-    // act of loading.
-    this.expired = false
+    if (this.emitLoad()) {
+      this.state = 'loading'
 
-    // Convert from XHR's callback-based API to up.Request's promise-based API
-    new up.Request.XHRRenderer(this).buildAndSend({
-      onload:    () => this.onXHRLoad(),
-      onerror:   () => this.onXHRError(),
-      ontimeout: () => this.onXHRTimeout(),
-      onabort:   () => this.onXHRAbort()
-    })
+      // Listeners to up:request:load may have mutated properties that need to be
+      // re-normalized and/or are part of a cache key.
+      //
+      // To be correct we would also need to re-run addAutoHeaders() here. However since
+      // this is costly and also rare that listeners mutate properties like #target or #layer,
+      // we leave it to the listener to update headers.
+      this.normalize()
+
+      // This callback is used by up.network to re-cache the request after its cache key
+      // may have changed by mutation from a up:request:load listener.
+      this.onLoading?.()
+
+      // If someone expired this link while it was waiting in the queue (e.g. through
+      // expiring everyhing with up.cache.expire(), it now becomes fresh through the
+      // act of loading.
+      this.expired = false
+
+      // Convert from XHR's callback-based API to up.Request's promise-based API
+      new up.Request.XHRRenderer(this).buildAndSend({
+        onload: () => this.onXHRLoad(),
+        onerror: () => this.onXHRError(),
+        ontimeout: () => this.onXHRTimeout(),
+        onabort: () => this.onXHRAbort()
+      })
+
+      // Signal to callers (in particular to up.Queue) that load() was not aborted.
+      return true
+    } else {
+      this.abort({ reason: 'Prevented by event listener' })
+    }
+  }
+
+  emitLoad() {
+    let event = this.emit('up:request:load', { log: ['Loading %s', this.description] })
+    return !event.defaultPrevented
   }
 
   /*-
@@ -643,18 +670,20 @@ up.Request = class Request extends up.Record {
   }
 
   respondWith(response) {
-    if (this.state !== 'loading') return
+    this.response = response
+
+    if (this.isSettled()) return
     this.state = 'loaded'
 
     if (response.ok) {
-      return this.deferred.resolve(response)
+      this.deferred.resolve(response)
     } else {
-      return this.deferred.reject(response)
+      this.deferred.reject(response)
     }
   }
 
   isSettled() {
-    return (this.state !== 'new') && (this.state !== 'loading')
+    return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')
   }
 
   csrfHeader() {
@@ -720,31 +749,6 @@ up.Request = class Request extends up.Record {
     return new up.Response(responseAttrs)
   }
 
-  cacheKey() {
-    return JSON.stringify([
-      this.method,
-      this.url,
-      this.params.toQuery(),
-      // If we send a meta prop to the server it must also become part of our cache key,
-      // given that server might send a different response based on these props.
-      this.metaProps()
-    ])
-  }
-
-  // Returns an object like { target: '...', mode: '...' } that will
-  // (1) be sent to the server so it can optimize responses and
-  // (2) become part of our @cacheKey().
-  metaProps() {
-    const props = {}
-    for (let key of u.evalOption(up.network.config.requestMetaKeys, this)) {
-      const value = this[key]
-      if (u.isGiven(value)) {
-        props[key] = value
-      }
-    }
-    return props
-  }
-
   buildEventEmitter(args) {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
@@ -781,13 +785,37 @@ up.Request = class Request extends up.Record {
     })
   }
 
-  get queueAge() {
-    const now = new Date()
-    return now - this.queuedAt
+  get age() {
+    return new Date() - this.builtAt
   }
 
   header(name) {
     return this.headers[name]
+  }
+
+  addAutoHeaders() {
+    // Add information about the response's intended use, so the server may
+    // customize or shorten its response.
+    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
+      this.addAutoHeader(
+        up.protocol.headerize(key),
+        this[key]
+      )
+    }
+
+    let csrfHeader, csrfToken
+    if ((csrfHeader = this.csrfHeader()) && (csrfToken = this.csrfToken())) {
+      this.addAutoHeader(csrfHeader, csrfToken)
+    }
+
+    this.addAutoHeader(up.protocol.headerize('version'), up.version)
+  }
+
+  addAutoHeader(name, value) {
+    if (u.isOptions(value) || u.isArray(value)) {
+      value = u.safeStringifyJSON(value)
+    }
+    this.headers[name] = value
   }
 
   static tester(condition, { except } = {}) {
@@ -804,8 +832,7 @@ up.Request = class Request extends up.Record {
     }
 
     if (except) {
-      let exceptCacheKey = except.cacheKey()
-      return (request) => (request.cacheKey() !== exceptCacheKey) && testFn(request)
+      return (request) => !up.cache.willHaveSameResponse(request, except) && testFn(request)
     } else {
       return testFn
     }

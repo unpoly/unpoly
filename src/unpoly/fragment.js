@@ -222,7 +222,7 @@ up.fragment = (function() {
 
   // Users who are not using layers will prefer settings default targets
   // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-  u.delegate(config, 'mainTargets', () => up.layer.config.any)
+  u.delegate(config, ['mainTargets'], () => up.layer.config.any)
 
   function reset() {
     config.reset()
@@ -544,9 +544,9 @@ up.fragment = (function() {
   @param {Object} [options.headers={}]
     An object with additional request headers.
 
-    Note that Unpoly will by default send a number of custom request headers.
+    Unpoly will by default send a number of custom request headers.
     E.g. the `X-Up-Target` header includes the [targeted](/targeting-fragments) CSS selector.
-    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+    See `up.protocol` for details.
 
   @param {string|Element} [options.content]
     The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
@@ -2759,4 +2759,4 @@ This is aliased as `up.layer.context`.
   If no context has been set an empty object is returned.
 @experimental
 */
-u.delegate(up, 'context', () => up.layer.current)
+u.delegate(up, ['context'], () => up.layer.current)

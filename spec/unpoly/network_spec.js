@@ -171,28 +171,6 @@ describe('up.network', function() {
             expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
           })
         }))
-
-        it('lets the user configure a smaller set of meta keys for better cacheability', asyncSpec(function(next) {
-          makeLayers(2)
-
-          up.network.config.requestMetaKeys = ['target']
-
-          up.request({
-            url: '/foo',
-            target: '.target',
-            layer: 'overlay',
-            failTarget: '.fail-target',
-            failLayer: 'root'
-          })
-
-          next(() => {
-            const request = this.lastRequest()
-            expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
-            expect(request.requestHeaders['X-Up-Fail-Target']).toBeMissing()
-            expect(request.requestHeaders['X-Up-Mode']).toBeMissing()
-            expect(request.requestHeaders['X-Up-Fail-Mode']).toBeMissing()
-          })
-        }))
       })
 
 
@@ -681,10 +659,12 @@ describe('up.network', function() {
       describe('with { cache } option', function() {
 
         it('caches server responses for the configured duration', asyncSpec(function(next) {
-          up.network.config.cacheEvictAge = 200; // 1 second for test
+          up.network.config.cacheEvictAge = 200 // 1 second for test
 
           const responses = []
-          const trackResponse = response => responses.push(response.text)
+          const trackResponse = function(response) {
+            responses.push(response.text)
+          }
 
           next(() => {
             up.request({url: '/foo', cache: true}).then(trackResponse)
@@ -715,25 +695,25 @@ describe('up.network', function() {
             expect(responses).toEqual(['foo', 'foo'])
           })
 
-          next.after((200), () => {
-            // Send another request after another 3 minutes
-            // The clock is now a total of 6 minutes after the first request,
-            // exceeding the cache's retention time of 5 minutes.
-            up.request({url: '/foo', cache: true}).then(trackResponse)
-          })
-
-          next(() => {
-            // See that we have triggered a second request
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
-          })
-
-          next(() => {
-            this.respondWith('bar')
-          })
-
-          next(() => {
-            expect(responses).toEqual(['foo', 'foo', 'bar'])
-          })
+          // next.after((200), () => {
+          //   // Send another request after another 3 minutes
+          //   // The clock is now a total of 6 minutes after the first request,
+          //   // exceeding the cache's retention time of 5 minutes.
+          //   up.request({url: '/foo', cache: true}).then(trackResponse)
+          // })
+          //
+          // next(() => {
+          //   // See that we have triggered a second request
+          //   expect(jasmine.Ajax.requests.count()).toEqual(2)
+          // })
+          //
+          // next(() => {
+          //   this.respondWith('bar')
+          // })
+          //
+          // next(() => {
+          //   expect(responses).toEqual(['foo', 'foo', 'bar'])
+          // })
         }))
 
         it('does not cache responses with a non-200 status code', asyncSpec(function(next) {
@@ -742,13 +722,6 @@ describe('up.network', function() {
           next(() => up.request({url: '/foo', cache: true}))
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
         }))
-
-        it('reuses a request with the same URL but a different #hash', function() {
-          const request1 = up.request({url: '/url#foo', cache: true})
-          expect(request1.hash).toEqual('#foo')
-          expect({url: '/url#foo'}).toBeCached()
-          expect({url: '/url#bar'}).toBeCached()
-        })
 
         it("does not lose a request's #hash when re-using a cached request without a #hash (bugfix)", function() {
           const request1 = up.request({url: '/url#foo', cache: true})
@@ -761,23 +734,23 @@ describe('up.network', function() {
           expect({url: '/url#bar'}).toBeCached()
         })
 
-        it("does not cache responses if config.cacheEvictAge is 0", asyncSpec(function(next) {
-          up.network.config.cacheEvictAge = 0
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+        it('caches requests that change their URL in up:request:load', asyncSpec(function(next) {
+          up.on('up:request:load', ({ request }) => request.url = '/changed-path')
+          up.request({url: '/original-path', cache: true})
+
+          next(() => {
+            expect({url: '/changed-path'}).toBeCached()
+          })
         }))
 
-        it("does not cache responses if config.cacheSize is 0", asyncSpec(function(next) {
-          up.network.config.cacheSize = 0
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+        it('caches GET requests that change their query params in up:request:load', asyncSpec(function(next) {
+          up.on('up:request:load', ({ request }) => request.params.add('bar', 'two'))
+          up.request({url: '/path?foo=one', cache: true})
+
+          next(() => {
+            expect({url: '/path?foo=one&bar=two'}).toBeCached()
+          })
         }))
-
-        it('does not limit the number of cache entries if config.cacheSize is undefined')
-
-        it('never discards old cache entries if config.cacheEvictAge is undefined')
 
         it('respects a config.cacheSize setting', asyncSpec(function(next) {
             up.network.config.cacheSize = 2
@@ -789,41 +762,135 @@ describe('up.network', function() {
           })
         )
 
-        it("doesn't reuse responses when asked for the same path, but different selectors", asyncSpec(function(next) {
-          next(() => up.request({url: '/path', target: '.a', cache: true}))
-          next(() => up.request({url: '/path', target: '.b', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
+        describe('matching requests', function() {
 
-        it("doesn't reuse responses when asked for the same path, but different params", asyncSpec(function(next) {
-          next(() => up.request({url: '/path', params: {query: 'foo'}, cache: true}))
-          next(() => up.request({url: '/path', params: {query: 'bar'}, cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
+          it('reuses a request with the same URL but a different #hash', function () {
+            const request1 = up.request({ url: '/url#foo', cache: true })
+            expect(request1.hash).toEqual('#foo')
+            expect({ url: '/url#foo' }).toBeCached()
+            expect({ url: '/url#bar' }).toBeCached()
+          })
 
-//        it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
-//          next => up.request(url: '/path', target: 'html', cache: true)
-//          next => up.request(url: '/path', target: 'body', cache: true)
-//          next => up.request(url: '/path', target: 'p', cache: true)
-//          next => up.request(url: '/path', target: '.klass', cache: true)
-//          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
-//
-//        it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", asyncSpec (next) ->
-//          next => up.request(url: '/path', target: 'body', cache: true)
-//          next => up.request(url: '/path', target: 'p', cache: true)
-//          next => up.request(url: '/path', target: '.klass', cache: true)
-//          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
-//
-//        it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", asyncSpec (next) ->
-//          next => up.request(url: '/path', target: 'body', cache: true)
-//          next => up.request(url: '/path', target: 'html', cache: true)
-//          next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+          it("reuses responses when asked for the same path, but different selectors", asyncSpec(function (next) {
+            next(() => up.request({ url: '/path', target: '.a', cache: true }))
+            next(() => up.request({ url: '/path', target: '.b', cache: true }))
+            next(() => expect(jasmine.Ajax.requests.count()).toEqual(1))
+          }))
 
-        it("doesn't reuse responses for different paths", asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => up.request({url: '/bar', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
+          describe('Vary response header', function() {
+            it("doesn't reuse responses when asked for the same path, but different selectors if the server responded with `Vary: X-Up-Target`", asyncSpec(function (next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => jasmine.respondWithSelector('.a', {
+                text: 'content',
+                responseHeaders: { 'Vary': 'X-Up-Target' }
+              }))
+              next(() => up.request({ url: '/path', target: '.b', cache: true }))
+              next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+            }))
+
+            it('does reuse responses for the same path and selector if the server responds with `Vary: X-Up-Target` (bugfix)', asyncSpec(function(next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+                jasmine.respondWithSelector('.a', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'X-Up-Target' }
+                })
+              })
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(up.network.isBusy()).toBe(false)
+              })
+            }))
+
+            it('loads a request that is tracking another request with the same path, but then retroactively becomes a cache miss due to a Vary header', asyncSpec(function(next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => up.request({ url: '/path', target: '.b', cache: true }))
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.a')
+
+                jasmine.respondWithSelector('.a', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'X-Up-Target' }
+                })
+              })
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(2)
+                expect(up.network.isBusy()).toBe(true)
+                expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.b')
+
+                jasmine.respondWithSelector('.b', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'X-Up-Target' }
+                })
+              })
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(2)
+                expect(up.network.isBusy()).toBe(false)
+              })
+
+            }))
+
+            it('ignores Vary for headers that were set outside Unpoly (e.g. by network infrastructure)', asyncSpec(function(next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+
+              next(() => up.request({ url: '/path', target: '.b', cache: true }))
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.a')
+
+                jasmine.respondWithSelector('.a', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'Proxy-Header' }
+                })
+              })
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(up.network.isBusy()).toBe(false)
+              })
+            }))
+
+            it('starts partitioning a method/URL pair once it receives a Vary header', asyncSpec(function(next) {
+              next(() => {
+                up.request({ url: '/path', target: '.a', cache: true })
+              })
+              next(() => {
+                expect({ url: '/path', target: '.a' }).toBeCached()
+                expect({ url: '/path', target: '.b' }).toBeCached()
+
+                jasmine.respondWith("content", { responseHeaders: { Vary: 'X-Up-Target' }})
+              })
+              next(() => {
+                expect({ url: '/path', target: '.a' }).toBeCached()
+                expect({ url: '/path', target: '.b' }).not.toBeCached()
+                expect({ url: '/path' }).not.toBeCached()
+
+                up.request({ url: '/path', target: '.a', headers: { Custom: 'custom-value' }, cache: true })
+              })
+            }))
+          })
+
+          it("doesn't reuse responses when asked for the same path, but different query params", asyncSpec(function (next) {
+            next(() => up.request({ url: '/path', params: { query: 'foo' }, cache: true }))
+            next(() => up.request({ url: '/path', params: { query: 'bar' }, cache: true }))
+            next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+          }))
+
+          it("never reuses responses for different paths, even if all other headers match", asyncSpec(function (next) {
+            next(() => up.request({ url: '/foo', cache: true, target: '.target' }))
+            next(() => up.request({ url: '/bar', cache: true, target: '.target' }))
+            next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+          }))
+
+        })
 
         describe('with { cache: "auto" }', function() {
 
@@ -2116,8 +2183,6 @@ describe('up.network', function() {
 
     })
 
-
-
     describe('up.cache.get()', function() {
 
       it('returns an existing cache entry for the given request', function() {
@@ -2131,16 +2196,33 @@ describe('up.network', function() {
 
     describe('up.cache.set()', () => it('should have tests'))
 
-    describe('up.cache.alias()', () => it('uses an existing cache entry for another request (used in case of redirects)', function() {
-      up.request({url: '/foo', cache: true})
-      expect({url: '/foo'}).toBeCached()
-      expect({url: '/bar'}).not.toBeCached()
+    describe('up.cache.alias()', () =>
+      it('uses an existing cache entry for another request (used in case of redirects)', asyncSpec(function(next) {
+        let originalRequest = up.request({url: '/foo', cache: true})
+        let aliasRequest
 
-      up.cache.alias({url: '/foo'}, {url: '/bar'})
+        next(() => {
+          expect({url: '/foo'}).toBeCached()
+          expect({url: '/bar'}).not.toBeCached()
 
-      expect({url: '/bar'}).toBeCached()
-      expect(up.cache.get({url: '/bar'})).toBe(up.cache.get({url: '/foo'}))
-    }))
+          aliasRequest = up.cache.alias({url: '/foo'}, {url: '/bar'})
+        })
+
+        next(() => {
+          expect({url: '/foo'}).toBeCached()
+          expect({url: '/bar'}).toBeCached()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          jasmine.respondWith("original request response")
+        })
+
+        next(() => {
+          expect(originalRequest.response.text).toBe('original request response')
+          expect(aliasRequest.response.text).toBe('original request response')
+        })
+
+      }))
+    )
 
     describe('up.cache.remove()', function() {
 

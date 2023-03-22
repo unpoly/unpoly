@@ -116,6 +116,18 @@ TODOs after V3
 - When a layer reaches a close condition, should we still render [up-hungry][up-if-layer=any] elements in another layer?
   - Would be practical for flashes
   - Would be weird for API. Render events flying afterwards, we cannot communicate a RenderResult.
+- When opening a new layer, we should update [up-hungry][up-if-layer=any] elements
+  => This is not trivial as OpenLayer cannot work with multiple steps yet
+  => Maybe we can do a "secret UpdateLayer pass" once the layer has opened.
+    - We would need to merge RenderResult objects
+- Custom attributes are not copied into [up-expand]
+  - up.link.config.expandableAttributes ?
+    - can also include regexp
+      - maybe reuse matcher logic for badTargetClasses
+  - up.link.config.expandableAttribute (attribute, element)
+    - The element will always be a link
+- Support custom expire times via Cache-Control: stale-while-revalidate
+  - Print a warning when we're discarding any other Cache-Control header format
 
 
 TODOs for V3
@@ -125,9 +137,17 @@ TODOs for V3
 Various changes
 ---------------
 
-- Migrate: Consider warning on up-solo=false
-- Migrate: Consider warning when setting old expiry
-- Decide whether to include Vary cache in V3
+- Migrate: Warning on { solo } render option
+  - "Unpoly 3+ only aborts requests targeting the same fragment. Setting [up-solo=false] or { solo: false } may no longer be necessary."
+  - The warning will go away after user migrates from [up-solo] to [up-abort]
+
+- Migrate: Warning when setting old expiry
+  - "Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting an expiry may no longer be necessary."
+  - The warning will go away after user migrates from up.network.config.cacheExpiry to up.network.config.cacheExpireAge
+
+- Now that compilers have the meta arg it should be possible to give up.RenderResult new { request, response } props
+
+- Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
 
 
 
@@ -137,13 +157,18 @@ Docs
 ### General
 
 - Finish the CHANGELOG
-- Protocol / CHANGELOG: Optimizing responses must send Vary
+  - Unfinished sections
+  - New commits
+  - No unbounded caches anymore
+  - Optimizing responses must send Vary
 - Check if the index links to doc pages preferrably
 - Events emitted through up.Layer#emit() must all have a { layer } prop documented
   - e.g. up:layer:location:changed hasn't documented this
-- Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
 - Document [up-href]
-
+- X-Up-Location: Mention that is only needed when you want a different URL in the browser. Link to preserving params in unpoly-rails.
+- X-Up-Method: You may also leave out the `X-Up-Method` header. In this case Unpoly will assume a `GET` method after a redirect. This assumption is correct for redirects with status codes 301, 302 and 303, and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
+- Extract /skipping-rendering#conditional-requests to its own page under the up.protocol parent
+- Server example in /context needs to talk about Vary
 
 ### Other docs
 
@@ -154,7 +179,7 @@ Docs
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
   - History in overlays
     - Always know their location, even if it might not be visible
-    - Explain that your should always render full pages
+    - Explain that servers should always render full pages
   - History restoration / Back button
     - This is currently documented in up:location:restore
     - Will collapse layers
@@ -162,7 +187,6 @@ Docs
       - Subnavigations make it easy
       - You can disable layer history
     - Customize restoration behavior
-- Analytics tracking
 - Preloading
   - (Currently sitting in a[up-preload])
   - On Hover
@@ -500,3 +524,7 @@ Decisions
 - Returning 'auto' for default would be a good way to override configs with exceptions
   - request.url.endsWith('/edit') ? false : 'auto'
   - Since this already the 'autoMeans' config we cannot return 'auto' here
+- Replace u.flatten() with Array#flat()
+  => We keep array-related utils because ours work with non-Array lists and iterators
+- Replace u.flatMap() with Array#flatMap()
+  => We keep array-related utils because ours work with non-Array lists and iterators

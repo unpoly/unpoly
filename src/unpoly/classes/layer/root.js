@@ -68,10 +68,6 @@ up.Layer.Root = class Root extends up.Layer {
     up.fail('Cannot close the root layer')
   }
 
-  reset() {
-    Object.assign(this, this.defaults())
-  }
-
   toString() {
     return "root layer"
   }

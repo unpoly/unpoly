@@ -150,57 +150,37 @@ To limit the memory required to hold its cache, Unpoly evicts cached content in 
 - The cache holds up to 70 responses. When this limit is reached, the oldest responses are evicted. This can be configured in `up.network.config.cacheSize`.
 
 
-Improving cache hit rates
--------------------------
+Caching optimized responses
+---------------------------
 
-Servers may inspect [request headers](/up.protocol) to send different response headers to optimize responses,
+Servers may inspect [request headers](/up.protocol) to [optimize responses](/optimizing-responses),
 e.g. by omitting a navigation bar that is not targeted.
 
-Unpoly uses separate cache entries for [different targets](/X-Up-Target), [layer modes](/X-Up-Mode) or [layer contexts](/X-Up-Context). While this behavior is correct in case the server optimizes a response, it may cause
-unnecessary cache misses. To improve cacheability, you may reduce
-`up.network.config.requestMetaKeys` to a shorter list of property keys
-that are revealed to the server as request headers.
+Request headers that influenced a response should be listed in a `Vary` response header.
+This tells Unpoly to partition its [cache](/up.caching) for that URL so that each
+request header value gets a separate cache entries.
 
-### Available properties
+### Example
 
-The default configuration is `['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']`.
-This means the following properties are sent to the server:
+The user makes a request to `/sitemap` in order to updates a fragment `.menu`.
+Unpoly makes a request like this:
 
-| Request property         | Request header      |
-|--------------------------|---------------------|
-| `up.Request#target`      | `X-Up-Target`       |
-| `up.Request#failTarget`  | `X-Up-Fail-Target`  |
-| `up.Request#context`     | `X-Up-Context`      |
-| `up.Request#failContext` | `X-Up-Fail-Context` |
-| `up.Request#mode`        | `X-Up-Mode`         |
-| `up.Request#failMode`    | `X-Up-Fail-Mode`    |
-
-### Per-route configuration
-
-You may also configure a function that accepts an [`up.Request`](/up.Request) and returns
-an array of request property names that are sent to the server.
-
-With this you may send different request properties for different URLs:
-
-```javascript
-up.network.config.requestMetaKeys = function(request) {
-  if (request.url == '/search') {
-    // The server optimizes responses on the /search route.
-    return ['target', 'failTarget']
-  } else {
-    // The server doesn't optimize any other route,
-    // so configure maximum cacheability.
-    return []
-  }
-}
+```http
+GET /sitemap HTTP/1.1
+X-Up-Target: .menu
 ```
 
+The server may choose to [optimize its response](/optimizing-responses) by only render only the HTML for
+the `.menu` fragment. It responds with the following HTTP:
 
-> [note]
-> Future versions of Unpoly may use the [`Vary`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary) header
-> to improve cache hit rates. Currently the `Vary` header is not honored by Unpoly.
+```http
+Vary: X-Up-Target
 
+<div class="menu">...</div>
+```
 
+After observing the `Vary: X-Up-Target` header, Unpoly will partition cache entries to `/sitemap` by `X-Up-Target` value.
+That means a request targeting `.menu` is no longer a cache hit for a request targeting a different selector.
 
 
 @page caching

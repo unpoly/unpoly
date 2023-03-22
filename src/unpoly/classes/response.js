@@ -166,6 +166,10 @@ up.Response = class Response extends up.Record {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
+  get ownInfluncingHeaders() {
+    let influencingHeaders = up.protocol.influencingHeadersFromResponse(this)
+    return u.filter(influencingHeaders, (headerName) => this.request.header(headerName))
+  }
 
   /*-
   The response's [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).

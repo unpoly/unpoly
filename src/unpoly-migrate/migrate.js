@@ -29,29 +29,53 @@ up.migrate = (function() {
   // }
 
   function renamedProperty(object, oldKey, newKey) {
-    const warning = () => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+    // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
+    // to print the object, which will call the warning, which will access the getter, etc.
+    const doWarn = u.memoize(() => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
+
     Object.defineProperty(object, oldKey, {
       get() {
-        warning()
+        doWarn()
         return this[newKey]
       },
       set(newValue) {
-        warning()
+        doWarn()
         this[newKey] = newValue
       }
     })
   }
 
-  function removedProperty(object, key) {
-    const warning = () => warn('Property { %s } has been removed without replacement (found in %o)', key, object)
+  function removedProperty(object, key, warning) {
+    // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
+    // to print the object, which will call the warning, which will access the getter, etc.
+    const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object))
+
+    let value = object[key]
+
     Object.defineProperty(object, key, {
       get() {
-        warning()
-        return this[key]
+        doWarn()
+        return value
       },
       set(newValue) {
-        warning()
-        this[key] = newValue
+        doWarn()
+        value = newValue
+      }
+    })
+  }
+
+  function forbiddenPropertyValue(object, key, forbiddenValue, errorMessage) {
+    let value = object[key]
+
+    Object.defineProperty(object, key, {
+      get() {
+        return value
+      },
+      set(newValue) {
+        if (newValue === forbiddenValue) {
+          throw new Error(errorMessage)
+        }
+        value = newValue
       }
     })
   }
@@ -163,6 +187,7 @@ up.migrate = (function() {
     renamedPackage,
     renamedProperty,
     removedProperty,
+    forbiddenPropertyValue,
     renamedAttribute,
     formerlyAsync,
     renamedEvent,

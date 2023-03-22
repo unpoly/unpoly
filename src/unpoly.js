@@ -18,7 +18,7 @@ require('./unpoly/errors/offline')
 require('./unpoly/classes/record')
 require('./unpoly/classes/config')
 require('./unpoly/classes/log_config')
-require('./unpoly/classes/cache')
+require('./unpoly/classes/fifo_cache')
 require('./unpoly/classes/rect')
 
 require('./unpoly/classes/body_shifter')

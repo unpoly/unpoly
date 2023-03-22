@@ -23,6 +23,7 @@ There are existing implementations for various web frameworks:
 - [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
 - [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
 
+@see optimizing-responses
 @see csp
 
 @module up.protocol
@@ -45,6 +46,14 @@ up.protocol = (function() {
   }
 
   /*-
+  @function up.protocol.targetFromXHR
+  @internal
+  */
+  function targetFromXHR(xhr) {
+    return extractHeader(xhr, 'target')
+  }
+
+  /*-
   This request header contains the current Unpoly version to mark this request as a fragment update.
 
   Server-side code may check for the presence of an `X-Up-Version` header to
@@ -54,9 +63,24 @@ up.protocol = (function() {
 
   ### Example
 
-  ```http
+  The user updates a fragment. Unpoly automatically includes the following request header:
+
+    ```http
   X-Up-Version: 1.0.0
   ```
+
+  The server chooses to render different HTML to Unpoly requests, e.g. by excluding the document `<head>`
+  and only rendering the `<body>`. The server responds with the folowing HTTP:
+
+  ```http
+  Vary: X-Up-Version
+
+  <body>
+    ...
+  </body>
+  ```
+
+  @include vary-header-note
 
   @header X-Up-Version
   @stable
@@ -65,15 +89,12 @@ up.protocol = (function() {
   /*-
   This request header contains the [target selector](/targeting-fragments) for a successful fragment update.
 
-  Server-side code is free to optimize its response by only rendering HTML
+  Server-side code is free to [optimize its response](/optimizing-responses) by only rendering HTML
   that matches the selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
 
   Unpoly will usually update a different selector in case the request fails.
   This selector is sent as a second header, `X-Up-Fail-Target`.
-
-  The user may choose to not send this header by configuring
-  `up.network.config.requestMetaKeys`.
 
   ### Example
 
@@ -129,12 +150,9 @@ up.protocol = (function() {
   A fragment update is considered *failed* if the server responds with a status code other than 2xx,
   but still renders HTML.
 
-  Server-side code is free to optimize its response to a failed request by only rendering HTML
+  Server-side code is free to [optimize its response](/optimizing-responses) to a failed request by only rendering HTML
   that matches the provided selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
-
-  The user may choose to not send this header by configuring
-  `up.network.config.requestMetaKeys`.
 
   ### Example
 
@@ -181,9 +199,6 @@ up.protocol = (function() {
   Server-side code is free to render different HTML for different modes.
   For example, you might prefer to not render a site navigation for overlays.
 
-  The user may choose to not send this header by configuring
-  `up.network.config.requestMetaKeys`.
-
   ### Example
 
   The user updates a fragment `main` within a [drawer overlay](/layer-terminology).
@@ -218,9 +233,6 @@ up.protocol = (function() {
 
   Server-side code is free to render different HTML for different modes.
   For example, you might prefer to not render a site navigation for overlays.
-
-  The user may choose to not send this header by configuring
-  `up.network.config.requestMetaKeys`.
 
   ### Example
 
@@ -405,9 +417,6 @@ up.protocol = (function() {
   /*-
   This request header contains the targeted layer's [context](/context), serialized as JSON.
 
-  The user may choose to not send this header by configuring
-  `up.network.config.requestMetaKeys`.
-
   ### Example
 
   The current layer has a context `{ lives: 3 }`.
@@ -477,9 +486,6 @@ up.protocol = (function() {
   Server-side code is free to render different HTML for different contexts.
   For example, you might prefer to not render a site navigation for overlays.
 
-  The user may choose to not send this header by configuring
-  `up.network.config.requestMetaKeys`.
-
   ### Example
 
   ```http
@@ -499,26 +505,6 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may set this optional response header to change the browser location after a fragment update.
-
-  Without this header Unpoly will set the browser location to the response URL, which is usually sufficient.
-
-  When setting `X-Up-Location` it is recommended to also set `X-Up-Method`. If no `X-Up-Method` header is given
-  and the response's URL changed from the request's URL, Unpoly will assume a redirect and set the
-  method to `GET`.
-
-  ### Example
-
-  ```http
-  X-Up-Location: /current-url
-  X-Up-Method: GET
-  ```
-
-  @header X-Up-Location
-  @stable
-  */
-
-  /*-
   The server may set this optional response header to change the HTTP method after a fragment update.
 
   Without this header Unpoly will assume a `GET` method if the response's URL changed from the request's URL,
@@ -535,14 +521,22 @@ up.protocol = (function() {
   */
 
   /*-
+  @function up.protocol.titleFromXHR
+  @internal
+  */
+  function titleFromXHR(xhr) {
+    return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', JSON.parse)
+  }
+
+  /*-
   The server may set this optional response header to change the document title after a fragment update.
 
   The title must be encoded as a JSON string.
 
   Without this header Unpoly will extract the `<title>` from the server response.
 
-  This header is useful when you [optimize your response](/X-Up-Target) to not render
-  the application layout unless targeted. Since your optimized response
+  This header is useful when you [optimize your response](/optimizing-responses) to not render
+  the application layout unless targeted. When your shortened response
   no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
 
   @include unicode-header-values
@@ -841,20 +835,73 @@ up.protocol = (function() {
   }
 
   /*-
-  @function up.protocol.titleFromXHR
-  @internal
+  The server may set this optional response header to change the browser location after a fragment update.
+
+  Without this header Unpoly will set the browser location to the response URL, which is usually sufficient.
+
+  When setting `X-Up-Location` it is recommended to also set `X-Up-Method`. If no `X-Up-Method` header is given
+  and the response's URL changed from the request's URL, Unpoly will assume a redirect and set the
+  method to `GET`.
+
+  ### Example
+
+  ```http
+  X-Up-Location: /current-url
+  X-Up-Method: GET
+  ```
+
+  @header X-Up-Location
+  @stable
   */
-  function titleFromXHR(xhr) {
-    return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', JSON.parse)
+
+  function influencingHeadersFromResponse(response) {
+    let varyHeaderValue = response.header('Vary')
+    return u.parseTokens(varyHeaderValue, { separator: 'comma' })
   }
 
   /*-
-  @function up.protocol.targetFromXHR
-  @internal
+  Request headers that influenced a response should be listed in a `Vary` response header.
+
+  This tells Unpoly to [partition its cache](/caching#caching-optimized-responses) for that URL so that each
+  request header value gets a separate cache entries.
+
+  > [tip]
+  > Server-side Unpoly apps may inspect [request headers](/up.protocol) to [customize or shorten responses](/optimizing-responses),
+  > e.g. by omitting content that isn't [targeted](/targeting-fragments).
+  > When a response is optimized in that fasion, a `Vary` header should be sent.
+
+  ### Example
+
+  The user makes a request to `/sitemap` in order to updates a fragment `.menu`.
+  Unpoly makes a request like this:
+
+  ```http
+  GET /sitemap HTTP/1.1
+  X-Up-Target: .menu
+  ```
+
+  The server may choose to [optimize its response](/optimizing-responses) by only render only the HTML for
+  the `.menu` fragment. It responds with the HTTP seen below. Note that it includes a `Vary` header
+  indicating that the `X-Up-Target` header has influenced the response body:
+
+  ```http
+  Vary: X-Up-Target
+
+  <div class="menu">...</div>
+  ```
+
+  After observing the `Vary: X-Up-Target` header, Unpoly will partition cache entries to `/sitemap` by `X-Up-Target` value.
+  That means a request targeting `.menu` is no longer a cache hit for a request targeting a different selector.
+
+  ### Resources
+
+  - [RFC 9110: Vary](https://httpwg.org/specs/rfc9110.html#field.vary)
+  - [MDN: Vary](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary)
+  - [Key CDN: Vary](https://www.keycdn.com/support/vary-header)
+
+  @header Vary
+  @stable
   */
-  function targetFromXHR(xhr) {
-    return extractHeader(xhr, 'target')
-  }
 
   /*-
   Configures strings used in the optional [server protocol](/up.protocol).
@@ -1012,5 +1059,6 @@ up.protocol = (function() {
     headerize,
     wrapMethod,
     cspNoncesFromHeader,
+    influencingHeadersFromResponse,
   }
 })()
