@@ -415,11 +415,6 @@ up.fragment = (function() {
 
   See [Targeting Fragments](/targeting-fragments) for many examples for how you can target content.
 
-  This function has many options to enable scrolling, focus, request cancelation and other side
-  effects. These options are all disabled by default and must be opted into one-by-one. To enable
-  defaults that a user would expects for navigation (like clicking a link),
-  pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
-
   ### Passing the new fragment
 
   The new fragment content can be passed as one of the following options:
@@ -428,6 +423,15 @@ up.fragment = (function() {
   - [`{ document }`](#options.document) renders content from a given HTML document string or partial document
   - [`{ fragment }`](#options.fragment) renders content from a given HTML string that only contains the new fragment
   - [`{ content }`](#options.content) replaces the targeted fragment's inner HTML with the given HTML string
+
+  ### Enabling side effects
+
+  This function has many options to enable scrolling, focus, request cancelation and other side
+  effects. These options are all disabled by default and must be opted into one-by-one.
+
+  To enable defaults that a user would expects for navigation (like clicking a link),
+  pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
+
 
   ### Example
 
