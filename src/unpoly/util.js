@@ -231,26 +231,26 @@ up.util = (function() {
   }
 
   /*-
-  Translate all items in an array to new array of items.
+  Translate all items in a [list](/up.util.isList) to new array of items.
 
   @function up.util.map
-  @param {Array} array
+  @param {List|Iterator} list
   @param {Function(element, index): any|String} block
     A function that will be called with each element and (optional) iteration index.
 
     You can also pass a property name as a String,
-    which will be collected from each item in the array.
+    which will be collected from each item in the list.
   @return {Array}
     A new array containing the result of each function call.
   @stable
   */
-  function map(array, block) {
-    if (array.length === 0) { return []; }
+  function map(list, block) {
+    if (list.length === 0) { return [] }
     block = iteratee(block)
     let mapped = []
-    for (let i = 0; i < array.length; i++) {
-      let element = array[i]
-      mapped.push(block(element, i))
+    let i = 0
+    for (let item of list) {
+      mapped.push(block(item, i++))
     }
     return mapped
   }
@@ -269,18 +269,19 @@ up.util = (function() {
 
   /*-
   Calls the given function for each element (and, optional, index)
-  of the given array.
+  of the given [list](/up.util.isList) or iterator.
 
   @function up.util.each
-  @param {Array} array
+  @param {List|Iterator} list
   @param {Function(element, index)} block
     A function that will be called with each element and (optional) iteration index.
   @stable
   */
   function each(array, block) {
     // note that the native Array.forEach is very slow (https://jsperf.com/fast-array-foreach)
-    for (let i = 0; i < array.length; i++) {
-      block(array[i], i)
+    let i = 0
+    for (let item of array) {
+      block(item, i++)
     }
   }
 
@@ -920,23 +921,24 @@ up.util = (function() {
 
   /*-
   Consecutively calls the given function which each element
-  in the given array. Returns the first truthy return value.
+  in the given list. Returns the first truthy return value.
 
   Returned `undefined` iff the function does not return a truthy
-  value for any element in the array.
+  value for any element in the list.
 
   @function up.util.findResult
-  @param {Array} array
+  @param {List|Iterator} list
   @param {Function(element): any} tester
     A function that will be called with each element and (optional) iteration index.
 
   @return {any|undefined}
   @experimental
   */
-  function findResult(array, tester) {
+  function findResult(list, tester) {
     tester = iteratee(tester)
-    for (let i = 0; i < array.length; i++) {
-      const result = tester(array[i], i)
+    let i = 0
+    for (let item of list) {
+      const result = tester(item, i++)
       if (result) {
         return result
       }
@@ -945,10 +947,10 @@ up.util = (function() {
 
   /*-
   Returns whether the given function returns a truthy value
-  for all elements in the given [array-like value](/up.util.isList).
+  for all elements in the given [list](/up.util.isList) or iterator.
 
   @function up.util.every
-  @param {List} list
+  @param {List|Iterator} list
   @param {Function(element, index): boolean} tester
     A function that will be called with each element and (optional) iteration index.
 
@@ -958,8 +960,9 @@ up.util = (function() {
   function every(list, tester) {
     tester = iteratee(tester)
     let match = true
-    for (let i = 0; i < list.length; i++) {
-      if (!tester(list[i], i)) {
+    let i = 0
+    for (let item of list) {
+      if (!tester(item, i++)) {
         match = false
         break
       }
@@ -968,11 +971,11 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given array that are
+  Returns all elements from the given [list](/up.util.isList) that are
   neither `null` or `undefined`.
 
   @function up.util.compact
-  @param {Array<T>} array
+  @param {List<T>} list
   @return {Array<T>}
   @stable
   */
@@ -1028,11 +1031,11 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [array-like value](/up.util.isList) that return
+  Returns all elements from the given [list](/up.util.isList) that return
   a truthy value when passed to the given function.
 
   @function up.util.filter
-  @param {List} list
+  @param {List|Iterator} list
   @param {Function(value, index): boolean} tester
   @return {Array}
   @stable

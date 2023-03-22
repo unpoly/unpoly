@@ -507,6 +507,18 @@ describe 'up.util', ->
         result = up.util.map(collection, 'className')
         expect(result).toEqual ['one', 'two']
 
+      it 'maps over a Set', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        results = up.util.map(set, (item) -> item.length)
+        expect(results).toEqual [3, 6, 8]
+
+      it 'maps over an iterator', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        iterator = set.values()
+        results = up.util.map(iterator, (item) -> item.length)
+        expect(results).toEqual [3, 6, 8]
+
+
     describe 'up.util.mapObject', ->
 
       it 'creates an object from the given array and pairer', ->
@@ -545,11 +557,28 @@ describe 'up.util', ->
         one = fixture('.qwertz')
         two = fixture('.qwertz')
         nodeList = jQuery([one, two])
-
         callback = jasmine.createSpy()
 
         up.util.each nodeList, callback
+
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
+
+      it 'iterates over a Set', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        callback = jasmine.createSpy()
+
+        up.util.each(set, callback)
+
+        expect(callback.calls.allArgs()).toEqual [['foo', 0], ['orange', 1], ['cucumber', 2]]
+
+      it 'iterates over an iterator', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        iterator = set.values()
+        callback = jasmine.createSpy()
+
+        up.util.each(iterator, callback)
+
+        expect(callback.calls.allArgs()).toEqual [['foo', 0], ['orange', 1], ['cucumber', 2]]
 
     describe 'up.util.filter', ->
 
@@ -577,6 +606,17 @@ describe 'up.util', ->
 
         up.util.filter nodeList, callback
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
+
+      it 'iterates over a Set', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        results = up.util.filter(set, (item) -> item.length > 3)
+        expect(results).toEqual ['orange', 'cucumber']
+
+      it 'iterates over an iterator', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        iterator = set.values()
+        results = up.util.filter(iterator, (item) -> item.length > 3)
+        expect(results).toEqual ['orange', 'cucumber']
 
     describe 'up.util.reject', ->
 
@@ -790,6 +830,17 @@ describe 'up.util', ->
         expect(up.util.every(allTrue, 'prop')).toBe(true)
         expect(up.util.every(someFalse, 'prop')).toBe(false)
 
+      it 'iterates over a Set', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        result = up.util.every(set, up.util.isPresent)
+        expect(result).toBe(true)
+
+      it 'iterates over an iterator', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        iterator = set.values()
+        result = up.util.every(iterator, up.util.isPresent)
+        expect(result).toBe(true)
+
 #    describe 'up.util.none', ->
 #
 #      it 'returns true if no element in the array returns true for the given function', ->
@@ -884,15 +935,31 @@ describe 'up.util', ->
         result = up.util.findResult ['a', 'b', 'c'], fn
         expect(result).toBeUndefined()
 
-      it 'iterates over an array-like value', ->
+      it 'iterates over a NodeList', ->
         one = fixture('.qwertz')
         two = fixture('.qwertz')
         nodeList = document.querySelectorAll('.qwertz')
-
         callback = jasmine.createSpy()
 
         up.util.findResult nodeList, callback
         expect(callback.calls.allArgs()).toEqual [[one, 0], [two, 1]]
+
+      it 'iterates over a Set', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        callback = jasmine.createSpy()
+
+        up.util.findResult(set, callback)
+
+        expect(callback.calls.allArgs()).toEqual [['foo', 0], ['orange', 1], ['cucumber', 2]]
+
+      it 'iterates over an iterator', ->
+        set = new Set(["foo", "orange", "cucumber"])
+        iterator = set.values()
+        callback = jasmine.createSpy()
+
+        up.util.findResult(iterator, callback)
+
+        expect(callback.calls.allArgs()).toEqual [['foo', 0], ['orange', 1], ['cucumber', 2]]
 
     describe 'up.util.isBlank', ->
 
