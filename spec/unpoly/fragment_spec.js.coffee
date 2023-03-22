@@ -5701,16 +5701,14 @@ describe 'up.fragment', ->
 
             u.microtask ->
               jasmine.respondWithSelector('.target', text: 'cached text')
-              u.microtask ->
-                request = up.request('/cached-path', { cache: true })
-                expect(request.fromCache).toBe(true)
-                done()
+              done()
 
           it 'reloads a fragment that was rendered from an older cached response', asyncSpec (next) ->
             up.render('.target', { url: '/cached-path', cache: true })
 
             next ->
               expect('.target').toHaveText('cached text')
+
               expect(up.network.isBusy()).toBe(true)
 
               jasmine.respondWithSelector('.target', text: 'verified text')

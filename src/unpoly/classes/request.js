@@ -366,6 +366,8 @@ up.Request = class Request extends up.Record {
     // (2) We want to set the default once and then keep the value immutable. Otherwise
     //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
+
+    this.uid = u.uid()
   }
 
   /*-
@@ -428,10 +430,6 @@ up.Request = class Request extends up.Record {
   */
   get fragment() {
     return this.fragments?.[0]
-  }
-
-  followState(sourceRequest) {
-    u.delegate(this, ['deferred', 'state', 'background', 'expired'], () => sourceRequest)
   }
 
   normalizeForCaching() {
@@ -505,12 +503,16 @@ up.Request = class Request extends up.Record {
   }
 
   runQueuedCallbacks() {
+    this.queuedAt = new Date()
+
     u.always(this, () => this.evictExpensiveAttrs())
 
     this.onQueued?.(this)
   }
 
   load() {
+    console.debug("[request] calling load() on %o", this.description)
+
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
     if (this.state !== 'new') return
@@ -643,13 +645,19 @@ up.Request = class Request extends up.Record {
   }
 
   respondWith(response) {
-    if (this.state !== 'loading') return
+    this.response = response
+
+    console.debug("[request] respondWith() at state %o / uid %o", this.state, this.uid)
+
+    if (this.isSettled()) return
     this.state = 'loaded'
 
     if (response.ok) {
-      return this.deferred.resolve(response)
+      console.debug("[request] fulfilling deferred of %o with response", this.uid)
+      this.deferred.resolve(response)
     } else {
-      return this.deferred.reject(response)
+      console.debug("[request] rejecting deferred of %o with response", this.uid)
+      this.deferred.reject(response)
     }
   }
 
@@ -720,31 +728,6 @@ up.Request = class Request extends up.Record {
     return new up.Response(responseAttrs)
   }
 
-  cacheKey() {
-    return JSON.stringify([
-      this.method,
-      this.url,
-      this.params.toQuery(),
-      // If we send a meta prop to the server it must also become part of our cache key,
-      // given that server might send a different response based on these props.
-      this.metaProps()
-    ])
-  }
-
-  // Returns an object like { target: '...', mode: '...' } that will
-  // (1) be sent to the server so it can optimize responses and
-  // (2) become part of our @cacheKey().
-  metaProps() {
-    const props = {}
-    for (let key of u.evalOption(up.network.config.requestMetaKeys, this)) {
-      const value = this[key]
-      if (u.isGiven(value)) {
-        props[key] = value
-      }
-    }
-    return props
-  }
-
   buildEventEmitter(args) {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
@@ -804,8 +787,7 @@ up.Request = class Request extends up.Record {
     }
 
     if (except) {
-      let exceptCacheKey = except.cacheKey()
-      return (request) => (request.cacheKey() !== exceptCacheKey) && testFn(request)
+      return (request) => !up.cache.isCacheCompatible(except, request) && testFn(request)
     } else {
       return testFn
     }

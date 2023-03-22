@@ -26,12 +26,11 @@ up.Request.XHRRenderer = class XHRRenderer {
 
     // Add information about the response's intended use, so the server may
     // customize or shorten its response.
-    const metaProps = this.request.metaProps()
-    for (let key in metaProps) {
+    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
       this.addHeader(
         xhr,
         up.protocol.headerize(key),
-        metaProps[key]
+        this.request[key]
       )
     }
 

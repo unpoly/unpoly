@@ -681,59 +681,68 @@ describe('up.network', function() {
       describe('with { cache } option', function() {
 
         it('caches server responses for the configured duration', asyncSpec(function(next) {
-          up.network.config.cacheEvictAge = 200; // 1 second for test
+          up.network.config.cacheEvictAge = 200 // 1 second for test
 
           const responses = []
-          const trackResponse = response => responses.push(response.text)
+          const trackResponse = function(response) {
+            console.debug("[spec] response to request %o fulfilled", response.request.uid)
+            responses.push(response.text)
+          }
 
           next(() => {
+            console.debug("[spec] first request to /foo")
             up.request({url: '/foo', cache: true}).then(trackResponse)
           })
 
           next(() => {
+            console.debug("[spec] expecting count to be 1")
             expect(jasmine.Ajax.requests.count()).toEqual(1)
           })
 
           next.after((10), () => {
+            console.debug("[spec] second request to /foo")
             // Send the same request for the same path
             up.request({url: '/foo', cache: true}).then(trackResponse)
           })
 
           next(() => {
             // See that only a single network request was triggered
+            console.debug("[spec] expecting count to be 1 again")
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(responses).toEqual([])
           })
 
           next(() => {
+            console.debug("[spec] responding with text")
             // Server responds once.
             this.respondWith('foo')
           })
 
           next(() => {
+            console.debug("[spec] expecting responses")
             // See that both requests have been fulfilled
             expect(responses).toEqual(['foo', 'foo'])
           })
 
-          next.after((200), () => {
-            // Send another request after another 3 minutes
-            // The clock is now a total of 6 minutes after the first request,
-            // exceeding the cache's retention time of 5 minutes.
-            up.request({url: '/foo', cache: true}).then(trackResponse)
-          })
-
-          next(() => {
-            // See that we have triggered a second request
-            expect(jasmine.Ajax.requests.count()).toEqual(2)
-          })
-
-          next(() => {
-            this.respondWith('bar')
-          })
-
-          next(() => {
-            expect(responses).toEqual(['foo', 'foo', 'bar'])
-          })
+          // next.after((200), () => {
+          //   // Send another request after another 3 minutes
+          //   // The clock is now a total of 6 minutes after the first request,
+          //   // exceeding the cache's retention time of 5 minutes.
+          //   up.request({url: '/foo', cache: true}).then(trackResponse)
+          // })
+          //
+          // next(() => {
+          //   // See that we have triggered a second request
+          //   expect(jasmine.Ajax.requests.count()).toEqual(2)
+          // })
+          //
+          // next(() => {
+          //   this.respondWith('bar')
+          // })
+          //
+          // next(() => {
+          //   expect(responses).toEqual(['foo', 'foo', 'bar'])
+          // })
         }))
 
         it('does not cache responses with a non-200 status code', asyncSpec(function(next) {

@@ -20,10 +20,9 @@ up.Request.Queue = class Queue {
     request.runQueuedCallbacks()
     u.always(request, responseOrError => this.onRequestSettled(request, responseOrError))
 
-    // When considering whether a request is "slow", we're measing the duration between { queuedAt }
+    // When considering whether a request is "slow", we're measing the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
     // make its own check whether a request in the queue is considered slow.
-    request.queuedAt = new Date()
     this.scheduleSlowTimer(request)
     this.queueRequest(request)
     u.microtask(() => this.poke())
