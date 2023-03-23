@@ -5992,6 +5992,7 @@ describe 'up.fragment', ->
                 jasmine.respondWith(status: 304)
 
               next ->
+                expect(up.network.isBusy()).toBe(false)
                 expect(onRendered.calls.count()).toBe(1)
                 expect('.target').toHaveText('cached text')
 
