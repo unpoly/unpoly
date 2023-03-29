@@ -125,10 +125,39 @@ TODOs for V3
 Various changes
 ---------------
 
-- Migrate: Consider warning on up-solo=false
-- Migrate: Consider warning when setting old expiry
-- Decide whether to include Vary cache in V3
+- Migrate: Warning on { solo } render option
+  - "Unpoly 3+ only aborts requests targeting the same fragment. Setting [up-solo=false] or { solo: false } may no longer be necessary."
+- Migrate: Warning when setting old expiry
+  - "Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting an expiry may no longer be necessary."
+- Vary-capable cache
+  - Requests must set their auto-headers sooner, e.g. in constructor
+  - Print warning when setting up.network.requestMetaKeys
+  - Move /caching#improving-cache-hit-rates to its own doc page /optimizing-responses
+    - Parent is up.protocol
+    - Link from /caching
+    - Link everywhere were it says "optimizing", "customizing" or "shorten" responses
+    - Make sure Vary is mentioned a lot
+  - up.FIFOCache
+    - Replace up.Cache with up.FIFOCache
+    - Test that caching works
+    - Test that FIFO is honored when capacity is reached
+  - up.Request.Cache
+    - To be fully correct the cache needs to be notified after up:request:load (cache relevant fields could have changed)
+    - up.cache.renamingCacheKey(() => ...)
+    - Tests
+      - Following a pending requests that responds with an unexpected Vary causes the following request to be re-queued. In the end we have two separate cache entries.
+      - After a response arrives with Vary, all future requests are assumed to have that same Vary
+      - After modifying cache-relevant props in up:request:load, the request remains cached
+      - Test that we can remove unwanted X-Up headers in up:request:load and the request remains cached
+      - Test that capacity and FIFO is honored
+    - up-migrate should throw an error when setting up.network.config.cacheSize = 0
+      - "Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. Set up.network.config.autoCache = false instead."
 
+    - Cache last assigned cache key on the Request for performance?
+  - Remove debug statements
+- Now that compilers have the meta arg it should be possible to give up.RenderResult new { request, response } props
+- Custom attributes are not copied into [up-expand]
+  - up.link.config.expandableAttributes ?
 
 
 Docs
@@ -137,13 +166,16 @@ Docs
 ### General
 
 - Finish the CHANGELOG
-- Protocol / CHANGELOG: Optimizing responses must send Vary
+  - Unfinished sections
+  - New commits
+  - No unbounded caches anymore
+  - Optimizing responses must send Vary
 - Check if the index links to doc pages preferrably
 - Events emitted through up.Layer#emit() must all have a { layer } prop documented
   - e.g. up:layer:location:changed hasn't documented this
 - Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
 - Document [up-href]
-
+-
 
 ### Other docs
 
@@ -500,3 +532,7 @@ Decisions
 - Returning 'auto' for default would be a good way to override configs with exceptions
   - request.url.endsWith('/edit') ? false : 'auto'
   - Since this already the 'autoMeans' config we cannot return 'auto' here
+- Replace u.flatten() with Array#flat()
+  => We keep array-related utils because ours work with non-Array lists and iterators
+- Replace u.flatMap() with Array#flatMap()
+  => We keep array-related utils because ours work with non-Array lists and iterators
