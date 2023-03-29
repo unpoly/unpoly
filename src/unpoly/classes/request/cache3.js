@@ -1,3 +1,5 @@
+const u = up.util
+
 up.Request.Cache3 = class Cache3 {
 
   constructor() {
