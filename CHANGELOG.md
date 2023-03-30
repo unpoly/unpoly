@@ -27,6 +27,7 @@ In addition to this CHANGELOG, there is also a [slide deck](http://triskweline.d
   - now stable
 - Deprecated up.$compiler, up.$macro
 - Deprecated up.$on
+- Documents in head are compiled
 
 
 ### Overview ✔️
