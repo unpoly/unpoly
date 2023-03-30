@@ -373,8 +373,6 @@ up.protocol = (function() {
   You can fix this edge case by delivering `X-Up-Location` and `X-Up-Method` headers with the *last* response
   in a series of redirects.
 
-  The **simplest implementation** is to set these headers for every request.
-
   ### Example
 
   ```http
