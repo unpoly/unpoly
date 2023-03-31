@@ -22,6 +22,7 @@ There are existing implementations for various web frameworks:
 - [Rack](https://github.com/adam12/rack-unpoly) (Sinatra, Padrino, Hanami, Cuba, ...)
 - [Phoenix](https://elixirforum.com/t/unpoly-a-framework-like-turbolinks/3614/15) (Elixir)
 - [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
+- [Python](https://gitlab.com/rocketduck/python-unpoly) (Python, including Django support)
 
 @see csp
 
