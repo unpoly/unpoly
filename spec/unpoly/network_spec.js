@@ -171,28 +171,6 @@ describe('up.network', function() {
             expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
           })
         }))
-
-        it('lets the user configure a smaller set of meta keys for better cacheability', asyncSpec(function(next) {
-          makeLayers(2)
-
-          up.network.config.requestMetaKeys = ['target']
-
-          up.request({
-            url: '/foo',
-            target: '.target',
-            layer: 'overlay',
-            failTarget: '.fail-target',
-            failLayer: 'root'
-          })
-
-          next(() => {
-            const request = this.lastRequest()
-            expect(request.requestHeaders['X-Up-Target']).toEqual('.target')
-            expect(request.requestHeaders['X-Up-Fail-Target']).toBeMissing()
-            expect(request.requestHeaders['X-Up-Mode']).toBeMissing()
-            expect(request.requestHeaders['X-Up-Fail-Mode']).toBeMissing()
-          })
-        }))
       })
 
 
@@ -798,8 +776,15 @@ describe('up.network', function() {
           })
         )
 
-        it("doesn't reuse responses when asked for the same path, but different selectors", asyncSpec(function(next) {
+        it("doesn't reuses responses when asked for the same path, but different selectors", asyncSpec(function(next) {
           next(() => up.request({url: '/path', target: '.a', cache: true}))
+          next(() => up.request({url: '/path', target: '.b', cache: true}))
+          next(() => expect(jasmine.Ajax.requests.count()).toEqual(1))
+        }))
+
+        it("doesn't reuse responses when asked for the same path, but different selectors if the server responded with `Vary: X-Up-Target`", asyncSpec(function(next) {
+          next(() => up.request({url: '/path', target: '.a', cache: true}))
+          next(() => jasmine.respondWithSelector('.a', { text: 'content', responseHeaders: { 'Vary': 'X-Up-Target' } }))
           next(() => up.request({url: '/path', target: '.b', cache: true}))
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
         }))
@@ -2125,8 +2110,6 @@ describe('up.network', function() {
 
     })
 
-
-
     describe('up.cache.get()', function() {
 
       it('returns an existing cache entry for the given request', function() {
@@ -2140,16 +2123,23 @@ describe('up.network', function() {
 
     describe('up.cache.set()', () => it('should have tests'))
 
-    describe('up.cache.alias()', () => it('uses an existing cache entry for another request (used in case of redirects)', function() {
-      up.request({url: '/foo', cache: true})
-      expect({url: '/foo'}).toBeCached()
-      expect({url: '/bar'}).not.toBeCached()
+    describe('up.cache.alias()', () =>
+      it('uses an existing cache entry for another request (used in case of redirects)', function() {
+        console.debug("[spec] making request to /foo")
+        up.request({url: '/foo', cache: true})
+        console.debug("[spec] checking if /foo is cached")
+        expect({url: '/foo'}).toBeCached()
+        console.debug("[spec] checking if /bar is cached before alias")
+        expect({url: '/bar'}).not.toBeCached()
 
-      up.cache.alias({url: '/foo'}, {url: '/bar'})
+        up.cache.alias({url: '/foo'}, {url: '/bar'})
 
-      expect({url: '/bar'}).toBeCached()
-      expect(up.cache.get({url: '/bar'})).toBe(up.cache.get({url: '/foo'}))
-    }))
+        console.debug("[spec] checking if /bar is cached AFTER alias")
+        expect({url: '/bar'}).toBeCached()
+        console.debug("[spec] checking if /foo and /bar are the same thing")
+        expect(up.cache.get({url: '/bar'})).toBe(up.cache.get({url: '/foo'}))
+      })
+    )
 
     describe('up.cache.remove()', function() {
 

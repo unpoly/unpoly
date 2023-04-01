@@ -827,12 +827,14 @@ describe 'up.form', ->
           up.validate(input)
 
           next ->
+            console.debug("!!! states 1 are %o", u.map(requests, 'state'))
             expect(u.map(requests, 'state')).toEqual ['loading']
             expect(input).toBeDisabled()
 
             up.submit(form)
 
           next ->
+            console.debug("!!! states 2 are %o", u.map(requests, 'state'))
             expect(u.map(requests, 'state')).toEqual ['aborted', 'loading']
             expect(input).toBeDisabled()
 

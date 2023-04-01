@@ -28,6 +28,7 @@ up.Request.Cache3 = class Cache3 {
   }
 
   get(request) {
+    request = this.wrap(request)
     console.debug("[cache] get() called with %o", request.description)
 
     let cacheKey = this.cacheKey(request)
@@ -37,8 +38,10 @@ up.Request.Cache3 = class Cache3 {
 
     if (cachedRequest) {
       if (this.isUsable(cachedRequest)) {
+        console.debug("[cache] cache hit is usable, returning it")
         return cachedRequest
       } else {
+        console.debug("[cache] cache hit is UNUSABLE, returning undefined")
         this.map.delete(cacheKey)
       }
     }
@@ -56,6 +59,7 @@ up.Request.Cache3 = class Cache3 {
   }
 
   async put(request) {
+    request = this.wrap(request)
     console.debug("[cache] put() called for %o", request.description)
     this.makeRoom()
     let cacheKey = this.updateCacheKey(request)
@@ -78,7 +82,7 @@ up.Request.Cache3 = class Cache3 {
   }
 
   renameMapKey(oldKey, newKey) {
-    if (this.map.has(oldKey)) {
+    if (oldKey !== newKey && this.map.has(oldKey)) {
       this.map.set(newKey, this.map.get(oldKey))
       this.map.delete(oldKey)
     }
@@ -95,17 +99,24 @@ up.Request.Cache3 = class Cache3 {
   }
 
   alias(existingCachedRequest, newRequest) {
+    existingCachedRequest = this.wrap(existingCachedRequest)
+    newRequest = this.wrap(newRequest)
+    console.debug("[cache] aliasing new %o to existing %o", newRequest.description, existingCachedRequest.description)
+
     this.connect(existingCachedRequest, newRequest, { force: true })
+    debugger
     this.put(newRequest)
   }
 
-  async connect(existingCachedRequest, newRequest, options = {}) {
-    let value = await u.always(existingCachedRequest)
+  async connect(existingRequest, newRequest, options = {}) {
+    newRequest.connectParent = existingRequest
+
+    let value = await u.always(existingRequest)
 
     if (value instanceof up.Response) {
       console.debug("[cache] connect settles to response %o", value.text)
 
-      if (options.force || this.isCacheCompatible(existingCachedRequest, newRequest)) {
+      if (options.force || this.isCacheCompatible(existingRequest, newRequest)) {
         console.debug("[cache] they are compatible")
         // Remember that newRequest was settles from cache.
         // This makes it a candidate for cache revalidation.
@@ -116,9 +127,12 @@ up.Request.Cache3 = class Cache3 {
 
         // Since this request object is never in the cache, we need
         // to expire ourselves when otherRequest is expired.
-        u.delegate(newRequest, ['expired', 'state'], () => existingCachedRequest)
+        u.delegate(newRequest, ['expired', 'state'], () => existingRequest)
       } else {
         console.debug("[cache] they are incompatible")
+
+        delete newRequest.connectParent
+
         // The two requests turned out to not be cache hits for each other, as
         // the response carried a Vary header. We will re-process newRequest as if it
         // was just queued.
@@ -130,7 +144,12 @@ up.Request.Cache3 = class Cache3 {
     }
   }
 
+  willHaveSameResponse(existingRequest, newRequest) {
+    return existingRequest === newRequest || existingRequest === newRequest.connectParent
+  }
+
   delete(request) {
+    request = this.wrap(request)
     let cacheKey = this.cacheKey(request)
     this.map.delete(cacheKey)
   }
@@ -180,6 +199,10 @@ up.Request.Cache3 = class Cache3 {
   // Used by up.Request.tester({ except })
   isCacheCompatible(request1, request2) {
     return this.cacheKey(request1) === this.cacheKey(request2)
+  }
+
+  wrap(requestOrOptions) {
+    return u.wrapValue(up.Request, requestOrOptions)
   }
 
 }

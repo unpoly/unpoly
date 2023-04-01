@@ -308,7 +308,8 @@ up.Request = class Request extends up.Record {
       state: 'new',
       abortable: true,
       headers: {},
-      timeout: up.network.config.timeout
+      timeout: up.network.config.timeout,
+      queuedAt: new Date(), // TODO: Better name for the thing we're measing age from
     }
   }
 
@@ -787,7 +788,8 @@ up.Request = class Request extends up.Record {
     }
 
     if (except) {
-      return (request) => !up.cache.isCacheCompatible(except, request) && testFn(request)
+      // TODO: Should we also excude requests except is following? In case except is a cache hit?
+      return (request) => !up.cache.willHaveSameResponse(request, except) && testFn(request)
     } else {
       return testFn
     }

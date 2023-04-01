@@ -195,30 +195,23 @@ describe 'up.link', ->
             history.back()
 
           next.after waitForBrowser, =>
-            respondWith('restored text from two', 'restored title from two')
-
-          next =>
-            expect('.target').toHaveText('restored text from two')
+            expect('.target').toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
-            expect(document.title).toEqual('restored title from two')
+            expect(document.title).toEqual('title from two')
 
             history.back()
 
           next.after waitForBrowser, =>
-            respondWith('restored text from one', 'restored title from one')
-
-          next =>
-            expect('.target').toHaveText('restored text from one')
+            expect('.target').toHaveText('text from one')
             expect(location.pathname).toEqual('/one')
-            expect(document.title).toEqual('restored title from one')
+            expect(document.title).toEqual('title from one')
 
             history.forward()
 
           next.after waitForBrowser, =>
-            # Since the response is cached, we don't have to respond
-            expect('.target').toHaveText('restored text from two')
+            expect('.target').toHaveText('text from two')
             expect(location.pathname).toEqual('/two')
-            expect(document.title).toEqual('restored title from two')
+            expect(document.title).toEqual('title from two')
 
         it 'renders history when the user clicks on a link, goes back and then clicks on the same link (bugfix)', asyncSpec (next) ->
           up.history.config.enabled = true

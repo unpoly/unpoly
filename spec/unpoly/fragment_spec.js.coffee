@@ -5331,6 +5331,20 @@ describe 'up.fragment', ->
                 expect(result.value).toBeAbortError()
                 done()
 
+          it 'aborts an existing requests targeting the same URL and element IFF not caching (bugfix)', (done) ->
+            fixture('.element')
+            change1Promise = up.render('.element', url: '/path1')
+
+            expect(up.network.queue.allRequests.length).toBe(1)
+
+            up.render('.element', url: '/path1', abort: 'target')
+
+            u.task ->
+              promiseState(change1Promise).then (result) ->
+                expect(result.state).toBe('rejected')
+                expect(result.value).toBeAbortError()
+                done()
+
           it 'aborts existing requests targeting the same element when updating from local content', (done) ->
             fixture('.element')
             change1Promise = up.render('.element', url: '/path1')
