@@ -188,7 +188,7 @@ Docs
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
   - History in overlays
     - Always know their location, even if it might not be visible
-    - Explain that your should always render full pages
+    - Explain that servers should always render full pages
   - History restoration / Back button
     - This is currently documented in up:location:restore
     - Will collapse layers
@@ -196,7 +196,6 @@ Docs
       - Subnavigations make it easy
       - You can disable layer history
     - Customize restoration behavior
-- Analytics tracking
 - Preloading
   - (Currently sitting in a[up-preload])
   - On Hover
