@@ -625,10 +625,13 @@ up.Request = class Request extends up.Record {
   }
 
   setAbortedState(reason) {
+    console.debug("[request] setAbortedState() for UID %o", this.uid)
+
     if (this.isSettled()) return
 
     let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'aborted'
+    console.debug("[request] rejecting deferred for UID %o", this.uid)
     this.deferred.reject(new up.Aborted(message))
     this.emit('up:request:aborted', { log: message })
 

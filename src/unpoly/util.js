@@ -1520,10 +1520,24 @@ up.util = (function() {
   [Unlike `promise#finally()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally#Description), `up.util.always()` may change the settlement value
   of the given promise.
 
+  ### Example: Callback style
+
+  ```js
+  let process = (value) => console.log(value)
+  up.always(promise, process)
+  ```
+
+  ### Example with `await`
+
+  ```js
+  let value = await up.always(promise)
+  console.log(value)
+  ```
+
   @function up.util.always
   @internal
   */
-  function always(promise, callback) {
+  function always(promise, callback = u.identity) {
     return promise.then(callback, callback)
   }
 
@@ -1770,7 +1784,7 @@ up.util = (function() {
   }
 
   function defineDelegates(object, props, targetProvider) {
-    wrapList(props).forEach(function(prop) {
+    for (let prop of props) {
       Object.defineProperty(object, prop, {
         get() {
           const target = targetProvider.call(this)
@@ -1785,8 +1799,21 @@ up.util = (function() {
           target[prop] = newValue
         }
       })
-    })
+    }
   }
+
+  // function defineTemporaryDelegates(object, props, targetProvider) {
+  //   let undo = sequence(props.map((prop) => {
+  //     let oldDescriptor = Object.getOwnPropertyDescriptor(object, prop)
+  //     // There's a case where Object.getOwnPropertyDescriptor() is missing because it is
+  //     // a inherited property. In this case it is non-trivial to undo the temporary delegation.
+  //     // Since we don't need that case, we don't handle it.
+  //     return () => Object.defineProperty(object, prop, oldDescriptor)
+  //     }
+  //   ))
+  //   defineDelegates(object, props, targetProvider)
+  //   return undo
+  // }
 
   function stringifyArg(arg) {
     let string
@@ -1989,6 +2016,7 @@ up.util = (function() {
     lowerCaseFirst,
     getter: defineGetter,
     delegate: defineDelegates,
+    // temporaryDelegate: defineTemporaryDelegates,
     reverse,
     // prefixCamelCase,
     // unprefixCamelCase,

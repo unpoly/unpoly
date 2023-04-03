@@ -222,7 +222,7 @@ up.fragment = (function() {
 
   // Users who are not using layers will prefer settings default targets
   // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-  u.delegate(config, 'mainTargets', () => up.layer.config.any)
+  u.delegate(config, ['mainTargets'], () => up.layer.config.any)
 
   function reset() {
     config.reset()
@@ -2759,4 +2759,4 @@ This is aliased as `up.layer.context`.
   If no context has been set an empty object is returned.
 @experimental
 */
-u.delegate(up, 'context', () => up.layer.current)
+u.delegate(up, ['context'], () => up.layer.current)

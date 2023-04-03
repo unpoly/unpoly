@@ -29,19 +29,13 @@ up.Request.Cache3 = class Cache3 {
 
   get(request) {
     request = this.wrap(request)
-    console.debug("[cache] get() called with %o", request.description)
-
     let cacheKey = this.cacheKey(request)
     let cachedRequest = this.map.get(cacheKey)
 
-    console.debug("[cache] cache hit is %o", cachedRequest)
-
     if (cachedRequest) {
       if (this.isUsable(cachedRequest)) {
-        console.debug("[cache] cache hit is usable, returning it")
         return cachedRequest
       } else {
-        console.debug("[cache] cache hit is UNUSABLE, returning undefined")
         this.map.delete(cacheKey)
       }
     }
@@ -60,7 +54,6 @@ up.Request.Cache3 = class Cache3 {
 
   async put(request) {
     request = this.wrap(request)
-    console.debug("[cache] put() called for %o", request.description)
     this.makeRoom()
     let cacheKey = this.updateCacheKey(request)
     this.map.set(cacheKey, request)
@@ -99,22 +92,27 @@ up.Request.Cache3 = class Cache3 {
   }
 
   alias(existingCachedRequest, newRequest) {
-    existingCachedRequest = this.wrap(existingCachedRequest)
+    existingCachedRequest = this.get(existingCachedRequest)
     newRequest = this.wrap(newRequest)
     console.debug("[cache] aliasing new %o to existing %o", newRequest.description, existingCachedRequest.description)
 
     this.connect(existingCachedRequest, newRequest, { force: true })
-    debugger
     this.put(newRequest)
+
+    // If the user has passed us request options for `newRequest`, we have constructed
+    // the up.Request instance. Return it to the user, who has no other means of accessing it.
+    return newRequest
   }
 
   async connect(existingRequest, newRequest, options = {}) {
+    console.debug("[cache] connecting new %o to existing %o", newRequest.uid, existingRequest.uid)
     newRequest.connectParent = existingRequest
 
     let value = await u.always(existingRequest)
+    console.debug("[cache] got always2 value after await: %o", value)
 
     if (value instanceof up.Response) {
-      console.debug("[cache] connect settles to response %o", value.text)
+      console.debug("[cache] connect parent settles to response %o", value.text)
 
       if (options.force || this.isCacheCompatible(existingRequest, newRequest)) {
         console.debug("[cache] they are compatible")
@@ -139,6 +137,9 @@ up.Request.Cache3 = class Cache3 {
         options.onIncompatible?.(newRequest)
       }
     } else {
+      // Copy terminal state like 'offline' or 'aborted'
+      newRequest.state = existingRequest.state
+      console.debug("[cache] connect parent rejects with %o", value)
       // If we did not get an up.Response, it must be an error
       newRequest.deferred.reject(value)
     }

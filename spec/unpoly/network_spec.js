@@ -2124,21 +2124,31 @@ describe('up.network', function() {
     describe('up.cache.set()', () => it('should have tests'))
 
     describe('up.cache.alias()', () =>
-      it('uses an existing cache entry for another request (used in case of redirects)', function() {
-        console.debug("[spec] making request to /foo")
-        up.request({url: '/foo', cache: true})
-        console.debug("[spec] checking if /foo is cached")
-        expect({url: '/foo'}).toBeCached()
-        console.debug("[spec] checking if /bar is cached before alias")
-        expect({url: '/bar'}).not.toBeCached()
+      it('uses an existing cache entry for another request (used in case of redirects)', asyncSpec(function(next) {
+        let originalRequest = up.request({url: '/foo', cache: true})
+        let aliasRequest
 
-        up.cache.alias({url: '/foo'}, {url: '/bar'})
+        next(() => {
+          expect({url: '/foo'}).toBeCached()
+          expect({url: '/bar'}).not.toBeCached()
 
-        console.debug("[spec] checking if /bar is cached AFTER alias")
-        expect({url: '/bar'}).toBeCached()
-        console.debug("[spec] checking if /foo and /bar are the same thing")
-        expect(up.cache.get({url: '/bar'})).toBe(up.cache.get({url: '/foo'}))
-      })
+          aliasRequest = up.cache.alias({url: '/foo'}, {url: '/bar'})
+        })
+
+        next(() => {
+          expect({url: '/foo'}).toBeCached()
+          expect({url: '/bar'}).toBeCached()
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          jasmine.respondWith("original request response")
+        })
+
+        next(() => {
+          expect(originalRequest.response.text).toBe('original request response')
+          expect(aliasRequest.response.text).toBe('original request response')
+        })
+
+      }))
     )
 
     describe('up.cache.remove()', function() {
