@@ -663,41 +663,34 @@ describe('up.network', function() {
 
           const responses = []
           const trackResponse = function(response) {
-            console.debug("[spec] response to request %o fulfilled", response.request.uid)
             responses.push(response.text)
           }
 
           next(() => {
-            console.debug("[spec] first request to /foo")
             up.request({url: '/foo', cache: true}).then(trackResponse)
           })
 
           next(() => {
-            console.debug("[spec] expecting count to be 1")
             expect(jasmine.Ajax.requests.count()).toEqual(1)
           })
 
           next.after((10), () => {
-            console.debug("[spec] second request to /foo")
             // Send the same request for the same path
             up.request({url: '/foo', cache: true}).then(trackResponse)
           })
 
           next(() => {
             // See that only a single network request was triggered
-            console.debug("[spec] expecting count to be 1 again")
             expect(jasmine.Ajax.requests.count()).toEqual(1)
             expect(responses).toEqual([])
           })
 
           next(() => {
-            console.debug("[spec] responding with text")
             // Server responds once.
             this.respondWith('foo')
           })
 
           next(() => {
-            console.debug("[spec] expecting responses")
             // See that both requests have been fulfilled
             expect(responses).toEqual(['foo', 'foo'])
           })

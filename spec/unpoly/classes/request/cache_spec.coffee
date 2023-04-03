@@ -1,6 +1,6 @@
 describe 'up.Request.Cache', ->
 
-  describe '#connect', ->
+  describe '#track', ->
 
     it 'resolves the given new request when the given cached request is resolved'
 
@@ -9,21 +9,15 @@ describe 'up.Request.Cache', ->
     it 'aborts the given new request when the given cached request is aborted', asyncSpec (next) ->
       sourceRequest = new up.Request(url: '/foo')
 
-      console.debug("[spec] catching value on request #%o", sourceRequest.uid)
-      sourceRequest.catch (v) -> console.debug("[spec] caught value %o", v)
-
       followingRequest = new up.Request(url: '/foo')
-      up.cache.connect(sourceRequest, followingRequest)
+      up.cache.track(sourceRequest, followingRequest)
 
       expect(sourceRequest.state).toEqual('new')
-      expect(followingRequest.state).toEqual('new')
+      expect(followingRequest.state).toEqual('tracking')
 
       next ->
-        console.debug("[spec] aborting sourceRequest")
         sourceRequest.abort()
 
       next ->
-        console.debug("[spec] expectations")
-
         expect(sourceRequest.state).toEqual('aborted')
         expect(followingRequest.state).toEqual('aborted')

@@ -147,8 +147,6 @@ up.RenderJob = class RenderJob {
       logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
     }
 
-    console.debug("!! abort %o with optionss %o", abort, abortOptions)
-
     if (abort === 'target') {
       // Abort requests in the subtree of the targeted fragment
       up.fragment.abort(fragments, abortOptions)

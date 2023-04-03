@@ -512,8 +512,6 @@ up.Request = class Request extends up.Record {
   }
 
   load() {
-    console.debug("[request] calling load() on %o", this.description)
-
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
     if (this.state !== 'new') return
@@ -625,13 +623,10 @@ up.Request = class Request extends up.Record {
   }
 
   setAbortedState(reason) {
-    console.debug("[request] setAbortedState() for UID %o", this.uid)
-
     if (this.isSettled()) return
 
     let message = 'Aborted request to ' + this.description + (reason ? ': ' + reason : '')
     this.state = 'aborted'
-    console.debug("[request] rejecting deferred for UID %o", this.uid)
     this.deferred.reject(new up.Aborted(message))
     this.emit('up:request:aborted', { log: message })
 
@@ -651,22 +646,18 @@ up.Request = class Request extends up.Record {
   respondWith(response) {
     this.response = response
 
-    console.debug("[request] respondWith() at state %o / uid %o", this.state, this.uid)
-
     if (this.isSettled()) return
     this.state = 'loaded'
 
     if (response.ok) {
-      console.debug("[request] fulfilling deferred of %o with response", this.uid)
       this.deferred.resolve(response)
     } else {
-      console.debug("[request] rejecting deferred of %o with response", this.uid)
       this.deferred.reject(response)
     }
   }
 
   isSettled() {
-    return (this.state !== 'new') && (this.state !== 'loading')
+    return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')
   }
 
   csrfHeader() {

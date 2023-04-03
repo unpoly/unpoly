@@ -205,7 +205,7 @@ up.network = (function() {
 
   const queue = new up.Request.Queue()
 
-  const cache = new up.Request.Cache3()
+  const cache = new up.Request.Cache()
 
   let progressBar = null
 
@@ -551,7 +551,7 @@ up.network = (function() {
       // There is also the edge case where a cached request is still in-flight and, when the
       // response is finally received, has a Vary header that makes it incompatible with
       // `newRequest`. In this case we re-process `newRequest` as if it was just made.
-      cache.connect(cachedRequest, newRequest, { onIncompatible: processRequest })
+      cache.track(cachedRequest, newRequest, { onIncompatible: processRequest })
 
       return true
     }
