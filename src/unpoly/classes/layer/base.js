@@ -753,5 +753,11 @@ up.Layer = class Layer extends up.Record {
     return focusedElement !== document.body && this.element.contains(focusedElement)
   }
 
+  reset() {
+    // Re-assigning defaults will also reset context as well as
+    // caches for scroll positions and focus.
+    Object.assign(this, this.defaults())
+  }
+
 }
 

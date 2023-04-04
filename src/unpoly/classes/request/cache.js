@@ -41,7 +41,7 @@ up.Request.Cache = class Cache {
     }
   }
 
-  get maxSize() {
+  get capacity() {
     return up.network.config.cacheSize
 
   }
@@ -170,11 +170,11 @@ up.Request.Cache = class Cache {
   }
 
   makeRoom() {
-    if (this.maxSize === 0) {
-      throw "Disabling the cache with maxSize 0 is no longer supported. Use up.network.config.autoCache = false instead."
+    if (this.capacity === 0) {
+      throw "Disabling the cache with capacity 0 is no longer supported. Use up.network.config.autoCache = false instead."
     }
 
-    while (this.map.size >= this.maxSize) {
+    while (this.map.size >= this.capacity) {
       let oldestKey = this.map.keys().next().value
       this.map.delete(oldestKey)
     }
