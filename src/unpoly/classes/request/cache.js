@@ -122,7 +122,10 @@ up.Request.Cache = class Cache {
         // to expire ourselves when otherRequest is expired.
         u.delegate(newRequest, ['expired', 'state'], () => existingRequest)
       } else {
+        // A supposed cache hit turns out to be a cache *miss* due to the response carrying
+        // an incompatible Vary header.
         delete newRequest.trackedRequest
+        newRequest.state = 'new'
 
         // The two requests turned out to not be cache hits for each other, as
         // the response carried a Vary header. We will re-process newRequest as if it

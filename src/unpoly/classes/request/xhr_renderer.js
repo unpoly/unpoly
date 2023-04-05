@@ -24,29 +24,12 @@ up.Request.XHRRenderer = class XHRRenderer {
     // The XMLHttpRequest method must be opened before we can add headers to it.
     xhr.open(this.getMethod(), this.request.url)
 
-    // Add information about the response's intended use, so the server may
-    // customize or shorten its response.
-    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
-      this.addHeader(
-        xhr,
-        up.protocol.headerize(key),
-        this.request[key]
-      )
-    }
-
-    let csrfHeader, csrfToken
-    if ((csrfHeader = this.request.csrfHeader()) && (csrfToken = this.request.csrfToken())) {
-      this.addHeader(xhr, csrfHeader, csrfToken)
-    }
-
-    this.addHeader(xhr, up.protocol.headerize('version'), up.version)
-
     // The { contentType } will be missing in case of a FormData payload.
     // In this case the browser will choose a content-type with MIME boundary,
     // like: multipart/form-data; boundary=----WebKitFormBoundaryHkiKAbOweEFUtny8
     let contentType = this.getContentType()
     if (contentType) {
-      this.addHeader(xhr, 'Content-Type', contentType)
+      xhr.setRequestHeader('Content-Type', contentType)
     }
 
     for (let headerName in this.request.headers) {
@@ -81,13 +64,6 @@ up.Request.XHRRenderer = class XHRRenderer {
   getPayload() {
     this.finalizePayload()
     return this.payload
-  }
-
-  addHeader(xhr, name, value) {
-    if (u.isOptions(value) || u.isArray(value)) {
-      value = u.safeStringifyJSON(value)
-    }
-    this.request.headers[name] = value
   }
 
   finalizePayload() {

@@ -723,13 +723,6 @@ describe('up.network', function() {
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
         }))
 
-        it('reuses a request with the same URL but a different #hash', function() {
-          const request1 = up.request({url: '/url#foo', cache: true})
-          expect(request1.hash).toEqual('#foo')
-          expect({url: '/url#foo'}).toBeCached()
-          expect({url: '/url#bar'}).toBeCached()
-        })
-
         it("does not lose a request's #hash when re-using a cached request without a #hash (bugfix)", function() {
           const request1 = up.request({url: '/url#foo', cache: true})
           expect(request1.hash).toEqual('#foo')
@@ -769,48 +762,117 @@ describe('up.network', function() {
           })
         )
 
-        it("doesn't reuses responses when asked for the same path, but different selectors", asyncSpec(function(next) {
-          next(() => up.request({url: '/path', target: '.a', cache: true}))
-          next(() => up.request({url: '/path', target: '.b', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(1))
-        }))
+        describe('matching requests', function() {
 
-        it("doesn't reuse responses when asked for the same path, but different selectors if the server responded with `Vary: X-Up-Target`", asyncSpec(function(next) {
-          next(() => up.request({url: '/path', target: '.a', cache: true}))
-          next(() => jasmine.respondWithSelector('.a', { text: 'content', responseHeaders: { 'Vary': 'X-Up-Target' } }))
-          next(() => up.request({url: '/path', target: '.b', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
+          it('reuses a request with the same URL but a different #hash', function () {
+            const request1 = up.request({ url: '/url#foo', cache: true })
+            expect(request1.hash).toEqual('#foo')
+            expect({ url: '/url#foo' }).toBeCached()
+            expect({ url: '/url#bar' }).toBeCached()
+          })
 
-        it("doesn't reuse responses when asked for the same path, but different params", asyncSpec(function(next) {
-          next(() => up.request({url: '/path', params: {query: 'foo'}, cache: true}))
-          next(() => up.request({url: '/path', params: {query: 'bar'}, cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
+          it("reuses responses when asked for the same path, but different selectors", asyncSpec(function (next) {
+            next(() => up.request({ url: '/path', target: '.a', cache: true }))
+            next(() => up.request({ url: '/path', target: '.b', cache: true }))
+            next(() => expect(jasmine.Ajax.requests.count()).toEqual(1))
+          }))
 
-//        it "reuses a response for an 'html' selector when asked for the same path and any other selector", asyncSpec (next) ->
-//          next => up.request(url: '/path', target: 'html', cache: true)
-//          next => up.request(url: '/path', target: 'body', cache: true)
-//          next => up.request(url: '/path', target: 'p', cache: true)
-//          next => up.request(url: '/path', target: '.klass', cache: true)
-//          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
-//
-//        it "reuses a response for a 'body' selector when asked for the same path and any other selector other than 'html'", asyncSpec (next) ->
-//          next => up.request(url: '/path', target: 'body', cache: true)
-//          next => up.request(url: '/path', target: 'p', cache: true)
-//          next => up.request(url: '/path', target: '.klass', cache: true)
-//          next => expect(jasmine.Ajax.requests.count()).toEqual(1)
-//
-//        it "doesn't reuse a response for a 'body' selector when asked for the same path but an 'html' selector", asyncSpec (next) ->
-//          next => up.request(url: '/path', target: 'body', cache: true)
-//          next => up.request(url: '/path', target: 'html', cache: true)
-//          next => expect(jasmine.Ajax.requests.count()).toEqual(2)
+          describe('Vary response header', function() {
+            it("doesn't reuse responses when asked for the same path, but different selectors if the server responded with `Vary: X-Up-Target`", asyncSpec(function (next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => jasmine.respondWithSelector('.a', {
+                text: 'content',
+                responseHeaders: { 'Vary': 'X-Up-Target' }
+              }))
+              next(() => up.request({ url: '/path', target: '.b', cache: true }))
+              next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+            }))
 
-        it("doesn't reuse responses for different paths", asyncSpec(function(next) {
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => up.request({url: '/bar', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
+            it('does reuse responses for the same path and selector if the server responds with `Vary: X-Up-Target` (bugfix)', asyncSpec(function(next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+                jasmine.respondWithSelector('.a', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'X-Up-Target' }
+                })
+              })
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(up.network.isBusy()).toBe(false)
+              })
+            }))
+
+            it('loads a request that is tracking another request with the same path, but then retroactively becomes a cache miss due to a Vary header', asyncSpec(function(next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+              next(() => up.request({ url: '/path', target: '.b', cache: true }))
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.a')
+
+                jasmine.respondWithSelector('.a', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'X-Up-Target' }
+                })
+              })
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(2)
+                expect(up.network.isBusy()).toBe(true)
+                expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.b')
+
+                jasmine.respondWithSelector('.b', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'X-Up-Target' }
+                })
+              })
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(2)
+                expect(up.network.isBusy()).toBe(false)
+              })
+
+            }))
+
+            it('ignores Vary for headers that were set outside Unpoly (e.g. by network infrastructure)', asyncSpec(function(next) {
+              next(() => up.request({ url: '/path', target: '.a', cache: true }))
+
+              next(() => up.request({ url: '/path', target: '.b', cache: true }))
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.a')
+
+                jasmine.respondWithSelector('.a', {
+                  text: 'content',
+                  responseHeaders: { 'Vary': 'Proxy-Header' }
+                })
+              })
+
+              next(() => {
+                expect(jasmine.Ajax.requests.count()).toEqual(1)
+                expect(up.network.isBusy()).toBe(false)
+              })
+            }))
+
+          })
+
+          it("doesn't reuse responses when asked for the same path, but different query params", asyncSpec(function (next) {
+            next(() => up.request({ url: '/path', params: { query: 'foo' }, cache: true }))
+            next(() => up.request({ url: '/path', params: { query: 'bar' }, cache: true }))
+            next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+          }))
+
+          it("never reuses responses for different paths, even if all other headers match", asyncSpec(function (next) {
+            next(() => up.request({ url: '/foo', cache: true, target: '.target' }))
+            next(() => up.request({ url: '/bar', cache: true, target: '.target' }))
+            next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+          }))
+
+        })
 
         describe('with { cache: "auto" }', function() {
 

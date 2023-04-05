@@ -369,6 +369,8 @@ up.Request = class Request extends up.Record {
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
 
     this.uid = u.uid()
+
+    this.addAutoHeaders()
   }
 
   /*-
@@ -768,6 +770,31 @@ up.Request = class Request extends up.Record {
     return this.headers[name]
   }
 
+  addAutoHeaders() {
+    // Add information about the response's intended use, so the server may
+    // customize or shorten its response.
+    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext']) {
+      this.addAutoHeader(
+        up.protocol.headerize(key),
+        this[key]
+      )
+    }
+
+    let csrfHeader, csrfToken
+    if ((csrfHeader = this.csrfHeader()) && (csrfToken = this.csrfToken())) {
+      this.addAutoHeader(csrfHeader, csrfToken)
+    }
+
+    this.addAutoHeader(up.protocol.headerize('version'), up.version)
+  }
+
+  addAutoHeader(name, value) {
+    if (u.isOptions(value) || u.isArray(value)) {
+      value = u.safeStringifyJSON(value)
+    }
+    this.headers[name] = value
+  }
+
   static tester(condition, { except } = {}) {
     let testFn
     if (u.isFunction(condition)) {
@@ -782,7 +809,6 @@ up.Request = class Request extends up.Record {
     }
 
     if (except) {
-      // TODO: Should we also excude requests except is following? In case except is a cache hit?
       return (request) => !up.cache.willHaveSameResponse(request, except) && testFn(request)
     } else {
       return testFn
