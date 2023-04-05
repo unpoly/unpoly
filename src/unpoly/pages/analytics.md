@@ -21,7 +21,7 @@ would use:
 
 ```js
 function trackPageView(url) {
-  _paq.push(['setCustomUrl', path])
+  _paq.push(['setCustomUrl', url])
   _paq.push(['trackPageView'])
 }
 ```
