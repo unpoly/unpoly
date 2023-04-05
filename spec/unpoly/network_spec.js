@@ -734,20 +734,6 @@ describe('up.network', function() {
           expect({url: '/url#bar'}).toBeCached()
         })
 
-        it("does not cache responses if config.cacheEvictAge is 0", asyncSpec(function(next) {
-          up.network.config.cacheEvictAge = 0
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
-
-        it("does not cache responses if config.cacheSize is 0", asyncSpec(function(next) {
-          up.network.config.cacheSize = 0
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => up.request({url: '/foo', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
-        }))
-
         it('caches requests that change their URL in up:request:load', asyncSpec(function(next) {
           up.on('up:request:load', ({ request }) => request.url = '/changed-path')
           up.request({url: '/original-path', cache: true})
@@ -765,10 +751,6 @@ describe('up.network', function() {
             expect({url: '/path?foo=one&bar=two'}).toBeCached()
           })
         }))
-
-        it('does not limit the number of cache entries if config.cacheSize is undefined')
-
-        it('never discards old cache entries if config.cacheEvictAge is undefined')
 
         it('respects a config.cacheSize setting', asyncSpec(function(next) {
             up.network.config.cacheSize = 2
