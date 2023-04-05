@@ -748,6 +748,24 @@ describe('up.network', function() {
           next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
         }))
 
+        it('caches requests that change their URL in up:request:load', asyncSpec(function(next) {
+          up.on('up:request:load', ({ request }) => request.url = '/changed-path')
+          up.request({url: '/original-path', cache: true})
+
+          next(() => {
+            expect({url: '/changed-path'}).toBeCached()
+          })
+        }))
+
+        it('caches GET requests that change their query params in up:request:load', asyncSpec(function(next) {
+          up.on('up:request:load', ({ request }) => request.params.add('bar', 'two'))
+          up.request({url: '/path?foo=one', cache: true})
+
+          next(() => {
+            expect({url: '/path?foo=one&bar=two'}).toBeCached()
+          })
+        }))
+
         it('does not limit the number of cache entries if config.cacheSize is undefined')
 
         it('never discards old cache entries if config.cacheEvictAge is undefined')

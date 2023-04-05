@@ -1,3 +1,5 @@
+const u = up.util
+
 up.FIFOCache = class FIFOCache {
 
   constructor({ capacity = 10, normalizeKey = u.identity } = {}) {

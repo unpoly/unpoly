@@ -297,6 +297,7 @@ up.Request = class Request extends up.Record {
       'contentType',
       'payload',
       'onQueued',
+      'onLoading',
       'fail',
       'abortable',
       'badResponseTime',
@@ -336,7 +337,7 @@ up.Request = class Request extends up.Record {
     if (this.wrapMethod == null) { this.wrapMethod = up.network.config.wrapMethod }
 
     // Normalize a first time to get a normalized cache key.
-    this.normalizeForCaching()
+    this.normalize()
 
     if ((this.target || this.layer || this.origin) && !options.basic) {
       const layerLookupOptions = { origin: this.origin }
@@ -435,7 +436,7 @@ up.Request = class Request extends up.Record {
     return this.fragments?.[0]
   }
 
-  normalizeForCaching() {
+  normalize() {
     this.method = u.normalizeMethod(this.method)
     this.extractHashFromURL()
     this.transferParamsToURL()
@@ -517,20 +518,45 @@ up.Request = class Request extends up.Record {
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
     if (this.state !== 'new') return
-    this.state = 'loading'
 
-    // If someone expired this link while it was waiting in the queue (e.g. through
-    // expiring everyhing with up.cache.expire(), it now becomes fresh through the
-    // act of loading.
-    this.expired = false
+    if (this.emitLoad()) {
+      this.state = 'loading'
 
-    // Convert from XHR's callback-based API to up.Request's promise-based API
-    new up.Request.XHRRenderer(this).buildAndSend({
-      onload:    () => this.onXHRLoad(),
-      onerror:   () => this.onXHRError(),
-      ontimeout: () => this.onXHRTimeout(),
-      onabort:   () => this.onXHRAbort()
-    })
+      // Listeners to up:request:load may have mutated properties that need to be
+      // re-normalized and/or are part of a cache key.
+      //
+      // To be correct we would also need to re-run addAutoHeaders() here. However since
+      // this is costly and also rare that listeners mutate properties like #target or #layer,
+      // we leave it to the listener to update headers.
+      this.normalize()
+
+      // This callback is used by up.network to re-cache the request after its cache key
+      // may have changed by mutation from a up:request:load listener.
+      this.onLoading?.()
+
+      // If someone expired this link while it was waiting in the queue (e.g. through
+      // expiring everyhing with up.cache.expire(), it now becomes fresh through the
+      // act of loading.
+      this.expired = false
+
+      // Convert from XHR's callback-based API to up.Request's promise-based API
+      new up.Request.XHRRenderer(this).buildAndSend({
+        onload: () => this.onXHRLoad(),
+        onerror: () => this.onXHRError(),
+        ontimeout: () => this.onXHRTimeout(),
+        onabort: () => this.onXHRAbort()
+      })
+
+      // Signal to callers (in particular to up.Queue) that load() was not aborted.
+      return true
+    } else {
+      this.abort({ reason: 'Prevented by event listener' })
+    }
+  }
+
+  emitLoad() {
+    let event = this.emit('up:request:load', { log: ['Loading %s', this.description] })
+    return !event.defaultPrevented
   }
 
   /*-

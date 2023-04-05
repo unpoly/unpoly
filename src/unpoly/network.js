@@ -567,8 +567,11 @@ up.network = (function() {
   }
 
   function handleCaching(request) {
+    // Cache the request before it is queued and loaded.
+    // This way additional requests to the same endpoint will hit and track this request.
     if (request.willCache()) {
       cache.put(request)
+      request.onLoading = () => cache.put(request)
     }
 
     // Once we receive a response we honor options/headers for eviction/expiration,

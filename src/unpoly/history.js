@@ -252,7 +252,7 @@ up.history = (function() {
 
   function restoreStateOnPop(state) {
     if (!state?.up) {
-      up.puts('pop', 'Ignoring a history state not owned by Unpoly')
+      up.puts('popstate', 'Ignoring a history state not owned by Unpoly')
       return
     }
 
