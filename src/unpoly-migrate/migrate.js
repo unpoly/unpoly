@@ -29,29 +29,38 @@ up.migrate = (function() {
   // }
 
   function renamedProperty(object, oldKey, newKey) {
-    const warning = () => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+    const doWarn = () => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
     Object.defineProperty(object, oldKey, {
       get() {
-        warning()
+        doWarn()
         return this[newKey]
       },
       set(newValue) {
-        warning()
+        doWarn()
         this[newKey] = newValue
       }
     })
   }
 
-  function removedProperty(object, key) {
-    const warning = () => warn('Property { %s } has been removed without replacement (found in %o)', key, object)
+  function removedProperty(object, key, warning) {
+    const doWarn = () => warning ? warn(warning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object)
+
+    // We still allow getting and setting, but we store the value in a different property internally.
+    let backupKey = `__removed_${key}`
+
+    if (key in object) {
+      // Store the value we're overriding with getters and setters below.
+      object[backupKey] = object[key]
+    }
+
     Object.defineProperty(object, key, {
       get() {
-        warning()
-        return this[key]
+        doWarn()
+        return this[backupKey]
       },
       set(newValue) {
-        warning()
-        this[key] = newValue
+        doWarn()
+        this[backupKey] = newValue
       }
     })
   }
