@@ -47,9 +47,7 @@ up.Request.Cache = class Cache {
   }
 
   isUsable(request) {
-    const evictAge = up.network.config.cacheEvictAge
-    const age = new Date() - request.queuedAt
-    return age < evictAge
+    return request.age < up.network.config.cacheEvictAge
   }
 
   async put(request) {

@@ -292,7 +292,7 @@ up.Request = class Request extends up.Record {
       'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
       'origin',
       'fragments',
-      'queuedAt',
+      'builtAt',
       'wrapMethod',
       'contentType',
       'payload',
@@ -310,7 +310,7 @@ up.Request = class Request extends up.Record {
       abortable: true,
       headers: {},
       timeout: up.network.config.timeout,
-      queuedAt: new Date(), // TODO: Better name for the thing we're measing age from
+      builtAt: new Date(),
     }
   }
 
@@ -507,8 +507,6 @@ up.Request = class Request extends up.Record {
   }
 
   runQueuedCallbacks() {
-    this.queuedAt = new Date()
-
     u.always(this, () => this.evictExpensiveAttrs())
 
     this.onQueued?.(this)
@@ -787,9 +785,8 @@ up.Request = class Request extends up.Record {
     })
   }
 
-  get queueAge() {
-    const now = new Date()
-    return now - this.queuedAt
+  get age() {
+    return new Date() - this.builtAt
   }
 
   header(name) {

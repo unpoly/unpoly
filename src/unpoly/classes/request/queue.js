@@ -47,7 +47,7 @@ up.Request.Queue = class Queue {
   scheduleSlowTimer(request) {
     // In case the request was loading in the background before it was promoted to
     // the foreground, the request may have less time left than request.badResponseTime.
-    let timeUntilLate = Math.max(request.badResponseTime - request.queueAge, 0)
+    let timeUntilLate = Math.max(request.badResponseTime - request.age, 0)
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @checkLate().
@@ -154,6 +154,6 @@ up.Request.Queue = class Queue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
 
-    return u.some(allForegroundRequests, request => request.queueAge >= (request.badResponseTime - timerTolerance))
+    return u.some(allForegroundRequests, (request) => request.age >= (request.badResponseTime - timerTolerance))
   }
 }
