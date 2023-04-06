@@ -369,7 +369,7 @@ up.Request = class Request extends up.Record {
     //     the timer logic for up:network:late/:recover gets inconvenient edge cases.
     this.badResponseTime ??= u.evalOption(up.network.config.badResponseTime, this)
 
-    this.uid = u.uid()
+    // this.uid = u.uid()
 
     this.addAutoHeaders()
   }
