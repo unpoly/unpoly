@@ -13,9 +13,6 @@ up.Request.Cache = class Cache {
 
   cacheKey(request) {
     let varyHeaderNames = this.getPreviousVaryHeaderNames(request)
-
-    // TODO: Requests don't know their headers until they are sent
-
     let varyPart = u.flatMap(varyHeaderNames, (headerName) => [headerName, request.header(headerName)])
     return [request.description, ...varyPart].join(':')
   }
@@ -171,10 +168,6 @@ up.Request.Cache = class Cache {
   }
 
   makeRoom() {
-    if (this.capacity === 0) {
-      throw "Disabling the cache with capacity 0 is no longer supported. Use up.network.config.autoCache = false instead."
-    }
-
     while (this.map.size >= this.capacity) {
       let oldestKey = this.map.keys().next().value
       this.map.delete(oldestKey)
