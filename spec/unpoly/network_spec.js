@@ -858,6 +858,23 @@ describe('up.network', function() {
               })
             }))
 
+            it('starts partitioning a method/URL pair once it receives a Vary header', asyncSpec(function(next) {
+              next(() => {
+                up.request({ url: '/path', target: '.a', cache: true })
+              })
+              next(() => {
+                expect({ url: '/path', target: '.a' }).toBeCached()
+                expect({ url: '/path', target: '.b' }).toBeCached()
+
+                jasmine.respondWith("content", { responseHeaders: { Vary: 'X-Up-Target' }})
+              })
+              next(() => {
+                expect({ url: '/path', target: '.a' }).toBeCached()
+                expect({ url: '/path', target: '.b' }).not.toBeCached()
+
+                up.request({ url: '/path', target: '.a', headers: { Custom: 'custom-value' }, cache: true })
+              })
+            }))
           })
 
           it("doesn't reuse responses when asked for the same path, but different query params", asyncSpec(function (next) {
