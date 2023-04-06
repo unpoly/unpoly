@@ -1537,7 +1537,7 @@ up.util = (function() {
   @function up.util.always
   @internal
   */
-  function always(promise, callback = u.identity) {
+  function always(promise, callback = identity) {
     return promise.then(callback, callback)
   }
 
