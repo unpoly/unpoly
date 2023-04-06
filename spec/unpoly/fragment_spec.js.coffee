@@ -5707,7 +5707,6 @@ describe 'up.fragment', ->
         describe 'cache revalidation', ->
 
           beforeEach (done) ->
-            up.network.config.requestMetaKeys = []
             up.fragment.config.autoRevalidate = (response) => response.age >= 0
             fixture('.target', text: 'initial text')
 
