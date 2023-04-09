@@ -12,12 +12,12 @@ up.Request.Cache = class Cache {
   }
 
   cacheKey(request) {
-    let varyHeaderNames = this.getPreviousVaryHeaderNames(request)
-    let varyPart = u.flatMap(varyHeaderNames, (headerName) => [headerName, request.header(headerName)])
+    let influencingHeaders = this.getPreviousInfluencingHeaders(request)
+    let varyPart = u.flatMap(influencingHeaders, (headerName) => [headerName, request.header(headerName)])
     return [request.description, ...varyPart].join(':')
   }
 
-  getPreviousVaryHeaderNames(request) {
+  getPreviousInfluencingHeaders(request) {
     // Returns a list of `Vary` header names that we have seen
     // in responses to earlier requests with the same method and URL.
     // This is how we know how fine we must segment our cache buckets.
@@ -77,11 +77,11 @@ up.Request.Cache = class Cache {
   }
 
   mergePreviousHeaderNames(request, response) {
-    let responseVaryHeaderNames = response.ownVaryHeaderNames
-    if (responseVaryHeaderNames.length) {
-      let previousVaryHeaderNames = this.getPreviousVaryHeaderNames(request)
-      for (let varyHeaderName of responseVaryHeaderNames) {
-        previousVaryHeaderNames.add(varyHeaderName)
+    let headersInfluencingResponse = response.ownInfluncingHeaders
+    if (headersInfluencingResponse.length) {
+      let previousInfluencingHeaders = this.getPreviousInfluencingHeaders(request)
+      for (let headerName of headersInfluencingResponse) {
+        previousInfluencingHeaders.add(headerName)
       }
     }
   }

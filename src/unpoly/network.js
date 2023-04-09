@@ -19,7 +19,7 @@ The HTTP client offers many quality-of-life improvements, for example:
   You may also implement a [custom loading indicator](/loading-indicators#custom-loading-indicators).
 - When two requests [target](/targeting-fragments) the same element,
   Unpoly will [abort the earlier request](/aborting-requests).
-- Requests send [additional HTTP headers](/up.protocol) that the server may use to optimize its response.
+- Requests send [additional HTTP headers](/up.protocol) that the server may use to [optimize its response](/optimizing-responses).
   For example, when [updating a fragment](/targeting-fragments), the target selector is automatically sent
   as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
 - Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response lifecycle.
@@ -210,7 +210,7 @@ up.network = (function() {
   let progressBar = null
 
   /*-
-  Returns a [cached](/caching) request [matching](/up.network.config#config.requestMetaKeys) the given request options.
+  Returns a [cached](/caching) request matching the given request options.
 
   Returns `undefined` if the given request is not currently cached.
 
@@ -424,8 +424,8 @@ up.network = (function() {
   @param {Object} [options.headers={}]
     An object of additional HTTP headers.
 
-    Note that Unpoly will by default send a number of custom request headers.
-    See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+    Unpoly will by default send a number of custom request headers.
+    See `up.protocol` for details.
 
   @param {boolean} [options.wrapMethod]
     Whether to wrap non-standard HTTP methods in a POST request.

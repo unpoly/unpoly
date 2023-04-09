@@ -210,7 +210,8 @@ By default Unpoly skips the following responses:
 The response may include a full HTML document, but only the [targeted fragment](/targeting-fragments)
 will be updated on the page. Other elements from the response will be discarded.
 
-An `up:fragment:loaded` listener may mutate `event.renderOptions.target` to render a different selector.
+The server may choose to [only render content that is targeted](/optimizing-responses).
+
 
 
 ### Preserving elements in a targeted fragment

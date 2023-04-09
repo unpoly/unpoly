@@ -359,7 +359,6 @@ describe 'up.history', ->
     describe 'events', ->
 
       it 'emits up:location:changed events as the user goes forwards and backwards through history', asyncSpec (next) ->
-        up.network.config.cacheSize = 0
         up.history.config.restoreTargets = ['.viewport']
 
         fixture('.viewport .content')
@@ -377,6 +376,8 @@ describe 'up.history', ->
           events.push [event.reason, normalize(event.location)]
 
         up.navigate('.content', url: '/foo', history: true)
+
+        tolerance = 150
 
         next =>
           respond()
@@ -411,10 +412,7 @@ describe 'up.history', ->
 
           history.back()
 
-        next.after 150, =>
-          respond()
-
-        next =>
+        next.after tolerance, =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]
@@ -425,9 +423,6 @@ describe 'up.history', ->
           history.back()
 
         next.after 150, =>
-          respond()
-
-        next =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]
@@ -439,9 +434,6 @@ describe 'up.history', ->
           history.forward()
 
         next.after 150, =>
-          respond()
-
-        next =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]
@@ -454,9 +446,6 @@ describe 'up.history', ->
           history.forward()
 
         next.after 150, =>
-          respond() # we need to respond since we've never requested /baz with the popTarget
-
-        next =>
           expect(events).toEqual [
             ['push', normalize('/foo')]
             ['push', normalize('/bar')]

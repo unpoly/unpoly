@@ -871,6 +871,7 @@ describe('up.network', function() {
               next(() => {
                 expect({ url: '/path', target: '.a' }).toBeCached()
                 expect({ url: '/path', target: '.b' }).not.toBeCached()
+                expect({ url: '/path' }).not.toBeCached()
 
                 up.request({ url: '/path', target: '.a', headers: { Custom: 'custom-value' }, cache: true })
               })

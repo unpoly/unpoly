@@ -84,7 +84,7 @@ up.Request = class Request extends up.Record {
   An object of HTTP headers that will be sent with this request.
 
   Unpoly will by default send a number of custom request headers.
-  See `up.protocol` and `up.network.config.requestMetaKeys` for details.
+  See `up.protocol` for details.
 
   @see up.Request.prototype.header
 

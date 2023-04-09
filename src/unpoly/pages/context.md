@@ -62,8 +62,8 @@ end
 ```
 
 
-Re-using interactions in an overlay, but with a variation
-----------------------------------------------------------
+Re-using interactions in an overlay, but with a variation{#reuse-interaction-with-variation}
+--------------------------------------------------------------------------------------------
 
 Context is useful when you want to re-use an existing interaction in an overlay, but make a slight variation.
 
@@ -104,5 +104,6 @@ The server can inspect the context in `/contacts/index.erb`:
   <li>...</li>
 <% end %>
 ```
+
 
 @page context

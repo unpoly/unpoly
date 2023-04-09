@@ -29,7 +29,10 @@ up.migrate = (function() {
   // }
 
   function renamedProperty(object, oldKey, newKey) {
-    const doWarn = () => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+    // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
+    // to print the object, which will call the warning, which will access the getter, etc.
+    const doWarn = u.memoize(() => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
+
     Object.defineProperty(object, oldKey, {
       get() {
         doWarn()
@@ -43,24 +46,36 @@ up.migrate = (function() {
   }
 
   function removedProperty(object, key, warning) {
-    const doWarn = () => warning ? warn(warning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object)
+    // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
+    // to print the object, which will call the warning, which will access the getter, etc.
+    const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object))
 
-    // We still allow getting and setting, but we store the value in a different property internally.
-    let backupKey = `__removed_${key}`
-
-    if (key in object) {
-      // Store the value we're overriding with getters and setters below.
-      object[backupKey] = object[key]
-    }
+    let value = object[key]
 
     Object.defineProperty(object, key, {
       get() {
         doWarn()
-        return this[backupKey]
+        return value
       },
       set(newValue) {
         doWarn()
-        this[backupKey] = newValue
+        value = newValue
+      }
+    })
+  }
+
+  function forbiddenPropertyValue(object, key, forbiddenValue, errorMessage) {
+    let value = object[key]
+
+    Object.defineProperty(object, key, {
+      get() {
+        return value
+      },
+      set(newValue) {
+        if (newValue === forbiddenValue) {
+          throw new Error(errorMessage)
+        }
+        value = newValue
       }
     })
   }
@@ -172,6 +187,7 @@ up.migrate = (function() {
     renamedPackage,
     renamedProperty,
     removedProperty,
+    forbiddenPropertyValue,
     renamedAttribute,
     formerlyAsync,
     renamedEvent,

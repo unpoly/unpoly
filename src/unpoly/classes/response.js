@@ -166,10 +166,9 @@ up.Response = class Response extends up.Record {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
-  get ownVaryHeaderNames() {
-    let varyHeaderValue = this.header('Vary')
-    let varyHeaderNames  = u.parseTokens(varyHeaderValue, { separator: 'comma' })
-    return u.filter(varyHeaderNames, (headerName) => this.request.header(headerName))
+  get ownInfluncingHeaders() {
+    let influencingHeaders = up.protocol.influencingHeadersFromResponse(this)
+    return u.filter(influencingHeaders, (headerName) => this.request.header(headerName))
   }
 
   /*-

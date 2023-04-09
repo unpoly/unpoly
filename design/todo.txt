@@ -119,6 +119,13 @@ TODOs after V3
 - When opening a new layer, we should update [up-hungry][up-if-layer=any] elements
   => This is not trivial as OpenLayer cannot work with multiple steps yet
   => Maybe we can do a "secret UpdateLayer pass" once the layer has opened.
+    - We would need to merge RenderResult objects
+- Custom attributes are not copied into [up-expand]
+  - up.link.config.expandableAttributes ?
+    - can also include regexp
+      - maybe reuse matcher logic for badTargetClasses
+  - up.link.config.expandableAttribute (attribute, element)
+    - The element will always be a link
 
 
 TODOs for V3
@@ -137,31 +144,22 @@ Various changes
   - The warning will go away after user migrates from up.network.config.cacheExpiry to up.network.config.cacheExpireAge
 
 - Vary-capable cache
-  - Replace queuedAt with constructedAt
-  - Remove Request#uid
-  - Print warning when setting up.network.requestMetaKeys
-  - up-migrate should throw an error when setting up.network.config.cacheSize = 0 or cacheEvictAge = 0
-    - "Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. Set up.network.config.autoCache = false instead."
-    - Remove exception in up.Request.Cache
-  - Remove docs for requestMetaKeys
-  - Move /caching#improving-cache-hit-rates to its own doc page /optimizing-responses
-    - Parent is up.protocol
-    - Link from /caching
-    - Link everywhere were it says "optimizing", "customizing" or "shorten" responses
-    - Make sure Vary is mentioned a lot
-  - up.Request.Cache
-    - Tests
-      - After a response arrives with Vary, all future requests with the same description will be partitioned using those Vary headers
-  - Remove debug statements
+  - Docs
+    - Remove docs for requestMetaKeys
+    - Move /caching#improving-cache-hit-rates to its own doc page /optimizing-responses
+      - Parent is up.protocol
+      - Link from /caching
+      - Link everywhere were it says "optimizing", "customizing" or "shorten" responses
+      - Make sure Vary is mentioned a lot
+    - Check that admonitions regarding "Vary" are OK
+    - Page /caching should have a note regarding Vary and link to optimizing responses
+    - Have an up.protocol doc entry for `Vary`
+      - Link to MDN
+        - Replace existing `Vary` links to mdn to our own /Vary page
+      - Link to /optimizing-responses
+      - Link to /caching
 
 - Now that compilers have the meta arg it should be possible to give up.RenderResult new { request, response } props
-
-- Custom attributes are not copied into [up-expand]
-  - up.link.config.expandableAttributes ?
-    - can also include regexp
-      - maybe reuse matcher logic for badTargetClasses
-  - up.link.config.expandableAttribute (attribute, element)
-    - The element will always be a link
 
 - Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
 
@@ -183,6 +181,8 @@ Docs
 - Document [up-href]
 - X-Up-Location: Mention that is only needed when you want a different URL in the browser. Link to preserving params in unpoly-rails.
 - X-Up-Method: You may also leave out the `X-Up-Method` header. In this case Unpoly will assume a `GET` method after a redirect. This assumption is correct for redirects with status codes 301, 302 and 303, and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
+- Extract /skipping-rendering#conditional-requests to its own page under the up.protocol parent
+- Server example in /context needs to talk about Vary
 
 ### Other docs
 
