@@ -30,7 +30,7 @@ Object.defineProperty(up.network.config, 'preloadDelay', {
 
 up.migrate.renamedProperty(up.network.config, 'maxRequests', 'concurrency')
 up.migrate.renamedProperty(up.network.config, 'slowDelay', 'badResponseTime')
-up.migrate.renamedProperty(up.network.config, 'cacheExpiry', 'cacheExpireAge')
+up.migrate.renamedProperty(up.network.config, 'cacheExpiry', 'cacheExpireAge', 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.')
 up.migrate.renamedProperty(up.network.config, 'clearCache', 'expireCache')
 up.migrate.forbiddenPropertyValue(up.network.config, 'cacheSize', 0, 'Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. To disable caching, set up.network.config.autoCache = false instead.')
 

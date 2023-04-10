@@ -28,10 +28,10 @@ up.migrate = (function() {
   //   return newValue
   // }
 
-  function renamedProperty(object, oldKey, newKey) {
+  function renamedProperty(object, oldKey, newKey, warning) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(() => warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
+    const doWarn = u.memoize(() => warning ? warn(warning) : warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
 
     Object.defineProperty(object, oldKey, {
       get() {

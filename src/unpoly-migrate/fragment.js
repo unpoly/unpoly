@@ -144,10 +144,11 @@ up.migrate.preprocessRenderOptions = function(options) {
     up.migrate.warn("The up.render() option { solo } has been replaced by { abort } and { abort } no longer accepts a Function(up.Request): boolean. Check if you can use { abort: 'target'} or use up.network.abort(fn) instead.")
     options.abort = (options) => { up.network.abort(solo, options) }
   } else if (solo === true) {
-    up.migrate.warn('Option { solo: true }', "{ abort: 'all' }")
+    up.migrate.deprecated('Option { solo: true }', "{ abort: 'all' }")
     options.abort = 'all'
   } else if (solo === false) {
-    up.migrate.warn('Option { solo: false }', "{ abort: false }")
+    up.migrate.deprecated('Option { solo: false }', "{ abort: false }")
+    up.migrate.warn('Unpoly 3+ only aborts requests targeting the same fragment. Setting [up-solo=false] or { solo: false } may no longer be necessary.')
     options.abort = false
   }
 
