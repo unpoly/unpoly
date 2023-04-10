@@ -137,18 +137,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- Migrate: Warning on { solo } render option
-  - "Unpoly 3+ only aborts requests targeting the same fragment. Setting [up-solo=false] or { solo: false } may no longer be necessary."
-  - The warning will go away after user migrates from [up-solo] to [up-abort]
-
-- Migrate: Warning when setting old expiry
-  - "Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting an expiry may no longer be necessary."
-  - The warning will go away after user migrates from up.network.config.cacheExpiry to up.network.config.cacheExpireAge
-
-- Now that compilers have the meta arg it should be possible to give up.RenderResult new { request, response } props
-
-- Test that when an [up-hungry][up-if-layer=any] updates in another layer, layer.current and meta.layer points to the correct layer
-
 
 
 Docs
@@ -168,7 +156,6 @@ Docs
 - X-Up-Location: Mention that is only needed when you want a different URL in the browser. Link to preserving params in unpoly-rails.
 - X-Up-Method: You may also leave out the `X-Up-Method` header. In this case Unpoly will assume a `GET` method after a redirect. This assumption is correct for redirects with status codes 301, 302 and 303, and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
 - Extract /skipping-rendering#conditional-requests to its own page under the up.protocol parent
-- Server example in /context needs to talk about Vary
 
 ### Other docs
 
@@ -528,3 +515,5 @@ Decisions
   => We keep array-related utils because ours work with non-Array lists and iterators
 - Replace u.flatMap() with Array#flatMap()
   => We keep array-related utils because ours work with non-Array lists and iterators
+- Now that compilers have the meta arg it should be possible to give up.RenderResult new { request, response } props
+  => Wait until we have a use case for this
