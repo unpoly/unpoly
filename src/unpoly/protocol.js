@@ -507,7 +507,14 @@ up.protocol = (function() {
   /*-
   The server may set this optional response header to change the HTTP method after a fragment update.
 
-  Without this header Unpoly will assume a `GET` method if the response's URL changed from the request's URL,
+  Without this header Unpoly will use the [requested method](/up.Request.prototype.method).
+
+  ### Signaling the HTTP method after a redirect
+
+  Without an `X-Up-Method` header, Unpoly will assume a `GET` method after a redirect.
+
+  This assumption is correct for redirects with status codes 301, 302 and 303,
+  and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
 
   ### Example
 
@@ -835,13 +842,13 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may set this optional response header to change the browser location after a fragment update.
+  The server may set this response header to set a custom browser location after a fragment update.
 
-  Without this header Unpoly will set the browser location to the response URL, which is usually sufficient.
+  Without an `X-Up-Location` header Unpoly will set the browser location to the
+  [requested URL](/up.Request.prototype.url). After a redirect the URL of the last request is used.
+  You only need to set `X-Up-Location` when you want to explicitly set a different URL.
 
-  When setting `X-Up-Location` it is recommended to also set `X-Up-Method`. If no `X-Up-Method` header is given
-  and the response's URL changed from the request's URL, Unpoly will assume a redirect and set the
-  method to `GET`.
+  When setting `X-Up-Location` it is recommended to also set `X-Up-Method`.
 
   ### Example
 
