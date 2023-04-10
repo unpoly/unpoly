@@ -128,6 +128,7 @@ TODOs after V3
     - The element will always be a link
 - Support custom expire times via Cache-Control: stale-while-revalidate
   - Print a warning when we're discarding any other Cache-Control header format
+- Test and document [up-href]
 
 
 TODOs for V3
@@ -150,12 +151,7 @@ Docs
   - No unbounded caches anymore
   - Optimizing responses must send Vary
 - Check if the index links to doc pages preferrably
-- Events emitted through up.Layer#emit() must all have a { layer } prop documented
-  - e.g. up:layer:location:changed hasn't documented this
-- Document [up-href]
-- X-Up-Location: Mention that is only needed when you want a different URL in the browser. Link to preserving params in unpoly-rails.
-- X-Up-Method: You may also leave out the `X-Up-Method` header. In this case Unpoly will assume a `GET` method after a redirect. This assumption is correct for redirects with status codes 301, 302 and 303, and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
-- Extract /skipping-rendering#conditional-requests to its own page under the up.protocol parent
+
 
 ### Other docs
 
@@ -163,6 +159,7 @@ Docs
 ### Ideas for new topic pages
 
 - How history is updated
+  - Only GET requests update the location bar
   - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
   - History in overlays
     - Always know their location, even if it might not be visible
@@ -174,11 +171,21 @@ Docs
       - Subnavigations make it easy
       - You can disable layer history
     - Customize restoration behavior
+
+- Rendering from strings
+  - { document }
+  - { fragment }
+  - { content }
+
 - Preloading
   - (Currently sitting in a[up-preload])
   - On Hover
   - Programmatically
     - Example: Preload next/prev
+
+- Polling
+  - (Currently sitting in [up-poll])
+
 - Options and defaults
   - Everything is opt-in
   - Navigation enables a set of new defaults
@@ -190,10 +197,7 @@ Docs
     - If we cannot serialize an option into an attribute, you can use `event.renderOptions` in up:link:follow, up:form:sumit
   - Explain that you can often override renderOptions in event handlers
     - This is already explained in /render-hooks
-- Rendering from strings
-  - { document }
-  - { fragment }
-  - { content }
+
 
 
 
