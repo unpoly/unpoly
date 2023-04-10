@@ -461,38 +461,80 @@ describe 'up.radio', ->
           expect('.inside').toHaveText('new inside')
           expect('.outside').toHaveText('old outside')
 
-        it 'does update an [up-hungry] element in an non-targeted layer if that hungry element also has [up-if-layer=any]', ->
-          up.layer.config.openDuration = 0
-          up.layer.config.closeDuration = 0
+        describe 'if that hungry element also has [up-if-layer=any]', ->
 
-          $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
+          it 'does update an [up-hungry] element in an non-targeted layer', ->
+            up.layer.config.openDuration = 0
+            up.layer.config.closeDuration = 0
 
-          closeEventHandler = jasmine.createSpy('close event handler')
-          up.on('up:layer:dismiss', closeEventHandler)
+            $fixture('.outside').text('old outside').attr('up-hungry', true).attr('up-if-layer', 'any')
 
-          up.layer.open fragment: """
-            <div class='inside'>
-              old inside
-            </div>
-            """
+            closeEventHandler = jasmine.createSpy('close event handler')
+            up.on('up:layer:dismiss', closeEventHandler)
 
-          expect(up.layer.isOverlay()).toBe(true)
-
-          up.render
-            target: '.inside',
-            document: """
-              <div class="outside">
-                new outside
-              </div>
+            up.layer.open fragment: """
               <div class='inside'>
-                new inside
+                old inside
               </div>
-              """,
-            layer: 'front'
+              """
 
-          expect(closeEventHandler).not.toHaveBeenCalled()
-          expect('.inside').toHaveText('new inside')
-          expect('.outside').toHaveText('new outside')
+            expect(up.layer.isOverlay()).toBe(true)
+
+            up.render
+              target: '.inside',
+              document: """
+                <div class="outside">
+                  new outside
+                </div>
+                <div class='inside'>
+                  new inside
+                </div>
+                """,
+              layer: 'front'
+
+            expect(closeEventHandler).not.toHaveBeenCalled()
+            expect('.inside').toHaveText('new inside')
+            expect('.outside').toHaveText('new outside')
+
+          it 'sets up.layer.current and meta.layer to the non-targeted layer', ->
+            currentLayerSpy = jasmine.createSpy('spy for up.layer.current')
+            metaLayerSpy = jasmine.createSpy('spy for meta.layer')
+
+            fixture('.outside', text: 'old outside', 'up-hungry': true, 'up-if-layer': 'any')
+
+            up.compiler '.outside', (element, data, meta) ->
+              currentLayerSpy(up.layer.current)
+              metaLayerSpy(meta.layer)
+
+            expect(currentLayerSpy.calls.count()).toBe(1)
+            expect(currentLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
+            expect(metaLayerSpy.calls.argsFor(0)[0]).toBe(up.layer.root)
+
+            up.layer.open fragment: """
+              <div class='inside'>
+                old inside
+              </div>
+              """
+
+            expect(up.layer.isOverlay()).toBe(true)
+
+            up.render
+              target: '.inside',
+              document: """
+                <div class="outside">
+                  new outside
+                </div>
+                <div class='inside'>
+                  new inside
+                </div>
+                """,
+              layer: 'front'
+
+            expect(up.layer.isOverlay()).toBe(true)
+
+            expect(currentLayerSpy.calls.count()).toBe(2)
+            expect(currentLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
+            expect(metaLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
 
       describe 'restriction by history', ->
 
