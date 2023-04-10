@@ -384,22 +384,6 @@ describe 'up.fragment', ->
       beforeEach ->
         up.motion.config.enabled = false
 
-      it 'returns a promise with an up.RenderResult that contains information about the updated fragments and layer', (done) ->
-        fixture('.one', text: 'old one')
-        fixture('.two', text: 'old two')
-        fixture('.three', text: 'old three')
-
-        promise = up.render('.one, .three', document: """
-          <div class="one">new one</div>
-          <div class="two">new two</div>
-          <div class="three">new three</div>
-        """)
-
-        promise.then (result) ->
-          expect(result.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
-          expect(result.layer).toBe(up.layer.root)
-          done()
-
       it 'preserves a verbatim "<script>" string in an element attribute (bugfix)', ->
         fixture('#target')
         attrValue = '<script>alert("I am valid unescaped HTML/JS")<script>'
@@ -407,6 +391,40 @@ describe 'up.fragment', ->
         up.render(fragment: "<div id='target' foo='#{attrValue}'></div>")
 
         expect(document.querySelector('#target').getAttribute('foo')).toBe(attrValue)
+
+      describe 'return value', ->
+
+        it 'returns a promise for an up.RenderResult describing the updated fragments and layer', (done) ->
+          fixture('.one', text: 'old one')
+          fixture('.two', text: 'old two')
+          fixture('.three', text: 'old three')
+
+          promise = up.render('.one, .three', document: """
+            <div class="one">new one</div>
+            <div class="two">new two</div>
+            <div class="three">new three</div>
+          """)
+
+          promise.then (result) ->
+            expect(result.fragments).toEqual([document.querySelector('.one'), document.querySelector('.three')])
+            expect(result.layer).toBe(up.layer.root)
+            done()
+
+#        it 'returns a promise for an up.RenderResult describing the request and response', asyncSpec (next) ->
+#          fixture('.target', text: 'old text')
+#          responseText = '<div class="target">new text</div>'
+#
+#          promise = up.render('.target', url: '/path')
+#
+#          next ->
+#            jasmine.respondWith(responseText)
+#            next.await(promise)
+#
+#          next (result) ->
+#            expect(result.request).toEqual(jasmine.any(up.Request))
+#            expect(result.request.url).toMatchURL('/path')
+#            expect(result.response).toEqual(jasmine.any(up.Respinse))
+#            expect(result.response.text).toBe(responseText)
 
       describe 'compilation', ->
 
