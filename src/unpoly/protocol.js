@@ -24,6 +24,7 @@ There are existing implementations for various web frameworks:
 - [PHP](https://github.com/webstronauts/php-unpoly) (Symfony, Laravel, Stack)
 
 @see optimizing-responses
+@see conditional-requests
 @see csp
 
 @module up.protocol
@@ -252,7 +253,7 @@ up.protocol = (function() {
   or a hash of the data's last modification time.
 
   ETags can be used to prevent unnecessary re-rendering of unchanged content.
-  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+  See [Conditional requests](/conditional-requests) for details and examples.
 
   ### Format
 
@@ -277,7 +278,7 @@ up.protocol = (function() {
   This request header contains the ETag of a fragment that is being reloaded.
 
   The server can use the header value to prevent unnecessary re-rendering of unchanged content.
-  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+  See [Conditional requests](/conditional-requests) for details and examples.
 
   The header is only set when Unpoly knows the ETag of the loading fragment.
   For this the fragment must have been rendered with an `ETag` response header or `[up-etag]` attribute.
@@ -298,7 +299,7 @@ up.protocol = (function() {
   This response header contains the time when the content in the response body was last modified.
 
   Last modification times can be used to prevent unnecessary re-rendering of unchanged content.
-  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+  See [Conditional requests](/conditional-requests) for details and examples.
 
   ### Format
 
@@ -322,7 +323,7 @@ up.protocol = (function() {
   This request header contains the last modification time of a fragment that is being reloaded.
 
   The server can use the header value to prevent unnecessary re-rendering of unchanged content.
-  See [conditional requests](/skipping-rendering#conditional-requests) for details and examples.
+  See [Conditional requests](/conditional-requests) for details and examples.
 
   The header is only set when Unpoly knows the last modification time of the loading fragment.
   For this the fragment must have been rendered with an `Last-Modified` response header or `[up-time]` attribute.

@@ -62,7 +62,7 @@ When [navigating](/navigation) the `{ revalidate: 'auto' }` option is already se
 
 Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
-By supporting [conditional HTTP requests](/skipping-rendering#conditional-requests) you can quickly produce an empty revalidation response for unchanged content.
+By supporting [conditional HTTP requests](/conditional-requests) you can quickly produce an empty revalidation response for unchanged content.
 
 
 ### Preventing rendering of revalidation responses

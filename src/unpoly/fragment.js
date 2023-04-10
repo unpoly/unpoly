@@ -161,7 +161,7 @@ up.fragment = (function() {
     By default Unpoly skips the following responses:
 
     - Responses without text in their body.
-      Such responses occur when a [conditional request](/skipping-rendering#conditional-requests)
+      Such responses occur when a [conditional request](/conditional-requests)
       in answered with HTTP status `304 Not Modified` or `204 No Content`.
     - When [revalidating](/caching#revalidation), if the expired response and fresh response
       have the exact same text.
@@ -273,7 +273,7 @@ up.fragment = (function() {
 
   When the fragment is reloaded,
   its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
-  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+  See [Conditional requests](/conditional-requests) for a full example.
 
   @function up.fragment.time
   @param {Element} element
@@ -301,7 +301,7 @@ up.fragment = (function() {
   When the fragment is reloaded,
   its known modification time is sent as an `If-Modified-Since` request header.
   The server may check the header and decide to [skip rendering](/skipping-rendering).
-  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+  See [Conditional requests](/conditional-requests) for a full example.
 
   ### How `[up-etag]` attributes are set
 
@@ -335,7 +335,7 @@ up.fragment = (function() {
 
   When the fragment is reloaded,
   its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
-  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+  See [Conditional requests](/conditional-requests) for a full example.
 
   @function up.fragment.etag
   @param {Element} element
@@ -356,7 +356,7 @@ up.fragment = (function() {
   Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
 
   ETags can be used to skip unnecessary rendering of unchanged content.\
-  See [Conditional requests](/skipping-rendering#conditional-requests) for a full example.
+  See [Conditional requests](/conditional-requests) for a full example.
 
   ### How `[up-etag]` attributes are set
 
@@ -1758,7 +1758,7 @@ up.fragment = (function() {
 
   Your server-side app is not required to re-render a request if there are no changes to the cached content.
 
-  By supporting [conditional HTTP requests](/skipping-rendering#conditional-requests) you can quickly produce an empty response for unchanged content.
+  By supporting [conditional HTTP requests](/conditional-requests) you can quickly produce an empty response for unchanged content.
 
   @function up.reload
 
