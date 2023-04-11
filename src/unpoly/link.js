@@ -327,8 +327,8 @@ up.link = (function() {
     Whether this fragment update is considered [navigation](/navigation).
 
     Setting this to `false` will disable most defaults, causing
-    Unpoly to render a fragment without side-effects like updating history
-    or scrolling.
+    Unpoly to render a fragment without side-effects like [updating history](/updating-history)
+    or [scrolling](/scrolling).
 
   @return {up.RenderJob}
     A promise that fulfills with an `up.RenderResult` once the link destination
@@ -991,7 +991,7 @@ up.link = (function() {
     See [handling server errors](/failed-responses) for details.
 
   @param [up-history='auto']
-    Whether the browser URL and window title will be updated.
+    Whether the browser URL and window title will be [updated](/updating-history).
 
     If set to `true`, the history will always be updated, using the title and URL from
     the server response, or from given `[up-title]` and `[up-location]` attributes.
@@ -1001,6 +1001,8 @@ up.link = (function() {
     [main targets](/up-main).
 
     If set to `false`, the history will remain unchanged.
+
+    @see updating-history
 
   @param [up-title]
     An explicit document title to use after rendering.
@@ -1053,8 +1055,6 @@ up.link = (function() {
     returns `true` for the request.
 
     With `[up-cache=false]` Unpoly will always make a network request.
-
-    Also see [`up.request({ cache })`](/up.request#options.cache).
 
   @param [up-revalidate='auto']
     Whether to reload the [targeted fragment](/targeting-fragments)

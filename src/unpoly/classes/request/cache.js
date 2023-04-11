@@ -87,7 +87,7 @@ up.Request.Cache = class Cache {
   }
 
   alias(existingCachedRequest, newRequest) {
-    existingCachedRequest = this.get(existingCachedRequest)
+    existingCachedRequest = this.wrap(existingCachedRequest)
     newRequest = this.wrap(newRequest)
 
     this.track(existingCachedRequest, newRequest, { force: true })

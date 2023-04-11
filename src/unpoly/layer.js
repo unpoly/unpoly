@@ -449,6 +449,8 @@ up.layer = (function() {
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
 
+    See [History in overlays](/updating-history#history-in-overlays).
+
   @param {string|Function} [options.animation]
     The opening animation.
 
@@ -732,12 +734,14 @@ up.layer = (function() {
     See [overlay classes](/customizing-overlays#overlay-classes).
 
   @param [up-history]
-    Whether history of the overlay content is visible.
+    Whether history of the overlay content is [visible](/updating-history#history-in-overlays).
 
     If set to `true` the overlay location and title will be shown in browser UI.
 
     If set to `'auto'` history will be visible if the initial overlay
     content matches a [main target](/up-main).
+
+    See [Updating history in overlays](/updating-history#history-in-overlays).
 
   @param [up-dismissable]
     How the overlay may be [dismissed](/closing-overlays) by the user.

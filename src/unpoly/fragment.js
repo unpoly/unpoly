@@ -592,7 +592,7 @@ up.fragment = (function() {
     See [handling server errors](/failed-responses) for details.
 
   @param {boolean|string} [options.history]
-    Whether the browser URL and window title will be updated.
+    Whether the browser URL and window title will be [updated](/updating-history).
 
     If set to `true`, the history will always be updated, using the title and URL from
     the server response, or from given `{ title }` and `{ location }` options.
@@ -602,6 +602,8 @@ up.fragment = (function() {
     [main targets](/main).
 
     If set to `false`, the history will remain unchanged.
+
+    @see updating-history
 
   @param {string} [options.title]
     An explicit document title to use after rendering.
@@ -646,12 +648,17 @@ up.fragment = (function() {
     Whether to read from and write to the [cache](/caching).
 
     With `{ cache: true }` Unpoly will try to re-use a cached response before connecting
-    to the network. If no cached response exists, Unpoly will make a request and cache
+    to the network. To prevent display of stale content, cached responses are
+    [reloaded once rendered](#options.revalidate).
+    If no cached response exists, Unpoly will make a request and cache
     the server response.
 
-    Also see [`up.request({ cache })`](/up.request#options.cache).
+    With `{ cache: 'auto' }` Unpoly will use the cache only if `up.network.config.autoCache`
+    returns `true` for the request.
 
-  @param {boolean} [options.revalidate]
+    With `{ cache: false }` Unpoly will always make a network request.
+
+  @param {boolean} [options.revalidate='auto']
     Whether to reload the targeted fragment after it was rendered from a cached response.
 
     Also see `up.fragment.config.autoRevalidate`.

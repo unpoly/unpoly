@@ -6,7 +6,10 @@ The `up.history` module helps you work with the browser history.
 
 @see up.history.location
 @see up:location:changed
+@see a[up-back]
 
+@see updating-history
+@see restoring-history
 @see analytics
 
 @module up.history
@@ -298,19 +301,8 @@ up.history = (function() {
   }
 
   /*-
-  This event is emitted when the user has navigated to another history entry, usually by pressing the back button.
-
-  ### Default restoration behavior
-
-  By default Unpoly will:
-
-  - Close all overlays.
-  - Fetch the content for the restored history entry's URL.
-  - Render the restored content into the `<body>` element. You may prefer other [targets](/targeting-fragments)
-    by configuring `up.history.config.restoreTargets`.
-  - Restore earlier scroll position for the history entry.
-
-  ### Custom restoration behavior
+  This event is emitted when the user is [restoring a previous history entry](/restoring-history),
+  usually by pressing the back button.
 
   Listeners may prevent `up:location:restore` and substitute their own restoration behavior:
 
@@ -323,7 +315,8 @@ up.history = (function() {
 
   Preventing the event will *not* prevent the browser from restoring the URL in the address bar.
 
-  Custom restoration code should avoid pushing new history entries.
+  > [important]
+  > Custom restoration code should avoid pushing new history entries.
 
   @event up:location:restore
   @param {string} event.location

@@ -50,3 +50,9 @@ RedirectPermanent /validating-forms /validation
 RedirectPermanent /validations /validation
 RedirectPermanent /disable /disabling-forms
 RedirectPermanent /disabling /disabling-forms
+
+RedirectPermanent /changing-history /updating-history
+RedirectPermanent /changing-location /updating-history
+RedirectPermanent /updating-location /updating-history
+RedirectPermanent /history-restoration /restoring-history
+RedirectPermanent /back-button /restoring-history

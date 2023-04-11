@@ -273,7 +273,6 @@ up.Request = class Request extends up.Record {
       'failTarget',
       'headers',
       'timeout',
-      'preload', // since up.network.request() options are sometimes wrapped in this class
       'background',
       'cache',  // since up.network.request() options are sometimes wrapped in this class
       'expireCache',  // since up.network.request() options are sometimes wrapped in this class
