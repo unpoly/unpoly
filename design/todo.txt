@@ -138,6 +138,12 @@ TODOs for V3
 Various changes
 ---------------
 
+- Is revalidation automatic with { cache: true }?
+  => Yes, it goes through autoRevalidate. It's a global render option default.
+  - Document this. Also that you can opt out with revalidate: false
+  - Do we get revalidation for back button?
+    - Test
+
 
 
 Docs
@@ -150,7 +156,6 @@ Docs
   - New commits
   - No unbounded caches anymore
   - Optimizing responses must send Vary
-- Check if the index links to doc pages preferrably
 
 
 ### Other docs
@@ -158,19 +163,8 @@ Docs
 
 ### Ideas for new topic pages
 
-- How history is updated
-  - Only GET requests update the location bar
-  - Explain { history: 'auto' } and up.fragment.config.autoHistoryTargets
-  - History in overlays
-    - Always know their location, even if it might not be visible
-    - Explain that servers should always render full pages
-  - History restoration / Back button
-    - This is currently documented in up:location:restore
-    - Will collapse layers
-      - Pages should work in both
-      - Subnavigations make it easy
-      - You can disable layer history
-    - Customize restoration behavior
+- Activating custom JavaScript
+  - (Currently sitting in up.compiler())
 
 - Rendering from strings
   - { document }
