@@ -289,10 +289,12 @@ up.network = (function() {
   In that case, both `/old` and `/new` will cache the same response from `/new`.
 
   @function up.cache.alias
-  @param {Object} oldRequest
-    The earlier [request options](/up.request).
-  @param {Object} newRequest
-    The new [request options](/up.request).
+  @param {Object|up.Request} oldRequest
+    The earlier request or [request options](/up.request).
+  @param {Object|up.Request|undefined} newRequest
+    The new request or [request options](/up.request).
+
+    If `oldRequest` wasn't found in the cache, `undefined` is returned.
   @experimental
   */
 

@@ -230,6 +230,7 @@ describe('up.network', function() {
           expect(request.context).toBeUndefined()
           expect(request.failContext).toBeUndefined()
         })
+
       })
 
       describe('error handling', function() {

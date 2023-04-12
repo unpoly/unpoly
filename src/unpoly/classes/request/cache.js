@@ -87,7 +87,16 @@ up.Request.Cache = class Cache {
   }
 
   alias(existingCachedRequest, newRequest) {
-    existingCachedRequest = this.wrap(existingCachedRequest)
+    // Check if we have a cached copy of the given up.Request or request options.
+    // Only the cached copy will have the correct promise that will resolve to a response,
+    // even if all other properties match.
+    //
+    // Calling up.get() will also wrap an options object into an up.Request.
+    existingCachedRequest = this.get(existingCachedRequest)
+
+    // If the existing request is no longer in the cache, we have nothing to register an alias against.
+    if (!existingCachedRequest) return
+
     newRequest = this.wrap(newRequest)
 
     this.track(existingCachedRequest, newRequest, { force: true })
