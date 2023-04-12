@@ -811,6 +811,10 @@ up.Request = class Request extends up.Record {
   }
 
   addAutoHeader(name, value) {
+    if (u.isMissing(value)) {
+      return
+    }
+
     if (u.isOptions(value) || u.isArray(value)) {
       value = u.safeStringifyJSON(value)
     }

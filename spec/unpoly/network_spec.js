@@ -171,8 +171,17 @@ describe('up.network', function() {
             expect(request.requestHeaders['X-Up-Fail-Mode']).toEqual('root')
           })
         }))
-      })
 
+        it ('does not transmit missing meta attributes as X-Up-prefixed headers', function(done) {
+          const request = up.request('/foo')
+          u.task(() => {
+            expect('X-Up-Target' in jasmine.lastRequest().requestHeaders).toBe(false)
+            expect('X-Up-Mode' in jasmine.lastRequest().requestHeaders).toBe(false)
+            done()
+          })
+        })
+
+      })
 
       describe('setting meta attributes', function() {
 
