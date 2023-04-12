@@ -129,6 +129,7 @@ TODOs after V3
 - Support custom expire times via Cache-Control: stale-while-revalidate
   - Print a warning when we're discarding any other Cache-Control header format
 - Test and document [up-href]
+- Polling should automatically restart when the tab is re-focused
 
 
 TODOs for V3
@@ -156,6 +157,7 @@ Docs
   - New commits
   - No unbounded caches anymore
   - Optimizing responses must send Vary
+- New topic pages
 
 
 ### Other docs
