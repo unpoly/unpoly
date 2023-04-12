@@ -1,5 +1,5 @@
-Context
-=======
+Layer context
+=============
 
 The web platform gives you several tools to persist state across requests,
 like cookies or session storage.

@@ -153,6 +153,7 @@ up.syntax = (function() {
     console.log(meta.response.text.length)        // => 160232
     console.log(meta.response.header('X-Course')) // => "advanced-ruby"
     console.log(meta.layer.mode)                  // => "root"
+    console.log(meta.revalidating)                // => boolean
   })
   ```
 
