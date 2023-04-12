@@ -312,7 +312,7 @@ up.fragment = (function() {
   A large response may contain multiple fragments that are later reloaded individually
   and should each have their own modification time. In this case the server may also also render multiple
   fragments with each their own `[up-time]` attribute.
-  See [Individual versions per fragment](/skipping-rendering#fragment-versions) for an example.
+  See [Individual versions per fragment](/conditional-requests#fragment-versions) for an example.
 
   @selector [up-time]
   @param {string} up-time
@@ -367,7 +367,7 @@ up.fragment = (function() {
   A large response may contain multiple fragments that are later reloaded individually
   and should each have their own ETag. In this case the server may also also render multiple
   fragments with each their own `[up-etag]` attribute.
-  See [Individual versions per fragment](/skipping-rendering#fragment-versions) for an example.
+  See [Individual versions per fragment](/conditional-requests#fragment-versions) for an example.
 
   @selector [up-etag]
   @param {string} up-etag

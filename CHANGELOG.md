@@ -312,7 +312,7 @@ For example, the following link will update the fragments `.content` (required) 
   This is in contrast to `event.preventDefault()`m which aborts the render pass and rejects programmatic callers with an `up.AbortError`.
 - You may use `up.fragment.config.skipResponse` to configure global rules for responses that should be skipped. By default Unpoly skips:
   - Responses without text in their body.
-    Such responses occur when a [conditional request](/skipping-rendering#conditional-requests)
+    Such responses occur when a [conditional request](/conditional-requests)
     in answered with HTTP status `304 Not Modified` or `204 No Content`.
   - When [revalidating](/caching#revalidation), if the expired response and fresh response
     have the exact same text.
@@ -542,7 +542,7 @@ Unpoly has always allowed server-side code to inspect [request headers](/up.prot
   now share the same cache entry.
 - If a server optimizes its response, all request headers that influenced the response should be listed
   in a `Vary` response header.
-  This tells Unpoly to partition its [cache](/up.caching) for that URL so that each
+  This tells Unpoly to partition its [cache](/caching) for that URL so that each
   request header value gets a separate cache entries.
 - Sending `Vary` headers also prevents browsers from using an optimized response for full page loads.
 - The configuration `up.network.config.requestMetaKeys` has been removed.

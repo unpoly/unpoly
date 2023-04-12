@@ -53,7 +53,7 @@ also set `up.fragment.config.skipResponse`.
 By default Unpoly skips the following responses:
 
 - Responses without text in their body.
-  Such responses occur when a [conditional request](#conditional-requests)
+  Such responses occur when a [conditional request](/conditional-requests)
   in answered with HTTP status `304 Not Modified` or `204 No Content`.
 - When [revalidating](/caching#revalidation), if the expired response and fresh response
   have the exact same text.

@@ -2,7 +2,7 @@ Optimizing responses
 ====================
 
 Servers may inspect [request headers](/up.protocol) to customize or shorten responses,
-e.g. by [omitting content that isn't targeted](/#omitting-content-that-isnt-targeted)
+e.g. by [omitting content that isn't targeted](#omitting-content-that-isnt-targeted)
 or by [rendering different content for overlays](#rendering-different-content-for-overlays).
 
 

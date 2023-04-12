@@ -157,7 +157,7 @@ Servers may inspect [request headers](/up.protocol) to [optimize responses](/opt
 e.g. by omitting a navigation bar that is not targeted.
 
 Request headers that influenced a response should be listed in a `Vary` response header.
-This tells Unpoly to partition its [cache](/up.caching) for that URL so that each
+This tells Unpoly to partition its cache for that URL so that each
 request header value gets a separate cache entries.
 
 ### Example

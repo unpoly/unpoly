@@ -60,7 +60,7 @@ To override this default, use one of the following:
   default for new overlays. You may also configure different defaults for different [layer modes](/layer-terminology),
   e.g. by setting `up.layer.configure.popup.history`. 
 
-Also see [History restoration in overlays](/restoring-history#history-restoration-in-overlays)
+Also see [History restoration in overlays](/restoring-history#overlays)
 
 ### Behavior of overlays with history
 

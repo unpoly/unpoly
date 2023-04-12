@@ -28,7 +28,7 @@ Listeners may prevent `up:location:restore` and substitute their own restoration
 See `up:location:restore` for details.
 
 
-## History restoration with overlays
+## History restoration with overlays {#overlays}
 
 When a previous history is restored while an [overlay](/up.layer) is open, all overlays
 will be closed. The restored URL will be rendered in the [root layer](/up.layer.root).
