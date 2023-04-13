@@ -30,9 +30,9 @@ Unpoly's HTTP client is used automatically when rendering, e.g. when [following 
 or [submitting a form](/form-up-submit). To use the client from your own JavaScripts, use `up.request()`.
 
 @see caching
-@see loading-indicators
 @see aborting-requests
 @see network-issues
+@see loading-indicators
 
 @see up.request
 @see up.Response
@@ -676,7 +676,10 @@ up.network = (function() {
   /*-
   Aborts pending [requests](/up.request) matching a condition.
 
-  This is a low-level API. If possible, use `up.fragment.abort()` instead.
+  > [important]
+  > This is a low-level API matching requests by their properties. If possible, use `up.fragment.abort()`,
+  > which matches requests by screen region. Only when requests are aborted by screen region, components
+  > can [react to being aborted](/up:fragment:aborted).
 
   ### Effects of aborting
 
@@ -735,10 +738,18 @@ up.network = (function() {
   Use `up.fragment.abort()`.
 
   @function up.network.abort
-  @param {up.Request|boolean|Function(up.Request|string): boolean} [condition=true]
-    Which requests to abort.
+  @param {string|Function(up.Request): boolean|up.Request|boolean} [condition=true]
+    A condition that controls which requests to abort.
 
-    If this argument is omitted, all pending requests are aborted.
+    If set to a string, it is interpreted as a [URL pattern](/url-pattern). All requests
+    matching that pattern will be aborted.
+
+    If set to an `up.Request` object, that one request is aborted.
+
+    If set to a function, it will be called for each pending requests.
+    All requests for which the function returns `true` will be aborted.
+
+    If set to `true`, all pending requests are aborted.
   @param {string} [options.reason]
     A reason for why the request was aborted.
 

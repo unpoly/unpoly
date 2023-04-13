@@ -981,7 +981,6 @@ up.fragment = (function() {
 
   ```js
   up.on('up:fragment:loaded', function(event) {
-    // Don't render revalidation responses that only differ in whitespace
     if (event.revalidating) {
       let newVersion = event.response.header('X-Version')
       let oldVersion = event.expiredResponse.header('X-Version')
@@ -2627,7 +2626,10 @@ up.fragment = (function() {
   If requests for entire layer were aborted, this event is emitted the
   [layer's outmost element](/up.Layer.prototype.element).
 
-  Note that this event will *not* be emitted by the low-level `up.network.abort()` function.
+  To simplify working with this event, the function `up.fragment.onAborted()` is also provided.
+
+  > [note]
+  > This event will *not* be emitted by the low-level `up.network.abort()` function.
 
   ### Example
 
@@ -2654,8 +2656,9 @@ up.fragment = (function() {
   up.destructor(element, off)
   ```
 
-  To simplify observing an element and its ancestors for aborted requests,
-  the function `up.fragment.onAborted()` is provided.
+  > [tip]
+  > To simplify observing an element and its ancestors for aborted requests,
+  > the function `up.fragment.onAborted()` is provided.
 
   @event up:fragment:aborted
   @param {Element} event.target
