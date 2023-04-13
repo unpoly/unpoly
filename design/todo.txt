@@ -139,12 +139,6 @@ TODOs for V3
 Various changes
 ---------------
 
-- Is revalidation automatic with { cache: true }?
-  => Yes, it goes through autoRevalidate. It's a global render option default.
-  - Document this. Also that you can opt out with revalidate: false
-  - Do we get revalidation for back button?
-    - Test
-
 
 
 Docs
@@ -194,39 +188,24 @@ Docs
   - Explain that you can often override renderOptions in event handlers
     - This is already explained in /render-hooks
 
-
+- Background requests
+  - Background requests deprioritized over foreground requests.
+  - Background requests also won't emit up:network:late events and won't trigger the progress bar.
+  - Background requests are promoted to the foreground if they are a cache hit for a new, non-background request
 
 
 V3.pre launch
 -------------
 
-- This would need a separate Algolia index, *or* disable full text search for pre.
-  - We do we name things "latest" when we scope by version?
-    - The Capistrano targets are called v1, v2, v3
-    - The Algolia indexes are called unpoly-site_v2, unpoly-site_v3 or maybe even v2.unpoly.com, v3.unpoly.com
-    - We keep the .htaccess saying v1*.unpoly.com is never indexed
-    - At the day we launch v3, we only change the DNS
-      - unpoly.com becomes a CNAME for v3.unpoly.com
-        => No, this needs to be changed in VHost
-      - how do we get v3 to redirect to unpoly.com?
-        - in the main branch .htaccess we redirect v??.unpoly.com to unpoly.com instead of enabling norobots
 
 
 V3 final Launch
 ---------------
 
-- Track CHANGELOG with changes done since the V3 presentation
-  - Exclude changes we shipped as maintenance release 2.7.x
-- Fix deploy targets for 2.x-stable@unpoly-site
-  - This should only have a v2 target, and it should deploy to v2.unpoly.com
-- We don't need anything from Ops
-  - We already have v2.unpoly.com, it just redirects to unpoly.com (via .htaccess in Git) while the current version is v2
-- We need a separate Algolia index for v2
-  - v3 would stay on "latest"
-  - use that index in unpoly-site/2.x-stable
+- Make sure v3 redirects to unpoly.com?
+  - in the main branch .htaccess we redirect v??.unpoly.com to unpoly.com instead of enabling norobots
 - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
 - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
-- *Maybe* have a pre.unpoly.com
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
   - Explain new / deprecated headers
@@ -508,6 +487,7 @@ Decisions
 - Can we allow await in Callbacks?
   - new AsyncFunction()
   - This would not work trivially with the postprocessing in up.NonceableCallback
+    - At least we would need to detect use of `await`
 - Returning 'auto' for default would be a good way to override configs with exceptions
   - request.url.endsWith('/edit') ? false : 'auto'
   - Since this already the 'autoMeans' config we cannot return 'auto' here
@@ -517,3 +497,6 @@ Decisions
   => We keep array-related utils because ours work with non-Array lists and iterators
 - Now that compilers have the meta arg it should be possible to give up.RenderResult new { request, response } props
   => Wait until we have a use case for this
+- Test synthetic ETag
+  - I think up.Response#headers is not documented
+  => There's a simpler way to this documented in https://v3.unpoly.com/up:fragment:loaded#example-discarding-a-revalidation-response
