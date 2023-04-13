@@ -741,7 +741,7 @@ up.network = (function() {
   @param {string|Function(up.Request): boolean|up.Request|boolean} [condition=true]
     A condition that controls which requests to abort.
 
-    If set to a string, it is interpreted as a [URL pattern](/url-pattern). All requests
+    If set to a string, it is interpreted as a [URL pattern](/url-patterns). All requests
     matching that pattern will be aborted.
 
     If set to an `up.Request` object, that one request is aborted.
