@@ -138,10 +138,10 @@ up.migrate.preprocessRenderOptions = function(options) {
   if (u.isString(solo)) {
     // Old { solo } option did not accept a string, but some users were passing a string as a truthy value.
     // This would break the { abort } option, where a string is parsed a CSS selector.
-    up.migrate.warn("The up.render() option { solo } has been replaced by { abort } and { abort } no longer accepts a URL pattern. Check if you can use { abort: 'target'} or use up.network.abort(pattern) instead.")
+    up.migrate.warn("The up.render() option { solo } has been replaced with { abort } and { abort } no longer accepts a URL pattern. Check if you can use { abort: 'target'} or use up.network.abort(pattern) instead.")
     options.abort = (options) => up.network.abort(solo, options)
   } else if (u.isFunction(solo)) {
-    up.migrate.warn("The up.render() option { solo } has been replaced by { abort } and { abort } no longer accepts a Function(up.Request): boolean. Check if you can use { abort: 'target'} or use up.network.abort(fn) instead.")
+    up.migrate.warn("The up.render() option { solo } has been replaced with { abort } and { abort } no longer accepts a Function(up.Request): boolean. Check if you can use { abort: 'target'} or use up.network.abort(fn) instead.")
     options.abort = (options) => { up.network.abort(solo, options) }
   } else if (solo === true) {
     up.migrate.deprecated('Option { solo: true }', "{ abort: 'all' }")

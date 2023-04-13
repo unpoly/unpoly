@@ -30,17 +30,17 @@ In addition to this CHANGELOG, there is also a [slide deck](http://triskweline.d
 
 ### Concurrent updates to the same fragment
 
-When the user clicks faster than a server can respond, multiple concurrent requests may be [targeting](/targeting-fragments) the fragments. 
+When a user clicks faster than a server can respond, multiple concurrent requests may be [targeting](/targeting-fragments) the fragments. 
 Over the years Unpoly has attempted different strategies to deal with this:
 
 - Unpoly 1 did not limit concurrent updates. This would sometimes lead to race conditions where concurrent responses were updating fragments out of order.
 - Unpoly 2 by default aborted *everything* on [navigation](/navigation). While this would guarantee the last update matching the user's last interaction, it sometimes killed background requests (e.g. the preloading of a large navigation menu).
-- Unpoly 3 by default only aborts requests conflicting with your update. Requests targeting other fragments are not aborted. See a [visual example here](aborting-requests#aborting-conflicting-requests).
+- Unpoly 3 by default only aborts requests conflicting with your update. Requests targeting other fragments are not aborted. See a [visual example here](/aborting-requests#aborting-conflicting-requests).
 
 That said, Unpoly 3 makes the following changes to the way conflicting fragment updates are handled:
 
-- The render option `{ solo }` was replaced by a new option `{ abort }`.
-- The HTML attribute was replaced by a new attribute `[up-abort]`.
+- The render option `{ solo }` was replaced with a new option `{ abort }`.
+- The HTML attribute `[up-solo]` was replaced with a new attribute `[up-abort]`.
 - A new default render option is `{ abort: 'target' }`. This [aborts earlier requests](/aborting-reqeusts)
   targeting fragments within *your* targeted fragments.
 
@@ -53,11 +53,11 @@ That said, Unpoly 3 makes the following changes to the way conflicting fragment 
   ⚠️ If your Unpoly 2 app uses a lot of `{ solo: false }` options or `[up-solo=false]` attributes, these may no longer
   be necessary now that Unpoly 3 is more selective about what it aborts. 
 - To programmatically abort all requests targeting fragments in a region, use `up.fragment.abort(selector)`.
-- Unpoly now cancels timers and other async work when a fragment is aborted:
+- Unpoly now cancels timers and other async work when a fragment is aborted by being targeted:
   - [Polling](/up-poll) now stops when the fragment is aborted.
   - Pending [validations](/validation) are now aborted when an observed field is aborted.
-  - When a fragment is destroyed or updated, pending requests targeting that fragment will always be aborted, regardless of `{ abort }` option.
-- Your own code may react to a fragment being aborted by listening to a new `up:fragment:aborted` event.
+  - When a fragment is destroyed or updated, pending requests targeting that fragment will always be aborted, regardless of the `{ abort }` option.
+- Your own code may react to a fragment being abortedby being targeted. To so, listen to the new `up:fragment:aborted` event.
   - To simplify observing an element and its ancestors for aborted requests, the function `up.fragment.onAborted()` is also provided. 
 - Fragment updates may exempt themselves from being aborted by setting an `[up-abortable=false]` attribute on the updating link,
   or by passing an `{ abortable: false }` render option.
@@ -97,7 +97,7 @@ derivation has been reworked to be more strict in Unpoly 3:
   - Verification of derived targets may be disabled with `up.fragment.config.verifyDerivedTarget = false`.
 - `[up-poll]` will only work on elements for which we can derive a good target selector.
 - `[up-hungry]` will only work on elements for which we can derive a good target selector.
-- New function `up.fragment.isTargetable()` that returns whether we can derive a good target
+- Added a new function `up.fragment.isTargetable()`. It returns whether we can derive a good target
   selector for the given element.
 - When `up.fragment.toTarget()` is called with a string, the string is now returned unchanged.
 
@@ -148,7 +148,7 @@ Unpoly 3 expands your options to [hook into specific stages](/render-hooks) of t
 ### Various changes
 
 - You may now target the origin origin using `:origin`. The previous shorthand `&` has been deprecated.
-- When Unpoly uses the the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#resolving-ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefer matching new content closest to that.
+- When Unpoly uses the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#resolving-ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefers matching new content closest to that.
 - Added a new property `up.RenderResult#fragment` which returns the first updated fragment.
 - The property `up.RenderResult#fragments` now only contains newly rendered fragments. It will no longer contain:
   - [Kept](/up-keep) elements.
@@ -156,10 +156,10 @@ Unpoly 3 expands your options to [hook into specific stages](/render-hooks) of t
   - Existing fragments that had their inner HTML replaced (`{ content }`).
 - New experimental function `up.fragment.matches()`. It returns whether the given element matches the given CSS selector or other element.
 - The function `up.fragment.closest()` is now stable.
-- Fix a memory leak where swapping an element did not [clear internal jQuery caches]((https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
+- Fix a memory leak where swapping an element did not [clear internal jQuery caches](https://makandracards.com/makandra/31325-how-to-create-memory-leaks-in-jquery).
 - Support prepending/appending content when rendering from a string using `up.render({ content })` and `up.render({ fragment })`.
 - When prepending/appending content you may now also target `::before` and `::after` pseudos (double colon) in addition to `:before` and `:after`.
-- New fragments may now have HTML attributes containing the verbatim string `<script>` (fixes #462)
+- New fragments may now have HTML attributes containing the verbatim string `<script>` (fixes [#462](https://github.com/unpoly/unpoly/issues/462))
 
 
 
@@ -193,7 +193,7 @@ Unpoly 3 makes it easier to work with [element data](/data):
   - Unpoly guarantees that each compiler only ever runs once for a matching elements.
 - You can now register compilers after content was rendered.
   - New compilers registered after booting automatically run on current elements.
-  - This makes it easier to split you compilers into multiple files that are then loaded as-needed.
+  - This makes it easier to split your compilers into multiple files that are then loaded as-needed.
   - Note that compilers with a `{ priority }` will only be called for new content, but not for existing content.
 - Compilers now accept an optional third argument with information about the current render pass:
 
@@ -281,7 +281,7 @@ Within a foreign overlay Unpoly will no longer have opinions regarding layers or
 - Unpoly now emits an event `up:location:restore` when the user is [restoring a previous history entry](/restoring-history), usually by pressing the back button.
   Listeners may prevent `up:location:restore` and substitute their own restoration behavior.
 - Rename `up:location:changed` event's `{ url }` property to `{ location }`.
-- Fix a bug where clicking links twice would not update location when the browser history API is used in between (closes #388).
+- Fix a bug where clicking links twice would not update location when the browser history API is used in between (closes [#388](https://github.com/unpoly/unpoly/issues/388)).
 
 
 ## Scrolling
@@ -364,9 +364,9 @@ Various changes make it easier to watch fields for changes:
 - Delayed callbacks no longer run when the watched field was *removed* from the DOM during the delay (e.g. by the user navigating away)
 - Delayed callbacks no longer run when the watched field was *aborted* during the delay (e.g. by the user submitting the containing form)
 - Sometimes fields emit non-standard events instead of `change` and `input`. You may now use `up.form.config.watchInputEvents` and `up.form.config.watchCangeEvents` to normalize field events so they become observable as `change` or `input`.
-- Date inputs (`<input type="date">`) are now (by default) validated on `blur` rather than on `change` (fixes #336).
+- Date inputs (`<input type="date">`) are now (by default) validated on `blur` rather than on `change` (fixes [#336](https://github.com/unpoly/unpoly/issues/336)).
 - The configuration `up.form.config.observeDelay` has been renamed to `up.form.config.watchInputDelay`.
-- The `this` in an `[up-watch]` callback is now always bound to the element that has the attribute (fixes #442).
+- The `this` in an `[up-watch]` callback is now always bound to the element that has the attribute (fixes [#442](https://github.com/unpoly/unpoly/issues/442)).
 - ⚠️ The `up.watch()` function (former `up.observe()`) no longer accepts an array of elements. It only accepts a single field, or an element containing multiple fields. 
 
 
@@ -410,7 +410,7 @@ That said, the following changes were made:
 - ⚠️ After rendering stale content from the cache, Unpoly now automatically renders a second time with fresh content from the server.
 - The cache now distinguishes between *expiration* (marking cache entries as stale)
   and *eviction* (completely erasing cache entries).
-- The old concept of *clearing* has been replaced by *expiring* the cache
+- The old concept of *clearing* has been replaced with *expiring* the cache
   - The configuration `up.network.config.clearCache` has been renamed to `up.network.config.expireCache`.
   - The default for `up.network.config.expireCache` is now 15 seconds (down from 5 minutes in Unpoly 2).
     - ⚠️ If you have previously configured a custom value for `up.network.config.clearCache` (now `.expireCache`) to
@@ -1839,7 +1839,7 @@ This release contains no new features, but will help you when using tools like B
   </form>
   ```
 
-  In this case `& .error` will be replaced by `#my-form .error` before submission.
+  In this case `& .error` will be replaced with `#my-form .error` before submission.
 
   This affects CSS selectors in the following HTML attributes:
 
@@ -2298,7 +2298,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### Breaking changes
 
 - [`up.replace()`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
-- `up.util.merge()` has been replaced by [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
+- `up.util.merge()` has been replaced with [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 - The `up.flow` module has been renamed to [`up.dom`](/up.dom).
 - The `up.navigation` module has been renamed to [`up.feedback`](/up.feedback).
 - Functions that measure position, dimensions or margin now return floats instead of rounded integers.

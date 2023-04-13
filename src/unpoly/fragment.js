@@ -1195,7 +1195,7 @@ up.fragment = (function() {
 
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
   to prevent the element from being persisted. If the event is prevented, the element
-  will be replaced by a fragment from the response.
+  will be replaced with a fragment from the response.
 
   ### Example
 
@@ -1217,7 +1217,7 @@ up.fragment = (function() {
   @param event.preventDefault()
     Prevents the fragment from being kept.
 
-    The fragment will be replaced by `event.newFragment`.
+    The fragment will be replaced with `event.newFragment`.
   @param {Element} event.target
     The fragment that will be kept.
   @param {Element} event.newFragment
