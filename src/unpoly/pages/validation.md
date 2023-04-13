@@ -158,6 +158,10 @@ The [form group](/up-form-group) around the changed field is then updated with t
 
 For a full example see the [documentation for `[up-validate]`](/up-validate).
 
+> [tip]
+> The `[up-validate]` attribute is a useful tool to partially update a form when one fields depends on the value of another field.
+> See [dependent fields](/dependent-fields) for more details and examples.
+
 
 Validating while typing
 -----------------------
