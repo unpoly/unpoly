@@ -31,7 +31,7 @@ Revalidation
 
 Cache entries are only considered *fresh* for [15 seconds](/up.network.config#config.cacheExpireAge). When rendering older cache content, Unpoly automatically reloads the fragment to ensure that the user never sees expired content. This process is called *cache revalidation*.
 
-This means when re-visiting pages Unpoly often renders twice:
+When re-visiting pages, Unpoly often renders twice:
 
 1. An initial render pass from the cache (which may be expired)
 2. A second render pass from the server (which is always fresh)

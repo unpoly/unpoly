@@ -874,6 +874,10 @@ up.protocol = (function() {
   This tells Unpoly to [partition its cache](/caching#caching-optimized-responses) for that URL so that each
   request header value gets a separate cache entries.
 
+  You can set a `Vary` header manually from your server-side code. You may also be using
+  a library like [unpoly-rails](https://github.com/unpoly/unpoly-rails) that sets the `Vary` header automatically.
+
+
   > [tip]
   > Server-side Unpoly apps may inspect [request headers](/up.protocol) to [customize or shorten responses](/optimizing-responses),
   > e.g. by omitting content that isn't [targeted](/targeting-fragments).

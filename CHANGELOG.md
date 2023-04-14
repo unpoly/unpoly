@@ -15,6 +15,9 @@ Unpoly 3 evolves and completes existing APIs based on community feedback.
 
 In addition to this CHANGELOG, there is also a [slide deck](http://triskweline.de/unpoly3-slides/) explaining the most relevant changes in more detail.
 
+Finally we have [reworked Unpoly's documentation](#reworked-documentation)
+in our ongoing efforts to evolve it an API reference to a long-form guide.
+
 
 ## Upgrade effort
 
@@ -53,20 +56,21 @@ That said, Unpoly 3 makes the following changes to the way conflicting fragment 
   ⚠️ If your Unpoly 2 app uses a lot of `{ solo: false }` options or `[up-solo=false]` attributes, these may no longer
   be necessary now that Unpoly 3 is more selective about what it aborts. 
 - To programmatically abort all requests targeting fragments in a region, use `up.fragment.abort(selector)`.
-- Unpoly now cancels timers and other async work when a fragment is aborted by being targeted:
+- ⚠️ Unpoly now cancels timers and other async work when a fragment is aborted by being targeted:
   - [Polling](/up-poll) now stops when the fragment is aborted.
   - Pending [validations](/validation) are now aborted when an observed field is aborted.
   - When a fragment is destroyed or updated, pending requests targeting that fragment will always be aborted, regardless of the `{ abort }` option.
 - Your own code may react to a fragment being abortedby being targeted. To so, listen to the new `up:fragment:aborted` event.
-  - To simplify observing an element and its ancestors for aborted requests, the function `up.fragment.onAborted()` is also provided. 
-- Fragment updates may exempt themselves from being aborted by setting an `[up-abortable=false]` attribute on the updating link,
+- To simplify observing an element and its ancestors for aborted requests, the function `up.fragment.onAborted()` is also provided. 
+- Fragment updates may exempt their requests from being aborted by setting an `[up-abortable=false]` attribute on the updating link,
   or by passing an `{ abortable: false }` render option.
-- Programmatic preloading with `up.link.preload()` is no longer abortable by default.
-  - This makes it easy to eagerly preload links like this:
+- Imperative preloading with `up.link.preload()` is no longer abortable by default.
+  
+  This makes it easy to eagerly preload links like this:
     
-    ```js
-    up.compiler('a[rel=next]', up.link.preload)
-    ```
+  ```js
+  up.compiler('a[rel=next]', up.link.preload)
+  ```
   - You can make preload requests abortable again by passing an `{ abortable: true }` option.
 - The option `up.request({ solo })` was removed. To abort existing requests, use `up.fragment.abort()` or `up.network.abort()`.
 
@@ -89,10 +93,10 @@ derivation has been reworked to be more strict in Unpoly 3:
 - A longer, but stricter list of possible patterns is used to derive a target selector.
   - The list of patterns may be configured in `up.fragment.config.targetDerivers`.
   - An element's tag name is no longer considered a useful target selector, except for unique elements like `<body>` or `<main>`.
-- Before a target selector is used, Unpoly 3 will verify whether it would actually match the targeted element.
+- ⚠️ Before a target selector is used, Unpoly 3 will verify whether it would actually match the targeted element.
   - If it matches another element, another target derivation pattern is attempted
   - If no pattern matches, an error `up.CannotTarget` is thrown.
-  - ⚠️ If you see an `up.CannotTarget` error while upgrading to Unpoly 3, this probably indicates a bug in your app
+  - If you see an `up.CannotTarget` error while upgrading to Unpoly 3, this probably indicates a bug in your app
     concerning elements with ambiguous selectors. You should fix it by giving those elements a unique `[id]` attribute.
   - Verification of derived targets may be disabled with `up.fragment.config.verifyDerivedTarget = false`.
 - `[up-poll]` will only work on elements for which we can derive a good target selector.
@@ -111,7 +115,7 @@ derivation has been reworked to be more strict in Unpoly 3:
 
 ### Extensive render hooks
 
-Unpoly 3 expands your options to [hook into specific stages](/render-hooks) of the rendering process in order to change the result or handle error cases.
+Unpoly 3 expands your options to [hook into specific stages](/render-hooks) of the rendering process in order to change the result or handle error cases:
 
 - Rendering functions now accept a wide range of callback functions.
   Using a callback you may intervene at many points in the rendering lifecycle:
@@ -148,7 +152,7 @@ Unpoly 3 expands your options to [hook into specific stages](/render-hooks) of t
 ### Various changes
 
 - You may now target the origin origin using `:origin`. The previous shorthand `&` has been deprecated.
-- When Unpoly uses the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#resolving-ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefers matching new content closest to that.
+- ⚠️ When Unpoly uses the `{ origin }` to [resolve ambiguous selectors](/targeting-fragments#resolving-ambiguous-selectors), that origin is now also rediscovered in the server response. If the origin could be rediscovered, Unpoly prefers matching new content closest to that.
 - Added a new property `up.RenderResult#fragment` which returns the first updated fragment.
 - The property `up.RenderResult#fragments` now only contains newly rendered fragments. It will no longer contain:
   - [Kept](/up-keep) elements.
@@ -230,7 +234,7 @@ Within a foreign overlay Unpoly will no longer have opinions regarding layers or
 
 ### Various changes
 
-- Fixed a bug where `up.fragment.get(selector, { layer: 0 })` would always match in the current layer instead of the root layer.
+- Fixed a bug where referring to the root layer by index (`up.fragment.get(selector, { layer: 0 })`) would always match in the current layer instead of the root layer.
 - The `up:layer:location:changed` now has a property `{ layer }`. It returns the layer that had its location changed.
 
 
@@ -280,7 +284,7 @@ Within a foreign overlay Unpoly will no longer have opinions regarding layers or
 
 - Unpoly now emits an event `up:location:restore` when the user is [restoring a previous history entry](/restoring-history), usually by pressing the back button.
   Listeners may prevent `up:location:restore` and substitute their own restoration behavior.
-- Rename `up:location:changed` event's `{ url }` property to `{ location }`.
+- Renamed `up:location:changed` event's `{ url }` property to `{ location }`.
 - Fix a bug where clicking links twice would not update location when the browser history API is used in between (closes [#388](https://github.com/unpoly/unpoly/issues/388)).
 
 
@@ -344,7 +348,7 @@ that does not require disabling:
 
 - ⚠️ Multiple elements targeted by `[up-validate]` are now batched into a single render pass with multiple targets. Duplicate or nested target elements are consolidated.
 - Validation will only have a single concurrent request at a time. Additional validation passes while the request is in flight will be queued. 
-- Form will eventually show a consistent state, regardless how fast the user clicks or how slow the network is
+- Form will eventually show a consistent state, regardless how fast the user clicks or how slow the network is.
 
 See [Dependent fields](/dependent-fields) for a full example.
 
@@ -367,7 +371,7 @@ Various changes make it easier to watch fields for changes:
 - Date inputs (`<input type="date">`) are now (by default) validated on `blur` rather than on `change` (fixes [#336](https://github.com/unpoly/unpoly/issues/336)).
 - The configuration `up.form.config.observeDelay` has been renamed to `up.form.config.watchInputDelay`.
 - The `this` in an `[up-watch]` callback is now always bound to the element that has the attribute (fixes [#442](https://github.com/unpoly/unpoly/issues/442)).
-- ⚠️ The `up.watch()` function (former `up.observe()`) no longer accepts an array of elements. It only accepts a single field, or an element containing multiple fields. 
+- ⚠️ The `up.watch()` function (formerly `up.observe()`) no longer accepts an array of elements. It only accepts a single field, or an element containing multiple fields. 
 
 
 ### Various changes
@@ -379,15 +383,13 @@ Various changes make it easier to watch fields for changes:
 - ⚠️ Replaced `[up-fieldset]` with `[up-form-group]`.
 - Replaced `up.form.config.validateTargets` with `up.form.config.groupSelectors`. Configured selectors must no longer contain a `:has(:origin)` suffix, as this is now added automatically when required.
 - All functions with a `{ params }` option now also accept a `FormData` value.
-- The `[up-show-for]` and `[up-hide-for]` attributes now accept values with spaces (#78). Such values must be encoded as a JSON array, e.g. `<element up-show-for='["John Doe", "Jane Doe"]'>`
-- When submitting a form the `{ origin }` is now the element that triggered the submission:
-  - Submitting a form by pressing `Enter` within a focused field sets that field as the `{ origin }`.
-  - Otherwise the used submit button is set as the `{ origin }`. 
-  - When watching or validating a form field, the changed field is set as the `{ origin }`.
-  - To select an active form, style `form:has(.up-active)`.
-- ⚠️ When a form is submitted, the `:origin` is now the submit button (instead of the `<form>` element)
-- ⚠️ When a form is watched or validated, the `:origin` is now the field that was changed (instead of the `<form>` element)
-- Fix `up.watch()` (former `up.observe()`) crashing when passed an input outside a form.
+- The `[up-show-for]` and `[up-hide-for]` attributes now accept values with spaces. Such values must be encoded as a JSON array, e.g. `<element up-show-for='["John Doe", "Jane Doe"]'>`. Fixes [#78](https://github.com/unpoly/unpoly/issues/78).
+- ⚠️ When submitting a form, `{ origin }` is now the element that triggered the submission:
+  - When a form is submitted, the `:origin` is now the submit button (instead of the `<form>` element)
+  - When a form is submitted by pressing `Enter` within a focused field sets that field as the `{ origin }`, the `:origin` is now the focused field (instead of the `<form>` element)
+  - When a form is watched or validated, the `:origin` is now the field that was changed (instead of the `<form>` element)
+  - To select an active form with CSS, select `form.up-active, form:has(.up-active) { ... }`.
+- Fix `up.watch()` (formerly `up.observe()`) crashing when passed an input outside a form.
 
 
 ## Network requests
@@ -398,12 +400,15 @@ In Unpoly 3, [cache](/caching) entries are only considered *fresh* for 15 second
 When rendering older cache content, Unpoly automatically reloads the fragment to ensure that the user never sees expired content.
 This process is called [cache revalidation](/caching#revalidation).
 
-This means when re-visiting pages Unpoly often renders twice:
+When re-visiting pages, Unpoly now often renders twice:
 
 - An initial render pass from the cache (which may be expired)
 - A second render pass from the server (which is always fresh)
 
-This allows us to cache content for much longer (90 minutes by default) and still guarantee that users always see fresh content.
+This caching technique allows for longer cache times (90 minutes by default) while ensuring that users always see the latest content.
+
+Servers may observe [conditional request headers](#conditional-requests) to skip the
+second render pass if the underlying data has not changed, making revalidation requests very inexpensive.
 
 That said, the following changes were made:
 
@@ -425,8 +430,8 @@ That said, the following changes were made:
   - New configuration `up.network.config.cacheEvictAge` (default is 90 minutes).
   - Added response header `X-Up-Evict-Cache`.
   - Added function `up.cache.evict(pattern)`.
-- Cache revalidation happens after `up.render()` settles. To run code when no further DOM changes will be caused by a
-  render pass, pass an `{ onFinished }` callback or `await up.render(..).finished`.
+- Cache revalidation happens after `up.render()` settles. To run code once all render passes have finished,
+  pass an `{ onFinished }` callback or `await up.render(..).finished`.
 - Cache revalidation can be controlled through a render option `{ revalidate }` or
   a link attribute `[up-revalidate]`.
   - The default option value is `{ revalidate: 'auto' }`, which revalidates
@@ -437,11 +442,13 @@ That said, the following changes were made:
 ### Conditional requests
 
 - Unpoly now supports [conditional requests](/conditional-requests). This allows your server to skip rendering
-  a response of the underlying data has not changed.
+  and send an empty response if the underlying data has not changed. 
+
+  Common use cases for conditional requests are [polling](/#up-poll) or [cache revalidation](#cache-revalidation). 
 - Unpoly now remembers the standard `Last-Modified` and `E-Tag` headers a fragment was delivered with.
   - Header values are set as `[up-time]` and `[up-etag]` attributes on updated fragment.
   - Users can also set these attributes manually in their views, to use different ETags for individually reloadable fragments.
-- When a fragment is reloaded (or polled), these props are sent as `If-Modified-Since` or `If-None-Match` request headers.
+- When a fragment is reloaded (or polled), these properties are sent as `If-Modified-Since` or `If-None-Match` request headers.
 - Server can render nothing by sending status `304 Not Modified` or status `204 No Content`.
 - Reloading is effectively free with conditional request support.
 - ⚠️ The header `X-Up-Reload-From-Time` was deprecated in favor of the standard `If-Modified-Since`.
@@ -456,7 +463,7 @@ The objective is to keep your application accessible as the user's connection be
 Unpoly 3 lets you handle [connection loss](/network-issues#connection-loss) with an `{ onOffline }` or `[up-on-offline]` callback:
 
 ```html
-<a href="..." up-on-offline="if (confirm('Retry?') event.retry()">Post bid</a>
+<a href="..." up-on-offline="if (confirm('You are offline. Retry?')) event.retry()">Post bid</a>
 ```
 
 You may also configure a global handler by listening to `up:request:offline` (renamed from `up:request:fatal`):
@@ -464,7 +471,7 @@ You may also configure a global handler by listening to `up:request:offline` (re
 
 ```js
 up.on('up:fragment:offline', function(event) {
-  if (confirm('Retry?')) event.retry()
+  if (confirm('You are offline. Retry?')) event.retry()
 })
 ```
 
@@ -488,13 +495,13 @@ Unpoly 3 handles Lie-Fi with timeouts:
 
 - ⚠️ All requests now have a default timeout of 90 seconds (`up.network.config.timeout`).
 - Timeouts will now trigger `onOffline()` and use your offline handling.
-- Customize timeouts per-request by passing an `{ timeout }` option or setting a `[up-timeout]` attribute.
+- Customize timeouts per-request by passing a `{ timeout }` option or setting an `[up-timeout]` attribute.
 
 
 
 ### Expired pages remain accessible while offline
 
-With Unpoly 3 apps remain partially accessible when the user loses their connection: 
+With Unpoly 3, apps remain partially accessible when the user loses their connection: 
 
 - Cached content will remain navigatable for 90 minutes.
 - Revalidation will fail, but not change the page and trigger `onOffline()`.
@@ -512,7 +519,7 @@ or a canned solution like [UpUp](https://www.talater.com/upup/) (no relation to 
 ### More control about the progress bar
 
 - You may now demote requests to the background by using `{ background: true }` or `[up-background]` when rendering or making a request
-  - Background requests are prioritized when the network connection is saturated.
+  - Background requests are de-prioritized when the network connection is saturated.
   - Background requests don't trigger `up:network:late` or show the progress bar.
 - Polling requests are demoted to the background automatically
 - Preload requests are demoted to the background automatically
@@ -533,6 +540,9 @@ Unpoly has always allowed server-side code to inspect [request headers](/up.prot
   in a `Vary` response header.
   This tells Unpoly to partition its [cache](/caching) for that URL so that each
   request header value gets a separate cache entries.
+
+  You can set a `Vary` header manually from your server-side code. You may also be using
+  a library like [unpoly-rails](https://github.com/unpoly/unpoly-rails) that sets the `Vary` header automatically.
 - Sending `Vary` headers also prevents browsers from using an optimized response for full page loads.
 - The configuration `up.network.config.requestMetaKeys` has been removed.
 
@@ -544,7 +554,7 @@ Unpoly has always allowed server-side code to inspect [request headers](/up.prot
 
 ### Detecting failure when the server sends wrong HTTP status
 
-Unpoly requires servers to send an HTTP error code to signal failure. E.g. an invalid form should render with HTTP 400 (Bad Request).
+Unpoly requires servers to send an HTTP error code to signal failure. E.g. an invalid form should render with HTTP 422 (Unprocessable Entity).
 Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is not always easy to fix, e.g. when screens are rendered by libraries outside your control. Unpoly 3 addresses this with the following changes:
 
 - Listeners to `up:fragment:loaded` can now can force failure by setting `event.renderOptions.fail = true`.
@@ -555,7 +565,10 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - You may now pass `FormData` values to all functions that also accept an `up.Params` object.
 - When a request is scheduled and aborted within the same microtask, it no longer touches the network.
 - `up.network.config.concurrency` now defaults to 6 (3 while reducing requests)
-- When calling `up.request()` manually, the request is now only associated with the current layer if either `{ origin, layer, target }` option was passed.
+- ⚠️ When calling `up.request()` manually, the request is now only associated with the current layer if either `{ origin, layer, target }` option was passed.
+
+  If neither of these options are given, the request will send no headers like `X-Up-Target` or `X-Up-Mode`.
+  Also, since the request is no longer associated with the layer, it will not be aborted if the layer closes.
 - The `up.network.isIdle()` function has been deprecated. Use `!up.network.isBusy()` instead.
 - The events `up:request:late` and `up:request:recover` were renamed to `up:network:late` and `up:network:recover` respectively. We may eventually re-introduce `up:request:late` and `up:request:recover` to support tracking individual requests (but not now).
 - New method `up.Request#header()` to access a given header.
@@ -590,7 +603,7 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - Deprecated `up.element.matches()`. Use `Element#matches()` instead.
 - Deprecated `up.element.closest()`. Use `Element#closest()` instead.
 - Deprecated `up.element.replace()`. Use `Element#replaceWith()` instead.
-- Deprecated `up.element.all()`. Use `document.querySelectorAll()`.
+- Deprecated `up.element.all()`. Use `document.querySelectorAll()` or `Element#querySelectorAll()` instead.
 - Deprecated `up.element.toggleClass()`. Use `Element#classList.toggle()` instead.
 - Deprecated `up.element.isDetached()`. Use `!Element#isConnected` instead.
 
@@ -607,7 +620,7 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 
 ## Reworked documentation
 
-In our efforts to evolve Unpoly's documentation from an API reference to a guide, we have added several
+In our ongoing efforts to evolve Unpoly's documentation from an API reference to a guide, we have added several
 documentation pages:
 
 - [Targeting fragments](/targeting-fragments)
@@ -633,13 +646,12 @@ documentation pages:
 - [Predefined animations](/predefined-animations)
 - [Predefined transitions](/predefined-transitions)
 
-This is adding to the existing documentation pages:
+All existing documentation pages from Unpoly 2 remain available:
 
-- [Working with strict Content Security Policies](/csp)
-- [Scrolling](/scrolling)
-- [Migrating legacy JavaScripts](/legacy-scripts)
 - [Handling all links and forms](/handling-everything)
 - [Tuning the scroll behavior](/scroll-tuning)
+- [Migrating legacy JavaScripts](/legacy-scripts)
+- [Scrolling](/scrolling)
 - [Navigation](/navigation)
 - [Layer terminology](/layer-terminology)
 - [Layer option](/layer-option)
@@ -650,19 +662,20 @@ This is adding to the existing documentation pages:
 - [Layer context](/context)
 - [Motion tuning](/motion-tuning)
 - [URL patterns](/url-patterns)
+- [Working with strict Content Security Policies](/csp)
 
 
 ## Migration polyfills
 
-- New polyfills for almost all functionality deprecated in version 3.0.0. 
-- When [`unpoly-migrate.js`](/changes/upgrading) migrates a renamed attribute, the old attribute is now removed
+- New polyfills for almost all functionality that was deprecated in this version 3.0.0. 
+- When [`unpoly-migrate.js`](/changes/upgrading) migrates a renamed attribute, the old attribute is now removed.
 - Fix a up where `unpoly-migrate.js` would not rewrite the deprecated `{ reveal }` option when navigating.
 
 
 ## Framework
 
-- New experimental event `up:framework:booted`. Is emitted when the framework has booted and the initial page has been compiled.
-- All error thrown by Unpoly now inherit from `up.Error`.
+- A new experimental event `up:framework:booted` is emitted when the framework has booted and the initial page has been compiled.
+- All errors thrown by Unpoly now inherit from `up.Error`.
 
 
 ## Dropped support for legacy technologies

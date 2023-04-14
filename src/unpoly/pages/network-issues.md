@@ -17,7 +17,7 @@ Interacting with an Unpoly-enhanced [link](/a-up-follow) or [form](/form-up-subm
 To handle connection loss, pass an `{ onOffline }` option or set an `[up-on-offline]` attribute. When the device gets disconnected before or during a request, the callback is called with an `up:fragment:offline` argument:
 
 ```html
-<a href="/path" up-follow up-on-offline="if (confirm('Retry?') event.retry()">
+<a href="/path" up-follow up-on-offline="if (confirm('You are offline. Retry?')) event.retry()">
   Post bid
 </a>
 ```
@@ -26,7 +26,7 @@ You may also configure a global handler that listens to `up:fragment:offline`:
 
 ```js
 up.on('up:fragment:offline', function(event) {
-  if (confirm('Retry?')) event.retry()
+  if (confirm('You are offline. Retry?')) event.retry()
 })
 ```
 
