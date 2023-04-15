@@ -17,13 +17,21 @@ You can enable caching with `{ cache: 'auto' }`, which caches all responses to G
 up.network.config.autoCache = (request) => request.method === 'GET'
 ```
 
-When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions). To opt *out* of caching while navigating, there are several methods:
-
-- Pass a [`{ cache: false }`](/up.render#options.cache) option (JavaScript)
-- Set an [`[up-cache=false]`](/a-up-follow#up-cache) attribute (HTML)
-- Exclude a URL from `up.network.config.autoCache`.
+When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
 
 To force caching regardless of HTTP method, pass `{ cache: true }`.
+
+
+Disabling caching
+-----------------
+
+To opt *out* of caching while navigating, there are several methods:
+
+- Set `up.fragment.config.navigateOptions.cache = false`.
+- Pass a [`{ cache: false }`](/up.render#options.cache) option to a rendering function.
+- Set an [`[up-cache=false]`](/a-up-follow#up-cache) attribute on a link. 
+- Exclude a URL from `up.network.config.autoCache`.
+
 
 
 Revalidation
@@ -118,10 +126,10 @@ After expiring, cached content is kept in the cache, but will trigger [revalidat
 
 There are multiple ways to override this behavior:
 
+- Configure which requests should cause expiration in `up.network.config.expireCache`
 - Pass an [`{ expireCache }`](/up.render#options.expireCache) option to the rendering function
 - Set an [`[up-expire-cache]`](/up.render#options.expireCache) attribute on a link or form
 - Send an `X-Up-Expire-Cache` response header from the server
-- Configure which requests should cause expiration in `up.network.config.expireCache`
 - Imperatively expire cache entries through the `up.cache.expire()` function
 
 
@@ -136,10 +144,10 @@ In practice you will often prefer *expiration* over *eviction*. Expired content 
 
 One use case for eviction is when it is not acceptable for the user to see a brief flash of stale content before [revalidation](#revalidation) finishes. You can do so in multiple ways:
 
+- Configure which requests should cause eviction in `up.network.config.evictCache`
 - Pass an [`{ evictCache }`](/up.render#options.evictCache) option to the rendering function
 - Set an [`[up-evict-cache]`](/up.render#options.evictCache) attribute on a link or form
 - Send an `X-Up-Evict-Cache` response header from the server
-- Configure which requests should cause eviction in `up.network.config.evictCache`
 - Imperatively evict cache entries through the `up.cache.evict()` function
 
 ### Capping memory usage
@@ -181,6 +189,16 @@ Vary: X-Up-Target
 
 After observing the `Vary: X-Up-Target` header, Unpoly will partition cache entries to `/sitemap` by `X-Up-Target` value.
 That means a request targeting `.menu` is no longer a cache hit for a request targeting a different selector.
+
+
+Caching after redirects
+-----------------------
+
+- When a request `GET /foo` redirects to `GET /bar`, the response to `/bar` will be cached for both `GET /foo/` and `GET /bar`.
+- For technical reasons Unpoly cannot read from the cache when an request to an uncached URL redirects to a cached URL.
+  For example, when a form submission makes a request to `POST /action`, and the response redirects to `GET /path`,
+  the browser will make a fresh request to `GET /path` even if `GET /path` was cached before. Unpoly cannot render
+  content before that 
 
 
 @page caching

@@ -417,7 +417,11 @@ That said, the following changes were made:
   and *eviction* (completely erasing cache entries).
 - The old concept of *clearing* has been replaced with *expiring* the cache
   - The configuration `up.network.config.clearCache` has been renamed to `up.network.config.expireCache`.
-  - The default for `up.network.config.expireCache` is now 15 seconds (down from 5 minutes in Unpoly 2).
+  
+    It can be used to configure which requests should expire existing cache entries.
+
+    By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
+  - The default for `up.network.config.expireCacheAge` is now 15 seconds (down from 5 minutes in Unpoly 2).
     - ⚠️ If you have previously configured a custom value for `up.network.config.clearCache` (now `.expireCache`) to
       prevent the display of stale content, check if that configuration is still needed with [revalidation](/caching#revalidation).
   - The response header `X-Up-Clear-Cache` has been renamed to `X-Up-Expire-Cache`.
@@ -427,9 +431,21 @@ That said, the following changes were made:
   - The option `up.render({ clearCache })` has been renamed to `{ expireCache }`.
   - The option `up.request({ clearCache })` has been renamed to `{ expireCache }`.
 - Features have been added to evict cache entries:
+  - New configuration `up.network.config.expireCache` lets you define which requests evict existing cache entries. 
+
+    By default Unpoly will *not* evict any cache entries when a request is made.
+
+    To restore Unpoly 2's behavior of evicting the entire cache after
+    a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method,
+    configure the following:
+
+    ```js
+    up.network.config.evictCache = (request) => !request.isSafe()
+    ```
   - New configuration `up.network.config.cacheEvictAge` (default is 90 minutes).
   - Added response header `X-Up-Evict-Cache`.
   - Added function `up.cache.evict(pattern)`.
+  - Added configuration `up.network`
 - Cache revalidation happens after `up.render()` settles. To run code once all render passes have finished,
   pass an `{ onFinished }` callback or `await up.render(..).finished`.
 - Cache revalidation can be controlled through a render option `{ revalidate }` or

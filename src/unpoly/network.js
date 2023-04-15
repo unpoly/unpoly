@@ -174,9 +174,15 @@ up.network = (function() {
   @param {Function(up.Request, up.Response): boolean|string} [config.evictCache=false]
     Whether to [evict](/caching#eviction) the [cache](/caching) after the given request and response.
 
-    By default Unpoly will *not* evict cache entries when a request is made.
-
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be evicted.
+
+    By default Unpoly will *not* evict any cache entries when a request is made.
+
+    For example, to evict the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
+
+    ```js
+    up.network.config.evictCache = (request) => !request.isSafe()
+    ```
 
   @param {boolean|Function(): boolean} [config.progressBar]
     Whether to show a [progress bar](/loading-indicators#progress-bar)

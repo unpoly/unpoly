@@ -202,10 +202,20 @@ V3.pre launch
 V3 final Launch
 ---------------
 
-- Make sure v3 redirects to unpoly.com?
-  - in the main branch .htaccess we redirect v??.unpoly.com to unpoly.com instead of enabling norobots
-- Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
-- Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
+- After release
+  - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
+  - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
+  - htaccess
+    - v2.unpoly.com must no longer redirect v2.unpoly.com to unpoly.com
+    - v3.unpoly.com must now redirect v3.unpoly.com to unpoly.com
+  - Deploy v1
+  - Deploy v2
+  - Deploy v3
+- Expand unpoly3-slides
+  - The Vary changes are still missing
+  - See if we can reduce slides further
+  - Push
+  - Re-publish on triskweline.de
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
   - Explain new / deprecated headers
@@ -220,7 +230,6 @@ V3 final Launch
   - Upgrade to unpoly3
   - Redeploy
 - Do a podcast
-- Fix unpoly3-slides
 - Migrate and rebase SF branch
   - Notify ED
 
