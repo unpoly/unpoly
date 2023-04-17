@@ -670,6 +670,7 @@ Misconfigured server endpoints may send HTTP 200 (OK) for everything. This is no
 - New method `up.Request#header()` to access a given header.
 - The method `up.Response#getHeader()` was renamed to `up.Response#header()`. It is now stable.
 - The property `up.Response.prototype.request` is now internal API and should no longer be used.
+- Disabling the cache with `up.network.config.cacheSize = 0` is no longer supported. To disable automatic caching during navigation, set `up.fragment.config.navigateOptions.cache = false` instead.
 
 
 
