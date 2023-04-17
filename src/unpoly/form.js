@@ -408,6 +408,12 @@ up.form = (function() {
   To automatically disable a form when it is submitted, add the [`[up-disable]`](/form-up-submit#up-disable)
   property to the `<form>` element.
 
+  ### Dealing with focus loss
+
+  When a focus field is disabled, it will lose focus.
+
+  In that case Unpoly will focus the [closest form group](/up.form.group) around the disabled control.
+
   @function up.form.disable
   @param {Element} element
     The element within which fields and buttons should be disabled.
@@ -418,23 +424,16 @@ up.form = (function() {
   function disableContainer(container) {
     let focusedElement = document.activeElement
     let focusFallback
-    let mayLoseFocus = container.contains(focusedElement)
-    if (mayLoseFocus) {
-      let focusedGroup = findGroup(focusedElement)
-      // (1) If the field's form group is closer than the container, we should restore focus there.
-      // (2) If we're disabling the focused element directly, we should focus the group.
-      if (container.contains(focusedGroup) || container === focusedElement) {
-        focusFallback = focusedGroup
-      } else {
-        focusFallback = container
-      }
-    }
-
     let controls = [...findFields(container), ...findSubmitButtons(container)]
 
-    controls.forEach(raiseDisableStack)
+    for (let control of controls) {
+      if (control === focusedElement) {
+        focusFallback = findGroup(focusedElement)
+      }
+      raiseDisableStack(control)
+    }
 
-    if (focusFallback && !focusFallback.contains(document.activeElement)) {
+    if (focusFallback) {
       up.focus(focusFallback, { force: true, preventScroll: true })
     }
 
