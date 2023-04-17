@@ -208,10 +208,6 @@ V3.pre launch
 V3 final Launch
 ---------------
 
-- Publish npm
-  - package.json
-  - Fresh build
-- Publish Unpoly Rails
 - After release
   - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
   - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
@@ -223,14 +219,13 @@ V3 final Launch
   - Deploy v3
 - Expand unpoly3-slides
   - The Vary changes are still missing
+  - Expand IE11 to legacy technologies
   - See if we can reduce slides further
-  - Push
   - Re-publish on triskweline.de
 - Submit to to https://github.com/github/release-radar/
 - Open heads-up issues for server integration maintainers
   - Explain new / deprecated headers
   - Explain that we should send Vary when optimizing responses
-- Update Glitch template: https://glitch.com/edit/#!/empty-unpoly-project
 - Schedule Tweets
   - For new doc pages
   - For new features (from slides)
