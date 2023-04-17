@@ -6,6 +6,7 @@ TODOs after V3
 - up:feedback:start / up:feedback:stop
   - On the layer, not an individual element
   - Needs to have reference to origin and targetElements
+  => With .up-validating we have different points where feedback starts and ends.
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
 - Honor `Vary` for cache keys (hard!)
@@ -130,6 +131,14 @@ TODOs after V3
   - Print a warning when we're discarding any other Cache-Control header format
 - Test and document [up-href]
 - Polling should automatically restart when the tab is re-focused
+- A validating fragment should get a .up-validating class
+  - Group under up.feedback
+  - Maybe we can have a private API
+    - { feedbackLoading: 'up-validating' }
+    - { feedback: { loading: 'up-validating', active: false } }
+    - With history we have separate options { title, location }
+- Consider renaming up.fragment.config.navigateOptions to just up.fragment.config.navigate
+  - There is precedence in up.layer.config.overlay
 
 
 TODOs for V3
@@ -145,13 +154,6 @@ Docs
 ----
 
 ### General
-
-- Finish the CHANGELOG
-  - Unfinished sections
-  - New commits
-  - No unbounded caches anymore
-  - Optimizing responses must send Vary
-- New topic pages
 
 
 ### Other docs
