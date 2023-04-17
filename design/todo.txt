@@ -139,6 +139,10 @@ TODOs after V3
     - With history we have separate options { title, location }
 - Consider renaming up.fragment.config.navigateOptions to just up.fragment.config.navigate
   - There is precedence in up.layer.config.overlay
+- Firefox: Focus loss after disable is not always detectable synchronously
+  - Force Repaint does not help
+  - setTimeout() helps (wait for next render?)
+  - We fixed this in up.form.disableWhile(), but it may still be broken for up.fragment.config.autoFocus options suffixed with "-if-lost"
 
 
 TODOs for V3
@@ -204,6 +208,10 @@ V3.pre launch
 V3 final Launch
 ---------------
 
+- Publish npm
+  - package.json
+  - Fresh build
+- Publish Unpoly Rails
 - After release
   - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
   - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
@@ -233,6 +241,7 @@ V3 final Launch
   - Redeploy
 - Do a podcast
 - Migrate and rebase SF branch
+  - Save diff and reset hard on master
   - Notify ED
 
 
