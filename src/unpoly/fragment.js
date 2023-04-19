@@ -144,11 +144,16 @@ up.fragment = (function() {
   @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
     Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
 
-    By default Unpoly verifies cached responses that are older than 15 seconds
-    when we're on a good connection:
+    By default Unpoly verifies cached responses that are older than `up.fragment.config.expireAge`:
 
     ```js
-    up.fragment.config.autoRevalidate = (response) => response.age > 15_000 && !up.network.shouldReduceRequests()
+    up.fragment.config.autoRevalidate = (response) => response.expired
+    ```
+
+    You can exempt server paths from being auto-revalidated like this:
+
+    ```js
+    up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
     ```
 
   @param {Function(Object): boolean} [config.skipResponse]

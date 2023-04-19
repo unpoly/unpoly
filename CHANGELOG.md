@@ -468,6 +468,7 @@ That said, the following changes were made:
     It can be used to configure which requests should expire existing cache entries.
 
     By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
+  - The configuration `up.network.config.cacheExpiry` has been renamed to `up.network.config.cacheExpireAge`.
   - The default for `up.network.config.expireCacheAge` is now 15 seconds (down from 5 minutes in Unpoly 2).
     
     ⚠️ If you have previously configured a custom value for `up.network.config.clearCache` (now `.expireCache`) to
