@@ -104,6 +104,14 @@ up.Request.Cache.prototype.clear = function(...args) {
   this.expire(...args)
 }
 
+/*-
+Preloads the given link.
+
+@function up.proxy.preload
+@param {Element} link
+@deprecated
+  Use `up.link.preload()` instead.
+*/
 up.network.preload = function(...args) {
   up.migrate.deprecated('up.proxy.preload(link)', 'up.link.preload(link)')
   return up.link.preload(...args)
