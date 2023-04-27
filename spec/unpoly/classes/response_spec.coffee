@@ -42,6 +42,10 @@ describe 'up.Response', ->
       response = new up.Response(status: 400)
       expect(response.ok).toBe(false)
 
+    it 'returns false for a HTTP 422 (Unprocessable Entity) response', ->
+      response = new up.Response(status: 422)
+      expect(response.ok).toBe(false)
+
     it 'ignores the status code and always returns false if the response was constructed with { fail: true }', ->
       response = new up.Response(status: 200, fail: true)
       expect(response.ok).toBe(false)
