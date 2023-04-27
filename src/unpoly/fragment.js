@@ -1711,12 +1711,20 @@ up.fragment = (function() {
   If the removal is [animated](/up.destroy#animating-the-removal),
   the class is assigned before the animation starts.
 
-  Elements that are about to be destroyed (but still animating) are ignored by all
+  ### Destroying elements are ignored
+
+  Elements that are being destroyed (but still animating) are ignored by all
   functions for fragment lookup:
 
   - `up.fragment.all()`
   - `up.fragment.get()`
   - `up.fragment.closest()`
+
+  ### Accessibility
+
+  While an element's destruction is animating, the element is also assigned an
+  [`[aria-hidden]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden) attribute.
+  This hides the element from the browser's accessibility API.
 
   @selector .up-destroying
   @stable
