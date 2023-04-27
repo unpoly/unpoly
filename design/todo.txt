@@ -1,7 +1,17 @@
-TODOs after V3
-==============
+Remaining V3 tasks
+==================
+
+- Do a podcast
+- Migrate and rebase SF branch
+  - Save diff and reset hard on master
+  - Notify ED
+
+
+Code
+====
 
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
+  - This is really confusing with [up-disable]
   - Or should we have an [up-switch-for] and [up-switch-effect]?
 - up:feedback:start / up:feedback:stop
   - On the layer, not an individual element
@@ -9,7 +19,6 @@ TODOs after V3
   => With .up-validating we have different points where feedback starts and ends.
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
-- Honor `Vary` for cache keys (hard!)
 - Do we want a preventable up:fragment:hungry event?
 - Do we want a preventable up:request:reuse event?
   - Maybe even :reused since there is no :loaded for cached requests
@@ -143,27 +152,16 @@ TODOs after V3
   - Force Repaint does not help
   - setTimeout() helps (wait for next render?)
   - We fixed this in up.form.disableWhile(), but it may still be broken for up.fragment.config.autoFocus options suffixed with "-if-lost"
+- Consider whether validation requests should be background requests by default
+  - We should also have [up-watch-background]
 
 
-TODOs for V3
-============
+Documentation
+=============
 
-
-Various changes
----------------
-
-
-
-Docs
-----
-
-### General
-
-
-### Other docs
-
-
-### Ideas for new topic pages
+- Example for a custom overlay
+  - Example in up:link:follow
+  - https://github.com/unpoly/unpoly/discussions/473#discussioncomment-5665806
 
 - Activating custom JavaScript
   - (Currently sitting in up.compiler())
@@ -198,47 +196,6 @@ Docs
   - Background requests deprioritized over foreground requests.
   - Background requests also won't emit up:network:late events and won't trigger the progress bar.
   - Background requests are promoted to the foreground if they are a cache hit for a new, non-background request
-
-
-V3.pre launch
--------------
-
-
-
-V3 final Launch
----------------
-
-- After release
-  - Update the version switcher to include 3.x on v2.unpoly.com and the new unpoly.com
-  - Add a "You're viewing docs for an old version of Unpoly" banner to v2.unpoly.com
-  - htaccess
-    - v2.unpoly.com must no longer redirect v2.unpoly.com to unpoly.com
-    - v3.unpoly.com must now redirect v3.unpoly.com to unpoly.com
-  - Deploy v1
-  - Deploy v2
-  - Deploy v3
-- Expand unpoly3-slides
-  - The Vary changes are still missing
-  - Expand IE11 to legacy technologies
-  - See if we can reduce slides further
-  - Re-publish on triskweline.de
-- Submit to to https://github.com/github/release-radar/
-- Open heads-up issues for server integration maintainers
-  - Explain new / deprecated headers
-  - Explain that we should send Vary when optimizing responses
-- Schedule Tweets
-  - For new doc pages
-  - For new features (from slides)
-  - Detecting use of deprecated APIs with automated tests
-  - Re-post wizard
-- Demo app
-  - Upgrade to unpoly3
-  - Redeploy
-- Do a podcast
-- Migrate and rebase SF branch
-  - Save diff and reset hard on master
-  - Notify ED
-
 
 
 Icebox
