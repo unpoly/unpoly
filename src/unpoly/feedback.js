@@ -298,7 +298,7 @@ up.feedback = (function() {
   ### Styling targeted fragments
 
   To improve the perceived responsiveness
-  of your user interface, cnsider styling loading fragments in your CSS:
+  of your user interface, consider styling loading fragments in your CSS:
 
   ```css
   .up-loading {
