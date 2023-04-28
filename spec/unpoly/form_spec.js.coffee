@@ -1336,6 +1336,22 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('input[name="email"]')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
 
+
+      describe 'with a CSS selector matching no element', ->
+
+        it 'does not crash a pending validation batch', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          target = e.affix(form, '.match')
+
+          up.validate('.match')
+          validateNoMatch = -> up.validate('.no-match')
+
+          expect(validateNoMatch).toThrowError()
+
+          next ->
+            # See that the validation of .match is still sent
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
       describe 'with a non-field element', ->
 
         it 'validates a target derived from the element', asyncSpec (next) ->
@@ -1441,6 +1457,20 @@ describe 'up.form', ->
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'does not crash a pending validation batch if the [up-validate] attribute value matches no element', asyncSpec (next) ->
+          form = fixture('form[action=/form]')
+          e.affix(form, '.match')
+          field = e.affix(form, 'input[name=email][up-validate=".no-match"]')
+
+          up.validate('.match')
+          validateNoMatch = -> up.validate(field)
+
+          expect(validateNoMatch).toThrowError(/does not match an element/)
+
+          next ->
+            # See that the validation of .match is still sent
+            expect(jasmine.Ajax.requests.count()).toBe(1)
 
       describe 'with an array of multiple elements', ->
 
@@ -1779,6 +1809,42 @@ describe 'up.form', ->
 
             expect(barDataSpy.calls.count()).toBe(2)
             expect(barDataSpy.calls.argsFor(1)[0]).toEqual(key: 2)
+
+        it 'removes destroyed elements from a pending batch', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          fooGroup = e.affix(form, '[up-form-group]')
+          fooField = e.affix(fooGroup, 'input[name=foo]')
+          barGroup = e.affix(form, '[up-form-group]')
+          barField = e.affix(barGroup, 'input[name=bar]')
+          bazGroup = e.affix(form, '[up-form-group]')
+          bazField = e.affix(bazGroup, 'input[name=baz]')
+
+          up.validate(fooField)
+          up.validate(bazField)
+
+          up.destroy(fooGroup)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="baz"])')
+
+        it 'removes aborted fragments from a pending batch', asyncSpec (next) ->
+          form = fixture('form[action=/path]')
+          fooGroup = e.affix(form, '[up-form-group]')
+          fooField = e.affix(fooGroup, 'input[name=foo]')
+          barGroup = e.affix(form, '[up-form-group]')
+          barField = e.affix(barGroup, 'input[name=bar]')
+          bazGroup = e.affix(form, '[up-form-group]')
+          bazField = e.affix(bazGroup, 'input[name=baz]')
+
+          up.validate(fooField)
+          up.validate(bazField)
+
+          up.fragment.abort(fooGroup)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('baz')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="baz"])')
 
     describe 'up.form.disable()', ->
 
@@ -2614,6 +2680,25 @@ describe 'up.form', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('birthday')
+
+        it 'does not validate a focused input[type=date] when it gets blurred by being destroyed (bugfix)', asyncSpec (next) ->
+          form = fixture('form[action="/path"]')
+          target = e.affix(form, '.target')
+          input = e.affix(form, 'input[type=date][name=birthday][up-validate=".target"]')
+          up.hello(form)
+
+          input.focus()
+
+          next ->
+            input.value = '2017-12-31'
+
+            # Destroying the input will detach it, which will cause it to lose focus and emit a `blur` event.
+            up.destroy(form)
+
+          next ->
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+
+            expect(window).not.toHaveUnhandledRejections()
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())

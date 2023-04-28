@@ -6835,6 +6835,18 @@ describe 'up.fragment', ->
         next.after 150, ->
           expect(destructor.calls.count()).toBe(1)
 
+      it 'calls destructors while the element is still attached', ->
+        attachmentSpy = jasmine.createSpy('attachment spy')
+        compiler = (element) ->
+            -> attachmentSpy(element.isConnected)
+        up.compiler('.element', compiler)
+
+        element = fixture('.element')
+        up.hello(element)
+        up.destroy(element)
+
+        expect(attachmentSpy).toHaveBeenCalledWith(true)
+
       it 'marks the old element as [aria-hidden=true] before destructors', (done) ->
         testElement = (element) ->
           expect(element).toHaveText('old text')
@@ -7679,14 +7691,14 @@ describe 'up.fragment', ->
 
         expect(callback).toHaveBeenCalled()
 
-      it "runs the callback when the fragment's descendant is aborted", ->
+      it "does not run the callback when the fragment's sibling is aborted", ->
         fragment = fixture('.fragment')
-        descendant = e.affix(fragment, '.descendant')
+        sibling = fixture('.sibling')
         callback = jasmine.createSpy('aborted callback')
         up.fragment.onAborted(fragment, callback)
         expect(callback).not.toHaveBeenCalled()
 
-        up.fragment.abort(descendant)
+        up.fragment.abort(sibling)
 
         expect(callback).not.toHaveBeenCalled()
 
@@ -7699,6 +7711,30 @@ describe 'up.fragment', ->
         up.fragment.abort(fragment)
 
         expect(callback).not.toHaveBeenCalled()
+
+      it "does not run the callback when the fragment's descendant is aborted", ->
+        fragment = fixture('.fragment')
+        descendant = e.affix(fragment, '.descendant')
+        callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+        expect(callback).not.toHaveBeenCalled()
+
+        up.fragment.abort(descendant)
+
+        expect(callback).not.toHaveBeenCalled()
+
+      describe 'with { around } option', ->
+
+        it "also runs the callback when the fragment's descendant is aborted", ->
+          fragment = fixture('.fragment')
+          descendant = e.affix(fragment, '.descendant')
+          callback = jasmine.createSpy('aborted callback')
+          up.fragment.onAborted(fragment, { around: true }, callback)
+          expect(callback).not.toHaveBeenCalled()
+
+          up.fragment.abort(descendant)
+
+          expect(callback).toHaveBeenCalled()
 
   describe 'up.fragment.parseTargetSteps()', ->
 

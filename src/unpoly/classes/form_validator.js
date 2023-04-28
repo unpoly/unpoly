@@ -12,9 +12,11 @@ up.FormValidator = class FormValidator {
   }
 
   honorAbort() {
-    up.fragment.onAborted(this.form, ({ target }) => {
-      this.dirtySolutions = u.reject(this.dirtySolutions, ({ element }) => target.contains(element))
-    })
+    up.fragment.onAborted(this.form, { around: true }, ({ target }) => this.unscheduleSolutionsWithin(target))
+  }
+
+  unscheduleSolutionsWithin(container) {
+    this.dirtySolutions = u.reject(this.dirtySolutions, ({ element }) => container.contains(element))
   }
 
   resetNextRenderPromise() {
@@ -23,7 +25,9 @@ up.FormValidator = class FormValidator {
 
   watchContainer(fieldOrForm) {
     let { event } = this.originOptions(fieldOrForm)
-    up.on(fieldOrForm, event, () => up.error.muteUncriticalRejection(this.validate({ origin: fieldOrForm })))
+    let guard = () => up.fragment.isAlive(fieldOrForm)
+    let callback = () => up.error.muteUncriticalRejection(this.validate({ origin: fieldOrForm }))
+    up.on(fieldOrForm, event, { guard }, callback)
   }
 
   validate(options = {}) {
@@ -69,13 +73,18 @@ up.FormValidator = class FormValidator {
     if (u.isString(target) && target) {
       up.puts('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = up.fragment.splitTarget(target)
-      return simpleSelectors.map(function(simpleSelector) {
-        return {
-          element: up.fragment.get(simpleSelector, { origin }),
-          target: simpleSelector,
-          origin
+      return u.compact(simpleSelectors.map(function(simpleSelector) {
+        let element = up.fragment.get(simpleSelector, { origin })
+        if (element) {
+          return {
+            element,
+            target: simpleSelector,
+            origin
+          }
+        } else {
+          up.fail('Validation target "%s" does not match an element', simpleSelector)
         }
-      })
+      }))
     }
   }
 
@@ -121,7 +130,7 @@ up.FormValidator = class FormValidator {
 
   async doRenderDirtySolutions() {
     // Remove solutions for elements that were detached while we were waiting for the timer.
-    this.dirtySolutions = u.filter(this.dirtySolutions, ({ element, origin }) => element.isConnected && origin.isConnected)
+    this.dirtySolutions = u.filter(this.dirtySolutions, ({ element, origin }) => up.fragment.isAlive(element) && up.fragment.isAlive(origin))
     if (!this.dirtySolutions.length || this.rendering) {
       return
     }

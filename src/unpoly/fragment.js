@@ -1282,11 +1282,20 @@ up.fragment = (function() {
     return up.emit(parent, 'up:fragment:destroyed', {fragment, parent, log})
   }
 
-  function isDestroying(element) {
-    return !!element.closest('.up-destroying')
+  function isNotDestroying(element) {
+    return !element.closest('.up-destroying')
   }
 
-  const isNotDestroying = u.negate(isDestroying)
+  /*-
+  Returns whether the given fragment is both connected and not currently in a destroy animation.
+
+  @function up.fragment.isAlive
+  @param {Element} fragment
+  @internal
+  */
+  function isAlive(fragment) {
+    return fragment.isConnected && isNotDestroying(fragment)
+  }
 
   /*-
   Returns the first fragment matching the given CSS selector.
@@ -2705,8 +2714,10 @@ up.fragment = (function() {
     A function that unsubscribes the callback.
   @experimental
   */
-  function onAborted(fragment, callback) {
-    let guard = (event) => event.target.contains(fragment)
+  function onAborted(fragment, ...args) {
+    let callback = u.extractCallback(args)
+    let options = u.extractOptions(args)
+    let guard = (event) => event.target.contains(fragment) || (options.around && fragment.contains(event.target))
     let unsubscribe = up.on('up:fragment:aborted', { guard }, callback)
     // Since we're binding to an element that is an ancestor of the fragment,
     // we need to unregister the event listener when the form is removed.
@@ -2760,6 +2771,7 @@ up.fragment = (function() {
     onAborted,
     splitTarget,
     parseTargetSteps,
+    isAlive,
     // timer: scheduleTimer
   }
 })()
