@@ -207,13 +207,14 @@ up.fragment = (function() {
     // These defaults will be set to both success and fail options
     // if { navigate: true } is given.
     navigateOptions: {
-      cache: 'auto',   // preflight
-      feedback: true,  // preflight
-      fallback: true,  // FromContent
-      focus: 'auto',   // UpdateLayer/OpenLayer
-      scroll: 'auto',  // UpdateLayer/OpenLayer
-      history: 'auto', // UpdateLayer/OpenLayer
-      peel: true      // UpdateLayer/OpenLayer
+      cache: 'auto',
+      revalidate: 'auto',
+      feedback: true,
+      fallback: true,
+      focus: 'auto',
+      scroll: 'auto',
+      history: 'auto',
+      peel: true,
     },
 
     matchAroundOrigin: true,
@@ -663,10 +664,17 @@ up.fragment = (function() {
 
     With `{ cache: false }` Unpoly will always make a network request.
 
-  @param {boolean} [options.revalidate='auto']
+  @param {boolean} [options.revalidate]
     Whether to reload the targeted fragment after it was rendered from a cached response.
 
-    Also see `up.fragment.config.autoRevalidate`.
+    With `{ revalidate: 'auto' }` Unpoly will revalidate if the `up.fragment.config.autoRevalidate(response)`
+    returns `true`. By default this configuration will return true for
+    [expired](/up.fragment.config#config.autoRevalidate) responses.
+
+    With `{ revalidate: true }` Unpoly will always revalidate cached content, regardless
+    of its age.
+
+    With `{ revalidate: false }` Unpoly will never revalidate cached content.
 
   @param {boolean|string} [options.expireCache]
     Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.

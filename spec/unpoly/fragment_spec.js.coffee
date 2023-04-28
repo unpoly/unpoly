@@ -1060,7 +1060,7 @@ describe 'up.fragment', ->
             it 'calls an { onOffline } instead of { onFinished } after revalidation fails', asyncSpec (next) ->
               onOffline = jasmine.createSpy('onOffline handler')
               onFinished = jasmine.createSpy('onFinished handler')
-              up.render('.target', { url: '/path', cache: true, onOffline, onFinished })
+              up.render('.target', { url: '/path', cache: true, revalidate: true, onOffline, onFinished })
 
               next ->
                 expect(up.network.isBusy()).toBe(true)
@@ -5722,10 +5722,9 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
 
-        describe 'cache revalidation', ->
+        describe 'cache revalidation with { revalidate }', ->
 
           beforeEach (done) ->
-            up.fragment.config.autoRevalidate = (response) => response.age >= 0
             fixture('.target', text: 'initial text')
 
             up.request('/cached-path', { cache: true })
@@ -5735,7 +5734,7 @@ describe 'up.fragment', ->
               done()
 
           it 'reloads a fragment that was rendered from an older cached response', asyncSpec (next) ->
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5748,17 +5747,17 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('verified text')
 
-          it 'does not verify a fragment rendered from a recent cached response', asyncSpec (next) ->
+          it 'does not verify a fragment rendered from a recent cached response with { revalidate: "auto" }', asyncSpec (next) ->
             up.fragment.config.autoRevalidate = (response) => response.age >= 10 * 1000
 
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: 'auto' })
 
             next ->
               expect('.target').toHaveText('cached text')
               expect(up.network.isBusy()).toBe(false)
 
           it "does not verify a fragment that wasn't rendered from a cached response", asyncSpec (next) ->
-            up.render('.target', { url: '/uncached-path', cache: true })
+            up.render('.target', { url: '/uncached-path', cache: true, revalidate: true })
 
             next ->
               expect(up.network.isBusy()).toBe(true)
@@ -5766,21 +5765,21 @@ describe 'up.fragment', ->
               jasmine.respondWithSelector('.target', text: 'server text')
 
           it 'does not verify a fragment when prepending content with :before', asyncSpec (next) ->
-            up.render('.target:before', { url: '/cached-path', cache: true })
+            up.render('.target:before', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('cached text' + 'initial text')
               expect(up.network.isBusy()).toBe(false)
 
           it 'does not verify a fragment when appending content with :after', asyncSpec (next) ->
-            up.render('.target:after', { url: '/cached-path', cache: true })
+            up.render('.target:after', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('initial text' + 'cached text')
               expect(up.network.isBusy()).toBe(false)
 
           it 'does not render a second time if the revalidation response is a 304 Not Modified', asyncSpec (next) ->
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5795,7 +5794,7 @@ describe 'up.fragment', ->
           it 'does not render a second time if the revalidation response has the same text as the expired response', asyncSpec (next) ->
             insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
             up.on('up:fragment:inserted', insertedSpy)
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect(insertedSpy.calls.count()).toBe(1)
@@ -5817,7 +5816,7 @@ describe 'up.fragment', ->
           it 'does not use options like { confirm } or { feedback } when verifying', asyncSpec (next) ->
             confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
 
-            up.render('.target', { url: '/cached-path', cache: true, confirm: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, confirm: true })
             expect(confirmSpy.calls.count()).toBe(1)
 
             next ->
@@ -5828,7 +5827,7 @@ describe 'up.fragment', ->
 
           it "delays revalidation until the original transition completed, so an element isn't changed in-flight", asyncSpec (next) ->
             up.motion.config.enabled = true
-            up.render('.target', { url: '/cached-path', cache: true, transition: 'cross-fade', easing: 'linear', duration: 200 })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, transition: 'cross-fade', easing: 'linear', duration: 200 })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5847,7 +5846,7 @@ describe 'up.fragment', ->
           it 'delays { onFinished } callback until the fragment was verified', asyncSpec (next) ->
             finishedCallback = jasmine.createSpy('finished callback')
 
-            up.render('.target', { url: '/cached-path', cache: true, onFinished: finishedCallback })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished: finishedCallback })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5865,7 +5864,7 @@ describe 'up.fragment', ->
           it 'delays up.render().finished promise until the fragment was verified', asyncSpec (next) ->
             finishedCallback = jasmine.createSpy('finished callback')
 
-            job = up.render('.target', { url: '/cached-path', cache: true })
+            job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
             job.finished.then(finishedCallback)
 
             next ->
@@ -5886,7 +5885,7 @@ describe 'up.fragment', ->
             finishedCallback = jasmine.createSpy('finished callback')
             finishedFailedCallback = jasmine.createSpy('finished callback')
 
-            job = up.render('.target', { url: '/cached-path', cache: true })
+            job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
             job.finished.then(finishedCallback, finishedFailedCallback)
 
             next ->
@@ -5907,7 +5906,7 @@ describe 'up.fragment', ->
           it 'runs the { onRendered } a second time for the second render pass', asyncSpec (next) ->
             onRendered = jasmine.createSpy('onRendered callback')
 
-            up.render('.target', { url: '/cached-path', cache: true, onRendered })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5928,7 +5927,7 @@ describe 'up.fragment', ->
             guardEvent = up.event.build('my:guard')
             up.on('my:guard', guardEventListener)
 
-            up.render('.target', { url: '/cached-path', cache: true, guardEvent })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, guardEvent })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5946,7 +5945,7 @@ describe 'up.fragment', ->
 
             up.viewport.root.scrollTop = 0
 
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5963,7 +5962,7 @@ describe 'up.fragment', ->
               expect(up.viewport.root.scrollTop).toBe(500)
 
           it "preserves user's changes in focus between the first and second render pass", asyncSpec (next) ->
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -5985,7 +5984,7 @@ describe 'up.fragment', ->
 
             expect(compiler.calls.count()).toBe(1)
 
-            up.render('.target', { url: '/cached-path', cache: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
             next ->
               expect('.target').toHaveText('cached text')
@@ -6011,7 +6010,7 @@ describe 'up.fragment', ->
 
             it 'does not call { onRendered } a second time', asyncSpec (next) ->
               onRendered = jasmine.createSpy('onRendered handler')
-              up.render('.target', { url: '/cached-path', cache: true, onRendered })
+              up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered })
 
               next ->
                 expect(onRendered.calls.count()).toBe(1)
@@ -6030,7 +6029,7 @@ describe 'up.fragment', ->
             it 'calls { onFinished } with the cached up.RenderResult from the first render pass', asyncSpec (next) ->
               onFinished = jasmine.createSpy('onFinished handler')
               onRendered = jasmine.createSpy('onRendered handler')
-              up.render('.target', { url: '/cached-path', cache: true, onRendered, onFinished })
+              up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onRendered, onFinished })
 
               next ->
                 expect('.target').toHaveText('cached text')
@@ -6059,7 +6058,7 @@ describe 'up.fragment', ->
               flags = []
               up.on 'up:fragment:loaded', (event) -> flags.push(event.revalidating)
 
-              up.render('.target', { url: '/cached-path', cache: true })
+              up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
 
               next ->
                 expect('.target').toHaveText('cached text')
@@ -6078,7 +6077,7 @@ describe 'up.fragment', ->
                 if event.revalidating
                   event.preventDefault()
 
-              finishedPromise = up.render('.target', { url: '/cached-path', cache: true }).finished
+              finishedPromise = up.render('.target', { url: '/cached-path', cache: true, revalidate: true }).finished
 
               next ->
                 expect('.target').toHaveText('cached text')
@@ -6101,7 +6100,7 @@ describe 'up.fragment', ->
                 if event.revalidating
                   event.skip()
 
-              finishedPromise = up.render('.target', { url: '/cached-path', cache: true }).finished
+              finishedPromise = up.render('.target', { url: '/cached-path', cache: true, revalidate: true }).finished
 
               next ->
                 expect('.target').toHaveText('cached text')

@@ -1060,7 +1060,14 @@ up.link = (function() {
     Whether to reload the [targeted fragment](/targeting-fragments)
     after it was rendered from a cached response.
 
-    Also see `up.fragment.config.autoRevalidate`.
+    With `[up-revalidate='auto']` Unpoly will revalidate if the `up.fragment.config.autoRevalidate(response)`
+    returns `true`. By default this configuration will return true for
+    [expired](/up.fragment.config#config.autoRevalidate) responses.
+
+    With `[up-revalidate='true']` Unpoly will always revalidate cached content, regardless
+    of its age.
+
+    With `[up-revalidate='false']` Unpoly will never revalidate cached content.
 
   @param [up-expire-cache]
     Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
