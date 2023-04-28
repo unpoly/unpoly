@@ -1299,7 +1299,6 @@ describe 'up.form', ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.credentials')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email password')
 
-
       describe 'with a CSS selector matching a field', ->
 
         it 'validates the closest form group', asyncSpec (next) ->
@@ -1457,6 +1456,26 @@ describe 'up.form', ->
           next ->
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.other-target')
             expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+
+        it 'update this form with [up-validate=form] (bugfix)', asyncSpec (next) ->
+          form1 = fixture('form.form')
+          form2 = fixture('form.form')
+          form3 = fixture('form.form')
+
+          form2Field = e.affix(form2, 'input[name=email][up-validate="form"]')
+
+          up.validate(form2Field)
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('form')
+
+            jasmine.respondWithSelector('form.form', text: 'new text')
+
+          next ->
+            [form1, form2, form3] = document.querySelectorAll('form.form')
+            expect(form1).toHaveText('')
+            expect(form2).toHaveText('new text')
+            expect(form3).toHaveText('')
 
         it 'does not crash a pending validation batch if the [up-validate] attribute value matches no element', asyncSpec (next) ->
           form = fixture('form[action=/form]')
