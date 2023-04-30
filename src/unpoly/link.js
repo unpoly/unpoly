@@ -192,7 +192,10 @@ up.link = (function() {
   @param {Array<string>} [config.clickableSelectors]
     A list of CSS selectors matching elements that should behave like links or buttons.
 
+    @include clickable-behaviors
+
     @see [up-clickable]
+    @see [up-href]
     @experimental
   @stable
   */
@@ -669,11 +672,19 @@ up.link = (function() {
   }
 
   /*-
-  Enables keyboard interaction for elements that should behave like links or buttons.
+  Enables keyboard interaction for elements that represent links or buttons.
 
-  The element will be focusable and screen readers will announce it as a link.
+  To define the element's effect when activated, handle the `up:click` event.
+  If you want Unpoly to treat this element like a hyperlink, set an `[up-href]` attribute.
 
-  Also see [`up.link.config.clickableSelectors`](/up.link.config#config.clickableSelectors).
+  ### Accessibility
+
+  @include clickable-behaviors
+
+  ### Unobtrusive use
+
+  To add these behaviors to existing elements without setting the `[up-clickable]`,
+  push a selector into [`up.link.config.clickableSelectors`](/up.link.config#config.clickableSelectors).
 
   @selector [up-clickable]
   @experimental
@@ -707,8 +718,8 @@ up.link = (function() {
 
   - It is emitted on mousedown for [up-instant] elements
   - It is not emitted if the element has disappeared (or was overshadowed)
-    between mousedown and click. This can happen if mousedown creates a layer
-    over the element, or if a mousedown handler removes a handler.
+    between `mousedown` and `click`. This can happen if `mousedown` creates a new element
+    that obstructs interaction with this element, or if a `mousedown` handler removes a handler.
 
   Stopping an up:click event will also stop the underlying event.
 
@@ -905,6 +916,8 @@ up.link = (function() {
 
     Instead of making a server request, you may also pass an existing HTML string as
     `[up-document]` or `[up-content]` attribute.
+
+    To use a different URL when a link is followed through Unpoly, set an `[up-href]` attribute.
 
   @param [up-target]
     The [target selector](/targeting-fragments) to update.
@@ -1295,6 +1308,43 @@ up.link = (function() {
       up.error.muteUncriticalRejection(follow(link))
     }
   })
+
+  /*-
+  Makes any element behave like a hyperlink.
+
+  ### Example
+
+  The following `<span>` element will [navigate](/a-up-follow) to `/details` when clicked:
+
+  ```html
+  <span up-href="/details">Read more</span>
+  ```
+
+  ### Accessibility
+
+  @include clickable-behaviors
+
+  The link-like element cannot be opened in a new tab.
+
+  ### Advantages of `<a>` elements
+
+  In general you should prefer using regular hyperlinks (`a[href]`) over elements with `[up-href]`:
+
+  - Only regular links allow the user to open the destination in a new tab
+  - Regular links still work when JavaScript is unavailable.
+  - Regular links can be followed from crawlers like Google
+
+  `<a>` elements are also exceptional in that they may [contain block elements](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
+
+  A use case for `[up-href]` is when you want to *prevent* the user from opening a link in a new tab.
+
+  @selector [up-href]
+  @param [up-href]
+    The URL to load when activated.
+  @params-note
+    All attributes for `a[up-follow]` may be used.
+  @stable
+  */
 
   /*-
   Follows this link on `mousedown` instead of `click`.

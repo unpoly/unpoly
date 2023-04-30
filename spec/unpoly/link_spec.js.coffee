@@ -1757,6 +1757,29 @@ describe 'up.link', ->
             next =>
               expect(@followSpy).not.toHaveBeenCalled()
 
+    describe '[up-href]', ->
+
+      it 'makes any element behave like an a[up-follow] link', asyncSpec (next) ->
+        link = fixture('span[up-href="/follow-path"][up-target=".target"]')
+        up.hello(link)
+        fixture('.target', text: 'old text')
+
+        Trigger.click(link)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
+
+          jasmine.respondWithSelector('.target', text: 'new text')
+
+        next ->
+          expect('.target').toHaveText('new text')
+
+      it 'gives the element a pointer cursor', asyncSpec (next) ->
+        link = fixture('span[up-href="/follow-path"][up-target=".target"]')
+        up.hello(link)
+
+        expect(link).toHaveCursorStyle('pointer')
+
     if up.migrate.loaded
 
       describe '[up-dash]', ->
