@@ -1232,19 +1232,19 @@ describe 'up.fragment', ->
 
             up.render(target: '.element', url: '/path')
 
-            event1 = { type: 'foo', prop: 'bar '}
-            event2 = { type: 'baz', prop: 'bam '}
+            event1Plan = { type: 'foo', prop: 'bar '}
+            event2Plan = { type: 'baz', prop: 'bam '}
 
             spyOn(up, 'emit').and.callThrough()
 
             next =>
               @respondWith
-                responseHeaders: { 'X-Up-Events': JSON.stringify([event1, event2]) }
+                responseHeaders: { 'X-Up-Events': JSON.stringify([event1Plan, event2Plan]) }
                 responseText: '<div class="element"></div>'
 
             next ->
-              expect(up.emit).toHaveBeenCalledWith(event1)
-              expect(up.emit).toHaveBeenCalledWith(event2)
+              expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
+              expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
 
         describe 'when the server sends an X-Up-Accept-Layer header', ->
 
@@ -1254,18 +1254,21 @@ describe 'up.fragment', ->
               callback = jasmine.createSpy('onAccepted callback')
               up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
 
-              next =>
-                @respondWithSelector('.target')
-
-              next =>
-                up.render({ url: '/path2', target: '.target'})
-
-              next =>
-                expect(callback).not.toHaveBeenCalled()
-
-                @respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "123" })
+              next ->
+                expect(up.layer.mode).toBe('root')
+                jasmine.respondWithSelector('.target')
 
               next ->
+                expect(up.layer.mode).toBe('modal')
+                up.render({ url: '/path2', target: '.target'})
+
+              next ->
+                expect(callback).not.toHaveBeenCalled()
+
+                jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "123" })
+
+              next ->
+                expect(up.layer.mode).toBe('root')
                 expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 123))
 
             it 'does not require the server to render content when the overlay will close anyway (when updating a layer)', asyncSpec (next) ->
@@ -1273,19 +1276,38 @@ describe 'up.fragment', ->
 
               up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
 
-              next =>
-                @respondWithSelector('.target')
+              next ->
+                jasmine.respondWithSelector('.target')
 
-              next =>
+              next ->
                 up.render({ url: '/path2', target: '.target' })
 
-              next =>
+              next ->
                 expect(callback).not.toHaveBeenCalled()
 
-                @respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+                jasmine.respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
 
               next ->
                 expect(callback).toHaveBeenCalled()
+
+            it 'makes the discarded response available to up:layer:accepted listeners as a { response } property', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+
+              next ->
+                jasmine.respondWithSelector('.target')
+
+              next ->
+                up.render({ url: '/path2', target: '.target'})
+
+              next ->
+                expect(callback).not.toHaveBeenCalled()
+
+                jasmine.respondWith('<div class="target">new content</div>', responseHeaders: { 'X-Up-Accept-Layer': "123" })
+
+              next ->
+                expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
+                expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="target">new content</div>')
 
           describe 'when updating the root layer', ->
 
@@ -1336,19 +1358,41 @@ describe 'up.fragment', ->
             callback = jasmine.createSpy('onDismissed callback')
             up.layer.open({ onDismissed: callback, url: '/path', target: '.target' })
 
-            next =>
-              @respondWithSelector('.target')
-
-            next =>
-              up.render({ url: '/path2', target: '.target'})
-
-            next =>
-              expect(callback).not.toHaveBeenCalled()
-
-              @respondWithSelector('.target', responseHeaders: { 'X-Up-Dismiss-Layer': "123" })
+            next ->
+              expect(up.layer.mode).toBe('root')
+              jasmine.respondWithSelector('.target')
 
             next ->
+              expect(up.layer.mode).toBe('modal')
+              up.render({ url: '/path2', target: '.target'})
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Dismiss-Layer': "123" })
+
+            next ->
+              expect(up.layer.mode).toBe('root')
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 123))
+
+          it 'makes the discarded response available to up:layer:accepted listeners as a { response } property', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onDismissed: callback, url: '/path', target: '.target' })
+
+            next ->
+              jasmine.respondWithSelector('.target')
+
+            next ->
+              up.render({ url: '/path2', target: '.target'})
+
+            next ->
+              expect(callback).not.toHaveBeenCalled()
+
+              jasmine.respondWith('<div class="target">new content</div>', responseHeaders: { 'X-Up-Dismiss-Layer': "123" })
+
+            next ->
+              expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
+              expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="target">new content</div>')
 
         describe 'when the server sends no content', ->
 
@@ -1358,8 +1402,8 @@ describe 'up.fragment', ->
 
             promise = up.render(target: '.one', url: '/path')
 
-            next =>
-              @respondWith(status: 304, responseText: '')
+            next ->
+              jasmine.respondWith(status: 304, responseText: '')
 
             next ->
               expect('.one').toHaveText('old one')
@@ -1376,8 +1420,8 @@ describe 'up.fragment', ->
 
             promise = up.render(target: '.one', url: '/path')
 
-            next =>
-              @respondWith(status: 204, responseText: '')
+            next ->
+              jasmine.respondWith(status: 204, responseText: '')
 
             next ->
               expect('.one').toHaveText('old one')

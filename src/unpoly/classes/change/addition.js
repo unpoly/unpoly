@@ -9,6 +9,7 @@ up.Change.Addition = class Addition extends up.Change {
     this.acceptLayer = options.acceptLayer
     this.dismissLayer = options.dismissLayer
     this.eventPlans = options.eventPlans || []
+    this.response = options.meta?.response
   }
 
   handleLayerChangeRequests() {
@@ -19,7 +20,7 @@ up.Change.Addition = class Addition extends up.Change {
 
       // A close condition { acceptLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryAcceptForLocation()
+      this.layer.tryAcceptForLocation(this.responseOption())
       this.abortWhenLayerClosed()
 
       // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
@@ -28,7 +29,7 @@ up.Change.Addition = class Addition extends up.Change {
 
       // A close condition { dismissLocation: '/path' } might have been
       // set when the layer was opened.
-      this.layer.tryDismissForLocation()
+      this.layer.tryDismissForLocation(this.responseOption())
       this.abortWhenLayerClosed()
     }
 
@@ -42,7 +43,7 @@ up.Change.Addition = class Addition extends up.Change {
     // A listener to such a server-sent event might also close the layer.
     this.layer.asCurrent(() => {
       for (let eventPlan of this.eventPlans) {
-        up.emit(eventPlan)
+        up.emit({ ...eventPlan, ...this.responseOption() })
         this.abortWhenLayerClosed()
       }
     })
@@ -51,14 +52,14 @@ up.Change.Addition = class Addition extends up.Change {
   tryAcceptLayerFromServer() {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
     if (u.isDefined(this.acceptLayer) && this.layer.isOverlay()) {
-      this.layer.accept(this.acceptLayer)
+      this.layer.accept(this.acceptLayer, this.responseOption())
     }
   }
 
   tryDismissLayerFromServer() {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
     if (u.isDefined(this.dismissLayer) && this.layer.isOverlay()) {
-      this.layer.dismiss(this.dismissLayer)
+      this.layer.dismiss(this.dismissLayer, this.responseOption())
     }
   }
 
@@ -102,4 +103,9 @@ up.Change.Addition = class Addition extends up.Change {
     this.setTime(options)
     this.setETag(options)
   }
+
+  responseOption() {
+    return { response: this.response }
+  }
+
 }

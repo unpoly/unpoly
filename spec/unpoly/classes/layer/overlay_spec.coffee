@@ -164,6 +164,38 @@ describe 'up.Layer.Overlay', ->
       next.after 600, ->
         expect(document).not.toHaveSelector('up-modal')
 
+    describe 'with { response } option', ->
+
+      it 'makes the response available to { onAccept } listeners', asyncSpec (next) ->
+        onAccept = jasmine.createSpy('listener')
+        response = new up.Response()
+
+        up.layer.open({ mode: 'modal', onAccept })
+
+
+        next ->
+          expect(up.layer.mode).toBe('modal')
+
+          up.layer.current.accept('value', { response })
+
+        next ->
+          expect(onAccept).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'value', response }))
+
+      it 'makes the response available to { onAccepted } listeners', asyncSpec (next) ->
+        onAccepted = jasmine.createSpy('listener')
+        response = new up.Response()
+
+        up.layer.open({ mode: 'modal', onAccepted })
+
+
+        next ->
+          expect(up.layer.mode).toBe('modal')
+
+          up.layer.current.accept('value', { response })
+
+        next ->
+          expect(onAccepted).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'value', response }))
+
     describe 'events', ->
 
       it 'emits an up:layer:accept event with the acceptance value'

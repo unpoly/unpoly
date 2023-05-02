@@ -100,19 +100,19 @@ describe 'up.layer', ->
           it 'emits these events', asyncSpec (next) ->
             up.layer.open(target: '.element', url: '/path')
 
-            event1 = { type: 'foo', prop: 'bar '}
-            event2 = { type: 'baz', prop: 'bam '}
+            event1Plan = { type: 'foo', prop: 'bar '}
+            event2Plan = { type: 'baz', prop: 'bam '}
 
             spyOn(up, 'emit').and.callThrough()
 
             next =>
               @respondWith
-                responseHeaders: { 'X-Up-Events': JSON.stringify([event1, event2]) }
+                responseHeaders: { 'X-Up-Events': JSON.stringify([event1Plan, event2Plan]) }
                 responseText: '<div class="element"></div>'
 
             next ->
-              expect(up.emit).toHaveBeenCalledWith(event1)
-              expect(up.emit).toHaveBeenCalledWith(event2)
+              expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
+              expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
 
       describe 'from a string of HTML', ->
 
@@ -840,6 +840,67 @@ describe 'up.layer', ->
               expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:accepted')
               expect(callback.calls.mostRecent().args[0].value).toBe(fooEvent)
 
+          describe 'when the server sends a matching event via X-Up-Events', ->
+
+            it 'accepts the overlay', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({ onAccepted: callback, acceptEvent: 'my:event', target: '.modal-content' })
+
+              next ->
+                expect(up.layer.mode).toBe('modal')
+                expect(callback).not.toHaveBeenCalled()
+
+                up.navigate({ url: '/path', target: '.modal-content' })
+
+              next ->
+                expect(up.layer.mode).toBe('modal')
+                expect(callback).not.toHaveBeenCalled()
+
+                jasmine.respondWithSelector('.modal-content', {
+                  responseHeaders: {
+                    'X-Up-Events': JSON.stringify([{ type: 'my:event', foo: 'foo-value', layer: 'current' }])
+                  }
+                })
+
+              next ->
+                expect(up.layer.mode).toBe('root')
+
+                expect(callback).toHaveBeenCalledWith(
+                  jasmine.objectContaining({
+                    value: jasmine.objectContaining({
+                      type: 'my:event',
+                      foo: 'foo-value'
+                    })
+                  })
+                )
+
+            it 'makes the response available to up:layer:accepted listeners as a { response } property', asyncSpec (next) ->
+              callback = jasmine.createSpy('onAccepted callback')
+              up.layer.open({ onAccepted: callback, acceptEvent: 'my:event', target: '.modal-content' })
+
+              next ->
+                expect(up.layer.mode).toBe('modal')
+                expect(callback).not.toHaveBeenCalled()
+
+                up.navigate({ url: '/path', target: '.modal-content' })
+
+              next ->
+                expect(up.layer.mode).toBe('modal')
+                expect(callback).not.toHaveBeenCalled()
+
+                jasmine.respondWith({
+                  responseText: '<div class="modal-content">closing text</div>'
+                  responseHeaders: {
+                    'X-Up-Events': JSON.stringify([{ type: 'my:event', layer: 'current' }])
+                  }
+                })
+
+              next ->
+                expect(up.layer.mode).toBe('root')
+
+                expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
+                expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="modal-content">closing text</div>')
+
           it 'does not accept the layer when the given event was emitted on another layer', asyncSpec (next) ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({ onAccepted: callback, acceptEvent: 'foo' })
@@ -930,16 +991,19 @@ describe 'up.layer', ->
             })
 
             next ->
+              expect(up.layer.mode).toBe('modal')
               expect(callback).not.toHaveBeenCalled()
 
               up.navigate('.overlay-content', content: 'other content', location: '/other-location')
 
             next ->
+              expect(up.layer.mode).toBe('modal')
               expect(callback).not.toHaveBeenCalled()
 
               up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
 
             next ->
+              expect(up.layer.mode).toBe('root')
               value = { location: u.normalizeURL('/acceptable-location') }
               expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
@@ -1019,6 +1083,33 @@ describe 'up.layer', ->
             expect(callback).not.toHaveBeenCalled()
 
           it 'immediately accepts a layer that was opened at the given location'
+
+          it 'makes the discarded response available to up:layer:accepted listeners as a { response } property', asyncSpec (next) ->
+            callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({
+              target: '.overlay-content',
+              content: 'start content'
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: '/acceptable-location'
+            })
+
+            next ->
+              expect(up.layer.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
+
+              up.navigate('.overlay-content', url: '/acceptable-location', history: true)
+
+            next ->
+              expect(up.layer.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
+
+              jasmine.respondWith('<div class="overlay-content">closing content</div>')
+
+            next ->
+              expect(up.layer.mode).toBe('root')
+              expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
+              expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="overlay-content">closing content</div>')
 
         describe '{ dismissLocation }', ->
 

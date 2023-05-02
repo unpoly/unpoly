@@ -137,6 +137,27 @@ To emit an event, use one of the following methods:
 | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 
 
+### Using the discarded response
+
+When server response reaches a close condition, the overlay closes immediately. No content from that response is rendered.
+
+Sometimes you need to access the discarded response, e.g. to render its content in another layer.
+For this you can access response via the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
+
+For example, the link link opens an overlay with a form to create a new company (`/companies/new`).
+After successful creation the form redirects to the list of companies (`/companies`). In that case
+we can use the HTML from the response and render it into the parent layer:   
+
+```html
+<a href="/companies/new"
+   up-layer="new"
+   up-accept-location="/companies"
+   up-on-accepted="up.render('.companies', { document: event.response.text }"> <!-- mark-phrase "event.response.text" -->
+  New company
+</a>
+```
+
+
 Closing from the server
 ----------------------
 

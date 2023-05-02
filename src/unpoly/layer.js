@@ -380,7 +380,7 @@ up.layer = (function() {
   }
 
   function closeCallbackAttr(link, attr) {
-    return e.callbackAttr(link, attr, { exposedKeys: ['layer', 'value'] })
+    return e.callbackAttr(link, attr, { exposedKeys: ['layer', 'value', 'response'] })
   }
 
   function reset() {
@@ -777,6 +777,7 @@ up.layer = (function() {
     | `this`     | The link that originally opened the overlay   |
     | `layer`    | An `up.Layer` object for the accepted overlay |
     | `value`    | The overlay's [acceptance value](/closing-overlays#overlay-result-values) |
+    | `response` | The server response that caused the overlay to close |
     | `event`    | An `up:layer:accepted` event                  |
 
   @param [up-on-dismissed]
@@ -789,6 +790,7 @@ up.layer = (function() {
     | `this`     | The link that originally opened the overlay    |
     | `layer`    | An `up.Layer` object for the dismissed overlay |
     | `value`    | The overlay's [dismissal value](/closing-overlays#overlay-result-values) |
+    | `response` | The server response that caused the overlay to close |
     | `event`    | An `up:layer:dismissed` event                  |
 
   @param [up-accept-event]
@@ -1101,12 +1103,20 @@ up.layer = (function() {
   @event up:layer:accept
   @param {up.Layer} event.layer
     The layer that is about to close.
-  @param {Element} [event.value]
+  @param {any} [event.value]
     The overlay's [acceptance value](/closing-overlays#overlay-result-values).
 
     Listeners may replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
+
+    Will be `undefined` if the overlay is not closing by a user interacting with an element.
+  @param {up.Response} [event.response]
+    The server response that is causing this overlay to close.
+
+    Will be `undefined` if the overlay is not closing in reaction to a server response.
+
+    @experimental
   @param event.preventDefault()
     Prevents the overlay from closing.
   @stable
@@ -1119,13 +1129,24 @@ up.layer = (function() {
   is starting. If the layer has no close animaton and was already removed from the DOM,
   the event is emitted a second time on the `document`.
 
+  > [tip]
+  > To prevent a layer from being closed, listen to `up:layer:accept` instead.
+
   @event up:layer:accepted
   @param {up.Layer} event.layer
     The layer that was closed.
-  @param {Element} [event.value]
+  @param {any} [event.value]
     The overlay's final [acceptance value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
-    The element that has caused the layer to close.
+    The element that caused the layer to close.
+
+    Will be `undefined` if the overlay was not closed by a user interacting with an element.
+  @param {up.Response} [event.response]
+    The server response that caused this overlay to close.
+
+    Will be `undefined` if the overlay was not closed in reaction to a server response.
+
+    @experimental
   @stable
   */
 
@@ -1149,12 +1170,20 @@ up.layer = (function() {
   @event up:layer:dismiss
   @param {up.Layer} event.layer
     The layer that is about to close.
-  @param {Element} [event.value]
+  @param {any} [event.value]
     The overlay's [dismissal value](/closing-overlays#overlay-result-values).
 
     Listeners may replace or mutate this value.
   @param {Element} [event.origin]
     The element that is causing the layer to close.
+
+    Will be `undefined` if the overlay is not closing by a user interacting with an element.
+  @param {up.Response} [event.response]
+    The server response that is causing this overlay to close.
+
+    Will be `undefined` if the overlay is not closing in reaction to a server response.
+
+    @experimental
   @param event.preventDefault()
     Event listeners may call this method to prevent the overlay from closing.
   @stable
@@ -1167,13 +1196,24 @@ up.layer = (function() {
   is starting. If the layer has no close animaton and was already removed from the DOM,
   the event is emitted a second time on the `document`.
 
+  > [tip]
+  > To prevent a layer from being closed, listen to `up:layer:dismiss` instead.
+
   @event up:layer:dismissed
   @param {up.Layer} event.layer
     The layer that was closed.
-  @param {Element} [event.value]
+  @param {any} [event.value]
     The overlay's final [dismissal value](/closing-overlays#overlay-result-values).
   @param {Element} [event.origin]
-    The element that has caused the layer to close.
+    The element that caused the layer to close.
+
+    Will be `undefined` if the overlay was not closed by a user interacting with an element.
+  @param {up.Response} [event.response]
+    The server response that caused this overlay to close.
+
+    Will be `undefined` if the overlay was not closed in reaction to a server response.
+
+    @experimental
   @stable
   */
 

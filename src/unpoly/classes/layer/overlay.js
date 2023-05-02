@@ -298,26 +298,26 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     if (!eventTypes) { return; }
     return this.on(eventTypes, event => {
       event.preventDefault()
-      closeFn.call(this, event)
+      closeFn.call(this, event, { response: event.response })
     })
   }
 
-  tryAcceptForLocation() {
-    this.tryCloseForLocation(this.acceptLocation, this.accept)
+  tryAcceptForLocation(options) {
+    this.tryCloseForLocation(this.acceptLocation, this.accept, options)
   }
 
-  tryDismissForLocation() {
-    this.tryCloseForLocation(this.dismissLocation, this.dismiss)
+  tryDismissForLocation(options) {
+    this.tryCloseForLocation(this.dismissLocation, this.dismiss, options)
   }
 
-  tryCloseForLocation(urlPattern, closeFn) {
+  tryCloseForLocation(urlPattern, closeFn, options) {
     let location, resolution
     if (urlPattern && (location = this.location) && (resolution = urlPattern.recognize(location))) {
       // resolution now contains named capture groups, e.g. when
       // '/decks/:deckId/cards/:cardId' is matched against
       // '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
-      const closeValue = { ... resolution, location }
-      closeFn.call(this, closeValue)
+      const closeValue = { ...resolution, location }
+      closeFn.call(this, closeValue, options)
     }
   }
 
