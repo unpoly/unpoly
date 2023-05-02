@@ -75,7 +75,7 @@ The following will capture `{ name: 'alice' }` from the path `/users/alice`:
 To only match digits (`0-9`), use the dollar symbol:
 
 ```text
-/users/:$id
+/users/$id
 ```
 
 @page url-patterns
