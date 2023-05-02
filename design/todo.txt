@@ -7,8 +7,13 @@ Remaining V3 tasks
   - Notify ED
 
 
-Code
-====
+Priority
+=========
+
+
+
+Backlog
+=======
 
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
   - This is really confusing with [up-disable]
@@ -143,8 +148,8 @@ Code
 - A validating fragment should get a .up-validating class
   - Group under up.feedback
   - Maybe we can have a private API
-    - { feedbackLoading: 'up-validating' }
-    - { feedback: { loading: 'up-validating', active: false } }
+    - { feedbackLoadingClass: 'up-validating', feedbackActiveClass: false } ?
+    - { feedback: { loading: 'up-validating', active: false } } ?
     - With history we have separate options { title, location }
 - Consider renaming up.fragment.config.navigateOptions to just up.fragment.config.navigate
   - There is precedence in up.layer.config.overlay
@@ -154,6 +159,8 @@ Code
   - We fixed this in up.form.disableWhile(), but it may still be broken for up.fragment.config.autoFocus options suffixed with "-if-lost"
 - Consider whether validation requests should be background requests by default
   - We should also have [up-watch-background]
+- Why does [up-validate=form] target the first form for some users?
+  - https://github.com/unpoly/unpoly/discussions/474
 
 
 Documentation
