@@ -6175,6 +6175,34 @@ describe 'up.fragment', ->
           next ->
             expect(destructor).toHaveBeenCalled()
 
+        it 'does not run destructors within kept elements when the <body> is targeted (bugfix)', asyncSpec (next) ->
+          destructor = jasmine.createSpy('destructor spy')
+
+          up.compiler('.keepable', (element) -> destructor)
+
+          keepable = fixture('.keepable[up-keep]', text: 'old content')
+
+          up.hello(keepable)
+
+          savedBody = document.body
+
+          try
+            up.render 'body', document: """
+              <body>
+                <div class='keepable' up-keep>new content</div>
+              </body>
+            """
+          finally
+            # Restore the Jasmine test runner that we just nuked
+            document.body.replaceWith(savedBody)
+            # The body get an .up-destroying class when it was swapped. We must remove it
+            # or up.fragment will ignore everything within the body from now on.
+            document.body.classList.remove('up-destroying')
+            document.body.removeAttribute('aria-hidden')
+
+          next ->
+            expect(destructor).not.toHaveBeenCalled()
+
         it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
           up.fragment.config.targetDerivers.unshift('middle-element')
 

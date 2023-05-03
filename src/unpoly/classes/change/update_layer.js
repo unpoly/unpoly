@@ -342,11 +342,17 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
             return () => up.viewport.copyCursorProps(cursorProps, viewport)
           })
 
-          // If keepable is a media element, detaching it (or attaching it to another document) would cause it
-          // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
-          // so it can remain attached while we swap fragment versions. We will move it to its place within
-          // the new fragment version once the swap is complete.
-          document.body.append(keepable)
+          if (this.willChangeElement(document.body)) {
+            // Since we're going to swap the entire oldElement and newElement containers afterwards,
+            // replace the matching element with keepable so it will eventually return to the DOM.
+            keepPlan.newElement.replaceWith(keepable)
+          } else {
+            // If keepable is a media element, detaching it (or attaching it to another document) would cause it
+            // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
+            // so it can remain attached while we swap fragment versions. We will move it to its place within
+            // the new fragment version once the swap is complete.
+            document.body.append(keepable)
+          }
 
           // // Since we're going to swap the entire oldElement and newElement containers afterwards,
           // // replace the matching element with keepable so it will eventually return to the DOM.
@@ -361,6 +367,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
   restoreKeepables(step) {
     for (let keepPlan of step.keepPlans) {
+      // Now that we know the final destination of { newElement }, we can replace it with the keepable.
       keepPlan.newElement.replaceWith(keepPlan.oldElement)
 
       for (let reviver of keepPlan.revivers) {
@@ -502,6 +509,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // one targeted fragment has auto-history.
     const oldFragments = u.map(this.steps, 'oldElement')
     return u.some(oldFragments, up.fragment.hasAutoHistory)
+  }
+
+  willChangeElement(element) {
+    return u.some(this.steps, (step) => step.oldElement.contains(element))
   }
 
   static {
