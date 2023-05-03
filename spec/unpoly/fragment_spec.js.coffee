@@ -6151,6 +6151,30 @@ describe 'up.fragment', ->
             expect('.middle').toHaveText('old-middle')
             expect('.after').toHaveText('new-after')
 
+        it 'does not run destructors within kept elements', asyncSpec (next) ->
+          destructor = jasmine.createSpy('destructor spy')
+
+          up.compiler('.keepable', (element) -> destructor)
+
+          container = fixture('.container')
+          keepable = e.affix(container, '.keepable[up-keep]', text: 'old text')
+
+          up.hello(keepable)
+
+          up.render '.container', document: """
+            <div class='container'>
+              <div class='keepable' up-keep>new text</div>
+            </div>
+          """
+
+          next ->
+            expect(destructor).not.toHaveBeenCalled()
+
+            up.destroy('.container')
+
+          next ->
+            expect(destructor).toHaveBeenCalled()
+
         it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
           up.fragment.config.targetDerivers.unshift('middle-element')
 
@@ -6311,6 +6335,29 @@ describe 'up.fragment', ->
 
             next =>
               expect('.keeper').toHaveText('old-inside')
+
+          it "does not run the element's destructors", asyncSpec (next) ->
+            destructor = jasmine.createSpy('destructor spy')
+
+            up.compiler('.keepable', (element) -> destructor)
+
+            keepable = fixture('.keepable[up-keep]', text: 'old text')
+
+            up.hello(keepable)
+
+            up.render '.keepable', document: """
+              <div class='keepable' up-keep>
+                new text
+              </div>
+            """
+
+            next ->
+              expect(destructor).not.toHaveBeenCalled()
+
+              up.destroy('.keepable')
+
+            next ->
+              expect(destructor).toHaveBeenCalled()
 
           it "only emits an event up:fragment:keep, but not an event up:fragment:inserted", asyncSpec (next) ->
             insertedListener = jasmine.createSpy('subscriber to up:fragment:inserted')
