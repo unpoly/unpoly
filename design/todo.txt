@@ -10,6 +10,8 @@ Remaining V3 tasks
 Priority
 =========
 
+- When rendering uses <up-wrapper> elements, do we set [up-time] and [up-etag] on these wrappers?
+
 
 
 Backlog
