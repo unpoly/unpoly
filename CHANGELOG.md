@@ -8,9 +8,31 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
-3.0.0
+3.1.0
 -----
 
+This release addresses some issues when upgrading from Unpoly 2 to 3:
+
+- Fix a bug where kept `[up-keep]` elements would call their destructors if the `<body>` element is swapped
+- [Validation](/validation) now throw an exception if a validation target cannot be matched (fixes [#476](https://github.com/unpoly/unpoly/issues/476))
+- Fix a bug where focused date inputs would trigger a validation when destroyed
+- [Cache revalidation](/caching#revalidation) is now only the default when [navigating](/navigation). If you render cached content without navigating, you must opt into cache revalidation with `{ cache: 'auto', revalidate: 'auto' }`.
+
+If also fixes some bugs in [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading):
+
+- Fix a bug where the deprecated origin shorthand (`&`) in attribute selector values that contain both square brackets and ampersands (fixes [#478](https://github.com/unpoly/unpoly/issues/478))
+- Fix a bug where `up.$on()` was not polyfilled properly
+- Fix a bug where `up.$off()` was not polyfilled properly
+- Fix a bug where `up.$compiler()` was not polyfilled properly
+- Fix a bug where `up.$macro()` was not polyfilled properly
+
+Finally this release publishes a small feature:
+
+- Published a new attribute `[up-href]`. Using this attribute you can make any element behave like a hyperlink when clicked.
+
+
+3.0.0
+-----
 
 ## Overview
 
