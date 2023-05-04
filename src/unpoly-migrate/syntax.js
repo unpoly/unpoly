@@ -62,10 +62,10 @@ up.$compiler('.current-time', function($element) {
 @deprecated
   Use `up.compiler()` instead.
 */
-up.$compiler = function(selector, ...definitionArgs) {
+up.$compiler = function(...definitionArgs) {
   let $fn = definitionArgs.pop()
 
-  up.compiler(...definitionArgs, function(element, ...fnArgs) {
+  return up.compiler(...definitionArgs, function(element, ...fnArgs) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
@@ -104,10 +104,10 @@ up.$macro('[content-link]', function($link) {
 @deprecated
   Use `up.macro()` instead.
 */
-up.$macro = function(selector, ...definitionArgs) {
+up.$macro = function(...definitionArgs) {
   let $fn = definitionArgs.pop()
 
-  up.macro(...definitionArgs, function(element, ...fnArgs) {
+  return up.macro(...definitionArgs, function(element, ...fnArgs) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })

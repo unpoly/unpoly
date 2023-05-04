@@ -423,6 +423,16 @@ describe 'up.event', ->
             expect(observeClass).not.toHaveBeenCalledWith('container')
             expect(observeClass).toHaveBeenCalledWith('child')
 
+        it 'returns a function that unbinds the listener when called', asyncSpec (next) ->
+          $child = $fixture('.child')
+          clickSpy = jasmine.createSpy()
+          unbind = up.$on 'click', '.child', clickSpy
+          Trigger.click($('.child'))
+          unbind()
+          Trigger.click($('.child'))
+
+          next =>
+            expect(clickSpy.calls.count()).toEqual(1)
 
     describe 'up.off', ->
 

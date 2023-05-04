@@ -75,10 +75,21 @@ up.$on('click', 'a', function(event, $link) {
 */
 up.$on = function(...definitionArgs) {
   let callback = definitionArgs.pop()
-  up.on(...definitionArgs, function(event, element, data) {
+
+  callback.upNativeCallback = function(event, element, data) {
     let $element = jQuery(element)
     callback.call($element, event, $element, data)
-  })
+  }
+  return up.on(...definitionArgs, callback.upNativeCallback)
 }
 
-up.$off = up.event.off; // it's the same as up.off()
+up.$off = function(...definitionArgs) {
+  let $callback = definitionArgs.pop()
+  let nativeCallback = $callback.upNativeCallback
+
+  if (!nativeCallback) {
+    up.fail('The callback passed to up.$off() was never registered with up.$on()')
+  }
+
+  return up.off(...definitionArgs, nativeCallback)
+}
