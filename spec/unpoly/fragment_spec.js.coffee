@@ -7553,6 +7553,10 @@ describe 'up.fragment', ->
           resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
           expect(resolved).toEqual 'a[href="/foo?a=1&b=2"]'
 
+        it "ignores the ampersand character '&' in the value of an attribute selector that also contains square brackets in the attribute value (bugfix)", ->
+          resolved = up.fragment.resolveOrigin('form[action="/example?param[]=a&param[]=b"]')
+          expect(resolved).toEqual 'form[action="/example?param[]=a&param[]=b"]'
+
       it "it expands ':origin' to a selector for { origin } if the origin's target is an attribute selector (bugfix)'", ->
         origin = fixture('a[href="/foo"]')
         resolved = up.fragment.resolveOrigin('.before :origin .after', origin: origin)
