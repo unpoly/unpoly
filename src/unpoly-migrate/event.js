@@ -71,9 +71,10 @@ up.$on('click', 'a', function(event, $link) {
 @return {Function()}
   A function that unbinds the event listeners when called.
 @deprecated
-  Use `up.on()` instead.
+  Use `up.on()` with a callback that wrap the given native element in a jQuery collection.
 */
 up.$on = function(...definitionArgs) {
+  up.migrate.warn('up.$on() has been deprecated. Instead use up.on() with a callback that wrap the given native element in a jQuery collection.')
   let callback = definitionArgs.pop()
 
   callback.upNativeCallback = function(event, element, data) {
@@ -84,6 +85,7 @@ up.$on = function(...definitionArgs) {
 }
 
 up.$off = function(...definitionArgs) {
+  up.migrate.deprecated('up.$off()', 'up.off()')
   let $callback = definitionArgs.pop()
   let nativeCallback = $callback.upNativeCallback
 
