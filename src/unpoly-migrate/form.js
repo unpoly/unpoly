@@ -78,8 +78,6 @@ up.migrate.renamedAttribute('up-delay', 'up-watch-delay', { scope: '[up-autosubm
 
 up.migrate.renamedAttribute('up-delay', 'up-watch-delay', { scope: '[up-watch]' })
 
-up.migrate.renamedAttribute('up-restore-scroll', 'up-scroll', { mapValue: (value) => (value === 'true' ? 'restore' : 'reset') })
-
 /*-
 Observes form fields and runs a callback when a value changes.
 

@@ -727,6 +727,33 @@ describe 'up.link', ->
         options = up.link.followOptions(link)
         expect(options.animation).toBe('move-from-top')
 
+      it 'parses an [up-scroll] attribute', ->
+        link = fixture('a[href="/foo"][up-scroll="reset"]')
+        options = up.link.followOptions(link)
+        expect(options.scroll).toBe('reset')
+
+      if up.migrate.loaded
+        it 'parses an [up-reset-scroll] attribute', ->
+          link = fixture('a[href="/foo"][up-reset-scroll]')
+          up.hello(link)
+
+          options = up.link.followOptions(link)
+          expect(options.scroll).toBe('reset')
+
+        it 'parses an [up-restore-scroll] attribute', ->
+          link = fixture('a[href="/foo"][up-restore-scroll]')
+          up.hello(link)
+
+          options = up.link.followOptions(link)
+          expect(options.scroll).toBe('restore')
+
+        it 'parses an [up-reveal] attribute', ->
+          link = fixture('a[href="/foo"][up-reveal=false]')
+          up.hello(link)
+
+          options = up.link.followOptions(link)
+          expect(options.scroll).toBe(false)
+
     describe 'up.link.shouldFollowEvent', ->
 
       buildEvent = (target, attrs) ->

@@ -474,6 +474,24 @@ describe 'up.viewport', ->
             expect(document.scrollingElement.scrollTop).toBeLessThan(19000)
             done()
 
+    if up.migrate.loaded
+      describe 'up.scroll()', ->
+
+        it 'scrolls the given viewport to the given Y position', ->
+          viewport = fixture('.viewport[up-viewport]', style: { height: '100px', overflowY: 'scroll' })
+          content = e.affix(viewport, '.content', style: { height: '1000px' })
+
+          expect(viewport.scrollTop).toBe(0)
+
+          up.scroll(viewport, 78)
+
+          expect(viewport.scrollTop).toBe(78)
+
+        it 'returns a promise', ->
+          viewport = fixture('.viewport[up-viewport]')
+          value = up.scroll(viewport, 78)
+          expect(value).toHaveKey('then')
+
     describe 'up.viewport.revealHash()', ->
 
       it 'reveals an element with an ID matching the given #hash', asyncSpec (next) ->

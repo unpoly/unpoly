@@ -148,7 +148,7 @@ up.migrate.preprocessRenderOptions = function(options) {
     options.abort = 'all'
   } else if (solo === false) {
     up.migrate.deprecated('Option { solo: false }', "{ abort: false }")
-    up.migrate.warn('Unpoly 3+ only aborts requests targeting the same fragment. Setting [up-solo=false] or { solo: false } may no longer be necessary.')
+    up.migrate.warn('Unpoly 3+ only aborts requests targeting the same fragment. Setting { solo: false } may no longer be necessary.')
     options.abort = false
   }
 
@@ -169,15 +169,21 @@ up.migrate.preprocessRenderOptions = function(options) {
   }
 
   // Rewrite deprecated { resetScroll } option
-  if (u.isDefined(options.resetScroll)) {
+  if (options.resetScroll === true) {
     up.migrate.deprecated('Option { resetScroll: true }', "{ scroll: 'reset' }")
-    options.scroll = 'teset'
+    options.scroll = 'reset'
+  } if (options.resetScroll === false) {
+    up.migrate.deprecated('Option { resetScroll: false }', "{ scroll: false }")
+    options.scroll = false
   }
 
   // Rewrite deprecated { restoreScroll } option
-  if (u.isDefined(options.restoreScroll)) {
+  if (options.restoreScroll === true) {
     up.migrate.deprecated('Option { restoreScroll: true }', "{ scroll: 'restore' }")
     options.scroll = 'restore'
+  } if (options.restoreScroll === false) {
+    up.migrate.deprecated('Option { restoreScroll: false }', "{ scroll: false }")
+    options.scroll = false
   }
 }
 

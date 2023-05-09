@@ -3889,6 +3889,23 @@ describe 'up.fragment', ->
             next =>
               expect(@revealMock).not.toHaveBeenCalled()
 
+          if up.migrate.loaded
+            describe 'with { reveal: false }', ->
+
+              it 'does not scroll', asyncSpec (next) ->
+                fixture('.target')
+                up.render('.target', url: '/path#hash', reveal: false)
+
+                next =>
+                  @respondWith """
+                    <div class="target">
+                      <div id="hash"></div>
+                    </div>
+                    """
+
+                next =>
+                  expect(@revealMock).not.toHaveBeenCalled()
+
         describe 'with { scroll: "target" }', ->
 
           mockRevealBeforeEach()
@@ -3926,6 +3943,20 @@ describe 'up.fragment', ->
 
             next =>
               expect(@revealedText).toEqual ['origin text']
+
+          if up.migrate.loaded
+
+            describe 'with { reveal: true }', ->
+
+              it 'scrolls to the new element that is inserted into the DOM', asyncSpec (next) ->
+                fixture('.target')
+                up.render('.target', url: '/path', reveal: true)
+
+                next =>
+                  @respondWithSelector('.target', text: 'new text')
+
+                next =>
+                  expect(@revealedText).toEqual ['new text']
 
           describe 'when more than one fragment is replaced', ->
 
@@ -7081,19 +7112,45 @@ describe 'up.fragment', ->
         container = fixture('.container[up-source="/source"]')
         element = e.affix(container, '.element', text: 'old text')
 
-        next =>
-          up.reload('.element')
+        up.reload('.element')
 
-        next =>
-          expect(@lastRequest().url).toMatch(/\/source$/)
-          @respondWith """
+        next ->
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          jasmine.respondWith """
             <div class="container">
               <div class="element">new text</div>
             </div>
             """
 
-        next =>
+        next ->
           expect('.element').toHaveText('new text')
+
+      it 'reloads the given element', asyncSpec (next) ->
+        element = fixture('.element', 'up-source': '/source', text: 'old text')
+
+        up.reload(element)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
+          expect(jasmine.lastRequest().url).toMatchURL('/source')
+          jasmine.respondWithSelector('.element', text: 'new text')
+
+        next ->
+          expect('.element').toHaveText('new text')
+
+      if up.migrate.loaded
+        it 'reloads the given jQuery collection', asyncSpec (next) ->
+          element = fixture('.element', 'up-source': '/source', text: 'old text')
+
+          up.reload($(element))
+
+          next ->
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.element')
+            expect(jasmine.lastRequest().url).toMatchURL('/source')
+            jasmine.respondWithSelector('.element', text: 'new text')
+
+          next ->
+            expect('.element').toHaveText('new text')
 
       it 'does not use a cached response', ->
         renderSpy = up.fragment.render.mock()

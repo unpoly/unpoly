@@ -80,19 +80,37 @@ up.migrate = (function() {
     })
   }
 
-  function renamedAttribute(oldAttr, newAttr, { scope, mapValue } = {}) {
+  function transformAttribute(oldAttr, ...args) {
+    let transformer = u.extractCallback(args)
+    let { scope } = u.extractOptions(args)
+
     // Scope may be a selector string OR a function
     let selector = scope || `[${oldAttr}]`
     up.macro(selector, { priority: -1000 }, function(element) {
       // If scope is given as a function it does not select for the attribute
       if (element.hasAttribute(oldAttr)) {
-        warn('Attribute [%s] has been renamed to [%s] (found in %o)', oldAttr, newAttr, element)
         let value = element.getAttribute(oldAttr)
-        if (mapValue) {
-          value = mapValue(value)
-        }
-        element.setAttribute(newAttr, value)
-        element.removeAttribute(oldAttr)
+        transformer(element, value)
+      }
+    })
+  }
+
+  function renamedAttribute(oldAttr, newAttr, { scope, mapValue } = {}) {
+    transformAttribute(oldAttr, { scope }, function(element, value) {
+      warn('Attribute [%s] has been renamed to [%s] (found in %o)', oldAttr, newAttr, element)
+      if (mapValue) {
+        value = u.evalOption(mapValue, value)
+      }
+      element.setAttribute(newAttr, value)
+    })
+  }
+
+  function removedAttribute(oldAttr, { scope, replacement } = {}) {
+    transformAttribute(oldAttr, { scope }, function(element, _value) {
+      if (replacement) {
+        warn('Attribute [%s] has been removed (found in %o). Use %s instead.', oldAttr, element, replacement)
+      } else {
+        warn('Attribute [%s] has been removed without replacement (found in %o)', oldAttr, element)
       }
     })
   }
@@ -188,7 +206,9 @@ up.migrate = (function() {
     renamedProperty,
     removedProperty,
     forbiddenPropertyValue,
+    transformAttribute,
     renamedAttribute,
+    removedAttribute,
     formerlyAsync,
     renamedEvent,
     removedEvent,

@@ -467,8 +467,6 @@ up.link = (function() {
     parser.string('easing')
     parser.number('duration')
 
-    up.migrate.parseFollowOptions?.(parser)
-
     // This is the event that may be prevented to stop the follow.
     // up.form.submit() changes this to be up:form:submit instead.
     // The guardEvent will also be assigned a { renderOptions } property in up.render()
@@ -1482,7 +1480,8 @@ up.link = (function() {
     convertClicks,
     config,
     combineFollowableSelectors,
-    preloadSelector: fullPreloadSelector
+    preloadSelector: fullPreloadSelector,
+    followSelector: fullFollowSelector,
   }
 })()
 
