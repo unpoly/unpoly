@@ -21,6 +21,8 @@ By default only errors are logged. You can enable debug logging through `up.log.
 */
 up.log = (function() {
 
+  const u = up.util
+
   /*-
   Configures the logging output on the developer console.
 
@@ -76,16 +78,15 @@ up.log = (function() {
   function printToStreamStyled(stream, trace, customStyles, message, ...args) {
     if (message) {
       if (config.format) {
-        args.unshift(
+        console[stream](
+          `%c${trace}%c ${message}`,
           'color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block;' + customStyles,
-          '' // reset for message after trace
+          '', // reset for message after trace
+          ...args
         )
-        message = `%c${trace}%c ${message}`
       } else {
-        message = `[${trace}] ${message}`
+        console[stream](`[${trace}] ${u.sprintf(message, ...args)}`)
       }
-
-      console[stream](message, ...args)
     }
   }
 
