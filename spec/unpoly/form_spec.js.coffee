@@ -107,6 +107,24 @@ describe 'up.form', ->
           target: '#group'
         ))
 
+    describe 'up.form.groupSelectors()', ->
+
+      it 'returns the configured up.form.config.groupSelectors', ->
+        up.form.config.groupSelectors = ['.form-group']
+
+        expect(up.form.groupSelectors()).toEqual(['.form-group'])
+
+      if up.migrate.loaded
+        it 'removes a :has(&) suffix from custom user selectors', ->
+          up.form.config.groupSelectors = ['.form-group:has(&)']
+
+          expect(up.form.groupSelectors()).toEqual(['.form-group'])
+
+        it 'removes a :has(:origin) suffix from custom user selectors', ->
+          up.form.config.groupSelectors = ['.form-group:has(:origin)']
+
+          expect(up.form.groupSelectors()).toEqual(['.form-group'])
+
     describe 'up.form.submitButtons()', ->
 
       it "returns the given form's submit buttons", ->
