@@ -1958,6 +1958,7 @@ up.form = (function() {
     disable: disableContainer,
     group: findGroup,
     groupSolution: findGroupSolution,
+    groupSelectors: getGroupSelectors,
     get: getForm,
   }
 })()
