@@ -146,6 +146,7 @@ Adds or removes the given class from the given element.
   Use [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) instead.
 */
 up.element.toggleClass = function(element, klass, newPresent) {
+  up.migrate.deprecated('up.element.toggleClass()', 'element.classList.toggle()')
   const list = element.classList
   if (newPresent == null) { newPresent = !list.contains(klass) }
   if (newPresent) {
