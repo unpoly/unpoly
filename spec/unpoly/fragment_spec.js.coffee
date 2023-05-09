@@ -2836,7 +2836,7 @@ describe 'up.fragment', ->
             u.task ->
               promiseState(promise).then (result) ->
                 expect(result.state).toEqual('rejected')
-                expect(result.value).toMatch(/layer parent does not exist/i)
+                expect(result.value).toMatch(/layer "parent" does not exist/i)
                 expect('.element').toHaveText(/old text/)
                 done()
 
