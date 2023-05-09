@@ -1127,15 +1127,15 @@ up.util = (function() {
   }
 
   /*-
-  Returns the last element of the given array.
+  Returns the last element of the given array or string.
 
   @function up.util.last
-  @param {Array<T>} array
-  @return {T}
+  @param {Array<T>|string} array
+  @return {T|string}
   @stable
   */
-  function last(array) {
-    return array[array.length - 1]
+  function last(value) {
+    return value[value.length - 1]
   }
 
   /*-

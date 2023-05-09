@@ -1650,6 +1650,16 @@ describe 'up.util', ->
         value = null
         expect(up.util.isPromise(value)).toBe(false)
 
+    describe 'up.util.last', ->
+
+      it 'returns the last element of an array', ->
+        value = [1, 2, 3]
+        expect(up.util.last(value)).toBe(3)
+
+      it 'returns the last character of a string', ->
+        value = 'foobar'
+        expect(up.util.last(value)).toBe('r')
+
     describe 'up.util.isRegExp', ->
 
       it 'returns true for a RegExp', ->
