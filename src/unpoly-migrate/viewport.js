@@ -60,6 +60,8 @@ up.scroll('.main', 100, { behavior: 'smooth' })
   Use [`Element#scrollTo()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollTo) instead.
 */
 up.viewport.scroll = function(viewport, top, options = {}) {
+  up.migrate.deprecated('up.scroll()', 'Element#scrollTo()')
+
   viewport = up.fragment.get(viewport, options)
   viewport.scrollTo({ ...options, top })
   return up.migrate.formerlyAsync('up.scroll()')
