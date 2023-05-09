@@ -569,6 +569,18 @@ up.util = (function() {
   }
 
   /*-
+  Returns whether the given argument is an error instance.
+
+  @function up.util.isError
+  @param object
+  @return {boolean}
+  @internal
+  */
+  function isError(object) {
+    return object instanceof Error
+  }
+
+  /*-
   Returns whether the given argument is a [jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
 
   @function up.util.isJQuery
@@ -1815,17 +1827,28 @@ up.util = (function() {
   //   return undo
   // }
 
-  function stringifyArg(arg) {
+  function stringifyArg(arg, placeholder = '%o') {
     let string
     const maxLength = 200
-    let closer = ''
+
+    // Discard color styles: https://developer.mozilla.org/en-US/docs/Web/API/Console#styling_console_output
+    if (placeholder === '%c') {
+      return ''
+    }
+
+    // In the browser console %s always stringifies the output.
+    // Objects become "[object Object]".
+    if (placeholder === '%s' && isGiven(arg)) {
+      arg = arg.toString()
+    }
 
     if (isString(arg)) {
-      string = arg.replace(/[\n\r\t ]+/g, ' ')
-      string = string.replace(/^[\n\r\t ]+/, '')
-      string = string.replace(/[\n\r\t ]$/, '')
-      // string = "\"#{string}\""
-      // closer = '"'
+      string = arg.trim().replace(/[\n\r\t ]+/g, ' ')
+
+      // In the browser console %o displays a string with quotes
+      if (placeholder === '%o') {
+        string = JSON.stringify(string)
+      }
     } else if (isUndefined(arg)) {
       // JSON.stringify(undefined) is actually undefined
       string = 'undefined'
@@ -1833,23 +1856,20 @@ up.util = (function() {
       string = arg.toString()
     } else if (isArray(arg)) {
       string = `[${map(arg, stringifyArg).join(', ')}]`
-      closer = ']'
     } else if (isJQuery(arg)) {
       string = `$(${map(arg, stringifyArg).join(', ')})`
-      closer = ')'
     } else if (isElement(arg)) {
       string = `<${arg.tagName.toLowerCase()}`
-      for (let attr of ['id', 'name', 'class']) {
+      for (let attr of ['id', 'up-id', 'name', 'class']) {
         let value = arg.getAttribute(attr)
         if (value) {
           string += ` ${attr}="${value}"`
         }
       }
       string += ">"
-      closer = '>'
-    } else if (isRegExp(arg)) {
+    } else if (isRegExp(arg) || isError(arg)) {
       string = arg.toString()
-    } else { // object, array
+    } else { // object, null
       try {
         string = JSON.stringify(arg)
       } catch (error) {
@@ -1862,13 +1882,12 @@ up.util = (function() {
     }
 
     if (string.length > maxLength) {
-      string = `${string.substr(0, maxLength)} …`
-      string += closer
+      string = `${string.substr(0, maxLength)}…${last(string)}`
     }
     return string
   }
 
-  const SPRINTF_PLACEHOLDERS = /%[oOdisf]/g
+  const SPRINTF_PLACEHOLDERS = /%[oOdisfc]/g
 
   /*-
   See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substitutions
@@ -1877,7 +1896,7 @@ up.util = (function() {
   @internal
   */
   function sprintf(message, ...args) {
-    return message.replace(SPRINTF_PLACEHOLDERS, () => stringifyArg(args.shift()))
+    return message.replace(SPRINTF_PLACEHOLDERS, (placeholder) => stringifyArg(args.shift(), placeholder))
   }
 
   function negate(fn) {

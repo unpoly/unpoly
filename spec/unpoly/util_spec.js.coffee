@@ -1678,9 +1678,13 @@ describe 'up.util', ->
 
       describe 'with string argument', ->
 
-        it 'serializes the string verbatim', ->
-          formatted = up.util.sprintf('before %o after', 'argument')
+        it 'serializes the string verbatim with %s', ->
+          formatted = up.util.sprintf('before %s after', 'argument')
           expect(formatted).toEqual('before argument after')
+
+        it 'includes quotes with %o', ->
+          formatted = up.util.sprintf('before %o after', 'argument')
+          expect(formatted).toEqual('before "argument" after')
 
       describe 'with undefined argument', ->
 
@@ -1688,11 +1692,39 @@ describe 'up.util', ->
           formatted = up.util.sprintf('before %o after', undefined)
           expect(formatted).toEqual('before undefined after')
 
+        it 'does not crash with %s', ->
+          formatted = up.util.sprintf('before %s after', undefined)
+          expect(formatted).toEqual('before undefined after')
+
       describe 'with null argument', ->
 
         it 'serializes to the word "null"', ->
           formatted = up.util.sprintf('before %o after', null)
           expect(formatted).toEqual('before null after')
+
+        it 'does not crash with %s', ->
+          formatted = up.util.sprintf('before %s after', null)
+          expect(formatted).toEqual('before null after')
+
+      describe 'with true argument', ->
+
+        it 'serializes to the word "true"', ->
+          formatted = up.util.sprintf('before %o after', true)
+          expect(formatted).toEqual('before true after')
+
+        it 'does not crash with %s', ->
+          formatted = up.util.sprintf('before %s after', true)
+          expect(formatted).toEqual('before true after')
+
+      describe 'with false argument', ->
+
+        it 'serializes to the word "false"', ->
+          formatted = up.util.sprintf('before %o after', false)
+          expect(formatted).toEqual('before false after')
+
+        it 'does not crash with %s', ->
+          formatted = up.util.sprintf('before %s after', false)
+          expect(formatted).toEqual('before false after')
 
       describe 'with number argument', ->
 
@@ -1714,11 +1746,11 @@ describe 'up.util', ->
 
       describe 'with element argument', ->
 
-        it 'serializes the tag name with id, name and class attributes, but ignores other attributes', ->
-          $element = $('<table id="id-value" name="name-value" class="class-value" title="title-value">')
+        it 'serializes the tag name with id, up-iid, name and class attributes, but ignores other attributes', ->
+          $element = $('<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value">')
           element = $element.get(0)
           formatted = up.util.sprintf('before %o after', element)
-          expect(formatted).toEqual('before <table id="id-value" name="name-value" class="class-value"> after')
+          expect(formatted).toEqual('before <table id="id-value" up-id="up-id-value" name="name-value" class="class-value"> after')
 
       describe 'with jQuery argument', ->
 
@@ -1750,6 +1782,19 @@ describe 'up.util', ->
           object.bar = 'bar'
           formatted = up.util.sprintf('before %o after', object)
           expect(formatted).toEqual('before {"bar":"bar"} after')
+
+      describe 'with Error argument', ->
+
+        it "serializes the error's class and message", ->
+          error = new up.CannotTarget("Error message")
+          formatted = up.util.sprintf('before %o after', error)
+          expect(formatted).toBe('before up.CannotTarget: Error message after')
+
+      describe 'with color style (%c)', ->
+
+        it 'discards the style directives', ->
+          formatted = up.util.sprintf('foo %cbar', 'color: red')
+          expect(formatted).toBe('foo bar')
 
     describe 'up.util.renameKeys', ->
 
