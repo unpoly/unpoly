@@ -10,6 +10,8 @@ Remaining V3 tasks
 Priority
 =========
 
+- Publish up.util.sprintf()
+  - But rename it to something else, as sprintf() is something else
 - When rendering uses <up-wrapper> elements, do we set [up-time] and [up-etag] on these wrappers?
 
 
