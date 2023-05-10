@@ -7,7 +7,9 @@
 	"settings": {
 		"files.exclude": {
 			"dist": true,
-			"pkg": true
+			"pkg": true,
+			"node_modules": true,
+			"tmp": true,
 		}
 	}
 }
