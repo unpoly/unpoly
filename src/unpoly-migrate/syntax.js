@@ -60,10 +60,10 @@ up.$compiler('.current-time', function($element) {
 
   See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
 @deprecated
-  Use `up.compiler()` with a callback that wrap the given native element in a jQuery collection.
+  Use `up.compiler()` with a callback that wraps the given native element in a jQuery collection.
 */
 up.$compiler = function(...definitionArgs) {
-  up.migrate.warn('up.$compiler() has been deprecated. Instead use up.compiler() with a callback that wrap the given native element in a jQuery collection.')
+  up.migrate.warn('up.$compiler() has been deprecated. Instead use up.compiler() with a callback that wraps the given native element in a jQuery collection.')
 
   let $fn = definitionArgs.pop()
 
@@ -104,10 +104,10 @@ up.$macro('[content-link]', function($link) {
 
   See [`compiler` argument for `up.compiler()`](/up.compiler#parameters).
 @deprecated
-  Use `up.macro()` with a callback that wrap the given native element in a jQuery collection.
+  Use `up.macro()` with a callback that wraps the given native element in a jQuery collection.
 */
 up.$macro = function(...definitionArgs) {
-  up.migrate.warn('up.$macro() has been deprecated. Instead use up.macro() with a callback that wrap the given native element in a jQuery collection.')
+  up.migrate.warn('up.$macro() has been deprecated. Instead use up.macro() with a callback that wraps the given native element in a jQuery collection.')
 
   let $fn = definitionArgs.pop()
 
