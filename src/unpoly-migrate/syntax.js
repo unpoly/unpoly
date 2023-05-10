@@ -1,3 +1,7 @@
+/*-
+@module up.syntax
+*/
+
 const u = up.util
 const e = up.element
 
