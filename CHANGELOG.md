@@ -8,6 +8,38 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.1.1
+-----
+
+This release contains more changes to [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) to help upgrading from Unpoly 2 to 3:
+
+- Deprecation warnings for renamed attributes now always mention the actual attribute name instead of the parsed render option.
+
+  For example, the deprecation warning for `[up-reveal]` used to say:
+  
+  ```text
+  Option { reveal: true } has been renamed to { scroll: "target" }
+  ```
+  
+  This wasn't very helpful for tracking down affected code. The warning has been changed to this:
+  
+  ```text
+  Attribute [up-reveal] was renamed to [up-scroll="target"].
+  ```
+- Using the deprecated `up.element.toggleClass()` now logs a deprecation warning.
+- Using the deprecated `up.$compiler()` now logs a deprecation warning.
+- Using the deprecated `up.$macro()` now logs a deprecation warning.
+- Using the deprecated `up.$on()` now logs a deprecation warning.
+- Using the deprecated `up.$off()` now logs a deprecation warning.
+- Using the deprecated `up.scroll()` now logs a deprecation warning.
+- `up.form.config.groupSelectors` now also removes the suffix `:has(&)` in addition to `:has(:origin)`.
+- When disabling log formatting with `up.log.config.format = false` Unpoly no longer prints structured objects to the console. This makes it easier to [detected use of undeprecated APIs with automated tests](https://unpoly.com/changes/upgrading#detecting-deprecated-apis-with-tests).
+
+There's also a small change to a utility function:
+
+- `up.util.last()` also returns the last character of a string.
+
+
 3.1.0
 -----
 
