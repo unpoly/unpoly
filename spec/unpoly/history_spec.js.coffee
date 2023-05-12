@@ -342,15 +342,14 @@ describe 'up.history', ->
 
     describe '[up-back]', ->
 
-      it 'sets an [up-href] attribute to the previous URL and sets the up-scroll attribute to "scroll"', ->
+      it 'sets an [up-href] attribute to the previous URL and sets the up-scroll attribute to "restore"', ->
         up.history.push('/path1')
         up.history.push('/path2')
-        element = up.hello($fixture('a[href="/path3"][up-back]').text('text'))
-        $element = $(element)
-        expect($element.attr('href')).toMatchURL('/path3')
-        expect($element.attr('up-href')).toMatchURL('/path1')
-        expect($element.attr('up-scroll')).toBe('restore')
-        expect($element.attr('up-follow')).toBe('')
+        element = up.hello(fixture('a[href="/path3"][up-back]', text: 'text'))
+        expect(element.getAttribute('href')).toMatchURL('/path3')
+        expect(element.getAttribute('up-href')).toMatchURL('/path1')
+        expect(element.getAttribute('up-scroll')).toBe('restore')
+        expect(element).toBeFollowable()
 
       it 'does not overwrite an existing up-href or up-restore-scroll attribute'
 

@@ -1807,6 +1807,24 @@ describe 'up.link', ->
 
         expect(link).toHaveCursorStyle('pointer')
 
+      it 'can be used without also setting [up-target] or [up-follow]', asyncSpec (next) ->
+        up.fragment.config.mainTargets = ['main']
+        link = fixture('span[up-href="/follow-path"]')
+        up.hello(link)
+        fixture('main', text: 'old text')
+
+        expect(link).toBeFollowable()
+
+        Trigger.click(link)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
+
+          jasmine.respondWithSelector('main', text: 'new text')
+
+        next ->
+          expect('main').toHaveText('new text')
+
     if up.migrate.loaded
 
       describe '[up-dash]', ->
@@ -1860,6 +1878,24 @@ describe 'up.link', ->
 
     describe '[up-expand]', ->
 
+      it 'makes the element followable to the same destination as the first contained link', asyncSpec (next) ->
+        up.fragment.config.mainTargets = ['main']
+        fixture('main', text: 'old text')
+        area = fixture('div[up-expand] a[href="/path"]')
+        up.hello(area)
+
+        expect(area).toBeFollowable()
+
+        Trigger.clickSequence(area)
+
+        next ->
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
+
+          jasmine.respondWithSelector('main', text: 'new text')
+
+        next ->
+          expect('main').toHaveText('new text')
+
       it 'copies up-related attributes of a contained link', ->
         $area = $fixture('div[up-expand] a[href="/path"][up-target="selector"][up-instant][up-preload]')
         up.hello($area)
@@ -1883,11 +1919,6 @@ describe 'up.link', ->
         $area = $fixture('div[up-expand] span[up-follow][up-href="/path"]')
         up.hello($area)
         expect($area.attr('up-href')).toEqual('/path')
-
-      it 'adds an up-follow attribute if the contained link has neither up-follow nor up-target attributes', ->
-        $area = $fixture('div[up-expand] a[href="/path"]')
-        up.hello($area)
-        expect($area.attr('up-follow')).toEqual('')
 
       it 'can be used to enlarge the click area of a link', asyncSpec (next) ->
         $area = $fixture('div[up-expand] a[href="/path"]')

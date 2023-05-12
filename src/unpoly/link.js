@@ -98,7 +98,7 @@ up.link = (function() {
   // Links with remote HTML are followable if there is one additional attribute
   // suggesting "follow me through Unpoly".
   const LINKS_WITH_REMOTE_HTML = ['a[href]', '[up-href]']
-  const ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]']
+  const ATTRIBUTES_SUGGESTING_FOLLOW = ['[up-follow]', '[up-target]', '[up-layer]', '[up-transition]', '[up-preload]', '[up-instant]', '[up-href]']
 
   function combineFollowableSelectors(elementSelectors, attributeSelectors) {
     return u.flatMap(elementSelectors, elementSelector => attributeSelectors.map(attrSelector => elementSelector + attrSelector))
@@ -1334,7 +1334,12 @@ up.link = (function() {
 
   `<a>` elements are also exceptional in that they may [contain block elements](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag).
 
-  A use case for `[up-href]` is when you want to *prevent* the user from opening a link in a new tab.
+  ### Use cases of `[up-href]`
+
+  There are some use cases for `[up-href]`:
+
+  - When you want to *prevent* the user from opening a link in a new tab.
+  - When the element cannot be wrapped in an `<a>`, e.g. a `<tr>`.
 
   @selector [up-href]
   @param [up-href]
