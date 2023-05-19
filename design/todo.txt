@@ -15,6 +15,9 @@ Priority
 - When rendering local content we should not set [up-source=true]
 - Test that system compilers always run before user compilers
 - Consider removing the `blur` default for changeEvent
+- Response use
+  - Allow up.render({ response })
+  - Also render hungry elements when closing or opening overlays
 
 
 
