@@ -12,13 +12,17 @@ Priority
 
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
-- When rendering uses <up-wrapper> elements, do we set [up-time] and [up-etag] on these wrappers?
+- When rendering local content we should not set [up-source=true]
+- Test that system compilers always run before user compilers
+- Consider removing the `blur` default for changeEvent
 
 
 
 Backlog
 =======
 
+
+- Message when unknown target: Revalidating cached response for target "undefined"
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
   - This is really confusing with [up-disable]
   - Or should we have an [up-switch-for] and [up-switch-effect]?
@@ -483,3 +487,5 @@ Decisions
 - Test synthetic ETag
   - I think up.Response#headers is not documented
   => There's a simpler way to this documented in https://v3.unpoly.com/up:fragment:loaded#example-discarding-a-revalidation-response
+- When rendering uses <up-wrapper> elements, do we set [up-time] and [up-etag] on these wrappers?
+  - We cannot really do better here, since up-wrapper children cannot be reloaded
