@@ -184,13 +184,18 @@ up.form = (function() {
   */
   function submittingButton(form) {
     const selector = submitButtonSelector()
-    const focusedElement = up.viewport.focusedElementWithin(form)
-    if (focusedElement && focusedElement.matches(selector)) {
-      return focusedElement
-    } else {
-      // If no button is focused, we assume the first button in the form.
-      return e.get(form, selector)
+    const focusedElement = document.activeElement
+
+    // Use focused element only if it is a part of the submitted form.
+    if (focusedElement && focusedElement.form === form) {
+      // It must match the submit button selector as well.
+      if (focusedElement.matches(selector)) {
+        return focusedElement
+      }
     }
+
+    // If no button is focused, we assume the first button in the form.
+    return e.get(form, selector)
   }
 
   /*-
