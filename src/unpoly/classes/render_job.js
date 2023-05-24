@@ -104,8 +104,10 @@ up.RenderJob = class RenderJob {
     if (this.options.url) {
       let onRequest = (request) => this.handleAbortOption(request)
       this.change = new up.Change.FromURL({ ...this.options, onRequest })
+    } else if (this.options.response) {
+      this.change = new up.Change.FromResponse(this.options)
+      this.handleAbortOption(null)
     } else {
-      // No need to give feedback as local changes are sync.
       this.change = new up.Change.FromContent(this.options)
       this.handleAbortOption(null)
     }

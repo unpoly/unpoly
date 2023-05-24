@@ -152,7 +152,7 @@ we can use the HTML from the response and render it into the parent layer:
 <a href="/companies/new"
    up-layer="new"
    up-accept-location="/companies"
-   up-on-accepted="up.render('.companies', { document: event.response.text }"> <!-- mark-phrase "event.response.text" -->
+   up-on-accepted="up.render('.companies', { response: event.response }"> <!-- mark-phrase "event.response" -->
   New company
 </a>
 ```

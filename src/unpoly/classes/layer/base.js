@@ -175,7 +175,7 @@ up.Layer = class Layer extends up.Record {
     and its parent layer has become [current](/up.layer.current).
 
     When the promise fulfills the accepted overlay may still be playing its close animation.
-    To run code after the animation has concluded, use [`{ onFinished }`](/options.onFinished).
+    To run code after the animation has concluded, use [`{ onFinished }`](#options.onFinished).
   @stable
   */
   accept() {
@@ -205,7 +205,7 @@ up.Layer = class Layer extends up.Record {
     and its parent layer has become [current](/up.layer.current).
 
     When the promise filfills the dismissed overlay may still be playing its close animation.
-    To run code after the animation has concluded, use [`{ onFinished }`](/options.onFinished).
+    To run code after the animation has concluded, use [`{ onFinished }`](/up.Layer.prototype.accept#options.onFinished).
   @stable
   */
   dismiss() {

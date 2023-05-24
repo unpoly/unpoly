@@ -119,6 +119,11 @@ up.Request.Cache = class Cache {
         // This makes it a candidate for cache revalidation.
         newRequest.fromCache = true
 
+        // Create a variant where response.request === newRequest.
+        // This is needed so up.render({ response }) can see the correct value for response.request.fromCache,
+        // which is true for the cache-missing request but false for the cache-hitting request.
+        value = u.variant(value, { request: newRequest })
+
         // respondWith() will check response.ok and either fulfill or reject newRequest's promise.
         newRequest.respondWith(value)
 

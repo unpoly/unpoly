@@ -30,4 +30,10 @@ up.Change = class Change {
       return newValue
     }
   }
+
+  deriveFailOptions() {
+    // This will merge shared keys and unprefix failKeys.
+    return up.RenderOptions.deriveFailOptions(this.options)
+  }
+
 }

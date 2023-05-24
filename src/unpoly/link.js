@@ -912,10 +912,12 @@ up.link = (function() {
   @param [href]
     The URL to fetch from the server.
 
-    Instead of making a server request, you may also pass an existing HTML string as
-    `[up-document]` or `[up-content]` attribute.
+    See [loading content from a URL](/render-content#url).
 
-    To use a different URL when a link is followed through Unpoly, set an `[up-href]` attribute.
+    To use a different URL when a link is followed through Unpoly (as opposed to a browser's full page load),
+    set an `[up-href]` attribute.
+
+    Instead of making a server request, you may also render an [existing string of HTML](/render-content#local).
 
   @param [up-target]
     The [target selector](/targeting-fragments) to update.
@@ -956,42 +958,24 @@ up.link = (function() {
     See `up.protocol` for details.
 
   @param [up-content]
-    A string for the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
+    The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
+    for the targeted fragment.
 
-    If your HTML string also contains the fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML),
-    consider the `[up-fragment]` attribute instead.
+    See [Updating an element's inner HTML from a string](/render-content#content).
 
   @param [up-fragment]
     A string of HTML comprising *only* the new fragment's
     [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
 
-    The `[up-target]` selector will be [derived](/target-derivation) from
-    the root element in the given HTML:
+    With an `[up-fragment]` attribute you can omit the `[up-target]` attribute.
+    The target will be [derived](/target-derivation) from the root element in the given HTML.
 
-    ```html
-    <!-- This will update .foo -->
-    <a up-fragment='&lt;div class=".foo"&gt;inner&lt;/div&gt;'>Click me</a>
-    ```
-
-    If your HTML string contains other fragments that will not be rendered, use
-    the `[up-document]` attribute instead.
-
-    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
-    consider the `[up-content]` attribute instead.
+    See [Rendering a string that only contains the fragment](/render-content#fragment).
 
   @param [up-document]
-    A string of HTML containing the new fragment.
+    A string of HTML containing the targeted fragment.
 
-    The string may contain other HTML, but only the element matching the
-    `[up-target]` selector will be extracted and placed into the page.
-    Other elements will be discarded.
-
-    If your HTML string comprises only the new fragment, consider the `[up-fragment]` attribute
-    instead. With `[up-fragment]` you don't need to pass a `[up-target]`, since
-    Unpoly can derive it from the root element in the given HTML.
-
-    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
-    consider the `[up-content]` attribute.
+    See [Extracting an element's outer HTML from a larger HTML string](/render-content#document).
 
   @param [up-fail]
     Whether the server response should be considered failed.

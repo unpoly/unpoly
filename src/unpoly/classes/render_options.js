@@ -68,11 +68,13 @@ up.RenderOptions = (function() {
     'navigate',     // Also set navigate defaults for fail options
   ])
 
+  // At least one of these properties must be given for Unpoly to render content.
   const CONTENT_KEYS = [
     'url',
+    'response',
     'content',
     'fragment',
-    'document'
+    'document',
   ]
 
   // preprocess() will leave out properties for which there may be a better default
@@ -80,7 +82,7 @@ up.RenderOptions = (function() {
   const LATE_KEYS = [
     'history',
     'focus',
-    'scroll'
+    'scroll',
   ]
 
   function navigateDefaults(options) {

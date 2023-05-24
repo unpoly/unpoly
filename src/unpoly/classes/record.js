@@ -19,11 +19,7 @@ up.Record = class Record {
   }
 
   [u.copy.key]() {
-    return this.variant()
-  }
-
-  variant(changes = {}) {
-    return new this.constructor(u.merge(this.attributes(), changes))
+    return u.variant(this)
   }
 
   [u.isEqual.key](other) {

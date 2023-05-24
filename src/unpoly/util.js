@@ -1944,6 +1944,12 @@ up.util = (function() {
     return string.replace(/[^\x00-\x7F]/g, unicodeEscape)
   }
 
+  function variant(source, changes = {}) {
+    let variant = Object.create(source)
+    Object.assign(variant, changes)
+    return variant
+  }
+
   return {
     parseURL,
     normalizeURL,
@@ -2047,5 +2053,6 @@ up.util = (function() {
     memoizeMethod,
     safeStringifyJSON,
     // groupBy,
+    variant,
   }
-})();
+})()

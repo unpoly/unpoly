@@ -1547,27 +1547,48 @@ describe 'up.fragment', ->
               expect(result.state).toBe('pending')
               done()
 
-      describeFallback 'canPushState', ->
+        describeFallback 'canPushState', ->
 
-        it 'loads the content in a new page', asyncSpec (next) ->
-          loadPage = spyOn(up.network, 'loadPage')
+          it 'loads the content in a new page', asyncSpec (next) ->
+            loadPage = spyOn(up.network, 'loadPage')
 
-          fixture('.one')
-          up.render(target: '.one', url: '/path')
+            fixture('.one')
+            up.render(target: '.one', url: '/path')
+
+            next ->
+              expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path'))
+              expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", (done) ->
+            loadPage = spyOn(up.network, 'loadPage')
+
+            fixture('.one')
+            promise = up.render(target: '.one', url: '/path')
+
+            promiseState(promise).then (result) ->
+              expect(result.state).toBe('pending')
+              done()
+
+      describe 'with { response } option', ->
+
+        it 'renders the given up.Response', asyncSpec (next) ->
+          up.history.config.enabled = true
+          target = fixture('.target', text: 'old text')
+
+          request = up.request('/response-url')
 
           next ->
-            expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining(url: '/path'))
-            expect(jasmine.Ajax.requests.count()).toBe(0)
+            jasmine.respondWith('<div class="target">new text</div>')
 
-        it "returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", (done) ->
-          loadPage = spyOn(up.network, 'loadPage')
+            return next.await(request)
 
-          fixture('.one')
-          promise = up.render(target: '.one', url: '/path')
+          next (response) ->
+            expect('.target').toHaveText('old text')
+            up.render({ target: '.target', response, history: true })
 
-          promiseState(promise).then (result) ->
-            expect(result.state).toBe('pending')
-            done()
+          next ->
+            expect('.target').toHaveText('new text')
+            expect(location.href).toMatchURL('/response-url')
 
       describe 'with { content } option', ->
 

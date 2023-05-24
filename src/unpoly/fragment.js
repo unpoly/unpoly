@@ -26,6 +26,7 @@ a server-rendered web application:
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @see navigation
+@see render-content
 @see render-hooks
 @see skipping-rendering
 @see target-derivation
@@ -415,31 +416,11 @@ up.fragment = (function() {
   /*-
   Replaces elements on the current page with matching elements from a server response or HTML string.
 
+  ### Choosing which fragment to update
+
   The current and new elements must both match the same [target selector](/targeting-fragments).
   The selector is either given as `{ target }` option,
   or a [main target](/up-main) is used as default.
-
-  See [Targeting Fragments](/targeting-fragments) for many examples for how you can target content.
-
-  ### Passing the new fragment
-
-  The new fragment content can be passed as one of the following options:
-
-  - [`{ url }`](#options.url) fetches and renders content from the server
-  - [`{ document }`](#options.document) renders content from a given HTML document string or partial document
-  - [`{ fragment }`](#options.fragment) renders content from a given HTML string that only contains the new fragment
-  - [`{ content }`](#options.content) replaces the targeted fragment's inner HTML with the given HTML string
-
-  ### Enabling side effects
-
-  This function has many options to enable scrolling, focus, request cancelation and other side
-  effects. These options are all disabled by default and must be opted into one-by-one.
-
-  To enable defaults that a user would expects for navigation (like clicking a link),
-  pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
-
-
-  ### Example
 
   Let's say your current HTML looks like this:
 
@@ -461,7 +442,7 @@ up.fragment = (function() {
   <div class="two">new two</div>
   ```
 
-  Unpoly looks for the selector `.two` in the response and [implants](/up.extract) it into
+  Unpoly looks for the selector `.two` in the response and places it
   the current page. The current page now looks like this:
 
   ```html
@@ -471,6 +452,24 @@ up.fragment = (function() {
 
   Note how only `.two` has changed. The update for `.one` was
   discarded, since it didn't match the selector.
+
+  See [targeting fragments](/targeting-fragments) for many examples for how you can target content.
+
+  ### Passing the new fragment
+
+  The new fragment content can be passed as one of the following options:
+
+  @include render-content-table
+
+  See [providing content to render](/render-content) for more details and examples.
+
+  ### Enabling side effects
+
+  This function has many options to enable scrolling, focus, request cancelation and other side
+  effects. These options are all disabled by default and must be opted into one-by-one.
+
+  To enable defaults that a user would expects for navigation (like clicking a link),
+  pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
 
   ### Hooking into the render process
 
@@ -530,9 +529,9 @@ up.fragment = (function() {
   @param {string} [options.url]
     The URL to fetch from the server.
 
-    Instead of making a server request, you may also pass an existing HTML string as
-    [`{ document }`](#options.document), [`{ fragment }`](#options.fragment) or
-    [`{ content }`](#options.content) option.
+    See [loading content from a URL](/render-content#url).
+
+    Instead of making a server request, you may also render an [existing string of HTML](/render-content#local).
 
   @param {string} [options.method='get']
     The HTTP method to use for the request.
@@ -556,38 +555,27 @@ up.fragment = (function() {
 
   @param {string|Element} [options.content]
     The new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
-    for the fragment.
+    for the targeted fragment.
+
+    See [Updating an element's inner HTML from a string](/render-content#content).
 
   @param {string|Element} [options.fragment]
-    A string of HTML comprising *only* the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
+    A string of HTML comprising only the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML).
 
-    The `{ target }` selector will be [derived](/target-derivation) from the root element in the given
-    HTML:
+    When passing `{ fragment }` you can omit the `{ target }` option.
+    The target will be [derived](/target-derivation) from the root element in the given HTML.
 
-    ```js
-    // This will update .foo
-    up.render({ fragment: '<div class=".foo">inner</div>' })
-    ```
-
-    If your HTML string contains other fragments that will not be rendered, use
-    the [`{ document }`](#options.document) option instead.
-
-    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
-    consider the [`{ content }`](#options.content) option.
+    See [Rendering a string that only contains the fragment](/render-content#fragment).
 
   @param {string|Element|Document} [options.document]
-    A string of HTML containing the new fragment.
+    A string of HTML containing the targeted fragment.
 
-    The string may contain other HTML, but only the element matching the
-    [target selector](/targeting-fragments) will be extracted and placed into the page.
-    Other elements will be discarded.
+    See [Extracting an element's outer HTML from a larger HTML string](/render-content#document).
 
-    If your HTML string comprises only the new fragment, consider the [`{ fragment }`](#options.fragment)
-    option instead. With `{ fragment }` you don't need to pass a `{ target }`, since
-    Unpoly can [derive](/target-derivation) it from the root element in the given HTML.
+  @param {up.Response} [options.response]
+    An `up.Response` object that contains the targeted fragments in its [text](/up.Response.prototype.text).
 
-    If your HTML string comprises only the new fragment's [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML),
-    consider the [`{ content }`](#options.content) option.
+    See [Rendering an up.Response object](/render-content#response).
 
   @param {boolean|Function(up.Response): boolean} [options.fail]
     Whether the server response should be considered failed.

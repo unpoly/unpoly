@@ -863,7 +863,7 @@ up.network = (function() {
 
   function registerAliasForRedirect(request, response) {
     if (request.cache && response.url && request.url !== response.url) {
-      const newRequest = request.variant({
+      const newRequest = u.variant(request, {
         method: response.method,
         url: response.url
       })

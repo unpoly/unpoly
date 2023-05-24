@@ -167,7 +167,7 @@ up.syntax = (function() {
 
   > [note]
   > Properties related to requests and responses are `undefined`
-  > when rendering from an HTML string instead of a URL.
+  > when rendering from an [HTML string](/render-content#local) instead of a URL.
 
   ### Registering compilers after booting
 
