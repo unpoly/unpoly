@@ -167,14 +167,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     renderOptions.dismissLayer = this.response.dismissLayer
     renderOptions.document = this.response.text
 
-    // There are some cases where the user might send us an empty body:
-    //
-    // - HTTP status `304 Not Modified` (especially when reloading)
-    // - HTTP status `204 No Content`
-    // - Header `X-Up-Target: :none`
-    // - Header `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer`, although the server
-    //   may send an optional body in case the response is used on the root layer.
-    if (!renderOptions.document) {
+    if (this.response.none) {
       renderOptions.target = ':none'
     }
 

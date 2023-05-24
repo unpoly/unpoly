@@ -726,11 +726,28 @@ describe('up.network', function() {
           // })
         }))
 
-        it('does not cache responses with a non-200 status code', asyncSpec(function(next) {
+        it('does not cache responses with an error status', asyncSpec(function(next) {
           next(() => up.request({url: '/foo', cache: true}))
-          next(() => this.respondWith({status: 500, contentType: 'text/html', responseText: 'foo'}))
+          next(() => jasmine.respondWith({status: 500, contentType: 'text/html', responseText: 'foo'}))
+          next(() => expect({url: '/foo', cache: true}).not.toBeCached())
+        }))
+
+        it('does not cache responses with a status of 304 (Not Modified)', asyncSpec(function(next) {
           next(() => up.request({url: '/foo', cache: true}))
-          next(() => expect(jasmine.Ajax.requests.count()).toEqual(2))
+          next(() => jasmine.respondWith({ status: 304 }))
+          next(() => expect({ url: '/foo' }).not.toBeCached())
+        }))
+
+        it('does not cache responses with a status of 204 (No Content)', asyncSpec(function(next) {
+          next(() => up.request({url: '/foo', cache: true}))
+          next(() => jasmine.respondWith({ status: 204 }))
+          next(() => expect({ url: '/foo' }).not.toBeCached())
+        }))
+
+        it('does not cache responses with an empty body', asyncSpec(function(next) {
+          next(() => up.request({url: '/foo', cache: true}))
+          next(() => jasmine.respondWith({ status: 200, responseText: '', responseHeaders: { 'X-Up-Accept-Layer': "123" } }))
+          next(() => expect({ url: '/foo' }).not.toBeCached())
         }))
 
         it("does not lose a request's #hash when re-using a cached request without a #hash (bugfix)", function() {

@@ -610,9 +610,7 @@ up.network = (function() {
         cache.put(request)
       }
 
-      if (!response.ok) {
-        // Uncache failed requests. We have no control over the server,
-        // and another request with the same properties might succeed.
+      if (!response.isCacheable()) {
         cache.evict(request)
       }
     })

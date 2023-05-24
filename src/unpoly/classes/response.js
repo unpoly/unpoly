@@ -150,6 +150,33 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
+  Response whether the response has an empty body text.
+
+  There are some cases where the server might send us an empty body:
+
+  - HTTP status `304 Not Modified` (especially when reloading)
+  - HTTP status `204 No Content`
+  - Header `X-Up-Target: :none`
+  - Header `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer`, although the server
+    may send an optional body in case the response is used on the root layer.
+
+  @property up.Response#none
+  @param {boolean} none
+  @internal
+  */
+  get none() {
+    return !this.text
+  }
+
+  isCacheable() {
+    // (1) Uncache responses that have failed. We have no control over the server,
+    //     and another request with the same properties may succeed.
+    // (2) Uncache responses that have an empty body, in particular 304 Not Modified.
+    //     Another request with a different ETag may produce a body.
+    return this.ok && !this.none
+  }
+
+  /*-
   Returns the HTTP header value with the given name.
 
   The search for the header is case-insensitive.
