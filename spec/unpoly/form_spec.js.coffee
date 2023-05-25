@@ -144,11 +144,11 @@ describe 'up.form', ->
 
       # Actually we only need `input`, but we want to notice
       # if another script manually triggers `change` on the element.
-      defaultChangeEvents = ['input', 'change']
+      defaultInputEvents = ['input', 'change']
 
       describe 'with a field element', ->
 
-        u.each defaultChangeEvents, (eventType) ->
+        u.each defaultInputEvents, (eventType) ->
 
           describe "when the input receives a #{eventType} event", ->
 
@@ -475,7 +475,7 @@ describe 'up.form', ->
 
       describe 'with a form element', ->
 
-        u.each defaultChangeEvents, (eventType) ->
+        u.each defaultInputEvents, (eventType) ->
 
           describe "when any of the form's fields receives a #{eventType} event", ->
 
@@ -502,7 +502,7 @@ describe 'up.form', ->
 
       describe 'with an element containing fields', ->
 
-        u.each defaultChangeEvents, (eventType) ->
+        u.each defaultInputEvents, (eventType) ->
 
           describe "when any of the contained fields receives a #{eventType} event", ->
 
