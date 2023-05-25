@@ -63,7 +63,7 @@ up.form = (function() {
     This default delay is only applied when [watching the `input` event](/watch-options#which-events-to-watch).
     There is no default delay when watching other types of events.
 
-  @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents]
+  @param {Array<string>|Function(Element): Array<string>} [config.watchInputEvents=['input', 'change']]
     An array of events to substitute if [watching the `input` event](/watch-options#which-events-to-watch).
 
     This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
@@ -76,7 +76,7 @@ up.form = (function() {
     Instead of configuring an array of event types, you may also set a function that accepts
     a form field and returns an array of event types to watch for that field.
 
-  @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents]
+  @param {Array<string>|Function(Element): Array<string>} [config.watchChangeEvents=['change']]
     An array of events to substitute if [watching the `change` event](/watch-options#which-events-to-watch).
 
     This can be used to watch [misbehaving fields](/watch-options#normalizing-non-standard-events)
@@ -101,9 +101,7 @@ up.form = (function() {
     // in case another script manually triggers it.
     watchInputEvents: ['input', 'change'],
     watchInputDelay: 0,
-    // Date inputs trigger `change` when editing a single date component
-    // https://github.com/unpoly/unpoly/issues/336
-    watchChangeEvents: (field) => field.matches('input[type=date]') ? ['blur'] : ['change'],
+    watchChangeEvents: ['change'],
   }))
 
   function fullSubmitSelector() {

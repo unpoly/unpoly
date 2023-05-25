@@ -2695,7 +2695,8 @@ describe 'up.form', ->
             expect(window).not.toHaveUnhandledRejections()
 
         # https://github.com/unpoly/unpoly/issues/336
-        it 'validates a input[type=date] on blur instead of change, as browser date pickers often emit `change` when any date component changes', asyncSpec (next) ->
+        # https://github.com/unpoly/unpoly/issues/488
+        it "validates a input[type=date] on change instead of blur (although desktop date pickers often emit `change` when any date component changes, this doesn't happen on mobile) ", asyncSpec (next) ->
           $form = $fixture('form[action="/path/to"]')
           $group = $("""
             <div class="field-group">
@@ -2707,12 +2708,12 @@ describe 'up.form', ->
           $input = $group.find('input')
           $input.focus()
           $input.val('2017-01-02')
-          Trigger.change($input)
+          up.emit($input, 'blur')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
-            up.emit($input, 'blur')
+            up.emit($input, 'change')
 
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(1)

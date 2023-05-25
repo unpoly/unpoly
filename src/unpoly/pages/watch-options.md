@@ -50,11 +50,16 @@ In the same fashion you may configure an event in `up.form.config.watchInputEven
 to make it observable with `[up-watch-event="input"]`.
 
 Instead of configuring an array of event types, you may also set a function that accepts
-a form field and returns an array of event types to watch for that field:
+a form field and returns an array of event types to watch for that field.
+
+For example,
+on Desktop browsers date pickers inconveniently emit a `change` event when any date *component*
+changes, causing multiple events as the user picks a date, month and year. In this case
+we can configure the watched event to `blur` like this:
 
 ```js
 up.form.config.watchChangeEvents = function(field) { 
-  if (field.matches('input[type=date]')) {
+  if (field.matches('input[type=date]') && isDesktop()) {
     return ['blur']
   } else {
     return ['change']
