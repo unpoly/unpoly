@@ -587,6 +587,37 @@ describe('up.network', function() {
             })
           }))
 
+          describe('eviction of expensive properties to prevent memory leaks when caching', function() {
+
+            it('does not keep element references in the up.Request object', asyncSpec(function(next) {
+              let request = up.request('/foo', { cache: true, layer: 'current', target: 'body', origin: document.body })
+
+              next(() => { jasmine.respondWith('response text') })
+
+              next(() => {
+                // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
+              })
+
+              next(() => { expect(request).not.toHaveRecursiveValue(u.isElement) })
+            }))
+
+            it('does not keep element references in the up.Response object', asyncSpec(function(next) {
+              let request = up.request('/foo', { cache: true, layer: 'current', target: 'body', origin: document.body })
+
+              next(() => {
+                jasmine.respondWith('response text')
+                next.await(request)
+              })
+
+              next(() => {
+                // Eviction is delayed by 1 task so event listeners can still observe the properties we're about to evict
+              })
+
+              next((response) => { expect(request).not.toHaveRecursiveValue(u.isElement) })
+            }))
+
+          })
+
         })
 
       })

@@ -5818,6 +5818,7 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
 
 
+
         describe 'cache revalidation with { revalidate }', ->
 
           beforeEach (done) ->
