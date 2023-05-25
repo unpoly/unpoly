@@ -403,16 +403,18 @@ up.Request = class Request extends up.Record {
     // We use this in `up.Change.FromURL` since we already know the element's we're trying
     // to replace.
     //
-    // If we haven't received a `{ fragments }` property but did we receive a `{ target }`,
-    // we find matching elements here.
-    if (!this._fragments && this.target) {
+    // If we haven't received a `{ fragments }` property (or if it has been deleted by
+    // evictExpensitveAttrs()) but did we receive a `{ target }`,we find matching elements here.
+    if (this._fragments) {
+      return this._fragments
+    } else if (this.target) {
       let steps = up.fragment.parseTargetSteps(this.target)
       let selectors = u.map(steps, 'selector')
       let lookupOpts = { origin: this.origin, layer: this.layer }
-      this._fragments = u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
-    }
 
-    return this._fragments
+      // Don't cache the results to prevent memory leaks
+      return u.compact(u.map(selectors, (selector) => up.fragment.get(selector, lookupOpts)))
+    }
   }
 
   set fragments(value) {
