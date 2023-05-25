@@ -395,7 +395,7 @@ up.Request = class Request extends up.Record {
   @param List<Element> fragments
   @experimental
   */
-  get fragments() {
+  get fragments() { // eslint-disable-line getter-return
     // This property is required for `up.fragment.abort()` to select requests within
     // the subtree that we're cancling.
     //
