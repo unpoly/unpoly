@@ -8,6 +8,66 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.2.0
+-----
+
+### Addressing an important caching issue
+
+Unpoly 3.2.0 no longer cache responses with an empty body (fixes #497). In particular responses with `304 Not Modified` are no longer cached when using [conditional requests](/conditional-requests).
+
+As this issue could cause errors when rendering, we recommend all Unpoly 3 users to upgrade.
+
+
+### Using the server response that closed an overlay
+
+When an overlay closes in reaction to a server response, no content from that response is rendered.
+
+Sometimes you do need to access the discarded response, e.g. to render its content in another layer.
+For this you can now access response via the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
+
+For example, the link link opens an overlay with a form to create a new company (`/companies/new`).
+After successful creation the form redirects to the list of companies (`/companies`). In that case
+we can use the HTML from the response and render it into the parent layer:
+
+```html
+<a href="/companies/new"
+   up-layer="new"
+   up-accept-location="/companies"
+   up-on-accepted="up.render('.companies', { response: event.response }"> <!-- mark-phrase "event.response" -->
+  New company
+</a>
+```
+
+The `{ response }` property is available whenever a server response causes an overlay to close:
+
+- When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
+- When the new location matches a [close condition](#close-conditions).
+- When the server [explicitly closes](#closing-from-the-server) an overlay using an HTTP header.
+
+### Rendering `up.Response` objects
+
+If you have manually fetched content from the server, you can now pass an `up.Response` object as a `{ response }` option to render its contents:
+
+```js
+let response = await up.request('/path')
+up.render({ target: '.target', response })
+```
+
+The various ways to provide HTML to rendering functions are now summarized on a [new documentation page](/render-content).
+
+
+### Other changes
+
+- You can now use `[up-href]` without also setting `[up-follow]` or `[up-target]` (fixes #489).
+- Date inputs are again validated on `change` instead of `blur`.
+
+  In Unpoly 3.0 this defaulted to `blur` because desktop date pickers emit a `change` event whenever the user changes a date component (day, month, year). Unfortunately this change caused issues with mobile date pickers as well as JavaScript date pickers (resolves #488, reverts #336).
+
+  If you prefer validating on `blur`, you can restore the behavior of Unpoly 3.0 by configuring `up.form.config.watchChangeEvents`.
+- Rendering functions now have a better error message when referring to detached elements or when referring to non-existing layers.
+- The results of `up.Response#fragments` are no longer cached to preserve memory.
+
+
 3.1.1
 -----
 
