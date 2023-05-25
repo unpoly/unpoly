@@ -49,7 +49,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     }
 
     if (!this.content || this.baseLayer.isClosed()) {
-      throw this.cannotMatch()
+      // An error message will be chosen by up.Change.FromContent
+      throw new up.CannotMatch()
     }
 
     onApplicable()

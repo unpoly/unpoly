@@ -146,19 +146,27 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   cannotMatchTarget(reason) {
+    let message
+
     if (this.getPlans().length) {
       const planTargets = u.uniq(u.map(this.getPlans(), 'target'))
       const humanizedLayerOption = up.layer.optionToString(this.options.layer)
-      up.fail(reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption)
+      message =  [reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption]
     } else if (this.layers.length) {
       if (this.options.failPrefixForced) {
-        up.fail('No target selector given for failed responses (https://unpoly.com/failed-responses)')
+        message = 'No target selector given for failed responses (https://unpoly.com/failed-responses)'
       } else {
-        up.fail('No target selector given')
+        message = 'No target selector given'
       }
     } else {
-      up.fail('Layer %o does not exist', this.options.layer)
+      // At this point this.layers is an empty array. This can be caused by:
+      //
+      // - A { layer } option pointing to a non-existing layer, e.g. { layer: 'parent' } when we're on the root layer.
+      // - A detached { origin } option for which we cannot look up a layer.
+      message = 'Could not find a layer to render in. You may have passed a non-existing layer reference, or a detached element.'
     }
+
+    throw new up.CannotMatch(message)
   }
 
   seekPlan(fn) {

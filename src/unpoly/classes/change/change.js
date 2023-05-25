@@ -6,10 +6,6 @@ up.Change = class Change {
     this.options = options
   }
 
-  cannotMatch(reason) {
-    throw new up.CannotMatch(reason)
-  }
-
   execute() {
     throw new up.NotImplemented()
   }

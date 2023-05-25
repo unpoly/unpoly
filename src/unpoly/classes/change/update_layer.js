@@ -386,7 +386,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       if (step.oldElement) {
         return true
       } else if (!step.maybe) {
-        throw this.cannotMatch(`Could not find element "${this.target}" in current page`)
+        // An error message will be chosen by up.Change.FromContent
+        throw new up.CannotMatch()
       }
     })
 
@@ -409,7 +410,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       if (step.newElement) {
         return true
       } else if (!step.maybe) {
-        throw this.cannotMatch(`Could not find element "${this.target}" in server response`)
+        // An error message will be chosen by up.Change.FromContent
+        throw new up.CannotMatch()
       }
     })
 

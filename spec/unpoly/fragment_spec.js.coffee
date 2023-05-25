@@ -2901,7 +2901,7 @@ describe 'up.fragment', ->
             u.task ->
               promiseState(promise).then (result) ->
                 expect(result.state).toEqual('rejected')
-                expect(result.value).toMatch(/layer "parent" does not exist/i)
+                expect(result.value).toMatch(/could not find (a )?layer/i)
                 expect('.element').toHaveText(/old text/)
                 done()
 
@@ -7203,6 +7203,15 @@ describe 'up.fragment', ->
 
         next ->
           expect('.element').toHaveText('new text')
+
+      it 'throws a readable error when attempting to reloading a detached element', (done) ->
+        element = fixture('.element', 'up-source': '/source', text: 'old text')
+        element.remove() # detach from document
+
+        promiseState(up.reload(element)).then (result) ->
+          expect(result.state).toBe('rejected')
+          expect(result.value).toBeError(/detached/)
+          done()
 
       if up.migrate.loaded
         it 'reloads the given jQuery collection', asyncSpec (next) ->
