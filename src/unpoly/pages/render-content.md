@@ -58,7 +58,7 @@ let response = await up.request('/path')
 up.render({ target: '.target', response })
 ```
 
-This is also useful for [accessing the discarded response](/closing-overlays#using-the-discarded-response) after reaching an overlay's [close condition](/closing-overlays#close-conditions).
+This is also useful for [accessing the discarded response](/closing-overlays#using-the-discarded-response) when an overlay was closed by a server response.
 
 
 Rendering a string of HTML {#local}

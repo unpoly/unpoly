@@ -82,7 +82,8 @@ Close conditions
 When opening an overlay, you may define a *condition* when the overlay interaction ends.
 When the condition occurs, the overlay is automatically closed and a callback is run.
 
-It is recommend to use close conditions instead of explicitly closing the overlay from within the overlay content.
+It is recommend to use close conditions instead of closing with explicit commands like [`up.layer.accept()`](#closing-from-javascript)
+or [`X-Up-Accept-Layer`](#closing-from-the-server).
 By defining a close condition, the overlay content does not need to be aware that it's running
 in an overlay. The overlay interaction is decoupled from the interaction in the parent layer.
 
@@ -137,16 +138,18 @@ To emit an event, use one of the following methods:
 | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 
 
+
+
 ### Using the discarded response
 
-When server response reaches a close condition, the overlay closes immediately. No content from that response is rendered.
+When an overlay closes in reaction to a server response, no content from that response is rendered.
 
 Sometimes you need to access the discarded response, e.g. to render its content in another layer.
 For this you can access response via the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
 
 For example, the link link opens an overlay with a form to create a new company (`/companies/new`).
 After successful creation the form redirects to the list of companies (`/companies`). In that case
-we can use the HTML from the response and render it into the parent layer:   
+we can use the HTML from the response and render it into the parent layer:
 
 ```html
 <a href="/companies/new"
@@ -157,16 +160,25 @@ we can use the HTML from the response and render it into the parent layer:
 </a>
 ```
 
+The `{ response }` property is available whenever a server response causes an overlay to close:
 
-Closing from the server
-----------------------
+- When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
+- When the new location matches a [close condition](#close-conditions).
+- When the server [explicitly closes](#closing-from-the-server) an overlay using an HTTP header.
 
-The server may explicitly close an overlay by sending an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
+
+Closing from the server explicitly {#closing-from-the-server}
+-------------------------------------------------------------
+
+If you don't want to use [close conditions](#close-conditions),
+the server may explicitly close an overlay by sending an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
 Optionally the header may transport a value.
 
 When you're using the `unpoly-rails` gem, you may produce these headers with `up.layer.accept(value)` or `up.layer.dismiss(value)`.
 
 The server may also test if the fragment change is targeting an overlay by looking at the `X-Up-Mode` header.
+
+When an overlay closes in reaction to a server response, you can [access the discarded response](#using-the-discarded-response).
 
 
 Closing from JavaScript
