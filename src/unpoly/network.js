@@ -164,14 +164,14 @@ up.network = (function() {
     }
     ```
 
-  @param {Function(up.Request, up.Response): boolean|string} [config.expireCache]
+  @param {Function(up.Request, up.Response | up.Offline): boolean|string} [config.expireCache]
     Whether to [expire](/caching#expiration) the [cache](/caching) after the given request and response.
 
     By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
 
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be expired.
 
-  @param {Function(up.Request, up.Response): boolean|string} [config.evictCache=false]
+  @param {Function(up.Request, up.Response | up.Offline): boolean|string} [config.evictCache=false]
     Whether to [evict](/caching#eviction) the [cache](/caching) after the given request and response.
 
     The configured function can either return a boolean or an [URL pattern](/url-patterns) matching responses that should be evicted.
@@ -581,13 +581,13 @@ up.network = (function() {
 
     // Once we receive a response we honor options/headers for eviction/expiration,
     // even if the request was not cachable.
-    u.always(request, function(response) {
+    u.always(request, function(responseOrError) {
       // Three places can request the cache to be expired or kept fresh:
       //
       // (1) The server via X-Up-Expire-Cache header, found in response.expireCache
       // (2) The interaction via { expireCache } option, found in request.expireCache
       // (3) The default in up.network.config.expireCache({ request, response })
-      let expireCache = response.expireCache ?? request.expireCache ?? u.evalOption(config.expireCache, request, response)
+      let expireCache = responseOrError.expireCache ?? request.expireCache ?? u.evalOption(config.expireCache, request, responseOrError)
       if (expireCache) {
         cache.expire(expireCache, { except: request })
       }
@@ -597,7 +597,7 @@ up.network = (function() {
       // (1) The server via X-Up-Evict-Cache header, found in response.evictCache
       // (2) The interaction via { evictCache } option, found in request.evictCache
       // (3) The default in up.network.config.evictCache({ request, response })
-      let evictCache = response.evictCache ?? request.evictCache ?? u.evalOption(config.evictCache, request, response)
+      let evictCache = responseOrError.evictCache ?? request.evictCache ?? u.evalOption(config.evictCache, request, responseOrError)
       if (evictCache) {
         cache.evict(evictCache, { except: request })
       }
@@ -610,7 +610,7 @@ up.network = (function() {
         cache.put(request)
       }
 
-      if (!response.isCacheable()) {
+      if (!responseOrError.isCacheable?.()) {
         cache.evict(request)
       }
     })

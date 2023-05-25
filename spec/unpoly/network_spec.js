@@ -760,7 +760,13 @@ describe('up.network', function() {
         it('does not cache responses with an error status', asyncSpec(function(next) {
           next(() => up.request({url: '/foo', cache: true}))
           next(() => jasmine.respondWith({status: 500, contentType: 'text/html', responseText: 'foo'}))
-          next(() => expect({url: '/foo', cache: true}).not.toBeCached())
+          next(() => expect({url: '/foo'}).not.toBeCached())
+        }))
+
+        it('evicts requests that caused a fatal network error', asyncSpec(function(next) {
+          next(() => up.request({url: '/foo', cache: true}))
+          next(() => jasmine.lastRequest().responseError()
+          next(() => expect({url: '/foo'}).not.toBeCached())
         }))
 
         it('does not cache responses with a status of 304 (Not Modified)', asyncSpec(function(next) {
