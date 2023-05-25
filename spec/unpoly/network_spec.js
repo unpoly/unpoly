@@ -765,7 +765,7 @@ describe('up.network', function() {
 
         it('evicts requests that caused a fatal network error', asyncSpec(function(next) {
           next(() => up.request({url: '/foo', cache: true}))
-          next(() => jasmine.lastRequest().responseError()
+          next(() => jasmine.lastRequest().responseError())
           next(() => expect({url: '/foo'}).not.toBeCached())
         }))
 
