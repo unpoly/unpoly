@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const opn = require('opn')
+const open = require('open')
 
 const { execSync } = require('child_process')
 // Can't use __dirname while /spec is a symlink
@@ -15,7 +15,7 @@ const URL = `http://${HOST}:${PORT}`
 app.listen(PORT, HOST, function(){
   console.log(`Unpoly specs serving on ${URL}.`)
   console.log("Press CTRL+C to quit.")
-  opn(URL)
+  open(URL)
 });
 
 app.get('/', function(req, res){
