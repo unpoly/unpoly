@@ -36,7 +36,6 @@ up.DestructorPass = class DestructorPass {
     } catch (error) {
       this.errors.push(error)
       up.log.error('up.destroy()', 'While destroying %o: %o', element, error)
-      up.error.emitGlobal(error)
     }
   }
 }

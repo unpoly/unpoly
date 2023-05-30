@@ -85,6 +85,8 @@ describe 'up.OptionsParser', ->
 
     describe 'with parser-wide { defaults } option', ->
 
+      it 'should have tests'
+
     describe 'with parser-wide { fail: true } option', ->
 
       it 'uses a fail-prefixed option from the observed options', ->
@@ -152,3 +154,5 @@ describe 'up.OptionsParser', ->
         expect(options.foo).toBe('value')
 
     describe 'with parser-wide { only } option', ->
+
+      it 'should have tests'

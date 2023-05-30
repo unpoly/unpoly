@@ -268,8 +268,6 @@ describe 'up.element', ->
       result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
 
-  describe 'up.element.emit()', ->
-
   if up.migrate.loaded
     describe 'up.element.remove()', ->
 

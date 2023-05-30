@@ -1122,6 +1122,8 @@ describe 'up.util', ->
           expect(result.state).toEqual('pending')
           done()
 
+        return
+
       it 'returns a different object every time (to prevent memory leaks)', ->
         one = up.util.unresolvablePromise()
         two = up.util.unresolvablePromise()

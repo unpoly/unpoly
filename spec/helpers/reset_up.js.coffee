@@ -6,21 +6,25 @@ message = 'Resetting framework for next test'
 logResetting = ->
   console.debug("%c#{message}", 'color: #2244aa')
 
-afterEach (done) ->
-  # If the spec has installed the Jasmine clock, uninstall it so
-  # the timeout below will actually happen.
-  jasmine.clock().uninstall()
+afterEach ->
+  # Ignore errors while the framework is being reset.
+  await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
 
-  # Abort all requests so any cancel handlers can run and do async things.
-  up.network.abort(reason: message)
+    # If the spec has installed the Jasmine clock, uninstall it so
+    # the timeout below will actually happen.
+    jasmine.clock().uninstall()
 
-  # Most pending promises will wait for an animation to finish.
-  up.motion.finish()
+    # Abort all requests so any cancel handlers can run and do async things.
+    up.network.abort(reason: message)
 
-  # Wait one more frame so pending callbacks have a chance to run.
-  # Pending callbacks might change the URL or cause errors that bleed into
-  # the next example.
-  up.util.task =>
+    # Most pending promises will wait for an animation to finish.
+    up.motion.finish()
+
+    await wait()
+
+    # Wait one more frame so pending callbacks have a chance to run.
+    # Pending callbacks might change the URL or cause errors that bleed into
+    # the next example.
     logResetting()
 
     up.framework.reset()
@@ -29,16 +33,17 @@ afterEach (done) ->
 
     # Give async reset behavior another frame to play out,
     # then start the next example.
-    up.util.task ->
-      overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
-      if overlays.length > 0
-        console.error("Overlays survived reset!", overlays)
+    await wait()
 
-      if document.querySelector('up-progress-bar')
-        console.error('Progress bar survived reset!')
+    # Make some final checks that we have reset successfully
+    overlays = document.querySelectorAll('up-modal, up-popup, up-cover, up-drawer')
+    if overlays.length > 0
+      console.error("Overlays survived reset!", overlays)
 
-      # Scroll to the top
-      document.scrollingElement.scrollTop = 0
+    if document.querySelector('up-progress-bar')
+      console.error('Progress bar survived reset!')
 
-      up.puts("Framework was reset")
-      done()
+    # Scroll to the top
+    document.scrollingElement.scrollTop = 0
+
+    up.puts("Framework was reset")

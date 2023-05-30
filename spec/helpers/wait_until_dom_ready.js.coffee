@@ -1,5 +1,5 @@
-u = up.util
-$ = jQuery
-
-beforeAll (done) ->
-  $(done)
+#u = up.util
+#$ = jQuery
+#
+#beforeAll (done) ->
+#  $(done)

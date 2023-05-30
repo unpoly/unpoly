@@ -1,10 +1,10 @@
 up.error = (function() {
 
-  function emitGlobal(error) {
-    // Emit an ErrorEvent on window.onerror for exception tracking tools
-    const { message } = error
-    up.emit(window, 'error', { message, error, log: false })
-  }
+  // function emitGlobal(error) {
+  //   // Emit an ErrorEvent on window.onerror for exception tracking tools
+  //   const { message } = error
+  //   up.emit(window, 'error', { message, error, log: false })
+  // }
 
   /*-
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
@@ -76,7 +76,7 @@ up.error = (function() {
 
   return {
     fail,
-    emitGlobal,
+    // emitGlobal,
     isCritical,
     muteUncriticalRejection,
   }

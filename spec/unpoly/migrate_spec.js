@@ -1,8 +1,9 @@
 const u = up.util
 const e = up.element
 
-describe('up.migrate', function() {
-  if (up.migrate.loaded) {
+if (up.migrate.loaded) {
+
+  describe('up.migrate', function() {
 
     describe('up.migrate.transformAttribute()', function() {
 
@@ -98,5 +99,35 @@ describe('up.migrate', function() {
 
     })
 
-  }
-})
+    describe('up.migrate.renamedPackage()', function() {
+
+      it('prints a warning and forwards the call to the new module', function() {
+        const warnSpy = spyOn(up.log, 'warn')
+        const value = up.dom
+        expect(warnSpy).toHaveBeenCalled()
+        expect(value).toBe(up.fragment)
+      })
+
+    })
+
+    describe('up.migrate.warn()', function() {
+
+      it('prepends a deprecation prefix to the given message and prints it to the warning log', function() {
+        const spy = spyOn(up.log, 'warn')
+        up.migrate.warn("a legacy warning")
+        expect(spy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
+      })
+
+      it('only prints a given message once', function() {
+        const spy = spyOn(up.log, 'warn')
+        up.migrate.warn("a very unique legacy warning")
+        up.migrate.warn("a very unique legacy warning")
+        expect(spy.calls.count()).toBe(1)
+      })
+
+      it('allows substitution')
+    })
+
+
+  })
+}
