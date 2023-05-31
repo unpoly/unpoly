@@ -1031,6 +1031,22 @@ describe 'up.element', ->
       element.classList.add('print:sm:hidden')
       expect(up.element.classSelector('print:sm:hidden')).toBe('.print\\:sm\\:hidden')
 
+    it 'escapes all square-brackets', ->
+      element = fixture('div')
+      element.classList.add('text-[2rem]')
+      expect(up.element.classSelector('text-[2rem]')).toBe('.text-\\[2rem\\]')
+
+    it 'escapes all periods', ->
+      element = fixture('div')
+      element.classList.add('text-[.8125rem]')
+      expect(up.element.classSelector('text-[.8125rem]')).toBe('.text-\\[\\.8125rem\\]')
+
+    it 'escapes all exclamation marks', ->
+      element = fixture('div')
+      element.classList.add('!font-bold')
+      expect(up.element.classSelector('!font-bold')).toBe('.\\!font-bold')
+
+
   describe 'up.element.hide()', ->
 
     it 'makes the given element invisible', ->
