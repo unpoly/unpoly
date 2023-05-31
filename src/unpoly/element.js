@@ -683,7 +683,7 @@ up.element = (function() {
   @internal
   */
   function classSelector(klass) {
-    klass = klass.replace(/[:\[\]\.\!]/g, '\\$&')
+    klass = klass.replace(/[^\w-]/g, '\\$&')
     return `.${klass}`
   }
 
