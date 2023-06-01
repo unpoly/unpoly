@@ -396,7 +396,6 @@ describe 'up.event', ->
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
 
-
       if up.migrate.loaded
         it 'allows to bind and unbind events by their old, deprecated name', ->
           up.migrate.renamedEvent('up:spec:old', 'up:spec:new')
