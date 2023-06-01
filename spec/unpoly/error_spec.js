@@ -23,7 +23,7 @@ describe('up.error', function() {
 
       u.task(() => promiseState(mutedPromise).then(function(result) {
         expect(result.state).toBe('fulfilled')
-        expect(window).not.toHaveUnhandledRejections()
+        // Jasmine will fail if there are unhandled promise rejections
         done()
       }))
     })
@@ -35,7 +35,7 @@ describe('up.error', function() {
 
       u.task(() => promiseState(mutedPromise).then(function(result) {
         expect(result.state).toBe('fulfilled')
-        expect(window).not.toHaveUnhandledRejections()
+        // Jasmine will fail if there are unhandled promise rejections
         done()
       }))
     })
@@ -47,7 +47,7 @@ describe('up.error', function() {
 
       u.task(() => promiseState(mutedPromise).then(function(result) {
         expect(result.state).toBe('fulfilled')
-        expect(window).not.toHaveUnhandledRejections()
+        // Jasmine will fail if there are unhandled promise rejections
         done()
       }))
     })

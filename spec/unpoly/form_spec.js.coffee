@@ -964,37 +964,34 @@ describe 'up.form', ->
         it "places the response into the form and doesn't update the browser URL if the submission returns a 5xx status code", asyncSpec (next) ->
           submitPromise = up.submit(@$form)
 
-          next =>
-            @respondWith
-              status: 500
-              contentType: 'text/html'
-              responseText:
-                """
-                <div class='before'>
-                  new-before
-                </div>
+          await wait()
 
-                <form action='/form-target'>
-                  error-messages
-                </form>
+          jasmine.respondWith
+            status: 500
+            contentType: 'text/html'
+            responseText:
+              """
+              <div class='before'>
+                new-before
+              </div>
 
-                <div class='after'>
-                  new-after
-                </div>
-                """
+              <form action='/form-target'>
+                error-messages
+              </form>
 
-          next =>
-            expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
-            expect('.response').toHaveText('old-text')
-            expect('form').toHaveText('error-messages')
-            # See that containers outside the form have not changed
-            expect('.before').not.toHaveText('old-before')
-            expect('.after').not.toHaveText('old-after')
+              <div class='after'>
+                new-after
+              </div>
+              """
 
-            next.await promiseState(submitPromise )
+          await expectAsync(submitPromise).toBeRejected()
 
-          next (result) ->
-            expect(result.state).toBe('rejected')
+          expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
+          expect('.response').toHaveText('old-text')
+          expect('form').toHaveText('error-messages')
+          # See that containers outside the form have not changed
+          expect('.before').not.toHaveText('old-before')
+          expect('.after').not.toHaveText('old-after')
 
 
         it 'respects X-Up-Method and X-Up-Location response headers so the server can show that it redirected to a GET URL', asyncSpec (next) ->
@@ -1550,32 +1547,26 @@ describe 'up.form', ->
             expect(value).toEqual(jasmine.any(up.RenderResult))
 
 
-        it 'returns a Promise that rejects when the server responds to validation with an error code', asyncSpec (next) ->
+        it 'returns a Promise that rejects with an up.RenderResult when the server responds to validation with an error code', ->
           form = fixture('form[action=/form]')
           element = e.affix(form, '.element', text: 'old text')
 
           promise = up.validate(element)
 
-          next ->
-            expect('.element').toHaveText('old text')
-            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
+          await wait()
 
-            next.await promiseState(promise)
+          expect('.element').toHaveText('old text')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.element')
 
-          next ({ state }) ->
-            expect(state).toBe('pending')
+          await expectAsync(promise).toBePending()
 
-          next ->
-            jasmine.respondWithSelector('.element', text: 'new text', status: 400)
+          jasmine.respondWithSelector('.element', text: 'new text', status: 400)
 
-          next ->
-            expect('.element').toHaveText('new text')
+          await wait()
 
-            next.await promiseState(promise)
+          expect('.element').toHaveText('new text')
 
-          next ({ state, value }) ->
-            expect(state).toBe('rejected')
-            expect(value).toEqual(jasmine.any(up.RenderResult))
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.RenderResult))
 
       describe 'request sequence', ->
 
@@ -2221,7 +2212,7 @@ describe 'up.form', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections()
+            # Jasmine will fail if there are unhandled promise rejections
 
         it 'updates a given selector when an [up-fail-target] is given', asyncSpec (next) ->
           $form = $fixture('form.my-form[action="/path"][up-target=".target"][up-fail-target=".errors"]').text('old form text')
@@ -2692,7 +2683,7 @@ describe 'up.form', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections()
+            # Jasmine will fail if there are unhandled promise rejections
 
         # https://github.com/unpoly/unpoly/issues/336
         # https://github.com/unpoly/unpoly/issues/488
@@ -2736,7 +2727,7 @@ describe 'up.form', ->
           next ->
             expect(jasmine.Ajax.requests.count()).toBe(0)
 
-            expect(window).not.toHaveUnhandledRejections()
+            # Jasmine will fail if there are unhandled promise rejections
 
         it 'does not reveal the updated fragment (bugfix)', asyncSpec (next) ->
           revealSpy = spyOn(up, 'reveal').and.returnValue(Promise.resolve())

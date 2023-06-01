@@ -2057,26 +2057,19 @@ describe('up.network', function() {
 
     describe('up.network.abort()', function() {
 
-      it('aborts the given up.Request', asyncSpec(function(next) {
+      it('aborts the given up.Request', async function() {
         const request1 = up.request('/url')
         const request2 = up.request('/url')
 
-        next(() => up.network.abort(request1))
+        await wait()
 
-        next.await(() => promiseState(request1))
+        up.network.abort(request1)
 
-        next((result) => {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
 
-        next.await(() => promiseState(request2))
+        await expectAsync(request2).toBePending()
 
-        next((result) => {
-          expect(result.state).toEqual('pending')
-        })
-
-      }))
+      })
 
       it('aborts all requests when called without an argument', asyncSpec(function(next) {
         const request = up.request('/url')
@@ -2091,52 +2084,28 @@ describe('up.network', function() {
         })
       }))
 
-      it('aborts all requests for which the given function returns true', asyncSpec(function(next) {
+      it('aborts all requests for which the given function returns true', async function() {
         const request1 = up.request('/foo')
         const request2 = up.request('/bar')
 
-        next(() => {
-          let matcher = (request) => request.url === '/foo'
-          up.network.abort(matcher)
-        })
+        let matcher = (request) => request.url === '/foo'
+        up.network.abort(matcher)
 
-        next.await(() => promiseState(request1))
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+        await expectAsync(request2).toBePending()
+      })
 
-        next((result) => {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
-
-        next.await(() => promiseState(request2))
-
-        next((result) => {
-          expect(result.state).toEqual('pending')
-        })
-
-      }))
-
-      it('aborts all requests matching the given URL pattern', asyncSpec(function(next) {
+      it('aborts all requests matching the given URL pattern', async function() {
         const request1 = up.request('/foo/123')
         const request2 = up.request('/bar/456')
 
-        next(() => {
-          up.network.abort('/foo/*')
-        })
+        await wait()
 
-        next.await(() => promiseState(request1))
+        up.network.abort('/foo/*')
 
-        next((result) => {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
-
-        next.await(() => promiseState(request2))
-
-        next((result) => {
-          expect(result.state).toEqual('pending')
-        })
-
-      }))
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+        await expectAsync(request1).toBePending()
+      })
 
       it('emits an up:request:aborted event', asyncSpec(function(next) {
         const listener = jasmine.createSpy('event listener')

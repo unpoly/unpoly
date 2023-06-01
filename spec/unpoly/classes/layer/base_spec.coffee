@@ -5,14 +5,14 @@ describe 'up.Layer', ->
 
   describe '#context', ->
 
-    it 'stores a per-layer context object', (done) ->
+    it 'stores a per-layer context object', ->
       up.layer.root.context.rootKey = 'rootValue'
 
-      up.layer.open(context: { overlayKey: 'overlayValue' }).then (overlay) ->
-        expect(overlay.context).toEqual(overlayKey: 'overlayValue')
-        # Show that the root layer's context wasn't changed.
-        expect(up.layer.root.context).toEqual(rootKey: 'rootValue')
-        done()
+      overlay = await up.layer.open(context: { overlayKey: 'overlayValue' })
+
+      expect(overlay.context).toEqual(overlayKey: 'overlayValue')
+      # Show that the root layer's context wasn't changed.
+      expect(up.layer.root.context).toEqual(rootKey: 'rootValue')
 
     it 'may be mutated by the user', ->
       up.layer.context.key = 'value'

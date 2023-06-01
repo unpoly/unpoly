@@ -290,7 +290,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       parser.number('duration')
       parser.string('confirm')
 
-      closeFn(value, closeOptions)
+      up.error.muteUncriticalSync(() => closeFn(value, closeOptions))
     })
   }
 
@@ -368,6 +368,10 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     if (this.backdrop && !up.motion.isNone(options.boxAnimation)) {
       backdropDone = up.animate(this.backdropElement, options.backdropAnimation, options)
     }
+
+    // if (up.motion.isEnabled() && !up.motion.isNone(options.boxAnimation)) {
+    //   debugger
+    // }
 
     // Promise.all() ignores non-Thenables in the given array
     return Promise.all([boxDone, backdropDone])

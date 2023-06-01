@@ -923,27 +923,28 @@ describe 'up.fragment', ->
                     expect(result.value.name).toBe('up.Offline')
                     done()
 
-          it 'emits an up:fragment:offline event with access to { request } and { renderOptions }', asyncSpec (next) ->
+          it 'emits an up:fragment:offline event with access to { request } and { renderOptions }', ->
             listener = jasmine.createSpy('up:fragment:offline listener')
             up.on('up:fragment:offline', listener)
 
             fixture('.target')
             up.render('.target', url: '/other-path')
 
-            next ->
-              expect(jasmine.Ajax.requests.count()).toBe(1)
+            await wait()
 
-              expect(listener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(listener).not.toHaveBeenCalled()
 
-              jasmine.lastRequest().responseError()
+            jasmine.lastRequest().responseError()
 
-            next ->
-              expect(listener).toHaveBeenCalled()
-              event = listener.calls.argsFor(0)[0]
-              expect(event.type).toBe('up:fragment:offline')
-              expect(event.request).toEqual(jasmine.any(up.Request))
-              expect(event.renderOptions.target).toMatchURL('.target')
-              expect(event.renderOptions.url).toMatchURL('/other-path')
+            await wait()
+
+            expect(listener).toHaveBeenCalled()
+            event = listener.calls.argsFor(0)[0]
+            expect(event.type).toBe('up:fragment:offline')
+            expect(event.request).toEqual(jasmine.any(up.Request))
+            expect(event.renderOptions.target).toMatchURL('.target')
+            expect(event.renderOptions.url).toMatchURL('/other-path')
 
           it 'calls an { onOffline } listener with an up:fragment:offline event', asyncSpec (next) ->
             listener = jasmine.createSpy('onOffline callback')
@@ -4839,7 +4840,7 @@ describe 'up.fragment', ->
             next ->
               expect('div[tabindex]').toHaveText('new focused')
               expect('div[tabindex]').not.toBeFocused()
-              expect(window).not.toHaveUnhandledRejections()
+              # Jasmine will fail if there are unhandled promise rejections
 
           it 'preserves focus of an element within the changed fragment when updating inner HTML with { content } (bugfix)', asyncSpec (next) ->
             container = fixture('.container')

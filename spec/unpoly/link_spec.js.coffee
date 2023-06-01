@@ -95,7 +95,7 @@ describe 'up.link', ->
 
         next (result) ->
           expect(result.state).toBe('fulfilled')
-          expect(window).not.toHaveUnhandledRejections()
+          # Jasmine will fail if there are unhandled promise rejections
 
 #      it 'does not change focus in a programmatic call', asyncSpec (next) ->
 #        input = fixture('input[type=text]')
@@ -956,7 +956,7 @@ describe 'up.link', ->
 
         next ->
           expect(onRendered).not.toHaveBeenCalled()
-          expect(window).not.toHaveUnhandledRejections()
+          # Jasmine will fail if there are unhandled promise rejections
 
       describe 'for an [up-target] link', ->
 
@@ -985,14 +985,14 @@ describe 'up.link', ->
           next => expect(@requestTarget()).toEqual('.target')
 
         it 'does not create layer elements', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
           up.link.preload($link)
           next =>
             expect('up-modal').not.toBeAttached()
 
         it 'does not emit an up:layer:open event', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new"]')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
           openListener = jasmine.createSpy('listener')
           up.on('up:layer:open', openListener)
@@ -1001,7 +1001,7 @@ describe 'up.link', ->
             expect(openListener).not.toHaveBeenCalled()
 
         it 'does not close a currently open overlay', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
           closeListener = jasmine.createSpy('listener')
           up.on('up:layer:dismiss', closeListener)
@@ -1026,14 +1026,14 @@ describe 'up.link', ->
             expect(closeListener).toHaveBeenCalled()
 
         it 'does not prevent the opening of other overlays while the request is still pending', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="modal"]')
+          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
           up.link.preload($link)
 
-          next =>
+          next ->
             up.layer.open(mode: 'modal', fragment: '<div class="content">Modal content</div>')
 
-          next =>
+          next ->
             expect('up-modal .content').toBeAttached()
 
         it 'calls up.request() with a { preload: true } option', asyncSpec (next) ->
@@ -1233,7 +1233,7 @@ describe 'up.link', ->
 
             # Since there isn't anyone who could handle the rejection inside
             # the event handler, our handler mutes the rejection.
-            expect(window).not.toHaveUnhandledRejections()
+            # Jasmine will fail if there are unhandled promise rejections
 
 
         it 'uses the [up-target] selector for a successful response', asyncSpec (next) ->
@@ -2078,7 +2078,7 @@ describe 'up.link', ->
 
         next.after 90, =>
           expect(jasmine.Ajax.requests.count()).toEqual(0)
-          expect(window).not.toHaveUnhandledRejections()
+          # Jasmine will fail if there are unhandled promise rejections
 
       it 'aborts a preload request if the user stops hovering before the response was received', asyncSpec (next) ->
         up.link.config.preloadDelay = 10
@@ -2236,7 +2236,7 @@ describe 'up.link', ->
 
           # Since there isn't anyone who could handle the rejection inside
           # the event handler, our handler mutes the rejection.
-          expect(window).not.toHaveUnhandledRejections()
+          # Jasmine will fail if there are unhandled promise rejections
 
       describe 'exemptions from preloading', ->
 
