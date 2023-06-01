@@ -36,6 +36,17 @@ describe 'up.event', ->
             jasmine.any(Object)
           )
 
+      it 'does not call the event listener if the event was triggered on a child and the selector has a [disabled] attribute', asyncSpec (next) ->
+        listener = jasmine.createSpy()
+        up.on('click', '.parent', listener)
+
+        $button = $fixture('button.parent[disabled]')
+        $child = $button.affix('span.child')
+
+        Trigger.click($child)
+        next =>
+          expect(listener.calls.count()).toBe(0)
+
       it 'passes the event target as the second argument if no selector was passed to up.on()', asyncSpec (next) ->
         $element = $fixture('.element')
         listener = jasmine.createSpy()
@@ -384,6 +395,7 @@ describe 'up.event', ->
 
           next =>
             expect(parseDataSpy).not.toHaveBeenCalled()
+
 
       if up.migrate.loaded
         it 'allows to bind and unbind events by their old, deprecated name', ->
