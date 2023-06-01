@@ -90,6 +90,10 @@ up.EventListener = class EventListener extends up.Record {
         args.push(data)
       }
 
+      if (element instanceof HTMLButtonElement && element.disabled) {
+        return
+      }
+
       const applyCallback = this.callback.bind(element, ...args)
 
       if (this.baseLayer) {
