@@ -2,44 +2,42 @@ describe 'up.Layer.OverlayWithViewport', ->
 
   describe 'preservation of overlays during fragment changes', ->
 
-    beforeEach ->
-      fixture('.container', content: 'old container text')
-      # Since we don't want to destroy the <body> in tests, reconfigure layers so they
-      # will attach to another element.
-      spyOn(up.Layer.Modal, 'getParentElement').and.callFake -> document.querySelector('.container')
+    it 'keeps the overlay in the DOM', ->
+      await up.layer.open(content: 'foo', animation: false)
 
-    it 'keeps the overlay in the DOM', asyncSpec (next) ->
-      next.await up.layer.open(content: 'foo', animation: false)
+      expect(up.layer.count).toBe(2)
 
-      next ->
-        expect(up.layer.count).toBe(2)
+      # Need to pass { peel: false } since peeling would close the layer
+      up.render('body', document: '<body>new body</body>', layer: 'root', peel: false)
 
-        # Need to pass { peel: false } since peeling would close the layer
-        up.render('.container', content: 'new container text', peel: false)
+      await wait()
 
-      next ->
-        expect(up.layer.count).toBe(2)
-        expect(up.layer.stack[1].element).toBeAttached()
-        expect(up.layer.stack[1].element.parentElement).toMatchSelector('.container')
+      expect(up.layer.count).toBe(2)
+      expect(up.layer.stack[1].element).toBeAttached()
+      expect(up.layer.stack[1].element.parentElement).toBe(document.body)
 
-    it 'does not call destructors', asyncSpec (next) ->
+    it 'does not call destructors', ->
       destructor = jasmine.createSpy('destructor for <overlay-child>')
       up.compiler('overlay-child', (element) -> return destructor)
 
-      next.await up.layer.open(content: '<overlay-child></overlay-child>', animation: false)
+      await up.layer.open(content: '<overlay-child></overlay-child>', animation: false)
 
-      next ->
-        expect(up.layer.count).toBe(2)
+      await wait()
 
-        # Need to pass { peel: false } since peeling would close the layer
-        up.render('.container', content: 'new container text', peel: false, layer: 'root')
+      expect(up.layer.count).toBe(2)
 
-      next ->
-        expect(up.layer.count).toBe(2)
-        expect(destructor).not.toHaveBeenCalled()
+      # Need to pass { peel: false } since peeling would close the layer
+      up.render('body', document: '<body>new body</body>', layer: 'root', peel: false)
 
-        up.layer.dismiss(null, animation: false)
+      await wait()
 
-      next ->
-        expect(up.layer.count).toBe(1)
-        expect(destructor).toHaveBeenCalled()
+      expect(up.layer.count).toBe(2)
+      expect(destructor).not.toHaveBeenCalled()
+
+      # Test that destructors *are* called when we close the overlay.
+      up.layer.dismiss(null, animation: false)
+
+      await wait()
+
+      expect(up.layer.count).toBe(1)
+      expect(destructor).toHaveBeenCalled()

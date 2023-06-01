@@ -694,44 +694,48 @@ describe 'up.fragment', ->
 
         describe 'when the server responds with an error or unexpected content', ->
 
-          it 'uses a target selector given as { failTarget } option', asyncSpec (next) ->
+          it 'uses a target selector given as { failTarget } option', ->
             fixture('.success-target', text: 'old success text')
             fixture('.failure-target', text: 'old failure text')
 
-            up.render('.success-target', url: '/path', failTarget: '.failure-target')
+            renderJob = up.render('.success-target', url: '/path', failTarget: '.failure-target')
 
-            next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="failure-target">new failure text</div>
-                  <div class="success-target">new success text</div>
-                """
+            await wait()
 
-            next =>
-              expect('.success-target').toHaveText('old success text')
-              expect('.failure-target').toHaveText('new failure text')
+            jasmine.respondWith
+              status: 500
+              responseText: """
+                <div class="failure-target">new failure text</div>
+                <div class="success-target">new success text</div>
+              """
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('.success-target').toHaveText('old success text')
+            expect('.failure-target').toHaveText('new failure text')
 
           describe 'with { fallback } option', ->
 
-            it 'updates a fallback target if the { failTarget } cannot be matched', asyncSpec (next) ->
+            it 'updates a fallback target if the { failTarget } cannot be matched', ->
               fixture('.fallback', text: 'old fallback text')
               fixture('.success-target', text: 'old success text')
               fixture('.failure-target', text: 'old failure text')
 
-              up.render('.success-target', url: '/path', failTarget: '.failure-target', fallback: '.fallback')
+              renderJob = up.render('.success-target', url: '/path', failTarget: '.failure-target', fallback: '.fallback')
 
-              next =>
-                @respondWith
-                  status: 500
-                  responseText: """
-                    <div class="fallback">new fallback text</div>
-                    <div class="success-target">new success text</div>
-                  """
+              await wait()
 
-              next =>
-                expect('.success-target').toHaveText('old success text')
-                expect('.fallback').toHaveText('new fallback text')
+              jasmine.respondWith
+                status: 500
+                responseText: """
+                  <div class="fallback">new fallback text</div>
+                  <div class="success-target">new success text</div>
+                """
+
+              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect('.success-target').toHaveText('old success text')
+              expect('.fallback').toHaveText('new fallback text')
 
           it 'does update a fragment if the server sends an XHTML content-type instead of text/html', asyncSpec (next) ->
             fixture('.target', text: 'old text')
@@ -746,21 +750,16 @@ describe 'up.fragment', ->
             next =>
               expect('.target').toHaveText('new text')
 
-          it 'rejects the returned promise', (done) ->
+          it 'rejects the returned promise', ->
             fixture('.success-target')
             fixture('.failure-target')
-            promise = up.render('.success-target', url: '/path', failTarget: '.failure-target')
+            renderJob = up.render('.success-target', url: '/path', failTarget: '.failure-target')
 
-            u.task =>
-              promiseState(promise).then (result) =>
-                expect(result.state).toEqual('pending')
+            await expectAsync(renderJob).toBePending()
 
-                @respondWithSelector('.failure-target', status: 500)
+            jasmine.respondWithSelector('.failure-target', status: 500)
 
-                u.task =>
-                  promiseState(promise).then (result) =>
-                    expect(result.state).toEqual('rejected')
-                    done()
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
           it 'rejects with an error that explains why success targets were not used', (done) ->
             fixture('.target')
@@ -775,35 +774,36 @@ describe 'up.fragment', ->
                   expect(value).toMatch(/No target selector given for failed responses/i)
                   done()
 
-          it 'runs an onFailRendered callback', asyncSpec (next) ->
+          it 'runs an onFailRendered callback', ->
             fixture('.success-target', text: 'old text')
             fixture('.failure-target', text: 'old text')
             onRendered = jasmine.createSpy('onRendered callback')
             onFailRendered = jasmine.createSpy('onFailRendered callback')
 
-            up.render('.success-target', { url: '/path', failTarget: '.failure-target', onRendered, onFailRendered })
+            renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target', onRendered, onFailRendered })
 
-            next ->
-              expect(onRendered).not.toHaveBeenCalled()
-              expect(onFailRendered).not.toHaveBeenCalled()
+            await wait()
 
-            next ->
-              jasmine.respondWithSelector('.failure-target', status: 500, text: 'new text')
+            expect(onRendered).not.toHaveBeenCalled()
+            expect(onFailRendered).not.toHaveBeenCalled()
 
-            next ->
-              expect('.success-target').toHaveText('old text')
-              expect('.failure-target').toHaveText('new text')
+            jasmine.respondWithSelector('.failure-target', status: 500, text: 'new text')
 
-              expect(onRendered).not.toHaveBeenCalled()
-              expect(onFailRendered).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('.success-target').toHaveText('old text')
+            expect('.failure-target').toHaveText('new text')
+
+            expect(onRendered).not.toHaveBeenCalled()
+            expect(onFailRendered).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
 
           describe 'with { fail } option', ->
 
-            it 'always uses success options with { fail: false }', asyncSpec (next) ->
+            it 'always uses success options with { fail: false }', ->
               fixture('.success-target', text: 'old success text')
               fixture('.failure-target', text: 'old failure text')
 
-              up.render(
+              renderJob = up.render(
                 target: '.success-target',
                 failTarget: '.failure-target',
                 url: '/path',
@@ -811,20 +811,23 @@ describe 'up.fragment', ->
                 fail: true
               )
 
-              next ->
-                jasmine.respondWith """
-                  <div class="success-target">new success text</div>
-                  <div class="failure-target">new failure text</div>
-                  """
+              await wait()
 
-              next ->
-                expect('.success-target').toHaveText('old success text')
-                expect('.failure-target').toHaveText('new failure text')
-            it 'always uses failure options with { fail: true }', asyncSpec (next) ->
+              jasmine.respondWith """
+                <div class="success-target">new success text</div>
+                <div class="failure-target">new failure text</div>
+                """
+
+              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect('.success-target').toHaveText('old success text')
+              expect('.failure-target').toHaveText('new failure text')
+
+            it 'always uses failure options with { fail: true }', ->
               fixture('.success-target', text: 'old success text')
               fixture('.failure-target', text: 'old failure text')
 
-              up.render(
+              renderJob = up.render(
                 target: '.success-target',
                 failTarget: '.failure-target',
                 url: '/path',
@@ -832,15 +835,17 @@ describe 'up.fragment', ->
                 fail: true
               )
 
-              next ->
-                jasmine.respondWith """
-                  <div class="success-target">new success text</div>
-                  <div class="failure-target">new failure text</div>
-                  """
+              await wait()
 
-              next ->
-                expect('.success-target').toHaveText('old success text')
-                expect('.failure-target').toHaveText('new failure text')
+              jasmine.respondWith """
+                <div class="success-target">new success text</div>
+                <div class="failure-target">new failure text</div>
+                """
+
+              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect('.success-target').toHaveText('old success text')
+              expect('.failure-target').toHaveText('new failure text')
 
             it 'accepts a function as { fail } option', asyncSpec (next) ->
               failFn = jasmine.createSpy('fail function').and.returnValue(false)
@@ -868,67 +873,67 @@ describe 'up.fragment', ->
                 expect('.success-target').toHaveText('new success text')
                 expect('.failure-target').toHaveText('old failure text')
 
-            it 'lets up:fragment:loaded listeners force a failure response by setting event.renderOptions.fail = true', asyncSpec (next) ->
+            it 'lets up:fragment:loaded listeners force a failure response by setting event.renderOptions.fail = true', ->
               fixture('.success-target', text: 'old success text')
               fixture('.failure-target', text: 'old failure text')
 
               up.on('up:fragment:loaded', (e) -> e.renderOptions.fail = true)
 
-              up.render(target: '.success-target', failTarget: '.failure-target', url: '/path')
+              renderJob = up.render(target: '.success-target', failTarget: '.failure-target', url: '/path')
 
-              next ->
-                jasmine.respondWith """
-                  <div class="success-target">new success text</div>
-                  <div class="failure-target">new failure text</div>
-                  """
+              await wait()
 
-              next ->
-                expect('.success-target').toHaveText('old success text')
-                expect('.failure-target').toHaveText('new failure text')
+              jasmine.respondWith """
+                <div class="success-target">new success text</div>
+                <div class="failure-target">new failure text</div>
+                """
+
+              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect('.success-target').toHaveText('old success text')
+              expect('.failure-target').toHaveText('new failure text')
 
         describe 'when the request times out', ->
 
-          it "doesn't crash and rejects the returned promise", asyncSpec (next) ->
+          it "doesn't crash and rejects the returned promise with an up.Offline error xx", ->
             jasmine.clock().install() # required by responseTimeout()
             fixture('.target')
-            promise = up.render('.target', url: '/path', timeout: 50)
+            renderJob = up.render('.target', url: '/path', timeout: 500)
 
-            next =>
-              # See that the correct timeout value has been set on the XHR instance
-              expect(@lastRequest().timeout).toEqual(50)
+            await wait()
 
-            next.await =>
-              # See that the promise is still pending before the timeout
-              promiseState(promise).then (result) -> expect(result.state).toEqual('pending')
+            # See that the correct timeout value has been set on the XHR instance
+            expect(jasmine.lastRequest().timeout).toEqual(500)
 
-            next =>
-              @lastRequest().responseTimeout()
+            await expectAsync(renderJob).toBePending()
 
-            next.await =>
-              promiseState(promise).then (result) -> expect(result.state).toEqual('rejected')
+            jasmine.lastRequest().responseTimeout()
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
 
         describe 'when there is a network issue', ->
 
-          it "doesn't crash and rejects the returned promise with up.Offline", (done) ->
+          it "doesn't crash and rejects the returned promise with an up.Offline error", ->
             fixture('.target')
-            promise = up.render('.target', url: '/path')
+            renderJob = up.render('.target', url: '/path', timeout: 50)
 
-            u.task =>
-              promiseState(promise).then (result) =>
-                expect(result.state).toEqual('pending')
-                @lastRequest().responseError()
-                u.task =>
-                  promiseState(promise).then (result) =>
-                    expect(result.state).toBe('rejected')
-                    expect(result.value.name).toBe('up.Offline')
-                    done()
+            await wait()
+
+            # See that the correct timeout value has been set on the XHR instance
+            expect(jasmine.lastRequest().timeout).toEqual(50)
+
+            await expectAsync(renderJob).toBePending()
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
 
           it 'emits an up:fragment:offline event with access to { request } and { renderOptions }', ->
             listener = jasmine.createSpy('up:fragment:offline listener')
             up.on('up:fragment:offline', listener)
 
             fixture('.target')
-            up.render('.target', url: '/other-path')
+            renderJob = up.render('.target', url: '/other-path')
 
             await wait()
 
@@ -937,7 +942,7 @@ describe 'up.fragment', ->
 
             jasmine.lastRequest().responseError()
 
-            await wait()
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
 
             expect(listener).toHaveBeenCalled()
             event = listener.calls.argsFor(0)[0]
@@ -946,23 +951,24 @@ describe 'up.fragment', ->
             expect(event.renderOptions.target).toMatchURL('.target')
             expect(event.renderOptions.url).toMatchURL('/other-path')
 
-          it 'calls an { onOffline } listener with an up:fragment:offline event', asyncSpec (next) ->
+          it 'calls an { onOffline } listener with an up:fragment:offline event', ->
             listener = jasmine.createSpy('onOffline callback')
 
             fixture('.target')
-            up.render('.target', url: '/other-path', onOffline: listener)
+            renderJob = up.render('.target', url: '/other-path', onOffline: listener)
 
-            next ->
-              expect(jasmine.Ajax.requests.count()).toBe(1)
+            await wait()
 
-              expect(listener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(listener).not.toHaveBeenCalled()
 
-              jasmine.lastRequest().responseError()
+            jasmine.lastRequest().responseError()
 
-            next ->
-              expect(listener).toHaveBeenCalled()
-              event = listener.calls.argsFor(0)[0]
-              expect(event.type).toBe('up:fragment:offline')
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
+
+            expect(listener).toHaveBeenCalled()
+            event = listener.calls.argsFor(0)[0]
+            expect(event.type).toBe('up:fragment:offline')
 
           it 'allows up:fragment:offline listeners to retry the rendering by calling event.retry()', ->
             listener = jasmine.createSpy('onOffline callback')
@@ -1023,21 +1029,22 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(2)
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.override-target')
 
-          it 'does not call an { onFinished } handler', asyncSpec (next) ->
+          it 'does not call an { onFinished } handler', ->
             listener = jasmine.createSpy('onFinished callback')
 
             fixture('.target')
-            up.render('.target', url: '/other-path', onFinished: listener)
+            renderJob = up.render('.target', url: '/other-path', onFinished: listener)
 
-            next ->
-              expect(jasmine.Ajax.requests.count()).toBe(1)
+            await wait()
 
-              expect(listener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(listener).not.toHaveBeenCalled()
 
-              jasmine.lastRequest().responseError()
+            jasmine.lastRequest().responseError()
 
-            next ->
-              expect(listener).not.toHaveBeenCalled()
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
+
+            expect(listener).not.toHaveBeenCalled()
 
           describe 'when there is an expired cache entry', ->
 
@@ -1065,24 +1072,30 @@ describe 'up.fragment', ->
               next ->
                 expect('.target').toHaveText('expired text')
 
-            it 'calls an { onOffline } instead of { onFinished } after revalidation fails', asyncSpec (next) ->
+            it 'calls an { onOffline } instead of { onFinished } after revalidation fails', ->
               onOffline = jasmine.createSpy('onOffline handler')
               onFinished = jasmine.createSpy('onFinished handler')
-              up.render('.target', { url: '/path', cache: true, revalidate: true, onOffline, onFinished })
 
-              next ->
-                expect(up.network.isBusy()).toBe(true)
-                expect(onFinished).not.toHaveBeenCalled()
-                expect(onOffline).not.toHaveBeenCalled()
+              renderJob = up.render('.target', { url: '/path', cache: true, revalidate: true, onOffline, onFinished })
 
-                expect('.target').toHaveText('expired text')
-                expect(up.network.isBusy()).toBe(true)
+              await wait()
 
-                jasmine.lastRequest().responseError()
+              await expectAsync(renderJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(renderJob.finished).toBePending()
 
-              next ->
-                expect(onFinished).not.toHaveBeenCalled()
-                expect(onOffline).toHaveBeenCalled()
+              expect(up.network.isBusy()).toBe(true)
+              expect(onFinished).not.toHaveBeenCalled()
+              expect(onOffline).not.toHaveBeenCalled()
+
+              expect('.target').toHaveText('expired text')
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.lastRequest().responseError()
+
+              await expectAsync(renderJob.finished).toBeRejectedWith(jasmine.any(up.Offline))
+
+              expect(onFinished).not.toHaveBeenCalled()
+              expect(onOffline).toHaveBeenCalled()
 
         describe 'up:fragment:loaded event', ->
 
@@ -1107,21 +1120,21 @@ describe 'up.fragment', ->
               expect(event.origin).toBe(origin)
               expect(event.layer).toBe(up.layer.root)
 
-          it 'allows listeners to prevent an up:fragment:loaded event to prevent changes to the DOM and browser history', (done) ->
+          it 'allows listeners to prevent an up:fragment:loaded event to prevent changes to the DOM and browser history', ->
             up.history.config.enabled = true
             up.on('up:fragment:loaded', (e) -> e.preventDefault())
             fixture('.target', text: 'old text')
 
-            up.render(target: '.target', url: '/url')
+            renderJob = up.render(target: '.target', url: '/url')
 
-            u.task ->
-              jasmine.respondWith('new text')
+            await wait()
 
-              u.task ->
-                expect('.target').toHaveText('old text')
-                expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+            jasmine.respondWith('new text')
 
-                done()
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect('.target').toHaveText('old text')
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it 'rejects programmatic callers with an up.AbortError when the event is prevented', (done) ->
             up.on('up:fragment:loaded', (e) -> e.preventDefault())
@@ -1178,28 +1191,30 @@ describe 'up.fragment', ->
               expect('.one').toHaveText('old one')
               expect('.two').toHaveText('new two')
 
-          it 'allows listeners to mutate up.render() options before the fragment is updated when the server responds with an error code (bugfix)', asyncSpec (next) ->
+          it 'allows listeners to mutate up.render() options before the fragment is updated when the server responds with an error code (bugfix)', ->
             fixture('.one', text: 'old one')
             fixture('.two', text: 'old two')
             fixture('.three', text: 'old three')
 
             up.on('up:fragment:loaded', (e) -> e.renderOptions.failTarget = '.three')
 
-            up.render(target: '.one', failTarget: '.two', url: '/url')
+            renderJob = up.render(target: '.one', failTarget: '.two', url: '/url')
 
-            next ->
-              jasmine.respondWith
-                status: 500
-                responseText: """
-                  <div class="one">new one</div>
-                  <div class="two">new two</div>
-                  <div class="three">new three</div>
-                  """
+            await wait()
 
-            next ->
-              expect('.one').toHaveText('old one')
-              expect('.two').toHaveText('old two')
-              expect('.three').toHaveText('new three')
+            jasmine.respondWith
+              status: 500
+              responseText: """
+                <div class="one">new one</div>
+                <div class="two">new two</div>
+                <div class="three">new three</div>
+                """
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('.one').toHaveText('old one')
+            expect('.two').toHaveText('old two')
+            expect('.three').toHaveText('new three')
 
           it 'allows to pass a listener for just one render pass using { onLoaded } option', asyncSpec (next) ->
             origin = fixture('.origin')
@@ -1217,21 +1232,24 @@ describe 'up.fragment', ->
               expect(event.request).toEqual(jasmine.any(up.Request))
               expect(event.request.url).toMatchURL('/url')
 
-          it 'runs an { onLoaded } listener for failed responses (there is no { onFailLoaded })', asyncSpec (next) ->
+          it 'runs an { onLoaded } listener for failed responses (there is no { onFailLoaded })', ->
             origin = fixture('.origin')
             fixture('.target')
+            fixture('.fail-target')
             event = undefined
             onLoaded = (e) -> event = e
 
-            up.render({ target: '.target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
+            renderJob = up.render({ target: '.target', failTarget: '.fail-target', url: '/url', location: '/location-from-option', peel: false, origin, onLoaded })
 
-            next ->
-              jasmine.respondWithSelector('.target', text: 'error from server', status: 500)
+            await wait()
 
-            next ->
-              expect(event).toBeGiven()
-              expect(event.request).toEqual(jasmine.any(up.Request))
-              expect(event.request.url).toMatchURL('/url')
+            jasmine.respondWithSelector('.fail-target', text: 'error from server', status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(event).toBeGiven()
+            expect(event.request).toEqual(jasmine.any(up.Request))
+            expect(event.request.url).toMatchURL('/url')
 
         describe 'when the server sends an X-Up-Events header', ->
 
@@ -1334,29 +1352,34 @@ describe 'up.fragment', ->
 
           describe 'when opening a layer', ->
 
-            it 'accepts the layer that is about to open', asyncSpec (next) ->
+            it 'accepts the layer that is about to open', ->
               callback = jasmine.createSpy('onAccepted callback')
-              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
 
-              next =>
-                expect(callback).not.toHaveBeenCalled()
+              layerPromise = up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
 
-                @respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+              await wait()
 
-              next ->
-                expect(callback).toHaveBeenCalled()
+              expect(callback).not.toHaveBeenCalled()
 
-            it 'does not require the server to render content when the overlay will close anyway', asyncSpec (next) ->
+              jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+              await expectAsync(layerPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(callback).toHaveBeenCalled()
+
+            it 'does not require the server to render content when the overlay will close anyway', ->
               callback = jasmine.createSpy('onAccepted callback')
-              up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
+              layerPromise = up.layer.open({ onAccepted: callback, url: '/path', target: '.target' })
 
-              next =>
-                expect(callback).not.toHaveBeenCalled()
+              await wait()
 
-                @respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+              expect(callback).not.toHaveBeenCalled()
 
-              next ->
-                expect(callback).toHaveBeenCalled()
+              jasmine.respondWith('', responseHeaders: { 'X-Up-Accept-Layer': "null" })
+
+              await expectAsync(layerPromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(callback).toHaveBeenCalled()
 
 
         describe 'when the server sends an X-Up-Dismiss-Layer header', ->
@@ -1373,14 +1396,14 @@ describe 'up.fragment', ->
             await wait()
 
             expect(up.layer.mode).toBe('modal')
-            up.render({ url: '/path2', target: '.target'})
+            renderPromise = up.render({ url: '/path2', target: '.target'})
 
             await wait()
 
             expect(callback).not.toHaveBeenCalled()
             jasmine.respondWithSelector('.target', responseHeaders: { 'X-Up-Dismiss-Layer': "123" })
 
-            await wait()
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
             expect(up.layer.mode).toBe('root')
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining(value: 123))
@@ -1471,20 +1494,22 @@ describe 'up.fragment', ->
               expect('.one').toHaveText('old content')
               expect('.two').toHaveText('new content')
 
-          it 'renders the server-provided target for a failed update', asyncSpec (next) ->
+          it 'renders the server-provided target for a failed update', ->
             fixture('.one', text: 'old content')
             fixture('.two', text: 'old content')
             fixture('.three', text: 'old content')
 
-            up.render(target: '.one', failTarget: '.two', url: '/path')
+            renderJob = up.render(target: '.one', failTarget: '.two', url: '/path')
 
-            next =>
-              @respondWithSelector('.three', text: 'new content', responseHeaders: { 'X-Up-Target': '.three' }, status: 500)
+            await wait()
 
-            next ->
-              expect('.one').toHaveText('old content')
-              expect('.two').toHaveText('old content')
-              expect('.three').toHaveText('new content')
+            jasmine.respondWithSelector('.three', text: 'new content', responseHeaders: { 'X-Up-Target': '.three' }, status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('.one').toHaveText('old content')
+            expect('.two').toHaveText('old content')
+            expect('.three').toHaveText('new content')
 
           describe 'when the server sends X-Up-Target: :none', ->
 
@@ -2699,18 +2724,21 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('old target')
               expect('.fallback').toHaveText('new fallback')
 
-          it "replaces the layer's main target with { fallback: true }", asyncSpec (next) ->
+          it "replaces the layer's main target with { fallback: true }", ->
             up.layer.config.root.mainTargets = ['.default']
             fixture('.target', text: 'old target text')
             fixture('.default', text: 'old fallback text')
 
-            next =>
-              up.render('.target', url: '/path', fallback: true)
-            next =>
-              @respondWithSelector('.default', text: 'new fallback text', status: 500)
-            next =>
-              expect('.target').toHaveText('old target text')
-              expect('.default').toHaveText('new fallback text')
+            up.render('.target', url: '/path', fallback: true)
+
+            await wait()
+
+            jasmine.respondWithSelector('.default', text: 'new fallback text')
+
+            await wait()
+
+            expect('.target').toHaveText('old target text')
+            expect('.default').toHaveText('new fallback text')
 
           describe 'if all alternatives are exhausted', ->
 
@@ -2990,11 +3018,17 @@ describe 'up.fragment', ->
             next =>
               expect(location.href).toMatchURL('/signaled-path')
 
-          it 'does add a history entry after a failed GET-request (since that is reloadable)', asyncSpec (next) ->
+          it 'does add a history entry after a failed GET-request (since that is reloadable)', ->
             fixture('.target')
-            up.render('.target', url: '/path', method: 'post', failTarget: '.target', history: true)
-            next => @respondWithSelector('.target', status: 500)
-            next => expect(location.href).toMatchURL(jasmine.locationBeforeExample)
+            renderJob = up.render('.target', url: '/path', method: 'post', failTarget: '.target', history: true)
+
+            await wait()
+
+            jasmine.respondWithSelector('.target', status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
           it 'does not add a history entry with { history: false } option', asyncSpec (next) ->
             fixture('.target')
@@ -3107,19 +3141,31 @@ describe 'up.fragment', ->
               next => @respondWithSelector('.target')
               next => expect(location.href).toMatchURL('/path3')
 
-            it 'does not override the response URL after a failed request', asyncSpec (next) ->
+            it 'does not override the response URL after a failed request', ->
               fixture('.success-target')
               fixture('.failure-target')
-              up.render('.success-target', url: '/path', history: true, location: '/path4', failLocation: true, failTarget: '.failure-target')
-              next => @respondWithSelector('.failure-target', status: 500)
-              next => expect(location.href).toMatchURL('/path')
+              renderJob = up.render('.success-target', url: '/path', history: true, location: '/path4', failLocation: true, failTarget: '.failure-target')
 
-            it 'overrides the response URL after a failed request when passed as { failLocation }', asyncSpec (next) ->
+              await wait()
+
+              jasmine.respondWithSelector('.failure-target', status: 500)
+
+              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect(location.href).toMatchURL('/path')
+
+            it 'overrides the response URL after a failed request when passed as { failLocation }', ->
               fixture('.success-target')
               fixture('.failure-target')
-              up.render('.success-target', url: '/path', history: true, location: '/path5', failLocation: '/path6', failTarget: '.failure-target')
-              next => @respondWithSelector('.failure-target', status: 500)
-              next => expect(location.href).toMatchURL('/path6')
+              renderJob = up.render('.success-target', url: '/path', history: true, location: '/path5', failLocation: '/path6', failTarget: '.failure-target')
+
+              await wait()
+
+              jasmine.respondWithSelector('.failure-target', status: 500)
+
+              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect(location.href).toMatchURL('/path6')
 
           describe 'up:layer:location:changed event', ->
 
@@ -3465,13 +3511,17 @@ describe 'up.fragment', ->
             next =>
               expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
 
-          it 'ignores the option and reuses the previous source after a failed non-GET request', asyncSpec (next) ->
+          it 'ignores the option and reuses the previous source after a failed non-GET request', ->
             target = fixture('.target[up-source="/previous-source"]')
-            up.navigate('.target', url: '/path', method: 'post', source: '/given-path', failTarget: '.target')
-            next =>
-              @respondWithSelector('target', status: 500)
-            next =>
-              expect(up.fragment.source(e.get '.target')).toMatchURL('/previous-source')
+            renderJob = up.navigate('.target', failTarget: '.target', url: '/path', method: 'post', source: '/given-path', failTarget: '.target')
+
+            await wait()
+
+            jasmine.respondWithSelector('.target', status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/previous-source')
 
       describe 'context', ->
 
@@ -3536,23 +3586,24 @@ describe 'up.fragment', ->
             expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
             expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
 
-        it 'uses updates from an X-Up-Context header for failed responses', asyncSpec (next) ->
+        it 'uses updates from an X-Up-Context header for failed responses', ->
           fixture('.success-target', text: 'success target')
           fixture('.failure-target', text: 'failure target')
 
-          next ->
-            up.render(target: '.success-target', failTarget: '.failure-target', url: '/path1')
+          renderJob = up.render(target: '.success-target', failTarget: '.failure-target', url: '/path1')
 
-          next =>
-            @respondWithSelector('.failure-target',
-              text: 'new text',
-              status: 500,
-              responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})}
-            )
+          await wait()
 
-          next ->
-            expect('.failure-target').toHaveText('new text')
-            expect(up.layer.get(0).context).toEqual({ newKey: 'newValue' })
+          jasmine.respondWithSelector('.failure-target',
+            text: 'new text',
+            status: 500,
+            responseHeaders: { 'X-Up-Context': JSON.stringify({ newKey: 'newValue'})}
+          )
+
+          await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+          expect('.failure-target').toHaveText('new text')
+          expect(up.layer.get(0).context).toEqual({ newKey: 'newValue' })
 
       describe 'with { transition } option', ->
 
@@ -4181,53 +4232,60 @@ describe 'up.fragment', ->
 
           mockRevealBeforeEach()
 
-          it 'ignores the { scroll } option', asyncSpec (next) ->
+          it 'ignores the { scroll } option', ->
             fixture('.target', text: 'target text')
             fixture('.other', text: 'other text')
             fixture('.fail-target', text: 'fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other')
 
-            next =>
-              @respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
+            renderJob = up.render('.target', url: '/path', failTarget: '.fail-target', scroll: '.other')
 
-            next =>
-              expect(@revealMock).not.toHaveBeenCalled()
+            await wait()
 
-          it 'accepts a { failScroll } option for error responses', asyncSpec (next) ->
+            jasmine.respondWithSelector('.fail-target', status: 500, text: 'new fail-target text')
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(@revealMock).not.toHaveBeenCalled()
+
+          it 'accepts a { failScroll } option for error responses', ->
             fixture('.target', text: 'old target text')
             fixture('.other', text: 'other text')
             fixture('.fail-target', text: 'old fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other')
+            renderJob = up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: '.other')
 
-            next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="fail-target">
-                    new fail-target text
-                  </div>
-                  """
+            await wait()
 
-            next =>
-              expect(@revealedText).toEqual ['other text']
+            jasmine.respondWith
+              status: 500
+              responseText: """
+                <div class="fail-target">
+                  new fail-target text
+                </div>
+                """
 
-          it 'allows to refer to the replacement { origin } as ":origin" in the { failScroll } selector', asyncSpec (next) ->
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(@revealedText).toEqual ['other text']
+
+          it 'allows to refer to the replacement { origin } as ":origin" in the { failScroll } selector', ->
             $origin = $fixture('.origin').text('origin text')
             $fixture('.target').text('old target text')
             $fixture('.fail-target').text('old fail-target text')
-            up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: ':origin', origin: $origin[0])
+            renderJob = up.render('.target', url: '/path', failTarget: '.fail-target', scroll: false, failScroll: ':origin', origin: $origin[0])
 
-            next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="fail-target">
-                    new fail-target text
-                  </div>
-                  """
+            await wait()
 
-            next =>
-              expect(@revealedText).toEqual ['origin text']
+            jasmine.respondWith
+              status: 500
+              responseText: """
+                <div class="fail-target">
+                  new fail-target text
+                </div>
+                """
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(@revealedText).toEqual ['origin text']
 
         describe 'with { scrollBehavior } option', ->
 
@@ -5188,30 +5246,32 @@ describe 'up.fragment', ->
           promise = up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
           await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/(Aborted|Prevented)/i))
 
-        it 'sets { renderOptions } on the emitted event', asyncSpec (next) ->
+        it 'sets { renderOptions } on the emitted event', ->
           fixture('.target', text: 'old content')
           listener = jasmine.createSpy('listener').and.callFake((event) -> event.preventDefault())
           guardEvent = up.event.build('my:guard')
           up.on('my:guard', listener)
 
-          up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
+          renderJob = up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
 
-          next ->
-            expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
-            expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
+          await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
-        it 'omits the { guardEvent } key from the { renderOptions }, so event handlers can pass this to render() without causing an infinite loop', asyncSpec (next) ->
+          expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
+          expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
+
+        it 'omits the { guardEvent } key from the { renderOptions }, so event handlers can pass this to render() without causing an infinite loop', ->
           fixture('.target', text: 'old content')
           listener = jasmine.createSpy('listener').and.callFake((event) -> event.preventDefault())
           guardEvent = up.event.build('my:guard')
           up.on('my:guard', listener)
 
-          up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
+          renderJob = up.render(target: '.target', content: 'new content', guardEvent: guardEvent)
 
-          next ->
-            expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
-            expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
-            expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
+          await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          expect(listener).toHaveBeenCalledWith(guardEvent, jasmine.anything(), jasmine.anything())
+          expect(listener.calls.argsFor(0)[0].renderOptions.target).toEqual('.target')
+          expect(listener.calls.argsFor(0)[0].renderOptions.guardEvent).toBeMissing()
 
       describe 'with { abort } option', ->
 
@@ -5775,7 +5835,7 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(target: '.element', url: '/path').toBeCached()
 
-            up.render('.element', url: '/path', cache: true)
+            up.render('.element', url: '/path', cache: true, abort: false)
 
           next ->
             # See that the cached request is used.
@@ -5790,7 +5850,7 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(target: '.element', url: '/path').not.toBeCached()
 
-            up.render('.element', url: '/path', cache: false)
+            up.render('.element', url: '/path', cache: false, abort: false)
 
           next ->
             # See that the cached request is used.
@@ -5805,7 +5865,7 @@ describe 'up.fragment', ->
             expect(jasmine.Ajax.requests.count()).toBe(1)
             expect(target: '.element', url: '/path').not.toBeCached()
 
-            up.render('.element', url: '/path')
+            up.render('.element', url: '/path', abort: false)
 
           next ->
             # See that the cached request is used.
@@ -5974,28 +6034,23 @@ describe 'up.fragment', ->
               expect('.target').toHaveText('verified text')
               expect(finishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
 
-          it 'rejects up.render().finished promise if the revalidation failed', asyncSpec (next) ->
+          it 'rejects up.render().finished promise if the revalidation failed', ->
             jasmine.clock().install()
-            finishedCallback = jasmine.createSpy('finished callback')
-            finishedFailedCallback = jasmine.createSpy('finished callback')
 
             job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
-            job.finished.then(finishedCallback, finishedFailedCallback)
 
-            next ->
-              expect('.target').toHaveText('cached text')
-              expect(finishedCallback).not.toHaveBeenCalled()
-              expect(finishedFailedCallback).not.toHaveBeenCalled()
+            await job
 
-              expect(up.network.isBusy()).toBe(true)
+            expect('.target').toHaveText('cached text')
 
-              jasmine.lastRequest().responseTimeout()
+            await expectAsync(job.finished).toBePending()
+            expect(up.network.isBusy()).toBe(true)
 
-            next ->
-              expect(up.network.isBusy()).toBe(false)
-              expect('.target').toHaveText('cached text')
-              expect(finishedCallback).not.toHaveBeenCalled()
-              expect(finishedFailedCallback).toHaveBeenCalled()
+            jasmine.lastRequest().responseTimeout()
+
+            await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Offline))
+            expect(up.network.isBusy()).toBe(false)
+            expect('.target').toHaveText('cached text')
 
           it 'runs the { onRendered } a second time for the second render pass', asyncSpec (next) ->
             onRendered = jasmine.createSpy('onRendered callback')
@@ -6166,16 +6221,19 @@ describe 'up.fragment', ->
                 expect('.target').toHaveText('verified text')
                 expect(flags).toEqual [false, true]
 
-            it 'lets listeners prevent insertion of revalidated content by *preventing* the second up:fragment:loaded event, aborting the { finished } promise', ->
+            it 'lets listeners prevent insertion of revalidated content by *preventing* the second up:fragment:loaded event, aborting the { finished } promise yy', ->
               up.on 'up:fragment:loaded', (event) ->
                 if event.revalidating
                   event.preventDefault()
 
-              finishedPromise = up.render('.target', { url: '/cached-path', cache: true, revalidate: true }).finished
+              job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+
+              await job
+
+              expect('.target').toHaveText('cached text')
 
               await wait()
 
-              expect('.target').toHaveText('cached text')
               expect(up.network.isBusy()).toBe(true)
 
               jasmine.respondWithSelector('.target', text: 'verified text')
@@ -6185,18 +6243,21 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-              await expectAsync(finishedPromise).toBeRejectedWith(jasmine.anyError('AbortError'))
+              await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.Aborted))
 
             it 'lets listeners prevent insertion of revalidated content by *skipping* the second up:fragment:loaded event, fulfilling the { finished } promise', ->
               up.on 'up:fragment:loaded', (event) ->
                 if event.revalidating
                   event.skip()
 
-              finishedPromise = up.render('.target', { url: '/cached-path', cache: true, revalidate: true }).finished
+              job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+
+              await job
+
+              expect('.target').toHaveText('cached text')
 
               await wait()
 
-              expect('.target').toHaveText('cached text')
               expect(up.network.isBusy()).toBe(true)
 
               jasmine.respondWithSelector('.target', text: 'verified text')
@@ -6206,7 +6267,7 @@ describe 'up.fragment', ->
               expect(up.network.isBusy()).toBe(false)
               expect('.target').toHaveText('cached text')
 
-              await expectAsync(finishedPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+              await expectAsync(job.finished).toBeResolvedTo(jasmine.any(up.RenderResult))
 
       describe 'handling of [up-keep] elements', ->
 
@@ -6264,7 +6325,7 @@ describe 'up.fragment', ->
           next ->
             expect(destructor).toHaveBeenCalled()
 
-        it 'does not run destructors within kept elements when the <body> is targeted (bugfix)', asyncSpec (next) ->
+        it 'does not run destructors within kept elements when the <body> is targeted (bugfix)', ->
           destructor = jasmine.createSpy('destructor spy')
 
           up.compiler('.keepable', (element) -> destructor)
@@ -6273,24 +6334,15 @@ describe 'up.fragment', ->
 
           up.hello(keepable)
 
-          savedBody = document.body
+          up.render 'body', document: """
+            <body>
+              <div class='keepable' up-keep>new content</div>
+            </body>
+          """
 
-          try
-            up.render 'body', document: """
-              <body>
-                <div class='keepable' up-keep>new content</div>
-              </body>
-            """
-          finally
-            # Restore the Jasmine test runner that we just nuked
-            document.body.replaceWith(savedBody)
-            # The body get an .up-destroying class when it was swapped. We must remove it
-            # or up.fragment will ignore everything within the body from now on.
-            document.body.classList.remove('up-destroying')
-            document.body.removeAttribute('aria-hidden')
+          await wait()
 
-          next ->
-            expect(destructor).not.toHaveBeenCalled()
+          expect(destructor).not.toHaveBeenCalled()
 
         it 'keeps an [up-keep] element when updating a singleton element like <body>', asyncSpec (next) ->
           up.fragment.config.targetDerivers.unshift('middle-element')

@@ -364,17 +364,18 @@ describe 'up.feedback', ->
         fixture('.target')
         fixture('.fail-target')
 
-        up.render('.target', url: '/path', failTarget: '.fail-target', feedback: true)
+        renderJob = up.render('.target', url: '/path', failTarget: '.fail-target', feedback: true)
 
-        next ->
-          expect('.target').toHaveClass('up-loading')
+        await wait()
 
-          jasmine.respondWithSelector('.fail-target', text: 'new text', status: 400)
+        expect('.target').toHaveClass('up-loading')
+        jasmine.respondWithSelector('.fail-target', text: 'new text', status: 400)
 
-        next ->
-          expect('.fail-target').toHaveText('new text')
-          expect('.target').not.toHaveClass('up-loading')
-          expect('.fail-target').not.toHaveClass('up-loading')
+        await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+        expect('.fail-target').toHaveText('new text')
+        expect('.target').not.toHaveClass('up-loading')
+        expect('.fail-target').not.toHaveClass('up-loading')
 
     describe '.up-active', ->
 

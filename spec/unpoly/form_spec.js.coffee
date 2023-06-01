@@ -664,7 +664,7 @@ describe 'up.form', ->
 
     describe 'up.submit()', ->
 
-      it 'emits a preventable up:form:submit event', asyncSpec (next) ->
+      it 'emits a preventable up:form:submit event', ->
         $form = $fixture('form[action="/form-target"][up-target=".response"]')
 
         listener = jasmine.createSpy('submit listener').and.callFake (event) ->
@@ -672,15 +672,16 @@ describe 'up.form', ->
 
         $form.on('up:form:submit', listener)
 
-        up.submit($form)
+        renderJob = up.submit($form)
 
-        next =>
-          expect(listener).toHaveBeenCalled()
-          element = listener.calls.mostRecent().args[1]
-          expect(element).toEqual(element)
+        await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
-          # No request should be made because we prevented the event
-          expect(jasmine.Ajax.requests.count()).toEqual(0)
+        expect(listener).toHaveBeenCalled()
+        element = listener.calls.mostRecent().args[1]
+        expect(element).toEqual(element)
+
+        # No request should be made because we prevented the event
+        expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       it 'submits an form that has both an [id] attribute and a field with [name=id] (bugfix)', asyncSpec (next) ->
         form = fixture('form#form-id[action="/path"][up-submit][method=post]')
@@ -819,21 +820,23 @@ describe 'up.form', ->
           next ->
             expect(input).not.toBeDisabled()
 
-        it 're-enables fields when the submission ends in a failed response', asyncSpec (next) ->
+        it 're-enables fields when the submission ends in a failed response', ->
           fixture('.success-target')
           fixture('.fail-target')
           form = fixture('form[up-target=".success-target"][up-fail-target=".fail-target"]')
           input = e.affix(form, 'input[name=email]')
 
-          up.submit(form, { disable: true })
+          renderJob = up.submit(form, { disable: true })
 
-          next ->
-            expect(input).toBeDisabled()
+          await wait()
 
-            jasmine.respondWithSelector('.target', status: 500)
+          expect(input).toBeDisabled()
 
-          next ->
-            expect(input).not.toBeDisabled()
+          jasmine.respondWithSelector('.fail-target', status: 500)
+
+          await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+          expect(input).not.toBeDisabled()
 
         it 'keeps a form disabled when it is first disabled by a validation, then again by a submission that aborts the validation request', asyncSpec (next) ->
           requests = []
@@ -1060,10 +1063,16 @@ describe 'up.form', ->
             next => @respondWith('<div class="response">new-text</div>')
             next => expect(up.history.location).toMatchURL('/given-path')
 
-          it 'keeps the current browser location if the request failed', asyncSpec (next) ->
-            up.submit(@$form, location: '/given-path', failTarget: '.response')
-            next => @respondWith('<div class="response">new-text</div>', status: 500)
-            next => expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
+          it 'keeps the current browser location if the request failed', ->
+            renderJob = up.submit(@$form, location: '/given-path', failTarget: '.response')
+
+            await wait()
+
+            jasmine.respondWith('<div class="response">new-text</div>', status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(up.history.location).toMatchURL(jasmine.locationBeforeExample)
 
         describe 'with { history: false } option', ->
 
@@ -1121,52 +1130,56 @@ describe 'up.form', ->
 
         describe 'with { failScroll } option', ->
 
-          it 'reveals the given selector for a failed submission', asyncSpec (next) ->
+          it 'reveals the given selector for a failed submission', ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
             $other = $fixture('.other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.submit($form, reveal: '.other', failScroll: '.error')
+            renderJob = up.submit($form, reveal: '.other', failScroll: '.error')
 
-            next =>
-              @respondWith
-                status: 500,
-                responseText: """
-                  <form id="foo-form">
-                    <div class="error">Errors here</div>
-                  </form>
-                  """
+            await wait()
 
-            next =>
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
+            jasmine.respondWith
+              status: 500,
+              responseText: """
+                <form id="foo-form">
+                  <div class="error">Errors here</div>
+                </form>
+                """
 
-          it 'allows to refer to the origin as ":origin" in the selector', asyncSpec (next) ->
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(revealStub).toHaveBeenCalled()
+            expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.error')
+
+          it 'allows to refer to the origin as ":origin" in the selector', ->
             $form = $fixture('form#foo-form[action="/action"][up-target=".target"]')
             $target = $fixture('.target')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
 
-            up.submit($form, failScroll: ':origin .form-child')
+            renderJob = up.submit($form, failScroll: ':origin .form-child')
 
-            next =>
-              @respondWith
-                status: 500
-                responseText: """
-                  <div class="target">
-                    new text
-                  </div>
+            await wait()
 
-                  <form id="foo-form">
-                    <div class="form-child">other</div>
-                  </form>
-                  """
+            jasmine.respondWith
+              status: 500
+              responseText: """
+                <div class="target">
+                  new text
+                </div>
 
-            next =>
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
+                <form id="foo-form">
+                  <div class="form-child">other</div>
+                </form>
+                """
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(revealStub).toHaveBeenCalled()
+            expect(revealStub.calls.mostRecent().args[0]).toEqual(e.get('#foo-form .form-child'))
 
     describe 'up.form.submitOptions()', ->
 

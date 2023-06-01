@@ -3,8 +3,11 @@ $ = jQuery
 
 showVersions = ->
   $('.jasmine-version').text """
-  jQuery #{$.fn.jquery}
   Jasmine #{jasmine.version}
+  /
+  Unpoly #{up.version}
+  /
+  jQuery #{$.fn.jquery}
   """
 
 $ ->
