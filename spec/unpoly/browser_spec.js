@@ -2,7 +2,7 @@ const u = up.util
 const $ = jQuery
 
 describe('up.browser', function() {
-  
+
   describe('JavaScript functions', function() {
 
     describe('up.browser.assertConfirmed', function() {

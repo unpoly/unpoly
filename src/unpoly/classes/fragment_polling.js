@@ -109,10 +109,7 @@ up.FragmentPolling = class FragmentPolling {
 
   onReloadFailure(reason) {
     this.scheduleReload()
-
-    if (up.error.isCritical(reason)) {
-      throw reason
-    }
+    up.error.rethrowCritical(reason)
   }
 
   onFragmentSwapped(newFragment) {

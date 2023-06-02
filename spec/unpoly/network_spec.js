@@ -128,16 +128,12 @@ describe('up.network', function() {
         })
       })
 
-      it('does not touch the network if a request is scheduled and aborted within the same microtask', function(done) {
+      it('does not touch the network if a request is scheduled and aborted within the same microtask', async function() {
         let request = up.request('/url')
         up.network.abort()
 
-        promiseState(request).then(function (result) {
-          expect(result.state).toBe('rejected')
-          expect(result.value).toBeAbortError()
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-          done()
-        })
+        await expectAsync(request).toBeRejectedWith(jasmine.any(up.Aborted))
+        expect(jasmine.Ajax.requests.count()).toBe(0)
       })
 
       describe('transfer of meta attributes', function() {
@@ -235,69 +231,49 @@ describe('up.network', function() {
 
       describe('error handling', function() {
 
-        it('rejects with up.Offline when there was a network error', function(done) {
+        it('rejects with up.Offline when there was a network error', async function() {
           const request = up.request('/url')
 
-          u.task(() => {
-            this.lastRequest().responseError()
+          await wait()
 
-            promiseState(request).then(function (result) {
-              expect(result.state).toEqual('rejected')
-              expect(result.value.name).toEqual('up.Offline')
-              expect(result.value.message).toMatch(/Network error/i)
-              done()
-            })
-          })
+          jasmine.lastRequest().responseError()
+
+          await expectAsync(request).toBeRejectedWith(jasmine.anyError('up.Offline', /Network error/i))
         })
 
-        it('rejects with a non-ok up.Response when the server sends a 404 status code', function(done) {
+        it('rejects with a non-ok up.Response when the server sends a 404 status code', async function() {
           const request = up.request('/url')
 
-          u.task(() => {
-            this.respondWith('text', {status: 404})
+          await wait()
 
-            promiseState(request).then(function (result) {
-              expect(result.state).toEqual('rejected')
-              expect(result.value).toEqual(jasmine.any(up.Response))
-              expect(result.value.status).toEqual(404)
-              expect(result.value.ok).toEqual(false)
-              done()
-            })
-          })
+          jasmine.respondWith('text', { status: 404 })
+
+          await expectAsync(request).toBeRejectedWith(jasmine.any(up.Response))
+          await expectAsync(request).toBeRejectedWith(jasmine.objectContaining({ status: 404, ok: false }))
         })
 
-        it('rejects with a non-ok up.Response when the server sends a 500 status code', function(done) {
+        it('rejects with a non-ok up.Response when the server sends a 500 status code', async function() {
           const request = up.request('/url')
 
-          u.task(() => {
-            this.respondWith('text', {status: 500})
+          await wait()
 
-            promiseState(request).then(function (result) {
-              expect(result.state).toEqual('rejected')
-              expect(result.value).toEqual(jasmine.any(up.Response))
-              expect(result.value.status).toEqual(500)
-              expect(result.value.ok).toEqual(false)
-              done()
-            })
-          })
+          jasmine.respondWith('text', {status: 500})
+
+          await expectAsync(request).toBeRejectedWith(jasmine.any(up.Response))
+          await expectAsync(request).toBeRejectedWith(jasmine.objectContaining({ status: 500, ok: false }))
         })
 
         describe('with { timeout } option', function() {
 
-          it('rejects with up.Offline when the request times out', function(done) {
+          it('rejects with up.Offline when the request times out', async function() {
             const request = up.request('/url')
 
-            u.task(() => {
-              jasmine.clock().install(); // required by responseTimeout()
-              this.lastRequest().responseTimeout()
+            await wait()
 
-              promiseState(request).then(function (result) {
-                expect(result.state).toEqual('rejected')
-                expect(result.value.name).toEqual('up.Offline')
-                expect(result.value.message).toMatch(/time ?out/i)
-                done()
-              })
-            })
+            jasmine.clock().install(); // required by responseTimeout()
+            this.lastRequest().responseTimeout()
+
+            await expectAsync(request).toBeRejectedWith(jasmine.anyError('up.Offline', /time ?out/i))
           })
 
           it('uses a default timeout from up.network.config.timeout', function() {
@@ -1622,7 +1598,7 @@ describe('up.network', function() {
           })
         }))
 
-        it('allows up:request:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', function(done) {
+        it('allows up:request:load listeners to prevent the request (useful to cancel all requests when stopping a test scenario)', async function() {
           const listener = jasmine.createSpy('listener').and.callFake(function (event) {
             expect(jasmine.Ajax.requests.count()).toEqual(0)
             event.preventDefault()
@@ -1632,16 +1608,9 @@ describe('up.network', function() {
 
           const promise = up.request('/bar')
 
-          u.task(function() {
-            expect(listener).toHaveBeenCalled()
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
-
-            promiseState(promise).then(function (result) {
-              expect(result.state).toEqual('rejected')
-              expect(result.value).toBeError(/prevented|aborted/i)
-              done()
-            })
-          })
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/prevented|aborted/i))
+          expect(listener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
         })
 
         it('does not block the queue when an up:request:load event was prevented', function(done) {
@@ -2057,86 +2026,50 @@ describe('up.network', function() {
 
     describe('up.network.abort()', function() {
 
-      it('aborts the given up.Request', asyncSpec(function(next) {
+      it('aborts the given up.Request', async function() {
         const request1 = up.request('/url')
         const request2 = up.request('/url')
 
-        next(() => up.network.abort(request1))
+        await wait()
 
-        next.await(() => promiseState(request1))
+        up.network.abort(request1)
 
-        next((result) => {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
 
-        next.await(() => promiseState(request2))
+        await expectAsync(request2).toBePending()
 
-        next((result) => {
-          expect(result.state).toEqual('pending')
-        })
+      })
 
-      }))
-
-      it('aborts all requests when called without an argument', asyncSpec(function(next) {
+      it('aborts all requests when called without an argument', async function() {
         const request = up.request('/url')
 
-        next(() => up.network.abort())
+        up.network.abort()
 
-        next.await(() => promiseState(request))
+        await expectAsync(request).toBeRejectedWith(jasmine.any(up.Aborted))
+      })
 
-        next(function(result) {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
-      }))
-
-      it('aborts all requests for which the given function returns true', asyncSpec(function(next) {
+      it('aborts all requests for which the given function returns true', async function() {
         const request1 = up.request('/foo')
         const request2 = up.request('/bar')
 
-        next(() => {
-          let matcher = (request) => request.url === '/foo'
-          up.network.abort(matcher)
-        })
+        let matcher = (request) => request.url === '/foo'
+        up.network.abort(matcher)
 
-        next.await(() => promiseState(request1))
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+        await expectAsync(request2).toBePending()
+      })
 
-        next((result) => {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
-
-        next.await(() => promiseState(request2))
-
-        next((result) => {
-          expect(result.state).toEqual('pending')
-        })
-
-      }))
-
-      it('aborts all requests matching the given URL pattern', asyncSpec(function(next) {
+      it('aborts all requests matching the given URL pattern', async function() {
         const request1 = up.request('/foo/123')
         const request2 = up.request('/bar/456')
 
-        next(() => {
-          up.network.abort('/foo/*')
-        })
+        await wait()
 
-        next.await(() => promiseState(request1))
+        up.network.abort('/foo/*')
 
-        next((result) => {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
-
-        next.await(() => promiseState(request2))
-
-        next((result) => {
-          expect(result.state).toEqual('pending')
-        })
-
-      }))
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+        await expectAsync(request1).toBePending()
+      })
 
       it('emits an up:request:aborted event', asyncSpec(function(next) {
         const listener = jasmine.createSpy('event listener')
@@ -2231,16 +2164,12 @@ describe('up.network', function() {
 
       describe('with { reason } option', function() {
 
-        it("sets the given reason as the AbortError's message", function(done) {
+        it("sets the given reason as the AbortError's message", async function() {
           let request = up.request('/url')
 
           up.network.abort(request, { reason: 'Given reason'})
 
-          promiseState(request).then(function({ state, value }) {
-            expect(state).toBe('rejected')
-            expect(value).toBeAbortError(/Given reason/)
-            done()
-          })
+          await expectAsync(request).toBeRejectedWith(jasmine.anyError('AbortError', /Given reason/i))
         })
 
       })

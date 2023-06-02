@@ -11,15 +11,13 @@ describe 'up.layer', ->
 
     describe 'up.layer.open()', ->
 
-      it 'resolves to an up.Layer instance', (done) ->
-        up.layer.open().then (value) ->
-          expect(value).toEqual(jasmine.any(up.Layer))
-          done()
+      it 'resolves to an up.Layer instance', ->
+        value = await up.layer.open()
+        expect(value).toEqual(jasmine.any(up.Layer))
 
-      it 'opens a layer with empty content when neither { url, document, fragment, content } option is given', (done) ->
-          up.layer.open().then (layer) ->
-            expect(layer).toHaveText('')
-            done()
+      it 'opens a layer with empty content when neither { url, document, fragment, content } option is given', ->
+        layer = await up.layer.open()
+        expect(layer).toHaveText('')
 
       it 'closes existing overlays over the { baseLayer }', ->
         makeLayers(2)
@@ -49,22 +47,23 @@ describe 'up.layer', ->
             expect(element).toHaveClass('other-class')
             expect(element).toHaveText('element text')
 
-        it 'aborts a pending request targeting the main element in the current layer', asyncSpec (next) ->
+        it 'aborts a pending request targeting the main element in the current layer', ->
           up.fragment.config.mainTargets.unshift('.root-element')
           fixture('.root-element')
 
-          up.navigate('.root-element', url: '/path1')
+          rootRenderJob = up.navigate('.root-element', url: '/path1')
           abortedURLs = []
           up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
-          next ->
-            expect(abortedURLs).toBeBlank()
+          await wait()
 
-            up.layer.open(url: '/path2')
+          expect(abortedURLs).toBeBlank()
 
-          next ->
-            expect(abortedURLs.length).toBe(1)
-            expect(abortedURLs[0]).toMatchURL('/path1')
+          up.layer.open(url: '/path2')
+
+          await expectAsync(rootRenderJob).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect(abortedURLs.length).toBe(1)
+          expect(abortedURLs[0]).toMatchURL('/path1')
 
         it 'does not abort a pending request targeting a non-main element in the current layer', asyncSpec (next) ->
           fixture('.root-element')
@@ -81,19 +80,20 @@ describe 'up.layer', ->
           next ->
             expect(abortedURLs).toBeBlank()
 
-        it 'aborts a previous pending request that would result in opening a new overlay', asyncSpec (next) ->
-          up.layer.open(url: '/path1')
+        it 'aborts a previous pending request that would result in opening a new overlay', ->
+          openJob1 = up.layer.open(url: '/path1')
           abortedURLs = []
           up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
-          next ->
-            expect(abortedURLs).toBeBlank()
+          await wait()
 
-            up.layer.open(url: '/path2')
+          expect(abortedURLs).toBeBlank()
 
-          next ->
-            expect(abortedURLs.length).toBe(1)
-            expect(abortedURLs[0]).toMatchURL('/path1')
+          openJob2 = up.layer.open(url: '/path2')
+
+          await expectAsync(openJob1).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect(abortedURLs.length).toBe(1)
+          expect(abortedURLs[0]).toMatchURL('/path1')
 
         describe 'when the server sends an X-Up-Events header', ->
 
@@ -116,64 +116,52 @@ describe 'up.layer', ->
 
       describe 'from a string of HTML', ->
 
-        it 'opens a new overlay with matching HTML extracted from the given as { document }', (done) ->
-          layerPromise = up.layer.open(
+        it 'opens a new overlay with matching HTML extracted from the given as { document }', ->
+          await up.layer.open(
             target: '.element',
             document: '<div class="element other-class">element text</div>'
           )
 
-          layerPromise.then ->
-            expect(up.layer.count).toBe(2)
+          expect(up.layer.count).toBe(2)
 
-            element = document.querySelector('up-modal .element')
-            expect(element).toBeGiven()
-            expect(element).toHaveClass('other-class')
-            expect(element).toHaveText('element text')
+          element = document.querySelector('up-modal .element')
+          expect(element).toBeGiven()
+          expect(element).toHaveClass('other-class')
+          expect(element).toHaveText('element text')
 
-            done()
-
-        it 'derives a new overlay with a selector and outer HTML derived from the given { fragment } option', (done) ->
-          layerPromise = up.layer.open(
+        it 'derives a new overlay with a selector and outer HTML derived from the given { fragment } option', ->
+          await up.layer.open(
             fragment: '<div class="element">element text</div>'
           )
 
-          layerPromise.then ->
-            expect(up.layer.count).toBe(2)
+          expect(up.layer.count).toBe(2)
 
-            element = document.querySelector('up-modal .element')
-            expect(element).toBeGiven()
-            expect(element).toHaveText('element text')
+          element = document.querySelector('up-modal .element')
+          expect(element).toBeGiven()
+          expect(element).toHaveText('element text')
 
-            done()
-
-        it 'opens a new overlay from inner HTML given as { content }, constructing a container matching the { target }', (done) ->
-          layerPromise = up.layer.open(
+        it 'opens a new overlay from inner HTML given as { content }, constructing a container matching the { target }', ->
+          await up.layer.open(
             target: '.element',
             content: 'element text'
           )
 
-          layerPromise.then ->
-            expect(up.layer.count).toBe(2)
+          expect(up.layer.count).toBe(2)
 
-            element = document.querySelector('up-modal .element')
-            expect(element).toBeGiven()
-            expect(element).toHaveText('element text')
+          element = document.querySelector('up-modal .element')
+          expect(element).toBeGiven()
+          expect(element).toHaveText('element text')
 
-            done()
-
-        it 'opens an empty overlay if neither { document } nor { fragment } nor { content } is given', (done) ->
-          layerPromise = up.layer.open(
+        it 'opens an empty overlay if neither { document } nor { fragment } nor { content } is given', ->
+          await up.layer.open(
             target: '.element'
           )
 
-          layerPromise.then ->
-            expect(up.layer.count).toBe(2)
+          expect(up.layer.count).toBe(2)
 
-            element = document.querySelector('up-modal .element')
-            expect(element).toBeGiven()
-            expect(element.innerText).toBeBlank()
-
-            done()
+          element = document.querySelector('up-modal .element')
+          expect(element).toBeGiven()
+          expect(element.innerText).toBeBlank()
 
         it 'has a sync effect', ->
           expect(up.layer.count).toBe(1)
@@ -198,23 +186,21 @@ describe 'up.layer', ->
           next.after 600, ->
             expect('up-modal-box').toHaveOpacity(1.0)
 
-        it 'uses a different animation with { animation } option', asyncSpec (next) ->
+        it 'uses a different animation with { animation } option', ->
           up.motion.config.enabled = true
           spyOn(up, 'animate').and.callThrough()
 
-          up.layer.open({ animation: 'move-from-top' })
+          await up.layer.open({ animation: 'move-from-top' })
 
-          next ->
-            expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
+          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
 
-        it 'uses a different animation with { openAnimation } option', asyncSpec (next) ->
+        it 'uses a different animation with { openAnimation } option', ->
           up.motion.config.enabled = true
           spyOn(up, 'animate').and.callThrough()
 
-          up.layer.open({ openAnimation: 'move-from-top' })
+          await up.layer.open({ openAnimation: 'move-from-top' })
 
-          next ->
-            expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
+          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
 
       describe 'events', ->
 
@@ -251,6 +237,8 @@ describe 'up.layer', ->
 
           up.layer.open(history: true, location: '/overlay-path')
 
+          return
+
       describe 'focus', ->
 
         it "focuses the new overlay's element", (done) ->
@@ -260,19 +248,21 @@ describe 'up.layer', ->
 
           up.layer.open(target: '.element', onFinished: assertFocus)
 
-        it 'focuses a CSS selector passed as { focus } option', (done) ->
-          assertFocus =  ->
-            child = document.querySelector('up-modal .element .child')
-            expect(child).toBeGiven()
-            expect(child).toBeFocused()
-            done()
+          return
 
+        it 'focuses a CSS selector passed as { focus } option', (done) ->
           up.layer.open(
             target: '.element',
             content: '<div class="child">child text</div>',
             focus: '.child',
-            onFinished: assertFocus
+            onFinished: ->
+              child = document.querySelector('up-modal .element .child')
+              expect(child).toBeGiven()
+              expect(child).toBeFocused()
+              done()
           )
+
+          return
 
       describe 'history', ->
 
@@ -403,23 +393,22 @@ describe 'up.layer', ->
 
       describe 'context', ->
 
-        it "sets the layer's initial context object from the { context } option", (done) ->
-          up.layer.open(context: { key: 'value' }).then (overlay) ->
-            expect(overlay.context).toEqual({ key: 'value' })
-            done()
+        it "sets the layer's initial context object from the { context } option", ->
+          overlay = await up.layer.open(context: { key: 'value' })
+          expect(overlay.context).toEqual({ key: 'value' })
 
-        it 'sets an empty object by default', (done) ->
+        it 'sets an empty object by default', ->
           expect(up.layer.root.context).toEqual({})
 
-          up.layer.open().then (overlay) ->
-            expect(overlay.context).toEqual({})
-            done()
+          overlay = await up.layer.open()
+          expect(overlay.context).toEqual({})
 
-        it 'sends the context object as an X-Up-Context header along with the request providing the initial overlay content', asyncSpec (next) ->
+        it 'sends the context object as an X-Up-Context header along with the request providing the initial overlay content', ->
           up.layer.open(url: '/modal', context: { key: 'value' })
 
-          next =>
-            expect(@lastRequest().requestHeaders['X-Up-Context']).toMatchJSON({ key: 'value'})
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Context']).toMatchJSON({ key: 'value'})
 
         it 'allows the server to update the initial context object', asyncSpec (next) ->
           up.layer.open(url: '/modal', target: '.target', context: { linkKey: 'linkValue' })
@@ -432,20 +421,18 @@ describe 'up.layer', ->
 
       describe 'mode', ->
 
-        it 'opens a new layer with the default mode from up.layer.config.mode', asyncSpec (next) ->
+        it 'opens a new layer with the default mode from up.layer.config.mode', ->
           up.layer.config.mode = 'cover'
-          up.layer.open()
+          await up.layer.open()
 
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(up.layer.mode).toEqual('cover')
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.mode).toEqual('cover')
 
-        it 'opens a new layer with the given { mode }', asyncSpec (next) ->
-          up.layer.open(mode: 'cover')
+        it 'opens a new layer with the given { mode }', ->
+          await up.layer.open(mode: 'cover')
 
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(up.layer.mode).toEqual('cover')
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.mode).toEqual('cover')
 
         it "sends the layer's mode as an X-Up-Mode request header"
 
@@ -453,29 +440,25 @@ describe 'up.layer', ->
 
         # maybe move this to the flavor specs
 
-        it 'sets a { position } option as a [position] attribute', asyncSpec (next) ->
-          up.layer.open(position: 'right')
+        it 'sets a { position } option as a [position] attribute', ->
+          await up.layer.open(position: 'right')
 
-          next ->
-            expect(up.layer.element).toHaveAttribute('position', 'right')
+          expect(up.layer.element).toHaveAttribute('position', 'right')
 
-        it 'sets a { size } option as a [size] attribute', asyncSpec (next) ->
-          up.layer.open(size: 'small')
+        it 'sets a { size } option as a [size] attribute', ->
+          await up.layer.open(size: 'small')
 
-          next ->
-            expect(up.layer.element).toHaveAttribute('size', 'small')
+          expect(up.layer.element).toHaveAttribute('size', 'small')
 
-        it 'sets an { align } option as an [align] attribute', asyncSpec (next) ->
-          up.layer.open(align: 'right')
+        it 'sets an { align } option as an [align] attribute', ->
+          await up.layer.open(align: 'right')
 
-          next ->
-            expect(up.layer.element).toHaveAttribute('align', 'right')
+          expect(up.layer.element).toHaveAttribute('align', 'right')
 
-        it 'sets a { class } option as a [class] of the overlay element', asyncSpec (next) ->
-          up.layer.open(class: 'foo')
+        it 'sets a { class } option as a [class] of the overlay element', ->
+          await up.layer.open(class: 'foo')
 
-          next ->
-            expect(up.layer.element).toHaveClass('foo')
+          expect(up.layer.element).toHaveClass('foo')
 
 
       describe 'choice of target', ->
@@ -485,42 +468,38 @@ describe 'up.layer', ->
           up.layer.config.overlay.mainTargets = []
           up.layer.config.modal.mainTargets = []
 
-        it 'uses a selector given as { target } option', asyncSpec (next) ->
-          up.layer.open(content: 'overlay text', target: '.target-from-option')
+        it 'uses a selector given as { target } option', ->
+          await up.layer.open(content: 'overlay text', target: '.target-from-option')
 
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(document).toHaveSelector('up-modal .target-from-option')
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(document).toHaveSelector('up-modal .target-from-option')
 
-        it 'uses a target from up.layer.config.any.mainTargets', asyncSpec (next) ->
+        it 'uses a target from up.layer.config.any.mainTargets', ->
           up.layer.config.any.mainTargets.push('.target-from-config-dot-all')
 
-          up.layer.open(content: 'overlay text')
+          await up.layer.open(content: 'overlay text')
 
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(document).toHaveSelector('up-modal .target-from-config-dot-all')
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(document).toHaveSelector('up-modal .target-from-config-dot-all')
 
-        it 'uses a target from up.layer.config.overlay.mainTargets', asyncSpec (next) ->
+        it 'uses a target from up.layer.config.overlay.mainTargets', ->
           up.layer.config.overlay.mainTargets.push('.target-from-config-dot-overlay')
           up.layer.config.any.mainTargets.push('.target-from-config-dot-all')
 
-          up.layer.open(content: 'overlay text')
+          await up.layer.open(content: 'overlay text')
 
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(document).toHaveSelector('up-modal .target-from-config-dot-overlay')
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(document).toHaveSelector('up-modal .target-from-config-dot-overlay')
 
         it "uses a target from up.layer.config.$mode.mainTargets, where $mode is the new overlay's mode", asyncSpec (next) ->
           up.layer.config.modal.mainTargets.push('.target-from-config-dot-modal')
           up.layer.config.overlay.mainTargets.push('.target-from-config-dot-overlay')
           up.layer.config.any.mainTargets.push('.target-from-config-dot-all')
 
-          up.layer.open(content: 'overlay text')
+          await up.layer.open(content: 'overlay text')
 
-          next ->
-            expect(up.layer.isOverlay()).toBe(true)
-            expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
 
       describe 'close conditions', ->
 
@@ -531,24 +510,21 @@ describe 'up.layer', ->
 
           describe 'with { dismissable: true }', ->
 
-            it 'sets all other dismissable options to true', (done) ->
-              up.layer.open(dismissable: true).then (layer) ->
-                expect(layer.dismissable).toMatchList ['button', 'key', 'outside']
-                done()
+            it 'sets all other dismissable options to true', ->
+              layer = await up.layer.open(dismissable: true)
+              expect(layer.dismissable).toMatchList ['button', 'key', 'outside']
 
            describe 'with { dismissable: false }', ->
 
-            it 'sets all other dismissable options to false if passed { dismissable: false }', (done) ->
-              up.layer.open(dismissable: false).then (layer) ->
-                expect(layer.dismissable).toEqual []
-                done()
+            it 'sets all other dismissable options to false if passed { dismissable: false }', ->
+              layer = await up.layer.open(dismissable: false)
+              expect(layer.dismissable).toEqual []
 
           describe 'with { dismissable: "button" }', ->
 
-            it 'adds a button that dimisses the layer', (done) ->
-              up.layer.open(dismissable: 'button').then (layer) ->
-                expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
-                done()
+            it 'adds a button that dimisses the layer', ->
+              layer = await up.layer.open(dismissable: 'button')
+              expect(layer.element).toHaveSelector('up-modal-dismiss[up-dismiss]')
 
             it 'emits an up:layer:dismissed event with { value: ":button" } and other details', asyncSpec (next) ->
               up.layer.open(dismissable: 'button', mode: 'modal')
@@ -573,10 +549,9 @@ describe 'up.layer', ->
 
           describe 'without { dismissable: "button" }', ->
 
-            it 'does not add a button that dimisses the layer', (done) ->
-              up.layer.open(dismissable: false).then (layer) ->
-                expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
-                done()
+            it 'does not add a button that dimisses the layer', ->
+              layer = await up.layer.open(dismissable: false)
+              expect(layer.element).not.toHaveSelector('up-modal-dismiss[up-dismiss]')
 
           describe 'with { dismissable: "key" }', ->
 
@@ -842,64 +817,68 @@ describe 'up.layer', ->
 
           describe 'when the server sends a matching event via X-Up-Events', ->
 
-            it 'accepts the overlay', asyncSpec (next) ->
+            it 'accepts the overlay', ->
               callback = jasmine.createSpy('onAccepted callback')
               up.layer.open({ onAccepted: callback, acceptEvent: 'my:event', target: '.modal-content' })
 
-              next ->
-                expect(up.layer.mode).toBe('modal')
-                expect(callback).not.toHaveBeenCalled()
+              await wait()
 
-                up.navigate({ url: '/path', target: '.modal-content' })
+              expect(up.layer.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
 
-              next ->
-                expect(up.layer.mode).toBe('modal')
-                expect(callback).not.toHaveBeenCalled()
+              closingJob = up.navigate({ url: '/path', target: '.modal-content' })
 
-                jasmine.respondWithSelector('.modal-content', {
-                  responseHeaders: {
-                    'X-Up-Events': JSON.stringify([{ type: 'my:event', foo: 'foo-value', layer: 'current' }])
-                  }
-                })
+              await wait()
 
-              next ->
-                expect(up.layer.mode).toBe('root')
+              expect(up.layer.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
 
-                expect(callback).toHaveBeenCalledWith(
-                  jasmine.objectContaining({
-                    value: jasmine.objectContaining({
-                      type: 'my:event',
-                      foo: 'foo-value'
-                    })
+              jasmine.respondWithSelector('.modal-content', {
+                responseHeaders: {
+                  'X-Up-Events': JSON.stringify([{ type: 'my:event', foo: 'foo-value', layer: 'current' }])
+                }
+              })
+
+              await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(up.layer.mode).toBe('root')
+
+              expect(callback).toHaveBeenCalledWith(
+                jasmine.objectContaining({
+                  value: jasmine.objectContaining({
+                    type: 'my:event',
+                    foo: 'foo-value'
                   })
-                )
+                })
+              )
 
-            it 'makes the response available to up:layer:accepted listeners as a { response } property', asyncSpec (next) ->
+            it 'makes the response available to up:layer:accepted listeners as a { response } property', ->
               callback = jasmine.createSpy('onAccepted callback')
               up.layer.open({ onAccepted: callback, acceptEvent: 'my:event', target: '.modal-content' })
 
-              next ->
-                expect(up.layer.mode).toBe('modal')
-                expect(callback).not.toHaveBeenCalled()
+              expect(up.layer.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
 
-                up.navigate({ url: '/path', target: '.modal-content' })
+              closingJob = up.navigate({ url: '/path', target: '.modal-content' })
 
-              next ->
-                expect(up.layer.mode).toBe('modal')
-                expect(callback).not.toHaveBeenCalled()
+              await wait()
 
-                jasmine.respondWith({
-                  responseText: '<div class="modal-content">closing text</div>'
-                  responseHeaders: {
-                    'X-Up-Events': JSON.stringify([{ type: 'my:event', layer: 'current' }])
-                  }
-                })
+              expect(up.layer.mode).toBe('modal')
+              expect(callback).not.toHaveBeenCalled()
 
-              next ->
-                expect(up.layer.mode).toBe('root')
+              jasmine.respondWith({
+                responseText: '<div class="modal-content">closing text</div>'
+                responseHeaders: {
+                  'X-Up-Events': JSON.stringify([{ type: 'my:event', layer: 'current' }])
+                }
+              })
 
-                expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
-                expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="modal-content">closing text</div>')
+              await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              expect(up.layer.mode).toBe('root')
+
+              expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
+              expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="modal-content">closing text</div>')
 
           it 'does not accept the layer when the given event was emitted on another layer', asyncSpec (next) ->
             callback = jasmine.createSpy('onAccepted callback')
@@ -980,7 +959,7 @@ describe 'up.layer', ->
 
         describe '{ acceptLocation }', ->
 
-          it 'accepts the layer when the layer has reached the given location', asyncSpec (next) ->
+          it 'accepts the layer when the layer has reached the given location', ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
               target: '.overlay-content',
@@ -990,24 +969,27 @@ describe 'up.layer', ->
               acceptLocation: '/acceptable-location'
             })
 
-            next ->
-              expect(up.layer.mode).toBe('modal')
-              expect(callback).not.toHaveBeenCalled()
+            await wait()
 
-              up.navigate('.overlay-content', content: 'other content', location: '/other-location')
+            expect(up.layer.mode).toBe('modal')
+            expect(callback).not.toHaveBeenCalled()
 
-            next ->
-              expect(up.layer.mode).toBe('modal')
-              expect(callback).not.toHaveBeenCalled()
+            up.navigate('.overlay-content', content: 'other content', location: '/other-location')
 
-              up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+            await wait()
 
-            next ->
-              expect(up.layer.mode).toBe('root')
-              value = { location: u.normalizeURL('/acceptable-location') }
-              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+            expect(up.layer.mode).toBe('modal')
+            expect(callback).not.toHaveBeenCalled()
 
-          it 'accepts the layer when the layer has reached the given location pattern', asyncSpec (next) ->
+            closingJob = up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(up.layer.mode).toBe('root')
+            value = { location: u.normalizeURL('/acceptable-location') }
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+
+          it 'accepts the layer when the layer has reached the given location pattern', ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
               target: '.overlay-content',
@@ -1017,16 +999,18 @@ describe 'up.layer', ->
               acceptLocation: '/users /records/* /articles'
             })
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            await wait()
 
-              up.navigate('.overlay-content', content: 'acceptable content', location: '/records/new')
+            expect(callback).not.toHaveBeenCalled()
 
-            next ->
-              value = { location: u.normalizeURL('/records/new') }
-              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+            closingJob = up.navigate('.overlay-content', content: 'acceptable content', location: '/records/new')
 
-          it 'parses a location pattern of named placeholders to produce an acceptance value', asyncSpec (next) ->
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            value = { location: u.normalizeURL('/records/new') }
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+
+          it 'parses a location pattern of named placeholders to produce an acceptance value', ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
               target: '.overlay-content',
@@ -1036,21 +1020,23 @@ describe 'up.layer', ->
               acceptLocation: '/records/:action/:id'
             })
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            await wait()
 
-              up.navigate('.overlay-content', content: 'acceptable content', location: '/records/edit/123')
+            expect(callback).not.toHaveBeenCalled()
 
-            next ->
-              value = {
-                location: u.normalizeURL('/records/edit/123')
-                action: 'edit'
-                id: '123'
-              }
+            closingJob = up.navigate('.overlay-content', content: 'acceptable content', location: '/records/edit/123')
 
-              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
 
-          it 'accepts the layer when the layer has reached the given location but renders no history', asyncSpec (next) ->
+            value = {
+              location: u.normalizeURL('/records/edit/123')
+              action: 'edit'
+              id: '123'
+            }
+
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+
+          it 'accepts the layer when the layer has reached the given location but renders no history', ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
               target: '.overlay-content',
@@ -1061,14 +1047,16 @@ describe 'up.layer', ->
               acceptLocation: '/acceptable-location'
             })
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            await wait()
 
-              up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+            expect(callback).not.toHaveBeenCalled()
 
-            next ->
-              value = { location: u.normalizeURL('/acceptable-location') }
-              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+            closingJob = up.navigate('.overlay-content', content: 'acceptable content', location: '/acceptable-location')
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            value = { location: u.normalizeURL('/acceptable-location') }
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
           it 'does not accept the layer when another layer has reached the given location', ->
             callback = jasmine.createSpy('onAccepted callback')
@@ -1078,13 +1066,13 @@ describe 'up.layer', ->
               { target: '.overlay-content', onAccepted: callback, acceptLocation: '/acceptable-location' }
             ]
 
-            up.navigate('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
+            up.navigate('.root-content', layer: 'root', content: 'new content', location: '/acceptable-location')
 
             expect(callback).not.toHaveBeenCalled()
 
           it 'immediately accepts a layer that was opened at the given location'
 
-          it 'makes the discarded response available to up:layer:accepted listeners as a { response } property', asyncSpec (next) ->
+          it 'makes the discarded response available to up:layer:accepted listeners as a { response } property', ->
             callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
               target: '.overlay-content',
@@ -1094,26 +1082,29 @@ describe 'up.layer', ->
               acceptLocation: '/acceptable-location'
             })
 
-            next ->
-              expect(up.layer.mode).toBe('modal')
-              expect(callback).not.toHaveBeenCalled()
+            await wait()
 
-              up.navigate('.overlay-content', url: '/acceptable-location', history: true)
+            expect(up.layer.mode).toBe('modal')
+            expect(callback).not.toHaveBeenCalled()
 
-            next ->
-              expect(up.layer.mode).toBe('modal')
-              expect(callback).not.toHaveBeenCalled()
+            closingJob = up.navigate('.overlay-content', url: '/acceptable-location', history: true)
 
-              jasmine.respondWith('<div class="overlay-content">closing content</div>')
+            await wait()
 
-            next ->
-              expect(up.layer.mode).toBe('root')
-              expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
-              expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="overlay-content">closing content</div>')
+            expect(up.layer.mode).toBe('modal')
+            expect(callback).not.toHaveBeenCalled()
+
+            jasmine.respondWith('<div class="overlay-content">closing content</div>')
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(up.layer.mode).toBe('root')
+            expect(callback.calls.mostRecent().args[0].response).toEqual(jasmine.any(up.Response))
+            expect(callback.calls.mostRecent().args[0].response.text).toBe('<div class="overlay-content">closing content</div>')
 
         describe '{ dismissLocation }', ->
 
-          it 'dismisses the layer when the layer has reached the given location', asyncSpec (next) ->
+          it 'dismisses the layer when the layer has reached the given location', ->
             callback = jasmine.createSpy('onDismissed callback')
             up.layer.open({
               target: '.overlay-content',
@@ -1123,19 +1114,22 @@ describe 'up.layer', ->
               dismissLocation: '/dismissable-location'
             })
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            await wait()
 
-              up.navigate('.overlay-content', content: 'other content', location: '/other-location')
+            expect(callback).not.toHaveBeenCalled()
 
-            next ->
-              expect(callback).not.toHaveBeenCalled()
+            up.navigate('.overlay-content', content: 'other content', location: '/other-location')
 
-              up.navigate('.overlay-content', content: 'dismissable content', location: '/dismissable-location')
+            await wait()
 
-            next ->
-              value = { location: u.normalizeURL('/dismissable-location') }
-              expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
+            expect(callback).not.toHaveBeenCalled()
+
+            closingJob = up.navigate('.overlay-content', content: 'dismissable content', location: '/dismissable-location')
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            value = { location: u.normalizeURL('/dismissable-location') }
+            expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
 
     describe 'up.layer.build()', ->
 
@@ -1447,58 +1441,46 @@ describe 'up.layer', ->
 
     describe 'up.layer.ask()', ->
 
-      it 'opens a new overlay and returns a promise that fulfills when that overlay is accepted', (done) ->
+      it 'opens a new overlay and returns a promise that fulfills when that overlay is accepted', ->
         up.motion.config.enabled = false
 
         promise = up.layer.ask(content: 'Would you like to accept?')
 
-        u.task ->
-          expect(up.layer.isOverlay()).toBe(true)
-          expect(up.layer.current).toHaveText ('Would you like to accept?')
+        await wait()
 
-          promiseState(promise).then (result) ->
-            expect(result.state).toEqual('pending')
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.current).toHaveText ('Would you like to accept?')
 
-            up.layer.accept('acceptance value')
+        await expectAsync(promise).toBePending()
 
-            u.task ->
-              promiseState(promise).then (result) ->
-                expect(result.state).toEqual('fulfilled')
-                expect(result.value).toEqual('acceptance value')
+        up.layer.accept('acceptance value')
 
-                done()
+        await expectAsync(promise).toBeResolvedTo('acceptance value')
 
-      it 'opens a new overlay and returns a promise that rejects when that overlay is dismissed', (done) ->
+      it 'opens a new overlay and returns a promise that rejects when that overlay is dismissed', ->
         up.motion.config.enabled = false
 
         promise = up.layer.ask(content: 'Would you like to accept?')
 
-        u.task ->
-          expect(up.layer.isOverlay()).toBe(true)
-          expect(up.layer.current).toHaveText ('Would you like to accept?')
+        await wait()
 
-          promiseState(promise).then (result) ->
-            expect(result.state).toEqual('pending')
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(up.layer.current).toHaveText ('Would you like to accept?')
 
-            up.layer.dismiss('dismissal value')
+        await expectAsync(promise).toBePending()
 
-            u.task ->
+        up.layer.dismiss('dismissal value')
 
-              promiseState(promise).then (result) ->
-                expect(result.state).toEqual('rejected')
-                expect(result.value).toEqual('dismissal value')
-
-                done()
+        await expectAsync(promise).toBeRejectedWith('dismissal value')
 
     describe 'up.layer.current', ->
 
-      it 'returns the front layer', (done) ->
+      it 'returns the front layer', ->
         expect(up.layer.current).toBe(up.layer.root)
 
-        up.layer.open().then ->
-          expect(up.layer.count).toBe(2)
-          expect(up.layer.current).toBe(up.layer.get(1))
-          done()
+        await up.layer.open()
+        expect(up.layer.count).toBe(2)
+        expect(up.layer.current).toBe(up.layer.get(1))
 
       it 'may be temporarily changed for the duration of a callback using up.Layer.asCurrent(fn)', ->
         makeLayers(2)

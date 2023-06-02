@@ -109,7 +109,6 @@ up.CompilerPass = class CompilerPass {
     } catch (error) {
       this.errors.push(error)
       up.log.error('up.hello()', 'While compiling %o: %o', elementOrElements, error)
-      up.error.emitGlobal(error)
     }
   }
 

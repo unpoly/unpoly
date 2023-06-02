@@ -323,7 +323,7 @@ describe 'up.Params', ->
 
     it 'deletes any previous entries with the same name'
 
-    describe '#toURL', ->
+  describe '#toURL', ->
 
     it 'composes a URL from a base URL (without query section) and a query section', ->
       base = 'http://foo.bar/path'

@@ -113,16 +113,14 @@ describe 'up.Request', ->
 
   describe '#abort', ->
 
-    it 'aborts this request', asyncSpec (next) ->
+    it 'aborts this request', ->
       request = up.request('/url')
 
-      next => request.abort()
+      await wait()
 
-      next.await => promiseState(request)
+      request.abort()
 
-      next (result) =>
-        expect(result.state).toEqual('rejected')
-        expect(result.value.name).toEqual('AbortError')
+      await expectAsync(request).toBeRejectedWith(jasmine.any(up.Aborted))
 
   describe '#header()', ->
 

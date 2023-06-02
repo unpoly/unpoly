@@ -1,5 +1,5 @@
-u = up.util
-$ = jQuery
-
-afterEach ->
-  $('body').scrollTop(0)
+#u = up.util
+#$ = jQuery
+#
+#afterEach ->
+#  $('body').scrollTop(0)

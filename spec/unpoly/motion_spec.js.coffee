@@ -402,26 +402,22 @@ describe 'up.motion', ->
           expect($v2).toHaveOpacity(1.0, 0.2)
           expect($v3).toHaveOpacity(0.0, 0.2)
 
-      it 'detaches the old element in the DOM', (done) ->
+      it 'detaches the old element in the DOM', ->
         $v1 = $fixture('.element').text('v1')
         $v2 = $fixture('.element').text('v2')
 
-        morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
+        await up.morph($v1, $v2, 'cross-fade', duration: 5)
 
-        morphDone.then ->
-          expect($v1).toBeDetached()
-          expect($v2).toBeAttached()
-          done()
+        expect($v1).toBeDetached()
+        expect($v2).toBeAttached()
 
-      it 'does not leave <up-bounds> elements in the DOM', (done) ->
+      it 'does not leave <up-bounds> elements in the DOM', ->
         $v1 = $fixture('.element').text('v1')
         $v2 = $fixture('.element').text('v2')
 
-        morphDone = up.morph($v1, $v2, 'cross-fade', duration: 5)
+        await up.morph($v1, $v2, 'cross-fade', duration: 5)
 
-        morphDone.then ->
-          expect($('up-bounds').length).toBe(0)
-          done()
+        expect($('up-bounds').length).toBe(0)
 
 
       describe 'when up.animate() is called from inside a transition function', ->
@@ -529,24 +525,23 @@ describe 'up.motion', ->
 
         describe "when called with a `#{JSON.stringify(noneTransition)}` transition", ->
 
-          it "doesn't animate and detaches the old element instead", asyncSpec (next) ->
+          it "doesn't animate and detaches the old element instead", ->
             $old = $fixture('.old').text('old content')
             $new = $fixture('.new').text('new content')
             up.morph($old, $new, noneTransition, duration: 1000)
 
-            next =>
-              expect($old).toBeDetached()
-              expect($new).toBeAttached()
-              expect($new).toHaveOpacity(1.0)
+            await wait()
 
-          it 'returns a fulfilled promise', (done) ->
+            expect($old).toBeDetached()
+            expect($new).toBeAttached()
+            expect($new).toHaveOpacity(1.0)
+
+          it 'returns a fulfilled promise', ->
             $old = $fixture('.old').text('old content')
             $new = $fixture('.new').text('new content')
             promise = up.morph($old, $new, noneTransition, duration: 1000)
 
-            promiseState(promise).then ({state}) ->
-              expect(state).toBe('fulfilled')
-              done()
+            await expectAsync(promise).toBeResolved()
 
     describe 'up.transition', ->
 

@@ -496,20 +496,6 @@ describe 'up.syntax', ->
           hello = -> up.hello(element)
           expect(hello).toThrowError(/errors while compiling/i)
 
-        it 'reports caught exceptions to window.onerror to support exception notification tools', ->
-          crashingCompiler = -> throw new Error("error from crashing compiler")
-          up.compiler '.element', crashingCompiler
-
-          element = fixture('.element')
-
-          hello = -> up.hello(element)
-          expect(hello).toThrowError(/errors while compiling/i)
-
-          expect(@globalErrorHandler).toHaveBeenCalled()
-          event = @globalErrorHandler.calls.mostRecent().args[0]
-          expect(event).toBeEvent('error')
-          expect(event.error).toBeError('error from crashing compiler')
-
       describe 'data', ->
 
         it 'parses an [up-data] attribute as JSON and passes the parsed object as a second argument to the compiler', ->
@@ -676,18 +662,3 @@ describe 'up.syntax', ->
 
           expect(destructorBefore).toHaveBeenCalled()
           expect(destructorAfter).toHaveBeenCalled()
-
-        it 'reports caught exceptions to window.onerror to support exception notification tools', ->
-          crashingDestructor = -> throw new Error("error from crashing destructor")
-          up.compiler '.element', -> return crashingDestructor
-
-          element = fixture('.element')
-          up.hello(element)
-
-          clean = -> up.syntax.clean(element)
-          expect(clean).toThrowError(/errors while destroying/i)
-
-          expect(@globalErrorHandler).toHaveBeenCalled()
-          event = @globalErrorHandler.calls.mostRecent().args[0]
-          expect(event).toBeEvent('error')
-          expect(event.error).toBeError('error from crashing destructor')

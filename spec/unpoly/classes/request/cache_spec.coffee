@@ -6,7 +6,7 @@ describe 'up.Request.Cache', ->
 
     it 'rejects the given new request when the given cached request is rejected'
 
-    it 'aborts the given new request when the given cached request is aborted', asyncSpec (next) ->
+    it 'aborts the given new request when the given cached request is aborted', ->
       sourceRequest = new up.Request(url: '/foo')
 
       followingRequest = new up.Request(url: '/foo')
@@ -15,9 +15,12 @@ describe 'up.Request.Cache', ->
       expect(sourceRequest.state).toEqual('new')
       expect(followingRequest.state).toEqual('tracking')
 
-      next ->
-        sourceRequest.abort()
+      await wait()
 
-      next ->
-        expect(sourceRequest.state).toEqual('aborted')
-        expect(followingRequest.state).toEqual('aborted')
+      sourceRequest.abort()
+
+      await expectAsync(sourceRequest).toBeRejectedWith(jasmine.any(up.Aborted))
+      expect(sourceRequest.state).toEqual('aborted')
+
+      await expectAsync(followingRequest).toBeRejectedWith(jasmine.any(up.Aborted))
+      expect(followingRequest.state).toEqual('aborted')

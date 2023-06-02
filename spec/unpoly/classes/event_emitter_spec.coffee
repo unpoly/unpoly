@@ -33,13 +33,12 @@ describe 'up.EventEmitter', ->
 
     describe 'with ([up.Layer, String])', ->
 
-      it "builds an event with the given name, which emits on the given layer's element, setting the current layer to that layer", (done) ->
-        up.layer.open(content: 'content').then (layer) ->
-          emitter = up.EventEmitter.fromEmitArgs([layer, 'my:event'])
-          expect(emitter.event).toBeEvent('my:event', layer: layer) # has { layer } property for event listeners
-          expect(emitter.target).toBe(layer.element)
-          expect(emitter.baseLayer).toBe(layer) # this will set up.layer.current during event emission
-          done()
+      it "builds an event with the given name, which emits on the given layer's element, setting the current layer to that layer", ->
+        layer = await up.layer.open(content: 'content')
+        emitter = up.EventEmitter.fromEmitArgs([layer, 'my:event'])
+        expect(emitter.event).toBeEvent('my:event', layer: layer) # has { layer } property for event listeners
+        expect(emitter.target).toBe(layer.element)
+        expect(emitter.baseLayer).toBe(layer) # this will set up.layer.current during event emission
 
     describe 'with ([Element, String, Object])', ->
 

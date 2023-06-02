@@ -32,20 +32,22 @@ describe 'up.Layer.Overlay', ->
       expect(listener.calls.argsFor(1)[0]).toBeEvent('up:layer:dismissed', layer: @layers[2])
       expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', layer: @layers[1])
 
-    it 'aborts pending requests for this layer', asyncSpec (next) ->
+    it 'aborts pending requests for this layer', ->
       abortedURLs = []
       up.on 'up:request:aborted', (event) -> abortedURLs.push(event.request.url)
 
       makeLayers(2)
 
-      up.render('.element', url: '/layer-url', layer: 'current')
+      promise = up.render('.element', url: '/layer-url', layer: 'current')
 
-      next ->
-        up.layer.accept()
+      await wait()
 
-      next ->
-        expect(abortedURLs.length).toBe(1)
-        expect(abortedURLs[0]).toMatchURL('/layer-url')
+      up.layer.accept()
+
+      await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+      expect(abortedURLs.length).toBe(1)
+      expect(abortedURLs[0]).toMatchURL('/layer-url')
 
     it 'does not abort a pending request for another layer', asyncSpec (next) ->
       abortedURLs = []
@@ -61,7 +63,7 @@ describe 'up.Layer.Overlay', ->
       next ->
         expect(abortedURLs).toBeBlank()
 
-    it 'takes an acceptance value that is passed to onAccepted handlers', asyncSpec (next) ->
+    it 'takes an acceptance value that is passed to onAccepted handlers', ->
       callback = jasmine.createSpy('onAccepted handler')
 
       makeLayers [

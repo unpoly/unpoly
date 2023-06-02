@@ -174,3 +174,19 @@ beforeEach ->
 afterEach ->
   for element in document.querySelectorAll('default-fallback')
     up.destroy(element, log: false)
+
+# Restore the original <body> (containing the Jasmine runner) in case a spec replaces the <body>
+originalBody = null
+
+beforeAll ->
+  originalBody = document.body
+
+afterEach ->
+  if originalBody != document.body
+    console.debug("Restoring <body> that was swapped by a spec")
+    # Restore the Jasmine test runner that we just nuked
+    document.body.replaceWith(originalBody)
+    # The body get an .up-destroying class when it was swapped. We must remove it
+    # or up.fragment will ignore everything within the body from now on.
+    document.body.classList.remove('up-destroying')
+    document.body.removeAttribute('aria-hidden')

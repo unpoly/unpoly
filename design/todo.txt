@@ -14,16 +14,13 @@ Priority
   - But rename it to something else, as sprintf() is something else
 - When rendering local content we should not set [up-source=true]
 - Test that system compilers always run before user compilers
-- Consider removing the `blur` default for changeEvent
-- Response use
-  - Allow up.render({ response })
-  - Also render hungry elements when closing or opening overlays
+- Also render hungry elements when closing or opening overlays
+- When going through form group solutions, rederive target before appending :has(...)
 
 
 
 Backlog
 =======
-
 
 - Message when unknown target: Revalidating cached response for target "undefined"
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]

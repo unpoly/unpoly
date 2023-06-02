@@ -111,3 +111,6 @@ window.asyncSpec = (args...) ->
         done()
 
     pokeQueue()
+
+    return
+

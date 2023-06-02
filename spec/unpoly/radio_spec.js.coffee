@@ -1,3 +1,5 @@
+import spyOnGlobalErrorsAsync from "jasmine.spyOnGlobalErrorsAsync"
+
 u = up.util
 e = up.element
 $ = jQuery
@@ -354,35 +356,37 @@ describe 'up.radio', ->
           expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
           expect(@lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
 
-      it 'does replace the element when the server responds with an error (e.g. for error flashes)', asyncSpec (next) ->
+      it 'does replace the element when the server responds with an error (e.g. for error flashes)', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
         $fixture('.fail-target').text('old fail target')
 
-        up.render('.target', url: '/path', failTarget: '.fail-target')
+        renderJob = up.render('.target', url: '/path', failTarget: '.fail-target')
 
-        next =>
-          @respondWith
-            status: 500
-            responseText: """
-              <div class="target">
-                new target
-              </div>
-              <div class="fail-target">
-                new fail target
-              </div>
-              <div class="between">
-                new between
-              </div>
-              <div class="hungry">
-                new hungry
-              </div>
-              """
+        await wait()
 
-        next =>
-          expect('.target').toHaveText('old target')
-          expect('.fail-target').toHaveText('new fail target')
-          expect('.hungry').toHaveText('new hungry')
+        jasmine.respondWith
+          status: 500
+          responseText: """
+            <div class="target">
+              new target
+            </div>
+            <div class="fail-target">
+              new fail target
+            </div>
+            <div class="between">
+              new between
+            </div>
+            <div class="hungry">
+              new hungry
+            </div>
+            """
+
+        await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+        expect('.target').toHaveText('old target')
+        expect('.fail-target').toHaveText('new fail target')
+        expect('.hungry').toHaveText('new hungry')
 
 
       it 'does not update [up-hungry] elements with { useHungry: false } option', asyncSpec (next) ->
@@ -659,35 +663,45 @@ describe 'up.radio', ->
         next.after 250, ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
-      it 'keeps polling if a request failed with a network issue', asyncSpec (next) ->
+      it 'keeps polling if a request failed with a network issue', ->
         up.radio.config.pollInterval = 75
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.reject(new up.Error('network error'))
 
         up.hello(fixture('.element[up-poll]'))
 
-        next.after 125, ->
+        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
+          await wait(125)
+
           expect(reloadSpy.calls.count()).toBe(1)
+          expect(globalErrorSpy.calls.count()).toBe(1)
 
-        next.after 75, ->
+          await wait(75)
+
           expect(reloadSpy.calls.count()).toBe(2)
+          expect(globalErrorSpy.calls.count()).toBe(2)
 
-      it 'keeps polling if the server responds with a 404 Not Found error', asyncSpec (next) ->
+      it 'keeps polling if the server responds with a 404 Not Found error', ->
         up.radio.config.pollInterval = 250
 
         up.hello(fixture('.element[up-poll][up-source="/source"]'))
 
-        next.after 50, ->
-          expect(jasmine.Ajax.requests.count()).toBe(0)
+        await wait(50)
+        expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        next.after 250, ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+        await wait(250)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        await jasmine.spyOnGlobalErrorsAsync (globalErrorSpy) ->
           jasmine.respondWith(status: 404, responseText: 'Not found')
 
-        next.after 50, ->
+          await wait(50)
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        next.after 250, ->
-          expect(jasmine.Ajax.requests.count()).toBe(2)
+          # up.FragmentPolling#onReloadFailure() will throw critical errors
+          expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
+
+        await wait(250)
+        expect(jasmine.Ajax.requests.count()).toBe(2)
 
       it 'does not reload if the tab is hidden', asyncSpec (next) ->
         up.radio.config.pollInterval = 50
@@ -777,22 +791,23 @@ describe 'up.radio', ->
         next.after initialInterval, ->
           expect(jasmine.Ajax.requests.count()).toBe(2)
 
-      it 'stops polling when the element is destroyed while waiting for a previous request (bugfix)', asyncSpec (next) ->
+      it 'stops polling when the element is destroyed while waiting for a previous request (bugfix)', ->
         up.radio.config.pollInterval = 75
-        respond = null
-        reloadSpy = spyOn(up, 'reload').and.callFake -> return new Promise((resolve) -> respond = resolve)
-
         element = up.hello(fixture('.element[up-poll]'))
 
-        next.after 125, ->
-          expect(reloadSpy.calls.count()).toBe(1)
-          up.destroy(element)
+        await wait(125)
 
-        next ->
-          respond()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        next.after 125, ->
-          expect(reloadSpy.calls.count()).toBe(1)
+        up.destroy(element)
+
+        await wait()
+
+        jasmine.respondWithSelector('.element[up-poll]')
+
+        await wait(125)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
       it 'allows to pass a polling interval per [up-interval] attribute', asyncSpec (next) ->
         reloadSpy = spyOn(up, 'reload').and.callFake -> return Promise.resolve(new up.RenderResult())

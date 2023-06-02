@@ -1,11 +1,5 @@
 up.error = (function() {
 
-  function emitGlobal(error) {
-    // Emit an ErrorEvent on window.onerror for exception tracking tools
-    const { message } = error
-    up.emit(window, 'error', { message, error, log: false })
-  }
-
   /*-
   Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
   with the given message.
@@ -67,18 +61,29 @@ up.error = (function() {
   @internal
   */
   function muteUncriticalRejection(promise) {
-    return promise.catch(function(reason) {
-      if (isCritical(reason)) {
-        throw reason
-      }
-    })
+    return promise.catch(rethrowCritical)
+  }
+
+  function muteUncriticalSync(block) {
+    try {
+      return block()
+    } catch (e) {
+      rethrowCritical(e)
+    }
+  }
+
+  function rethrowCritical(value) {
+    if (isCritical(value)) {
+      throw value
+    }
   }
 
   return {
     fail,
-    emitGlobal,
+    rethrowCritical,
     isCritical,
     muteUncriticalRejection,
+    muteUncriticalSync,
   }
 })()
 

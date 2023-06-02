@@ -290,7 +290,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       parser.number('duration')
       parser.string('confirm')
 
-      closeFn(value, closeOptions)
+      up.error.muteUncriticalSync(() => closeFn(value, closeOptions))
     })
   }
 
