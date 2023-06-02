@@ -90,7 +90,8 @@ up.EventListener = class EventListener extends up.Record {
         args.push(data)
       }
 
-      if (element instanceof HTMLButtonElement && element.disabled) {
+      // Do not allow click events from disabled elements to propagate
+      if (this.eventType === 'click' && element.disabled === true) {
         return
       }
 
