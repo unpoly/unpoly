@@ -356,35 +356,37 @@ describe 'up.radio', ->
           expect(@lastRequest().requestHeaders['X-Up-Target']).toEqual('.target')
           expect(@lastRequest().requestHeaders['X-Up-Fail-Target']).toEqual('.fail-target')
 
-      it 'does replace the element when the server responds with an error (e.g. for error flashes)', asyncSpec (next) ->
+      it 'does replace the element when the server responds with an error (e.g. for error flashes)', ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
         $fixture('.fail-target').text('old fail target')
 
-        up.render('.target', url: '/path', failTarget: '.fail-target')
+        renderJob = up.render('.target', url: '/path', failTarget: '.fail-target')
 
-        next =>
-          @respondWith
-            status: 500
-            responseText: """
-              <div class="target">
-                new target
-              </div>
-              <div class="fail-target">
-                new fail target
-              </div>
-              <div class="between">
-                new between
-              </div>
-              <div class="hungry">
-                new hungry
-              </div>
-              """
+        await wait()
 
-        next =>
-          expect('.target').toHaveText('old target')
-          expect('.fail-target').toHaveText('new fail target')
-          expect('.hungry').toHaveText('new hungry')
+        jasmine.respondWith
+          status: 500
+          responseText: """
+            <div class="target">
+              new target
+            </div>
+            <div class="fail-target">
+              new fail target
+            </div>
+            <div class="between">
+              new between
+            </div>
+            <div class="hungry">
+              new hungry
+            </div>
+            """
+
+        await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+        expect('.target').toHaveText('old target')
+        expect('.fail-target').toHaveText('new fail target')
+        expect('.hungry').toHaveText('new hungry')
 
 
       it 'does not update [up-hungry] elements with { useHungry: false } option', asyncSpec (next) ->

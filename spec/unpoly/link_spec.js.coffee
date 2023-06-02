@@ -112,7 +112,7 @@ describe 'up.link', ->
 
       describe 'events', ->
 
-        it 'emits a preventable up:link:follow event', asyncSpec (next) ->
+        it 'emits a preventable up:link:follow event', ->
           link = fixture('a[href="/destination"][up-target=".response"]')
 
           listener = jasmine.createSpy('follow listener').and.callFake (event) ->
@@ -120,15 +120,16 @@ describe 'up.link', ->
 
           link.addEventListener('up:link:follow', listener)
 
-          up.follow(link)
+          followPromise = up.follow(link)
 
-          next =>
-            expect(listener).toHaveBeenCalled()
-            event = listener.calls.mostRecent().args[0]
-            expect(event.target).toEqual(link)
+          await expectAsync(followPromise).toBeRejectedWith(jasmine.any(up.Aborted))
 
-            # No request should be made because we prevented the event
-            expect(jasmine.Ajax.requests.count()).toEqual(0)
+          expect(listener).toHaveBeenCalled()
+          event = listener.calls.mostRecent().args[0]
+          expect(event.target).toEqual(link)
+
+          # No request should be made because we prevented the event
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
 
       describe 'history', ->
 
@@ -448,27 +449,28 @@ describe 'up.link', ->
 
         describe 'with { failScroll: "target" }', ->
 
-          it 'reveals the { failTarget } if the server responds with an error', asyncSpec (next) ->
+          it 'reveals the { failTarget } if the server responds with an error', ->
             link = fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
             target = fixture('.target')
             failTarget = fixture('.fail-target')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            renderJob = up.follow(link, failScroll: "target")
 
-            up.follow(link, failScroll: "target")
+            await wait()
 
-            next ->
-              jasmine.respondWith
-                status: 500,
-                responseText: """
-                  <div class="fail-target">
-                    Errors here
-                  </div>
-                  """
+            jasmine.respondWith
+              status: 500,
+              responseText: """
+                <div class="fail-target">
+                  Errors here
+                </div>
+                """
 
-            next =>
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(revealStub).toHaveBeenCalled()
+            expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-target')
 
         describe 'with { scroll: string } option', ->
 
@@ -495,27 +497,27 @@ describe 'up.link', ->
               expect(revealStub).toHaveBeenCalled()
               expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.other')
 
-          it 'ignores the { scroll } option for a failed response', asyncSpec (next) ->
+          it 'ignores the { scroll } option for a failed response', ->
             link = fixture('a[href="/action"][up-target=".target"][up-fail-target=".fail-target"]')
             target = fixture('.target')
             failTarget = fixture('.fail-target')
             other = fixture('.other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            renderJob = up.follow(link, scroll: '.other', failTarget: '.fail-target')
 
-            up.follow(link, scroll: '.other', failTarget: '.fail-target')
+            await wait()
 
-            next ->
-              jasmine.respondWith
-                status: 500,
-                responseText: """
-                  <div class="fail-target">
-                    Errors here
-                  </div>
-                  """
+            jasmine.respondWith
+              status: 500,
+              responseText: """
+                <div class="fail-target">
+                  Errors here
+                </div>
+                """
 
-            next =>
-              expect(revealStub).not.toHaveBeenCalled()
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+            expect(revealStub).not.toHaveBeenCalled()
 
         describe 'with { failScroll } option', ->
 
@@ -527,24 +529,25 @@ describe 'up.link', ->
             failOther = fixture('.fail-other')
 
             revealStub = spyOn(up, 'reveal').and.returnValue(Promise.resolve())
+            renderJob = up.follow(link, reveal: '.other', failScroll: '.fail-other')
 
-            up.follow(link, reveal: '.other', failScroll: '.fail-other')
+            await wait()
 
-            next ->
-              jasmine.respondWith
-                status: 500,
-                responseText: """
-                  <div class="fail-target">
-                    Errors here
-                  </div>
-                  <div class="fail-other">
-                    Fail other here
-                  </div>
-                  """
+            jasmine.respondWith
+              status: 500,
+              responseText: """
+                <div class="fail-target">
+                  Errors here
+                </div>
+                <div class="fail-other">
+                  Fail other here
+                </div>
+                """
 
-            next ->
-              expect(revealStub).toHaveBeenCalled()
-              expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-other')
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(revealStub).toHaveBeenCalled()
+            expect(revealStub.calls.mostRecent().args[0]).toMatchSelector('.fail-other')
 
         describe 'with { scroll: "restore" } option', ->
 
@@ -609,13 +612,16 @@ describe 'up.link', ->
           next =>
             expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
 
-        it 'does not follow the link if the user cancels the confirmation dialog', asyncSpec (next) ->
+        it 'does not follow the link if the user cancels the confirmation dialog', ->
           spyOn(window, 'confirm').and.returnValue(false)
           link = fixture('a[href="/danger"][up-target=".middle"]')
-          up.follow(link, confirm: 'Do you really want to go there?')
 
-          next =>
-            expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
+          renderJob = up.follow(link, confirm: 'Do you really want to go there?')
+
+          await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
 
         it 'does not show a confirmation dialog if the option is not a present string', asyncSpec (next) ->
           spyOn(up, 'render').and.returnValue(Promise.resolve())
@@ -639,18 +645,14 @@ describe 'up.link', ->
 
     describe "when the link's [href] is '#'", ->
 
-      it 'does not follow the link', asyncSpec (next) ->
+      it 'does not follow the link', ->
         fixture('.target', text: 'old text')
 
         link = fixture('a[href="#"][up-target=".target"]')
-        promise = up.follow(link)
+        renderJob = up.follow(link)
 
-        next.await ->
-          return promiseState(promise)
-
-        next (result) ->
-          expect(result.state).toBe('rejected')
-          expect('.target').toHaveText('old text')
+        await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Error))
+        expect('.target').toHaveText('old text')
 
       it 'does follow the link if it has a local content attribute', asyncSpec (next) ->
         fixture('.target', text: 'old text')
@@ -1036,15 +1038,16 @@ describe 'up.link', ->
           next ->
             expect('up-modal .content').toBeAttached()
 
-        it 'calls up.request() with a { preload: true } option', asyncSpec (next) ->
-          requestSpy = spyOn(up, 'request')
+        it 'calls up.request() with a { preload: true } option', ->
+          requestSpy = spyOn(up, 'request').and.callThrough()
 
           $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
           up.link.preload($link)
 
-          next =>
-            expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
+          await wait()
+
+          expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining(preload: true))
 
       describe 'aborting', ->
 
@@ -1060,17 +1063,19 @@ describe 'up.link', ->
           next ->
             expect(up.network.isBusy()).toBe(true)
 
-        it 'is abortable with { abortable: true }', asyncSpec (next) ->
+        it 'is abortable with { abortable: true }', ->
           link = fixture('a[href="/path"][up-target=".target"]')
-          up.link.preload(link, abortable: true)
+          preloadJob = up.link.preload(link, abortable: true)
 
-          next ->
-            expect(up.network.isBusy()).toBe(true)
+          await wait()
 
-            up.fragment.abort()
+          expect(up.network.isBusy()).toBe(true)
 
-          next ->
-            expect(up.network.isBusy()).toBe(false)
+          up.fragment.abort()
+
+          await expectAsync(preloadJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          expect(up.network.isBusy()).toBe(false)
 
   describe 'unobtrusive behavior', ->
 

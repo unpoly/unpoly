@@ -2071,18 +2071,13 @@ describe('up.network', function() {
 
       })
 
-      it('aborts all requests when called without an argument', asyncSpec(function(next) {
+      it('aborts all requests when called without an argument', async function() {
         const request = up.request('/url')
 
-        next(() => up.network.abort())
+        up.network.abort()
 
-        next.await(() => promiseState(request))
-
-        next(function(result) {
-          expect(result.state).toEqual('rejected')
-          expect(result.value?.name).toEqual('AbortError')
-        })
-      }))
+        await expectAsync(request).toBeRejectedWith(jasmine.any(up.Aborted))
+      })
 
       it('aborts all requests for which the given function returns true', async function() {
         const request1 = up.request('/foo')

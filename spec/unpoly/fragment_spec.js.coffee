@@ -3477,7 +3477,7 @@ describe 'up.fragment', ->
           next =>
             expect(up.fragment.source(e.get '.target')).toMatchURL('/path')
 
-        it 'keeps the previous source for a non-GET request (since that is reloadable)', asyncSpec (next) ->
+        it 'keeps the previous source for a non-GET request (since only that is reloadable)', asyncSpec (next) ->
           target = fixture('.target[up-source="/previous-source"]')
           up.render('.target', url: '/path', method: 'post')
           next =>
@@ -3496,22 +3496,33 @@ describe 'up.fragment', ->
         describe 'with { source } option', ->
 
           it 'uses that URL as the source for a GET request', asyncSpec (next) ->
-            fixture('.target')
+            fixture('.target[up-source="/previous-source"]')
             up.render('.target', url: '/path', source: '/given-path')
             next =>
               @respondWithSelector('.target')
             next =>
               expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
 
+          it 'uses that URL as the source for a failed GET request', ->
+            fixture('.target[up-source="/previous-source"]')
+            renderJob = up.render('.target', failTarget: '.target', url: '/path', source: '/given-path')
+
+            await wait()
+
+            jasmine.respondWithSelector('.target', status: 500)
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
+
           it 'uses that URL as the source after a non-GET request', asyncSpec (next) ->
-            fixture('.target')
+            fixture('.target[up-source="/previous-source"]')
             up.render('.target', url: '/path', method: 'post', source: '/given-path')
             next =>
               @respondWithSelector('.target')
             next =>
               expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
 
-          it 'ignores the option and reuses the previous source after a failed non-GET request', ->
+          it 'uses that URL as the source after a failed non-GET request\'', ->
             target = fixture('.target[up-source="/previous-source"]')
             renderJob = up.navigate('.target', failTarget: '.target', url: '/path', method: 'post', source: '/given-path', failTarget: '.target')
 
@@ -3521,7 +3532,7 @@ describe 'up.fragment', ->
 
             await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
 
-            expect(up.fragment.source(e.get '.target')).toMatchURL('/previous-source')
+            expect(up.fragment.source(e.get '.target')).toMatchURL('/given-path')
 
       describe 'context', ->
 

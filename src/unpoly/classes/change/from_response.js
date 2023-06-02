@@ -148,7 +148,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       renderOptions.source = this.improveHistoryValue(renderOptions.source, responseURL)
     } else {
       // Keep the source of the previous fragment (e.g. the form that was submitted into failure).
-      renderOptions.source = 'keep'
+      renderOptions.source = this.improveHistoryValue(renderOptions.source, 'keep')
       // Since the current URL is not retrievable over the GET-only address bar,
       // we can only provide history if an *explicit* location URL is passed as an option.
       renderOptions.history = !!renderOptions.location
