@@ -19,8 +19,6 @@ describe 'up.Request.Cache', ->
 
       sourceRequest.abort()
 
-      await wait()
-
       await expectAsync(sourceRequest).toBeRejectedWith(jasmine.any(up.Aborted))
       expect(sourceRequest.state).toEqual('aborted')
 

@@ -44,12 +44,10 @@ describe 'up.Layer.Overlay', ->
 
       up.layer.accept()
 
-      await wait()
+      await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
       expect(abortedURLs.length).toBe(1)
       expect(abortedURLs[0]).toMatchURL('/layer-url')
-
-      await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
 
     it 'does not abort a pending request for another layer', asyncSpec (next) ->
       abortedURLs = []

@@ -61,8 +61,6 @@ describe 'up.layer', ->
 
           up.layer.open(url: '/path2')
 
-          await wait()
-
           await expectAsync(rootRenderJob).toBeRejectedWith(jasmine.any(up.Aborted))
           expect(abortedURLs.length).toBe(1)
           expect(abortedURLs[0]).toMatchURL('/path1')
@@ -92,8 +90,6 @@ describe 'up.layer', ->
           expect(abortedURLs).toBeBlank()
 
           openJob2 = up.layer.open(url: '/path2')
-
-          await wait()
 
           await expectAsync(openJob1).toBeRejectedWith(jasmine.any(up.Aborted))
           expect(abortedURLs.length).toBe(1)
@@ -1070,7 +1066,7 @@ describe 'up.layer', ->
               { target: '.overlay-content', onAccepted: callback, acceptLocation: '/acceptable-location' }
             ]
 
-            up.navigate('.root-content', layer: '.root-content', content: 'new content', location: '/acceptable-location')
+            up.navigate('.root-content', layer: 'root', content: 'new content', location: '/acceptable-location')
 
             expect(callback).not.toHaveBeenCalled()
 
