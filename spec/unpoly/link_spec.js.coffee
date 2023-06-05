@@ -604,13 +604,15 @@ describe 'up.link', ->
 
       describe 'with { confirm } option', ->
 
-        it 'follows the link after the user OKs a confirmation dialog', asyncSpec (next) ->
+        it 'follows the link after the user OKs a confirmation dialog', ->
           spyOn(window, 'confirm').and.returnValue(true)
           link = fixture('a[href="/danger"][up-target=".middle"]')
           up.follow(link, confirm: 'Do you really want to go there?')
 
-          next =>
-            expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
+          await wait()
+
+          expect(window.confirm).toHaveBeenCalledWith('Do you really want to go there?')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
         it 'does not follow the link if the user cancels the confirmation dialog', ->
           spyOn(window, 'confirm').and.returnValue(false)
@@ -654,18 +656,14 @@ describe 'up.link', ->
         await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Error))
         expect('.target').toHaveText('old text')
 
-      it 'does follow the link if it has a local content attribute', asyncSpec (next) ->
+      it 'does follow the link if it has a local content attribute', ->
         fixture('.target', text: 'old text')
 
         link = fixture('a[href="#"][up-target=".target"][up-content="new text"]')
         promise = up.follow(link)
 
-        next.await ->
-          return promiseState(promise)
-
-        next (result) ->
-          expect(result.state).toBe('fulfilled')
-          expect('.target').toHaveText('new text')
+        await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+        expect('.target').toHaveText('new text')
 
     describe 'up.link.followOptions()', ->
 
@@ -898,145 +896,173 @@ describe 'up.link', ->
       beforeEach ->
         @requestTarget = => @lastRequest().requestHeaders['X-Up-Target']
 
-      it "loads and caches the given link's destination", asyncSpec (next) ->
+      it "loads and caches the given link's destination", ->
         fixture('.target')
         link = fixture('a[href="/path"][up-target=".target"]')
 
         up.link.preload(link)
 
-        next =>
-          cachedPromise = up.cache.get
-            url: '/path'
-            target: '.target'
-            failTarget: 'default-fallback'
-            origin: link
-          expect(u.isPromise(cachedPromise)).toBe(true)
+        await wait()
 
-      it 'accepts options that overrides those options that were parsed from the link', asyncSpec (next) ->
+        expect(
+          url: '/path'
+          target: '.target'
+          failTarget: 'default-fallback'
+          origin: link
+        ).toBeCached()
+
+      it 'accepts options that overrides those options that were parsed from the link', ->
         fixture('.target')
         link = fixture('a[href="/path"][up-target=".target"]')
         up.link.preload(link, url: '/options-path')
 
-        next =>
-          cachedPromise = up.cache.get
-            url: '/options-path'
-            target: '.target'
-            failTarget: 'default-fallback'
-            origin: link
-          expect(u.isPromise(cachedPromise)).toBe(true)
+        await wait()
 
-      it 'does not dispatch another request for a link that is currently loading', asyncSpec (next) ->
+        expect(
+          url: '/options-path'
+          target: '.target'
+          failTarget: 'default-fallback'
+          origin: link
+        ).toBeCached()
+
+      it 'does not dispatch another request for a link that is currently loading', ->
         link = fixture('a[href="/path"][up-target=".target"]')
         up.follow(link)
 
-        next ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+        await wait()
 
-          up.link.preload(link)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        next ->
-          expect(jasmine.Ajax.requests.count()).toBe(1)
+        up.link.preload(link)
 
-      it 'does not update fragments for a link with local content (bugfix)', asyncSpec (next) ->
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+      it 'does not update fragments for a link with local content (bugfix)', ->
         target = fixture('.target', text: 'old text')
         link = fixture('a[up-content="new text"][up-target=".target"]')
 
         up.link.preload(link)
 
-        next ->
-          expect('.target').toHaveText('old text')
+        await wait()
 
-      it 'does not call an { onRendered } callback', asyncSpec (next) ->
+        expect('.target').toHaveText('old text')
+
+      it 'does not call an { onRendered } callback', ->
         onRendered = jasmine.createSpy('{ onRendered } callback')
         fixture('.target')
         link = fixture('a[up-href="/path"][up-target=".target"]')
 
-        up.link.preload(link, { onRendered })
+        promise = up.link.preload(link, { onRendered })
 
-        next ->
-          jasmine.respondWithSelector('.target')
+        await wait()
 
-        next ->
-          expect(onRendered).not.toHaveBeenCalled()
-          # Jasmine will fail if there are unhandled promise rejections
+        jasmine.respondWithSelector('.target')
+
+        await expectAsync(promise).toBeResolved()
+
+        expect(onRendered).not.toHaveBeenCalled()
+        # Jasmine will fail if there are unhandled promise rejections
 
       describe 'for an [up-target] link', ->
 
-        it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', asyncSpec (next) ->
-          $fixture('.target')
-          $link = $fixture('a[href="/path"][up-target=".target"]')
-          up.link.preload($link)
-          next => expect(@requestTarget()).toEqual('.target')
+        it 'includes the [up-target] selector as an X-Up-Target header if the targeted element is currently on the page', ->
+          fixture('.target')
+          link = fixture('a[href="/path"][up-target=".target"]')
+          up.link.preload(link)
 
-        it 'replaces the [up-target] selector as with a fallback and uses that as an X-Up-Target header if the targeted element is not currently on the page', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"]')
-          up.link.preload($link)
+          await wait()
+
+          expect(@requestTarget()).toEqual('.target')
+
+        it 'replaces the [up-target] selector as with a fallback and uses that as an X-Up-Target header if the targeted element is not currently on the page', ->
+          link = fixture('a[href="/path"][up-target=".target"]')
+          up.link.preload(link)
+
+          await wait()
+
           # The default fallback would usually be `body`, but in Jasmine specs we change
           # it to protect the test runner during failures.
-          next => expect(@requestTarget()).toEqual('default-fallback')
+          expect(@requestTarget()).toEqual('default-fallback')
 
       describe 'for a link opening a new layer', ->
 
         beforeEach ->
           up.motion.config.enabled = false
 
-        it 'includes the selector as an X-Up-Target header and does not replace it with a fallback, since the layer frame always exists', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new"]')
-          up.hello($link)
-          up.link.preload($link)
-          next => expect(@requestTarget()).toEqual('.target')
+        it 'includes the selector as an X-Up-Target header and does not replace it with a fallback, since the layer frame always exists', ->
+          link = fixture('a[href="/path"][up-target=".target"][up-layer="new"]')
+          up.hello(link)
 
-        it 'does not create layer elements', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
-          up.hello($link)
-          up.link.preload($link)
-          next =>
-            expect('up-modal').not.toBeAttached()
+          up.link.preload(link)
 
-        it 'does not emit an up:layer:open event', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
-          up.hello($link)
+          await wait()
+
+          expect(@requestTarget()).toEqual('.target')
+
+        it 'does not create layer elements', ->
+          link = fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
+          up.hello(link)
+
+          up.link.preload(link)
+
+          await wait()
+
+          expect('up-modal').not.toBeAttached()
+
+        it 'does not emit an up:layer:open event', ->
+          link = fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
+          up.hello(link)
           openListener = jasmine.createSpy('listener')
           up.on('up:layer:open', openListener)
-          up.link.preload($link)
-          next =>
-            expect(openListener).not.toHaveBeenCalled()
 
-        it 'does not close a currently open overlay', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
-          up.hello($link)
+          up.link.preload(link)
+
+          await wait()
+
+          expect(openListener).not.toHaveBeenCalled()
+
+        it 'does not close a currently open overlay', ->
+          link = fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
+          up.hello(link)
           closeListener = jasmine.createSpy('listener')
           up.on('up:layer:dismiss', closeListener)
 
           up.layer.open(mode: 'modal', fragment: '<div class="content">Modal content</div>')
 
-          next =>
-            expect('up-modal .content').toBeAttached()
+          await wait()
 
-          next =>
-            up.link.preload($link)
+          expect('up-modal .content').toBeAttached()
 
-          next =>
-            expect('up-modal .content').toBeAttached()
-            expect(closeListener).not.toHaveBeenCalled()
+          up.link.preload(link)
 
-          next =>
-            up.layer.dismiss()
+          await wait()
 
-          next =>
-            expect('up-modal .content').not.toBeAttached()
-            expect(closeListener).toHaveBeenCalled()
+          expect('up-modal .content').toBeAttached()
+          expect(closeListener).not.toHaveBeenCalled()
 
-        it 'does not prevent the opening of other overlays while the request is still pending', asyncSpec (next) ->
-          $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
-          up.hello($link)
-          up.link.preload($link)
+          up.layer.dismiss()
 
-          next ->
-            up.layer.open(mode: 'modal', fragment: '<div class="content">Modal content</div>')
+          await wait()
 
-          next ->
-            expect('up-modal .content').toBeAttached()
+          expect('up-modal .content').not.toBeAttached()
+          expect(closeListener).toHaveBeenCalled()
+
+        it 'does not prevent the opening of other overlays while the request is still pending', ->
+          link = fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
+          up.hello(link)
+          up.link.preload(link)
+
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          up.layer.open(mode: 'modal', fragment: '<div class="content">Modal content</div>')
+
+          await wait()
+
+          expect('up-modal .content').toBeAttached()
 
         it 'calls up.request() with a { preload: true } option', ->
           requestSpy = spyOn(up, 'request').and.callThrough()
