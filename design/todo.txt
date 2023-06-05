@@ -16,6 +16,7 @@ Priority
 - Test that system compilers always run before user compilers
 - Also render hungry elements when closing or opening overlays
 - When going through form group solutions, rederive target before appending :has(...)
+  -
 
 
 
@@ -232,6 +233,8 @@ Icebox
 - Improve polling in the background
   - It would be great to *not* have a timeout running while we're in the background or offline
   - It would be great to not wait up to 10 seconds when we're re-focused or regain connectivity
+    - Are timeouts really paused or do they just not fire until re-focus?
+    - Mobile Chrome seems to reload old tabs automatically, test this!
 - Elemente mit [up-hungry][up-layer=any] müssten wir *eigentlich* auch austauschen, wenn wir einen neuen Layer öffnen
   - OpenLayer kann aber gar nicht mit mehreren Steps umgehen
 - can badResponseTime be a function that takes a request?
