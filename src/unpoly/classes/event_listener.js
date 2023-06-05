@@ -91,7 +91,7 @@ up.EventListener = class EventListener extends up.Record {
       }
 
       // Do not allow click events from disabled elements to propagate
-      if (this.eventType === 'click' && element.disabled === true) {
+      if (this.eventType === 'click' && element.disabled) {
         return
       }
 
