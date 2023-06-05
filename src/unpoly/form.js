@@ -49,6 +49,31 @@ up.form = (function() {
   @param {Array<string>} [config.groupSelectors=['[up-form-group]', 'fieldset', 'label', 'form']]
     An array of CSS selectors matching a [form group](/up-form-group).
 
+    When [validating](/validation#validating-after-changing-a-field) a field,
+    Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+    form group around that field.
+
+    When a group is matched, Unpoly will [derive a target selector](/target-derivation) for the element.
+    In the example below, changing the *City* field would validate the target `#city_group`:
+
+    ```html
+    <fieldset id="city_group">
+      <label for="city">City</label>
+      <input type="text" name="city" id="city" up-validate>
+    </fieldset>
+    ```
+
+    If no good selector cannot be derived from the group element, the resulting target will
+    use a `:has()` suffix that matches the changed field. In the example below the target
+    would be `fieldset:has(#city)`:
+
+    ```html
+    <fieldset> <!-- no [id] attribute to derive a selector from -->
+      <label for="city">City</label>
+      <input type="text" name="city" id="city" up-validate>
+    </fieldset>
+    ```
+
   @param {string} [config.fieldSelectors]
     An array of CSS selectors that represent form fields, such as `input` or `select`.
 
@@ -814,7 +839,7 @@ up.form = (function() {
 
   You are not required to use form groups to [submit forms through Unpoly](/form-up-submit).
   However, structuring your form into groups will help Unpoly to make smaller changes to the DOM when
-  working with complex form. For instance, when [validating](/up-validate) a field,
+  working with complex form. For instance, when [validating](/validation#validating-after-changing-a-field) a field,
   Unpoly will re-render the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
   form group around that field.
 
@@ -823,10 +848,10 @@ up.form = (function() {
 
   ### Example
 
-  Many apps use form groups to wrap a label, input field, error message and help text.
+  Many apps use form groups to wrap a label, input field, error message and help text:
 
   ```html
-  <form>
+  <form up-validate>
     <div up-form-group>
       <label for="email">E-mail</label>
       <input type="text" name="email" id="email">
@@ -838,6 +863,12 @@ up.form = (function() {
     </div>
   </form>
   ```
+
+  The form above also uses the `[up-validate]` attribute to [validate](/validation#validating-after-changing-a-field)
+  form groups after changing a field:
+
+  - After changing the *E-Mail* field, Unpoly will validate the `[up-form-group]:has(#email)` target.
+  - After changing the *Password* field, Unpoly will validate the `[up-form-group]:has(#password)` target.
 
   @selector [up-form-group]
   @stable
