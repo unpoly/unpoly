@@ -97,7 +97,7 @@ function scriptPipeline({ es, lint = true }) {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(js|ts)$/,
           exclude: /node_modules/,
           use: [tsLoader]
         },
@@ -107,7 +107,7 @@ function scriptPipeline({ es, lint = true }) {
           use: [tsLoader, coffeeLoader]
         },
         {
-          test: /\.js\.erb$/,
+          test: /\.(js|ts)\.erb$/,
           exclude: /node_modules/,
           use: [tsLoader, erbLoader]
         },
@@ -119,7 +119,7 @@ function scriptPipeline({ es, lint = true }) {
       ]
     },
     resolve: {
-      extensions: ['.js', '.coffee', '.js.erb', '.coffee.erb']
+      extensions: ['.js', '.ts', '.coffee', '.js.erb', '.ts.erb', '.coffee.erb']
     },
     target: ['web', es]
   }

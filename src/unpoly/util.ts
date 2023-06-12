@@ -13,6 +13,7 @@ to not include another library in your asset bundle.
 
 @module up.util
 */
+
 up.util = (function() {
 
   /*-
@@ -21,7 +22,7 @@ up.util = (function() {
   @function up.util.noop
   @experimental
   */
-  function noop() {
+  function noop(): void {
   }
 
   /*-
@@ -30,7 +31,7 @@ up.util = (function() {
   @function up.util.asyncNoop
   @internal
   */
-  function asyncNoop(){
+  function asyncNoop(): Promise<void>{
     return Promise.resolve()
   }
 
@@ -54,10 +55,6 @@ up.util = (function() {
         return cachedValue = func.apply(this, args)
       }
     }
-  }
-
-  const NORMALIZE_URL_DEFAULTS = {
-    host: 'cross-domain',
   }
 
   /*-
@@ -118,7 +115,18 @@ up.util = (function() {
     The normalized URL.
   @experimental
   */
-  function normalizeURL(url, options) {
+  type NormalizeURLOptions = {
+    host?: string|boolean
+    trailingSlash?: boolean
+    search?: boolean
+    hash?: false
+  }
+
+  const NORMALIZE_URL_DEFAULTS: NormalizeURLOptions = {
+    host: 'cross-domain',
+  }
+
+  function normalizeURL(url, options: NormalizeURLOptions = {}): string {
     options = newOptions(options, NORMALIZE_URL_DEFAULTS)
 
     const parts = parseURL(url)
@@ -193,24 +201,25 @@ up.util = (function() {
     `{ protocol, hostname, port, pathname, search, hash }` properties.
   @stable
   */
-  function parseURL(url) {
-    if (url.pathname) {
+  function parseURL(url: string|URL|HTMLAnchorElement) {
+    if (isString(url)) {
+      // We would prefer to use `new URL(url, location.href)` here, but that is 30% slower
+      // than creating a link (see benchmark at https://jsbench.me/l7l2x9cruf/1).
+      // We're parsing a *lot* of URLs for [up-active], so this matters.
+      let link = document.createElement('a')
+      link.href = url
+      return link
+    } else {
       return url
     }
 
-    // We would prefer to use `new URL(url, location.href)` here, but that is 30% slower
-    // than creating a link (see benchmark at https://jsbench.me/l7l2x9cruf/1).
-    // We're parsing a *lot* of URLs for [up-active], so this matters.
-    let link = document.createElement('a')
-    link.href = url
-    return link
   }
 
   /*-
   @function up.util.normalizeMethod
   @internal
   */
-  function normalizeMethod(method) {
+  function normalizeMethod(method: string|undefined): string {
     return method ? method.toUpperCase() : 'GET'
   }
 
@@ -218,7 +227,7 @@ up.util = (function() {
   @function up.util.methodAllowsPayload
   @internal
   */
-  function methodAllowsPayload(method) {
+  function methodAllowsPayload(method: string): boolean {
     return (method !== 'GET') && (method !== 'HEAD')
   }
 
@@ -483,7 +492,7 @@ up.util = (function() {
   @return {boolean}
   @stable
   */
-  function isString(object) {
+  function isString(object): object is string {
     return (typeof(object) === 'string') || object instanceof String
   }
 
@@ -872,7 +881,7 @@ up.util = (function() {
   @return {Object}
   @internal
   */
-  function newOptions(object, defaults) {
+  function newOptions<E extends Options>(object: E|undefined, defaults: E): E {
     if (defaults) {
       return merge(defaults, object)
     } else if (object) {

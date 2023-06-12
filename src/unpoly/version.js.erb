@@ -1,0 +1,7 @@
+/***
+ @module up
+ */
+up.version = '<%=
+  require 'json'
+  JSON.parse(File.read('package.json')).fetch('version')
+%>'
