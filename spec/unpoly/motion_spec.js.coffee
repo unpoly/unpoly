@@ -87,6 +87,15 @@ describe 'up.motion', ->
           expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
           expect(parseFloat($element.css('height'))).toBeAround(200, 40)
 
+      describe 'with an animation that flies in the element from the screen edge', ->
+
+        # https://github.com/unpoly/unpoly/issues/439
+        it 'does not leave a `transform` CSS property once the animation finishes, as to not affect the positioning of child elements', ->
+          element = fixture('.element')
+
+          await up.animate(element, 'move-from-left', { duration: 10 })
+
+          expect(element.style.transform).toBeBlank()
 
       describe 'when up.animate() is called from inside an animation function', ->
 
@@ -419,6 +428,14 @@ describe 'up.motion', ->
 
         expect($('up-bounds').length).toBe(0)
 
+      # https://github.com/unpoly/unpoly/issues/439
+      it 'does not leave a `transition` CSS property once the transition finishes, as to not affect the positioning of child elements', ->
+        v1 = fixture('.element', text: 'v1')
+        v2 = fixture('.element', text: 'v2')
+
+        await up.morph(v1, v2, 'move-left', { duration: 10 })
+
+        expect(v2.style.transition).toBeBlank()
 
       describe 'when up.animate() is called from inside a transition function', ->
 

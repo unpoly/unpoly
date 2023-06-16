@@ -617,8 +617,12 @@ up.motion = (function() {
     return { transform: `translate(${dx}px, ${dy}px)` }
   }
 
+  function noTranslateCSS() {
+    return { transform: null }
+  }
+
   function untranslatedBox(element) {
-    e.setStyle(element, translateCSS(0, 0))
+    e.setStyle(element, noTranslateCSS())
     return element.getBoundingClientRect()
   }
 
@@ -636,7 +640,7 @@ up.motion = (function() {
       const box = untranslatedBox(element)
       const transform = boxToTransform(box)
       e.setStyle(element, transform)
-      return animateNow(element, translateCSS(0, 0), options)
+      return animateNow(element, noTranslateCSS(), options)
     })
   }
 

@@ -1345,6 +1345,23 @@ describe 'up.link', ->
             expect('.target:not(.old)').toHaveOpacity(0.5, 0.15)
             expect('.target:not(.old)').toHaveText('text 3')
 
+        # https://github.com/unpoly/unpoly/issues/439
+        it 'does not leave a `transform` CSS property once the transition finishes, as to not affect the positioning of child elements', ->
+          element = fixture('.target.old', text: 'v1')
+          link = fixture('a[href="/path"][up-target=".target"][up-transition="move-left"][up-duration="10"]')
+
+          Trigger.clickSequence(link)
+
+          await wait()
+
+          jasmine.respondWithSelector('.target.new', text: 'v2')
+
+          await wait(50)
+
+          newElement = document.querySelector('.target')
+          expect(newElement).toHaveText('v2')
+          expect(newElement.style.transform).toBeBlank()
+
 
       describe 'wih a CSS selector in the [up-fallback] attribute', ->
 
