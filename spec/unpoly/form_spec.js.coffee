@@ -2294,6 +2294,18 @@ describe 'up.form', ->
             expect(params['text-field']).toEqual(['text-field-value'])
             expect(params['submit-button']).toEqual(['submit-button-value'])
 
+        it 'includes the clicked submit button in the params if the button is outside the form', asyncSpec (next) ->
+          $form = $fixture('form#my-form[action="/action"][up-target=".target"][method=post]')
+          $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
+          $submitButton = $fixture('input[type="submit"][name="submit-button"][value="submit-button-value"][form="my-form"]')
+          up.hello($form)
+          Trigger.clickSequence($submitButton)
+
+          next =>
+            params = @lastRequest().data()
+            expect(params['text-field']).toEqual(['text-field-value'])
+            expect(params['submit-button']).toEqual(['submit-button-value'])
+
         it 'excludes an unused submit button in the params', asyncSpec (next) ->
           $form = $fixture('form[action="/action"][up-target=".target"][method=post]')
           $textField = $form.affix('input[type="text"][name="text-field"][value="text-field-value"]')
