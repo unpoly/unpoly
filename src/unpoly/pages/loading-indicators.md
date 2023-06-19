@@ -61,7 +61,7 @@ To implement a fully custom loading indicator instead,
 observe the `up:network:late` and `up:network:recover` events.
 
 
-To build a custom loading indicator, please an element like this in your application layout:
+To build a custom loading indicator, place an element like this in your application layout:
 
 ```html
 <loading-indicator>Please wait!</loading-indicator>
