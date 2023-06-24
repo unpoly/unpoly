@@ -75,7 +75,7 @@ up.element = (function() {
   */
   function isInSubtree(root, selectorOrElement) {
     const element = getOne(selectorOrElement)
-    return root.contains(element)
+    return Node.prototype.contains.call(root, element)
   }
 
   /*-
