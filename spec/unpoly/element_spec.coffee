@@ -204,6 +204,13 @@ describe 'up.element', ->
       results = up.element.subtree($element[0], '.match')
       expect(results).toEqual []
 
+  describe 'up.element.isInSubtree()', ->
+    it 'can handle conflicts with forms where an input is named `contains` GH#507', ->
+      $form = $fixture('form')
+      $child = $form.affix('input[name="contains"]')
+
+      expect(up.element.isInSubtree($form[0], $child)).toBe(true)
+
   if up.migrate.loaded
     describe 'up.element.closest()', ->
 
