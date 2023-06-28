@@ -166,6 +166,10 @@ up.Layer = class Layer extends up.Record {
     A callback that will run when the elements have been removed from the DOM.
 
     If the layer has a close animation, the callback will run after the animation has finished.
+  @param {number} [options.history=true]
+    Whether to restore the the parent layer's location in the browser's address bar.
+
+    @experimental
   @param {boolean} [options.preventable=true]
     Whether the closing can be prevented by an event listener.
 
