@@ -8,6 +8,23 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.2.1
+-----
+
+This is a bugfix release with many contributions from the community.
+
+- Click event handlers added via `up.on()` no longer fire when clicking on a child of a disabled button. *By @adam12.*
+- Fix a crash when [targeting](/targeting-fragments) elements with class names containing special characters, e.g. dynamic Tailwind CSS classes. *By @adam12.*
+- Submit buttons [outside a form](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form) are now included in the request params. *By @mordae.*
+- Documentation for [URL patterns](/url-patterns) has been expanded with many examples. *By @jmoppel.* 
+- Fix a bug where forms with a field named `"contains"` could not be submitted. *By @adam12.*
+- Fix a bug where the `{ location }` property of the `up:location:changed` would sometimes be `Location` object instead of a string. *By @triskweline.*
+- When layers are closed during a fragment update, Unpoly no longer adds a history entry for the revealed layer. *By @triskweline.*
+- Animations that fly in an element from the screen edge (`move-from-top`, `move-from-left`, etc.) no longer leave a `transform` style on the animated element. *By @triskweline.*
+- New experimental option `{ history: false }` for all functions that close layers. This prevents Unpoly from restoring history from the revealed parent layer. *By @triskweline.*
+- To help with contributions to Unpoly, development dependencies were upgraded to Jasmine 5, TypeScript 5, and Node.js 20. *By @triskweline.*
+
+
 3.2.0
 -----
 
