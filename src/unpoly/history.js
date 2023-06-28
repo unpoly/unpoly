@@ -331,6 +331,7 @@ up.history = (function() {
   function onPop(event) {
     // The earlier URL has now been restored by the browser. This cannot be prevented.
     trackCurrentLocation()
+    let location = currentLocation()
     emitLocationChanged({ location, reason: 'pop', log: `Navigated to history entry ${location}` })
 
     up.viewport.saveFocus({ location: previousLocation })

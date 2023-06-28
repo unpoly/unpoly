@@ -9,6 +9,18 @@ describe 'up.history', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.history.push()', ->
+
+      it 'emits an up:location:changed event with a string { location } property (issue #490)', ->
+        listener = jasmine.createSpy('event listener')
+        up.on('up:location:changed', listener)
+
+        up.history.push('/new-location')
+
+        expect(listener).toHaveBeenCalled()
+        expect(listener.calls.mostRecent().args[0].location).toEqual(jasmine.any(String))
+        expect(listener.calls.mostRecent().args[0].location).toMatchURL('/new-location')
+
     describe 'up.history.replace', ->
 
       it 'should have tests'
@@ -95,6 +107,124 @@ describe 'up.history', ->
   describe 'unobtrusive behavior', ->
 
     describe 'back button', ->
+
+      it 'emits up:location:changed events as the user goes forwards and backwards through history', asyncSpec (next) ->
+        up.history.config.restoreTargets = ['.viewport']
+
+        fixture('.viewport .content')
+        respond = =>
+          @respondWith """
+            <div class="viewport">
+              <div class="content">content</div>
+            </div>
+            """
+
+        normalize = up.history.normalizeURL
+
+        events = []
+        up.on 'up:location:changed', (event) ->
+          console.debug("!!! event.location is %o", event.location)
+          events.push [event.reason, normalize(event.location)]
+
+        up.navigate('.content', url: '/foo', history: true)
+
+        tolerance = 150
+
+        next =>
+          respond()
+
+        next =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+          ]
+
+          up.navigate('.content', url: '/bar', history: true)
+
+        next =>
+          respond()
+
+        next =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+          ]
+
+          up.navigate('.content', url: '/baz', history: true)
+
+        next =>
+          respond()
+
+        next =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+          ]
+
+          history.back()
+
+        next.after tolerance, =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+          ]
+
+          history.back()
+
+        next.after 150, =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/foo')]
+          ]
+
+          history.forward()
+
+        next.after 150, =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/foo')]
+            ['pop', normalize('/bar')]
+          ]
+
+          history.forward()
+
+        next.after 150, =>
+          expect(events).toEqual [
+            ['push', normalize('/foo')]
+            ['push', normalize('/bar')]
+            ['push', normalize('/baz')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/foo')]
+            ['pop', normalize('/bar')]
+            ['pop', normalize('/baz')]
+          ]
+
+      it 'emits an up:location:changed event with a string { location } property (issue #490)', ->
+        waitForBrowser = 100
+        # fixture('.content')
+        # up.history.config.restoreTargets = ['.content']
+        up.history.push('/page1')
+        await wait(waitForBrowser)
+        up.history.push('/page2')
+        await wait(waitForBrowser)
+
+        listener = jasmine.createSpy('event listener')
+        up.on('up:location:changed', listener)
+
+        history.back()
+        await wait(waitForBrowser)
+
+        expect(listener).toHaveBeenCalled()
+        expect(listener.calls.mostRecent().args[0].location).toEqual(jasmine.any(String))
+        expect(listener.calls.mostRecent().args[0].location).toMatchURL('/page1')
 
       it 'calls destructor functions when destroying compiled elements (bugfix)', asyncSpec (next) ->
         waitForBrowser = 100
@@ -355,102 +485,3 @@ describe 'up.history', ->
 
       it 'does not set an up-href attribute if there is no previous URL'
 
-    describe 'events', ->
-
-      it 'emits up:location:changed events as the user goes forwards and backwards through history', asyncSpec (next) ->
-        up.history.config.restoreTargets = ['.viewport']
-
-        fixture('.viewport .content')
-        respond = =>
-          @respondWith """
-            <div class="viewport">
-              <div class="content">content</div>
-            </div>
-            """
-
-        normalize = up.history.normalizeURL
-
-        events = []
-        up.on 'up:location:changed', (event) ->
-          events.push [event.reason, normalize(event.location)]
-
-        up.navigate('.content', url: '/foo', history: true)
-
-        tolerance = 150
-
-        next =>
-          respond()
-
-        next =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-          ]
-
-          up.navigate('.content', url: '/bar', history: true)
-
-        next =>
-          respond()
-
-        next =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-            ['push', normalize('/bar')]
-          ]
-
-          up.navigate('.content', url: '/baz', history: true)
-
-        next =>
-          respond()
-
-        next =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-            ['push', normalize('/bar')]
-            ['push', normalize('/baz')]
-          ]
-
-          history.back()
-
-        next.after tolerance, =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-            ['push', normalize('/bar')]
-            ['push', normalize('/baz')]
-            ['pop', normalize('/bar')]
-          ]
-
-          history.back()
-
-        next.after 150, =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-            ['push', normalize('/bar')]
-            ['push', normalize('/baz')]
-            ['pop', normalize('/bar')]
-            ['pop', normalize('/foo')]
-          ]
-
-          history.forward()
-
-        next.after 150, =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-            ['push', normalize('/bar')]
-            ['push', normalize('/baz')]
-            ['pop', normalize('/bar')]
-            ['pop', normalize('/foo')]
-            ['pop', normalize('/bar')]
-          ]
-
-          history.forward()
-
-        next.after 150, =>
-          expect(events).toEqual [
-            ['push', normalize('/foo')]
-            ['push', normalize('/bar')]
-            ['push', normalize('/baz')]
-            ['pop', normalize('/bar')]
-            ['pop', normalize('/foo')]
-            ['pop', normalize('/bar')]
-            ['pop', normalize('/baz')]
-          ]
