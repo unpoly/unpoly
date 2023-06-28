@@ -11,6 +11,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     this.value = options.value
     this.preventable = options.preventable ?? true
     this.response = options.response
+    this.history = options.history ?? true
   }
 
   execute() {
@@ -41,12 +42,15 @@ up.Change.CloseLayer = class CloseLayer extends up.Change.Removal {
     // Remove ourselves from the layer stack.
     this.layer.stack.remove(this.layer)
 
-    // Restore the history of the parent layer we just uncovered.
-    parent.restoreHistory()
+    if (this.history) {
+      // Restore the history of the parent layer we just uncovered.
+      parent.restoreHistory()
+    }
 
     this.handleFocus(parent)
 
     this.layer.teardownHandlers()
+
     this.layer.destroyElements(this.options) // this will also pass the { onFinished } option
 
     this.emitClosedEvent(parent)

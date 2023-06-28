@@ -71,10 +71,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     }
 
     if (this.options.peel) {
-      // Layer#peel() will manipulate the stack sync.
-      // We don't wait for the peeling animation to finish.
-      // Closing a layer will also abort requests targeting that layer.
-      this.layer.peel()
+      // (1) Layer#peel() will manipulate the stack sync.
+      //     We don't wait for the peeling animation to finish.
+      //
+      // (2) Closing a layer will also abort requests targeting that layer.
+      //
+      // (3) Only restore the base layer's history if the fragment update adds a
+      //     history entry (issue #397).
+      this.layer.peel({ history: !this.hasHistory() })
     }
 
     // Unless the user has explicitly opted out of the default { abort: 'target' }

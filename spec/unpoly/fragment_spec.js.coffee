@@ -2769,29 +2769,86 @@ describe 'up.fragment', ->
 
       describe 'choice of layer', ->
 
-        it 'updates the layer given as { layer } option', ->
-          makeLayers [
-            { target: '.element', content: 'old text in root' }
-            { target: '.element', content: 'old text in modal' }
-          ]
+        describe 'targeting a background layer', ->
 
-          up.render('.element', content: 'new text', layer: 'root', peel: false)
+          it 'updates the layer given as { layer } option', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in modal' }
+            ]
 
-          expect(up.layer.get(0)).toHaveText(/new text/)
-          expect(up.layer.get(1)).toHaveText(/old text in modal/)
+            up.render('.element', content: 'new text', layer: 'root', peel: false)
 
-        it 'updates the layer of the given target, if the target is given as an element (and not a selector)', ->
-          makeLayers [
-            { target: '.element', content: 'old text in root' }
-            { target: '.element', content: 'old text in overlay 1' }
-            { target: '.element', content: 'old text in overlay 2' }
-          ]
+            expect(up.layer.get(0)).toHaveText(/new text/)
+            expect(up.layer.get(1)).toHaveText(/old text in modal/)
 
-          up.render(up.layer.get(1).getFirstSwappableElement(), content: 'new text in overlay 1')
+          it 'updates the layer of the given target, if the target is given as an element (and not a selector)', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in overlay 1' }
+              { target: '.element', content: 'old text in overlay 2' }
+            ]
 
-          expect(up.layer.get(0)).toHaveText(/old text in root/)
-          expect(up.layer.get(1)).toHaveText('new text in overlay 1')
-          expect(up.layer.get(2)).toHaveText('old text in overlay 2')
+            up.render(up.layer.get(1).getFirstSwappableElement(), content: 'new text in overlay 1')
+
+            expect(up.layer.get(0)).toHaveText(/old text in root/)
+            expect(up.layer.get(1)).toHaveText('new text in overlay 1')
+            expect(up.layer.get(2)).toHaveText('old text in overlay 2')
+
+          it 'closes all overlays over the target with { peel: true }', ->
+            makeLayers [
+              { target: '.element', content: 'old text in root' }
+              { target: '.element', content: 'old text in overlay 1' }
+              { target: '.element', content: 'old text in overlay 2' }
+            ]
+
+            up.render('.element', content: 'new text', layer: 'root', peel: true)
+
+            expect(up.layer.count).toBe(1)
+            expect(up.layer.current.mode).toBe('root')
+            expect(up.layer.current).toHaveText(/new text/)
+
+          it 'does not create a history entry for the peeled layer', ->
+            up.history.config.enabled = true
+            up.history.replace('/root1')
+            locations = []
+            up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
+
+            fixture('.content', text: 'root 1')
+
+            up.layer.open(location: '/overlay1', history: true)
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+            expect(locations).toEqual ['/overlay1']
+
+            up.render(content: 'root 2', target: '.content', history: true, location: '/root2', layer: 'root', peel: true)
+            await wait()
+
+            expect('.content').toHaveText('root 2')
+            expect(up.layer.count).toBe(1)
+            expect(locations).toEqual ['/overlay1', '/root2']
+
+          it 'does create a history entry for the peeled layer if the fragment update does not update history', ->
+            up.history.config.enabled = true
+            up.history.replace('/root1')
+            locations = []
+            up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
+
+            fixture('.content', text: 'root 1')
+
+            up.layer.open(location: '/overlay1', history: true)
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+            expect(locations).toEqual ['/overlay1']
+
+            up.render(content: 'root 2', target: '.content', history: false, layer: 'root', peel: true)
+            await wait()
+
+            expect('.content').toHaveText('root 2')
+            expect(up.layer.count).toBe(1)
+            expect(locations).toEqual ['/overlay1', '/root1']
 
         describe 'stacking a new overlay', ->
 
@@ -2846,6 +2903,41 @@ describe 'up.fragment', ->
             expect(up.layer.count).toBe(2)
             expect(up.layer.current.mode).toEqual('drawer')
             expect(up.layer.current).toHaveText('new text')
+
+          it 'does not push a history entry between that of the old and new overlays', ->
+            up.history.config.enabled = true
+            locations = []
+            up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
+
+            up.layer.open(location: '/overlay1', history: true)
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+            expect(locations).toEqual ['/overlay1']
+
+            up.render(content: 'overlay 2', target: '.content', history: true, location: '/overlay2', layer: 'swap')
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+            expect(locations).toEqual ['/overlay1', '/overlay2']
+
+          it "does restore the base layer's history entry if the new overlay has no history", ->
+            up.history.config.enabled = true
+            up.history.replace('/base-layer')
+            locations = []
+            up.on('up:location:changed', ({ location }) -> locations.push(up.util.normalizeURL(location)))
+
+            up.layer.open(location: '/overlay1', history: true)
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+            expect(locations).toEqual ['/overlay1']
+
+            up.render(content: 'overlay 2', target: '.content', history: false, layer: 'swap')
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+            expect(locations).toEqual ['/overlay1', '/base-layer']
 
         describe 'with { layer: "shatter" }', ->
 

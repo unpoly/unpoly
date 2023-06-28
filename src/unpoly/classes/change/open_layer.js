@@ -64,13 +64,19 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       throw new up.Aborted('Open event was prevented')
     }
 
-    // Make sure that the baseLayer layer doesn't already have a child layer.
-    // Note that this cannot be prevented with { peel: false }!
-    // We don't wait for the peeling to finish.
-    this.baseLayer.peel()
-
-    // Change the stack sync. Don't wait for peeling to finish.
     this.layer = this.buildLayer()
+
+    // (1) Make sure that the baseLayer layer doesn't already have a child layer.
+    //     This cannot be prevented with { peel: false }, as the layer stack must be a sequence,
+    //     not a tree.
+    //
+    // (2) Only restore the base layer's history if the new overlay does not add one of its own.
+    //     Otherwise we would add an intermediate history entries when swapping overlays
+    //     with { layer: 'swap' } (issue #397).
+    this.baseLayer.peel({ history: !this.layer.history })
+
+    // Don't wait for peeling to finish. Change the stack sync so there is no state
+    // when the new overlay is scheduled to be pushed, but not yet in the stack.
     up.layer.stack.push(this.layer)
 
     this.layer.createElements(this.content)
@@ -165,7 +171,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     this.layer.parent.saveHistory()
 
-    // For the initial fragment insertion we always update history, even if the layer
+    // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
     // layer always has a #location.
     this.layer.updateHistory(this.options)
