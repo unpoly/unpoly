@@ -135,7 +135,7 @@ up.layer.open({ acceptLocation: "/users/* /users/456" })
 
 Sometimes it's useful to capture the value of the wildcard that was matched.
 For example, when closing an overlay [once a location is reached](/closing-overlays#closing-when-a-location-is-reached),
-you can use a part of the URL as the overlay's [result value](closing-overlays#overlay-result-values).
+you can use a part of the URL as the overlay's [result value](/closing-overlays#overlay-result-values).
 
 To define a captured segment, prefix it with a `:` like this:
 
@@ -146,7 +146,7 @@ To define a captured segment, prefix it with a `:` like this:
 ### Example
 
 The example below will keep an overlay until a user's detail page is reached (like `/users/foo`).
-Then the user name from the URL (`foo`) becomes the overlay's [result value](closing-overlays#overlay-result-values) as `{ name: 'foo' }`:
+Then the user name from the URL (`foo`) becomes the overlay's [result value](/closing-overlays#overlay-result-values) as `{ name: 'foo' }`:
 
 ```html
 <!-- Closes layer when user visits any URL beginning with "/users/" and captures the suffix as { name } -->
@@ -159,7 +159,7 @@ Then the user name from the URL (`foo`) becomes the overlay's [result value](clo
 ```
 
 We can use the same pattern from JavaScript. Here we're using the `up.layer.ask()` function which opens an overlay
-and returns a promise for its [result value](closing-overlays#overlay-result-values):
+and returns a promise for its [result value](/closing-overlays#overlay-result-values):
 
 ```js
 var { name } = await up.layer.ask({ acceptLocation: '/users/:name' });
