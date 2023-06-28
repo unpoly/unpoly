@@ -75,6 +75,8 @@ up.element = (function() {
   */
   function isInSubtree(root, selectorOrElement) {
     const element = getOne(selectorOrElement)
+    // We cannot use `root.contains(element)` as <form> elements with an input named "contains"
+    // would define `root.contains` to return that input (GH#507).
     return Node.prototype.contains.call(root, element)
   }
 
