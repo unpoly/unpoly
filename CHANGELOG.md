@@ -22,7 +22,7 @@ This is a bugfix release with many contributions from the community.
 - When layers are closed during a fragment update, Unpoly no longer adds a history entry for the revealed layer. *By @triskweline.*
 - Animations that fly in an element from the screen edge (`move-from-top`, `move-from-left`, etc.) no longer leave a `transform` style on the animated element. *By @triskweline.*
 - New experimental option `{ history: false }` for all functions that close layers. This prevents Unpoly from restoring history from the revealed parent layer. *By @triskweline.*
-- To help with contributions to Unpoly, development dependencies were upgraded to Jasmine 5, TypeScript 5, and Node.js 20. *By @triskweline.*
+- To help with future contributions to Unpoly, development dependencies were upgraded to Jasmine 5, TypeScript 5, and Node.js 20. *By @triskweline.*
 
 
 3.2.0
