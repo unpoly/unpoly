@@ -342,9 +342,9 @@ describe 'up.util', ->
       it 'flattens return values that are NodeLists', ->
         fun = (selector) -> document.querySelectorAll(selector)
 
-        foo1 = $fixture('.foo-element')[0]
-        foo2 = $fixture('.foo-element')[0]
-        bar = $fixture('.bar-element')[0]
+        foo1 = fixture('.foo-element')
+        foo2 = fixture('.foo-element')
+        bar = fixture('.bar-element')
 
         result = up.util.flatMap(['.foo-element', '.bar-element'], fun)
 
@@ -1749,8 +1749,7 @@ describe 'up.util', ->
       describe 'with element argument', ->
 
         it 'serializes the tag name with id, up-iid, name and class attributes, but ignores other attributes', ->
-          $element = $('<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value">')
-          element = $element.get(0)
+          element = e.createFromHTML('<table id="id-value" up-id="up-id-value" name="name-value" class="class-value" title="title-value"></table>')
           formatted = up.util.sprintf('before %o after', element)
           expect(formatted).toEqual('before <table id="id-value" up-id="up-id-value" name="name-value" class="class-value"> after')
 
