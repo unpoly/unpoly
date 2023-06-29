@@ -295,7 +295,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   registerEventCloser(eventTypes, closeFn) {
-    if (!eventTypes) { return; }
+    if (!eventTypes) { return }
     return this.on(eventTypes, event => {
       event.preventDefault()
       closeFn.call(this, event, { response: event.response })

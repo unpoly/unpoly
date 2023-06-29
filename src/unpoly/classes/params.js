@@ -517,7 +517,7 @@ up.Params = class Params {
   @experimental
   */
   addField(field) {
-    field = e.get(field); // unwrap jQuery
+    field = e.get(field) // unwrap jQuery
 
     // Input fields are excluded from form submissions if they have no [name]
     // or when they are [disabled].

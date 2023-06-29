@@ -51,7 +51,7 @@ up.CompilerPass = class CompilerPass {
 
   runCompiler(compiler) {
     const matches = this.selectOnce(compiler)
-    if (!matches.length) { return; }
+    if (!matches.length) { return }
 
     if (!compiler.isDefault) {
       up.puts('up.hello()', 'Compiling %d× "%s" on %s', matches.length, compiler.selector, this.layer)

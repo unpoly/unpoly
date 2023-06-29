@@ -817,7 +817,7 @@ up.util = (function() {
   copy.key = 'up.util.copy'
 
   // Implement up.util.copy protocol for Date
-  Date.prototype[copy.key] = function() { return new Date(+this); }
+  Date.prototype[copy.key] = function() { return new Date(+this) }
 
   /*-
   Creates a new object by merging together the properties from the given objects.
@@ -1012,7 +1012,7 @@ up.util = (function() {
   @stable
   */
   function uniq(array) {
-    if (array.length < 2) { return array; }
+    if (array.length < 2) { return array }
     return Array.from(new Set(array))
   }
 
@@ -1028,7 +1028,7 @@ up.util = (function() {
   @experimental
   */
   function uniqBy(array, mapper) {
-    if (array.length < 2) { return array; }
+    if (array.length < 2) { return array }
     mapper = iteratee(mapper)
     const seenElements = new Set()
     return filterList(array, function(elem, index) {
@@ -1615,8 +1615,8 @@ up.util = (function() {
   @experimental
   */
   function isEqual(a, b) {
-    if (a?.valueOf) { a = a.valueOf(); } // Date, String objects, Number objects
-    if (b?.valueOf) { b = b.valueOf(); } // Date, String objects, Number objects
+    if (a?.valueOf) { a = a.valueOf() } // Date, String objects, Number objects
+    if (b?.valueOf) { b = b.valueOf() } // Date, String objects, Number objects
     if (typeof(a) !== typeof(b)) {
       return false
     } else if (isList(a) && isList(b)) {

@@ -22,7 +22,7 @@ up.URLPattern = class URLPattern {
   }
 
   buildRegexp(list, capture) {
-    if (!list.length) { return; }
+    if (!list.length) { return }
 
     list = list.map((url) => {
       // If the current browser location is multiple directories deep (e.g. /foo/bar),
@@ -42,10 +42,10 @@ up.URLPattern = class URLPattern {
     reCode = reCode.replace(/(:|\\\$)([a-z][\w-]*)/ig, (match, type, name) => {
       // It's \\$ instead of $ because we do u.escapeRegExp above
       if (type === '\\$') {
-        if (capture) { this.groups.push({ name, cast: Number }); }
+        if (capture) { this.groups.push({ name, cast: Number }) }
         return '(\\d+)'
       } else {
-        if (capture) { this.groups.push({ name, cast: String }); }
+        if (capture) { this.groups.push({ name, cast: String }) }
         return '([^/?#]+)'
       }
     })
@@ -56,14 +56,14 @@ up.URLPattern = class URLPattern {
   // This method is performance-sensitive. It's called for every link in an [up-nav]
   // after every fragment update.
   test(url, doNormalize = true) {
-    if (doNormalize) { url = this.normalizeURL(url); }
+    if (doNormalize) { url = this.normalizeURL(url) }
     // Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     // and we only need to know whether the URL matches (true / false).
     return this.positiveRegexp.test(url) && !this.isExcluded(url)
   }
 
   recognize(url, doNormalize = true) {
-    if (doNormalize) { url = this.normalizeURL(url); }
+    if (doNormalize) { url = this.normalizeURL(url) }
     let match = this.positiveRegexp.exec(url)
     if (match && !this.isExcluded(url)) {
       const resolution = {}

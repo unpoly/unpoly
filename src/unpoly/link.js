@@ -267,7 +267,7 @@ up.link = (function() {
     // Instantiate a lightweight request with basic link attributes needed for the cache-check.
     const options = parseRequestOptions(link)
     if (options.url) {
-      if (options.cache == null) { options.cache = 'auto'; }
+      if (options.cache == null) { options.cache = 'auto' }
       options.basic = true
       const request = new up.Request(options)
       return request.willCache()
@@ -470,7 +470,7 @@ up.link = (function() {
     // This is the event that may be prevented to stop the follow.
     // up.form.submit() changes this to be up:form:submit instead.
     // The guardEvent will also be assigned a { renderOptions } property in up.render()
-    if (!options.guardEvent) { options.guardEvent = up.event.build('up:link:follow', {log: 'Following link'}); }
+    if (!options.guardEvent) { options.guardEvent = up.event.build('up:link:follow', {log: 'Following link'}) }
 
     return options
   }
@@ -1416,7 +1416,7 @@ up.link = (function() {
     let childLink = e.get(area, selector)
     if (childLink) {
       const areaAttrs = e.upAttrs(childLink)
-      if (!areaAttrs['up-href']) { areaAttrs['up-href'] = childLink.getAttribute('href'); }
+      if (!areaAttrs['up-href']) { areaAttrs['up-href'] = childLink.getAttribute('href') }
       e.setMissingAttrs(area, areaAttrs)
       makeFollowable(area)
       // We could also consider making the area clickable, via makeClickable().

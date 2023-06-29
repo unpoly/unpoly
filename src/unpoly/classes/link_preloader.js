@@ -74,7 +74,7 @@ up.LinkPreloader = class LinkPreloader {
       return
     }
 
-    const onQueued = request => { return this.currentRequest = request; }
+    const onQueued = request => { return this.currentRequest = request }
     up.log.putsEvent(event)
 
     // Here we really need { onQueued }, not something like { onProcessed }

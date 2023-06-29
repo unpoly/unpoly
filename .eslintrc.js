@@ -16,6 +16,7 @@ module.exports = {
   //   "ecmaVersion": 12
   // },
   "rules": {
+    "semi": ["error", "never"],
     "no-implicit-globals": "error",
     "no-cond-assign": "off",
     "no-control-regex": "off",

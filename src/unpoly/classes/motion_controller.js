@@ -125,7 +125,7 @@ up.MotionController = class MotionController {
   }
 
   whileForwardingFinishEvent(cluster, fn) {
-    if (cluster.length < 2) { return fn(); }
+    if (cluster.length < 2) { return fn() }
     const doForward = (event) => {
       if (!event.forwarded) {
         for (let element of cluster) {

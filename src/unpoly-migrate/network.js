@@ -5,16 +5,16 @@ const u = up.util
 */
 
 up.migrate.renamedPackage('proxy', 'network')
-up.migrate.renamedEvent('up:proxy:load',     'up:request:load');    // renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:received', 'up:request:loaded');  // renamed in 0.50.0
-up.migrate.renamedEvent('up:proxy:loaded',   'up:request:loaded');  // renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:fatal',    'up:request:offline');   // renamed in 1.0.0
-up.migrate.renamedEvent('up:request:fatal',  'up:request:offline');   // renamed in 3.0.0
-up.migrate.renamedEvent('up:proxy:aborted',  'up:request:aborted'); // renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:slow',     'up:network:late');    // renamed in 1.0.0
-up.migrate.renamedEvent('up:proxy:recover',  'up:network:recover'); // renamed in 1.0.0
-up.migrate.renamedEvent('up:request:late',   'up:network:late');    // renamed in 3.0.0
-up.migrate.renamedEvent('up:request:recover', 'up:network:recover'); // renamed in 3.0.0
+up.migrate.renamedEvent('up:proxy:load',     'up:request:load')    // renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:received', 'up:request:loaded')  // renamed in 0.50.0
+up.migrate.renamedEvent('up:proxy:loaded',   'up:request:loaded')  // renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:fatal',    'up:request:offline')   // renamed in 1.0.0
+up.migrate.renamedEvent('up:request:fatal',  'up:request:offline')   // renamed in 3.0.0
+up.migrate.renamedEvent('up:proxy:aborted',  'up:request:aborted') // renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:slow',     'up:network:late')    // renamed in 1.0.0
+up.migrate.renamedEvent('up:proxy:recover',  'up:network:recover') // renamed in 1.0.0
+up.migrate.renamedEvent('up:request:late',   'up:network:late')    // renamed in 3.0.0
+up.migrate.renamedEvent('up:request:recover', 'up:network:recover') // renamed in 3.0.0
 
 // The `config.preloadDelay` configuration was defined on up.proxy in V1. It was moved to up.link in V2.
 const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')

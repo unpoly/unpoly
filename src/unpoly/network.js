@@ -517,7 +517,7 @@ up.network = (function() {
 
   function parseRequestOptions(args) {
     const options = u.extractOptions(args)
-    if (!options.url) { options.url = args[0]; }
+    if (!options.url) { options.url = args[0] }
     up.migrate.handleRequestOptions?.(options)
     return options
   }

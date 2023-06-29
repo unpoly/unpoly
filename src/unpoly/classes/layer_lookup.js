@@ -47,7 +47,7 @@ up.LayerLookup = class LayerLookup {
   }
 
   forElement(element) {
-    element = e.get(element); // unwrap jQuery
+    element = e.get(element) // unwrap jQuery
     return u.find(this.stack.reversed(), layer => layer.contains(element))
   }
 
@@ -92,7 +92,7 @@ up.LayerLookup = class LayerLookup {
       case 'descendants':
         return this.baseLayer.descendants
       case 'new':
-        return 'new'; // pass-through
+        return 'new' // pass-through
       case 'root':
         return this.stack.root
       case 'overlay':

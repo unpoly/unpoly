@@ -168,7 +168,7 @@ up.feedback = (function() {
   }
 
   function updateLinks(links, options = {}) {
-    if (!links.length) { return; }
+    if (!links.length) { return }
 
     const layer = options.layer || up.layer.get(links[0])
 

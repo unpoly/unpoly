@@ -36,7 +36,7 @@ up.Tether = class Tether {
   changeEventSubscription(fn) {
     let doScheduleSync = this.scheduleSync.bind(this)
     up[fn](window, 'resize', doScheduleSync)
-    if (this.syncOnScroll) { up[fn](this.viewport, 'scroll', doScheduleSync); }
+    if (this.syncOnScroll) { up[fn](this.viewport, 'scroll', doScheduleSync) }
   }
 
   scheduleSync() {

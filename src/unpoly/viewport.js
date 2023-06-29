@@ -87,7 +87,7 @@ up.viewport = (function() {
     revealSnap: 200,
     revealPadding: 0,
     revealTop: false,
-    revealMax() { return 0.5 * window.innerHeight; },
+    revealMax() { return 0.5 * window.innerHeight },
   }))
 
   function reset() {
@@ -175,7 +175,7 @@ up.viewport = (function() {
       up.fail('Cannot reveal a detached element')
     }
 
-    if (options.peel) { options.layer.peel(); }
+    if (options.peel) { options.layer.peel() }
 
     const motion = new up.RevealMotion(element, options)
     motion.start()
@@ -685,8 +685,7 @@ up.viewport = (function() {
       left:   'auto', // CSS default
       width:  '100%', // stretch to the <up-bounds> width we set below
       height: '100%'
-    }
-    ); // stretch to the <up-bounds> height we set below
+    }) // stretch to the <up-bounds> height we set below
 
     // Wrap the ghost in another container so its margin can expand
     // freely. If we would position the element directly (old implementation),

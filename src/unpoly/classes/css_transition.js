@@ -66,22 +66,22 @@ up.CSSTransition = class CSSTransition {
   onTransitionEnd(event) {
     // Check if the transitionend event was caused by our own transition,
     // and not by some other transition that happens to affect this element.
-    if (event.target !== this.element) { return; }
+    if (event.target !== this.element) { return }
 
     // Check if we are receiving a late transitionEnd event
     // from a previous CSS transition.
     const elapsed = new Date() - this.startTime
-    if (elapsed <= (0.25 * this.duration)) { return; }
+    if (elapsed <= (0.25 * this.duration)) { return }
 
     const completedPropertyKebab = event.propertyName
-    if (!u.contains(this.lastFrameKeysKebab, completedPropertyKebab)) { return; }
+    if (!u.contains(this.lastFrameKeysKebab, completedPropertyKebab)) { return }
 
     this.finish()
   }
 
   finish() {
     // Make sure that any queued events won't finish multiple times.
-    if (this.finished) { return; }
+    if (this.finished) { return }
     this.finished = true
 
     this.stopFallbackTimer()

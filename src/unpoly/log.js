@@ -99,7 +99,7 @@ up.log = (function() {
   }
 
   function printBanner() {
-    if (!config.banner) { return; }
+    if (!config.banner) { return }
 
     // The ASCII art looks broken in code since we need to escape backslashes
     const logo =

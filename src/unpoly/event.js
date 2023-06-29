@@ -336,7 +336,7 @@ The parsed data will be passed to your event handler as a third argument:
     const type = args[0] || props.type || up.fail('Expected event type to be passed as string argument or { type } property')
 
     const event = document.createEvent('Event')
-    event.initEvent(type, true, true); // name, bubbles, cancelable
+    event.initEvent(type, true, true) // name, bubbles, cancelable
     Object.assign(event, u.omit(props, ['type', 'target']))
 
     return event
@@ -475,7 +475,7 @@ The parsed data will be passed to your event handler as a third argument:
   @stable
   */
   function executeEmitAttr(event, element) {
-    if (!isUnmodified(event)) { return; }
+    if (!isUnmodified(event)) { return }
     const eventType = e.attr(element, 'up-emit')
     const eventProps = e.jsonAttr(element, 'up-emit-props')
     const forkedEvent = fork(event, eventType)
