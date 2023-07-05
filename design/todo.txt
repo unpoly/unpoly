@@ -15,8 +15,7 @@ Priority
 - When rendering local content we should not set [up-source=true]
 - Test that system compilers always run before user compilers
 - Also render hungry elements when closing or opening overlays
-- When going through form group solutions, rederive target before appending :has(...)
-  -
+- Publish up.fragment.contains()
 
 
 
