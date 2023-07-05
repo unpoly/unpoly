@@ -86,6 +86,7 @@ namespace :release do
     puts "Before continuing, make sure the following tasks are done:"
     puts
     puts "- Bump the version in package.json"
+    puts "- Run `npm install` to update version in package-lock.json"
     puts "- Update CHANGELOG.md"
     puts "- Commit and push changes"
     puts "- Make sure you're logged into npm"
