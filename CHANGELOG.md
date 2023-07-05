@@ -8,6 +8,16 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.2.2
+-----
+
+- Fix a bug where rendering on the root layer while a focused overlay is closing would crash with an error like this:
+
+  ```text
+  up.Error: Must pass an up.Layer as { layer } option, but got undefined
+  ```
+
+
 3.2.1
 -----
 
