@@ -1619,15 +1619,19 @@ up.fragment = (function() {
   }
 
   /*-
-  Returns whether the given `element` or one of its descendants match the given `selector`.
+  Returns whether the given `root` matches or contains the given selector or element.
 
   @param {Element} element
   @param {string} selector
   @function up.fragment.contains
   @internal
   */
-  function contains(element, selector) {
-    return getSubtree(element, selector).length > 0
+  function contains(root, selectorOrElement) {
+    if (u.isElement(selectorOrElement)) {
+      return e.contains(root, selectorOrElement) && up.layer.get(root).contains(selectorOrElement)
+    } else {
+      return getSubtree(root, selectorOrElement).length > 0
+    }
   }
 
   /*-

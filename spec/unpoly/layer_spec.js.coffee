@@ -744,6 +744,33 @@ describe 'up.layer', ->
             next ->
               expect(baseLayerSpy).toHaveBeenCalledWith(rootLayer)
 
+          it 'does not crash when there is focus in the overlay, animations are enabled and we reload in the background (bugfix)', ->
+            up.motion.config.enabled = true
+            up.layer.config.modal.closeAnimation = 'fade-out'
+            up.layer.config.modal.closeDuration = 200
+
+            fixture('.target', text: 'old target text', 'up-source': '/target-source')
+
+            overlay = await up.layer.open({ onAccepted: -> up.reload('.target') })
+
+            button = overlay.affix('button', { class: 'button', text: 'button label' })
+            button.focus()
+            expect(button).toBeFocused()
+
+            overlay.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/target-source')
+
+            await wait()
+
+            jasmine.respondWithSelector('.target', text: 'new target text')
+            await wait()
+
+            expect('.target').toHaveText('new target text')
+
+
         describe '{ onDismissed }', ->
 
           it 'runs the given callback when they layer is dimissed', asyncSpec (next) ->

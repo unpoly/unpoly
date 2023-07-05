@@ -70,10 +70,10 @@ up.element = (function() {
   Returns whether the given element is either the given root element
   or its descendants.
 
-  @function isInSubtree
+  @function contains
   @internal
   */
-  function isInSubtree(root, selectorOrElement) {
+  function contains(root, selectorOrElement) {
     const element = getOne(selectorOrElement)
     // We cannot use `root.contains(element)` as <form> elements with an input named "contains"
     // would define `root.contains` to return that input (GH#507).
@@ -1296,7 +1296,7 @@ up.element = (function() {
 
   return {
     subtree, // practical
-    isInSubtree,
+    contains,
     closestAttr,
     ancestor, // not practical. we use it in up.feedback
     around,

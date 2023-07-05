@@ -887,7 +887,7 @@ up.viewport = (function() {
 
   function focusedElementWithin(scopeElement) {
     const focusedElement = document.activeElement
-    if (e.isInSubtree(scopeElement, focusedElement)) {
+    if (up.fragment.contains(scopeElement, focusedElement)) {
       return focusedElement
     }
   }

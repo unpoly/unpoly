@@ -6,6 +6,33 @@ describe 'up.viewport', ->
 
   describe 'JavaScript functions', ->
 
+    describe 'up.viewport.focusedElementWithin()', ->
+
+      it 'returns the focused element if it is contained by the given root', ->
+        root = fixture('.root')
+        button = e.affix(root, 'button')
+        button.focus()
+
+        expect(up.viewport.focusedElementWithin(root)).toBe(button)
+
+      it 'returns undefined if the focused element is not contained by the given root', ->
+        root = fixture('.root')
+        button = fixture('button')
+        button.focus()
+
+        expect(up.viewport.focusedElementWithin(root)).toBeMissing()
+
+      it 'returns undefined if no element is focused', ->
+        root = fixture('.root')
+        expect(up.viewport.focusedElementWithin(root)).toBeMissing()
+
+      it 'returns undefined if the given root is the <body>, but the focused element is an overlay', ->
+        overlay = await up.layer.open()
+        button = overlay.affix('button')
+        button.focus()
+
+        expect(up.viewport.focusedElementWithin(document.body)).toBeMissing()
+
     describe 'up.reveal()', ->
 
       beforeEach ->
