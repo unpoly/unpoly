@@ -957,7 +957,7 @@ up.viewport = (function() {
     tryFocus,
     newStateCache,
     focusedElementWithin,
-    copyCursorProps
+    copyCursorProps,
   }
 })()
 
