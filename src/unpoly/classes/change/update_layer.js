@@ -1,5 +1,4 @@
 const u = up.util
-const e = up.element
 
 up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
@@ -32,7 +31,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   bestPreflightSelector() {
     this.matchPreflight()
 
-    return u.map(this.steps, 'selector').join(', ') || ':none'
+    return up.fragment.targetForSteps(this.steps)
   }
 
   getFragments() {
@@ -44,8 +43,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   execute(responseDoc, onApplicable) {
     this.responseDoc = responseDoc
 
-    // For each step, find a step.alternative that matches in both the current page
-    // and the response document.
+    // (1) For each step, find a `step.newElement` that matches both in this.layer
+    //     and in the response document.
+    // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
+    //     do it later. This way we will throw up.CannotMatch early, and our caller
+    //     up.Change.FromContent knows that this plan is not applicable. It can then
+    //     try a fallback plan.
     this.matchPostflight()
 
     onApplicable()
@@ -107,10 +110,9 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     this.handleLayerChangeRequests()
 
     let renderResult = new up.Change.UpdateSteps({
-      ...this.options,
       steps: this.steps,
-      responseDoc,
-    }).execute()
+      noneOptions: this.options,
+    }).execute(responseDoc)
 
 
     // Don't wait for animations to finish.
@@ -118,7 +120,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   matchPreflight() {
-    this.filterSteps((step) => {
+    this.steps = this.steps.filter((step) => {
       const finder = new up.FragmentFinder(step)
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by @parseSteps().
@@ -138,51 +140,16 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   matchPostflight() {
     this.matchPreflight()
 
-    // Only when we have a match in the required selectors, we
-    // append the optional steps for [up-hungry] elements.
-    if (this.options.useHungry) {
-      this.addHungrySteps()
-    }
-
-    this.filterSteps((step) => {
-      // The responseDoc has no layers.
-      step.newElement = this.responseDoc.select(step.selector)
-
-      if (step.newElement) {
-        return true
-      } else if (!step.maybe) {
-        // An error message will be chosen by up.Change.FromContent
-        throw new up.CannotMatch()
-      }
-    })
-
-    this.resolveOldNesting()
+    this.steps = this.responseDoc.selectSteps(this.steps)
   }
 
-  filterSteps(condition) {
-    this.steps = u.filter(this.steps, condition)
-  }
-
-  addHungrySteps() {
+  getHungrySteps() {
     // Find all [up-hungry] elements matching our layer and fragments.
-    const hungrySolutions = up.radio.hungrySolutions({
+    return up.radio.hungrySteps({
       layer: this.layer,
       history: this.hasHistory(),
       origin: this.options.origin
     })
-
-    for (let { element: oldElement, target: selector } of hungrySolutions) {
-      const transition = e.booleanOrStringAttr(oldElement, 'transition')
-
-      const step = {
-        selector,
-        oldElement,
-        transition,
-        placement: 'swap',
-        maybe: true
-      }
-      this.steps.push(step)
-    }
   }
 
   containedByRivalStep(steps, candidateStep) {

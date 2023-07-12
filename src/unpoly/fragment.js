@@ -2517,6 +2517,10 @@ up.fragment = (function() {
     return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
 
+  function targetForSteps(steps) {
+    return u.map(steps, 'selector').join(', ') || ':none'
+  }
+
   /*-
   [Aborts requests](/aborting-requests) targeting a fragment or layer.
 
@@ -2772,6 +2776,7 @@ up.fragment = (function() {
     splitTarget,
     parseTargetSteps,
     isAlive,
+    targetForSteps,
     // timer: scheduleTimer
   }
 })()

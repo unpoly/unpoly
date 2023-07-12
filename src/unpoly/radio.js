@@ -76,7 +76,7 @@ up.radio = (function() {
     config.reset()
   }
 
-  function hungrySolutions({ layer, history, origin }) {
+  function hungrySteps({ layer, history, origin }) {
     let hungrySelector = config.hungrySelectors.join(', ')
     let hungries = up.fragment.all(hungrySelector, { layer: 'any' })
 
@@ -94,11 +94,23 @@ up.radio = (function() {
       }
 
       let ifLayer = e.attr(element, 'up-if-layer')
-      if (ifLayer !== 'any' && layer !== up.layer.get(element)) {
+      let elementLayer = up.layer.get(element)
+      if (ifLayer !== 'any' && layer !== elementLayer) {
         return
       }
 
-      return { target, element }
+      let transition = e.booleanOrStringAttr(element, 'up-transition')
+
+      return {
+        selector: target,    // The selector for a single step is { selector }
+        oldElement: element, // The match on the current page
+        layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
+        origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
+        transition,          // The transition parsed from the hungry element's [up-transition] attribute
+        placement: 'swap',   // Hungry elements are always swapped, never appended
+        useKeep: true,       // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
+        maybe: true,         // Don't fail if we cannot match { newElement ] later.
+      }
     })
   }
 
@@ -355,7 +367,7 @@ up.radio = (function() {
 
   return {
     config,
-    hungrySolutions,
+    hungrySteps,
     startPolling,
     stopPolling,
     pollIssue,
