@@ -2517,6 +2517,24 @@ up.fragment = (function() {
     return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
   }
 
+  function targetForSteps(steps) {
+    return u.map(steps, 'selector').join(', ') || ':none'
+  }
+
+  function isContainedByRivalStep(steps, candidateStep) {
+    return u.some(steps, function(rivalStep) {
+      return (rivalStep !== candidateStep) &&
+        ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
+        rivalStep.oldElement.contains(candidateStep.oldElement)
+    })
+  }
+
+  function compressNestedSteps(steps) {
+    let compressed = u.uniqBy(steps, 'oldElement')
+    compressed = u.reject(compressed, step => isContainedByRivalStep(compressed, step))
+    return compressed
+  }
+
   /*-
   [Aborts requests](/aborting-requests) targeting a fragment or layer.
 
@@ -2772,6 +2790,8 @@ up.fragment = (function() {
     splitTarget,
     parseTargetSteps,
     isAlive,
+    targetForSteps,
+    compressNestedSteps,
     // timer: scheduleTimer
   }
 })()

@@ -92,6 +92,20 @@ up.ResponseDoc = class ResponseDoc {
     return finder.find()
   }
 
+  selectSteps(steps) {
+    return steps.filter((step) => {
+      // The responseDoc has no layers.
+      step.newElement ||= this.select(step.selector)
+
+      if (step.newElement) {
+        return true
+      } else if (!step.maybe) {
+        // An error message will be chosen by up.Change.FromContent
+        throw new up.CannotMatch()
+      }
+    })
+  }
+
   finalizeElement(element) {
     // Rewrite per-request CSP nonces to match that of the current page.
     up.NonceableCallback.adoptNonces(element, this.cspNonces)

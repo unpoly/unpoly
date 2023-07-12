@@ -63,8 +63,8 @@ up.Change.Addition = class Addition extends up.Change {
     }
   }
 
-  abortWhenLayerClosed() {
-    if (this.layer.isClosed()) {
+  abortWhenLayerClosed(layer = this.layer) {
+    if (layer.isClosed()) {
       // Wind up the call stack. Whoever has closed the layer will also clean up
       // elements, handlers, etc.
       throw new up.Aborted('Layer was closed')

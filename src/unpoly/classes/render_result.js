@@ -86,7 +86,7 @@ up.RenderResult = class RenderResult extends up.Record {
       'fragments',
       'layer',
       'target',
-      'options',
+      'options', // set by up.Change.FromContent
       'finished',
     ]
   }
@@ -130,6 +130,13 @@ up.RenderResult = class RenderResult extends up.Record {
   */
   get fragment() {
     return this.fragments[0]
+  }
+
+  static buildNone() {
+    return new this({
+      target: ':none',
+      finished: Promise.resolve(),
+    })
   }
 
 }

@@ -5,17 +5,25 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
   constructor(options) {
     super(options)
-    this.target = options.target
-    this.layer = options.layer
-    this.useKeep = options.useKeep
+
+    this.noneOptions = options.noneOptions || {}
     this.steps = u.copy(options.steps) // we mutate it below
-    this.responseDoc = options.responseDoc
   }
 
-  execute() {
+  execute(responseDoc) {
+    this.responseDoc = responseDoc
+
+    // Fill in `step.newElement` unless it was already done by our caller.
+    // This may throw up.CannotMatch for non-optional steps that don't match in `responseDoc`.
+    this.steps = responseDoc.selectSteps(this.steps)
+
+    if (!this.steps.length) {
+      return this.executeNone()
+    }
+
     this.renderResult = new up.RenderResult({
-      layer: this.layer,
-      target: this.target,
+      layer: this.steps[0]?.layer,
+      target: up.fragment.targetForSteps(this.steps),
     })
 
     // We swap fragments in reverse order for two reasons:
@@ -28,25 +36,26 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this.steps.reverse()
 
     const motionEndPromises = this.steps.map(step => this.executeStep(step))
-
     this.renderResult.finished = this.finish(motionEndPromises)
-
-    // When rendering nothing we still want to proess { focus, scroll } options.
-    if (!this.steps.length) {
-      this.handleFocus(null, this.options)
-      this.handleScroll(null, this.options)
-    }
 
     return this.renderResult
   }
 
+  executeNone() {
+    // When rendering nothing we still want to process { focus, scroll } options.
+    this.handleFocus(null, this.noneOptions)
+    this.handleScroll(null, this.noneOptions)
+    return up.RenderResult.buildNone()
+  }
 
   async finish(motionEndPromises) {
     await Promise.all(motionEndPromises)
 
     // If our layer was closed while animations are running, don't finish
     // and reject with an up.AbortError.
-    this.abortWhenLayerClosed()
+    for (let step of this.steps) {
+      this.abortWhenLayerClosed(step.layer)
+    }
 
     // Resolve second promise for callers that need to know when animations are done.
     return this.renderResult
@@ -111,7 +120,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               // with a clone in step.oldElement. However, since that clone was never compiled,
               // it does not have destructors registered. Hence we will not clean the clone
               // unnecessarily.
-              up.syntax.clean(step.oldElement, {layer: this.layer})
+              up.syntax.clean(step.oldElement, { layer: step.layer })
             },
             afterDetach() {
               up.element.cleanJQuery()
@@ -195,7 +204,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // @param {Element} options.newElement
   // @param {boolean} options.descendantsOnly
   findKeepPlan(options) {
-    if (!this.useKeep) { return }
+    if (!options.useKeep) { return }
 
     const { oldElement, newElement } = options
 
@@ -205,7 +214,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
 
     let partner
     let partnerSelector = up.fragment.toTarget(oldElement)
-    const lookupOpts = { layer: this.layer }
+    const lookupOpts = { layer: options.layer }
 
     if (options.descendantsOnly) {
       // Since newElement is from a freshly parsed HTML document, we could use
@@ -235,7 +244,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // Returns an array of keepPlans.
   preserveKeepables(step) {
     const keepPlans = []
-    if (this.useKeep) {
+    if (step.useKeep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
         let keepPlan = this.findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {

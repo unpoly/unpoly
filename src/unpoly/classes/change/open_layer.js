@@ -36,11 +36,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     }
   }
 
-  // bestPreflightSelector() {
-  //   // We assume that the server will respond with our target.
-  //   return this.target
-  // }
-
   execute(responseDoc, onApplicable) {
     if (this.target === ':none') {
       this.content = document.createElement('up-none')
@@ -111,13 +106,13 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // Otherwise a popup would start to open and only reveal itself after the animation.
     this.handleScroll()
 
-    let renderResult = new up.RenderResult({
+    this.renderResult = new up.RenderResult({
       layer: this.layer,
       fragments: [this.content],
       target: this.target,
     })
 
-    renderResult.finished = this.finish(renderResult)
+    this.renderResult.finished = this.finish()
 
     // Emit up:layer:opened to indicate that the layer was opened successfully.
     // This is a good time for listeners to manipulate the overlay optics.
@@ -133,10 +128,10 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     //     layer = await up.layer.open(...)
     //
     // Don't wait to animations to finish:
-    return renderResult
+    return this.renderResult
   }
 
-  async finish(renderResult) {
+  async finish() {
     await this.layer.startOpenAnimation()
 
     // Don't change focus if the layer has been closed while the animation was running.
@@ -146,8 +141,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // However, don't change focus if the layer has been closed while the animation was running.
     this.handleFocus()
 
-    // Resolve second promise for callers that need to know when animations are done.
-    return renderResult
+    // Resolve the RenderResult#finished promise for callers that need to know when animations are done.
+    return this.renderResult
   }
 
   buildLayer() {
@@ -222,5 +217,13 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       log: `Opened new ${this.layer}`
     }
     )
+  }
+
+  getHungrySteps() {
+    return up.radio.hungrySteps({
+      layer: null, // don't even try to find elements on the new layer
+      history: (this.layer && this.layer.isHistoryVisible()), // we may have aborted before this.layer was built
+      origin: this.options.origin,
+    })
   }
 }

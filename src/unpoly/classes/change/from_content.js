@@ -78,13 +78,45 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   executePlan(matchedPlan) {
-    let result = matchedPlan.execute(
-      this.getResponseDoc(),
-      this.onPlanApplicable.bind(this, matchedPlan)
-    )
+    let result
 
-    result.options = this.options
-    return result
+    try {
+      result = matchedPlan.execute(
+        this.getResponseDoc(),
+        this.onPlanApplicable.bind(this, matchedPlan)
+      )
+
+      result.options = this.options
+
+      this.executeHungry(matchedPlan, result)
+
+      return result
+    } catch (error) {
+      if (this.isApplicablePlanError(error)) {
+        this.executeHungry(matchedPlan, result)
+      }
+
+      throw error
+    }
+  }
+
+  isApplicablePlanError(error) {
+    return !(error instanceof up.CannotMatch)
+  }
+
+  executeHungry(plan, originalResult) {
+    if (!this.options.useHungry) return
+
+    let hungrySteps = plan.getHungrySteps()
+
+    // up.Change.UpdateSteps will match step.newElement in responseDoc.
+    // We do not need to worry about nested changes as this.content was already
+    // removed from responseDoc.
+    let hungryResult = new up.Change.UpdateSteps({ steps: hungrySteps }).execute(this.getResponseDoc())
+
+    if (originalResult) { // If we're executing after an AbortError, the originalResult may not have been set
+      originalResult.fragments.push(...hungryResult.fragments)
+    }
   }
 
   onPlanApplicable(plan) {
@@ -176,8 +208,8 @@ up.Change.FromContent = class FromContent extends up.Change {
         // but would not stop an u.each() or Array#forEach().
         return fn(plan)
       } catch (error) {
-        // Re-throw any unexpected type of error
-        if (!(error instanceof up.CannotMatch)) {
+        // Re-throw any unexpected type of error, but ignore up.CannotMatch to try the next plan.
+        if (this.isApplicablePlanError(error)) {
           throw error
         }
       }
