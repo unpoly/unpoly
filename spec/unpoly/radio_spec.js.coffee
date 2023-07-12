@@ -540,6 +540,52 @@ describe 'up.radio', ->
             expect(currentLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
             expect(metaLayerSpy.calls.argsFor(1)[0]).toBe(up.layer.root)
 
+        it 'updates that [up-hungry] element when opening a new layer', ->
+          up.layer.config.openDuration = 0
+          up.layer.config.closeDuration = 0
+
+          fixture('.outside', text: 'old outside', 'up-hungry': true,  'up-if-layer': 'any')
+
+          up.layer.open target: '.inside', document: """
+            <div class="outside">
+              new outside
+            </div>
+            <div class='inside'>
+              new inside
+            </div>
+            """
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          expect('.inside').toHaveText('new inside')
+          expect('.outside').toHaveText('new outside')
+
+        it 'updates that [up-hungry] element when a server response causes an overlay to close', ->
+          fixture('.root-element', text: 'old root', 'up-hungry': 'true', 'up-if-layer': 'any')
+
+          await up.layer.open fragment: """
+            <div class="overlay-element">
+              old overlay
+            </div>
+          """
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          navigatePromise = up.navigate(url: '/other-page')
+
+          await wait()
+
+          jasmine.respondWith responseHeaders: { 'X-Up-Accept-Layer': 'null'}, responseText: """
+            <div class="overlay-element">new overlay</div>
+            <div class="root-element">new root</div>
+          """
+
+          await expectAsync(navigatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+
+          expect(up.layer.isRoot()).toBe(true)
+
+          expect('.root-element').toHaveText('new root')
+
       describe 'restriction by history', ->
 
         it 'only updates a hungry fragment when updating history with [up-if-history]', asyncSpec (next) ->
