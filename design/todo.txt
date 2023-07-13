@@ -2,9 +2,6 @@ Remaining V3 tasks
 ==================
 
 - Do a podcast
-- Migrate and rebase SF branch
-  - Save diff and reset hard on master
-  - Notify ED
 
 
 Priority
@@ -22,6 +19,8 @@ Priority
 Backlog
 =======
 
+- Concepts [up-feedback] and [up-background] are overlapping
+  - Should feedback: false imply background: true ?
 - Message when unknown target: Revalidating cached response for target "undefined"
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
   - This is really confusing with [up-disable]
@@ -29,7 +28,9 @@ Backlog
 - up:feedback:start / up:feedback:stop
   - On the layer, not an individual element
   - Needs to have reference to origin and targetElements
+    - Must be the same element in :start / :stop, even if the DOM has changed in between
   => With .up-validating we have different points where feedback starts and ends.
+    - This class does not exist?
 - Consider parsing scroll-margin-top, scroll-margin-bottom for revealing
 - Allow [up-emit] for buttons
 - Do we want a preventable up:fragment:hungry event?
@@ -37,9 +38,6 @@ Backlog
   - Maybe even :reused since there is no :loaded for cached requests
 - Experiment with property mangling vs. public API
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
-- This always passes: expect(window).not.toHaveUnhandledRejections()
-  - All rejections seem to be delayed until the test ends
-  - Maybe a Jasmine issue?
 - Can we get rid of the afterMeasure() callback?
 - Support { scroll: 'keep' }
   - Similiar to { focus: 'keep' }
