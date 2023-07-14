@@ -1241,7 +1241,7 @@ describe 'up.fragment', ->
 
         describe 'when the server sends an X-Up-Events header', ->
 
-          it 'emits these events', asyncSpec (next) ->
+          it 'emits these events', ->
             fixture('.element')
 
             up.render(target: '.element', url: '/path')
@@ -1251,14 +1251,36 @@ describe 'up.fragment', ->
 
             spyOn(up, 'emit').and.callThrough()
 
-            next =>
-              @respondWith
-                responseHeaders: { 'X-Up-Events': JSON.stringify([event1Plan, event2Plan]) }
-                responseText: '<div class="element"></div>'
+            await wait()
 
-            next ->
-              expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
-              expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
+            jasmine.respondWith
+              responseHeaders: { 'X-Up-Events': JSON.stringify([event1Plan, event2Plan]) }
+              responseText: '<div class="element"></div>'
+
+            await wait()
+
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
+
+          it 'emits these events for a failure response', ->
+            fixture('.element')
+
+            renderPromise = up.render(target: '.element', failTarget: '.element', url: '/path')
+
+            eventPlan = { type: 'foo', prop: 'bar '}
+
+            spyOn(up, 'emit').and.callThrough()
+
+            await wait()
+
+            jasmine.respondWith
+              status: 422,
+              responseHeaders: { 'X-Up-Events': JSON.stringify([eventPlan]) }
+              responseText: '<div class="element"></div>'
+
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(eventPlan))
 
         describe 'when the server sends an X-Up-Accept-Layer header', ->
 
