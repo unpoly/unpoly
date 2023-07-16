@@ -344,7 +344,6 @@ describe 'up.radio', ->
           expect(revealArg).not.toMatchSelector('.hungry')
           expect(revealArg).toMatchSelector('.target')
 
-
       it 'does not change the X-Up-Target header for the request', asyncSpec (next) ->
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
@@ -387,7 +386,6 @@ describe 'up.radio', ->
         expect('.target').toHaveText('old target')
         expect('.fail-target').toHaveText('new fail target')
         expect('.hungry').toHaveText('new hungry')
-
 
       it 'does not update [up-hungry] elements with { useHungry: false } option', asyncSpec (next) ->
         $fixture('.hungry[up-hungry]').text('old hungry')
