@@ -8,6 +8,17 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+3.3.0
+-----
+
+Elements with an `[up-hungry]` attribute are updated whenever the server sends a matching element, even if the element isn't [targeted](/targeting-fragments) explicitly.
+
+By default hungry elements only update from responses that target their own [layer](/up.layer). Unpoly 3.0 introduced a modifying attribute `[up-if-layer="any"]` that tells the element to also update from responses from *other* layers. Unpoly 3.3.0 addresses two edge cases:
+
+- Hungry elements with `[up-if-layer="any"]` are also updated from responses that [open an overlay](/opening-overlays).
+- Hungry elements with `[up-if-layer="any"]` are also updated from responses that cause [an overlay to close](/closing-overlays).
+
+
 3.2.2
 -----
 
