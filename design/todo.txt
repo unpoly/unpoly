@@ -10,8 +10,6 @@ Priority
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
 - When rendering local content we should not set [up-source=true]
-- Test that system compilers always run before user compilers
-- Also render hungry elements when closing or opening overlays
 - Publish up.fragment.contains()
 
 
@@ -19,8 +17,12 @@ Priority
 Backlog
 =======
 
+- Test that system compilers always run before user compilers
+  => We already have macros if compilers need to use others?
 - Concepts [up-feedback] and [up-background] are overlapping
   - Should feedback: false imply background: true ?
+  - Should we generalize the feedback option?
+    - { feedback: ['classes', 'progress', 'event', 'custom'] }
 - Message when unknown target: Revalidating cached response for target "undefined"
 - Extend [up-switch] with [up-disable-for="..."] [up-enable-for="..."]
   - This is really confusing with [up-disable]
@@ -37,6 +39,8 @@ Backlog
 - Do we want a preventable up:request:reuse event?
   - Maybe even :reused since there is no :loaded for cached requests
 - Experiment with property mangling vs. public API
+  - Possibly do a unpoly.experimental-min.js ?
+  - If we could test a minified version we could publish this
 - Issue with splitting Immediate-Child-Selectors: https://makandra.slack.com/archives/C02KGPZDE/p1659097196752189
 - Can we get rid of the afterMeasure() callback?
 - Support { scroll: 'keep' }
@@ -49,11 +53,6 @@ Backlog
   - Is there any case other than [up-target], where we already have [up-fallback] ?
 - Should animations force painting?
   - I don't understand how the transitions work when we set both the first and final frame in the same JavaScript task
-- Should we send optional targets in X-Up-Target ?
-  - As :maybe?
-    - This would mean we need to parse [up-hungry] elements before the request
-  - As a separate header?
-  => I think it's :maybe and then update unpoly-rails so target? and any_target? ignore the :maybe
 - Reconciliation of <head> elements
 - Maybe auto-submit should not navigate by default
   - How to restore this?
@@ -79,6 +78,10 @@ Backlog
 - Try to have a 'hash' strategy in overlays
   - Also update doc page /focus
 - Use native `:has` where available
+  - This is actualy more code until we can drop :has() emulation entirely
+    - Currently blocked by Safari (2 years support window reached in early 2024)
+    - Currently blocked by Firefox (behind a flag)
+      - No news for Firefox 116 (to be released on August 01 2023)
 - Split JavaScript => Do this after asset reconciliation
 - input.setCustomValidity() should block submission
 - Replace symlinks in dist/ with copied files
@@ -122,10 +125,6 @@ Backlog
     - a[up-drawer]
     - a[up-modal]
     - a[up-popup]
-- Make accepting response available on up:layer:accepted
-  - This lets us write: up-on-accepted="up.render('.table', document: event.response.text)">
-  - Update demo app
-- Test that Requests hold no references to detached elements after one task
 - Can layer objects nullify their { element, tether } once closed?
   => This may cause async JS to throw, if that JS wants to go through the layer shortly after closing
   => How about we do this 10 seconds after { onFinished } or so?
