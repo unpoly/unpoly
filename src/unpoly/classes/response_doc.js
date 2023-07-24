@@ -74,10 +74,50 @@ up.ResponseDoc = class ResponseDoc {
     return up.fragment.toTarget(this.root)
   }
 
-  getTitle() {
-    // We query for 'head title' instead of 'title' so we won't match the <title>
-    // of an inline SVG image.
-    return this.root.querySelector('head title')?.textContent
+  get title() {
+    // We get it from the <head> instead of this.root.title.
+    // We want to distinguish between a parsed document that does not have a <head> or <title>
+    // and a given, but empty title.
+    return this.fromHead(this.getTitleText)
+  }
+
+  /*
+  Returns the root's `<head>`, if it has one.
+
+  Returns `undefined` if the root has no contentful `<head>`, e.g. if the root was
+  parsed from a fragment, or from a docuemnt without a `<head>` element.
+  */
+  // eslint-disable-next-line getter-return
+  get head() {
+    // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
+    // or an `Element` (which never has a `#head`).
+    let { head } = this.root
+
+    // DocumentParser also produces a document with a <head>, even if the initial HTML
+    // has no <head> element. To work around this we consider the head to be missing
+    // if it has no child nodes.
+    if (head && head.childNodes.length > 0) {
+      return head
+    }
+  }
+
+  fromHead(fn) {
+    let { head } = this
+    return head && fn(head)
+  }
+
+  get headMetas() {
+    return this.fromHead(up.head.findMetas)
+  }
+
+  get assets() {
+    return this.fromHead(up.head.findAssets)
+  }
+
+  getTitleText(head) {
+    // We must find inside the head ('head title') instead of 'title'
+    // so we won't match the <title> of an inline SVG image.
+    return head.querySelector('title')?.textContent
   }
 
   // Selects a single fragment with the given selector.
@@ -117,7 +157,9 @@ up.ResponseDoc = class ResponseDoc {
 
   static {
     // Cache since multiple plans will query this.
-    u.memoizeMethod(this.prototype, 'getTitle')
+    u.memoizeMethod(this.prototype, [
+      'head',
+    ])
   }
 
 }

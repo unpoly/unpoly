@@ -1923,8 +1923,8 @@ up.util = (function() {
 
   function memoizeMethod(object, propOrProps) {
     for (let prop of wrapList(propOrProps)) {
-      // let originalDescriptor = object.getOwnPropertyDescriptor(object)
-      let oldImpl = object[prop]
+      let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
+      let oldImpl = originalDescriptor.get || originalDescriptor.value
       object[prop] = function (...args) {
         let cache = this[`__${prop}MemoizeCache`] ||= {}
         let cacheKey = JSON.stringify(args)

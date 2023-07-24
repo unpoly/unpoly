@@ -98,6 +98,8 @@ describe 'up.history', ->
         up.history.replace('/location3')
         expect(up.history.previousLocation).toMatchURL('/location2#hash')
 
+        console.log(1)
+
       it 'returns the last previous location that is different from the current URL', ->
         initialLocation = location.href
         up.history.replace('/double-replaced-location')
@@ -123,7 +125,6 @@ describe 'up.history', ->
 
         events = []
         up.on 'up:location:changed', (event) ->
-          console.debug("!!! event.location is %o", event.location)
           events.push [event.reason, normalize(event.location)]
 
         up.navigate('.content', url: '/foo', history: true)

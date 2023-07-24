@@ -2127,9 +2127,8 @@ up.fragment = (function() {
     return (up.migrate.resolveOrigin || modernResolveOrigin)(...args)
   }
 
-
   function expandTargets(targets, options = {}) {
-    const {layer} = options
+    const { layer } = options
     if (layer !== 'new' && !(layer instanceof up.Layer)) {
       up.fail('Must pass an up.Layer as { layer } option, but got %o', layer)
     }
@@ -2143,7 +2142,16 @@ up.fragment = (function() {
       const target = targets.shift()
 
       if (target === ':main' || target === true) {
-        const mode = layer === 'new' ? options.mode : layer.mode
+        // const mode = layer === 'new' ? options.mode : layer.mode
+
+        let mode
+
+        if (layer === 'new') {
+          mode = options.mode || up.fail('Must pass a { mode } option together with { layer: "new" }')
+        } else {
+          mode = layer.mode
+        }
+
         targets.unshift(...up.layer.mainTargets(mode))
       } else if (target === ':layer') {
         // Discard this target for new layers, which don't have a first-swappable-element.

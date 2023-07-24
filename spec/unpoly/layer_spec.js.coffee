@@ -297,6 +297,35 @@ describe 'up.layer', ->
               expect(up.layer.history).toBe(true)
               expect(location.href).toMatchURL('/modal-location')
 
+          it "updates history-related <meta> and <link> elements from the response", ->
+            e.affix(document.head, 'meta[name="description"][content="old description"]')
+
+            up.layer.open(
+              location: '/modal-location'
+              history: true
+              target: '.element',
+              document: """
+                <html>
+                  <head>
+                    <link rel='canonical' href='/new-canonical'>
+                    <meta name='description' content='new description'>
+                  </head>
+                  <body>
+                    <div class='element'>
+                      overlay text
+                    </div>
+                  </body>
+                </html>
+              """
+            )
+
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            expect(up.layer.history).toBe(true)
+            expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
+            expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
+
           it 'does not emit up:layer:location:changed when the overlay opens', asyncSpec (next) ->
             changedListener = jasmine.createSpy('up:layer:location:changed listener')
             up.on('up:layer:location:changed', changedListener)

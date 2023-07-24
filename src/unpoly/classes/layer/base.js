@@ -587,6 +587,7 @@ up.Layer = class Layer extends up.Record {
   saveHistory() {
     if (this.isHistoryVisible()) {
       this.savedTitle = document.title
+      this.savedHeadMetas = up.head.findMetas()
       this.savedLocation = up.history.location
     }
   }
@@ -596,6 +597,7 @@ up.Layer = class Layer extends up.Record {
       return
     }
 
+    // We may not have a #savedLocation when we were opened from a HTML string instead of a URL.
     if (this.savedLocation) {
       // We cannot use the `this.title` setter as that does not
       // push a state if `newLocation === this.savedLocation`.
@@ -604,6 +606,10 @@ up.Layer = class Layer extends up.Record {
 
     if (this.savedTitle) {
       document.title = this.savedTitle
+    }
+
+    if (this.savedHeadMetas) {
+      up.head.updateMetas(this.savedHeadMetas)
     }
   }
 
@@ -626,10 +632,17 @@ up.Layer = class Layer extends up.Record {
   }
 
   updateHistory(options) {
+    // Set unless { location: false }
     if (u.isString(options.location)) {
       this.location = options.location
     }
 
+    // Set unless { headMetas: false }
+    if (u.isList(options.headMetas)) {
+      this.headMetas = options.headMetas
+    }
+
+    // Set unless { title: false }
     if (u.isString(options.title)) {
       this.title = options.title
     }
@@ -663,6 +676,8 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get title() {
+    // TODO: Consider deprecate / move to unpoly-migrate
+
     if (this.showsLiveHistory()) {
       // Allow Unpoly-unaware code to set the document title directly.
       // This will implicitey change the front layer's title.
@@ -673,10 +688,28 @@ up.Layer = class Layer extends up.Record {
   }
 
   set title(title) {
+    // TODO: Consider deprecate / move to unpoly-migrate
+
     this.savedTitle = title
 
     if (this.showsLiveHistory()) {
       document.title = title
+    }
+  }
+
+  get headMetas() {
+    if (this.showsLiveHistory()) {
+      return up.head.findMetas()
+    } else {
+      return this.savedHeadMetas
+    }
+  }
+
+  set headMetas(metas) {
+    this.savedHeadMetas = metas
+
+    if (this.showsLiveHistory()) {
+      up.head.updateMetas(metas)
     }
   }
 

@@ -5,50 +5,56 @@ up.Change.FromContent = class FromContent extends up.Change {
   constructor(options) {
     super(options)
 
-    // If we're rendering a fragment from a { url }, options.layer will already
-    // be an array of up.Layer objects, set by up.Change.FromURL. It looks up the
-    // layer eagerly because in case of { layer: 'origin' } (default for navigation)
-    // the { origin } element may get removed while the request was in flight.
-    // From that given array we need to remove layers that have been closed while
-    // the request was in flight.
-    //
-    // If we're rendering a framgent from local content ({ document, fragment, content }),
-    // options.layer will be a layer name like "current" and needs to be looked up.
-    this.layers = u.filter(up.layer.getAll(this.options), this.isRenderableLayer)
-
     // Only extract options required for step building, since #execute() will be called with an
     // postflightOptions argument once the response is received and has provided refined
     // options.
     this.origin = this.options.origin
     this.preview = this.options.preview
-    this.mode = this.options.mode
 
-    // When we're swapping elements in origin's layer, we can be choose a fallback
-    // replacement zone close to the origin instead of looking up a selector in the
-    // entire layer (where it might match unrelated elements).
-    if (this.origin) {
-      this.originLayer = up.layer.get(this.origin)
-    }
-  }
-
-  isRenderableLayer(layer) {
-    return (layer === 'new') || layer.isOpen()
+    // // When we're swapping elements in origin's layer, we can be choose a fallback
+    // // replacement zone close to the origin instead of looking up a selector in the
+    // // entire layer (where it might match unrelated elements).
+    // if (this.origin) {
+    //   this.originLayer = up.layer.get(this.origin)
+    // }
   }
 
   getPlans() {
     let plans = []
 
-    if (this.options.fragment) {
-      // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
-      // requires a { target }. We use a target that matches the parsed { fragment }.
-      this.options.target ||= this.getResponseDoc().rootSelector()
-    }
+    this.ensureRenderableLayers()
+    this.improveOptionsFromResponseDoc()
 
     // First seek { target } in all layers, then seek { fallback } in all layers.
     this.expandIntoPlans(plans, this.layers, this.options.target)
     this.expandIntoPlans(plans, this.layers, this.options.fallback)
 
     return plans
+  }
+
+  isRenderableLayer(layer) {
+    return (layer === 'new') || layer.isOpen()
+  }
+
+  ensureRenderableLayers() {
+    // (1) If we're rendering a fragment from a { url }, options.layer will already
+    //     be an array of up.Layer objects, set by up.Change.FromURL. It looks up the
+    //     layer eagerly because in case of { layer: 'origin' } (default for navigation)
+    //     the { origin } element may get removed while the request was in flight.
+    //     From that given array we need to remove layers that have been closed while
+    //     the request was in flight.
+    //
+    // (2) If we're rendering a framgent from local content ({ document, fragment, content }),
+    //     options.layer will be a layer name like "current" and needs to be looked up.
+    this.layers = u.filter(up.layer.getAll(this.options), this.isRenderableLayer)
+
+    if (u.isBlank(this.layers)) {
+      // At this point this.layers is an empty array. This can be caused by:
+      //
+      // - A { layer } option pointing to a non-existing layer, e.g. { layer: 'parent' } when we're on the root layer.
+      // - A detached { origin } option for which we cannot look up a layer.
+      throw new up.Error('Could not find a layer to render in. You may have passed a non-existing layer reference, or a detached element.')
+    }
   }
 
   expandIntoPlans(plans, layers, targets) {
@@ -65,7 +71,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   expandTargets(targets, layer) {
-    return up.fragment.expandTargets(targets, { layer, mode: this.mode, origin: this.origin })
+    return up.fragment.expandTargets(targets, { layer, mode: this.options.mode, origin: this.origin })
   }
 
   execute() {
@@ -124,6 +130,11 @@ up.Change.FromContent = class FromContent extends up.Change {
     if (plan !== primaryPlan) {
       up.puts('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
     }
+
+    let { assets } = this.getResponseDoc()
+    if (assets) {
+      up.head.assertAssetsOK(assets, plan.options)
+    }
   }
 
   getResponseDoc() {
@@ -148,6 +159,22 @@ up.Change.FromContent = class FromContent extends up.Change {
     }
 
     return new up.ResponseDoc(docOptions)
+  }
+
+  improveOptionsFromResponseDoc() {
+    if (this.preview) return
+
+    let responseDoc = this.getResponseDoc()
+
+    if (this.options.fragment) {
+      // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
+      // requires a { target }. We use a target that matches the parsed { fragment }.
+      this.options.target ||= responseDoc.rootSelector()
+    }
+
+    this.options.title = this.improveHistoryValue(this.options.title, responseDoc.title)
+
+    this.options.headMetas = this.improveHistoryValue(this.options.headMetas, responseDoc.headMetas)
   }
 
   defaultPlacement() {

@@ -60,8 +60,6 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       up.puts('up.render()', 'Nothing was rendered')
     }
 
-    this.options.title = this.improveHistoryValue(this.options.title, this.responseDoc.getTitle())
-
     // Make sure only the first step will have scroll-related options.
     this.setScrollAndFocusOptions()
 

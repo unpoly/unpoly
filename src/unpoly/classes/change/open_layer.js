@@ -51,8 +51,6 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     onApplicable()
     up.puts('up.render()', `Opening element "${this.target}" in new overlay`)
 
-    this.options.title = this.improveHistoryValue(this.options.title, responseDoc.getTitle())
-
     if (this.emitOpenEvent().defaultPrevented) {
       // We cannot use @abortWhenLayerClosed() here,
       // because the layer is not even in the stack yet.

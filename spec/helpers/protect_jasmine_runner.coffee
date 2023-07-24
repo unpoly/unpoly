@@ -190,3 +190,11 @@ afterEach ->
     # or up.fragment will ignore everything within the body from now on.
     document.body.classList.remove('up-destroying')
     document.body.removeAttribute('aria-hidden')
+
+findAssets = ->
+  document.head.querySelectorAll('link[rel=stylesheet], script[src]')
+
+beforeAll ->
+  # Ignore assets from the Jasmine runner
+  for asset in findAssets()
+    asset.setAttribute('up-asset', 'false')

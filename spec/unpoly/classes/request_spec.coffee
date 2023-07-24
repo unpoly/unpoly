@@ -96,7 +96,8 @@ describe 'up.Request', ->
         element = fixture('.element')
         request = new up.Request(url: '/path', target: '.element')
         expect(request.fragments).toEqual [element]
-        expect(request).not.toHaveRecursiveValue(u.isElement)
+        expect(request._fragments).toBeBlank()
+        expect(request).not.toHaveRecursiveValue((value) -> value == element)
 
       it 'looks up the { target } selector in a different { layer }', ->
         element = fixture('.element')

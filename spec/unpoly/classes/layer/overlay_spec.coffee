@@ -118,6 +118,149 @@ describe 'up.Layer.Overlay', ->
       expect(up.layer.isRoot()).toBe(true)
       expect(location.href).toMatchURL(jasmine.locationBeforeExample)
 
+    it "restores the parent layer's title", ->
+      up.history.config.enabled = true
+
+      document.title = "Root title"
+
+      up.layer.open(
+        target: '.element',
+        location: '/path/to/modal'
+        history: true,
+        document: """
+          <html>
+            <head>
+              <title>Overlay title</title>
+            </head>
+            <body>
+              <div class='element'>
+                overlay text
+              </div>
+            </body>
+          </html>
+        """
+      )
+
+      await wait()
+
+      expect(up.layer.isOverlay()).toBe(true)
+
+      debugger
+
+      expect(document.title).toBe('Overlay title')
+
+      up.layer.current.accept()
+
+      await wait()
+
+      expect(up.layer.isRoot()).toBe(true)
+      expect(document.title).toBe('Root title')
+
+    it "restores the parent layer's title if document.title was changed while the overlay was open (bugfix)", ->
+      up.history.config.enabled = true
+
+      document.title = "Root title"
+
+      up.layer.open(
+        target: '.element',
+        location: '/path/to/modal'
+        history: true,
+        document: """
+          <html>
+            <head>
+              <title>Overlay title</title>
+            </head>
+            <body>
+              <div class='element'>
+                overlay text
+              </div>
+            </body>
+          </html>
+        """
+      )
+
+      await wait()
+
+      expect(up.layer.isOverlay()).toBe(true)
+      expect(document.title).toBe('Overlay title')
+
+      document.title = "Manually changed title"
+
+      up.layer.current.accept()
+
+      await wait()
+
+      expect(up.layer.isRoot()).toBe(true)
+      expect(document.title).toBe('Root title')
+
+    it "restores the parent layer's title if the overlay was opened with { title } option and document.title was changed while the overlay was open (bugfix)", ->
+      up.history.config.enabled = true
+
+      document.title = "Root title"
+
+      up.layer.open(
+        location: '/path/to/modal'
+        history: true,
+        title: 'Overlay title',
+        fragment: """
+          <div class='element'>
+            overlay text
+          </div>
+        """
+      )
+
+      await wait()
+
+      expect(up.layer.isOverlay()).toBe(true)
+      expect(document.title).toBe('Overlay title')
+
+      document.title = "Manually changed title"
+
+      up.layer.current.accept()
+
+      await wait()
+
+      expect(up.layer.isRoot()).toBe(true)
+      expect(document.title).toBe('Root title')
+
+    it "restores the parent layer's history-related <meta> and <link> elements", ->
+      up.history.config.enabled = true
+
+      e.affix(document.head, 'meta[name="description"][content="old description"]')
+
+      up.layer.open(
+        location: '/modal-location'
+        history: true
+        target: '.element'
+        document: """
+          <html>
+            <head>
+              <link rel='canonical' href='/new-canonical'>
+              <meta name='description' content='new description'>
+            </head>
+            <body>
+              <div class='element'>
+                overlay text
+              </div>
+            </body>
+          </html>
+        """
+      )
+
+      await wait()
+
+      expect(up.layer.isOverlay()).toBe(true)
+      expect(up.layer.history).toBe(true)
+      expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
+      expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
+
+      up.layer.current.accept()
+
+      await wait()
+
+      expect(document.head).not.toHaveSelector('meta[name="description"][content="new description"]')
+      expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+
     it "does not restore the parent layer's location if the parent layer does not render history", ->
       up.history.config.enabled = true
 
