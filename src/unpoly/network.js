@@ -142,7 +142,7 @@ up.network = (function() {
 
     Defaults to 15 seconds.
 
-  @param {number} [config.cacheEvictAge=15_000]
+  @param {number} [config.cacheEvictAge=90*60*1000]
     The number of milliseconds after which a cache entry is [evicted](/caching#eviction).
 
     In practice you will often prefer [*expiration*](/caching#expiration) over *eviction*.
