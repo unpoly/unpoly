@@ -7,26 +7,25 @@ Remaining V3 tasks
 Head reconciliation
 ===================
 
-- migrate: Prevent meta[up-hungry]
-  - Or if we merge the head before the fragment it will not matter
-  - Or disable reconciliation by default, but force migrate user to decide true/false
-- We may have examples for <link rel=canonical> in [up-hungry][up-if-history]
-- Deprecate { title } option
-- Deprecate X-Up-Title
+- Allow to disable reconciliation
+  - up.history.config.swapHeadMetas = true
+- migrate
+  - Disable reconciliation by default, but force migrate user to decide true/false
+  - Warn when reconciliation is enabled, but a head element is targeted or has [up-hungry]
+- Docs
+  - We may have examples for <link rel=canonical> in [up-hungry][up-if-history]
+  - New doc page for meta reconciliation
+  - New doc page for detecting new deployments / backend revisions
 - Get rid of up.head module
   - Rename up.syntax to up.script
   - Move asset checking to up.script
   - Move meta checking to up.history
-- document.title setter mutates <title> element
-  - This is not an issue as overlays each have their own <title> element
-  - Use cases
-    - Setter is called by up.Layer#title= (legacy title support)
-    - Setter is called by manual calls of document.title=
-  - Is there an issue with stacked overlays sharing the same <meta> elements, if an overlay in the middle does not have a <head>?
-  - What can we do?
-    - Keep title handling separate of meta handling
-    - Always clone metas before opening an overlay
-      - writeMetasFromResponseDoc() || cloneMetasFromHead()
+    - Need to rename plain "meta" to "headMeta", e.g. config.headMetaSelectors
+      - But we don't want config.headMetas
+- saveHistory should clone meta elements
+- Move code around
+  - Move `isRenderableLayer()` logic to LayerLookup
+  - Consider having LayerLookup#getAll() throw if results are blank
 - TODO: Docs
   - For up.head
   - For up.head.config
@@ -35,17 +34,14 @@ Head reconciliation
   - For up:assets:changed
 
 
+
 Priority
 =========
 
-
+- Document throws
+  - But consider waiting until async compilers, as we're changing some method signatures
 - Async compiler functions
-  - Allow to return a promise for a destructor
-    - This would mean *all* async compilers would register a destructor
-    - We could remove the .up-can-clean if they end up not registering one
-  - up.destructor() could detect if an element is destroyed and run the destructor immediately?
-    - What's the performance impact?
-      - !element.isConnected && element.closest('.up-destroyed') ?
+  - See separate doc
 - Sync meta elements on history change
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
