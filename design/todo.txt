@@ -8,7 +8,7 @@ Head reconciliation
 ===================
 
 - Allow to disable reconciliation
-  - up.history.config.swapHeadMetas = true
+  - up.history.config.updateMetas = true
 - migrate
   - Disable reconciliation by default, but force migrate user to decide true/false
   - Warn when reconciliation is enabled, but a head element is targeted or has [up-hungry]
@@ -20,12 +20,6 @@ Head reconciliation
   - Rename up.syntax to up.script
   - Move asset checking to up.script
   - Move meta checking to up.history
-    - Need to rename plain "meta" to "headMeta", e.g. config.headMetaSelectors
-      - But we don't want config.headMetas
-- saveHistory should clone meta elements
-- Move code around
-  - Move `isRenderableLayer()` logic to LayerLookup
-  - Consider having LayerLookup#getAll() throw if results are blank
 - TODO: Docs
   - For up.head
   - For up.head.config
@@ -332,7 +326,7 @@ Icebox
   - This would be the first feature that goes beyond "navigation is just a preset"
   - People might expect history changes to trigger this
   - Maybe think about this more
-- Replace up.hello() and up.syntax.clean() to MutationObserver()
+- Replace up.hello() and up.script.clean() with MutationObserver()
 - Do we want to serialize all actions in a form?
   - up-sequence="form"
   - This would need to abortable on submit => Would be handled by existing { solo: 'target' } IF there is a request
@@ -522,3 +516,7 @@ Decisions
   => There's a simpler way to this documented in https://v3.unpoly.com/up:fragment:loaded#example-discarding-a-revalidation-response
 - When rendering uses <up-wrapper> elements, do we set [up-time] and [up-etag] on these wrappers?
   - We cannot really do better here, since up-wrapper children cannot be reloaded
+- Move `isRenderableLayer()` logic to LayerLookup
+  - Consider having LayerLookup#getAll() throw if results are blank
+  => We have a lot of code / specs that work with closed layers and sometimes normalize the layer through up.layer.get(), and now get undefined.
+     All of this code would fail with this change.
