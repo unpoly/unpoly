@@ -107,11 +107,11 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   get headMetas() {
-    return this.fromHead(up.head.findMetas)
+    return this.fromHead(up.history.findMetas)
   }
 
   get assets() {
-    return this.fromHead(up.head.findAssets)
+    return this.fromHead(up.script.findAssets)
   }
 
   getTitleText(head) {

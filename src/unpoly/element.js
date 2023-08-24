@@ -1294,6 +1294,14 @@ up.element = (function() {
     }
   }
 
+  function filteredQuery(parent, includeSelectors, excludeSelectors) {
+    let fullIncludeSelector = includeSelectors.join()
+    let fullExcludeSelector = excludeSelectors.join()
+    let elements = parent.querySelectorAll(fullIncludeSelector)
+    let isExcluded = (element) => element.matches(fullExcludeSelector)
+    return u.reject(elements, isExcluded)
+  }
+
   return {
     subtree, // practical
     contains,
@@ -1348,5 +1356,6 @@ up.element = (function() {
     setTemporaryAttr,
     cleanJQuery,
     parseSelector,
+    filteredQuery,
   }
 })()

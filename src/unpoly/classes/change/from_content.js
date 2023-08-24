@@ -133,7 +133,7 @@ up.Change.FromContent = class FromContent extends up.Change {
 
     let { assets } = this.getResponseDoc()
     if (assets) {
-      up.head.assertAssetsOK(assets, plan.options)
+      up.script.assertAssetsOK(assets, plan.options)
     }
   }
 

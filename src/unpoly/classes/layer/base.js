@@ -587,7 +587,7 @@ up.Layer = class Layer extends up.Record {
   saveHistory() {
     if (this.isHistoryVisible()) {
       this.savedTitle = document.title
-      this.savedHeadMetas = up.head.findMetas()
+      this.savedMetas = up.history.findMetas()
       this.savedLocation = up.history.location
     }
   }
@@ -608,8 +608,8 @@ up.Layer = class Layer extends up.Record {
       document.title = this.savedTitle
     }
 
-    if (this.savedHeadMetas) {
-      up.head.updateMetas(this.savedHeadMetas)
+    if (this.savedMetas) {
+      up.history.updateMetas(this.savedMetas)
     }
   }
 
@@ -676,8 +676,6 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get title() {
-    // TODO: Consider deprecate / move to unpoly-migrate
-
     if (this.showsLiveHistory()) {
       // Allow Unpoly-unaware code to set the document title directly.
       // This will implicitey change the front layer's title.
@@ -688,8 +686,6 @@ up.Layer = class Layer extends up.Record {
   }
 
   set title(title) {
-    // TODO: Consider deprecate / move to unpoly-migrate
-
     this.savedTitle = title
 
     if (this.showsLiveHistory()) {
@@ -699,17 +695,17 @@ up.Layer = class Layer extends up.Record {
 
   get headMetas() {
     if (this.showsLiveHistory()) {
-      return up.head.findMetas()
+      return up.history.findMetas()
     } else {
-      return this.savedHeadMetas
+      return this.savedMetas
     }
   }
 
   set headMetas(metas) {
-    this.savedHeadMetas = metas
+    this.savedMetas = metas
 
     if (this.showsLiveHistory()) {
-      up.head.updateMetas(metas)
+      up.history.updateMetas(metas)
     }
   }
 

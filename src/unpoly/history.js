@@ -39,7 +39,18 @@ up.history = (function() {
     enabled: true,
     // Prefer restoring the body instead of :main, in case the last fragment update
     // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
-    restoreTargets: ['body']
+    restoreTargets: ['body'],
+    metaSelectors: [
+      'meta',
+      'link[rel=alternate]',
+      'link[rel=canonical]',
+      'link[rel=icon]',
+      '[up-meta]',
+    ],
+    noMetaSelectors: [
+      'meta[http-equiv]',
+      '[up-meta=false]',
+    ],
   }))
 
   /*-
@@ -364,6 +375,23 @@ up.history = (function() {
     }
   })
 
+  function findMetas(head = document.head) {
+    return e.filteredQuery(head, config.metaSelectors, config.noMetaSelectors)
+  }
+
+  function updateMetas(newMetas) {
+    let oldMetas = findMetas()
+    for (let oldMeta of oldMetas) {
+      // We do not use up.destroy() as meta elements may be inserted/removed
+      // multiple times as we open and close an overlay.
+      oldMeta.remove()
+    }
+
+    for (let newMeta of newMetas) {
+      document.head.append(newMeta)
+    }
+  }
+
   /*-
   Changes the link's destination so it points to the previous URL.
 
@@ -414,6 +442,8 @@ up.history = (function() {
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },
     normalizeURL,
-    isLocation
+    isLocation,
+    findMetas,
+    updateMetas,
   }
 })()

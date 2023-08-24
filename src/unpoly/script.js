@@ -24,6 +24,18 @@ for details.
 up.script = (function() {
 
   const u = up.util
+  const e = up.element
+
+  const config = new up.Config(() => ({
+    assetSelectors: [
+      'link[rel=stylesheet]',
+      'script[src]',
+      '[up-asset]'
+    ],
+    noAssetSelectors: [
+      '[up-asset=false]',
+    ]
+  }))
 
   const SYSTEM_MACRO_PRIORITIES = {
     '[up-back]': -100,        // sets [up-href] to previous URL
@@ -628,6 +640,20 @@ up.script = (function() {
     }
   }
 
+  function findAssets(head = document.head) {
+    return e.filteredQuery(head, config.assetSelectors, config.noAssetSelectors)
+  }
+
+  function assertAssetsOK(newAssets, renderOptions) {
+    let oldAssets = findAssets()
+
+    let oldHTML = u.map(oldAssets, 'outerHTML').join()
+    let newHTML = u.map(newAssets, 'outerHTML').join()
+
+    if (oldHTML !== newHTML) {
+      up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions })
+    }
+  }
 
   /*
   Resets the list of registered compiler directives to the
@@ -636,6 +662,7 @@ up.script = (function() {
   function reset() {
     registeredCompilers = u.filter(registeredCompilers, 'isDefault')
     registeredMacros = u.filter(registeredMacros, 'isDefault')
+    config.reset()
   }
 
   up.on('up:framework:reset', reset)
@@ -647,6 +674,8 @@ up.script = (function() {
     hello,
     clean,
     data: readData,
+    findAssets,
+    assertAssetsOK,
   }
 })()
 
