@@ -8,7 +8,7 @@ The information in the log includes:
 
 - Which [events](/up.event) are called
 - When we're [making requests to the network](/up.request)
-- Which [compilers](/up.syntax) are applied to which elements
+- Which [compilers](/up.script) are applied to which elements
 
 By default only errors are logged. You can enable debug logging through `up.log.enable()`:
 
@@ -30,7 +30,7 @@ up.log = (function() {
   @param {boolean} [config.enabled=false]
     Whether Unpoly will print debugging information to the developer console.
 
-    Debugging information includes which elements are being [compiled](/up.syntax)
+    Debugging information includes which elements are being [compiled](/up.script)
     and which [events](/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [config.banner=true]
@@ -137,7 +137,7 @@ up.log = (function() {
   /*-
   Starts printing debugging information to the developer console.
 
-  Debugging information includes which elements are being [compiled](/up.syntax)
+  Debugging information includes which elements are being [compiled](/up.script)
   and which [events](/up.event) are being emitted.
 
   Errors will always be printed, regardless of this setting.

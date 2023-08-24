@@ -86,7 +86,7 @@ up.EventListener = class EventListener extends up.Record {
       const expectedArgCount = this.callback.length
 
       if (expectedArgCount !== 1 && expectedArgCount !== 2) {
-        const data = up.syntax.data(element)
+        const data = up.script.data(element)
         args.push(data)
       }
 

@@ -1,9 +1,11 @@
 /*-
-@module up.syntax
+@module up.script
 */
 
 const u = up.util
 const e = up.element
+
+up.migrate.renamedPackage('syntax', 'script')
 
 up.migrate.postCompile = function(elements, compiler) {
   // up.compiler() has a legacy { keep } option that will automatically

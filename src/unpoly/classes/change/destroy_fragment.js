@@ -48,7 +48,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change.Removal {
   wipe() {
     this.layer.asCurrent(() => {
       up.fragment.abort(this.element)
-      up.syntax.clean(this.element, { layer: this.layer })
+      up.script.clean(this.element, { layer: this.layer })
       up.element.cleanJQuery(this.element)
       this.element.remove()
     })

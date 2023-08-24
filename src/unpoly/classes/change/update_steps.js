@@ -89,7 +89,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           return Promise.resolve()
 
         } else {
-          // This needs to happen before up.syntax.clean() below.
+          // This needs to happen before up.script.clean() below.
           // Otherwise we would run destructors for elements we want to keep.
           this.preserveKeepables(step)
 
@@ -120,7 +120,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
               // with a clone in step.oldElement. However, since that clone was never compiled,
               // it does not have destructors registered. Hence we will not clean the clone
               // unnecessarily.
-              up.syntax.clean(step.oldElement, { layer: step.layer })
+              up.script.clean(step.oldElement, { layer: step.layer })
             },
             afterDetach() {
               up.element.cleanJQuery()
@@ -230,7 +230,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       const plan = {
         oldElement, // the element that should be kept
         newElement: partner, // the element that would have replaced it but now does not
-        newData: up.syntax.data(partner) // the parsed up-data attribute of the element we will discard
+        newData: up.script.data(partner) // the parsed up-data attribute of the element we will discard
       }
 
       if (!up.fragment.emitKeep(plan).defaultPrevented) {

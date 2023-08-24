@@ -2,7 +2,7 @@ u = up.util
 e = up.element
 $ = jQuery
 
-describe 'up.syntax', ->
+describe 'up.script', ->
 
   describe 'JavaScript functions', ->
 
@@ -520,7 +520,7 @@ describe 'up.syntax', ->
           expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining({}))
 
         it 'does not parse an [up-data] attribute if the compiler function only takes a single argument', ->
-          parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
+          parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
 
           $child = $fixture(".child")
 
@@ -573,7 +573,7 @@ describe 'up.syntax', ->
         expect(compiler).toHaveBeenCalledWith($first[0])
         expect(compiler).toHaveBeenCalledWith($second[0])
 
-    describe 'up.syntax.clean', ->
+    describe 'up.script.clean', ->
 
       it 'allows compilers to return a function to call when the compiled element is cleaned', ->
         destructor = jasmine.createSpy('destructor')
@@ -584,7 +584,7 @@ describe 'up.syntax', ->
         up.hello(container)
         expect(destructor).not.toHaveBeenCalled()
 
-        up.syntax.clean(container)
+        up.script.clean(container)
         expect(destructor).toHaveBeenCalled()
 
       it 'allows compilers to return an array of functions to call when the compiled element is cleaned', ->
@@ -596,7 +596,7 @@ describe 'up.syntax', ->
         container = fixture('.container .child')
         up.hello(container)
 
-        up.syntax.clean(container)
+        up.script.clean(container)
 
         expect(destructor1).toHaveBeenCalled()
         expect(destructor2).toHaveBeenCalled()
@@ -610,7 +610,7 @@ describe 'up.syntax', ->
         container = fixture('.container .child')
         up.hello(container)
 
-        up.syntax.clean(container)
+        up.script.clean(container)
 
         expect(value1).not.toHaveBeenCalled()
 
@@ -623,7 +623,7 @@ describe 'up.syntax', ->
         element = fixture('.one.two')
         up.hello(element)
 
-        up.syntax.clean(element)
+        up.script.clean(element)
 
         expect(destructor1).toHaveBeenCalled()
         expect(destructor2).toHaveBeenCalled()
@@ -637,7 +637,7 @@ describe 'up.syntax', ->
 
         container = fixture('.container .child')
 
-        clean = -> up.syntax.clean(container)
+        clean = -> up.script.clean(container)
         expect(clean).not.toThrowError()
 
       describe 'when a destructor throws an error', ->
@@ -656,7 +656,7 @@ describe 'up.syntax', ->
           element = fixture('.element')
           up.hello(element)
 
-          clean = -> up.syntax.clean(element)
+          clean = -> up.script.clean(element)
 
           expect(clean).toThrowError(/errors while destroying/i)
 

@@ -7546,6 +7546,8 @@ describe 'up.fragment', ->
 
         up.destroy('.container')
 
+        return
+
       it 'immediately marks the old element as .up-destroying', ->
         container = fixture('.container')
 

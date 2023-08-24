@@ -2,7 +2,7 @@
 Custom JavaScript
 =================
 
-The `up.syntax` package lets you pair HTML elements with JavaScript behavior.
+The `up.script` package lets you pair HTML elements with JavaScript behavior.
 
 ### Migrating existing JavaScript code
 
@@ -19,9 +19,9 @@ for details.
 @see up.macro
 @see up.hello
 
-@module up.syntax
+@module up.script
 */
-up.syntax = (function() {
+up.script = (function() {
 
   const u = up.util
 
@@ -328,7 +328,7 @@ up.syntax = (function() {
 
   Unlike [`up.hello()`](/up.hello), this doesn't emit any events.
 
-  @function up.syntax.compile
+  @function up.script.compile
   @param {Element} target
   @param {Array<Element>} [options.skip]
     A list of elements whose subtrees should not be compiled.
@@ -471,7 +471,7 @@ up.syntax = (function() {
   Unlike [`up.destroy()`](/up.destroy), this does not emit any events
   and does not remove the element from the DOM.
 
-  @function up.syntax.clean
+  @function up.script.clean
   @param {Element} fragment
   @param {up.Layer} options.layer
   @internal
@@ -495,7 +495,7 @@ up.syntax = (function() {
   <span class='person' up-data='{ "age": 18, "name": "Bob" }'>Bob</span>
   ```
 
-  Calling `up.syntax.data()` will deserialize the JSON string into a JavaScript object:
+  Calling `up.script.data()` will deserialize the JSON string into a JavaScript object:
 
   ```js
   up.data('.person') // returns { age: 18, name: 'Bob' }
@@ -650,8 +650,8 @@ up.syntax = (function() {
   }
 })()
 
-up.compiler = up.syntax.compiler
-up.destructor = up.syntax.destructor
-up.macro = up.syntax.macro
-up.data = up.syntax.data
-up.hello = up.syntax.hello
+up.compiler = up.script.compiler
+up.destructor = up.script.destructor
+up.macro = up.script.macro
+up.data = up.script.data
+up.hello = up.script.hello

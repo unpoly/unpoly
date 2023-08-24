@@ -18,7 +18,8 @@ RedirectPermanent /up.layout /up.viewport
 RedirectPermanent /up.layout.config /up.viewport.config
 RedirectPermanent /up.dom /up.fragment
 RedirectPermanent /up.dom.config /up.fragment.config
-RedirectPermanent /up.syntax.data /up.data
+RedirectPermanent /up.script /up.script
+RedirectPermanent /up.script.data /up.data
 RedirectPermanent /up.bus /up.event
 RedirectPermanent /up.bus.onEscape /up.event.onEscape
 RedirectPermanent /up.params /up.Params

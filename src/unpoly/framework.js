@@ -131,7 +131,7 @@ up.framework = (function() {
 
   For most apps this event will be emitted in the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
   as [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
-  All [compilers](/up.syntax) will already have run on the initial page content.
+  All [compilers](/up.script) will already have run on the initial page content.
 
   @event up:framework:booted
   @experimental

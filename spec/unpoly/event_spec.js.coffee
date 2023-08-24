@@ -383,7 +383,7 @@ describe 'up.event', ->
             expect(observeArgs).toHaveBeenCalledWith('child', jasmine.objectContaining({}))
 
         it 'does not parse an [up-data] attribute if the listener function only takes one argument', asyncSpec (next) ->
-          parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
+          parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
 
           $child = $fixture('.child')
           up.on 'click', '.child', (event) -> # no-op
@@ -394,7 +394,7 @@ describe 'up.event', ->
             expect(parseDataSpy).not.toHaveBeenCalled()
 
         it 'does not parse an [up-data] attribute if the listener function only takes two arguments', asyncSpec (next) ->
-          parseDataSpy = spyOn(up.syntax, 'data').and.returnValue({})
+          parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
 
           $child = $fixture('.child')
           up.on 'click', '.child', (event, $element) -> # no-op

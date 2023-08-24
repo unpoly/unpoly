@@ -74,7 +74,7 @@ up.CompilerPass = class CompilerPass {
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
-      const data = up.syntax.data(element)
+      const data = up.script.data(element)
       compileArgs.push(data, this.meta)
     }
 
@@ -92,7 +92,7 @@ up.CompilerPass = class CompilerPass {
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
-      const dataList = u.map(elements, up.syntax.data)
+      const dataList = u.map(elements, up.script.data)
       compileArgs.push(dataList, this.meta)
     }
 
