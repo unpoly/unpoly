@@ -224,19 +224,19 @@ up.link = (function() {
   }))
 
   function fullFollowSelector() {
-    return config.followSelectors.join(',')
+    return config.followSelectors.join()
   }
 
   function fullPreloadSelector() {
-    return config.preloadSelectors.join(',')
+    return config.preloadSelectors.join()
   }
 
   function fullInstantSelector() {
-    return config.instantSelectors.join(',')
+    return config.instantSelectors.join()
   }
 
   function fullClickableSelector() {
-    return config.clickableSelectors.join(',')
+    return config.clickableSelectors.join()
   }
 
   /*-
@@ -253,12 +253,12 @@ up.link = (function() {
   @internal
   */
   function isFollowDisabled(link) {
-    return link.matches(config.noFollowSelectors.join(',')) || u.isCrossOrigin(link)
+    return link.matches(config.noFollowSelectors.join()) || u.isCrossOrigin(link)
   }
 
   function isPreloadDisabled(link) {
     return !up.browser.canPushState() ||
-      link.matches(config.noPreloadSelectors.join(',')) ||
+      link.matches(config.noPreloadSelectors.join()) ||
       isFollowDisabled(link) ||
       !willCache(link)
   }
@@ -275,7 +275,7 @@ up.link = (function() {
   }
 
   function isInstantDisabled(link) {
-    return link.matches(config.noInstantSelectors.join(',')) || isFollowDisabled(link)
+    return link.matches(config.noInstantSelectors.join()) || isFollowDisabled(link)
   }
 
   function reset() {

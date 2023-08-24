@@ -681,7 +681,7 @@ up.layer = (function() {
   }
 
   function anySelector() {
-    return u.map(LAYER_CLASSES, Class => Class.selector()).join(',')
+    return u.map(LAYER_CLASSES, Class => Class.selector()).join()
   }
 
   function optionToString(option) {
@@ -693,7 +693,7 @@ up.layer = (function() {
   }
 
   function isWithinForeignOverlay(element) {
-    let selector = config.foreignOverlaySelectors.join(',')
+    let selector = config.foreignOverlaySelectors.join()
     return !!(selector && element.closest(selector))
   }
 

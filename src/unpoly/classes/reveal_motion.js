@@ -89,7 +89,7 @@ up.RevealMotion = class RevealMotion {
   }
 
   selectObstructions(selectors) {
-    let elements = up.fragment.all(selectors.join(','), { layer: this.obstructionsLayer })
+    let elements = up.fragment.all(selectors.join(), { layer: this.obstructionsLayer })
     return u.filter(elements, e.isVisible)
   }
 

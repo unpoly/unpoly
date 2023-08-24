@@ -99,7 +99,7 @@ up.viewport = (function() {
   @internal
   */
   function anchoredRight() {
-    const selector = config.anchoredRight.join(',')
+    const selector = config.anchoredRight.join()
     return f.all(selector, { layer: 'root' })
   }
 
@@ -268,7 +268,7 @@ up.viewport = (function() {
 
   function allSelector() {
     // On Edge the document viewport can be changed from CSS
-    return [rootSelector(), ...config.viewportSelectors].join(',')
+    return [rootSelector(), ...config.viewportSelectors].join()
   }
 
   /*-
@@ -450,7 +450,7 @@ up.viewport = (function() {
   */
   function fixedElements(root = document) {
     const queryParts = ['[up-fixed]'].concat(config.fixedTop).concat(config.fixedBottom)
-    return root.querySelectorAll(queryParts.join(','))
+    return root.querySelectorAll(queryParts.join())
   }
 
   /*-
@@ -870,7 +870,7 @@ up.viewport = (function() {
         e.attrSelector('id', hash),
         // Match an <a name="hash">
         'a' + e.attrSelector('name', hash)
-      ].join(',')
+      ].join()
       return f.get(selector, options)
     }
   }

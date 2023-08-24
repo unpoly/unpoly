@@ -650,7 +650,7 @@ up.element = (function() {
   @function up.element.isSingleton
   @internal
   */
-  const isSingleton = up.mockable(element => element.matches(SINGLETON_TAG_NAMES.join(',')))
+  const isSingleton = up.mockable(element => element.matches(SINGLETON_TAG_NAMES.join()))
 
   function elementTagName(element) {
     return element.tagName.toLowerCase()

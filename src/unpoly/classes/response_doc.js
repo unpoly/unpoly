@@ -44,7 +44,7 @@ up.ResponseDoc = class ResponseDoc {
     let content = options.content || ''
     let target = options.target || up.fail("must pass a { target } when passing { content }")
 
-    target = u.map(up.fragment.parseTargetSteps(target), 'selector').join(',')
+    target = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
 
     // Conjure an element that will later match options.target in @select()
     const matchingElement = e.createFromSelector(target)

@@ -32,8 +32,8 @@ up.head = (function() {
   }
 
   function findElements(parent = document.head, includeSelectors, excludeSelectors) {
-    let fullIncludeSelector = includeSelectors.join(',')
-    let fullExcludeSelector = excludeSelectors.join(',')
+    let fullIncludeSelector = includeSelectors.join()
+    let fullExcludeSelector = excludeSelectors.join()
     let elements = parent.querySelectorAll(fullIncludeSelector)
     let isExcluded = (element) => element.matches(fullExcludeSelector)
     return u.reject(elements, isExcluded)
@@ -63,8 +63,8 @@ up.head = (function() {
   function assertAssetsOK(newAssets, renderOptions) {
     let oldAssets = findAssets()
 
-    let oldHTML = u.map(oldAssets, 'outerHTML').join('')
-    let newHTML = u.map(newAssets, 'outerHTML').join('')
+    let oldHTML = u.map(oldAssets, 'outerHTML').join()
+    let newHTML = u.map(newAssets, 'outerHTML').join()
 
     if (oldHTML !== newHTML) {
       up.event.assertEmitted('up:assets:changed', { oldAssets, newAssets, renderOptions })

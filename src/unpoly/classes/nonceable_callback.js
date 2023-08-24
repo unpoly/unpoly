@@ -52,7 +52,7 @@ up.NonceableCallback = class NonceableCallback {
   runAsNoncedFunction(thisArg, argNames, args) {
     let wrappedScript = `
       try {
-        up.noncedEval.value = (function(${argNames.join(',')}) {
+        up.noncedEval.value = (function(${argNames.join()}) {
           ${this.script}
         }).apply(up.noncedEval.thisArg, up.noncedEval.args)
       } catch (error) {

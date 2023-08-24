@@ -8,7 +8,7 @@ up.Selector = class Selector {
 
     // If the user has set config.mainTargets = [] then a selector :main
     // will resolve to an empty array.
-    this.unionSelector = this.selectors.join(',') || 'match-none'
+    this.unionSelector = this.selectors.join() || 'match-none'
   }
 
   matches(element) {

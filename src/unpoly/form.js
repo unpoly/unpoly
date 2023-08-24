@@ -130,7 +130,7 @@ up.form = (function() {
   }))
 
   function fullSubmitSelector() {
-    return config.submitSelectors.join(',')
+    return config.submitSelectors.join()
   }
 
   function reset() {
@@ -142,7 +142,7 @@ up.form = (function() {
    @internal
    */
   function fieldSelector(suffix = '') {
-    return config.fieldSelectors.map(field => field + suffix).join(',')
+    return config.fieldSelectors.map(field => field + suffix).join()
   }
 
   function isField(element) {
@@ -226,7 +226,7 @@ up.form = (function() {
   @internal
   */
   function submitButtonSelector() {
-    return config.submitButtonSelectors.join(',')
+    return config.submitButtonSelectors.join()
   }
 
   /*-
@@ -1225,7 +1225,7 @@ up.form = (function() {
   function isSubmitDisabled(form) {
     // We also don't want to handle cross-origin forms.
     // That will be handled in `up.Change.FromURL#newPageReason`.
-    return form.matches(config.noSubmitSelectors.join(','))
+    return form.matches(config.noSubmitSelectors.join())
   }
 
   /*-
