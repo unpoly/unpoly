@@ -643,7 +643,12 @@ up.network = (function() {
     The method for the request.
 
     Methods other than GET or POST will be [wrapped](/up.protocol.config#config.methodParam) in a POST request.
-  @param {Object|Array|FormData|string} [options.params]
+  @param {Object|up.Params|FormData|string|Array} [options.params]
+    [Parameters](/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
   @experimental
   */
   function loadPage(requestsAttrs) {

@@ -158,6 +158,8 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   handleHistory() {
+    // If the layer is opened with { history } auto, the new overlay will from now
+    // on have visible history *if* its initial fragment has auto-history.
     if (this.layer.history === 'auto') {
       this.layer.history = up.fragment.hasAutoHistory(this.content)
     }

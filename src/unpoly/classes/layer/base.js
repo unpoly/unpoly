@@ -638,7 +638,7 @@ up.Layer = class Layer extends up.Record {
     }
 
     // Set unless { headMetas: false }
-    if (u.isList(options.headMetas)) {
+    if (up.history.config.updateMetas && u.isList(options.headMetas)) {
       this.headMetas = options.headMetas
     }
 

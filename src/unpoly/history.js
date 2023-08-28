@@ -37,6 +37,7 @@ up.history = (function() {
   */
   const config = new up.Config(() => ({
     enabled: true,
+    updateMetas: true,
     // Prefer restoring the body instead of :main, in case the last fragment update
     // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
     restoreTargets: ['body'],

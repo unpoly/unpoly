@@ -346,8 +346,9 @@ up.feedback = (function() {
 
   You may also assign `[up-nav]` to an individual link instead of an navigational container.
 
-  If you don't want to manually add this attribute to every navigational element,
-  you can configure selectors to automatically match your navigation components in `up.feedback.config.navSelectors`.
+  Standard [`<nav>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/nav) elements are always
+  navigational containers and do not need an `[up-nav]` attribute.
+  You can configure additional selectors to automatically match your navigation components in `up.feedback.config.navSelectors`.
 
 
   ### Example

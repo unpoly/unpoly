@@ -3,11 +3,43 @@ Updating history
 
 Unpoly will update the browser location as the user [follows links](/a-up-follow) and [submits forms](/form-up-submit).
 
-However there are some restrictions for when Unpoly will change history. This page explains the reasons
-for these restrictions and shows how to override them.
 
 
-## Only major fragments change history 
+## History state
+
+
+
+- The URL shown in the browser's address bar
+- The document title shown as the browser's window title
+- History-related `<meta>` elements in the `<head>`, like `meta[name=description]`, `meta[rel=canonical]` or `meta[property="og:image"]`.
+
+```html
+<head>
+  <title>AcmeCorp</title> <!-- mark-line -->
+  <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
+  <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
+  <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+  <script src="/assets/app.js"></script>
+  <link rel="stylesheet" href="/assets/app.css">  
+</head>
+```
+
+When Unpoly renders content with the `<head>` above, Unpoly will update:
+
+- The browser URL
+- The `<title>` element
+- The `<link rel="canonical">` element
+- The `<meta name="description">` element
+- The `<meta prop="og:image`>` element
+
+The linked JavaScript and stylesheet are not part of history state and will not be updated.
+They may hover cause an `up:assets:changed` event.
+
+
+## When history is changed
+
+
+### Only major fragments change history 
 
 By default Unpoly only changes history when a [main element](/main) is rendered.
 This is to prevent location changes when rendering a minor fragment, like a table row or a message counter.
@@ -36,7 +68,7 @@ To prevent a location change after rendering a major fragment, use one of the fo
 - Set `up.fragment.config.navigateOptions.history = false`. This will be the new default for all links and forms.
 
 
-## Only `GET` requests change history
+### Only `GET` requests change history
 
 Only requests with a `GET` method are egible to change browser history.
 This is because only `GET` requests can be reloaded and restored safely.
@@ -44,7 +76,7 @@ This behavior cannot be configured.
 
 ### Changing history after a form submission
 
-This restrictions means form submissions with methods like `POST`, `PUT` or `PATCH` never change history. 
+Form submissions with methods like `POST`, `PUT` or `PATCH` never change history. 
 However, if a successful form submssion redirects to a `GET` URL, that new request is
 again egible to change history.
 
@@ -64,10 +96,10 @@ Also see [History restoration in overlays](/restoring-history#overlays)
 
 ### Behavior of overlays with history
 
-When an overlay has visible history, its location is shown in the browser's address bar while
-the overlay is open.
+When an overlay has visible history, its location and title are shown in the browser window while
+the overlay is open. Also `<meta>` elements from the overlay content will be appended to the `<head>`.  
 
-When an overlay is closed, the URL from the background layer is restored.
+When an overlay is closed, the URL, title and `<meta>` elements from the background layer are restored.
 
 ### Behavior of overlays without history
 
@@ -75,6 +107,9 @@ If visible history is disabled, it will remain disabled for the lifetime of the 
  
 Even when an overlay doesn't have visible history, is still tracks its location using the rules described
 on this page. You can access an overlay's current location using `up.layer.location`.
+
+When an overlay without history opens *another* overlay, the nested overlay cannot have history,
+even with `{ history: true }`.
 
 
 ## History for programmatic updates

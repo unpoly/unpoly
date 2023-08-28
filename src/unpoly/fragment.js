@@ -15,7 +15,7 @@ a server-rendered web application:
 - Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
 - Fragments are usually updated by a [link](/a-up-follow) for [form](/form-up-submit) that targets their selector.
   When the server renders HTML with a matching element, the fragment is swapped with a new version.
-- As fragments enter the page they are automatically [compiled](/up.compiler) to activate JavaScript behavior.
+- As fragments enter the page they are automatically [compiled](/up.compiler) to activate [JavaScript behavior](/up.script).
 - Fragment changes may be [animated](/up.motion).
 - Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
   Unpoly features will only see or change fragments from the [current layer](/up.layer.current)
@@ -159,7 +159,7 @@ up.fragment = (function() {
 
   @param {Function(Object): boolean} [config.skipResponse]
     When to finishes a render pass without changes,
-    ususually to [not re-insert identical content](/skipping-rendering).
+    usually to [not re-insert identical content](/skipping-rendering).
 
     The configured function accepts an object with the same properties
     as an `up:fragment:loaded` event.
@@ -539,7 +539,7 @@ up.fragment = (function() {
     Common values are `'get'`, `'post'`, `'put'`, `'patch'` and `'delete`'.
     The value is case insensitive.
 
-  @param {Object|FormData|string|Array} [options.params]
+  @param {Object|up.Params|FormData|string|Array} [options.params]
     Additional [parameters](/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
@@ -1003,7 +1003,7 @@ up.fragment = (function() {
 
   @param event.skip()
     Finishes this render pass without changes,
-    ususually to [not re-insert identical content](/skipping-rendering).
+    usually to [not re-insert identical content](/skipping-rendering).
 
     Programmatic callers will fulfill with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
 
@@ -1728,6 +1728,8 @@ up.fragment = (function() {
   - `up.fragment.all()`
   - `up.fragment.get()`
   - `up.fragment.closest()`
+
+  Note that the low-level DOM helpers in `up.element` will *not* ignore elements that are being destroyed.
 
   ### Accessibility
 
