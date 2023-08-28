@@ -1,2 +1,2 @@
-- Consider removing [up-hungry][up-if-history] since we now auto-update head elements
-- Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
+- Remove up.form.config.watchInputEvents
+- Remove up.form.config.watchChangeEvents

@@ -7,26 +7,40 @@ Remaining V3 tasks
 Head reconciliation
 ===================
 
-- Allow to disable reconciliation
-  - up.history.config.updateMetas = true
+- Problem: We cannot really do location.reload() in up:assets:changed as the location has not been updated yet
+  - Event prop?
+    - Location preview is hard
+  - Emit after render pass?
+    - We could then no longer prevent default
+  - Emit after history change
+    - When opening a layer the layer stack has already been changed
 - migrate
   - Disable reconciliation by default, but force migrate user to decide true/false
   - Warn when reconciliation is enabled, but a head element is targeted or has [up-hungry]
 - Docs
   - We may have examples for <link rel=canonical> in [up-hungry][up-if-history]
-  - New doc page for meta reconciliation
+  - event.newAssets should mention
+    - that it includes all new assets, even if an identical element is already in the page
+    - that it includes stylesheets and javascripts
+  - Doc page "Updating history" should describe what updating history entails
+    - Browser URL
+    - Browser title
+    - Meta tags
   - New doc page for detecting new deployments / backend revisions
-- Get rid of up.head module
-  - Rename up.syntax to up.script
-  - Move asset checking to up.script
-  - Move meta checking to up.history
-- TODO: Docs
-  - For up.head
-  - For up.head.config
+    - Detecting changed frontend code
+    - /detecting-asset-changes
+  - New config options
+    - updateMetas
+    - selectors
+    - noSelectors
+    - assetSelectors should mention that only in the <head>
   - For [up-meta]
   - For [up-asset]
   - For up:assets:changed
-
+    - Does not do anything by default
+    - Is not triggered if a response has no <head>
+  - Docs for { history } and { up-history } must also mention metas
+- Rebase changes with [tag] prefix
 
 
 Priority
@@ -34,9 +48,8 @@ Priority
 
 - Document throws
   - But consider waiting until async compilers, as we're changing some method signatures
-- Async compiler functions
+- [v4] Async compiler functions
   - See separate doc
-- Sync meta elements on history change
 - Publish up.util.sprintf()
   - But rename it to something else, as sprintf() is something else
 - When rendering local content we should not set [up-source=true]
@@ -47,6 +60,10 @@ Priority
 Backlog
 =======
 
+- [v4] Consider removing [up-hungry][up-if-history] since we now auto-update head elements
+- [v4] Consider removing X-Up-Title, [up-title] and { title } since we now auto-update head elements
+- [v4] Consider moving history-related methods from up.Layer.Base to up.history
+  - All other packages work by taking a { layer } option, why not history-related?
 - Test that system compilers always run before user compilers
   => We already have macros if compilers need to use others?
 - Concepts [up-feedback] and [up-background] are overlapping
