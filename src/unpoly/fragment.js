@@ -1729,6 +1729,8 @@ up.fragment = (function() {
   - `up.fragment.get()`
   - `up.fragment.closest()`
 
+  Note that the low-level DOM helpers in `up.element` will *not* ignore elements that are being destroyed.
+
   ### Accessibility
 
   While an element's destruction is animating, the element is also assigned an

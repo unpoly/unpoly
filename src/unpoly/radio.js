@@ -158,10 +158,10 @@ up.radio = (function() {
   By default hungry fragments are processed for all updates of the current layer.
   You can control or disable the processing of hungry fragments using one of the following methods:
 
-  - Using an `[up-if-layer]` attribute on the hungry fragment
-  - Using an `[up-if-history]` attribute on the hungry fragment
-  - Rendering with [`{ useHungry }`](/up.render#options.useHungry) option
-  - Setting an [`[up-use-hungry]`](/a-up-follow#up-use-hungry) attribute on the link or form
+  - Setting an `[up-if-layer="any"]` attribute will also process the hungry fragment when updating other layers.
+  - Setting an `[up-if-history="true"]` attribute will only process the hungry fragment when [updating history](/up.history).
+  - Rendering with an [`{ useHungry: false }`](/up.render#options.useHungry) option will not process any hungry fragments.
+  - Setting an [`[up-use-hungry="false"]`](/a-up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
 
   @selector [up-hungry]
   @param [up-if-layer='current']
@@ -172,11 +172,13 @@ up.radio = (function() {
   @param [up-if-history]
     Only piggy-back on updates that update the browser history.
 
-    For instance, you want to auto-update a [canonical link element](https://en.wikipedia.org/wiki/Canonical_link_element),
+    For instance, you want to auto-update an hungry navigation bar,
     but only if we're changing history entries:
 
     ```html
-    <link rel="canonical" href="..." up-hungry up-if-history>
+    <nav id="side-nav" up-hungry up-if-history>
+     ...
+    </nav>
     ```
 
     @experimental

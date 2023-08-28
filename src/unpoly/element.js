@@ -8,10 +8,16 @@ The `up.element` module offers functions for DOM manipulation and traversal.
 
 It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.framework.isSupported).
 
-> [IMPORTANT]
-> `up.element` is a low-level API to work with DOM elements.
-> For a high-level API that is aware of [layers](/up.layer) and [animating fragments](/up.motion),
-> use `up.fragment`.
+
+
+### Differences to `up.fragment`
+
+`up.element` is a low-level API to work with DOM elements directly we recommend using `up.fragment`:
+
+
+- By default `up.fragment` functions will only see elements from the [current layer](/up.layer.current).
+  `up.element` is not aware of layers and always sees the entire DOM.
+- `up.fragment` functions will ignore elements that are being destroyed, but are still finishing an exit [animation](/up.motion) (e.g. fading out).
 
 @module up.element
 */
@@ -417,7 +423,7 @@ up.element = (function() {
     The created element.
   @stable
   */
-  function createFromSelector(selector, attrs) {
+  function createFromSelector(selector, attrs = {}) {
     let { includePath } = parseSelector(selector)
 
     let rootElement
@@ -454,25 +460,21 @@ up.element = (function() {
       previousElement = depthElement
     }
 
-    if (attrs) {
-      let value
-      if (value = u.pluckKey(attrs, 'class')) {
+    for (let key in attrs) {
+      let value = attrs[key]
+      if (key === 'class') {
         for (let klass of u.wrapList(value)) {
           rootElement.classList.add(klass)
         }
-      }
-      if (value = u.pluckKey(attrs, 'style')) {
+      } else if (key === 'style') {
         setInlineStyle(rootElement, value)
-      }
-      if (value = u.pluckKey(attrs, 'text')) {
-        // Use .textContent instead of .innerText, since .textContent preserves line breaks.
+      } else if (key === 'text') {
         rootElement.textContent = value
-      }
-      if (value = u.pluckKey(attrs, 'content')) {
+      } else if (key === 'content') {
         rootElement.innerHTML = value
+      } else {
+        rootElement.setAttribute(key, value)
       }
-
-      setAttrs(rootElement, attrs)
     }
 
     return rootElement
